@@ -805,7 +805,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
             )
         return fig, axs, sns_data_heatmap
 
-    def plot_best_classwise(
+    def plot_best_classwise_heatmap(
             self,
             organ: str,
             organism: str,
@@ -878,13 +878,164 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         celltype_versions = SPECIES_DICT.copy()
         celltype_versions[organism][organ].set_version(celltype_version)
         leafnodes = celltype_versions[organism][organ].ids
+        ontology = celltype_versions[organism][organ].ontology[celltype_version]["names"]
+
+        celltypelist = list(cell_counts.keys()).copy()
+        for k in celltypelist:
+            if k not in leafnodes:
+                if k not in ontology.keys():
+                    raise(ValueError(f"Celltype '{k}' not found in celltype universe"))
+                for leaf in ontology[k]:
+                    cell_counts[leaf] += 1/len(ontology[k])
+                del cell_counts[k]
+
+        # Compute class-wise metrics
+        vals = []
+        for i, run_id in enumerate(sns_tab["run"].values):
+            yhat = self.load_y(hat_or_true='hat', run_id=run_id)
+            ytrue = self.load_y(hat_or_true='true', run_id=run_id)
+            if metric_show == "acc":
+                m = accuracy(yhat, ytrue)
+            elif metric_show == "f1":
+                m = f1(yhat, ytrue)
+            else:
+                raise ValueError("did not recognize metric_show %s" % metric_show)
+            vals.append(m)
+        sns_tab[metric_show + "_classwise"] = vals
+
+        # Build figure.
+        model_types = sns_tab["model_type"].unique()
+        classes = self.load_ontology_names(run_id=sns_tab["run"].values[0])
+        if 'unknown' not in classes and 'Unknown' not in classes:
+            classes = classes + ['Unknown']
+            cell_counts['Unknown'] = 0
+        hm = np.zeros((len(classes), len(model_types))) + np.nan
+        # mask = np.isnan(hm)
+        for i, m in enumerate(model_types):
+            data_temp = np.vstack(sns_tab.loc[sns_tab["model_type"].values == m, metric_show + "_classwise"].values)
+            if data_temp.shape[0] > 0:
+                if self.cv:
+                    if collapse_cv == "mean":
+                        hm[:, i] = np.nanmean(data_temp, axis=0)
+                    elif collapse_cv == "median":
+                        hm[:, i] = np.nanmedian(data_temp, axis=0)
+                    elif collapse_cv == "max":
+                        hm[:, i] = np.nanmax(data_temp, axis=0)
+                    elif collapse_cv == "min":
+                        hm[:, i] = np.nanmin(data_temp, axis=0)
+                    else:
+                        raise ValueError(f"collapse_cv {collapse_cv} not recognized")
+                else:
+                    hm[:, i] = data_temp.values[0]
+        n_cells = np.array([np.round(cell_counts[c]) for c in classes])[:, None]
+        sns_data_heatmap = pandas.DataFrame(
+            np.hstack((n_cells, hm)),
+            index=classes,
+            columns=['Number of cells in whole dataset'] + list(model_types)
+        )
+        sns_data_heatmap = sns_data_heatmap[sns_data_heatmap['Number of cells in whole dataset'] >= min_cells]
+        mask = np.zeros(sns_data_heatmap.shape).astype(bool)
+        mask[:, 0] = True
+        fig, axs = plt.subplots(1, 1, figsize=(width_fig, height_fig))
+        with sns.axes_style("dark"):
+            axs = sns.heatmap(
+                sns_data_heatmap, mask=mask,
+                annot=True, fmt=".2f",
+                ax=axs, vmin=0, vmax=1,
+                xticklabels=True, yticklabels=True,
+                cbar_kws={'label': "test_" + metric_show},
+                cmap=None
+            )
+            axs = sns.heatmap(
+                sns_data_heatmap, mask=~mask,
+                annot=True, fmt=".0f",
+                ax=axs, alpha=0,
+                xticklabels=True, yticklabels=True,
+                annot_kws={"color": "black"},
+                cbar=False
+            )
+        return fig, axs, sns_data_heatmap
+
+    def plot_best_classwise_scatter(
+            self,
+            organ: str,
+            organism: str,
+            datapath: str,
+            celltype_version: str = "0",
+            partition_select: str = "val",
+            metric_select: str = "custom_cce_agg",
+            metric_show: str = "f1",
+            collapse_cv: str = "mean",
+            min_cells: int = 10,
+            height_fig: int = 7,
+            width_fig: int = 7
+    ):
+        """
+        Plot evaluation metric scatterplot for specified organ by cell classes and model types.
+
+        :param organ: Organ to plot in heatmap.
+        :param organism: Species that the gridsearch was run on
+        :param datapath: Path to the local sfaira data repository
+        :param celltype_version: Version in sfaira celltype universe
+        :param partition_select: Based on which partition to select the best model
+            - train
+            - val
+            - test
+            - all
+        :param metric_select: Based on which metric to select the best model
+            - loss
+            - accuracy
+            - custom_cce_agg
+            - acc_agg
+            - f1
+            - tpr
+            - fpr
+        :param metric_show: Which classwise metric to plot.
+            - accuracy
+            - f1
+        :param collapse_cv: How to collapse over the single cv runs.
+        :param min_cells: Minimum number of cells of a type must be present in the whole dataset for that class to be included in the plot.
+        :param height_fig: Figure height.
+        :param width_fig: Figure width.
+        :return: fig, axs, sns_data_heatmap
+        """
+
+        import matplotlib.pyplot as plt
+        import seaborn as sns
+
+        if self.summary_tab is None:
+            self.create_summary_tab()
+
+        # Choose the best over categories based on mean loss in CV.
+        # Keep variation across CV.
+        sns_tab = self.best_model_by_partition(
+            partition_select=partition_select,
+            metric_select=metric_select,
+            return_run_only=False,
+            grouping=["organ", "model_type"]
+        )
+        sns_tab = sns_tab[sns_tab['organ'] == organ]
+
+        tz = TargetZoos(path=datapath)
+        if organism == "human":
+            dataset = tz.data_human[organ]
+        elif organism == "mouse":
+            dataset = tz.data_mouse[organ]
+        else:
+            raise(ValueError(f"Supplied organism {organism} not recognised. Should be one of ('mouse', 'human')"))
+        dataset.load_all()
+        cell_counts = dataset.obs_concat(keys=['cell_ontology_class'])['cell_ontology_class'].value_counts().to_dict()
+
+        celltype_versions = SPECIES_DICT.copy()
+        celltype_versions[organism][organ].set_version(celltype_version)
+        leafnodes = celltype_versions[organism][organ].ids
         ontology = celltype_versions['human']['pancreas'].ontology[celltype_version]["names"]
 
         celltypelist = list(cell_counts.keys()).copy()
         for k in celltypelist:
             if k not in leafnodes:
                 if k not in ontology.keys():
-                    raise(ValueError(f"Celltype {k} cannot be fount in the celltype universe"))
+                    raise(ValueError(f"Celltype '{k}' not found in celltype universe"))
                 for leaf in ontology[k]:
                     cell_counts[leaf] += 1/len(ontology[k])
                 del cell_counts[k]
