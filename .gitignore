@@ -1,4 +1,4 @@
-build
+git abuild
 cache
 sfaira.egg-info
 config.ini
@@ -7,7 +7,6 @@ config.ini
 .Rhistory
 playground/*
 venv/*
-resources/*
 **/__pycache__
 *.ipynb_checkpoints/
 */*.ipynb_checkpoints/
