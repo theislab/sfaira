@@ -101,6 +101,14 @@ before it is loaded into memory:
 
 
 
+Data loaders can be added into a copy of the sfaira repository and can be used locally before they are contributed to
+the public sfaira repository.
+Alternatively, we also provide the optional dependency sfaira_extensions (https://github.com/theislab/sfaira_extension)
+in which local data and cell type annotation can be managed separately but still be loaded as usual through sfaira.
+The data loaders and cell type annotation formats between sfaira and sfaira_extensions are identical and can be easily
+copied over.
+
+
 Handling ontologies in data loaders
 -----------------------------------
 
