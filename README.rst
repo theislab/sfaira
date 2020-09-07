@@ -1,7 +1,7 @@
 Managing single-cell data sets and neural networks used for analysis
 =====================================================================
 
-.. image:: https://raw.githubusercontent.com/theislab/sfaira/master/resources/images/concept.pdf
+.. image:: https://raw.githubusercontent.com/theislab/sfaira/master/resources/images/concept.jpeg
    :width: 600px
    :align: center
 
