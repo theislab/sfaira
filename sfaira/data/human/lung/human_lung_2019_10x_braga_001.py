@@ -46,7 +46,7 @@ class Dataset(DatasetBase):
                 'Basal 2': 'Basal',
                 'B cells': 'B cell lineage',
                 'T and NK': '2_Lymphoid',
-                'Mesothelium': '2_Mesothelium',
+                'Mesothelium': 'Mesothelium',
                 'Mast cells': 'Mast cells',
                 'Fibroblasts': '2_Fibroblast lineage',
                 'Type 2 alveolar': 'AT2',
@@ -76,6 +76,7 @@ class Dataset(DatasetBase):
         self.adata.uns["counts"] = 'norm'
 
         self.adata.obs["cell_ontology_class"] = self.adata.obs['CellType']
+        self.set_unkown_class_id(ids=["1_Unicorns and artifacts"])
         self.adata.obs["healthy"] = True
         self.adata.obs['state_exact'] = 'healthy'
 

@@ -34,9 +34,9 @@ class Dataset(DatasetBase):
             "0": {
                 'Airway Smooth Muscle': 'Airway smooth muscle',
                 'Basal cell': 'Basal',
-                'Bud tip adjacent': '2_Fetal airway progenitors',
-                'Bud tip progenitor': '2_Fetal airway progenitors',
-                'Cartilage': '2_Cartilage',
+                'Bud tip adjacent': 'Fetal airway progenitors',
+                'Bud tip progenitor': 'Fetal airway progenitors',
+                'Cartilage': 'Cartilage',
                 'Club-like secretory': 'Secretory',
                 'Endothelial': '1_Endothelial',
                 'Epithelial': '1_Epithelial',
@@ -85,6 +85,7 @@ class Dataset(DatasetBase):
         self.adata.uns["counts"] = 'raw'
 
         self.adata.obs["cell_ontology_class"] = self.adata.obs['Cell_type']
+        self.set_unkown_class_id(ids=["1_Unicorns and artifacts"])
         self.adata.obs["healthy"] = True
         self.adata.obs['state_exact'] = 'healthy'
 

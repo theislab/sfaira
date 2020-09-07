@@ -74,6 +74,7 @@ class Dataset(DatasetBase):
         self.adata.uns["counts"] = 'raw'
 
         self.adata.obs["cell_ontology_class"] = self.adata.obs['CellType']
+        self.set_unkown_class_id(ids=["1_Unicorns and artifacts"])
         self.adata.obs["healthy"] = True
         self.adata.obs['state_exact'] = 'healthy'
 

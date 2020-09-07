@@ -114,6 +114,7 @@ class Dataset(DatasetBase):
 
         self.adata.obs["cell_ontology_class"] = ["_".join(i.split('_')[:-1]) for i in self.adata.obs['free_annotation']]
         self.adata.obs["cell_ontology_class"] = self.adata.obs["cell_ontology_class"].astype('category')
+        self.set_unkown_class_id(ids=["1_Unicorns and artifacts"])
         self.adata.obs["healthy"] = True
         self.adata.obs['state_exact'] = 'healthy'
 
