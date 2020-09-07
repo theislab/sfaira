@@ -1,0 +1,17 @@
+build
+cache
+sfaira.egg-info
+config.ini
+.metadata
+.idea
+.Rhistory
+playground/*
+venv/*
+resources/*
+**/__pycache__
+*.ipynb_checkpoints/
+*/*.ipynb_checkpoints/
+**/.DS_Store
+docs/_templates/
+dist/
+!**/.gitignore
