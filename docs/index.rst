@@ -3,7 +3,7 @@
 
 
 
-Welcome to diffxpy's documentation!
+Welcome to sfaira's documentation!
 ====================================
 
 .. toctree::
