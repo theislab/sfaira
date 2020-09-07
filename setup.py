@@ -26,8 +26,8 @@ setup(
     ],
     extras_require={
         'tensorflow': [
-            'tensorflow>=1.15.0',
-            'tensorflow-gpu>=1.15.0'
+            'tensorflow>=2.0.0',
+            'tensorflow-gpu>=2.0.0'
         ],
         'kipoi': [
             'kipoi',
