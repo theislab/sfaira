@@ -1096,16 +1096,16 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         with sns.axes_style("dark"):
             fig, axs = plt.subplots(1, 1, figsize=(width_fig, height_fig))
             axs = sns.scatterplot(x='Number of cells in whole dataset',
-                                  y='classwise f1 score',
-                                  style='model type',
-                                  data=df,
+                                  y='Classwise f1 score',
+                                  style='Model type',
+                                  data=sns_data_scatter,
                                   ax=axs
                                   )
             for line in range(0, sns_data_scatter.shape[0]):
                 if (sns_data_scatter['Number of cells in whole dataset'][line] > 1000) \
-                        and (sns_data_scatter['classwise f1 score'][line] > 0.6):
+                        and (sns_data_scatter['Classwise f1 score'][line] > 0.6):
                     axs.text(sns_data_scatter['Number of cells in whole dataset'][line] + 100,
-                             sns_data_scatter['classwise f1 score'][line],
+                             sns_data_scatter['Classwise f1 score'][line],
                              sns_data_scatter.index[line],
                              horizontalalignment='left',
                              size='medium',
