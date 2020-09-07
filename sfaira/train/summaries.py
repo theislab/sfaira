@@ -5,7 +5,7 @@ import json
 import shutil
 from typing import Union, List
 import os
-from . import TargetZoos
+from .train_model import TargetZoos
 from .external import SPECIES_DICT
 
 

@@ -52,7 +52,7 @@ class Dataset(DatasetBase):
                 'Proliferating Macrophages': 'Macrophages',
                 'Myofibroblasts': 'Myofibroblasts',
                 'Proliferating Epithelial Cells': 'Proliferating Epithelial Cells',
-                'Mesothelial Cells': '2_Mesothelium',
+                'Mesothelial Cells': 'Mesothelium',
                 'cDCs': 'Dendritic cells',
                 'Mast Cells': 'Mast cells',
                 'Ciliated': 'Multiciliated lineage',
@@ -119,6 +119,7 @@ class Dataset(DatasetBase):
         self.adata.uns["counts"] = 'raw'
 
         self.adata.obs["cell_ontology_class"] = self.adata.obs['celltype']
+        self.set_unkown_class_id(ids=["1_Unicorns and artifacts"])
         self.adata.obs["healthy"] = [i == 'Control' for i in self.adata.obs['Status']]
         self.adata.obs['state_exact'] = self.adata.obs['Diagnosis'].astype('category')
 

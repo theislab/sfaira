@@ -63,7 +63,7 @@ class Dataset(DatasetBase):
                 'Basophil/Mast 1': 'Mast cells',
                 'Serous': 'Submucosal Secretory',
                 'Natural Killer T': 'T cell lineage',
-                'Mesothelial': '2_Mesothelium',
+                'Mesothelial': 'Mesothelium',
                 'Ionocyte': 'Rare',
                 'Bronchial Vessel 1': 'Bronchial Vessel 1',
                 'Natural Killer': 'Innate lymphoid cells',
@@ -127,6 +127,7 @@ class Dataset(DatasetBase):
 
         self.adata.obs["cell_ontology_class"] = ["_".join(i.split('_')[:-1]) for i in self.adata.obs['free_annotation']]
         self.adata.obs["cell_ontology_class"] = self.adata.obs["cell_ontology_class"].astype('category')
+        self.set_unkown_class_id(ids=["1_Unicorns and artifacts"])
         self.adata.obs["healthy"] = True
         self.adata.obs['state_exact'] = 'healthy'
 
