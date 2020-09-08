@@ -936,8 +936,8 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         sns_data_heatmap = sns_data_heatmap[sns_data_heatmap['Number of cells in whole dataset'] >= min_cells]
         mask = np.zeros(sns_data_heatmap.shape).astype(bool)
         mask[:, 0] = True
-        fig, axs = plt.subplots(1, 1, figsize=(width_fig, height_fig))
         with sns.axes_style("dark"):
+            fig, axs = plt.subplots(1, 1, figsize=(width_fig, height_fig))
             axs = sns.heatmap(
                 sns_data_heatmap, mask=mask,
                 annot=True, fmt=".2f",
@@ -947,7 +947,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
                 cmap=None
             )
             axs = sns.heatmap(
-                sns_data_heatmap, mask=~mask,
+                data=sns_data_heatmap, mask=~mask,
                 annot=True, fmt=".0f",
                 ax=axs, alpha=0,
                 xticklabels=True, yticklabels=True,
@@ -997,7 +997,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         :param min_cells: Minimum number of cells of a type must be present in the whole dataset for that class to be included in the plot.
         :param height_fig: Figure height.
         :param width_fig: Figure width.
-        :return: fig, axs, sns_data_heatmap
+        :return: fig, axs, sns_data_scatter
         """
 
         import matplotlib.pyplot as plt
@@ -1029,7 +1029,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         celltype_versions = SPECIES_DICT.copy()
         celltype_versions[organism][organ].set_version(celltype_version)
         leafnodes = celltype_versions[organism][organ].ids
-        ontology = celltype_versions['human']['pancreas'].ontology[celltype_version]["names"]
+        ontology = celltype_versions[organism][organ].ontology[celltype_version]["names"]
 
         celltypelist = list(cell_counts.keys()).copy()
         for k in celltypelist:
@@ -1079,33 +1079,41 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
                 else:
                     hm[:, i] = data_temp.values[0]
         n_cells = np.array([np.round(cell_counts[c]) for c in classes])[:, None]
-        sns_data_heatmap = pandas.DataFrame(
+        sns_data_scatter = pandas.DataFrame(
             np.hstack((n_cells, hm)),
             index=classes,
             columns=['Number of cells in whole dataset'] + list(model_types)
         )
-        sns_data_heatmap = sns_data_heatmap[sns_data_heatmap['Number of cells in whole dataset'] >= min_cells]
-        mask = np.zeros(sns_data_heatmap.shape).astype(bool)
-        mask[:, 0] = True
-        fig, axs = plt.subplots(1, 1, figsize=(width_fig, height_fig))
+        sns_data_scatter = sns_data_scatter[sns_data_scatter['Number of cells in whole dataset'] >= min_cells]
+        sns_data_scatter = pandas.melt(sns_data_scatter,
+                                       id_vars=['Number of cells in whole dataset'],
+                                       value_vars=list(model_types),
+                                       var_name='Model type',
+                                       value_name='Classwise f1 score',
+                                       ignore_index=False
+                                       )
+
         with sns.axes_style("dark"):
-            axs = sns.heatmap(
-                sns_data_heatmap, mask=mask,
-                annot=True, fmt=".2f",
-                ax=axs, vmin=0, vmax=1,
-                xticklabels=True, yticklabels=True,
-                cbar_kws={'label': "test_" + metric_show},
-                cmap=None
-            )
-            axs = sns.heatmap(
-                sns_data_heatmap, mask=~mask,
-                annot=True, fmt=".0f",
-                ax=axs, alpha=0,
-                xticklabels=True, yticklabels=True,
-                annot_kws={"color": "black"},
-                cbar=False
-            )
-        return fig, axs, sns_data_heatmap
+            fig, axs = plt.subplots(1, 1, figsize=(width_fig, height_fig))
+            axs = sns.scatterplot(x='Number of cells in whole dataset',
+                                  y='Classwise f1 score',
+                                  style='Model type',
+                                  data=sns_data_scatter,
+                                  ax=axs
+                                  )
+            for line in range(0, sns_data_scatter.shape[0]):
+                if (sns_data_scatter['Number of cells in whole dataset'][line] > 1000) \
+                        and (sns_data_scatter['Classwise f1 score'][line] > 0.6):
+                    axs.text(sns_data_scatter['Number of cells in whole dataset'][line] + 100,
+                             sns_data_scatter['Classwise f1 score'][line],
+                             sns_data_scatter.index[line],
+                             horizontalalignment='left',
+                             size='medium',
+                             color='black',
+                             weight='semibold'
+                             )
+
+        return fig, axs, sns_data_scatter
 
 
 class SummarizeGridsearchEmbedding(GridsearchContainer):
