@@ -22,6 +22,7 @@ class Topologies:
                 "embedding": {
                     "ae": mouse.embedding.ae.AE_TOPOLOGIES,
                     "linear": mouse.embedding.linear.LINEAR_TOPOLOGIES,
+                    "nmf": mouse.embedding.nmf.NMF_TOPOLOGIES,
                     "vae": mouse.embedding.vae.VAE_TOPOLOGIES,
                     "vaeiaf": mouse.embedding.vaeiaf.VAEIAF_TOPOLOGIES,
                     "vaevamp": mouse.embedding.vaevamp.VAEVAMP_TOPOLOGIES
@@ -35,6 +36,7 @@ class Topologies:
                 "embedding": {
                     "ae": human.embedding.ae.AE_TOPOLOGIES,
                     "linear": human.embedding.linear.LINEAR_TOPOLOGIES,
+                    "nmf": human.embedding.nmf.NMF_TOPOLOGIES,
                     "vae": human.embedding.vae.VAE_TOPOLOGIES,
                     "vaeiaf": human.embedding.vaeiaf.VAEIAF_TOPOLOGIES,
                     "vaevamp": human.embedding.vaevamp.VAEVAMP_TOPOLOGIES
