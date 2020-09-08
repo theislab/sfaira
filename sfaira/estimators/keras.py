@@ -496,7 +496,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             from sfaira.models.embedding import ModelVaeVersioned as Model
         elif self.model_type == 'ae':
             from sfaira.models.embedding import ModelAeVersioned as Model
-        elif self.model_type == 'linear':
+        elif self.model_type == 'linear' or self.model_type == 'nmf':
             from sfaira.models.embedding import ModelLinearVersioned as Model
         elif self.model_type == 'vaeiaf':
             from sfaira.models.embedding import ModelVaeIAFVersioned as Model
