@@ -31,6 +31,7 @@ class Dataset(DatasetBase):
             "0": {
                 "kidney capillary endothelial cell": "endothelial cell",
                 "kidney mesangial cell": "mesangial cell",
+                "kidney interstitial fibroblast": "interstitial fibroblast",
             },
         }
 

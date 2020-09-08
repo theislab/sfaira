@@ -11,6 +11,7 @@ CELLTYPES_MOUSE_KIDNEY_V0 = [
     ["fetal mesenchymal cell", "nan"],
     ["fetal proliferative cell", "nan"],
     ["fibroblast", "CL:0000057"],
+    ["interstitial fibroblast", "nan"],
     ["glomerular epithelial cell", "nan"],
     ["kidney collecting duct epithelial cell", "CL:1000454"],
     ["kidney collecting duct principal cell", "CL:1001431"],

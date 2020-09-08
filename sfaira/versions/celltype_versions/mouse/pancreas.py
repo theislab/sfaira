@@ -31,6 +31,11 @@ ONTOLOGIES_MOUSE_PANCREAS_V0 = {
             "macrophage",
             "t cell"
         ],
+    "endocrine cell": [
+            "pancreatic A cell",
+            "pancreatic D cell",
+            "pancreatic PP cell"
+        ],
     },
     "ontology_ids": {},
 }

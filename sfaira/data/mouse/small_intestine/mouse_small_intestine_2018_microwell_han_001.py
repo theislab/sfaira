@@ -48,6 +48,7 @@ class Dataset(DatasetBase):
                 'Stromal cell_Dcn high(Small-Intestine)': 'stromal cell',
                 'T cell_Ccl5 high(Small-Intestine)': 'T cell',
                 'T cell_Icos high(Small-Intestine)': 'T cell',
+                'T cell_Cd7 high(Small-Intestine)': 'T cell',
             },
         }
 
