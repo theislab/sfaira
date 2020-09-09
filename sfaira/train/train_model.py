@@ -377,6 +377,8 @@ class TrainModelCelltype(TrainModel):
                 if k not in ontology.keys():
                     raise(ValueError(f"Celltype '{k}' not found in celltype universe"))
                 for leaf in ontology[k]:
+                    if leaf not in cell_counts_leaf.keys():
+                        cell_counts_leaf[leaf] = 0
                     cell_counts_leaf[leaf] += 1/len(ontology[k])
                 del cell_counts_leaf[k]
         with open(fn + '_celltypes_valuecounts_wholedata.pickle', 'wb') as f:

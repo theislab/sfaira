@@ -887,7 +887,6 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
                     raise(ValueError(f"Celltype '{k}' not found in celltype universe"))
                 for leaf in ontology[k]:
                     if leaf not in cell_counts.keys():
-                    if leaf not in cell_counts.keys():
                         cell_counts[leaf] = 0
                     cell_counts[leaf] += 1/len(ontology[k])
                 del cell_counts[k]
