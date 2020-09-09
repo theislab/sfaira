@@ -24,6 +24,7 @@ class ModelZoo(abc.ABC):
     model_type: Union[str, None]
     model_topology: Union[str, None]
     model_version: Union[str, None]
+    celltypes: Union[List, None]
 
     def __init__(
             self,
@@ -43,6 +44,7 @@ class ModelZoo(abc.ABC):
         self.model_topology = None
         self.model_version = None
         self.topology_container = None
+        self.celltypes = None
 
     @abc.abstractmethod
     def load_ontology_from_model_ids(
