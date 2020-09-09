@@ -104,7 +104,7 @@ class TestModelVae(unittest.TestCase, _TestModel):
         self.train()
         # (_,_), (_,sf) is dummy for kl loss
         _ = self.model.training_model.evaluate(x=(self.data, self.sf), y=(self.data, self.sf))
-        embedding = self.model.predict_embedding(x=(self.data, self.sf))
+        embedding = self.model.predict_embedding(x=(self.data, self.sf))[0]
         assert embedding.shape[0] == self.data.shape[0], embedding.shape
         denoised = self.model.predict_reconstructed(x=(self.data, self.sf))
         assert denoised.shape == self.data.shape, (denoised.shape, self.data.shape)
