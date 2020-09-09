@@ -2,7 +2,7 @@ VAEVAMP_TOPOLOGIES = {
     "0.1": {
         "genome": "Homo_sapiens_GRCh38_97",
         "hyper_parameters": {
-            "latent_dim": (32, 32),
+            "latent_dim": (256, 128, (32, 32), 128, 256),
             "l1_coef": 0.,
             "l2_coef": 0.,
             "dropout_rate": 0.,
@@ -15,7 +15,7 @@ VAEVAMP_TOPOLOGIES = {
     "0.2": {
         "genome": "Homo_sapiens_GRCh38_97",
         "hyper_parameters": {
-            "latent_dim": (64, 64),
+            "latent_dim": (512, 256, (64, 64), 256, 512),
             "l1_coef": 0.,
             "l2_coef": 0.,
             "dropout_rate": 0.,
