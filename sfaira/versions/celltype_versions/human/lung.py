@@ -37,7 +37,8 @@ CELLTYPES_HUMAN_LUNG_V0 = [
     ['Submucosal Secretory', "nan"],
     ['T cell lineage', "nan"],
     ['Venous', "nan"],
-    ['Venous smooth muscle', "nan"]
+    ['Venous smooth muscle', "nan"],
+    ['unknown', "nan"]
 ]
 ONTOLOGIES_HUMAN_LUNG_V0 = {
     "names": {

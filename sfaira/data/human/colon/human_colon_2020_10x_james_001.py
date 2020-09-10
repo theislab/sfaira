@@ -25,7 +25,7 @@ class Dataset(DatasetBase):
     ):
         DatasetBase.__init__(self=self, path=path, meta_path=meta_path, **kwargs)
         self.species = "human"
-        self.id = "human_colon_2019_10x_smilie_001_10.1038/s41590-020-0602-z"
+        self.id = "human_colon_2019_10x_james_001_10.1038/s41590-020-0602-z"
         self.download_website = "https://covid19.cog.sanger.ac.uk/james20.processed.h5ad"
         self.organ = "colon"
         self.sub_tissue = "colonic immune cells"
@@ -44,7 +44,7 @@ class Dataset(DatasetBase):
                 'LYVE1 Macrophage': 'LYVE1 Macrophage',
                 'Lymphoid DC': 'Lymphoid DC',
                 'Macrophage': 'Macrophage',
-                'Mast': 'Mast',
+                'Mast': 'Mast cell',
                 'Monocyte': 'Monocyte',
                 'NK': 'NK',
                 'Tcm': 'Tcm',
