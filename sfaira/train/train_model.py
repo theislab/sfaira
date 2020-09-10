@@ -9,6 +9,7 @@ from .external import DatasetGroupBase, DatasetSuperGroup
 from .external import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
 from .external import ModelZoo, ModelZooEmbedding, ModelZooCelltype
 from .external import mouse, human
+from .external import SPECIES_DICT
 
 
 class TargetZoos:
@@ -364,3 +365,21 @@ class TrainModelCelltype(TrainModel):
         df_summary.to_csv(fn + "_covar.csv")
         with open(fn + '_ontology_names.pickle', 'wb') as f:
             pickle.dump(obj=self.estimator.ids, file=f)
+
+        cell_counts = self.data.obs_concat(keys=['cell_ontology_class'])['cell_ontology_class'].value_counts().to_dict()
+        cell_counts_leaf = cell_counts.copy()
+        celltype_versions = SPECIES_DICT.copy()
+        celltype_versions[self.zoo.species][self.zoo.organ].set_version(self.zoo.model_version.split(".")[0])
+        leafnodes = celltype_versions[self.zoo.species][self.zoo.organ].ids
+        ontology = celltype_versions[self.zoo.species][self.zoo.organ].ontology[self.zoo.model_version.split(".")[0]]["names"]
+        for k in cell_counts.keys():
+            if k not in leafnodes:
+                if k not in ontology.keys():
+                    raise(ValueError(f"Celltype '{k}' not found in celltype universe"))
+                for leaf in ontology[k]:
+                    if leaf not in cell_counts_leaf.keys():
+                        cell_counts_leaf[leaf] = 0
+                    cell_counts_leaf[leaf] += 1/len(ontology[k])
+                del cell_counts_leaf[k]
+        with open(fn + '_celltypes_valuecounts_wholedata.pickle', 'wb') as f:
+            pickle.dump(obj=[cell_counts, cell_counts_leaf], file=f)

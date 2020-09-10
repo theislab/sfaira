@@ -49,7 +49,7 @@ class Dataset(DatasetBase):
                 'Tuft': 'Tuft',
                 'Follicular': 'Follicular',
                 'Enteroendocrine': 'Enteroendocrine cells',
-                'Plasma': 'Plasma',
+                'Plasma': 'Plasma Cells',
                 'CD4+ Memory': 'CD4+ Memory',
                 'CD8+ LP': 'CD8+ LP',
                 'CD69- Mast': 'CD69- Mast',

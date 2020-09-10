@@ -63,13 +63,14 @@ class DensityBlock(tf.keras.layers.Layer):
 class DenseBlock(tf.keras.layers.Layer):
     def __init__(
             self,
-            config
+            config,
+            units
     ):
         super(DenseBlock, self).__init__(name='dense_block')
-        _, hidden_dim, l1_coef, l2_coef, dropout_rate, self.batchnorm, activation, kernel_initializer = config
+        _, l1_coef, l2_coef, dropout_rate, self.batchnorm, activation, kernel_initializer = config
 
         self.dense = tf.keras.layers.Dense(
-            units=hidden_dim,
+            units=units,
             activation=activation,
             kernel_initializer=kernel_initializer,
             kernel_regularizer=tf.keras.regularizers.l1_l2(l1=l1_coef, l2=l2_coef),
@@ -125,25 +126,25 @@ class Encoder(tf.keras.layers.Layer):
             **kwargs
     ):
         super().__init__(name=name, **kwargs)
-        z1_dim, z2_dim = config[0]
+        outer_hidden_dim, inner_hidden_dim, (z1_dim, z2_dim), _, _ = config[0]
 
-        self.enc_dense1 = DenseBlock(config)
-        self.enc_dense2 = DenseBlock(config)
+        self.enc_dense1 = DenseBlock(config, units=outer_hidden_dim)
+        self.enc_dense2 = DenseBlock(config, units=inner_hidden_dim)
         self.q_z2 = DensityBlock(z2_dim)
 
-        self.enc_dense3a = DenseBlock(config)
-        self.enc_dense3b = DenseBlock(config)
-        self.enc_dense4 = DenseBlock(config)
+        self.enc_dense3a = DenseBlock(config, units=inner_hidden_dim)
+        self.enc_dense3b = DenseBlock(config, units=inner_hidden_dim)
+        self.enc_dense4 = DenseBlock(config, units=inner_hidden_dim)
         self.q_z1 = DensityBlock(z1_dim)
 
-    def call(self, inputs, **kwargs):                                                    # (batch_size, in_dim)
-        x = self.enc_dense1(inputs)                                          # (batch_size, 300)
-        x = self.enc_dense2(x)                                          # (batch_size, 300)
+    def call(self, inputs, **kwargs):                                   # (batch_size, in_dim)
+        x = self.enc_dense1(inputs)                                     # (batch_size, outer_hidden_dim)
+        x = self.enc_dense2(x)                                          # (batch_size, inner_hidden_dim)
         z2, q_z2_mean, q_z2_log_var = self.q_z2(x)                      # (batch_size, z2_dim)
 
-        x = tf.concat([self.enc_dense3a(z2), self.enc_dense3b(inputs)], axis=1)
-        x = self.enc_dense4(x)
-        z1, q_z1_mean, q_z1_log_var = self.q_z1(x)
+        x = tf.concat([self.enc_dense3a(z2), self.enc_dense3b(inputs)], axis=1)  # (batch_size, 2 * inner_hidden_dim)
+        x = self.enc_dense4(x)                                                   # (batch_size, inner_hidden_dim)
+        z1, q_z1_mean, q_z1_log_var = self.q_z1(x)                               # (batch_size, z1_dim)
         return (z1, q_z1_mean, q_z1_log_var), (z2, q_z2_mean, q_z2_log_var)
 
 
@@ -159,16 +160,16 @@ class Decoder(Encoder):
             **kwargs
     ):
         super().__init__(config=config, name=name, **kwargs)
-        z1_dim, z2_dim = config[0]
+        _, _, (z1_dim, z2_dim), inner_hidden_dim, outer_hidden_dim = config[0]
 
-        self.dec_dense1 = DenseBlock(config)
-        self.dec_dense2 = DenseBlock(config)
+        self.dec_dense1 = DenseBlock(config, units=inner_hidden_dim)
+        self.dec_dense2 = DenseBlock(config, units=inner_hidden_dim)
         self.p_z1 = DensityBlock(z1_dim)
 
-        self.dec_dense3a = DenseBlock(config)
-        self.dec_dense3b = DenseBlock(config)
+        self.dec_dense3a = DenseBlock(config, units=inner_hidden_dim)
+        self.dec_dense3b = DenseBlock(config, units=inner_hidden_dim)
 
-        self.dec_dense4 = DenseBlock(config)
+        self.dec_dense4 = DenseBlock(config, units=outer_hidden_dim)
 
         self.pseudo_inputs_layer = TrainablePseudoInputs(out_shape=(batch_size_u, in_dim))
 
@@ -176,23 +177,23 @@ class Decoder(Encoder):
         z1, z2, data_input = inputs                                     # (batch_size, z1_dim/z2_dim/in_dim)
 
         # p(z_1|z_2)
-        x = self.dec_dense1(z2)                                         # (batch_size, 300)
-        x = self.dec_dense2(x)                                          # (batch_size, 300)
+        x = self.dec_dense1(z2)                                         # (batch_size, inner_hidden_dim)
+        x = self.dec_dense2(x)                                          # (batch_size, inner_hidden_dim)
         _, p_z1_mean, p_z1_log_var = self.p_z1(x)                       # (batch_size, z1_dim)
 
         # the prior p(z_2)
         u = self.pseudo_inputs_layer(data_input)                        # (batch_size_u, in_dim)
-        x = self.enc_dense1(u)                                          # (batch_size_u, 300)
-        x = self.enc_dense2(x)                                          # (batch_size_u, 300)
+        x = self.enc_dense1(u)                                          # (batch_size_u, inner_hidden_dim)
+        x = self.enc_dense2(x)                                          # (batch_size_u, inner_hidden_dim)
         _, p_z2_mean, p_z2_log_var = self.q_z2(x)                       # (batch_size_u, z2_dim)
 
-        x = tf.concat([self.dec_dense3a(z1), self.dec_dense3b(z2)], axis=1)
-        out = self.dec_dense4(x)
+        x = tf.concat([self.dec_dense3a(z1), self.dec_dense3b(z2)], axis=1)  # (batch_size, 2 * inner_hidden_dim)
+        out = self.dec_dense4(x)                                             # (batch_size, outer_hidden_dim)
 
         return (p_z1_mean, p_z1_log_var), (p_z2_mean, p_z2_log_var), out
 
 
-class ModelVaeVamp(tf.keras.Model):
+class ModelVaeVamp(BasicModel):
 
     def predict_reconstructed(self, x: np.ndarray):
         return np.split(self.training_model.predict(x)[0], indices_or_sections=2, axis=1)[0]
@@ -200,8 +201,7 @@ class ModelVaeVamp(tf.keras.Model):
     def __init__(
             self,
             in_dim,
-            latent_dim=(64, 64),
-            hidden_dim=300,
+            latent_dim=(256, 128, (32, 32), 128, 256),
             dropout_rate=0.1,
             l1_coef: float = 0.,
             l2_coef: float = 0.,
@@ -214,7 +214,6 @@ class ModelVaeVamp(tf.keras.Model):
         super(ModelVaeVamp, self).__init__()
         config = (
             latent_dim,
-            hidden_dim,
             l1_coef,
             l2_coef,
             dropout_rate,

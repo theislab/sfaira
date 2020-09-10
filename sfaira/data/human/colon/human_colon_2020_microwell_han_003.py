@@ -34,7 +34,7 @@ class Dataset(DatasetBase):
             "0": {
                 'Enterocyte progenitor': 'Enterocyte Progenitors',
                 'B cell (Plasmocyte)': 'B cell (Plasmocyte)',
-                'Enterocyte': 'Enterocyte',
+                'Enterocyte': 'Enterocytes',
                 'Epithelial cell': 'Epithelial cell',
                 'T cell': 'T cell',
                 'Stromal cell': 'Stromal',
