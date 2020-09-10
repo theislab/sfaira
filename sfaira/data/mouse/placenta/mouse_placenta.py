@@ -22,7 +22,7 @@ class DatasetGroupPlacenta(DatasetGroupBase):
         self.datasets = dict(zip(keys, datasets))
         # Load versions from extension if available:
         try:
-            import sfaira_extension as sfairae
+            import sfaira_extension.api as sfairae
             datasets.update(sfairae.data.mouse.DatasetGroupPlacenta().datasets)
         except ImportError:
             pass

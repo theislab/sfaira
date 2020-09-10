@@ -8,7 +8,7 @@ human = human.ORGAN_DICT
 
 # Load versions from extension if available:
 try:
-    import sfaira_extension as sfairae
+    import sfaira_extension.api as sfairae
     mouse_e = sfairae.versions.celltype_versions.SPECIES_DICT["mouse"]
     human_e = sfairae.versions.celltype_versions.SPECIES_DICT["human"]
     for k in mouse.keys():

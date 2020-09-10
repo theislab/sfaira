@@ -35,7 +35,7 @@ LINEAR_TOPOLOGIES = {
 
 # Load versions from extension if available:
 try:
-    import sfaira_extension as sfairae
+    import sfaira_extension.api as sfairae
     ADD_TOPOLOGIES = sfairae.versions.topology_versions.human.embedding.LINEAR_TOPOLOGIES
     for k in LINEAR_TOPOLOGIES.keys():
         if k in ADD_TOPOLOGIES.keys():

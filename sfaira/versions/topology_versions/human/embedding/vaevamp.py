@@ -29,7 +29,7 @@ VAEVAMP_TOPOLOGIES = {
 
 # Load versions from extension if available:
 try:
-    import sfaira_extension as sfairae
+    import sfaira_extension.api as sfairae
     ADD_TOPOLOGIES = sfairae.versions.topology_versions.human.embedding.VAEVAMP_TOPOLOGIES
     for k in VAEVAMP_TOPOLOGIES.keys():
         if k in ADD_TOPOLOGIES.keys():
