@@ -51,7 +51,10 @@ class Encoder(tf.keras.layers.Layer):
             if batchnorm and i < (len(latent_dim) - 2):
                 self.layer_list.append(tf.keras.layers.BatchNormalization(center=True, scale=False))
             if hid_drop > 0.0 and i < (len(latent_dim) - 2):
-                self.layer_list.append(tf.keras.layers.Dropout(hid_drop, name='enc_%s_drop' % i))
+                if activation == "selu":
+                    self.layer_list.append(tf.keras.layers.AlphaDropout(hid_drop, name='enc_%s_drop' % i))
+                else:
+                    self.layer_list.append(tf.keras.layers.Dropout(hid_drop, name='enc_%s_drop' % i))
 
     def call(self, x, **kwargs):
         for l in self.layer_list:
@@ -94,9 +97,11 @@ class Decoder(tf.keras.layers.Layer):
                     tf.keras.layers.BatchNormalization(center=True, scale=False)
                 )
 
-            # TODO: Check if dropout is automatically deactivated during inference
             if hid_drop > 0.0:
-                self.layer_list.append(tf.keras.layers.Dropout(hid_drop, name='dec_%s_drop' % i))
+                if activation == "selu":
+                    self.layer_list.append(tf.keras.layers.AlphaDropout(hid_drop, name='dec_%s_drop' % i))
+                else:
+                    self.layer_list.append(tf.keras.layers.Dropout(hid_drop, name='dec_%s_drop' % i))
 
     def call(self, x, **kwargs):
         for l in self.layer_list:

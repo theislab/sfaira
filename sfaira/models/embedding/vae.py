@@ -59,14 +59,11 @@ class Encoder(tf.keras.layers.Layer):
                         scale=True
                     )
                 )
-            if i < (len(latent_dim) - 1):
-                self.fwd_pass.append(
-                    tf.keras.layers.Dropout(
-                        dropout_rate,
-                        noise_shape=None,
-                        seed=None
-                    )
-                )
+            if i < (len(latent_dim) - 1) and dropout_rate > 0:
+                if activation == "selu":
+                    self.fwd_pass.append(tf.keras.layers.AlphaDropout(dropout_rate))
+                else:
+                    self.fwd_pass.append(tf.keras.layers.Dropout(dropout_rate, noise_shape=None, seed=None))
 
         # final layer
         self.dense_mean = tf.keras.layers.Dense(
@@ -125,13 +122,12 @@ class Decoder(tf.keras.layers.Layer):
                         scale=True
                     )
                 )
-            self.fwd_pass.append(
-                tf.keras.layers.Dropout(
-                    dropout_rate,
-                    noise_shape=None,
-                    seed=None
-                )
-            )
+
+            if dropout_rate > 0.0:
+                if activation == "selu":
+                    self.fwd_pass.append(tf.keras.layers.AlphaDropout(dropout_rate))
+                else:
+                    self.fwd_pass.append(tf.keras.layers.Dropout(dropout_rate, noise_shape=None, seed=None))
 
     def call(self, inputs, **kwargs):
         x = inputs

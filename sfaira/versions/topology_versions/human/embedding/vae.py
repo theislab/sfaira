@@ -7,11 +7,12 @@ VAE_TOPOLOGIES = {
                 "l2_coef": 0.,
                 "dropout_rate": 0.,
                 "batchnorm": True,
-                "activation": "tanh",
-                "init": "glorot_uniform",
+                "activation": "selu",
+                "init": "lecun_normal",
                 "output_layer": "nb_shared_disp"
         }
     },
+
     "0.2": {
         "genome": "Homo_sapiens_GRCh38_97",
         "hyper_parameters": {
@@ -20,11 +21,12 @@ VAE_TOPOLOGIES = {
                 "l2_coef": 0.,
                 "dropout_rate": 0.,
                 "batchnorm": True,
-                "activation": "tanh",
-                "init": "glorot_uniform",
+                "activation": "selu",
+                "init": "lecun_normal",
                 "output_layer": "nb_shared_disp"
         }
     },
+
     "0.3": {
         "genome": "Homo_sapiens_GRCh38_97",
         "hyper_parameters": {
@@ -33,8 +35,8 @@ VAE_TOPOLOGIES = {
                 "l2_coef": 0.,
                 "dropout_rate": 0.,
                 "batchnorm": True,
-                "activation": "tanh",
-                "init": "glorot_uniform",
+                "activation": "selu",
+                "init": "lecun_normal",
                 "output_layer": "nb_shared_disp"
         }
     }

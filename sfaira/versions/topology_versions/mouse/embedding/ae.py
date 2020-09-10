@@ -3,13 +3,13 @@ AE_TOPOLOGIES = {
         "genome": "Mus_musculus_GRCm38_97",
         "hyper_parameters": {
                 "latent_dim": (512, 64, 512),
-                "l2_coef": 0.,
                 "l1_coef": 0.,
+                "l2_coef": 0.,
                 "dropout_rate": 0.,
                 "input_dropout": 0.,
-                "batchnorm": False,
-                "activation": "relu",
-                "init": "glorot_uniform",
+                "batchnorm": True,
+                "activation": "selu",
+                "init": "lecun_normal",
                 "output_layer": "nb_shared_disp"
         }
     },
@@ -18,13 +18,13 @@ AE_TOPOLOGIES = {
         "genome": "Mus_musculus_GRCm38_97",
         "hyper_parameters": {
                 "latent_dim": (256, 128, 64, 128, 256),
-                "l2_coef": 0.,
                 "l1_coef": 0.,
+                "l2_coef": 0.,
                 "dropout_rate": 0.,
                 "input_dropout": 0.,
-                "batchnorm": False,
-                "activation": "relu",
-                "init": "glorot_uniform",
+                "batchnorm": True,
+                "activation": "selu",
+                "init": "lecun_normal",
                 "output_layer": "nb_shared_disp"
         }
     },
@@ -33,13 +33,13 @@ AE_TOPOLOGIES = {
         "genome": "Mus_musculus_GRCm38_97",
         "hyper_parameters": {
                 "latent_dim": (512, 256, 128, 256, 512),
-                "l2_coef": 0.,
                 "l1_coef": 0.,
+                "l2_coef": 0.,
                 "dropout_rate": 0.,
                 "input_dropout": 0.,
                 "batchnorm": True,
-                "activation": "relu",
-                "init": "glorot_uniform",
+                "activation": "selu",
+                "init": "lecun_normal",
                 "output_layer": "nb_shared_disp"
         }
     },
@@ -53,8 +53,8 @@ AE_TOPOLOGIES = {
                 "dropout_rate": 0.,
                 "input_dropout": 0.,
                 "batchnorm": True,
-                "activation": "relu",
-                "init": "glorot_uniform",
+                "activation": "selu",
+                "init": "lecun_normal",
                 "output_layer": "nb_const_disp"
         }
     }
@@ -62,7 +62,7 @@ AE_TOPOLOGIES = {
 
 # Load versions from extension if available:
 try:
-    import sfaira_extension.api as sfairae
+    import sfaira_extension as sfairae
     ADD_TOPOLOGIES = sfairae.versions.topology_versions.mouse.embedding.AE_TOPOLOGIES
     for k in AE_TOPOLOGIES.keys():
         if k in ADD_TOPOLOGIES.keys():
