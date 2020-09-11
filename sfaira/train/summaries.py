@@ -251,7 +251,6 @@ class GridsearchContainer:
 
         if metric_select.endswith('accuracy') \
                 or metric_select.endswith('acc_agg') \
-                or metric_select.endswith('custom_cce_agg') \
                 or metric_select.endswith('f1') \
                 or metric_select.endswith('tpr'):
             ascending = False
@@ -260,6 +259,7 @@ class GridsearchContainer:
         elif metric_select.endswith('loss') \
                 or metric_select.endswith('mse') \
                 or metric_select.endswith('negll') \
+                or metric_select.endswith('custom_cce_agg') \
                 or metric_select.endswith('fpr'):
             ascending = True
             if cv_mode == "max":
