@@ -283,7 +283,8 @@ class TrainModelEmbedding(TrainModel):
         :param fn:
         :return:
         """
-        embedding = self.estimator.predict_embedding()
+        use_test_data = self.estimator.idx_test is None or self.estimator.idx_test.any()  # False if idx_test is empty array
+        embedding = self.estimator.predict_embedding(test_data=use_test_data)
         df_summary = self.estimator.obs_test[
             ["dataset", "cell_ontology_class", "state_exact", "lab", "year", "subtissue", "protocol"]
         ]

@@ -687,15 +687,18 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         :param idx: Indices of observations to evaluate on. Evaluates on all observations if None.
         :return: Dictionary of metric names and values.
         """
-        x, y = self._get_dataset(
-            idx=idx,
-            batch_size=None,
-            mode='eval'
-        )
-        results = self.model.training_model.evaluate(
-            x=x, y=y
-        )
-        return dict(zip(self.model.training_model.metrics_names, results))
+        if idx is None or idx.any():   # true if the array is not empty or if the passed value is None 
+            x, y = self._get_dataset(
+                idx=idx,
+                batch_size=None,
+                mode='eval'
+            )
+            results = self.model.training_model.evaluate(
+                x=x, y=y
+            )
+            return dict(zip(self.model.training_model.metrics_names, results))
+        else:
+            return {}
 
     def evaluate(self):
         """
