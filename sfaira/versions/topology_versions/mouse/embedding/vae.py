@@ -39,6 +39,20 @@ VAE_TOPOLOGIES = {
                 "init": "lecun_normal",
                 "output_layer": "nb_shared_disp"
         }
+    },
+
+    "0.4": {
+        "genome": "Mus_musculus_GRCm38_97",
+        "hyper_parameters": {
+                "latent_dim": (512, 256, 128, 64, 128, 256, 512),
+                "l2_coef": 0.,
+                "l1_coef": 0.,
+                "dropout_rate": 0.,
+                "batchnorm": True,
+                "activation": "selu",
+                "init": "lecun_normal",
+                "output_layer": "nb_const_disp"
+        }
     }
 }
 
