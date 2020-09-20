@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 from typing import List, Union, Tuple
 
-from sfaira.models.embedding.output_layers import NegBinOutput, NegBinSharedDispOutput
+from sfaira.models.embedding.output_layers import NegBinOutput, NegBinSharedDispOutput, NegBinConstDispOutput
 from sfaira.models.embedding.external import BasicModel
 from sfaira.models.embedding.external import PreprocInput
 from sfaira.models.embedding.external import Topologies
@@ -196,6 +196,8 @@ class ModelVae(BasicModel):
             output_decoder_nb = NegBinOutput(original_dim=in_dim)((output_decoder, inputs_sf))
         elif output_layer == 'nb_shared_disp':
             output_decoder_nb = NegBinSharedDispOutput(original_dim=in_dim)((output_decoder, inputs_sf))
+        elif output_layer == 'nb_const_disp':
+            output_decoder_nb = NegBinConstDispOutput(original_dim=in_dim)((output_decoder, inputs_sf))
         else:
             raise ValueError("tried to access a non-supported output layer %s" % output_layer)
         output_decoder_nb_concat = tf.keras.layers.Concatenate(axis=1, name="neg_ll")(output_decoder_nb)
