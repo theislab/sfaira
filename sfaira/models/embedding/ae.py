@@ -2,7 +2,8 @@ import numpy as np
 import tensorflow as tf
 from typing import List, Union, Tuple
 
-from sfaira.models.embedding.output_layers import NegBinOutput, NegBinSharedDispOutput, NegBinConstDispOutput
+from sfaira.models.embedding.output_layers import NegBinOutput, NegBinSharedDispOutput, NegBinConstDispOutput, \
+    GaussianOutput, GaussianSharedStdOutput, GaussianConstStdOutput
 from sfaira.models.embedding.external import BasicModel
 from sfaira.models.embedding.external import PreprocInput
 from sfaira.models.embedding.external import Topologies
@@ -168,14 +169,20 @@ class ModelAe(BasicModel):
         )(output_encoder)
 
         if output_layer == 'nb':
-            output_decoder_nb = NegBinOutput(original_dim=out_dim)((output_decoder, inputs_sf))
+            output_decoder_expfamily = NegBinOutput(original_dim=out_dim)((output_decoder, inputs_sf))
         elif output_layer == 'nb_shared_disp':
-            output_decoder_nb = NegBinSharedDispOutput(original_dim=out_dim)((output_decoder, inputs_sf))
+            output_decoder_expfamily = NegBinSharedDispOutput(original_dim=out_dim)((output_decoder, inputs_sf))
         elif output_layer == 'nb_const_disp':
-            output_decoder_nb = NegBinConstDispOutput(original_dim=out_dim)((output_decoder, inputs_sf))
+            output_decoder_expfamily = NegBinConstDispOutput(original_dim=out_dim)((output_decoder, inputs_sf))
+        elif output_layer == 'gaussian':
+            output_decoder_expfamily = GaussianOutput(original_dim=out_dim)((output_decoder, inputs_sf))
+        elif output_layer == 'gaussian_shared_disp':
+            output_decoder_expfamily = GaussianSharedStdOutput(original_dim=out_dim)((output_decoder, inputs_sf))
+        elif output_layer == 'gaussian_const_disp':
+            output_decoder_expfamily = GaussianConstStdOutput(original_dim=out_dim)((output_decoder, inputs_sf))
         else:
             raise ValueError("tried to access a non-supported output layer %s" % output_layer)
-        output_decoder_nb_concat = tf.keras.layers.Concatenate(axis=1, name="neg_ll")(output_decoder_nb)
+        output_decoder_expfamily_concat = tf.keras.layers.Concatenate(axis=1, name="neg_ll")(output_decoder_expfamily)
 
         self.encoder_model = tf.keras.Model(
             inputs=inputs_encoder,
@@ -184,7 +191,7 @@ class ModelAe(BasicModel):
         )
         self.training_model = tf.keras.Model(
             inputs=[inputs_encoder, inputs_sf],
-            outputs=output_decoder_nb_concat,
+            outputs=output_decoder_expfamily_concat,
             name="autoencoder"
         )
 

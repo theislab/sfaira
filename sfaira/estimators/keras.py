@@ -10,8 +10,8 @@ import os
 import warnings
 from tqdm import tqdm
 from .external import CelltypeVersionsBase, Topologies, BasicModel
-from .losses import LossLoglikelihoodNb, LossCrossentropyAgg, KLLoss
-from .metrics import custom_mse, custom_negll, custom_kl, \
+from .losses import LossLoglikelihoodNb, LossLoglikelihoodGaussian, LossCrossentropyAgg, KLLoss
+from .metrics import custom_mse, custom_negll_nb, custom_negll_gaussian, custom_kl, \
     CustomAccAgg, CustomF1Classwise, CustomFprClasswise, CustomTprClasswise, custom_cce_agg
 
 
@@ -520,7 +520,6 @@ class EstimatorKerasEmbedding(EstimatorKeras):
 
         return output_types, output_shapes
 
-
     def _get_dataset(
             self,
             idx: Union[np.ndarray, None],
@@ -664,15 +663,39 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             raise ValueError('Mode %s not recognised. Should be "train" "eval" or" predict"' % mode)
 
     def _get_loss(self):
-        if self.model_type[:3] == "vae":
+        if self.topology_container.topology["hyper_parameters"]["output_layer"] in [
+            "nb", "nb_const_disp", "nb_shared_disp"
+        ]:
+            reconstruction_loss_vae = LossLoglikelihoodNb(average=False)  # TODO maybe handly kwargs via functional?
+            reconstruction_loss = LossLoglikelihoodNb(average=True)
+        elif self.topology_container.topology["hyper_parameters"]["output_layer"] in [
+            "gaussian", "gaussian_const_disp", "gaussian_shared_disp"
+        ]:
+            reconstruction_loss_vae = LossLoglikelihoodGaussian(average=False)
+            reconstruction_loss = LossLoglikelihoodGaussian(average=True)
+        else:
+            raise ValueError(self.topology_container.topology["hyper_parameters"]["output_layer"])
+
+        if self.model_type[:3] == "vae":  # TODO too hacky
             return {
-                "neg_ll": LossLoglikelihoodNb(average=False),
+                "neg_ll": reconstruction_loss_vae,
                 "kl": KLLoss()
             }
         else:
-            return {"neg_ll": LossLoglikelihoodNb()}
+            return {"neg_ll": reconstruction_loss}
 
     def _metrics(self):
+        if self.topology_container.topology["hyper_parameters"]["output_layer"] in [
+            "nb", "nb_const_disp", "nb_shared_disp"
+        ]:
+            custom_negll = custom_negll_nb
+        elif self.topology_container.topology["hyper_parameters"]["output_layer"] in [
+            "gaussian", "gaussian_const_disp", "gaussian_shared_disp"
+        ]:
+            custom_negll = custom_negll_gaussian
+        else:
+            raise ValueError(self.topology_container.topology["hyper_parameters"]["output_layer"])
+
         if self.model_type[:3] == "vae":
             return {
                 "neg_ll": [custom_mse, custom_negll],
