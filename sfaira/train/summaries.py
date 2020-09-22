@@ -970,7 +970,9 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
             collapse_cv: str = "mean",
             min_cells: int = 10,
             height_fig: int = 7,
-            width_fig: int = 7
+            width_fig: int = 7,
+            annotate_thres_ncells: int = 1000,
+            annotate_thres_f1: float = 0.5
     ):
         """
         Plot evaluation metric scatterplot for specified organ by cell classes and model types.
@@ -999,6 +1001,8 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         :param min_cells: Minimum number of cells of a type must be present in the whole dataset for that class to be included in the plot.
         :param height_fig: Figure height.
         :param width_fig: Figure width.
+        :param annotate_thres_ncells:
+        :param annotate_thres_f1:
         :return: fig, axs, sns_data_scatter
         """
 
@@ -1106,8 +1110,8 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
                                   ax=axs
                                   )
             for line in range(0, sns_data_scatter.shape[0]):
-                if (sns_data_scatter['Number of cells in whole dataset'][line] > 1000) \
-                        and (sns_data_scatter['Classwise f1 score'][line] > 0.6):
+                if (sns_data_scatter['Number of cells in whole dataset'][line] > annotate_thres_ncells) \
+                        and (sns_data_scatter['Classwise f1 score'][line] > annotate_thres_f1):
                     axs.text(sns_data_scatter['Number of cells in whole dataset'][line] + 100,
                              sns_data_scatter['Classwise f1 score'][line],
                              sns_data_scatter.index[line],
