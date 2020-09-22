@@ -3,6 +3,7 @@ import pandas
 import pickle
 import json
 import shutil
+import warnings
 from typing import Union, List
 import os
 from .train_model import TargetZoos
@@ -929,7 +930,14 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
                         raise ValueError(f"collapse_cv {collapse_cv} not recognized")
                 else:
                     hm[:, i] = data_temp.values[0]
-        n_cells = np.array([np.round(cell_counts[c]) for c in classes])[:, None]
+        n_cells = []
+        for c in classes:
+            if c in cell_counts.keys():
+                n_cells.append(np.round(cell_counts[c]))
+            else:
+                warnings.warn(f"Celltype {c} from cell ontology now found in {organism} {organ} dataset")
+                n_cells.append(np.nan)
+        n_cells = np.array(n_cells)[:, None]
         sns_data_heatmap = pandas.DataFrame(
             np.hstack((n_cells, hm)),
             index=classes,
@@ -1086,7 +1094,14 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
                         raise ValueError(f"collapse_cv {collapse_cv} not recognized")
                 else:
                     hm[:, i] = data_temp.values[0]
-        n_cells = np.array([np.round(cell_counts[c]) for c in classes])[:, None]
+        n_cells = []
+        for c in classes:
+            if c in cell_counts.keys():
+                n_cells.append(np.round(cell_counts[c]))
+            else:
+                warnings.warn(f"Celltype {c} from cell ontology now found in {organism} {organ} dataset")
+                n_cells.append(np.nan)
+        n_cells = np.array(n_cells)[:, None]
         sns_data_scatter = pandas.DataFrame(
             np.hstack((n_cells, hm)),
             index=classes,
