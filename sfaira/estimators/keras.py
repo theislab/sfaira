@@ -696,12 +696,9 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         else:
             raise ValueError(self.topology_container.topology["hyper_parameters"]["output_layer"])
 
-        if self.model_type[:3] == "vae":
-            return {
-                "neg_ll": [custom_mse, custom_negll],
-            }
-        else:
-            return {"neg_ll": [custom_mse, custom_negll]}
+        custom_negll.__name__ = "custom_negll"
+
+        return {"neg_ll": [custom_mse, custom_negll]}
 
     def evaluate_any(self, idx):
         """
