@@ -107,7 +107,7 @@ class GaussianOutput(tf.keras.layers.Layer):
     def __init__(
             self,
             original_dim=None,
-            name='neg_bin_output',
+            name='gaussian_output',
             **kwargs
     ):
 
@@ -141,7 +141,7 @@ class GaussianSharedStdOutput(tf.keras.layers.Layer):
     def __init__(
             self,
             original_dim=None,
-            name='neg_bin_shared_disp_output',
+            name='gaussian_shared_disp_output',
             **kwargs
     ):
 
@@ -180,7 +180,7 @@ class GaussianConstStdOutput(tf.keras.layers.Layer):
     def __init__(
             self,
             original_dim=None,
-            name='neg_bin_const_disp_output',
+            name='gaussian_const_disp_output',
             **kwargs
     ):
 
