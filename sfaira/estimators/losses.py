@@ -6,8 +6,9 @@ import numpy as np
 class LossLoglikelihoodNb(tf.keras.losses.Loss):
 
     def __init__(self, average=True, *args, **kwargs):
-        super(LossLoglikelihoodNb, self).__init__(*args, **kwargs, name="cce_agg")
+        super(LossLoglikelihoodNb, self).__init__(*args, **kwargs, name="ll_nb")
         self.average = average
+
     def call(
             self,
             y_true,
@@ -27,6 +28,31 @@ class LossLoglikelihoodNb(tf.keras.losses.Loss):
         ll = ll - tf.math.lgamma(scale)
         ll = ll + tf.multiply(x, eta_loc - log_r_plus_mu) + tf.multiply(scale, eta_scale - log_r_plus_mu)
 
+        ll = tf.clip_by_value(ll, -300, 300, "log_probs")
+        neg_ll = -ll
+        if self.average:
+            neg_ll = tf.reduce_mean(neg_ll)
+        else:
+            # sum over features, average over batch
+            neg_ll = tf.reduce_mean(tf.reduce_sum(neg_ll, axis=1), axis=0)
+        return neg_ll
+
+
+class LossLoglikelihoodGaussian(tf.keras.losses.Loss):
+
+    def __init__(self, average=True, *args, **kwargs):
+        super(LossLoglikelihoodGaussian, self).__init__(*args, **kwargs, name="ll_norm")
+        self.average = average
+
+    def call(
+            self,
+            y_true,
+            y_pred
+    ):
+        """Implements the gaussian log likelihood loss as VAE reconstruction loss"""
+        loc, scale = tf.split(y_pred, num_or_size_splits=2, axis=1)
+
+        ll = -tf.math.log(scale*tf.math.sqrt(2.*np.pi)) - 0.5*tf.math.square((y_true - loc) / scale)
         ll = tf.clip_by_value(ll, -300, 300, "log_probs")
         neg_ll = -ll
         if self.average:

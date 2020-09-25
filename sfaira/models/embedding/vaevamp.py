@@ -2,7 +2,8 @@ import numpy as np
 import tensorflow as tf
 from typing import List, Union, Tuple
 
-from sfaira.models.embedding.output_layers import NegBinOutput, NegBinSharedDispOutput, NegBinConstDispOutput
+from sfaira.models.embedding.output_layers import NegBinOutput, NegBinSharedDispOutput, NegBinConstDispOutput, \
+    GaussianOutput, GaussianSharedStdOutput, GaussianConstStdOutput
 from sfaira.models.embedding.external import BasicModel
 from sfaira.models.embedding.external import PreprocInput
 from sfaira.models.embedding.external import Topologies
@@ -247,14 +248,20 @@ class ModelVaeVamp(BasicModel):
         expected_densities = tf.keras.layers.Concatenate(axis=1, name="kl")([logqz_x, logpz])
 
         if output_layer == 'nb':
-            output_decoder_nb = NegBinOutput(original_dim=in_dim)((out, inputs_sf))
+            output_decoder_expfamily = NegBinOutput(original_dim=in_dim)((out, inputs_sf))
         elif output_layer == 'nb_shared_disp':
-            output_decoder_nb = NegBinSharedDispOutput(original_dim=in_dim)((out, inputs_sf))
+            output_decoder_expfamily = NegBinSharedDispOutput(original_dim=in_dim)((out, inputs_sf))
         elif output_layer == 'nb_const_disp':
-            output_decoder_nb = NegBinConstDispOutput(original_dim=in_dim)((out, inputs_sf))
+            output_decoder_expfamily = NegBinConstDispOutput(original_dim=in_dim)((out, inputs_sf))
+        elif output_layer == 'gaussian':
+            output_decoder_expfamily = GaussianOutput(original_dim=in_dim)((out, inputs_sf))
+        elif output_layer == 'gaussian_shared_disp':
+            output_decoder_expfamily = GaussianSharedStdOutput(original_dim=in_dim)((out, inputs_sf))
+        elif output_layer == 'gaussian_const_disp':
+            output_decoder_expfamily = GaussianConstStdOutput(original_dim=in_dim)((out, inputs_sf))
         else:
             raise ValueError("tried to access a non-supported output layer %s" % output_layer)
-        output_decoder_nb_concat = tf.keras.layers.Concatenate(axis=1, name="neg_ll")(output_decoder_nb)
+        output_decoder_expfamily_concat = tf.keras.layers.Concatenate(axis=1, name="neg_ll")(output_decoder_expfamily)
 
         z = tf.keras.layers.Concatenate(axis=1, name="z")([z1, z2])
         z_mean = tf.keras.layers.Concatenate(axis=1, name="z_mean")([q_z1_mean, q_z2_mean])
@@ -267,7 +274,7 @@ class ModelVaeVamp(BasicModel):
         )
         self.training_model = tf.keras.Model(
             inputs=[inputs_encoder, inputs_sf],
-            outputs=[output_decoder_nb_concat, expected_densities],
+            outputs=[output_decoder_expfamily_concat, expected_densities],
             name="autoencoder"
         )
 
