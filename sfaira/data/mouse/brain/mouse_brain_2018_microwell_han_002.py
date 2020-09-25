@@ -29,6 +29,7 @@ class Dataset(DatasetBase):
                 'Astroglial cell(Bergman glia)(Brain)': 'Bergmann glial cell',
                 'Astrocyte_Atp1b2 high(Brain)': 'astrocyte',
                 'Astrocyte_Mfe8 high(Brain)': 'astrocyte',
+                'Astrocyte_Pla2g7 high(Brain)': 'astrocyte',
                 'Granulocyte_Ngp high(Brain)': 'granulocyte',
                 'Hypothalamic ependymal cell(Brain)': 'ependymal cell',
                 'Macrophage_Klf2 high(Brain)': 'macrophage',
