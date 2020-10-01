@@ -330,13 +330,19 @@ class ModelVaeIAF(BasicModel):
     def predict_reconstructed(self, x: np.ndarray):
         return np.split(self.training_model.predict(x)[0], indices_or_sections=2, axis=1)[0]
 
-    def predict_embedding(self, x: np.ndarray, return_z0=False):
-        if return_z0:
-            z_t, z_t_mean, z_0 = self.encoder_model.predict(x)[0:3]
+    def predict_embedding(self, x: np.ndarray, variational=False, return_z0=False):
+        if return_z0 and variational:
+            z_t, z_t_mean, z_0 = self.encoder_model.predict(x)
             return z_t, z_t_mean, z_0
-        else:
-            z_t, z_t_mean = self.encoder_model.predict(x)[0:2]
+        elif not return_z0 and variational:
+            z_t, z_t_mean = self.encoder_model.predict(x)[:2]
             return z_t, z_t_mean
+        elif return_z0 and not variational:
+            z_t_mean, z_0 = self.encoder_model.predict(x)[1:]
+            return z_t_mean, z_0
+        elif not return_z0 and not variational:
+            z_t_mean = self.encoder_model.predict(x)[1]
+            return z_t_mean
 
 
 class ModelVaeIAFVersioned(ModelVaeIAF):

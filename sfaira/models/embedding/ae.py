@@ -198,7 +198,9 @@ class ModelAe(BasicModel):
     def predict_reconstructed(self, x: np.ndarray):
         return np.split(self.training_model.predict(x), indices_or_sections=2, axis=1)[0]
 
-    def predict_embedding(self, x: np.ndarray):
+    def predict_embedding(self, x: np.ndarray, variational=False):
+        if variational:
+            raise ValueError("Cannot predict variational embedding on AE model.")
         return self.encoder_model.predict(x)
 
 

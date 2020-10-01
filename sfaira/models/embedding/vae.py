@@ -220,8 +220,11 @@ class ModelVae(BasicModel):
             name="autoencoder"
         )
 
-    def predict_embedding(self, x: np.ndarray):
-        return self.encoder_model.predict(x)
+    def predict_embedding(self, x: np.ndarray, variational=False):
+        if variational:
+            return self.encoder_model.predict(x)
+        else:
+            return self.encoder_model.predict(x)[1]
 
 
 class ModelVaeVersioned(ModelVae):

@@ -756,7 +756,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
 
     def predict_embedding(self, test_data=True):
         """
-        return the prediction in the latent space
+        return the prediction in the latent space (z_mean for variational models)
 
         :return:
         latent space
@@ -771,7 +771,29 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             mode='predict'
         )
         return self.model.predict_embedding(
-            x=x
+            x=x,
+            variational=False
+        )
+
+    def predict_embedding_variational(self, test_data=True):
+        """
+        return the prediction of z, z_mean, z_log_var in the variational latent space
+
+        :return:
+        sample of latent space, mean of latent space, variance of latent space
+        """
+        if test_data:
+            idx = self.idx_test
+        else:
+            idx = None
+        x, y = self._get_dataset(
+            idx=idx,
+            batch_size=None,
+            mode='predict'
+        )
+        return self.model.predict_embedding(
+            x=x,
+            variational=True
         )
 
     def compute_gradients_input(

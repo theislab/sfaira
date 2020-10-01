@@ -8,10 +8,12 @@ from sfaira.models.embedding.external import BasicModel
 from sfaira.models.embedding.external import PreprocInput
 from sfaira.models.embedding.external import Topologies
 
+
 def log_sum_of_exponentials(x, axis):
     x_max = tf.math.reduce_max(x, axis=axis)
     x_max_expanded = tf.expand_dims(x_max, axis=axis)
     return x_max + tf.math.log(tf.reduce_sum(tf.exp(x - x_max_expanded), axis=axis))
+
 
 def log_normal_diag(x, mean, log_var, average=False, axis=None):
     log2pi = np.log(2 * np.pi)
@@ -20,6 +22,7 @@ def log_normal_diag(x, mean, log_var, average=False, axis=None):
         return tf.mean(log_normal, axis=axis)
     else:
         return tf.reduce_sum(log_normal, axis=axis)
+
 
 class Sampling(tf.keras.layers.Layer):
     """Uses (z_mean, z_log_var) to sample z."""
@@ -278,8 +281,11 @@ class ModelVaeVamp(BasicModel):
             name="autoencoder"
         )
 
-    def predict_embedding(self, x: np.ndarray):
-        return self.encoder_model.predict(x)
+    def predict_embedding(self, x: np.ndarray, variational=False):
+        if variational:
+            return self.encoder_model.predict(x)
+        else:
+            return self.encoder_model.predict(x)[1]
 
 
 class ModelVaeVampVersioned(ModelVaeVamp):
