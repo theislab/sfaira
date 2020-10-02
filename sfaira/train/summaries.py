@@ -721,6 +721,8 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
             metric_select: str = "acc",
             metric_show: str = "acc",
             collapse_cv: str = "max",
+            vmin=None,
+            vmax=None,
             height_fig=7,
             width_fig=7
     ):
@@ -791,6 +793,10 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
                     else:
                         hm[j, i] = data_temp.values[0]
                         mask[j, i] = False
+        if vmin is not None:
+            hm = np.maximum(hm, np.asarray(vmin))
+        if vmax is not None:
+            hm = np.minimum(hm, np.asarray(vmin))
         sns_data_heatmap = pandas.DataFrame(
             hm, index=organs, columns=model_types
         )
@@ -1220,6 +1226,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
             metric_select: str = "ll",
             metric_show: str = "ll",
             collapse_cv: str = "min",
+            vmin=None,
+            vmax=None,
             height_fig=7,
             width_fig=7
     ):
@@ -1281,6 +1289,10 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                     else:
                         hm[j, i] = data_temp.values[0]
                         mask[j, i] = False
+        if vmin is not None:
+            hm = np.maximum(hm, np.asarray(vmin))
+        if vmax is not None:
+            hm = np.minimum(hm, np.asarray(vmin))
         sns_data_heatmap = pandas.DataFrame(
             hm, index=organs, columns=model_types
         )
