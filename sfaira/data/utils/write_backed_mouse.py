@@ -3,19 +3,20 @@ import tensorflow as tf
 import sfaira.api as sfaira
 import os
 
+from sfaira.data import mouse
+
+
 print(tf.__version__)
 
 # Set global variables.
 print("sys.argv", sys.argv)
 
-path_base = str(sys.argv[1])
+path = str(sys.argv[1])
 fn = str(sys.argv[2])
 genome = str(sys.argv[3])
 
-path = os.path.join(path_base, "data")
 path_meta = os.path.join(path_base, "meta")
 
-from sfaira.data import mouse
 ds_dict = {
     "bladder": mouse.DatasetGroupBladder(path=path, meta_path=path_meta),
     "brain": mouse.DatasetGroupBrain(path=path, meta_path=path_meta),
