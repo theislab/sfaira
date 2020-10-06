@@ -1,6 +1,6 @@
 import sys
 import tensorflow as tf
-from sfaira.data import human
+from sfaira.data import mouse
 
 
 print(tf.__version__)
