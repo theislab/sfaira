@@ -15,7 +15,7 @@ path = str(sys.argv[1])
 fn = str(sys.argv[2])
 genome = str(sys.argv[3])
 
-path_meta = os.path.join(path_base, "meta")
+path_meta = os.path.join(path, "meta")
 
 ds_dict = {
     "bladder": mouse.DatasetGroupBladder(path=path, meta_path=path_meta),
