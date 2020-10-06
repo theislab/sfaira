@@ -13,7 +13,7 @@ fn = str(sys.argv[2])
 genome = str(sys.argv[3])
 
 path = os.path.join(path_base, "data")
-path_meta = os.path.join(path_base, "meta")
+path_meta = os.path.join(path_base, "meta_leander")
 
 from sfaira.data import human
 ds_dict = {
