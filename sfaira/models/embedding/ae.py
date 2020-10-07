@@ -200,7 +200,7 @@ class ModelAe(BasicModel):
 
     def predict_embedding(self, x: np.ndarray, variational=False):
         if variational:
-            raise ValueError("Cannot predict variational embedding on AE model.")
+            raise ValueError("Cannot predict variational embedding on AE model.topo")
         return self.encoder_model.predict(x)
 
 
