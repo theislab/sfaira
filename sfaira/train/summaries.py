@@ -1306,3 +1306,131 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                 cbar_kws={'label': partition_show + "_" + metric_show}
             )
         return fig, axs, sns_data_heatmap
+    
+    def plot_gradients(
+            self,
+            organ: str,
+            organism: str,
+            datapath: str,
+            model_type: str,
+            celltype_version: str = "0",
+            partition_select: str = "val",
+            metric_select: str = "custom_cce_agg",
+            height_fig=7,
+            width_fig=14,
+            test_data=False,
+            ignore_cache=False,
+            normalize=True,
+            min_cells = 10
+    ):
+        """
+        Plot gradients of the latent space wrt. the input for specified organ by cell classes and model types.
+
+        :param organ: Organ to plot in heatmap.
+        :param organism: Species that the gridsearch was run on
+        :param datapath: Path to the local sfaira data repository
+        :param celltype_version: Version in sfaira celltype universe
+        :param partition_select: Based on which partition to select the best model
+            - train
+            - val
+            - test
+            - all
+        :param metric_select: Based on which metric to select the best model
+            - loss
+            - accuracy
+            - custom_cce_agg
+            - acc_agg
+            - f1
+            - tpr
+            - fpr
+        :param metric_show: Which classwise metric to plot.
+            - accuracy
+            - f1
+        :param collapse_cv: How to collapse over the single cv runs.
+        :param min_cells: Minimum number of cells of a type must be present in the whole dataset for that class to be included in the plot.
+        :param height_fig: Figure height.
+        :param width_fig: Figure width.
+        :return: fig, axs, sns_data_scatter
+        """
+
+        import matplotlib.pyplot as plt
+        import seaborn as sns
+        from sfaira.estimators.keras import EstimatorKerasEmbedding
+        import pdb
+        if self.summary_tab is None:
+            self.create_summary_tab()
+
+        # best model for each organ and model_type
+        model_id, _, _ = self.get_best_model_ids(
+            tab=self.summary_tab, 
+            metric_select=metric_select, 
+            partition_select=partition_select, 
+            subset={
+                "organ": organ,
+                "model_type": model_type, 
+            }
+        )
+        # check cached file
+        resultspath = os.path.join(self.source_path, self.gs_keys[model_id], 'results')
+        if os.path.isfile(os.path.join(resultspath, model_id + '_grads.pickle')) and not ignore_cache:
+            print('Load gradients from cached file...')
+            with open(os.path.join(resultspath, model_id + '_grads.pickle'), 'rb') as f:
+                gradients = pickle.load(f)
+        else:
+            print('Compute gradients (1/3): load data')
+            # load data
+            tz = TargetZoos(path=datapath)
+            if organism == "human":
+                dataset = tz.data_human[organ]
+            elif organism == "mouse":
+                dataset = tz.data_mouse[organ]
+            else:
+                raise(ValueError(f"Supplied organism {organism} not recognised. Should be one of ('mouse', 'human')"))
+            dataset.load_all()
+
+            pdb.set_trace()
+            print('Compute gradients (2/3): load embedding')
+            # load embedding
+            adata = dataset.adata
+            topology = model_id
+            embedding = EstimatorKerasEmbedding(
+                data = adata,
+                model_dir = "",
+                model_id = "",
+                species = organism,
+                organ = organ,
+                model_type = model_type,
+                model_topology = model_id.split('_')[5]
+            )
+            embedding.init_model()
+            embedding.model.training_model.load_weights(os.path.join(resultspath, model_id + '_weights.h5'))
+            
+
+            # compute gradients
+            print('Compute gradients (3/3): cumulate gradients')
+            gradients = embedding.compute_gradients_input(test_data=test_data, batch_size=256, per_celltype=True)
+            with open(os.path.join(resultspath, model_id + '_grads.pickle'), 'wb') as f:
+                pickle.dump(gradients, f, pickle.HIGHEST_PROTOCOL)
+            print('Gradients saved to cache file!')
+        
+        # filter by minimum number cells min_cells
+        filtered_grads = {}
+        for celltype in gradients['gradients'].keys():
+            if gradients['counts'][celltype] > min_cells:
+                filtered_grads.update({celltype: gradients['gradients'][celltype]})
+        
+        avg_grads = np.concatenate([np.mean(a, axis=0, keepdims=True) for a in list(filtered_grads.values())], axis=0)
+
+        if normalize:
+            avg_grads = (avg_grads - np.min(avg_grads, axis=1, keepdims=True))/(np.max(avg_grads, axis=1, keepdims=True) - np.min(avg_grads, axis=1, keepdims=True))
+
+        with sns.axes_style("dark"):
+            fig, axs = plt.subplots(1, 1, figsize=(width_fig, height_fig))
+            axs = sns.heatmap(
+                data=avg_grads,
+                xticklabels=False,
+                yticklabels=[*filtered_grads.keys()],
+                ax=axs
+            )
+
+        return fig, axs, avg_grads
