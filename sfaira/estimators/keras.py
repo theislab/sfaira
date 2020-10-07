@@ -597,11 +597,10 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 sf = self._prepare_sf(x=x)
                 if idx is None:
                     idx = np.arange(0, self.data.X.shape[0])
-                y = self.data.obs['cell_ontology_class'][idx]  # for compute_gradients_input()
                 n_features = x.shape[1]
                 output_types, output_shapes = self._get_output_dim(n_features, model_type)
 
-                if model_type == "vae" or for_compute_gradients_inputs:
+                if model_type == "vae":
                     def generator():
                         for i in range(x.shape[0]):
                             yield (x[i, :].toarray().flatten(), sf[i]), (x[i, :].toarray().flatten(), sf[i])
@@ -659,6 +658,47 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 return (x, sf), (x, sf)
             else:
                 return (x, sf), x
+        
+        elif mode == 'gradient_method':
+            # Prepare data reading according to whether anndata is backed or not:
+            if self.data.filename is None:
+                x = self._prepare_data_matrix(idx=idx)
+                sf = self._prepare_sf(x=x)
+                if idx is None:
+                    idx = np.arange(0, self.data.X.shape[0])
+                cell_to_class = self._get_class_dict()
+                y = self.data.obs['cell_ontology_class'][idx]  # for gradients per celltype in compute_gradients_input()
+                n_features = x.shape[1]                
+                output_types, output_shapes = self._get_output_dim(n_features, 'vae')
+                
+                def generator():
+                    for i in range(x.shape[0]):
+                        yield (x[i, :].toarray().flatten(), sf[i]), (x[i, :].toarray().flatten(), cell_to_class[y[i]])
+            else:
+                n_features = self.data.X.shape[1]
+                cell_to_class = self._get_class_dict()
+                output_types, output_shapes = self._get_output_dim(n_features, 'vae')
+
+                def generator():
+                    for i in idx:
+                        # (_,_), (_,sf) is dummy for kl loss
+                        x = self.data.X[i, :].flatten()
+                        sf = self._prepare_sf(x=x)[0]
+                        y = self.data.obs['cell_ontology_class'][i]
+                        yield (x, sf), (x, cell_to_class[y])
+
+            dataset = tf.data.Dataset.from_generator(
+                generator=generator,
+                output_types=output_types,
+                output_shapes=output_shapes
+            )
+
+            dataset = dataset.shuffle(
+                buffer_size=shuffle_buffer_size,
+                seed=None,
+                reshuffle_each_iteration=True
+            ).batch(batch_size).prefetch(prefetch)
+            return dataset
         else:
             raise ValueError('Mode %s not recognised. Should be "train" "eval" or" predict"' % mode)
 
@@ -798,14 +838,17 @@ class EstimatorKerasEmbedding(EstimatorKeras):
 
     def compute_gradients_input(
             self,
-            batch_size: int = 64,
+            batch_size: int = 128,
             test_data: bool = False,
             abs_gradients: bool = True,
             per_celltype: bool = False
     ):
         if test_data:
             idx = self.idx_test
-            n_obs = len(self.idx_test)
+            if self.idx_test is None:
+                num_samples = 10000
+                idx = np.random.randint(0,self.data.X.shape[0],num_samples)
+            n_obs = len(idx)
         else:
             idx = None
             n_obs = self.data.X.shape[0]
@@ -813,8 +856,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         ds = self._get_dataset(
             idx=idx,
             batch_size=batch_size,
-            mode='train_val',  # to get a tf.GradientTape compatible data set
-            for_compute_gradients_inputs=True  # quick solution to get y in models other than vae
+            mode='gradient_method',  # to get a tf.GradientTape compatible data set
         )
 
         if per_celltype:
@@ -823,29 +865,28 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             cell_id = cell_to_id.values()
             id_to_cell = dict([(key, value) for (key, value) in zip(cell_id, cell_names)])
             grads_x = dict([(key, 0) for key in cell_names])
+            counts = dict([(key, 0) for key in cell_names])
         else:
             grads_x = 0
         # Loop over sub-selected data set and sum gradients across all selected observations.
-        if self.model_type == "vaeiaf":  # TODO: fix bug for vaeiaf model. This function can not be called for vaeiaf model
+        if self.model_type[:3] == "vae":  # TODO: fix bug for vaeiaf model. This function can not be called for vaeiaf model
             model = tf.keras.Model(
                 self.model.training_model.input,
                 self.model.encoder_model.output[0]
             )
-        elif self.model_type == "ae":
-            model = tf.keras.Model(
-                self.model.training_model.input,
-                self.model.encoder.output
-            )
-
+            latent_dim = self.model.encoder_model.output[0].shape[1] 
+            input_dim = self.model.training_model.input[0].shape[1]
         else:
             model = tf.keras.Model(
                 self.model.training_model.input,
                 self.model.encoder_model.output
             )
+            latent_dim = self.model.encoder_model.output[0].shape[0] 
+            input_dim = self.model.training_model.input[0].shape[1]
 
-        for step, (x_batch, y_batch) in tqdm(enumerate(ds), total=np.ceil(n_obs / batch_size)):
+        @tf.function
+        def get_gradients(x_batch):
             x, sf = x_batch
-            _, y = y_batch
             with tf.GradientTape(persistent=True) as tape:
                 tape.watch(x)
                 model_out = model((x, sf))
@@ -855,14 +896,24 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 f = lambda x: x
             # marginalize on batch level and then accumulate batches
             # batch_jacobian gives output of size: (batch_size, latent_dim, input_dim)
-            batch_gradients = f(tape.batch_jacobian(model_out, x).numpy())
+            batch_gradients = f(tape.batch_jacobian(model_out, x))
+            return batch_gradients
+ 
+        for step, (x_batch, y_batch) in tqdm(enumerate(ds), total=np.ceil(n_obs / batch_size)):
+            batch_gradients = get_gradients(x_batch).numpy()
+            _, y = y_batch
             if per_celltype:
-                for id in np.unique(y):
-                    grads_x[id_to_cell[id]] += np.sum(batch_gradients[y == id, :, :], axis=0)
+                for i in np.unique(y):
+                    grads_x[id_to_cell[i]] += np.sum(batch_gradients[y == i, :, :], axis=0)
+                    counts[id_to_cell[i]] += np.sum(y == i)
             else:
                 grads_x += np.sum(batch_gradients, axis=0)
         if per_celltype:
-            return grads_x
+            for cell in cell_names:
+                print(f'{cell} with {counts[cell]} observations')
+                grads_x[cell] = grads_x[cell]/counts[cell] if counts[cell] > 0 else np.zeros((latent_dim, input_dim))
+            
+            return {'gradients': grads_x, 'counts': counts}
         else:
             return grads_x/n_obs
 
