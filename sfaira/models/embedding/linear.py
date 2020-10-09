@@ -81,7 +81,7 @@ class ModelLinear(BasicModel):
             raise ValueError("tried to access a non-supported output layer %s" % output_layer)
         output_decoder_expfamily_concat = tf.keras.layers.Concatenate(axis=1, name="neg_ll")(output_decoder_expfamily)
 
-        self.encoder = tf.keras.Model(
+        self.encoder_model = tf.keras.Model(
             inputs=inputs_encoder,
             outputs=output_encoder,
             name="encoder"
@@ -95,7 +95,7 @@ class ModelLinear(BasicModel):
     def predict_reconstructed(self, x: np.ndarray):
         return np.split(self.training_model.predict(x), indices_or_sections=2, axis=1)[0]
 
-    def predict_embedding(self, x: np.ndarray):
+    def predict_embedding(self, x: np.ndarray, **kwargs):
         return self.encoder.predict(x)
 
 
