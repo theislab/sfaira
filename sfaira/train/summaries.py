@@ -1356,7 +1356,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         import matplotlib.pyplot as plt
         import seaborn as sns
         from sfaira.estimators.keras import EstimatorKerasEmbedding
-        import pdb
+
         if self.summary_tab is None:
             self.create_summary_tab()
 
@@ -1371,7 +1371,9 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
             }
         )
         # check cached file
+
         resultspath = os.path.join(self.source_path, self.gs_keys[model_id], 'results')
+
         if os.path.isfile(os.path.join(resultspath, model_id + '_grads.pickle')) and not ignore_cache:
             print('Load gradients from cached file...')
             with open(os.path.join(resultspath, model_id + '_grads.pickle'), 'rb') as f:
@@ -1386,9 +1388,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                 dataset = tz.data_mouse[organ]
             else:
                 raise(ValueError(f"Supplied organism {organism} not recognised. Should be one of ('mouse', 'human')"))
-            dataset.load_all()
+            dataset.load_all(annotated_only=True)
 
-            pdb.set_trace()
             print('Compute gradients (2/3): load embedding')
             # load embedding
             adata = dataset.adata
