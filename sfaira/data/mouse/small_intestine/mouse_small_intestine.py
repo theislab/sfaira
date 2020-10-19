@@ -25,6 +25,6 @@ class DatasetGroupSmallintestine(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             import sfaira_extension.api as sfairae
-            datasets.update(sfairae.data.mouse.DatasetGroupSmallintestine().datasets)
+            self.datasets += sfairae.data.mouse.DatasetGroupSmallintestine().datasets
         except ImportError:
             pass

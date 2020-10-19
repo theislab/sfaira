@@ -25,6 +25,6 @@ class DatasetGroupSpleen(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             import sfaira_extension.api as sfairae
-            datasets.update(sfairae.data.mouse.DatasetGroupSpleen().datasets)
+            self.datasets += sfairae.data.mouse.DatasetGroupSpleen().datasets
         except ImportError:
             pass

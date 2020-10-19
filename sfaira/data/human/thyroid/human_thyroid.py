@@ -23,6 +23,6 @@ class DatasetGroupThyroid(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             import sfaira_extension.api as sfairae
-            datasets.update(sfairae.data.human.DatasetGroupThyroid().datasets)
+            self.datasets += sfairae.data.human.DatasetGroupThyroid().datasets
         except ImportError:
             pass

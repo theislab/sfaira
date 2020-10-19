@@ -25,6 +25,6 @@ class DatasetGroupBladder(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             import sfaira_extension.api as sfairae
-            datasets.update(sfairae.data.human.DatasetGroupBladder().datasets)
+            self.datasets += sfairae.data.human.DatasetGroupBladder().datasets
         except ImportError:
             pass

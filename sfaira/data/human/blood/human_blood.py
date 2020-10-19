@@ -37,6 +37,6 @@ class DatasetGroupBlood(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             import sfaira_extension.api as sfairae
-            datasets.update(sfairae.data.human.DatasetGroupBlood().datasets)
+            self.datasets += sfairae.data.human.DatasetGroupBlood().datasets
         except ImportError:
             pass

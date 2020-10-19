@@ -27,6 +27,6 @@ class DatasetGroupHeart(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             import sfaira_extension.api as sfairae
-            datasets.update(sfairae.data.human.DatasetGroupHeart().datasets)
+            self.datasets += sfairae.data.human.DatasetGroupHeart().datasets
         except ImportError:
             pass

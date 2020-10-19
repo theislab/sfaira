@@ -29,6 +29,6 @@ class DatasetGroupPeripheralBlood (DatasetGroupBase):
         # Load versions from extension if available:
         try:
             import sfaira_extension.api as sfairae
-            datasets.update(sfairae.data.mouse.DatasetGroupPeripheralBlood().datasets)
+            self.datasets += sfairae.data.mouse.DatasetGroupPeripheralBlood().datasets
         except ImportError:
             pass
