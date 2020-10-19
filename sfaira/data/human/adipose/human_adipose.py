@@ -21,6 +21,6 @@ class DatasetGroupAdipose(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             import sfaira_extension.api as sfairae
-            self.datasets += sfairae.data.human.DatasetGroupAdipose().datasets
+            datasets.update(sfairae.data.human.DatasetGroupAdipose().datasets)
         except ImportError:
             pass

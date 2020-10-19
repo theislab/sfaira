@@ -29,6 +29,6 @@ class DatasetGroupFat(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             import sfaira_extension.api as sfairae
-            self.datasets += sfairae.data.mouse.DatasetGroupFat().datasets
+            datasets.update(sfairae.data.mouse.DatasetGroupFat().datasets)
         except ImportError:
             pass

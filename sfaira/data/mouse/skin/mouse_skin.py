@@ -23,6 +23,6 @@ class DatasetGroupSkin(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             import sfaira_extension.api as sfairae
-            self.datasets += sfairae.data.mouse.DatasetGroupSkin().datasets
+            datasets.update(sfairae.data.mouse.DatasetGroupSkin().datasets)
         except ImportError:
             pass

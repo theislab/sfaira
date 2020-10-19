@@ -21,6 +21,6 @@ class DatasetGroupSpinalcord(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             import sfaira_extension.api as sfairae
-            self.datasets += sfairae.data.human.DatasetGroupSpinalcord().datasets
+            datasets.update(sfairae.data.human.DatasetGroupSpinalcord().datasets)
         except ImportError:
             pass

@@ -23,6 +23,6 @@ class DatasetGroupProstate(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             import sfaira_extension.api as sfairae
-            self.datasets += sfairae.data.mouse.DatasetGroupProstate().datasets
+            datasets.update(sfairae.data.mouse.DatasetGroupProstate().datasets)
         except ImportError:
             pass

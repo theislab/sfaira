@@ -33,6 +33,6 @@ class DatasetGroupBrain(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             import sfaira_extension.api as sfairae
-            self.datasets += sfairae.data.human.DatasetGroupBrain().datasets
+            datasets.update(sfairae.data.human.DatasetGroupBrain().datasets)
         except ImportError:
             pass

@@ -25,6 +25,6 @@ class DatasetGroupMarrow(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             import sfaira_extension.api as sfairae
-            self.datasets += sfairae.data.mouse.DatasetGroupMarrow().datasets
+            datasets.update(sfairae.data.mouse.DatasetGroupMarrow().datasets)
         except ImportError:
             pass

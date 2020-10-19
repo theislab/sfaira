@@ -21,6 +21,6 @@ class DatasetGroupArtery(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             import sfaira_extension.api as sfairae
-            self.datasets += sfairae.data.human.DatasetGroupArtery().datasets
+            datasets.update(sfairae.data.human.DatasetGroupArtery().datasets)
         except ImportError:
             pass

@@ -27,6 +27,6 @@ class DatasetGroupLiver(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             import sfaira_extension.api as sfairae
-            self.datasets += sfairae.data.mouse.DatasetGroupLiver().datasets
+            datasets.update(sfairae.data.mouse.DatasetGroupLiver().datasets)
         except ImportError:
             pass
