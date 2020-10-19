@@ -678,6 +678,8 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 n_features = self.data.X.shape[1]
                 cell_to_class = self._get_class_dict()
                 output_types, output_shapes = self._get_output_dim(n_features, 'vae')
+                if idx is None:
+                    idx = np.arange(0, self.data.X.shape[0])
 
                 def generator():
                     for i in idx:
