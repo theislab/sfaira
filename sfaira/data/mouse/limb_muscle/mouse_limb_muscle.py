@@ -25,6 +25,6 @@ class DatasetGroupLimbmuscle(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             import sfaira_extension.api as sfairae
-            datasets.update(sfairae.data.mouse.DatasetGroupLimbmuscle().datasets)
+            self.datasets.update(sfairae.data.mouse.DatasetGroupLimbmuscle().datasets)
         except ImportError:
             pass

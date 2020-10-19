@@ -23,6 +23,6 @@ class DatasetGroupPlacenta(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             import sfaira_extension.api as sfairae
-            datasets.update(sfairae.data.mouse.DatasetGroupPlacenta().datasets)
+            self.datasets.update(sfairae.data.mouse.DatasetGroupPlacenta().datasets)
         except ImportError:
             pass

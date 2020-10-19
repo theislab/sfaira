@@ -23,6 +23,6 @@ class DatasetGroupRectum(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             import sfaira_extension.api as sfairae
-            datasets.update(sfairae.data.human.DatasetGroupRectum().datasets)
+            self.datasets.update(sfairae.data.human.DatasetGroupRectum().datasets)
         except ImportError:
             pass

@@ -21,6 +21,6 @@ class DatasetGroupDiaphragm(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             import sfaira_extension.api as sfairae
-            datasets.update(sfairae.data.mouse.DatasetGroupDiaphragm().datasets)
+            self.datasets.update(sfairae.data.mouse.DatasetGroupDiaphragm().datasets)
         except ImportError:
             pass
