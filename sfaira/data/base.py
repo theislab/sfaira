@@ -298,6 +298,7 @@ class DatasetBase(abc.ABC):
                 x_new = self.adata.X.toarray()
             else:
                 x_new = self.adata.X
+
             adata_backed.X[np.sort(idx), :] = x_new[np.argsort(idx), :]
             for k in adata_backed.obs.columns:
                 if k == "dataset":
@@ -524,14 +525,11 @@ class DatasetGroupBase(abc.ABC):
         :param celltype_version: Version of cell type ontology to use. Uses most recent if None.
         :return: New row index for next element to be written into backed anndata.
         """
-        keys_to_always_load = ["organ"]
-        for x in keys_to_always_load:
-            if x not in keys:
-                keys.append(x)
-        for i, id in enumerate(self.ids):
+
+        for i, ident in enumerate(self.ids):
             # if this is for celltype prediction, only load the data with have celltype annotation
-            if self.datasets[id].has_celltypes or not annotated_only:
-                self.datasets[id].load_tobacked(
+            if self.datasets[ident].has_celltypes or not annotated_only:
+                self.datasets[ident].load_tobacked(
                     adata_backed=adata_backed,
                     genome=genome,
                     idx=idx[i],
@@ -876,9 +874,12 @@ class DatasetSuperGroup:
                 annotated_only=annotated_only,
                 celltype_version=celltype_version
             )
-        # Save obs separately as this is not included in backed h5ad.
-        fn_backed_obs = ".".join(self.fn_backed.split(".")[:-1]) + "_obs.csv"
-        self.adata.obs.to_csv(fn_backed_obs)
+        # Explicitly write backed file to disk again to make sure that obs are included and that n_obs is set correctly
+        self.adata.write()
+
+        # Saving obs separately below is therefore no longer required (hence commented out)
+        #fn_backed_obs = ".".join(self.fn_backed.split(".")[:-1]) + "_obs.csv"
+        #self.adata.obs.to_csv(fn_backed_obs)
 
     def delete_backed(self):
         del self.adata
