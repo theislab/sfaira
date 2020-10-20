@@ -153,7 +153,9 @@ class EstimatorKeras:
             idx: Union[np.ndarray, None],
             batch_size: Union[int, None],
             mode: str,
-            shuffle_buffer_size: int
+            shuffle_buffer_size: int,
+            prefetch: int,
+            weighted: bool
     ):
         pass
 
@@ -172,12 +174,14 @@ class EstimatorKeras:
         return label_dict
 
     def _prepare_data_matrix(self, idx: Union[np.ndarray, None]):
-        # Make data sparse.
-        if idx is None:
-            idx = np.arange(0, self.data.n_obs)
+        # Check that AnnData is not backed. If backed, assume that these processing steps were done before.
+        if self.data.isbacked:
+            raise ValueError("tried running backed AnnData object through standard pipeline")
 
-        # Check that anndata is not backed. If backed, assume that these processing steps were done before.
-        if self.data.filename is None:
+        else:
+            if idx is None:
+                idx = np.arange(0, self.data.n_obs)
+
             # Convert data matrix to csr matrix
             if isinstance(self.data.X, np.ndarray):
                 # Change NaN to zero. This occurs for example in concatenation of anndata instances.
@@ -223,16 +227,13 @@ class EstimatorKeras:
 
             x_new = x_new.tocsr()
 
-            print("found %i out of %i features from input data set in reference" %
-                  (len(idx_feature_kept), x.shape[1]))
-            print("found %i out of %i features from reference data set in input" %
-                  (len(idx_feature_kept), self.topology_container.ngenes))
-            print("found %i observations" %
-                  (x_new.shape[0]))
-        else:
-            raise ValueError("tried running backed anndata object through standard pipeline")
-        return x_new
+            print(f"found {len(idx_feature_kept)} intersecting features between {x.shape[1]} "
+                  f"features in input data set and {self.topology_container.ngenes} features in reference genome")
+            print(f"found {x_new.shape[0]} observations")
 
+            return x_new
+
+    @staticmethod
     def _prepare_sf(self, x):
         if len(x.shape) == 2:
             sf = np.asarray(x.sum(axis=1)).flatten()
@@ -305,6 +306,8 @@ class EstimatorKeras:
         :param shuffle_buffer_size: tf.Dataset.shuffle(): buffer_size argument.
         :param log_dir: Directory to save tensorboard callback to. Disabled if None.
         :param callbacks: Add additional callbacks to the training call
+        :param weighted:
+        :param verbose:
         :return:
         """
         # Set optimizer
@@ -388,8 +391,7 @@ class EstimatorKeras:
                 else:
                     in_test = np.logical_and(in_test, self.data.obs[k].values == v)
             self.idx_test = np.where(in_test)[0]
-            print("Found %i out of %i cells that correspond to held out data set" %
-                  (len(self.idx_test), self.data.n_obs))
+            print(f"Found {len(self.idx_test)} out of {self.data.n_obs} cells that correspond to held out data set")
             print(self.idx_test)
         else:
             raise ValueError("type of test_split %s not recognized" % type(test_split))
@@ -527,8 +529,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             mode: str,
             shuffle_buffer_size: int = int(1e7),
             prefetch: int = 10,
-            weighted: bool = True,
-            for_compute_gradients_inputs: bool = False
+            weighted: bool = False,
     ):
         """
 
@@ -702,7 +703,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             ).batch(batch_size).prefetch(prefetch)
             return dataset
         else:
-            raise ValueError('Mode %s not recognised. Should be "train" "eval" or" predict"' % mode)
+            raise ValueError(f'Mode {mode} not recognised. Should be "train", "eval" or" predict"')
 
     def _get_loss(self):
         if self.topology_container.topology["hyper_parameters"]["output_layer"] in [
@@ -1040,10 +1041,19 @@ class EstimatorKerasCelltype(EstimatorKeras):
             idx: Union[np.ndarray, None],
             batch_size: Union[int, None],
             mode: str,
-            weighted: bool = True,
             shuffle_buffer_size: int = int(1e7),
-            prefetch: int = 10
+            prefetch: int = 10,
+            weighted: bool = True,
     ):
+        """
+
+        :param idx:
+        :param batch_size:
+        :param mode:
+        :param shuffle_buffer_size:
+        :param weighted: Whether to use weights.
+        :return:
+        """
         if mode == 'train':
             weights, y = self._get_celltype_out(idx=idx)
             if not weighted:
@@ -1138,7 +1148,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
                 x = x[np.argsort(idx), :]
             return x, y, weights
         else:
-            raise ValueError('Mode {} not recognised. Should be "train" "eval" or" predict"'.format(mode))
+            raise ValueError(f'Mode {mode} not recognised. Should be "train", "eval" or" predict"')
 
     def _get_loss(self):
         return LossCrossentropyAgg()
