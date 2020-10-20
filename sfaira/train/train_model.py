@@ -149,14 +149,15 @@ class TrainModel(TargetZoos):
     estimator: Union[None, EstimatorKeras]
     zoo: Union[None, ModelZoo]
     model_dir: str
-    data: Union[DatasetGroupBase, DatasetSuperGroup, str, None]
+    data: Union[DatasetGroupBase, DatasetSuperGroup, anndata.AnnData, str, None]
 
     def __init__(self, data_path: str, meta_path: str):
         # Check if handling backed anndata or base path to directory of raw files:
         if data_path.split(".")[-1] == "h5ad":
             self.data = anndata.read(data_path, backed='r')
-            fn_backed_obs = ".".join(data_path.split(".")[:-1]) + "_obs.csv"
-            self.data.obs = pd.read_csv(fn_backed_obs)
+            if len(self.data.obs.columns) == 0:
+                fn_backed_obs = ".".join(data_path.split(".")[:-1]) + "_obs.csv"
+                self.data.obs = pd.read_csv(fn_backed_obs)
         else:
             super(TrainModel, self).__init__(path=data_path, meta_path=meta_path)
             self.data = None
