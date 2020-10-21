@@ -691,7 +691,6 @@ class DatasetSuperGroup:
         self.fn_backed = None
         self.set_dataset_groups(dataset_groups=dataset_groups)
 
-    @staticmethod
     def get_gc(
             self,
             genome: str = None

@@ -231,7 +231,6 @@ class EstimatorKeras:
 
             return x_new
 
-    @staticmethod
     def _prepare_sf(self, x):
         if len(x.shape) == 2:
             sf = np.asarray(x.sum(axis=1)).flatten()
