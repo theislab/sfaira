@@ -258,15 +258,8 @@ class DatasetBase(abc.ABC):
             warnings.warn("You are trying to subset organs after loading the dataset."
                           "This will have no effect unless the dataset is loaded again.")
 
-    def load_tobacked(
-            self,
-            adata_backed: anndata.AnnData,
-            genome: str,
-            idx: np.ndarray,
-            keys: List[str] = [],
-            fn: Union[None, str] = None,
-            celltype_version: Union[str, None] = None,
-    ):
+    def load_tobacked(self, adata_backed: anndata.AnnData, genome: str, idx: np.ndarray, fn: Union[None, str] = None,
+                      celltype_version: Union[str, None] = None):
         """
         Loads data set into slice of backed anndata object.
 
@@ -330,7 +323,7 @@ class DatasetBase(abc.ABC):
                 ]))
             )
         else:
-             raise ValueError("did not reccognize backed anndata.X format %s" % type(adata_backed.X))
+            raise ValueError("did not reccognize backed AnnData.X format %s" % type(adata_backed.X))
 
     def set_unkown_class_id(self, ids: list):
         """
@@ -504,15 +497,8 @@ class DatasetGroupBase(abc.ABC):
                     load_raw=load_raw
                 )
 
-    def load_all_tobacked(
-            self,
-            adata_backed: anndata.AnnData,
-            genome: str,
-            idx: List[np.ndarray],
-            keys: List[str] = [],
-            annotated_only: bool = False,
-            celltype_version: Union[str, None] = None,
-    ):
+    def load_all_tobacked(self, adata_backed: anndata.AnnData, genome: str, idx: List[np.ndarray],
+                          annotated_only: bool = False, celltype_version: Union[str, None] = None):
         """
         Loads data set group into slice of backed anndata object.
 
@@ -529,13 +515,8 @@ class DatasetGroupBase(abc.ABC):
         for i, ident in enumerate(self.ids):
             # if this is for celltype prediction, only load the data with have celltype annotation
             if self.datasets[ident].has_celltypes or not annotated_only:
-                self.datasets[ident].load_tobacked(
-                    adata_backed=adata_backed,
-                    genome=genome,
-                    idx=idx[i],
-                    keys=keys,
-                    celltype_version=self.format_type_version(celltype_version)
-                )
+                self.datasets[ident].load_tobacked(adata_backed=adata_backed, genome=genome, idx=idx[i],
+                                                   celltype_version=self.format_type_version(celltype_version))
 
     @property
     def ids(self):
@@ -866,17 +847,10 @@ class DatasetSuperGroup:
         print(self.ncells_bydataset)
         print([[len(x) for x in xx] for xx in idx_ls])
         for i, x in enumerate(self.dataset_groups):
-            x.load_all_tobacked(
-                adata_backed=self.adata,
-                genome=genome,
-                idx=idx_ls[i],
-                keys=keys,
-                annotated_only=annotated_only,
-                celltype_version=celltype_version
-            )
+            x.load_all_tobacked(adata_backed=self.adata, genome=genome, idx=idx_ls[i], annotated_only=annotated_only,
+                                celltype_version=celltype_version)
         # Explicitly write backed file to disk again to make sure that obs are included and that n_obs is set correctly
         self.adata.write()
-
         # Saving obs separately below is therefore no longer required (hence commented out)
         #fn_backed_obs = ".".join(self.fn_backed.split(".")[:-1]) + "_obs.csv"
         #self.adata.obs.to_csv(fn_backed_obs)
