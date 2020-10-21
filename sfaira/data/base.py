@@ -799,7 +799,7 @@ class DatasetSuperGroup:
         """
         if shuffled and not as_dense:
             raise ValueError("cannot write backed shuffled and sparse")
-        scatter_update = shuffled
+        scatter_update = shuffled or as_dense
         self.fn_backed = fn_backed
         n_cells = self.ncells(annotated_only=annotated_only)
         gc = self.get_gc(genome=genome)
@@ -854,6 +854,9 @@ class DatasetSuperGroup:
         for i, x in enumerate(self.dataset_groups):
             x.load_all_tobacked(adata_backed=self.adata, genome=genome, idx=idx_ls[i], annotated_only=annotated_only,
                                 celltype_version=celltype_version)
+        # If the sparse non-shuffled approach is used, make sure that self.adata.obs.index is unique() before saving
+        if not scatter_update:
+            self.adata.obs.index = pd.RangeIndex(0, len(self.adata.obs.index))
         # Explicitly write backed file to disk again to make sure that obs are included and that n_obs is set correctly
         self.adata.write()
         # Saving obs separately below is therefore no longer required (hence commented out)
