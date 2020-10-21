@@ -511,12 +511,13 @@ class DatasetGroupBase(abc.ABC):
         :param celltype_version: Version of cell type ontology to use. Uses most recent if None.
         :return: New row index for next element to be written into backed anndata.
         """
-
-        for i, ident in enumerate(self.ids):
+        i = 0
+        for ident in self.ids:
             # if this is for celltype prediction, only load the data with have celltype annotation
             if self.datasets[ident].has_celltypes or not annotated_only:
                 self.datasets[ident].load_tobacked(adata_backed=adata_backed, genome=genome, idx=idx[i],
                                                    celltype_version=self.format_type_version(celltype_version))
+                i += 1
 
     @property
     def ids(self):
@@ -629,7 +630,7 @@ class DatasetGroupBase(abc.ABC):
 
     def ncells(self, annotated_only: bool = False):
         cells = []
-        for i, ident in enumerate(self.ids):
+        for ident in self.ids:
             # if this is for celltype prediction, only load the data with have celltype annotation
             if self.datasets[ident].has_celltypes or not annotated_only:
                 cells.append(self.datasets[ident].ncells)
@@ -637,7 +638,7 @@ class DatasetGroupBase(abc.ABC):
 
     def ncells_bydataset(self, annotated_only: bool = False):
         cells = []
-        for i, ident in enumerate(self.ids):
+        for ident in self.ids:
             # if this is for celltype prediction, only load the data with have celltype annotation
             if self.datasets[ident].has_celltypes or not annotated_only:
                 cells.append(self.datasets[ident].ncells)
