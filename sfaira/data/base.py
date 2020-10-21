@@ -628,20 +628,20 @@ class DatasetGroupBase(abc.ABC):
         return obs_concat
 
     def ncells(self, annotated_only: bool = False):
+        cells = []
         for i, ident in enumerate(self.ids):
-            cells = []
             # if this is for celltype prediction, only load the data with have celltype annotation
             if self.datasets[ident].has_celltypes or not annotated_only:
                 cells.append(self.datasets[ident].ncells)
-            return sum(cells)
+        return sum(cells)
 
     def ncells_bydataset(self, annotated_only: bool = False):
+        cells = []
         for i, ident in enumerate(self.ids):
-            cells = []
             # if this is for celltype prediction, only load the data with have celltype annotation
             if self.datasets[ident].has_celltypes or not annotated_only:
                 cells.append(self.datasets[ident].ncells)
-            return cells
+        return cells
 
     def assert_celltype_version_key(
             self,
