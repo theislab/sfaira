@@ -362,7 +362,7 @@ class DatasetBase(abc.ABC):
     def doi_cleaned_id(self):
         return "_".join(self.id.split("_")[:-1])
 
-    def load_meta(self, fn: Union[PathLike, str]):
+    def load_meta(self, fn: Union[PathLike, str, None]):
         if fn is None:
             if self.meta_path is None:
                 raise ValueError("provide either fn in load or path in constructor")
@@ -627,13 +627,21 @@ class DatasetGroupBase(abc.ABC):
         )) for x in self.ids if self.datasets[x].adata is not None])
         return obs_concat
 
-    @property
-    def ncells(self):
-        return sum([self.datasets[i].ncells for i in self.ids])
+    def ncells(self, annotated_only: bool = False):
+        for i, ident in enumerate(self.ids):
+            cells = []
+            # if this is for celltype prediction, only load the data with have celltype annotation
+            if self.datasets[ident].has_celltypes or not annotated_only:
+                cells.append(self.datasets[ident].ncells)
+            return sum(cells)
 
-    @property
-    def ncells_bydataset(self):
-        return [self.datasets[i].ncells for i in self.ids]
+    def ncells_bydataset(self, annotated_only: bool = False):
+        for i, ident in enumerate(self.ids):
+            cells = []
+            # if this is for celltype prediction, only load the data with have celltype annotation
+            if self.datasets[ident].has_celltypes or not annotated_only:
+                cells.append(self.datasets[ident].ncells)
+            return cells
 
     def assert_celltype_version_key(
             self,
@@ -683,6 +691,7 @@ class DatasetSuperGroup:
         self.fn_backed = None
         self.set_dataset_groups(dataset_groups=dataset_groups)
 
+    @staticmethod
     def get_gc(
             self,
             genome: str = None
@@ -701,26 +710,22 @@ class DatasetSuperGroup:
             raise ValueError("genomes %s not recognised. please provide valid genomes." % genome)
         return g
 
+    def ncells(self, annotated_only: bool = False):
+        return sum([x.ncells(annotated_only=annotated_only) for x in self.dataset_groups])
 
-    @property
-    def ncells(self):
-        return sum([x.ncells for x in self.dataset_groups])
-
-    @property
-    def ncells_bydataset(self):
+    def ncells_bydataset(self, annotated_only: bool = False):
         """
         List of list of length of all data sets by data set group.
         :return:
         """
-        return [x.ncells_bydataset for x in self.dataset_groups]
+        return [x.ncells_bydataset(annotated_only=annotated_only) for x in self.dataset_groups]
 
-    @property
-    def ncells_bydataset_flat(self):
+    def ncells_bydataset_flat(self, annotated_only: bool = False):
         """
         Flattened list of length of all data sets.
         :return:
         """
-        return [xx for x in self.dataset_groups for xx in x.ncells_bydataset]
+        return [xx for x in self.dataset_groups for xx in x.ncells_bydataset(annotated_only=annotated_only)]
 
     def set_dataset_groups(self, dataset_groups: List[DatasetGroupBase]):
         self.dataset_groups = dataset_groups
@@ -796,16 +801,16 @@ class DatasetSuperGroup:
             raise ValueError("cannot write backed shuffled and sparse")
         scatter_update = shuffled
         self.fn_backed = fn_backed
-        ncells = self.ncells
+        n_cells = self.ncells(annotated_only=annotated_only)
         gc = self.get_gc(genome=genome)
-        ngenes = gc.ngenes
+        n_genes = gc.ngenes
         if scatter_update:
             self.adata = anndata.AnnData(
-                scipy.sparse.csr_matrix((ncells, ngenes), dtype=np.float32)
+                scipy.sparse.csr_matrix((n_cells, n_genes), dtype=np.float32)
             )  # creates an empty anndata object with correct dimensions that can be filled with cells from data sets
         else:
             self.adata = anndata.AnnData(
-                scipy.sparse.csr_matrix((0, ngenes), dtype=np.float32)
+                scipy.sparse.csr_matrix((0, n_genes), dtype=np.float32)
             )
         self.adata.filename = fn_backed  # setting this attribute switches this anndata to a backed object
         # Note that setting .filename automatically redefines .X as dense, so we have to redefine it as sparse:
@@ -826,25 +831,25 @@ class DatasetSuperGroup:
         ]
         if scatter_update:
             self.adata.obs = pandas.DataFrame({
-                k: ["nan" for x in range(ncells)] for k in keys
+                k: ["nan" for x in range(n_cells)] for k in keys
             })
         else:
             for k in keys:
                 self.adata.obs[k] = []
         # Define index vectors to write to:
-        idx_vector = np.arange(0, ncells)
+        idx_vector = np.arange(0, n_cells)
         if shuffled:
             np.random.shuffle(idx_vector)
         idx_ls = []
         row = 0
-        for x in self.ncells_bydataset:
+        for x in self.ncells_bydataset(annotated_only=annotated_only):
             temp_ls = []
             for y in x:
                 temp_ls.append(idx_vector[row:(row+y)])
                 row += y
             idx_ls.append(temp_ls)
         print("checking expected and received data set sizes, rerun meta data generation if mismatch is found:")
-        print(self.ncells_bydataset)
+        print(self.ncells_bydataset(annotated_only=annotated_only))
         print([[len(x) for x in xx] for xx in idx_ls])
         for i, x in enumerate(self.dataset_groups):
             x.load_all_tobacked(adata_backed=self.adata, genome=genome, idx=idx_ls[i], annotated_only=annotated_only,
