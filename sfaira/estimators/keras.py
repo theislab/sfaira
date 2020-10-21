@@ -553,13 +553,15 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                     def generator():
                         for i in idx:
                             # (_,_), (_,sf) is dummy for kl loss
-                            x = self.data.X[i, :].flatten()
+                            raw_sample = self.data.X[i, :]
+                            x = raw_sample.toarray().flatten() if raw_sample.ndim == 2 else raw_sample.flatten()
                             sf = self._prepare_sf(x=x)[0]
                             yield (x, sf), (x, sf)
                 else:
                     def generator():
                         for i in idx:
-                            x = self.data.X[i, :].flatten()
+                            raw_sample = self.data.X[i, :]
+                            x = raw_sample.toarray().flatten() if raw_sample.ndim == 2 else raw_sample.flatten()
                             sf = self._prepare_sf(x=x)[0]
                             yield (x, sf), x
             else:
@@ -620,7 +622,8 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 def generator():
                     for i in idx:
                         # (_,_), (_,sf) is dummy for kl loss
-                        x = self.data.X[i, :].flatten()
+                        raw_sample = self.data.X[i, :]
+                        x = raw_sample.toarray().flatten() if raw_sample.ndim == 2 else raw_sample.flatten()
                         sf = self._prepare_sf(x=x)[0]
                         y = self.data.obs['cell_ontology_class'][i]
                         yield (x, sf), (x, cell_to_class[y])
