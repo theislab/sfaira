@@ -1003,24 +1003,24 @@ class EstimatorKerasCelltype(EstimatorKeras):
         :param weighted: Whether to use weights.
         :return:
         """
-        if mode == 'train':
+        if mode == 'train' or mode == 'train_val':
             weights, y = self._get_celltype_out(idx=idx)
             if not weighted:
                 weights = np.ones_like(weights)
 
-            if self.data.filename is None:
+            if self.data.isbacked:
+                n_features = self.data.X.shape[1]
+
+                def generator():
+                    for i, ii in enumerate(idx):
+                        yield np.asarray(self.data.X[ii, :]).flatten(), y[i, :], weights[i]
+            else:
                 x = self._prepare_data_matrix(idx=idx)
                 n_features = x.shape[1]
 
                 def generator():
                     for i, ii in enumerate(idx):
                         yield x[i, :].toarray().flatten(), y[i, :], weights[i]
-            else:
-                n_features = self.data.X.shape[1]
-
-                def generator():
-                    for i, ii in enumerate(idx):
-                        yield np.asarray(self.data.X[ii, :]).flatten(), y[i, :], weights[i]
 
             dataset = tf.data.Dataset.from_generator(
                 generator=generator,
@@ -1031,71 +1031,33 @@ class EstimatorKerasCelltype(EstimatorKeras):
                     tf.TensorShape([])
                 )
             )
-            dataset = dataset.repeat().shuffle(
-                buffer_size=min(x.shape[0], shuffle_buffer_size),
-                seed=None,
-                reshuffle_each_iteration=True
-            ).batch(batch_size).prefetch(prefetch)
-            return dataset
-        elif mode == 'train_val':
-            weights, y = self._get_celltype_out(idx=idx)
-            if not weighted:
-                weights = np.ones_like(weights)
-
-            if self.data.filename is None:
-                x = self._prepare_data_matrix(idx=idx)
-                n_features = x.shape[1]
-
-                def generator():
-                    for i, ii in enumerate(idx):
-                        yield x[i, :].toarray().flatten(), y[i, :], weights[i]
-            else:
-                n_features = self.data.X.shape[1]
-
-                def generator():
-                    for i, ii in enumerate(idx):
-                        yield np.asarray(self.data.X[ii, :]).flatten(), y[i, :], weights[i]
-
-            dataset = tf.data.Dataset.from_generator(
-                generator=generator,
-                output_types=(tf.float32, tf.float32, tf.float32),
-                output_shapes=(
-                    (tf.TensorShape([n_features])),
-                    tf.TensorShape([y.shape[1]]),
-                    tf.TensorShape([])
-                )
-            )
+            if mode == 'train':
+                dataset = dataset.repeat()
             dataset = dataset.shuffle(
                 buffer_size=min(x.shape[0], shuffle_buffer_size),
                 seed=None,
                 reshuffle_each_iteration=True
             ).batch(batch_size).prefetch(prefetch)
+
             return dataset
-        elif mode == 'predict':
-            # Prepare data reading according to whether anndata is backed or not:
-            if self.data.filename is None:
-                x = self._prepare_data_matrix(idx=idx)
-                x = x.toarray()
-            else:
-                # Need to supply sorted indices to backed anndata:
-                x = self.data.X[np.sort(idx), :]
-                # Sort back in original order of indices.
-                x = x[np.argsort(idx), :]
-            return x, None, None
-        elif mode == 'eval':
+
+        elif mode == 'eval' or mode == 'predict':
             weights, y = self._get_celltype_out(idx=idx)
             if not weighted:
                 weights = np.ones_like(weights)
+
             # Prepare data reading according to whether anndata is backed or not:
-            if self.data.filename is None:
-                x = self._prepare_data_matrix(idx=idx)
-                x = x.toarray()
-            else:
+            if self.data.isbacked:
                 # Need to supply sorted indices to backed anndata:
                 x = self.data.X[np.sort(idx), :]
                 # Sort back in original order of indices.
                 x = x[np.argsort(idx), :]
+            else:
+                x = self._prepare_data_matrix(idx=idx)
+                x = x.toarray()
+
             return x, y, weights
+
         else:
             raise ValueError(f'Mode {mode} not recognised. Should be "train", "eval" or" predict"')
 
