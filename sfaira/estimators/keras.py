@@ -583,7 +583,9 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 output_types=output_types,
                 output_shapes=output_shapes
             )
-            dataset = dataset.repeat().shuffle(
+            if mode == 'train':
+                dataset = dataset.repeat()
+            dataset = dataset.shuffle(
                 buffer_size=min(self.data.X.shape[0], shuffle_buffer_size),
                 seed=None,
                 reshuffle_each_iteration=True
