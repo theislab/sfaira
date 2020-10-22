@@ -1012,8 +1012,10 @@ class EstimatorKerasCelltype(EstimatorKeras):
                 n_features = self.data.X.shape[1]
 
                 def generator():
+                    sparse = isinstance(self.data.X[0, :], scipy.sparse.spmatrix)
                     for i, ii in enumerate(idx):
-                        yield np.asarray(self.data.X[ii, :]).flatten(), y[i, :], weights[i]
+                        x = self.data.X[ii, :].toarray().flatten() if sparse else self.data.X[ii, :].flatten()
+                        yield x, y[i, :], weights[i]
             else:
                 x = self._prepare_data_matrix(idx=idx)
                 n_features = x.shape[1]
