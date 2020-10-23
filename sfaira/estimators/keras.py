@@ -380,6 +380,7 @@ class EstimatorKeras:
                 size=round(self.data.shape[0] * test_split),
                 replace=False,
             )
+            self.idx_test = np.sort(self.idx_test)
         elif isinstance(test_split, dict):
             in_test = np.ones((self.data.obs.shape[0],), dtype=int) == 1
             for k, v in test_split.items():
@@ -601,7 +602,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 # Need to supply sorted indices to backed anndata:
                 x = self.data.X[np.sort(idx), :]
                 # Sort back in original order of indices.
-                x = x[np.argsort(idx), :]
+                # x = x[np.argsort(idx), :]
             else:
                 x = self._prepare_data_matrix(idx=idx)
                 x = x.toarray()
