@@ -1051,8 +1051,6 @@ class EstimatorKerasCelltype(EstimatorKeras):
             if self.data.isbacked:
                 # Need to supply sorted indices to backed anndata:
                 x = self.data.X[np.sort(idx), :]
-                # Sort back in original order of indices.
-                x = x[np.argsort(idx), :]
             else:
                 x = self._prepare_data_matrix(idx=idx)
                 x = x.toarray()
