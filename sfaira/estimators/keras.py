@@ -380,7 +380,6 @@ class EstimatorKeras:
                 size=round(self.data.shape[0] * test_split),
                 replace=False,
             )
-            self.idx_test = np.sort(self.idx_test)
         elif isinstance(test_split, dict):
             in_test = np.ones((self.data.obs.shape[0],), dtype=int) == 1
             for k, v in test_split.items():
@@ -393,6 +392,7 @@ class EstimatorKeras:
             print(self.idx_test)
         else:
             raise ValueError("type of test_split %s not recognized" % type(test_split))
+        self.idx_test = np.sort(self.idx_test)
         idx_train_eval = np.array([x for x in all_idx if x not in self.idx_test])
         np.random.seed(1)
         self.idx_eval = np.random.choice(
@@ -601,8 +601,6 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             if self.data.isbacked:
                 # Need to supply sorted indices to backed anndata:
                 x = self.data.X[np.sort(idx), :]
-                # Sort back in original order of indices.
-                # x = x[np.argsort(idx), :]
             else:
                 x = self._prepare_data_matrix(idx=idx)
                 x = x.toarray()
