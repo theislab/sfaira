@@ -1194,12 +1194,12 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         rename_dict = {
             "train_neg_ll_custom_mse": "train_custom_mse",
             "train_neg_ll_custom_negll": "train_custom_negll",
-            "test_neg_ll_custom_mse": "train_custom_mse",
-            "test_neg_ll_custom_negll": "train_custom_negll",
-            "val_neg_ll_custom_mse": "train_custom_mse",
-            "val_neg_ll_custom_negll": "train_custom_negll",
-            "all_neg_ll_custom_mse": "train_custom_mse",
-            "all_neg_ll_custom_negll": "train_custom_negll",
+            "test_neg_ll_custom_mse": "test_custom_mse",
+            "test_neg_ll_custom_negll": "test_custom_negll",
+            "val_neg_ll_custom_mse": "val_custom_mse",
+            "val_neg_ll_custom_negll": "val_custom_negll",
+            "all_neg_ll_custom_mse": "all_custom_mse",
+            "all_neg_ll_custom_negll": "all_custom_negll",
         }
         self.summary_tab = self.summary_tab.rename(columns=rename_dict)
 
