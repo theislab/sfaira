@@ -84,6 +84,7 @@ class KLLoss(tf.keras.losses.Loss):
     def __init__(self):
         super(KLLoss, self).__init__()
         self.beta = tf.Variable(1.0, dtype=tf.float32, trainable=False)
+
     def call(
             self,
             y_true,
