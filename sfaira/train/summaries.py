@@ -506,7 +506,7 @@ class GridsearchContainer:
                 ).tolist():
                     sns_data_temp = pandas.DataFrame(self.histories[run])
                     sns_data_temp["epoch"] = np.arange(0, sns_data_temp.shape[0])
-                    sns_data_temp["cv"] = run.split("_")[-1]
+                    sns_data_temp["cv"] = int(run.split("_")[-1])
                     sns_data.append(sns_data_temp)
                 sns_data = pandas.concat(sns_data, axis=0)
             else:
@@ -1595,3 +1595,113 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         if save is not None:
             plt.savefig(save)
         plt.show()
+
+    def plot_npc(
+        self,
+        organ,
+        topology_version,
+        cvs=None
+    ):
+        import matplotlib.pyplot as plt
+        if self.summary_tab is None:
+            self.create_summary_tab() 
+        models = np.unique(self.summary_tab["model_type"]).tolist()
+        mode = np.mean
+        self.summary_tab["topology"] = [x.split("_")[5] for x in self.summary_tab["model_gs_id"].values]
+        
+        with plt.style.context("seaborn-whitegrid"):
+            fig, ax = plt.subplots(figsize=(12,6))
+            for model in models:
+                model_id, embedding, covar = self.best_model_embedding(
+                    subset={"model_type": model, "organ": organ, "topology": topology_version},
+                    partition="val",
+                    metric="loss",
+                    cvs=cvs,
+                )
+                if len(embedding[0].shape) == 3:
+                    z, mean, logvar = embedding[0]
+                else:
+                    z = embedding[0]
+                latent_dim = z.shape[1]
+                cov = np.cov(z.T)
+                eig_vals, eig_vecs = np.linalg.eig(cov)
+                eig_sum = sum(eig_vals)
+                var_exp = [(i / eig_sum) for i in sorted(eig_vals, reverse=True)]
+                cum_var_exp = np.cumsum([0] + var_exp)
+
+                #plt.bar(range(eig_vals.shape[0]), var_exp, alpha=0.5, align="center",
+                #        label="%s individual explained variance" % key)
+                plt.step(range(0, eig_vals.shape[0]+1), cum_var_exp, where="post", linewidth=3,
+                        label="%s cumulative explained variance (95%%: %s / 99%%: %s)" % (model, np.sum(cum_var_exp < .95), np.sum(cum_var_exp < .99)))
+            plt.yticks([0.0, .25 ,.50, .75, .95, .99])
+            #if latent_dim > 20:
+            #    plt.xticks([1,5, 10, 15, 20])
+            #    plt.xlim([0, 20])
+            plt.ylabel("Explained variance ratio", fontsize=16)
+            plt.xlabel("Principal components", fontsize=16)
+            plt.legend(loc="best", fontsize=16, frameon=True)
+            plt.tight_layout()
+            #plt.savefig(fname=figdir + organ + "_pca_" + model + ".png")
+            plt.show()
+
+    def plot_active_latent_units(
+        self, 
+        organ, 
+        topology_version,
+        cvs=None
+    ):
+        colors=['red', 'blue', 'green', 'cyan', 'magenta', 'yellow', 'darkgreen', 'lime', 'navy', 'royalblue', 'pink', 'peru']
+        def active_latent_units_mask(z):
+            var_x = np.diagonal(np.cov(z.T))
+            min_var_x = 0.01
+            active_units_mask = var_x > min_var_x
+            return active_units_mask
+        
+        import matplotlib.pyplot as plt
+        if self.summary_tab is None:
+            self.create_summary_tab()
+        models = np.unique(self.summary_tab["model_type"]).tolist()
+        self.summary_tab["topology"] = [x.split("_")[5] for x in self.summary_tab["model_gs_id"].values]
+
+        with plt.style.context("seaborn-whitegrid"):
+            plt.figure(figsize=(12, 6))
+            plt.axhline(np.log(0.01), color="k", linestyle='dashed', linewidth=2,
+                   label="active unit threshold")
+            for i, model in enumerate(models):
+                model_id, embedding, covar = self.best_model_embedding(
+                        subset={"model_type": model, "organ": organ, "topology": topology_version},
+                        partition="val",
+                        metric="loss",
+                        cvs=cvs,
+                    )
+                if len(embedding[0].shape) == 3:
+                    z, mean, logvar = embedding[0]
+                else:
+                    mean = embedding[0]
+                latent_dim = mean.shape[1]
+                var = np.sort(np.diagonal(np.cov(mean.T)))[::-1]
+                log_var = np.log(var)
+                active_units = np.log(var[active_latent_units_mask(mean)])
+
+                plt.plot(range(1,log_var.shape[0]+1), log_var, color=colors[i], alpha=1.0, linewidth=3,
+                         label="%s active units: %i" % (model, len(active_units)))
+                # to plot vertical lines
+                log_var_cut = var.copy()
+                log_var_cut[~active_latent_units_mask(mean)] = 0
+                log_var_cut = np.log(log_var_cut)
+                num_active = np.argmax(log_var_cut)
+                if num_active > 0:
+                    plt.vlines(num_active, ymin = -.15, ymax = 0.15, color=colors[i], linestyle='solid', linewidth=3)
+                if model == "vaevamp":
+                    z1,z2 = np.split(np.log(np.diagonal(np.cov(mean.T))),2)
+                    plt.plot(range(1,int(latent_dim/2)+1), np.sort(z2)[::-1], color=colors[i], alpha=1.0,
+                         label=r"%s $z_2$ active units: %i" % (model, len(z2[z2>np.log(0.01)])), linestyle='dashed', linewidth=3)
+                    plt.plot(range(1,int(latent_dim/2)+1), np.sort(z1)[::-1], color=colors[i], alpha=1.0,
+                         label=r"%s $z_1$ active units: %i" % (model, len(z1[z1>np.log(0.01)])), linestyle='dotted', linewidth=3)
+            plt.xlabel(r'Latent unit $i$', fontsize=16)
+            plt.ylabel(r'$\log\,{(A_{\bf z})}_i$', fontsize=16)
+            #plt.title(r"Latent unit activity", fontsize=16)
+            plt.legend(loc="upper right", frameon=True, fontsize=12)
+            plt.tight_layout()
+            # plt.savefig(fname=figdir + organ + "_activity_statistic_" + model + ".png")
+            plt.show()
