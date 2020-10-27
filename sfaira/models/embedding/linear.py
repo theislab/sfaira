@@ -96,7 +96,7 @@ class ModelLinear(BasicModel):
         return np.split(self.training_model.predict(x), indices_or_sections=2, axis=1)[0]
 
     def predict_embedding(self, x: np.ndarray, **kwargs):
-        return self.encoder.predict(x)
+        return self.encoder_model.predict(x)
 
 
 class ModelLinearVersioned(ModelLinear):
