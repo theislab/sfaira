@@ -147,4 +147,4 @@ class Dataset(DatasetBase):
         self.adata.obs[ADATA_IDS.state_exact] = self.adata.obs[ADATA_IDS.state_exact]\
             .cat.rename_categories({'normal': 'healthy', 'ulcerative colitis (disease)': 'ulcerative colitis'})
 
-        self._convert_and_set_var_names(symbol_col='names', ensembl_col='Accession', new_index=ADATA_IDS.gene_id_ensembl)
+        self._convert_and_set_var_names(symbol_col=ADATA_IDS.gene_id_names, ensembl_col='Accession', new_index=ADATA_IDS.gene_id_ensembl)

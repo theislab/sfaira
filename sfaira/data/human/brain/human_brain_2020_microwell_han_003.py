@@ -89,5 +89,5 @@ class Dataset(DatasetBase):
         self.adata.uns[ADATA_IDS.normalization] = 'raw'
         self.adata.uns["dev_stage"] = self.dev_stage
 
-        self._convert_and_set_var_names(symbol_col='names', ensembl_col='ensembl', new_index=ADATA_IDS.gene_id_ensembl)
+        self._convert_and_set_var_names(symbol_col=ADATA_IDS.gene_id_names, ensembl_col=ADATA_IDS.gene_id_ensembl, new_index=ADATA_IDS.gene_id_ensembl)
 

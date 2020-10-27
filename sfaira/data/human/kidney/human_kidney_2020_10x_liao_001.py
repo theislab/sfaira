@@ -112,4 +112,4 @@ class Dataset(DatasetBase):
         self.adata.obs[ADATA_IDS.healthy] = True
         self.adata.obs[ADATA_IDS.state_exact] = 'healthy'
 
-        self._convert_and_set_var_names(symbol_col='names', ensembl_col='ensembl', new_index=ADATA_IDS.gene_id_ensembl)
+        self._convert_and_set_var_names(symbol_col=ADATA_IDS.gene_id_names, ensembl_col=ADATA_IDS.gene_id_ensembl, new_index=ADATA_IDS.gene_id_ensembl)
