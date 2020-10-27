@@ -553,7 +553,6 @@ class DatasetBase(abc.ABC):
         if self.adata is None:
             self.load(fn=fn_data, remove_gene_version=False, match_to_reference=None)
         meta = pandas.DataFrame({
-            "animal": self.adata.uns[ADATA_IDS_SFAIRA.animal],
             "author": self.adata.uns[ADATA_IDS_SFAIRA.author],
             "annotated": self.adata.uns[ADATA_IDS_SFAIRA.annotated],
             "doi": self.adata.uns[ADATA_IDS_SFAIRA.doi],
@@ -563,6 +562,7 @@ class DatasetBase(abc.ABC):
             "normalization": self.adata.uns[ADATA_IDS_SFAIRA.normalization] if ADATA_IDS_SFAIRA.normalization in self.adata.uns.keys() else None,
             "organ": self.adata.uns[ADATA_IDS_SFAIRA.organ],
             "protocol": self.adata.uns[ADATA_IDS_SFAIRA.protocol],
+            "species": self.adata.uns[ADATA_IDS_SFAIRA.species],
             "year": self.adata.uns[ADATA_IDS_SFAIRA.year],
         }, index=range(1))
         meta.to_csv(fn_meta)

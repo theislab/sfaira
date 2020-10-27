@@ -3,7 +3,6 @@ class ADATA_IDS_BASE:
     """
     Base class of minimal constant field names of anndata.AnnData object entries, such as .uns keys and .obs columns.
     """
-    _animal: str
     _annotated: str
     _author: str
     _cell_types_original: str
@@ -20,12 +19,9 @@ class ADATA_IDS_BASE:
     _normalization: str
     _organ: str
     _protocol: str
+    _species: str
     _subtissue: str
     _year: str
-
-    @property
-    def animal(self):
-        return self._animal
 
     @property
     def annotated(self):
@@ -90,6 +86,10 @@ class ADATA_IDS_BASE:
     @property
     def organ(self):
         return self._organ
+
+    @property
+    def species(self):
+        return self._species
 
     @property
     def subtissue(self):

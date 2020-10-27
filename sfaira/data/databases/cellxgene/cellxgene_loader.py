@@ -37,7 +37,7 @@ class DatasetCellxgene(DatasetBase):
         self.adata.uns[ADATA_IDS_SFAIRA.author] = adata.uns[ADATA_IDS_CELLXGENE.author][ADATA_IDS_CELLXGENE.author_names]
         self.adata.uns[ADATA_IDS_SFAIRA.year] = adata.uns[ADATA_IDS_CELLXGENE.year]
         self.adata.uns[ADATA_IDS_SFAIRA.doi] = adata.uns[ADATA_IDS_CELLXGENE.doi]
-        if len(np.unique(adata.obs[ADATA_IDS_SFAIRA.animal].values)) > 1:
+        if len(np.unique(adata.obs[ADATA_IDS_SFAIRA.species].values)) > 1:
             raise Warning("found multiple assay in data set %s" % self.fn)
         self.adata.uns[ADATA_IDS_SFAIRA.protocol] = adata.obs[ADATA_IDS_CELLXGENE.protocol].values[0]
         # Select tissue: blood is handled as a separate tissue in .obs
@@ -45,9 +45,9 @@ class DatasetCellxgene(DatasetBase):
         #    raise Warning("found multiple tissue in data set %s" % self.fn)
         #self.adata.uns["organ"] = adata.obs["tissue"].values[0]
         self.adata.uns[ADATA_IDS_SFAIRA.organ] = str(self.fn).split("_")[3]
-        if len(np.unique(adata.obs[ADATA_IDS_SFAIRA.animal].values)) > 1:
+        if len(np.unique(adata.obs[ADATA_IDS_SFAIRA.species].values)) > 1:
             raise Warning("found multiple organisms in data set %s" % self.fn)
-        self.adata.uns[ADATA_IDS_SFAIRA.animal] = adata.obs[ADATA_IDS_CELLXGENE.animal].values[0]
+        self.adata.uns[ADATA_IDS_SFAIRA.species] = adata.obs[ADATA_IDS_CELLXGENE.species].values[0]
         self.adata.uns[ADATA_IDS_SFAIRA.id] = self.id
         self.adata.uns[ADATA_IDS_SFAIRA.download] = self.download
         self.adata.uns[ADATA_IDS_SFAIRA.annotated] = self.annotated

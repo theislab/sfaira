@@ -57,7 +57,7 @@ class Dataset(DatasetBase):
         self.adata.uns[ADATA_IDS_SFAIRA.protocol] = "microwell-seq"
         self.adata.uns[ADATA_IDS_SFAIRA.organ] = self.organ
         self.adata.uns[ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue  # TODO
-        self.adata.uns[ADATA_IDS_SFAIRA.animal] = "mouse"
+        self.adata.uns[ADATA_IDS_SFAIRA.species] = "mouse"
         self.adata.uns[ADATA_IDS_SFAIRA.id] = self.id
         self.adata.uns[ADATA_IDS_SFAIRA.download] = self.download_website
         self.adata.uns[ADATA_IDS_SFAIRA.annotated] = self.has_celltypes

@@ -68,7 +68,7 @@ class Dataset(DatasetBase):
         self.adata.uns[ADATA_IDS_SFAIRA.protocol] = 'dropseq'
         self.adata.uns[ADATA_IDS_SFAIRA.organ] = self.organ
         self.adata.uns[ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
-        self.adata.uns[ADATA_IDS_SFAIRA.animal] = "human"
+        self.adata.uns[ADATA_IDS_SFAIRA.species] = "human"
         self.adata.uns[ADATA_IDS_SFAIRA.id] = self.id
         self.adata.uns[ADATA_IDS_SFAIRA.download] = [self.download_website, self.download_website_meta]
         self.adata.uns[ADATA_IDS_SFAIRA.annotated] = self.has_celltypes
