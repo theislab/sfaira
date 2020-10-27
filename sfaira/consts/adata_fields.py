@@ -4,28 +4,32 @@ class ADATA_IDS_BASE:
     Base class of minimal constant field names of anndata.AnnData object entries, such as .uns keys and .obs columns.
     """
     _animal: str
+    _annotated: str
     _author: str
     _cell_types_original: str
     _cell_ontology_class: str
     _cell_ontology_id: str
     _doi: str
+    _download: str
     _dataset: str
     _dataset_group: str
     _gene_id_ensembl: str
     _gene_id_names: str
-    _has_celltypes: str
     _healthy: str
     _id: str
     _normalization: str
     _organ: str
     _protocol: str
     _subtissue: str
-    _wget_download: str
     _year: str
 
     @property
     def animal(self):
         return self._animal
+
+    @property
+    def annotated(self):
+        return self._annotated
 
     @property
     def author(self):
@@ -56,16 +60,16 @@ class ADATA_IDS_BASE:
         return self._doi
 
     @property
+    def download(self):
+        return self._download
+
+    @property
     def gene_id_ensembl(self):
         return self._gene_id_ensembl
 
     @property
     def gene_id_names(self):
         return self._gene_id_names
-
-    @property
-    def has_celltypes(self):
-        return self._has_celltypes
 
     @property
     def healthy(self):
@@ -90,10 +94,6 @@ class ADATA_IDS_BASE:
     @property
     def subtissue(self):
         return self._subtissue
-
-    @property
-    def wget_download(self):
-        return self._wget_download
 
     @property
     def year(self):

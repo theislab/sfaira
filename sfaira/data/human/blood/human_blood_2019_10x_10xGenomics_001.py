@@ -54,8 +54,8 @@ class Dataset(DatasetBase):
         self.adata.uns[ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
         self.adata.uns[ADATA_IDS_SFAIRA.animal] = "human"
         self.adata.uns[ADATA_IDS_SFAIRA.id] = self.id
-        self.adata.uns[ADATA_IDS_SFAIRA.wget_download] = "http://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_10k_v3/pbmc_10k_v3_filtered_feature_bc_matrix.h5"
-        self.adata.uns[ADATA_IDS_SFAIRA.has_celltypes] = self.has_celltypes
+        self.adata.uns[ADATA_IDS_SFAIRA.download] = "http://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_10k_v3/pbmc_10k_v3_filtered_feature_bc_matrix.h5"
+        self.adata.uns[ADATA_IDS_SFAIRA.annotated] = self.has_celltypes
         self.adata.uns[ADATA_IDS_SFAIRA.normalization] = 'raw'
 
         self.adata.obs[ADATA_IDS_SFAIRA.cell_ontology_class] = None

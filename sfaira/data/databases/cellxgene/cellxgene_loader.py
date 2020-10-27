@@ -6,7 +6,7 @@ from .external import DatasetBase
 from .external import ADATA_IDS_SFAIRA, ADATA_IDS_CELLXGENE
 
 
-class Dataset(DatasetBase):
+class DatasetCellxgene(DatasetBase):
     """
     This is a dataloader for downloaded h5ad from cellxgene.
 
@@ -24,14 +24,7 @@ class Dataset(DatasetBase):
     ):
         DatasetBase.__init__(self=self, path=path, meta_path=meta_path, **kwargs)
         self.fn = fn
-        # TODO from meta:
-        self.species = str(fn).split("_")[2]
-        self.id = str(fn).split(".")[0]
-        self.organ = str(fn).split("_")[3]
-        self.sub_tissue = None
-        self.download_website = None  # TODO
-        self.has_celltypes = True
-
+        self.load_meta()
         self.class_maps = {
             "0": {},
         }
@@ -56,11 +49,11 @@ class Dataset(DatasetBase):
             raise Warning("found multiple organisms in data set %s" % self.fn)
         self.adata.uns[ADATA_IDS_SFAIRA.animal] = adata.obs[ADATA_IDS_CELLXGENE.animal].values[0]
         self.adata.uns[ADATA_IDS_SFAIRA.id] = self.id
-        self.adata.uns[ADATA_IDS_SFAIRA.wget_download] = self.download_website
-        self.adata.uns[ADATA_IDS_SFAIRA.has_celltypes] = self.has_celltypes
+        self.adata.uns[ADATA_IDS_SFAIRA.download] = self.download
+        self.adata.uns[ADATA_IDS_SFAIRA.annotated] = self.annotated
         self.adata.uns[ADATA_IDS_SFAIRA.normalization] = 'raw'
 
-        self.adata.obs[ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
+        self.adata.obs[ADATA_IDS_SFAIRA.subtissue] = adata.obs[ADATA_IDS_CELLXGENE.subtissue].values
         self.adata.obs[ADATA_IDS_SFAIRA.dev_stage] = adata.obs[ADATA_IDS_CELLXGENE.dev_stage].values
         self.adata.obs[ADATA_IDS_SFAIRA.sex] = adata.obs[ADATA_IDS_CELLXGENE.sex].values
         self.adata.obs[ADATA_IDS_SFAIRA.ethnicity] = adata.obs[ADATA_IDS_CELLXGENE.ethnicity].values

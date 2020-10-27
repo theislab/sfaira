@@ -53,8 +53,8 @@ class Dataset(DatasetBase):
         self.adata.uns[ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue  # TODO
         self.adata.uns[ADATA_IDS_SFAIRA.animal] = "mouse"
         self.adata.uns[ADATA_IDS_SFAIRA.id] = self.id
-        self.adata.uns[ADATA_IDS_SFAIRA.wget_download] = self.download_website
-        self.adata.uns[ADATA_IDS_SFAIRA.has_celltypes] = self.has_celltypes
+        self.adata.uns[ADATA_IDS_SFAIRA.download] = self.download_website
+        self.adata.uns[ADATA_IDS_SFAIRA.annotated] = self.has_celltypes
         self.adata.uns[ADATA_IDS_SFAIRA.normalization] = 'raw'
         self.adata.obs[ADATA_IDS_SFAIRA.cell_ontology_class] = self.adata.obs["Annotation"].values.tolist()
         self.set_unkown_class_id(ids=[np.nan, "nan"])

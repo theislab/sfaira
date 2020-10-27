@@ -11,7 +11,7 @@ from typing import Dict, List, Union
 import warnings
 
 from .external import SuperGenomeContainer
-from .external import ADATA_IDS_SFAIRA
+from .external import ADATA_IDS_SFAIRA, META_DATA_FIELDS
 
 
 class DatasetBase(abc.ABC):
@@ -19,16 +19,22 @@ class DatasetBase(abc.ABC):
     adata: Union[None, anndata.AnnData]
     class_maps: dict
     meta: Union[None, pandas.DataFrame]
-    download_website: Union[None, str]
     download_website_meta: Union[None, str]
     path: Union[None, str]
     id: Union[None, str]
-    download_website: Union[None, str]
-    organ: Union[None, str]
-    sub_tissue: Union[None, str]
-    has_celltypes: Union[None, bool]
-    species: Union[None, str]
     genome: Union[None, str]
+
+    _annotated: str
+    _author: str
+    _doi: str
+    _download: str
+    _id: str
+    _ncells: str
+    _normalization: str
+    _organ: str
+    _protocol: str
+    _species: str
+    _year: str
 
     def __init__(
             self,
@@ -36,20 +42,13 @@ class DatasetBase(abc.ABC):
             meta_path: Union[str, None] = None,
             **kwargs
     ):
-        self.species = None
         self.adata = None
         self.download_website_meta = None
-        self.id = None
-        self.download_website = None
-        self.organ = None
-        self.sub_tissue = None
-        self.has_celltypes = None
         self.meta = None
         self.genome = None
         self.path = path
         self.meta_path = meta_path
         self._load_raw = None
-
 
     @abc.abstractmethod
     def _load(self, fn):
@@ -395,10 +394,6 @@ class DatasetBase(abc.ABC):
 
         self.genome_container = g
 
-    @property
-    def doi_cleaned_id(self):
-        return "_".join(self.id.split("_")[:-1])
-
     def load_meta(self, fn: Union[PathLike, str]):
         if fn is None:
             if self.meta_path is None:
@@ -407,13 +402,141 @@ class DatasetBase(abc.ABC):
         else:
             if isinstance(fn, str):
                 fn = os.path.normpath(fn)
-        self.meta = pandas.read_csv(fn)
+        self.meta = pandas.read_csv(fn, usecols=META_DATA_FIELDS)
 
     @property
-    def ncells(self):
-        if self.meta is None:
-            self.load_meta(fn=None)
-        return int(self.meta["ncells"])
+    def author(self):
+        if self._author is not None:
+            return self._author
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            return self.meta["author"]
+
+    @author.setter
+    def author(self, x):
+        self._author = x
+
+    @property
+    def doi(self):
+        if self._doi is not None:
+            return self._doi
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            return self.meta["doi"]
+
+    @doi.setter
+    def doi(self, x):
+        self._doi = x
+
+    @property
+    def download(self):
+        if self._download is not None:
+            return self._download
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            return self.meta["download"]
+
+    @download.setter
+    def download(self, x):
+        self._download = x
+
+    @property
+    def annotated(self):
+        if self._annotated is not None:
+            return self._annotated
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            return self.meta["annotated"]
+
+    @annotated.setter
+    def annotated(self, x):
+        self._annotated = x
+
+    @property
+    def id(self):
+        if self._id is not None:
+            return self._id
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            return self.meta["id"]
+
+    @id.setter
+    def id(self, x):
+        self._id = x
+
+    @property
+    def normalization(self):
+        if self._normalization is not None:
+            return self._normalization
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            return self.meta["normalization"]
+
+    @normalization.setter
+    def normalization(self, x):
+        self._normalization = x
+
+    @property
+    def organ(self):
+        if self._organ is not None:
+            return self._organ
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            return self.meta["organ"]
+
+    @organ.setter
+    def organ(self, x):
+        self._organ = x
+
+    @property
+    def protocol(self):
+        if self._protocol is not None:
+            return self._protocol
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            return self.meta["protocol"]
+
+    @protocol.setter
+    def protocol(self, x):
+        self._protocol = x
+
+    @property
+    def species(self):
+        if self._species is not None:
+            return self._species
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            return self.meta["species"]
+
+    @species.setter
+    def species(self, x):
+        self._species = x
+
+    @property
+    def year(self):
+        if self._year is not None:
+            return self._year
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            return self.meta["year"]
+
+    @year.setter
+    def year(self, x):
+        self._year = x
+
+    @property
+    def doi_cleaned_id(self):
+        return "_".join(self.id.split("_")[:-1])
 
     def write_meta(
             self,
@@ -430,16 +553,17 @@ class DatasetBase(abc.ABC):
         if self.adata is None:
             self.load(fn=fn_data, remove_gene_version=False, match_to_reference=None)
         meta = pandas.DataFrame({
-            "ncells": self.adata.n_obs,
             "animal": self.adata.uns[ADATA_IDS_SFAIRA.animal],
-            "organ": self.adata.uns[ADATA_IDS_SFAIRA.organ],
-            "subtissue": self.adata.uns[ADATA_IDS_SFAIRA.subtissue],
+            "author": self.adata.uns[ADATA_IDS_SFAIRA.author],
+            "annotated": self.adata.uns[ADATA_IDS_SFAIRA.annotated],
+            "doi": self.adata.uns[ADATA_IDS_SFAIRA.doi],
+            "download": self.adata.uns[ADATA_IDS_SFAIRA.download],
             "id": self.adata.uns[ADATA_IDS_SFAIRA.id],
-            "lab": self.adata.uns[ADATA_IDS_SFAIRA.author],
-            "year": self.adata.uns[ADATA_IDS_SFAIRA.year],
+            "ncells": self.adata.n_obs,
+            "normalization": self.adata.uns[ADATA_IDS_SFAIRA.normalization] if ADATA_IDS_SFAIRA.normalization in self.adata.uns.keys() else None,
+            "organ": self.adata.uns[ADATA_IDS_SFAIRA.organ],
             "protocol": self.adata.uns[ADATA_IDS_SFAIRA.protocol],
-            "counts": self.adata.uns[ADATA_IDS_SFAIRA.normalization] if ADATA_IDS_SFAIRA.normalization in self.adata.uns.keys() else None,
-            "has_celltypes": self.has_celltypes
+            "year": self.adata.uns[ADATA_IDS_SFAIRA.year],
         }, index=range(1))
         meta.to_csv(fn_meta)
 
@@ -485,6 +609,15 @@ class DatasetBase(abc.ABC):
             for x in raw_ids
         ]
 
+    @property
+    def citation(self):
+        """
+        Return all information necessary to cite data set.
+
+        :return:
+        """
+        return [self.author, self.year, self.doi]
+
 
 class DatasetGroupBase(abc.ABC):
     """
@@ -526,7 +659,7 @@ class DatasetGroupBase(abc.ABC):
         :return:
         """
         for i in self.ids:
-            if self.datasets[i].has_celltypes or not annotated_only:
+            if self.datasets[i].annotated or not annotated_only:
                 self.datasets[i].load(
                     celltype_version=self.format_type_version(celltype_version),
                     remove_gene_version=remove_gene_version,
@@ -561,7 +694,7 @@ class DatasetGroupBase(abc.ABC):
                 keys.append(x)
         for i, id in enumerate(self.ids):
             # if this is for celltype prediction, only load the data with have celltype annotation
-            if self.datasets[id].has_celltypes or not annotated_only:
+            if self.datasets[id].annotated or not annotated_only:
                 self.datasets[id].load_tobacked(
                     adata_backed=adata_backed,
                     genome=genome,
@@ -598,7 +731,7 @@ class DatasetGroupBase(abc.ABC):
                 adata.obs[ADATA_IDS_SFAIRA.normalization] = adata.uns[ADATA_IDS_SFAIRA.normalization]
             if ADATA_IDS_SFAIRA.dev_stage in adata.obs.columns:
                 adata.obs[ADATA_IDS_SFAIRA.dev_stage] = adata.uns[ADATA_IDS_SFAIRA.dev_stage]
-            adata.obs[ADATA_IDS_SFAIRA.has_celltypes] = adata.uns[ADATA_IDS_SFAIRA.has_celltypes]
+            adata.obs[ADATA_IDS_SFAIRA.annotated] = adata.uns[ADATA_IDS_SFAIRA.annotated]
         # Workaround related to anndata bugs:  # TODO remove this in future.
         for adata in adata_ls:
             # Fix 1:
@@ -614,7 +747,7 @@ class DatasetGroupBase(abc.ABC):
                     ADATA_IDS_SFAIRA.subtissue,
                     ADATA_IDS_SFAIRA.normalization,
                     ADATA_IDS_SFAIRA.dev_stage,
-                    ADATA_IDS_SFAIRA.has_celltypes,
+                    ADATA_IDS_SFAIRA.annotated,
                     "mapped_features"
                 ]
                 for k in list(adata.uns.keys()):
@@ -872,7 +1005,7 @@ class DatasetSuperGroup:
             ADATA_IDS_SFAIRA.state_exact,
             ADATA_IDS_SFAIRA.normalization,
             ADATA_IDS_SFAIRA.dev_stage,
-            ADATA_IDS_SFAIRA.has_celltypes,
+            ADATA_IDS_SFAIRA.annotated,
             ADATA_IDS_SFAIRA.dataset
         ]
         if scatter_update:

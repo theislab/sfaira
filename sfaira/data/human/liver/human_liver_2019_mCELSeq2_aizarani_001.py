@@ -98,8 +98,8 @@ class Dataset(DatasetBase):
         self.adata.uns[ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
         self.adata.uns[ADATA_IDS_SFAIRA.animal] = "human"
         self.adata.uns[ADATA_IDS_SFAIRA.id] = self.id
-        self.adata.uns[ADATA_IDS_SFAIRA.wget_download] = self.download_website
-        self.adata.uns[ADATA_IDS_SFAIRA.has_celltypes] = self.has_celltypes
+        self.adata.uns[ADATA_IDS_SFAIRA.download] = self.download_website
+        self.adata.uns[ADATA_IDS_SFAIRA.annotated] = self.has_celltypes
         self.adata.uns[ADATA_IDS_SFAIRA.normalization] = 'raw'
 
         self.adata.obs['cell_ontology_class'] = self.adata.obs['CellType']
