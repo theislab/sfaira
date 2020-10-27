@@ -5,12 +5,17 @@ class ADATA_IDS:
     """
 
     def __init__(self):
+        self._age = "age"
         self._animal = "animal"
         self._cell_types_original = "cell_types_original"
         self._cell_ontology_class = "cell_ontology_class"
         self._cell_ontology_id = "cell_ontology_id"
+        self._dev_stage = "dev_stage"
         self._doi = "doi"
+        self._dataset = "dataset"
+        self._dataset_group = "dataset_group"
         self._gene_id_ensembl = "ensembl"
+        self._gene_id_names = "names"
         self._has_celltypes = "has_celltypes"
         self._healthy = "healthy"
         self._id = "id"
@@ -22,6 +27,10 @@ class ADATA_IDS:
         self._subtissue = "subtissue"
         self._wget_download = "wget_download"
         self._year = "year"
+
+    @property
+    def age(self):
+        return self._age
 
     @property
     def animal(self):
@@ -40,12 +49,28 @@ class ADATA_IDS:
         return self._cell_ontology_id
 
     @property
+    def dataset(self):
+        return self._dataset
+
+    @property
+    def dataset_group(self):
+        return self._dataset_group
+
+    @property
+    def dev_stage(self):
+        return self._dev_stage
+
+    @property
     def doi(self):
         return self._doi
 
     @property
     def gene_id_ensembl(self):
         return self._gene_id_ensembl
+
+    @property
+    def gene_id_names(self):
+        return self._gene_id_names
 
     @property
     def has_celltypes(self):
