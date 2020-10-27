@@ -1121,16 +1121,19 @@ class EstimatorKerasCelltype(EstimatorKeras):
         :param weighted: Whether to use class weights in evaluation.
         :return: Dictionary of metric names and values.
         """
-        x, y, w = self._get_dataset(
-            idx=idx,
-            batch_size=None,
-            mode='eval',
-            weighted=weighted
-        )
-        results = self.model.training_model.evaluate(
-            x=x, y=y, sample_weight=w
-        )
-        return dict(zip(self.model.training_model.metrics_names, results))
+        if idx is None or idx.any():   # true if the array is not empty or if the passed value is None
+            x, y, w = self._get_dataset(
+                idx=idx,
+                batch_size=None,
+                mode='eval',
+                weighted=weighted
+            )
+            results = self.model.training_model.evaluate(
+                x=x, y=y, sample_weight=w
+            )
+            return dict(zip(self.model.training_model.metrics_names, results))
+        else:
+            return {}
 
     def evaluate(self, weighted: bool = True):
         """
