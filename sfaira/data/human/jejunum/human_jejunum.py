@@ -21,6 +21,6 @@ class DatasetGroupJejunum(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             import sfaira_extension.api as sfairae
-            datasets.update(sfairae.data.human.DatasetGroupJejunum().datasets)
+            self.datasets.update(sfairae.data.human.DatasetGroupJejunum().datasets)
         except ImportError:
             pass

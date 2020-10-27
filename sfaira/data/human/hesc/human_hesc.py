@@ -21,6 +21,6 @@ class DatasetGroupHesc(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             import sfaira_extension.api as sfairae
-            datasets.update(sfairae.data.human.DatasetGroupHesc().datasets)
+            self.datasets.update(sfairae.data.human.DatasetGroupHesc().datasets)
         except ImportError:
             pass

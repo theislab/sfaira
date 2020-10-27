@@ -33,6 +33,6 @@ class DatasetGroupPancreas(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             import sfaira_extension.api as sfairae
-            datasets.update(sfairae.data.human.DatasetGroupPancreas().datasets)
+            self.datasets.update(sfairae.data.human.DatasetGroupPancreas().datasets)
         except ImportError:
             pass

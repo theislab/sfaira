@@ -258,12 +258,12 @@ class DatasetBase(abc.ABC):
             if ensembl_col == 'index':
                 self.adata.var.index.name = 'index'
                 self.adata.var = self.adata.var.reset_index().rename(
-                    {'index': ADATA_IDS_SFAIRA.gene_id_ensembl}, 
+                    {'index': ADATA_IDS_SFAIRA.gene_id_ensembl},
                     axis='columns'
                 )
             else:
                 self.adata.var = self.adata.var.rename(
-                    {ensembl_col: ADATA_IDS_SFAIRA.gene_id_names}, 
+                    {ensembl_col: ADATA_IDS_SFAIRA.gene_id_names},
                     axis='columns'
                 )
 
@@ -288,15 +288,8 @@ class DatasetBase(abc.ABC):
             warnings.warn("You are trying to subset organs after loading the dataset."
                           "This will have no effect unless the dataset is loaded again.")
 
-    def load_tobacked(
-            self,
-            adata_backed: anndata.AnnData,
-            genome: str,
-            idx: np.ndarray,
-            keys: List[str] = [],
-            fn: Union[None, str] = None,
-            celltype_version: Union[str, None] = None,
-    ):
+    def load_tobacked(self, adata_backed: anndata.AnnData, genome: str, idx: np.ndarray, fn: Union[None, str] = None,
+                      celltype_version: Union[str, None] = None):
         """
         Loads data set into slice of backed anndata object.
 
@@ -328,6 +321,7 @@ class DatasetBase(abc.ABC):
                 x_new = self.adata.X.toarray()
             else:
                 x_new = self.adata.X
+
             adata_backed.X[np.sort(idx), :] = x_new[np.argsort(idx), :]
             for k in adata_backed.obs.columns:
                 if k == ADATA_IDS_SFAIRA.dataset:
@@ -359,7 +353,7 @@ class DatasetBase(abc.ABC):
                 ]))
             )
         else:
-             raise ValueError("did not reccognize backed anndata.X format %s" % type(adata_backed.X))
+            raise ValueError("did not reccognize backed AnnData.X format %s" % type(adata_backed.X))
 
     def set_unkown_class_id(self, ids: list):
         """
@@ -677,15 +671,8 @@ class DatasetGroupBase(abc.ABC):
                     load_raw=load_raw
                 )
 
-    def load_all_tobacked(
-            self,
-            adata_backed: anndata.AnnData,
-            genome: str,
-            idx: List[np.ndarray],
-            keys: List[str] = [],
-            annotated_only: bool = False,
-            celltype_version: Union[str, None] = None,
-    ):
+    def load_all_tobacked(self, adata_backed: anndata.AnnData, genome: str, idx: List[np.ndarray],
+                          annotated_only: bool = False, celltype_version: Union[str, None] = None):
         """
         Loads data set group into slice of backed anndata object.
 
@@ -698,20 +685,14 @@ class DatasetGroupBase(abc.ABC):
         :param celltype_version: Version of cell type ontology to use. Uses most recent if None.
         :return: New row index for next element to be written into backed anndata.
         """
-        keys_to_always_load = ["organ"]
-        for x in keys_to_always_load:
-            if x not in keys:
-                keys.append(x)
-        for i, id in enumerate(self.ids):
+        i = 0
+        for ident in self.ids:
             # if this is for celltype prediction, only load the data with have celltype annotation
-            if self.datasets[id].annotated or not annotated_only:
-                self.datasets[id].load_tobacked(
-                    adata_backed=adata_backed,
-                    genome=genome,
-                    idx=idx[i],
-                    keys=keys,
-                    celltype_version=self.format_type_version(celltype_version)
-                )
+            if self.datasets[ident].annotated or not annotated_only:
+                self.datasets[ident].load_tobacked(
+                    adata_backed=adata_backed, genome=genome, idx=idx[i],
+                    celltype_version=self.format_type_version(celltype_version))
+                i += 1
 
     @property
     def ids(self):
@@ -822,13 +803,21 @@ class DatasetGroupBase(abc.ABC):
         )) for x in self.ids if self.datasets[x].adata is not None])
         return obs_concat
 
-    @property
-    def ncells(self):
-        return sum([self.datasets[i].ncells for i in self.ids])
+    def ncells(self, annotated_only: bool = False):
+        cells = []
+        for ident in self.ids:
+            # if this is for celltype prediction, only load the data with have celltype annotation
+            if self.datasets[ident].has_celltypes or not annotated_only:
+                cells.append(self.datasets[ident].ncells)
+        return sum(cells)
 
-    @property
-    def ncells_bydataset(self):
-        return [self.datasets[i].ncells for i in self.ids]
+    def ncells_bydataset(self, annotated_only: bool = False):
+        cells = []
+        for ident in self.ids:
+            # if this is for celltype prediction, only load the data with have celltype annotation
+            if self.datasets[ident].has_celltypes or not annotated_only:
+                cells.append(self.datasets[ident].ncells)
+        return cells
 
     def assert_celltype_version_key(
             self,
@@ -922,26 +911,22 @@ class DatasetSuperGroup:
             raise ValueError("genomes %s not recognised. please provide valid genomes." % genome)
         return g
 
+    def ncells(self, annotated_only: bool = False):
+        return sum([x.ncells(annotated_only=annotated_only) for x in self.dataset_groups])
 
-    @property
-    def ncells(self):
-        return sum([x.ncells for x in self.dataset_groups])
-
-    @property
-    def ncells_bydataset(self):
+    def ncells_bydataset(self, annotated_only: bool = False):
         """
         List of list of length of all data sets by data set group.
         :return:
         """
-        return [x.ncells_bydataset for x in self.dataset_groups]
+        return [x.ncells_bydataset(annotated_only=annotated_only) for x in self.dataset_groups]
 
-    @property
-    def ncells_bydataset_flat(self):
+    def ncells_bydataset_flat(self, annotated_only: bool = False):
         """
         Flattened list of length of all data sets.
         :return:
         """
-        return [xx for x in self.dataset_groups for xx in x.ncells_bydataset]
+        return [xx for x in self.dataset_groups for xx in x.ncells_bydataset(annotated_only=annotated_only)]
 
     def set_dataset_groups(self, dataset_groups: List[DatasetGroupBase]):
         self.dataset_groups = dataset_groups
@@ -1015,18 +1000,18 @@ class DatasetSuperGroup:
         """
         if shuffled and not as_dense:
             raise ValueError("cannot write backed shuffled and sparse")
-        scatter_update = shuffled
+        scatter_update = shuffled or as_dense
         self.fn_backed = fn_backed
-        ncells = self.ncells
+        n_cells = self.ncells(annotated_only=annotated_only)
         gc = self.get_gc(genome=genome)
-        ngenes = gc.ngenes
+        n_genes = gc.ngenes
         if scatter_update:
             self.adata = anndata.AnnData(
-                scipy.sparse.csr_matrix((ncells, ngenes), dtype=np.float32)
+                scipy.sparse.csr_matrix((n_cells, n_genes), dtype=np.float32)
             )  # creates an empty anndata object with correct dimensions that can be filled with cells from data sets
         else:
             self.adata = anndata.AnnData(
-                scipy.sparse.csr_matrix((0, ngenes), dtype=np.float32)
+                scipy.sparse.csr_matrix((0, n_genes), dtype=np.float32)
             )
         self.adata.filename = fn_backed  # setting this attribute switches this anndata to a backed object
         # Note that setting .filename automatically redefines .X as dense, so we have to redefine it as sparse:
@@ -1047,38 +1032,37 @@ class DatasetSuperGroup:
         ]
         if scatter_update:
             self.adata.obs = pandas.DataFrame({
-                k: ["nan" for x in range(ncells)] for k in keys
+                k: ["nan" for x in range(n_cells)] for k in keys
             })
         else:
             for k in keys:
                 self.adata.obs[k] = []
         # Define index vectors to write to:
-        idx_vector = np.arange(0, ncells)
+        idx_vector = np.arange(0, n_cells)
         if shuffled:
             np.random.shuffle(idx_vector)
         idx_ls = []
         row = 0
-        for x in self.ncells_bydataset:
+        for x in self.ncells_bydataset(annotated_only=annotated_only):
             temp_ls = []
             for y in x:
                 temp_ls.append(idx_vector[row:(row+y)])
                 row += y
             idx_ls.append(temp_ls)
         print("checking expected and received data set sizes, rerun meta data generation if mismatch is found:")
-        print(self.ncells_bydataset)
+        print(self.ncells_bydataset(annotated_only=annotated_only))
         print([[len(x) for x in xx] for xx in idx_ls])
         for i, x in enumerate(self.dataset_groups):
-            x.load_all_tobacked(
-                adata_backed=self.adata,
-                genome=genome,
-                idx=idx_ls[i],
-                keys=keys,
-                annotated_only=annotated_only,
-                celltype_version=celltype_version
-            )
-        # Save obs separately as this is not included in backed h5ad.
-        fn_backed_obs = ".".join(self.fn_backed.split(".")[:-1]) + "_obs.csv"
-        self.adata.obs.to_csv(fn_backed_obs)
+            x.load_all_tobacked(adata_backed=self.adata, genome=genome, idx=idx_ls[i], annotated_only=annotated_only,
+                                celltype_version=celltype_version)
+        # If the sparse non-shuffled approach is used, make sure that self.adata.obs.index is unique() before saving
+        if not scatter_update:
+            self.adata.obs.index = pd.RangeIndex(0, len(self.adata.obs.index))
+        # Explicitly write backed file to disk again to make sure that obs are included and that n_obs is set correctly
+        self.adata.write()
+        # Saving obs separately below is therefore no longer required (hence commented out)
+        #fn_backed_obs = ".".join(self.fn_backed.split(".")[:-1]) + "_obs.csv"
+        #self.adata.obs.to_csv(fn_backed_obs)
 
     def delete_backed(self):
         del self.adata

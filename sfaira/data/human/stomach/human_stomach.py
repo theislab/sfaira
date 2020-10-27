@@ -39,6 +39,6 @@ class DatasetGroupStomach(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             import sfaira_extension.api as sfairae
-            datasets.update(sfairae.data.human.DatasetGroupStomach().datasets)
+            self.datasets.update(sfairae.data.human.DatasetGroupStomach().datasets)
         except ImportError:
             pass

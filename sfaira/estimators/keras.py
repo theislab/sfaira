@@ -153,7 +153,9 @@ class EstimatorKeras:
             idx: Union[np.ndarray, None],
             batch_size: Union[int, None],
             mode: str,
-            shuffle_buffer_size: int
+            shuffle_buffer_size: int,
+            prefetch: int,
+            weighted: bool
     ):
         pass
 
@@ -172,12 +174,11 @@ class EstimatorKeras:
         return label_dict
 
     def _prepare_data_matrix(self, idx: Union[np.ndarray, None]):
-        # Make data sparse.
-        if idx is None:
-            idx = np.arange(0, self.data.n_obs)
+        # Check that AnnData is not backed. If backed, assume that these processing steps were done before.
+        if self.data.isbacked:
+            raise ValueError("tried running backed AnnData object through standard pipeline")
 
-        # Check that anndata is not backed. If backed, assume that these processing steps were done before.
-        if self.data.filename is None:
+        else:
             # Convert data matrix to csr matrix
             if isinstance(self.data.X, np.ndarray):
                 # Change NaN to zero. This occurs for example in concatenation of anndata instances.
@@ -189,8 +190,9 @@ class EstimatorKeras:
             else:
                 raise ValueError("data type %s not recognized" % type(self.data.X))
 
-            # Only keep cells provided as idx
-            x = x[idx, :]
+            # Subset cells by provided idx
+            if idx is not None:
+                x = x[idx, :]
 
             # If the feature space is already mapped to the right reference, return the data matrix immediately
             if 'mapped_features' in self.data.uns_keys():
@@ -223,15 +225,11 @@ class EstimatorKeras:
 
             x_new = x_new.tocsr()
 
-            print("found %i out of %i features from input data set in reference" %
-                  (len(idx_feature_kept), x.shape[1]))
-            print("found %i out of %i features from reference data set in input" %
-                  (len(idx_feature_kept), self.topology_container.ngenes))
-            print("found %i observations" %
-                  (x_new.shape[0]))
-        else:
-            raise ValueError("tried running backed anndata object through standard pipeline")
-        return x_new
+            print(f"found {len(idx_feature_kept)} intersecting features between {x.shape[1]} "
+                  f"features in input data set and {self.topology_container.ngenes} features in reference genome")
+            print(f"found {x_new.shape[0]} observations")
+
+            return x_new
 
     def _prepare_sf(self, x):
         if len(x.shape) == 2:
@@ -305,6 +303,8 @@ class EstimatorKeras:
         :param shuffle_buffer_size: tf.Dataset.shuffle(): buffer_size argument.
         :param log_dir: Directory to save tensorboard callback to. Disabled if None.
         :param callbacks: Add additional callbacks to the training call
+        :param weighted:
+        :param verbose:
         :return:
         """
         # Set optimizer
@@ -388,8 +388,7 @@ class EstimatorKeras:
                 else:
                     in_test = np.logical_and(in_test, self.data.obs[k].values == v)
             self.idx_test = np.where(in_test)[0]
-            print("Found %i out of %i cells that correspond to held out data set" %
-                  (len(self.idx_test), self.data.n_obs))
+            print(f"Found {len(self.idx_test)} out of {self.data.n_obs} cells that correspond to held out data set")
             print(self.idx_test)
         else:
             raise ValueError("type of test_split %s not recognized" % type(test_split))
@@ -527,8 +526,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             mode: str,
             shuffle_buffer_size: int = int(1e7),
             prefetch: int = 10,
-            weighted: bool = True,
-            for_compute_gradients_inputs: bool = False
+            weighted: bool = False,
     ):
         """
 
@@ -542,9 +540,31 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         # Determine model type [ae, vae(iaf, vamp)]
         model_type = "vae" if self.model_type[:3] == "vae" else "ae"
 
-        if mode == 'train':
+        if idx is None:
+            idx = np.arange(0, self.data.n_obs)
+
+        if mode == 'train' or mode == 'train_val':
             # Prepare data reading according to whether anndata is backed or not:
-            if self.data.filename is None:
+            if self.data.isbacked:
+                n_features = self.data.X.shape[1]
+                output_types, output_shapes = self._get_output_dim(n_features, model_type)
+
+                if model_type == "vae":
+                    def generator():
+                        sparse = isinstance(self.data.X[0, :], scipy.sparse.spmatrix)
+                        for i in idx:
+                            # (_,_), (_,sf) is dummy for kl loss
+                            x = self.data.X[i, :].toarray().flatten() if sparse else self.data.X[i, :].flatten()
+                            sf = self._prepare_sf(x=x)[0]
+                            yield (x, sf), (x, sf)
+                else:
+                    def generator():
+                        sparse = isinstance(self.data.X[0, :], scipy.sparse.spmatrix)
+                        for i in idx:
+                            x = self.data.X[i, :].toarray().flatten() if sparse else self.data.X[i, :].flatten()
+                            sf = self._prepare_sf(x=x)[0]
+                            yield (x, sf), x
+            else:
                 x = self._prepare_data_matrix(idx=idx)
                 sf = self._prepare_sf(x=x)
                 n_features = x.shape[1]
@@ -560,98 +580,31 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                         for i in range(x.shape[0]):
                             yield (x[i, :].toarray().flatten(), sf[i]), x[i, :].toarray().flatten()
 
-            else:
-                n_features = self.data.X.shape[1]
-                output_types, output_shapes = self._get_output_dim(n_features, model_type)
-
-                if model_type == "vae":
-                    def generator():
-                        for i in idx:
-                            # (_,_), (_,sf) is dummy for kl loss
-                            x = self.data.X[i, :].flatten()
-                            sf = self._prepare_sf(x=x)[0]
-                            yield (x, sf), (x, sf)
-                else:
-                    def generator():
-                        for i in idx:
-                            x = self.data.X[i, :].flatten()
-                            sf = self._prepare_sf(x=x)[0]
-                            yield (x, sf), x
-
             dataset = tf.data.Dataset.from_generator(
                 generator=generator,
                 output_types=output_types,
                 output_shapes=output_shapes
             )
-            dataset = dataset.repeat().shuffle(
+            if mode == 'train':
+                dataset = dataset.repeat()
+            dataset = dataset.shuffle(
                 buffer_size=min(self.data.X.shape[0], shuffle_buffer_size),
                 seed=None,
                 reshuffle_each_iteration=True
             ).batch(batch_size).prefetch(prefetch)
-            return dataset
 
-        elif mode == 'train_val':
-            # Prepare data reading according to whether anndata is backed or not:
-            if self.data.filename is None:
-                x = self._prepare_data_matrix(idx=idx)
-                sf = self._prepare_sf(x=x)
-                if idx is None:
-                    idx = np.arange(0, self.data.X.shape[0])
-                n_features = x.shape[1]
-                output_types, output_shapes = self._get_output_dim(n_features, model_type)
-
-                if model_type == "vae":
-                    def generator():
-                        for i in range(x.shape[0]):
-                            yield (x[i, :].toarray().flatten(), sf[i]), (x[i, :].toarray().flatten(), sf[i])
-                else:
-                    def generator():
-                        for i in range(x.shape[0]):
-                            yield (x[i, :].toarray().flatten(), sf[i]), x[i, :].toarray().flatten()
-
-            else:
-                n_features = self.data.X.shape[1]
-                output_types, output_shapes = self._get_output_dim(n_features, model_type)
-
-                if model_type == "vae":
-                    def generator():
-                        for i in idx:
-                            # (_,_), (_,sf) is dummy for kl loss
-                            x = self.data.X[i, :].flatten()
-                            sf = self._prepare_sf(x=x)[0]
-                            yield (x, sf), (x, sf)
-                else:
-                    def generator():
-                        for i in idx:
-                            x = self.data.X[i, :].flatten()
-                            sf = self._prepare_sf(x=x)[0]
-                            yield (x, sf), x
-
-            dataset = tf.data.Dataset.from_generator(
-                generator=generator,
-                output_types=output_types,
-                output_shapes=output_shapes
-            )
-
-            dataset = dataset.shuffle(
-                buffer_size=shuffle_buffer_size,
-                seed=None,
-                reshuffle_each_iteration=True
-            ).batch(batch_size).prefetch(prefetch)
             return dataset
 
         elif mode == 'eval' or mode == 'predict':
             # Prepare data reading according to whether anndata is backed or not:
-            if self.data.filename is None:
-                x = self._prepare_data_matrix(idx=idx)
-                x = x.toarray()
-            else:
+            if self.data.isbacked:
                 # Need to supply sorted indices to backed anndata:
-                if idx is None:
-                    idx = np.arange(0, self.data.n_obs)
                 x = self.data.X[np.sort(idx), :]
                 # Sort back in original order of indices.
                 x = x[np.argsort(idx), :]
+            else:
+                x = self._prepare_data_matrix(idx=idx)
+                x = x.toarray()
 
             sf = self._prepare_sf(x=x)
             if self.model_type[:3] == "vae":
@@ -661,11 +614,21 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         
         elif mode == 'gradient_method':
             # Prepare data reading according to whether anndata is backed or not:
-            if self.data.filename is None:
+            if self.data.isbacked:
+                n_features = self.data.X.shape[1]
+                cell_to_class = self._get_class_dict()
+                output_types, output_shapes = self._get_output_dim(n_features, 'vae')
+
+                def generator():
+                    sparse = isinstance(self.data.X[0, :], scipy.sparse.spmatrix)
+                    for i in idx:
+                        x = self.data.X[i, :].toarray().flatten() if sparse else self.data.X[i, :].flatten()
+                        sf = self._prepare_sf(x=x)[0]
+                        y = self.data.obs['cell_ontology_class'][i]
+                        yield (x, sf), (x, cell_to_class[y])
+            else:
                 x = self._prepare_data_matrix(idx=idx)
                 sf = self._prepare_sf(x=x)
-                if idx is None:
-                    idx = np.arange(0, self.data.X.shape[0])
                 cell_to_class = self._get_class_dict()
                 y = self.data.obs['cell_ontology_class'][idx]  # for gradients per celltype in compute_gradients_input()
                 n_features = x.shape[1]                
@@ -674,33 +637,22 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 def generator():
                     for i in range(x.shape[0]):
                         yield (x[i, :].toarray().flatten(), sf[i]), (x[i, :].toarray().flatten(), cell_to_class[y[i]])
-            else:
-                n_features = self.data.X.shape[1]
-                cell_to_class = self._get_class_dict()
-                output_types, output_shapes = self._get_output_dim(n_features, 'vae')
-
-                def generator():
-                    for i in idx:
-                        # (_,_), (_,sf) is dummy for kl loss
-                        x = self.data.X[i, :].flatten()
-                        sf = self._prepare_sf(x=x)[0]
-                        y = self.data.obs['cell_ontology_class'][i]
-                        yield (x, sf), (x, cell_to_class[y])
 
             dataset = tf.data.Dataset.from_generator(
                 generator=generator,
                 output_types=output_types,
                 output_shapes=output_shapes
             )
-
             dataset = dataset.shuffle(
                 buffer_size=shuffle_buffer_size,
                 seed=None,
                 reshuffle_each_iteration=True
             ).batch(batch_size).prefetch(prefetch)
+
             return dataset
+
         else:
-            raise ValueError('Mode %s not recognised. Should be "train" "eval" or" predict"' % mode)
+            raise ValueError(f'Mode {mode} not recognised. Should be "train", "eval" or" predict"')
 
     def _get_loss(self):
         if self.topology_container.topology["hyper_parameters"]["output_layer"] in [
@@ -1038,28 +990,39 @@ class EstimatorKerasCelltype(EstimatorKeras):
             idx: Union[np.ndarray, None],
             batch_size: Union[int, None],
             mode: str,
-            weighted: bool = True,
             shuffle_buffer_size: int = int(1e7),
-            prefetch: int = 10
+            prefetch: int = 10,
+            weighted: bool = True,
     ):
-        if mode == 'train':
+        """
+
+        :param idx:
+        :param batch_size:
+        :param mode:
+        :param shuffle_buffer_size:
+        :param weighted: Whether to use weights.
+        :return:
+        """
+        if mode == 'train' or mode == 'train_val':
             weights, y = self._get_celltype_out(idx=idx)
             if not weighted:
                 weights = np.ones_like(weights)
 
-            if self.data.filename is None:
+            if self.data.isbacked:
+                n_features = self.data.X.shape[1]
+
+                def generator():
+                    sparse = isinstance(self.data.X[0, :], scipy.sparse.spmatrix)
+                    for i, ii in enumerate(idx):
+                        x = self.data.X[ii, :].toarray().flatten() if sparse else self.data.X[ii, :].flatten()
+                        yield x, y[i, :], weights[i]
+            else:
                 x = self._prepare_data_matrix(idx=idx)
                 n_features = x.shape[1]
 
                 def generator():
                     for i, ii in enumerate(idx):
                         yield x[i, :].toarray().flatten(), y[i, :], weights[i]
-            else:
-                n_features = self.data.X.shape[1]
-
-                def generator():
-                    for i, ii in enumerate(idx):
-                        yield np.asarray(self.data.X[ii, :]).flatten(), y[i, :], weights[i]
 
             dataset = tf.data.Dataset.from_generator(
                 generator=generator,
@@ -1070,73 +1033,35 @@ class EstimatorKerasCelltype(EstimatorKeras):
                     tf.TensorShape([])
                 )
             )
-            dataset = dataset.repeat().shuffle(
-                buffer_size=min(x.shape[0], shuffle_buffer_size),
-                seed=None,
-                reshuffle_each_iteration=True
-            ).batch(batch_size).prefetch(prefetch)
-            return dataset
-        elif mode == 'train_val':
-            weights, y = self._get_celltype_out(idx=idx)
-            if not weighted:
-                weights = np.ones_like(weights)
-
-            if self.data.filename is None:
-                x = self._prepare_data_matrix(idx=idx)
-                n_features = x.shape[1]
-
-                def generator():
-                    for i, ii in enumerate(idx):
-                        yield x[i, :].toarray().flatten(), y[i, :], weights[i]
-            else:
-                n_features = self.data.X.shape[1]
-
-                def generator():
-                    for i, ii in enumerate(idx):
-                        yield np.asarray(self.data.X[ii, :]).flatten(), y[i, :], weights[i]
-
-            dataset = tf.data.Dataset.from_generator(
-                generator=generator,
-                output_types=(tf.float32, tf.float32, tf.float32),
-                output_shapes=(
-                    (tf.TensorShape([n_features])),
-                    tf.TensorShape([y.shape[1]]),
-                    tf.TensorShape([])
-                )
-            )
+            if mode == 'train':
+                dataset = dataset.repeat()
             dataset = dataset.shuffle(
                 buffer_size=min(x.shape[0], shuffle_buffer_size),
                 seed=None,
                 reshuffle_each_iteration=True
             ).batch(batch_size).prefetch(prefetch)
+
             return dataset
-        elif mode == 'predict':
-            # Prepare data reading according to whether anndata is backed or not:
-            if self.data.filename is None:
-                x = self._prepare_data_matrix(idx=idx)
-                x = x.toarray()
-            else:
-                # Need to supply sorted indices to backed anndata:
-                x = self.data.X[np.sort(idx), :]
-                # Sort back in original order of indices.
-                x = x[np.argsort(idx), :]
-            return x, None, None
-        elif mode == 'eval':
+
+        elif mode == 'eval' or mode == 'predict':
             weights, y = self._get_celltype_out(idx=idx)
             if not weighted:
                 weights = np.ones_like(weights)
+
             # Prepare data reading according to whether anndata is backed or not:
-            if self.data.filename is None:
-                x = self._prepare_data_matrix(idx=idx)
-                x = x.toarray()
-            else:
+            if self.data.isbacked:
                 # Need to supply sorted indices to backed anndata:
                 x = self.data.X[np.sort(idx), :]
                 # Sort back in original order of indices.
                 x = x[np.argsort(idx), :]
+            else:
+                x = self._prepare_data_matrix(idx=idx)
+                x = x.toarray()
+
             return x, y, weights
+
         else:
-            raise ValueError('Mode {} not recognised. Should be "train" "eval" or" predict"'.format(mode))
+            raise ValueError(f'Mode {mode} not recognised. Should be "train", "eval" or" predict"')
 
     def _get_loss(self):
         return LossCrossentropyAgg()
@@ -1196,16 +1121,19 @@ class EstimatorKerasCelltype(EstimatorKeras):
         :param weighted: Whether to use class weights in evaluation.
         :return: Dictionary of metric names and values.
         """
-        x, y, w = self._get_dataset(
-            idx=idx,
-            batch_size=None,
-            mode='eval',
-            weighted=weighted
-        )
-        results = self.model.training_model.evaluate(
-            x=x, y=y, sample_weight=w
-        )
-        return dict(zip(self.model.training_model.metrics_names, results))
+        if idx is None or idx.any():   # true if the array is not empty or if the passed value is None
+            x, y, w = self._get_dataset(
+                idx=idx,
+                batch_size=None,
+                mode='eval',
+                weighted=weighted
+            )
+            results = self.model.training_model.evaluate(
+                x=x, y=y, sample_weight=w
+            )
+            return dict(zip(self.model.training_model.metrics_names, results))
+        else:
+            return {}
 
     def evaluate(self, weighted: bool = True):
         """
