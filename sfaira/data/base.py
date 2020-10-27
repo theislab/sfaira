@@ -862,6 +862,32 @@ class DatasetGroupBase(abc.ABC):
             self.assert_celltype_version_key()
             return version
 
+    def subset(self, key, values):
+        """
+        Subset list of adata objects based on match to values in key property.
+
+        These keys are properties that are available in lazy model.
+        Subsetting happens on .datasets.
+
+        :param key: Property to subset by.
+        :param values: Classes to overlap to.
+        :return:
+        """
+        ids_del = []
+        if not isinstance(values, list):
+            values = [values]
+        for x in self.ids:
+            try:
+                values_found = getattr(self.datasets[x], key)
+                if not isinstance(values_found, list):
+                    values_found = [values_found]
+                if not np.any([xx in values for xx in values_found]):
+                    ids_del.append(x)
+            except AttributeError:
+                raise ValueError(f"{key} not a valid property of data set object")
+        for x in ids_del:
+            del self.datasets[x]
+
 
 class DatasetSuperGroup:
     """
@@ -1060,3 +1086,17 @@ class DatasetSuperGroup:
 
     def load_cached_backed(self, fn: PathLike):
         self.adata = anndata.read(fn, backed='r')
+
+    def subset(self, key, values):
+        """
+        Subset list of adata objects based on match to values in key property.
+
+        These keys are properties that are available in lazy model.
+        Subsetting happens on .datasets.
+
+        :param key: Property to subset by.
+        :param values: Classes to overlap to.
+        :return:
+        """
+        for x in self.dataset_groups:
+            x.subset(key=key, values=values)
