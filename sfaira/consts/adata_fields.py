@@ -1,3 +1,8 @@
+"""
+The classes in this file are containers of field names and element entries that are used in streamlined adata objects
+in sfaira and in associated data bases.
+"""
+
 
 class ADATA_IDS_BASE:
     """

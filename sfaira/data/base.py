@@ -394,7 +394,7 @@ class DatasetBase(abc.ABC):
 
         self.genome_container = g
 
-    def load_meta(self, fn: Union[PathLike, str]):
+    def load_meta(self, fn: Union[PathLike, str], map=None):
         if fn is None:
             if self.meta_path is None:
                 raise ValueError("provide either fn in load or path in constructor")
@@ -402,7 +402,45 @@ class DatasetBase(abc.ABC):
         else:
             if isinstance(fn, str):
                 fn = os.path.normpath(fn)
-        self.meta = pandas.read_csv(fn, usecols=META_DATA_FIELDS)
+        if map is None:
+            usecols = META_DATA_FIELDS
+            newcols = META_DATA_FIELDS
+        else:
+            usecols = list(map.keys())
+            newcols = list(map.values())
+        tab = pandas.read_csv(fn, usecols=usecols)
+        tab.columns = newcols
+        self.meta = tab
+
+    def write_meta(
+            self,
+            fn_meta: Union[None, str] = None,
+            fn_data: Union[None, str] = None,
+            dir_out: Union[None, str] = None,
+    ):
+        if fn_meta is None:
+            if self.path is None and dir_out is None:
+                raise ValueError("provide either fn in load or path in constructor")
+            if dir_out is None:
+                dir_out = self.meta_path
+            fn_meta = os.path.join(dir_out, self.doi_cleaned_id + "_meta.csv")
+        if self.adata is None:
+            self.load(fn=fn_data, remove_gene_version=False, match_to_reference=None)
+        meta = pandas.DataFrame({
+            "author": self.adata.uns[ADATA_IDS_SFAIRA.author],
+            "annotated": self.adata.uns[ADATA_IDS_SFAIRA.annotated],
+            "doi": self.adata.uns[ADATA_IDS_SFAIRA.doi],
+            "download": self.adata.uns[ADATA_IDS_SFAIRA.download],
+            "id": self.adata.uns[ADATA_IDS_SFAIRA.id],
+            "ncells": self.adata.n_obs,
+            "normalization": self.adata.uns[ADATA_IDS_SFAIRA.normalization] if ADATA_IDS_SFAIRA.normalization in self.adata.uns.keys() else None,
+            "organ": self.adata.uns[ADATA_IDS_SFAIRA.organ],
+            "protocol": self.adata.uns[ADATA_IDS_SFAIRA.protocol],
+            "species": self.adata.uns[ADATA_IDS_SFAIRA.species],
+            "year": self.adata.uns[ADATA_IDS_SFAIRA.year],
+        }, index=range(1))
+        meta.to_csv(fn_meta)
+
 
     @property
     def author(self):
@@ -537,35 +575,6 @@ class DatasetBase(abc.ABC):
     @property
     def doi_cleaned_id(self):
         return "_".join(self.id.split("_")[:-1])
-
-    def write_meta(
-            self,
-            fn_meta: Union[None, str] = None,
-            fn_data: Union[None, str] = None,
-            dir_out: Union[None, str] = None,
-    ):
-        if fn_meta is None:
-            if self.path is None and dir_out is None:
-                raise ValueError("provide either fn in load or path in constructor")
-            if dir_out is None:
-                dir_out = self.meta_path
-            fn_meta = os.path.join(dir_out, self.doi_cleaned_id + "_meta.csv")
-        if self.adata is None:
-            self.load(fn=fn_data, remove_gene_version=False, match_to_reference=None)
-        meta = pandas.DataFrame({
-            "author": self.adata.uns[ADATA_IDS_SFAIRA.author],
-            "annotated": self.adata.uns[ADATA_IDS_SFAIRA.annotated],
-            "doi": self.adata.uns[ADATA_IDS_SFAIRA.doi],
-            "download": self.adata.uns[ADATA_IDS_SFAIRA.download],
-            "id": self.adata.uns[ADATA_IDS_SFAIRA.id],
-            "ncells": self.adata.n_obs,
-            "normalization": self.adata.uns[ADATA_IDS_SFAIRA.normalization] if ADATA_IDS_SFAIRA.normalization in self.adata.uns.keys() else None,
-            "organ": self.adata.uns[ADATA_IDS_SFAIRA.organ],
-            "protocol": self.adata.uns[ADATA_IDS_SFAIRA.protocol],
-            "species": self.adata.uns[ADATA_IDS_SFAIRA.species],
-            "year": self.adata.uns[ADATA_IDS_SFAIRA.year],
-        }, index=range(1))
-        meta.to_csv(fn_meta)
 
     @property
     def available_type_versions(self):

@@ -3,7 +3,7 @@ import numpy as np
 import os
 from typing import Union
 from .external import DatasetBase
-from .external import ADATA_IDS_SFAIRA, ADATA_IDS_CELLXGENE
+from .external import ADATA_IDS_SFAIRA, ADATA_IDS_CELLXGENE, META_DATA_FIELDS_CELLXGENE
 
 
 class DatasetCellxgene(DatasetBase):
@@ -24,7 +24,7 @@ class DatasetCellxgene(DatasetBase):
     ):
         DatasetBase.__init__(self=self, path=path, meta_path=meta_path, **kwargs)
         self.fn = fn
-        self.load_meta()
+        self.load_meta(map=META_DATA_FIELDS_CELLXGENE)
         self.class_maps = {
             "0": {},
         }
