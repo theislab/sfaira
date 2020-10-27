@@ -1,10 +1,9 @@
+import anndata
 import numpy as np
 import os
 from typing import Union
 from .external import DatasetBase
-import anndata
-
-from .external import DatasetGroupBase
+from .external import ADATA_IDS, ADATA_IDS_CELLXGENE
 
 
 class Dataset(DatasetBase):
@@ -41,35 +40,39 @@ class Dataset(DatasetBase):
         adata = anndata.read(fn)
         adata.X = adata.raw.X
 
-        self.adata.uns["lab"] = adata.uns["contributors"]["name"]
-        self.adata.uns["year"] = None
-        self.adata.uns["doi"] = None  # TODO
-        if len(np.unique(adata.obs["organism"].values)) > 1:
+        self.adata.uns[ADATA_IDS.lab] = adata.uns[ADATA_IDS_CELLXGENE.author][ADATA_IDS_CELLXGENE.author_names]
+        self.adata.uns[ADATA_IDS.year] = None
+        self.adata.uns[ADATA_IDS.doi] = None  # TODO
+        if len(np.unique(adata.obs[ADATA_IDS.animal].values)) > 1:
             raise Warning("found multiple assay in data set %s" % self.fn)
-        self.adata.uns["protocol"] = adata.obs["assay"].values[0]
+        self.adata.uns[ADATA_IDS.protocol] = adata.obs[ADATA_IDS_CELLXGENE.protocol].values[0]
         # Select tissue: blood is handled as a separate tissue in .obs
         #if len(np.unique(adata.obs["tissue"].values)) > 1:
         #    raise Warning("found multiple tissue in data set %s" % self.fn)
         #self.adata.uns["organ"] = adata.obs["tissue"].values[0]
-        self.adata.uns["organ"] = str(self.fn).split("_")[3]
-        if len(np.unique(adata.obs["organism"].values)) > 1:
+        self.adata.uns[ADATA_IDS.organ] = str(self.fn).split("_")[3]
+        if len(np.unique(adata.obs[ADATA_IDS.animal].values)) > 1:
             raise Warning("found multiple organisms in data set %s" % self.fn)
-        self.adata.uns["animal"] = adata.obs["organism"].values[0]
-        self.adata.uns["id"] = self.id
-        self.adata.uns["wget_download"] = self.download_website
-        self.adata.uns["has_celltypes"] = self.has_celltypes
-        self.adata.uns["counts"] = 'raw'
+        self.adata.uns[ADATA_IDS.animal] = adata.obs[ADATA_IDS_CELLXGENE.animal].values[0]
+        self.adata.uns[ADATA_IDS.id] = self.id
+        self.adata.uns[ADATA_IDS.wget_download] = self.download_website
+        self.adata.uns[ADATA_IDS.has_celltypes] = self.has_celltypes
+        self.adata.uns[ADATA_IDS.normalization] = 'raw'
 
-        self.adata.obs["subtissue"] = self.sub_tissue
-        self.adata.obs["dev_stage"] = adata.obs["development_stage"].values
-        self.adata.obs["sex"] = adata.obs["sex"].values
-        self.adata.obs["ethnicity"] = adata.obs["ethnicity"].values
-        self.adata.obs["healthy"] = adata.obs["disease"].values == "normal"
-        self.adata.obs["state_exact"] = adata.obs["disease"].values
+        self.adata.obs[ADATA_IDS.subtissue] = self.sub_tissue
+        self.adata.obs[ADATA_IDS.dev_stage] = adata.obs[ADATA_IDS_CELLXGENE.dev_stage].values
+        self.adata.obs[ADATA_IDS.sex] = adata.obs[ADATA_IDS_CELLXGENE.sex].values
+        self.adata.obs[ADATA_IDS.ethnicity] = adata.obs[ADATA_IDS_CELLXGENE.ethnicity].values
+        self.adata.obs[ADATA_IDS.healthy] = adata.obs[ADATA_IDS_CELLXGENE.disease].values == ADATA_IDS_CELLXGENE.disease_state_healthy
+        self.adata.obs[ADATA_IDS.state_exact] = adata.obs[ADATA_IDS_CELLXGENE.disease].values
 
-        self.adata.obs["cell_ontology_id"] = adata.obs["cell_type_ontology_term_id"].values.tolist()
-        self.adata.obs["cell_ontology_class"] = adata.obs["cell_type"].values.tolist()
-        self.adata.obs["cell_types_original"] = adata.obs["free_annotation"].values.tolist()
+        self.adata.obs[ADATA_IDS.cell_ontology_id] = adata.obs[ADATA_IDS_CELLXGENE.cell_ontology_id].values.tolist()
+        self.adata.obs[ADATA_IDS.cell_ontology_class] = adata.obs[ADATA_IDS_CELLXGENE.cell_ontology_class].values.tolist()
+        self.adata.obs[ADATA_IDS.cell_types_original] = adata.obs[ADATA_IDS_CELLXGENE.cell_types_original].values.tolist()
 
-        self._convert_and_set_var_names(symbol_col='names', ensembl_col='ensembl', new_index='ensembl')
+        self._convert_and_set_var_names(
+            symbol_col=ADATA_IDS_CELLXGENE.gene_id_names,
+            ensembl_col=ADATA_IDS_CELLXGENE.gene_id_ensembl,
+            new_index=ADATA_IDS_CELLXGENE.gene_id_ensembl
+        )
 
