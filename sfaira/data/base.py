@@ -394,6 +394,64 @@ class DatasetBase(abc.ABC):
 
         self.genome_container = g
 
+    @property
+    def doi_cleaned_id(self):
+        return "_".join(self.id.split("_")[:-1])
+
+    @property
+    def available_type_versions(self):
+        return np.array(list(self.class_maps.keys()))
+
+    def set_default_type_version(self):
+        """
+        Choose most recent version.
+
+        :return: Version key corresponding to most recent version.
+        """
+        return self.available_type_versions[np.argmax([int(x) for x in self.available_type_versions])]
+
+    def assert_celltype_version_key(
+            self,
+            celltype_version
+    ):
+        if celltype_version not in self.available_type_versions:
+            raise ValueError(
+                "required celltype version %s not found. available are: %s" %
+                (celltype_version, str(self.available_type_versions))
+            )
+
+    def map_ontology_class(
+            self,
+            raw_ids,
+            celltype_version
+    ):
+        """
+
+        :param raw_ids:
+        :param class_maps:
+        :param celltype_version: Version of cell type ontology to use. Uses most recent if None.
+        :return:
+        """
+        if celltype_version is None:
+            celltype_version = self.set_default_type_version()
+        self.assert_celltype_version_key(celltype_version=celltype_version)
+        return [
+            self.class_maps[celltype_version][x] if x in self.class_maps[celltype_version].keys() else x
+            for x in raw_ids
+        ]
+
+    @property
+    def citation(self):
+        """
+        Return all information necessary to cite data set.
+
+        :return:
+        """
+        return [self.author, self.year, self.doi]
+
+    # Meta data handling code: Reading, writing and selected properties. Properties are either set in constructor
+    # (and saved in self._somename) or accessed in self.meta.
+
     def load_meta(self, fn: Union[PathLike, str], map=None):
         if fn is None:
             if self.meta_path is None:
@@ -571,61 +629,6 @@ class DatasetBase(abc.ABC):
     @year.setter
     def year(self, x):
         self._year = x
-
-    @property
-    def doi_cleaned_id(self):
-        return "_".join(self.id.split("_")[:-1])
-
-    @property
-    def available_type_versions(self):
-        return np.array(list(self.class_maps.keys()))
-
-    def set_default_type_version(self):
-        """
-        Choose most recent version.
-
-        :return: Version key corresponding to most recent version.
-        """
-        return self.available_type_versions[np.argmax([int(x) for x in self.available_type_versions])]
-
-    def assert_celltype_version_key(
-            self,
-            celltype_version
-    ):
-        if celltype_version not in self.available_type_versions:
-            raise ValueError(
-                "required celltype version %s not found. available are: %s" %
-                (celltype_version, str(self.available_type_versions))
-            )
-
-    def map_ontology_class(
-            self,
-            raw_ids,
-            celltype_version
-    ):
-        """
-
-        :param raw_ids:
-        :param class_maps:
-        :param celltype_version: Version of cell type ontology to use. Uses most recent if None.
-        :return:
-        """
-        if celltype_version is None:
-            celltype_version = self.set_default_type_version()
-        self.assert_celltype_version_key(celltype_version=celltype_version)
-        return [
-            self.class_maps[celltype_version][x] if x in self.class_maps[celltype_version].keys() else x
-            for x in raw_ids
-        ]
-
-    @property
-    def citation(self):
-        """
-        Return all information necessary to cite data set.
-
-        :return:
-        """
-        return [self.author, self.year, self.doi]
 
 
 class DatasetGroupBase(abc.ABC):
