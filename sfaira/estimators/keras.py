@@ -392,7 +392,6 @@ class EstimatorKeras:
             print(self.idx_test)
         else:
             raise ValueError("type of test_split %s not recognized" % type(test_split))
-        self.idx_test = np.sort(self.idx_test)
         idx_train_eval = np.array([x for x in all_idx if x not in self.idx_test])
         np.random.seed(1)
         self.idx_eval = np.random.choice(
@@ -601,6 +600,8 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             if self.data.isbacked:
                 # Need to supply sorted indices to backed anndata:
                 x = self.data.X[np.sort(idx), :]
+                # Sort back in original order of indices.
+                x = x[[np.where(np.sort(idx) == i)[0][0] for i in idx], :]
             else:
                 x = self._prepare_data_matrix(idx=idx)
                 x = x.toarray()
@@ -1051,6 +1052,8 @@ class EstimatorKerasCelltype(EstimatorKeras):
             if self.data.isbacked:
                 # Need to supply sorted indices to backed anndata:
                 x = self.data.X[np.sort(idx), :]
+                # Sort back in original order of indices.
+                x = x[[np.where(np.sort(idx) == i)[0][0] for i in idx], :]
             else:
                 x = self._prepare_data_matrix(idx=idx)
                 x = x.toarray()
@@ -1118,16 +1121,19 @@ class EstimatorKerasCelltype(EstimatorKeras):
         :param weighted: Whether to use class weights in evaluation.
         :return: Dictionary of metric names and values.
         """
-        x, y, w = self._get_dataset(
-            idx=idx,
-            batch_size=None,
-            mode='eval',
-            weighted=weighted
-        )
-        results = self.model.training_model.evaluate(
-            x=x, y=y, sample_weight=w
-        )
-        return dict(zip(self.model.training_model.metrics_names, results))
+        if idx is None or idx.any():   # true if the array is not empty or if the passed value is None
+            x, y, w = self._get_dataset(
+                idx=idx,
+                batch_size=None,
+                mode='eval',
+                weighted=weighted
+            )
+            results = self.model.training_model.evaluate(
+                x=x, y=y, sample_weight=w
+            )
+            return dict(zip(self.model.training_model.metrics_names, results))
+        else:
+            return {}
 
     def evaluate(self, weighted: bool = True):
         """
