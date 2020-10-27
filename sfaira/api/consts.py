@@ -1,2 +1,2 @@
 from sfaira.consts import ADATA_IDS_SFAIRA, ADATA_IDS_CELLXGENE, ADATA_IDS_BASE, ADATA_IDS_EXTENDED
-from sfaira.consts import META_DATA_FIELDS, META_DATA_FIELDS_CELLXGENE
+from sfaira.consts import META_DATA_FIELDS

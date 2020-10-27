@@ -24,7 +24,6 @@ class DatasetCellxgene(DatasetBase):
     ):
         DatasetBase.__init__(self=self, path=path, meta_path=meta_path, **kwargs)
         self.fn = fn
-        self.load_meta(map=META_DATA_FIELDS_CELLXGENE)
         self.class_maps = {
             "0": {},
         }

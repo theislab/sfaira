@@ -452,23 +452,22 @@ class DatasetBase(abc.ABC):
     # Meta data handling code: Reading, writing and selected properties. Properties are either set in constructor
     # (and saved in self._somename) or accessed in self.meta.
 
-    def load_meta(self, fn: Union[PathLike, str], map=None):
+    @property
+    def meta_fn(self):
+        if self.meta_path is None:
+            return None
+        else:
+            return os.path.join(self.meta_path, self.doi_cleaned_id + "_meta.csv")
+
+    def load_meta(self, fn: Union[PathLike, str]):
         if fn is None:
-            if self.meta_path is None:
+            if self.meta_fn is None:
                 raise ValueError("provide either fn in load or path in constructor")
-            fn = os.path.join(self.meta_path, self.doi_cleaned_id + "_meta.csv")
+            fn = self.meta_fn
         else:
             if isinstance(fn, str):
                 fn = os.path.normpath(fn)
-        if map is None:
-            usecols = META_DATA_FIELDS
-            newcols = META_DATA_FIELDS
-        else:
-            usecols = list(map.keys())
-            newcols = list(map.values())
-        tab = pandas.read_csv(fn, usecols=usecols)
-        tab.columns = newcols
-        self.meta = tab
+        self.meta = pandas.read_csv(fn, usecols=META_DATA_FIELDS)
 
     def write_meta(
             self,
@@ -481,7 +480,7 @@ class DatasetBase(abc.ABC):
                 raise ValueError("provide either fn in load or path in constructor")
             if dir_out is None:
                 dir_out = self.meta_path
-            fn_meta = os.path.join(dir_out, self.doi_cleaned_id + "_meta.csv")
+            fn_meta = self.meta_fn
         if self.adata is None:
             self.load(fn=fn_data, remove_gene_version=False, match_to_reference=None)
         meta = pandas.DataFrame({
@@ -498,7 +497,6 @@ class DatasetBase(abc.ABC):
             "year": self.adata.uns[ADATA_IDS_SFAIRA.year],
         }, index=range(1))
         meta.to_csv(fn_meta)
-
 
     @property
     def author(self):
