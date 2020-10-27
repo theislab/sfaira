@@ -1,6 +1,7 @@
 import os
 from typing import Union
 from .external import DatasetBase
+from .external import ADATA_IDS
 import anndata
 import tarfile
 import gzip
@@ -128,20 +129,20 @@ class Dataset(DatasetBase):
                 fn = os.path.join(self.path, "human/pancreas/GSE81547.h5ad")
             self.adata = anndata.read(fn)
 
-        self.adata.uns["lab"] = "Quake"
-        self.adata.uns["year"] = 2017
-        self.adata.uns["doi"] = "10.1016/j.cell.2017.09.004"
-        self.adata.uns["protocol"] = 'Smartseq2'
-        self.adata.uns["organ"] = self.organ
-        self.adata.uns["subtissue"] = self.sub_tissue
-        self.adata.uns["animal"] = "human"
-        self.adata.uns["id"] = self.id
-        self.adata.uns["wget_download"] = self.download_website
-        self.adata.uns["has_celltypes"] = self.has_celltypes
-        self.adata.uns["counts"] = 'raw'
+        self.adata.uns[ADATA_IDS.lab] = "Quake"
+        self.adata.uns[ADATA_IDS.year] = 2017
+        self.adata.uns[ADATA_IDS.doi] = "10.1016/j.cell.2017.09.004"
+        self.adata.uns[ADATA_IDS.protocol] = 'Smartseq2'
+        self.adata.uns[ADATA_IDS.organ] = self.organ
+        self.adata.uns[ADATA_IDS.subtissue] = self.sub_tissue
+        self.adata.uns[ADATA_IDS.animal] = "human"
+        self.adata.uns[ADATA_IDS.id] = self.id
+        self.adata.uns[ADATA_IDS.wget_download] = self.download_website
+        self.adata.uns[ADATA_IDS.has_celltypes] = self.has_celltypes
+        self.adata.uns[ADATA_IDS.normalization] = 'raw'
 
-        self.adata.obs["healthy"] = True
-        self.adata.obs["state_exact"] = "healthy"
+        self.adata.obs[ADATA_IDS.healthy] = True
+        self.adata.obs[ADATA_IDS.state_exact] = "healthy"
 
-        self.adata.obs["cell_ontology_class"] = self.adata.obs['celltype']
-        self._convert_and_set_var_names(symbol_col='index', ensembl_col=None, new_index='ensembl')
+        self.adata.obs[ADATA_IDS.cell_ontology_class] = self.adata.obs['celltype']
+        self._convert_and_set_var_names(symbol_col='index', ensembl_col=None, new_index=ADATA_IDS.gene_id_ensembl)

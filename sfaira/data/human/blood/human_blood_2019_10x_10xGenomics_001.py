@@ -1,6 +1,7 @@
 import os
 from typing import Union
 from .external import DatasetBase
+from .external import ADATA_IDS
 import anndata
 
 
@@ -45,20 +46,20 @@ class Dataset(DatasetBase):
                 fn = os.path.join(self.path, "human/blood/pbmc_10k_v3_filtered_feature_bc_matrix.h5ad")
             self.adata = anndata.read(fn)
 
-        self.adata.uns["lab"] = '10x Genomics'
-        self.adata.uns["year"] = 2019
-        self.adata.uns["doi"] = None
-        self.adata.uns["protocol"] = '10x'
-        self.adata.uns["organ"] = self.organ
-        self.adata.uns["subtissue"] = self.sub_tissue
-        self.adata.uns["animal"] = "human"
-        self.adata.uns["id"] = self.id
-        self.adata.uns["wget_download"] = "http://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_10k_v3/pbmc_10k_v3_filtered_feature_bc_matrix.h5"
-        self.adata.uns["has_celltypes"] = self.has_celltypes
-        self.adata.uns["counts"] = 'raw'
+        self.adata.uns[ADATA_IDS.lab] = '10x Genomics'
+        self.adata.uns[ADATA_IDS.year] = 2019
+        self.adata.uns[ADATA_IDS.doi] = None
+        self.adata.uns[ADATA_IDS.protocol] = '10x'
+        self.adata.uns[ADATA_IDS.organ] = self.organ
+        self.adata.uns[ADATA_IDS.subtissue] = self.sub_tissue
+        self.adata.uns[ADATA_IDS.animal] = "human"
+        self.adata.uns[ADATA_IDS.id] = self.id
+        self.adata.uns[ADATA_IDS.wget_download] = "http://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_10k_v3/pbmc_10k_v3_filtered_feature_bc_matrix.h5"
+        self.adata.uns[ADATA_IDS.has_celltypes] = self.has_celltypes
+        self.adata.uns[ADATA_IDS.normalization] = 'raw'
 
-        self.adata.obs["cell_ontology_class"] = None
-        self.adata.obs["healthy"] = True
-        self.adata.obs["state_exact"] = 'healthy'
+        self.adata.obs[ADATA_IDS.cell_ontology_class] = None
+        self.adata.obs[ADATA_IDS.healthy] = True
+        self.adata.obs[ADATA_IDS.state_exact] = 'healthy'
 
-        self._convert_and_set_var_names(symbol_col='index', ensembl_col='gene_ids', new_index='ensembl')
+        self._convert_and_set_var_names(symbol_col='index', ensembl_col='gene_ids', new_index=ADATA_IDS.gene_id_ensembl)

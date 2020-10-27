@@ -1,6 +1,7 @@
 import os
 from typing import Union
 from .external import DatasetBase
+from .external import ADATA_IDS
 import anndata
 import numpy as np
 import scipy.sparse
@@ -72,21 +73,21 @@ class Dataset(DatasetBase):
             self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs['nUMI'].values[:, None]))\
                                        .multiply(1/10000)
 
-        self.adata.uns["lab"] = 'Spence'
-        self.adata.uns["year"] = 2020
-        self.adata.uns["doi"] = "10.1016/j.devcel.2020.01.033"
-        self.adata.uns["protocol"] = '10x'
-        self.adata.uns["organ"] = self.organ
-        self.adata.uns["subtissue"] = self.sub_tissue
-        self.adata.uns["animal"] = "human"
-        self.adata.uns["id"] = self.id
-        self.adata.uns["wget_download"] = self.download_website
-        self.adata.uns["has_celltypes"] = self.has_celltypes
-        self.adata.uns["counts"] = 'raw'
+        self.adata.uns[ADATA_IDS.lab] = 'Spence'
+        self.adata.uns[ADATA_IDS.year] = 2020
+        self.adata.uns[ADATA_IDS.doi] = "10.1016/j.devcel.2020.01.033"
+        self.adata.uns[ADATA_IDS.protocol] = '10x'
+        self.adata.uns[ADATA_IDS.organ] = self.organ
+        self.adata.uns[ADATA_IDS.subtissue] = self.sub_tissue
+        self.adata.uns[ADATA_IDS.animal] = "human"
+        self.adata.uns[ADATA_IDS.id] = self.id
+        self.adata.uns[ADATA_IDS.wget_download] = self.download_website
+        self.adata.uns[ADATA_IDS.has_celltypes] = self.has_celltypes
+        self.adata.uns[ADATA_IDS.normalization] = 'raw'
 
-        self.adata.obs["cell_ontology_class"] = self.adata.obs['Cell_type']
+        self.adata.obs[ADATA_IDS.cell_ontology_class] = self.adata.obs['Cell_type']
         self.set_unkown_class_id(ids=["1_Unicorns and artifacts"])
-        self.adata.obs["healthy"] = True
+        self.adata.obs[ADATA_IDS.healthy] = True
         self.adata.obs['state_exact'] = 'healthy'
 
-        self._convert_and_set_var_names(symbol_col='index', ensembl_col=None, new_index='ensembl')
+        self._convert_and_set_var_names(symbol_col='index', ensembl_col=None, new_index=ADATA_IDS.gene_id_ensembl)

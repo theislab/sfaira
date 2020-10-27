@@ -3,6 +3,7 @@ import numpy as np
 import os
 from typing import Union
 from .external import DatasetBase
+from .external import ADATA_IDS
 
 
 class Dataset(DatasetBase):
@@ -55,21 +56,21 @@ class Dataset(DatasetBase):
             self.adata.varm = {}
             self.adata.uns = {}
 
-        self.adata.uns["lab"] = "Quake"
-        self.adata.uns["year"] = "2019"
-        self.adata.uns["doi"] = "10.1101/661728"
-        self.adata.uns["protocol"] = "10x"
-        self.adata.uns["organ"] = self.organ
-        self.adata.uns["subtissue"] = self.sub_tissue
-        self.adata.uns["animal"] = "mouse"
-        self.adata.uns["id"] = self.id
-        self.adata.uns["wget_download"] = self.download_website
-        self.adata.uns["has_celltypes"] = self.has_celltypes
-        self.adata.uns["counts"] = 'norm'
-        # self.adata.obs["cell_ontology_class"] is already set
-        self.adata.obs["cell_types_original"] = self.adata.obs["cell_ontology_class"].values.tolist()
+        self.adata.uns[ADATA_IDS.lab] = "Quake"
+        self.adata.uns[ADATA_IDS.year] = "2019"
+        self.adata.uns[ADATA_IDS.doi] = "10.1101/661728"
+        self.adata.uns[ADATA_IDS.protocol] = "10x"
+        self.adata.uns[ADATA_IDS.organ] = self.organ
+        self.adata.uns[ADATA_IDS.subtissue] = self.sub_tissue
+        self.adata.uns[ADATA_IDS.animal] = "mouse"
+        self.adata.uns[ADATA_IDS.id] = self.id
+        self.adata.uns[ADATA_IDS.wget_download] = self.download_website
+        self.adata.uns[ADATA_IDS.has_celltypes] = self.has_celltypes
+        self.adata.uns[ADATA_IDS.normalization] = 'norm'
+        # self.adata.obs[ADATA_IDS.cell_ontology_class] is already set
+        self.adata.obs[ADATA_IDS.cell_types_original] = self.adata.obs[ADATA_IDS.cell_ontology_class].values.tolist()
         self.set_unkown_class_id(ids=["nan", "kidney cell"])
-        self.adata.obs["healthy"] = True
-        self.adata.obs["state_exact"] = "healthy"
+        self.adata.obs[ADATA_IDS.healthy] = True
+        self.adata.obs[ADATA_IDS.state_exact] = "healthy"
 
-        self._convert_and_set_var_names(symbol_col='index', ensembl_col=None, new_index='ensembl')
+        self._convert_and_set_var_names(symbol_col='index', ensembl_col=None, new_index=ADATA_IDS.gene_id_ensembl)
