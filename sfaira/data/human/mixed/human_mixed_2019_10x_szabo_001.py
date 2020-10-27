@@ -1,7 +1,7 @@
 import os
 from typing import Union
 from .external import DatasetBase
-from .external import ADATA_IDS
+from .external import ADATA_IDS_SFAIRA
 import anndata
 import tarfile
 import pandas as pd
@@ -150,7 +150,7 @@ class Dataset(DatasetBase):
                 fn = os.path.join(self.path, "human/mixed/GSE126030.h5ad")
             self.adata = anndata.read(fn)
 
-        self.adata.uns[ADATA_IDS.lab] = "Sims"
+        self.adata.uns[ADATA_IDS.author] = "Sims"
         self.adata.uns[ADATA_IDS.year] = 2019
         self.adata.uns[ADATA_IDS.doi] = "10.1038/s41467-019-12464-3"
         self.adata.uns[ADATA_IDS.protocol] = "10x"

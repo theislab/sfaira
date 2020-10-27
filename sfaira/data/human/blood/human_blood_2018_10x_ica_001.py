@@ -1,7 +1,7 @@
 import os
 from typing import Union
 from .external import DatasetBase
-from .external import ADATA_IDS
+from .external import ADATA_IDS_SFAIRA
 import anndata
 import numpy as np
 
@@ -62,7 +62,7 @@ class Dataset(DatasetBase):
                 fn = os.path.join(self.path, "human/blood/ica_blood.h5ad")
             self.adata = anndata.read(fn)
 
-        self.adata.uns[ADATA_IDS.lab] = 'Regev'
+        self.adata.uns[ADATA_IDS.author] = 'Regev'
         self.adata.uns[ADATA_IDS.year] = 2018
         self.adata.uns[ADATA_IDS.doi] = None
         self.adata.uns[ADATA_IDS.protocol] = '10x'

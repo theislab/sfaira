@@ -1,7 +1,7 @@
 import os
 from typing import Union
 from .external import DatasetBase
-from .external import ADATA_IDS
+from .external import ADATA_IDS_SFAIRA
 import anndata
 import numpy as np
 import scipy.sparse
@@ -69,7 +69,7 @@ class Dataset(DatasetBase):
                                        .multiply(1/10000)
             self.adata = self.adata[self.adata.obs['CellType'] != 'Doublets'].copy()
 
-        self.adata.uns[ADATA_IDS.lab] = "Kenigsberg"
+        self.adata.uns[ADATA_IDS.author] = "Kenigsberg"
         self.adata.uns[ADATA_IDS.year] = 2019
         self.adata.uns[ADATA_IDS.doi] = "10.1016/j.cell.2019.08.008"
         self.adata.uns[ADATA_IDS.protocol] = '10x'

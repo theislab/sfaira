@@ -4,7 +4,7 @@ import os
 import pandas
 from typing import Union
 from .external import DatasetBase
-from .external import ADATA_IDS
+from .external import ADATA_IDS_SFAIRA
 
 
 class Dataset(DatasetBase):
@@ -58,7 +58,7 @@ class Dataset(DatasetBase):
         self.adata.var_names_make_unique()
         self.adata = self.adata[celltypes.index]
 
-        self.adata.uns[ADATA_IDS.lab] = "Bhushan"
+        self.adata.uns[ADATA_IDS.author] = "Bhushan"
         self.adata.uns[ADATA_IDS.year] = "2019"
         self.adata.uns[ADATA_IDS.doi] = "10.1016/j.cmet.2019.01.021"
         self.adata.uns[ADATA_IDS.protocol] = "10x"

@@ -4,7 +4,7 @@ import os
 import pandas
 from typing import Union
 from .external import DatasetBase
-from .external import ADATA_IDS
+from .external import ADATA_IDS_SFAIRA
 
 
 class Dataset(DatasetBase):
@@ -61,7 +61,7 @@ class Dataset(DatasetBase):
         self.adata = self.adata[np.array([x in celltypes.index for x in self.adata.obs_names])].copy()
         self.adata.obs = celltypes.loc[self.adata.obs_names, :]
 
-        self.adata.uns[ADATA_IDS.lab] = "Guo"
+        self.adata.uns[ADATA_IDS.author] = "Guo"
         self.adata.uns[ADATA_IDS.year] = "2018"
         self.adata.uns[ADATA_IDS.doi] = "10.1016/j.cell.2018.02.001"
         self.adata.uns[ADATA_IDS.protocol] = "microwell-seq"

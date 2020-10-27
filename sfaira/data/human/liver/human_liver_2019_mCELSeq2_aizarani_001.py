@@ -1,7 +1,7 @@
 import os
 from typing import Union
 from .external import DatasetBase
-from .external import ADATA_IDS
+from .external import ADATA_IDS_SFAIRA
 import anndata
 import pandas as pd
 
@@ -90,7 +90,7 @@ class Dataset(DatasetBase):
             self.adata = self.adata[[i in celltype_df.index for i in self.adata.obs.index]].copy()
             self.adata.obs['CellType'] = [str(celltype_df.loc[i]['sct@cpart']) for i in self.adata.obs.index]
 
-        self.adata.uns[ADATA_IDS.lab] = 'Gruen'
+        self.adata.uns[ADATA_IDS.author] = 'Gruen'
         self.adata.uns[ADATA_IDS.year] = 2019
         self.adata.uns[ADATA_IDS.doi] = '10.1038/s41586-019-1373-2'
         self.adata.uns[ADATA_IDS.protocol] = 'mCEL-Seq2'

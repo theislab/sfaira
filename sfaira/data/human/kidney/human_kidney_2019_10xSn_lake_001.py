@@ -1,7 +1,7 @@
 import os
 from typing import Union
 from .external import DatasetBase
-from .external import ADATA_IDS
+from .external import ADATA_IDS_SFAIRA
 import anndata
 import pandas as pd
 
@@ -77,7 +77,7 @@ class Dataset(DatasetBase):
             annot = pd.read_csv(fn[1], index_col=0, dtype='category')
             self.adata.obs['celltype'] = [annot.loc[i.split('_')[0][1:]]['Annotation'] for i in self.adata.obs.index]
 
-        self.adata.uns[ADATA_IDS.lab] = 'Jain'
+        self.adata.uns[ADATA_IDS.author] = 'Jain'
         self.adata.uns[ADATA_IDS.year] = 2019
         self.adata.uns[ADATA_IDS.doi] = '10.1038/s41467-019-10861-2'
         self.adata.uns[ADATA_IDS.protocol] = '10xSn'

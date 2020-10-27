@@ -1,7 +1,7 @@
 import os
 from typing import Union
 from .external import DatasetBase
-from .external import ADATA_IDS
+from .external import ADATA_IDS_SFAIRA
 import anndata
 import pandas as pd
 
@@ -69,7 +69,7 @@ class Dataset(DatasetBase):
             # filter observations which are not cells (empty wells, low quality cells etc.)
             self.adata = self.adata[self.adata.obs['Characteristics[cell type]'] != 'not applicable'].copy()
 
-        self.adata.uns[ADATA_IDS.lab] = "Sandberg"
+        self.adata.uns[ADATA_IDS.author] = "Sandberg"
         self.adata.uns[ADATA_IDS.year] = 2016
         self.adata.uns[ADATA_IDS.doi] = "10.1016/j.cmet.2016.08.020"
         self.adata.uns[ADATA_IDS.protocol] = 'Smartseq2'

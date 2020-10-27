@@ -24,6 +24,7 @@ class Dataset(DatasetBase):
     ):
         DatasetBase.__init__(self=self, path=path, meta_path=meta_path, **kwargs)
         self.fn = fn
+        # TODO from meta:
         self.species = str(fn).split("_")[2]
         self.id = str(fn).split(".")[0]
         self.organ = str(fn).split("_")[3]
@@ -40,9 +41,9 @@ class Dataset(DatasetBase):
         adata = anndata.read(fn)
         adata.X = adata.raw.X
 
-        self.adata.uns[ADATA_IDS.lab] = adata.uns[ADATA_IDS_CELLXGENE.author][ADATA_IDS_CELLXGENE.author_names]
-        self.adata.uns[ADATA_IDS.year] = None
-        self.adata.uns[ADATA_IDS.doi] = None  # TODO
+        self.adata.uns[ADATA_IDS.author] = adata.uns[ADATA_IDS_CELLXGENE.author][ADATA_IDS_CELLXGENE.author_names]
+        self.adata.uns[ADATA_IDS.year] = adata.uns[ADATA_IDS_CELLXGENE.year]
+        self.adata.uns[ADATA_IDS.doi] = adata.uns[ADATA_IDS_CELLXGENE.doi]
         if len(np.unique(adata.obs[ADATA_IDS.animal].values)) > 1:
             raise Warning("found multiple assay in data set %s" % self.fn)
         self.adata.uns[ADATA_IDS.protocol] = adata.obs[ADATA_IDS_CELLXGENE.protocol].values[0]

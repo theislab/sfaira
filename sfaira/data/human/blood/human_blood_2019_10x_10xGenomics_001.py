@@ -1,7 +1,7 @@
 import os
 from typing import Union
 from .external import DatasetBase
-from .external import ADATA_IDS
+from .external import ADATA_IDS_SFAIRA
 import anndata
 
 
@@ -46,7 +46,7 @@ class Dataset(DatasetBase):
                 fn = os.path.join(self.path, "human/blood/pbmc_10k_v3_filtered_feature_bc_matrix.h5ad")
             self.adata = anndata.read(fn)
 
-        self.adata.uns[ADATA_IDS.lab] = '10x Genomics'
+        self.adata.uns[ADATA_IDS.author] = '10x Genomics'
         self.adata.uns[ADATA_IDS.year] = 2019
         self.adata.uns[ADATA_IDS.doi] = None
         self.adata.uns[ADATA_IDS.protocol] = '10x'

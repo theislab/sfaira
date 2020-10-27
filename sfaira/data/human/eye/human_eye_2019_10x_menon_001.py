@@ -1,7 +1,7 @@
 import os
 from typing import Union
 from .external import DatasetBase
-from .external import ADATA_IDS
+from .external import ADATA_IDS_SFAIRA
 import anndata
 
 
@@ -52,7 +52,7 @@ class Dataset(DatasetBase):
                 fn = os.path.join(self.path, "human/eye/menon19.processed.h5ad")
             self.adata = anndata.read(fn)
 
-        self.adata.uns[ADATA_IDS.lab] = 'Hafler'
+        self.adata.uns[ADATA_IDS.author] = 'Hafler'
         self.adata.uns[ADATA_IDS.year] = 2019
         self.adata.uns[ADATA_IDS.doi] = '10.1038/s41467-019-12780-8'
         self.adata.uns[ADATA_IDS.protocol] = '10x'

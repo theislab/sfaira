@@ -1,7 +1,7 @@
 import os
 from typing import Union
 from .external import DatasetBase
-from .external import ADATA_IDS
+from .external import ADATA_IDS_SFAIRA
 import anndata
 import numpy as np
 import scipy.sparse
@@ -63,7 +63,7 @@ class Dataset(DatasetBase):
             self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs['n_counts'].values[:, None]))\
                                        .multiply(1/10000)
 
-        self.adata.uns[ADATA_IDS.lab] = "Regev"
+        self.adata.uns[ADATA_IDS.author] = "Regev"
         self.adata.uns[ADATA_IDS.year] = 2017
         self.adata.uns[ADATA_IDS.doi] = "10.1038/nmeth.4407"
         self.adata.uns[ADATA_IDS.protocol] = 'DroNcSeq'

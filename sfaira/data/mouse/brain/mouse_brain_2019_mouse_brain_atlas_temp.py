@@ -4,7 +4,7 @@ import os
 import pandas
 from typing import Union
 from .external import DatasetBase
-from .external import ADATA_IDS
+from .external import ADATA_IDS_SFAIRA
 
 
 class Dataset(DatasetBase):
@@ -69,7 +69,7 @@ class Dataset(DatasetBase):
         self.adata.obs = obs
         assert np.all(self.adata.obs_names == self.adata.obs["cell"].values)
 
-        self.adata.uns[ADATA_IDS.lab] = "Movahedi"
+        self.adata.uns[ADATA_IDS.author] = "Movahedi"
         self.adata.uns[ADATA_IDS.year] = "2019"
         self.adata.uns[ADATA_IDS.doi] = "10.1038/s41593-019-0393-4"
         self.adata.uns[ADATA_IDS.protocol] = "microwell"

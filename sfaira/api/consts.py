@@ -1,1 +1,1 @@
-from sfaira.const import ADATA_IDS
+from sfaira.consts import ADATA_IDS_SFAIRA, ADATA_IDS_CELLXGENE

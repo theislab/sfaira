@@ -1,7 +1,7 @@
 import os
 from typing import Union
 from .external import DatasetBase
-from .external import ADATA_IDS
+from .external import ADATA_IDS_SFAIRA
 import anndata
 import tarfile
 import gzip
@@ -129,7 +129,7 @@ class Dataset(DatasetBase):
                 fn = os.path.join(self.path, "human/pancreas/GSE81547.h5ad")
             self.adata = anndata.read(fn)
 
-        self.adata.uns[ADATA_IDS.lab] = "Quake"
+        self.adata.uns[ADATA_IDS.author] = "Quake"
         self.adata.uns[ADATA_IDS.year] = 2017
         self.adata.uns[ADATA_IDS.doi] = "10.1016/j.cell.2017.09.004"
         self.adata.uns[ADATA_IDS.protocol] = 'Smartseq2'

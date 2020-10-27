@@ -1,7 +1,7 @@
 import os
 from typing import Union
 from .external import DatasetBase
-from .external import ADATA_IDS
+from .external import ADATA_IDS_SFAIRA
 import anndata
 import numpy as np
 
@@ -89,7 +89,7 @@ class Dataset(DatasetBase):
             self.adata = anndata.read(fn)
             self.adata.X = np.expm1(self.adata.X)
 
-        self.adata.uns[ADATA_IDS.lab] = "Teichmann"
+        self.adata.uns[ADATA_IDS.author] = "Teichmann"
         self.adata.uns[ADATA_IDS.year] = 2020
         self.adata.uns[ADATA_IDS.doi] = "10.1126/science.aay3224"
         self.adata.uns[ADATA_IDS.protocol] = '10x'

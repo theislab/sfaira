@@ -1,7 +1,7 @@
 import os
 from typing import Union
 from .external import DatasetBase
-from .external import ADATA_IDS
+from .external import ADATA_IDS_SFAIRA
 import anndata
 import pandas as pd
 
@@ -70,7 +70,7 @@ class Dataset(DatasetBase):
             celltype_df = pd.read_csv(fn[1], sep='\t').set_index('CellName')
             self.adata.obs['celltype'] = [str(celltype_df.loc[i]['Cluster#']) for i in self.adata.obs.index]
 
-        self.adata.uns[ADATA_IDS.lab] = 'McGilvray'
+        self.adata.uns[ADATA_IDS.author] = 'McGilvray'
         self.adata.uns[ADATA_IDS.year] = 2018
         self.adata.uns[ADATA_IDS.doi] = '10.1038/s41467-018-06318-7'
         self.adata.uns[ADATA_IDS.protocol] = '10x'

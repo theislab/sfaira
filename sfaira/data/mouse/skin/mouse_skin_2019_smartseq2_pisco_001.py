@@ -2,7 +2,7 @@ import anndata
 import os
 from typing import Union
 from .external import DatasetBase
-from .external import ADATA_IDS
+from .external import ADATA_IDS_SFAIRA
 
 
 class Dataset(DatasetBase):
@@ -54,7 +54,7 @@ class Dataset(DatasetBase):
             self.adata.varm = {}
             self.adata.uns = {}
 
-        self.adata.uns[ADATA_IDS.lab] = "Quake"
+        self.adata.uns[ADATA_IDS.author] = "Quake"
         self.adata.uns[ADATA_IDS.year] = "2019"
         self.adata.uns[ADATA_IDS.doi] = "10.1101/661728"
         self.adata.uns[ADATA_IDS.protocol] = "smartseq2"

@@ -1,7 +1,7 @@
 import os
 from typing import Union
 from .external import DatasetBase
-from .external import ADATA_IDS
+from .external import ADATA_IDS_SFAIRA
 import pandas as pd
 import anndata
 
@@ -83,7 +83,7 @@ class Dataset(DatasetBase):
             for i in df.columns:
                 self.adata.obs[i] = [df.loc[j][i] for j in self.adata.obs.index]
 
-        self.adata.uns[ADATA_IDS.lab] = 'Teichmann'
+        self.adata.uns[ADATA_IDS.author] = 'Teichmann'
         self.adata.uns[ADATA_IDS.year] = 2018
         self.adata.uns[ADATA_IDS.doi] = '10.1038/s41586-018-0698-6'
         self.adata.uns[ADATA_IDS.protocol] = "10x"

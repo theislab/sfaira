@@ -1,7 +1,7 @@
 import os
 from typing import Union
 from .external import DatasetBase
-from .external import ADATA_IDS
+from .external import ADATA_IDS_SFAIRA
 import anndata
 import pandas as pd
 
@@ -62,7 +62,7 @@ class Dataset(DatasetBase):
             self.adata = anndata.read_csv(fn[0]).T
             self.adata.obs = pd.read_csv(fn[1], sep='\t', index_col=0)
 
-        self.adata.uns[ADATA_IDS.lab] = 'Teichmann'
+        self.adata.uns[ADATA_IDS.author] = 'Teichmann'
         self.adata.uns[ADATA_IDS.year] = 2019
         self.adata.uns[ADATA_IDS.doi] = "10.1038/s41591-019-0468-5"
         self.adata.uns[ADATA_IDS.protocol] = 'dropseq'
