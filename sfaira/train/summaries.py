@@ -9,6 +9,8 @@ import os
 from .train_model import TargetZoos
 from .external import SPECIES_DICT
 
+from .external import EstimatorKerasEmbedding
+
 
 def _tp(yhat, ytrue):
     """
@@ -1306,3 +1308,276 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                 cbar_kws={'label': partition_show + "_" + metric_show}
             )
         return fig, axs, sns_data_heatmap
+
+    from typing import Union, List
+
+    def get_gradients_by_celltype(
+            self,
+            organ: str,
+            organism: str,
+            model_type: Union[str, List[str]],
+            metric_select: str,
+            datapath,
+            test_data=True,
+            partition_select: str = "val",
+            ignore_cache=False,
+            min_cells=10,
+    ):
+        """
+        Compute gradients across latent units with respect to input features for each cell type.
+
+        :param organ:
+        :param organism:
+        :param model_type:
+        :param metric_select:
+        :param datapath:
+        :param test_data:
+        :param partition_select:
+        :param ignore_cache:
+        :param min_cells:
+        :return: (cell types, input features) cumulative gradients
+        """
+        model_id, _, _ = self.get_best_model_ids(
+            tab=self.summary_tab,
+            metric_select=metric_select,
+            partition_select=partition_select,
+            subset={
+                "organ": organ,
+                "model_type": model_type,
+            }
+        )
+        # check cached file
+
+        resultspath = os.path.join(self.source_path, self.gs_keys[model_id], 'results')
+
+        if os.path.isfile(os.path.join(resultspath, model_id + '_grads.pickle')) and not ignore_cache:
+            print('Load gradients from cached file...')
+            with open(os.path.join(resultspath, model_id + '_grads.pickle'), 'rb') as f:
+                gradients_raw = pickle.load(f)
+        else:
+            print('Compute gradients (1/3): load data')
+            # load data
+            tz = TargetZoos(path=datapath)
+            if organism == "human":
+                dataset = tz.data_human[organ]
+            elif organism == "mouse":
+                dataset = tz.data_mouse[organ]
+            else:
+                raise (ValueError(f"Supplied organism {organism} not recognised. Should be one of ('mouse', 'human')"))
+            dataset.load_all(annotated_only=True)
+
+            print('Compute gradients (2/3): load embedding')
+            # load embedding
+            adata = dataset.adata
+            topology = model_id
+            embedding = EstimatorKerasEmbedding(
+                data=adata,
+                model_dir="",
+                model_id="",
+                species=organism,
+                organ=organ,
+                model_type=model_type,
+                model_topology=model_id.split('_')[5]
+            )
+            embedding.init_model()
+            embedding.model.training_model.load_weights(os.path.join(resultspath, model_id + '_weights.h5'))
+
+            # compute gradients
+            print('Compute gradients (3/3): cumulate gradients')
+            gradients_raw = embedding.compute_gradients_input(test_data=test_data, batch_size=256, per_celltype=True)
+            with open(os.path.join(resultspath, model_id + '_grads.pickle'), 'wb') as f:
+                pickle.dump(gradients_raw, f, pickle.HIGHEST_PROTOCOL)
+            print('Gradients saved to cache file!')
+
+        # filter by minimum number cells min_cells
+        filtered_grads = {}
+        celltypes = []
+        for celltype in gradients_raw['gradients'].keys():
+            if gradients_raw['counts'][celltype] > min_cells:
+                filtered_grads.update({celltype: gradients_raw['gradients'][celltype]})
+                celltypes.append(celltype)
+
+        return np.concatenate([
+            np.mean(a, axis=0, keepdims=True)
+            for a in list(filtered_grads.values())
+        ], axis=0), celltypes
+
+    def plot_gradient_distr(
+            self,
+            organ: str,
+            organism: str,
+            model_type: Union[str, List[str]],
+            metric_select: str,
+            datapath,
+            test_data=True,
+            partition_select: str = "val",
+            normalize=True,
+            remove_inactive=True,
+            min_cells=10,
+            bw=0.02,
+            xlim=None,
+            by_type=True,
+            height_fig=7,
+            width_fig=7,
+            hist=False,
+            ignore_cache=False,
+            save=None,
+    ):
+        import seaborn as sns
+        import matplotlib.pyplot as plt
+
+        if by_type and isinstance(model_type, list):
+            raise ValueError("cannot plot by type and by model")
+        if isinstance(model_type, str):
+            model_type = [model_type]
+
+        if self.summary_tab is None:
+            self.create_summary_tab()
+
+        # best model for each organ and model_type
+        avg_grads = {}
+        celltypes = {}
+        for modelt in model_type:
+            avg_grads[modelt], celltypes[modelt] = self.get_gradients_by_celltype(
+                organ=organ,
+                organism=organism,
+                model_type=modelt,
+                metric_select=metric_select,
+                datapath=datapath,
+                test_data=test_data,
+                partition_select=partition_select,
+                ignore_cache=ignore_cache,
+                min_cells=min_cells,
+            )
+
+            if normalize:
+                avg_grads[modelt] = np.abs(avg_grads[modelt])
+                avg_grads[modelt] = (avg_grads[modelt] - np.min(avg_grads[modelt], axis=1, keepdims=True)) / \
+                                    np.maximum(
+                                        np.max(avg_grads[modelt], axis=1, keepdims=True) - np.min(avg_grads[modelt],
+                                                                                                  axis=1,
+                                                                                                  keepdims=True), 1e-8)
+
+        fig, axs = plt.subplots(1, 1, figsize=(width_fig, height_fig))
+
+        if len(avg_grads.values()) == 1:
+            threshold = np.mean(list(avg_grads.values())[0]) * 0.05
+            avg_grads_mask = np.mean(list(avg_grads.values())[0], axis=0) > threshold
+            active_grads = list(avg_grads.values())[0][:, avg_grads_mask]
+            plt.axvline(threshold, color='k', linestyle='dashed', linewidth=1,
+                        label="active gene threshold"
+                        )
+            plt.axvline(np.mean(active_grads), color='k', linestyle='solid', linewidth=1,
+                        label="average gradient\nof active genes")
+            print('number of active inputs: ', active_grads.shape[1])
+
+        for k, v in avg_grads.items():
+            if by_type:
+                v_mask = np.mean(v, axis=0) > threshold
+                for i, x in enumerate(v):
+                    if remove_inactive:
+                        x = x[v_mask]
+                    if not hist:
+                        sns.kdeplot(x, bw_method=bw, ax=axs)
+            else:
+                if remove_inactive:
+                    threshold = np.mean(v) * 0.05
+                    v_mask = np.mean(v, axis=0) > threshold
+                    v = v[:, v_mask]
+                if not hist:
+                    sns.kdeplot(np.asarray(v).flatten(), bw_method=bw, label=k, ax=axs)
+
+        if xlim is not None:
+            axs.set_xlim(xlim)
+        plt.legend(loc="best")
+        plt.xlabel(r'$\rm{mean}_{i=1,...,D} \frac{\partial z_i}{\partial x}$')
+        if hist:
+            plt.ylabel('# genes')
+        plt.tight_layout()
+        if save is not None:
+            plt.savefig(save)
+        plt.show()
+
+    def plot_gradient_cor(
+            self,
+            organ: str,
+            organism: str,
+            model_type: Union[str, List[str]],
+            metric_select: str,
+            datapath,
+            test_data=True,
+            partition_select: str = "val",
+            height_fig=7,
+            width_fig=7,
+            ignore_cache=False,
+            min_cells=10,
+            by_type=True,
+            vmin=0.,
+            vmax=1.,
+            save=None,
+    ):
+        """
+        Plot correlation heatmap of gradient vectors accumulated on input features between cell types or models.
+
+        :param organ:
+        :param organism:
+        :param model_type:
+        :param metric_select:
+        :param datapath:
+        :param test_data:
+        :param partition_select:
+        :param height_fig:
+        :param width_fig:
+        :param ignore_cache:
+        :param min_cells:
+        :param by_type:
+        :param vmin:
+        :param vmax:
+        :param save:
+        :return:
+        """
+        import seaborn as sns
+        import matplotlib.pyplot as plt
+
+        if by_type and isinstance(model_type, list):
+            raise ValueError("cannot plot by type and by model")
+        if isinstance(model_type, str):
+            model_type = [model_type]
+
+        if self.summary_tab is None:
+            self.create_summary_tab()
+
+        # best model for each organ and model_type
+        avg_grads = {}
+        celltypes = {}
+        for modelt in model_type:
+            avg_grads[modelt], celltypes[modelt] = self.get_gradients_by_celltype(
+                organ=organ,
+                organism=organism,
+                model_type=modelt,
+                metric_select=metric_select,
+                datapath=datapath,
+                test_data=test_data,
+                partition_select=partition_select,
+                ignore_cache=ignore_cache,
+                min_cells=min_cells,
+            )
+
+        fig, axs = plt.subplots(1, 1, figsize=(width_fig, height_fig))
+        if by_type:
+            v = avg_grads[model_type[0]]
+            celltypes_coord = celltypes[model_type[0]]
+            cell_names = [str(i) for i in range(v.shape[0])]
+            cormat = pandas.DataFrame(
+                np.corrcoef(v),
+                index=celltypes_coord,
+                columns=celltypes_coord
+            )
+            sns.heatmap(cormat, vmin=vmin, vmax=vmax, ax=axs)
+        else:
+            pass
+
+        plt.tight_layout()
+        if save is not None:
+            plt.savefig(save)
+        plt.show()

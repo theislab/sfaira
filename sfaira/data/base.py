@@ -1009,6 +1009,7 @@ class DatasetSuperGroup:
         :param fn_backed: File name to save backed anndata to temporarily.
         :param genome: ID of target genomes.
         :param shuffled: Whether to shuffle data when writing to backed.
+        :param as_dense:
         :param annotated_only:
         :param celltype_version: Version of cell type ontology to use. Uses most recent if None.
         """
