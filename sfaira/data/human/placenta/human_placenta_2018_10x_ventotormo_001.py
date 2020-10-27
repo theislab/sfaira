@@ -83,30 +83,30 @@ class Dataset(DatasetBase):
             for i in df.columns:
                 self.adata.obs[i] = [df.loc[j][i] for j in self.adata.obs.index]
 
-        self.adata.uns[ADATA_IDS.author] = 'Teichmann'
-        self.adata.uns[ADATA_IDS.year] = 2018
-        self.adata.uns[ADATA_IDS.doi] = '10.1038/s41586-018-0698-6'
-        self.adata.uns[ADATA_IDS.protocol] = "10x"
-        self.adata.uns[ADATA_IDS.organ] = self.organ
-        self.adata.uns[ADATA_IDS.subtissue] = self.sub_tissue
-        self.adata.uns[ADATA_IDS.animal] = "human"
-        self.adata.uns[ADATA_IDS.id] = self.id
-        self.adata.uns[ADATA_IDS.wget_download] = self.download_website
-        self.adata.uns[ADATA_IDS.has_celltypes] = self.has_celltypes
-        self.adata.uns[ADATA_IDS.normalization] = 'raw'
+        self.adata.uns[ADATA_IDS_SFAIRA.author] = 'Teichmann'
+        self.adata.uns[ADATA_IDS_SFAIRA.year] = 2018
+        self.adata.uns[ADATA_IDS_SFAIRA.doi] = '10.1038/s41586-018-0698-6'
+        self.adata.uns[ADATA_IDS_SFAIRA.protocol] = "10x"
+        self.adata.uns[ADATA_IDS_SFAIRA.organ] = self.organ
+        self.adata.uns[ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
+        self.adata.uns[ADATA_IDS_SFAIRA.animal] = "human"
+        self.adata.uns[ADATA_IDS_SFAIRA.id] = self.id
+        self.adata.uns[ADATA_IDS_SFAIRA.wget_download] = self.download_website
+        self.adata.uns[ADATA_IDS_SFAIRA.has_celltypes] = self.has_celltypes
+        self.adata.uns[ADATA_IDS_SFAIRA.normalization] = 'raw'
         self.adata.obs = self.adata.obs.rename({'location': 'organ'}, axis='columns')
 
-        self.adata.obs[ADATA_IDS.cell_ontology_class] = self.adata.obs['annotation']
+        self.adata.obs[ADATA_IDS_SFAIRA.cell_ontology_class] = self.adata.obs['annotation']
         self.adata.obs["subtissue"] = self.adata.obs["organ"].copy()
         self.adata.obs["final_cluster"] = self.adata.obs['final_cluster'].astype('category')
-        self.adata.obs[ADATA_IDS.healthy] = True
-        self.adata.obs[ADATA_IDS.state_exact] = "healthy"
+        self.adata.obs[ADATA_IDS_SFAIRA.healthy] = True
+        self.adata.obs[ADATA_IDS_SFAIRA.state_exact] = "healthy"
 
         self.adata.var['ensembl'] = [i.split("_")[1] for i in self.adata.var.index]
         self.adata.var['names'] = [i.split("_")[0] for i in self.adata.var.index]
         self.adata.var = self.adata.var.reset_index().reset_index().drop('index', axis=1)
 
-        self._convert_and_set_var_names(symbol_col=ADATA_IDS.gene_id_names, ensembl_col=ADATA_IDS.gene_id_ensembl, new_index=ADATA_IDS.gene_id_ensembl)
+        self._convert_and_set_var_names(symbol_col=ADATA_IDS_SFAIRA.gene_id_names, ensembl_col=ADATA_IDS_SFAIRA.gene_id_ensembl, new_index=ADATA_IDS_SFAIRA.gene_id_ensembl)
 
         self.adata = self.adata[:, ~self.adata.var.index.isin(
             ['', '-1', '-10', '-11', '-2', '-3', '-4', '-5', '-6', '-7', '-8', '-9', 'A.2', 'A.3'])].copy()

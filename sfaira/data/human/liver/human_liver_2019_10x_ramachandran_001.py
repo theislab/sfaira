@@ -72,20 +72,20 @@ class Dataset(DatasetBase):
                 fn = os.path.join(self.path, "human/liver/ramachandran.h5ad")
             self.adata = anndata.read(fn)
 
-        self.adata.uns[ADATA_IDS.author] = 'Henderson'
-        self.adata.uns[ADATA_IDS.year] = 2019
-        self.adata.uns[ADATA_IDS.doi] = '10.1038/s41586-019-1631-3'
-        self.adata.uns[ADATA_IDS.protocol] = '10x'
-        self.adata.uns[ADATA_IDS.organ] = self.organ
-        self.adata.uns[ADATA_IDS.subtissue] = self.sub_tissue
-        self.adata.uns[ADATA_IDS.animal] = "human"
-        self.adata.uns[ADATA_IDS.id] = self.id
-        self.adata.uns[ADATA_IDS.wget_download] = self.download_website
-        self.adata.uns[ADATA_IDS.has_celltypes] = self.has_celltypes
-        self.adata.uns[ADATA_IDS.normalization] = 'raw'
+        self.adata.uns[ADATA_IDS_SFAIRA.author] = 'Henderson'
+        self.adata.uns[ADATA_IDS_SFAIRA.year] = 2019
+        self.adata.uns[ADATA_IDS_SFAIRA.doi] = '10.1038/s41586-019-1631-3'
+        self.adata.uns[ADATA_IDS_SFAIRA.protocol] = '10x'
+        self.adata.uns[ADATA_IDS_SFAIRA.organ] = self.organ
+        self.adata.uns[ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
+        self.adata.uns[ADATA_IDS_SFAIRA.animal] = "human"
+        self.adata.uns[ADATA_IDS_SFAIRA.id] = self.id
+        self.adata.uns[ADATA_IDS_SFAIRA.wget_download] = self.download_website
+        self.adata.uns[ADATA_IDS_SFAIRA.has_celltypes] = self.has_celltypes
+        self.adata.uns[ADATA_IDS_SFAIRA.normalization] = 'raw'
 
-        self.adata.obs[ADATA_IDS.cell_ontology_class] = self.adata.obs["annotation_lineage"]
-        self.adata.obs[ADATA_IDS.healthy] = [i == 'Uninjured' for i in self.adata.obs["condition"]]
-        self.adata.obs[ADATA_IDS.state_exact] = ['healthy' if i == 'Uninjured' else i for i in self.adata.obs["condition"]]
+        self.adata.obs[ADATA_IDS_SFAIRA.cell_ontology_class] = self.adata.obs["annotation_lineage"]
+        self.adata.obs[ADATA_IDS_SFAIRA.healthy] = [i == 'Uninjured' for i in self.adata.obs["condition"]]
+        self.adata.obs[ADATA_IDS_SFAIRA.state_exact] = ['healthy' if i == 'Uninjured' else i for i in self.adata.obs["condition"]]
 
-        self._convert_and_set_var_names(symbol_col='index', ensembl_col=None, new_index=ADATA_IDS.gene_id_ensembl)
+        self._convert_and_set_var_names(symbol_col='index', ensembl_col=None, new_index=ADATA_IDS_SFAIRA.gene_id_ensembl)

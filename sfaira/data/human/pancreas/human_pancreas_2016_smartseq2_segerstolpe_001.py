@@ -69,21 +69,21 @@ class Dataset(DatasetBase):
             # filter observations which are not cells (empty wells, low quality cells etc.)
             self.adata = self.adata[self.adata.obs['Characteristics[cell type]'] != 'not applicable'].copy()
 
-        self.adata.uns[ADATA_IDS.author] = "Sandberg"
-        self.adata.uns[ADATA_IDS.year] = 2016
-        self.adata.uns[ADATA_IDS.doi] = "10.1016/j.cmet.2016.08.020"
-        self.adata.uns[ADATA_IDS.protocol] = 'Smartseq2'
-        self.adata.uns[ADATA_IDS.organ] = self.organ
-        self.adata.uns[ADATA_IDS.subtissue] = self.sub_tissue
-        self.adata.uns[ADATA_IDS.animal] = "human"
-        self.adata.uns[ADATA_IDS.id] = self.id
-        self.adata.uns[ADATA_IDS.wget_download] = self.download_website
-        self.adata.uns[ADATA_IDS.has_celltypes] = self.has_celltypes
-        self.adata.uns[ADATA_IDS.normalization] = 'raw'
+        self.adata.uns[ADATA_IDS_SFAIRA.author] = "Sandberg"
+        self.adata.uns[ADATA_IDS_SFAIRA.year] = 2016
+        self.adata.uns[ADATA_IDS_SFAIRA.doi] = "10.1016/j.cmet.2016.08.020"
+        self.adata.uns[ADATA_IDS_SFAIRA.protocol] = 'Smartseq2'
+        self.adata.uns[ADATA_IDS_SFAIRA.organ] = self.organ
+        self.adata.uns[ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
+        self.adata.uns[ADATA_IDS_SFAIRA.animal] = "human"
+        self.adata.uns[ADATA_IDS_SFAIRA.id] = self.id
+        self.adata.uns[ADATA_IDS_SFAIRA.wget_download] = self.download_website
+        self.adata.uns[ADATA_IDS_SFAIRA.has_celltypes] = self.has_celltypes
+        self.adata.uns[ADATA_IDS_SFAIRA.normalization] = 'raw'
 
-        self.adata.obs[ADATA_IDS.healthy] = [True if line == 'normal' else False for line in self.adata.obs['Characteristics[disease]']]
-        self.adata.obs[ADATA_IDS.state_exact] = self.adata.obs['Characteristics[disease]'].astype('category')
-        self.adata.obs[ADATA_IDS.state_exact] = self.adata.obs[ADATA_IDS.state_exact].cat.rename_categories({'normal':'healthy', 'type II diabetes mellitus':'type II diabetes mellitus'})
+        self.adata.obs[ADATA_IDS_SFAIRA.healthy] = [True if line == 'normal' else False for line in self.adata.obs['Characteristics[disease]']]
+        self.adata.obs[ADATA_IDS_SFAIRA.state_exact] = self.adata.obs['Characteristics[disease]'].astype('category')
+        self.adata.obs[ADATA_IDS_SFAIRA.state_exact] = self.adata.obs[ADATA_IDS_SFAIRA.state_exact].cat.rename_categories({'normal':'healthy', 'type II diabetes mellitus':'type II diabetes mellitus'})
 
-        self.adata.obs[ADATA_IDS.cell_ontology_class] = self.adata.obs['Characteristics[cell type]']
-        self._convert_and_set_var_names(symbol_col='index', ensembl_col=None, new_index=ADATA_IDS.gene_id_ensembl)
+        self.adata.obs[ADATA_IDS_SFAIRA.cell_ontology_class] = self.adata.obs['Characteristics[cell type]']
+        self._convert_and_set_var_names(symbol_col='index', ensembl_col=None, new_index=ADATA_IDS_SFAIRA.gene_id_ensembl)
