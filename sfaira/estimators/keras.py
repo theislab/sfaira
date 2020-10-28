@@ -720,15 +720,18 @@ class EstimatorKerasEmbedding(EstimatorKeras):
 
         :return: Dictionary of metric names and values.
         """
-        x, y = self._get_dataset(
-            idx=self.idx_test,
-            batch_size=None,
-            mode='eval'
-        )
-        results = self.model.training_model.evaluate(
-            x=x, y=y
-        )
-        return dict(zip(self.model.training_model.metrics_names, results))
+        if self.idx_test is None or self.idx_test.any():   # true if the array is not empty or if the passed value is None
+            x, y = self._get_dataset(
+                idx=self.idx_test,
+                batch_size=None,
+                mode='eval'
+            )
+            results = self.model.training_model.evaluate(
+                x=x, y=y
+            )
+            return dict(zip(self.model.training_model.metrics_names, results))
+        else:
+            return {}
 
     def predict(self):
         """
@@ -737,56 +740,57 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         :return:
         prediction
         """
-        x, y = self._get_dataset(
-            idx=self.idx_test,
-            batch_size=None,
-            mode='predict'
-        )
-        return self.model.predict_reconstructed(
-            x=x
-        )
+        if self.idx_test is None or self.idx_test.any():   # true if the array is not empty or if the passed value is None
+            x, y = self._get_dataset(
+                idx=self.idx_test,
+                batch_size=None,
+                mode='predict'
+            )
+            return self.model.predict_reconstructed(
+                x=x
+            )
+        else:
+            return np.array([])
 
-    def predict_embedding(self, test_data=True):
+    def predict_embedding(self):
         """
         return the prediction in the latent space (z_mean for variational models)
 
         :return:
         latent space
         """
-        if test_data:
-            idx = self.idx_test
+        if self.idx_test is None or self.idx_test.any():   # true if the array is not empty or if the passed value is None
+            x, y = self._get_dataset(
+                idx=self.idx_test,
+                batch_size=None,
+                mode='predict'
+            )
+            return self.model.predict_embedding(
+                x=x,
+                variational=False
+            )
         else:
-            idx = None
-        x, y = self._get_dataset(
-            idx=idx,
-            batch_size=None,
-            mode='predict'
-        )
-        return self.model.predict_embedding(
-            x=x,
-            variational=False
-        )
+            return np.array([])
 
-    def predict_embedding_variational(self, test_data=True):
+    def predict_embedding_variational(self):
         """
         return the prediction of z, z_mean, z_log_var in the variational latent space
 
         :return:
         sample of latent space, mean of latent space, variance of latent space
         """
-        if test_data:
-            idx = self.idx_test
+        if self.idx_test is None or self.idx_test:   # true if the array is not empty or if the passed value is None
+            x, y = self._get_dataset(
+                idx=self.idx_test,
+                batch_size=None,
+                mode='predict'
+            )
+            return self.model.predict_embedding(
+                x=x,
+                variational=True
+            )
         else:
-            idx = None
-        x, y = self._get_dataset(
-            idx=idx,
-            batch_size=None,
-            mode='predict'
-        )
-        return self.model.predict_embedding(
-            x=x,
-            variational=True
-        )
+            return np.array([])
 
     def compute_gradients_input(
             self,
@@ -1087,14 +1091,17 @@ class EstimatorKerasCelltype(EstimatorKeras):
         :return:
         prediction
         """
-        x, y, _ = self._get_dataset(
-            idx=self.idx_test,
-            batch_size=None,
-            mode='predict'
-        )
-        return self.model.training_model.predict(
-            x=x
-        )
+        if self.idx_test is None or self.idx_test.any():   # true if the array is not empty or if the passed value is None
+            x, y, _ = self._get_dataset(
+                idx=self.idx_test,
+                batch_size=None,
+                mode='predict'
+            )
+            return self.model.training_model.predict(
+                x=x
+            )
+        else:
+            return np.array([])
 
     def ytrue(self):
         """
@@ -1102,12 +1109,15 @@ class EstimatorKerasCelltype(EstimatorKeras):
 
         :return: true labels
         """
-        x, y, w = self._get_dataset(
-            idx=self.idx_test,
-            batch_size=None,
-            mode='eval'
-        )
-        return y
+        if self.idx_test is None or self.idx_test.any():   # true if the array is not empty or if the passed value is None
+            x, y, w = self._get_dataset(
+                idx=self.idx_test,
+                batch_size=None,
+                mode='eval'
+            )
+            return y
+        else:
+            return np.array([])
 
     def evaluate_any(
             self,
@@ -1144,15 +1154,18 @@ class EstimatorKerasCelltype(EstimatorKeras):
         :param weighted: Whether to use class weights in evaluation.
         :return: model.evaluate
         """
-        x, y, w = self._get_dataset(
-            idx=self.idx_test,
-            batch_size=None,
-            mode='eval',
-            weighted=weighted
-        )
-        return self.model.training_model.evaluate(
-            x=x, y=y, sample_weight=w
-        )
+        if self.idx_test is None or self.idx_test.any():   # true if the array is not empty or if the passed value is None
+            x, y, w = self._get_dataset(
+                idx=self.idx_test,
+                batch_size=None,
+                mode='eval',
+                weighted=weighted
+            )
+            return self.model.training_model.evaluate(
+                x=x, y=y, sample_weight=w
+            )
+        else:
+            return np.array([])
 
     def compute_gradients_input(
             self,

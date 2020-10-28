@@ -1189,6 +1189,20 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
             list(dict([("val_" + m, [self.evals[x]["val"][m] for x in self.run_ids]) for m in metrics]).items()) +
             list(dict([("all_" + m, [self.evals[x]["all"][m] for x in self.run_ids]) for m in metrics]).items())
         ))
+
+        # TODO: Hacky solution to make sure metrics are called the same in VAE and other models
+        rename_dict = {
+            "train_neg_ll_custom_mse": "train_custom_mse",
+            "train_neg_ll_custom_negll": "train_custom_negll",
+            "test_neg_ll_custom_mse": "test_custom_mse",
+            "test_neg_ll_custom_negll": "test_custom_negll",
+            "val_neg_ll_custom_mse": "val_custom_mse",
+            "val_neg_ll_custom_negll": "val_custom_negll",
+            "all_neg_ll_custom_mse": "all_custom_mse",
+            "all_neg_ll_custom_negll": "all_custom_negll",
+        }
+        self.summary_tab = self.summary_tab.rename(columns=rename_dict)
+
         if self.summary_tab.shape[0] == 0:
             raise ValueError("summary_tab was empty")
 
