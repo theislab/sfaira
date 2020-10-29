@@ -947,12 +947,12 @@ class EstimatorKerasCelltype(EstimatorKeras):
     def _get_celltype_out(
             self,
             idx: Union[np.ndarray, None],
-            lookup_ontology=["names"]
+            lookup_ontology="names"
     ):
         """
         Build one hot encoded cell type output tensor and observation-wise weight matrix.
 
-        :param lookup_ontology: list of ontology names to conisder.
+        :param lookup_ontology: list of ontology names to consider.
         :return:
         """
         if idx is None:
@@ -963,10 +963,10 @@ class EstimatorKerasCelltype(EstimatorKeras):
         else:
             type_classes = self.ntypes + 1
         y = np.zeros((len(idx), type_classes), dtype="float32")
-        celltype_idx = self.celltypes_version.map_to_leaves(
-            nodes=self.data.obs["cell_ontology_class"].values.tolist(),
+        celltype_idx = self.model.celltypes_version.map_to_leaves(
+            nodes=self.data.obs["cell_ontology_class"].values[idx].tolist(),
             ontology="custom",
-            ontology_id="names",
+            ontology_id=lookup_ontology,
             return_type="idx"
         )
         for i, x in enumerate(celltype_idx):

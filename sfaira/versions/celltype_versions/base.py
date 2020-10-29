@@ -36,7 +36,7 @@ class OntologyBase:
         if return_type == "elements":
             return [x for x in self.leaves if x in ancestors]
         if return_type == "idx":
-            return np.array([i for i, x in enumerate(self.leaves) if x in ancestors])
+            return np.array([i for i, (x, y) in enumerate(self.leaves) if x in ancestors])
 
 
 class OntologyDict(OntologyBase):
