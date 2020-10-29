@@ -1,8 +1,76 @@
+import abc
 import networkx
 import numpy as np
 import obonet
 import pandas as pd
-from typing import List, Tuple
+from typing import List, Tuple, Union
+
+
+class OntologyBase:
+    leaves: list
+
+    @abc.abstractmethod
+    def set_leaves(self, nodes: list = None):
+        pass
+
+    @abc.abstractmethod
+    def get_ancestors(self, node: str) -> List[str]:
+        pass
+
+    def map_to_leaves(self, node: str, return_type: str = "elements", include_self: bool = True):
+        """
+        Map a given list of nodes to leave nodes.
+
+        :param node:
+        :param return_type:
+
+            "elements": names of mapped leave nodes
+            "idx": indicies in leave note list of of mapped leave nodes
+        :param include_self: whether to include node itself
+        :return:
+        """
+        assert self.leaves is not None
+        ancestors = self.get_ancestors(node)
+        if include_self:
+            ancestors = ancestors + [node]
+        if return_type == "elements":
+            return [x for x in self.leaves if x in ancestors]
+        if return_type == "idx":
+            return np.array([i for i, x in enumerate(self.leaves) if x in ancestors])
+
+
+class OntologyDict(OntologyBase):
+
+    def __init__(self, onto: dict):
+        self.onto = onto
+
+    def set_leaves(self, nodes: list = None):
+        self.leaves = nodes
+
+    def get_ancestors(self, node: str) -> List[str]:
+        return self.onto[node] if node in self.onto.keys() else [node]
+
+
+class OntologyObo(OntologyBase):
+
+    def __init__(self, obo: str = "http://purl.obolibrary.org/obo/cl.obo"):
+        self.graph = obonet.read_obo(obo)
+        assert networkx.is_directed_acyclic_graph(self.graph)
+
+    def set_leaves(self, nodes: list = None):
+        if nodes is not None:
+            for x in nodes:
+                assert x in self.graph.nodes, f"{x} not found"
+            self.leaves = nodes
+        else:
+            self.leaves = self.get_all_roots()
+
+    def get_all_roots(self) -> List[str]:
+        return [x for x in self.graph.nodes() if self.graph.in_degree(x) == 0]
+
+    def get_ancestors(self, node: str) -> List[str]:
+        return list(networkx.ancestors(self.graph, node))
+
 
 class CelltypeVersionsBase:
     """
@@ -16,7 +84,6 @@ class CelltypeVersionsBase:
 
     Basic checks on the organ specific instance are performed in the constructor.
     """
-
     celltype_universe: dict
     ontology: dict
     version: str
@@ -110,35 +177,28 @@ class CelltypeVersionsBase:
         tab = pd.read_csv(fn)
         return [(x, y) for x, y in zip(tab["name"].values, tab["id"].values)]
 
-    def to_csv(
+    def map_to_leaves(
             self,
-            fn: str
+            nodes: List[str],
+            ontology: str = "custom",
+            ontology_id: str = "names",
+            return_type: str = "elements"
     ):
-        pass
+        """
+        Map a given list of nodes to leave nodes defined for this ontology
+        :param nodes:
+        :param ontology:
+        :param return_type:
 
-
-class OntologyObo:
-    leaves: list
-
-    def __init__(self, obo: str = "http://purl.obolibrary.org/obo/cl.obo"):
-        self.graph = obonet.read_obo(obo)
-        assert networkx.is_directed_acyclic_graph(self.graph)
-
-    def set_leaves(self, nodes: list = None):
-        if nodes is not None:
-            for x in nodes:
-                assert x in self.graph.nodes, f"{x} not found"
-            self.leaves = nodes
+            "elements": names of mapped leave nodes
+            "idx": indicies in leave note list of of mapped leave nodes
+        :return:
+        """
+        if ontology == "custom":
+            onto = OntologyDict(self.ontology[self.version][ontology_id])
+        elif ontology == "cl":
+            onto = OntologyObo()
         else:
-            self.leaves = self.get_all_roots()
-
-    def get_all_roots(self):
-        return [x for x in self.graph.nodes() if self.graph.in_degree(x) == 0]
-
-    def map_to_leaves(self, node, return_type: str = "elements"):
-        assert self.leaves is not None
-        ancestors = networkx.ancestors(self.graph, node)
-        if return_type == "elements":
-            return [x for x in self.leaves if x in ancestors]
-        if return_type == "idx":
-            return np.array([i for i, x in enumerate(self.leaves) if x in ancestors])
+            assert False
+        onto.set_leaves(self.celltype_universe[self.version])
+        return [onto.map_to_leaves(x, return_type=return_type) for x in nodes]
