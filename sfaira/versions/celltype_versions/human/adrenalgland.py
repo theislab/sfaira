@@ -1,53 +1,5 @@
 from .external import CelltypeVersionsBase
 
-CELLTYPES_HUMAN_ADRENALGLAND_V0 = [
-    ['Adrenal gland inflammatory cell', "nan"],
-    ['Antigen presenting cell (RPS high)', "nan"],
-    ['B cell', "nan"],
-    ['B cell (Plasmocyte)', "nan"],
-    ['CB CD34+', "nan"],
-    ['Dendritic cell', "nan"],
-    ['Endothelial cell', "nan"],
-    ['Endothelial cell (APC)', "nan"],
-    ['Endothelial cell (endothelial to mesenchymal transition)', "nan"],
-    ['Enterocyte', "nan"],
-    ['Enterocyte progenitor', "nan"],
-    ['Epithelial cell', "nan"],
-    ['Erythroid cell', "nan"],
-    ['Erythroid progenitor cell (RP high)', "nan"],
-    ['Fasciculata cell', "nan"],
-    ['Fetal Neuron', "nan"],
-    ['Fetal acinar cell', "nan"],
-    ['Fetal endocrine cell', "nan"],
-    ['Fetal enterocyte ', "nan"],
-    ['Fetal epithelial progenitor', "nan"],
-    ['Fetal fibroblast', "nan"],
-    ['Fetal mesenchymal progenitor', "nan"],
-    ['Fetal neuron', "nan"],
-    ['Fetal skeletal muscle cell', "nan"],
-    ['Fetal stromal cell', "nan"],
-    ['Fibroblast', "nan"],
-    ['Goblet cell', "nan"],
-    ['Hepatocyte/Endodermal cell', "nan"],
-    ['Immature sertoli cell (Pre-Sertoli cell)', "nan"],
-    ['Kidney intercalated cell', "nan"],
-    ['Loop of Henle', "nan"],
-    ['M2 Macrophage', "nan"],
-    ['Macrophage', "nan"],
-    ['Mast cell', "nan"],
-    ['Monocyte', "nan"],
-    ['Myeloid cell', "nan"],
-    ['Neutrophil', "nan"],
-    ['Neutrophil (RPS high)', "nan"],
-    ['Primordial germ cell', "nan"],
-    ['Proximal tubule progenitor', "nan"],
-    ['Sinusoidal endothelial cell', "nan"],
-    ['Smooth muscle cell', "nan"],
-    ['Stromal cell', "nan"],
-    ['T cell', "nan"],
-    ['Ureteric bud cell', "nan"],
-    ['hESC', "nan"]
-]
 ONTOLOGIES_HUMAN_ADRENALGLAND_V0 = {
     "names": {},
     "ontology_ids": {},
@@ -58,7 +10,7 @@ class CelltypeVersionsHumanAdrenalgland(CelltypeVersionsBase):
 
     def __init__(self, **kwargs):
         self.celltype_universe = {
-            "0": CELLTYPES_HUMAN_ADRENALGLAND_V0
+            "0": self.read_csv(".".join(__file__.split(".")[:-1])+".csv")
         }
         self.ontology = {
             "0": ONTOLOGIES_HUMAN_ADRENALGLAND_V0

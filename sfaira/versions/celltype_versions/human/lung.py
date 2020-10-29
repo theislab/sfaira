@@ -1,45 +1,5 @@
 from .external import CelltypeVersionsBase
 
-CELLTYPES_HUMAN_LUNG_V0 = [
-    ['Cycling cells', "nan"],
-    ['Cartilage', "nan"],
-    ['Fetal airway progenitors', "nan"],
-    ['Mesothelium', "nan"],
-    ['AT1', "nan"],
-    ['AT2', "nan"],
-    ['Acinar', "nan"],
-    ['Airway smooth muscle', "nan"],
-    ['Arterial', "nan"],
-    ['B cell lineage', "nan"],
-    ['Basal', "nan"],
-    ['Bronchial Vessel 1', "nan"],
-    ['Bronchial Vessel 2', "nan"],
-    ['Capillary', "nan"],
-    ['Capillary Intermediate 1', "nan"],
-    ['Capillary Intermediate 2', "nan"],
-    ['Dendritic cells', "nan"],
-    ['Erythrocytes', "nan"],
-    ['Fibroblasts', "nan"],
-    ['Fibromyocyte', "nan"],
-    ['Innate lymphoid cells', "nan"],
-    ['KRT5-/KRT17+', "nan"],
-    ['Lymphatic EC', "nan"],
-    ['Macrophages', "nan"],
-    ['Mast cells', "nan"],
-    ['Megakaryocytes', "nan"],
-    ['Monocytes', "nan"],
-    ['Multiciliated lineage', "nan"],
-    ['Myofibroblasts', "nan"],
-    ['Neutrophilic', "nan"],
-    ['Proliferating Epithelial Cells', "nan"],
-    ['Rare', "nan"],
-    ['Secretory', "nan"],
-    ['Submucosal Secretory', "nan"],
-    ['T cell lineage', "nan"],
-    ['Venous', "nan"],
-    ['Venous smooth muscle', "nan"],
-    ['unknown', "nan"]
-]
 ONTOLOGIES_HUMAN_LUNG_V0 = {
     "names": {
         "1_Endothelial": ['Arterial', 'Capillary', 'Venous', 'Bronchial Vessel 1', 'Bronchial Vessel 2',
@@ -66,7 +26,7 @@ class CelltypeVersionsHumanLung(CelltypeVersionsBase):
 
     def __init__(self, **kwargs):
         self.celltype_universe = {
-            "0": CELLTYPES_HUMAN_LUNG_V0
+            "0": self.read_csv(".".join(__file__.split(".")[:-1]) + ".csv")
         }
         self.ontology = {
             "0": ONTOLOGIES_HUMAN_LUNG_V0
