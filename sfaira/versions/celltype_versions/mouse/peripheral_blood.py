@@ -1,18 +1,6 @@
 from .external import CelltypeVersionsBase
 
 # Version 0
-CELLTYPES_MOUSE_PERIPHERALBLOOD_V0 = [
-    ["B cell", "CL:0000236"],
-    ["macrophage", "CL:0000235"],
-    ["T cell", "CL:0000084"],
-    ["NK cell", "nan"],
-    ["neutrophil", "nan"],
-    ["monocyte", "nan"],
-    ["erythroblast", "nan"],
-    ["dendritic cell", "nan"],
-    ["basophil", "nan"],
-    ["unknown", "nan"]
-]
 ONTOLOGIES_MOUSE_PERIPHERALBLOOD_V0 = {
     "names": {},
     "ontology_ids": {},
@@ -23,7 +11,7 @@ class CelltypeVersionsMousePeripheralblood(CelltypeVersionsBase):
 
     def __init__(self, **kwargs):
         self.celltype_universe = {
-            "0": CELLTYPES_MOUSE_PERIPHERALBLOOD_V0
+            "0": self.read_csv(".".join(__file__.split(".")[:-1])+".csv")
         }
         self.ontology = {
             "0": ONTOLOGIES_MOUSE_PERIPHERALBLOOD_V0

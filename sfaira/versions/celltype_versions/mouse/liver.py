@@ -1,25 +1,6 @@
 from .external import CelltypeVersionsBase
 
 # Version 0
-CELLTYPES_MOUSE_LIVER_V0 = [
-    ["B cell", "CL:0000236"],
-    ["dendritic cell", "nan"],
-    ["CD4-positive, alpha-beta T cell", "nan"],
-    ["CD8-positive, alpha-beta T cell", "nan"],
-    ["duct epithelial cell", "nan"],
-    ["erythroblast", "nan"],
-    ["endothelial cell of hepatic sinusoid", "CL:1000398"],
-    ["granulocyte", "nan"],
-    ["hepatic stellate cell", "CL:0000632"],
-    ["hepatocyte", "CL:0000182"],
-    ["Kupffer cell", "CL:0000091"],
-    ["macrophage", "nan"],
-    ["neutrophil", "CL:0000775"],
-    ["NK cell", "CL:0000623"],
-    ["plasmacytoid dendritic cell", "CL:0000784"],
-    ["stromal cell", "nan"],
-    ["unknown", "nan"]
-]
 ONTOLOGIES_MOUSE_LIVER_V0 = {
     "names": {
         "myeloid leukocyte": [
@@ -37,7 +18,7 @@ class CelltypeVersionsMouseLiver(CelltypeVersionsBase):
 
     def __init__(self, **kwargs):
         self.celltype_universe = {
-            "0": CELLTYPES_MOUSE_LIVER_V0
+            "0": self.read_csv(".".join(__file__.split(".")[:-1])+".csv")
         }
         self.ontology = {
             "0": ONTOLOGIES_MOUSE_LIVER_V0

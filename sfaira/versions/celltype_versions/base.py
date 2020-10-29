@@ -1,6 +1,8 @@
 import networkx
 import numpy as np
 import obonet
+import pandas as pd
+from typing import List, Tuple
 
 class CelltypeVersionsBase:
     """
@@ -103,6 +105,10 @@ class CelltypeVersionsBase:
 
     def _ntypes(self, version: str):
         return len(self.celltype_universe[version])
+
+    def read_csv(self, fn) -> List[Tuple[str, str]]:
+        tab = pd.read_csv(fn)
+        return [(x, y) for x, y in zip(tab["name"].values, tab["id"].values)]
 
     def to_csv(
             self,

@@ -1,19 +1,6 @@
 from .external import CelltypeVersionsBase
 
 # Version 0
-CELLTYPES_MOUSE_TESTIS_V0 = [
-    ["macrophage", "CL:0000235"],
-    ["leydig cell", "nan"],
-    ["elongating spermatid", "nan"],
-    ["erythroblast", "nan"],
-    ["pre-sertoli cell", "nan"],
-    ["sertoli cell", "nan"],
-    ["preleptotene spermatogonia", "nan"],
-    ["spermatogonia", "nan"],
-    ["spermatocyte", "nan"],
-    ["spermatid", "nan"],
-    ["unknown", "nan"]
-]
 ONTOLOGIES_MOUSE_TESTIS_V0 = {
     "names": {
     },
@@ -25,7 +12,7 @@ class CelltypeVersionsMouseTestis(CelltypeVersionsBase):
 
     def __init__(self, **kwargs):
         self.celltype_universe = {
-            "0": CELLTYPES_MOUSE_TESTIS_V0
+            "0": self.read_csv(".".join(__file__.split(".")[:-1])+".csv")
         }
         self.ontology = {
             "0": ONTOLOGIES_MOUSE_TESTIS_V0
