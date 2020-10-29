@@ -2,8 +2,10 @@ anndata>=0.7
 docutils
 jinja2
 loompy
-numpy>=1.14.0
 matplotlib
+numpy>=1.14.0
+networkx
+obonet
 pandas
 scanpy
 scipy

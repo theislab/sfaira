@@ -1,5 +1,6 @@
+import networkx
 import numpy as np
-
+import obonet
 
 class CelltypeVersionsBase:
     """
@@ -108,3 +109,30 @@ class CelltypeVersionsBase:
             fn: str
     ):
         pass
+
+
+class OntologyObo:
+    leaves: list
+
+    def __init__(self, obo: str = "http://purl.obolibrary.org/obo/cl.obo"):
+        self.graph = obonet.read_obo(obo)
+        assert networkx.is_directed_acyclic_graph(self.graph)
+
+    def set_leaves(self, nodes: list = None):
+        if nodes is not None:
+            for x in nodes:
+                assert x in self.graph.nodes, f"{x} not found"
+            self.leaves = nodes
+        else:
+            self.leaves = self.get_all_roots()
+
+    def get_all_roots(self):
+        return [x for x in self.graph.nodes() if self.graph.in_degree(x) == 0]
+
+    def map_to_leaves(self, node, return_type: str = "elements"):
+        assert self.leaves is not None
+        ancestors = networkx.ancestors(self.graph, node)
+        if return_type == "elements":
+            return [x for x in self.leaves if x in ancestors]
+        if return_type == "idx":
+            return np.array([i for i, x in enumerate(self.leaves) if x in ancestors])

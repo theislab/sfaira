@@ -19,10 +19,12 @@ setup(
     install_requires=[
         'anndata>=0.7',
         'h5py',
+        'networkx',
         'numpy>=1.16.4',
+        'obonet',
         'pandas',
         'scipy>=1.2.1',
-        'tqdm'
+        'tqdm',
     ],
     extras_require={
         'tensorflow': [
