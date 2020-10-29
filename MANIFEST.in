@@ -1,4 +1,0 @@
-include README.rst
-include docs/*.txt
-include sfaira/versions/celltype_versions/mouse/bladder.csv
-include sfaira/versions/celltype_versions/mouse/lung.csv
