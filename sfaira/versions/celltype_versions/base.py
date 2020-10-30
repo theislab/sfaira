@@ -71,6 +71,56 @@ class OntologyObo(OntologyBase):
     def get_ancestors(self, node: str) -> List[str]:
         return list(networkx.ancestors(self.graph, node))
 
+    def fuzzymatch_nodes(
+            self,
+            source,
+            match_only: bool = False,
+            include_old: bool = False,
+            include_synonyms: bool = True,
+            remove: list = []
+    ):
+        from fuzzywuzzy import fuzz
+        matches = []
+        nodes = [(k, v) for k, v in self.graph.nodes.items()]
+        include = []
+        if isinstance(source, pd.DataFrame):
+            source = list(zip(source.iloc[:, 0].values, source.iloc[:, 1].values))
+        for x in source:
+            if not isinstance(x, list) and not isinstance(x, tuple):
+                x = [x, "nan"]
+            scores = np.array([
+                np.max([
+                    fuzz.ratio(x[0].lower().strip("'").strip("\""), y[1]["name"].lower())
+                ] + ([
+                    fuzz.ratio(x[0].lower().strip("'").strip("\"").strip("]").strip("["), yy.lower())
+                    for yy in y[1]["synonym"]
+                ] if "synonym" in y[1].keys() and include_synonyms else []))
+                for y in nodes
+            ])
+            include.append(x[0].lower().strip("'").strip("\"") not in remove)
+            if match_only:
+                matches.append(np.any(scores == 100))  # perfect match
+            else:
+                if np.any(scores == 100):
+                    matches.append([(nodes[i][1]["name"], nodes[i][0]) for i in np.where(scores == 100)[0]])
+                else:
+                    matchesi = [(
+                        nodes[i][1]["name"] + "[" + ";".join([
+                            yy.strip("'").strip("\"").strip("]").strip("[")
+                            for yy in nodes[i][1]["synonym"]
+                        ]) + "}"
+                        if "synonym" in nodes[i][1].keys() and include_synonyms else nodes[i][1]["name"],
+                        nodes[i][0]
+                    ) for i in np.argsort(scores)[-10:]]
+                    if include_old:
+                        matchesi = matchesi + [(x[0].upper(), x[1])]
+                    matches.append(matchesi)
+        if match_only:
+            tab = pd.DataFrame({"name": source, "matched": matches})
+        else:
+            tab = pd.DataFrame({"name,id": [" ".join([",".join(zz) for zz in z]) for z in matches]})
+        return tab.loc[include]
+
 
 class CelltypeVersionsBase:
     """

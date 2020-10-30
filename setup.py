@@ -18,11 +18,13 @@ setup(
     packages=find_packages(),
     install_requires=[
         'anndata>=0.7',
+        'fuzzywuzzy',
         'h5py',
         'networkx',
         'numpy>=1.16.4',
         'obonet',
         'pandas',
+        'python-Levenshtein',
         'scipy>=1.2.1',
         'tqdm',
     ],
