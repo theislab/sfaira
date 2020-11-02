@@ -601,7 +601,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 # Need to supply sorted indices to backed anndata:
                 x = self.data.X[np.sort(idx), :]
                 # Sort back in original order of indices.
-                x = x[np.argsort(idx), :]
+                x = x[[np.where(np.sort(idx) == i)[0][0] for i in idx], :]
             else:
                 x = self._prepare_data_matrix(idx=idx)
                 x = x.toarray()
@@ -1057,7 +1057,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
                 # Need to supply sorted indices to backed anndata:
                 x = self.data.X[np.sort(idx), :]
                 # Sort back in original order of indices.
-                x = x[np.argsort(idx), :]
+                x = x[[np.where(np.sort(idx) == i)[0][0] for i in idx], :]
             else:
                 x = self._prepare_data_matrix(idx=idx)
                 x = x.toarray()
