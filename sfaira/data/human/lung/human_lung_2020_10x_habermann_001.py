@@ -1,6 +1,7 @@
 import os
 from typing import Union
 from .external import DatasetBase
+from .external import ADATA_IDS_SFAIRA
 import anndata
 import pandas as pd
 
@@ -106,21 +107,21 @@ class Dataset(DatasetBase):
                 fn = os.path.join(self.path, "human/lung/habermann_processed.h5ad")
             self.adata = anndata.read(fn)
 
-        self.adata.uns["lab"] = 'Kropski'
-        self.adata.uns["year"] = 2020
-        self.adata.uns["doi"] = "10.1101/753806"
-        self.adata.uns["protocol"] = '10x'
-        self.adata.uns["organ"] = self.organ
-        self.adata.uns["subtissue"] = self.sub_tissue
-        self.adata.uns["animal"] = "human"
-        self.adata.uns["id"] = self.id
-        self.adata.uns["wget_download"] = self.download_website
-        self.adata.uns["has_celltypes"] = self.has_celltypes
-        self.adata.uns["counts"] = 'raw'
+        self.adata.uns[ADATA_IDS_SFAIRA.author] = 'Kropski'
+        self.adata.uns[ADATA_IDS_SFAIRA.year] = 2020
+        self.adata.uns[ADATA_IDS_SFAIRA.doi] = "10.1101/753806"
+        self.adata.uns[ADATA_IDS_SFAIRA.protocol] = '10x'
+        self.adata.uns[ADATA_IDS_SFAIRA.organ] = self.organ
+        self.adata.uns[ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
+        self.adata.uns[ADATA_IDS_SFAIRA.species] = "human"
+        self.adata.uns[ADATA_IDS_SFAIRA.id] = self.id
+        self.adata.uns[ADATA_IDS_SFAIRA.download] = self.download_website
+        self.adata.uns[ADATA_IDS_SFAIRA.annotated] = self.has_celltypes
+        self.adata.uns[ADATA_IDS_SFAIRA.normalization] = 'raw'
 
-        self.adata.obs["cell_ontology_class"] = self.adata.obs['celltype']
+        self.adata.obs[ADATA_IDS_SFAIRA.cell_ontology_class] = self.adata.obs['celltype']
         self.set_unkown_class_id(ids=["1_Unicorns and artifacts"])
-        self.adata.obs["healthy"] = [i == 'Control' for i in self.adata.obs['Status']]
+        self.adata.obs[ADATA_IDS_SFAIRA.healthy] = [i == 'Control' for i in self.adata.obs['Status']]
         self.adata.obs['state_exact'] = self.adata.obs['Diagnosis'].astype('category')
 
-        self._convert_and_set_var_names(symbol_col='index', ensembl_col=None, new_index='ensembl')
+        self._convert_and_set_var_names(symbol_col='index', ensembl_col=None, new_index=ADATA_IDS_SFAIRA.gene_id_ensembl)

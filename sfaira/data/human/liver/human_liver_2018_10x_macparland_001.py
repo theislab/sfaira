@@ -1,6 +1,7 @@
 import os
 from typing import Union
 from .external import DatasetBase
+from .external import ADATA_IDS_SFAIRA
 import anndata
 import pandas as pd
 
@@ -69,20 +70,20 @@ class Dataset(DatasetBase):
             celltype_df = pd.read_csv(fn[1], sep='\t').set_index('CellName')
             self.adata.obs['celltype'] = [str(celltype_df.loc[i]['Cluster#']) for i in self.adata.obs.index]
 
-        self.adata.uns["lab"] = 'McGilvray'
-        self.adata.uns["year"] = 2018
-        self.adata.uns["doi"] = '10.1038/s41467-018-06318-7'
-        self.adata.uns["protocol"] = '10x'
-        self.adata.uns["organ"] = self.organ
-        self.adata.uns["subtissue"] = self.sub_tissue
-        self.adata.uns["animal"] = "human"
-        self.adata.uns["id"] = self.id
-        self.adata.uns["wget_download"] = self.download_website
-        self.adata.uns["has_celltypes"] = self.has_celltypes
-        self.adata.uns["counts"] = 'raw'
+        self.adata.uns[ADATA_IDS_SFAIRA.author] = 'McGilvray'
+        self.adata.uns[ADATA_IDS_SFAIRA.year] = 2018
+        self.adata.uns[ADATA_IDS_SFAIRA.doi] = '10.1038/s41467-018-06318-7'
+        self.adata.uns[ADATA_IDS_SFAIRA.protocol] = '10x'
+        self.adata.uns[ADATA_IDS_SFAIRA.organ] = self.organ
+        self.adata.uns[ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
+        self.adata.uns[ADATA_IDS_SFAIRA.species] = "human"
+        self.adata.uns[ADATA_IDS_SFAIRA.id] = self.id
+        self.adata.uns[ADATA_IDS_SFAIRA.download] = self.download_website
+        self.adata.uns[ADATA_IDS_SFAIRA.annotated] = self.has_celltypes
+        self.adata.uns[ADATA_IDS_SFAIRA.normalization] = 'raw'
 
-        self.adata.obs["cell_ontology_class"] = self.adata.obs['celltype']
-        self.adata.obs["healthy"] = True
-        self.adata.obs["state_exact"] = 'healthy'
+        self.adata.obs[ADATA_IDS_SFAIRA.cell_ontology_class] = self.adata.obs['celltype']
+        self.adata.obs[ADATA_IDS_SFAIRA.healthy] = True
+        self.adata.obs[ADATA_IDS_SFAIRA.state_exact] = 'healthy'
 
-        self._convert_and_set_var_names(symbol_col='index', ensembl_col=None, new_index='ensembl')
+        self._convert_and_set_var_names(symbol_col='index', ensembl_col=None, new_index=ADATA_IDS_SFAIRA.gene_id_ensembl)

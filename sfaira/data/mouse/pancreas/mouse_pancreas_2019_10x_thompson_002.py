@@ -4,6 +4,7 @@ import os
 import pandas
 from typing import Union
 from .external import DatasetBase
+from .external import ADATA_IDS_SFAIRA
 
 
 class Dataset(DatasetBase):
@@ -57,21 +58,21 @@ class Dataset(DatasetBase):
         self.adata.var_names_make_unique()
         self.adata = self.adata[celltypes.index]
 
-        self.adata.uns["lab"] = "Bhushan"
-        self.adata.uns["year"] = "2019"
-        self.adata.uns["doi"] = "10.1016/j.cmet.2019.01.021"
-        self.adata.uns["protocol"] = "10x"
-        self.adata.uns["organ"] = self.organ
-        self.adata.uns["subtissue"] = self.sub_tissue  # TODO
-        self.adata.uns["animal"] = "mouse"
-        self.adata.uns["id"] = self.id
-        self.adata.uns["wget_download"] = self.download_website
-        self.adata.uns["has_celltypes"] = self.has_celltypes
-        self.adata.uns["counts"] = 'raw'
-        self.adata.obs["cell_ontology_class"] = celltypes
+        self.adata.uns[ADATA_IDS_SFAIRA.author] = "Bhushan"
+        self.adata.uns[ADATA_IDS_SFAIRA.year] = "2019"
+        self.adata.uns[ADATA_IDS_SFAIRA.doi] = "10.1016/j.cmet.2019.01.021"
+        self.adata.uns[ADATA_IDS_SFAIRA.protocol] = "10x"
+        self.adata.uns[ADATA_IDS_SFAIRA.organ] = self.organ
+        self.adata.uns[ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue  # TODO
+        self.adata.uns[ADATA_IDS_SFAIRA.species] = "mouse"
+        self.adata.uns[ADATA_IDS_SFAIRA.id] = self.id
+        self.adata.uns[ADATA_IDS_SFAIRA.download] = self.download_website
+        self.adata.uns[ADATA_IDS_SFAIRA.annotated] = self.has_celltypes
+        self.adata.uns[ADATA_IDS_SFAIRA.normalization] = 'raw'
+        self.adata.obs[ADATA_IDS_SFAIRA.cell_ontology_class] = celltypes
         self.set_unkown_class_id(ids=[np.nan, "nan"])
-        self.adata.obs["cell_types_original"] = celltypes
-        self.adata.obs["healthy"] = False
-        self.adata.obs["state_exact"] = "diabetic"
+        self.adata.obs[ADATA_IDS_SFAIRA.cell_types_original] = celltypes
+        self.adata.obs[ADATA_IDS_SFAIRA.healthy] = False
+        self.adata.obs[ADATA_IDS_SFAIRA.state_exact] = "diabetic"
 
-        self._convert_and_set_var_names(symbol_col='index', ensembl_col=None, new_index='ensembl')
+        self._convert_and_set_var_names(symbol_col='index', ensembl_col=None, new_index=ADATA_IDS_SFAIRA.gene_id_ensembl)

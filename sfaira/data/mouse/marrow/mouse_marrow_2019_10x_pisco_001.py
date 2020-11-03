@@ -2,6 +2,7 @@ import anndata
 import os
 from typing import Union
 from .external import DatasetBase
+from .external import ADATA_IDS_SFAIRA
 
 
 class Dataset(DatasetBase):
@@ -52,21 +53,21 @@ class Dataset(DatasetBase):
             self.adata.varm = {}
             self.adata.uns = {}
 
-        self.adata.uns["lab"] = "Quake"
-        self.adata.uns["year"] = "2019"
-        self.adata.uns["doi"] = "10.1101/661728"
-        self.adata.uns["protocol"] = "10x"
-        self.adata.uns["organ"] = self.organ
-        self.adata.uns["subtissue"] = self.sub_tissue
-        self.adata.uns["animal"] = "mouse"
-        self.adata.uns["id"] = self.id
-        self.adata.uns["wget_download"] = self.download_website
-        self.adata.uns["has_celltypes"] = self.has_celltypes
-        self.adata.uns["counts"] = 'norm'
-        # self.adata.obs["cell_ontology_class"] is already set
+        self.adata.uns[ADATA_IDS_SFAIRA.author] = "Quake"
+        self.adata.uns[ADATA_IDS_SFAIRA.year] = "2019"
+        self.adata.uns[ADATA_IDS_SFAIRA.doi] = "10.1101/661728"
+        self.adata.uns[ADATA_IDS_SFAIRA.protocol] = "10x"
+        self.adata.uns[ADATA_IDS_SFAIRA.organ] = self.organ
+        self.adata.uns[ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
+        self.adata.uns[ADATA_IDS_SFAIRA.species] = "mouse"
+        self.adata.uns[ADATA_IDS_SFAIRA.id] = self.id
+        self.adata.uns[ADATA_IDS_SFAIRA.download] = self.download_website
+        self.adata.uns[ADATA_IDS_SFAIRA.annotated] = self.has_celltypes
+        self.adata.uns[ADATA_IDS_SFAIRA.normalization] = 'norm'
+        # self.adata.obs[ADATA_IDS_SFAIRA.cell_ontology_class] is already set
         self.set_unkown_class_id(ids=["unknown cell-1", "unknown cell-2"])
-        self.adata.obs["cell_types_original"] = self.adata.obs["cell_ontology_class"].values.tolist()
-        self.adata.obs["healthy"] = True
-        self.adata.obs["state_exact"] = "healthy"
+        self.adata.obs[ADATA_IDS_SFAIRA.cell_types_original] = self.adata.obs[ADATA_IDS_SFAIRA.cell_ontology_class].values.tolist()
+        self.adata.obs[ADATA_IDS_SFAIRA.healthy] = True
+        self.adata.obs[ADATA_IDS_SFAIRA.state_exact] = "healthy"
 
-        self._convert_and_set_var_names(symbol_col='index', ensembl_col=None, new_index='ensembl')
+        self._convert_and_set_var_names(symbol_col='index', ensembl_col=None, new_index=ADATA_IDS_SFAIRA.gene_id_ensembl)

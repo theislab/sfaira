@@ -11,6 +11,7 @@ from typing import Dict, List, Union
 import warnings
 
 from .external import SuperGenomeContainer
+from .external import ADATA_IDS_SFAIRA, META_DATA_FIELDS
 
 
 class DatasetBase(abc.ABC):
@@ -18,16 +19,22 @@ class DatasetBase(abc.ABC):
     adata: Union[None, anndata.AnnData]
     class_maps: dict
     meta: Union[None, pandas.DataFrame]
-    download_website: Union[None, str]
     download_website_meta: Union[None, str]
     path: Union[None, str]
     id: Union[None, str]
-    download_website: Union[None, str]
-    organ: Union[None, str]
-    sub_tissue: Union[None, str]
-    has_celltypes: Union[None, bool]
-    species: Union[None, str]
     genome: Union[None, str]
+
+    _annotated: str
+    _author: str
+    _doi: str
+    _download: str
+    _id: str
+    _ncells: str
+    _normalization: str
+    _organ: str
+    _protocol: str
+    _species: str
+    _year: str
 
     def __init__(
             self,
@@ -35,20 +42,13 @@ class DatasetBase(abc.ABC):
             meta_path: Union[str, None] = None,
             **kwargs
     ):
-        self.species = None
         self.adata = None
         self.download_website_meta = None
-        self.id = None
-        self.download_website = None
-        self.organ = None
-        self.sub_tissue = None
-        self.has_celltypes = None
         self.meta = None
         self.genome = None
         self.path = path
         self.meta_path = meta_path
         self._load_raw = None
-
 
     @abc.abstractmethod
     def _load(self, fn):
@@ -94,12 +94,12 @@ class DatasetBase(abc.ABC):
 
         self._load(fn=fn)
 
-        if 'cell_ontology_id' not in self.adata.obs.columns:
-            self.adata.obs["cell_ontology_id"] = None
+        if ADATA_IDS_SFAIRA.cell_ontology_id not in self.adata.obs.columns:
+            self.adata.obs[ADATA_IDS_SFAIRA.cell_ontology_id] = None
 
         # Map cell type names from raw IDs to ontology maintained ones::
-        self.adata.obs["cell_ontology_class"] = self.map_ontology_class(
-            raw_ids=self.adata.obs["cell_ontology_class"].values,
+        self.adata.obs[ADATA_IDS_SFAIRA.cell_ontology_class] = self.map_ontology_class(
+            raw_ids=self.adata.obs[ADATA_IDS_SFAIRA.cell_ontology_class].values,
             celltype_version=celltype_version
         )
 
@@ -143,8 +143,8 @@ class DatasetBase(abc.ABC):
                 self.adata.obs_names = obs_names
                 self.adata.var_names = new_index_collapsed
                 new_index = new_index_collapsed
-            self.adata.var["ensembl"] = new_index
-            self.adata.var.index = self.adata.var['ensembl'].values
+            self.adata.var[ADATA_IDS_SFAIRA.gene_id_ensembl] = new_index
+            self.adata.var.index = self.adata.var[ADATA_IDS_SFAIRA.gene_id_ensembl].values
 
         # Match feature space to a genomes provided with sfaira
         if match_to_reference:
@@ -160,7 +160,7 @@ class DatasetBase(abc.ABC):
                 raise ValueError("data type %s not recognized" % type(self.adata.X))
 
             # Compute indices of genes to keep
-            data_ids = self.adata.var["ensembl"].values
+            data_ids = self.adata.var[ADATA_IDS_SFAIRA.gene_id_ensembl].values
             idx_feature_kept = np.where([x in self.genome_container.ensembl for x in data_ids])[0]
             idx_feature_map = np.array([self.genome_container.ensembl.index(x)
                                         for x in data_ids[idx_feature_kept]])
@@ -187,60 +187,90 @@ class DatasetBase(abc.ABC):
                     obs=self.adata.obs,
                     obsm=self.adata.obsm,
                     var=pd.DataFrame(data={'names': self.genome_container.names,
-                                           'ensembl': self.genome_container.ensembl},
+                                           ADATA_IDS_SFAIRA.gene_id_ensembl: self.genome_container.ensembl},
                                      index=self.genome_container.ensembl),
                     uns=self.adata.uns
             )
 
         self.adata.uns['mapped_features'] = match_to_reference
 
-    def _convert_and_set_var_names(self, symbol_col: str = None, ensembl_col: str = None, new_index: str = 'ensembl'):
-
+    def _convert_and_set_var_names(
+            self,
+            symbol_col: str = None,
+            ensembl_col: str = None,
+            new_index: str = ADATA_IDS_SFAIRA.gene_id_ensembl
+    ):
         if symbol_col and ensembl_col:
             if symbol_col == 'index':
                 self.adata.var.index.name = 'index'
-                self.adata.var = self.adata.var.reset_index().rename({'index': 'names'}, axis='columns')
+                self.adata.var = self.adata.var.reset_index().rename(
+                    {'index': ADATA_IDS_SFAIRA.gene_id_names},
+                    axis='columns'
+                )
             else:
-                self.adata.var = self.adata.var.rename({symbol_col: 'names'}, axis='columns')
+                self.adata.var = self.adata.var.rename(
+                    {symbol_col:  ADATA_IDS_SFAIRA.gene_id_names},
+                    axis='columns'
+                )
 
             if ensembl_col == 'index':
                 self.adata.var.index.name = 'index'
-                self.adata.var = self.adata.var.reset_index().rename({'index': 'ensembl'}, axis='columns')
+                self.adata.var = self.adata.var.reset_index().rename(
+                    {'index': ADATA_IDS_SFAIRA.gene_id_ensembl},
+                    axis='columns'
+                )
             else:
-                self.adata.var = self.adata.var.rename({ensembl_col: 'ensembl'}, axis='columns')
+                self.adata.var = self.adata.var.rename(
+                    {ensembl_col: ADATA_IDS_SFAIRA.gene_id_ensembl},
+                    axis='columns'
+                )
 
         elif symbol_col:
             id_dict = self.genome_container.names_to_id_dict
             id_strip_dict = self.genome_container.strippednames_to_id_dict
             if symbol_col == 'index':
                 self.adata.var.index.name = 'index'
-                self.adata.var = self.adata.var.reset_index().rename({'index': 'names'}, axis='columns')
+                self.adata.var = self.adata.var.reset_index().rename(
+                    {'index':  ADATA_IDS_SFAIRA.gene_id_names},
+                    axis='columns'
+                )
             else:
-                self.adata.var = self.adata.var.rename({symbol_col: 'names'}, axis='columns')
+                self.adata.var = self.adata.var.rename(
+                    {symbol_col:  ADATA_IDS_SFAIRA.gene_id_names},
+                    axis='columns'
+                )
 
             # Matching gene names to ensembl ids in the following way: if the gene is present in the ensembl dictionary,
             # match it straight away, if it is not in there we try to match everything in front of the first period in
             # the gene name with a dictionary that was modified in the same way, if there is still no match we append na
             ensids = []
-            for n in self.adata.var["names"]:
+            for n in self.adata.var[ADATA_IDS_SFAIRA.gene_id_names]:
                 if n in id_dict.keys():
                     ensids.append(id_dict[n])
                 elif n.split(".")[0] in id_strip_dict.keys():
                     ensids.append(id_strip_dict[n.split(".")[0]])
                 else:
                     ensids.append('n/a')
-            self.adata.var['ensembl'] = ensids
+            self.adata.var[ADATA_IDS_SFAIRA.gene_id_ensembl] = ensids
 
         elif ensembl_col:
             id_dict = self.genome_container.id_to_names_dict
             if ensembl_col == 'index':
                 self.adata.var.index.name = 'index'
-                self.adata.var = self.adata.var.reset_index().rename({'index': 'ensembl'}, axis='columns')
+                self.adata.var = self.adata.var.reset_index().rename(
+                    {'index': ADATA_IDS_SFAIRA.gene_id_ensembl},
+                    axis='columns'
+                )
             else:
-                self.adata.var = self.adata.var.rename({ensembl_col: 'ensembl'}, axis='columns')
+                self.adata.var = self.adata.var.rename(
+                    {ensembl_col: ADATA_IDS_SFAIRA.gene_id_names},
+                    axis='columns'
+                )
 
-            self.adata.var['names'] = [id_dict[n.split(".")[0]] if n.split(".")[0] in id_dict.keys() else 'n/a'
-                                       for n in self.adata.var['ensembl']]
+            self.adata.var[ADATA_IDS_SFAIRA.gene_id_names] = [
+                id_dict[n.split(".")[0]] if n.split(".")[0] in id_dict.keys() else 'n/a'
+                for n in self.adata.var[ADATA_IDS_SFAIRA.gene_id_ensembl]
+            ]
 
         else:
             raise ValueError('Please provide the name of at least the name of the var column containing ensembl ids or'
@@ -294,8 +324,8 @@ class DatasetBase(abc.ABC):
 
             adata_backed.X[np.sort(idx), :] = x_new[np.argsort(idx), :]
             for k in adata_backed.obs.columns:
-                if k == "dataset":
-                    adata_backed.obs.loc[np.sort(idx), "dataset"] = [self.id for i in range(len(idx))]
+                if k == ADATA_IDS_SFAIRA.dataset:
+                    adata_backed.obs.loc[np.sort(idx), ADATA_IDS_SFAIRA.dataset] = [self.id for i in range(len(idx))]
                 elif k in self.adata.obs.columns:
                     adata_backed.obs.loc[np.sort(idx), k] = self.adata.obs[k].values[np.argsort(idx)]
                 elif k in list(self.adata.uns.keys()):
@@ -315,7 +345,7 @@ class DatasetBase(abc.ABC):
             adata_backed._n_obs = adata_backed.X.shape[0]  # not automatically updated after append
             adata_backed.obs = adata_backed.obs.append(  # .obs was not broadcasted to the right shape!
                 pandas.DataFrame(dict([
-                    (k, [self.id for i in range(len(idx))]) if k == "dataset"
+                    (k, [self.id for i in range(len(idx))]) if k == ADATA_IDS_SFAIRA.dataset
                     else (k, self.adata.obs[k].values[np.argsort(idx)]) if k in self.adata.obs.columns
                     else (k, [self.adata.uns[k] for i in range(len(idx))]) if k in list(self.adata.uns.keys())
                     else (k, ["key_not_found" for i in range(len(idx))])
@@ -335,9 +365,9 @@ class DatasetBase(abc.ABC):
         target_id = "unknown"
         ontology_classes = [
             x if x not in ids else target_id
-            for x in self.adata.obs["cell_ontology_class"].tolist()
+            for x in self.adata.obs[ADATA_IDS_SFAIRA.cell_ontology_class].tolist()
         ]
-        self.adata.obs["cell_ontology_class"] = ontology_classes
+        self.adata.obs[ADATA_IDS_SFAIRA.cell_ontology_class] = ontology_classes
 
     def _set_genome(self,
                     genome: str
@@ -361,50 +391,6 @@ class DatasetBase(abc.ABC):
     @property
     def doi_cleaned_id(self):
         return "_".join(self.id.split("_")[:-1])
-
-    def load_meta(self, fn: Union[PathLike, str, None]):
-        if fn is None:
-            if self.meta_path is None:
-                raise ValueError("provide either fn in load or path in constructor")
-            fn = os.path.join(self.meta_path, self.doi_cleaned_id + "_meta.csv")
-        else:
-            if isinstance(fn, str):
-                fn = os.path.normpath(fn)
-        self.meta = pandas.read_csv(fn)
-
-    @property
-    def ncells(self):
-        if self.meta is None:
-            self.load_meta(fn=None)
-        return int(self.meta["ncells"])
-
-    def write_meta(
-            self,
-            fn_meta: Union[None, str] = None,
-            fn_data: Union[None, str] = None,
-            dir_out: Union[None, str] = None,
-    ):
-        if fn_meta is None:
-            if self.path is None and dir_out is None:
-                raise ValueError("provide either fn in load or path in constructor")
-            if dir_out is None:
-                dir_out = self.meta_path
-            fn_meta = os.path.join(dir_out, self.doi_cleaned_id + "_meta.csv")
-        if self.adata is None:
-            self.load(fn=fn_data, remove_gene_version=False, match_to_reference=None)
-        meta = pandas.DataFrame({
-            "ncells": self.adata.n_obs,
-            "animal": self.adata.uns["animal"],
-            "organ": self.adata.uns["organ"],
-            "subtissue": self.adata.uns["subtissue"],
-            "id": self.adata.uns["id"],
-            "lab": self.adata.uns["lab"],
-            "year": self.adata.uns["year"],
-            "protocol": self.adata.uns["protocol"],
-            "counts": self.adata.uns["counts"] if 'counts' in self.adata.uns.keys() else None,
-            "has_celltypes": self.has_celltypes
-        }, index=range(1))
-        meta.to_csv(fn_meta)
 
     @property
     def available_type_versions(self):
@@ -448,6 +434,194 @@ class DatasetBase(abc.ABC):
             for x in raw_ids
         ]
 
+    @property
+    def citation(self):
+        """
+        Return all information necessary to cite data set.
+
+        :return:
+        """
+        return [self.author, self.year, self.doi]
+
+    # Meta data handling code: Reading, writing and selected properties. Properties are either set in constructor
+    # (and saved in self._somename) or accessed in self.meta.
+
+    @property
+    def meta_fn(self):
+        if self.meta_path is None:
+            return None
+        else:
+            return os.path.join(self.meta_path, self.doi_cleaned_id + "_meta.csv")
+
+    def load_meta(self, fn: Union[PathLike, str]):
+        if fn is None:
+            if self.meta_fn is None:
+                raise ValueError("provide either fn in load or path in constructor")
+            fn = self.meta_fn
+        else:
+            if isinstance(fn, str):
+                fn = os.path.normpath(fn)
+        self.meta = pandas.read_csv(fn, usecols=META_DATA_FIELDS)
+
+    def write_meta(
+            self,
+            fn_meta: Union[None, str] = None,
+            fn_data: Union[None, str] = None,
+            dir_out: Union[None, str] = None,
+    ):
+        if fn_meta is None:
+            if self.path is None and dir_out is None:
+                raise ValueError("provide either fn in load or path in constructor")
+            if dir_out is None:
+                dir_out = self.meta_path
+            fn_meta = self.meta_fn
+        if self.adata is None:
+            self.load(fn=fn_data, remove_gene_version=False, match_to_reference=None)
+        meta = pandas.DataFrame({
+            "author": self.adata.uns[ADATA_IDS_SFAIRA.author],
+            "annotated": self.adata.uns[ADATA_IDS_SFAIRA.annotated],
+            "doi": self.adata.uns[ADATA_IDS_SFAIRA.doi],
+            "download": self.adata.uns[ADATA_IDS_SFAIRA.download],
+            "id": self.adata.uns[ADATA_IDS_SFAIRA.id],
+            "ncells": self.adata.n_obs,
+            "normalization": self.adata.uns[ADATA_IDS_SFAIRA.normalization] if ADATA_IDS_SFAIRA.normalization in self.adata.uns.keys() else None,
+            "organ": self.adata.uns[ADATA_IDS_SFAIRA.organ],
+            "protocol": self.adata.uns[ADATA_IDS_SFAIRA.protocol],
+            "species": self.adata.uns[ADATA_IDS_SFAIRA.species],
+            "year": self.adata.uns[ADATA_IDS_SFAIRA.year],
+        }, index=range(1))
+        meta.to_csv(fn_meta)
+
+    @property
+    def author(self):
+        if self._author is not None:
+            return self._author
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            return self.meta["author"]
+
+    @author.setter
+    def author(self, x):
+        self._author = x
+
+    @property
+    def doi(self):
+        if self._doi is not None:
+            return self._doi
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            return self.meta["doi"]
+
+    @doi.setter
+    def doi(self, x):
+        self._doi = x
+
+    @property
+    def download(self):
+        if self._download is not None:
+            return self._download
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            return self.meta["download"]
+
+    @download.setter
+    def download(self, x):
+        self._download = x
+
+    @property
+    def annotated(self):
+        if self._annotated is not None:
+            return self._annotated
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            return self.meta["annotated"]
+
+    @annotated.setter
+    def annotated(self, x):
+        self._annotated = x
+
+    @property
+    def id(self):
+        if self._id is not None:
+            return self._id
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            return self.meta["id"]
+
+    @id.setter
+    def id(self, x):
+        self._id = x
+
+    @property
+    def normalization(self):
+        if self._normalization is not None:
+            return self._normalization
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            return self.meta["normalization"]
+
+    @normalization.setter
+    def normalization(self, x):
+        self._normalization = x
+
+    @property
+    def organ(self):
+        if self._organ is not None:
+            return self._organ
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            return self.meta["organ"]
+
+    @organ.setter
+    def organ(self, x):
+        self._organ = x
+
+    @property
+    def protocol(self):
+        if self._protocol is not None:
+            return self._protocol
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            return self.meta["protocol"]
+
+    @protocol.setter
+    def protocol(self, x):
+        self._protocol = x
+
+    @property
+    def species(self):
+        if self._species is not None:
+            return self._species
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            return self.meta["species"]
+
+    @species.setter
+    def species(self, x):
+        self._species = x
+
+    @property
+    def year(self):
+        if self._year is not None:
+            return self._year
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            return self.meta["year"]
+
+    @year.setter
+    def year(self, x):
+        self._year = x
+
 
 class DatasetGroupBase(abc.ABC):
     """
@@ -489,7 +663,7 @@ class DatasetGroupBase(abc.ABC):
         :return:
         """
         for i in self.ids:
-            if self.datasets[i].has_celltypes or not annotated_only:
+            if self.datasets[i].annotated or not annotated_only:
                 self.datasets[i].load(
                     celltype_version=self.format_type_version(celltype_version),
                     remove_gene_version=remove_gene_version,
@@ -514,9 +688,10 @@ class DatasetGroupBase(abc.ABC):
         i = 0
         for ident in self.ids:
             # if this is for celltype prediction, only load the data with have celltype annotation
-            if self.datasets[ident].has_celltypes or not annotated_only:
-                self.datasets[ident].load_tobacked(adata_backed=adata_backed, genome=genome, idx=idx[i],
-                                                   celltype_version=self.format_type_version(celltype_version))
+            if self.datasets[ident].annotated or not annotated_only:
+                self.datasets[ident].load_tobacked(
+                    adata_backed=adata_backed, genome=genome, idx=idx[i],
+                    celltype_version=self.format_type_version(celltype_version))
                 i += 1
 
     @property
@@ -539,15 +714,15 @@ class DatasetGroupBase(abc.ABC):
         adata_ls = self.adata_ls
         # Save uns attributes that are fixed for entire data set to .obs to retain during concatenation:
         for adata in adata_ls:
-            adata.obs["lab"] = adata.uns["lab"]
-            adata.obs["year"] = adata.uns["year"]
-            adata.obs["protocol"] = adata.uns["protocol"]
-            adata.obs["subtissue"] = adata.uns["subtissue"]
-            if "counts" in adata.uns.keys():
-                adata.obs["counts"] = adata.uns["counts"]
-            if "dev_stage" in adata.obs.columns:
-                adata.obs["dev_stage"] = adata.uns["dev_stage"]
-            adata.obs["has_celltypes"] = adata.uns["has_celltypes"]
+            adata.obs[ADATA_IDS_SFAIRA.author] = adata.uns[ADATA_IDS_SFAIRA.author]
+            adata.obs[ADATA_IDS_SFAIRA.year] = adata.uns[ADATA_IDS_SFAIRA.year]
+            adata.obs[ADATA_IDS_SFAIRA.protocol] = adata.uns[ADATA_IDS_SFAIRA.protocol]
+            adata.obs[ADATA_IDS_SFAIRA.subtissue] = adata.uns[ADATA_IDS_SFAIRA.subtissue]
+            if ADATA_IDS_SFAIRA.normalization in adata.uns.keys():
+                adata.obs[ADATA_IDS_SFAIRA.normalization] = adata.uns[ADATA_IDS_SFAIRA.normalization]
+            if ADATA_IDS_SFAIRA.dev_stage in adata.obs.columns:
+                adata.obs[ADATA_IDS_SFAIRA.dev_stage] = adata.uns[ADATA_IDS_SFAIRA.dev_stage]
+            adata.obs[ADATA_IDS_SFAIRA.annotated] = adata.uns[ADATA_IDS_SFAIRA.annotated]
         # Workaround related to anndata bugs:  # TODO remove this in future.
         for adata in adata_ls:
             # Fix 1:
@@ -557,13 +732,13 @@ class DatasetGroupBase(abc.ABC):
             if adata.uns is not None:
                 keys_to_keep = [
                     'neighbors',
-                    "lab",
-                    "year",
-                    "protocol",
-                    "subtissue",
-                    "counts",
-                    "dev_stage",
-                    "has_celltypes",
+                    ADATA_IDS_SFAIRA.author,
+                    ADATA_IDS_SFAIRA.year,
+                    ADATA_IDS_SFAIRA.protocol,
+                    ADATA_IDS_SFAIRA.subtissue,
+                    ADATA_IDS_SFAIRA.normalization,
+                    ADATA_IDS_SFAIRA.dev_stage,
+                    ADATA_IDS_SFAIRA.annotated,
                     "mapped_features"
                 ]
                 for k in list(adata.uns.keys()):
@@ -576,7 +751,7 @@ class DatasetGroupBase(abc.ABC):
         # To preserve gene names in .var, the target gene names are copied into var_names and are then copied
         # back into .var.
         for adata in adata_ls:
-            adata.var.index = adata.var["ensembl"].tolist()
+            adata.var.index = adata.var[ADATA_IDS_SFAIRA.gene_id_ensembl].tolist()
         if len(adata_ls) > 1:
             # TODO: need to keep this? -> yes, still catching errors here (March 2020)
             # Fix for loading bug: sometime concatenating sparse matrices fails the first time but works on second try.
@@ -584,18 +759,18 @@ class DatasetGroupBase(abc.ABC):
                 adata_concat = adata_ls[0].concatenate(
                     *adata_ls[1:],
                     join="outer",
-                    batch_key='dataset',
+                    batch_key=ADATA_IDS_SFAIRA.dataset,
                     batch_categories=[i for i in self.ids if self.datasets[i].adata is not None]
                 )
             except ValueError:
                 adata_concat = adata_ls[0].concatenate(
                     *adata_ls[1:],
                     join="outer",
-                    batch_key='dataset',
+                    batch_key=ADATA_IDS_SFAIRA.dataset,
                     batch_categories=[i for i in self.ids if self.datasets[i].adata is not None]
                 )
 
-            adata_concat.var["ensembl"] = adata_concat.var.index
+            adata_concat.var[ADATA_IDS_SFAIRA.gene_id_ensembl] = adata_concat.var.index
 
             if len(set([a.uns['mapped_features'] for a in adata_ls])) == 1:
                 adata_concat.uns['mapped_features'] = adata_ls[0].uns['mapped_features']
@@ -603,7 +778,7 @@ class DatasetGroupBase(abc.ABC):
                 adata_concat.uns['mapped_features'] = False
         else:
             adata_concat = adata_ls[0]
-            adata_concat.obs['dataset'] = self.ids[0]
+            adata_concat.obs[ADATA_IDS_SFAIRA.dataset] = self.ids[0]
 
         adata_concat.var_names_make_unique()
         return adata_concat
@@ -624,7 +799,7 @@ class DatasetGroupBase(abc.ABC):
                 (k, self.datasets[x].adata.obs[k]) if k in self.datasets[x].adata.obs.columns
                 else (k, ["nan" for i in range(self.datasets[x].adata.obs.shape[0])])
                 for k in keys
-            ] + [("dataset", [x for i in range(self.datasets[x].adata.obs.shape[0])])]
+            ] + [(ADATA_IDS_SFAIRA.dataset, [x for i in range(self.datasets[x].adata.obs.shape[0])])]
         )) for x in self.ids if self.datasets[x].adata is not None])
         return obs_concat
 
@@ -675,6 +850,32 @@ class DatasetGroupBase(abc.ABC):
         else:
             self.assert_celltype_version_key()
             return version
+
+    def subset(self, key, values):
+        """
+        Subset list of adata objects based on match to values in key property.
+
+        These keys are properties that are available in lazy model.
+        Subsetting happens on .datasets.
+
+        :param key: Property to subset by.
+        :param values: Classes to overlap to.
+        :return:
+        """
+        ids_del = []
+        if not isinstance(values, list):
+            values = [values]
+        for x in self.ids:
+            try:
+                values_found = getattr(self.datasets[x], key)
+                if not isinstance(values_found, list):
+                    values_found = [values_found]
+                if not np.any([xx in values for xx in values_found]):
+                    ids_del.append(x)
+            except AttributeError:
+                raise ValueError(f"{key} not a valid property of data set object")
+        for x in ids_del:
+            del self.datasets[x]
 
 
 class DatasetSuperGroup:
@@ -764,7 +965,7 @@ class DatasetSuperGroup:
         self.adata = self.dataset_groups[i].adata.concatenate(
             *[x.adata for x in self.dataset_groups[1:] if x is not None],
             join="outer",
-            batch_key='dataset_group'
+            batch_key=ADATA_IDS_SFAIRA.dataset_group
         )
 
     def load_all_tobacked(
@@ -817,17 +1018,17 @@ class DatasetSuperGroup:
         if not as_dense:
             self.adata.X = scipy.sparse.csr_matrix(self.adata.X)  # redefines this backed anndata as sparse
         keys = [
-            "lab",
-            "year",
-            "protocol",
-            "organ",
-            "subtissue",
-            "cell_ontology_class",
-            "state_exact",
-            "counts",
-            "dev_stage",
-            "has_celltypes",
-            "dataset"
+            ADATA_IDS_SFAIRA.author,
+            ADATA_IDS_SFAIRA.year,
+            ADATA_IDS_SFAIRA.protocol,
+            ADATA_IDS_SFAIRA.organ,
+            ADATA_IDS_SFAIRA.subtissue,
+            ADATA_IDS_SFAIRA.cell_ontology_class,
+            ADATA_IDS_SFAIRA.state_exact,
+            ADATA_IDS_SFAIRA.normalization,
+            ADATA_IDS_SFAIRA.dev_stage,
+            ADATA_IDS_SFAIRA.annotated,
+            ADATA_IDS_SFAIRA.dataset
         ]
         if scatter_update:
             self.adata.obs = pandas.DataFrame({
@@ -870,3 +1071,17 @@ class DatasetSuperGroup:
 
     def load_cached_backed(self, fn: PathLike):
         self.adata = anndata.read(fn, backed='r')
+
+    def subset(self, key, values):
+        """
+        Subset list of adata objects based on match to values in key property.
+
+        These keys are properties that are available in lazy model.
+        Subsetting happens on .datasets.
+
+        :param key: Property to subset by.
+        :param values: Classes to overlap to.
+        :return:
+        """
+        for x in self.dataset_groups:
+            x.subset(key=key, values=values)
