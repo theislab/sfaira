@@ -1602,6 +1602,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         cvs=None
     ):
         """
+        Plots the explained variance ration that accumulates explained variation of the latent space’s ordered
+        principal components.
         If an embedding file is found that contains z, z_mean, z_var (eg. output from predict_variational() function)
         the model will use z, and not z_mean.
         """
@@ -1609,11 +1611,10 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         if self.summary_tab is None:
             self.create_summary_tab() 
         models = np.unique(self.summary_tab["model_type"]).tolist()
-        mode = np.mean
         self.summary_tab["topology"] = [x.split("_")[5] for x in self.summary_tab["model_gs_id"].values]
         
         with plt.style.context("seaborn-whitegrid"):
-            fig, ax = plt.subplots(figsize=(12,6))
+            plt.figure(figsize=(12, 6))
             for model in models:
                 model_id, embedding, covar = self.best_model_embedding(
                     subset={"model_type": model, "organ": organ, "topology": topology_version},
@@ -1625,26 +1626,18 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                     z = embedding[0][0]  # in case of three-dimensional VAE embedding (z, z_mean, z_var), use z
                 else:
                     z = embedding[0]
-                latent_dim = z.shape[1]
                 cov = np.cov(z.T)
                 eig_vals, eig_vecs = np.linalg.eig(cov)
                 eig_sum = sum(eig_vals)
                 var_exp = [(i / eig_sum) for i in sorted(eig_vals, reverse=True)]
                 cum_var_exp = np.cumsum([0] + var_exp)
-
-                # plt.bar(range(eig_vals.shape[0]), var_exp, alpha=0.5, align="center",
-                #        label="%s individual explained variance" % key)
                 plt.step(range(0, eig_vals.shape[0]+1), cum_var_exp, where="post", linewidth=3,
                         label="%s cumulative explained variance (95%%: %s / 99%%: %s)" % (model, np.sum(cum_var_exp < .95), np.sum(cum_var_exp < .99)))
             plt.yticks([0.0, .25 ,.50, .75, .95, .99])
-            # if latent_dim > 20:
-            #    plt.xticks([1,5, 10, 15, 20])
-            #    plt.xlim([0, 20])
             plt.ylabel("Explained variance ratio", fontsize=16)
             plt.xlabel("Principal components", fontsize=16)
             plt.legend(loc="best", fontsize=16, frameon=True)
             plt.tight_layout()
-            # plt.savefig(fname=figdir + organ + "_pca_" + model + ".png")
             plt.show()
 
     def plot_active_latent_units(
@@ -1654,6 +1647,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         cvs=None
     ):
         """
+        Plots latent unit activity measured by empirical variance of the expected latent space.
+        See: https://arxiv.org/abs/1509.00519
         If an embedding file is found that contains z, z_mean, z_var (eg. output from predict_variational() function)
         the model will use z, and not z_mean.
         """
@@ -1709,8 +1704,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                          label=r"%s $z_1$ active units: %i" % (model, len(z1[z1>np.log(0.01)])), linestyle='dotted', linewidth=3)
             plt.xlabel(r'Latent unit $i$', fontsize=16)
             plt.ylabel(r'$\log\,{(A_{\bf z})}_i$', fontsize=16)
-            #plt.title(r"Latent unit activity", fontsize=16)
+            plt.title(r"Latent unit activity", fontsize=16)
             plt.legend(loc="upper right", frameon=True, fontsize=12)
             plt.tight_layout()
-            # plt.savefig(fname=figdir + organ + "_activity_statistic_" + model + ".png")
             plt.show()
