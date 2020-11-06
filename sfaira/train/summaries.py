@@ -1632,8 +1632,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                 var_exp = [(i / eig_sum) for i in sorted(eig_vals, reverse=True)]
                 cum_var_exp = np.cumsum([0] + var_exp)
                 plt.step(range(0, eig_vals.shape[0]+1), cum_var_exp, where="post", linewidth=3,
-                        label="%s cumulative explained variance (95%%: %s / 99%%: %s)" % (model, np.sum(cum_var_exp < .95), np.sum(cum_var_exp < .99)))
-            plt.yticks([0.0, .25 ,.50, .75, .95, .99])
+                         label="%s cumulative explained variance (95%%: %s / 99%%: %s)" % (model, np.sum(cum_var_exp < .95), np.sum(cum_var_exp < .99)))
+            plt.yticks([0.0, .25, .50, .75, .95, .99])
             plt.ylabel("Explained variance ratio", fontsize=16)
             plt.xlabel("Principal components", fontsize=16)
             plt.legend(loc="best", fontsize=16, frameon=True)
@@ -1669,8 +1669,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
 
         with plt.style.context("seaborn-whitegrid"):
             plt.figure(figsize=(12, 6))
-            plt.axhline(np.log(0.01), color="k", linestyle='dashed', linewidth=2,
-                   label="active unit threshold")
+            plt.axhline(np.log(0.01), color="k", linestyle='dashed', linewidth=2, label="active unit threshold")
             for i, model in enumerate(models):
                 model_id, embedding, covar = self.best_model_embedding(
                         subset={"model_type": model, "organ": organ, "topology": topology_version},
@@ -1697,11 +1696,13 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                 if num_active > 0:
                     plt.vlines(num_active, ymin = -.15, ymax = 0.15, color=colors[i], linestyle='solid', linewidth=3)
                 if model == "vaevamp":
-                    z1,z2 = np.split(np.log(np.diagonal(np.cov(z.T))),2)
-                    plt.plot(range(1,int(latent_dim/2)+1), np.sort(z2)[::-1], color=colors[i], alpha=1.0,
-                         label=r"%s $z_2$ active units: %i" % (model, len(z2[z2>np.log(0.01)])), linestyle='dashed', linewidth=3)
-                    plt.plot(range(1,int(latent_dim/2)+1), np.sort(z1)[::-1], color=colors[i], alpha=1.0,
-                         label=r"%s $z_1$ active units: %i" % (model, len(z1[z1>np.log(0.01)])), linestyle='dotted', linewidth=3)
+                    z1, z2 = np.split(np.log(np.diagonal(np.cov(z.T))),2)
+                    plt.plot(range(1, int(latent_dim/2)+1), np.sort(z2)[::-1], color=colors[i], alpha=1.0,
+                             label=r"%s $z_2$ active units: %i" % (model, len(z2[z2>np.log(0.01)])), linestyle='dashed',
+                             linewidth=3)
+                    plt.plot(range(1, int(latent_dim/2)+1), np.sort(z1)[::-1], color=colors[i], alpha=1.0,
+                             label=r"%s $z_1$ active units: %i" % (model, len(z1[z1 > np.log(0.01)])),
+                             linestyle='dotted', linewidth=3)
             plt.xlabel(r'Latent unit $i$', fontsize=16)
             plt.ylabel(r'$\log\,{(A_{\bf z})}_i$', fontsize=16)
             plt.title(r"Latent unit activity", fontsize=16)
