@@ -71,7 +71,7 @@ class DenseBlock(tf.keras.layers.Layer):
             units
     ):
         super(DenseBlock, self).__init__(name='dense_block')
-        _, l1_coef, l2_coef, dropout_rate, self.batchnorm, activation, kernel_initializer = config
+        _, l1_coef, l2_coef, dropout_rate, self.batchnorm, self.gated_dense, activation, kernel_initializer = config
 
         self.dense = tf.keras.layers.Dense(
             units=units,
@@ -88,13 +88,23 @@ class DenseBlock(tf.keras.layers.Layer):
             noise_shape=None,
             seed=None
         )
+        if self.gated_dense:
+            self.gate = tf.keras.layers.Dense(
+                units=units,
+                activation="sigmoid",
+                kernel_initializer=kernel_initializer,
+                kernel_regularizer=tf.keras.regularizers.l1_l2(l1=l1_coef, l2=l2_coef),
+            )
 
     def call(self, input_tensor, training=False):
         x = self.dense(input_tensor)
         if self.batchnorm:
             x = self.bn(x, training=training)
         x = self.dropout(x)
-        return x
+        if self.gated_dense:
+            return x * self.gate(input_tensor)
+        else:
+            return x
 
 
 class TrainablePseudoInputs(tf.keras.layers.Layer):
@@ -212,6 +222,7 @@ class ModelVaeVamp(BasicModel):
             batch_size_u: int = 500,
             batchnorm: bool = False,
             activation='tanh',
+            gated_dense=False,
             init='glorot_uniform',
             output_layer="nb"
     ):
@@ -222,6 +233,7 @@ class ModelVaeVamp(BasicModel):
             l2_coef,
             dropout_rate,
             batchnorm,
+            gated_dense,
             activation,
             init
         )
