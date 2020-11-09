@@ -1047,7 +1047,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
 
             return dataset
 
-        elif mode == 'eval' or mode == 'predict':
+        elif mode == 'eval':
             weights, y = self._get_celltype_out(idx=idx)
             if not weighted:
                 weights = np.ones_like(weights)
@@ -1063,6 +1063,19 @@ class EstimatorKerasCelltype(EstimatorKeras):
                 x = x.toarray()
 
             return x, y, weights
+
+        elif mode == 'predict':
+            # Prepare data reading according to whether anndata is backed or not:
+            if self.data.isbacked:
+                # Need to supply sorted indices to backed anndata:
+                x = self.data.X[np.sort(idx), :]
+                # Sort back in original order of indices.
+                x = x[[np.where(np.sort(idx) == i)[0][0] for i in idx], :]
+            else:
+                x = self._prepare_data_matrix(idx=idx)
+                x = x.toarray()
+
+            return x, None, None
 
         else:
             raise ValueError(f'Mode {mode} not recognised. Should be "train", "eval" or" predict"')
@@ -1092,7 +1105,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
         prediction
         """
         if self.idx_test is None or self.idx_test.any():   # true if the array is not empty or if the passed value is None
-            x, y, _ = self._get_dataset(
+            x, _, _ = self._get_dataset(
                 idx=self.idx_test,
                 batch_size=None,
                 mode='predict'
