@@ -3,7 +3,7 @@ from typing import Union
 from .external import DatasetBase
 
 
-class Dataset(DatasetBase):
+class DatasetInteractive(DatasetBase):
 
     def __init__(
             self,

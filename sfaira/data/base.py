@@ -97,11 +97,12 @@ class DatasetBase(abc.ABC):
         if 'cell_ontology_id' not in self.adata.obs.columns:
             self.adata.obs["cell_ontology_id"] = None
 
-        # Map cell type names from raw IDs to ontology maintained ones::
-        self.adata.obs["cell_ontology_class"] = self.map_ontology_class(
-            raw_ids=self.adata.obs["cell_ontology_class"].values,
-            celltype_version=celltype_version
-        )
+        # Map cell type names from raw IDs to ontology maintained ones:
+        if "cell_ontology_class" in self.adata.obs.columns:
+            self.adata.obs["cell_ontology_class"] = self.map_ontology_class(
+                raw_ids=self.adata.obs["cell_ontology_class"].values,
+                celltype_version=celltype_version
+            )
 
         # Remove version tag on ensembl gene ID so that different versions are superimposed downstream:
         if remove_gene_version:
