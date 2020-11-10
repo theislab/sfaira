@@ -66,7 +66,7 @@ class Dataset(DatasetBase):
 
         if self._load_raw or not self._load_raw:
             if fn is None:
-                fn = os.path.join(self.path, "human/liver/fetal_liver_alladata_.h5ad")
+                fn = os.path.join(self.path, "human", "liver", "fetal_liver_alladata_.h5ad")
             self.adata = anndata.read(fn)
 
         self.adata.uns["lab"] = 'Haniffa'

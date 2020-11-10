@@ -56,8 +56,8 @@ class Dataset(DatasetBase):
         if self._load_raw or not self._load_raw:
             if fn is None:
                 fn = [
-                    os.path.join(self.path, "human/pancreas/E-MTAB-5061.processed.1.zip"),
-                    os.path.join(self.path, "human/pancreas/E-MTAB-5061.sdrf.txt")
+                    os.path.join(self.path, "human", "pancreas", "E-MTAB-5061.processed.1.zip"),
+                    os.path.join(self.path, "human", "pancreas", "E-MTAB-5061.sdrf.txt")
                 ]
             df = pd.read_csv(fn[0], sep='\t')
             df.index = df.index.get_level_values(0)

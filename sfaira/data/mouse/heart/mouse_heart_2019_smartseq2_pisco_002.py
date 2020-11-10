@@ -38,7 +38,7 @@ class Dataset(DatasetBase):
             if self.path is None:
                 raise ValueError("provide either fn in load or path in constructor")
             if self.source == "aws":
-                fn = os.path.join(self.path, "mouse/heart/tabula-muris-senis-facs-processed-official-annotations-Aorta.h5ad")
+                fn = os.path.join(self.path, "mouse", "heart", "tabula-muris-senis-facs-processed-official-annotations-Aorta.h5ad")
             elif self.source == "figshare":
                 raise ValueError("not defined")
             else:

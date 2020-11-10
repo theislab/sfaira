@@ -40,7 +40,7 @@ class Dataset(DatasetBase):
 
         if self._load_raw or not self._load_raw:
             if fn is None:
-                fn = os.path.join(self.path, "human/heart/hcl_FetalHeart_2.h5ad")
+                fn = os.path.join(self.path, "human", "heart", "hcl_FetalHeart_2.h5ad")
             self.adata = anndata.read(fn)
 
         self.adata.uns["lab"] = 'Guo'

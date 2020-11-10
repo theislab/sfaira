@@ -36,9 +36,9 @@ class Dataset(DatasetBase):
             if self.path is None:
                 raise ValueError("provide either fn in load or path in constructor")
             if self.source == "aws":
-                fn = os.path.join(self.path, "mouse/mammary_gland/tabula-muris-senis-facs-processed-official-annotations-Mammary_Gland.h5ad")
+                fn = os.path.join(self.path, "mouse", "mammary_gland", "tabula-muris-senis-facs-processed-official-annotations-Mammary_Gland.h5ad")
             elif self.source == "figshare":
-                fn = os.path.join(self.path, "mouse/mammary_gland/Mammary_Gland_facs.h5ad")
+                fn = os.path.join(self.path, "mouse", "mammary_gland", "Mammary_Gland_facs.h5ad")
             else:
                 raise ValueError("source %s not recognized" % self.source)
         self.adata = anndata.read_h5ad(fn)

@@ -37,9 +37,9 @@ class Dataset(DatasetBase):
             if self.path is None:
                 raise ValueError("provide either fn in load or path in constructor")
             if self.source == "aws":
-                fn = os.path.join(self.path, "mouse/thymus/tabula-muris-senis-droplet-processed-official-annotations-Thymus.h5ad")
+                fn = os.path.join(self.path, "mouse", "thymus", "tabula-muris-senis-droplet-processed-official-annotations-Thymus.h5ad")
             elif self.source == "figshare":
-                fn = os.path.join(self.path, "mouse/thymus/Thymus_droplet.h5ad")
+                fn = os.path.join(self.path, "mouse", "thymus", "Thymus_droplet.h5ad")
             else:
                 raise ValueError("source %s not recognized" % self.source)
         self.adata = anndata.read_h5ad(fn)

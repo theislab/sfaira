@@ -69,7 +69,7 @@ class Dataset(DatasetBase):
 
         if self._load_raw:
             if fn is None:
-                fn = os.path.join(self.path, "human/kidney/GSE131685_RAW.tar")
+                fn = os.path.join(self.path, "human", "kidney", "GSE131685_RAW.tar")
             adatas = []
             with tarfile.open(fn) as tar:
                 for member in tar.getmembers():
@@ -92,7 +92,7 @@ class Dataset(DatasetBase):
 
         else:
             if fn is None:
-                fn = os.path.join(self.path, "human/kidney/GSE131685.h5ad")
+                fn = os.path.join(self.path, "human", "kidney", "GSE131685.h5ad")
             self.adata = anndata.read(fn)
 
         self.adata.uns["lab"] = 'Mo'

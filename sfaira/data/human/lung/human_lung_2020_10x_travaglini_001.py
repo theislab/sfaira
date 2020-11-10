@@ -106,7 +106,7 @@ class Dataset(DatasetBase):
 
         if self._load_raw or not self._load_raw:
             if fn is None:
-                fn = os.path.join(self.path, "human/lung/droplet_normal_lung_blood_scanpy.20200205.RC4.h5ad")
+                fn = os.path.join(self.path, "human", "lung", "droplet_normal_lung_blood_scanpy.20200205.RC4.h5ad")
             self.adata = anndata.read(fn)
             self.adata.X = scipy.sparse.csc_matrix(self.adata.X)
             self.adata.X = np.expm1(self.adata.X)

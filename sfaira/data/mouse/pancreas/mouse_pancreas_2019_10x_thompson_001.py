@@ -46,8 +46,8 @@ class Dataset(DatasetBase):
         if fn is None:
             if self.path is None:
                 raise ValueError("provide either fn in load or path in constructor")
-            fn = os.path.join(self.path, "mouse/pancreas/GSM3308545_NOD_08w_A")
-            fn_meta = os.path.join(self.path, "mouse/pancreas/GSM3308545_NOD_08w_A_annotation.csv")
+            fn = os.path.join(self.path, "mouse", "pancreas", "GSM3308545_NOD_08w_A")
+            fn_meta = os.path.join(self.path, "mouse", "pancreas", "GSM3308545_NOD_08w_A_annotation.csv")
 
         celltypes = pandas.read_csv(fn_meta, index_col=0)
 

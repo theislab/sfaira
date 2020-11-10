@@ -93,9 +93,9 @@ class Dataset(DatasetBase):
         if self._load_raw:
             if fn is None:
                 fn = [
-                    os.path.join(self.path, "human/colon/f8aa201c-4ff1-45a4-890e-840d63459ca2.homo_sapiens.loom"),
-                    os.path.join(self.path, "human/colon/uc_meta_data_stromal_with_donor.txt"),
-                    os.path.join(self.path, "human/colon/hc_meta_data_stromal_with_donor.txt")
+                    os.path.join(self.path, "human", "colon", "f8aa201c-4ff1-45a4-890e-840d63459ca2.homo_sapiens.loom"),
+                    os.path.join(self.path, "human", "colon", "uc_meta_data_stromal_with_donor.txt"),
+                    os.path.join(self.path, "human", "colon", "hc_meta_data_stromal_with_donor.txt")
                 ]
             adata = anndata.read_loom(fn[0])
             ctuc = pd.read_csv(fn[1], sep='\t')
@@ -124,7 +124,7 @@ class Dataset(DatasetBase):
 
         else:
             if fn is None:
-                fn = os.path.join(self.path, "human/colon/kinchenetal.h5ad")
+                fn = os.path.join(self.path, "human", "colon", "kinchenetal.h5ad")
             self.adata = anndata.read(fn)
 
         self.adata.uns["lab"] = 'Simmons'

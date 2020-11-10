@@ -81,8 +81,8 @@ class Dataset(DatasetBase):
         if self._load_raw or not self._load_raw:
             if fn is None:
                 fn = [
-                    os.path.join(self.path, "human/liver/GSE124395_Normalhumanlivercellatlasdata.txt.gz"),
-                    os.path.join(self.path, 'human/liver/GSE124395_clusterpartition.txt.gz')
+                    os.path.join(self.path, "human", "liver", "GSE124395_Normalhumanlivercellatlasdata.txt.gz"),
+                    os.path.join(self.path, "human", "liver", "GSE124395_clusterpartition.txt.gz")
                 ]
             self.adata = anndata.AnnData(pd.read_csv(fn[0], sep='\t').T)
             celltype_df = pd.read_csv(fn[1], sep=' ')

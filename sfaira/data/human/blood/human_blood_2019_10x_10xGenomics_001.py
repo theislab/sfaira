@@ -42,7 +42,7 @@ class Dataset(DatasetBase):
 
         if self._load_raw or not self._load_raw:
             if fn is None:
-                fn = os.path.join(self.path, "human/blood/pbmc_10k_v3_filtered_feature_bc_matrix.h5ad")
+                fn = os.path.join(self.path, "human", "blood", "pbmc_10k_v3_filtered_feature_bc_matrix.h5ad")
             self.adata = anndata.read(fn)
 
         self.adata.uns["lab"] = '10x Genomics'

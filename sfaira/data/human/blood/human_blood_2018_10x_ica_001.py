@@ -50,7 +50,7 @@ class Dataset(DatasetBase):
 
         if self._load_raw:
             if fn is None:
-                fn = os.path.join(self.path, "human/blood/cc95ff89-2e68-4a08-a234-480eca21ce79.homo_sapiens.loom")
+                fn = os.path.join(self.path, "human", "blood", "cc95ff89-2e68-4a08-a234-480eca21ce79.homo_sapiens.loom")
             self.adata = anndata.read_loom(fn)
             idx = np.logical_and((self.adata.obs['derived_organ_parts_label'] == 'umbilical cord blood').values,
                                  (self.adata.obs['emptydrops_is_cell'] == 't').values)
@@ -58,7 +58,7 @@ class Dataset(DatasetBase):
 
         else:
             if fn is None:
-                fn = os.path.join(self.path, "human/blood/ica_blood.h5ad")
+                fn = os.path.join(self.path, "human", "blood", "ica_blood.h5ad")
             self.adata = anndata.read(fn)
 
         self.adata.uns["lab"] = 'Regev'

@@ -84,7 +84,7 @@ class Dataset(DatasetBase):
 
         if self._load_raw or not self._load_raw:
             if fn is None:
-                fn = os.path.join(self.path, "human/thymus/park20.processed.h5ad")
+                fn = os.path.join(self.path, "human", "thymus", "park20.processed.h5ad")
             self.adata = anndata.read(fn)
             self.adata.X = np.expm1(self.adata.X)
 

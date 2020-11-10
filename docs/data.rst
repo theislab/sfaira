@@ -74,7 +74,7 @@ before it is loaded into memory:
         if fn is None:
             if self.path is None:
                 raise ValueError("provide either fn in load or path in constructor")
-            fn = os.path.join(self.path, "human/eye/my_data.h5ad")  defined file in streamlined directory structure
+            fn = os.path.join(self.path, "human", "eye", "my_data.h5ad")  defined file in streamlined directory structure
         self.adata = anndata.read(fn)  # loading instruction into .adata, use other ones if the data is not h5ad
 
         self.adata.uns["lab"] = x  # load the adata.uns with meta data
