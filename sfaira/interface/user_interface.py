@@ -50,21 +50,14 @@ class UserInterface:
             self,
             custom_repo: Union[list, str, None] = None,
             sfaira_repo: bool = False,
-            cache_path: str = 'cache/'
+            cache_path: str = os.path.join('cache', '')
     ):
         self.model_kipoi_embedding = None
         self.model_kipoi_celltype = None
         self.estimator_embedding = None
         self.estimator_celltype = None
         self.use_sfaira_repo = sfaira_repo
-
-        if cache_path.endswith("/"):
-            self.cache_path = cache_path
-        else:
-            self.cache_path = cache_path + "/"
-
-        if custom_repo is not None and not custom_repo.endswith("/"):
-            custom_repo += "/"
+        self.cache_path = os.path.join(cache_path, '')
 
         if sfaira_repo:  # check if public sfaira repository should be accessed
             self.model_lookuptable = self._load_lookuptable("https://sandbox.zenodo.org/record/647061/files/")   #TODO: this still points to zenodo sandbox
@@ -74,7 +67,7 @@ class UserInterface:
                 custom_repo = [custom_repo]
 
             for repo in custom_repo:
-                if os.path.exists(repo) and not os.path.exists(repo + 'model_lookuptable.csv'):
+                if os.path.exists(repo) and not os.path.exists(os.path.join(repo, 'model_lookuptable.csv')):
                     self.write_lookuptable(repo)
 
                 if hasattr(self, 'model_lookuptable'):
@@ -103,7 +96,7 @@ class UserInterface:
         :param repo_path:
         :return: model_lookuptable
         """
-        model_lookuptable = pd.read_csv(repo_path + 'model_lookuptable.csv', header=0, index_col=0)
+        model_lookuptable = pd.read_csv(os.path.join(repo_path, 'model_lookuptable.csv'), header=0, index_col=0)
 
         # check for any duplicated model_ids
         if hasattr(self, 'model_lookuptable'):
@@ -125,28 +118,26 @@ class UserInterface:
         """
         import hashlib
 
-        weights_files = []
+        file_names = []
+        file_paths = []
+        md5 = []
         for subdir, dirs, files in os.walk(repo_path):
             for file in files:
                 if os.path.isfile(os.path.join(subdir, file)) and (
                         file.endswith('_weights.h5') or file.endswith('_weights.data-00000-of-00001')) and (
                         file.startswith('embedding') or file.startswith('celltype')):
-                    weights_files.append(os.path.join(subdir, file))
+                    file_paths.append(subdir)
+                    file_names.append(file)
+                    with open(os.path.join(subdir, file), 'rb') as f:
+                        md5.append(hashlib.md5(f.read()).hexdigest())
+        s = [i.split('_')[0:7] for i in file_names]
+        ids = ['_'.join(i) for i in s]
 
-        if weights_files:
-            file_names = [f.split('/')[-1] for f in weights_files]
-            weights_paths = [f.split('/')[:-1] for f in weights_files]
-            s = [i.split('_')[0:7] for i in file_names]
-            ids = ['_'.join(i) for i in s]
-            md5 = []
-            for file in weights_files:
-                with open(file, 'rb') as f:
-                    md5.append(hashlib.md5(f.read()).hexdigest())
-
+        if ids:
             pd.DataFrame(
                 list(zip(ids, weights_paths, md5)),
                 columns=['model_id', 'model_path', 'md5']
-            ).sort_values('model_id').to_csv(repo_path + 'model_lookuptable.csv')
+            ).sort_values('model_id').to_csv(os.path.join(repo_path, 'model_lookuptable.csv'))
         else:
             raise ValueError(f'No model weights found in {repo_path} '
                              'Weights need to have .h5 or .data-00000-of-00001 extension'
@@ -182,8 +173,7 @@ class UserInterface:
         """
         assert self.zoo_embedding.model_id is not None, "choose embedding model first"
         model_dir = self.model_lookuptable.model_path[self.model_lookuptable.model_id == self.zoo_embedding.model_id].iloc[0]
-        if not model_dir.endswith("/"):
-            model_dir += "/"
+        model_dir = self.path.join(model_dir, '')
         md5 = self.model_lookuptable.md5[self.model_lookuptable.model_id == self.zoo_embedding.model_id].iloc[0]
         self.estimator_embedding = EstimatorKerasEmbedding(
             data=self.data,
@@ -209,8 +199,7 @@ class UserInterface:
         """
         assert self.zoo_celltype.model_id is not None, "choose cell type model first"
         model_dir = self.model_lookuptable.model_path[self.model_lookuptable.model_id == self.zoo_celltype.model_id].iloc[0]
-        if not model_dir.endswith("/"):
-            model_dir += "/"
+        model_dir = self.path.join(model_dir, '')
         md5 = self.model_lookuptable.md5[self.model_lookuptable.model_id == self.zoo_celltype.model_id].iloc[0]
         self.estimator_celltype = EstimatorKerasCelltype(
             data=self.data,

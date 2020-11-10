@@ -135,7 +135,7 @@ class GridsearchContainer:
         :param gs_ids:
         :return:
         """
-        res_dirs = [self.source_path + x + "/results/" for x in gs_ids]
+        res_dirs = [os.path.join(self.source_path, x, "results", "") for x in gs_ids]
         run_ids = [
             np.sort(np.unique([
                 x.split("_history.pickle")[0]
@@ -149,36 +149,38 @@ class GridsearchContainer:
         hyperpars = {}
         model_hyperpars = {}
         run_ids_proc = []
-        gs_keys = []
+        gs_keys = gs_ids
         for i, indir in enumerate(res_dirs):
             for x in run_ids[i]:
-                fn_history = indir + x + "_history.pickle"
+                fn_history = os.path.join(indir, f"{x}_history.pickle")
                 if os.path.isfile(fn_history):
                     with open(fn_history, 'rb') as f:
                         histories[x] = pickle.load(f)
                 else:
-                    print("file %s not found" % (x + "_history.pickle"))
-                fn_eval = indir + x + "_evaluation.pickle"
+                    print(f"file {x}_history.pickle not found")
+
+                fn_eval = os.path.join(indir, f"{x}_evaluation.pickle")
                 if os.path.isfile(fn_eval):
                     with open(fn_eval, 'rb') as f:
                         evals[x] = pickle.load(f)
                 else:
-                    print("file %s not found" % (x + "_evaluation.pickle"))
-                fn_hp = indir + x + "_hyperparam.pickle"
+                    print(f"file {x}_evaluation.pickle not found")
+
+                fn_hp = os.path.join(indir, f"{x}_hyperparam.pickle")
                 if os.path.isfile(fn_hp):
                     with open(fn_hp, 'rb') as f:
                         hyperpars[x] = pickle.load(f)
                 else:
-                    print("file %s not found" % (x + "_hyperparam.pickle"))
-                fn_mhp = indir + x + "_model_hyperparam.pickle"
+                    print(f"file {x}_hyperparam.pickle not found")
+
+                fn_mhp = os.path.join(indir, f"{x}_model_hyperparam.pickle")
                 if os.path.isfile(fn_mhp):
                     with open(fn_mhp, 'rb') as f:
                         model_hyperpars[x] = pickle.load(f)
                 else:
-                    pass
-                    #TODO add: print("file %s not found" % (x + "_model_hyperparam.pickle"))
+                    print(f"file {x}_model_hyperparam.pickle not found")
+
                 run_ids_proc.append(x)
-                gs_keys.append(indir.split("/")[-3])
 
         self.run_ids = run_ids_proc
         self.gs_keys = dict(zip(run_ids_proc, gs_keys))
@@ -192,7 +194,7 @@ class GridsearchContainer:
             hat_or_true: str,
             run_id: str
     ):
-        fn = self.source_path + self.gs_keys[run_id] + "/results/" + run_id + f"_y{hat_or_true}.npy"
+        fn = os.path.join(self.source_path, self.gs_keys[run_id], "results", f"{run_id}_y{hat_or_true}.npy")
         return np.load(fn)
 
     def best_model_by_partition(
@@ -273,7 +275,7 @@ class GridsearchContainer:
         if partition_select not in ["test", "val", "train"]:
             raise ValueError("partition %s not recognised" % partition_select)
 
-        metric_select = partition_select + "_" + metric_select
+        metric_select = f"{partition_select}_{metric_select}"
 
         if cv_mode.lower() == "mean":
             best_model = tab.groupby("run", as_index=False)[metric_select].mean().\
@@ -337,8 +339,8 @@ class GridsearchContainer:
             subset=subset,
         )
         shutil.copyfile(
-            self.source_path + self.gs_keys[model_id] + "/results/" + model_id + "_weights.h5",
-            path + model_id + "_weights.h5"
+            os.path.join(self.source_path, self.gs_keys[model_id], "results", f"{model_id}_weights.h5"),
+            os.path.join(path, f"{model_id}_weights.h5")
         )
 
     def plot_completions(
@@ -438,7 +440,7 @@ class GridsearchContainer:
             for i, organ in enumerate(organs):
                 summary_table = summary_table_param.loc[summary_table_param["organ"].values == organ, :]
                 # Plot each metric:
-                ycol = partition_show + "_" + metric_select
+                ycol = f"{partition_show}_{metric_select}"
                 if len(organs) == 1 and len(params) == 1:
                     ax = np.array([ax])
                 sns.boxplot(
@@ -511,7 +513,7 @@ class GridsearchContainer:
                 sns_data = pandas.concat(sns_data, axis=0)
             else:
                 cv = cv_key
-                sns_data = pandas.DataFrame(self.histories[model_gs_id + "_" + cv])
+                sns_data = pandas.DataFrame(self.histories[f"{model_gs_id}_{cv}"])
                 sns_data["epoch"] = np.arange(0, sns_data.shape[0])
                 sns_data["cv"] = cv
 
@@ -531,13 +533,13 @@ class GridsearchContainer:
 
             # metric
             if metric_show not in sns_data.columns:
-                raise ValueError("metric %s not found in %s" % (metric_show, str(sns_data.columns)))
+                raise ValueError(f"metric {metric_show} not found in {sns_data.columns}")
             sns_data_metric = pandas.concat([pandas.DataFrame({
                 "epoch": sns_data["epoch"].values,
                 "cv": sns_data["cv"].values,
                 metric_show: sns_data[metric_show].values,
                 "partition": x
-            }) for i, x in enumerate([metric_show, "val_" + metric_show])])
+            }) for i, x in enumerate([metric_show, f"val_{metric_show}"])])
             sns.lineplot(
                 x="epoch", y=metric_show, style="partition", hue="cv",
                 data=sns_data_metric, ax=ax[i, 1]
@@ -580,26 +582,26 @@ class GridsearchContainer:
                     self.source_path,
                     self.gs_keys[best_model_id],
                     'results',
-                    best_model_id
+                    best_model_id,
                 )
             else:
                 file_path_base = os.path.join(
                     self.source_path,
-                    self.gs_keys[best_model_id + "_cv" + str(cvs[0])],
+                    self.gs_keys[f"{best_model_id}_cv{cvs[0]}"],
                     'results',
-                    best_model_id + "_cv" + str(cvs[0])
+                    f"{best_model_id}_cv{cvs[0]}",
                 )
 
             # Read model hyperparameter
-            with open(file_path_base + "_model_hyperparam.pickle", 'rb') as file:
+            with open(f"{file_path_base}_model_hyperparam.pickle", 'rb') as file:
                 hyparam_model = pickle.load(file)
 
             # Read optimizer hyperparameter
-            with open(file_path_base + "_hyperparam.pickle", 'rb') as file:
+            with open(f"{file_path_base}_hyperparam.pickle", 'rb') as file:
                 hyparam_optim = pickle.load(file)
 
             # Write both hyperparameter dicts
-            with open(os.path.join(write_path, best_model_id[:-12] + "_best_hyperparam.txt"), 'w') as file:
+            with open(os.path.join(write_path, f"{best_model_id[:-12]}_best_hyperparam.txt"), 'w') as file:
                 file.write(json.dumps({"model": hyparam_model, "optimizer": hyparam_optim}))
         return
 
@@ -630,7 +632,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         :param run_id:
         :return:
         """
-        fn = self.source_path + self.gs_keys[run_id] + "/results/" + run_id + "_ontology_names.pickle"
+        fn = os.path.join(self.source_path, self.gs_keys[run_id], "results", f"{run_id}_ontology_names.pickle")
         if not os.path.isfile(fn):
             raise FileNotFoundError(f"file {run_id}_ontology_names.pickle not found")
         with open(fn, 'rb') as f:
@@ -663,15 +665,15 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         metrics = list(self.evals.values())[0]['val'].keys()
         self.summary_tab = pandas.DataFrame(dict(
             list({
-                "depth": [id_i.split("_")[self.model_id_len + 0] for id_i in self.run_ids],
-                "width": [id_i.split("_")[self.model_id_len + 1] for id_i in self.run_ids],
-                "lr": [id_i.split("_")[self.model_id_len + 2] for id_i in self.run_ids],
+                "depth":   [id_i.split("_")[self.model_id_len + 0] for id_i in self.run_ids],
+                "width":   [id_i.split("_")[self.model_id_len + 1] for id_i in self.run_ids],
+                "lr":      [id_i.split("_")[self.model_id_len + 2] for id_i in self.run_ids],
                 "dropout": [id_i.split("_")[self.model_id_len + 3] for id_i in self.run_ids],
-                "l1": [id_i.split("_")[self.model_id_len + 4] for id_i in self.run_ids],
-                "l2": [id_i.split("_")[self.model_id_len + 5] for id_i in self.run_ids],
-                "cv": [id_i.split("_")[-1] if self.cv else "cv0" for id_i in self.run_ids],
-                "model": ["_".join(id_i.split("_")[:self.model_id_len]) for id_i in self.run_ids],
-                "organ": [id_i.split("_")[2] for id_i in self.run_ids],
+                "l1":      [id_i.split("_")[self.model_id_len + 4] for id_i in self.run_ids],
+                "l2":      [id_i.split("_")[self.model_id_len + 5] for id_i in self.run_ids],
+                "cv":      [id_i.split("_")[-1] if self.cv else "cv0" for id_i in self.run_ids],
+                "model":   ["_".join(id_i.split("_")[:self.model_id_len]) for id_i in self.run_ids],
+                "organ":   [id_i.split("_")[2] for id_i in self.run_ids],
                 "model_type": [
                     "linear" if (id_i.split("_")[3] == "mlp" and id_i.split("_")[5].split(".")[1] == "0")
                     else id_i.split("_")[3]
@@ -705,12 +707,12 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         if model_id is not None:
             if cvs is not None:
                 fns = [
-                    self.source_path + self.gs_keys[model_id + "_cv" + str(x)] + "/results/" + model_id + "_cv" + str(x)
+                    os.path.join(self.source_path, self.gs_keys[f"{model_id}_cv{x}"], "results", f"{model_id}_cv{x}")
                     for x in cvs
                 ]
             else:
-                fns = [self.source_path + self.gs_keys[model_id] + "/results/" + model_id]
-            covar = [pandas.read_csv(x + "_covar.csv") for x in fns]
+                fns = [os.path.join(self.source_path, self.gs_keys[model_id], "results", model_id)]
+            covar = [pandas.read_csv(f"{x}_covar.csv") for x in fns]
             return model_id, covar
         else:
             return None, [None]
@@ -777,7 +779,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
                     np.logical_and(
                         sns_tab["model_type"].values == m,
                         sns_tab["organ"].values == o
-                    ), partition_show + "_" + metric_show
+                    ), f"{partition_show}_{metric_show}"
                 ]
                 if data_temp.shape[0] > 0:
                     if self.cv:
@@ -809,7 +811,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
                 annot=True, fmt=".2f",
                 ax=axs, vmin=0, vmax=1,
                 xticklabels=True, yticklabels=True,
-                cbar_kws={'label': partition_show + "_" + metric_show},
+                cbar_kws={'label': f"{partition_show}_{metric_show}"},
                 cmap=None
             )
         return fig, axs, sns_data_heatmap
@@ -910,9 +912,9 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
             elif metric_show == "f1":
                 m = f1(yhat, ytrue)
             else:
-                raise ValueError("did not recognize metric_show %s" % metric_show)
+                raise ValueError(f"did not recognize metric_show {metric_show}")
             vals.append(m)
-        sns_tab[metric_show + "_classwise"] = vals
+        sns_tab[f"{metric_show}_classwise"] = vals
 
         # Build figure.
         model_types = sns_tab["model_type"].unique()
@@ -923,7 +925,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         hm = np.zeros((len(classes), len(model_types))) + np.nan
         # mask = np.isnan(hm)
         for i, m in enumerate(model_types):
-            data_temp = np.vstack(sns_tab.loc[sns_tab["model_type"].values == m, metric_show + "_classwise"].values)
+            data_temp = np.vstack(sns_tab.loc[sns_tab["model_type"].values == m, f"{metric_show}_classwise"].values)
             if data_temp.shape[0] > 0:
                 if self.cv:
                     if collapse_cv == "mean":
@@ -961,7 +963,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
                 annot=True, fmt=".2f",
                 ax=axs, vmin=0, vmax=1,
                 xticklabels=True, yticklabels=True,
-                cbar_kws={'label': "test_" + metric_show},
+                cbar_kws={'label': f"test_{metric_show}"},
                 cmap=None
             )
             axs = sns.heatmap(
@@ -1076,7 +1078,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
             else:
                 raise ValueError("did not recognize metric_show %s" % metric_show)
             vals.append(m)
-        sns_tab[metric_show + "_classwise"] = vals
+        sns_tab[f"{metric_show}_classwise"] = vals
 
         # Build figure.
         model_types = sns_tab["model_type"].unique()
@@ -1087,7 +1089,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         hm = np.zeros((len(classes), len(model_types))) + np.nan
         # mask = np.isnan(hm)
         for i, m in enumerate(model_types):
-            data_temp = np.vstack(sns_tab.loc[sns_tab["model_type"].values == m, metric_show + "_classwise"].values)
+            data_temp = np.vstack(sns_tab.loc[sns_tab["model_type"].values == m, f"{metric_show}_classwise"].values)
             if data_temp.shape[0] > 0:
                 if self.cv:
                     if collapse_cv == "mean":
@@ -1171,16 +1173,16 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         metrics = list(self.evals.values())[0]['val'].keys()
         self.summary_tab = pandas.DataFrame(dict(
             list({
-                "depth": [id_i.split("_")[self.model_id_len + 0] for id_i in self.run_ids],
-                "width": [id_i.split("_")[self.model_id_len + 1] for id_i in self.run_ids],
-                "lr": [id_i.split("_")[self.model_id_len + 2] for id_i in self.run_ids],
-                "dropout": [id_i.split("_")[self.model_id_len + 3] for id_i in self.run_ids],
-                "l1": [id_i.split("_")[self.model_id_len + 4] for id_i in self.run_ids],
-                "l2": [id_i.split("_")[self.model_id_len + 5] for id_i in self.run_ids],
-                "cv": [id_i.split("_")[-1] if self.cv else "1" for id_i in self.run_ids],
-                "model": ["_".join(id_i.split("_")[:self.model_id_len]) for id_i in self.run_ids],
-                "organ": [id_i.split("_")[2] for id_i in self.run_ids],
-                "model_type": [id_i.split("_")[3] for id_i in self.run_ids],
+                "depth":       [id_i.split("_")[self.model_id_len + 0] for id_i in self.run_ids],
+                "width":       [id_i.split("_")[self.model_id_len + 1] for id_i in self.run_ids],
+                "lr":          [id_i.split("_")[self.model_id_len + 2] for id_i in self.run_ids],
+                "dropout":     [id_i.split("_")[self.model_id_len + 3] for id_i in self.run_ids],
+                "l1":          [id_i.split("_")[self.model_id_len + 4] for id_i in self.run_ids],
+                "l2":          [id_i.split("_")[self.model_id_len + 5] for id_i in self.run_ids],
+                "cv":          [id_i.split("_")[-1] if self.cv else "1" for id_i in self.run_ids],
+                "model":       ["_".join(id_i.split("_")[:self.model_id_len]) for id_i in self.run_ids],
+                "organ":       [id_i.split("_")[2] for id_i in self.run_ids],
+                "model_type":  [id_i.split("_")[3] for id_i in self.run_ids],
                 "model_gs_id": ["_".join(id_i.split("_")[:(self.model_id_len + 6)]) for id_i in self.run_ids],
                 "run": self.run_ids,
         }.items()) +
@@ -1223,13 +1225,13 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         if model_id is not None:
             if cvs is not None:
                 fns = [
-                    self.source_path + self.gs_keys[model_id + "_cv" + str(x)] + "/results/" + model_id + "_cv" + str(x)
+                    os.path.join(self.source_path, self.gs_keys[f"{model_id}_cv{x}"], "results", f"{model_id}_cv{x}")
                     for x in cvs
                 ]
             else:
-                fns = [self.source_path + self.gs_keys[model_id] + "/results/" + model_id]
-            embedding = [np.load(x + "_embedding.npy") for x in fns]
-            covar = [pandas.read_csv(x + "_covar.csv") for x in fns]
+                fns = [os.path.join(self.source_path, self.gs_keys[model_id], "results", model_id)]
+            embedding = [np.load(f"{x}_embedding.npy") for x in fns]
+            covar = [pandas.read_csv(f"{x}_covar.csv") for x in fns]
             return model_id, embedding, covar
         else:
             return None, [None], [None]
@@ -1288,7 +1290,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                     np.logical_and(
                         sns_tab["model_type"].values == m,
                         sns_tab["organ"].values == o
-                    ), partition_show + "_" + metric_show
+                    ),  f"{partition_show}_{metric_show}"
                 ]
                 if data_temp.shape[0] > 0:
                     if self.cv:
@@ -1319,7 +1321,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                 annot=True, fmt=".2f",
                 ax=axs,
                 xticklabels=True, yticklabels=True,
-                cbar_kws={'label': partition_show + "_" + metric_show}
+                cbar_kws={'label': f"{partition_show}_{metric_show}"}
             )
         return fig, axs, sns_data_heatmap
 
@@ -1362,11 +1364,11 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         )
         # check cached file
 
-        resultspath = os.path.join(self.source_path, self.gs_keys[model_id], 'results')
+        resultspath = os.path.join(self.source_path, self.gs_keys[model_id], 'results', '')
 
-        if os.path.isfile(os.path.join(resultspath, model_id + '_grads.pickle')) and not ignore_cache:
+        if os.path.isfile(os.path.join(resultspath, f'{model_id}_grads.pickle')) and not ignore_cache:
             print('Load gradients from cached file...')
-            with open(os.path.join(resultspath, model_id + '_grads.pickle'), 'rb') as f:
+            with open(os.path.join(resultspath, f'{model_id}_grads.pickle'), 'rb') as f:
                 gradients_raw = pickle.load(f)
         else:
             print('Compute gradients (1/3): load data')
@@ -1394,12 +1396,12 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                 model_topology=model_id.split('_')[5]
             )
             embedding.init_model()
-            embedding.model.training_model.load_weights(os.path.join(resultspath, model_id + '_weights.h5'))
+            embedding.model.training_model.load_weights(os.path.join(resultspath, f'{model_id}_weights.h5'))
 
             # compute gradients
             print('Compute gradients (3/3): cumulate gradients')
             gradients_raw = embedding.compute_gradients_input(test_data=test_data, batch_size=256, per_celltype=True)
-            with open(os.path.join(resultspath, model_id + '_grads.pickle'), 'wb') as f:
+            with open(os.path.join(resultspath, f'{model_id}_grads.pickle'), 'wb') as f:
                 pickle.dump(gradients_raw, f, pickle.HIGHEST_PROTOCOL)
             print('Gradients saved to cache file!')
 

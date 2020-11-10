@@ -45,7 +45,7 @@ class EstimatorKeras:
             model_type: Union[str, None],
             model_topology: Union[str, None],
             weights_md5: Union[str, None] = None,
-            cache_path: str = 'cache/'
+            cache_path: str = os.path.join('cache', '')
     ):
         self.data = data
         self.obs_train = None
@@ -78,8 +78,7 @@ class EstimatorKeras:
         """
         Loads model weights from local directory or zenodo.
         """
-        if not self.model_dir.endswith('/'):
-            self.model_dir += '/'
+        self.model_dir = os.path.join(self.model_dir, '')
 
         if self.model_dir.startswith('http'):
             # Remote repo
@@ -87,29 +86,32 @@ class EstimatorKeras:
                 os.makedirs(self.cache_path)
 
             import urllib.request
+            from urllib.parse import urljoin
             from urllib.error import HTTPError
             try:
-                urllib.request.urlretrieve(self.model_dir + self.model_id + '_weights.h5',
-                                           self.cache_path + self.model_id + '_weights.h5')
+                urllib.request.urlretrieve(urljoin(self.model_dir, f'{self.model_id}_weights.h5'),
+                                           os.path.join(self.cache_path, f'{self.model_id}_weights.h5')
+                                           )
             except HTTPError:
                 try:
-                    urllib.request.urlretrieve(self.model_dir + self.model_id + '_weights.data-00000-of-00001',
-                                               self.cache_path + self.model_id + '_weights.data-00000-of-00001')
+                    urllib.request.urlretrieve(urljoin(self.model_dir, f'{self.model_id}_weights.data-00000-of-00001'),
+                                               os.path.join(self.cache_path, f'{self.model_id}_weights.data-00000-of-00001')
+                                               )
                 except HTTPError:
                     raise FileNotFoundError(f'cannot find remote weightsfile: {self.model_dir + self.model_id}')
 
-            fn = self.cache_path + self.model_id + "_weights"
+            fn = os.path.join(self.cache_path, f"{self.model_id}_weights")
         else:
             # Local repo
             if not self.model_dir:
                 raise ValueError('the model_id is set but the path to the model is empty')
-            fn = self.model_dir + self.model_id + "_weights"
+            fn = os.path.join(self.model_dir, f"{self.model_id}_weights")
 
-        if os.path.exists(fn+'.h5'):
-            self._assert_md5_sum(fn+'.h5', self.md5)
-            self.model.training_model.load_weights(fn+'.h5')
-        elif os.path.exists(fn + ".data-00000-of-00001"):
-            self._assert_md5_sum(fn + ".data-00000-of-00001", self.md5)
+        if os.path.exists(f'{fn}.h5'):
+            self._assert_md5_sum(f'{fn}.h5', self.md5)
+            self.model.training_model.load_weights(f'{fn}.h5')
+        elif os.path.exists(f"{fn}.data-00000-of-00001"):
+            self._assert_md5_sum(f"{fn}.data-00000-of-00001", self.md5)
             self.model.training_model.load_weights(fn)
         elif os.path.exists(fn):
             raise ValueError('weights files saved in h5 format need to have an h5 file extension')
@@ -117,13 +119,13 @@ class EstimatorKeras:
             raise ValueError(f'the weightsfile {fn} could not be found')
 
     def save_weights_to_cache(self):
-        if not os.path.exists(self.cache_path+'weights/'):
-            os.makedirs(self.cache_path+'weights/')
-        fn = self.cache_path + 'weights/' + str(self.model_id) + "_weights_cache.h5"
+        if not os.path.exists(os.path.join(self.cache_path, 'weights')):
+            os.makedirs(os.path.join(self.cache_path, 'weights'))
+        fn = os.path.join(self.cache_path, 'weights', f"{self.model_id}_weights_cache.h5")
         self.model.training_model.save_weights(fn)
 
     def load_weights_from_cache(self):
-        fn = self.cache_path + 'weights/' + str(self.model_id) + "_weights_cache.h5"
+        fn = os.path.join(self.cache_path, 'weights', f"{self.model_id}_weights_cache.h5")
         self.model.training_model.load_weights(fn)
 
     def init_model(self, clear_weight_cache=True, override_hyperpar=None):
@@ -132,9 +134,9 @@ class EstimatorKeras:
         :return:
         """
         if clear_weight_cache:
-            if os.path.exists(self.cache_path+'weights/'):
-                for file in os.listdir(self.cache_path+'weights/'):
-                    file_path = os.path.join(self.cache_path+'weights/', file)
+            if os.path.exists(os.path.join(self.cache_path, 'weights')):
+                for file in os.listdir(os.path.join(self.cache_path, 'weights')):
+                    file_path = os.path.join(os.path.join(self.cache_path, 'weights'), file)
                     os.remove(file_path)
 
     def _assert_md5_sum(
@@ -466,7 +468,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             model_type: Union[str, None],
             model_topology: Union[str, None],
             weights_md5: Union[str, None] = None,
-            cache_path: str = 'cache/'
+            cache_path: str = os.path.join('cache', '')
     ):
         super(EstimatorKerasEmbedding, self).__init__(
                 data=data,
@@ -891,7 +893,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             model_type: Union[str, None],
             model_topology: Union[str, None],
             weights_md5: Union[str, None] = None,
-            cache_path: str = 'cache/',
+            cache_path: str = os.path.join('cache', ''),
             max_class_weight: float = 1e3
     ):
         super(EstimatorKerasCelltype, self).__init__(
