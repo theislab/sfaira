@@ -120,39 +120,36 @@ class UserInterface:
             repo_path: str
     ):
         """
-        checks if there is a txt file that lists the model_id and path of models in the directory
-        adds model_index that connects model_id with the link to the model
-
         :param repo_path:
         :return:
         """
         import hashlib
 
-        files = [
-            os.path.join(repo_path, f) for f in os.listdir(repo_path)
-            if (os.path.isfile(os.path.join(repo_path, f))
-                and (f.endswith('_weights.h5') or f.endswith('_weights.data-00000-of-00001'))
-                and (f.startswith('embedding') or f.startswith('celltype'))
-                )
-        ]
+        weights_files = []
+        for subdir, dirs, files in os.walk(repo_path):
+            for file in files:
+                if os.path.isfile(os.path.join(subdir, file)) and (
+                        file.endswith('_weights.h5') or file.endswith('_weights.data-00000-of-00001')) and (
+                        file.startswith('embedding') or file.startswith('celltype')):
+                    weights_files.append(os.path.join(subdir, file))
 
-        if files:
-            file_names = [f.split('/')[-1] for f in files]
+        if weights_files:
+            file_names = [f.split('/')[-1] for f in weights_files]
             s = [i.split('_')[0:7] for i in file_names]
             ids = ['_'.join(i) for i in s]
             md5 = []
-            for file in files:
+            for file in weights_files:
                 with open(file, 'rb') as f:
                     md5.append(hashlib.md5(f.read()).hexdigest())
 
             pd.DataFrame(
-                list(zip(ids, [repo_path for i in files], md5)),
+                list(zip(ids, [repo_path for i in weights_files], md5)),
                 columns=['model_id', 'model_path', 'md5']
             ).to_csv(repo_path + 'model_lookuptable.csv')
         else:
-            raise ValueError('No model weights found in {}.'
+            raise ValueError(f'No model weights found in {repo_path} '
                              'Weights need to have .h5 or .data-00000-of-00001 extension'
-                             'to be recognised'.format(repo_path)
+                             'to be recognised'
                              )
 
     def load_data(
