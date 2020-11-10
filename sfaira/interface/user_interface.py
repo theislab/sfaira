@@ -135,6 +135,7 @@ class UserInterface:
 
         if weights_files:
             file_names = [f.split('/')[-1] for f in weights_files]
+            weights_paths = [f.split('/')[:-1] for f in weights_files]
             s = [i.split('_')[0:7] for i in file_names]
             ids = ['_'.join(i) for i in s]
             md5 = []
@@ -143,7 +144,7 @@ class UserInterface:
                     md5.append(hashlib.md5(f.read()).hexdigest())
 
             pd.DataFrame(
-                list(zip(ids, [repo_path for i in weights_files], md5)),
+                list(zip(ids, weights_paths, md5)),
                 columns=['model_id', 'model_path', 'md5']
             ).sort_values('model_id').to_csv(repo_path + 'model_lookuptable.csv')
         else:

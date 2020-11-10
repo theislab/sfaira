@@ -78,7 +78,7 @@ class EstimatorKeras:
         """
         Loads model weights from local directory or zenodo.
         """
-        if self.model_dir.endswith('/'):
+        if not self.model_dir.endswith('/'):
             self.model_dir += '/'
 
         if self.model_dir.startswith('http'):
