@@ -145,7 +145,7 @@ class UserInterface:
             pd.DataFrame(
                 list(zip(ids, [repo_path for i in weights_files], md5)),
                 columns=['model_id', 'model_path', 'md5']
-            ).to_csv(repo_path + 'model_lookuptable.csv')
+            ).sort_values('model_id').to_csv(repo_path + 'model_lookuptable.csv')
         else:
             raise ValueError(f'No model weights found in {repo_path} '
                              'Weights need to have .h5 or .data-00000-of-00001 extension'
