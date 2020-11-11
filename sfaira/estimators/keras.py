@@ -78,7 +78,7 @@ class EstimatorKeras:
         """
         Loads model weights from local directory or zenodo.
         """
-        self.model_dir = os.path.join(self.model_dir, '')
+        self.model_dir = self.model_dir if os.path.isfile(self.model_dir) else os.path.join(self.model_dir, '')
 
         if self.model_dir.startswith('http'):
             # Remote repo
@@ -123,7 +123,7 @@ class EstimatorKeras:
             elif os.path.isfile(os.path.join(self.model_dir, f"{self.model_id}_weights.h5")):
                 fn = os.path.join(self.model_dir, f"{self.model_id}_weights.h5")
             else:
-                raise ValueError(f'the weightsfile {fn} could not be found')
+                raise ValueError('the weightsfile could not be found')
 
         self._assert_md5_sum(fn, self.md5)
         if fn.endswith(".data-00000-of-00001"):
