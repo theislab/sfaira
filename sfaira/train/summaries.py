@@ -149,7 +149,7 @@ class GridsearchContainer:
         hyperpars = {}
         model_hyperpars = {}
         run_ids_proc = []
-        gs_keys = gs_ids
+        gs_keys = []
         for i, indir in enumerate(res_dirs):
             for x in run_ids[i]:
                 fn_history = os.path.join(indir, f"{x}_history.pickle")
@@ -181,6 +181,7 @@ class GridsearchContainer:
                     print(f"file {x}_model_hyperparam.pickle not found")
 
                 run_ids_proc.append(x)
+                gs_keys.append(os.path.normpath(indir).split(os.path.sep)[-2])
 
         self.run_ids = run_ids_proc
         self.gs_keys = dict(zip(run_ids_proc, gs_keys))
