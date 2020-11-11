@@ -135,7 +135,7 @@ class UserInterface:
 
         if ids:
             pd.DataFrame(
-                list(zip(ids, weights_paths, md5)),
+                list(zip(ids, file_paths, md5)),
                 columns=['model_id', 'model_path', 'md5']
             ).sort_values('model_id').to_csv(os.path.join(repo_path, 'model_lookuptable.csv'))
         else:
