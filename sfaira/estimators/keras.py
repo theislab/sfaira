@@ -78,8 +78,6 @@ class EstimatorKeras:
         """
         Loads model weights from local directory or zenodo.
         """
-        self.model_dir = self.model_dir if os.path.isfile(self.model_dir) else os.path.join(self.model_dir, '')
-
         if self.model_dir.startswith('http'):
             # Remote repo
             if not os.path.exists(self.cache_path):
