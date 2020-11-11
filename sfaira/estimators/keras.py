@@ -89,34 +89,47 @@ class EstimatorKeras:
             from urllib.parse import urljoin
             from urllib.error import HTTPError
             try:
-                urllib.request.urlretrieve(urljoin(self.model_dir, f'{self.model_id}_weights.h5'),
-                                           os.path.join(self.cache_path, f'{self.model_id}_weights.h5')
+                urllib.request.urlretrieve(self.model_dir,
+                                           os.path.join(self.cache_path, os.path.basename(self.model_dir))
                                            )
+                fn = os.path.join(self.cache_path, os.path.basename(self.model_dir))
             except HTTPError:
                 try:
-                    urllib.request.urlretrieve(urljoin(self.model_dir, f'{self.model_id}_weights.data-00000-of-00001'),
-                                               os.path.join(self.cache_path, f'{self.model_id}_weights.data-00000-of-00001')
+                    urllib.request.urlretrieve(urljoin(self.model_dir, f'{self.model_id}_weights.h5'),
+                                               os.path.join(self.cache_path, f'{self.model_id}_weights.h5')
                                                )
+                    fn = os.path.join(self.cache_path, f"{self.model_id}_weights.h5")
                 except HTTPError:
-                    raise FileNotFoundError(f'cannot find remote weightsfile: {self.model_dir + self.model_id}')
-
-            fn = os.path.join(self.cache_path, f"{self.model_id}_weights")
+                    try:
+                        urllib.request.urlretrieve(urljoin(self.model_dir, f'{self.model_id}_weights.data-00000-of-00001'),
+                                                   os.path.join(self.cache_path, f'{self.model_id}_weights.data-00000-of-00001')
+                                                   )
+                        fn = os.path.join(self.cache_path, f"{self.model_id}_weights.data-00000-of-00001")
+                    except HTTPError:
+                        raise FileNotFoundError(f'cannot find remote weightsfile')
         else:
             # Local repo
             if not self.model_dir:
                 raise ValueError('the model_id is set but the path to the model is empty')
-            fn = os.path.join(self.model_dir, f"{self.model_id}_weights")
+            if os.path.isfile(self.model_dir) \
+                    and not self.model_dir.endswith(".h5") \
+                    and not self.model_dir.endswith(".data-00000-of-00001"):
+                raise ValueError('weights files saved in h5 format need to have an h5 file extension')
 
-        if os.path.exists(f'{fn}.h5'):
-            self._assert_md5_sum(f'{fn}.h5', self.md5)
-            self.model.training_model.load_weights(f'{fn}.h5')
-        elif os.path.exists(f"{fn}.data-00000-of-00001"):
-            self._assert_md5_sum(f"{fn}.data-00000-of-00001", self.md5)
-            self.model.training_model.load_weights(fn)
-        elif os.path.exists(fn):
-            raise ValueError('weights files saved in h5 format need to have an h5 file extension')
+            if os.path.isfile(self.model_dir):
+                fn = self.model_dir
+            elif os.path.isfile(os.path.join(self.model_dir, f"{self.model_id}_weights.data-00000-of-00001")):
+                fn = os.path.join(self.model_dir, f"{self.model_id}_weights.data-00000-of-00001")
+            elif os.path.isfile(os.path.join(self.model_dir, f"{self.model_id}_weights.h5")):
+                fn = os.path.join(self.model_dir, f"{self.model_id}_weights.h5")
+            else:
+                raise ValueError(f'the weightsfile {fn} could not be found')
+
+        self._assert_md5_sum(fn, self.md5)
+        if fn.endswith(".data-00000-of-00001"):
+            self.model.training_model.load_weights(".".join(fn.split(".")[:-1]))
         else:
-            raise ValueError(f'the weightsfile {fn} could not be found')
+            self.model.training_model.load_weights(fn)
 
     def save_weights_to_cache(self):
         if not os.path.exists(os.path.join(self.cache_path, 'weights')):
