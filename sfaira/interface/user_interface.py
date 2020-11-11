@@ -137,9 +137,12 @@ class UserInterface:
 
         if ids:
             pd.DataFrame(
-                list(zip(ids, model_paths, file_paths, md5)),
-                columns=['model_id', 'model_path', 'model_file_path', 'md5']
-            ).sort_values('model_id').to_csv(os.path.join(repo_path, 'model_lookuptable.csv'))
+                    list(zip(ids, model_paths, file_paths, md5)),
+                    columns=['model_id', 'model_path', 'model_file_path', 'md5']
+                )\
+                .sort_values('model_id')\
+                .reset_index(drop=True)\
+                .to_csv(os.path.join(repo_path, 'model_lookuptable.csv'))
         else:
             raise ValueError(f'No model weights found in {repo_path} '
                              'Weights need to have .h5 or .data-00000-of-00001 extension'
