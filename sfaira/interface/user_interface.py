@@ -281,7 +281,7 @@ class UserInterface:
         """
         assert self.zoo_embedding.model_id is not None, "choose embedding model first"
         model_dir = self.model_lookuptable.model_path[self.model_lookuptable.model_id == self.zoo_embedding.model_id].iloc[0]
-        model_dir = self.path.join(model_dir, '')
+        model_dir = os.path.join(model_dir, '')
         md5 = self.model_lookuptable.md5[self.model_lookuptable.model_id == self.zoo_embedding.model_id].iloc[0]
         self.estimator_embedding = EstimatorKerasEmbedding(
             data=self.data,
@@ -307,7 +307,7 @@ class UserInterface:
         """
         assert self.zoo_celltype.model_id is not None, "choose cell type model first"
         model_dir = self.model_lookuptable.model_path[self.model_lookuptable.model_id == self.zoo_celltype.model_id].iloc[0]
-        model_dir = self.path.join(model_dir, '')
+        model_dir = os.path.join(model_dir, '')
         md5 = self.model_lookuptable.md5[self.model_lookuptable.model_id == self.zoo_celltype.model_id].iloc[0]
         self.estimator_celltype = EstimatorKerasCelltype(
             data=self.data,
