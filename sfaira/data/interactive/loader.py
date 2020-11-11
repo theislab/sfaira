@@ -11,7 +11,7 @@ class DatasetInteractive(DatasetBase):
             species: str,
             organ: str,
             gene_symbol_col: Union[str, None] = 'index',
-            gene_ensg_col: Union[str, None] = None,
+            gene_ens_col: Union[str, None] = None,
             class_maps: dict = {},
             dataset_id: str = "interactive",
             **kwargs
@@ -32,7 +32,7 @@ class DatasetInteractive(DatasetBase):
         self.organ = organ
 
         self.gene_symbol_col = gene_symbol_col
-        self.gene_ensg_col = gene_ensg_col
+        self.gene_ensg_col = gene_ens_col
 
         self.class_maps = class_maps
 

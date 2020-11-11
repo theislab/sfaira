@@ -9,7 +9,7 @@ import os
 from typing import List, Union
 import warnings
 
-from .external import EstimatorKerasEmbedding, EstimatorKerasCelltype
+from .external import EstimatorKerasEmbedding, EstimatorKerasCelltype, DatasetInteractive
 from .model_zoo import ModelZooEmbedding, ModelZooCelltype
 
 
@@ -254,13 +254,40 @@ class UserInterface:
 
     def load_data(
             self,
-            data: anndata.AnnData
+            data: anndata.AnnData,
+            gene_symbol_col: Union[str, None] = None,
+            gene_ens_col: Union[str, None] = None
     ):
         """
-
-        :return:
+        Loads the provided AnnData object into sfaira.
+        If genes in the provided AnnData object are annotated as gene symbols, please provide the name of the corresponding var column (or 'index') through the gene_symbol_col argument.
+        If genes in the provided AnnData object are annotated as ensembl ids, please provide the name of the corresponding var column (or 'index') through the gene_ens_col argument.
+        You need to provide at least one of the two.
+        :param data: AnnData object to load
+        :param gene_symbol_col: Var column name (or 'index') which contains gene symbols
+        :param gene_ens_col: ar column name (or 'index') which contains ensembl ids
         """
-        self.data = data
+        if self.zoo_embedding.species is not None:
+            species = self.zoo_embedding.species
+            organ = self.zoo_embedding.organ
+        elif self.zoo_celltype.species is None:
+            species = self.zoo_embedding.species
+            organ = self.zoo_embedding.organ
+        else:
+            raise ValueError("Please first set which model_id to use via the model zoo before loading the data")
+
+        if gene_ens_col is None and gene_symbol_col is None:
+            raise ValueError("Please provide either the gene_ens_col or the gene_symbol_col argument.")
+
+        dataset = DatasetInteractive(
+                    data=data,
+                    species=species,
+                    organ=organ,
+                    gene_symbol_col=gene_symbol_col,
+                    gene_ens_col=gene_ens_col
+                )
+        dataset.load()
+        self.data = dataset.adata
 
     def filter_cells(self):
         """
