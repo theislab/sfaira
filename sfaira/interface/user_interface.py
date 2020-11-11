@@ -270,9 +270,9 @@ class UserInterface:
         if self.zoo_embedding.species is not None:
             species = self.zoo_embedding.species
             organ = self.zoo_embedding.organ
-        elif self.zoo_celltype.species is None:
-            species = self.zoo_embedding.species
-            organ = self.zoo_embedding.organ
+        elif self.zoo_celltype.species is not None:
+            species = self.zoo_celltype.species
+            organ = self.zoo_celltype.organ
         else:
             raise ValueError("Please first set which model_id to use via the model zoo before loading the data")
 
