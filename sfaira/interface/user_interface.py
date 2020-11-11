@@ -119,6 +119,7 @@ class UserInterface:
         import hashlib
 
         file_names = []
+        model_paths = []
         file_paths = []
         md5 = []
         for subdir, dirs, files in os.walk(repo_path):
@@ -126,7 +127,8 @@ class UserInterface:
                 if os.path.isfile(os.path.join(subdir, file)) and (
                         file.endswith('_weights.h5') or file.endswith('_weights.data-00000-of-00001')) and (
                         file.startswith('embedding') or file.startswith('celltype')):
-                    file_paths.append(subdir)
+                    model_paths.append(os.path.join(subdir, ""))
+                    file_paths.append(os.path.join(subdir, file))
                     file_names.append(file)
                     with open(os.path.join(subdir, file), 'rb') as f:
                         md5.append(hashlib.md5(f.read()).hexdigest())
@@ -135,8 +137,8 @@ class UserInterface:
 
         if ids:
             pd.DataFrame(
-                list(zip(ids, file_paths, md5)),
-                columns=['model_id', 'model_path', 'md5']
+                list(zip(ids, model_paths, file_paths, md5)),
+                columns=['model_id', 'model_path', 'model_file_path', 'md5']
             ).sort_values('model_id').to_csv(os.path.join(repo_path, 'model_lookuptable.csv'))
         else:
             raise ValueError(f'No model weights found in {repo_path} '
