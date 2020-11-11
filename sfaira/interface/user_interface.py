@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import os
 from typing import List, Union
+import warnings
 
 from .external import EstimatorKerasEmbedding, EstimatorKerasCelltype
 from .model_zoo import ModelZooEmbedding, ModelZooCelltype
@@ -148,6 +149,108 @@ class UserInterface:
                              'Weights need to have .h5 or .data-00000-of-00001 extension'
                              'to be recognised'
                              )
+
+    def deposit_zenodo(
+            self,
+            zenodo_access_token: str,
+            title: str,
+            authors: list,
+            description: str,
+            publish: bool = False,
+            sandbox: bool = False
+    ):
+        """
+        Deposit all models in model lookup table on Zenodo. If publish is set to false, files will be uploaded to a
+        deposition draft, which can be further edited (additional metadata, files etc.). Returns the DOI link if
+        publish=True or a link to the deposition draft if publish=False.
+
+        :param zenodo_access_token: Your personal Zenodo API access token. Create one here: https://zenodo.org/account/settings/applications/tokens/new/
+        :param title: Title of the Zenodo deposition
+        :param authors: List of dicts, where each dict defines one author (dict keys: name: Name of creator in the format "Family name, Given names", affiliation: Affiliation of creator (optional), orcid: ORCID identifier of creator (optional), gnd: GND identifier of creator (optional)
+        :param description: Description of the Zenodo deposition.
+        :param publish: Set this to True to directly publish the weights on Zenodo. When set to False a draft will be created, which can be edited in the browser before publishing.
+        :param sandbox: If True, use the Zenodo testing platform at https://sandbox.zenodo.org for your deposition. We recommend testing your upload with sandbox first as depositions cannot be deleted from the main Zenodo platfowm once created.
+        """
+
+        import requests
+        import json
+        headers = {"Content-Type": "application/json"}
+        params = {'access_token': zenodo_access_token}
+        sandbox = 'sandbox.' if sandbox else ''
+
+        # Verify access token
+        r = requests.get(f'https://{sandbox}zenodo.org/api/deposit/depositions', params=params)
+        if r.status_code != 200:
+            raise ValueError(
+                "Your Zenodo access token was not accepted by the API. Please provide a valid access token.")
+
+        # Create empty deposition
+        r = requests.post(f'https://{sandbox}zenodo.org/api/deposit/depositions',
+                          params=params,
+                          json={},
+                          headers=headers)
+
+        # Obtain bucket URL and deposition ID
+        bucket_url = r.json()["links"]["bucket"]
+        deposition_id = r.json()['id']
+
+        # Loop over files in model lookup table and upload them one by one
+        for i, weight_path in enumerate(self.model_lookuptable['model_file_path']):
+            filename = os.path.basename(weight_path)
+            with open(weight_path, "rb") as fp:
+                r = requests.put(
+                    f"{bucket_url}/{filename}",
+                    data=fp,
+                    params=params,
+                )
+            # Verify checksum after upload
+            if r.json()['checksum'][4:] != self.model_lookuptable['md5'][i]:
+                warnings.warn(f"The md5 checksum in your model_lookuptable for {self.model_lookuptable['model_id'][i]} "
+                              f"does not match the md5 checksum of the uploaded file.")
+
+        # Add model lookup table to zenodo
+        df = self.model_lookuptable.copy()
+        df['model_path'] = f"https://{sandbox}zenodo.org/record/{deposition_id}/files/"
+        df['model_file_path'] = [f"https://{sandbox}zenodo.org/record/{deposition_id}/files/{os.path.basename(f)}" for f
+                                 in self.model_lookuptable['model_file_path']]
+        r = requests.put(
+            f"{bucket_url}/model_lookuptable.csv",
+            data=df.to_csv(),
+            params=params,
+        )
+
+        # Add metadata
+        r = requests.put(f'https://{sandbox}zenodo.org/api/deposit/depositions/{deposition_id}',
+                         params=params,
+                         data=json.dumps({
+                             'metadata': {
+                                 'title': title,
+                                 'creators': authors,
+                                 'description': description,
+                                 'license': 'cc-by-4.0',
+                                 'upload_type': 'dataset',
+                                 'access_right': 'open'
+                             }
+                         }),
+                         headers=headers)
+
+        if not publish:
+            print(f"Zenodo deposition draft has been created: {r.json()['links']['latest_draft_html']}")
+            return r.json()['links']['latest_draft_html']
+        else:
+            # Publish the deposition
+            r = requests.post(f'https://{sandbox}zenodo.org/api/deposit/depositions/{deposition_id}/actions/publish',
+                              params=params)
+            if r.status_code == 202:
+                print(f"Weights referenced in model_lookuptable have been sucessfully published on Zenodo: "
+                      f"{r.json()['links']['conceptdoi']}")
+                return r.json()['links']['conceptdoi']
+            else:
+                try:
+                    m = r.json()['message']
+                except KeyError:
+                    m = f"Submission failed with html status code {r.status_code}"
+                raise ValueError(m)
 
     def load_data(
             self,

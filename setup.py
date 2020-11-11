@@ -47,6 +47,9 @@ setup(
         'extension': [
             "sfaira_extension",
         ],
+        'zenodo': [
+            "requests"
+        ],
         'docs': [
             'sphinx',
             'sphinx-autodoc-typehints',
