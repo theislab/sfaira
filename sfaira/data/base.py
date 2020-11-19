@@ -816,7 +816,10 @@ class DatasetSuperGroup:
         self.adata.filename = fn_backed  # setting this attribute switches this anndata to a backed object
         # Note that setting .filename automatically redefines .X as dense, so we have to redefine it as sparse:
         if not as_dense:
-            self.adata.X = scipy.sparse.csr_matrix(self.adata.X)  # redefines this backed anndata as sparse
+            X = scipy.sparse.csr_matrix(self.adata.X)  # redefines this backed anndata as sparse
+            X.indices = X.indices.astype(np.int64)
+            X.indptr = X.indptr.astype(np.int64)
+            self.adata.X = X
         keys = [
             "lab",
             "year",
