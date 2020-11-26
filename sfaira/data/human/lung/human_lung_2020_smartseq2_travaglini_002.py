@@ -32,7 +32,7 @@ class Dataset(DatasetBase):
     ):
         DatasetBase.__init__(self=self, path=path, meta_path=meta_path, **kwargs)
         self.species = "human"
-        self.id = "human_lung_2020_smartseq2_travaglini_002_10.1101/742320"
+        self.id = "human_lung_2020_smartseq2_travaglini_002_10.1038/s41586-020-2922-4"
         self.download_website = "https://www.synapse.org/#!Synapse:syn21041850"
         self.organ = "lung"
         self.sub_tissue = "proximal, medial, distal, blood"
@@ -102,7 +102,7 @@ class Dataset(DatasetBase):
 
         self.adata.uns["lab"] = 'Krasnow'
         self.adata.uns["year"] = 2020
-        self.adata.uns["doi"] = "10.1101/742320"
+        self.adata.uns["doi"] = "10.1038/s41586-020-2922-4"
         self.adata.uns["protocol"] = 'smartseq2'
         self.adata.uns["organ"] = self.organ
         self.adata.uns["subtissue"] = self.sub_tissue
