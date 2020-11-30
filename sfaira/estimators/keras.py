@@ -617,13 +617,14 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 x = x[[np.where(np.sort(idx) == i)[0][0] for i in idx], :]
                 sf = self._prepare_sf(x=x)
 
-                def convert_sparse_matrix_to_sparse_tensor(X):
-                    coo = X.tocoo()
-                    indices = np.mat([coo.row, coo.col]).transpose()
-                    return tf.SparseTensor(indices, coo.data, coo.shape)
+                if isinstance(x, scipy.sparse.spmatrix):
+                    def convert_sparse_matrix_to_sparse_tensor(X):
+                        coo = X.tocoo()
+                        indices = np.mat([coo.row, coo.col]).transpose()
+                        return tf.SparseTensor(indices, coo.data, coo.shape)
 
-                x = convert_sparse_matrix_to_sparse_tensor(x)
-                x = tf.keras.layers.Lambda(tf.sparse.to_dense)(x)
+                    x = convert_sparse_matrix_to_sparse_tensor(x)
+                    x = tf.keras.layers.Lambda(tf.sparse.to_dense)(x)
             else:
                 x = self._prepare_data_matrix(idx=idx)
                 x = x.toarray()
