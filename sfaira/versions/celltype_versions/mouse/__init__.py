@@ -23,7 +23,7 @@ from .stomach import CelltypeVersionsMouseStomach
 from .malegonad import CelltypeVersionsMouseMalegonad
 from .thymus import CelltypeVersionsMouseThymus
 from .tongue import CelltypeVersionsMouseTongue
-from .trachae import CelltypeVersionsMouseTrachae
+from .trachea import CelltypeVersionsMouseTrachea
 from .uterus import CelltypeVersionsMouseUterus
 
 ORGAN_DICT = {
@@ -52,6 +52,6 @@ ORGAN_DICT = {
     "malegonad": CelltypeVersionsMouseMalegonad(),
     "thymus": CelltypeVersionsMouseThymus(),
     "tongue": CelltypeVersionsMouseTongue(),
-    "trachae": CelltypeVersionsMouseTrachae(),
+    "trachea": CelltypeVersionsMouseTrachea(),
     "uterus": CelltypeVersionsMouseUterus()
 }

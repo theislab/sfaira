@@ -42,7 +42,7 @@ class TargetZoos:
                 "malegonad": mouse.DatasetGroupMalegonad(path=path, meta_path=meta_path),
                 "thymus": mouse.DatasetGroupThymus(path=path, meta_path=meta_path),
                 "tongue": mouse.DatasetGroupTongue(path=path, meta_path=meta_path),
-                "trachae": mouse.DatasetGroupTrachea(path=path, meta_path=meta_path),
+                "trachea": mouse.DatasetGroupTrachea(path=path, meta_path=meta_path),
                 "uterus": mouse.DatasetGroupUterus(path=path)
             }
             self.data_human = {

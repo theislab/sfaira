@@ -43,7 +43,7 @@ ds_dict = {
     "malegonad": mouse.DatasetGroupMalegonad(path=path, meta_path=path_meta),
     "thymus": mouse.DatasetGroupThymus(path=path, meta_path=path_meta),
     "tongue": mouse.DatasetGroupTongue(path=path, meta_path=path_meta),
-    "trachae": mouse.DatasetGroupTrachea(path=path, meta_path=path_meta),
+    "trachea": mouse.DatasetGroupTrachea(path=path, meta_path=path_meta),
     "uterus": mouse.DatasetGroupUterus(path=path, meta_path=path_meta),
 }
 ds = sfaira.data.DatasetSuperGroup(

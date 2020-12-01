@@ -23,5 +23,5 @@ from .stomach import DatasetGroupStomach
 from .malegonad import DatasetGroupMalegonad
 from .thymus import DatasetGroupThymus
 from .tongue import DatasetGroupTongue
-from .trachae import DatasetGroupTrachea
+from .trachea import DatasetGroupTrachea
 from .uterus import DatasetGroupUterus
