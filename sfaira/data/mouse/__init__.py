@@ -10,7 +10,7 @@ from .liver import DatasetGroupLiver
 from .lung import DatasetGroupLung
 from .mammarygland import DatasetGroupMammaryGland
 from .bone import DatasetGroupBone
-from .ovary import DatasetGroupOvary
+from .femalegonad import DatasetGroupFemalegonad
 from .pancreas import DatasetGroupPancreas
 from .placenta import DatasetGroupPlacenta
 from .blood import DatasetGroupBlood

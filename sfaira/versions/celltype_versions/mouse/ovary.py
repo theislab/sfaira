@@ -1,7 +1,7 @@
 from .external import CelltypeVersionsBase
 
 # Version 0
-CELLTYPES_MOUSE_OVARY_V0 = [
+CELLTYPES_MOUSE_FEMALEGONAD_V0 = [
     ["cumulus cell", "nan"],
     ["granulosa cell", "nan"],
     ["large luteal cell", "nan"],
@@ -13,7 +13,7 @@ CELLTYPES_MOUSE_OVARY_V0 = [
     ["thecal cell", "nan"],
     ["unknown", "nan"]
 ]
-ONTOLOGIES_MOUSE_OVARY_V0 = {
+ONTOLOGIES_MOUSE_FEMALEGONAD_V0 = {
     "names": {
         'luteal cell': ['small luteal cell', 'large luteal cell'],
     },
@@ -21,13 +21,13 @@ ONTOLOGIES_MOUSE_OVARY_V0 = {
 }
 
 
-class CelltypeVersionsMouseOvary(CelltypeVersionsBase):
+class CelltypeVersionsMouseFemalegonad(CelltypeVersionsBase):
 
     def __init__(self, **kwargs):
         self.celltype_universe = {
-            "0": CELLTYPES_MOUSE_OVARY_V0
+            "0": CELLTYPES_MOUSE_FEMALEGONAD_V0
         }
         self.ontology = {
-            "0": ONTOLOGIES_MOUSE_OVARY_V0
+            "0": ONTOLOGIES_MOUSE_FEMALEGONAD_V0
         }
-        super(CelltypeVersionsMouseOvary, self).__init__(**kwargs)
+        super(CelltypeVersionsMouseFemalegonad, self).__init__(**kwargs)

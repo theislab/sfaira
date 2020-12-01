@@ -16,10 +16,10 @@ class Dataset(DatasetBase):
     ):
         DatasetBase.__init__(self=self, path=path, meta_path=meta_path, **kwargs)
         self.species = "mouse"
-        self.id = "mouse_ovary_2018_microwell-seq_han_001_10.1016/j.cell.2018.02.001"
+        self.id = "mouse_femalegonad_2018_microwell-seq_han_001_10.1016/j.cell.2018.02.001"
         self.download_website = "https://ndownloader.figshare.com/articles/5435866?private_link=865e694ad06d5857db4b"
-        self.organ = "ovary"
-        self.sub_tissue = "ovary"
+        self.organ = "femalegonad"
+        self.sub_tissue = "femalegonad"
         self.has_celltypes = True
 
         self.class_maps = {

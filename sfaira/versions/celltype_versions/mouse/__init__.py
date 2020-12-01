@@ -10,7 +10,7 @@ from .liver import CelltypeVersionsMouseLiver
 from .lung import CelltypeVersionsMouseLung
 from .mammarygland import CelltypeVersionsMouseMammarygland
 from .bone import CelltypeVersionsMouseBone
-from .ovary import CelltypeVersionsMouseOvary
+from .femalegonad import CelltypeVersionsMouseFemalegonad
 from .blood import CelltypeVersionsMouseBlood
 from .placenta import CelltypeVersionsMousePlacenta
 from .pancreas import CelltypeVersionsMousePancreas
@@ -39,7 +39,7 @@ ORGAN_DICT = {
     "lung": CelltypeVersionsMouseLung(),
     "mammarygland": CelltypeVersionsMouseMammarygland(),
     "bone": CelltypeVersionsMouseBone(),
-    "ovary": CelltypeVersionsMouseOvary(),
+    "femalegonad": CelltypeVersionsMouseFemalegonad(),
     "blood": CelltypeVersionsMouseBlood(),
     "placenta": CelltypeVersionsMousePlacenta(),
     "pancreas": CelltypeVersionsMousePancreas(),

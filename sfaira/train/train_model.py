@@ -29,7 +29,7 @@ class TargetZoos:
                 "lung": mouse.DatasetGroupLung(path=path, meta_path=meta_path),
                 "mammarygland": mouse.DatasetGroupMammaryGland(path=path, meta_path=meta_path),
                 "bone": mouse.DatasetGroupBone(path=path, meta_path=meta_path),
-                "ovary": mouse.DatasetGroupOvary(path=path, meta_path=meta_path),
+                "femalegonad": mouse.DatasetGroupFemalegonad(path=path, meta_path=meta_path),
                 "pancreas": mouse.DatasetGroupPancreas(path=path, meta_path=meta_path),
                 "blood": mouse.DatasetGroupBlood(path=path, meta_path=meta_path),
                 "placenta": mouse.DatasetGroupPlacenta(path=path, meta_path=meta_path),

@@ -30,7 +30,7 @@ ds_dict = {
     "lung": mouse.DatasetGroupLung(path=path, meta_path=path_meta),
     "mammarygland": mouse.DatasetGroupMammaryGland(path=path, meta_path=path_meta),
     "bone": mouse.DatasetGroupBone(path=path, meta_path=path_meta),
-    "ovary": mouse.DatasetGroupOvary(path=path, meta_path=path_meta),
+    "femalegonad": mouse.DatasetGroupFemalegonad(path=path, meta_path=path_meta),
     "pancreas": mouse.DatasetGroupPancreas(path=path, meta_path=path_meta),
     "blood": mouse.DatasetGroupBlood(path=path, meta_path=path_meta),
     "placenta": mouse.DatasetGroupPlacenta(path=path, meta_path=path_meta),

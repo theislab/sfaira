@@ -1,1 +1,1 @@
-from .mouse_ovary import DatasetGroupOvary
+from .mouse_femalegonad import DatasetGroupFemalegonad

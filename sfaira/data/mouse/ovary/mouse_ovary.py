@@ -3,11 +3,11 @@ from typing import Union
 
 from .external import DatasetGroupBase
 
-from .mouse_ovary_2018_microwell_han_001 import Dataset as Dataset0001
-from .mouse_ovary_2018_microwell_han_002 import Dataset as Dataset0002
+from .mouse_femalegonad_2018_microwell_han_001 import Dataset as Dataset0001
+from .mouse_femalegonad_2018_microwell_han_002 import Dataset as Dataset0002
 
 
-class DatasetGroupOvary(DatasetGroupBase):
+class DatasetGroupFemalegonad(DatasetGroupBase):
 
     def __init__(
         self, 
@@ -23,6 +23,6 @@ class DatasetGroupOvary(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             import sfaira_extension.api as sfairae
-            self.datasets.update(sfairae.data.mouse.DatasetGroupOvary().datasets)
+            self.datasets.update(sfairae.data.mouse.DatasetGroupFemalegonad().datasets)
         except ImportError:
             pass
