@@ -1,1 +1,0 @@
-from .mouse_small_intestine import DatasetGroupSmallintestine
