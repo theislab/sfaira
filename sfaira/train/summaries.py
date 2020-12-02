@@ -919,6 +919,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
 
         # Build figure.
         model_types = sns_tab["model_type"].unique()
+        model_types.sort()
         classes = self.load_ontology_names(run_id=sns_tab["run"].values[0])
         if 'unknown' not in classes and 'Unknown' not in classes:
             classes = classes + ['Unknown']
@@ -946,7 +947,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
             if c in cell_counts.keys():
                 n_cells.append(np.round(cell_counts[c]))
             else:
-                warnings.warn(f"Celltype {c} from cell ontology now found in {organism} {organ} dataset")
+                warnings.warn(f"Celltype {c} from cell ontology not found in {organism} {organ} dataset")
                 n_cells.append(np.nan)
         n_cells = np.array(n_cells)[:, None]
         sns_data_heatmap = pandas.DataFrame(
@@ -1110,7 +1111,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
             if c in cell_counts.keys():
                 n_cells.append(np.round(cell_counts[c]))
             else:
-                warnings.warn(f"Celltype {c} from cell ontology now found in {organism} {organ} dataset")
+                warnings.warn(f"Celltype {c} from cell ontology not found in {organism} {organ} dataset")
                 n_cells.append(np.nan)
         n_cells = np.array(n_cells)[:, None]
         sns_data_scatter = pandas.DataFrame(
