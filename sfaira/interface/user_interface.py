@@ -246,9 +246,14 @@ class UserInterface:
             r = requests.post(f'https://{sandbox}zenodo.org/api/deposit/depositions/{deposition_id}/actions/publish',
                               params=params)
             if r.status_code == 202:
-                print(f"Weights referenced in model_lookuptable have been sucessfully published on Zenodo: "
-                      f"{r.json()['links']['conceptdoi']}")
-                return r.json()['links']['conceptdoi']
+                if sandbox:
+                    print(f"Weights referenced in model_lookuptable have been sucessfully published on Zenodo: "
+                          f"{r.json()['links']['latest_html']}")
+                    return r.json()['links']['latest_html']
+                else:
+                    print(f"Weights referenced in model_lookuptable have been sucessfully published on Zenodo: "
+                          f"{r.json()['links']['conceptdoi']}")
+                    return r.json()['links']['conceptdoi']
             else:
                 try:
                     m = r.json()['message']
