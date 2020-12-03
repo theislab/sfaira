@@ -156,6 +156,7 @@ class UserInterface:
             title: str,
             authors: list,
             description: str,
+            metadata: dict = {},
             publish: bool = False,
             sandbox: bool = False
     ):
@@ -168,6 +169,7 @@ class UserInterface:
         :param title: Title of the Zenodo deposition
         :param authors: List of dicts, where each dict defines one author (dict keys: name: Name of creator in the format "Family name, Given names", affiliation: Affiliation of creator (optional), orcid: ORCID identifier of creator (optional), gnd: GND identifier of creator (optional)
         :param description: Description of the Zenodo deposition.
+        :param metadata: Dictionary with further metadata attributes of the deposit. See the Zenodo API refenrece for accepted keys: https://developers.zenodo.org/#representation
         :param publish: Set this to True to directly publish the weights on Zenodo. When set to False a draft will be created, which can be edited in the browser before publishing.
         :param sandbox: If True, use the Zenodo testing platform at https://sandbox.zenodo.org for your deposition. We recommend testing your upload with sandbox first as depositions cannot be deleted from the main Zenodo platfowm once created.
         """
@@ -220,17 +222,19 @@ class UserInterface:
         )
 
         # Add metadata
+        meta_core = {
+            'title': title,
+            'creators': authors,
+            'description': description,
+            'license': 'cc-by-4.0',
+            'upload_type': 'dataset',
+            'access_right': 'open'
+            }
+        meta = {**meta_core, **metadata}
         r = requests.put(f'https://{sandbox}zenodo.org/api/deposit/depositions/{deposition_id}',
                          params=params,
                          data=json.dumps({
-                             'metadata': {
-                                 'title': title,
-                                 'creators': authors,
-                                 'description': description,
-                                 'license': 'cc-by-4.0',
-                                 'upload_type': 'dataset',
-                                 'access_right': 'open'
-                             }
+                             'metadata': meta
                          }),
                          headers=headers)
 
