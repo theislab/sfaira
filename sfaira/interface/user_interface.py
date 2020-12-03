@@ -126,8 +126,8 @@ class UserInterface:
         for subdir, dirs, files in os.walk(repo_path):
             for file in files:
                 if os.path.isfile(os.path.join(subdir, file)) and (
-                        file.endswith('_weights.h5') or file.endswith('_weights.data-00000-of-00001')) and (
-                        file.startswith('embedding') or file.startswith('celltype')):
+                        file.endswith('.h5') or file.endswith('.data-00000-of-00001')) and (
+                        file.startswith('embedding_') or file.startswith('celltype_')):
                     model_paths.append(os.path.join(subdir, ""))
                     file_paths.append(os.path.join(subdir, file))
                     file_names.append(file)
