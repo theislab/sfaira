@@ -582,7 +582,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 else:
                     x = self._prepare_data_matrix(idx=idx)
 
-            elif mode in ['eval', 'predict']:
+            else:
                 # Prepare data reading according to whether anndata is backed or not:
                 if self.data.isbacked:
                     # Need to supply sorted indices to backed anndata:
