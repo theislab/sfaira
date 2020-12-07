@@ -34,6 +34,7 @@ class Dataset(DatasetBase):
         self.species = "human"
         self.id = "human_lung_2020_10x_travaglini_001_10.1038/s41586-020-2922-4"
         self.download_website = "https://www.synapse.org/#!Synapse:syn21041850"
+        self.download_website_meta = None
         self.organ = "lung"
         self.sub_tissue = "proximal, medial, distal, blood"
         self.has_celltypes = True

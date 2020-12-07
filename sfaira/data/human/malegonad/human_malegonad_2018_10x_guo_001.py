@@ -26,6 +26,7 @@ class Dataset(DatasetBase):
         self.species = "human"
         self.id = "human_malegonad_2018_10x_guo_001_10.1038/s41422-018-0099-2"
         self.download_website = "https://covid19.cog.sanger.ac.uk/guo18_donor.processed.h5ad"
+        self.download_website_meta = None
         self.organ = "malegonad"
         self.sub_tissue = "testis"
         self.has_celltypes = True

@@ -36,6 +36,7 @@ class Dataset(DatasetBase):
         self.species = "human"
         self.id = "human_bone_2018_10x_ica_unknown"
         self.download_website = "https://data.humancellatlas.org/project-assets/project-matrices/cc95ff89-2e68-4a08-a234-480eca21ce79.homo_sapiens.loom"
+        self.download_website_meta = None
         self.organ = "bone"
         self.sub_tissue = "bone_marrow"
         self.has_celltypes = False

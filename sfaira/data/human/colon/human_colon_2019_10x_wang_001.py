@@ -26,6 +26,7 @@ class Dataset(DatasetBase):
         self.species = "human"
         self.id = "human_colon_2019_10x_wang_001_10.1084/jem.20191130"
         self.download_website = "https://covid19.cog.sanger.ac.uk/wang20_colon.processed.h5ad"
+        self.download_website_meta = None
         self.organ = "colon"
         self.sub_tissue = "colon"
         self.has_celltypes = True

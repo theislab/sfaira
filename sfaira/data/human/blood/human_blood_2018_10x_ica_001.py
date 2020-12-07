@@ -36,6 +36,7 @@ class Dataset(DatasetBase):
         self.species = "human"
         self.id = "human_blood_2018_10x_ica_001_unknown"
         self.download_website = "https://data.humancellatlas.org/project-assets/project-matrices/cc95ff89-2e68-4a08-a234-480eca21ce79.homo_sapiens.loom"
+        self.download_website_meta = None
         self.organ = "blood"
         self.sub_tissue = "umbilical_cord_blood"
         self.has_celltypes = False

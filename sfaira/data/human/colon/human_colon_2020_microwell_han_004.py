@@ -27,7 +27,8 @@ class Dataset(DatasetBase):
         self.organ = 'Colon'
         self.sub_tissue = 'AdultSigmoidColon'
         self.dev_stage = 'Adult'
-        self.download_website = "https://figshare.com/articles/HCL_DGE_Data/7235471"
+        self.download_website = 'https://figshare.com/articles/HCL_DGE_Data/7235471'
+        self.download_website_meta = None
         self.has_celltypes = True
 
         self.class_maps = {

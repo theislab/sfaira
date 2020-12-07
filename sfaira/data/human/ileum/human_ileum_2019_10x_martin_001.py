@@ -26,6 +26,7 @@ class Dataset(DatasetBase):
         self.species = "human"
         self.id = "human_ileum_2019_10x_martin_001_10.1016/j.cell.2019.08.008"
         self.download_website = "https://covid19.cog.sanger.ac.uk/martin19.processed.h5ad"
+        self.download_website_meta = None
         self.organ = "ileum"
         self.sub_tissue = "ileum"
         self.has_celltypes = True

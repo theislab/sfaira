@@ -26,6 +26,7 @@ class Dataset(DatasetBase):
         self.species = "human"
         self.id = "human_lung_2020_10x_miller_001_10.1016/j.devcel.2020.01.033"
         self.download_website = "https://covid19.cog.sanger.ac.uk/miller20.processed.h5ad"
+        self.download_website_meta = None
         self.organ = "lung"
         self.sub_tissue = "fetal lung"
         self.has_celltypes = True
