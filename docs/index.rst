@@ -1,6 +1,8 @@
-.. include:: ../README.rst
-   :end-line: 22
+sfaira_ is a model and a data repository in a single python package.
+We provide an interactive overview of the current state of the zoos on sfaira-site_.
 
+.. _sfaira: https://sfaira.readthedocs.io
+.. _sfaira-site: https://theislab.github.io/sfaira-site/index.html
 
 News
 ----
