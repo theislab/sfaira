@@ -1,14 +1,33 @@
-.. You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+.. include:: ../README.rst
+   :end-line: 22
 
 
+News
+----
 
-Welcome to sfaira's documentation!
-====================================
+.. include:: news.rst
+
+
+Roadmap
+-------
+
+.. include:: roadmap.rst
+
+
+Environment
+-----------
+
+.. include:: environment_brief.rst
+
+
+Latest additions
+----------------
+
+.. include:: release-latest.rst
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 1
+   :hidden:
 
    installation
    api/index
@@ -18,11 +37,5 @@ Welcome to sfaira's documentation!
    ontologies
    genomes
    training
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   environment
+   release-notes

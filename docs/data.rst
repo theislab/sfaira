@@ -4,12 +4,24 @@ Data
 Build data repository locally
 ------------------------------
 
-Build a repository structure:
+Build a repository structure
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 1. Choose a directory to dedicate to the data base, called root in the following.
 2. Make subfolders in root for each organism for which you want to build a data base.
 3. Make subfolders for each organ whithin each organism for which you want to build a data base.
 
-Add data sets:
+Use 3rd party repositories
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+Some organization provide streamlined data objects that can be directly consumed by data zoos such as sfaira.
+One example for such an organization is the cellxgene_ data portal.
+Through these repositories, one can easily build or extend a collection of data sets that can be easily interfaced with sfaira.
+Data loaders for cellxgene structured data objects will be available soon!
+Contact us for support of any other repositories.
+
+.. _cellxgene: https://cellxgene.cziscience.com/
+
+Add data sets
+~~~~~~~~~~~~~
 4. For each species and organ combination, choose the data sets that you want to use.
 5. Identify the raw files as indicated in the data loader classes and copy them into the folder. Use processed data
 using the described processing if this is required: This is usually done to speed up loading for file
@@ -24,8 +36,6 @@ of the directory structure as `path to the constructor of the class that you are
 Depending on the functionalities you want to use, you need to create a directory with data set meta data first. This
 can be easily done via the data set api itself, example python scripts are under benchmarks/data_preparation. This
 meta information is necessary to anticipate file sizes for backing merged adata objects for example.
-
-TODO example.
 
 Contribute data loaders
 -----------------------
@@ -117,4 +127,3 @@ This dictionary allows mapping of the cell type annotations that come with the r
 universe or ontology terms defined in sfaira, this is, however, only done upon loading of the data (.load()).
 The outcome of this map is a new set of cell type labels that can be propagated to leave nodes of the ontology graph.
 This dictionary requires a new entry for each new version of the corresponding cell type universe.
-
