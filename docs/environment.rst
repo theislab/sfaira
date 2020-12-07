@@ -31,7 +31,7 @@ Contact us for support of any other repositories.
 Single-cell study data base by Svensson et al.
 ----------------------------------------------
 
-Svensson_ et al. published a single-cell database_ in the form of a table in wich each row contains a description of a study which published single-cell RNA-seq data.
+Svensson_ et al. published a single-cell database_ in the form of a table in which each row contains a description of a study which published single-cell RNA-seq data.
 Some of these data sets are already included in sfaira:
 We aim to include all of these data sets but have currently a much smaller set of data sets.
 However, the sfaira database handles direct access to these data sets,
