@@ -1,7 +1,7 @@
 .. role:: small
 .. role:: smaller
 
-Sfaira fits into an envrionment of many other project centred on making data and models accessible.
+sfaira fits into an environment of many other project centred on making data and models accessible.
 
 Data zoo
 ~~~~~~~~

@@ -4,10 +4,10 @@
 
 Cell ontologies
 ~~~~~~~~~~~~~~~
-We are currently migrating our ontology to use the `Cell Onotology`_ as a backbone.
+We are currently migrating our ontology to use the Cell Onotology_ as a backbone.
 For details, read through this milestone_.
 
-.. _Cell Ontology: http://www.obofoundry.org/ontology/cl.html
+.. _Ontology: http://www.obofoundry.org/ontology/cl.html
 .. _milestone: https://github.com/theislab/sfaira/milestone/1
 
 
