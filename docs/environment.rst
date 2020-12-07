@@ -26,3 +26,21 @@ Data loaders for cellxgene structured data objects will be available soon!
 Contact us for support of any other repositories.
 
 .. _cellxgene: https://cellxgene.cziscience.com/
+
+
+Single-cell study data base by Svensson et al.
+----------------------------------------------
+
+Svensson_ et al. published a single-cell database_ in the form of a table in wich each row contains a description of a study which published single-cell RNA-seq data.
+Some of these data sets are already included in sfaira:
+We aim to include all of these data sets but have currently a much smaller set of data sets.
+However, the sfaira database handles direct access to these data sets,
+allowing users to interact with anndata_ objects that represent subsets of this database,
+without requiring any data loading code from the user,
+therefore opening up further use cases.
+Consider also our interactive website_ for a graphical user interface to our complete data zoo.
+
+.. _Svensson: https://academic.oup.com/database/article/doi/10.1093/database/baaa073/6008692
+.. _database: https://www.nxn.se/single-cell-studies/gui
+.. _anndata: https://github.com/theislab/anndata
+.. _website: https://theislab.github.io/sfaira-site/index.html
