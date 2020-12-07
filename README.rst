@@ -1,5 +1,5 @@
-Managing single-cell data sets and neural networks used for analysis
-=====================================================================
+sfaira - data and model repository for single-cell data
+=======================================================
 
 .. image:: https://github.com/theislab/sfaira/blob/master/resources/images/concept.jpeg
    :width: 600px

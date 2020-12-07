@@ -1,3 +1,6 @@
+sfaira - data and model repository for single-cell data
+=======================================================
+
 sfaira_ is a model and a data repository in a single python package.
 We provide an interactive overview of the current state of the zoos on sfaira-site_.
 
