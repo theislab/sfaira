@@ -7,23 +7,12 @@ We provide an interactive overview of the current state of the zoos on sfaira-si
 .. _sfaira: https://sfaira.readthedocs.io
 .. _sfaira-site: https://theislab.github.io/sfaira-site/index.html
 
+.. include:: environment_brief.rst
+
 News
 ----
 
 .. include:: news.rst
-
-
-Roadmap
--------
-
-.. include:: roadmap.rst
-
-
-Environment
------------
-
-.. include:: environment_brief.rst
-
 
 Latest additions
 ----------------
@@ -37,10 +26,8 @@ Latest additions
    installation
    api/index
    tutorials
-   models
    data
-   ontologies
-   genomes
-   training
+   models
    environment
+   roadmap
    release-notes

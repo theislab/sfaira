@@ -1,8 +1,8 @@
 Models
 ======
 
-Introduction to sfaira model management
----------------------------------------
+Model management
+----------------
 
 A sfaira model is a class that inherits from BasicModel which defines a tf.keras.models.Model in self.training_model.
 This training_model describes the full forward pass. Additionally, embedding models also have an attribute X, a
@@ -16,11 +16,19 @@ In particular, ModelXVersioned
     - has access to a map of a version ID to an architectural hyperparameter setting (Topologies), allowing this class to set depth, width, etc of the model directly based on the name of the yielded model.
     - has access to the feature space of the model, including its gene names, which are defined by the model topology in Topologies
 
-
 Contribute models
------------------
+~~~~~~~~~~~~~~~~~
 
 Models can be contributed and used in two ways
 
     - Full model code in sfaira repo
     - Sfaira compatible model code in external package (to come)
+
+Training
+--------
+
+Estimator classes
+~~~~~~~~~~~~~~~~~
+
+We define estimator classes that have model instances as an attribute, that orchestrate all major aspects of model
+fitting, such as a data loading, data streaming and model evaluation.
