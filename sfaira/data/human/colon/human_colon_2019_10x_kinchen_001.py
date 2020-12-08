@@ -63,6 +63,7 @@ class Dataset(DatasetBase):
         self.species = "human"
         self.id = "human_colon_2019_10x_kinchen_001_10.1016/j.cell.2018.08.067"
         self.download_website = "https://data.humancellatlas.org/project-assets/project-matrices/f8aa201c-4ff1-45a4-890e-840d63459ca2.homo_sapiens.loom"
+        self.download_website_meta = 'private'
         self.organ = "colon"
         self.sub_tissue = "lamina propria of mucosa of colon"
         self.has_celltypes = True

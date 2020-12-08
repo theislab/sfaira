@@ -27,6 +27,7 @@ class Dataset(DatasetBase):
         self.species = "human"
         self.id = "human_colon_2019_10x_smilie_001_10.1016/j.cell.2019.06.029"
         self.download_website = "https://covid19.cog.sanger.ac.uk/smillie19_epi.processed.h5ad"
+        self.download_website_meta = None
         self.organ = "colon"
         self.sub_tissue = "colonic epithelium"
         self.has_celltypes = True

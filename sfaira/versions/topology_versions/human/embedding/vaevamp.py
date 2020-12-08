@@ -7,8 +7,8 @@ VAEVAMP_TOPOLOGIES = {
             "l2_coef": 0.,
             "dropout_rate": 0.,
             "batchnorm": True,
-            "activation": "tanh",
-            "init": "glorot_uniform",
+            "activation": "selu",
+            "init": "lecun_normal",
             "output_layer": "nb_shared_disp"
         }
     },
@@ -20,8 +20,8 @@ VAEVAMP_TOPOLOGIES = {
             "l2_coef": 0.,
             "dropout_rate": 0.,
             "batchnorm": True,
-            "activation": "tanh",
-            "init": "glorot_uniform",
+            "activation": "selu",
+            "init": "lecun_normal",
             "output_layer": "nb_shared_disp"
         }
     }

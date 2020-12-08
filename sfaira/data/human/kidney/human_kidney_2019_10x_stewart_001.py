@@ -28,6 +28,7 @@ class Dataset(DatasetBase):
             'https://cellgeni.cog.sanger.ac.uk/BenKidney_v2.1/Mature_Full_v2.1.h5ad',
             'https://cellgeni.cog.sanger.ac.uk/BenKidney_v2.1/Fetal_full.h5ad'
         ]
+        self.download_website_meta = None
         self.organ = "kidney"
         self.sub_tissue = "renal medulla, renal pelvis, ureter, cortex of kidney"
         self.has_celltypes = True

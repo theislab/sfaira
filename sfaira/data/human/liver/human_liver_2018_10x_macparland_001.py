@@ -26,6 +26,7 @@ class Dataset(DatasetBase):
         self.species = "human"
         self.id = "human_liver_2018_10x_macparland_001_10.1038/s41467-018-06318-7"
         self.download_website = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE115469"
+        self.download_website_meta = 'private'
         self.organ = "liver"
         self.sub_tissue = "caudate lobe"
         self.has_celltypes = True

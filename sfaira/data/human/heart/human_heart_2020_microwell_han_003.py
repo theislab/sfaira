@@ -28,6 +28,7 @@ class Dataset(DatasetBase):
         self.sub_tissue = 'AdultHeart'
         self.dev_stage = 'Adult'
         self.download_website = 'https://figshare.com/articles/HCL_DGE_Data/7235471'
+        self.download_website_meta = None
         self.has_celltypes = True
 
         self.class_maps = {

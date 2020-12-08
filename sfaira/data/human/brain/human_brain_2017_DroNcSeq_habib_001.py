@@ -26,6 +26,7 @@ class Dataset(DatasetBase):
         self.species = "human"
         self.id = "human_brain_2017_DroNcSeq_habib_001_10.1038/nmeth.4407"
         self.download_website = "https://covid19.cog.sanger.ac.uk/habib17.processed.h5ad"
+        self.download_website_meta = None
         self.organ = "brain"
         self.sub_tissue = "hippocampus, prefrontal cortex"
         self.has_celltypes = True

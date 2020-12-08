@@ -26,6 +26,7 @@ class Dataset(DatasetBase):
         self.species = "human"
         self.id = "human_pancreas_2016_indrop_baron_001_10.1016/j.cels.2016.08.011"
         self.download_website = "https://covid19.cog.sanger.ac.uk/baron16.processed.h5ad"
+        self.download_website_meta = None
         self.organ = "pancreas"
         self.sub_tissue = "pancreas"
         self.has_celltypes = True

@@ -61,7 +61,7 @@ class UserInterface:
         self.cache_path = os.path.join(cache_path, '')
 
         if sfaira_repo:  # check if public sfaira repository should be accessed
-            self.model_lookuptable = self._load_lookuptable("https://sandbox.zenodo.org/record/647061/files/")   #TODO: this still points to zenodo sandbox
+            self.model_lookuptable = self._load_lookuptable("https://zenodo.org/record/4304660/files/")
 
         if custom_repo:
             if isinstance(custom_repo, str):
@@ -82,6 +82,9 @@ class UserInterface:
             if not sfaira_repo:
                 raise ValueError("please either provide a custom folder/repository with model weights or specify "
                                  "`sfaira_repo=True` to access the public weight repository")
+
+        # TODO: workaround to deal with model ids bearing file endings in model lookuptable (as is the case in first sfaira model repo upload)
+        self.model_lookuptable['model_id'] = [i.replace('.h5', '').replace('.data-00000-of-00001', '') for i in self.model_lookuptable['model_id']]
 
         self.zoo_embedding = ModelZooEmbedding(self.model_lookuptable)
         self.zoo_celltype = ModelZooCelltype(self.model_lookuptable)
@@ -126,8 +129,8 @@ class UserInterface:
         for subdir, dirs, files in os.walk(repo_path):
             for file in files:
                 if os.path.isfile(os.path.join(subdir, file)) and (
-                        file.endswith('_weights.h5') or file.endswith('_weights.data-00000-of-00001')) and (
-                        file.startswith('embedding') or file.startswith('celltype')):
+                        file.endswith('.h5') or file.endswith('.data-00000-of-00001')) and (
+                        file.startswith('embedding_') or file.startswith('celltype_')):
                     model_paths.append(os.path.join(subdir, ""))
                     file_paths.append(os.path.join(subdir, file))
                     file_names.append(file)
@@ -135,10 +138,11 @@ class UserInterface:
                         md5.append(hashlib.md5(f.read()).hexdigest())
         s = [i.split('_')[0:7] for i in file_names]
         ids = ['_'.join(i) for i in s]
+        ids_cleaned = [i.replace('.h5', '').replace('.data-00000-of-00001', '') for i in ids]  # remove file extensions from ids
 
         if ids:
             pd.DataFrame(
-                    list(zip(ids, model_paths, file_paths, md5)),
+                    list(zip(ids_cleaned, model_paths, file_paths, md5)),
                     columns=['model_id', 'model_path', 'model_file_path', 'md5']
                 )\
                 .sort_values('model_id')\
@@ -156,6 +160,7 @@ class UserInterface:
             title: str,
             authors: list,
             description: str,
+            metadata: dict = {},
             publish: bool = False,
             sandbox: bool = False
     ):
@@ -168,6 +173,7 @@ class UserInterface:
         :param title: Title of the Zenodo deposition
         :param authors: List of dicts, where each dict defines one author (dict keys: name: Name of creator in the format "Family name, Given names", affiliation: Affiliation of creator (optional), orcid: ORCID identifier of creator (optional), gnd: GND identifier of creator (optional)
         :param description: Description of the Zenodo deposition.
+        :param metadata: Dictionary with further metadata attributes of the deposit. See the Zenodo API refenrece for accepted keys: https://developers.zenodo.org/#representation
         :param publish: Set this to True to directly publish the weights on Zenodo. When set to False a draft will be created, which can be edited in the browser before publishing.
         :param sandbox: If True, use the Zenodo testing platform at https://sandbox.zenodo.org for your deposition. We recommend testing your upload with sandbox first as depositions cannot be deleted from the main Zenodo platfowm once created.
         """
@@ -220,17 +226,19 @@ class UserInterface:
         )
 
         # Add metadata
+        meta_core = {
+            'title': title,
+            'creators': authors,
+            'description': description,
+            'license': 'cc-by-4.0',
+            'upload_type': 'dataset',
+            'access_right': 'open'
+            }
+        meta = {**meta_core, **metadata}
         r = requests.put(f'https://{sandbox}zenodo.org/api/deposit/depositions/{deposition_id}',
                          params=params,
                          data=json.dumps({
-                             'metadata': {
-                                 'title': title,
-                                 'creators': authors,
-                                 'description': description,
-                                 'license': 'cc-by-4.0',
-                                 'upload_type': 'dataset',
-                                 'access_right': 'open'
-                             }
+                             'metadata': meta
                          }),
                          headers=headers)
 
@@ -242,9 +250,14 @@ class UserInterface:
             r = requests.post(f'https://{sandbox}zenodo.org/api/deposit/depositions/{deposition_id}/actions/publish',
                               params=params)
             if r.status_code == 202:
-                print(f"Weights referenced in model_lookuptable have been sucessfully published on Zenodo: "
-                      f"{r.json()['links']['conceptdoi']}")
-                return r.json()['links']['conceptdoi']
+                if sandbox:
+                    print(f"Weights referenced in model_lookuptable have been sucessfully published on Zenodo: "
+                          f"{r.json()['links']['latest_html']}")
+                    return r.json()['links']['latest_html']
+                else:
+                    print(f"Weights referenced in model_lookuptable have been sucessfully published on Zenodo: "
+                          f"{r.json()['links']['conceptdoi']}")
+                    return r.json()['links']['conceptdoi']
             else:
                 try:
                     m = r.json()['message']

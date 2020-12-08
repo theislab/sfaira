@@ -27,6 +27,7 @@ class Dataset(DatasetBase):
         self.species = "human"
         self.id = "human_colon_2019_10x_james_001_10.1038/s41590-020-0602-z"
         self.download_website = "https://covid19.cog.sanger.ac.uk/james20.processed.h5ad"
+        self.download_website_meta = None
         self.organ = "colon"
         self.sub_tissue = "colonic immune cells"
         self.has_celltypes = True

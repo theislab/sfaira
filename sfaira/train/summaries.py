@@ -919,6 +919,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
 
         # Build figure.
         model_types = sns_tab["model_type"].unique()
+        model_types.sort()
         classes = self.load_ontology_names(run_id=sns_tab["run"].values[0])
         if 'unknown' not in classes and 'Unknown' not in classes:
             classes = classes + ['Unknown']
@@ -946,7 +947,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
             if c in cell_counts.keys():
                 n_cells.append(np.round(cell_counts[c]))
             else:
-                warnings.warn(f"Celltype {c} from cell ontology now found in {organism} {organ} dataset")
+                warnings.warn(f"Celltype {c} from cell ontology not found in {organism} {organ} dataset")
                 n_cells.append(np.nan)
         n_cells = np.array(n_cells)[:, None]
         sns_data_heatmap = pandas.DataFrame(
@@ -1110,7 +1111,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
             if c in cell_counts.keys():
                 n_cells.append(np.round(cell_counts[c]))
             else:
-                warnings.warn(f"Celltype {c} from cell ontology now found in {organism} {organ} dataset")
+                warnings.warn(f"Celltype {c} from cell ontology not found in {organism} {organ} dataset")
                 n_cells.append(np.nan)
         n_cells = np.array(n_cells)[:, None]
         sns_data_scatter = pandas.DataFrame(
@@ -1187,10 +1188,10 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                 "model_gs_id": ["_".join(id_i.split("_")[:(self.model_id_len + 6)]) for id_i in self.run_ids],
                 "run": self.run_ids,
         }.items()) +
-            list(dict([("train_" + m, [self.evals[x]["train"][m] for x in self.run_ids]) for m in metrics]).items()) +
-            list(dict([("test_" + m, [self.evals[x]["test"][m] for x in self.run_ids]) for m in metrics]).items()) +
-            list(dict([("val_" + m, [self.evals[x]["val"][m] for x in self.run_ids]) for m in metrics]).items()) +
-            list(dict([("all_" + m, [self.evals[x]["all"][m] for x in self.run_ids]) for m in metrics]).items())
+            list(dict([("train_" + m, [self.evals[x]["train"][m] if m in self.evals[x]["train"].keys() else self.evals[x]["train"]['neg_ll_'+m] for x in self.run_ids]) for m in metrics]).items()) +  # TODO: Hacky solution to make sure metrics are called the same in VAE and other models
+            list(dict([("test_" + m, [self.evals[x]["test"][m] if m in self.evals[x]["test"].keys() else self.evals[x]["test"]['neg_ll_'+m] for x in self.run_ids]) for m in metrics]).items()) +  # TODO: Hacky solution to make sure metrics are called the same in VAE and other models
+            list(dict([("val_" + m, [self.evals[x]["val"][m] if m in self.evals[x]["val"].keys() else self.evals[x]["val"]['neg_ll_'+m] for x in self.run_ids]) for m in metrics]).items()) +  # TODO: Hacky solution to make sure metrics are called the same in VAE and other models
+            list(dict([("all_" + m, [self.evals[x]["all"][m] if m in self.evals[x]["all"].keys() else self.evals[x]["all"]['neg_ll_'+m] for x in self.run_ids]) for m in metrics]).items())  # TODO: Hacky solution to make sure metrics are called the same in VAE and other models
         ))
 
         # TODO: Hacky solution to make sure metrics are called the same in VAE and other models

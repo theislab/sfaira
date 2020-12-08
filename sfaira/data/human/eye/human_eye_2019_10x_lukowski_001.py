@@ -26,6 +26,7 @@ class Dataset(DatasetBase):
         self.species = "human"
         self.id = "human_eye_2019_10x_lukowski_001_10.15252/embj.2018100811"
         self.download_website = "https://covid19.cog.sanger.ac.uk/lukowski19.processed.h5ad"
+        self.download_website_meta = None
         self.organ = "eye"
         self.sub_tissue = "retina"
         self.has_celltypes = True

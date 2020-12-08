@@ -26,6 +26,7 @@ class Dataset(DatasetBase):
         self.id = "human_lung_2019_10x_braga_002_10.1038/s41591-019-0468-5"
         self.download_website = "https://covid19.cog.sanger.ac.uk/" \
                                 "vieira19_Bronchi_anonymised.processed.h5ad"
+        self.download_website_meta = None
         self.organ = "lung"
         self.sub_tissue = "bronchi"
         self.has_celltypes = True
