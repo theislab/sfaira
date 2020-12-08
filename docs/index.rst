@@ -28,6 +28,6 @@ Latest additions
    tutorials
    data
    models
-   environment
+   ecosystem
    roadmap
    release-notes

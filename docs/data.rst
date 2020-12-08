@@ -1,6 +1,10 @@
 Data
 ======
 
+.. image:: https://raw.githubusercontent.com/theislab/sfaira/master/resources/images/data_zoo.png
+   :width: 300px
+   :align: center
+
 Build data repository locally
 ------------------------------
 

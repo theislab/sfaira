@@ -1,6 +1,18 @@
 Models
 ======
 
+.. image:: https://raw.githubusercontent.com/theislab/sfaira/master/resources/images/model_zoo.png
+   :width: 300px
+   :align: center
+
+User interface
+--------------
+
+The user interface allows users to query model code and parameter estimates to run on local data.
+It takes care of downloading model parameters from the relevant cloud storage, loading parameters into a model instance locally and performing the forward pass.
+With the user interface, users only have to worry about which model they want to execute, but now how this is facilitated.
+
+
 Model management
 ----------------
 

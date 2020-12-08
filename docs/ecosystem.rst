@@ -1,5 +1,5 @@
-Environment
-===========
+Ecosystem
+=========
 
 scanpy
 ------
