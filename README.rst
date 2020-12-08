@@ -1,3 +1,13 @@
+|Stars| |PyPI| |PyPIDownloads|
+
+.. |Stars| image:: https://img.shields.io/github/stars/theislab/sfaira?logo=GitHub&color=yellow
+   :target: https://github.com/theislab/sfaira/stargazers
+.. |PyPI| image:: https://img.shields.io/pypi/v/sfaira?logo=PyPI
+   :target: https://pypi.org/project/sfaira
+.. |PyPIDownloads| image:: https://pepy.tech/badge/sfaira
+   :target: https://pepy.tech/project/sfaira
+
+
 sfaira - data and model repository for single-cell data
 =======================================================
 
