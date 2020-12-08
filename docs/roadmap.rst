@@ -1,6 +1,5 @@
-.. role:: small
-.. role:: smaller
-
+Roadmap
+=======
 
 Cell ontologies
 ~~~~~~~~~~~~~~~
