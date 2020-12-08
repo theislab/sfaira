@@ -1,7 +1,7 @@
 sfaira - data and model repository for single-cell data
 =======================================================
 
-.. image:: https://github.com/theislab/sfaira/blob/master/resources/images/concept.jpeg
+.. image:: https://github.com/theislab/sfaira/blob/master/resources/images/concept.png
    :width: 600px
    :align: center
 

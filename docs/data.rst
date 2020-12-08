@@ -10,9 +10,10 @@ Build data repository locally
 
 Build a repository structure
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-1. Choose a directory to dedicate to the data base, called root in the following.
-2. Make subfolders in root for each organism for which you want to build a data base.
-3. Make subfolders for each organ whithin each organism for which you want to build a data base.
+
+    1. Choose a directory to dedicate to the data base, called root in the following.
+    2. Make subfolders in root for each organism for which you want to build a data base.
+    3. Make subfolders for each organ whithin each organism for which you want to build a data base.
 
 Use 3rd party repositories
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -26,10 +27,11 @@ Contact us for support of any other repositories.
 
 Add data sets
 ~~~~~~~~~~~~~
-4. For each species and organ combination, choose the data sets that you want to use.
-5. Identify the raw files as indicated in the data loader classes and copy them into the folder. Use processed data
-using the described processing if this is required: This is usually done to speed up loading for file
-formats that are difficult to access.
+
+    4. For each species and organ combination, choose the data sets that you want to use.
+    5. Identify the raw files as indicated in the data loader classes and copy them into the folder. Use processed data
+    using the described processing if this is required: This is usually done to speed up loading for file
+    formats that are difficult to access.
 
 Data loaders
 ------------

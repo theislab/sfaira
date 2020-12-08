@@ -16,11 +16,12 @@ Data providers which streamline data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Some organization provide streamlined data objects that can be directly consumed by data zoos such as sfaira.
-Examples for such providers are:
-- Human Cell Atlas data portal (HCA DCP_)
-- cellxgene_ data portal
-- Broad_ institute single cell data portal
-- EBI_ single cell expression atlas
+Examples for such data providers are:
+
+    - Human Cell Atlas data portal (HCA DCP_)
+    - cellxgene_ data portal
+    - Broad_ institute single cell data portal
+    - EBI_ single cell expression atlas
 
 Through these repositories, one can easily build or extend a collection of data sets that can be easily interfaced with sfaira.
 Data loaders for cellxgene structured data objects will be available soon, we are working on interfacing more such organisations!
@@ -35,10 +36,11 @@ Contact us for support of any other repositories.
 Study-centric data set servers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Many authors of data sets provide their data sets on servers such as:
-- GEO_
-- cloud storage servers
-- manuscript supplements
+Many authors of data sets provide their data sets on servers:
+
+    - GEO_
+    - cloud storage servers
+    - manuscript supplements
 
 Our data zoo interface is able to represent these data sets such that they can be queried in a streamlined fashion,
 together with many other data sets.
