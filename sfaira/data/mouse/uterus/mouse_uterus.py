@@ -22,7 +22,7 @@ class DatasetGroupUterus(DatasetGroupBase):
         self.datasets = dict(zip(keys, datasets))
         # Load versions from extension if available:
         try:
-            from sfaira_extension.data.mouse import
+            from sfaira_extension.data.mouse import DatasetGroupUterus
             self.datasets.update(DatasetGroupUterus().datasets)
         except ImportError:
             pass
