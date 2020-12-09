@@ -14,14 +14,8 @@ try:
         if organ in SPECIES_DICT_EXTENSION["mouse"].keys():
             for v in SPECIES_DICT_EXTENSION["mouse"][organ].versions:
                 if v in mouse[organ].celltype_universe.keys():
-                    mouse[organ].celltype_universe[v] = {
-                        **mouse[organ].celltype_universe[v],
-                        **SPECIES_DICT_EXTENSION["mouse"][organ].celltype_universe[v]
-                    }
-                    mouse[organ].ontology[v] = {
-                        **mouse[organ].ontology[v],
-                        **SPECIES_DICT_EXTENSION["mouse"][organ].ontology[v]
-                    }
+                    raise ValueError(f'Celltype version {v} already defined for mouse organ {organ} in base sfaira. '
+                                     f'Please define a new version in sfaira_extension')
                 else:
                     mouse[organ].celltype_universe[v] = SPECIES_DICT_EXTENSION["mouse"][organ].celltype_universe[v]
                     mouse[organ].ontology[v] = SPECIES_DICT_EXTENSION["mouse"][organ].ontology[v]
@@ -30,14 +24,8 @@ try:
         if organ in SPECIES_DICT_EXTENSION["human"].keys():
             for v in SPECIES_DICT_EXTENSION["human"][organ].versions:
                 if v in human[organ].celltype_universe.keys():
-                    human[organ].celltype_universe[v] = {
-                        **human[organ].celltype_universe[v],
-                        **SPECIES_DICT_EXTENSION["human"][organ].celltype_universe[v]
-                    }
-                    human[organ].ontology[v] = {
-                        **human[organ].ontology[v],
-                        **SPECIES_DICT_EXTENSION["human"][organ].ontology[v]
-                    }
+                    raise ValueError(f'Celltype version {v} already defined for human organ {organ} in base sfaira. '
+                                     f'Please define a new version in sfaira_extension')
                 else:
                     human[organ].celltype_universe[v] = SPECIES_DICT_EXTENSION["human"][organ].celltype_universe[v]
                     human[organ].ontology[v] = SPECIES_DICT_EXTENSION["human"][organ].ontology[v]
