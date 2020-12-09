@@ -20,7 +20,7 @@ class DatasetGroupStomach(DatasetGroupBase):
         self.datasets = dict(zip(keys, datasets))
         # Load versions from extension if available:
         try:
-            import sfaira_extension.api as sfairae
-            self.datasets.update(sfairae.data.mouse.DatasetGroupStomach().datasets)
+            import sfaira_extension
+            self.datasets.update(sfaira_extension.data.mouse.DatasetGroupStomach().datasets)
         except ImportError:
             pass

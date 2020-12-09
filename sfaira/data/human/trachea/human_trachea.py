@@ -20,7 +20,7 @@ class DatasetGroupTrachea(DatasetGroupBase):
         self.datasets = dict(zip(keys, datasets))
         # Load versions from extension if available:
         try:
-            import sfaira_extension.api as sfairae
-            self.datasets.update(sfairae.data.human.DatasetGroupTrachea().datasets)
+            import sfaira_extension
+            self.datasets.update(sfaira_extension.data.human.DatasetGroupTrachea().datasets)
         except ImportError:
             pass

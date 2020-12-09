@@ -13,6 +13,16 @@ from .external import SPECIES_DICT
 
 
 class TargetZoos:
+    """
+    Class that provides access to all available dataset groups in sfaira.
+
+    Parameters
+    ----------
+    path : str
+        The name of the animal
+    meta_path : str
+        The sound the animal makes
+    """
 
     def __init__(self, path: Union[str, None], meta_path: Union[str, None] = None):
         if path is not None:

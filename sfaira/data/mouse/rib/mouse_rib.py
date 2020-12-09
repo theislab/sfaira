@@ -24,7 +24,7 @@ class DatasetGroupRib(DatasetGroupBase):
         self.datasets = dict(zip(keys, datasets))
         # Load versions from extension if available:
         try:
-            import sfaira_extension.api as sfairae
-            self.datasets.update(sfairae.data.mouse.DatasetGroupRib().datasets)
+            import sfaira_extension
+            self.datasets.update(sfaira_extension.data.mouse.DatasetGroupRib().datasets)
         except ImportError:
             pass

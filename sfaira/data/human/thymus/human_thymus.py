@@ -24,7 +24,7 @@ class DatasetGroupThymus(DatasetGroupBase):
         self.datasets = dict(zip(keys, datasets))
         # Load versions from extension if available:
         try:
-            import sfaira_extension.api as sfairae
-            self.datasets.update(sfairae.data.human.DatasetGroupThymus().datasets)
+            import sfaira_extension
+            self.datasets.update(sfaira_extension.data.human.DatasetGroupThymus().datasets)
         except ImportError:
             pass
