@@ -22,4 +22,4 @@ import sfaira.data
 import sfaira.genomes
 import sfaira.models
 import sfaira.train
-import sfaira.interface as ui
+from sfaira.interface import UserInterface

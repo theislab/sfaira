@@ -24,7 +24,7 @@ class UserInterface:
 
     # initialise your sfaira instance with a model lookuptable.
     # instead of setting `custom_repo` when initialising the UI you can also use `sfaira_repo=True` to use public weights
-    ui = sfaira.ui.UserInterface(custom_repo="/path/to/local/repo/folder/or/zenodo/repo/URL", sfaira_repo=False)
+    ui = sfaira.UserInterface(custom_repo="/path/to/local/repo/folder/or/zenodo/repo/URL", sfaira_repo=False)
     ui.zoo_embedding.set_latest(species, organ, model_type, organisation, model_topology)
     ui.zoo_celltype.set_latest(species, organ, model_type, organisation, model_topology)
     ui.load_data(anndata.read("/path/to/file.h5ad"))  # load your dataset into sfaira

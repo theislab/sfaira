@@ -78,7 +78,7 @@ Models: `models`
 
 The sfaira model zoo API for advanced use.
 This API is structured by streamlined, task-specific APIs for specific analysis problems.
-This API is targeted at developers, see also `ui` for a user centric wrapping API for this model zoo.
+This API is targeted at developers, see also `UserInterface` for a user centric wrapping API for this model zoo.
 
 
 Cell-type predictor models
@@ -139,16 +139,16 @@ which were saved through Trainer classes.
    train.SummarizeGridsearchCelltype
    train.SummarizeGridsearchEmbedding
 
-User interface: `ui`
+User interface: `UserInterface`
 --------------------
 
-.. module:: sfaira.ui
+.. module:: sfaira.UserInterface
 .. currentmodule:: sfaira
 
-This sub-module gives users access to the model zoo, including model query from remote servers.
+This class gives users access to the model zoo, including model query from remote servers.
 This API is designed to be used in analysis workflows and does not require any understanding of the way models are defined and stored.
 
 .. autosummary::
    :toctree: .
 
-   ui.UserInterface
+   UserInterface
