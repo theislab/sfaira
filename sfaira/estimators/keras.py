@@ -522,8 +522,11 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         )
 
     @staticmethod
-    def _get_output_dim(n_features, model_type):
-        if model_type == "vae":
+    def _get_output_dim(n_features, model_type, mode='train'):
+        if mode == 'predict':   # Output shape is same for predict mode regardless of model type
+            output_types = (tf.float32, tf.float32)
+            output_shapes = (n_features, ())
+        elif model_type == "vae":
             output_types = ((tf.float32, tf.float32), (tf.float32, tf.float32))
             output_shapes = ((n_features, ()), (n_features, ()))
         else:
@@ -569,7 +572,9 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                     x = convert_sparse_matrix_to_sparse_tensor(x)
                     x = tf.keras.layers.Lambda(tf.sparse.to_dense)(x)
                 sf = self._prepare_sf(x=x)[0]
-                if model_type == "vae":
+                if mode == 'predict':   # If predicting, only return X regardless of model type
+                    yield x, sf
+                elif model_type == "vae":
                     yield (x, sf), (x, sf)
                 else:
                     yield (x, sf), x
@@ -593,7 +598,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             # tf.from_generator takes 'args' but it implicitly converts to tensor before passing to generator.
             self.X = x
             n_features = self.X.shape[1]
-            output_types, output_shapes = self._get_output_dim(n_features, model_type)
+            output_types, output_shapes = self._get_output_dim(n_features, model_type, mode=mode)
 
             dataset = tf.data.Dataset.from_generator(
                 generator=generator,
@@ -745,9 +750,9 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         prediction
         """
         if self.idx_test is None or self.idx_test.any():   # true if the array is not empty or if the passed value is None
-            x, y = self._get_dataset(
+            x = self._get_dataset(
                 idx=self.idx_test,
-                batch_size=None,
+                batch_size=64,
                 mode='predict'
             )
             return self.model.predict_reconstructed(
@@ -764,9 +769,9 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         latent space
         """
         if self.idx_test is None or self.idx_test.any():   # true if the array is not empty or if the passed value is None
-            x, y = self._get_dataset(
+            x = self._get_dataset(
                 idx=self.idx_test,
-                batch_size=None,
+                batch_size=64,
                 mode='predict'
             )
             return self.model.predict_embedding(
@@ -784,9 +789,9 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         sample of latent space, mean of latent space, variance of latent space
         """
         if self.idx_test is None or self.idx_test:   # true if the array is not empty or if the passed value is None
-            x, y = self._get_dataset(
+            x = self._get_dataset(
                 idx=self.idx_test,
-                batch_size=None,
+                batch_size=64,
                 mode='predict'
             )
             return self.model.predict_embedding(
