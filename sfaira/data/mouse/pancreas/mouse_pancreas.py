@@ -40,7 +40,7 @@ class DatasetGroupPancreas(DatasetGroupBase):
         self.datasets = dict(zip(keys, datasets))
         # Load versions from extension if available:
         try:
-            import sfaira_extension
-            self.datasets.update(sfaira_extension.data.mouse.DatasetGroupPancreas().datasets)
+            from sfaira_extension.data.mouse import DatasetGroupPancreas
+            self.datasets.update(DatasetGroupPancreas().datasets)
         except ImportError:
             pass

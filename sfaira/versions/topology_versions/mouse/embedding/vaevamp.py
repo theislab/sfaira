@@ -29,10 +29,10 @@ VAEVAMP_TOPOLOGIES = {
 
 # Load versions from extension if available:
 try:
-    import sfaira_extension
+    from sfaira_extension.versions.topology_versions.mouse.embedding import VAEVAMP_TOPOLOGIES as VAEVAMP_TOPOLOGIES_EXTENSION
     VAEVAMP_TOPOLOGIES = {
         **VAEVAMP_TOPOLOGIES,
-        **sfaira_extension.versions.topology_versions.mouse.embedding.VAEVAMP_TOPOLOGIES
+        **VAEVAMP_TOPOLOGIES_EXTENSION
     }
 except ImportError:
     pass

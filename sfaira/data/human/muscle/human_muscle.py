@@ -22,7 +22,7 @@ class DatasetGroupMuscle(DatasetGroupBase):
         self.datasets = dict(zip(keys, datasets))
         # Load versions from extension if available:
         try:
-            import sfaira_extension
-            self.datasets.update(sfaira_extension.data.human.DatasetGroupMuscle().datasets)
+            from sfaira_extension.data.human import DatasetGroupMuscle
+            self.datasets.update(DatasetGroupMuscle().datasets)
         except ImportError:
             pass

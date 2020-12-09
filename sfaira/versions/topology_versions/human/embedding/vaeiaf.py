@@ -31,10 +31,10 @@ VAEIAF_TOPOLOGIES = {
 
 # Load versions from extension if available:
 try:
-    import sfaira_extension
+    from sfaira_extension.versions.topology_versions.human.embedding import VAEIAF_TOPOLOGIES as VAEIAF_TOPOLOGIES_EXTENSION
     VAEIAF_TOPOLOGIES = {
         **VAEIAF_TOPOLOGIES,
-        **sfaira_extension.versions.topology_versions.human.embedding.VAEIAF_TOPOLOGIES
+        **VAEIAF_TOPOLOGIES_EXTENSION
     }
 except ImportError:
     pass

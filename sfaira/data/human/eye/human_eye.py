@@ -26,7 +26,7 @@ class DatasetGroupEye(DatasetGroupBase):
         self.datasets = dict(zip(keys, datasets))
         # Load versions from extension if available:
         try:
-            import sfaira_extension
-            self.datasets.update(sfaira_extension.data.human.DatasetGroupEye().datasets)
+            from sfaira_extension.data.human import DatasetGroupEye
+            self.datasets.update(DatasetGroupEye().datasets)
         except ImportError:
             pass

@@ -22,7 +22,7 @@ class DatasetGroupTongue(DatasetGroupBase):
         self.datasets = dict(zip(keys, datasets))
         # Load versions from extension if available:
         try:
-            import sfaira_extension
-            self.datasets.update(sfaira_extension.data.mouse.DatasetGroupTongue().datasets)
+            from sfaira_extension.data.mouse import DatasetGroupTongue
+            self.datasets.update(DatasetGroupTongue().datasets)
         except ImportError:
             pass

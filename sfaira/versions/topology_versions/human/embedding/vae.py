@@ -58,10 +58,10 @@ VAE_TOPOLOGIES = {
 
 # Load versions from extension if available:
 try:
-    import sfaira_extension
+    from sfaira_extension.versions.topology_versions.human.embedding import VAE_TOPOLOGIES as VAE_TOPOLOGIES_EXTENSION
     VAE_TOPOLOGIES = {
         **VAE_TOPOLOGIES,
-        **sfaira_extension.versions.topology_versions.human.embedding.VAE_TOPOLOGIES
+        **VAE_TOPOLOGIES_EXTENSION
     }
 except ImportError:
     pass

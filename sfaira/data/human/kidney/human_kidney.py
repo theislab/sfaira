@@ -38,7 +38,7 @@ class DatasetGroupKidney(DatasetGroupBase):
         self.datasets = dict(zip(keys, datasets))
         # Load versions from extension if available:
         try:
-            import sfaira_extension
-            self.datasets.update(sfaira_extension.data.human.DatasetGroupKidney().datasets)
+            from sfaira_extension.data.human import DatasetGroupKidney
+            self.datasets.update(DatasetGroupKidney().datasets)
         except ImportError:
             pass

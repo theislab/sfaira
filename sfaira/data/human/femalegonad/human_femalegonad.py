@@ -22,7 +22,7 @@ class DatasetGroupFemalegonad(DatasetGroupBase):
         self.datasets = dict(zip(keys, datasets))
         # Load versions from extension if available:
         try:
-            import sfaira_extension
-            self.datasets.update(sfaira_extension.data.human.DatasetGroupFemalegonad().datasets)
+            from sfaira_extension.data.human import DatasetGroupFemalegonad
+            self.datasets.update(DatasetGroupFemalegonad().datasets)
         except ImportError:
             pass

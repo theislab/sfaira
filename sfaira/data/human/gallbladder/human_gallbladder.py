@@ -20,7 +20,7 @@ class DatasetGroupGallbladder(DatasetGroupBase):
         self.datasets = dict(zip(keys, datasets))
         # Load versions from extension if available:
         try:
-            import sfaira_extension
-            self.datasets.update(sfaira_extension.data.human.DatasetGroupGallbladder().datasets)
+            from sfaira_extension.data.human import DatasetGroupGallbladder
+            self.datasets.update(DatasetGroupGallbladder().datasets)
         except ImportError:
             pass

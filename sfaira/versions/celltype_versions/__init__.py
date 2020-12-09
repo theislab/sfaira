@@ -8,9 +8,9 @@ human = human.ORGAN_DICT
 
 # Load versions from extension if available:
 try:
-    import sfaira_extension
-    mouse_e = sfaira_extension.versions.celltype_versions.SPECIES_DICT["mouse"]
-    human_e = sfaira_extension.versions.celltype_versions.SPECIES_DICT["human"]
+    from sfaira_extension.versions.celltype_versions import SPECIES_DICT as SPECIES_DICT_EXTENSION
+    mouse_e = SPECIES_DICT_EXTENSION["mouse"]
+    human_e = SPECIES_DICT_EXTENSION["human"]
     for k in mouse.keys():
         if k in mouse_e.keys():
             mouse[k].celltype_universe.update(mouse_e[k])

@@ -35,10 +35,10 @@ LINEAR_TOPOLOGIES = {
 
 # Load versions from extension if available:
 try:
-    import sfaira_extension
+    from sfaira_extension.versions.topology_versions.human.embedding import LINEAR_TOPOLOGIES as LINEAR_TOPOLOGIES_EXTENSION
     LINEAR_TOPOLOGIES = {
         **LINEAR_TOPOLOGIES,
-        **sfaira_extension.versions.topology_versions.human.embedding.LINEAR_TOPOLOGIES
+        **LINEAR_TOPOLOGIES_EXTENSION
     }
 except ImportError:
     pass

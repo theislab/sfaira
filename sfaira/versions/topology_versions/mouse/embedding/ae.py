@@ -62,10 +62,10 @@ AE_TOPOLOGIES = {
 
 # Load versions from extension if available:
 try:
-    import sfaira_extension
+    from sfaira_extension.versions.topology_versions.mouse.embedding import AE_TOPOLOGIES as AE_TOPOLOGIES_EXTENSION
     AE_TOPOLOGIES = {
         **AE_TOPOLOGIES,
-        **sfaira_extension.versions.topology_versions.mouse.embedding.AE_TOPOLOGIES
+        **AE_TOPOLOGIES_EXTENSION
     }
 except ImportError:
     pass

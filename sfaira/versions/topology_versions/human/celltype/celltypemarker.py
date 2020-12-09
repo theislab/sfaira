@@ -15,10 +15,10 @@ CELLTYPEMARKER_TOPOLOGIES = {
 
 # Load versions from extension if available:
 try:
-    import sfaira_extension
+    from sfaira_extension.versions.topology_versions.human.celltype import CELLTYPEMARKER_TOPOLOGIES as CELLTYPEMARKER_TOPOLOGIES_EXTENSION
     CELLTYPEMARKER_TOPOLOGIES = {
         **CELLTYPEMARKER_TOPOLOGIES,
-        **sfaira_extension.versions.topology_versions.human.celltype.CELLTYPEMARKER_TOPOLOGIES
+        **CELLTYPEMARKER_TOPOLOGIES_EXTENSION
     }
 except ImportError:
     pass

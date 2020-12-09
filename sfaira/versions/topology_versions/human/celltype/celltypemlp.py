@@ -67,10 +67,10 @@ CELLTYPEMLP_TOPOLOGIES = {
 
 # Load versions from extension if available:
 try:
-    import sfaira_extension
+    from sfaira_extension.versions.topology_versions.human.celltype import CELLTYPEMLP_TOPOLOGIES as CELLTYPEMLP_TOPOLOGIES_EXTENSION
     CELLTYPEMLP_TOPOLOGIES = {
         **CELLTYPEMLP_TOPOLOGIES,
-        **sfaira_extension.versions.topology_versions.human.celltype.CELLTYPEMLP_TOPOLOGIES
+        **CELLTYPEMLP_TOPOLOGIES_EXTENSION
     }
 except ImportError:
     pass

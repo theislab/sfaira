@@ -35,10 +35,10 @@ NMF_TOPOLOGIES = {
 
 # Load versions from extension if available:
 try:
-    import sfaira_extension
+    from sfaira_extension.versions.topology_versions.human.embedding import NMF_TOPOLOGIES as NMF_TOPOLOGIES_EXTENSION
     NMF_TOPOLOGIES = {
         **NMF_TOPOLOGIES,
-        **sfaira_extension.versions.topology_versions.human.embedding.NMF_TOPOLOGIES
+        **NMF_TOPOLOGIES_EXTENSION
     }
 except ImportError:
     pass

@@ -20,7 +20,7 @@ class DatasetGroupDuodenum(DatasetGroupBase):
         self.datasets = dict(zip(keys, datasets))
         # Load versions from extension if available:
         try:
-            import sfaira_extension
-            self.datasets.update(sfaira_extension.data.human.DatasetGroupDuodenum().datasets)
+            from sfaira_extension.data.human import DatasetGroupDuodenum
+            self.datasets.update(DatasetGroupDuodenum().datasets)
         except ImportError:
             pass

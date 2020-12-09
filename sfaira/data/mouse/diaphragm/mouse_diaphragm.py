@@ -20,7 +20,7 @@ class DatasetGroupDiaphragm(DatasetGroupBase):
         self.datasets = dict(zip(keys, datasets))
         # Load versions from extension if available:
         try:
-            import sfaira_extension
-            self.datasets.update(sfaira_extension.data.mouse.DatasetGroupDiaphragm().datasets)
+            from sfaira_extension.data.mouse import DatasetGroupDiaphragm
+            self.datasets.update(DatasetGroupDiaphragm().datasets)
         except ImportError:
             pass
