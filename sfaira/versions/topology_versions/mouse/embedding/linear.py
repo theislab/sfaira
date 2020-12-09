@@ -36,9 +36,9 @@ LINEAR_TOPOLOGIES = {
 # Load versions from extension if available:
 try:
     import sfaira_extension
-    ADD_TOPOLOGIES = sfaira_extension.versions.topology_versions.mouse.embedding.LINEAR_TOPOLOGIES
-    for k in LINEAR_TOPOLOGIES.keys():
-        if k in ADD_TOPOLOGIES.keys():
-            LINEAR_TOPOLOGIES.update(ADD_TOPOLOGIES)
+    LINEAR_TOPOLOGIES = {
+        **LINEAR_TOPOLOGIES,
+        **sfaira_extension.versions.topology_versions.mouse.embedding.LINEAR_TOPOLOGIES
+    }
 except ImportError:
     pass

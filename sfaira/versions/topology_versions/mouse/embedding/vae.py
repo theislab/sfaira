@@ -59,9 +59,9 @@ VAE_TOPOLOGIES = {
 # Load versions from extension if available:
 try:
     import sfaira_extension
-    ADD_TOPOLOGIES = sfaira_extension.versions.topology_versions.mouse.embedding.VAE_TOPOLOGIES
-    for k in VAE_TOPOLOGIES.keys():
-        if k in ADD_TOPOLOGIES.keys():
-            VAE_TOPOLOGIES.update(ADD_TOPOLOGIES)
+    VAE_TOPOLOGIES = {
+        **VAE_TOPOLOGIES,
+        **sfaira_extension.versions.topology_versions.mouse.embedding.VAE_TOPOLOGIES
+    }
 except ImportError:
     pass

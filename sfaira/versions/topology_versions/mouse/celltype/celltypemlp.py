@@ -68,9 +68,9 @@ CELLTYPEMLP_TOPOLOGIES = {
 # Load versions from extension if available:
 try:
     import sfaira_extension
-    ADD_TOPOLOGIES = sfaira_extension.versions.topology_versions.mouse.celltype.CELLTYPEMLP_TOPOLOGIES
-    for k in CELLTYPEMLP_TOPOLOGIES.keys():
-        if k in ADD_TOPOLOGIES.keys():
-            CELLTYPEMLP_TOPOLOGIES.update(ADD_TOPOLOGIES)
+    CELLTYPEMLP_TOPOLOGIES = {
+        **CELLTYPEMLP_TOPOLOGIES,
+        **sfaira_extension.versions.topology_versions.mouse.celltype.CELLTYPEMLP_TOPOLOGIES
+    }
 except ImportError:
     pass
