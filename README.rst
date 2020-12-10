@@ -12,7 +12,7 @@ sfaira - data and model repository for single-cell data
 =======================================================
 
 .. image:: https://github.com/theislab/sfaira/blob/master/resources/images/concept.png
-   :width: 600px
+   :width: 1000px
    :align: center
 
 sfaira_ is a model and a data repository in a single python package. 

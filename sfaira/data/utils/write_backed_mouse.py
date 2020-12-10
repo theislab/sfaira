@@ -1,6 +1,6 @@
 import sys
 import tensorflow as tf
-import sfaira.api as sfaira
+import sfaira
 import os
 
 from sfaira.data import mouse

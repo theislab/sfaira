@@ -20,7 +20,7 @@ class DatasetGroupArtery(DatasetGroupBase):
         self.datasets = dict(zip(keys, datasets))
         # Load versions from extension if available:
         try:
-            import sfaira_extension.api as sfairae
-            self.datasets.update(sfairae.data.human.DatasetGroupArtery().datasets)
+            from sfaira_extension.data.human import DatasetGroupArtery
+            self.datasets.update(DatasetGroupArtery().datasets)
         except ImportError:
             pass
