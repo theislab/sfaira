@@ -1,8 +1,7 @@
+import anndata
 import os
 from typing import Union
 from .external import DatasetBase
-from .external import ADATA_IDS_SFAIRA
-import anndata
 import tarfile
 import gzip
 from io import StringIO
@@ -72,7 +71,7 @@ class Dataset(DatasetBase):
         self.download_website_meta = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE81nnn/GSE81547/matrix/GSE81547_series_matrix.txt.gz"
         self.organ = "pancreas"
         self.sub_tissue = "islet of Langerhans"
-        self.has_celltypes = True
+        self.annotated = True
 
         self.class_maps = {
             "0": {
@@ -129,20 +128,20 @@ class Dataset(DatasetBase):
                 fn = os.path.join(self.path, "human", "pancreas", "GSE81547.h5ad")
             self.adata = anndata.read(fn)
 
-        self.adata.uns[ADATA_IDS_SFAIRA.author] = "Quake"
-        self.adata.uns[ADATA_IDS_SFAIRA.year] = 2017
-        self.adata.uns[ADATA_IDS_SFAIRA.doi] = "10.1016/j.cell.2017.09.004"
-        self.adata.uns[ADATA_IDS_SFAIRA.protocol] = 'Smartseq2'
-        self.adata.uns[ADATA_IDS_SFAIRA.organ] = self.organ
-        self.adata.uns[ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
-        self.adata.uns[ADATA_IDS_SFAIRA.species] = "human"
-        self.adata.uns[ADATA_IDS_SFAIRA.id] = self.id
-        self.adata.uns[ADATA_IDS_SFAIRA.download] = self.download_website
-        self.adata.uns[ADATA_IDS_SFAIRA.annotated] = self.has_celltypes
-        self.adata.uns[ADATA_IDS_SFAIRA.normalization] = 'raw'
+        self.adata.uns[self._ADATA_IDS_SFAIRA.author] = "Quake"
+        self.adata.uns[self._ADATA_IDS_SFAIRA.year] = 2017
+        self.adata.uns[self._ADATA_IDS_SFAIRA.doi] = "10.1016/j.cell.2017.09.004"
+        self.adata.uns[self._ADATA_IDS_SFAIRA.protocol] = 'Smartseq2'
+        self.adata.uns[self._ADATA_IDS_SFAIRA.organ] = self.organ
+        self.adata.uns[self._ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
+        self.adata.uns[self._ADATA_IDS_SFAIRA.species] = "human"
+        self.adata.uns[self._ADATA_IDS_SFAIRA.id] = self.id
+        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download_website
+        self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
+        self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = 'raw'
 
-        self.adata.obs[ADATA_IDS_SFAIRA.healthy] = True
-        self.adata.obs[ADATA_IDS_SFAIRA.state_exact] = "healthy"
+        self.adata.obs[self._ADATA_IDS_SFAIRA.healthy] = True
+        self.adata.obs[self._ADATA_IDS_SFAIRA.state_exact] = "healthy"
 
-        self.adata.obs[ADATA_IDS_SFAIRA.cell_ontology_class] = self.adata.obs['celltype']
-        self._convert_and_set_var_names(symbol_col='index', ensembl_col=None, new_index=ADATA_IDS_SFAIRA.gene_id_ensembl)
+        self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class] = self.adata.obs['celltype']
+        self._convert_and_set_var_names(symbol_col='index', ensembl_col=None)

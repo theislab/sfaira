@@ -4,7 +4,6 @@ import os
 import pandas
 from typing import Union
 from .external import DatasetBase
-from .external import ADATA_IDS_SFAIRA
 
 
 class Dataset(DatasetBase):
@@ -26,7 +25,7 @@ class Dataset(DatasetBase):
             "www.brainimmuneatlas.org/data_files/toDownload/annot_fullAggr.csv"
         self.organ = "brain"
         self.sub_tissue = "brain"
-        self.has_celltypes = True
+        self.annotated = True
 
         self.class_maps = {
             "0": {
@@ -65,23 +64,23 @@ class Dataset(DatasetBase):
         # Assign attributes
         self.adata.obs_names = obs_names
         self.adata.var = var
-        self._convert_and_set_var_names(symbol_col=ADATA_IDS_SFAIRA.gene_id_names, ensembl_col=ADATA_IDS_SFAIRA.gene_id_ensembl, new_index=ADATA_IDS_SFAIRA.gene_id_ensembl)
+        self._convert_and_set_var_names(symbol_col=ADATA_IDS_SFAIRA.gene_id_names, ensembl_col=ADATA_IDS_SFAIRA.gene_id_ensembl)
         self.adata.obs = obs
         assert np.all(self.adata.obs_names == self.adata.obs["cell"].values)
 
-        self.adata.uns[ADATA_IDS_SFAIRA.author] = "Movahedi"
-        self.adata.uns[ADATA_IDS_SFAIRA.year] = "2019"
-        self.adata.uns[ADATA_IDS_SFAIRA.doi] = "10.1038/s41593-019-0393-4"
-        self.adata.uns[ADATA_IDS_SFAIRA.protocol] = "microwell"
-        self.adata.uns[ADATA_IDS_SFAIRA.organ] = self.organ
-        self.adata.uns[ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
-        self.adata.uns[ADATA_IDS_SFAIRA.species] = "mouse"
-        self.adata.uns[ADATA_IDS_SFAIRA.id] = self.id
-        self.adata.uns[ADATA_IDS_SFAIRA.download] = self.download_website
-        self.adata.uns[ADATA_IDS_SFAIRA.annotated] = self.has_celltypes
-        self.adata.uns[ADATA_IDS_SFAIRA.normalization] = 'raw'
-        # self.adata.obs[ADATA_IDS_SFAIRA.cell_ontology_class] is already set
+        self.adata.uns[self._ADATA_IDS_SFAIRA.author] = "Movahedi"
+        self.adata.uns[self._ADATA_IDS_SFAIRA.year] = "2019"
+        self.adata.uns[self._ADATA_IDS_SFAIRA.doi] = "10.1038/s41593-019-0393-4"
+        self.adata.uns[self._ADATA_IDS_SFAIRA.protocol] = "microwell"
+        self.adata.uns[self._ADATA_IDS_SFAIRA.organ] = self.organ
+        self.adata.uns[self._ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
+        self.adata.uns[self._ADATA_IDS_SFAIRA.species] = "mouse"
+        self.adata.uns[self._ADATA_IDS_SFAIRA.id] = self.id
+        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download_website
+        self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
+        self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = 'raw'
+        # self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class] is already set
         self.set_unkown_class_id(ids=["nan"])
-        self.adata.obs[ADATA_IDS_SFAIRA.cell_types_original] = self.adata.obs[ADATA_IDS_SFAIRA.cell_ontology_class].values.tolist()
-        self.adata.obs[ADATA_IDS_SFAIRA.healthy] = True
-        self.adata.obs[ADATA_IDS_SFAIRA.state_exact] = "healthy"
+        self.adata.obs[self._ADATA_IDS_SFAIRA.cell_types_original] = self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class].values.tolist()
+        self.adata.obs[self._ADATA_IDS_SFAIRA.healthy] = True
+        self.adata.obs[self._ADATA_IDS_SFAIRA.state_exact] = "healthy"

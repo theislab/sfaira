@@ -1,8 +1,7 @@
+import anndata
 import os
 from typing import Union
 from .external import DatasetBase
-from .external import ADATA_IDS_SFAIRA
-import anndata
 
 
 class Dataset(DatasetBase):
@@ -32,7 +31,7 @@ class Dataset(DatasetBase):
         self.download_website_meta = None
         self.organ = "blood"
         self.sub_tissue = "pbmcs"
-        self.has_celltypes = False
+        self.annotated = False
 
         self.class_maps = {
             "0": {},
@@ -47,20 +46,20 @@ class Dataset(DatasetBase):
                 fn = os.path.join(self.path, "human", "blood", "pbmc_10k_v3_filtered_feature_bc_matrix.h5ad")
             self.adata = anndata.read(fn)
 
-        self.adata.uns[ADATA_IDS_SFAIRA.author] = '10x Genomics'
-        self.adata.uns[ADATA_IDS_SFAIRA.year] = 2019
-        self.adata.uns[ADATA_IDS_SFAIRA.doi] = None
-        self.adata.uns[ADATA_IDS_SFAIRA.protocol] = '10x'
-        self.adata.uns[ADATA_IDS_SFAIRA.organ] = self.organ
-        self.adata.uns[ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
-        self.adata.uns[ADATA_IDS_SFAIRA.species] = "human"
-        self.adata.uns[ADATA_IDS_SFAIRA.id] = self.id
-        self.adata.uns[ADATA_IDS_SFAIRA.download] = "http://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_10k_v3/pbmc_10k_v3_filtered_feature_bc_matrix.h5"
-        self.adata.uns[ADATA_IDS_SFAIRA.annotated] = self.has_celltypes
-        self.adata.uns[ADATA_IDS_SFAIRA.normalization] = 'raw'
+        self.adata.uns[self._ADATA_IDS_SFAIRA.author] = '10x Genomics'
+        self.adata.uns[self._ADATA_IDS_SFAIRA.year] = 2019
+        self.adata.uns[self._ADATA_IDS_SFAIRA.doi] = None
+        self.adata.uns[self._ADATA_IDS_SFAIRA.protocol] = '10x'
+        self.adata.uns[self._ADATA_IDS_SFAIRA.organ] = self.organ
+        self.adata.uns[self._ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
+        self.adata.uns[self._ADATA_IDS_SFAIRA.species] = "human"
+        self.adata.uns[self._ADATA_IDS_SFAIRA.id] = self.id
+        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = "http://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_10k_v3/pbmc_10k_v3_filtered_feature_bc_matrix.h5"
+        self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
+        self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = 'raw'
 
-        self.adata.obs[ADATA_IDS_SFAIRA.cell_ontology_class] = None
-        self.adata.obs[ADATA_IDS_SFAIRA.healthy] = True
-        self.adata.obs[ADATA_IDS_SFAIRA.state_exact] = 'healthy'
+        self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class] = None
+        self.adata.obs[self._ADATA_IDS_SFAIRA.healthy] = True
+        self.adata.obs[self._ADATA_IDS_SFAIRA.state_exact] = 'healthy'
 
-        self._convert_and_set_var_names(symbol_col='index', ensembl_col='gene_ids', new_index=ADATA_IDS_SFAIRA.gene_id_ensembl)
+        self._convert_and_set_var_names(symbol_col='index', ensembl_col='gene_ids')

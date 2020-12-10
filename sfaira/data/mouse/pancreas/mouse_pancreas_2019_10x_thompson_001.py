@@ -4,7 +4,6 @@ import os
 import pandas
 from typing import Union
 from .external import DatasetBase
-from .external import ADATA_IDS_SFAIRA
 
 
 class Dataset(DatasetBase):
@@ -23,7 +22,7 @@ class Dataset(DatasetBase):
         self.download_website = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE117770"
         self.organ = "pancreas"
         self.sub_tissue = "pancreas"
-        self.has_celltypes = True
+        self.annotated = True
 
         self.class_maps = {
             "0": {
@@ -58,21 +57,21 @@ class Dataset(DatasetBase):
         self.adata.var_names_make_unique()
         self.adata = self.adata[celltypes.index]
 
-        self.adata.uns[ADATA_IDS_SFAIRA.author] = "Bhushan"
-        self.adata.uns[ADATA_IDS_SFAIRA.year] = "2019"
-        self.adata.uns[ADATA_IDS_SFAIRA.doi] = "10.1016/j.cmet.2019.01.021"
-        self.adata.uns[ADATA_IDS_SFAIRA.protocol] = "10x"
-        self.adata.uns[ADATA_IDS_SFAIRA.organ] = self.organ
-        self.adata.uns[ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue  # TODO
-        self.adata.uns[ADATA_IDS_SFAIRA.species] = "mouse"
-        self.adata.uns[ADATA_IDS_SFAIRA.id] = self.id
-        self.adata.uns[ADATA_IDS_SFAIRA.download] = self.download_website
-        self.adata.uns[ADATA_IDS_SFAIRA.annotated] = self.has_celltypes
-        self.adata.uns[ADATA_IDS_SFAIRA.normalization] = 'raw'
-        self.adata.obs[ADATA_IDS_SFAIRA.cell_ontology_class] = celltypes
+        self.adata.uns[self._ADATA_IDS_SFAIRA.author] = "Bhushan"
+        self.adata.uns[self._ADATA_IDS_SFAIRA.year] = "2019"
+        self.adata.uns[self._ADATA_IDS_SFAIRA.doi] = "10.1016/j.cmet.2019.01.021"
+        self.adata.uns[self._ADATA_IDS_SFAIRA.protocol] = "10x"
+        self.adata.uns[self._ADATA_IDS_SFAIRA.organ] = self.organ
+        self.adata.uns[self._ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue  # TODO
+        self.adata.uns[self._ADATA_IDS_SFAIRA.species] = "mouse"
+        self.adata.uns[self._ADATA_IDS_SFAIRA.id] = self.id
+        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download_website
+        self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
+        self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = 'raw'
+        self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class] = celltypes
         self.set_unkown_class_id(ids=[np.nan, "nan"])
-        self.adata.obs[ADATA_IDS_SFAIRA.cell_types_original] = celltypes
-        self.adata.obs[ADATA_IDS_SFAIRA.healthy] = False
-        self.adata.obs[ADATA_IDS_SFAIRA.state_exact] = "diabetic"
+        self.adata.obs[self._ADATA_IDS_SFAIRA.cell_types_original] = celltypes
+        self.adata.obs[self._ADATA_IDS_SFAIRA.healthy] = False
+        self.adata.obs[self._ADATA_IDS_SFAIRA.state_exact] = "diabetic"
 
-        self._convert_and_set_var_names(symbol_col='index', ensembl_col=None, new_index=ADATA_IDS_SFAIRA.gene_id_ensembl)
+        self._convert_and_set_var_names(symbol_col='index', ensembl_col=None)

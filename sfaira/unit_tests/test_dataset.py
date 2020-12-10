@@ -6,9 +6,9 @@ import unittest
 from sfaira.data import mouse, DatasetSuperGroup
 
 
-class TestDatasets(unittest.TestCase):
-    dir_data: str = "."
-    dir_meta: str = "."
+class TestDatasetGroups(unittest.TestCase):
+    dir_data: str = "./test_data"
+    dir_meta: str = "./test_data/meta"
 
     def test_load(self):
         ds = mouse.DatasetGroupLung(path=self.dir_data, meta_path=self.dir_meta)
@@ -16,6 +16,27 @@ class TestDatasets(unittest.TestCase):
 
     def test_adata(self):
         ds = mouse.DatasetGroupBladder(path=self.dir_data, meta_path=self.dir_meta)
+        _ = ds.adata
+
+
+class TestDatasetSuperGroups(unittest.TestCase):
+    dir_data: str = "./test_data"
+    dir_meta: str = "./test_data/meta"
+
+    def test_load(self):
+        ds = DatasetSuperGroup(
+            dataset_groups=[
+                mouse.DatasetGroupLung(path=self.dir_data, meta_path=self.dir_meta)
+            ]
+        )
+        ds.load_all()
+
+    def test_adata(self):
+        ds = DatasetSuperGroup(
+            dataset_groups=[
+                mouse.DatasetGroupLung(path=self.dir_data, meta_path=self.dir_meta)
+            ]
+        )
         _ = ds.adata
 
     def test_load_backed_dense(self, genome="Mus_musculus_GRCm38_97"):

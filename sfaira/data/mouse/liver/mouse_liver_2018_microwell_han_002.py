@@ -4,7 +4,6 @@ import os
 import pandas
 from typing import Union
 from .external import DatasetBase
-from .external import ADATA_IDS_SFAIRA
 
 
 class Dataset(DatasetBase):
@@ -21,7 +20,7 @@ class Dataset(DatasetBase):
         self.download_website = "https://ndownloader.figshare.com/articles/5435866?private_link=865e694ad06d5857db4b"
         self.organ = "liver"
         self.sub_tissue = "liver"
-        self.has_celltypes = True
+        self.annotated = True
 
         self.class_maps = {
             "0": {
@@ -57,21 +56,21 @@ class Dataset(DatasetBase):
         self.adata = self.adata[np.array([x in celltypes.index for x in self.adata.obs_names])].copy()
         self.adata.obs = celltypes.loc[self.adata.obs_names, :]
 
-        self.adata.uns[ADATA_IDS_SFAIRA.author] = "Guo"
-        self.adata.uns[ADATA_IDS_SFAIRA.year] = "2018"
-        self.adata.uns[ADATA_IDS_SFAIRA.doi] = "10.1016/j.cell.2018.02.001"
-        self.adata.uns[ADATA_IDS_SFAIRA.protocol] = "microwell-seq"
-        self.adata.uns[ADATA_IDS_SFAIRA.organ] = self.organ
-        self.adata.uns[ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue  # TODO
-        self.adata.uns[ADATA_IDS_SFAIRA.species] = "mouse"
-        self.adata.uns[ADATA_IDS_SFAIRA.id] = self.id
-        self.adata.uns[ADATA_IDS_SFAIRA.download] = self.download_website
-        self.adata.uns[ADATA_IDS_SFAIRA.annotated] = self.has_celltypes
-        self.adata.uns[ADATA_IDS_SFAIRA.normalization] = 'raw'
-        self.adata.obs[ADATA_IDS_SFAIRA.cell_ontology_class] = self.adata.obs["Annotation"].values.tolist()
+        self.adata.uns[self._ADATA_IDS_SFAIRA.author] = "Guo"
+        self.adata.uns[self._ADATA_IDS_SFAIRA.year] = "2018"
+        self.adata.uns[self._ADATA_IDS_SFAIRA.doi] = "10.1016/j.cell.2018.02.001"
+        self.adata.uns[self._ADATA_IDS_SFAIRA.protocol] = "microwell-seq"
+        self.adata.uns[self._ADATA_IDS_SFAIRA.organ] = self.organ
+        self.adata.uns[self._ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue  # TODO
+        self.adata.uns[self._ADATA_IDS_SFAIRA.species] = "mouse"
+        self.adata.uns[self._ADATA_IDS_SFAIRA.id] = self.id
+        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download_website
+        self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
+        self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = 'raw'
+        self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class] = self.adata.obs["Annotation"].values.tolist()
         self.set_unkown_class_id(ids=[np.nan, "nan"])
-        self.adata.obs[ADATA_IDS_SFAIRA.cell_types_original] = self.adata.obs["Annotation"].values.tolist()
-        self.adata.obs[ADATA_IDS_SFAIRA.healthy] = True
-        self.adata.obs[ADATA_IDS_SFAIRA.state_exact] = "healthy"
+        self.adata.obs[self._ADATA_IDS_SFAIRA.cell_types_original] = self.adata.obs["Annotation"].values.tolist()
+        self.adata.obs[self._ADATA_IDS_SFAIRA.healthy] = True
+        self.adata.obs[self._ADATA_IDS_SFAIRA.state_exact] = "healthy"
 
-        self._convert_and_set_var_names(symbol_col='index', ensembl_col=None, new_index=ADATA_IDS_SFAIRA.gene_id_ensembl)
+        self._convert_and_set_var_names(symbol_col='index', ensembl_col=None)
