@@ -18,6 +18,7 @@ __email__ = ', '.join([
     "david.fischer@helmholtz-muenchen.de"
 ])
 
+import sfaira.consts as consts
 import sfaira.data
 import sfaira.genomes
 import sfaira.models
