@@ -291,7 +291,7 @@ class DatasetBase(abc.ABC):
                              'the name of the var column containing gene symbols')
 
         self.adata.var.set_index(
-            self.adata.var.loc[self._ADATA_IDS_SFAIRA.gene_id_index].values.tolist(),
+            self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_index].values.tolist(),
             inplace=True, verify_integrity=False
         )
         self.adata.var_names_make_unique()
