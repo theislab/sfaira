@@ -24,17 +24,17 @@ class DatasetBase(abc.ABC):
     id: Union[None, str]
     genome: Union[None, str]
 
-    _annotated: str
-    _author: str
-    _doi: str
-    _download: str
-    _id: str
-    _ncells: str
-    _normalization: str
-    _organ: str
-    _protocol: str
-    _species: str
-    _year: str
+    _annotated: Union[None, bool]
+    _author: Union[None, str]
+    _doi: Union[None, str]
+    _download: Union[None, str]
+    _id: Union[None, str]
+    _ncells: Union[None, int]
+    _normalization: Union[None, str]
+    _organ: Union[None, str]
+    _protocol: Union[None, str]
+    _species: Union[None, str]
+    _year: Union[None, str]
 
     def __init__(
             self,
@@ -49,6 +49,18 @@ class DatasetBase(abc.ABC):
         self.path = path
         self.meta_path = meta_path
         self._load_raw = None
+
+        self._annotated = None
+        self._author = None
+        self._doi = None
+        self._download = None
+        self._id = None
+        self._ncells = None
+        self._normalization = None
+        self._organ = None
+        self._protocol = None
+        self._species = None
+        self._year = None
 
     @abc.abstractmethod
     def _load(self, fn):
@@ -72,7 +84,6 @@ class DatasetBase(abc.ABC):
         :param load_raw: Loads unprocessed version of data if available in data loader.
         :return:
         """
-
         self._load_raw = load_raw
 
         if match_to_reference and not remove_gene_version:
@@ -479,148 +490,160 @@ class DatasetBase(abc.ABC):
         if self.adata is None:
             self.load(fn=fn_data, remove_gene_version=False, match_to_reference=None)
         meta = pandas.DataFrame({
-            "author": self.adata.uns[ADATA_IDS_SFAIRA.author],
-            "annotated": self.adata.uns[ADATA_IDS_SFAIRA.annotated],
-            "doi": self.adata.uns[ADATA_IDS_SFAIRA.doi],
-            "download": self.adata.uns[ADATA_IDS_SFAIRA.download],
-            "id": self.adata.uns[ADATA_IDS_SFAIRA.id],
-            "ncells": self.adata.n_obs,
-            "normalization": self.adata.uns[ADATA_IDS_SFAIRA.normalization] if ADATA_IDS_SFAIRA.normalization in self.adata.uns.keys() else None,
-            "organ": self.adata.uns[ADATA_IDS_SFAIRA.organ],
-            "protocol": self.adata.uns[ADATA_IDS_SFAIRA.protocol],
-            "species": self.adata.uns[ADATA_IDS_SFAIRA.species],
-            "year": self.adata.uns[ADATA_IDS_SFAIRA.year],
+            ADATA_IDS_SFAIRA.annotated: self.adata.uns[ADATA_IDS_SFAIRA.annotated],
+            ADATA_IDS_SFAIRA.author: self.adata.uns[ADATA_IDS_SFAIRA.author],
+            ADATA_IDS_SFAIRA.doi: self.adata.uns[ADATA_IDS_SFAIRA.doi],
+            ADATA_IDS_SFAIRA.download: self.adata.uns[ADATA_IDS_SFAIRA.download],
+            ADATA_IDS_SFAIRA.id: self.adata.uns[ADATA_IDS_SFAIRA.id],
+            ADATA_IDS_SFAIRA.ncells: self.adata.n_obs,
+            ADATA_IDS_SFAIRA.normalization: self.adata.uns[ADATA_IDS_SFAIRA.normalization] if ADATA_IDS_SFAIRA.normalization in self.adata.uns.keys() else None,
+            ADATA_IDS_SFAIRA.organ: self.adata.uns[ADATA_IDS_SFAIRA.organ],
+            ADATA_IDS_SFAIRA.protocol: self.adata.uns[ADATA_IDS_SFAIRA.protocol],
+            ADATA_IDS_SFAIRA.species: self.adata.uns[ADATA_IDS_SFAIRA.species],
+            ADATA_IDS_SFAIRA.year: self.adata.uns[ADATA_IDS_SFAIRA.year],
         }, index=range(1))
         meta.to_csv(fn_meta)
 
     @property
-    def author(self):
-        if self._author is not None:
-            return self._author
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            return self.meta["author"]
-
-    @author.setter
-    def author(self, x):
-        self._author = x
-
-    @property
-    def doi(self):
-        if self._doi is not None:
-            return self._doi
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            return self.meta["doi"]
-
-    @doi.setter
-    def doi(self, x):
-        self._doi = x
-
-    @property
-    def download(self):
-        if self._download is not None:
-            return self._download
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            return self.meta["download"]
-
-    @download.setter
-    def download(self, x):
-        self._download = x
-
-    @property
-    def annotated(self):
+    def annotated(self) -> bool:
         if self._annotated is not None:
             return self._annotated
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            return self.meta["annotated"]
+            return self.meta[ADATA_IDS_SFAIRA.annotated]
 
     @annotated.setter
-    def annotated(self, x):
+    def annotated(self, x: bool):
         self._annotated = x
 
     @property
-    def id(self):
+    def author(self) -> str:
+        if self._author is not None:
+            return self._author
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            return self.meta[ADATA_IDS_SFAIRA.author]
+
+    @author.setter
+    def author(self, x: str):
+        self._author = x
+
+    @property
+    def doi(self) -> str:
+        if self._doi is not None:
+            return self._doi
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            return self.meta[ADATA_IDS_SFAIRA.doi]
+
+    @doi.setter
+    def doi(self, x: str):
+        self._doi = x
+
+    @property
+    def download(self) -> str:
+        if self._download is not None:
+            return self._download
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            return self.meta[ADATA_IDS_SFAIRA.download]
+
+    @download.setter
+    def download(self, x: str):
+        self._download = x
+
+    @property
+    def id(self) -> str:
         if self._id is not None:
             return self._id
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            return self.meta["id"]
+            return self.meta[ADATA_IDS_SFAIRA.id]
 
     @id.setter
-    def id(self, x):
+    def id(self, x: str):
         self._id = x
 
     @property
-    def normalization(self):
+    def ncells(self) -> int:
+        if self.adata is not None:
+            x = self.adata.n_obs
+        elif self._ncells is not None:
+            x = self._ncells
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            x = self.meta[ADATA_IDS_SFAIRA.ncells]
+        return int(x)
+
+    @property
+    def normalization(self) -> str:
         if self._normalization is not None:
             return self._normalization
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            return self.meta["normalization"]
+            return self.meta[ADATA_IDS_SFAIRA.normalization]
 
     @normalization.setter
-    def normalization(self, x):
+    def normalization(self, x: str):
         self._normalization = x
 
     @property
-    def organ(self):
+    def organ(self) -> str:
         if self._organ is not None:
             return self._organ
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            return self.meta["organ"]
+            return self.meta[ADATA_IDS_SFAIRA.organ]
 
     @organ.setter
-    def organ(self, x):
+    def organ(self, x: str):
         self._organ = x
 
     @property
-    def protocol(self):
+    def protocol(self) -> str:
         if self._protocol is not None:
             return self._protocol
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            return self.meta["protocol"]
+            return self.meta[ADATA_IDS_SFAIRA.protocol]
 
     @protocol.setter
-    def protocol(self, x):
+    def protocol(self, x: str):
         self._protocol = x
 
     @property
-    def species(self):
+    def species(self) -> str:
         if self._species is not None:
             return self._species
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            return self.meta["species"]
+            return self.meta[ADATA_IDS_SFAIRA.species]
 
     @species.setter
-    def species(self, x):
+    def species(self, x: str):
         self._species = x
 
     @property
-    def year(self):
+    def year(self) -> str:
         if self._year is not None:
             return self._year
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            return self.meta["year"]
+            return self.meta[ADATA_IDS_SFAIRA.year]
 
     @year.setter
-    def year(self, x):
+    def year(self, x: str):
         self._year = x
 
 
@@ -637,7 +660,6 @@ class DatasetGroupBase(abc.ABC):
     #dsg_humanlung.adata
     """
     datasets: Dict
-
 
     def subset_organs(self, subset: Union[None, List]):
         for i in self.ids:
@@ -656,6 +678,8 @@ class DatasetGroupBase(abc.ABC):
     ):
         """
 
+        Subsets self.datasets to the data sets that were found.
+
         :param celltype_version: Version of cell type ontology to use. Uses most recent if None.
         :param annotated_only:
         :param remove_gene_version:
@@ -663,19 +687,24 @@ class DatasetGroupBase(abc.ABC):
         :param load_raw: Loads unprocessed version of data if available in data loader.
         :return:
         """
-        for i in self.ids:
-            if self.datasets[i].annotated or not annotated_only:
-                self.datasets[i].load(
-                    celltype_version=self.format_type_version(celltype_version),
-                    remove_gene_version=remove_gene_version,
-                    match_to_reference=match_to_reference,
-                    load_raw=load_raw
-                )
+        for x in self.ids:
+            try:
+                if self.datasets[x].annotated or not annotated_only:
+                    self.datasets[x].load(
+                        celltype_version=self.format_type_version(celltype_version),
+                        remove_gene_version=remove_gene_version,
+                        match_to_reference=match_to_reference,
+                        load_raw=load_raw
+                    )
+            except FileNotFoundError:
+                del self.datasets[x]
 
     def load_all_tobacked(self, adata_backed: anndata.AnnData, genome: str, idx: List[np.ndarray],
                           annotated_only: bool = False, celltype_version: Union[str, None] = None):
         """
         Loads data set group into slice of backed anndata object.
+
+        Subsets self.datasets to the data sets that were found.
 
         :param adata_backed:
         :param genome: Genome container target genomes loaded.
@@ -687,13 +716,16 @@ class DatasetGroupBase(abc.ABC):
         :return: New row index for next element to be written into backed anndata.
         """
         i = 0
-        for ident in self.ids:
+        for x in self.ids:
             # if this is for celltype prediction, only load the data with have celltype annotation
-            if self.datasets[ident].annotated or not annotated_only:
-                self.datasets[ident].load_tobacked(
-                    adata_backed=adata_backed, genome=genome, idx=idx[i],
-                    celltype_version=self.format_type_version(celltype_version))
-                i += 1
+            try:
+                if self.datasets[x].annotated or not annotated_only:
+                    self.datasets[x].load_tobacked(
+                        adata_backed=adata_backed, genome=genome, idx=idx[i],
+                        celltype_version=self.format_type_version(celltype_version))
+                    i += 1
+            except FileNotFoundError:
+                del self.datasets[x]
 
     @property
     def ids(self):
@@ -804,21 +836,20 @@ class DatasetGroupBase(abc.ABC):
         )) for x in self.ids if self.datasets[x].adata is not None])
         return obs_concat
 
-    def ncells(self, annotated_only: bool = False):
+    def ncells_bydataset(self, annotated_only: bool = False) -> np.ndarray:
         cells = []
-        for ident in self.ids:
+        for x in self.ids:
             # if this is for celltype prediction, only load the data with have celltype annotation
-            if self.datasets[ident].has_celltypes or not annotated_only:
-                cells.append(self.datasets[ident].ncells)
-        return sum(cells)
-
-    def ncells_bydataset(self, annotated_only: bool = False):
-        cells = []
-        for ident in self.ids:
-            # if this is for celltype prediction, only load the data with have celltype annotation
-            if self.datasets[ident].has_celltypes or not annotated_only:
-                cells.append(self.datasets[ident].ncells)
+            try:
+                if self.datasets[x].has_celltypes or not annotated_only:
+                    cells.append(self.datasets[x].ncells)
+            except FileNotFoundError:
+                del self.datasets[x]
         return cells
+
+    def ncells(self, annotated_only: bool = False):
+        cells = self.ncells_bydataset(annotated_only=annotated_only)
+        return np.sum(cells)
 
     def assert_celltype_version_key(
             self,
@@ -912,9 +943,6 @@ class DatasetSuperGroup:
             raise ValueError(f"Genome {genome} not recognised. Needs to start with 'Mus_Musculus' or 'Homo_Sapiens'.")
         return g
 
-    def ncells(self, annotated_only: bool = False):
-        return sum([x.ncells(annotated_only=annotated_only) for x in self.dataset_groups])
-
     def ncells_bydataset(self, annotated_only: bool = False):
         """
         List of list of length of all data sets by data set group.
@@ -927,7 +955,10 @@ class DatasetSuperGroup:
         Flattened list of length of all data sets.
         :return:
         """
-        return [xx for x in self.dataset_groups for xx in x.ncells_bydataset(annotated_only=annotated_only)]
+        return [xx for x in self.ncells_bydataset(annotated_only=annotated_only) for xx in x]
+
+    def ncells(self, annotated_only: bool = False):
+        return np.sum(self.ncells_bydataset(annotated_only=annotated_only))
 
     def set_dataset_groups(self, dataset_groups: List[DatasetGroupBase]):
         self.dataset_groups = dataset_groups
@@ -1022,17 +1053,17 @@ class DatasetSuperGroup:
             X.indptr = X.indptr.astype(np.int64)
             self.adata.X = X
         keys = [
-            ADATA_IDS_SFAIRA.author,
-            ADATA_IDS_SFAIRA.year,
-            ADATA_IDS_SFAIRA.protocol,
-            ADATA_IDS_SFAIRA.organ,
-            ADATA_IDS_SFAIRA.subtissue,
-            ADATA_IDS_SFAIRA.cell_ontology_class,
-            ADATA_IDS_SFAIRA.state_exact,
-            ADATA_IDS_SFAIRA.normalization,
-            ADATA_IDS_SFAIRA.dev_stage,
             ADATA_IDS_SFAIRA.annotated,
-            ADATA_IDS_SFAIRA.dataset
+            ADATA_IDS_SFAIRA.author,
+            ADATA_IDS_SFAIRA.dataset,
+            ADATA_IDS_SFAIRA.cell_ontology_class,
+            ADATA_IDS_SFAIRA.dev_stage,
+            ADATA_IDS_SFAIRA.normalization,
+            ADATA_IDS_SFAIRA.organ,
+            ADATA_IDS_SFAIRA.protocol,
+            ADATA_IDS_SFAIRA.state_exact,
+            ADATA_IDS_SFAIRA.subtissue,
+            ADATA_IDS_SFAIRA.year,
         ]
         if scatter_update:
             self.adata.obs = pandas.DataFrame({
@@ -1047,7 +1078,10 @@ class DatasetSuperGroup:
             np.random.shuffle(idx_vector)
         idx_ls = []
         row = 0
-        for x in self.ncells_bydataset(annotated_only=annotated_only):
+        ncells = self.ncells_bydataset(annotated_only=annotated_only)
+        if np.all([len(x) == 0 for x in ncells]):
+            raise ValueError("no datasets found")
+        for x in ncells:
             temp_ls = []
             for y in x:
                 temp_ls.append(idx_vector[row:(row+y)])
