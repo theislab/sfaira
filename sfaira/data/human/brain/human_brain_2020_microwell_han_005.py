@@ -89,5 +89,5 @@ class Dataset(DatasetBase):
         self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = 'raw'
         self.adata.uns[self._ADATA_IDS_SFAIRA.dev_stage] = self.dev_stage
 
-        self._convert_and_set_var_names(symbol_col=ADATA_IDS_SFAIRA.gene_id_names, ensembl_col=ADATA_IDS_SFAIRA.gene_id_ensembl)
+        self._convert_and_set_var_names(symbol_col="names", ensembl_col="ensembl")
 

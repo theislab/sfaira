@@ -105,7 +105,7 @@ class Dataset(DatasetBase):
         self.adata.var['names'] = [i.split("_")[0] for i in self.adata.var.index]
         self.adata.var = self.adata.var.reset_index().reset_index().drop('index', axis=1)
 
-        self._convert_and_set_var_names(symbol_col=ADATA_IDS_SFAIRA.gene_id_names, ensembl_col=ADATA_IDS_SFAIRA.gene_id_ensembl)
+        self._convert_and_set_var_names(symbol_col="names", ensembl_col="ensembl")
 
         self.adata = self.adata[:, ~self.adata.var.index.isin(
             ['', '-1', '-10', '-11', '-2', '-3', '-4', '-5', '-6', '-7', '-8', '-9', 'A.2', 'A.3'])].copy()
