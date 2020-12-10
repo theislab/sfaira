@@ -289,9 +289,11 @@ class DatasetBase(abc.ABC):
 
         print(self.adata.var.columns)
         print(self.adata.var.index)
-        print(ADATA_IDS_SFAIRA.gene_id_names)
-        print(ADATA_IDS_SFAIRA.gene_id_index)
-        print(self.adata.var.loc[ADATA_IDS_SFAIRA.gene_id_index])
+        print(ADATA_IDS_SFAIRA().gene_id_names)
+        print(ADATA_IDS_SFAIRA().gene_id_index)
+        print(self.adata.var[ADATA_IDS_SFAIRA.gene_id_names])
+        print(self.adata.var.loc[ADATA_IDS_SFAIRA().gene_id_index])
+        print(self.adata.var[ADATA_IDS_SFAIRA().gene_id_index])
         self.adata.var.set_index(self.adata.var.loc[ADATA_IDS_SFAIRA.gene_id_index].values.tolist(), inplace=True, verify_integrity=False)
         self.adata.var_names_make_unique()
 
