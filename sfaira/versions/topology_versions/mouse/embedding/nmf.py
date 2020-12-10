@@ -35,10 +35,10 @@ NMF_TOPOLOGIES = {
 
 # Load versions from extension if available:
 try:
-    import sfaira_extension.api as sfairae
-    ADD_TOPOLOGIES = sfairae.versions.topology_versions.mouse.embedding.NMF_TOPOLOGIES
-    for k in NMF_TOPOLOGIES.keys():
-        if k in ADD_TOPOLOGIES.keys():
-            NMF_TOPOLOGIES.update(ADD_TOPOLOGIES)
+    from sfaira_extension.versions.topology_versions.mouse.embedding import NMF_TOPOLOGIES as NMF_TOPOLOGIES_EXTENSION
+    NMF_TOPOLOGIES = {
+        **NMF_TOPOLOGIES,
+        **NMF_TOPOLOGIES_EXTENSION
+    }
 except ImportError:
     pass

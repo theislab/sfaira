@@ -27,6 +27,7 @@ class Dataset(DatasetBase):
         self.species = "human"
         self.id = "human_prostate_2018_10x_henry_001_10.1016/j.celrep.2018.11.086"
         self.download_website = "https://covid19.cog.sanger.ac.uk/henry18_0.processed.h5ad"
+        self.download_website_meta = None
         self.organ = "prostate"
         self.sub_tissue = "prostate"
         self.has_celltypes = True
@@ -50,7 +51,7 @@ class Dataset(DatasetBase):
 
         if self._load_raw or not self._load_raw:
             if fn is None:
-                fn = os.path.join(self.path, "human/prostate/henry18_0.processed.h5ad")
+                fn = os.path.join(self.path, "human", "prostate", "henry18_0.processed.h5ad")
             self.adata = anndata.read(fn)
             self.adata.X = np.expm1(self.adata.X)
             self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs['n_counts'].values[:, None]))\

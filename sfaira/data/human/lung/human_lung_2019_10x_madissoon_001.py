@@ -25,6 +25,7 @@ class Dataset(DatasetBase):
         self.species = "human"
         self.id = "human_lung_2019_10x_madissoon_001._10.1186/s13059-019-1906-x"
         self.download_website = "https://covid19.cog.sanger.ac.uk/madissoon19_lung.processed.h5ad"
+        self.download_website_meta = None
         self.organ = "lung"
         self.sub_tissue = "parenchyma"
         self.has_celltypes = True
@@ -65,7 +66,7 @@ class Dataset(DatasetBase):
 
         if self._load_raw or not self._load_raw:
             if fn is None:
-                fn = os.path.join(self.path, "human/lung/madissoon19_lung.processed.h5ad")
+                fn = os.path.join(self.path, "human", "lung", "madissoon19_lung.processed.h5ad")
             self.adata = anndata.read(fn)
 
         self.adata.uns[ADATA_IDS_SFAIRA.author] = 'Meyer'

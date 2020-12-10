@@ -38,10 +38,10 @@ class Dataset(DatasetBase):
 
     def _load(self, fn=None):
         if fn is None:
-            fn = os.path.join(self.path, "mouse/temp_mouse_brain_atlas/matrix.mtx")
-        fn_barcodes = os.path.join(self.path, "mouse/temp_mouse_brain_atlas/barcodes.tsv")
-        fn_var = os.path.join(self.path, "mouse/temp_mouse_brain_atlas/genes.tsv")
-        fn_meta = os.path.join(self.path, "mouse/temp_mouse_brain_atlas/annot_fullAggr.csv")
+            fn = os.path.join(self.path, "mouse", "temp_mouse_brain_atlas", "matrix.mtx")
+        fn_barcodes = os.path.join(self.path, "mouse", "temp_mouse_brain_atlas", "barcodes.tsv")
+        fn_var = os.path.join(self.path, "mouse", "temp_mouse_brain_atlas", "genes.tsv")
+        fn_meta = os.path.join(self.path, "mouse", "temp_mouse_brain_atlas", "annot_fullAggr.csv")
 
         self.adata = anndata.read_mtx(fn)
         self.adata = anndata.AnnData(self.adata.X.T)

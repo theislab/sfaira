@@ -25,7 +25,7 @@ class DatasetGroupHeart(DatasetGroupBase):
         self.datasets = dict(zip(keys, datasets))
         # Load versions from extension if available:
         try:
-            import sfaira_extension.api as sfairae
-            self.datasets.update(sfairae.data.mouse.DatasetGroupHeart().datasets)
+            from sfaira_extension.data.mouse import DatasetGroupHeart
+            self.datasets.update(DatasetGroupHeart().datasets)
         except ImportError:
             pass

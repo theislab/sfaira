@@ -27,6 +27,7 @@ class Dataset(DatasetBase):
         self.species = "human"
         self.id = "human_malegonad_2018_10x_guo_001_10.1038/s41422-018-0099-2"
         self.download_website = "https://covid19.cog.sanger.ac.uk/guo18_donor.processed.h5ad"
+        self.download_website_meta = None
         self.organ = "malegonad"
         self.sub_tissue = "testis"
         self.has_celltypes = True
@@ -53,7 +54,7 @@ class Dataset(DatasetBase):
 
         if self._load_raw or not self._load_raw:
             if fn is None:
-                fn = os.path.join(self.path, "human/malegonad/guo18_donor.processed.h5ad")
+                fn = os.path.join(self.path, "human", "malegonad", "guo18_donor.processed.h5ad")
             self.adata = anndata.read(fn)
             self.adata.X = np.expm1(self.adata.X)
             self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs['n_counts'].values[:, None]))\

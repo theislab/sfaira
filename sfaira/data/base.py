@@ -98,10 +98,11 @@ class DatasetBase(abc.ABC):
             self.adata.obs[ADATA_IDS_SFAIRA.cell_ontology_id] = None
 
         # Map cell type names from raw IDs to ontology maintained ones::
-        self.adata.obs[ADATA_IDS_SFAIRA.cell_ontology_class] = self.map_ontology_class(
-            raw_ids=self.adata.obs[ADATA_IDS_SFAIRA.cell_ontology_class].values,
-            celltype_version=celltype_version
-        )
+        if ADATA_IDS_SFAIRA.cell_ontology_class in self.adata.obs.columns:
+            self.adata.obs[ADATA_IDS_SFAIRA.cell_ontology_class] = self.map_ontology_class(
+                raw_ids=self.adata.obs[ADATA_IDS_SFAIRA.cell_ontology_class].values,
+                celltype_version=celltype_version
+            )
 
         # Remove version tag on ensembl gene ID so that different versions are superimposed downstream:
         if remove_gene_version:
@@ -157,7 +158,7 @@ class DatasetBase(abc.ABC):
             elif isinstance(self.adata.X, scipy.sparse.spmatrix):
                 x = self.adata.X.tocsc()
             else:
-                raise ValueError("data type %s not recognized" % type(self.adata.X))
+                raise ValueError(f"Data type {type(self.adata.X)} not recognized.")
 
             # Compute indices of genes to keep
             data_ids = self.adata.var[ADATA_IDS_SFAIRA.gene_id_ensembl].values
@@ -353,11 +354,11 @@ class DatasetBase(abc.ABC):
                 ]))
             )
         else:
-            raise ValueError("did not reccognize backed AnnData.X format %s" % type(adata_backed.X))
+            raise ValueError(f"Did not reccognize backed AnnData.X format {type(adata_backed.X)}")
 
     def set_unkown_class_id(self, ids: list):
         """
-        Sets list of custom identifiers of unkown cell types in adata.obs["cell_ontology_class"] to the target one.
+        Sets list of custom identifiers of unknown cell types in adata.obs["cell_ontology_class"] to the target one.
 
         :param ids: IDs in adata.obs["cell_ontology_class"] to replace.
         :return:
@@ -384,7 +385,7 @@ class DatasetBase(abc.ABC):
                 genome=genome
             )
         else:
-            raise ValueError("genomes %s not recognised. please provide valid genomes." % genome)
+            raise ValueError(f"Genome {genome} not recognised. Needs to start with 'Mus_Musculus' or 'Homo_Sapiens'.")
 
         self.genome_container = g
 
@@ -908,7 +909,7 @@ class DatasetSuperGroup:
                 genome=genome
             )
         else:
-            raise ValueError("genomes %s not recognised. please provide valid genomes." % genome)
+            raise ValueError(f"Genome {genome} not recognised. Needs to start with 'Mus_Musculus' or 'Homo_Sapiens'.")
         return g
 
     def ncells(self, annotated_only: bool = False):
@@ -1016,7 +1017,10 @@ class DatasetSuperGroup:
         self.adata.filename = fn_backed  # setting this attribute switches this anndata to a backed object
         # Note that setting .filename automatically redefines .X as dense, so we have to redefine it as sparse:
         if not as_dense:
-            self.adata.X = scipy.sparse.csr_matrix(self.adata.X)  # redefines this backed anndata as sparse
+            X = scipy.sparse.csr_matrix(self.adata.X)  # redefines this backed anndata as sparse
+            X.indices = X.indices.astype(np.int64)
+            X.indptr = X.indptr.astype(np.int64)
+            self.adata.X = X
         keys = [
             ADATA_IDS_SFAIRA.author,
             ADATA_IDS_SFAIRA.year,

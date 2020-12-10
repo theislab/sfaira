@@ -1,1 +1,0 @@
-from .mouse_large_intestine import DatasetGroupLargeintestine

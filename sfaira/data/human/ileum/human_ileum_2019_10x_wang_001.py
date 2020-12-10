@@ -27,6 +27,7 @@ class Dataset(DatasetBase):
         self.species = "human"
         self.id = "human_ileum_2019_10x_wang_001_10.1084/jem.20191130"
         self.download_website = "https://covid19.cog.sanger.ac.uk/wang20_ileum.processed.h5ad"
+        self.download_website_meta = None
         self.organ = "ileum"
         self.sub_tissue = "ileum"
         self.has_celltypes = True
@@ -49,7 +50,7 @@ class Dataset(DatasetBase):
 
         if self._load_raw or not self._load_raw:
             if fn is None:
-                fn = os.path.join(self.path, "human/ileum/wang20_ileum.processed.h5ad")
+                fn = os.path.join(self.path, "human", "ileum", "wang20_ileum.processed.h5ad")
             self.adata = anndata.read(fn)
             self.adata.X = np.expm1(self.adata.X)
             self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs['n_counts'].values[:, None]))\

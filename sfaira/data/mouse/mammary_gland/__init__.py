@@ -1,1 +1,0 @@
-from .mouse_mammary_gland import DatasetGroupMammaryGland

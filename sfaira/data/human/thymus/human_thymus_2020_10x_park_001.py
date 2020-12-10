@@ -26,6 +26,7 @@ class Dataset(DatasetBase):
         self.species = "human"
         self.id = "human_thymus_2020_10x_park_001_10.1126/science.aay3224"
         self.download_website = "https://covid19.cog.sanger.ac.uk/park20.processed.h5ad"
+        self.download_website_meta = None
         self.organ = "thymus"
         self.sub_tissue = "fetal thymus"
         self.has_celltypes = True
@@ -85,7 +86,7 @@ class Dataset(DatasetBase):
 
         if self._load_raw or not self._load_raw:
             if fn is None:
-                fn = os.path.join(self.path, "human/thymus/park20.processed.h5ad")
+                fn = os.path.join(self.path, "human", "thymus", "park20.processed.h5ad")
             self.adata = anndata.read(fn)
             self.adata.X = np.expm1(self.adata.X)
 

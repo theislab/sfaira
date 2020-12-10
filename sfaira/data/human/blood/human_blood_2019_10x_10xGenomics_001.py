@@ -29,6 +29,7 @@ class Dataset(DatasetBase):
         self.species = "human"
         self.id = "human_blood_2019_10x_10xGenomics_001_unknown"
         self.download_website = "http://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_10k_v3/pbmc_10k_v3_filtered_feature_bc_matrix.h5"
+        self.download_website_meta = None
         self.organ = "blood"
         self.sub_tissue = "pbmcs"
         self.has_celltypes = False
@@ -43,7 +44,7 @@ class Dataset(DatasetBase):
 
         if self._load_raw or not self._load_raw:
             if fn is None:
-                fn = os.path.join(self.path, "human/blood/pbmc_10k_v3_filtered_feature_bc_matrix.h5ad")
+                fn = os.path.join(self.path, "human", "blood", "pbmc_10k_v3_filtered_feature_bc_matrix.h5ad")
             self.adata = anndata.read(fn)
 
         self.adata.uns[ADATA_IDS_SFAIRA.author] = '10x Genomics'

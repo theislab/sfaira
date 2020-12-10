@@ -29,6 +29,7 @@ class Dataset(DatasetBase):
             'https://cellgeni.cog.sanger.ac.uk/BenKidney_v2.1/Mature_Full_v2.1.h5ad',
             'https://cellgeni.cog.sanger.ac.uk/BenKidney_v2.1/Fetal_full.h5ad'
         ]
+        self.download_website_meta = None
         self.organ = "kidney"
         self.sub_tissue = "renal medulla, renal pelvis, ureter, cortex of kidney"
         self.has_celltypes = True
@@ -115,8 +116,8 @@ class Dataset(DatasetBase):
         if self._load_raw or not self._load_raw:
             if fn is None:
                 fn = [
-                    os.path.join(self.path, "human/kidney/Mature_Full_v2.1.h5ad"),
-                    os.path.join(self.path, 'human/kidney/Fetal_full.h5ad')
+                    os.path.join(self.path, "human", "kidney", "Mature_Full_v2.1.h5ad"),
+                    os.path.join(self.path, "human", "kidney", "Fetal_full.h5ad")
                 ]
             adult = anndata.read(fn[0])
             fetal = anndata.read(fn[1])

@@ -42,6 +42,7 @@ class Dataset(DatasetBase):
         self.species = "human"
         self.id = "human_liver_2019_10x_ramachandran_001_10.1038/s41586-019-1631-3"
         self.download_website = "https://datashare.is.ed.ac.uk/bitstream/handle/10283/3433/tissue.rdata"
+        self.download_website_meta = None
         self.organ = "liver"
         self.sub_tissue = "liver"
         self.has_celltypes = True
@@ -69,7 +70,7 @@ class Dataset(DatasetBase):
 
         if self._load_raw or not self._load_raw:
             if fn is None:
-                fn = os.path.join(self.path, "human/liver/ramachandran.h5ad")
+                fn = os.path.join(self.path, "human", "liver", "ramachandran.h5ad")
             self.adata = anndata.read(fn)
 
         self.adata.uns[ADATA_IDS_SFAIRA.author] = 'Henderson'
