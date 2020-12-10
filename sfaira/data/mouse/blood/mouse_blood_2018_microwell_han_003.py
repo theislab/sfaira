@@ -4,6 +4,7 @@ import os
 import pandas
 from typing import Union
 from .external import DatasetBase
+from .external import ADATA_IDS_SFAIRA
 
 
 class Dataset(DatasetBase):

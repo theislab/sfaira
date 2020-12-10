@@ -1,8 +1,8 @@
+import anndata
 import os
 from typing import Union
 from .external import DatasetBase
 from .external import ADATA_IDS_SFAIRA
-import anndata
 import pandas as pd
 
 

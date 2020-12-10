@@ -1,8 +1,8 @@
+import anndata
 import os
 from typing import Union
 from .external import DatasetBase
 from .external import ADATA_IDS_SFAIRA
-import anndata
 import pandas as pd
 
 
@@ -122,6 +122,6 @@ class Dataset(DatasetBase):
         self.adata.obs[ADATA_IDS_SFAIRA.cell_ontology_class] = self.adata.obs['celltype']
         self.set_unkown_class_id(ids=["1_Unicorns and artifacts"])
         self.adata.obs[ADATA_IDS_SFAIRA.healthy] = [i == 'Control' for i in self.adata.obs['Status']]
-        self.adata.obs['state_exact'] = self.adata.obs['Diagnosis'].astype('category')
+        self.adata.uns[ADATA_IDS_SFAIRA.state_exact] = self.adata.obs['Diagnosis'].astype('category')
 
         self._convert_and_set_var_names(symbol_col='index', ensembl_col=None)

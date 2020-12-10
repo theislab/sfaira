@@ -1,8 +1,8 @@
+import anndata
 import os
 from typing import Union
 from .external import DatasetBase
 from .external import ADATA_IDS_SFAIRA
-import anndata
 
 
 class Dataset(DatasetBase):
@@ -86,7 +86,7 @@ class Dataset(DatasetBase):
         self.adata.uns[ADATA_IDS_SFAIRA.download] = self.download_website
         self.adata.uns[ADATA_IDS_SFAIRA.annotated] = self.annotated
         self.adata.uns[ADATA_IDS_SFAIRA.normalization] = 'raw'
-        self.adata.uns["dev_stage"] = self.dev_stage
+        self.adata.uns[ADATA_IDS_SFAIRA.dev_stage] = self.dev_stage
 
         self._convert_and_set_var_names(symbol_col=ADATA_IDS_SFAIRA.gene_id_names, ensembl_col=ADATA_IDS_SFAIRA.gene_id_ensembl)
 
