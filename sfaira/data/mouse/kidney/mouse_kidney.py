@@ -27,6 +27,6 @@ class DatasetGroupKidney(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             from sfaira_extension.data.mouse import DatasetGroupKidney
-            self.datasets.update(DatasetGroupKidney().datasets)
+            self.datasets.update(DatasetGroupKidney(path=path, meta_path=meta_path).datasets)
         except ImportError:
             pass

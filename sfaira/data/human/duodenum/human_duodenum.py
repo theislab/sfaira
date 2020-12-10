@@ -21,6 +21,6 @@ class DatasetGroupDuodenum(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             from sfaira_extension.data.human import DatasetGroupDuodenum
-            self.datasets.update(DatasetGroupDuodenum().datasets)
+            self.datasets.update(DatasetGroupDuodenum(path=path, meta_path=meta_path).datasets)
         except ImportError:
             pass

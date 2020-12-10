@@ -31,6 +31,6 @@ class DatasetGroupMammaryGland(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             from sfaira_extension.data.mouse import DatasetGroupMammaryGland
-            self.datasets.update(DatasetGroupMammaryGland().datasets)
+            self.datasets.update(DatasetGroupMammaryGland(path=path, meta_path=meta_path).datasets)
         except ImportError:
             pass

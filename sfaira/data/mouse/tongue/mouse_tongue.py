@@ -23,6 +23,6 @@ class DatasetGroupTongue(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             from sfaira_extension.data.mouse import DatasetGroupTongue
-            self.datasets.update(DatasetGroupTongue().datasets)
+            self.datasets.update(DatasetGroupTongue(path=path, meta_path=meta_path).datasets)
         except ImportError:
             pass

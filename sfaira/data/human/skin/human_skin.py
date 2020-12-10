@@ -23,6 +23,6 @@ class DatasetGroupSkin(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             from sfaira_extension.data.human import DatasetGroupSkin
-            self.datasets.update(DatasetGroupSkin().datasets)
+            self.datasets.update(DatasetGroupSkin(path=path, meta_path=meta_path).datasets)
         except ImportError:
             pass

@@ -21,6 +21,6 @@ class DatasetGroupUterus(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             from sfaira_extension.data.human import DatasetGroupUterus
-            self.datasets.update(DatasetGroupUterus().datasets)
+            self.datasets.update(DatasetGroupUterus(path=path, meta_path=meta_path).datasets)
         except ImportError:
             pass

@@ -21,6 +21,6 @@ class DatasetGroupEpityphlon(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             from sfaira_extension.data.human import DatasetGroupEpityphlon
-            self.datasets.update(DatasetGroupEpityphlon().datasets)
+            self.datasets.update(DatasetGroupEpityphlon(path=path, meta_path=meta_path).datasets)
         except ImportError:
             pass

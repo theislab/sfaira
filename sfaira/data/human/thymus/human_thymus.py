@@ -25,6 +25,6 @@ class DatasetGroupThymus(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             from sfaira_extension.data.human import DatasetGroupThymus
-            self.datasets.update(DatasetGroupThymus().datasets)
+            self.datasets.update(DatasetGroupThymus(path=path, meta_path=meta_path).datasets)
         except ImportError:
             pass

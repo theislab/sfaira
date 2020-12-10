@@ -23,6 +23,6 @@ class DatasetGroupTrachea(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             from sfaira_extension.data.mouse import DatasetGroupTrachea
-            self.datasets.update(DatasetGroupTrachea().datasets)
+            self.datasets.update(DatasetGroupTrachea(path=path, meta_path=meta_path).datasets)
         except ImportError:
             pass

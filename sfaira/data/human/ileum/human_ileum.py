@@ -25,6 +25,6 @@ class DatasetGroupIleum(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             from sfaira_extension.data.human import DatasetGroupIleum
-            self.datasets.update(DatasetGroupIleum().datasets)
+            self.datasets.update(DatasetGroupIleum(path=path, meta_path=meta_path).datasets)
         except ImportError:
             pass

@@ -21,6 +21,6 @@ class DatasetGroupFallopiantube(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             from sfaira_extension.data.human import DatasetGroupFallopiantube
-            self.datasets.update(DatasetGroupFallopiantube().datasets)
+            self.datasets.update(DatasetGroupFallopiantube(path=path, meta_path=meta_path).datasets)
         except ImportError:
             pass

@@ -25,6 +25,6 @@ class DatasetGroupPlacenta(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             from sfaira_extension.data.human import DatasetGroupPlacenta
-            self.datasets.update(DatasetGroupPlacenta().datasets)
+            self.datasets.update(DatasetGroupPlacenta(path=path, meta_path=meta_path).datasets)
         except ImportError:
             pass

@@ -29,6 +29,6 @@ class DatasetGroupLung(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             from sfaira_extension.data.mouse import DatasetGroupLung
-            self.datasets.update(DatasetGroupLung().datasets)
+            self.datasets.update(DatasetGroupLung(path=path, meta_path=meta_path).datasets)
         except ImportError:
             pass

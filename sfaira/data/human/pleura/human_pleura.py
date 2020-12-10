@@ -21,6 +21,6 @@ class DatasetGroupPleura(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             from sfaira_extension.data.human import DatasetGroupPleura
-            self.datasets.update(DatasetGroupPleura().datasets)
+            self.datasets.update(DatasetGroupPleura(path=path, meta_path=meta_path).datasets)
         except ImportError:
             pass

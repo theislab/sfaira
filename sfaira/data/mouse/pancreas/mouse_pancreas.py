@@ -41,6 +41,6 @@ class DatasetGroupPancreas(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             from sfaira_extension.data.mouse import DatasetGroupPancreas
-            self.datasets.update(DatasetGroupPancreas().datasets)
+            self.datasets.update(DatasetGroupPancreas(path=path, meta_path=meta_path).datasets)
         except ImportError:
             pass

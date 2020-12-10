@@ -21,6 +21,6 @@ class DatasetGroupCervix(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             from sfaira_extension.data.human import DatasetGroupCervix
-            self.datasets.update(DatasetGroupCervix().datasets)
+            self.datasets.update(DatasetGroupCervix(path=path, meta_path=meta_path).datasets)
         except ImportError:
             pass
