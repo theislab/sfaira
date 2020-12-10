@@ -20,7 +20,7 @@ class DatasetGroupPleura(DatasetGroupBase):
         self.datasets = dict(zip(keys, datasets))
         # Load versions from extension if available:
         try:
-            import sfaira_extension.api as sfairae
-            self.datasets.update(sfairae.data.human.DatasetGroupPleura().datasets)
+            from sfaira_extension.data.human import DatasetGroupPleura
+            self.datasets.update(DatasetGroupPleura().datasets)
         except ImportError:
             pass

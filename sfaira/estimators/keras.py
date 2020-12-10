@@ -45,7 +45,7 @@ class EstimatorKeras:
             model_type: Union[str, None],
             model_topology: Union[str, None],
             weights_md5: Union[str, None] = None,
-            cache_path: str = 'cache/'
+            cache_path: str = os.path.join('cache', '')
     ):
         self.data = data
         self.obs_train = None
@@ -78,52 +78,65 @@ class EstimatorKeras:
         """
         Loads model weights from local directory or zenodo.
         """
-        if self.model_dir.endswith('/'):
-            self.model_dir += '/'
-
         if self.model_dir.startswith('http'):
             # Remote repo
             if not os.path.exists(self.cache_path):
                 os.makedirs(self.cache_path)
 
             import urllib.request
+            from urllib.parse import urljoin
             from urllib.error import HTTPError
             try:
-                urllib.request.urlretrieve(self.model_dir + self.model_id + '_weights.h5',
-                                           self.cache_path + self.model_id + '_weights.h5')
+                urllib.request.urlretrieve(self.model_dir,
+                                           os.path.join(self.cache_path, os.path.basename(self.model_dir))
+                                           )
+                fn = os.path.join(self.cache_path, os.path.basename(self.model_dir))
             except HTTPError:
                 try:
-                    urllib.request.urlretrieve(self.model_dir + self.model_id + '_weights.data-00000-of-00001',
-                                               self.cache_path + self.model_id + '_weights.data-00000-of-00001')
+                    urllib.request.urlretrieve(urljoin(self.model_dir, f'{self.model_id}_weights.h5'),
+                                               os.path.join(self.cache_path, f'{self.model_id}_weights.h5')
+                                               )
+                    fn = os.path.join(self.cache_path, f"{self.model_id}_weights.h5")
                 except HTTPError:
-                    raise FileNotFoundError(f'cannot find remote weightsfile: {self.model_dir + self.model_id}')
-
-            fn = self.cache_path + self.model_id + "_weights"
+                    try:
+                        urllib.request.urlretrieve(urljoin(self.model_dir, f'{self.model_id}_weights.data-00000-of-00001'),
+                                                   os.path.join(self.cache_path, f'{self.model_id}_weights.data-00000-of-00001')
+                                                   )
+                        fn = os.path.join(self.cache_path, f"{self.model_id}_weights.data-00000-of-00001")
+                    except HTTPError:
+                        raise FileNotFoundError(f'cannot find remote weightsfile')
         else:
             # Local repo
             if not self.model_dir:
                 raise ValueError('the model_id is set but the path to the model is empty')
-            fn = self.model_dir + self.model_id + "_weights"
+            if os.path.isfile(self.model_dir) \
+                    and not self.model_dir.endswith(".h5") \
+                    and not self.model_dir.endswith(".data-00000-of-00001"):
+                raise ValueError('weights files saved in h5 format need to have an h5 file extension')
 
-        if os.path.exists(fn+'.h5'):
-            self._assert_md5_sum(fn+'.h5', self.md5)
-            self.model.training_model.load_weights(fn+'.h5')
-        elif os.path.exists(fn + ".data-00000-of-00001"):
-            self._assert_md5_sum(fn + ".data-00000-of-00001", self.md5)
-            self.model.training_model.load_weights(fn)
-        elif os.path.exists(fn):
-            raise ValueError('weights files saved in h5 format need to have an h5 file extension')
+            if os.path.isfile(self.model_dir):
+                fn = self.model_dir
+            elif os.path.isfile(os.path.join(self.model_dir, f"{self.model_id}_weights.data-00000-of-00001")):
+                fn = os.path.join(self.model_dir, f"{self.model_id}_weights.data-00000-of-00001")
+            elif os.path.isfile(os.path.join(self.model_dir, f"{self.model_id}_weights.h5")):
+                fn = os.path.join(self.model_dir, f"{self.model_id}_weights.h5")
+            else:
+                raise ValueError('the weightsfile could not be found')
+
+        self._assert_md5_sum(fn, self.md5)
+        if fn.endswith(".data-00000-of-00001"):
+            self.model.training_model.load_weights(".".join(fn.split(".")[:-1]))
         else:
-            raise ValueError(f'the weightsfile {fn} could not be found')
+            self.model.training_model.load_weights(fn)
 
     def save_weights_to_cache(self):
-        if not os.path.exists(self.cache_path+'weights/'):
-            os.makedirs(self.cache_path+'weights/')
-        fn = self.cache_path + 'weights/' + str(self.model_id) + "_weights_cache.h5"
+        if not os.path.exists(os.path.join(self.cache_path, 'weights')):
+            os.makedirs(os.path.join(self.cache_path, 'weights'))
+        fn = os.path.join(self.cache_path, 'weights', f"{self.model_id}_weights_cache.h5")
         self.model.training_model.save_weights(fn)
 
     def load_weights_from_cache(self):
-        fn = self.cache_path + 'weights/' + str(self.model_id) + "_weights_cache.h5"
+        fn = os.path.join(self.cache_path, 'weights', f"{self.model_id}_weights_cache.h5")
         self.model.training_model.load_weights(fn)
 
     def init_model(self, clear_weight_cache=True, override_hyperpar=None):
@@ -132,9 +145,9 @@ class EstimatorKeras:
         :return:
         """
         if clear_weight_cache:
-            if os.path.exists(self.cache_path+'weights/'):
-                for file in os.listdir(self.cache_path+'weights/'):
-                    file_path = os.path.join(self.cache_path+'weights/', file)
+            if os.path.exists(os.path.join(self.cache_path, 'weights')):
+                for file in os.listdir(os.path.join(self.cache_path, 'weights')):
+                    file_path = os.path.join(os.path.join(self.cache_path, 'weights'), file)
                     os.remove(file_path)
 
     def _assert_md5_sum(
@@ -466,7 +479,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             model_type: Union[str, None],
             model_topology: Union[str, None],
             weights_md5: Union[str, None] = None,
-            cache_path: str = 'cache/'
+            cache_path: str = os.path.join('cache', '')
     ):
         super(EstimatorKerasEmbedding, self).__init__(
                 data=data,
@@ -891,7 +904,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             model_type: Union[str, None],
             model_topology: Union[str, None],
             weights_md5: Union[str, None] = None,
-            cache_path: str = 'cache/',
+            cache_path: str = os.path.join('cache', ''),
             max_class_weight: float = 1e3
     ):
         super(EstimatorKerasCelltype, self).__init__(
@@ -1044,7 +1057,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
 
             return dataset
 
-        elif mode == 'eval' or mode == 'predict':
+        elif mode == 'eval':
             weights, y = self._get_celltype_out(idx=idx)
             if not weighted:
                 weights = np.ones_like(weights)
@@ -1060,6 +1073,19 @@ class EstimatorKerasCelltype(EstimatorKeras):
                 x = x.toarray()
 
             return x, y, weights
+
+        elif mode == 'predict':
+            # Prepare data reading according to whether anndata is backed or not:
+            if self.data.isbacked:
+                # Need to supply sorted indices to backed anndata:
+                x = self.data.X[np.sort(idx), :]
+                # Sort back in original order of indices.
+                x = x[[np.where(np.sort(idx) == i)[0][0] for i in idx], :]
+            else:
+                x = self._prepare_data_matrix(idx=idx)
+                x = x.toarray()
+
+            return x, None, None
 
         else:
             raise ValueError(f'Mode {mode} not recognised. Should be "train", "eval" or" predict"')
@@ -1089,7 +1115,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
         prediction
         """
         if self.idx_test is None or self.idx_test.any():   # true if the array is not empty or if the passed value is None
-            x, y, _ = self._get_dataset(
+            x, _, _ = self._get_dataset(
                 idx=self.idx_test,
                 batch_size=None,
                 mode='predict'

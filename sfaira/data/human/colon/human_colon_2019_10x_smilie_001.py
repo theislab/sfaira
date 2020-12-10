@@ -28,6 +28,7 @@ class Dataset(DatasetBase):
         self.species = "human"
         self.id = "human_colon_2019_10x_smilie_001_10.1016/j.cell.2019.06.029"
         self.download_website = "https://covid19.cog.sanger.ac.uk/smillie19_epi.processed.h5ad"
+        self.download_website_meta = None
         self.organ = "colon"
         self.sub_tissue = "colonic epithelium"
         self.has_celltypes = True
@@ -81,7 +82,7 @@ class Dataset(DatasetBase):
 
         if self._load_raw or not self._load_raw:
             if fn is None:
-                fn = os.path.join(self.path, "human/colon/smillie19_epi.processed.h5ad")
+                fn = os.path.join(self.path, "human", "colon", "smillie19_epi.processed.h5ad")
             self.adata = anndata.read(fn)
             self.adata.X = np.expm1(self.adata.X)
             self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs['n_counts'].values[:, None]))\

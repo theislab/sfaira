@@ -37,6 +37,7 @@ class Dataset(DatasetBase):
         self.species = "human"
         self.id = "human_bone_2018_10x_ica_unknown"
         self.download_website = "https://data.humancellatlas.org/project-assets/project-matrices/cc95ff89-2e68-4a08-a234-480eca21ce79.homo_sapiens.loom"
+        self.download_website_meta = None
         self.organ = "bone"
         self.sub_tissue = "bone_marrow"
         self.has_celltypes = False
@@ -51,7 +52,7 @@ class Dataset(DatasetBase):
 
         if self._load_raw:
             if fn is None:
-                fn = os.path.join(self.path, "human/bone/cc95ff89-2e68-4a08-a234-480eca21ce79.homo_sapiens.loom")
+                fn = os.path.join(self.path, "human", "bone", "cc95ff89-2e68-4a08-a234-480eca21ce79.homo_sapiens.loom")
             self.adata = anndata.read_loom(fn)
             idx = np.logical_and((self.adata.obs['derived_organ_parts_label'] == 'bone marrow').values,
                                  (self.adata.obs['emptydrops_is_cell'] == 't').values)
@@ -59,7 +60,7 @@ class Dataset(DatasetBase):
 
         else:
             if fn is None:
-                fn = os.path.join(self.path, "human/bone/ica_bone.h5ad")
+                fn = os.path.join(self.path, "human", "bone", "ica_bone.h5ad")
             self.adata = anndata.read(fn)
 
         self.adata.uns[ADATA_IDS_SFAIRA.author] = 'Regev'

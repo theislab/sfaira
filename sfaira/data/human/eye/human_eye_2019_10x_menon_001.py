@@ -25,6 +25,7 @@ class Dataset(DatasetBase):
         self.species = "human"
         self.id = "human_eye_2019_10x_menon_001_10.1038/s41467-019-12780-8"
         self.download_website = "https://covid19.cog.sanger.ac.uk/menon19.processed.h5ad"
+        self.download_website_meta = None
         self.organ = "eye"
         self.sub_tissue = "retina"
         self.has_celltypes = True
@@ -49,7 +50,7 @@ class Dataset(DatasetBase):
 
         if self._load_raw or not self._load_raw:
             if fn is None:
-                fn = os.path.join(self.path, "human/eye/menon19.processed.h5ad")
+                fn = os.path.join(self.path, "human", "eye", "menon19.processed.h5ad")
             self.adata = anndata.read(fn)
 
         self.adata.uns[ADATA_IDS_SFAIRA.author] = 'Hafler'

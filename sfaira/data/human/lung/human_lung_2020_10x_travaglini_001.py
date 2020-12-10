@@ -33,8 +33,9 @@ class Dataset(DatasetBase):
     ):
         DatasetBase.__init__(self=self, path=path, meta_path=meta_path, **kwargs)
         self.species = "human"
-        self.id = "human_lung_2020_10x_travaglini_001_10.1101/742320"
+        self.id = "human_lung_2020_10x_travaglini_001_10.1038/s41586-020-2922-4"
         self.download_website = "https://www.synapse.org/#!Synapse:syn21041850"
+        self.download_website_meta = None
         self.organ = "lung"
         self.sub_tissue = "proximal, medial, distal, blood"
         self.has_celltypes = True
@@ -107,7 +108,7 @@ class Dataset(DatasetBase):
 
         if self._load_raw or not self._load_raw:
             if fn is None:
-                fn = os.path.join(self.path, "human/lung/droplet_normal_lung_blood_scanpy.20200205.RC4.h5ad")
+                fn = os.path.join(self.path, "human", "lung", "droplet_normal_lung_blood_scanpy.20200205.RC4.h5ad")
             self.adata = anndata.read(fn)
             self.adata.X = scipy.sparse.csc_matrix(self.adata.X)
             self.adata.X = np.expm1(self.adata.X)
@@ -116,7 +117,7 @@ class Dataset(DatasetBase):
 
         self.adata.uns[ADATA_IDS_SFAIRA.author] = 'Krasnow'
         self.adata.uns[ADATA_IDS_SFAIRA.year] = 2020
-        self.adata.uns[ADATA_IDS_SFAIRA.doi] = "10.1101/742320"
+        self.adata.uns[ADATA_IDS_SFAIRA.doi] = "10.1038/s41586-020-2922-4"
         self.adata.uns[ADATA_IDS_SFAIRA.protocol] = '10x'
         self.adata.uns[ADATA_IDS_SFAIRA.organ] = self.organ
         self.adata.uns[ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue

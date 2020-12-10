@@ -24,7 +24,7 @@ class DatasetGroupSpleen(DatasetGroupBase):
         self.datasets = dict(zip(keys, datasets))
         # Load versions from extension if available:
         try:
-            import sfaira_extension.api as sfairae
-            self.datasets.update(sfairae.data.human.DatasetGroupSpleen().datasets)
+            from sfaira_extension.data.human import DatasetGroupSpleen
+            self.datasets.update(DatasetGroupSpleen().datasets)
         except ImportError:
             pass

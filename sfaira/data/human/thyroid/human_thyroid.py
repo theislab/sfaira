@@ -22,7 +22,7 @@ class DatasetGroupThyroid(DatasetGroupBase):
         self.datasets = dict(zip(keys, datasets))
         # Load versions from extension if available:
         try:
-            import sfaira_extension.api as sfairae
-            self.datasets.update(sfairae.data.human.DatasetGroupThyroid().datasets)
+            from sfaira_extension.data.human import DatasetGroupThyroid
+            self.datasets.update(DatasetGroupThyroid().datasets)
         except ImportError:
             pass

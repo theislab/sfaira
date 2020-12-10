@@ -27,6 +27,7 @@ class Dataset(DatasetBase):
         self.species = "human"
         self.id = "human_lung_2020_10x_lukassen_002_10.1101/2020.03.13.991455"
         self.download_website = "https://covid19.cog.sanger.ac.uk/lukassen20_airway_orig.processed.h5ad"
+        self.download_website_meta = None
         self.organ = "lung"
         self.sub_tissue = "bronchial epithelial cells"
         self.has_celltypes = True
@@ -56,7 +57,7 @@ class Dataset(DatasetBase):
 
         if self._load_raw or not self._load_raw:
             if fn is None:
-                fn = os.path.join(self.path, "human/lung/lukassen20_airway_orig.processed.h5ad")
+                fn = os.path.join(self.path, "human", "lung", "lukassen20_airway_orig.processed.h5ad")
             self.adata = anndata.read(fn)
             self.adata.X = np.expm1(self.adata.X)
             self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs['nCount_RNA'].values[:, None]))\

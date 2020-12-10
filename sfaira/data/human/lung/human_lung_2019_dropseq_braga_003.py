@@ -56,8 +56,8 @@ class Dataset(DatasetBase):
         if self._load_raw or not self._load_raw:
             if fn is None:
                 fn = [
-                    os.path.join(self.path, "human/lung/GSE130148_raw_counts.csv.gz"),
-                    os.path.join(self.path, "human/lung/GSE130148_barcodes_cell_types.txt.gz"),
+                    os.path.join(self.path, "human", "lung", "GSE130148_raw_counts.csv.gz"),
+                    os.path.join(self.path, "human", "lung", "GSE130148_barcodes_cell_types.txt.gz"),
                 ]
             self.adata = anndata.read_csv(fn[0]).T
             self.adata.obs = pd.read_csv(fn[1], sep='\t', index_col=0)

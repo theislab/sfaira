@@ -24,7 +24,7 @@ class DatasetGroupBladder(DatasetGroupBase):
         self.datasets = dict(zip(keys, datasets))
         # Load versions from extension if available:
         try:
-            import sfaira_extension.api as sfairae
-            self.datasets.update(sfairae.data.mouse.DatasetGroupBladder().datasets)
+            from sfaira_extension.data.mouse import DatasetGroupBladder
+            self.datasets.update(DatasetGroupBladder().datasets)
         except ImportError:
             pass

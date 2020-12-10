@@ -22,7 +22,7 @@ class DatasetGroupSkin(DatasetGroupBase):
         self.datasets = dict(zip(keys, datasets))
         # Load versions from extension if available:
         try:
-            import sfaira_extension.api as sfairae
-            self.datasets.update(sfairae.data.human.DatasetGroupSkin().datasets)
+            from sfaira_extension.data.human import DatasetGroupSkin
+            self.datasets.update(DatasetGroupSkin().datasets)
         except ImportError:
             pass

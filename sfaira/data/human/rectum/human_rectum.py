@@ -22,7 +22,7 @@ class DatasetGroupRectum(DatasetGroupBase):
         self.datasets = dict(zip(keys, datasets))
         # Load versions from extension if available:
         try:
-            import sfaira_extension.api as sfairae
-            self.datasets.update(sfairae.data.human.DatasetGroupRectum().datasets)
+            from sfaira_extension.data.human import DatasetGroupRectum
+            self.datasets.update(DatasetGroupRectum().datasets)
         except ImportError:
             pass

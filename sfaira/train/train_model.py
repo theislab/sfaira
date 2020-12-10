@@ -13,6 +13,16 @@ from .external import SPECIES_DICT
 
 
 class TargetZoos:
+    """
+    Class that provides access to all available dataset groups in sfaira.
+
+    Parameters
+    ----------
+    path : str
+        The name of the animal
+    meta_path : str
+        The sound the animal makes
+    """
 
     def __init__(self, path: Union[str, None], meta_path: Union[str, None] = None):
         if path is not None:
@@ -20,29 +30,29 @@ class TargetZoos:
                 "bladder": mouse.DatasetGroupBladder(path=path, meta_path=meta_path),
                 "brain": mouse.DatasetGroupBrain(path=path, meta_path=meta_path),
                 "diaphragm": mouse.DatasetGroupDiaphragm(path=path, meta_path=meta_path),
-                "fat": mouse.DatasetGroupFat(path=path, meta_path=meta_path),
+                "adipose": mouse.DatasetGroupAdipose(path=path, meta_path=meta_path),
                 "heart": mouse.DatasetGroupHeart(path=path, meta_path=meta_path),
                 "kidney": mouse.DatasetGroupKidney(path=path, meta_path=meta_path),
-                "largeintestine": mouse.DatasetGroupLargeintestine(path=path, meta_path=meta_path),
-                "limbmuscle": mouse.DatasetGroupLimbmuscle(path=path, meta_path=meta_path),
+                "colon": mouse.DatasetGroupColon(path=path, meta_path=meta_path),
+                "muscle": mouse.DatasetGroupMuscle(path=path, meta_path=meta_path),
                 "liver": mouse.DatasetGroupLiver(path=path, meta_path=meta_path),
                 "lung": mouse.DatasetGroupLung(path=path, meta_path=meta_path),
                 "mammarygland": mouse.DatasetGroupMammaryGland(path=path, meta_path=meta_path),
-                "marrow": mouse.DatasetGroupMarrow(path=path, meta_path=meta_path),
-                "ovary": mouse.DatasetGroupOvary(path=path, meta_path=meta_path),
+                "bone": mouse.DatasetGroupBone(path=path, meta_path=meta_path),
+                "femalegonad": mouse.DatasetGroupFemalegonad(path=path, meta_path=meta_path),
                 "pancreas": mouse.DatasetGroupPancreas(path=path, meta_path=meta_path),
-                "peripheralblood": mouse.DatasetGroupPeripheralBlood(path=path, meta_path=meta_path),
+                "blood": mouse.DatasetGroupBlood(path=path, meta_path=meta_path),
                 "placenta": mouse.DatasetGroupPlacenta(path=path, meta_path=meta_path),
                 "prostate": mouse.DatasetGroupProstate(path=path, meta_path=meta_path),
                 "rib": mouse.DatasetGroupRib(path=path, meta_path=meta_path),
                 "skin": mouse.DatasetGroupSkin(path=path, meta_path=meta_path),
-                "smallintestine": mouse.DatasetGroupSmallintestine(path=path, meta_path=meta_path),
+                "ileum": mouse.DatasetGroupIleum(path=path, meta_path=meta_path),
                 "spleen": mouse.DatasetGroupSpleen(path=path, meta_path=meta_path),
                 "stomach": mouse.DatasetGroupStomach(path=path, meta_path=meta_path),
-                "testis": mouse.DatasetGroupTestis(path=path, meta_path=meta_path),
+                "malegonad": mouse.DatasetGroupMalegonad(path=path, meta_path=meta_path),
                 "thymus": mouse.DatasetGroupThymus(path=path, meta_path=meta_path),
                 "tongue": mouse.DatasetGroupTongue(path=path, meta_path=meta_path),
-                "trachae": mouse.DatasetGroupTrachea(path=path, meta_path=meta_path),
+                "trachea": mouse.DatasetGroupTrachea(path=path, meta_path=meta_path),
                 "uterus": mouse.DatasetGroupUterus(path=path)
             }
             self.data_human = {
