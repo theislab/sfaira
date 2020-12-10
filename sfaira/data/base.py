@@ -291,8 +291,8 @@ class DatasetBase(abc.ABC):
         print(self.adata.var.columns)
         print(self.adata.var.index)
         print(new_index)
-        print(self.adata.var[new_index])
-        self.adata.var.set_index(self.adata.var[new_index].values.tolist(), inplace=True, verify_integrity=False)
+        print(self.adata.var.loc[new_index])
+        self.adata.var.set_index(self.adata.var.loc[new_index].values.tolist(), inplace=True, verify_integrity=False)
         self.adata.var_names_make_unique()
 
     def subset_organs(self, subset: Union[None, List]):
