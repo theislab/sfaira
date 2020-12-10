@@ -15,6 +15,9 @@ Build a repository structure
     2. Make subfolders in root for each organism for which you want to build a data base.
     3. Make subfolders for each organ whithin each organism for which you want to build a data base.
 
+We maintain a couple of download scripts that automatise this process, which have to be executed in a shell once to download specific subsets of the full data zoo.
+These scripts can be found in sfaira.data.download_scripts.
+
 Use 3rd party repositories
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 Some organization provide streamlined data objects that can be directly consumed by data zoos such as sfaira.
