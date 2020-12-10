@@ -21,6 +21,7 @@ class ADATA_IDS_BASE:
     _gene_id_names: str
     _healthy: str
     _id: str
+    _ncells: str
     _normalization: str
     _organ: str
     _protocol: str
@@ -79,6 +80,10 @@ class ADATA_IDS_BASE:
     @property
     def id(self):
         return self._id
+
+    @property
+    def ncells(self):
+        return self._ncells
 
     @property
     def normalization(self):
@@ -154,6 +159,7 @@ class ADATA_IDS_SFAIRA(ADATA_IDS_EXTENDED):
         self._has_celltypes = "has_celltypes"
         self._healthy = "healthy"
         self._id = "id"
+        self._ncells = "ncells"
         self._normalization = "normalization"
         self._lab = "lab"
         self._organ = "organ"
@@ -190,6 +196,7 @@ class ADATA_IDS_CELLXGENE(ADATA_IDS_EXTENDED):
         self._has_celltypes = ""  # TODO
         self._healthy = None  # is inferred from _disease
         self._id = ""  # TODO
+        self._ncells = "ncells"
         self._normalization = None  # is always "counts"
         self._lab = ""  # TODO
         self._organ = ""  # TODO
