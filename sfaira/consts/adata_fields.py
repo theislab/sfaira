@@ -208,7 +208,6 @@ class ADATA_IDS_CELLXGENE(ADATA_IDS_EXTENDED):
         self._id = ""  # TODO
         self._ncells = "ncells"
         self._normalization = None  # is always "counts"
-        self._lab = ""  # TODO
         self._organ = ""  # TODO
         self._protocol = "assay"
         self._species = "organism"
