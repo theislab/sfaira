@@ -21,6 +21,6 @@ class DatasetGroupAdipose(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             from sfaira_extension.data.human import DatasetGroupAdipose
-            self.datasets.update(DatasetGroupAdipose().datasets)
+            self.datasets.update(DatasetGroupAdipose(path=path, meta_path=meta_path).datasets)
         except ImportError:
             pass

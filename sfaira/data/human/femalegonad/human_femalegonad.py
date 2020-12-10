@@ -23,6 +23,6 @@ class DatasetGroupFemalegonad(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             from sfaira_extension.data.human import DatasetGroupFemalegonad
-            self.datasets.update(DatasetGroupFemalegonad().datasets)
+            self.datasets.update(DatasetGroupFemalegonad(path=path, meta_path=meta_path).datasets)
         except ImportError:
             pass

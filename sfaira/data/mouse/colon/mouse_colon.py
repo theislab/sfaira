@@ -23,6 +23,6 @@ class DatasetGroupColon(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             from sfaira_extension.data.mouse import DatasetGroupColon
-            self.datasets.update(DatasetGroupColon().datasets)
+            self.datasets.update(DatasetGroupColon(path=path, meta_path=meta_path).datasets)
         except ImportError:
             pass

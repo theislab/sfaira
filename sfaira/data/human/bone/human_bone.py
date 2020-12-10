@@ -25,6 +25,6 @@ class DatasetGroupBone(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             from sfaira_extension.data.human import DatasetGroupBone
-            self.datasets.update(DatasetGroupBone().datasets)
+            self.datasets.update(DatasetGroupBone(path=path, meta_path=meta_path).datasets)
         except ImportError:
             pass

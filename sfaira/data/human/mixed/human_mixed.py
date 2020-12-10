@@ -21,6 +21,6 @@ class DatasetGroupMixed(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             from sfaira_extension.data.human import DatasetGroupMixed
-            self.datasets.update(DatasetGroupMixed().datasets)
+            self.datasets.update(DatasetGroupMixed(path=path, meta_path=meta_path).datasets)
         except ImportError:
             pass

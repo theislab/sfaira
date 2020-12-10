@@ -25,6 +25,6 @@ class DatasetGroupOmentum(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             from sfaira_extension.data.human import DatasetGroupOmentum
-            self.datasets.update(DatasetGroupOmentum().datasets)
+            self.datasets.update(DatasetGroupOmentum(path=path, meta_path=meta_path).datasets)
         except ImportError:
             pass

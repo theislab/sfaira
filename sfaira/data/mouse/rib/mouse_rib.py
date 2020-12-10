@@ -25,6 +25,6 @@ class DatasetGroupRib(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             from sfaira_extension.data.mouse import DatasetGroupRib
-            self.datasets.update(DatasetGroupRib().datasets)
+            self.datasets.update(DatasetGroupRib(path=path, meta_path=meta_path).datasets)
         except ImportError:
             pass

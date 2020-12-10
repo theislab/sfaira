@@ -21,6 +21,6 @@ class DatasetGroupChorionicvillus(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             from sfaira_extension.data.human import DatasetGroupChorionicvillus
-            self.datasets.update(DatasetGroupChorionicvillus().datasets)
+            self.datasets.update(DatasetGroupChorionicvillus(path=path, meta_path=meta_path).datasets)
         except ImportError:
             pass

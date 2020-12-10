@@ -29,6 +29,6 @@ class DatasetGroupBlood (DatasetGroupBase):
         # Load versions from extension if available:
         try:
             from sfaira_extension.data.mouse import DatasetGroupBlood
-            self.datasets.update(DatasetGroupBlood().datasets)
+            self.datasets.update(DatasetGroupBlood(path=path, meta_path=meta_path).datasets)
         except ImportError:
             pass

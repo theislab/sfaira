@@ -27,6 +27,6 @@ class DatasetGroupEye(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             from sfaira_extension.data.human import DatasetGroupEye
-            self.datasets.update(DatasetGroupEye().datasets)
+            self.datasets.update(DatasetGroupEye(path=path, meta_path=meta_path).datasets)
         except ImportError:
             pass

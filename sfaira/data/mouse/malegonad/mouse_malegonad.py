@@ -23,6 +23,6 @@ class DatasetGroupMalegonad(DatasetGroupBase):
         # Load versions from extension if available:
         try:
             from sfaira_extension.data.mouse import DatasetGroupMalegonad
-            self.datasets.update(DatasetGroupMalegonad().datasets)
+            self.datasets.update(DatasetGroupMalegonad(path=path, meta_path=meta_path).datasets)
         except ImportError:
             pass
