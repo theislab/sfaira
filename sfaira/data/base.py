@@ -288,7 +288,7 @@ class DatasetBase(abc.ABC):
             raise ValueError('Please provide the name of at least the name of the var column containing ensembl ids or'
                              'the name of the var column containing gene symbols')
 
-        self.adata.var.index = self.adata.var[new_index].tolist()
+        self.adata.var.set_index(self.adata.var[new_index].tolist(), inplace=True, verify_integrity=True)
         self.adata.var_names_make_unique()
 
     def subset_organs(self, subset: Union[None, List]):
@@ -696,7 +696,8 @@ class DatasetGroupBase(abc.ABC):
                         match_to_reference=match_to_reference,
                         load_raw=load_raw
                     )
-            except FileNotFoundError:
+            except FileNotFoundError as e:
+                print(e)
                 del self.datasets[x]
 
     def load_all_tobacked(self, adata_backed: anndata.AnnData, genome: str, idx: List[np.ndarray],
@@ -981,6 +982,11 @@ class DatasetSuperGroup:
 
         :param celltype_version: Version of cell type ontology to use.
             Uses most recent within each DatasetGroup if None.
+        :param match_to_reference:
+        :param remove_gene_version:
+        :param annotated_only:
+        :param load_raw:
+        :return:
         """
         for x in self.dataset_groups:
             x.load_all(
@@ -1078,6 +1084,7 @@ class DatasetSuperGroup:
             np.random.shuffle(idx_vector)
         idx_ls = []
         row = 0
+        print([x.ids for x in self.dataset_groups])
         ncells = self.ncells_bydataset(annotated_only=annotated_only)
         if np.all([len(x) == 0 for x in ncells]):
             raise ValueError("no datasets found")
