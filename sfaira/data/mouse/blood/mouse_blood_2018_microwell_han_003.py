@@ -4,7 +4,6 @@ import os
 import pandas
 from typing import Union
 from .external import DatasetBase
-from .external import ADATA_IDS_SFAIRA
 
 
 class Dataset(DatasetBase):
@@ -75,7 +74,7 @@ class Dataset(DatasetBase):
         self.adata.uns["animal"] = "mouse"
         self.adata.uns["id"] = self.id
         self.adata.uns["wget_download"] = self.download_website
-        self.adata.uns[ADATA_IDS_SFAIRA.annotated] = self.annotated
+        self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
         self.adata.uns["counts"] = 'raw'
         self.adata.obs["cell_ontology_class"] = self.adata.obs["Annotation"].values.tolist()
         self.set_unkown_class_id(ids=[np.nan, "nan"])

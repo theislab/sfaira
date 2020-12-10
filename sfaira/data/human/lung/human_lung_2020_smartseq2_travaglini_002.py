@@ -2,7 +2,6 @@ import anndata
 import os
 from typing import Union
 from .external import DatasetBase
-from .external import ADATA_IDS_SFAIRA
 import scipy.sparse
 import numpy as np
 
@@ -102,22 +101,22 @@ class Dataset(DatasetBase):
             self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs['nReads'].values[:, None])) \
                 .multiply(1 / 1000000)
 
-        self.adata.uns[ADATA_IDS_SFAIRA.author] = 'Krasnow'
-        self.adata.uns[ADATA_IDS_SFAIRA.year] = 2020
-        self.adata.uns[ADATA_IDS_SFAIRA.doi] = "10.1038/s41586-020-2922-4"
-        self.adata.uns[ADATA_IDS_SFAIRA.protocol] = 'smartseq2'
-        self.adata.uns[ADATA_IDS_SFAIRA.organ] = self.organ
-        self.adata.uns[ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
-        self.adata.uns[ADATA_IDS_SFAIRA.species] = "human"
-        self.adata.uns[ADATA_IDS_SFAIRA.id] = self.id
-        self.adata.uns[ADATA_IDS_SFAIRA.download] = self.download_website
-        self.adata.uns[ADATA_IDS_SFAIRA.annotated] = self.annotated
-        self.adata.uns[ADATA_IDS_SFAIRA.normalization] = 'raw'
+        self.adata.uns[self._ADATA_IDS_SFAIRA.author] = 'Krasnow'
+        self.adata.uns[self._ADATA_IDS_SFAIRA.year] = 2020
+        self.adata.uns[self._ADATA_IDS_SFAIRA.doi] = "10.1038/s41586-020-2922-4"
+        self.adata.uns[self._ADATA_IDS_SFAIRA.protocol] = 'smartseq2'
+        self.adata.uns[self._ADATA_IDS_SFAIRA.organ] = self.organ
+        self.adata.uns[self._ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
+        self.adata.uns[self._ADATA_IDS_SFAIRA.species] = "human"
+        self.adata.uns[self._ADATA_IDS_SFAIRA.id] = self.id
+        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download_website
+        self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
+        self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = 'raw'
 
-        self.adata.obs[ADATA_IDS_SFAIRA.cell_ontology_class] = ["_".join(i.split('_')[:-1]) for i in self.adata.obs['free_annotation']]
-        self.adata.obs[ADATA_IDS_SFAIRA.cell_ontology_class] = self.adata.obs[ADATA_IDS_SFAIRA.cell_ontology_class].astype('category')
+        self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class] = ["_".join(i.split('_')[:-1]) for i in self.adata.obs['free_annotation']]
+        self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class] = self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class].astype('category')
         self.set_unkown_class_id(ids=["1_Unicorns and artifacts"])
-        self.adata.obs[ADATA_IDS_SFAIRA.healthy] = True
-        self.adata.uns[ADATA_IDS_SFAIRA.state_exact] = 'healthy'
+        self.adata.obs[self._ADATA_IDS_SFAIRA.healthy] = True
+        self.adata.uns[self._ADATA_IDS_SFAIRA.state_exact] = 'healthy'
 
         self._convert_and_set_var_names(symbol_col='index', ensembl_col=None)

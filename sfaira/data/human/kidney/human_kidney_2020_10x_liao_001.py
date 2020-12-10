@@ -2,7 +2,6 @@ import anndata
 import os
 from typing import Union
 from .external import DatasetBase
-from .external import ADATA_IDS_SFAIRA
 import pandas as pd
 import scipy.io
 import gzip
@@ -97,20 +96,20 @@ class Dataset(DatasetBase):
                 fn = os.path.join(self.path, "human", "kidney", "GSE131685.h5ad")
             self.adata = anndata.read(fn)
 
-        self.adata.uns[ADATA_IDS_SFAIRA.author] = 'Mo'
-        self.adata.uns[ADATA_IDS_SFAIRA.year] = 2020
-        self.adata.uns[ADATA_IDS_SFAIRA.doi] = '10.1038/s41597-019-0351-8'
-        self.adata.uns[ADATA_IDS_SFAIRA.protocol] = '10x'
-        self.adata.uns[ADATA_IDS_SFAIRA.organ] = self.organ
-        self.adata.uns[ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
-        self.adata.uns[ADATA_IDS_SFAIRA.species] = "human"
-        self.adata.uns[ADATA_IDS_SFAIRA.id] = self.id
-        self.adata.uns[ADATA_IDS_SFAIRA.download] = self.download_website
-        self.adata.uns[ADATA_IDS_SFAIRA.annotated] = self.annotated
-        self.adata.uns[ADATA_IDS_SFAIRA.normalization] = 'raw'
+        self.adata.uns[self._ADATA_IDS_SFAIRA.author] = 'Mo'
+        self.adata.uns[self._ADATA_IDS_SFAIRA.year] = 2020
+        self.adata.uns[self._ADATA_IDS_SFAIRA.doi] = '10.1038/s41597-019-0351-8'
+        self.adata.uns[self._ADATA_IDS_SFAIRA.protocol] = '10x'
+        self.adata.uns[self._ADATA_IDS_SFAIRA.organ] = self.organ
+        self.adata.uns[self._ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
+        self.adata.uns[self._ADATA_IDS_SFAIRA.species] = "human"
+        self.adata.uns[self._ADATA_IDS_SFAIRA.id] = self.id
+        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download_website
+        self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
+        self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = 'raw'
 
-        self.adata.obs[ADATA_IDS_SFAIRA.cell_ontology_class] = None
-        self.adata.obs[ADATA_IDS_SFAIRA.healthy] = True
-        self.adata.obs[ADATA_IDS_SFAIRA.state_exact] = 'healthy'
+        self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class] = None
+        self.adata.obs[self._ADATA_IDS_SFAIRA.healthy] = True
+        self.adata.obs[self._ADATA_IDS_SFAIRA.state_exact] = 'healthy'
 
         self._convert_and_set_var_names(symbol_col=ADATA_IDS_SFAIRA.gene_id_names, ensembl_col=ADATA_IDS_SFAIRA.gene_id_ensembl)
