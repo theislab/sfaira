@@ -62,7 +62,7 @@ class Dataset(DatasetBase):
         self.adata.uns[self._ADATA_IDS_SFAIRA.species] = "mouse"
         self.adata.uns[self._ADATA_IDS_SFAIRA.id] = self.id
         self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download_website
-        self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.has_celltypes
+        self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
         self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = 'norm'
         # self.adata.obs[ADATA_IDS_SFAIRA.cell_ontology_class] is already set
         self.adata.obs[self._ADATA_IDS_SFAIRA.cell_types_original] = self.adata.obs[
