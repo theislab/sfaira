@@ -290,10 +290,7 @@ class DatasetBase(abc.ABC):
             raise ValueError('Please provide the name of at least the name of the var column containing ensembl ids or'
                              'the name of the var column containing gene symbols')
 
-        self.adata.var.set_index(
-            self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_index].values.tolist(),
-            inplace=True, verify_integrity=False
-        )
+        self.adata.var.index = self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_index].values.tolist()
         self.adata.var_names_make_unique()
 
     def subset_organs(self, subset: Union[None, List]):
@@ -1094,7 +1091,6 @@ class DatasetSuperGroup:
             np.random.shuffle(idx_vector)
         idx_ls = []
         row = 0
-        print([x.ids for x in self.dataset_groups])
         ncells = self.ncells_bydataset(annotated_only=annotated_only)
         if np.all([len(x) == 0 for x in ncells]):
             raise ValueError("no datasets found")
