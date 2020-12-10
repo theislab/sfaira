@@ -63,7 +63,7 @@ class DatasetBase(abc.ABC):
         self._year = None
 
         self._ADATA_IDS_SFAIRA = ADATA_IDS_SFAIRA()
-        self._META_DATA_FIELDS = META_DATA_FIELDS()
+        self._META_DATA_FIELDS = META_DATA_FIELDS
 
     @abc.abstractmethod
     def _load(self, fn):
@@ -478,7 +478,7 @@ class DatasetBase(abc.ABC):
         else:
             if isinstance(fn, str):
                 fn = os.path.normpath(fn)
-        self.meta = pandas.read_csv(fn, usecols=self._META_DATA_FIELDS)
+        self.meta = pandas.read_csv(fn, usecols=self.META_DATA_FIELDS)
 
     def write_meta(
             self,
