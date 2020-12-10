@@ -491,6 +491,7 @@ class DatasetBase(abc.ABC):
             fn_meta = self.meta_fn
         if self.adata is None:
             self.load(fn=fn_data, remove_gene_version=False, match_to_reference=None)
+        print(self.adata.uns.keys())
         meta = pandas.DataFrame({
             self._ADATA_IDS_SFAIRA.annotated: self.adata.uns[self._ADATA_IDS_SFAIRA.annotated],
             self._ADATA_IDS_SFAIRA.author: self.adata.uns[self._ADATA_IDS_SFAIRA.author],
