@@ -22,7 +22,7 @@ class Dataset(DatasetBase):
         self.download_website = "https://ndownloader.figshare.com/articles/5435866?private_link=865e694ad06d5857db4b"
         self.organ = "blood"
         self.sub_tissue = "blood"
-        self.has_celltypes = True
+        self.annotated = True
 
         self.class_maps = {
             "0": {
@@ -74,7 +74,7 @@ class Dataset(DatasetBase):
         self.adata.uns["animal"] = "mouse"
         self.adata.uns["id"] = self.id
         self.adata.uns["wget_download"] = self.download_website
-        self.adata.uns["has_celltypes"] = self.has_celltypes
+        self.adata.uns[ADATA_IDS_SFAIRA.annotated] = self.annotated
         self.adata.uns["counts"] = 'raw'
         self.adata.obs["cell_ontology_class"] = self.adata.obs["Annotation"].values.tolist()
         self.set_unkown_class_id(ids=[np.nan, "nan"])

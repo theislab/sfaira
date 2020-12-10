@@ -848,7 +848,7 @@ class DatasetGroupBase(abc.ABC):
         for x in self.ids:
             # if this is for celltype prediction, only load the data with have celltype annotation
             try:
-                if self.datasets[x].has_celltypes or not annotated_only:
+                if self.datasets[x].annotated or not annotated_only:
                     cells.append(self.datasets[x].ncells)
             except FileNotFoundError:
                 del self.datasets[x]

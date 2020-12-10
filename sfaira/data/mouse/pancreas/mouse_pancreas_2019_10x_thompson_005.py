@@ -23,7 +23,7 @@ class Dataset(DatasetBase):
         self.download_website = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE117770"
         self.organ = "pancreas"
         self.sub_tissue = "pancreas"
-        self.has_celltypes = True
+        self.annotated = True
 
         self.class_maps = {
             "0": {
@@ -67,7 +67,7 @@ class Dataset(DatasetBase):
         self.adata.uns[ADATA_IDS_SFAIRA.species] = "mouse"
         self.adata.uns[ADATA_IDS_SFAIRA.id] = self.id
         self.adata.uns[ADATA_IDS_SFAIRA.download] = self.download_website
-        self.adata.uns[ADATA_IDS_SFAIRA.annotated] = self.has_celltypes
+        self.adata.uns[ADATA_IDS_SFAIRA.annotated] = self.annotated
         self.adata.uns[ADATA_IDS_SFAIRA.normalization] = 'raw'
         self.adata.obs[ADATA_IDS_SFAIRA.cell_ontology_class] = celltypes
         self.set_unkown_class_id(ids=[np.nan, "nan"])

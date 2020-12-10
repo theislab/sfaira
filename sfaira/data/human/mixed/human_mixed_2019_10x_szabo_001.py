@@ -85,7 +85,7 @@ class Dataset(DatasetBase):
         self.download_website_meta = 'private'
         self.organ = "mixed"
         self.sub_tissue = "Bone Marrow, Lung, Lymph Node"
-        self.has_celltypes = True
+        self.annotated = True
         self.loaded = False
 
         self.class_maps = {
@@ -160,7 +160,7 @@ class Dataset(DatasetBase):
         self.adata.uns[ADATA_IDS_SFAIRA.species] = "human"
         self.adata.uns[ADATA_IDS_SFAIRA.id] = self.id
         self.adata.uns[ADATA_IDS_SFAIRA.download] = self.download_website
-        self.adata.uns[ADATA_IDS_SFAIRA.annotated] = self.has_celltypes
+        self.adata.uns[ADATA_IDS_SFAIRA.annotated] = self.annotated
         self.adata.uns[ADATA_IDS_SFAIRA.normalization] = 'raw'
 
         self.adata.obs["subtissue"] = self.adata.obs["organ"]

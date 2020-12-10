@@ -29,7 +29,7 @@ class Dataset(DatasetBase):
         self.download_website_meta = 'https://www.ebi.ac.uk/arrayexpress/files/E-MTAB-6701/E-MTAB-6701.processed.2.zip'
         self.organ = "placenta"
         self.sub_tissue = "placenta, decidua, blood"
-        self.has_celltypes = True
+        self.annotated = True
 
         self.class_maps = {
             "0": {
@@ -92,7 +92,7 @@ class Dataset(DatasetBase):
         self.adata.uns[ADATA_IDS_SFAIRA.species] = "human"
         self.adata.uns[ADATA_IDS_SFAIRA.id] = self.id
         self.adata.uns[ADATA_IDS_SFAIRA.download] = self.download_website
-        self.adata.uns[ADATA_IDS_SFAIRA.annotated] = self.has_celltypes
+        self.adata.uns[ADATA_IDS_SFAIRA.annotated] = self.annotated
         self.adata.uns[ADATA_IDS_SFAIRA.normalization] = 'raw'
         self.adata.obs = self.adata.obs.rename({'location': 'organ'}, axis='columns')
 

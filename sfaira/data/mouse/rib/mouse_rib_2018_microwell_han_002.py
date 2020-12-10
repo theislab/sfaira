@@ -21,7 +21,7 @@ class Dataset(DatasetBase):
         self.download_website = "https://ndownloader.figshare.com/articles/5435866?private_link=865e694ad06d5857db4b"
         self.organ = "rib"
         self.sub_tissue = "rib"
-        self.has_celltypes = True
+        self.annotated = True
 
         self.class_maps = {
             "0": {
@@ -77,7 +77,7 @@ class Dataset(DatasetBase):
         self.adata.uns[ADATA_IDS_SFAIRA.species] = "mouse"
         self.adata.uns[ADATA_IDS_SFAIRA.id] = self.id
         self.adata.uns[ADATA_IDS_SFAIRA.download] = self.download_website
-        self.adata.uns[ADATA_IDS_SFAIRA.annotated] = self.has_celltypes
+        self.adata.uns[ADATA_IDS_SFAIRA.annotated] = self.annotated
         self.adata.uns[ADATA_IDS_SFAIRA.normalization] = 'raw'
         self.adata.obs[ADATA_IDS_SFAIRA.cell_ontology_class] = self.adata.obs["Annotation"].values.tolist()
         self.set_unkown_class_id(ids=[np.nan, "nan"])

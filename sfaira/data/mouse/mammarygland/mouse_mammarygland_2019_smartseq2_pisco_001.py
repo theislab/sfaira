@@ -25,7 +25,7 @@ class Dataset(DatasetBase):
             raise ValueError("source %s not recognized" % self.source)
         self.organ = "mammarygland"
         self.sub_tissue = "mammarygland"
-        self.has_celltypes = True
+        self.annotated = True
 
         self.class_maps = {
             "0": {},
@@ -59,7 +59,7 @@ class Dataset(DatasetBase):
         self.adata.uns["animal"] = "mouse"
         self.adata.uns["id"] = self.id
         self.adata.uns["wget_download"] = self.download_website
-        self.adata.uns["has_celltypes"] = self.has_celltypes
+        self.adata.uns[ADATA_IDS_SFAIRA.annotated] = self.annotated
         self.adata.uns["counts"] = 'norm'
         # self.adata.obs["cell_ontology_class"] is already set
         self.adata.obs["cell_types_original"] = self.adata.obs["cell_ontology_class"].values.tolist()
