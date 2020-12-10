@@ -156,7 +156,8 @@ class ADATA_IDS_SFAIRA(ADATA_IDS_EXTENDED):
     """
 
     def __init__(self):
-        self._animal = "animal"
+        self._annotated = "annotated"
+        self._author = "author"
         self._cell_types_original = "cell_types_original"
         self._cell_ontology_class = "cell_ontology_class"
         self._cell_ontology_id = "cell_ontology_id"
@@ -166,14 +167,13 @@ class ADATA_IDS_SFAIRA(ADATA_IDS_EXTENDED):
         self._gene_id_ensembl = "ensembl"
         self._gene_id_index = "ensembl"
         self._gene_id_names = "names"
-        self._has_celltypes = "has_celltypes"
         self._healthy = "healthy"
         self._id = "id"
         self._ncells = "ncells"
         self._normalization = "normalization"
-        self._lab = "lab"
         self._organ = "organ"
         self._protocol = "protocol"
+        self._species = "organism"
         self._subtissue = "subtissue"
         self._wget_download = "wget_download"
         self._year = "year"
@@ -194,7 +194,6 @@ class ADATA_IDS_CELLXGENE(ADATA_IDS_EXTENDED):
     _disease_state_healthy: str
 
     def __init__(self):
-        self._animal = "organism"
         self._cell_types_original = "free_annotation"
         self._cell_ontology_class = "cell_type"
         self._cell_ontology_id = "cell_type_ontology_term_id"
@@ -212,6 +211,7 @@ class ADATA_IDS_CELLXGENE(ADATA_IDS_EXTENDED):
         self._lab = ""  # TODO
         self._organ = ""  # TODO
         self._protocol = "assay"
+        self._species = "organism"
         self._subtissue = ""  # TODO
         self._wget_download = ""  # TODO
         self._year = ""  # TODO
