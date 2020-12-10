@@ -27,6 +27,7 @@ class Dataset(DatasetBase):
         self.species = "human"
         self.id = "human_pancreas_2016_indrop_baron_001_10.1016/j.cels.2016.08.011"
         self.download_website = "https://covid19.cog.sanger.ac.uk/baron16.processed.h5ad"
+        self.download_website_meta = None
         self.organ = "pancreas"
         self.sub_tissue = "pancreas"
         self.has_celltypes = True
@@ -56,7 +57,7 @@ class Dataset(DatasetBase):
 
         if self._load_raw or not self._load_raw:
             if fn is None:
-                fn = os.path.join(self.path, "human/pancreas/baron16.processed.h5ad")
+                fn = os.path.join(self.path, "human", "pancreas", "baron16.processed.h5ad")
             self.adata = anndata.read(fn)
             self.adata.X = np.expm1(self.adata.X)
             self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs['n_counts'].values[:, None]))\

@@ -91,10 +91,10 @@ class Dataset(DatasetBase):
         if self._load_raw:
             if fn is None:
                 fn = [
-                    os.path.join(self.path, "human/lung/GSE135893_matrix.mtx.gz"),
-                    os.path.join(self.path, "human/lung/GSE135893_genes.tsv.gz"),
-                    os.path.join(self.path, "human/lung/GSE135893_barcodes.tsv.gz"),
-                    os.path.join(self.path, "human/lung/GSE135893_IPF_metadata.csv.gz"),
+                    os.path.join(self.path, "human", "lung", "GSE135893_matrix.mtx.gz"),
+                    os.path.join(self.path, "human", "lung", "GSE135893_genes.tsv.gz"),
+                    os.path.join(self.path, "human", "lung", "GSE135893_barcodes.tsv.gz"),
+                    os.path.join(self.path, "human", "lung", "GSE135893_IPF_metadata.csv.gz"),
                 ]
             self.adata = anndata.read_mtx(fn[0]).T
             self.adata.var = pd.read_csv(fn[1], index_col=0, header=None, names=['ids'])
@@ -104,7 +104,7 @@ class Dataset(DatasetBase):
             self.adata.obs = obs
         else:
             if fn is None:
-                fn = os.path.join(self.path, "human/lung/habermann_processed.h5ad")
+                fn = os.path.join(self.path, "human", "lung", "habermann_processed.h5ad")
             self.adata = anndata.read(fn)
 
         self.adata.uns[ADATA_IDS_SFAIRA.author] = 'Kropski'

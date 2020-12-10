@@ -82,6 +82,7 @@ class Dataset(DatasetBase):
         self.species = "human"
         self.id = "human_mixed_2019_10x_szabo_001_10.1038/s41467-019-12464-3"
         self.download_website = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE126nnn/GSE126030/suppl/GSE126030_RAW.tar"
+        self.download_website_meta = 'private'
         self.organ = "mixed"
         self.sub_tissue = "Bone Marrow, Lung, Lymph Node"
         self.has_celltypes = True
@@ -98,9 +99,9 @@ class Dataset(DatasetBase):
         if self._load_raw:
             if fn is None:
                 fn = [
-                    os.path.join(self.path, "human/mixed/GSE126030_RAW.tar"),
-                    os.path.join(self.path, "human/mixed/donor1.annotation.txt"),
-                    os.path.join(self.path, "human/mixed/donor2.annotation.txt"),
+                    os.path.join(self.path, "human", "mixed", "GSE126030_RAW.tar"),
+                    os.path.join(self.path, "human", "mixed", "donor1.annotation.txt"),
+                    os.path.join(self.path, "human", "mixed", "donor2.annotation.txt"),
                 ]
             adatas = []
             with tarfile.open(fn[0]) as tar:
@@ -147,7 +148,7 @@ class Dataset(DatasetBase):
             self.adata.X = scipy.sparse.csc_matrix(self.adata.X)
         else:
             if fn is None:
-                fn = os.path.join(self.path, "human/mixed/GSE126030.h5ad")
+                fn = os.path.join(self.path, "human", "mixed", "GSE126030.h5ad")
             self.adata = anndata.read(fn)
 
         self.adata.uns[ADATA_IDS_SFAIRA.author] = "Sims"

@@ -1,57 +1,57 @@
 from .bladder import CelltypeVersionsMouseBladder
 from .brain import CelltypeVersionsMouseBrain
 from .diaphragm import CelltypeVersionsMouseDiaphragm
-from .fat import CelltypeVersionsMouseFat
+from .adipose import CelltypeVersionsMouseAdipose
 from .heart import CelltypeVersionsMouseHeart
 from .kidney import CelltypeVersionsMouseKidney
-from .large_intestine import CelltypeVersionsMouseLargeintestine
-from .limb_muscle import CelltypeVersionsMouseLimbmuscle
+from .colon import CelltypeVersionsMouseColon
+from .muscle import CelltypeVersionsMouseMuscle
 from .liver import CelltypeVersionsMouseLiver
 from .lung import CelltypeVersionsMouseLung
-from .mammary_gland import CelltypeVersionsMouseMammarygland
-from .marrow import CelltypeVersionsMouseMarrow
-from .ovary import CelltypeVersionsMouseOvary
-from .peripheral_blood import CelltypeVersionsMousePeripheralblood
+from .mammarygland import CelltypeVersionsMouseMammarygland
+from .bone import CelltypeVersionsMouseBone
+from .femalegonad import CelltypeVersionsMouseFemalegonad
+from .blood import CelltypeVersionsMouseBlood
 from .placenta import CelltypeVersionsMousePlacenta
 from .pancreas import CelltypeVersionsMousePancreas
 from .prostate import CelltypeVersionsMouseProstate
 from .rib import CelltypeVersionsMouseRib
 from .skin import CelltypeVersionsMouseSkin
-from .small_intestine import CelltypeVersionsMouseSmallintestine
+from .ileum import CelltypeVersionsMouseIleum
 from .spleen import CelltypeVersionsMouseSpleen
 from .stomach import CelltypeVersionsMouseStomach
-from .testis import CelltypeVersionsMouseTestis
+from .malegonad import CelltypeVersionsMouseMalegonad
 from .thymus import CelltypeVersionsMouseThymus
 from .tongue import CelltypeVersionsMouseTongue
-from .trachae import CelltypeVersionsMouseTrachae
+from .trachea import CelltypeVersionsMouseTrachea
 from .uterus import CelltypeVersionsMouseUterus
 
 ORGAN_DICT = {
     "bladder": CelltypeVersionsMouseBladder(),
     "brain": CelltypeVersionsMouseBrain(),
     "diaphragm": CelltypeVersionsMouseDiaphragm(),
-    "fat": CelltypeVersionsMouseFat(),
+    "adipose": CelltypeVersionsMouseAdipose(),
     "heart": CelltypeVersionsMouseHeart(),
     "kidney": CelltypeVersionsMouseKidney(),
-    "largeintestine": CelltypeVersionsMouseLargeintestine(),
-    "limbmuscle": CelltypeVersionsMouseLimbmuscle(),
+    "colon": CelltypeVersionsMouseColon(),
+    "muscle": CelltypeVersionsMouseMuscle(),
     "liver": CelltypeVersionsMouseLiver(),
     "lung": CelltypeVersionsMouseLung(),
     "mammarygland": CelltypeVersionsMouseMammarygland(),
-    "marrow": CelltypeVersionsMouseMarrow(),
-    "ovary": CelltypeVersionsMouseOvary(),
-    "peripheralblood": CelltypeVersionsMousePeripheralblood(),
+    "bone": CelltypeVersionsMouseBone(),
+    "femalegonad": CelltypeVersionsMouseFemalegonad(),
+    "blood": CelltypeVersionsMouseBlood(),
     "placenta": CelltypeVersionsMousePlacenta(),
     "pancreas": CelltypeVersionsMousePancreas(),
     "prostate": CelltypeVersionsMouseProstate(),
     "rib": CelltypeVersionsMouseRib(),
     "skin": CelltypeVersionsMouseSkin(),
-    "smallintestine": CelltypeVersionsMouseSmallintestine(),
+    "ileum": CelltypeVersionsMouseIleum(),
     "spleen": CelltypeVersionsMouseSpleen(),
     "stomach": CelltypeVersionsMouseStomach(),
-    "testis": CelltypeVersionsMouseTestis(),
+    "malegonad": CelltypeVersionsMouseMalegonad(),
     "thymus": CelltypeVersionsMouseThymus(),
     "tongue": CelltypeVersionsMouseTongue(),
-    "trachae": CelltypeVersionsMouseTrachae(),
+    "trachea": CelltypeVersionsMouseTrachea(),
     "uterus": CelltypeVersionsMouseUterus()
 }

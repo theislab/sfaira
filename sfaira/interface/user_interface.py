@@ -7,8 +7,9 @@ import numpy as np
 import pandas as pd
 import os
 from typing import List, Union
+import warnings
 
-from .external import EstimatorKerasEmbedding, EstimatorKerasCelltype
+from .external import EstimatorKerasEmbedding, EstimatorKerasCelltype, DatasetInteractive
 from .model_zoo import ModelZooEmbedding, ModelZooCelltype
 
 
@@ -17,7 +18,7 @@ class UserInterface:
     This class performs data set handling and coordinates estimators for the different model types.
     Example code to obtain a UMAP embedding plot of the embedding created from your data with cell-type labels:
     ```
-    import sfaira.api as sfaira
+    import sfaira
     import anndata
     import scanpy
 
@@ -50,31 +51,24 @@ class UserInterface:
             self,
             custom_repo: Union[list, str, None] = None,
             sfaira_repo: bool = False,
-            cache_path: str = 'cache/'
+            cache_path: str = os.path.join('cache', '')
     ):
         self.model_kipoi_embedding = None
         self.model_kipoi_celltype = None
         self.estimator_embedding = None
         self.estimator_celltype = None
         self.use_sfaira_repo = sfaira_repo
-
-        if cache_path.endswith("/"):
-            self.cache_path = cache_path
-        else:
-            self.cache_path = cache_path + "/"
-
-        if custom_repo is not None and not custom_repo.endswith("/"):
-            custom_repo += "/"
+        self.cache_path = os.path.join(cache_path, '')
 
         if sfaira_repo:  # check if public sfaira repository should be accessed
-            self.model_lookuptable = self._load_lookuptable("https://sandbox.zenodo.org/record/647061/files/")   #TODO: this still points to zenodo sandbox
+            self.model_lookuptable = self._load_lookuptable("https://zenodo.org/record/4304660/files/")
 
         if custom_repo:
             if isinstance(custom_repo, str):
                 custom_repo = [custom_repo]
 
             for repo in custom_repo:
-                if os.path.exists(repo) and not os.path.exists(repo + 'model_lookuptable.csv'):
+                if os.path.exists(repo) and not os.path.exists(os.path.join(repo, 'model_lookuptable.csv')):
                     self.write_lookuptable(repo)
 
                 if hasattr(self, 'model_lookuptable'):
@@ -88,6 +82,9 @@ class UserInterface:
             if not sfaira_repo:
                 raise ValueError("please either provide a custom folder/repository with model weights or specify "
                                  "`sfaira_repo=True` to access the public weight repository")
+
+        # TODO: workaround to deal with model ids bearing file endings in model lookuptable (as is the case in first sfaira model repo upload)
+        self.model_lookuptable['model_id'] = [i.replace('.h5', '').replace('.data-00000-of-00001', '') for i in self.model_lookuptable['model_id']]
 
         self.zoo_embedding = ModelZooEmbedding(self.model_lookuptable)
         self.zoo_celltype = ModelZooCelltype(self.model_lookuptable)
@@ -103,7 +100,7 @@ class UserInterface:
         :param repo_path:
         :return: model_lookuptable
         """
-        model_lookuptable = pd.read_csv(repo_path + 'model_lookuptable.csv', header=0, index_col=0)
+        model_lookuptable = pd.read_csv(os.path.join(repo_path, 'model_lookuptable.csv'), header=0, index_col=0)
 
         # check for any duplicated model_ids
         if hasattr(self, 'model_lookuptable'):
@@ -120,50 +117,190 @@ class UserInterface:
             repo_path: str
     ):
         """
-        checks if there is a txt file that lists the model_id and path of models in the directory
-        adds model_index that connects model_id with the link to the model
-
         :param repo_path:
         :return:
         """
         import hashlib
 
-        files = [
-            os.path.join(repo_path, f) for f in os.listdir(repo_path)
-            if (os.path.isfile(os.path.join(repo_path, f))
-                and (f.endswith('_weights.h5') or f.endswith('_weights.data-00000-of-00001'))
-                and (f.startswith('embedding') or f.startswith('celltype'))
-                )
-        ]
-
-        if files:
-            file_names = [f.split('/')[-1] for f in files]
-            s = [i.split('_')[0:7] for i in file_names]
-            ids = ['_'.join(i) for i in s]
-            md5 = []
+        file_names = []
+        model_paths = []
+        file_paths = []
+        md5 = []
+        for subdir, dirs, files in os.walk(repo_path):
             for file in files:
-                with open(file, 'rb') as f:
-                    md5.append(hashlib.md5(f.read()).hexdigest())
+                if os.path.isfile(os.path.join(subdir, file)) and (
+                        file.endswith('.h5') or file.endswith('.data-00000-of-00001')) and (
+                        file.startswith('embedding_') or file.startswith('celltype_')):
+                    model_paths.append(os.path.join(subdir, ""))
+                    file_paths.append(os.path.join(subdir, file))
+                    file_names.append(file)
+                    with open(os.path.join(subdir, file), 'rb') as f:
+                        md5.append(hashlib.md5(f.read()).hexdigest())
+        s = [i.split('_')[0:7] for i in file_names]
+        ids = ['_'.join(i) for i in s]
+        ids_cleaned = [i.replace('.h5', '').replace('.data-00000-of-00001', '') for i in ids]  # remove file extensions from ids
 
+        if ids:
             pd.DataFrame(
-                list(zip(ids, [repo_path for i in files], md5)),
-                columns=['model_id', 'model_path', 'md5']
-            ).to_csv(repo_path + 'model_lookuptable.csv')
+                    list(zip(ids_cleaned, model_paths, file_paths, md5)),
+                    columns=['model_id', 'model_path', 'model_file_path', 'md5']
+                )\
+                .sort_values('model_id')\
+                .reset_index(drop=True)\
+                .to_csv(os.path.join(repo_path, 'model_lookuptable.csv'))
         else:
-            raise ValueError('No model weights found in {}.'
+            raise ValueError(f'No model weights found in {repo_path} '
                              'Weights need to have .h5 or .data-00000-of-00001 extension'
-                             'to be recognised'.format(repo_path)
+                             'to be recognised'
                              )
+
+    def deposit_zenodo(
+            self,
+            zenodo_access_token: str,
+            title: str,
+            authors: list,
+            description: str,
+            metadata: dict = {},
+            publish: bool = False,
+            sandbox: bool = False
+    ):
+        """
+        Deposit all models in model lookup table on Zenodo. If publish is set to false, files will be uploaded to a
+        deposition draft, which can be further edited (additional metadata, files etc.). Returns the DOI link if
+        publish=True or a link to the deposition draft if publish=False.
+
+        :param zenodo_access_token: Your personal Zenodo API access token. Create one here: https://zenodo.org/account/settings/applications/tokens/new/
+        :param title: Title of the Zenodo deposition
+        :param authors: List of dicts, where each dict defines one author (dict keys: name: Name of creator in the format "Family name, Given names", affiliation: Affiliation of creator (optional), orcid: ORCID identifier of creator (optional), gnd: GND identifier of creator (optional)
+        :param description: Description of the Zenodo deposition.
+        :param metadata: Dictionary with further metadata attributes of the deposit. See the Zenodo API refenrece for accepted keys: https://developers.zenodo.org/#representation
+        :param publish: Set this to True to directly publish the weights on Zenodo. When set to False a draft will be created, which can be edited in the browser before publishing.
+        :param sandbox: If True, use the Zenodo testing platform at https://sandbox.zenodo.org for your deposition. We recommend testing your upload with sandbox first as depositions cannot be deleted from the main Zenodo platfowm once created.
+        """
+
+        import requests
+        import json
+        headers = {"Content-Type": "application/json"}
+        params = {'access_token': zenodo_access_token}
+        sandbox = 'sandbox.' if sandbox else ''
+
+        # Verify access token
+        r = requests.get(f'https://{sandbox}zenodo.org/api/deposit/depositions', params=params)
+        if r.status_code != 200:
+            raise ValueError(
+                "Your Zenodo access token was not accepted by the API. Please provide a valid access token.")
+
+        # Create empty deposition
+        r = requests.post(f'https://{sandbox}zenodo.org/api/deposit/depositions',
+                          params=params,
+                          json={},
+                          headers=headers)
+
+        # Obtain bucket URL and deposition ID
+        bucket_url = r.json()["links"]["bucket"]
+        deposition_id = r.json()['id']
+
+        # Loop over files in model lookup table and upload them one by one
+        for i, weight_path in enumerate(self.model_lookuptable['model_file_path']):
+            filename = os.path.basename(weight_path)
+            with open(weight_path, "rb") as fp:
+                r = requests.put(
+                    f"{bucket_url}/{filename}",
+                    data=fp,
+                    params=params,
+                )
+            # Verify checksum after upload
+            if r.json()['checksum'][4:] != self.model_lookuptable['md5'][i]:
+                warnings.warn(f"The md5 checksum in your model_lookuptable for {self.model_lookuptable['model_id'][i]} "
+                              f"does not match the md5 checksum of the uploaded file.")
+
+        # Add model lookup table to zenodo
+        df = self.model_lookuptable.copy()
+        df['model_path'] = f"https://{sandbox}zenodo.org/record/{deposition_id}/files/"
+        df['model_file_path'] = [f"https://{sandbox}zenodo.org/record/{deposition_id}/files/{os.path.basename(f)}" for f
+                                 in self.model_lookuptable['model_file_path']]
+        r = requests.put(
+            f"{bucket_url}/model_lookuptable.csv",
+            data=df.to_csv(),
+            params=params,
+        )
+
+        # Add metadata
+        meta_core = {
+            'title': title,
+            'creators': authors,
+            'description': description,
+            'license': 'cc-by-4.0',
+            'upload_type': 'dataset',
+            'access_right': 'open'
+            }
+        meta = {**meta_core, **metadata}
+        r = requests.put(f'https://{sandbox}zenodo.org/api/deposit/depositions/{deposition_id}',
+                         params=params,
+                         data=json.dumps({
+                             'metadata': meta
+                         }),
+                         headers=headers)
+
+        if not publish:
+            print(f"Zenodo deposition draft has been created: {r.json()['links']['latest_draft_html']}")
+            return r.json()['links']['latest_draft_html']
+        else:
+            # Publish the deposition
+            r = requests.post(f'https://{sandbox}zenodo.org/api/deposit/depositions/{deposition_id}/actions/publish',
+                              params=params)
+            if r.status_code == 202:
+                if sandbox:
+                    print(f"Weights referenced in model_lookuptable have been sucessfully published on Zenodo: "
+                          f"{r.json()['links']['latest_html']}")
+                    return r.json()['links']['latest_html']
+                else:
+                    print(f"Weights referenced in model_lookuptable have been sucessfully published on Zenodo: "
+                          f"{r.json()['links']['conceptdoi']}")
+                    return r.json()['links']['conceptdoi']
+            else:
+                try:
+                    m = r.json()['message']
+                except KeyError:
+                    m = f"Submission failed with html status code {r.status_code}"
+                raise ValueError(m)
 
     def load_data(
             self,
-            data: anndata.AnnData
+            data: anndata.AnnData,
+            gene_symbol_col: Union[str, None] = None,
+            gene_ens_col: Union[str, None] = None
     ):
         """
-
-        :return:
+        Loads the provided AnnData object into sfaira.
+        If genes in the provided AnnData object are annotated as gene symbols, please provide the name of the corresponding var column (or 'index') through the gene_symbol_col argument.
+        If genes in the provided AnnData object are annotated as ensembl ids, please provide the name of the corresponding var column (or 'index') through the gene_ens_col argument.
+        You need to provide at least one of the two.
+        :param data: AnnData object to load
+        :param gene_symbol_col: Var column name (or 'index') which contains gene symbols
+        :param gene_ens_col: ar column name (or 'index') which contains ensembl ids
         """
-        self.data = data
+        if self.zoo_embedding.species is not None:
+            species = self.zoo_embedding.species
+            organ = self.zoo_embedding.organ
+        elif self.zoo_celltype.species is not None:
+            species = self.zoo_celltype.species
+            organ = self.zoo_celltype.organ
+        else:
+            raise ValueError("Please first set which model_id to use via the model zoo before loading the data")
+
+        if gene_ens_col is None and gene_symbol_col is None:
+            raise ValueError("Please provide either the gene_ens_col or the gene_symbol_col argument.")
+
+        dataset = DatasetInteractive(
+                    data=data,
+                    species=species,
+                    organ=organ,
+                    gene_symbol_col=gene_symbol_col,
+                    gene_ens_col=gene_ens_col
+                )
+        dataset.load()
+        self.data = dataset.adata
 
     def filter_cells(self):
         """
@@ -183,9 +320,7 @@ class UserInterface:
         :return: Model ID loaded.
         """
         assert self.zoo_embedding.model_id is not None, "choose embedding model first"
-        model_dir = self.model_lookuptable.model_path[self.model_lookuptable.model_id == self.zoo_embedding.model_id].iloc[0]
-        if not model_dir.endswith("/"):
-            model_dir += "/"
+        model_dir = self.model_lookuptable.model_file_path[self.model_lookuptable.model_id == self.zoo_embedding.model_id].iloc[0]
         md5 = self.model_lookuptable.md5[self.model_lookuptable.model_id == self.zoo_embedding.model_id].iloc[0]
         self.estimator_embedding = EstimatorKerasEmbedding(
             data=self.data,
@@ -210,9 +345,7 @@ class UserInterface:
         :return: Model ID loaded.
         """
         assert self.zoo_celltype.model_id is not None, "choose cell type model first"
-        model_dir = self.model_lookuptable.model_path[self.model_lookuptable.model_id == self.zoo_celltype.model_id].iloc[0]
-        if not model_dir.endswith("/"):
-            model_dir += "/"
+        model_dir = self.model_lookuptable.model_file_path[self.model_lookuptable.model_id == self.zoo_celltype.model_id].iloc[0]
         md5 = self.model_lookuptable.md5[self.model_lookuptable.model_id == self.zoo_celltype.model_id].iloc[0]
         self.estimator_celltype = EstimatorKerasCelltype(
             data=self.data,

@@ -93,8 +93,8 @@ class Dataset(DatasetBase):
         if self._load_raw:
             if fn is None:
                 fn = [
-                    os.path.join(self.path, "human/pancreas/GSE81547_RAW.tar"),
-                    os.path.join(self.path, "human/pancreas/GSE81547_series_matrix.txt.gz")
+                    os.path.join(self.path, "human", "pancreas", "GSE81547_RAW.tar"),
+                    os.path.join(self.path, "human", "pancreas", "GSE81547_series_matrix.txt.gz")
                 ]
             dfs = []
             with tarfile.open(fn[0]) as tar:
@@ -126,7 +126,7 @@ class Dataset(DatasetBase):
 
         else:
             if fn is None:
-                fn = os.path.join(self.path, "human/pancreas/GSE81547.h5ad")
+                fn = os.path.join(self.path, "human", "pancreas", "GSE81547.h5ad")
             self.adata = anndata.read(fn)
 
         self.adata.uns[ADATA_IDS_SFAIRA.author] = "Quake"

@@ -15,10 +15,10 @@ CELLTYPEMARKER_TOPOLOGIES = {
 
 # Load versions from extension if available:
 try:
-    import sfaira_extension.api as sfairae
-    ADD_TOPOLOGIES = sfairae.versions.topology_versions.mouse.celltype.CELLTYPEMARKER_TOPOLOGIES
-    for k in CELLTYPEMARKER_TOPOLOGIES.keys():
-        if k in ADD_TOPOLOGIES.keys():
-            CELLTYPEMARKER_TOPOLOGIES.update(ADD_TOPOLOGIES)
+    from sfaira_extension.versions.topology_versions.mouse.celltype import CELLTYPEMARKER_TOPOLOGIES as CELLTYPEMARKER_TOPOLOGIES_EXTENSION
+    CELLTYPEMARKER_TOPOLOGIES = {
+        **CELLTYPEMARKER_TOPOLOGIES,
+        **CELLTYPEMARKER_TOPOLOGIES_EXTENSION
+    }
 except ImportError:
     pass
