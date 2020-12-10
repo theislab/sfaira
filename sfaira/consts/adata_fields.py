@@ -164,6 +164,7 @@ class ADATA_IDS_SFAIRA(ADATA_IDS_EXTENDED):
         self._doi = "doi"
         self._dataset = "dataset"
         self._dataset_group = "dataset_group"
+        self._download = "download"
         self._gene_id_ensembl = "ensembl"
         self._gene_id_index = "ensembl"
         self._gene_id_names = "names"
@@ -175,7 +176,6 @@ class ADATA_IDS_SFAIRA(ADATA_IDS_EXTENDED):
         self._protocol = "protocol"
         self._species = "organism"
         self._subtissue = "subtissue"
-        self._wget_download = "wget_download"
         self._year = "year"
 
         self._age = "age"
@@ -200,6 +200,7 @@ class ADATA_IDS_CELLXGENE(ADATA_IDS_EXTENDED):
         self._doi = ""  # TODO
         self._dataset = "dataset"
         self._dataset_group = "dataset_group"
+        self._download = ""  # TODO
         self._gene_id_ensembl = ""  # TODO
         self._gene_id_index = "ensembl"
         self._gene_id_names = ""  # TODO
@@ -212,7 +213,6 @@ class ADATA_IDS_CELLXGENE(ADATA_IDS_EXTENDED):
         self._protocol = "assay"
         self._species = "organism"
         self._subtissue = ""  # TODO
-        self._wget_download = ""  # TODO
         self._year = ""  # TODO
 
         self._age = "age"
