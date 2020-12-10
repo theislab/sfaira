@@ -288,7 +288,7 @@ class DatasetBase(abc.ABC):
             raise ValueError('Please provide the name of at least the name of the var column containing ensembl ids or'
                              'the name of the var column containing gene symbols')
 
-        self.adata.var.set_index(self.adata.var[new_index].tolist(), inplace=True, verify_integrity=True)
+        self.adata.var.set_index(self.adata.var[new_index].values.tolist(), inplace=True, verify_integrity=True)
         self.adata.var_names_make_unique()
 
     def subset_organs(self, subset: Union[None, List]):
