@@ -41,5 +41,7 @@ ds_dict = {
     "uterus": mouse.DatasetGroupUterus(path=path, meta_path=path_meta)
 }
 for k in list(ds_dict.keys()):
+    print(k)
     for kk in ds_dict[k].ids:
+        print(kk)
         ds_dict[k].datasets[kk].write_meta(dir_out=path_meta)

@@ -162,7 +162,7 @@ class Dataset(DatasetBase):
         self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
         self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = 'raw'
 
-        self.adata.obs["subtissue"] = self.adata.obs["organ"]
+        self.adata.obs[self._ADATA_IDS_SFAIRA.subtissue] = self.adata.obs["organ"]
         self.adata.obs[self._ADATA_IDS_SFAIRA.healthy] = True
         self.adata.obs[self._ADATA_IDS_SFAIRA.state_exact] = 'healthy'
 

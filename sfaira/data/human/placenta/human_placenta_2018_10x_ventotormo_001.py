@@ -96,7 +96,7 @@ class Dataset(DatasetBase):
         self.adata.obs = self.adata.obs.rename({'location': 'organ'}, axis='columns')
 
         self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class] = self.adata.obs['annotation']
-        self.adata.obs["subtissue"] = self.adata.obs["organ"].copy()
+        self.adata.obs[self._ADATA_IDS_SFAIRA.subtissue] = self.adata.obs["organ"].copy()
         self.adata.obs["final_cluster"] = self.adata.obs['final_cluster'].astype('category')
         self.adata.obs[self._ADATA_IDS_SFAIRA.healthy] = True
         self.adata.obs[self._ADATA_IDS_SFAIRA.state_exact] = "healthy"
