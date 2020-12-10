@@ -7,7 +7,7 @@ from sfaira.estimators.losses import LossLoglikelihoodNb
 from sfaira.estimators.metrics import custom_mse
 
 import sfaira.models as models
-from sfaira.models import BasicModel
+from sfaira.models.base import BasicModel
 
 
 class _TestModel:

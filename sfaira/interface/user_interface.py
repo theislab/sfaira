@@ -18,7 +18,7 @@ class UserInterface:
     This class performs data set handling and coordinates estimators for the different model types.
     Example code to obtain a UMAP embedding plot of the embedding created from your data with cell-type labels:
     ```
-    import sfaira.api as sfaira
+    import sfaira
     import anndata
     import scanpy
 

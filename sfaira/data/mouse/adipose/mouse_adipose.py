@@ -28,7 +28,7 @@ class DatasetGroupAdipose(DatasetGroupBase):
         self.datasets = dict(zip(keys, datasets))
         # Load versions from extension if available:
         try:
-            import sfaira_extension.api as sfairae
-            self.datasets.update(sfairae.data.mouse.DatasetGroupAdipose().datasets)
+            from sfaira_extension.data.mouse import DatasetGroupAdipose
+            self.datasets.update(DatasetGroupAdipose().datasets)
         except ImportError:
             pass

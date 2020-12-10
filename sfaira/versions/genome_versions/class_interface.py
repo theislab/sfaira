@@ -14,11 +14,30 @@ class SuperGenomeContainer:
     ):
         self.species = species
         if self.species == "human":
-            from .human import GenomeContainer
+            try:
+                from sfaira_extension.versions.genome_versions.human import GenomeContainer
+                if genome not in GenomeContainer.available_genomes:
+                    from .human import GenomeContainer
+                    if genome not in GenomeContainer.available_genomes:
+                        raise ValueError(f"Genome {genome} not recognised.")
+            except ImportError:
+                from .human import GenomeContainer
+                if genome not in GenomeContainer.available_genomes:
+                    raise ValueError(f"Genome {genome} not recognised.")
         elif self.species == "mouse":
-            from .mouse import GenomeContainer
+            try:
+                from sfaira_extension.versions.genome_versions.mouse import GenomeContainer
+                if genome not in GenomeContainer.available_genomes:
+                    from .mouse import GenomeContainer
+                    if genome not in GenomeContainer.available_genomes:
+                        raise ValueError(f"Genome {genome} not recognised.")
+            except ImportError:
+                from .mouse import GenomeContainer
+                if genome not in GenomeContainer.available_genomes:
+                    raise ValueError(f"Genome {genome} not recognised.")
         else:
-            raise ValueError("species %s not recognized" % species)
+            raise ValueError(f"Species {species} not recognised.")
+
         self.gc = GenomeContainer()
         self.set_genome(genome=genome)
 

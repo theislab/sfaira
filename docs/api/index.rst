@@ -7,7 +7,7 @@ API
 
 Import sfaira as::
 
-   import sfaira.api as sfaira
+   import sfaira
 
 
 

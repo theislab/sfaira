@@ -20,7 +20,7 @@ class DatasetGroupChorionicvillus(DatasetGroupBase):
         self.datasets = dict(zip(keys, datasets))
         # Load versions from extension if available:
         try:
-            import sfaira_extension.api as sfairae
-            self.datasets.update(sfairae.data.human.DatasetGroupChorionicvillus().datasets)
+            from sfaira_extension.data.human import DatasetGroupChorionicvillus
+            self.datasets.update(DatasetGroupChorionicvillus().datasets)
         except ImportError:
             pass

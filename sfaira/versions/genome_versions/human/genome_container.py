@@ -5,6 +5,7 @@ from .genome_sizes import GENOME_SIZE_DICT
 
 
 class GenomeContainer:
+    available_genomes = ["Homo_sapiens_GRCh38_97"]
 
     def __init__(self):
         self.genomes = {

@@ -20,7 +20,7 @@ class DatasetGroupCervix(DatasetGroupBase):
         self.datasets = dict(zip(keys, datasets))
         # Load versions from extension if available:
         try:
-            import sfaira_extension.api as sfairae
-            self.datasets.update(sfairae.data.human.DatasetGroupCervix().datasets)
+            from sfaira_extension.data.human import DatasetGroupCervix
+            self.datasets.update(DatasetGroupCervix().datasets)
         except ImportError:
             pass
