@@ -30,83 +30,83 @@ class ADATA_IDS_BASE:
     _year: str
 
     @property
-    def annotated(self):
+    def annotated(self) -> str:
         return self._annotated
 
     @property
-    def author(self):
+    def author(self) -> str:
         return self._author
 
     @property
-    def cell_types_original(self):
+    def cell_types_original(self) -> str:
         return self._cell_types_original
 
     @property
-    def cell_ontology_class(self):
+    def cell_ontology_class(self) -> str:
         return self._cell_ontology_class
 
     @property
-    def cell_ontology_id(self):
+    def cell_ontology_id(self) -> str:
         return self._cell_ontology_id
 
     @property
-    def dataset(self):
+    def dataset(self) -> str:
         return self._dataset
 
     @property
-    def dataset_group(self):
+    def dataset_group(self) -> str:
         return self._dataset_group
 
     @property
-    def doi(self):
+    def doi(self) -> str:
         return self._doi
 
     @property
-    def download(self):
+    def download(self) -> str:
         return self._download
 
     @property
-    def gene_id_ensembl(self):
+    def gene_id_ensembl(self) -> str:
         return self._gene_id_ensembl
 
     @property
-    def gene_id_names(self):
+    def gene_id_names(self) -> str:
         return self._gene_id_names
 
     @property
-    def healthy(self):
+    def healthy(self) -> str:
         return self._healthy
 
     @property
-    def id(self):
+    def id(self) -> str:
         return self._id
 
     @property
-    def ncells(self):
+    def ncells(self) -> str:
         return self._ncells
 
     @property
-    def normalization(self):
+    def normalization(self) -> str:
         return self._normalization
 
     @property
-    def protocol(self):
+    def protocol(self) -> str:
         return self._protocol
 
     @property
-    def organ(self):
+    def organ(self) -> str:
         return self._organ
 
     @property
-    def species(self):
+    def species(self) -> str:
         return self._species
 
     @property
-    def subtissue(self):
+    def subtissue(self) -> str:
         return self._subtissue
 
     @property
-    def year(self):
+    def year(self) -> str:
         return self._year
 
 
@@ -121,23 +121,23 @@ class ADATA_IDS_EXTENDED(ADATA_IDS_BASE):
     _state_exact: str
 
     @property
-    def age(self):
+    def age(self) -> str:
         return self._age
 
     @property
-    def dev_stage(self):
+    def dev_stage(self) -> str:
         return self._dev_stage
 
     @property
-    def ethnicity(self):
+    def ethnicity(self) -> str:
         return self._ethnicity
 
     @property
-    def sex(self):
+    def sex(self) -> str:
         return self._sex
 
     @property
-    def state_exact(self):
+    def state_exact(self) -> str:
         return self._state_exact
 
 
@@ -217,9 +217,9 @@ class ADATA_IDS_CELLXGENE(ADATA_IDS_EXTENDED):
         self._author_names = "names"
 
     @property
-    def author_names(self):
+    def author_names(self) -> str:
         return self._author_names
 
     @property
-    def disease_state_healthy(self):
+    def disease_state_healthy(self) -> str:
         return self._disease_state_healthy
