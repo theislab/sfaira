@@ -147,4 +147,4 @@ class Dataset(DatasetBase):
         self.adata.obs[self._ADATA_IDS_SFAIRA.state_exact] = self.adata.obs[self._ADATA_IDS_SFAIRA.state_exact]\
             .cat.rename_categories({'normal': 'healthy', 'ulcerative colitis (disease)': 'ulcerative colitis'})
 
-        self._convert_and_set_var_names(symbol_col=ADATA_IDS_SFAIRA.gene_id_names, ensembl_col='Accession')
+        self._convert_and_set_var_names(symbol_col="names", ensembl_col='Accession')
