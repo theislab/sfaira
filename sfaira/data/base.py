@@ -210,7 +210,6 @@ class DatasetBase(abc.ABC):
             self,
             symbol_col: str = None,
             ensembl_col: str = None,
-            new_index: str = ADATA_IDS_SFAIRA.gene_id_ensembl
     ):
         if symbol_col and ensembl_col:
             if symbol_col == 'index':
@@ -290,9 +289,10 @@ class DatasetBase(abc.ABC):
 
         print(self.adata.var.columns)
         print(self.adata.var.index)
-        print(new_index)
-        print(self.adata.var.loc[new_index])
-        self.adata.var.set_index(self.adata.var.loc[new_index].values.tolist(), inplace=True, verify_integrity=False)
+        print(ADATA_IDS_SFAIRA.gene_id_names)
+        print(ADATA_IDS_SFAIRA.gene_id_index)
+        print(self.adata.var.loc[ADATA_IDS_SFAIRA.gene_id_index])
+        self.adata.var.set_index(self.adata.var.loc[ADATA_IDS_SFAIRA.gene_id_index].values.tolist(), inplace=True, verify_integrity=False)
         self.adata.var_names_make_unique()
 
     def subset_organs(self, subset: Union[None, List]):

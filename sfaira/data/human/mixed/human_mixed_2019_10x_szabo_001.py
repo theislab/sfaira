@@ -167,7 +167,7 @@ class Dataset(DatasetBase):
         self.adata.obs[ADATA_IDS_SFAIRA.healthy] = True
         self.adata.obs[ADATA_IDS_SFAIRA.state_exact] = 'healthy'
 
-        self._convert_and_set_var_names(symbol_col='Gene', ensembl_col='Accession', new_index=ADATA_IDS_SFAIRA.gene_id_ensembl)
+        self._convert_and_set_var_names(symbol_col='Gene', ensembl_col='Accession')
 
         # If the subset_organs() method has been run before, subset to specified organs
         if "organsubset" in self.__dict__:

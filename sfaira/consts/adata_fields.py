@@ -18,6 +18,7 @@ class ADATA_IDS_BASE:
     _dataset: str
     _dataset_group: str
     _gene_id_ensembl: str
+    _gene_id_index: str
     _gene_id_names: str
     _healthy: str
     _id: str
@@ -68,6 +69,14 @@ class ADATA_IDS_BASE:
     @property
     def gene_id_ensembl(self) -> str:
         return self._gene_id_ensembl
+
+    @property
+    def gene_id_index(self) -> str:
+        return self._gene_id_index
+
+    @gene_id_index.setter
+    def gene_id_index(self, x: str):
+        self._gene_id_index = x
 
     @property
     def gene_id_names(self) -> str:
@@ -155,6 +164,7 @@ class ADATA_IDS_SFAIRA(ADATA_IDS_EXTENDED):
         self._dataset = "dataset"
         self._dataset_group = "dataset_group"
         self._gene_id_ensembl = "ensembl"
+        self._gene_id_index = "ensembl"
         self._gene_id_names = "names"
         self._has_celltypes = "has_celltypes"
         self._healthy = "healthy"
@@ -192,6 +202,7 @@ class ADATA_IDS_CELLXGENE(ADATA_IDS_EXTENDED):
         self._dataset = "dataset"
         self._dataset_group = "dataset_group"
         self._gene_id_ensembl = ""  # TODO
+        self._gene_id_index = "ensembl"
         self._gene_id_names = ""  # TODO
         self._has_celltypes = ""  # TODO
         self._healthy = None  # is inferred from _disease

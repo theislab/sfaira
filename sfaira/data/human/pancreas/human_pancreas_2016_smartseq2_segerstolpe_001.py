@@ -86,4 +86,4 @@ class Dataset(DatasetBase):
         self.adata.obs[ADATA_IDS_SFAIRA.state_exact] = self.adata.obs[ADATA_IDS_SFAIRA.state_exact].cat.rename_categories({'normal':'healthy', 'type II diabetes mellitus':'type II diabetes mellitus'})
 
         self.adata.obs[ADATA_IDS_SFAIRA.cell_ontology_class] = self.adata.obs['Characteristics[cell type]']
-        self._convert_and_set_var_names(symbol_col='index', ensembl_col=None, new_index=ADATA_IDS_SFAIRA.gene_id_ensembl)
+        self._convert_and_set_var_names(symbol_col='index', ensembl_col=None)

@@ -65,7 +65,7 @@ class Dataset(DatasetBase):
         # Assign attributes
         self.adata.obs_names = obs_names
         self.adata.var = var
-        self._convert_and_set_var_names(symbol_col=ADATA_IDS_SFAIRA.gene_id_names, ensembl_col=ADATA_IDS_SFAIRA.gene_id_ensembl, new_index=ADATA_IDS_SFAIRA.gene_id_ensembl)
+        self._convert_and_set_var_names(symbol_col=ADATA_IDS_SFAIRA.gene_id_names, ensembl_col=ADATA_IDS_SFAIRA.gene_id_ensembl)
         self.adata.obs = obs
         assert np.all(self.adata.obs_names == self.adata.obs["cell"].values)
 
