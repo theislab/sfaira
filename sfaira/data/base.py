@@ -7,7 +7,7 @@ import os
 from os import PathLike
 import pandas
 import scipy.sparse
-from typing import Dict, List, Union
+from typing import Dict, List, Tuple, Union
 import warnings
 
 from .external import SuperGenomeContainer
@@ -546,7 +546,13 @@ class DatasetBase(abc.ABC):
         self._doi = x
 
     @property
-    def download(self) -> str:
+    def download(self) -> Tuple[List[str]]:
+        """
+        Download website(s).
+
+        Save as tuple with single element, which is a list of all download websites relevant to dataset.
+        :return:
+        """
         if self._download is not None:
             return self._download
         else:
@@ -555,8 +561,11 @@ class DatasetBase(abc.ABC):
             return self.meta[self._ADATA_IDS_SFAIRA.download]
 
     @download.setter
-    def download(self, x: str):
-        self._download = x
+    def download(self, x: Union[str, List[str], None]):
+        #
+        if isinstance(x, str):
+            x = [x]
+        self._download = (x,)
 
     @property
     def id(self) -> str:
