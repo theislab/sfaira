@@ -37,6 +37,7 @@ class DatasetBase(abc.ABC):
     _source: Union[None, str]
     _species: Union[None, str]
     _state_exact: Union[None, str]
+    _subtissue: Union[None, str]
     _year: Union[None, str]
 
     def __init__(
@@ -66,6 +67,7 @@ class DatasetBase(abc.ABC):
         self._source = None
         self._species = None
         self._state_exact = None
+        self._subtissue = None
         self._year = None
 
         self._ADATA_IDS_SFAIRA = ADATA_IDS_SFAIRA()
@@ -113,10 +115,27 @@ class DatasetBase(abc.ABC):
             self._set_genome(genome=genome)
 
         self._load(fn=fn)
+        # Set data set-wide attributes (.uns):
+        self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
+        self.adata.uns[self._ADATA_IDS_SFAIRA.author] = self.author
+        self.adata.uns[self._ADATA_IDS_SFAIRA.doi] = self.doi
+        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download
+        self.adata.uns[self._ADATA_IDS_SFAIRA.download_meta] = self.download_meta
+        self.adata.uns[self._ADATA_IDS_SFAIRA.protocol] = self.protocol
+        self.adata.uns[self._ADATA_IDS_SFAIRA.organ] = self.organ
+        self.adata.uns[self._ADATA_IDS_SFAIRA.id] = self.id
+        self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = self.normalization
+        self.adata.uns[self._ADATA_IDS_SFAIRA.subtissue] = self.subtissue
+        self.adata.uns[self._ADATA_IDS_SFAIRA.species] = self.species
+        self.adata.uns[self._ADATA_IDS_SFAIRA.year] = self.year
 
+        # Set cell-wise attributes (.obs):
+        self.adata.obs[self._ADATA_IDS_SFAIRA.healthy] = self.healthy
+        self.adata.obs[self._ADATA_IDS_SFAIRA.state_exact] = self.state_exact
+
+        # Set cell types:
         if self._ADATA_IDS_SFAIRA.cell_ontology_id not in self.adata.obs.columns:
             self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_id] = None
-
         # Map cell type names from raw IDs to ontology maintained ones::
         if self._ADATA_IDS_SFAIRA.cell_ontology_class in self.adata.obs.columns:
             self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class] = self.map_ontology_class(
@@ -503,14 +522,12 @@ class DatasetBase(abc.ABC):
             self._ADATA_IDS_SFAIRA.doi: self.adata.uns[self._ADATA_IDS_SFAIRA.doi],
             self._ADATA_IDS_SFAIRA.download: self.adata.uns[self._ADATA_IDS_SFAIRA.download],
             self._ADATA_IDS_SFAIRA.download_meta: self.adata.uns[self._ADATA_IDS_SFAIRA.download_meta],
-            self._ADATA_IDS_SFAIRA.healthy: self.adata.uns[self._ADATA_IDS_SFAIRA.healthy],
             self._ADATA_IDS_SFAIRA.id: self.adata.uns[self._ADATA_IDS_SFAIRA.id],
             self._ADATA_IDS_SFAIRA.ncells: self.adata.n_obs,
             self._ADATA_IDS_SFAIRA.normalization: self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] if self._ADATA_IDS_SFAIRA.normalization in self.adata.uns.keys() else None,
             self._ADATA_IDS_SFAIRA.organ: self.adata.uns[self._ADATA_IDS_SFAIRA.organ],
             self._ADATA_IDS_SFAIRA.protocol: self.adata.uns[self._ADATA_IDS_SFAIRA.protocol],
             self._ADATA_IDS_SFAIRA.species: self.adata.uns[self._ADATA_IDS_SFAIRA.species],
-            self._ADATA_IDS_SFAIRA.state_exact: self.adata.uns[self._ADATA_IDS_SFAIRA.state_exact],
             self._ADATA_IDS_SFAIRA.year: self.adata.uns[self._ADATA_IDS_SFAIRA.year],
         }, index=range(1))
         meta.to_csv(fn_meta)
@@ -729,6 +746,19 @@ class DatasetBase(abc.ABC):
     @state_exact.setter
     def state_exact(self, x: str):
         self._state_exact = x
+
+    @property
+    def subtissue(self) -> str:
+        if self._subtissue is not None:
+            return self._subtissue
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            return self.meta[self._ADATA_IDS_SFAIRA.subtissue]
+
+    @subtissue.setter
+    def subtissue(self, x: str):
+        self._subtissue = x
 
     @property
     def year(self) -> str:

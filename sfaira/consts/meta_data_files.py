@@ -16,5 +16,6 @@ META_DATA_FIELDS = [
     "protocol",
     "species",
     "state_exact",
+    "sub_tissue",
     "year",
 ]
