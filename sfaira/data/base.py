@@ -47,6 +47,9 @@ class DatasetBase(abc.ABC):
     _obs_key_state_exact: Union[None, str]
     _obs_key_subtissue: Union[None, str]
 
+    _var_symbol_col: Union[None, str]
+    _var_ensembl_col: Union[None, str]
+
     def __init__(
             self,
             path: Union[str, None] = None,
@@ -83,6 +86,9 @@ class DatasetBase(abc.ABC):
         self._obs_key_species = None
         self._obs_key_state_exact = None
         self._obs_key_subtissue = None
+
+        self._var_symbol_col = None
+        self._var_ensembl_col = None
 
         self._ADATA_IDS_SFAIRA = ADATA_IDS_SFAIRA()
         self._META_DATA_FIELDS = META_DATA_FIELDS
@@ -128,7 +134,10 @@ class DatasetBase(abc.ABC):
             warnings.warn(f"using default genomes {genome}")
             self._set_genome(genome=genome)
 
+        # Run data set-specific loading script:
         self._load(fn=fn)
+        # Streamline feature space using the gene name columns set in the data loader:
+        self._convert_and_set_var_names()
         # Set data set-wide attributes (.uns):
         self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
         self.adata.uns[self._ADATA_IDS_SFAIRA.author] = self.author
@@ -272,6 +281,10 @@ class DatasetBase(abc.ABC):
             symbol_col: str = None,
             ensembl_col: str = None,
     ):
+        if symbol_col is None:
+            symbol_col = self.var_symbol_col
+        if ensembl_col is None:
+            ensembl_col = self.var_ensembl_col
         if symbol_col and ensembl_col:
             if symbol_col == 'index':
                 self.adata.var.index.name = 'index'
@@ -855,6 +868,22 @@ class DatasetBase(abc.ABC):
     @subtissue.setter
     def subtissue(self, x: str):
         self._subtissue = x
+
+    @property
+    def var_ensembl_col(self) -> str:
+        return self._var_ensembl_col
+
+    @var_ensembl_col.setter
+    def var_ensembl_col(self, x: str):
+        self._var_ensembl_col = x
+
+    @property
+    def var_symbol_col(self) -> str:
+        return self._var_symbol_col
+
+    @var_symbol_col.setter
+    def var_symbol_col(self, x: str):
+        self._var_symbol_col = x
 
     @property
     def year(self) -> str:
