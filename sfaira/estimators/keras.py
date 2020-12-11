@@ -561,10 +561,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
 
         if mode in ['train', 'train_val', 'eval', 'predict']:
             # Prepare data reading according to whether anndata is backed or not:
-            if self.data.isbacked:
-                x = self.data.X
-            else:
-                x = self._prepare_data_matrix(idx=idx)
+            x = self.data.X if self.data.isbacked else self._prepare_data_matrix(idx=idx)
 
             def convert_sparse_matrix_to_sparse_tensor(x):
                 coo = x.tocoo()
