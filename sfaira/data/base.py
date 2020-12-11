@@ -28,6 +28,7 @@ class DatasetBase(abc.ABC):
     _doi: Union[None, str]
     _download: Union[None, str]
     _download_meta: Union[None, str]
+    _healthy: Union[None, str]
     _id: Union[None, str]
     _ncells: Union[None, int]
     _normalization: Union[None, str]
@@ -35,6 +36,7 @@ class DatasetBase(abc.ABC):
     _protocol: Union[None, str]
     _source: Union[None, str]
     _species: Union[None, str]
+    _state_exact: Union[None, str]
     _year: Union[None, str]
 
     def __init__(
@@ -55,6 +57,7 @@ class DatasetBase(abc.ABC):
         self._doi = None
         self._download = None
         self._download_meta = None
+        self._healthy = None
         self._id = None
         self._ncells = None
         self._normalization = None
@@ -62,6 +65,7 @@ class DatasetBase(abc.ABC):
         self._protocol = None
         self._source = None
         self._species = None
+        self._state_exact = None
         self._year = None
 
         self._ADATA_IDS_SFAIRA = ADATA_IDS_SFAIRA()
@@ -499,12 +503,14 @@ class DatasetBase(abc.ABC):
             self._ADATA_IDS_SFAIRA.doi: self.adata.uns[self._ADATA_IDS_SFAIRA.doi],
             self._ADATA_IDS_SFAIRA.download: self.adata.uns[self._ADATA_IDS_SFAIRA.download],
             self._ADATA_IDS_SFAIRA.download_meta: self.adata.uns[self._ADATA_IDS_SFAIRA.download_meta],
+            self._ADATA_IDS_SFAIRA.healthy: self.adata.uns[self._ADATA_IDS_SFAIRA.healthy],
             self._ADATA_IDS_SFAIRA.id: self.adata.uns[self._ADATA_IDS_SFAIRA.id],
             self._ADATA_IDS_SFAIRA.ncells: self.adata.n_obs,
             self._ADATA_IDS_SFAIRA.normalization: self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] if self._ADATA_IDS_SFAIRA.normalization in self.adata.uns.keys() else None,
             self._ADATA_IDS_SFAIRA.organ: self.adata.uns[self._ADATA_IDS_SFAIRA.organ],
             self._ADATA_IDS_SFAIRA.protocol: self.adata.uns[self._ADATA_IDS_SFAIRA.protocol],
             self._ADATA_IDS_SFAIRA.species: self.adata.uns[self._ADATA_IDS_SFAIRA.species],
+            self._ADATA_IDS_SFAIRA.state_exact: self.adata.uns[self._ADATA_IDS_SFAIRA.state_exact],
             self._ADATA_IDS_SFAIRA.year: self.adata.uns[self._ADATA_IDS_SFAIRA.year],
         }, index=range(1))
         meta.to_csv(fn_meta)
@@ -614,6 +620,19 @@ class DatasetBase(abc.ABC):
         self._download_meta = x
 
     @property
+    def healthy(self) -> str:
+        if self._healthy is not None:
+            return self._healthy
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            return self.meta[self._ADATA_IDS_SFAIRA.healthy]
+
+    @healthy.setter
+    def healthy(self, x: str):
+        self._healthy = x
+
+    @property
     def id(self) -> str:
         if self._id is not None:
             return self._id
@@ -697,6 +716,19 @@ class DatasetBase(abc.ABC):
     @species.setter
     def species(self, x: str):
         self._species = x
+
+    @property
+    def state_exact(self) -> str:
+        if self._state_exact is not None:
+            return self._state_exact
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            return self.meta[self._ADATA_IDS_SFAIRA.state_exact]
+
+    @state_exact.setter
+    def state_exact(self, x: str):
+        self._state_exact = x
 
     @property
     def year(self) -> str:

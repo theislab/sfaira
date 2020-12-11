@@ -8,11 +8,13 @@ META_DATA_FIELDS = [
     "doi",
     "download",
     "download_meta",
+    "healthy",
     "id",
     "ncells",
     "normalization",
     "organ",
     "protocol",
     "species",
+    "state_exact",
     "year",
 ]
