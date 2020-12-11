@@ -13,6 +13,8 @@ import warnings
 from .external import SuperGenomeContainer
 from .external import ADATA_IDS_SFAIRA, META_DATA_FIELDS
 
+UNS_STRING_META_IN_OBS = "__obs__"
+
 
 class DatasetBase(abc.ABC):
 
@@ -389,7 +391,7 @@ class DatasetBase(abc.ABC):
             elif x is None and z is None:
                 self.adata.uns[y] = None
             else:
-                self.adata.uns[y] = "__obs__"
+                self.adata.uns[y] = UNS_STRING_META_IN_OBS
                 # Search for direct match of the sought-after column name or for attribute specific obs key.
                 if z is not None:
                     if z not in self.adata.obs.keys():
@@ -404,7 +406,7 @@ class DatasetBase(abc.ABC):
         for x, y in (
                 [self._ADATA_IDS_SFAIRA.healthy, self.healthy_state_healthy],
         ):
-            if self.adata.uns[x] == "__obs__":
+            if self.adata.uns[x] == UNS_STRING_META_IN_OBS:
                 self.adata.obs[x] = self.adata.obs[x].values == y
             else:
                 if not isinstance(self.adata.uns[x], bool):
@@ -646,7 +648,7 @@ class DatasetBase(abc.ABC):
             self._ADATA_IDS_SFAIRA.state_exact,
             self._ADATA_IDS_SFAIRA.subtissue,
         ]:
-            if self.adata.uns[x] == "__obs__":
+            if self.adata.uns[x] == UNS_STRING_META_IN_OBS:
                 meta[x] = (np.sort(np.unique(self.adata.obs[x].values)),)
             else:
                 meta[x] = self.adata.uns[x]
