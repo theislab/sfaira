@@ -37,7 +37,6 @@ class Dataset(DatasetTms):
         if fn is None:
             if self.path is None:
                 raise ValueError("provide either fn in load or path in constructor")
-            fn = os.path.join(self.path, "mouse", "trachea", "Trachea_droplet.h5ad")
             if self.source == "aws":
                 fn = os.path.join(self.path, "mouse", "trachea", "tabula-muris-senis-droplet-processed-official-annotations-Trachea.h5ad")
             elif self.source == "figshare":
