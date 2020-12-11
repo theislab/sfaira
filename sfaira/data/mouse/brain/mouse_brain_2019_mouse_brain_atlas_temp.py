@@ -3,10 +3,10 @@ import numpy as np
 import os
 import pandas
 from typing import Union
-from .external import DatasetBase
+from .external import DatasetMca
 
 
-class Dataset(DatasetBase):
+class Dataset(DatasetMca):
 
     id: str
 
@@ -16,16 +16,29 @@ class Dataset(DatasetBase):
             meta_path: Union[str, None] = None,
             **kwargs
     ):
-        DatasetBase.__init__(self=self, path=path, meta_path=meta_path, **kwargs)
-        self.species = "mouse"
-        self.id = "mouse_brain_2019_10x_hove_001_10.1038/s41593-019-0393-4"
+        DatasetMca.__init__(self=self, path=path, meta_path=meta_path, **kwargs)
+
+        self.author = "Movahedi"
+        self.doi = "10.1038/s41593-019-0393-4"
         self.download = \
             "www.brainimmuneatlas.org/data_files/toDownload/filtered_gene_bc_matrices_mex_WT_fullAggr.zip"
         self.download_meta = \
             "www.brainimmuneatlas.org/data_files/toDownload/annot_fullAggr.csv"
+        self.healthy = True
+        self.id = "mouse_brain_2019_10x_hove_001_10.1038/s41593-019-0393-4"
+        self.normalization = 'raw'
         self.organ = "brain"
+        self.protocol = "microwell"
+        self.state_exact = "healthy"
         self.sub_tissue = "brain"
-        self.annotated = True
+        self.year = "2019"
+
+        self.var_ensembl_col = "ensembl"
+        self.var_symbol_col = "names"
+
+        self.obs_key_cellontology_class = self._ADATA_IDS_SFAIRA.cell_ontology_class
+        self.obs_key_cellontology_id = self._ADATA_IDS_SFAIRA.cell_ontology_id
+        self.obs_key_cellontology_original = self._ADATA_IDS_SFAIRA.cell_ontology_class
 
         self.class_maps = {
             "0": {
@@ -64,24 +77,7 @@ class Dataset(DatasetBase):
         # Assign attributes
         self.adata.obs_names = obs_names
         self.adata.var = var
-        self._convert_and_set_var_names(symbol_col="names", ensembl_col="ensembl")
         self.adata.obs = obs
         assert np.all(self.adata.obs_names == self.adata.obs["cell"].values)
 
-        self.adata.uns[self._ADATA_IDS_SFAIRA.author] = "Movahedi"
-        self.adata.uns[self._ADATA_IDS_SFAIRA.year] = "2019"
-        self.adata.uns[self._ADATA_IDS_SFAIRA.doi] = "10.1038/s41593-019-0393-4"
-        self.adata.uns[self._ADATA_IDS_SFAIRA.protocol] = "microwell"
-        self.adata.uns[self._ADATA_IDS_SFAIRA.organ] = self.organ
-        self.adata.uns[self._ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
-        self.adata.uns[self._ADATA_IDS_SFAIRA.species] = self.species
-        self.adata.uns[self._ADATA_IDS_SFAIRA.id] = self.id
-        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download
-        self.adata.uns[self._ADATA_IDS_SFAIRA.download_meta] = self.download_meta
-        self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
-        self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = 'raw'
-        # self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class] is already set
         self.set_unkown_class_id(ids=["nan"])
-        self.adata.obs[self._ADATA_IDS_SFAIRA.cell_types_original] = self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class].values.tolist()
-        self.adata.obs[self._ADATA_IDS_SFAIRA.healthy] = True
-        self.adata.obs[self._ADATA_IDS_SFAIRA.state_exact] = "healthy"

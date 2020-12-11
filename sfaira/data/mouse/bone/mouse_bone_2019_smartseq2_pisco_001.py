@@ -1,10 +1,10 @@
 import anndata
 import os
 from typing import Union
-from .external import DatasetBase
+from .external import DatasetTms
 
 
-class Dataset(DatasetBase):
+class Dataset(DatasetTms):
 
     id: str
 
@@ -15,8 +15,8 @@ class Dataset(DatasetBase):
             source: str = "aws",
             **kwargs
     ):
-        DatasetBase.__init__(self=self, path=path, meta_path=meta_path, **kwargs)
-        self.species = "mouse"
+        DatasetTms.__init__(self=self, path=path, meta_path=meta_path, **kwargs)
+
         self.id = "mouse_bone_2019_smartseq2_pisco_001_10.1101/661728"
         self.source = source
         if self.source == "aws":
@@ -27,7 +27,6 @@ class Dataset(DatasetBase):
             raise ValueError("source %s not recognized" % self.source)
         self.organ = "bone"
         self.sub_tissue = "marrow"
-        self.annotated = True
 
         self.class_maps = {
             "0": {},
@@ -43,31 +42,5 @@ class Dataset(DatasetBase):
                 fn = os.path.join(self.path, "mouse", "bone", "Marrow_facs.h5ad")
             else:
                 raise ValueError("source %s not recognized" % self.source)
-        self.adata = anndata.read_h5ad(fn)
-        if self.source == "aws":
-            self.adata.X = self.adata.raw.X
-            self.adata.var = self.adata.raw.var
-            del self.adata.raw
-            self.adata.obsm = {}
-            self.adata.varm = {}
-            self.adata.uns = {}
-
-        self.adata.uns[self._ADATA_IDS_SFAIRA.author] = "Quake"
-        self.adata.uns[self._ADATA_IDS_SFAIRA.year] = "2019"
-        self.adata.uns[self._ADATA_IDS_SFAIRA.doi] = "10.1101/661728"
-        self.adata.uns[self._ADATA_IDS_SFAIRA.protocol] = "smartseq2"
-        self.adata.uns[self._ADATA_IDS_SFAIRA.organ] = self.organ
-        self.adata.uns[self._ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
-        self.adata.uns[self._ADATA_IDS_SFAIRA.species] = self.species
-        self.adata.uns[self._ADATA_IDS_SFAIRA.id] = self.id
-        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download
-        self.adata.uns[self._ADATA_IDS_SFAIRA.download_meta] = self.download_meta
-        self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
-        self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = 'norm'
-        # self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class] is already set
+        self._load_tms(fn=fn)
         self.set_unkown_class_id(ids=["unknown", "nan-marrow-needs-subclustering"])
-        self.adata.obs[self._ADATA_IDS_SFAIRA.cell_types_original] = self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class].values.tolist()
-        self.adata.obs[self._ADATA_IDS_SFAIRA.healthy] = True
-        self.adata.obs[self._ADATA_IDS_SFAIRA.state_exact] = "healthy"
-
-        self._convert_and_set_var_names(symbol_col='index', ensembl_col=None)

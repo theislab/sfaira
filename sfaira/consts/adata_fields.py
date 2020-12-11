@@ -264,3 +264,80 @@ class ADATA_IDS_CELLXGENE(ADATA_IDS_EXTENDED):
     @property
     def disease_state_healthy(self) -> str:
         return self._disease_state_healthy
+
+
+class ADATA_IDS_TMS(ADATA_IDS_EXTENDED):
+    """
+    Class of constant field names of anndata.AnnData object entries, such as .uns keys and .obs columns in cellxgene
+    objects.
+    """
+    _author_names: str
+    _disease_state_healthy: str
+
+    def __init__(self):
+        self._cell_types_original = "cell_types_original"
+        self._cell_ontology_class = "cell_ontology_class"
+        self._cell_ontology_id = "cell_ontology_id"
+        self._doi = "doi"
+        self._dataset = "dataset"
+        self._dataset_group = "dataset_group"
+        self._download = "download"
+        self._download_meta = ""  # never necessary as we interface via anndata objects
+        self._gene_id_ensembl = None
+        self._gene_id_index = "ensembl"
+        self._gene_id_names = "index"
+        self._healthy = None
+        self._id = ""  # TODO
+        self._ncells = "ncells"
+        self._normalization = "normalization"
+        self._organ = "organ"
+        self._organism = "organism"
+        self._protocol = "assay"
+        self._subtissue = "subtissue"
+        self._year = "year"
+
+        self._age = "age"
+        self._author = "contributors"
+        self._dev_stage = "development_stage"
+        self._ethnicity = "ethnicity"
+        self._sex = "sex"
+        self._state_exact = "disease"
+
+
+class ADATA_IDS_MCA(ADATA_IDS_EXTENDED):
+    """
+    Class of constant field names of anndata.AnnData object entries, such as .uns keys and .obs columns in cellxgene
+    objects.
+    """
+    _author_names: str
+    _disease_state_healthy: str
+
+    def __init__(self):
+        self._cell_types_original = "Annotation"
+        self._cell_ontology_class = "Annotation"
+        self._cell_ontology_id = None
+        self._doi = "doi"
+        self._dataset = "dataset"
+        self._dataset_group = "dataset_group"
+        self._download = "download"
+        self._download_meta = ""  # never necessary as we interface via anndata objects
+        self._gene_id_ensembl = None
+        self._gene_id_index = "ensembl"
+        self._gene_id_names = "index"
+        self._healthy = None
+        self._id = ""  # TODO
+        self._ncells = "ncells"
+        self._normalization = "normalization"
+        self._organ = "organ"
+        self._organism = "organism"
+        self._protocol = "assay"
+        self._subtissue = "subtissue"
+        self._year = "year"
+
+        self._age = "age"
+        self._author = "contributors"
+        self._dev_stage = "development_stage"
+        self._ethnicity = "ethnicity"
+        self._sex = "sex"
+        self._state_exact = "disease"
+
