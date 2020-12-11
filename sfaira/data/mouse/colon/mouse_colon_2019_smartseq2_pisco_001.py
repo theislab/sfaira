@@ -59,9 +59,10 @@ class Dataset(DatasetBase):
         self.adata.uns[self._ADATA_IDS_SFAIRA.protocol] = "smartseq2"
         self.adata.uns[self._ADATA_IDS_SFAIRA.organ] = self.organ
         self.adata.uns[self._ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
-        self.adata.uns[self._ADATA_IDS_SFAIRA.species] = "mouse"
+        self.adata.uns[self._ADATA_IDS_SFAIRA.species] = self.species
         self.adata.uns[self._ADATA_IDS_SFAIRA.id] = self.id
         self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download
+        self.adata.uns[self._ADATA_IDS_SFAIRA.download_meta] = self.download_meta
         self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
         self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = 'norm'
         # self.adata.obs[ADATA_IDS_SFAIRA.cell_ontology_class] is already set

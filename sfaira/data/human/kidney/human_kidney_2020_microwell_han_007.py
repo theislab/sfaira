@@ -100,9 +100,10 @@ class Dataset(DatasetBase):
         self.adata.uns[self._ADATA_IDS_SFAIRA.protocol] = "microwell"
         self.adata.uns[self._ADATA_IDS_SFAIRA.organ] = self.organ
         self.adata.uns[self._ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
-        self.adata.uns[self._ADATA_IDS_SFAIRA.species] = "human"
+        self.adata.uns[self._ADATA_IDS_SFAIRA.species] = self.species
         self.adata.uns[self._ADATA_IDS_SFAIRA.id] = self.id
         self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download
+        self.adata.uns[self._ADATA_IDS_SFAIRA.download_meta] = self.download_meta
         self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
         self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = 'raw'
         self.adata.uns[self._ADATA_IDS_SFAIRA.dev_stage] = self.dev_stage
