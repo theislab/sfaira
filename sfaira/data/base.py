@@ -40,6 +40,9 @@ class DatasetBase(abc.ABC):
     _subtissue: Union[None, str]
     _year: Union[None, str]
 
+    _obs_key_cellontology_id: Union[None, str]
+    _obs_key_cellontology_original: Union[None, str]
+    _obs_key_healthy: Union[None, str]
     _obs_key_healthy: Union[None, str]
     _obs_key_organ: Union[None, str]
     _obs_key_protocol: Union[None, str]
@@ -82,6 +85,8 @@ class DatasetBase(abc.ABC):
         self._subtissue = None
         self._year = None
 
+        self._obs_key_cellontology_id = None
+        self._obs_key_cellontology_original = None
         self._obs_key_healthy = None
         self._obs_key_organ = None
         self._obs_key_protocol = None
@@ -143,7 +148,7 @@ class DatasetBase(abc.ABC):
         self._load(fn=fn)
         # Set data-specific meta data in .adata:
         self._set_metadata_in_adata(celltype_version=celltype_version)
-        # Set loading hyperparameter-specific meta data:
+        # Set loading hyper-parameter-specific meta data:
         self.adata.uns[self._ADATA_IDS_SFAIRA.mapped_features] = match_to_reference
         # Streamline feature space:
         self._convert_and_set_var_names()
@@ -794,6 +799,22 @@ class DatasetBase(abc.ABC):
     @normalization.setter
     def normalization(self, x: str):
         self._normalization = x
+
+    @property
+    def obs_key_cellontology_id(self) -> str:
+        return self._obs_key_cellontology_id
+
+    @obs_key_cellontology_id.setter
+    def obs_key_cellontology_id(self, x: str):
+        self._obs_key_cellontology_id = x
+
+    @property
+    def obs_key_cellontology_original(self) -> str:
+        return self._obs_key_cellontology_original
+
+    @obs_key_cellontology_original.setter
+    def obs_key_cellontology_original(self, x: str):
+        self._obs_key_cellontology_original = x
 
     @property
     def obs_key_healthy(self) -> str:
