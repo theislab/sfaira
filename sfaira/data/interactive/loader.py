@@ -39,6 +39,5 @@ class DatasetInteractive(DatasetBase):
     def _load(self, fn=None):
         self._convert_and_set_var_names(
             symbol_col=self.gene_symbol_col,
-            ensembl_col=self.gene_ensg_col,
-            new_index='ensembl'
+            ensembl_col=self.gene_ensg_col
         )

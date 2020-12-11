@@ -65,7 +65,6 @@ class DatasetCellxgene(DatasetBase):
 
         self._convert_and_set_var_names(
             symbol_col=ADATA_IDS_CELLXGENE.gene_id_names,
-            ensembl_col=ADATA_IDS_CELLXGENE.gene_id_ensembl,
-            new_index=ADATA_IDS_CELLXGENE.gene_id_ensembl
+            ensembl_col=ADATA_IDS_CELLXGENE.gene_id_ensembl
         )
 
