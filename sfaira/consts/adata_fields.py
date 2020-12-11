@@ -190,6 +190,12 @@ class ADATA_IDS_SFAIRA(ADATA_IDS_EXTENDED):
         self._sex = "sex"
         self._state_exact = "state_exact"
 
+        self._mapped_features = "mapped_features"
+
+    @property
+    def mapped_features(self) -> str:
+        return self._mapped_features
+
 
 class ADATA_IDS_CELLXGENE(ADATA_IDS_EXTENDED):
     """

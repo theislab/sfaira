@@ -120,6 +120,7 @@ class DatasetBase(abc.ABC):
         :return:
         """
         self._load_raw = load_raw
+        self._mapped_features = match_to_reference
 
         if match_to_reference and not remove_gene_version:
             warnings.warn("it is not recommended to enable matching the feature space to a genomes reference"
@@ -140,155 +141,14 @@ class DatasetBase(abc.ABC):
 
         # Run data set-specific loading script:
         self._load(fn=fn)
-        # Streamline feature space using the gene name columns set in the data loader:
+        # Set data-specific meta data in .adata:
+        self._set_metadata_in_adata(celltype_version=celltype_version)
+        # Set loading hyperparameter-specific meta data:
+        self.adata.uns[self._ADATA_IDS_SFAIRA.mapped_features] = match_to_reference
+        # Streamline feature space:
         self._convert_and_set_var_names()
-        # Set data set-wide attributes (.uns):
-        self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
-        self.adata.uns[self._ADATA_IDS_SFAIRA.author] = self.author
-        self.adata.uns[self._ADATA_IDS_SFAIRA.doi] = self.doi
-        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download
-        self.adata.uns[self._ADATA_IDS_SFAIRA.download_meta] = self.download_meta
-        self.adata.uns[self._ADATA_IDS_SFAIRA.id] = self.id
-        self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = self.normalization
-        self.adata.uns[self._ADATA_IDS_SFAIRA.year] = self.year
-
-        # Set cell-wise or data set-wide attributes (.uns / .obs):
-        # These are saved in .uns if they are data set wide to save memory.
-        for x, y, z in (
-            [self.healthy, self._ADATA_IDS_SFAIRA.healthy, self.obs_key_healthy],
-            [self.organ, self._ADATA_IDS_SFAIRA.organ, self.obs_key_organ],
-            [self.protocol, self._ADATA_IDS_SFAIRA.protocol, self.obs_key_protocol],
-            [self.species, self._ADATA_IDS_SFAIRA.species, self.obs_key_species],
-            [self.state_exact, self._ADATA_IDS_SFAIRA.state_exact, self.obs_key_state_exact],
-            [self.subtissue, self._ADATA_IDS_SFAIRA.subtissue, self.obs_key_subtissue],
-        ):
-            if isinstance(x, str) or x is None:
-                self.adata.uns[self._ADATA_IDS_SFAIRA.protocol] = x
-            else:
-                self.adata.uns[y] = "__obs__"
-                # Search for direct match of the sought-after column name or for attribute specific obs key.
-                if z is not None:
-                    if z not in self.adata.obs.keys():
-                        raise ValueError(f"attribute {y} of data set {self.id}"\
-                                         f" was not set to be in column {z} which was not found")
-                    self.adata.obs[y] = self.adata.obs[z].values
-                elif y in self.adata.obs.keys():
-                    pass  # correct column is already set!
-                else:
-                    raise ValueError(f"attribute {y} of data set {self.id} was not set")
-        # Process entries which are boolean element matches:
-        for x, y in (
-                [self._ADATA_IDS_SFAIRA.healthy, self.healthy_state_healthy],
-        ):
-            if self.adata.uns[x] == "__obs__":
-                self.adata.obs[x] = self.adata.obs[x].values == y
-            else:
-                if not isinstance(self.adata.uns[x], bool):
-                    raise ValueError(
-                        f"entry in .uns {self._ADATA_IDS_SFAIRA.healthy} is not boolean in data set {self.id}"
-                    )
-        # Set cell-wise attributes (.obs):
-        # None so far other than celltypes.
-        # Set cell types:
-        if self._ADATA_IDS_SFAIRA.cell_ontology_id not in self.adata.obs.columns:
-            self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_id] = None
-        # Map cell type names from raw IDs to ontology maintained ones::
-        if self._ADATA_IDS_SFAIRA.cell_ontology_class in self.adata.obs.columns:
-            self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class] = self.map_ontology_class(
-                raw_ids=self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class].values,
-                celltype_version=celltype_version
-            )
-
-        # Remove version tag on ensembl gene ID so that different versions are superimposed downstream:
-        if remove_gene_version:
-            new_index = [x.split(".")[0] for x in self.adata.var_names.tolist()]
-            # Collapse if necessary:
-            new_index_collapsed = list(np.unique(new_index))
-            if len(new_index_collapsed) < self.adata.n_vars:
-                raise ValueError("duplicate features detected after removing gene versions."
-                                 "the code to collapse these features is implemented but not tested.")
-                idx_map = np.array([new_index_collapsed.index(x) for x in new_index])
-                # Need reverse sorting to find index of last element in sorted list to split array using list index().
-                idx_map_sorted_rev = np.argsort(idx_map)[::-1]
-                n_genes = len(idx_map_sorted_rev)
-                # 1. Sort array in non-reversed order: idx_map_sorted_rev[::-1]
-                # 2. Split into chunks based on blocks of identical entries in idx_map, using the occurrence of the
-                # last element of each block as block boundaries:
-                # n_genes - 1 - idx_map_sorted_rev.index(x)
-                # Note that the blocks are named as positive integers starting at 1, without gaps.
-                counts = np.concatenate([
-                    np.sum(x, axis=1, keepdims=True)
-                    for x in np.split(
-                        self.adata[:, idx_map_sorted_rev[::-1]].X,  # forward ordered data
-                        indices_or_sections=[
-                            n_genes - 1 - idx_map_sorted_rev.index(x)  # last occurrence of element in forward order
-                            for x in np.arange(0, len(new_index_collapsed)-1)  # -1: do not need end of last partition
-                        ],
-                        axis=1
-                    )
-                ][::-1], axis=1)
-                # Remove varm and populate var with first occurrence only:
-                obs_names = self.adata.obs_names
-                self.adata = anndata.AnnData(
-                    X=counts,
-                    obs=self.adata.obs,
-                    obsm=self.adata.obsm,
-                    var=self.adata.var.iloc[[new_index.index(x) for x in new_index_collapsed]],
-                    uns=self.adata.uns
-                )
-                self.adata.obs_names = obs_names
-                self.adata.var_names = new_index_collapsed
-                new_index = new_index_collapsed
-            self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_ensembl] = new_index
-            self.adata.var.index = self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_ensembl].values
-
-        # Match feature space to a genomes provided with sfaira
-        if match_to_reference:
-            # Convert data matrix to csc matrix
-            if isinstance(self.adata.X, np.ndarray):
-                # Change NaN to zero. This occurs for example in concatenation of anndata instances.
-                if np.any(np.isnan(self.adata.X)):
-                    self.adata.X[np.isnan(self.adata.X)] = 0
-                x = scipy.sparse.csc_matrix(self.adata.X)
-            elif isinstance(self.adata.X, scipy.sparse.spmatrix):
-                x = self.adata.X.tocsc()
-            else:
-                raise ValueError(f"Data type {type(self.adata.X)} not recognized.")
-
-            # Compute indices of genes to keep
-            data_ids = self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_ensembl].values
-            idx_feature_kept = np.where([x in self.genome_container.ensembl for x in data_ids])[0]
-            idx_feature_map = np.array([self.genome_container.ensembl.index(x)
-                                        for x in data_ids[idx_feature_kept]])
-            # Remove unmapped genes
-            x = x[:, idx_feature_kept]
-
-            # Create reordered feature matrix based on reference and convert to csr
-            x_new = scipy.sparse.csc_matrix((x.shape[0], self.genome_container.ngenes), dtype=x.dtype)
-            # copying this over to the new matrix in chunks of size `steps` prevents a strange scipy error:
-            # ... scipy/sparse/compressed.py", line 922, in _zero_many i, j, offsets)
-            # ValueError: could not convert integer scalar
-            step = 2000
-            if step < len(idx_feature_map):
-                for i in range(0, len(idx_feature_map), step):
-                    x_new[:, idx_feature_map[i:i + step]] = x[:, i:i + step]
-                x_new[:, idx_feature_map[i + step:]] = x[:, i + step:]
-            else:
-                x_new[:, idx_feature_map] = x
-
-            x_new = x_new.tocsr()
-
-            self.adata = anndata.AnnData(
-                    X=x_new,
-                    obs=self.adata.obs,
-                    obsm=self.adata.obsm,
-                    var=pd.DataFrame(data={'names': self.genome_container.names,
-                                           self._ADATA_IDS_SFAIRA.gene_id_ensembl: self.genome_container.ensembl},
-                                     index=self.genome_container.ensembl),
-                    uns=self.adata.uns
-            )
-
-        self.adata.uns['mapped_features'] = match_to_reference
+        self._collapse_gene_versions(remove_gene_version=remove_gene_version)
+        self._match_features_to_reference(match_to_reference=match_to_reference)
 
     def _convert_and_set_var_names(
             self,
@@ -377,6 +237,171 @@ class DatasetBase(abc.ABC):
 
         self.adata.var.index = self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_index].values.tolist()
         self.adata.var_names_make_unique()
+
+    def _collapse_gene_versions(self, remove_gene_version):
+        """
+        Remove version tag on ensembl gene ID so that different versions are superimposed downstream.
+
+        :param remove_gene_version:
+        :return:
+        """
+        if remove_gene_version:
+            new_index = [x.split(".")[0] for x in self.adata.var_names.tolist()]
+            # Collapse if necessary:
+            new_index_collapsed = list(np.unique(new_index))
+            if len(new_index_collapsed) < self.adata.n_vars:
+                raise ValueError("duplicate features detected after removing gene versions."
+                                 "the code to collapse these features is implemented but not tested.")
+                idx_map = np.array([new_index_collapsed.index(x) for x in new_index])
+                # Need reverse sorting to find index of last element in sorted list to split array using list index().
+                idx_map_sorted_rev = np.argsort(idx_map)[::-1]
+                n_genes = len(idx_map_sorted_rev)
+                # 1. Sort array in non-reversed order: idx_map_sorted_rev[::-1]
+                # 2. Split into chunks based on blocks of identical entries in idx_map, using the occurrence of the
+                # last element of each block as block boundaries:
+                # n_genes - 1 - idx_map_sorted_rev.index(x)
+                # Note that the blocks are named as positive integers starting at 1, without gaps.
+                counts = np.concatenate([
+                                            np.sum(x, axis=1, keepdims=True)
+                                            for x in np.split(
+                        self.adata[:, idx_map_sorted_rev[::-1]].X,  # forward ordered data
+                        indices_or_sections=[
+                            n_genes - 1 - idx_map_sorted_rev.index(x)  # last occurrence of element in forward order
+                            for x in np.arange(0, len(new_index_collapsed) - 1)  # -1: do not need end of last partition
+                        ],
+                        axis=1
+                    )
+                                        ][::-1], axis=1)
+                # Remove varm and populate var with first occurrence only:
+                obs_names = self.adata.obs_names
+                self.adata = anndata.AnnData(
+                    X=counts,
+                    obs=self.adata.obs,
+                    obsm=self.adata.obsm,
+                    var=self.adata.var.iloc[[new_index.index(x) for x in new_index_collapsed]],
+                    uns=self.adata.uns
+                )
+                self.adata.obs_names = obs_names
+                self.adata.var_names = new_index_collapsed
+                new_index = new_index_collapsed
+            self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_ensembl] = new_index
+            self.adata.var.index = self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_ensembl].values
+
+    def _match_features_to_reference(self, match_to_reference):
+        """
+        Match feature space to a genomes provided with sfaira
+
+        :param match_to_reference:
+        :return:
+        """
+        if match_to_reference:
+            # Convert data matrix to csc matrix
+            if isinstance(self.adata.X, np.ndarray):
+                # Change NaN to zero. This occurs for example in concatenation of anndata instances.
+                if np.any(np.isnan(self.adata.X)):
+                    self.adata.X[np.isnan(self.adata.X)] = 0
+                x = scipy.sparse.csc_matrix(self.adata.X)
+            elif isinstance(self.adata.X, scipy.sparse.spmatrix):
+                x = self.adata.X.tocsc()
+            else:
+                raise ValueError(f"Data type {type(self.adata.X)} not recognized.")
+
+            # Compute indices of genes to keep
+            data_ids = self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_ensembl].values
+            idx_feature_kept = np.where([x in self.genome_container.ensembl for x in data_ids])[0]
+            idx_feature_map = np.array([self.genome_container.ensembl.index(x)
+                                        for x in data_ids[idx_feature_kept]])
+            # Remove unmapped genes
+            x = x[:, idx_feature_kept]
+
+            # Create reordered feature matrix based on reference and convert to csr
+            x_new = scipy.sparse.csc_matrix((x.shape[0], self.genome_container.ngenes), dtype=x.dtype)
+            # copying this over to the new matrix in chunks of size `steps` prevents a strange scipy error:
+            # ... scipy/sparse/compressed.py", line 922, in _zero_many i, j, offsets)
+            # ValueError: could not convert integer scalar
+            step = 2000
+            if step < len(idx_feature_map):
+                for i in range(0, len(idx_feature_map), step):
+                    x_new[:, idx_feature_map[i:i + step]] = x[:, i:i + step]
+                x_new[:, idx_feature_map[i + step:]] = x[:, i + step:]
+            else:
+                x_new[:, idx_feature_map] = x
+
+            x_new = x_new.tocsr()
+
+            self.adata = anndata.AnnData(
+                X=x_new,
+                obs=self.adata.obs,
+                obsm=self.adata.obsm,
+                var=pd.DataFrame(data={'names': self.genome_container.names,
+                                       self._ADATA_IDS_SFAIRA.gene_id_ensembl: self.genome_container.ensembl},
+                                 index=self.genome_container.ensembl),
+                uns=self.adata.uns
+            )
+
+    def _set_metadata_in_adata(self, celltype_version):
+        """
+        Copy meta data from dataset class in .anndata.
+
+        :param celltype_version:
+        :return:
+        """
+        # Set data set-wide attributes (.uns):
+        self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
+        self.adata.uns[self._ADATA_IDS_SFAIRA.author] = self.author
+        self.adata.uns[self._ADATA_IDS_SFAIRA.doi] = self.doi
+        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download
+        self.adata.uns[self._ADATA_IDS_SFAIRA.download_meta] = self.download_meta
+        self.adata.uns[self._ADATA_IDS_SFAIRA.id] = self.id
+        self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = self.normalization
+        self.adata.uns[self._ADATA_IDS_SFAIRA.year] = self.year
+
+        # Set cell-wise or data set-wide attributes (.uns / .obs):
+        # These are saved in .uns if they are data set wide to save memory.
+        for x, y, z in (
+                [self.healthy, self._ADATA_IDS_SFAIRA.healthy, self.obs_key_healthy],
+                [self.organ, self._ADATA_IDS_SFAIRA.organ, self.obs_key_organ],
+                [self.protocol, self._ADATA_IDS_SFAIRA.protocol, self.obs_key_protocol],
+                [self.species, self._ADATA_IDS_SFAIRA.species, self.obs_key_species],
+                [self.state_exact, self._ADATA_IDS_SFAIRA.state_exact, self.obs_key_state_exact],
+                [self.subtissue, self._ADATA_IDS_SFAIRA.subtissue, self.obs_key_subtissue],
+        ):
+            if isinstance(x, str) or x is None:
+                self.adata.uns[self._ADATA_IDS_SFAIRA.protocol] = x
+            else:
+                self.adata.uns[y] = "__obs__"
+                # Search for direct match of the sought-after column name or for attribute specific obs key.
+                if z is not None:
+                    if z not in self.adata.obs.keys():
+                        raise ValueError(f"attribute {y} of data set {self.id}"
+                                         f" was not set to be in column {z} which was not found")
+                    self.adata.obs[y] = self.adata.obs[z].values
+                elif y in self.adata.obs.keys():
+                    pass  # correct column is already set!
+                else:
+                    raise ValueError(f"attribute {y} of data set {self.id} was not set")
+        # Process entries which are boolean element matches:
+        for x, y in (
+                [self._ADATA_IDS_SFAIRA.healthy, self.healthy_state_healthy],
+        ):
+            if self.adata.uns[x] == "__obs__":
+                self.adata.obs[x] = self.adata.obs[x].values == y
+            else:
+                if not isinstance(self.adata.uns[x], bool):
+                    raise ValueError(
+                        f"entry in .uns {self._ADATA_IDS_SFAIRA.healthy} is not boolean in data set {self.id}"
+                    )
+        # Set cell-wise attributes (.obs):
+        # None so far other than celltypes.
+        # Set cell types:
+        if self._ADATA_IDS_SFAIRA.cell_ontology_id not in self.adata.obs.columns:
+            self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_id] = None
+        # Map cell type names from raw IDs to ontology maintained ones::
+        if self._ADATA_IDS_SFAIRA.cell_ontology_class in self.adata.obs.columns:
+            self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class] = self.map_ontology_class(
+                raw_ids=self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class].values,
+                celltype_version=celltype_version
+            )
 
     def subset_organs(self, subset: Union[None, List]):
         if self.organ == "mixed":
@@ -1050,7 +1075,7 @@ class DatasetGroupBase(abc.ABC):
                     self._ADATA_IDS_SFAIRA.normalization,
                     self._ADATA_IDS_SFAIRA.dev_stage,
                     self._ADATA_IDS_SFAIRA.annotated,
-                    "mapped_features"
+                    self._ADATA_IDS_SFAIRA.mapped_features,
                 ]
                 for k in list(adata.uns.keys()):
                     if k not in keys_to_keep:
@@ -1083,10 +1108,11 @@ class DatasetGroupBase(abc.ABC):
 
             adata_concat.var[self._ADATA_IDS_SFAIRA.gene_id_ensembl] = adata_concat.var.index
 
-            if len(set([a.uns['mapped_features'] for a in adata_ls])) == 1:
-                adata_concat.uns['mapped_features'] = adata_ls[0].uns['mapped_features']
+            if len(set([a.uns[self._ADATA_IDS_SFAIRA.mapped_features] for a in adata_ls])) == 1:
+                adata_concat.uns[self._ADATA_IDS_SFAIRA.mapped_features] = \
+                    adata_ls[0].uns[self._ADATA_IDS_SFAIRA.mapped_features]
             else:
-                adata_concat.uns['mapped_features'] = False
+                adata_concat.uns[self._ADATA_IDS_SFAIRA.mapped_features] = False
         else:
             adata_concat = adata_ls[0]
             adata_concat.obs[self._ADATA_IDS_SFAIRA.dataset] = self.ids[0]
