@@ -23,29 +23,36 @@ class DatasetBase(abc.ABC):
     id: Union[None, str]
     genome: Union[None, str]
 
+    _age: Union[None, str]
     _author: Union[None, str]
     _doi: Union[None, str]
     _download: Union[None, str]
     _download_meta: Union[None, str]
+    _ethnicity: Union[None, str]
     _healthy: Union[None, str]
     _id: Union[None, str]
     _ncells: Union[None, int]
     _normalization: Union[None, str]
     _organ: Union[None, str]
+    _organism: Union[None, str]
     _protocol: Union[None, str]
+    _sex: Union[None, str]
     _source: Union[None, str]
-    _species: Union[None, str]
     _state_exact: Union[None, str]
     _subtissue: Union[None, str]
     _year: Union[None, str]
 
+    _obs_key_age: Union[None, str]
     _obs_key_cellontology_id: Union[None, str]
     _obs_key_cellontology_original: Union[None, str]
+    _obs_key_dev_stage: Union[None, str]
+    _obs_key_ethnicity: Union[None, str]
     _obs_key_healthy: Union[None, str]
     _obs_key_healthy: Union[None, str]
     _obs_key_organ: Union[None, str]
+    _obs_key_organism: Union[None, str]
     _obs_key_protocol: Union[None, str]
-    _obs_key_species: Union[None, str]
+    _obs_key_sex: Union[None, str]
     _obs_key_state_exact: Union[None, str]
     _obs_key_subtissue: Union[None, str]
 
@@ -70,24 +77,30 @@ class DatasetBase(abc.ABC):
         self._doi = None
         self._download = None
         self._download_meta = None
+        self._ethnicity = None
         self._healthy = None
         self._id = None
         self._ncells = None
         self._normalization = None
         self._organ = None
+        self._organism = None
         self._protocol = None
+        self._sex = None
         self._source = None
-        self._species = None
         self._state_exact = None
         self._subtissue = None
         self._year = None
 
+        self._obs_key_age = None
         self._obs_key_cellontology_id = None
         self._obs_key_cellontology_original = None
+        self._obs_key_dev_stage = None
+        self._obs_key_ethnicity = None
         self._obs_key_healthy = None
         self._obs_key_organ = None
+        self._obs_key_organism = None
         self._obs_key_protocol = None
-        self._obs_key_species = None
+        self._obs_key_sex = None
         self._obs_key_state_exact = None
         self._obs_key_subtissue = None
 
@@ -129,11 +142,11 @@ class DatasetBase(abc.ABC):
         if match_to_reference:
             genome = match_to_reference
             self._set_genome(genome=genome)
-        elif self.species == "human":
+        elif self.organism == "human":
             genome = "Homo_sapiens_GRCh38_97"
             warnings.warn(f"using default genomes {genome}")
             self._set_genome(genome=genome)
-        elif self.species == "mouse":
+        elif self.organism == "mouse":
             genome = "Mus_musculus_GRCm38_97"
             warnings.warn(f"using default genomes {genome}")
             self._set_genome(genome=genome)
@@ -360,15 +373,19 @@ class DatasetBase(abc.ABC):
         # Set cell-wise or data set-wide attributes (.uns / .obs):
         # These are saved in .uns if they are data set wide to save memory.
         for x, y, z in (
+                [self.age, self._ADATA_IDS_SFAIRA.age, self.obs_key_age],
+                [self.dev_stage, self._ADATA_IDS_SFAIRA.dev_stage, self.obs_key_dev_stage],
+                [self.ethnicity, self._ADATA_IDS_SFAIRA.ethnicity, self.obs_key_ethnicity],
                 [self.healthy, self._ADATA_IDS_SFAIRA.healthy, self.obs_key_healthy],
                 [self.organ, self._ADATA_IDS_SFAIRA.organ, self.obs_key_organ],
                 [self.protocol, self._ADATA_IDS_SFAIRA.protocol, self.obs_key_protocol],
-                [self.species, self._ADATA_IDS_SFAIRA.species, self.obs_key_species],
+                [self.sex, self._ADATA_IDS_SFAIRA.sex, self.obs_key_sex],
+                [self.organism, self._ADATA_IDS_SFAIRA.species, self.obs_key_organism],
                 [self.state_exact, self._ADATA_IDS_SFAIRA.state_exact, self.obs_key_state_exact],
                 [self.subtissue, self._ADATA_IDS_SFAIRA.subtissue, self.obs_key_subtissue],
         ):
             if isinstance(x, str) or x is None:
-                self.adata.uns[self._ADATA_IDS_SFAIRA.protocol] = x
+                self.adata.uns[y] = x
             else:
                 self.adata.uns[y] = "__obs__"
                 # Search for direct match of the sought-after column name or for attribute specific obs key.
@@ -616,9 +633,13 @@ class DatasetBase(abc.ABC):
         }, index=range(1))
         # Expand table by variably cell-wise or data set-wise meta data:
         for x in [
+            self._ADATA_IDS_SFAIRA.age,
+            self._ADATA_IDS_SFAIRA.dev_stage,
+            self._ADATA_IDS_SFAIRA.ethnicity,
             self._ADATA_IDS_SFAIRA.healthy,
             self._ADATA_IDS_SFAIRA.organ,
             self._ADATA_IDS_SFAIRA.protocol,
+            self._ADATA_IDS_SFAIRA.sex,
             self._ADATA_IDS_SFAIRA.species,
             self._ADATA_IDS_SFAIRA.state_exact,
             self._ADATA_IDS_SFAIRA.subtissue,
@@ -632,6 +653,19 @@ class DatasetBase(abc.ABC):
             np.sort(np.unique(self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class].values)),
         )
         meta.to_csv(fn_meta)
+
+    @property
+    def age(self) -> str:
+        if self._age is not None:
+            return self._age
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            return self.meta[self._ADATA_IDS_SFAIRA.age]
+
+    @age.setter
+    def age(self, x: str):
+        self._age = x
 
     @property
     def annotated(self) -> bool:
@@ -654,6 +688,19 @@ class DatasetBase(abc.ABC):
     @author.setter
     def author(self, x: str):
         self._author = x
+
+    @property
+    def dev_stage(self) -> str:
+        if self._dev_stage is not None:
+            return self._dev_stage
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            return self.meta[self._ADATA_IDS_SFAIRA.dev_stage]
+
+    @dev_stage.setter
+    def dev_stage(self, x: str):
+        self._dev_stage = x
 
     @property
     def doi(self) -> str:
@@ -734,6 +781,19 @@ class DatasetBase(abc.ABC):
         self._download_meta = x
 
     @property
+    def ethnicity(self) -> str:
+        if self._ethnicity is not None:
+            return self._ethnicity
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            return self.meta[self._ADATA_IDS_SFAIRA.ethnicity]
+
+    @ethnicity.setter
+    def ethnicity(self, x: str):
+        self._ethnicity = x
+
+    @property
     def healthy(self) -> str:
         if self._healthy is not None:
             return self._healthy
@@ -793,6 +853,14 @@ class DatasetBase(abc.ABC):
         self._normalization = x
 
     @property
+    def obs_key_age(self) -> str:
+        return self._obs_key_age
+
+    @obs_key_age.setter
+    def obs_key_age(self, x: str):
+        self._obs_key_age = x
+
+    @property
     def obs_key_cellontology_id(self) -> str:
         return self._obs_key_cellontology_id
 
@@ -807,6 +875,22 @@ class DatasetBase(abc.ABC):
     @obs_key_cellontology_original.setter
     def obs_key_cellontology_original(self, x: str):
         self._obs_key_cellontology_original = x
+
+    @property
+    def obs_key_dev_stage(self) -> str:
+        return self._obs_key_dev_stage
+
+    @obs_key_dev_stage.setter
+    def obs_key_dev_stage(self, x: str):
+        self._obs_key_dev_stage = x
+
+    @property
+    def obs_key_ethnicity(self) -> str:
+        return self._obs_key_ethnicity
+
+    @obs_key_ethnicity.setter
+    def obs_key_ethnicity(self, x: str):
+        self._obs_key_ethnicity = x
 
     @property
     def obs_key_healthy(self) -> str:
@@ -825,6 +909,14 @@ class DatasetBase(abc.ABC):
         self._obs_key_organ = x
 
     @property
+    def obs_key_organism(self) -> str:
+        return self._obs_key_organism
+
+    @obs_key_organism.setter
+    def obs_key_organism(self, x: str):
+        self._obs_key_organism = x
+
+    @property
     def obs_key_protocol(self) -> str:
         return self._obs_key_protocol
 
@@ -833,12 +925,12 @@ class DatasetBase(abc.ABC):
         self._obs_key_protocol = x
 
     @property
-    def obs_key_species(self) -> str:
-        return self._obs_key_species
+    def obs_key_sex(self) -> str:
+        return self._obs_key_sex
 
-    @obs_key_species.setter
-    def obs_key_species(self, x: str):
-        self._obs_key_species = x
+    @obs_key_sex.setter
+    def obs_key_sex(self, x: str):
+        self._obs_key_sex = x
 
     @property
     def obs_key_state_exact(self) -> str:
@@ -870,6 +962,21 @@ class DatasetBase(abc.ABC):
         self._organ = x
 
     @property
+    def organism(self) -> str:
+        if self._organism is not None:
+            return self._organism
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            return self.meta[self._ADATA_IDS_SFAIRA.species]
+
+    @organism.setter
+    def organism(self, x: str):
+        if x not in self._ADATA_IDS_SFAIRA.species_allowed_entries:
+            raise ValueError(f"{x} is not a valid entry for species")
+        self._organism = x
+
+    @property
     def protocol(self) -> str:
         if self._protocol is not None:
             return self._protocol
@@ -883,27 +990,25 @@ class DatasetBase(abc.ABC):
         self._protocol = x
 
     @property
+    def sex(self) -> str:
+        if self._sex is not None:
+            return self._sex
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            return self.meta[self._ADATA_IDS_SFAIRA.sex]
+
+    @sex.setter
+    def sex(self, x: str):
+        self._sex = x
+
+    @property
     def source(self) -> str:
         return self._source
 
     @source.setter
     def source(self, x: Union[str, None]):
         self._source = x
-
-    @property
-    def species(self) -> str:
-        if self._species is not None:
-            return self._species
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            return self.meta[self._ADATA_IDS_SFAIRA.species]
-
-    @species.setter
-    def species(self, x: str):
-        if x not in self._ADATA_IDS_SFAIRA.species_allowed_entries:
-            raise ValueError(f"{x} is not a valid entry for species")
-        self._species = x
 
     @property
     def state_exact(self) -> str:

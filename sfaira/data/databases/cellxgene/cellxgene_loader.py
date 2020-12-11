@@ -25,6 +25,19 @@ class DatasetCellxgene(DatasetBase):
         DatasetBase.__init__(self=self, path=path, meta_path=meta_path, **kwargs)
         self._ADATA_IDS_CELLXGENE = ADATA_IDS_CELLXGENE()
         self.fn = fn
+
+        self.obs_key_ethnicity = self._ADATA_IDS_CELLXGENE.ethnicity
+        self.obs_key_healthy = self._ADATA_IDS_CELLXGENE.healthy
+        self.obs_key_species = self._ADATA_IDS_CELLXGENE.species
+        self.obs_key_species = self._ADATA_IDS_CELLXGENE.species
+        self.obs_key_sex = self._ADATA_IDS_CELLXGENE.sex
+        self.obs_key_species = self._ADATA_IDS_CELLXGENE.species
+        self.obs_key_subtissue = self._ADATA_IDS_CELLXGENE.subtissue
+        self.obs_key_species = self._ADATA_IDS_CELLXGENE.species
+        self.obs_key_state_exact = self._ADATA_IDS_CELLXGENE.disease
+
+        self.healthy_state_healthy = self._ADATA_IDS_CELLXGENE.disease_state_healthy
+
         self.class_maps = {
             "0": {},
         }
@@ -53,12 +66,7 @@ class DatasetCellxgene(DatasetBase):
         self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
         self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = 'raw'
 
-        self.adata.obs[self._ADATA_IDS_SFAIRA.subtissue] = adata.obs[self._ADATA_IDS_CELLXGENE.subtissue].values
         self.adata.obs[self._ADATA_IDS_SFAIRA.dev_stage] = adata.obs[self._ADATA_IDS_CELLXGENE.dev_stage].values
-        self.adata.obs[self._ADATA_IDS_SFAIRA.sex] = adata.obs[self._ADATA_IDS_CELLXGENE.sex].values
-        self.adata.obs[self._ADATA_IDS_SFAIRA.ethnicity] = adata.obs[self._ADATA_IDS_CELLXGENE.ethnicity].values
-        self.adata.obs[self._ADATA_IDS_SFAIRA.healthy] = adata.obs[self._ADATA_IDS_CELLXGENE.disease].values == self._ADATA_IDS_CELLXGENE.disease_state_healthy
-        self.adata.obs[self._ADATA_IDS_SFAIRA.state_exact] = adata.obs[self._ADATA_IDS_CELLXGENE.disease].values
 
         self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_id] = adata.obs[self._ADATA_IDS_CELLXGENE.cell_ontology_id].values.tolist()
         self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class] = adata.obs[self._ADATA_IDS_CELLXGENE.cell_ontology_class].values.tolist()

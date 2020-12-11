@@ -28,8 +28,8 @@ class ADATA_IDS_BASE:
     _ncells: str
     _normalization: str
     _organ: str
+    _organism: str
     _protocol: str
-    _species: str
     _subtissue: str
     _year: str
 
@@ -106,16 +106,16 @@ class ADATA_IDS_BASE:
         return self._normalization
 
     @property
-    def protocol(self) -> str:
-        return self._protocol
-
-    @property
     def organ(self) -> str:
         return self._organ
 
     @property
-    def species(self) -> str:
-        return self._species
+    def species(self) -> str:  # TODO refactor into organism
+        return self._organism
+
+    @property
+    def protocol(self) -> str:
+        return self._protocol
 
     @property
     def subtissue(self) -> str:
@@ -181,8 +181,8 @@ class ADATA_IDS_SFAIRA(ADATA_IDS_EXTENDED):
         self._ncells = "ncells"
         self._normalization = "normalization"
         self._organ = "organ"
+        self._organism = "organism"
         self._protocol = "protocol"
-        self._species = "organism"
         self._subtissue = "subtissue"
         self._year = "year"
 
@@ -241,8 +241,8 @@ class ADATA_IDS_CELLXGENE(ADATA_IDS_EXTENDED):
         self._ncells = "ncells"
         self._normalization = None  # is always "counts"
         self._organ = ""  # TODO
+        self._organism = "organism"
         self._protocol = "assay"
-        self._species = "organism"
         self._subtissue = ""  # TODO
         self._year = ""  # TODO
 
