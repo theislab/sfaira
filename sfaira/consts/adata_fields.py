@@ -192,9 +192,15 @@ class ADATA_IDS_SFAIRA(ADATA_IDS_EXTENDED):
 
         self._mapped_features = "mapped_features"
 
+        self._species_allowed_entries = ["mouse", "human"]
+
     @property
     def mapped_features(self) -> str:
         return self._mapped_features
+
+    @property
+    def species_allowed_entries(self) -> str:
+        return self._species_allowed_entries
 
 
 class ADATA_IDS_CELLXGENE(ADATA_IDS_EXTENDED):

@@ -909,6 +909,8 @@ class DatasetBase(abc.ABC):
 
     @species.setter
     def species(self, x: str):
+        if x not in self._ADATA_IDS_SFAIRA.species_allowed_entries:
+            raise ValueError(f"{x} is not a valid entry for species")
         self._species = x
 
     @property
