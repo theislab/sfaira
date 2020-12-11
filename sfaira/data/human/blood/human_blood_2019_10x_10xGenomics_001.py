@@ -54,7 +54,8 @@ class Dataset(DatasetBase):
         self.adata.uns[self._ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
         self.adata.uns[self._ADATA_IDS_SFAIRA.species] = self.species
         self.adata.uns[self._ADATA_IDS_SFAIRA.id] = self.id
-        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = "http://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_10k_v3/pbmc_10k_v3_filtered_feature_bc_matrix.h5"
+        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download
+        self.adata.uns[self._ADATA_IDS_SFAIRA.download_meta] = self.download_meta
         self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
         self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = 'raw'
 
