@@ -47,6 +47,8 @@ class DatasetBase(abc.ABC):
     _obs_key_state_exact: Union[None, str]
     _obs_key_subtissue: Union[None, str]
 
+    _healthy_state_healthy: Union[None, str]
+
     _var_symbol_col: Union[None, str]
     _var_ensembl_col: Union[None, str]
 
@@ -86,6 +88,8 @@ class DatasetBase(abc.ABC):
         self._obs_key_species = None
         self._obs_key_state_exact = None
         self._obs_key_subtissue = None
+
+        self._healthy_state_healthy = None
 
         self._var_symbol_col = None
         self._var_ensembl_col = None
@@ -172,7 +176,17 @@ class DatasetBase(abc.ABC):
                     pass  # correct column is already set!
                 else:
                     raise ValueError(f"attribute {y} of data set {self.id} was not set")
-
+        # Process entries which are boolean element matches:
+        for x, y in (
+                [self._ADATA_IDS_SFAIRA.healthy, self.healthy_state_healthy],
+        ):
+            if self.adata.uns[x] == "__obs__":
+                self.adata.obs[x] = self.adata.obs[x].values == y
+            else:
+                if not isinstance(self.adata.uns[x], bool):
+                    raise ValueError(
+                        f"entry in .uns {self._ADATA_IDS_SFAIRA.healthy} is not boolean in data set {self.id}"
+                    )
         # Set cell-wise attributes (.obs):
         # None so far other than celltypes.
         # Set cell types:
@@ -709,6 +723,14 @@ class DatasetBase(abc.ABC):
     @healthy.setter
     def healthy(self, x: str):
         self._healthy = x
+
+    @property
+    def healthy_state_healthy(self) -> str:
+        return self._healthy_state_healthy
+
+    @healthy_state_healthy.setter
+    def healthy_state_healthy(self, x: str):
+        self._healthy_state_healthy = x
 
     @property
     def id(self) -> str:
