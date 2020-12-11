@@ -16,6 +16,7 @@ class DatasetGroupKidney(DatasetGroupBase):
         path: Union[str, None] = None,
         meta_path: Union[str, None] = None
     ):
+        super().__init__()
         datasets = [
             Dataset0001(path=path, meta_path=meta_path),
             Dataset0002(path=path, meta_path=meta_path),
