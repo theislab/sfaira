@@ -1,1 +1,0 @@
-from .mouse_adipose import DatasetGroupAdipose
