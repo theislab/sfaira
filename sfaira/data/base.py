@@ -477,7 +477,7 @@ class DatasetBase(abc.ABC):
         else:
             if isinstance(fn, str):
                 fn = os.path.normpath(fn)
-        self.meta = pandas.read_csv(fn, usecols=self.META_DATA_FIELDS)
+        self.meta = pandas.read_csv(fn, usecols=self._META_DATA_FIELDS)
 
     def write_meta(
             self,
