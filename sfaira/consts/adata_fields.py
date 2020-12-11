@@ -190,13 +190,23 @@ class ADATA_IDS_SFAIRA(ADATA_IDS_EXTENDED):
         self._sex = "sex"
         self._state_exact = "state_exact"
 
+        self._load_raw = "load_raw"
         self._mapped_features = "mapped_features"
+        self._remove_gene_version = "remove_gene_version"
 
         self._species_allowed_entries = ["mouse", "human"]
 
     @property
+    def load_raw(self) -> str:
+        return self._load_raw
+
+    @property
     def mapped_features(self) -> str:
         return self._mapped_features
+
+    @property
+    def remove_gene_version(self) -> str:
+        return self._remove_gene_version
 
     @property
     def species_allowed_entries(self) -> str:

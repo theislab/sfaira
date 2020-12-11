@@ -66,7 +66,6 @@ class DatasetBase(abc.ABC):
         self.genome = None
         self.path = path
         self.meta_path = meta_path
-        self._load_raw = None
 
         self._annotated = None
         self._author = None
@@ -124,9 +123,6 @@ class DatasetBase(abc.ABC):
         :param load_raw: Loads unprocessed version of data if available in data loader.
         :return:
         """
-        self._load_raw = load_raw
-        self._mapped_features = match_to_reference
-
         if match_to_reference and not remove_gene_version:
             warnings.warn("it is not recommended to enable matching the feature space to a genomes reference"
                           "while not removing gene versions. this can lead to very poor matching performance")
@@ -149,7 +145,9 @@ class DatasetBase(abc.ABC):
         # Set data-specific meta data in .adata:
         self._set_metadata_in_adata(celltype_version=celltype_version)
         # Set loading hyper-parameter-specific meta data:
+        self.adata.uns[self._ADATA_IDS_SFAIRA.load_raw] = load_raw
         self.adata.uns[self._ADATA_IDS_SFAIRA.mapped_features] = match_to_reference
+        self.adata.uns[self._ADATA_IDS_SFAIRA.remove_gene_version] = remove_gene_version
         # Streamline feature space:
         self._convert_and_set_var_names()
         self._collapse_gene_versions(remove_gene_version=remove_gene_version)
