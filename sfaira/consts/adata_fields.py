@@ -231,7 +231,7 @@ class ADATA_IDS_CELLXGENE(ADATA_IDS_EXTENDED):
         self._dataset = "dataset"
         self._dataset_group = "dataset_group"
         self._download = ""  # TODO
-        self._download_meta = ""  # TODO
+        self._download_meta = ""  # never necessary as we interface via anndata objects
         self._gene_id_ensembl = ""  # TODO
         self._gene_id_index = "ensembl"
         self._gene_id_names = ""  # TODO
@@ -239,7 +239,7 @@ class ADATA_IDS_CELLXGENE(ADATA_IDS_EXTENDED):
         self._healthy = None  # is inferred from _disease
         self._id = ""  # TODO
         self._ncells = "ncells"
-        self._normalization = None  # is always "counts"
+        self._normalization = ""  # is always "raw"
         self._organ = ""  # TODO
         self._organism = "organism"
         self._protocol = "assay"
