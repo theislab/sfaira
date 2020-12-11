@@ -562,7 +562,7 @@ class DatasetBase(abc.ABC):
             if self.meta is None:
                 self.load_meta(fn=None)
             x = self.meta[self._ADATA_IDS_SFAIRA.download]
-        if isinstance(x, str):
+        if isinstance(x, str) or isinstance(x, None):
             x = [x]
         if isinstance(x, list):
             x = (x,)
@@ -588,13 +588,14 @@ class DatasetBase(abc.ABC):
         Save as tuple with single element, which is a list of all download websites relevant to dataset.
         :return:
         """
-        if self._download_meta is not None:
-            x = self._download_meta
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            x = self.meta[self._ADATA_IDS_SFAIRA.download_meta]
-        if isinstance(x, str):
+        x = self._download_meta
+        #if self._download_meta is not None:  # TODO add this back in once download_meta is routineyl set in datasets
+        #    x = self._download_meta
+        #else:
+        #    if self.meta is None:
+        #        self.load_meta(fn=None)
+        #    x = self.meta[self._ADATA_IDS_SFAIRA.download_meta]
+        if isinstance(x, str) or isinstance(x, None):
             x = [x]
         if isinstance(x, list):
             x = (x,)
