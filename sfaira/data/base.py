@@ -568,7 +568,6 @@ class DatasetBase(abc.ABC):
         """
 
         :param raw_ids:
-        :param class_maps:
         :param celltype_version: Version of cell type ontology to use. Uses most recent if None.
         :return:
         """
