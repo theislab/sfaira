@@ -40,6 +40,13 @@ class DatasetBase(abc.ABC):
     _subtissue: Union[None, str]
     _year: Union[None, str]
 
+    _obs_key_healthy: Union[None, str]
+    _obs_key_organ: Union[None, str]
+    _obs_key_protocol: Union[None, str]
+    _obs_key_species: Union[None, str]
+    _obs_key_state_exact: Union[None, str]
+    _obs_key_subtissue: Union[None, str]
+
     def __init__(
             self,
             path: Union[str, None] = None,
@@ -69,6 +76,13 @@ class DatasetBase(abc.ABC):
         self._state_exact = None
         self._subtissue = None
         self._year = None
+
+        self._obs_key_healthy = None
+        self._obs_key_organ = None
+        self._obs_key_protocol = None
+        self._obs_key_species = None
+        self._obs_key_state_exact = None
+        self._obs_key_subtissue = None
 
         self._ADATA_IDS_SFAIRA = ADATA_IDS_SFAIRA()
         self._META_DATA_FIELDS = META_DATA_FIELDS
@@ -121,18 +135,37 @@ class DatasetBase(abc.ABC):
         self.adata.uns[self._ADATA_IDS_SFAIRA.doi] = self.doi
         self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download
         self.adata.uns[self._ADATA_IDS_SFAIRA.download_meta] = self.download_meta
-        self.adata.uns[self._ADATA_IDS_SFAIRA.protocol] = self.protocol
-        self.adata.uns[self._ADATA_IDS_SFAIRA.organ] = self.organ
         self.adata.uns[self._ADATA_IDS_SFAIRA.id] = self.id
         self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = self.normalization
-        self.adata.uns[self._ADATA_IDS_SFAIRA.subtissue] = self.subtissue
-        self.adata.uns[self._ADATA_IDS_SFAIRA.species] = self.species
         self.adata.uns[self._ADATA_IDS_SFAIRA.year] = self.year
 
-        # Set cell-wise attributes (.obs):
-        self.adata.obs[self._ADATA_IDS_SFAIRA.healthy] = self.healthy
-        self.adata.obs[self._ADATA_IDS_SFAIRA.state_exact] = self.state_exact
+        # Set cell-wise or data set-wide attributes (.uns / .obs):
+        # These are saved in .uns if they are data set wide to save memory.
+        for x, y, z in (
+            [self.healthy, self._ADATA_IDS_SFAIRA.healthy, self.obs_key_healthy],
+            [self.organ, self._ADATA_IDS_SFAIRA.organ, self.obs_key_organ],
+            [self.protocol, self._ADATA_IDS_SFAIRA.protocol, self.obs_key_protocol],
+            [self.species, self._ADATA_IDS_SFAIRA.species, self.obs_key_species],
+            [self.state_exact, self._ADATA_IDS_SFAIRA.state_exact, self.obs_key_state_exact],
+            [self.subtissue, self._ADATA_IDS_SFAIRA.subtissue, self.obs_key_subtissue],
+        ):
+            if isinstance(x, str) or x is None:
+                self.adata.uns[self._ADATA_IDS_SFAIRA.protocol] = x
+            else:
+                self.adata.uns[y] = "__obs__"
+                # Search for direct match of the sought-after column name or for attribute specific obs key.
+                if z is not None:
+                    if z not in self.adata.obs.keys():
+                        raise ValueError(f"attribute {y} of data set {self.id}"\
+                                         f" was not set to be in column {z} which was not found")
+                    self.adata.obs[y] = self.adata.obs[z].values
+                elif y in self.adata.obs.keys():
+                    pass  # correct column is already set!
+                else:
+                    raise ValueError(f"attribute {y} of data set {self.id} was not set")
 
+        # Set cell-wise attributes (.obs):
+        # None so far other than celltypes.
         # Set cell types:
         if self._ADATA_IDS_SFAIRA.cell_ontology_id not in self.adata.obs.columns:
             self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_id] = None
@@ -516,6 +549,7 @@ class DatasetBase(abc.ABC):
             fn_meta = self.meta_fn
         if self.adata is None:
             self.load(fn=fn_data, remove_gene_version=False, match_to_reference=None)
+        # Add data-set wise meta data into table:
         meta = pandas.DataFrame({
             self._ADATA_IDS_SFAIRA.annotated: self.adata.uns[self._ADATA_IDS_SFAIRA.annotated],
             self._ADATA_IDS_SFAIRA.author: self.adata.uns[self._ADATA_IDS_SFAIRA.author],
@@ -524,12 +558,26 @@ class DatasetBase(abc.ABC):
             self._ADATA_IDS_SFAIRA.download_meta: self.adata.uns[self._ADATA_IDS_SFAIRA.download_meta],
             self._ADATA_IDS_SFAIRA.id: self.adata.uns[self._ADATA_IDS_SFAIRA.id],
             self._ADATA_IDS_SFAIRA.ncells: self.adata.n_obs,
-            self._ADATA_IDS_SFAIRA.normalization: self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] if self._ADATA_IDS_SFAIRA.normalization in self.adata.uns.keys() else None,
-            self._ADATA_IDS_SFAIRA.organ: self.adata.uns[self._ADATA_IDS_SFAIRA.organ],
-            self._ADATA_IDS_SFAIRA.protocol: self.adata.uns[self._ADATA_IDS_SFAIRA.protocol],
-            self._ADATA_IDS_SFAIRA.species: self.adata.uns[self._ADATA_IDS_SFAIRA.species],
+            self._ADATA_IDS_SFAIRA.normalization: self.adata.uns[self._ADATA_IDS_SFAIRA.normalization],
             self._ADATA_IDS_SFAIRA.year: self.adata.uns[self._ADATA_IDS_SFAIRA.year],
         }, index=range(1))
+        # Expand table by variably cell-wise or data set-wise meta data:
+        for x in [
+            self._ADATA_IDS_SFAIRA.healthy,
+            self._ADATA_IDS_SFAIRA.organ,
+            self._ADATA_IDS_SFAIRA.protocol,
+            self._ADATA_IDS_SFAIRA.species,
+            self._ADATA_IDS_SFAIRA.state_exact,
+            self._ADATA_IDS_SFAIRA.subtissue,
+        ]:
+            if self.adata.uns[x] == "__obs__":
+                meta[x] = (np.sort(np.unique(self.adata.obs[x].values)),)
+            else:
+                meta[x] = self.adata.uns[x]
+        # Add cell types into table:
+        meta[self._ADATA_IDS_SFAIRA.cell_ontology_class] = (
+            np.sort(np.unique(self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class].values)),
+        )
         meta.to_csv(fn_meta)
 
     @property
@@ -686,6 +734,54 @@ class DatasetBase(abc.ABC):
     @normalization.setter
     def normalization(self, x: str):
         self._normalization = x
+
+    @property
+    def obs_key_healthy(self) -> str:
+        return self._obs_key_healthy
+
+    @obs_key_healthy.setter
+    def obs_key_healthy(self, x: str):
+        self._obs_key_healthy = x
+
+    @property
+    def obs_key_organ(self) -> str:
+        return self._obs_key_organ
+
+    @obs_key_organ.setter
+    def obs_key_organ(self, x: str):
+        self._obs_key_organ = x
+
+    @property
+    def obs_key_protocol(self) -> str:
+        return self._obs_key_protocol
+
+    @obs_key_protocol.setter
+    def obs_key_protocol(self, x: str):
+        self._obs_key_protocol = x
+
+    @property
+    def obs_key_species(self) -> str:
+        return self._obs_key_species
+
+    @obs_key_species.setter
+    def obs_key_species(self, x: str):
+        self._obs_key_species = x
+
+    @property
+    def obs_key_state_exact(self) -> str:
+        return self._obs_key_state_exact
+
+    @obs_key_state_exact.setter
+    def obs_key_state_exact(self, x: str):
+        self._obs_key_state_exact = x
+
+    @property
+    def obs_key_subtissue(self) -> str:
+        return self._obs_key_subtissue
+
+    @obs_key_subtissue.setter
+    def obs_key_subtissue(self, x: str):
+        self._obs_key_subtissue = x
 
     @property
     def organ(self) -> str:
