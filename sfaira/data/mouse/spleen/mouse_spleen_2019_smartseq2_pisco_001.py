@@ -6,8 +6,6 @@ from .external import DatasetTms
 
 class Dataset(DatasetTms):
 
-    id: str
-
     def __init__(
             self,
             path: Union[str, None] = None,

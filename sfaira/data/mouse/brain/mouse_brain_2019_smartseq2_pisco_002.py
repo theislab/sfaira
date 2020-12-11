@@ -7,8 +7,6 @@ from .external import DatasetTms
 
 class Dataset(DatasetTms):
 
-    id: str
-
     def __init__(
             self,
             path: Union[str, None] = None,
@@ -27,7 +25,8 @@ class Dataset(DatasetTms):
         else:
             raise ValueError("source %s not recognized" % self.source)
         self.organ = "brain"
-        self.sub_tissue = "brain"
+        self.sub_tissue = "brain"        
+        self.protocol = self._get_protocol_tms(self.id)        
 
         self.class_maps = {
             "0": {},

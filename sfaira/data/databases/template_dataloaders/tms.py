@@ -30,7 +30,6 @@ class DatasetTms(DatasetBase):
         self.author = "Quake"
         self.year = "2019"
         self.doi = "10.1101/661728"
-        self.protocol = None  # TODO load from data / name
         self.normalization = 'norm'
         self.healthy = True
         self.state_exact = "healthy"
@@ -48,3 +47,6 @@ class DatasetTms(DatasetBase):
             self.adata.obsm = {}
             self.adata.varm = {}
             self.adata.uns = {}
+
+    def _get_protocol_tms(self, x) -> str:
+        return "smartseq2" if "smartseq2" in x else "10x"

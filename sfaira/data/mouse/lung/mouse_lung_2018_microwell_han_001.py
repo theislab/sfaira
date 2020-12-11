@@ -8,8 +8,6 @@ from .external import DatasetMca
 
 class Dataset(DatasetMca):
 
-    id: str
-
     def __init__(
             self,
             path: Union[str, None] = None,

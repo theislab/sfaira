@@ -24,7 +24,8 @@ class Dataset(DatasetTms):
         else:
             raise ValueError("source %s not recognized" % self.source)
         self.organ = "mammarygland"
-        self.sub_tissue = "mammarygland"
+        self.sub_tissue = "mammarygland"        
+        self.protocol = self._get_protocol_tms(self.id)        
 
         self.class_maps = {
             "0": {},
