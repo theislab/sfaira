@@ -559,82 +559,51 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         if idx is None:
             idx = np.arange(0, self.data.n_obs)
 
-        def convert_sparse_matrix_to_sparse_tensor(X):
-            coo = X.tocoo()
-            indices = np.mat([coo.row, coo.col]).transpose()
-            return tf.SparseTensor(indices, coo.data, coo.shape)
-
-        def generator():
-            is_sparse = isinstance(self.X[0, :], scipy.sparse.spmatrix)
-            for i in range(self.X.shape[0]):
-                x = self.X[i, :].toarray().flatten() if is_sparse else self.X[i, :].flatten()
-                if not isinstance(x, np.ndarray):
-                    x = convert_sparse_matrix_to_sparse_tensor(x)
-                    x = tf.keras.layers.Lambda(tf.sparse.to_dense)(x)
-                sf = self._prepare_sf(x=x)[0]
-                if mode == 'predict':   # If predicting, only return X regardless of model type
-                    yield x, sf
-                elif model_type == "vae":
-                    yield (x, sf), (x, sf)
-                else:
-                    yield (x, sf), x
-
-        def generator_backed():
-            is_sparse = isinstance(self.data.X[0, :], scipy.sparse.spmatrix)
-            for i in idx:
-                x = self.data.X[i, :].toarray().flatten() if is_sparse else self.data.X[i, :].flatten()
-                if not isinstance(x, np.ndarray):
-                    x = convert_sparse_matrix_to_sparse_tensor(x)
-                    x = tf.keras.layers.Lambda(tf.sparse.to_dense)(x)
-                sf = self._prepare_sf(x=x)[0]
-                if mode == 'predict':   # If predicting, only return X regardless of model type
-                    yield x, sf
-                elif model_type == "vae":
-                    yield (x, sf), (x, sf)
-                else:
-                    yield (x, sf), x
-
         if mode in ['train', 'train_val', 'eval', 'predict']:
-            if mode in ['train', 'train_val']:
-                # Prepare data reading according to whether anndata is backed or not:
-                # x = self.data.X if self.data.isbacked else self._prepare_data_matrix(idx=idx)
-                if self.data.isbacked:
-                    ...
-                else:
-                    x = self._prepare_data_matrix(idx=idx)
-                    self.X = x
+            # Prepare data reading according to whether anndata is backed or not:
+            if self.data.isbacked:
+                x = self.data.X
             else:
-                # Prepare data reading according to whether anndata is backed or not:
-                if self.data.isbacked:
-                    # Need to supply sorted indices to backed anndata:
-                    #x = self.data.X[np.sort(idx), :]
-                    # Sort back in original order of indices.
-                    #x = x[[np.where(np.sort(idx) == i)[0][0] for i in idx], :]
-                    ...
-                else:
-                    x = self._prepare_data_matrix(idx=idx)
-                    x = x.toarray()
-                    self.X = x
+                x = self._prepare_data_matrix(idx=idx)
 
-            # Need to store data in class attribute for generator to get access.
-            # tf.from_generator takes 'args' but it implicitly converts to tensor before passing to generator.
-            #self.X = x
-            n_features = self.X.shape[1] if not self.data.isbacked else self.data.X.shape[1]
+            def convert_sparse_matrix_to_sparse_tensor(x):
+                coo = x.tocoo()
+                indices = np.mat([coo.row, coo.col]).transpose()
+                return tf.SparseTensor(indices, coo.data, coo.shape)
+
+            def generator():
+                is_sparse = isinstance(x[0, :], scipy.sparse.spmatrix)
+                indices = idx if self.data.isbacked else range(x.shape[0])
+                for i in indices:
+                    x_sample = x[i, :].toarray().flatten() if is_sparse else x[i, :].flatten()
+                    if not isinstance(x_sample, np.ndarray):    # Convert to dense tensor if sparse object
+                        x_sample = convert_sparse_matrix_to_sparse_tensor(x_sample)
+                        x_sample = tf.keras.layers.Lambda(tf.sparse.to_dense)(x_sample)
+                    sf = self._prepare_sf(x=x_sample)[0]
+                    if mode == 'predict':  # If predicting, only return X regardless of model type
+                        yield x_sample, sf
+                    elif model_type == "vae":
+                        yield (x_sample, sf), (x_sample, sf)
+                    else:
+                        yield (x_sample, sf), x_sample
+
+            n_features = x.shape[1]
+            n_samples = x.shape[0]
             output_types, output_shapes = self._get_output_dim(n_features, model_type, mode=mode)
-            n_samples = self.X.shape[0] if not self.data.isbacked else self.data.X.shape[0]
 
             dataset = tf.data.Dataset.from_generator(
-                generator=generator_backed if self.data.isbacked else generator,
+                generator=generator,
                 output_types=output_types,
                 output_shapes=output_shapes
             )
-            if mode == 'train':
+            # Only shuffle in train modes
+            if mode in ['train', 'train_val']:
                 dataset = dataset.repeat()
-            dataset = dataset.shuffle(
-                buffer_size=min(n_samples, shuffle_buffer_size),
-                seed=None,
-                reshuffle_each_iteration=True
-            ).batch(batch_size).prefetch(prefetch)
+                dataset = dataset.shuffle(
+                    buffer_size=min(n_samples, shuffle_buffer_size),
+                    seed=None,
+                    reshuffle_each_iteration=True)
+            dataset = dataset.batch(batch_size).prefetch(prefetch)
 
             return dataset
         
