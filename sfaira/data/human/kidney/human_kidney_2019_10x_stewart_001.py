@@ -138,7 +138,7 @@ class Dataset(DatasetBase):
         self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = 'norm'
 
         self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class] = self.adata.obs["celltype"]
-        self.adata.obs["cell_ontology_id"] = None
+        self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_id] = None
         self.adata.obs[self._ADATA_IDS_SFAIRA.healthy] = True
         self.adata.obs[self._ADATA_IDS_SFAIRA.state_exact] = 'healthy'
 
