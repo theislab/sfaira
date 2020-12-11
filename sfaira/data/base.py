@@ -384,8 +384,10 @@ class DatasetBase(abc.ABC):
                 [self.state_exact, self._ADATA_IDS_SFAIRA.state_exact, self.obs_key_state_exact],
                 [self.subtissue, self._ADATA_IDS_SFAIRA.subtissue, self.obs_key_subtissue],
         ):
-            if isinstance(x, str) or x is None:
+            if isinstance(x, str):
                 self.adata.uns[y] = x
+            elif x is None and z is None:
+                self.adata.uns[y] = None
             else:
                 self.adata.uns[y] = "__obs__"
                 # Search for direct match of the sought-after column name or for attribute specific obs key.
