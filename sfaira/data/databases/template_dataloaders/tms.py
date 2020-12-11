@@ -24,6 +24,7 @@ class DatasetTms(DatasetBase):
         self.obs_key_cellontology_class = self._ADATA_IDS_TMS.cell_ontology_class
         self.obs_key_cellontology_id = self._ADATA_IDS_TMS.cell_ontology_id
         self.obs_key_cellontology_original = self._ADATA_IDS_TMS.cell_types_original
+        self.obs_key_age = self._ADATA_IDS_TMS.age
         self.obs_key_dev_stage = self._ADATA_IDS_TMS.dev_stage
         self.obs_key_state_exact = self._ADATA_IDS_TMS.state_exact
 
