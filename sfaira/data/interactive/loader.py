@@ -8,7 +8,7 @@ class DatasetInteractive(DatasetBase):
     def __init__(
             self,
             data: anndata.AnnData,
-            species: str,
+            organism: str,
             organ: str,
             gene_symbol_col: Union[str, None] = 'index',
             gene_ens_col: Union[str, None] = None,
@@ -17,27 +17,28 @@ class DatasetInteractive(DatasetBase):
             **kwargs
     ):
         """
+        Load data set into sfaira data format.
 
-        :param data:
-        :param species:
-        :param organ:
-        :param class_maps:
-        :param id:
+        :param data: Data set.
+        :param organism: Organism of data set.
+        :param organ: Organ of data set.
+        :param gene_symbol_col: Column name in .var which contains gene symbols. Set to "index" to use the index.
+        :param gene_ens_col:  Column name in .var which contains ENSG symbols. Set to "index" to use the index.
+        :param class_maps: Cell type class maps.
+        :param dataset_id: Identifer of data set.
         :param kwargs:
         """
         DatasetBase.__init__(self=self, path=None, meta_path=None, **kwargs)
         self.adata = data
-        self.species = species
+
         self.id = dataset_id
         self.organ = organ
+        self.species = organism
 
-        self.gene_symbol_col = gene_symbol_col
-        self.gene_ensg_col = gene_ens_col
+        self.var_symbol_col = gene_symbol_col
+        self.var_ensembl_col = gene_ens_col
 
         self.class_maps = class_maps
 
     def _load(self, fn=None):
-        self._convert_and_set_var_names(
-            symbol_col=self.gene_symbol_col,
-            ensembl_col=self.gene_ensg_col
-        )
+        pass
