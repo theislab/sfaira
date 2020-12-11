@@ -23,7 +23,6 @@ class DatasetBase(abc.ABC):
     id: Union[None, str]
     genome: Union[None, str]
 
-    _annotated: Union[None, bool]
     _author: Union[None, str]
     _doi: Union[None, str]
     _download: Union[None, str]
@@ -67,7 +66,6 @@ class DatasetBase(abc.ABC):
         self.path = path
         self.meta_path = meta_path
 
-        self._annotated = None
         self._author = None
         self._doi = None
         self._download = None
@@ -637,16 +635,12 @@ class DatasetBase(abc.ABC):
 
     @property
     def annotated(self) -> bool:
-        if self._annotated is not None:
-            return self._annotated
+        if self.obs_key_cellontology_id is not None or self.obs_key_cellontology_original is not None:
+            return True
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
             return self.meta[self._ADATA_IDS_SFAIRA.annotated]
-
-    @annotated.setter
-    def annotated(self, x: bool):
-        self._annotated = x
 
     @property
     def author(self) -> str:
