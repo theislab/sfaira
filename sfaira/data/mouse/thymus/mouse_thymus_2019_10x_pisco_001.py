@@ -18,9 +18,9 @@ class Dataset(DatasetBase):
         self.id = "mouse_thymus_2019_10x_pisco_001_10.1101/661728"
         self.source = source
         if self.source == "aws":
-            self.download_website = "https://czb-tabula-muris-senis.s3-us-west-2.amazonaws.com/Data-objects/"
+            self.download = "https://czb-tabula-muris-senis.s3-us-west-2.amazonaws.com/Data-objects/"
         elif self.source == "figshare":
-            self.download_website = "https://ndownloader.figshare.com/articles/8273102/versions/2"
+            self.download = "https://ndownloader.figshare.com/articles/8273102/versions/2"
         else:
             raise ValueError("source %s not recognized" % self.source)
         self.organ = "spleen"
@@ -59,7 +59,7 @@ class Dataset(DatasetBase):
         self.adata.uns[self._ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
         self.adata.uns[self._ADATA_IDS_SFAIRA.species] = "mouse"
         self.adata.uns[self._ADATA_IDS_SFAIRA.id] = self.id
-        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download_website
+        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download
         self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
         self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = 'norm'
         # self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class] is already set

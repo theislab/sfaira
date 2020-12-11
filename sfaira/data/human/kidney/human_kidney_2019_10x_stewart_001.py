@@ -24,11 +24,11 @@ class Dataset(DatasetBase):
         DatasetBase.__init__(self=self, path=path, meta_path=meta_path, **kwargs)
         self.species = "human"
         self.id = "human_kidney_2019_10x_stewart_001_10.1126/science.aat5031"
-        self.download_website = [
+        self.download = [
             'https://cellgeni.cog.sanger.ac.uk/BenKidney_v2.1/Mature_Full_v2.1.h5ad',
             'https://cellgeni.cog.sanger.ac.uk/BenKidney_v2.1/Fetal_full.h5ad'
         ]
-        self.download_website_meta = None
+        self.download_meta = None
         self.organ = "kidney"
         self.sub_tissue = "renal medulla, renal pelvis, ureter, cortex of kidney"
         self.annotated = True
@@ -133,7 +133,7 @@ class Dataset(DatasetBase):
         self.adata.uns[self._ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
         self.adata.uns[self._ADATA_IDS_SFAIRA.species] = "human"
         self.adata.uns[self._ADATA_IDS_SFAIRA.id] = self.id
-        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download_website
+        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download
         self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
         self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = 'norm'
 

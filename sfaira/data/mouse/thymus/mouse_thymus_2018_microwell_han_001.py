@@ -17,7 +17,7 @@ class Dataset(DatasetBase):
         DatasetBase.__init__(self=self, path=path, meta_path=meta_path, **kwargs)
         self.species = "mouse"
         self.id = "mouse_thymus_2018_microwell-seq_han_001_10.1016/j.cell.2018.02.001"
-        self.download_website = "https://ndownloader.figshare.com/articles/5435866?private_link=865e694ad06d5857db4b"
+        self.download = "https://ndownloader.figshare.com/articles/5435866?private_link=865e694ad06d5857db4b"
         self.organ = "thymus"
         self.sub_tissue = "thymus"
         self.annotated = True
@@ -58,7 +58,7 @@ class Dataset(DatasetBase):
         self.adata.uns[self._ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue  # TODO
         self.adata.uns[self._ADATA_IDS_SFAIRA.species] = "mouse"
         self.adata.uns[self._ADATA_IDS_SFAIRA.id] = self.id
-        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download_website
+        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download
         self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
         self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = 'raw'
         self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class] = self.adata.obs["Annotation"].values.tolist()

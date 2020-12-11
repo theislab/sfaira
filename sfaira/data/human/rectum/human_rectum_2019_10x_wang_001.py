@@ -25,7 +25,7 @@ class Dataset(DatasetBase):
         DatasetBase.__init__(self=self, path=path, meta_path=meta_path, **kwargs)
         self.species = "human"
         self.id = "human_rectum_2019_10x_wang_001_10.1084/jem.20191130"
-        self.download_website = "https://covid19.cog.sanger.ac.uk/wang20_rectum.processed.h5ad"
+        self.download = "https://covid19.cog.sanger.ac.uk/wang20_rectum.processed.h5ad"
         self.organ = "rectum"
         self.sub_tissue = "rectum"
         self.annotated = True
@@ -62,7 +62,7 @@ class Dataset(DatasetBase):
         self.adata.uns[self._ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
         self.adata.uns[self._ADATA_IDS_SFAIRA.species] = "human"
         self.adata.uns[self._ADATA_IDS_SFAIRA.id] = self.id
-        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download_website
+        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download
         self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
         self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = 'raw'
 

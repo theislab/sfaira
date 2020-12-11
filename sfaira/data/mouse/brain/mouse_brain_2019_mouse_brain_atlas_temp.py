@@ -19,9 +19,9 @@ class Dataset(DatasetBase):
         DatasetBase.__init__(self=self, path=path, meta_path=meta_path, **kwargs)
         self.species = "mouse"
         self.id = "mouse_brain_2019_10x_hove_001_10.1038/s41593-019-0393-4"
-        self.download_website = \
+        self.download = \
             "www.brainimmuneatlas.org/data_files/toDownload/filtered_gene_bc_matrices_mex_WT_fullAggr.zip"
-        self.download_website_meta = \
+        self.download_meta = \
             "www.brainimmuneatlas.org/data_files/toDownload/annot_fullAggr.csv"
         self.organ = "brain"
         self.sub_tissue = "brain"
@@ -76,7 +76,7 @@ class Dataset(DatasetBase):
         self.adata.uns[self._ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
         self.adata.uns[self._ADATA_IDS_SFAIRA.species] = "mouse"
         self.adata.uns[self._ADATA_IDS_SFAIRA.id] = self.id
-        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download_website
+        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download
         self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
         self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = 'raw'
         # self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class] is already set

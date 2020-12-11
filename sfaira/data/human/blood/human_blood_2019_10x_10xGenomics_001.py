@@ -27,8 +27,8 @@ class Dataset(DatasetBase):
         DatasetBase.__init__(self=self, path=path, meta_path=meta_path, **kwargs)
         self.species = "human"
         self.id = "human_blood_2019_10x_10xGenomics_001_unknown"
-        self.download_website = "http://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_10k_v3/pbmc_10k_v3_filtered_feature_bc_matrix.h5"
-        self.download_website_meta = None
+        self.download = "http://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_10k_v3/pbmc_10k_v3_filtered_feature_bc_matrix.h5"
+        self.download_meta = None
         self.organ = "blood"
         self.sub_tissue = "pbmcs"
         self.annotated = False

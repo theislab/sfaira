@@ -19,7 +19,7 @@ class Dataset(DatasetBase):
         DatasetBase.__init__(self=self, path=path, meta_path=meta_path, **kwargs)
         self.species = "mouse"
         self.id = "mouse_pancreas_2019_10x_thompson_002_10.1016/j.cmet.2019.01.021"
-        self.download_website = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE117770"
+        self.download = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE117770"
         self.organ = "pancreas"
         self.sub_tissue = "pancreas"
         self.annotated = True
@@ -65,7 +65,7 @@ class Dataset(DatasetBase):
         self.adata.uns[self._ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue  # TODO
         self.adata.uns[self._ADATA_IDS_SFAIRA.species] = "mouse"
         self.adata.uns[self._ADATA_IDS_SFAIRA.id] = self.id
-        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download_website
+        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download
         self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
         self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = 'raw'
         self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class] = celltypes

@@ -25,8 +25,8 @@ class Dataset(DatasetBase):
         DatasetBase.__init__(self=self, path=path, meta_path=meta_path, **kwargs)
         self.species = "human"
         self.id = "human_liver_2018_10x_macparland_001_10.1038/s41467-018-06318-7"
-        self.download_website = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE115469"
-        self.download_website_meta = 'private'
+        self.download = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE115469"
+        self.download_meta = 'private'
         self.organ = "liver"
         self.sub_tissue = "caudate lobe"
         self.annotated = True
@@ -78,7 +78,7 @@ class Dataset(DatasetBase):
         self.adata.uns[self._ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
         self.adata.uns[self._ADATA_IDS_SFAIRA.species] = "human"
         self.adata.uns[self._ADATA_IDS_SFAIRA.id] = self.id
-        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download_website
+        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download
         self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
         self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = 'raw'
 

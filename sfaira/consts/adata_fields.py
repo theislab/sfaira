@@ -15,6 +15,7 @@ class ADATA_IDS_BASE:
     _cell_ontology_id: str
     _doi: str
     _download: str
+    _download_meta: str
     _dataset: str
     _dataset_group: str
     _gene_id_ensembl: str
@@ -65,6 +66,10 @@ class ADATA_IDS_BASE:
     @property
     def download(self) -> str:
         return self._download
+
+    @property
+    def download_meta(self) -> str:
+        return self._download_meta
 
     @property
     def gene_id_ensembl(self) -> str:
@@ -165,6 +170,7 @@ class ADATA_IDS_SFAIRA(ADATA_IDS_EXTENDED):
         self._dataset = "dataset"
         self._dataset_group = "dataset_group"
         self._download = "download"
+        self._download_meta = "download_meta"
         self._gene_id_ensembl = "ensembl"
         self._gene_id_index = "ensembl"
         self._gene_id_names = "names"
@@ -201,6 +207,7 @@ class ADATA_IDS_CELLXGENE(ADATA_IDS_EXTENDED):
         self._dataset = "dataset"
         self._dataset_group = "dataset_group"
         self._download = ""  # TODO
+        self._download_meta = ""  # TODO
         self._gene_id_ensembl = ""  # TODO
         self._gene_id_index = "ensembl"
         self._gene_id_names = ""  # TODO

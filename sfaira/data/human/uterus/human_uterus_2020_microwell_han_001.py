@@ -28,8 +28,8 @@ class Dataset(DatasetBase):
         self.organ = 'uterus'
         self.sub_tissue = 'AdultUterus'
         self.dev_stage = 'Adult'
-        self.download_website = 'https://figshare.com/articles/HCL_DGE_Data/7235471'
-        self.download_website_meta = None
+        self.download = 'https://figshare.com/articles/HCL_DGE_Data/7235471'
+        self.download_meta = None
         self.annotated = True
 
         self.class_maps = {
@@ -53,7 +53,7 @@ class Dataset(DatasetBase):
         self.adata.uns[self._ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
         self.adata.uns[self._ADATA_IDS_SFAIRA.species] = "human"
         self.adata.uns[self._ADATA_IDS_SFAIRA.id] = self.id
-        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download_website
+        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download
         self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
         self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = 'raw'
         self.adata.uns[self._ADATA_IDS_SFAIRA.dev_stage] = self.dev_stage

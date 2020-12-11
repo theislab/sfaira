@@ -24,8 +24,8 @@ class Dataset(DatasetBase):
         DatasetBase.__init__(self=self, path=path, meta_path=meta_path, **kwargs)
         self.species = "human"
         self.id = "human_eye_2019_10x_voigt_001_10.1073/pnas.1914143116"
-        self.download_website = "https://covid19.cog.sanger.ac.uk/voigt19.processed.h5ad"
-        self.download_website_meta = None
+        self.download = "https://covid19.cog.sanger.ac.uk/voigt19.processed.h5ad"
+        self.download_meta = None
         self.organ = "eye"
         self.sub_tissue = "retina"
         self.annotated = True
@@ -64,7 +64,7 @@ class Dataset(DatasetBase):
         self.adata.uns[self._ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
         self.adata.uns[self._ADATA_IDS_SFAIRA.species] = "human"
         self.adata.uns[self._ADATA_IDS_SFAIRA.id] = self.id
-        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download_website
+        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download
         self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
         self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = 'norm'
 

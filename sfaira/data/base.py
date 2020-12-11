@@ -19,7 +19,6 @@ class DatasetBase(abc.ABC):
     adata: Union[None, anndata.AnnData]
     class_maps: dict
     meta: Union[None, pandas.DataFrame]
-    download_website_meta: Union[None, str]
     path: Union[None, str]
     id: Union[None, str]
     genome: Union[None, str]
@@ -28,6 +27,7 @@ class DatasetBase(abc.ABC):
     _author: Union[None, str]
     _doi: Union[None, str]
     _download: Union[None, str]
+    _download_meta: Union[None, str]
     _id: Union[None, str]
     _ncells: Union[None, int]
     _normalization: Union[None, str]
@@ -43,7 +43,6 @@ class DatasetBase(abc.ABC):
             **kwargs
     ):
         self.adata = None
-        self.download_website_meta = None
         self.meta = None
         self.genome = None
         self.path = path
@@ -54,6 +53,7 @@ class DatasetBase(abc.ABC):
         self._author = None
         self._doi = None
         self._download = None
+        self._download_meta = None
         self._id = None
         self._ncells = None
         self._normalization = None
@@ -496,6 +496,7 @@ class DatasetBase(abc.ABC):
             self._ADATA_IDS_SFAIRA.author: self.adata.uns[self._ADATA_IDS_SFAIRA.author],
             self._ADATA_IDS_SFAIRA.doi: self.adata.uns[self._ADATA_IDS_SFAIRA.doi],
             self._ADATA_IDS_SFAIRA.download: self.adata.uns[self._ADATA_IDS_SFAIRA.download],
+            self._ADATA_IDS_SFAIRA.download_meta: self.adata.uns[self._ADATA_IDS_SFAIRA.download_meta],
             self._ADATA_IDS_SFAIRA.id: self.adata.uns[self._ADATA_IDS_SFAIRA.id],
             self._ADATA_IDS_SFAIRA.ncells: self.adata.n_obs,
             self._ADATA_IDS_SFAIRA.normalization: self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] if self._ADATA_IDS_SFAIRA.normalization in self.adata.uns.keys() else None,
@@ -548,24 +549,66 @@ class DatasetBase(abc.ABC):
     @property
     def download(self) -> Tuple[List[str]]:
         """
-        Download website(s).
+        Data download website(s).
 
         Save as tuple with single element, which is a list of all download websites relevant to dataset.
         :return:
         """
         if self._download is not None:
-            return self._download
+            x = self._download
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            return self.meta[self._ADATA_IDS_SFAIRA.download]
-
-    @download.setter
-    def download(self, x: Union[str, List[str], None]):
-        #
+            x = self.meta[self._ADATA_IDS_SFAIRA.download]
         if isinstance(x, str):
             x = [x]
-        self._download = (x,)
+        if isinstance(x, list):
+            x = (x,)
+        assert isinstance(x, tuple)
+        assert len(x) == 1
+        return x
+
+    @download.setter
+    def download(self, x: Union[str, List[str], Tuple[List[str]], None]):
+        # Formats to tuple with single element, which is a list of all download websites relevant to dataset,
+        # which can be used as a single element column in a pandas data frame.
+        if isinstance(x, str):
+            x = [x]
+        if isinstance(x, list):
+            x = (x,)
+        self._download = x
+
+    @property
+    def download_meta(self) -> Tuple[List[str]]:
+        """
+        Meta data download website(s).
+
+        Save as tuple with single element, which is a list of all download websites relevant to dataset.
+        :return:
+        """
+        if self._download_meta is not None:
+            x = self._download_meta
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            x = self.meta[self._ADATA_IDS_SFAIRA.download_meta]
+        if isinstance(x, str):
+            x = [x]
+        if isinstance(x, list):
+            x = (x,)
+        assert isinstance(x, tuple)
+        assert len(x) == 1
+        return x
+
+    @download_meta.setter
+    def download_meta(self, x: Union[str, List[str], Tuple[List[str]], None]):
+        # Formats to tuple with single element, which is a list of all download websites relevant to dataset,
+        # which can be used as a single element column in a pandas data frame.
+        if isinstance(x, str):
+            x = [x]
+        if isinstance(x, list):
+            x = (x,)
+        self._download_meta = x
 
     @property
     def id(self) -> str:
