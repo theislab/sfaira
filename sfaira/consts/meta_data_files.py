@@ -7,6 +7,7 @@ META_DATA_FIELDS = [
     "author",
     "doi",
     "download",
+    "download_meta",
     "id",
     "ncells",
     "normalization",

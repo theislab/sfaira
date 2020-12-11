@@ -33,6 +33,7 @@ class DatasetBase(abc.ABC):
     _normalization: Union[None, str]
     _organ: Union[None, str]
     _protocol: Union[None, str]
+    _source: Union[None, str]
     _species: Union[None, str]
     _year: Union[None, str]
 
@@ -59,6 +60,7 @@ class DatasetBase(abc.ABC):
         self._normalization = None
         self._organ = None
         self._protocol = None
+        self._source = None
         self._species = None
         self._year = None
 
@@ -673,6 +675,14 @@ class DatasetBase(abc.ABC):
     @protocol.setter
     def protocol(self, x: str):
         self._protocol = x
+
+    @property
+    def source(self) -> str:
+        return self._source
+
+    @source.setter
+    def source(self, x: Union[str, None]):
+        self._source = x
 
     @property
     def species(self) -> str:
