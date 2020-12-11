@@ -562,7 +562,7 @@ class DatasetBase(abc.ABC):
             if self.meta is None:
                 self.load_meta(fn=None)
             x = self.meta[self._ADATA_IDS_SFAIRA.download]
-        if isinstance(x, str) or isinstance(x, None):
+        if isinstance(x, str) or x is None:
             x = [x]
         if isinstance(x, list):
             x = (x,)
@@ -574,7 +574,7 @@ class DatasetBase(abc.ABC):
     def download(self, x: Union[str, List[str], Tuple[List[str]], None]):
         # Formats to tuple with single element, which is a list of all download websites relevant to dataset,
         # which can be used as a single element column in a pandas data frame.
-        if isinstance(x, str):
+        if isinstance(x, str) or x is None:
             x = [x]
         if isinstance(x, list):
             x = (x,)
@@ -595,7 +595,7 @@ class DatasetBase(abc.ABC):
         #    if self.meta is None:
         #        self.load_meta(fn=None)
         #    x = self.meta[self._ADATA_IDS_SFAIRA.download_meta]
-        if isinstance(x, str) or isinstance(x, None):
+        if isinstance(x, str) or x is None:
             x = [x]
         if isinstance(x, list):
             x = (x,)
@@ -607,7 +607,7 @@ class DatasetBase(abc.ABC):
     def download_meta(self, x: Union[str, List[str], Tuple[List[str]], None]):
         # Formats to tuple with single element, which is a list of all download websites relevant to dataset,
         # which can be used as a single element column in a pandas data frame.
-        if isinstance(x, str):
+        if isinstance(x, str) or x is None:
             x = [x]
         if isinstance(x, list):
             x = (x,)
