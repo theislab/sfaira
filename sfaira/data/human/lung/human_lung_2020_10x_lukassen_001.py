@@ -29,7 +29,6 @@ class Dataset(DatasetBase):
         self.download_meta = None
         self.organ = "lung"
         self.sub_tissue = "lung"
-        self.annotated = True
 
         self.class_maps = {
             "0": {

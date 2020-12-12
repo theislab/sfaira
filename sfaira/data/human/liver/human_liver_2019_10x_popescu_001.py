@@ -27,7 +27,15 @@ class Dataset(DatasetBase):
         self.download_meta = 'private'
         self.organ = "liver"
         self.sub_tissue = "liver"
-        self.annotated = True
+        self.author = 'Haniffa'
+        self.year = 2019
+        self.doi = '10.1038/s41586-019-1652-y'
+        self.protocol = '10x'
+        self.normalization = 'raw'
+        self.healthy = True
+        self.state_exact = 'healthy'
+        self.var_symbol_col = 'index'
+        self.obs_key_cellontology_original = 'cell.labels'
 
         self.class_maps = {
             "0": {
@@ -69,22 +77,3 @@ class Dataset(DatasetBase):
             if fn is None:
                 fn = os.path.join(self.path, "human", "liver", "fetal_liver_alladata_.h5ad")
             self.adata = anndata.read(fn)
-
-        self.adata.uns[self._ADATA_IDS_SFAIRA.author] = 'Haniffa'
-        self.adata.uns[self._ADATA_IDS_SFAIRA.year] = 2019
-        self.adata.uns[self._ADATA_IDS_SFAIRA.doi] = '10.1038/s41586-019-1652-y'
-        self.adata.uns[self._ADATA_IDS_SFAIRA.protocol] = '10x'
-        self.adata.uns[self._ADATA_IDS_SFAIRA.organ] = self.organ
-        self.adata.uns[self._ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
-        self.adata.uns[self._ADATA_IDS_SFAIRA.species] = self.species
-        self.adata.uns[self._ADATA_IDS_SFAIRA.id] = self.id
-        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download
-        self.adata.uns[self._ADATA_IDS_SFAIRA.download_meta] = self.download_meta
-        self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
-        self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = 'raw'
-
-        self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class] = self.adata.obs["cell.labels"]
-        self.adata.obs[self._ADATA_IDS_SFAIRA.healthy] = True
-        self.adata.obs[self._ADATA_IDS_SFAIRA.state_exact] = 'healthy'
-
-        self._convert_and_set_var_names(symbol_col='index', ensembl_col=None)

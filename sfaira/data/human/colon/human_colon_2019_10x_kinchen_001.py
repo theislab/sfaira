@@ -66,7 +66,17 @@ class Dataset(DatasetBase):
         self.download_meta = 'private'
         self.organ = "colon"
         self.sub_tissue = "lamina propria of mucosa of colon"
-        self.annotated = True
+        self.author = 'Simmons'
+        self.year = 2019
+        self.doi = "10.1016/j.cell.2018.08.067"
+        self.protocol = '10x'
+        self.normalization = 'raw'
+        self.var_symbol_col = 'names'
+        self.var_ensembl_col = 'Accession'
+        self.obs_key_state_exact = 'donor_organism.diseases.ontology_label'
+        self.obs_key_healthy = self.obs_key_state_exact
+        self.healthy_state_healthy = 'normal'
+        self.obs_key_cellontology_original = 'celltype'
 
         self.class_maps = {
             "0": {
@@ -127,25 +137,3 @@ class Dataset(DatasetBase):
             if fn is None:
                 fn = os.path.join(self.path, "human", "colon", "kinchenetal.h5ad")
             self.adata = anndata.read(fn)
-
-        self.adata.uns[self._ADATA_IDS_SFAIRA.author] = 'Simmons'
-        self.adata.uns[self._ADATA_IDS_SFAIRA.year] = 2019
-        self.adata.uns[self._ADATA_IDS_SFAIRA.doi] = "10.1016/j.cell.2018.08.067"
-        self.adata.uns[self._ADATA_IDS_SFAIRA.protocol] = '10x'
-        self.adata.uns[self._ADATA_IDS_SFAIRA.organ] = self.organ
-        self.adata.uns[self._ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
-        self.adata.uns[self._ADATA_IDS_SFAIRA.species] = self.species
-        self.adata.uns[self._ADATA_IDS_SFAIRA.id] = self.id
-        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download
-        self.adata.uns[self._ADATA_IDS_SFAIRA.download_meta] = self.download_meta
-        self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
-        self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = 'raw'
-
-        self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class] = self.adata.obs['celltype']
-        self.adata.obs[self._ADATA_IDS_SFAIRA.healthy] = [line == 'normal' for line in
-                                     self.adata.obs['donor_organism.diseases.ontology_label']]
-        self.adata.obs[self._ADATA_IDS_SFAIRA.state_exact] = self.adata.obs['donor_organism.diseases.ontology_label'].astype('category')
-        self.adata.obs[self._ADATA_IDS_SFAIRA.state_exact] = self.adata.obs[self._ADATA_IDS_SFAIRA.state_exact]\
-            .cat.rename_categories({'normal': 'healthy', 'ulcerative colitis (disease)': 'ulcerative colitis'})
-
-        self._convert_and_set_var_names(symbol_col="names", ensembl_col='Accession')

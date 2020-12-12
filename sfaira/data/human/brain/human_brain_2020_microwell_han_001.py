@@ -29,7 +29,16 @@ class Dataset(DatasetBase):
         self.dev_stage = 'Fetus'
         self.download = 'https://figshare.com/articles/HCL_DGE_Data/7235471'
         self.download_meta = None
-        self.annotated = True
+        self.author = 'Guo'
+        self.year = 2020
+        self.doi = '10.1038/s41586-020-2157-4'
+        self.protocol = 'microwell'
+        self.normalization = 'raw'
+        self.healthy = True
+        self.state_exact = 'healthy'
+        self.var_symbol_col = 'names'
+        self.var_ensembl_col = 'ensembl'
+        self.obs_key_cellontology_original = 'cell_ontology_class'
 
         self.class_maps = {
             "0": {
@@ -75,20 +84,3 @@ class Dataset(DatasetBase):
             if fn is None:
                 fn = os.path.join(self.path, "human", "brain", "hcl_FetalBrain_4.h5ad")
             self.adata = anndata.read(fn)
-
-        self.adata.uns[self._ADATA_IDS_SFAIRA.author] = 'Guo'
-        self.adata.uns[self._ADATA_IDS_SFAIRA.year] = 2020
-        self.adata.uns[self._ADATA_IDS_SFAIRA.doi] = '10.1038/s41586-020-2157-4'
-        self.adata.uns[self._ADATA_IDS_SFAIRA.protocol] = "microwell"
-        self.adata.uns[self._ADATA_IDS_SFAIRA.organ] = self.organ
-        self.adata.uns[self._ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
-        self.adata.uns[self._ADATA_IDS_SFAIRA.species] = self.species
-        self.adata.uns[self._ADATA_IDS_SFAIRA.id] = self.id
-        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download
-        self.adata.uns[self._ADATA_IDS_SFAIRA.download_meta] = self.download_meta
-        self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
-        self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = 'raw'
-        self.adata.uns[self._ADATA_IDS_SFAIRA.dev_stage] = self.dev_stage
-
-        self._convert_and_set_var_names(symbol_col="names", ensembl_col="ensembl")
-

@@ -84,8 +84,18 @@ class Dataset(DatasetBase):
         self.download_meta = 'private'
         self.organ = "mixed"
         self.sub_tissue = "Bone Marrow, Lung, Lymph Node"
-        self.annotated = True
         self.loaded = False
+        self.author = "Sims"
+        self.year = 2019
+        self.doi = "10.1038/s41467-019-12464-3"
+        self.protocol = "10x"
+        self.normalization = 'raw'
+        self.healthy = True
+        self.state_exact = 'healthy'
+        self.var_symbol_col = 'Gene'
+        self.var_ensembl_col = 'Accession'
+        self.obs_key_cellontology_original = 'cell_ontology_class'
+        self.obs_key_subtissue = 'organ'
 
         self.class_maps = {
             "0": {},
@@ -149,25 +159,6 @@ class Dataset(DatasetBase):
             if fn is None:
                 fn = os.path.join(self.path, "human", "mixed", "GSE126030.h5ad")
             self.adata = anndata.read(fn)
-
-        self.adata.uns[self._ADATA_IDS_SFAIRA.author] = "Sims"
-        self.adata.uns[self._ADATA_IDS_SFAIRA.year] = 2019
-        self.adata.uns[self._ADATA_IDS_SFAIRA.doi] = "10.1038/s41467-019-12464-3"
-        self.adata.uns[self._ADATA_IDS_SFAIRA.protocol] = "10x"
-        self.adata.uns[self._ADATA_IDS_SFAIRA.organ] = self.organ
-        self.adata.uns[self._ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
-        self.adata.uns[self._ADATA_IDS_SFAIRA.species] = self.species
-        self.adata.uns[self._ADATA_IDS_SFAIRA.id] = self.id
-        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download
-        self.adata.uns[self._ADATA_IDS_SFAIRA.download_meta] = self.download_meta
-        self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
-        self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = 'raw'
-
-        self.adata.obs[self._ADATA_IDS_SFAIRA.subtissue] = self.adata.obs["organ"]
-        self.adata.obs[self._ADATA_IDS_SFAIRA.healthy] = True
-        self.adata.obs[self._ADATA_IDS_SFAIRA.state_exact] = 'healthy'
-
-        self._convert_and_set_var_names(symbol_col='Gene', ensembl_col='Accession')
 
         # If the subset_organs() method has been run before, subset to specified organs
         if "organsubset" in self.__dict__:

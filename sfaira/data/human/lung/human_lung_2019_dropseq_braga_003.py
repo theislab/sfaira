@@ -28,7 +28,15 @@ class Dataset(DatasetBase):
         self.download_meta = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE130nnn/GSE130148/suppl/GSE130148%5Fbarcodes%5Fcell%5Ftypes%2Etxt%2Egz"
         self.organ = "lung"
         self.sub_tissue = "parenchymal lung and distal airway specimens"
-        self.annotated = True
+        self.author = 'Teichmann'
+        self.year = 2019
+        self.doi = "10.1038/s41591-019-0468-5"
+        self.protocol = 'dropseq'
+        self.normalization = 'raw'
+        self.healthy = True
+        self.state_exact = 'uninvolved areas of tumour resection material'
+        self.var_symbol_col = 'index'
+        self.obs_key_cellontology_original = 'celltype'
 
         self.class_maps = {
             "0": {
@@ -61,22 +69,4 @@ class Dataset(DatasetBase):
             self.adata = anndata.read_csv(fn[0]).T
             self.adata.obs = pd.read_csv(fn[1], sep='\t', index_col=0)
 
-        self.adata.uns[self._ADATA_IDS_SFAIRA.author] = 'Teichmann'
-        self.adata.uns[self._ADATA_IDS_SFAIRA.year] = 2019
-        self.adata.uns[self._ADATA_IDS_SFAIRA.doi] = "10.1038/s41591-019-0468-5"
-        self.adata.uns[self._ADATA_IDS_SFAIRA.protocol] = 'dropseq'
-        self.adata.uns[self._ADATA_IDS_SFAIRA.organ] = self.organ
-        self.adata.uns[self._ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
-        self.adata.uns[self._ADATA_IDS_SFAIRA.species] = self.species
-        self.adata.uns[self._ADATA_IDS_SFAIRA.id] = self.id
-        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download
-        self.adata.uns[self._ADATA_IDS_SFAIRA.download_meta] = self.download_meta
-        self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
-        self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = 'raw'
-
-        self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class] = self.adata.obs['celltype']
         self.set_unkown_class_id(ids=["1_Unicorns and artifacts"])
-        self.adata.obs[self._ADATA_IDS_SFAIRA.healthy] = True
-        self.adata.uns[self._ADATA_IDS_SFAIRA.state_exact] = 'uninvolved areas of tumour resection material'
-
-        self._convert_and_set_var_names(symbol_col='index', ensembl_col=None)

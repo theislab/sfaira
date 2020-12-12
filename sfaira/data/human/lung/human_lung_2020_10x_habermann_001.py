@@ -45,7 +45,6 @@ class Dataset(DatasetBase):
         self.download_meta = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE135nnn/GSE135893/suppl/GSE135893%5FIPF%5Fmetadata%2Ecsv%2Egz"
         self.organ = "lung"
         self.sub_tissue = "parenchyma"
-        self.annotated = True
 
         self.class_maps = {
             "0": {

@@ -71,7 +71,15 @@ class Dataset(DatasetBase):
         self.download_meta = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE81nnn/GSE81547/matrix/GSE81547_series_matrix.txt.gz"
         self.organ = "pancreas"
         self.sub_tissue = "islet of Langerhans"
-        self.annotated = True
+        self.author = "Quake"
+        self.year = 2017
+        self.doi = "10.1016/j.cell.2017.09.004"
+        self.protocol = 'Smartseq2'
+        self.normalization = 'raw'
+        self.healthy = True
+        self.state_exact = "healthy"
+        self.var_symbol_col = 'index'
+        self.obs_key_cellontology_original = 'celltype'
 
         self.class_maps = {
             "0": {
@@ -127,22 +135,3 @@ class Dataset(DatasetBase):
             if fn is None:
                 fn = os.path.join(self.path, "human", "pancreas", "GSE81547.h5ad")
             self.adata = anndata.read(fn)
-
-        self.adata.uns[self._ADATA_IDS_SFAIRA.author] = "Quake"
-        self.adata.uns[self._ADATA_IDS_SFAIRA.year] = 2017
-        self.adata.uns[self._ADATA_IDS_SFAIRA.doi] = "10.1016/j.cell.2017.09.004"
-        self.adata.uns[self._ADATA_IDS_SFAIRA.protocol] = 'Smartseq2'
-        self.adata.uns[self._ADATA_IDS_SFAIRA.organ] = self.organ
-        self.adata.uns[self._ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
-        self.adata.uns[self._ADATA_IDS_SFAIRA.species] = self.species
-        self.adata.uns[self._ADATA_IDS_SFAIRA.id] = self.id
-        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download
-        self.adata.uns[self._ADATA_IDS_SFAIRA.download_meta] = self.download_meta
-        self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
-        self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = 'raw'
-
-        self.adata.obs[self._ADATA_IDS_SFAIRA.healthy] = True
-        self.adata.obs[self._ADATA_IDS_SFAIRA.state_exact] = "healthy"
-
-        self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class] = self.adata.obs['celltype']
-        self._convert_and_set_var_names(symbol_col='index', ensembl_col=None)

@@ -28,7 +28,15 @@ class Dataset(DatasetBase):
         self.download_meta = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE124nnn/GSE124395/suppl/GSE124395%5Fclusterpartition%2Etxt%2Egz"
         self.organ = "liver"
         self.sub_tissue = "liver"
-        self.annotated = True
+        self.author = 'Gruen'
+        self.year = 2019
+        self.doi = '10.1038/s41586-019-1373-2'
+        self.protocol = 'mCEL-Seq2'
+        self.normalization = 'raw'
+        self.healthy = True
+        self.state_exact = 'healthy'
+        self.var_symbol_col = 'index'
+        self.obs_key_cellontology_original = 'CellType'
 
         self.class_maps = {
             "0": {
@@ -88,22 +96,3 @@ class Dataset(DatasetBase):
             celltype_df = pd.read_csv(fn[1], sep=' ')
             self.adata = self.adata[[i in celltype_df.index for i in self.adata.obs.index]].copy()
             self.adata.obs['CellType'] = [str(celltype_df.loc[i]['sct@cpart']) for i in self.adata.obs.index]
-
-        self.adata.uns[self._ADATA_IDS_SFAIRA.author] = 'Gruen'
-        self.adata.uns[self._ADATA_IDS_SFAIRA.year] = 2019
-        self.adata.uns[self._ADATA_IDS_SFAIRA.doi] = '10.1038/s41586-019-1373-2'
-        self.adata.uns[self._ADATA_IDS_SFAIRA.protocol] = 'mCEL-Seq2'
-        self.adata.uns[self._ADATA_IDS_SFAIRA.organ] = self.organ
-        self.adata.uns[self._ADATA_IDS_SFAIRA.subtissue] = self.sub_tissue
-        self.adata.uns[self._ADATA_IDS_SFAIRA.species] = self.species
-        self.adata.uns[self._ADATA_IDS_SFAIRA.id] = self.id
-        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download
-        self.adata.uns[self._ADATA_IDS_SFAIRA.download_meta] = self.download_meta
-        self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
-        self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = 'raw'
-
-        self.adata.obs['cell_ontology_class'] = self.adata.obs['CellType']
-        self.adata.obs[self._ADATA_IDS_SFAIRA.healthy] = True
-        self.adata.obs[self._ADATA_IDS_SFAIRA.state_exact] = 'healthy'
-
-        self._convert_and_set_var_names(symbol_col='index', ensembl_col=None)
