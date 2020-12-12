@@ -24,7 +24,6 @@ class DatasetMca(DatasetBase):
         self.fn = fn
 
         self.obs_key_cellontology_class = self._ADATA_IDS_MCA.cell_ontology_class
-        self.obs_key_cellontology_id = self._ADATA_IDS_MCA.cell_ontology_id
         self.obs_key_cellontology_original = self._ADATA_IDS_MCA.cell_types_original
 
         self.author = "Guo"

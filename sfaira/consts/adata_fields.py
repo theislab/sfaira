@@ -297,3 +297,24 @@ class ADATA_IDS_MCA(ADATA_IDS_EXTENDED):
         self._dev_stage = "development_stage"  # TODO
         self._sex = "sex"
 
+        self._gene_id_ensembl = "ensembl"
+        self._gene_id_names = "names"
+
+
+class ADATA_IDS_HCL(ADATA_IDS_EXTENDED):
+    """
+    Class of constant field names of anndata.AnnData object entries, such as .uns keys and .obs columns in human cell
+    landscape objects.
+    """
+
+    def __init__(self):
+        self._cell_types_original = "Annotation"
+        self._cell_ontology_class = "Annotation"
+
+        self._dev_stage = "development_stage"  # TODO
+        self._sex = "sex"
+        
+
+        self._gene_id_ensembl = "ensembl"
+        self._gene_id_names = "names"
+
