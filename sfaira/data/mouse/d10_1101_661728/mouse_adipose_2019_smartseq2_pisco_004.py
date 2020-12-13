@@ -4,7 +4,7 @@ from typing import Union
 from .external import DatasetTms
 
 
-class DatasetTms(DatasetTms):
+class Dataset(DatasetTms):
 
     def __init__(
             self,
