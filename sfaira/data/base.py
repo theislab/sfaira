@@ -22,6 +22,8 @@ class DatasetBase(abc.ABC):
     class_maps: dict
     meta: Union[None, pandas.DataFrame]
     path: Union[None, str]
+    meta_path: Union[None, str]
+    cache_path: Union[None, str]
     id: Union[None, str]
     genome: Union[None, str]
 
@@ -67,6 +69,7 @@ class DatasetBase(abc.ABC):
             self,
             path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
+            cache_path: Union[str, None] = None,
             **kwargs
     ):
         self.adata = None
@@ -74,6 +77,7 @@ class DatasetBase(abc.ABC):
         self.genome = None
         self.path = path
         self.meta_path = meta_path
+        self.cache_path = cache_path
 
         self._author = None
         self._doi = None
@@ -118,13 +122,47 @@ class DatasetBase(abc.ABC):
     def _load(self, fn):
         pass
 
+    @property
+    def _directory_formatted_doi(self) -> str:
+        return "_".join("_".join(self.doi.split("/")).split("."))
+
+    @property
+    def _directory_formatted_id(self) -> str:
+        return "_".join("_".join(self.id.split("/")).split("."))
+
+    def _load_chached(self, fn: str, load_raw: bool, allow_caching: bool):
+        """
+        Wraps data set specific load and allows for caching.
+
+        Cache is written into director named after doi and h5ad named after data set id.
+
+        :param load_raw: Loads unprocessed version of data if available in data loader.
+        :param allow_caching: Whether to allow method to cache adata object for faster re-loading.
+        :return:
+        """
+        if fn is None and self.path is None:
+            raise ValueError("provide either fn in load or path in constructor")
+
+        fn_cache = os.path.join(
+            self.cache_path,
+            self._directory_formatted_doi,
+            self._directory_formatted_id + ".h5ad"
+        )
+        # Check if raw loader has to be called:
+        if load_raw or not os.path.exists(fn_cache):
+            self._load(fn=fn)
+        # Check if file needs to be cached:
+        if allow_caching and not os.path.exists(fn_cache):
+            self.adata.write_h5ad(fn_cache)
+
     def load(
             self,
             celltype_version: Union[str, None] = None,
             fn: Union[str, None] = None,
             remove_gene_version: bool = True,
             match_to_reference: Union[str, None] = None,
-            load_raw: bool = False
+            load_raw: bool = False,
+            allow_caching: bool = True
     ):
         """
 
@@ -134,6 +172,7 @@ class DatasetBase(abc.ABC):
             data sets are superimposed.
         :param match_to_reference: Reference genomes name.
         :param load_raw: Loads unprocessed version of data if available in data loader.
+        :param allow_caching: Whether to allow method to cache adata object for faster re-loading.
         :return:
         """
         if match_to_reference and not remove_gene_version:
@@ -154,9 +193,7 @@ class DatasetBase(abc.ABC):
             self._set_genome(genome=genome)
 
         # Run data set-specific loading script:
-        if fn is None and self.path is None:
-            raise ValueError("provide either fn in load or path in constructor")
-        self._load(fn=fn)
+        self._load_chached(fn=fn, load_raw=load_raw, allow_caching=allow_caching)
         # Set data-specific meta data in .adata:
         self._set_metadata_in_adata(celltype_version=celltype_version)
         # Set loading hyper-parameter-specific meta data:
