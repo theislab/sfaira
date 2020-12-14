@@ -118,18 +118,14 @@ class Dataset(DatasetBase):
         }
 
     def _load(self, fn=None):
-        if fn is None and self.path is None:
-            raise ValueError("provide either fn in load or path in constructor")
-
-        if self._load_raw or not self._load_raw:
-            if fn is None:
-                fn = [
-                    os.path.join(self.path, "human", "kidney", "Mature_Full_v2.1.h5ad"),
-                    os.path.join(self.path, "human", "kidney", "Fetal_full.h5ad")
-                ]
-            adult = anndata.read(fn[0])
-            fetal = anndata.read(fn[1])
-            adult.obs['development'] = 'adult'
-            fetal.obs['development'] = 'fetal'
-            self.adata = adult.concatenate(fetal)
-            self.adata.X = np.expm1(self.adata.X)
+        if fn is None:
+            fn = [
+                os.path.join(self.path, "human", "kidney", "Mature_Full_v2.1.h5ad"),
+                os.path.join(self.path, "human", "kidney", "Fetal_full.h5ad")
+            ]
+        adult = anndata.read(fn[0])
+        fetal = anndata.read(fn[1])
+        adult.obs['development'] = 'adult'
+        fetal.obs['development'] = 'fetal'
+        self.adata = adult.concatenate(fetal)
+        self.adata.X = np.expm1(self.adata.X)

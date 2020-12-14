@@ -56,13 +56,9 @@ class Dataset(DatasetBase):
         }
 
     def _load(self, fn=None):
-        if fn is None and self.path is None:
-            raise ValueError("provide either fn in load or path in constructor")
-
-        if self._load_raw or not self._load_raw:
-            if fn is None:
-                fn = os.path.join(self.path, "human", "malegonad", "guo18_donor.processed.h5ad")
-            self.adata = anndata.read(fn)
-            self.adata.X = np.expm1(self.adata.X)
-            self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs['n_counts'].values[:, None]))\
-                                       .multiply(1/10000)
+        if fn is None:
+            fn = os.path.join(self.path, "human", "malegonad", "guo18_donor.processed.h5ad")
+        self.adata = anndata.read(fn)
+        self.adata.X = np.expm1(self.adata.X)
+        self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs['n_counts'].values[:, None]))\
+                                   .multiply(1/10000)

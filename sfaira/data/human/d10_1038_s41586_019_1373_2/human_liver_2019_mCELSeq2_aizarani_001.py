@@ -83,16 +83,12 @@ class Dataset(DatasetBase):
         }
 
     def _load(self, fn=None):
-        if fn is None and self.path is None:
-            raise ValueError("provide either fn in load or path in constructor")
-
-        if self._load_raw or not self._load_raw:
-            if fn is None:
-                fn = [
-                    os.path.join(self.path, "human", "liver", "GSE124395_Normalhumanlivercellatlasdata.txt.gz"),
-                    os.path.join(self.path, "human", "liver", "GSE124395_clusterpartition.txt.gz")
-                ]
-            self.adata = anndata.AnnData(pd.read_csv(fn[0], sep='\t').T)
-            celltype_df = pd.read_csv(fn[1], sep=' ')
-            self.adata = self.adata[[i in celltype_df.index for i in self.adata.obs.index]].copy()
-            self.adata.obs['CellType'] = [str(celltype_df.loc[i]['sct@cpart']) for i in self.adata.obs.index]
+        if fn is None:
+            fn = [
+                os.path.join(self.path, "human", "liver", "GSE124395_Normalhumanlivercellatlasdata.txt.gz"),
+                os.path.join(self.path, "human", "liver", "GSE124395_clusterpartition.txt.gz")
+            ]
+        self.adata = anndata.AnnData(pd.read_csv(fn[0], sep='\t').T)
+        celltype_df = pd.read_csv(fn[1], sep=' ')
+        self.adata = self.adata[[i in celltype_df.index for i in self.adata.obs.index]].copy()
+        self.adata.obs['CellType'] = [str(celltype_df.loc[i]['sct@cpart']) for i in self.adata.obs.index]

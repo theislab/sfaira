@@ -154,6 +154,8 @@ class DatasetBase(abc.ABC):
             self._set_genome(genome=genome)
 
         # Run data set-specific loading script:
+        if fn is None and self.path is None:
+            raise ValueError("provide either fn in load or path in constructor")
         self._load(fn=fn)
         # Set data-specific meta data in .adata:
         self._set_metadata_in_adata(celltype_version=celltype_version)

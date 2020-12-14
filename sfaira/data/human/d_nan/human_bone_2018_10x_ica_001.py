@@ -54,18 +54,9 @@ class Dataset(DatasetBase):
         }
 
     def _load(self, fn=None):
-        if fn is None and self.path is None:
-            raise ValueError("provide either fn in load or path in constructor")
-
-        if self._load_raw:
-            if fn is None:
-                fn = os.path.join(self.path, "human", "bone", "cc95ff89-2e68-4a08-a234-480eca21ce79.homo_sapiens.loom")
-            self.adata = anndata.read_loom(fn)
-            idx = np.logical_and((self.adata.obs['derived_organ_parts_label'] == 'bone marrow').values,
-                                 (self.adata.obs['emptydrops_is_cell'] == 't').values)
-            self.adata = self.adata[idx].copy()
-
-        else:
-            if fn is None:
-                fn = os.path.join(self.path, "human", "bone", "ica_bone.h5ad")
-            self.adata = anndata.read(fn)
+        if fn is None:
+            fn = os.path.join(self.path, "human", "bone", "cc95ff89-2e68-4a08-a234-480eca21ce79.homo_sapiens.loom")
+        self.adata = anndata.read_loom(fn)
+        idx = np.logical_and((self.adata.obs['derived_organ_parts_label'] == 'bone marrow').values,
+                             (self.adata.obs['emptydrops_is_cell'] == 't').values)
+        self.adata = self.adata[idx].copy()

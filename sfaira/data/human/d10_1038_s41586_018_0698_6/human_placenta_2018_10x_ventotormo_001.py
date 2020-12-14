@@ -78,19 +78,15 @@ class Dataset(DatasetBase):
         }
 
     def _load(self, fn=None):
-        if fn is None and self.path is None:
-            raise ValueError("provide either fn in load or path in constructor")
-
-        if self._load_raw or not self._load_raw:
-            if fn is None:
-                fn = [
-                    os.path.join(self.path, "human", "placenta", "E-MTAB-6701.processed.1.zip"),
-                    os.path.join(self.path, "human", "placenta", "E-MTAB-6701.processed.2.zip"),
-                ]
-            self.adata = anndata.AnnData(pd.read_csv(fn[0], sep='\t', index_col='Gene').T)
-            df = pd.read_csv(fn[1], sep='\t')
-            for i in df.columns:
-                self.adata.obs[i] = [df.loc[j][i] for j in self.adata.obs.index]
+        if fn is None:
+            fn = [
+                os.path.join(self.path, "human", "placenta", "E-MTAB-6701.processed.1.zip"),
+                os.path.join(self.path, "human", "placenta", "E-MTAB-6701.processed.2.zip"),
+            ]
+        self.adata = anndata.AnnData(pd.read_csv(fn[0], sep='\t', index_col='Gene').T)
+        df = pd.read_csv(fn[1], sep='\t')
+        for i in df.columns:
+            self.adata.obs[i] = [df.loc[j][i] for j in self.adata.obs.index]
 
         self.adata.var['ensembl'] = [i.split("_")[1] for i in self.adata.var.index]
         self.adata.var['names'] = [i.split("_")[0] for i in self.adata.var.index]

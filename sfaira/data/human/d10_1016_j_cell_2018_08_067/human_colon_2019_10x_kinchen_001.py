@@ -98,42 +98,33 @@ class Dataset(DatasetBase):
         }
 
     def _load(self, fn=None):
-        if fn is None and self.path is None:
-            raise ValueError("provide either fn in load or path in constructor")
-
-        if self._load_raw:
-            if fn is None:
-                fn = [
-                    os.path.join(self.path, "human", "colon", "f8aa201c-4ff1-45a4-890e-840d63459ca2.homo_sapiens.loom"),
-                    os.path.join(self.path, "human", "colon", "uc_meta_data_stromal_with_donor.txt"),
-                    os.path.join(self.path, "human", "colon", "hc_meta_data_stromal_with_donor.txt")
-                ]
-            adata = anndata.read_loom(fn[0])
-            ctuc = pd.read_csv(fn[1], sep='\t')
-            cthealthy = pd.read_csv(fn[2], sep='\t')
-            adata = adata[adata.obs['emptydrops_is_cell'] == 't'].copy()
-            adata = adata[adata.X.sum(axis=1).flatten() >= 250].copy()
-            uc = adata[adata.obs['donor_organism.diseases.ontology_label'] == "ulcerative colitis (disease)"].copy()
-            bcuc = [i.split('-')[0] for i in ctuc['Barcode']]
-            seluc = []
-            for i in uc.obs['barcode']:
-                seluc.append((uc.obs['barcode'].str.count(i).sum() == 1) and i in bcuc)
-            uc = uc[seluc].copy()
-            ctuc.index = [i.split('-')[0] for i in ctuc['Barcode']]
-            uc.obs['celltype'] = [ctuc.loc[i]['Cluster'] for i in uc.obs['barcode']]
-            uc.var = uc.var.reset_index().rename(columns={'index': 'names'}).set_index('featurekey')
-            healthy = adata[adata.obs['donor_organism.diseases.ontology_label'] == "normal"].copy()
-            bchealthy = [i.split('-')[0] for i in cthealthy['Barcode']]
-            selhealthy = []
-            for i in healthy.obs['barcode']:
-                selhealthy.append((healthy.obs['barcode'].str.count(i).sum() == 1) and i in bchealthy)
-            healthy = healthy[selhealthy].copy()
-            cthealthy.index = [i.split('-')[0] for i in cthealthy['Barcode']]
-            healthy.obs['celltype'] = [cthealthy.loc[i]['Cluster'] for i in healthy.obs['barcode']]
-            healthy.var = healthy.var.reset_index().rename(columns={'index': 'names'}).set_index('featurekey')
-            self.adata = healthy.concatenate(uc)
-
-        else:
-            if fn is None:
-                fn = os.path.join(self.path, "human", "colon", "kinchenetal.h5ad")
-            self.adata = anndata.read(fn)
+        if fn is None:
+            fn = [
+                os.path.join(self.path, "human", "colon", "f8aa201c-4ff1-45a4-890e-840d63459ca2.homo_sapiens.loom"),
+                os.path.join(self.path, "human", "colon", "uc_meta_data_stromal_with_donor.txt"),
+                os.path.join(self.path, "human", "colon", "hc_meta_data_stromal_with_donor.txt")
+            ]
+        adata = anndata.read_loom(fn[0])
+        ctuc = pd.read_csv(fn[1], sep='\t')
+        cthealthy = pd.read_csv(fn[2], sep='\t')
+        adata = adata[adata.obs['emptydrops_is_cell'] == 't'].copy()
+        adata = adata[adata.X.sum(axis=1).flatten() >= 250].copy()
+        uc = adata[adata.obs['donor_organism.diseases.ontology_label'] == "ulcerative colitis (disease)"].copy()
+        bcuc = [i.split('-')[0] for i in ctuc['Barcode']]
+        seluc = []
+        for i in uc.obs['barcode']:
+            seluc.append((uc.obs['barcode'].str.count(i).sum() == 1) and i in bcuc)
+        uc = uc[seluc].copy()
+        ctuc.index = [i.split('-')[0] for i in ctuc['Barcode']]
+        uc.obs['celltype'] = [ctuc.loc[i]['Cluster'] for i in uc.obs['barcode']]
+        uc.var = uc.var.reset_index().rename(columns={'index': 'names'}).set_index('featurekey')
+        healthy = adata[adata.obs['donor_organism.diseases.ontology_label'] == "normal"].copy()
+        bchealthy = [i.split('-')[0] for i in cthealthy['Barcode']]
+        selhealthy = []
+        for i in healthy.obs['barcode']:
+            selhealthy.append((healthy.obs['barcode'].str.count(i).sum() == 1) and i in bchealthy)
+        healthy = healthy[selhealthy].copy()
+        cthealthy.index = [i.split('-')[0] for i in cthealthy['Barcode']]
+        healthy.obs['celltype'] = [cthealthy.loc[i]['Cluster'] for i in healthy.obs['barcode']]
+        healthy.var = healthy.var.reset_index().rename(columns={'index': 'names'}).set_index('featurekey')
+        self.adata = healthy.concatenate(uc)

@@ -62,13 +62,9 @@ class Dataset(DatasetBase):
         }
 
     def _load(self, fn=None):
-        if fn is None and self.path is None:
-            raise ValueError("provide either fn in load or path in constructor")
-
-        if self._load_raw or not self._load_raw:
-            if fn is None:
-                fn = os.path.join(self.path, "human", "lung", "vieira19_Alveoli_and_parenchyma_anonymised.processed.h5ad")
-            self.adata = anndata.read(fn)
-            self.adata.X = np.expm1(self.adata.X)
+        if fn is None:
+            fn = os.path.join(self.path, "human", "lung", "vieira19_Alveoli_and_parenchyma_anonymised.processed.h5ad")
+        self.adata = anndata.read(fn)
+        self.adata.X = np.expm1(self.adata.X)
 
         self.set_unkown_class_id(ids=["1_Unicorns and artifacts"])

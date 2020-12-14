@@ -73,33 +73,24 @@ class Dataset(DatasetBase):
         }
 
     def _load(self, fn=None):
-        if fn is None and self.path is None:
-            raise ValueError("provide either fn in load or path in constructor")
-
-        if self._load_raw:
-            if fn is None:
-                fn = os.path.join(self.path, "human", "kidney", "GSE131685_RAW.tar")
-            adatas = []
-            with tarfile.open(fn) as tar:
-                for member in tar.getmembers():
-                    if '_matrix.mtx.gz' in member.name:
-                        name = '_'.join(member.name.split('_')[:-1])
-                        with gzip.open(tar.extractfile(member), 'rb') as mm:
-                            X = scipy.io.mmread(mm).T.tocsr()
-                        obs = pd.read_csv(tar.extractfile(name + '_barcodes.tsv.gz'), compression='gzip', header=None,
-                                          sep='\t', index_col=0)
-                        obs.index.name = None
-                        var = pd.read_csv(tar.extractfile(name + '_features.tsv.gz'), compression='gzip', header=None,
-                                          sep='\t').iloc[:, :2]
-                        var.columns = ['ensembl', 'names']
-                        var.index = var['ensembl'].values
-                        self.adata = anndata.AnnData(X=X, obs=obs, var=var)
-                        self.adata.obs['sample'] = name
-                        adatas.append(self.adata)
-            self.adata = adatas[0].concatenate(adatas[1:])
-            del self.adata.obs['batch']
-
-        else:
-            if fn is None:
-                fn = os.path.join(self.path, "human", "kidney", "GSE131685.h5ad")
-            self.adata = anndata.read(fn)
+        if fn is None:
+            fn = os.path.join(self.path, "human", "kidney", "GSE131685_RAW.tar")
+        adatas = []
+        with tarfile.open(fn) as tar:
+            for member in tar.getmembers():
+                if '_matrix.mtx.gz' in member.name:
+                    name = '_'.join(member.name.split('_')[:-1])
+                    with gzip.open(tar.extractfile(member), 'rb') as mm:
+                        X = scipy.io.mmread(mm).T.tocsr()
+                    obs = pd.read_csv(tar.extractfile(name + '_barcodes.tsv.gz'), compression='gzip', header=None,
+                                      sep='\t', index_col=0)
+                    obs.index.name = None
+                    var = pd.read_csv(tar.extractfile(name + '_features.tsv.gz'), compression='gzip', header=None,
+                                      sep='\t').iloc[:, :2]
+                    var.columns = ['ensembl', 'names']
+                    var.index = var['ensembl'].values
+                    self.adata = anndata.AnnData(X=X, obs=obs, var=var)
+                    self.adata.obs['sample'] = name
+                    adatas.append(self.adata)
+        self.adata = adatas[0].concatenate(adatas[1:])
+        del self.adata.obs['batch']

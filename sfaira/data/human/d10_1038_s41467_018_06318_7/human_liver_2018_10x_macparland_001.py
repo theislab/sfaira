@@ -65,15 +65,11 @@ class Dataset(DatasetBase):
         }
 
     def _load(self, fn=None):
-        if fn is None and self.path is None:
-            raise ValueError("provide either fn in load or path in constructor")
-
-        if self._load_raw or not self._load_raw:
-            if fn is None:
-                fn = [
-                    os.path.join(self.path, "human", "liver", "GSE115469.csv.gz"),
-                    os.path.join(self.path, "human", "liver", "GSE115469_labels.txt")
-                ]
-            self.adata = anndata.read_csv(fn[0]).T
-            celltype_df = pd.read_csv(fn[1], sep='\t').set_index('CellName')
-            self.adata.obs['celltype'] = [str(celltype_df.loc[i]['Cluster#']) for i in self.adata.obs.index]
+        if fn is None:
+            fn = [
+                os.path.join(self.path, "human", "liver", "GSE115469.csv.gz"),
+                os.path.join(self.path, "human", "liver", "GSE115469_labels.txt")
+            ]
+        self.adata = anndata.read_csv(fn[0]).T
+        celltype_df = pd.read_csv(fn[1], sep='\t').set_index('CellName')
+        self.adata.obs['celltype'] = [str(celltype_df.loc[i]['Cluster#']) for i in self.adata.obs.index]
