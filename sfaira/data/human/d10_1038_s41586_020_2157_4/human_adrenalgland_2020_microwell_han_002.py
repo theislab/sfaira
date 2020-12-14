@@ -6,8 +6,6 @@ from .external import DatasetHcl
 class Dataset(DatasetHcl):
     """
     This is a dataloader for a the Human Cell Landscape dataset (Han et al. 2020. doi: 10.1038/s41586-020-2157-4).
-    In order to obtain the required preprocessed datafiles, please use the notebook provided in this repository under:
-    sfaira/data/download_scripts/get_and_preprocess_HumanCellLandscape.ipynb
 
     :param path:
     :param meta_path:
@@ -30,10 +28,4 @@ class Dataset(DatasetHcl):
         }
 
     def _load(self, fn=None):
-        if fn is None and self.path is None:
-            raise ValueError("provide either fn in load or path in constructor")
-
-        if self._load_raw or not self._load_raw:
-            if fn is None:
-                fn = os.path.join(self.path, "human", "adrenalgland", "hcl_FetalAdrenalGland_2.h5ad")
-            self._load_hcl(fn=fn)
+        self._load_hcl(fn=fn, sample_id="FetalAdrenalGland_2")
