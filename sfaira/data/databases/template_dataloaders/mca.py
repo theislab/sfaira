@@ -9,7 +9,7 @@ from .external import ADATA_IDS_MCA
 
 class DatasetMca(DatasetBase):
     """
-    This is a dataloader template for tabula muris data.
+    This is a dataloader template for mca data.
     """
 
     def __init__(

@@ -308,13 +308,12 @@ class ADATA_IDS_HCL(ADATA_IDS_EXTENDED):
     """
 
     def __init__(self):
-        self._cell_types_original = "Annotation"
-        self._cell_ontology_class = "Annotation"
+        self._cell_types_original = "cell_ontology_class"
+        self._cell_ontology_class = "cell_ontology_class"
 
-        self._dev_stage = "development_stage"  # TODO
-        self._sex = "sex"
-        
+        self._age = 'age'
+        self._dev_stage = "dev_stage"
+        self._sex = "gender"
 
         self._gene_id_ensembl = "ensembl"
         self._gene_id_names = "names"
-

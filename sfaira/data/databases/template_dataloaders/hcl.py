@@ -1,7 +1,4 @@
 import anndata
-import numpy as np
-import os
-import pandas
 from typing import Union
 from .external import DatasetBase
 from .external import ADATA_IDS_HCL
@@ -9,7 +6,7 @@ from .external import ADATA_IDS_HCL
 
 class DatasetHcl(DatasetBase):
     """
-    This is a dataloader template for tabula muris data.
+    This is a dataloader template for human cell landscape data.
     """
 
     def __init__(
@@ -25,6 +22,9 @@ class DatasetHcl(DatasetBase):
 
         self.obs_key_cellontology_class = self._ADATA_IDS_HCL.cell_ontology_class
         self.obs_key_cellontology_original = self._ADATA_IDS_HCL.cell_types_original
+        self.obs_key_dev_stage = self._ADATA_IDS_HCL.dev_stage
+        self.obs_key_sex = self._ADATA_IDS_HCL.sex
+        self.obs_key_age = self._ADATA_IDS_HCL.age
 
         self.author = 'Guo'
         self.doi = '10.1038/s41586-020-2157-4'
@@ -41,4 +41,4 @@ class DatasetHcl(DatasetBase):
         self.var_symbol_col = self._ADATA_IDS_HCL.gene_id_names
 
     def _load_hcl(self, fn):
-        pass  # TODO
+        self.adata = anndata.read(fn)

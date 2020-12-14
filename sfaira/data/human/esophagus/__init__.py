@@ -1,1 +1,0 @@
-from .human_esophagus import DatasetGroupEsophagus
