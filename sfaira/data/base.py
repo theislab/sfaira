@@ -122,6 +122,9 @@ class DatasetBase(abc.ABC):
     def _load(self, fn):
         pass
 
+    def _download(self, fn):
+        pass
+
     @property
     def _directory_formatted_doi(self) -> str:
         return "_".join("_".join(self.doi.split("/")).split("."))
