@@ -78,87 +78,82 @@ class DatasetHcl(DatasetBase):
         :param fn:
         :return:
         """
-        if fn is None:
-            fn = os.path.join(self.path, self.organism, self.organ, sample_id)
-        if os.path.exists(fn):
-            self.adata = anndata.read(fn)
-        else:
-            adata = anndata.read(os.path.join(self.path, self.organism, self.organ, 'HCL_Fig1_adata.h5ad'))
-            # convert to sparse matrix
-            adata.X = scipy.sparse.csr_matrix(adata.X).copy()
+        adata = anndata.read(os.path.join(self.path, self.organism, self.organ, 'HCL_Fig1_adata.h5ad'))
+        # convert to sparse matrix
+        adata.X = scipy.sparse.csr_matrix(adata.X).copy()
 
-            # harmonise annotations
-            for col in ['batch', 'tissue']:
-                adata.obs[col] = adata.obs[col].astype('str')
-            adata.obs.index = adata.obs.index.str.replace('AdultJeJunum', 'AdultJejunum', regex=True).str.replace(
-                'AdultGallBladder', 'AdultGallbladder', regex=True).str.replace(
-                'FetalFemaleGonald', 'FetalFemaleGonad', regex=True)
-            adata.obs.replace({'AdultJeJunum': 'AdultJejunum', 'AdultGallBladder': 'AdultGallbladder',
-                               'FetalFemaleGonald': 'FetalFemaleGonad'}, regex=True, inplace=True)
-            adata.obs.index = ["-".join(i.split('-')[:-1]) for i in adata.obs.index]
+        # harmonise annotations
+        for col in ['batch', 'tissue']:
+            adata.obs[col] = adata.obs[col].astype('str')
+        adata.obs.index = adata.obs.index.str.replace('AdultJeJunum', 'AdultJejunum', regex=True).str.replace(
+            'AdultGallBladder', 'AdultGallbladder', regex=True).str.replace(
+            'FetalFemaleGonald', 'FetalFemaleGonad', regex=True)
+        adata.obs.replace({'AdultJeJunum': 'AdultJejunum', 'AdultGallBladder': 'AdultGallbladder',
+                           'FetalFemaleGonald': 'FetalFemaleGonad'}, regex=True, inplace=True)
+        adata.obs.index = ["-".join(i.split('-')[:-1]) for i in adata.obs.index]
 
-            # load celltype labels and harmonise them
-            fig1_anno = pd.read_excel(
-                os.path.join(self.path, self.organism, self.organ, 'HCL_Fig1_cell_Info.xlsx'),
-                index_col='cellnames'
-            )
-            fig1_anno.index = fig1_anno.index.str.replace('AdultJeJunum', 'AdultJejunum', regex=True).str.replace(
-                'AdultGallBladder', 'AdultGallbladder', regex=True).str.replace(
-                'FetalFemaleGonald', 'FetalFemaleGonad', regex=True)
+        # load celltype labels and harmonise them
+        fig1_anno = pd.read_excel(
+            os.path.join(self.path, self.organism, self.organ, 'HCL_Fig1_cell_Info.xlsx'),
+            index_col='cellnames'
+        )
+        fig1_anno.index = fig1_anno.index.str.replace('AdultJeJunum', 'AdultJejunum', regex=True).str.replace(
+            'AdultGallBladder', 'AdultGallbladder', regex=True).str.replace(
+            'FetalFemaleGonald', 'FetalFemaleGonad', regex=True)
 
-            # check that the order of cells and cell labels is the same
-            assert np.all(fig1_anno.index == adata.obs.index)
+        # check that the order of cells and cell labels is the same
+        assert np.all(fig1_anno.index == adata.obs.index)
 
-            # add annotations to adata object and rename columns
-            adata.obs = pd.concat([adata.obs, fig1_anno[['cluster', 'stage', 'donor', 'celltype']]], axis=1)
-            adata.obs.columns = ['sample', 'tissue', 'n_genes', 'n_counts', 'cluster_global', 'stage', 'donor',
-                                 'celltype_global']
+        # add annotations to adata object and rename columns
+        adata.obs = pd.concat([adata.obs, fig1_anno[['cluster', 'stage', 'donor', 'celltype']]], axis=1)
+        adata.obs.columns = ['sample', 'tissue', 'n_genes', 'n_counts', 'cluster_global', 'stage', 'donor',
+                             'celltype_global']
 
-            # add sample-wise annotations to the full adata object
-            df = pd.DataFrame(
-                columns=['Cell_barcode', 'Sample', 'Batch', 'Cell_id', 'Cluster_id', 'Ages', 'Development_stage', 'Method',
-                         'Gender', 'Source', 'Biomaterial', 'Name', 'ident', 'Celltype'])
-            for f in os.listdir('annotation_rmbatch_data_revised417/'):
-                df1 = pd.read_csv('annotation_rmbatch_data_revised417/' + f, encoding='unicode_escape')
-                df = pd.concat([df, df1], sort=True)
-            df = df.set_index('Cell_id')
-            adata = adata[[i in df.index for i in adata.obs.index]].copy()
-            a_idx = adata.obs.index.copy()
-            adata.obs = pd.concat([adata.obs, df[['Ages', 'Celltype', 'Cluster_id', 'Gender', 'Method', 'Source']]], axis=1)
-            assert np.all(a_idx == adata.obs.index)
+        # add sample-wise annotations to the full adata object
+        df = pd.DataFrame(
+            columns=['Cell_barcode', 'Sample', 'Batch', 'Cell_id', 'Cluster_id', 'Ages', 'Development_stage', 'Method',
+                     'Gender', 'Source', 'Biomaterial', 'Name', 'ident', 'Celltype'])
+        for f in os.listdir('annotation_rmbatch_data_revised417/'):
+            df1 = pd.read_csv('annotation_rmbatch_data_revised417/' + f, encoding='unicode_escape')
+            df = pd.concat([df, df1], sort=True)
+        df = df.set_index('Cell_id')
+        adata = adata[[i in df.index for i in adata.obs.index]].copy()
+        a_idx = adata.obs.index.copy()
+        adata.obs = pd.concat([adata.obs, df[['Ages', 'Celltype', 'Cluster_id', 'Gender', 'Method', 'Source']]], axis=1)
+        assert np.all(a_idx == adata.obs.index)
 
-            # remove mouse cells from the object
-            adata = adata[adata.obs['Source'] != 'MCA2.0'].copy()
+        # remove mouse cells from the object
+        adata = adata[adata.obs['Source'] != 'MCA2.0'].copy()
 
-            # tidy up the column names of the obs annotations
-            adata.obs.columns = ['sample', 'sub_tissue', 'n_genes', 'n_counts', 'cluster_global', 'dev_stage',
-                                 'donor', 'celltype_global', 'age', 'celltype_specific', 'cluster_specific', 'gender',
-                                 'protocol', 'source']
+        # tidy up the column names of the obs annotations
+        adata.obs.columns = ['sample', 'sub_tissue', 'n_genes', 'n_counts', 'cluster_global', 'dev_stage',
+                             'donor', 'celltype_global', 'age', 'celltype_specific', 'cluster_specific', 'gender',
+                             'protocol', 'source']
 
-            # create some annotations that are used in sfaira
-            adata.obs["healthy"] = True
-            adata.obs["state_exact"] = 'healthy'
-            adata.obs["cell_ontology_class"] = adata.obs["celltype_global"]
-            adata.obs["cell_ontology_id"] = None
-            adata.var = adata.var.reset_index().rename({'index': 'names'}, axis='columns')
+        # create some annotations that are used in sfaira
+        adata.obs["healthy"] = True
+        adata.obs["state_exact"] = 'healthy'
+        adata.obs["cell_ontology_class"] = adata.obs["celltype_global"]
+        adata.obs["cell_ontology_id"] = None
+        adata.var = adata.var.reset_index().rename({'index': 'names'}, axis='columns')
 
-            # create a tidy organ annotaion which is then used in sfaira
-            adata.obs['organ'] = adata.obs['sub_tissue'] \
-                .str.replace("Adult", "") \
-                .str.replace("Fetal", "") \
-                .str.replace("Neonatal", "") \
-                .str.replace("Transverse", "") \
-                .str.replace("Sigmoid", "") \
-                .str.replace("Ascending", "") \
-                .str.replace("Cord", "") \
-                .str.replace("Peripheral", "") \
-                .str.replace("CD34P", "") \
-                .str.replace("Cerebellum", "Brain") \
-                .str.replace("TemporalLobe", "Brain") \
-                .str.replace("BoneMarrow", "Bone") \
-                .str.replace("Spinal", "SpinalCord") \
-                .str.replace("Intestine", "Stomach") \
-                .str.replace("Eyes", "Eye") \
-                .str.lower()
+        # create a tidy organ annotaion which is then used in sfaira
+        adata.obs['organ'] = adata.obs['sub_tissue'] \
+            .str.replace("Adult", "") \
+            .str.replace("Fetal", "") \
+            .str.replace("Neonatal", "") \
+            .str.replace("Transverse", "") \
+            .str.replace("Sigmoid", "") \
+            .str.replace("Ascending", "") \
+            .str.replace("Cord", "") \
+            .str.replace("Peripheral", "") \
+            .str.replace("CD34P", "") \
+            .str.replace("Cerebellum", "Brain") \
+            .str.replace("TemporalLobe", "Brain") \
+            .str.replace("BoneMarrow", "Bone") \
+            .str.replace("Spinal", "SpinalCord") \
+            .str.replace("Intestine", "Stomach") \
+            .str.replace("Eyes", "Eye") \
+            .str.lower()
 
-            self.adata = adata[adata.obs['sample'] == sample_id].copy()
+        self.adata = adata[adata.obs['sample'] == sample_id].copy()
