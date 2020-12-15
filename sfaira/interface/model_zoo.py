@@ -18,7 +18,7 @@ class ModelZoo(abc.ABC):
     ontology: dict
     model_id: Union[str, None]
     model_class: Union[str, None]
-    species: Union[str, None]
+    organism: Union[str, None]
     organ: Union[str, None]
     model_class: Union[str, None]
     model_type: Union[str, None]
@@ -37,7 +37,7 @@ class ModelZoo(abc.ABC):
             self.ontology = self.load_ontology_from_model_ids(model_lookuptable['model_id'].values)
         self.model_id = None
         self.model_class = None
-        self.species = None
+        self.organism = None
         self.organ = None
         self.model_type = None
         self.organisation = None
@@ -80,7 +80,7 @@ class ModelZoo(abc.ABC):
         self.model_id = model_id
         ixs = self.model_id.split('_')
         self.model_class = ixs[0]
-        self.species = ixs[1]
+        self.organism = ixs[1]
         self.organ = ixs[2]
         self.model_type = ixs[3]
         self.organisation = ixs[4]
@@ -88,7 +88,7 @@ class ModelZoo(abc.ABC):
         self.model_version = ixs[6]
 
         self.topology_container = Topologies(
-            species=self.species,
+            organism=self.organism,
             model_class=self.model_class,
             model_type=self.model_type,
             topology_id=self.model_topology
@@ -131,112 +131,112 @@ class ModelZoo(abc.ABC):
         # alternatively:
         #return kipoi_experimental.get_model("https://github.com/kipoi/models/tree/7d3ea7800184de414aac16811deba6c8eefef2b6/pwm_HOCOMOCO/human/CTCF", source='github-permalink')
 
-    def species(self) -> List[str]:
+    def organism(self) -> List[str]:
         """
-        Return list of available species.
+        Return list of available organism.
 
-        :return: List of species available.
+        :return: List of organism available.
         """
         return self.ontology.keys()
 
     def organs(
             self,
-            species: str
+            organism: str
     ) -> List[str]:
         """
-        Return list of available organs for a given species.
+        Return list of available organs for a given organism.
 
-        :param species: Identifier of species to show organs for.
+        :param organism: Identifier of organism to show organs for.
         :return: List of organs available.
         """
-        assert species in self.ontology.keys(), "species requested was not found in ontology"
-        return self.ontology[species].keys()
+        assert organism in self.ontology.keys(), "organism requested was not found in ontology"
+        return self.ontology[organism].keys()
 
     def models(
             self,
-            species: str,
+            organism: str,
             organ: str
     ) -> List[str]:
         """
-        Return list of available models for a given species, organ.
+        Return list of available models for a given organism, organ.
 
-        :param species: Identifier of species to show organs for.
+        :param organism: Identifier of organism to show organs for.
         :param organ: Identifier of organ to show versions for.
         :return: List of models available.
         """
-        assert species in self.ontology.keys(), "species requested was not found in ontology"
-        assert organ in self.ontology[species].keys(), "organ requested was not found in ontology"
-        return self.ontology[species][organ].keys()
+        assert organism in self.ontology.keys(), "organism requested was not found in ontology"
+        assert organ in self.ontology[organism].keys(), "organ requested was not found in ontology"
+        return self.ontology[organism][organ].keys()
 
     def organisation(
             self,
-            species: str,
+            organism: str,
             organ: str,
             model_type: str
     ) -> List[str]:
         """
-        Return list of available organisation that trained a given model for a given species and organ
+        Return list of available organisation that trained a given model for a given organism and organ
 
-        :param species: Identifier of species to show versions for.
+        :param organism: Identifier of organism to show versions for.
         :param organ: Identifier of organ to show versions for.
         :param model_type: Identifier of model to show versions for.
         :return: List of versions available.
         """
-        assert species in self.ontology.keys(), "species requested was not found in ontology"
-        assert organ in self.ontology[species].keys(), "organ requested was not found in ontology"
-        assert model_type in self.ontology[species][organ].keys(), "model_type requested was not found in ontology"
-        return self.ontology[species][organ][model_type]
+        assert organism in self.ontology.keys(), "organism requested was not found in ontology"
+        assert organ in self.ontology[organism].keys(), "organ requested was not found in ontology"
+        assert model_type in self.ontology[organism][organ].keys(), "model_type requested was not found in ontology"
+        return self.ontology[organism][organ][model_type]
 
     def topology(
             self,
-            species: str,
+            organism: str,
             organ: str,
             model_type: str,
             organisation: str
     ) -> List[str]:
         """
         Return list of available model topologies that trained by a given organisation,
-        a given model for a given species and organ
+        a given model for a given organism and organ
 
-        :param species: Identifier of species to show versions for.
+        :param organism: Identifier of organism to show versions for.
         :param organ: Identifier of organ to show versions for.
         :param model_type: Identifier of model_type to show versions for.
         :param organisation: Identifier of organisation to show versions for.
         :return: List of versions available.
         """
-        assert species in self.ontology.keys(), "species requested was not found in ontology"
-        assert organ in self.ontology[species].keys(), "organ requested was not found in ontology"
-        assert model_type in self.ontology[species][organ].keys(), "model_type requested was not found in ontology"
-        assert organisation in self.ontology[species][organ][model_type].keys(), \
+        assert organism in self.ontology.keys(), "organism requested was not found in ontology"
+        assert organ in self.ontology[organism].keys(), "organ requested was not found in ontology"
+        assert model_type in self.ontology[organism][organ].keys(), "model_type requested was not found in ontology"
+        assert organisation in self.ontology[organism][organ][model_type].keys(), \
             "organisation requested was not found in ontology"
-        return self.ontology[species][organ][model_type][organisation]
+        return self.ontology[organism][organ][model_type][organisation]
 
     def versions(
             self,
-            species: str,
+            organism: str,
             organ: str,
             model_type: str,
             organisation: str,
             model_topology: str
     ) -> List[str]:
         """
-        Return list of available model versions of a given organisation for a given species and organ and model.
+        Return list of available model versions of a given organisation for a given organism and organ and model.
 
-        :param species: Identifier of species to show versions for.
+        :param organism: Identifier of organism to show versions for.
         :param organ: Identifier of organ to show versions for.
         :param model_type: Identifier of model_type to show versions for.
         :param organisation: Identifier of organisation to show versions for.
         :param model_topology: Identifier of model_topology to show versions for.
         :return: List of versions available.
         """
-        assert species in self.ontology.keys(), "species requested was not found in ontology"
-        assert organ in self.ontology[species].keys(), "organ requested was not found in ontology"
-        assert model_type in self.ontology[species][organ].keys(), "model_type requested was not found in ontology"
-        assert organisation in self.ontology[species][organ][model_type].keys(), \
+        assert organism in self.ontology.keys(), "organism requested was not found in ontology"
+        assert organ in self.ontology[organism].keys(), "organ requested was not found in ontology"
+        assert model_type in self.ontology[organism][organ].keys(), "model_type requested was not found in ontology"
+        assert organisation in self.ontology[organism][organ][model_type].keys(), \
             "organisation requested was not found in ontology"
-        assert model_topology in self.ontology[species][organ][model_type][organisation].keys(), \
+        assert model_topology in self.ontology[organism][organ][model_type][organisation].keys(), \
             "model_topology requested was not found in ontology"
-        return self.ontology[species][organ][model_type][organisation][model_topology]
+        return self.ontology[organism][organ][model_type][organisation][model_topology]
 
     @property
     def genome(self):
@@ -260,7 +260,7 @@ class ModelZooEmbedding(ModelZoo):
     """
     The supported model ontology is:
 
-        species -> organ -> model -> organisation -> topology -> version -> ID
+        organism -> organ -> model -> organisation -> topology -> version -> ID
 
     Maybe: include experimental protocol? Ie droplet, full-length, single-nuclei.
     """
@@ -279,12 +279,12 @@ class ModelZooEmbedding(ModelZoo):
         ids = [i for i in model_ids if i.split('_')[0] == 'embedding']
         id_df = pd.DataFrame(
             [i.split('_')[1:7] for i in ids],
-            columns=['species', 'organ', 'model_type', 'organisation', 'model_topology', 'model_version']
+            columns=['organism', 'organ', 'model_type', 'organisation', 'model_topology', 'model_version']
         )
-        species = np.unique(id_df['species'])
-        ontology = dict.fromkeys(species)
-        for g in species:
-            id_df_g = id_df[id_df.species == g]
+        organism = np.unique(id_df['organism'])
+        ontology = dict.fromkeys(organism)
+        for g in organism:
+            id_df_g = id_df[id_df.organism == g]
             organ = np.unique(id_df_g['organ'])
             ontology[g] = dict.fromkeys(organ)
             for o in organ:
@@ -307,7 +307,7 @@ class ModelZooEmbedding(ModelZoo):
 
     def set_latest(
             self,
-            species: str,
+            organism: str,
             organ: str,
             model_type: str,
             organisation: str,
@@ -316,38 +316,38 @@ class ModelZooEmbedding(ModelZoo):
         """
         Set model ID to latest model in given ontology group.
 
-        :param species: Identifier of species to select.
+        :param organism: Identifier of organism to select.
         :param organ: Identifier of organ to select.
         :param model_type: Identifier of model_type to select.
         :param organisation: Identifier of organisation to select.
         :param model_topology: Identifier of model_topology to select
         :return:
         """
-        assert species in self.ontology.keys(), "species requested was not found in ontology"
-        assert organ in self.ontology[species].keys(), "organ requested was not found in ontology"
-        assert model_type in self.ontology[species][organ].keys(), "model_type requested was not found in ontology"
-        assert organisation in self.ontology[species][organ][model_type].keys(), \
+        assert organism in self.ontology.keys(), "organism requested was not found in ontology"
+        assert organ in self.ontology[organism].keys(), "organ requested was not found in ontology"
+        assert model_type in self.ontology[organism][organ].keys(), "model_type requested was not found in ontology"
+        assert organisation in self.ontology[organism][organ][model_type].keys(), \
             "organisation requested was not found in ontology"
-        assert model_topology in self.ontology[species][organ][model_type][organisation].keys(), \
+        assert model_topology in self.ontology[organism][organ][model_type][organisation].keys(), \
             "model_topology requested was not found in ontology"
 
         versions = self.versions(
-            species=species,
+            organism=organism,
             organ=organ,
             model_type=model_type,
             organisation=organisation,
             model_topology=model_topology
         )
-        self.species = species
+        self.organism = organism
         self.organ = organ
         self.model_type = model_type
         self.organisation = organisation
-        self.model_topology = model_topology  # set to model for now, could be species/organ specific later
+        self.model_topology = model_topology  # set to model for now, could be organism/organ specific later
 
         self.model_version = self._order_versions(versions=versions)[0]
         self.model_id = '_'.join([
             'embedding',
-            self.species,
+            self.organism,
             self.organ,
             self.model_type,
             self.organisation,
@@ -355,7 +355,7 @@ class ModelZooEmbedding(ModelZoo):
             self.model_version
         ])
         self.topology_container = Topologies(
-            species=self.species,
+            organism=self.organism,
             model_class="embedding",
             model_type=self.model_type,
             topology_id=self.model_topology
@@ -366,7 +366,7 @@ class ModelZooCelltype(ModelZoo):
     """
     The supported model ontology is:
 
-        species -> organ -> model -> organisation -> topology -> version -> ID
+        organism -> organ -> model -> organisation -> topology -> version -> ID
 
     Maybe: include experimental protocol? Ie droplet, full-length, single-nuclei.
 
@@ -388,12 +388,12 @@ class ModelZooCelltype(ModelZoo):
         ids = [i for i in model_ids if i.split('_')[0] == 'celltype']
         id_df = pd.DataFrame(
             [i.split('_')[1:7] for i in ids],
-            columns=['species', 'organ', 'model_type', 'organisation', 'model_topology', 'model_version']
+            columns=['organism', 'organ', 'model_type', 'organisation', 'model_topology', 'model_version']
         )
-        species = np.unique(id_df['species'])
-        ontology = dict.fromkeys(species)
-        for g in species:
-            id_df_g = id_df[id_df.species == g]
+        organism = np.unique(id_df['organism'])
+        ontology = dict.fromkeys(organism)
+        for g in organism:
+            id_df_g = id_df[id_df.organism == g]
             organ = np.unique(id_df_g['organ'])
             ontology[g] = dict.fromkeys(organ)
             for o in organ:
@@ -416,7 +416,7 @@ class ModelZooCelltype(ModelZoo):
 
     def set_latest(
             self,
-            species: str,
+            organism: str,
             organ: str,
             model_type: str,
             organisation: str,
@@ -425,39 +425,39 @@ class ModelZooCelltype(ModelZoo):
         """
         Set model ID to latest model in given ontology group.
 
-        :param species: Identifier of species to select.
+        :param organism: Identifier of organism to select.
         :param organ: Identifier of organ to select.
         :param model_type: Identifier of model_type to select.
         :param organisation: Identifier of organisation to select.
         :param model_topology: Identifier of model_topology to select
         :return:
         """
-        assert species in self.ontology.keys(), "species requested was not found in ontology"
-        assert organ in self.ontology[species].keys(), "organ requested was not found in ontology"
-        assert model_type in self.ontology[species][organ].keys(), "model_type requested was not found in ontology"
-        assert organisation in self.ontology[species][organ][model_type].keys(), \
+        assert organism in self.ontology.keys(), "organism requested was not found in ontology"
+        assert organ in self.ontology[organism].keys(), "organ requested was not found in ontology"
+        assert model_type in self.ontology[organism][organ].keys(), "model_type requested was not found in ontology"
+        assert organisation in self.ontology[organism][organ][model_type].keys(), \
             "organisation requested was not found in ontology"
-        assert model_topology in self.ontology[species][organ][model_type][organisation].keys(), \
+        assert model_topology in self.ontology[organism][organ][model_type][organisation].keys(), \
             "model_topology requested was not found in ontology"
 
         versions = self.versions(
-            species=species,
+            organism=organism,
             organ=organ,
             model_type=model_type,
             organisation=organisation,
             model_topology=model_topology
         )
 
-        self.species = species
+        self.organism = organism
         self.organ = organ
         self.model_type = model_type
         self.organisation = organisation
-        self.model_topology = model_topology  # set to model for now, could be species/organ specific later
+        self.model_topology = model_topology  # set to model for now, could be organism/organ specific later
 
         self.model_version = self._order_versions(versions=versions)[0]
         self.model_id = '_'.join([
             'celltype',
-            self.species,
+            self.organism,
             self.organ,
             self.model_type,
             self.organisation,
@@ -465,9 +465,10 @@ class ModelZooCelltype(ModelZoo):
             self.model_version
         ])
         self.topology_container = Topologies(
-            species=self.species,
+            organism=self.organism,
             model_class="celltype",
             model_type=self.model_type,
             topology_id=self.model_topology
         )
-        self.celltypes = celltype_versions.SPECIES_DICT[self.species][self.organ].celltype_universe[self.model_version.split(".")[0]]
+        self.celltypes = celltype_versions.ORGANISM_DICT[self.organism][self.organ].celltype_universe[
+            self.model_version.split(".")[0]]

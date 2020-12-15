@@ -1,8 +1,10 @@
-import anndata
 import os
 from typing import Union
-from .external import DatasetBase
+
+import anndata
 import numpy as np
+
+from .external import DatasetBase
 
 
 class Dataset(DatasetBase):
@@ -22,7 +24,7 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(self=self, path=path, meta_path=meta_path, **kwargs)
-        self.species = "human"
+        self.organism = "human"
         self.id = "human_kidney_2019_10x_stewart_001_10.1126/science.aat5031"
         self.download = [
             'https://cellgeni.cog.sanger.ac.uk/BenKidney_v2.1/Mature_Full_v2.1.h5ad',

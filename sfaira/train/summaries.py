@@ -1,15 +1,16 @@
-import numpy as np
-import pandas
-import pickle
 import json
+import os
+import pickle
 import shutil
 import warnings
 from typing import Union, List
-import os
-from .train_model import TargetZoos
-from .external import SPECIES_DICT
+
+import numpy as np
+import pandas
 
 from .external import EstimatorKerasEmbedding
+from .external import ORGANISM_DICT
+from .train_model import TargetZoos
 
 
 def _tp(yhat, ytrue):
@@ -835,7 +836,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         Plot evaluation metric heatmap for specified organ by cell classes and model types.
 
         :param organ: Organ to plot in heatmap.
-        :param organism: Species that the gridsearch was run on
+        :param organism: Organism that the gridsearch was run on
         :param datapath: Path to the local sfaira data repository
         :param celltype_version: Version in sfaira celltype universe
         :param partition_select: Based on which partition to select the best model
@@ -887,7 +888,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         dataset.load_all()
         cell_counts = dataset.obs_concat(keys=['cell_ontology_class'])['cell_ontology_class'].value_counts().to_dict()
 
-        celltype_versions = SPECIES_DICT.copy()
+        celltype_versions = ORGANISM_DICT.copy()
         celltype_versions[organism][organ].set_version(celltype_version)
         leafnodes = celltype_versions[organism][organ].ids
         ontology = celltype_versions[organism][organ].ontology[celltype_version]["names"]
@@ -998,7 +999,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         Plot evaluation metric scatterplot for specified organ by cell classes and model types.
 
         :param organ: Organ to plot in heatmap.
-        :param organism: Species that the gridsearch was run on
+        :param organism: Organism that the gridsearch was run on
         :param datapath: Path to the local sfaira data repository
         :param celltype_version: Version in sfaira celltype universe
         :param partition_select: Based on which partition to select the best model
@@ -1052,7 +1053,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         dataset.load_all()
         cell_counts = dataset.obs_concat(keys=['cell_ontology_class'])['cell_ontology_class'].value_counts().to_dict()
 
-        celltype_versions = SPECIES_DICT.copy()
+        celltype_versions = ORGANISM_DICT.copy()
         celltype_versions[organism][organ].set_version(celltype_version)
         leafnodes = celltype_versions[organism][organ].ids
         ontology = celltype_versions[organism][organ].ontology[celltype_version]["names"]
@@ -1392,7 +1393,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                 data=adata,
                 model_dir="",
                 model_id="",
-                species=organism,
+                organism=organism,
                 organ=organ,
                 model_type=model_type,
                 model_topology=model_id.split('_')[5]

@@ -1,9 +1,11 @@
-import anndata
 import os
 from typing import Union
-from .external import DatasetBase
+
+import anndata
 import numpy as np
 import scipy.sparse
+
+from .external import DatasetBase
 
 
 class Dataset(DatasetBase):
@@ -24,7 +26,7 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(self=self, path=path, meta_path=meta_path, **kwargs)
-        self.species = "human"
+        self.organism = "human"
         self.id = "human_colon_2019_10x_james_001_10.1038/s41590-020-0602-z"
         self.download = "https://covid19.cog.sanger.ac.uk/james20.processed.h5ad"
         self.download_meta = None

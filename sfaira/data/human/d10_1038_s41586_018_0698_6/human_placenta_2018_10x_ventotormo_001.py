@@ -1,8 +1,10 @@
 import os
 from typing import Union
-from .external import DatasetBase
-import pandas as pd
+
 import anndata
+import pandas as pd
+
+from .external import DatasetBase
 
 
 class Dataset(DatasetBase):
@@ -22,7 +24,7 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(self=self, path=path, meta_path=meta_path, **kwargs)
-        self.species = "human"
+        self.organism = "human"
         self.id = "human_placenta_2018_10x_ventotormo_10.1038/s41586-018-0698-6"
         self.download = 'https://www.ebi.ac.uk/arrayexpress/files/E-MTAB-6701/E-MTAB-6701.processed.1.zip'
         self.download_meta = 'https://www.ebi.ac.uk/arrayexpress/files/E-MTAB-6701/E-MTAB-6701.processed.2.zip'

@@ -1,13 +1,14 @@
-import anndata
-import os
-from typing import Union
-from .external import DatasetBase
-import tarfile
 import gzip
+import os
+import tarfile
 from io import StringIO
+from typing import Union
+
 import anndata as ad
 import pandas as pd
 import scipy.sparse
+
+from .external import DatasetBase
 
 
 class Dataset(DatasetBase):
@@ -65,7 +66,7 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(self=self, path=path, meta_path=meta_path, **kwargs)
-        self.species = "human"
+        self.organism = "human"
         self.id = "human_pancreas_2017_smartseq2_enge_001_10.1016/j.cell.2017.09.004"
         self.download = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE81nnn/GSE81547/suppl/GSE81547_RAW.tar"
         self.download_meta = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE81nnn/GSE81547/matrix/GSE81547_series_matrix.txt.gz"

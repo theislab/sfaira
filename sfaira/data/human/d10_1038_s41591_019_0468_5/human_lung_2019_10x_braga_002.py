@@ -1,8 +1,10 @@
-import anndata
 import os
 from typing import Union
-from .external import DatasetBase
+
+import anndata
 import numpy as np
+
+from .external import DatasetBase
 
 
 class Dataset(DatasetBase):
@@ -22,7 +24,7 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(self=self, path=path, meta_path=meta_path, **kwargs)
-        self.species = "human"
+        self.organism = "human"
         self.id = "human_lung_2019_10x_braga_002_10.1038/s41591-019-0468-5"
         self.download = "https://covid19.cog.sanger.ac.uk/vieira19_Bronchi_anonymised.processed.h5ad"
         self.download_meta = None

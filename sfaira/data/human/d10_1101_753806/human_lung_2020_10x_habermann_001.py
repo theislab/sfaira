@@ -1,8 +1,10 @@
-import anndata
 import os
 from typing import Union
-from .external import DatasetBase
+
+import anndata
 import pandas as pd
+
+from .external import DatasetBase
 
 
 class Dataset(DatasetBase):
@@ -35,7 +37,7 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(self=self, path=path, meta_path=meta_path, **kwargs)
-        self.species = "human"
+        self.organism = "human"
         self.id = "human_lung_2020_10x_habermann_001_10.1101/753806"
         self.download = [
             "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE135nnn/GSE135893/suppl/GSE135893%5Fmatrix%2Emtx%2Egz",

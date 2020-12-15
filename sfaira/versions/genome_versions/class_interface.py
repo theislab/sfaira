@@ -1,19 +1,18 @@
-import abc
 import pandas
 
 
 class SuperGenomeContainer:
     _cache_tab: pandas.DataFrame
     genome: str
-    species: str
+    organism: str
 
     def __init__(
             self,
-            species: str,
+            organism: str,
             genome: str
     ):
-        self.species = species
-        if self.species == "human":
+        self.organism = organism
+        if self.organism == "human":
             try:
                 from sfaira_extension.versions.genome_versions.human import GenomeContainer
                 if genome not in GenomeContainer.available_genomes:
@@ -24,7 +23,7 @@ class SuperGenomeContainer:
                 from .human import GenomeContainer
                 if genome not in GenomeContainer.available_genomes:
                     raise ValueError(f"Genome {genome} not recognised.")
-        elif self.species == "mouse":
+        elif self.organism == "mouse":
             try:
                 from sfaira_extension.versions.genome_versions.mouse import GenomeContainer
                 if genome not in GenomeContainer.available_genomes:
@@ -36,7 +35,7 @@ class SuperGenomeContainer:
                 if genome not in GenomeContainer.available_genomes:
                     raise ValueError(f"Genome {genome} not recognised.")
         else:
-            raise ValueError(f"Species {species} not recognised.")
+            raise ValueError(f"Organism {organism} not recognised.")
 
         self.gc = GenomeContainer()
         self.set_genome(genome=genome)

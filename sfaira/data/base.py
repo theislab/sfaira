@@ -1,17 +1,18 @@
 import abc
+import os
+import warnings
+from os import PathLike
+from typing import Dict, List, Tuple, Union
+
 import anndata
 import h5py
 import numpy as np
-import pandas as pd
-import os
-from os import PathLike
 import pandas
+import pandas as pd
 import scipy.sparse
-from typing import Dict, List, Tuple, Union
-import warnings
 
-from .external import SuperGenomeContainer
 from .external import ADATA_IDS_SFAIRA, META_DATA_FIELDS
+from .external import SuperGenomeContainer
 
 UNS_STRING_META_IN_OBS = "__obs__"
 
@@ -424,7 +425,7 @@ class DatasetBase(abc.ABC):
                 [self.organ, self._ADATA_IDS_SFAIRA.organ, self.obs_key_organ],
                 [self.protocol, self._ADATA_IDS_SFAIRA.protocol, self.obs_key_protocol],
                 [self.sex, self._ADATA_IDS_SFAIRA.sex, self.obs_key_sex],
-                [self.organism, self._ADATA_IDS_SFAIRA.species, self.obs_key_organism],
+                [self.organism, self._ADATA_IDS_SFAIRA.organism, self.obs_key_organism],
                 [self.state_exact, self._ADATA_IDS_SFAIRA.state_exact, self.obs_key_state_exact],
                 [self.subtissue, self._ADATA_IDS_SFAIRA.subtissue, self.obs_key_subtissue],
         ):
@@ -563,12 +564,12 @@ class DatasetBase(abc.ABC):
 
         if genome.lower().startswith("homo_sapiens"):
             g = SuperGenomeContainer(
-                species="human",
+                organism="human",
                 genome=genome
             )
         elif genome.lower().startswith("mus_musculus"):
             g = SuperGenomeContainer(
-                species="mouse",
+                organism="mouse",
                 genome=genome
             )
         else:
@@ -685,7 +686,7 @@ class DatasetBase(abc.ABC):
             self._ADATA_IDS_SFAIRA.organ,
             self._ADATA_IDS_SFAIRA.protocol,
             self._ADATA_IDS_SFAIRA.sex,
-            self._ADATA_IDS_SFAIRA.species,
+            self._ADATA_IDS_SFAIRA.organism,
             self._ADATA_IDS_SFAIRA.state_exact,
             self._ADATA_IDS_SFAIRA.subtissue,
         ]:
@@ -1013,12 +1014,12 @@ class DatasetBase(abc.ABC):
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            return self.meta[self._ADATA_IDS_SFAIRA.species]
+            return self.meta[self._ADATA_IDS_SFAIRA.organism]
 
     @organism.setter
     def organism(self, x: str):
-        if x not in self._ADATA_IDS_SFAIRA.species_allowed_entries:
-            raise ValueError(f"{x} is not a valid entry for species")
+        if x not in self._ADATA_IDS_SFAIRA.organism_allowed_entries:
+            raise ValueError(f"{x} is not a valid entry for organism")
         self._organism = x
 
     @property
@@ -1402,12 +1403,12 @@ class DatasetSuperGroup:
     ):
         if genome.lower().startswith("homo_sapiens"):
             g = SuperGenomeContainer(
-                species="human",
+                organism="human",
                 genome=genome
             )
         elif genome.lower().startswith("mus_musculus"):
             g = SuperGenomeContainer(
-                species="mouse",
+                organism="mouse",
                 genome=genome
             )
         else:

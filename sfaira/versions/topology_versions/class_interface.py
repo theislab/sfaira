@@ -1,14 +1,13 @@
-from .external import SuperGenomeContainer
-
 from . import human
 from . import mouse
+from .external import SuperGenomeContainer
 
 
 class Topologies:
 
     def __init__(
             self,
-            species: str,
+            organism: str,
             model_class: str,
             model_type: str,
             topology_id: str
@@ -43,27 +42,27 @@ class Topologies:
                 }
             }
         }
-        self.species = species
+        self.organism = organism
         self.model_class = model_class
         self.model_type = model_type
         self.topology_id = topology_id
-        assert species in list(self.topologies.keys()), \
-            "species %s not found in %s" % \
-            (species, list(self.topologies.keys()))
-        assert model_class in list(self.topologies[species].keys()), \
+        assert organism in list(self.topologies.keys()), \
+            "organism %s not found in %s" % \
+            (organism, list(self.topologies.keys()))
+        assert model_class in list(self.topologies[organism].keys()), \
             "model_class %s not found in %s" % \
-            (model_type, list(self.topologies[species].keys()))
-        assert model_type in list(self.topologies[species][model_class].keys()), \
+            (model_type, list(self.topologies[organism].keys()))
+        assert model_type in list(self.topologies[organism][model_class].keys()), \
             "model_type %s not found in %s" % \
-            (model_type, list(self.topologies[species][model_class].keys()))
-        assert topology_id in list(self.topologies[species][model_class][model_type].keys()), \
+            (model_type, list(self.topologies[organism][model_class].keys()))
+        assert topology_id in list(self.topologies[organism][model_class][model_type].keys()), \
             "topology_id %s not found in %s" % \
-            (topology_id, list(self.topologies[species][model_class][model_type].keys()))
-        self.genome_container = SuperGenomeContainer(species=species, genome=self.topology["genome"])
+            (topology_id, list(self.topologies[organism][model_class][model_type].keys()))
+        self.genome_container = SuperGenomeContainer(organism=organism, genome=self.topology["genome"])
 
     @property
     def topology(self):
-        return self.topologies[self.species][self.model_class][self.model_type][self.topology_id]
+        return self.topologies[self.organism][self.model_class][self.model_type][self.topology_id]
 
     @property
     def ngenes(self):

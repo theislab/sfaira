@@ -1,18 +1,20 @@
 import abc
-import anndata
 import hashlib
+import os
+import warnings
+from typing import Union
+
+import anndata
 import numpy as np
 import pandas
 import scipy.sparse
 import tensorflow as tf
-from typing import Union
-import os
-import warnings
 from tqdm import tqdm
+
 from .external import CelltypeVersionsBase, Topologies, BasicModel
 from .losses import LossLoglikelihoodNb, LossLoglikelihoodGaussian, LossCrossentropyAgg, KLLoss
-from .metrics import custom_mse, custom_negll_nb, custom_negll_gaussian, custom_kl, \
-    CustomAccAgg, CustomF1Classwise, CustomFprClasswise, CustomTprClasswise, custom_cce_agg
+from .metrics import custom_mse, custom_negll_nb, custom_negll_gaussian, CustomAccAgg, CustomF1Classwise, \
+    CustomFprClasswise, CustomTprClasswise, custom_cce_agg
 
 
 class EstimatorKeras:
@@ -40,7 +42,7 @@ class EstimatorKeras:
             model_dir: Union[str, None],
             model_id: Union[str, None],
             model_class: Union[str, None],
-            species: Union[str, None],
+            organism: Union[str, None],
             organ: Union[str, None],
             model_type: Union[str, None],
             model_topology: Union[str, None],
@@ -55,12 +57,12 @@ class EstimatorKeras:
         self.model_dir = model_dir
         self.model_id = model_id
         self.model_class = model_class.lower()
-        self.species = species.lower()
+        self.organism = organism.lower()
         self.organ = organ.lower()
         self.model_type = model_type.lower()
         self.model_topology = model_topology
         self.topology_container = Topologies(
-            species=species,
+            organism=organism,
             model_class=model_class,
             model_type=model_type,
             topology_id=model_topology
@@ -474,7 +476,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             data: Union[anndata.AnnData, np.ndarray],
             model_dir: Union[str, None],
             model_id: Union[str, None],
-            species: Union[str, None],
+            organism: Union[str, None],
             organ: Union[str, None],
             model_type: Union[str, None],
             model_topology: Union[str, None],
@@ -482,16 +484,16 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             cache_path: str = os.path.join('cache', '')
     ):
         super(EstimatorKerasEmbedding, self).__init__(
-                data=data,
-                model_dir=model_dir,
-                model_id=model_id,
-                model_class="embedding",
-                species=species,
-                organ=organ,
-                model_type=model_type,
-                model_topology=model_topology,
-                weights_md5=weights_md5,
-                cache_path=cache_path
+            data=data,
+            model_dir=model_dir,
+            model_id=model_id,
+            model_class="embedding",
+            organism=organism,
+            organ=organ,
+            model_type=model_type,
+            model_topology=model_topology,
+            weights_md5=weights_md5,
+            cache_path=cache_path
         )
 
     def init_model(
@@ -899,7 +901,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             data: Union[anndata.AnnData, np.ndarray],
             model_dir: Union[str, None],
             model_id: Union[str, None],
-            species: Union[str, None],
+            organism: Union[str, None],
             organ: Union[str, None],
             model_type: Union[str, None],
             model_topology: Union[str, None],
@@ -908,16 +910,16 @@ class EstimatorKerasCelltype(EstimatorKeras):
             max_class_weight: float = 1e3
     ):
         super(EstimatorKerasCelltype, self).__init__(
-                data=data,
-                model_dir=model_dir,
-                model_id=model_id,
-                model_class="celltype",
-                species=species,
-                organ=organ,
-                model_type=model_type,
-                model_topology=model_topology,
-                weights_md5=weights_md5,
-                cache_path=cache_path
+            data=data,
+            model_dir=model_dir,
+            model_id=model_id,
+            model_class="celltype",
+            organism=organism,
+            organ=organ,
+            model_type=model_type,
+            model_topology=model_topology,
+            weights_md5=weights_md5,
+            cache_path=cache_path
         )
         self.max_class_weight = max_class_weight
 
@@ -939,7 +941,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             raise ValueError('unknown topology %s for EstimatorKerasCelltype' % self.model_type)
 
         self.model = Model(
-            species=self.species,
+            organism=self.organism,
             organ=self.organ,
             topology_container=self.topology_container,
             override_hyperpar=override_hyperpar

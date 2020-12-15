@@ -1,10 +1,12 @@
-import anndata
 import os
-from typing import Union
-from .external import DatasetBase
 import tarfile
+from typing import Union
+
+import anndata
 import pandas as pd
 import scipy.sparse
+
+from .external import DatasetBase
 
 
 class Dataset(DatasetBase):
@@ -78,7 +80,7 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(self=self, path=path, meta_path=meta_path, **kwargs)
-        self.species = "human"
+        self.organism = "human"
         self.id = "human_mixed_2019_10x_szabo_001_10.1038/s41467-019-12464-3"
         self.download = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE126nnn/GSE126030/suppl/GSE126030_RAW.tar"
         self.download_meta = 'private'
