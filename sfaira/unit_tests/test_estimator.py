@@ -1,13 +1,12 @@
 import abc
-import unittest
-from typing import Union
-
 import anndata
 import numpy as np
 import tensorflow as tf
+from typing import Union
+import unittest
 
 from sfaira.unit_tests.external import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
-from sfaira.unit_tests.external import Topologies
+from sfaira.unit_tests.external import celltype_versions, SuperGenomeContainer, Topologies
 
 
 class _TestEstimator:
@@ -74,7 +73,7 @@ class TestEstimatorKerasEmbedding(unittest.TestCase, _TestEstimator):
 
     def set_topology(self, model_type):
         self.topology_container = Topologies(
-            organism="mouse",
+            species="mouse",
             model_class="embedding",
             model_type=model_type,
             topology_id="0.1"
@@ -85,7 +84,7 @@ class TestEstimatorKerasEmbedding(unittest.TestCase, _TestEstimator):
             data=self.data,
             model_dir=None,
             model_id=None,
-            organism="mouse",
+            species="mouse",
             organ="lung",
             model_type=self.topology_container.model_type,
             model_topology=self.topology_container.topology_id
@@ -135,7 +134,7 @@ class TestEstimatorKerasCelltype(unittest.TestCase, _TestEstimator):
 
     def set_topology(self, model_type):
         self.topology_container = Topologies(
-            organism="mouse",
+            species="mouse",
             model_class="celltype",
             model_type=model_type,
             topology_id="0.0.1"
@@ -146,7 +145,7 @@ class TestEstimatorKerasCelltype(unittest.TestCase, _TestEstimator):
             data=self.data,
             model_dir=None,
             model_id=None,
-            organism="mouse",
+            species="mouse",
             organ="lung",
             model_type=self.topology_container.model_type,
             model_topology=self.topology_container.topology_id

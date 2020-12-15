@@ -1,7 +1,5 @@
-from typing import Union
-
 import anndata
-
+from typing import Union
 from .external import DatasetBase
 
 
@@ -35,7 +33,7 @@ class DatasetInteractive(DatasetBase):
 
         self.id = dataset_id
         self.organ = organ
-        self.organism = organism
+        self.species = organism
 
         self.var_symbol_col = gene_symbol_col
         self.var_ensembl_col = gene_ens_col

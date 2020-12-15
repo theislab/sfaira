@@ -1,9 +1,8 @@
-from typing import Union
-
 import anndata
 import numpy as np
+import os
 import pandas
-
+from typing import Union
 from .external import DatasetBase
 
 
@@ -30,7 +29,7 @@ class DatasetMca(DatasetBase):
         self.normalization = 'raw'
         self.healthy = True
         self.state_exact = "healthy"
-        self.organism = "mouse"
+        self.species = "mouse"
 
         self.var_ensembl_col = "ensembl"
         self.var_symbol_col = "names"

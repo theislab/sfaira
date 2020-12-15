@@ -25,8 +25,8 @@ class UserInterface:
     # initialise your sfaira instance with a model lookuptable.
     # instead of setting `custom_repo` when initialising the UI you can also use `sfaira_repo=True` to use public weights
     ui = sfaira.ui.UserInterface(custom_repo="/path/to/local/repo/folder/or/zenodo/repo/URL", sfaira_repo=False)
-    ui.zoo_embedding.set_latest(organism, organ, model_type, organisation, model_topology)
-    ui.zoo_celltype.set_latest(organism, organ, model_type, organisation, model_topology)
+    ui.zoo_embedding.set_latest(species, organ, model_type, organisation, model_topology)
+    ui.zoo_celltype.set_latest(species, organ, model_type, organisation, model_topology)
     ui.load_data(anndata.read("/path/to/file.h5ad"))  # load your dataset into sfaira
     ui.load_model_embedding()
     ui.load_model_celltype()
@@ -280,11 +280,11 @@ class UserInterface:
         :param gene_symbol_col: Var column name (or 'index') which contains gene symbols
         :param gene_ens_col: ar column name (or 'index') which contains ensembl ids
         """
-        if self.zoo_embedding.organism is not None:
-            organism = self.zoo_embedding.organism
+        if self.zoo_embedding.species is not None:
+            species = self.zoo_embedding.species
             organ = self.zoo_embedding.organ
-        elif self.zoo_celltype.organism is not None:
-            organism = self.zoo_celltype.organism
+        elif self.zoo_celltype.species is not None:
+            species = self.zoo_celltype.species
             organ = self.zoo_celltype.organ
         else:
             raise ValueError("Please first set which model_id to use via the model zoo before loading the data")
@@ -293,12 +293,12 @@ class UserInterface:
             raise ValueError("Please provide either the gene_ens_col or the gene_symbol_col argument.")
 
         dataset = DatasetInteractive(
-            data=data,
-            organism=organism,
-            organ=organ,
-            gene_symbol_col=gene_symbol_col,
-            gene_ens_col=gene_ens_col
-        )
+                    data=data,
+                    species=species,
+                    organ=organ,
+                    gene_symbol_col=gene_symbol_col,
+                    gene_ens_col=gene_ens_col
+                )
         dataset.load()
         self.data = dataset.adata
 
@@ -326,7 +326,7 @@ class UserInterface:
             data=self.data,
             model_dir=model_dir,
             model_id=self.zoo_embedding.model_id,
-            organism=self.zoo_embedding.organism,
+            species=self.zoo_embedding.species,
             organ=self.zoo_embedding.organ,
             model_type=self.zoo_embedding.model_type,
             model_topology=self.zoo_embedding.model_topology,
@@ -351,7 +351,7 @@ class UserInterface:
             data=self.data,
             model_dir=model_dir,
             model_id=self.zoo_celltype.model_id,
-            organism=self.zoo_celltype.organism,
+            species=self.zoo_celltype.species,
             organ=self.zoo_celltype.organ,
             model_type=self.zoo_celltype.model_type,
             model_topology=self.zoo_celltype.model_topology,

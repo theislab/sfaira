@@ -1,12 +1,11 @@
-import os
-import urllib.request
-import zipfile
-from typing import Union
-
 import anndata
 import numpy as np
+import os
 import pandas as pd
 import scipy.sparse
+from typing import Union
+import urllib.request
+import zipfile
 
 from .external import DatasetBase
 
@@ -32,7 +31,7 @@ class DatasetHcl(DatasetBase):
 
         self.author = 'Guo'
         self.doi = '10.1038/s41586-020-2157-4'
-        self.organism = "human"
+        self.species = "human"
         self.download = 'https://ndownloader.figshare.com/files/17727365'
         self.download_meta = [
             'https://ndownloader.figshare.com/files/21758835',

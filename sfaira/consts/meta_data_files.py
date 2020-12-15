@@ -15,7 +15,7 @@ META_DATA_FIELDS = [
     "normalization",
     "organ",
     "protocol",
-    "organism",
+    "species",
     "state_exact",
     "sub_tissue",
     "year",

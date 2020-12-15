@@ -1,8 +1,6 @@
+import anndata
 import os
 from typing import Union
-
-import anndata
-
 from .external import DatasetBase
 
 
@@ -23,7 +21,7 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(self=self, path=path, meta_path=meta_path, **kwargs)
-        self.organism = "human"
+        self.species = "human"
         self.id = "human_eye_2019_10x_menon_001_10.1038/s41467-019-12780-8"
         self.download = "https://covid19.cog.sanger.ac.uk/menon19.processed.h5ad"
         self.download_meta = None

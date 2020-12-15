@@ -1,10 +1,8 @@
+import anndata
 import os
 from typing import Union
-
-import anndata
-
-from .external import ADATA_IDS_CELLXGENE
 from .external import DatasetBase
+from .external import ADATA_IDS_CELLXGENE
 
 
 class DatasetCellxgene(DatasetBase):
@@ -34,7 +32,7 @@ class DatasetCellxgene(DatasetBase):
         self.obs_key_ethnicity = self._ADATA_IDS_CELLXGENE.ethnicity
         self.obs_key_healthy = self._ADATA_IDS_CELLXGENE.healthy
         self.obs_key_sex = self._ADATA_IDS_CELLXGENE.sex
-        self.obs_key_organism = self._ADATA_IDS_CELLXGENE.organism
+        self.obs_key_species = self._ADATA_IDS_CELLXGENE.species
         self.obs_key_state_exact = self._ADATA_IDS_CELLXGENE.state_exact
         self.obs_key_subtissue = self._ADATA_IDS_CELLXGENE.subtissue
 
@@ -68,6 +66,6 @@ class DatasetCellxgene(DatasetBase):
         self.normalization = 'raw'
         self.organ = str(self.fn).split("_")[3]  # TODO interface this properly
         #self.organ = adata.obs["tissue"].values[0]
-        self.organism = adata.obs[self._ADATA_IDS_CELLXGENE.organism].values[0]
+        self.organism = adata.obs[self._ADATA_IDS_CELLXGENE.species].values[0]
         self.protocol = adata.obs[self._ADATA_IDS_CELLXGENE.protocol].values[0]
         self.year = adata.uns[self._ADATA_IDS_CELLXGENE.year]

@@ -1,10 +1,8 @@
+import anndata
 import os
 from typing import Union
-
-import anndata
-import numpy as np
-
 from .external import DatasetBase
+import numpy as np
 
 
 class Dataset(DatasetBase):
@@ -35,7 +33,7 @@ class Dataset(DatasetBase):
     ):
 
         super().__init__(self=self, path=path, meta_path=meta_path, **kwargs)
-        self.organism = "human"
+        self.species = "human"
         self.id = "human_bone_2018_10x_ica_unknown"
         self.download = "https://data.humancellatlas.org/project-assets/project-matrices/cc95ff89-2e68-4a08-a234-480eca21ce79.homo_sapiens.loom"
         self.download_meta = None

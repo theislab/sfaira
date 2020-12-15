@@ -1,10 +1,8 @@
+import anndata
 import os
 from typing import Union
-
-import anndata
-import scipy.sparse
-
 from .external import DatasetBase
+import scipy.sparse
 
 
 class Dataset(DatasetBase):
@@ -24,7 +22,7 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(self=self, path=path, meta_path=meta_path, **kwargs)
-        self.organism = "human"
+        self.species = "human"
         self.id = "human_spleen_2019_10x_madissoon_001_10.1186/s13059-019-1906-x"
         self.download = "https://cellgeni.cog.sanger.ac.uk/tissue-stability/tissue-stability/spleen.cellxgene.h5ad"
         self.download_meta = None
