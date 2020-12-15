@@ -13,8 +13,7 @@ class Dataset(DatasetTms):
             source: str = "aws",
             **kwargs
     ):
-        DatasetTms.__init__(self=self, path=path, meta_path=meta_path, **kwargs)
-        self.id = "mouse_skin_2019_smartseq2_pisco_001_10.1101/661728"
+        super().__init__(self=self, path=path, meta_path=meta_path, **kwargs)        self.id = "mouse_skin_2019_smartseq2_pisco_001_10.1101/661728"
         self.source = source
         if self.source == "aws":
             self.download = "https://czb-tabula-muris-senis.s3-us-west-2.amazonaws.com/Data-objects/"

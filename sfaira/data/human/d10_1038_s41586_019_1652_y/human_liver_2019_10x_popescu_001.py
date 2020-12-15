@@ -20,7 +20,7 @@ class Dataset(DatasetBase):
             meta_path: Union[str, None] = None,
             **kwargs
     ):
-        DatasetBase.__init__(self=self, path=path, meta_path=meta_path, **kwargs)
+        super().__init__(self=self, path=path, meta_path=meta_path, **kwargs)
         self.species = "human"
         self.id = "human_liver_2019_10x_popescu_001_10.1038/s41586-019-1652-y"
         self.download = "https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-7407/"

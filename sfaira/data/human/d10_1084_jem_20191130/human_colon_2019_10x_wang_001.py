@@ -22,7 +22,7 @@ class Dataset(DatasetBase):
             meta_path: Union[str, None] = None,
             **kwargs
     ):
-        DatasetBase.__init__(self=self, path=path, meta_path=meta_path, **kwargs)
+        super().__init__(self=self, path=path, meta_path=meta_path, **kwargs)
         self.species = "human"
         self.id = "human_colon_2019_10x_wang_001_10.1084/jem.20191130"
         self.download = "https://covid19.cog.sanger.ac.uk/wang20_colon.processed.h5ad"

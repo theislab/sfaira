@@ -21,7 +21,7 @@ class DatasetCellxgene(DatasetBase):
             meta_path: Union[str, None] = None,
             **kwargs
     ):
-        DatasetBase.__init__(self=self, path=path, meta_path=meta_path, **kwargs)
+        super().__init__(self=self, path=path, meta_path=meta_path, **kwargs)
         self._ADATA_IDS_CELLXGENE = ADATA_IDS_CELLXGENE()
         self.fn = fn
 

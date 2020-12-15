@@ -18,8 +18,7 @@ class Dataset(DatasetHcl):
             meta_path: Union[str, None] = None,
             **kwargs
     ):
-        DatasetHcl.__init__(self=self, path=path, meta_path=meta_path, **kwargs)
-        self.id = "human_pancreas_2020_microwell_han_003_10.1038/s41586-020-2157-4"
+        super().__init__(self=self, path=path, meta_path=meta_path, **kwargs)        self.id = "human_pancreas_2020_microwell_han_003_10.1038/s41586-020-2157-4"
         self.organ = 'Pancreas'
         self.sub_tissue = 'FetalPancreas'
         self.dev_stage = 'Fetus'

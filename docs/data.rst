@@ -68,7 +68,7 @@ before it is loaded into memory:
             meta_path: Union[str, None] = None,
             **kwargs
     ):
-        DatasetBase.__init__(self=self, path=path, meta_path=meta_path, **kwargs)
+        super().__init__(self=self, path=path, meta_path=meta_path, **kwargs)
         self.species = x  # your-species
         self.id = x  # "organism_organ_year_protocoll_first-author_doi"
         self.download_website = x  # link to raw data

@@ -21,7 +21,7 @@ class DatasetHcl(DatasetBase):
             meta_path: Union[str, None] = None,
             **kwargs
     ):
-        DatasetBase.__init__(self=self, path=path, meta_path=meta_path, **kwargs)
+        super().__init__(self=self, path=path, meta_path=meta_path, **kwargs)
 
         self.obs_key_cellontology_class = "cell_ontology_class"
         self.obs_key_cellontology_original = "cell_ontology_class"

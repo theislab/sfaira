@@ -13,8 +13,7 @@ class Dataset(DatasetTms):
             source: str = "aws",
             **kwargs
     ):
-        DatasetTms.__init__(self=self, path=path, meta_path=meta_path, **kwargs)
-
+        super().__init__(self=self, path=path, meta_path=meta_path, **kwargs)
         self.id = "mouse_kidney_2019_smartseq2_pisco_001_10.1101/661728"
         self.source = source
         if self.source == "aws":
