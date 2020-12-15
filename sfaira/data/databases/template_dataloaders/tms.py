@@ -2,7 +2,6 @@ import anndata
 import os
 from typing import Union
 from .external import DatasetBase
-from .external import ADATA_IDS_TMS
 
 
 class DatasetTms(DatasetBase):
@@ -17,14 +16,12 @@ class DatasetTms(DatasetBase):
             **kwargs
     ):
         DatasetBase.__init__(self=self, path=path, meta_path=meta_path, **kwargs)
-        self._ADATA_IDS_TMS = ADATA_IDS_TMS()
 
-        self.obs_key_cellontology_class = self._ADATA_IDS_TMS.cell_ontology_class
-        self.obs_key_cellontology_id = self._ADATA_IDS_TMS.cell_ontology_id
-        self.obs_key_cellontology_original = self._ADATA_IDS_TMS.cell_types_original
-        self.obs_key_age = self._ADATA_IDS_TMS.age
-        self.obs_key_dev_stage = self._ADATA_IDS_TMS.dev_stage
-        self.obs_key_state_exact = self._ADATA_IDS_TMS.state_exact
+        self.obs_key_cellontology_class = "cell_ontology_class"
+        self.obs_key_cellontology_id = "cell_ontology_id"
+        self.obs_key_cellontology_original = "cell_types_original"
+        self.obs_key_age = "age"
+        self.obs_key_dev_stage = "development_stage"
 
         self.author = "Quake"
         self.year = "2019"
@@ -34,8 +31,8 @@ class DatasetTms(DatasetBase):
         self.state_exact = "healthy"
         self.species = "mouse"
 
-        self.var_ensembl_col = self._ADATA_IDS_TMS.gene_id_ensembl
-        self.var_symbol_col = self._ADATA_IDS_TMS.gene_id_names
+        self.var_ensembl_col = None
+        self.var_symbol_col = "index"
 
     def _load_tms(self, fn):
         self.adata = anndata.read_h5ad(fn)

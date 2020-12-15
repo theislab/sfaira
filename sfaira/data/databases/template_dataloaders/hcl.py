@@ -8,7 +8,6 @@ import urllib.request
 import zipfile
 
 from .external import DatasetBase
-from .external import ADATA_IDS_HCL
 
 
 class DatasetHcl(DatasetBase):
@@ -23,13 +22,12 @@ class DatasetHcl(DatasetBase):
             **kwargs
     ):
         DatasetBase.__init__(self=self, path=path, meta_path=meta_path, **kwargs)
-        self._ADATA_IDS_HCL = ADATA_IDS_HCL()
 
-        self.obs_key_cellontology_class = self._ADATA_IDS_HCL.cell_ontology_class
-        self.obs_key_cellontology_original = self._ADATA_IDS_HCL.cell_types_original
-        self.obs_key_dev_stage = self._ADATA_IDS_HCL.dev_stage
-        self.obs_key_sex = self._ADATA_IDS_HCL.sex
-        self.obs_key_age = self._ADATA_IDS_HCL.age
+        self.obs_key_cellontology_class = "cell_ontology_class"
+        self.obs_key_cellontology_original = "cell_ontology_class"
+        self.obs_key_dev_stage = "dev_stage"
+        self.obs_key_sex = "gender"
+        self.obs_key_age = "age"
 
         self.author = 'Guo'
         self.doi = '10.1038/s41586-020-2157-4'
@@ -45,8 +43,8 @@ class DatasetHcl(DatasetBase):
         self.state_exact = 'healthy'
         self.year = 2020
 
-        self.var_ensembl_col = self._ADATA_IDS_HCL.gene_id_ensembl
-        self.var_symbol_col = self._ADATA_IDS_HCL.gene_id_names
+        self.var_ensembl_col = "ensembl"
+        self.var_symbol_col = "names"
 
     def _download(self):
 

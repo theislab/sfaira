@@ -4,7 +4,6 @@ import os
 import pandas
 from typing import Union
 from .external import DatasetBase
-from .external import ADATA_IDS_MCA
 
 
 class DatasetMca(DatasetBase):
@@ -19,10 +18,9 @@ class DatasetMca(DatasetBase):
             **kwargs
     ):
         DatasetBase.__init__(self=self, path=path, meta_path=meta_path, **kwargs)
-        self._ADATA_IDS_MCA = ADATA_IDS_MCA()
 
-        self.obs_key_cellontology_class = self._ADATA_IDS_MCA.cell_ontology_class
-        self.obs_key_cellontology_original = self._ADATA_IDS_MCA.cell_types_original
+        self.obs_key_cellontology_class = "Annotation"
+        self.obs_key_cellontology_original = "Annotation"
 
         self.author = "Guo"
         self.year = "2018"
@@ -33,8 +31,8 @@ class DatasetMca(DatasetBase):
         self.state_exact = "healthy"
         self.species = "mouse"
 
-        self.var_ensembl_col = self._ADATA_IDS_MCA.gene_id_ensembl
-        self.var_symbol_col = self._ADATA_IDS_MCA.gene_id_names
+        self.var_ensembl_col = "ensembl"
+        self.var_symbol_col = "names"
 
     def _load_mca(self, fn, fn_meta):
         celltypes = pandas.read_csv(fn_meta, index_col=1)
