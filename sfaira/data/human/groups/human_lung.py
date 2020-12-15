@@ -24,31 +24,32 @@ class DatasetGroupLung(DatasetGroupBase):
     def __init__(
         self, 
         path: Union[str, None] = None,
-        meta_path: Union[str, None] = None
+        meta_path: Union[str, None] = None,
+        cache_path: Union[str, None] = None
     ):
         super().__init__()
         datasets = [
-            Dataset0001(path=path, meta_path=meta_path),
-            Dataset0002(path=path, meta_path=meta_path),
-            Dataset0003(path=path, meta_path=meta_path),
-            Dataset0004(path=path, meta_path=meta_path),
-            Dataset0005(path=path, meta_path=meta_path),
-            Dataset0006(path=path, meta_path=meta_path),
-            Dataset0007(path=path, meta_path=meta_path),
-            Dataset0008(path=path, meta_path=meta_path),
-            Dataset0009(path=path, meta_path=meta_path),
-            Dataset0010(path=path, meta_path=meta_path),
-            Dataset0011(path=path, meta_path=meta_path),
-            Dataset0012(path=path, meta_path=meta_path),
-            Dataset0013(path=path, meta_path=meta_path),
-            Dataset0014(path=path, meta_path=meta_path),
-            Dataset0015(path=path, meta_path=meta_path),
+            Dataset0001(path=path, meta_path=meta_path, cache_path=cache_path),
+            Dataset0002(path=path, meta_path=meta_path, cache_path=cache_path),
+            Dataset0003(path=path, meta_path=meta_path, cache_path=cache_path),
+            Dataset0004(path=path, meta_path=meta_path, cache_path=cache_path),
+            Dataset0005(path=path, meta_path=meta_path, cache_path=cache_path),
+            Dataset0006(path=path, meta_path=meta_path, cache_path=cache_path),
+            Dataset0007(path=path, meta_path=meta_path, cache_path=cache_path),
+            Dataset0008(path=path, meta_path=meta_path, cache_path=cache_path),
+            Dataset0009(path=path, meta_path=meta_path, cache_path=cache_path),
+            Dataset0010(path=path, meta_path=meta_path, cache_path=cache_path),
+            Dataset0011(path=path, meta_path=meta_path, cache_path=cache_path),
+            Dataset0012(path=path, meta_path=meta_path, cache_path=cache_path),
+            Dataset0013(path=path, meta_path=meta_path, cache_path=cache_path),
+            Dataset0014(path=path, meta_path=meta_path, cache_path=cache_path),
+            Dataset0015(path=path, meta_path=meta_path, cache_path=cache_path),
         ]
         keys = [x.id for x in datasets]
         self.datasets = dict(zip(keys, datasets))
         # Load versions from extension if available:
         try:
             from sfaira_extension.data.human import DatasetGroupLung
-            self.datasets.update(DatasetGroupLung(path=path, meta_path=meta_path).datasets)
+            self.datasets.update(DatasetGroupLung(path=path, meta_path=meta_path, cache_path=cache_path).datasets)
         except ImportError:
             pass

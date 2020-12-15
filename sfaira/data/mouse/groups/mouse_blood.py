@@ -15,21 +15,22 @@ class DatasetGroupBlood (DatasetGroupBase):
     def __init__(
         self, 
         path: Union[str, None] = None,
-        meta_path: Union[str, None] = None
+        meta_path: Union[str, None] = None,
+        cache_path: Union[str, None] = None
     ):
         super().__init__()
         datasets = [
-            Dataset0001(path=path, meta_path=meta_path),
-            Dataset0002(path=path, meta_path=meta_path),
-            Dataset0003(path=path, meta_path=meta_path),
-            Dataset0004(path=path, meta_path=meta_path),
-            Dataset0005(path=path, meta_path=meta_path)
+            Dataset0001(path=path, meta_path=meta_path, cache_path=cache_path),
+            Dataset0002(path=path, meta_path=meta_path, cache_path=cache_path),
+            Dataset0003(path=path, meta_path=meta_path, cache_path=cache_path),
+            Dataset0004(path=path, meta_path=meta_path, cache_path=cache_path),
+            Dataset0005(path=path, meta_path=meta_path, cache_path=cache_path)
         ]
         keys = [x.id for x in datasets]
         self.datasets = dict(zip(keys, datasets))
         # Load versions from extension if available:
         try:
             from sfaira_extension.data.mouse import DatasetGroupBlood
-            self.datasets.update(DatasetGroupBlood(path=path, meta_path=meta_path).datasets)
+            self.datasets.update(DatasetGroupBlood(path=path, meta_path=meta_path, cache_path=cache_path).datasets)
         except ImportError:
             pass
