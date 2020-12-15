@@ -15,13 +15,11 @@ class DatasetMca(DatasetBase):
     def __init__(
             self,
             path: Union[str, None],
-            fn: str,
             meta_path: Union[str, None] = None,
             **kwargs
     ):
         DatasetBase.__init__(self=self, path=path, meta_path=meta_path, **kwargs)
         self._ADATA_IDS_MCA = ADATA_IDS_MCA()
-        self.fn = fn
 
         self.obs_key_cellontology_class = self._ADATA_IDS_MCA.cell_ontology_class
         self.obs_key_cellontology_original = self._ADATA_IDS_MCA.cell_types_original
