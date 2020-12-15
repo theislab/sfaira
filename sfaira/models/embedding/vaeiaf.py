@@ -355,8 +355,7 @@ class ModelVaeIAFVersioned(ModelVaeIAF):
         if override_hyperpar is not None:
             for k in list(override_hyperpar.keys()):
                 hyperpar[k] = override_hyperpar[k]
-        ModelVaeIAF.__init__(
-            self=self,
+        super().__init__(
             in_dim=topology_container.ngenes,
             **hyperpar
         )

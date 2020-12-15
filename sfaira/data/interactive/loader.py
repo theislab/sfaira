@@ -28,7 +28,7 @@ class DatasetInteractive(DatasetBase):
         :param dataset_id: Identifer of data set.
         :param kwargs:
         """
-        DatasetBase.__init__(self=self, path=None, meta_path=None, **kwargs)
+        super().__init__(path=None, meta_path=None, **kwargs)
         self.adata = data
 
         self.id = dataset_id

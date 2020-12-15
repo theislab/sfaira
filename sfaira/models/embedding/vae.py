@@ -237,8 +237,7 @@ class ModelVaeVersioned(ModelVae):
         if override_hyperpar is not None:
             for k in list(override_hyperpar.keys()):
                 hyperpar[k] = override_hyperpar[k]
-        ModelVae.__init__(
-            self=self,
+        super().__init__(
             in_dim=topology_container.ngenes,
             **hyperpar
         )

@@ -95,8 +95,7 @@ class CellTypeMlpVersioned(CellTypeMlp):
         if override_hyperpar is not None:
             for k in list(override_hyperpar.keys()):
                 hyperpar[k] = override_hyperpar[k]
-        CellTypeMlp.__init__(
-            self=self,
+        super().__init__(
             in_dim=topology_container.ngenes,
             out_dim=self.celltypes_version.ntypes if unkown_already_included else self.celltypes_version.ntypes + 1,
             **hyperpar
