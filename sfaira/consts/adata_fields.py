@@ -266,7 +266,7 @@ class ADATA_IDS_CELLXGENE(ADATA_IDS_EXTENDED):
         return self._disease_state_healthy
 
 
-class ADATA_IDS_TMS(ADATA_IDS_EXTENDED):
+class ADATA_IDS_TMS(ADATA_IDS_SFAIRA):
     """
     Class of constant field names of anndata.AnnData object entries, such as .uns keys and .obs columns in tabula muris
     senis objects.
@@ -275,6 +275,7 @@ class ADATA_IDS_TMS(ADATA_IDS_EXTENDED):
     _disease_state_healthy: str
 
     def __init__(self):
+        super().__init__()
         self._cell_types_original = "cell_types_original"
         self._cell_ontology_class = "cell_ontology_class"
         self._cell_ontology_id = "cell_ontology_id"
@@ -284,13 +285,14 @@ class ADATA_IDS_TMS(ADATA_IDS_EXTENDED):
         self._sex = "sex"  # TODO exists?
 
 
-class ADATA_IDS_MCA(ADATA_IDS_EXTENDED):
+class ADATA_IDS_MCA(ADATA_IDS_SFAIRA):
     """
     Class of constant field names of anndata.AnnData object entries, such as .uns keys and .obs columns in mouse cell
     atlas objects.
     """
 
     def __init__(self):
+        super().__init__()
         self._cell_types_original = "Annotation"
         self._cell_ontology_class = "Annotation"
 
@@ -301,13 +303,14 @@ class ADATA_IDS_MCA(ADATA_IDS_EXTENDED):
         self._gene_id_names = "names"
 
 
-class ADATA_IDS_HCL(ADATA_IDS_EXTENDED):
+class ADATA_IDS_HCL(ADATA_IDS_SFAIRA):
     """
     Class of constant field names of anndata.AnnData object entries, such as .uns keys and .obs columns in human cell
     landscape objects.
     """
 
     def __init__(self):
+        super().__init__()
         self._cell_types_original = "cell_ontology_class"
         self._cell_ontology_class = "cell_ontology_class"
 
