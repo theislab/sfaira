@@ -4,7 +4,7 @@ import os
 import pandas as pd
 import scipy.sparse
 from typing import Union
-import urllib
+import urllib.request
 import zipfile
 
 from .external import DatasetBase
@@ -51,6 +51,7 @@ class DatasetHcl(DatasetBase):
         self.var_symbol_col = self._ADATA_IDS_HCL.gene_id_names
 
     def _download(self):
+
         # download required files from human cell landscape publication data: https://figshare.com/articles/HCL_DGE_Data/7235471
         print(urllib.request.urlretrieve(
             'https://ndownloader.figshare.com/files/17727365',
@@ -137,7 +138,7 @@ class DatasetHcl(DatasetBase):
         adata.obs["cell_ontology_id"] = None
         adata.var = adata.var.reset_index().rename({'index': 'names'}, axis='columns')
 
-        # create a tidy organ annotaion which is then used in sfaira
+        # create a tidy organ annotation which is then used in sfaira
         adata.obs['organ'] = adata.obs['sub_tissue'] \
             .str.replace("Adult", "") \
             .str.replace("Fetal", "") \

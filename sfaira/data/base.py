@@ -133,7 +133,7 @@ class DatasetBase(abc.ABC):
     def _directory_formatted_id(self) -> str:
         return "_".join("_".join(self.id.split("/")).split("."))
 
-    def _load_chached(self, fn: str, load_raw: bool, allow_caching: bool):
+    def _load_cached(self, fn: str, load_raw: bool, allow_caching: bool):
         """
         Wraps data set specific load and allows for caching.
 
@@ -196,7 +196,7 @@ class DatasetBase(abc.ABC):
             self._set_genome(genome=genome)
 
         # Run data set-specific loading script:
-        self._load_chached(fn=fn, load_raw=load_raw, allow_caching=allow_caching)
+        self._load_cached(fn=fn, load_raw=load_raw, allow_caching=allow_caching)
         # Set data-specific meta data in .adata:
         self._set_metadata_in_adata(celltype_version=celltype_version)
         # Set loading hyper-parameter-specific meta data:
