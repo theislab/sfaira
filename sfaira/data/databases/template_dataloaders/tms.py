@@ -13,13 +13,11 @@ class DatasetTms(DatasetBase):
     def __init__(
             self,
             path: Union[str, None],
-            fn: str,
             meta_path: Union[str, None] = None,
             **kwargs
     ):
         DatasetBase.__init__(self=self, path=path, meta_path=meta_path, **kwargs)
         self._ADATA_IDS_TMS = ADATA_IDS_TMS()
-        self.fn = fn
 
         self.obs_key_cellontology_class = self._ADATA_IDS_TMS.cell_ontology_class
         self.obs_key_cellontology_id = self._ADATA_IDS_TMS.cell_ontology_id
