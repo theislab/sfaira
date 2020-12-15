@@ -30,7 +30,7 @@ class Dataset(DatasetBase):
             meta_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(self=self, path=path, meta_path=meta_path, **kwargs)
+        super().__init__(path=path, meta_path=meta_path, **kwargs)
         self.organism = "human"
         self.id = "human_lung_2020_10x_travaglini_001_10.1038/s41586-020-2922-4"
         self.download = "https://www.synapse.org/#!Synapse:syn21041850"

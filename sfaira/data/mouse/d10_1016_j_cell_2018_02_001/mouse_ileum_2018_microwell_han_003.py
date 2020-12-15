@@ -14,7 +14,7 @@ class Dataset(DatasetMca):
             meta_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(self=self, path=path, meta_path=meta_path, **kwargs)
+        super().__init__(path=path, meta_path=meta_path, **kwargs)
         self.id = "mouse_ileum_2018_microwell-seq_han_003_10.1016/j.cell.2018.02.001"
         self.download = "https://ndownloader.figshare.com/articles/5435866?private_link=865e694ad06d5857db4b"
         self.organ = "ileum"

@@ -22,7 +22,7 @@ class Dataset(DatasetBase):
             meta_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(self=self, path=path, meta_path=meta_path, **kwargs)
+        super().__init__(path=path, meta_path=meta_path, **kwargs)
         self.organism = "human"
         self.id = "human_liver_2018_10x_macparland_001_10.1038/s41467-018-06318-7"
         self.download = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE115469"
