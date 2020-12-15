@@ -56,4 +56,4 @@ class Dataset(DatasetHcl):
         }
 
     def _load(self, fn=None):
-        self._load_hcl(fn=fn, sample_id="AdultColon_1")
+        self._load_hcl(fn=fn, sample_id="AdultTransverseColon_2")
