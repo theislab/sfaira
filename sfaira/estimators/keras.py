@@ -563,19 +563,11 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             # Prepare data reading according to whether anndata is backed or not:
             x = self.data.X if self.data.isbacked else self._prepare_data_matrix(idx=idx)
 
-            def convert_sparse_matrix_to_sparse_tensor(x):
-                coo = x.tocoo()
-                indices = np.mat([coo.row, coo.col]).transpose()
-                return tf.SparseTensor(indices, coo.data, coo.shape)
-
             def generator():
                 is_sparse = isinstance(x[0, :], scipy.sparse.spmatrix)
                 indices = idx if self.data.isbacked else range(x.shape[0])
                 for i in indices:
                     x_sample = x[i, :].toarray().flatten() if is_sparse else x[i, :].flatten()
-                    if not isinstance(x_sample, np.ndarray):  # Convert to dense tensor if sparse object
-                        x_sample = convert_sparse_matrix_to_sparse_tensor(x_sample)
-                        x_sample = tf.keras.layers.Lambda(tf.sparse.to_dense)(x_sample)
                     sf = self._prepare_sf(x=x_sample)[0]
                     if mode == 'predict':  # If predicting, only return X regardless of model type
                         yield x_sample, sf
