@@ -40,7 +40,7 @@ class EstimatorKeras:
             model_dir: Union[str, None],
             model_id: Union[str, None],
             model_class: Union[str, None],
-            species: Union[str, None],
+            organism: Union[str, None],
             organ: Union[str, None],
             model_type: Union[str, None],
             model_topology: Union[str, None],
@@ -55,12 +55,12 @@ class EstimatorKeras:
         self.model_dir = model_dir
         self.model_id = model_id
         self.model_class = model_class.lower()
-        self.species = species.lower()
+        self.organism = organism.lower()
         self.organ = organ.lower()
         self.model_type = model_type.lower()
         self.model_topology = model_topology
         self.topology_container = Topologies(
-            species=species,
+            organism=organism,
             model_class=model_class,
             model_type=model_type,
             topology_id=model_topology
@@ -474,7 +474,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             data: Union[anndata.AnnData, np.ndarray],
             model_dir: Union[str, None],
             model_id: Union[str, None],
-            species: Union[str, None],
+            organism: Union[str, None],
             organ: Union[str, None],
             model_type: Union[str, None],
             model_topology: Union[str, None],
@@ -486,7 +486,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 model_dir=model_dir,
                 model_id=model_id,
                 model_class="embedding",
-                species=species,
+                organism=organism,
                 organ=organ,
                 model_type=model_type,
                 model_topology=model_topology,
@@ -899,7 +899,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             data: Union[anndata.AnnData, np.ndarray],
             model_dir: Union[str, None],
             model_id: Union[str, None],
-            species: Union[str, None],
+            organism: Union[str, None],
             organ: Union[str, None],
             model_type: Union[str, None],
             model_topology: Union[str, None],
@@ -912,7 +912,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
                 model_dir=model_dir,
                 model_id=model_id,
                 model_class="celltype",
-                species=species,
+                organism=organism,
                 organ=organ,
                 model_type=model_type,
                 model_topology=model_topology,
@@ -939,7 +939,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             raise ValueError('unknown topology %s for EstimatorKerasCelltype' % self.model_type)
 
         self.model = Model(
-            species=self.species,
+            organism=self.organism,
             organ=self.organ,
             topology_container=self.topology_container,
             override_hyperpar=override_hyperpar

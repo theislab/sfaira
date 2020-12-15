@@ -29,7 +29,7 @@ class DatasetMca(DatasetBase):
         self.normalization = 'raw'
         self.healthy = True
         self.state_exact = "healthy"
-        self.species = "mouse"
+        self.organism = "mouse"
 
         self.var_ensembl_col = "ensembl"
         self.var_symbol_col = "names"

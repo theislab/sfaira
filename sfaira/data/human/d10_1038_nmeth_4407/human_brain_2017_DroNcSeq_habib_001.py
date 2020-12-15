@@ -23,7 +23,7 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(self=self, path=path, meta_path=meta_path, **kwargs)
-        self.species = "human"
+        self.organism = "human"
         self.id = "human_brain_2017_DroNcSeq_habib_001_10.1038/nmeth.4407"
         self.download = "https://covid19.cog.sanger.ac.uk/habib17.processed.h5ad"
         self.download_meta = None

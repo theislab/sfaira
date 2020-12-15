@@ -9,7 +9,7 @@ from .external import DatasetGroupBase, DatasetSuperGroup
 from .external import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
 from .external import ModelZoo, ModelZooEmbedding, ModelZooCelltype
 from .external import mouse, human
-from .external import SPECIES_DICT
+from .external import ORGANISM_DICT
 
 
 class TargetZoos:
@@ -260,7 +260,7 @@ class TrainModelEmbedding(TrainModel):
             data=self.adata,
             model_dir=self.model_dir,
             model_id=self.zoo.model_id,
-            species=self.zoo.species,
+            organism=self.zoo.organism,
             organ=self.zoo.organ,
             model_type=self.zoo.model_type,
             model_topology=self.zoo.model_topology
@@ -327,7 +327,7 @@ class TrainModelCelltype(TrainModel):
             data=self.adata,
             model_dir=self.model_dir,
             model_id=self.zoo.model_id,
-            species=self.zoo.species,
+            organism=self.zoo.organism,
             organ=self.zoo.organ,
             model_type=self.zoo.model_type,
             model_topology=self.zoo.model_topology
@@ -379,10 +379,10 @@ class TrainModelCelltype(TrainModel):
 
         cell_counts = self.data.obs_concat(keys=['cell_ontology_class'])['cell_ontology_class'].value_counts().to_dict()
         cell_counts_leaf = cell_counts.copy()
-        celltype_versions = SPECIES_DICT.copy()
-        celltype_versions[self.zoo.species][self.zoo.organ].set_version(self.zoo.model_version.split(".")[0])
-        leafnodes = celltype_versions[self.zoo.species][self.zoo.organ].ids
-        ontology = celltype_versions[self.zoo.species][self.zoo.organ].ontology[self.zoo.model_version.split(".")[0]]["names"]
+        celltype_versions = ORGANISM_DICT.copy()
+        celltype_versions[self.zoo.organism][self.zoo.organ].set_version(self.zoo.model_version.split(".")[0])
+        leafnodes = celltype_versions[self.zoo.organism][self.zoo.organ].ids
+        ontology = celltype_versions[self.zoo.organism][self.zoo.organ].ontology[self.zoo.model_version.split(".")[0]]["names"]
         for k in cell_counts.keys():
             if k not in leafnodes:
                 if k not in ontology.keys():

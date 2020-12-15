@@ -31,7 +31,7 @@ class DatasetHcl(DatasetBase):
 
         self.author = 'Guo'
         self.doi = '10.1038/s41586-020-2157-4'
-        self.species = "human"
+        self.organism = "human"
         self.download = 'https://ndownloader.figshare.com/files/17727365'
         self.download_meta = [
             'https://ndownloader.figshare.com/files/21758835',

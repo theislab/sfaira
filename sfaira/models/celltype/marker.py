@@ -97,7 +97,7 @@ class CellTypeMarkerVersioned(CellTypeMarker):
 
     def __init__(
             self,
-            species: str,
+            organism: str,
             organ: str,
             topology_container: Topologies,
             override_hyperpar: Union[dict, None] = None
@@ -110,8 +110,8 @@ class CellTypeMarkerVersioned(CellTypeMarker):
         :param override_hyperpar: Dictionary with hyper-parameters of model to override in preset hyper-parameter
             dictionary that is queried based on the topology_id. Can contain a subset of all hyperparameters.
         """
-        # Get cell type version instance based on topology ID, species and organ.
-        self.celltypes_version = celltype_versions.SPECIES_DICT[species.lower()][organ.lower()]
+        # Get cell type version instance based on topology ID, organism and organ.
+        self.celltypes_version = celltype_versions.ORGANISM_DICT[organism.lower()][organ.lower()]
         self.celltypes_version.set_version(version=topology_container.topology_id)
 
         unkown_already_included = np.any([x.lower() == "unknown" for x in self.celltypes_version.ids])

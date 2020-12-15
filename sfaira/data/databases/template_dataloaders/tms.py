@@ -29,7 +29,7 @@ class DatasetTms(DatasetBase):
         self.normalization = 'norm'
         self.healthy = True
         self.state_exact = "healthy"
-        self.species = "mouse"
+        self.organism = "mouse"
 
         self.var_ensembl_col = None
         self.var_symbol_col = "index"

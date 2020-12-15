@@ -33,7 +33,7 @@ class DatasetInteractive(DatasetBase):
 
         self.id = dataset_id
         self.organ = organ
-        self.species = organism
+        self.organism = organism
 
         self.var_symbol_col = gene_symbol_col
         self.var_ensembl_col = gene_ens_col

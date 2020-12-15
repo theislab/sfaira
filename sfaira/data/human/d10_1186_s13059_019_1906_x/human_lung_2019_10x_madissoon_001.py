@@ -21,7 +21,7 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(self=self, path=path, meta_path=meta_path, **kwargs)
-        self.species = "human"
+        self.organism = "human"
         self.id = "human_lung_2019_10x_madissoon_001._10.1186/s13059-019-1906-x"
         self.download = "https://covid19.cog.sanger.ac.uk/madissoon19_lung.processed.h5ad"
         self.download_meta = None

@@ -31,7 +31,7 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(self=self, path=path, meta_path=meta_path, **kwargs)
-        self.species = "human"
+        self.organism = "human"
         self.id = "human_lung_2020_smartseq2_travaglini_002_10.1038/s41586-020-2922-4"
         self.download = "https://www.synapse.org/#!Synapse:syn21041850"
         self.download_meta = None

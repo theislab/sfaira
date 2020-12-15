@@ -110,7 +110,7 @@ class ADATA_IDS_BASE:
         return self._organ
 
     @property
-    def species(self) -> str:  # TODO refactor into organism
+    def organism(self) -> str:  # TODO refactor into organism
         return self._organism
 
     @property
@@ -196,7 +196,7 @@ class ADATA_IDS_SFAIRA(ADATA_IDS_EXTENDED):
         self._mapped_features = "mapped_features"
         self._remove_gene_version = "remove_gene_version"
 
-        self._species_allowed_entries = ["mouse", "human"]
+        self._organism_allowed_entries = ["mouse", "human"]
 
     @property
     def load_raw(self) -> str:
@@ -211,8 +211,8 @@ class ADATA_IDS_SFAIRA(ADATA_IDS_EXTENDED):
         return self._remove_gene_version
 
     @property
-    def species_allowed_entries(self) -> List[str]:
-        return self._species_allowed_entries
+    def organism_allowed_entries(self) -> List[str]:
+        return self._organism_allowed_entries
 
 
 class ADATA_IDS_CELLXGENE(ADATA_IDS_EXTENDED):
