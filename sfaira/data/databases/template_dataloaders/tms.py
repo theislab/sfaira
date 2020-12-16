@@ -13,9 +13,17 @@ class DatasetTms(DatasetBase):
             self,
             path: Union[str, None],
             meta_path: Union[str, None] = None,
+            source: Union[str, None] = None,
             **kwargs
     ):
         super().__init__(path=path, meta_path=meta_path, **kwargs)
+        self.source = source
+        if self.source == "aws":
+            self.download = "https://czb-tabula-muris-senis.s3-us-west-2.amazonaws.com/Data-objects/"
+        elif self.source == "figshare":
+            self.download = "https://ndownloader.figshare.com/articles/8273102/versions/2"
+        else:
+            raise ValueError("source %s not recognized" % self.source)
 
         self.obs_key_cellontology_class = "cell_ontology_class"
         self.obs_key_cellontology_id = "cell_ontology_id"
