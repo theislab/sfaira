@@ -154,8 +154,13 @@ class DatasetBase(abc.ABC):
         # Check if raw loader has to be called:
         if load_raw or not os.path.exists(fn_cache):
             self._load(fn=fn)
+        else:
+            assert self.cache_path is not None, "set cache_path to use caching"
+            assert os.path.exists(fn_cache),  f"did not find cache file {fn_cache}, consider caching first"
+            self.adata = anndata.read_h5ad(fn_cache)
         # Check if file needs to be cached:
         if allow_caching and not os.path.exists(fn_cache):
+            assert self.cache_path is not None, "set cache_path to use caching"
             self.adata.write_h5ad(fn_cache)
 
     def load(
