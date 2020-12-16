@@ -69,13 +69,53 @@ before it is loaded into memory:
             **kwargs
     ):
         super().__init__(path=path, meta_path=meta_path, **kwargs)
-        self.species = x  # your-species
+        # Data set meta data: You do not have to include all of these and can simply skip lines corresponding
+        # to attritbutes that you do not have access to. These are meta data on a sample level.
+        # The meta data attributes labeled with (!) may als be supplied per cell, see below,
+        # in this case, if you supply a .obs_key* attribute, you ccan leave out the sample-wise attribute.
+        self.age = x  # (!) age of sample
+        self.author = x  # author (list) who sampled / created the data set
+        self.doi = x  # doi of data set accompanying manuscript
+        self.download = x  # download website(s) of data files
+        self.download_meta = x  # download website(s) of meta data files
+        self.dev_stage = x  # (!) developmental stage of organism
+        self.ethnicity = x  # (!) ethnicity of sample
+        self.healthy = x  # (!) whether sample represents a healthy organism
         self.id = x  # "organism_organ_year_protocoll_first-author_doi"
-        self.download_website = x  # link to raw data
-        self.organ = x  #y ourorgan
-        self.sub_tissue = x # sub-tissue name, otherwise organ
-        self.dev_stage = x  # developmental stage of organism
-        self.has_celltypes = x  # if cell type annotation is available
+        self.normalisation = x  # normalisation applied to raw data loaded (ideally counts, "raw")
+        self.organ = x  # (!) organ
+        self.organism = x  # (!) species / organism
+        self.protocol = x  # (!) protocol used to sample data (e.g. smart-seq2)
+        self.sex = x  # (!) sex
+        self.state_exact = x  # (!) exact disease, treatment or perturbation state of sample
+        self.sub_tissue = x # (!) sub-tissue name, otherwise organ
+        self.year = x  # year in which sample was acquired
+
+        # (!):
+        # The followin meta data may instead also be supplied on a cell level if an appropriate column is present in the
+        # anndata instance (specifically in .obs) after loading
+        # (ie you need to make sure this is loaded in the loading script)!
+        # See above for a description what these meta data attributes mean.
+        # Again, if these attributes are note available, you can simply leave this out.
+        self.obs_key_age = x
+        self.obs_key_dev_stage = x
+        self.obs_key_ethnicity = x
+        self.obs_key_healthy = x
+        self.obs_key_healthy = x
+        self.obs_key_organ = x
+        self.obs_key_organism = x
+        self.obs_key_protocol = x
+        self.obs_key_sex = x
+        self.obs_key_state_exact = x
+        self.obs_key_subtissue = x
+        # Additionally, cell type annotation is ALWAYS provided per cell in .obs:
+        self.obs_key_cellontology_class = x  # name of column which contain streamlined cell ontology cell type classes
+        self.obs_key_cellontology_id = x  # name of column which contain streamlined cell ontology cell type IDs
+        self.obs_key_cellontology_original = x  # name of column which contain raw cell type labels
+        # In a simple setting in which you only have non-streamlined annotation,
+        # you would only set obs_key_cellontology_original and ignore the other two, sfaira than takes care of that
+        # via class_maps below.
+
 
         # A dictionary of dictionaries with:
         # One item for each annotation label that is not contained in the ontology.
@@ -93,34 +133,44 @@ before it is loaded into memory:
 .. code-block:: python
 
     def _load(self, fn=None):
-        if fn is None:
-            if self.path is None:
-                raise ValueError("provide either fn in load or path in constructor")
-            fn = os.path.join(self.path, "human", "eye", "my_data.h5ad")  defined file in streamlined directory structure
         self.adata = anndata.read(fn)  # loading instruction into .adata, use other ones if the data is not h5ad
+        # Some times, you need to load multiple files (e.g. counts and annotation), all of this code would be here.
 
-        self.adata.uns["lab"] = x  # load the adata.uns with meta data
-        self.adata.uns["year"] = x
-        self.adata.uns["doi"] = x
-        self.adata.uns["protocol"] = x  # e.g. 10x, microwell, seqwell...
-        self.adata.uns["organ"] = self.organ
-        self.adata.uns["subtissue"] = self.sub_tissue
-        self.adata.uns["animal"] = x
-        self.adata.uns["id"] = self.id
-        self.adata.uns["wget_download"] = self.download_website
-        self.adata.uns["has_celltypes"] = self.has_celltypes
-        self.adata.uns["counts"] = 'raw'
-        self.adata.uns["dev_stage"] = self.dev_stage
 
-        # Class expects unprocessed cell type labels in self.adata.obs["cell_ontology_class"]
-        self.adata.obs["cell_ontology_class"] = self.adata.obs['CellType']
-        # You can additional set self.adata.obs["cell_ontology_id"] if you have streamlined ontology IDs. This are also
-        # defined in the cell type universe lists.
-        self.adata.obs["healthy"] = x  # boolean tissue sample healthy or diseased / treated
-        self.adata.obs["state_exact"] = x  # exact tissue state as string, e.g. "tumor" or "healthy"
+In summary, a simply example data loader for a mouse lung data set could look like this:
 
-        self._convert_and_set_var_names(symbol_col='names', ensembl_col='ensembl', new_index='ensembl')
+.. code-block:: python
 
+class MyDataset(DatasetBase)    
+    def __init__(
+            self,
+            path: Union[str, None] = None,
+            meta_path: Union[str, None] = None,
+            **kwargs
+    ):
+        super().__init__(path=path, meta_path=meta_path, **kwargs)
+        self.author = "me"
+        self.doi = "my preprint"
+        self.download = "my GEO upload"
+        self.normalisation = "raw"  # because I uploaded raw counts, which is good practice!
+        self.organ = "lung"
+        self.organism = "mouse"
+        self.protocol = "smart-seq2"
+        self.year = "2020"
+
+        self.obs_key_cellontology_original = "louvain_named"  # i save my cell type names in here
+        
+        self.class_maps = {
+            "0": {  # one entry for each cell type version for this species and organ
+                'my weird name for T cells': 'T cell',  # one map from a custom ID to an ontology supported ID
+            },
+        }
+
+    def _load(self, fn=None):
+        # assuming that i uploaded an h5ad somewhere (in self.download)
+        if fn is None:
+            fn = os.path.join(self.path, "mouse", "lung", "my.h5ad")
+        self.adata = anndata.read(fn)
 
 
 Data loaders can be added into a copy of the sfaira repository and can be used locally before they are contributed to
