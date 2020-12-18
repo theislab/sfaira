@@ -141,36 +141,36 @@ In summary, a simply example data loader for a mouse lung data set could look li
 
 .. code-block:: python
 
-class MyDataset(DatasetBase)    
-    def __init__(
-            self,
-            path: Union[str, None] = None,
-            meta_path: Union[str, None] = None,
-            **kwargs
-    ):
-        super().__init__(path=path, meta_path=meta_path, **kwargs)
-        self.author = "me"
-        self.doi = "my preprint"
-        self.download = "my GEO upload"
-        self.normalisation = "raw"  # because I uploaded raw counts, which is good practice!
-        self.organ = "lung"
-        self.organism = "mouse"
-        self.protocol = "smart-seq2"
-        self.year = "2020"
+    class MyDataset(DatasetBase)
+        def __init__(
+                self,
+                path: Union[str, None] = None,
+                meta_path: Union[str, None] = None,
+                **kwargs
+        ):
+            super().__init__(path=path, meta_path=meta_path, **kwargs)
+            self.author = "me"
+            self.doi = "my preprint"
+            self.download = "my GEO upload"
+            self.normalisation = "raw"  # because I uploaded raw counts, which is good practice!
+            self.organ = "lung"
+            self.organism = "mouse"
+            self.protocol = "smart-seq2"
+            self.year = "2020"
 
-        self.obs_key_cellontology_original = "louvain_named"  # i save my cell type names in here
-        
-        self.class_maps = {
-            "0": {  # one entry for each cell type version for this species and organ
-                'my weird name for T cells': 'T cell',  # one map from a custom ID to an ontology supported ID
-            },
-        }
+            self.obs_key_cellontology_original = "louvain_named"  # i save my cell type names in here
 
-    def _load(self, fn=None):
-        # assuming that i uploaded an h5ad somewhere (in self.download)
-        if fn is None:
-            fn = os.path.join(self.path, "mouse", "lung", "my.h5ad")
-        self.adata = anndata.read(fn)
+            self.class_maps = {
+                "0": {  # one entry for each cell type version for this species and organ
+                    'my weird name for T cells': 'T cell',  # one map from a custom ID to an ontology supported ID
+                },
+            }
+
+        def _load(self, fn=None):
+            # assuming that i uploaded an h5ad somewhere (in self.download)
+            if fn is None:
+                fn = os.path.join(self.path, "mouse", "lung", "my.h5ad")
+            self.adata = anndata.read(fn)
 
 
 Data loaders can be added into a copy of the sfaira repository and can be used locally before they are contributed to
