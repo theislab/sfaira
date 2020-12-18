@@ -161,6 +161,9 @@ class DatasetBase(abc.ABC):
         # Check if file needs to be cached:
         if allow_caching and not os.path.exists(fn_cache):
             assert self.cache_path is not None, "set cache_path to use caching"
+            dir_cache = os.path.dirname(fn_cache)
+            if not os.path.exists(dir_cache):
+                os.makedirs(dir_cache)
             self.adata.write_h5ad(fn_cache)
 
     def load(
