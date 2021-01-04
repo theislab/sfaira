@@ -29,6 +29,7 @@ class DatasetBase(abc.ABC):
 
     _age: Union[None, str]
     _author: Union[None, str]
+    _dev_stage: Union[None, str]
     _doi: Union[None, str]
     _download: Union[None, str]
     _download_meta: Union[None, str]
@@ -79,7 +80,9 @@ class DatasetBase(abc.ABC):
         self.meta_path = meta_path
         self.cache_path = cache_path
 
+        self._age = None
         self._author = None
+        self._dev_stage = None
         self._doi = None
         self._download = None
         self._download_meta = None
