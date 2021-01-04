@@ -772,6 +772,8 @@ class DatasetBase(abc.ABC):
         ))
         meta.to_csv(fn_meta)
 
+    # Properties:
+
     @property
     def age(self) -> str:
         if self._age is not None:
@@ -786,6 +788,8 @@ class DatasetBase(abc.ABC):
 
     @age.setter
     def age(self, x: str):
+        self.__erasing_protection(attr="age", val_old=self._age, val_new=x)
+        self.__value_protection(attr="age", allowed=self._ADATA_IDS_SFAIRA.age_allowed_entries, attempted=x)
         self._age = x
 
     @property
@@ -813,6 +817,7 @@ class DatasetBase(abc.ABC):
 
     @author.setter
     def author(self, x: str):
+        self.__erasing_protection(attr="author", val_old=self._author, val_new=x)
         self._author = x
 
     @property
@@ -829,6 +834,8 @@ class DatasetBase(abc.ABC):
 
     @dev_stage.setter
     def dev_stage(self, x: str):
+        self.__erasing_protection(attr="dev_stage", val_old=self._dev_stage, val_new=x)
+        self.__value_protection(attr="dev_stage", allowed=self._ADATA_IDS_SFAIRA.dev_stage_allowed_entries, attempted=x)
         self._dev_stage = x
 
     @property
@@ -844,6 +851,7 @@ class DatasetBase(abc.ABC):
 
     @doi.setter
     def doi(self, x: str):
+        self.__erasing_protection(attr="doi", val_old=self._doi, val_new=x)
         self._doi = x
 
     @property
@@ -870,6 +878,7 @@ class DatasetBase(abc.ABC):
 
     @download.setter
     def download(self, x: Union[str, List[str], Tuple[List[str]], None]):
+        self.__erasing_protection(attr="download", val_old=self._download, val_new=x)
         # Formats to tuple with single element, which is a list of all download websites relevant to dataset,
         # which can be used as a single element column in a pandas data frame.
         if isinstance(x, str) or x is None:
@@ -903,6 +912,7 @@ class DatasetBase(abc.ABC):
 
     @download_meta.setter
     def download_meta(self, x: Union[str, List[str], Tuple[List[str]], None]):
+        self.__erasing_protection(attr="download_meta", val_old=self._download_meta, val_new=x)
         # Formats to tuple with single element, which is a list of all download websites relevant to dataset,
         # which can be used as a single element column in a pandas data frame.
         if isinstance(x, str) or x is None:
@@ -925,6 +935,8 @@ class DatasetBase(abc.ABC):
 
     @ethnicity.setter
     def ethnicity(self, x: str):
+        self.__erasing_protection(attr="ethnicity", val_old=self._ethnicity, val_new=x)
+        self.__value_protection(attr="ethnicity", allowed=self._ADATA_IDS_SFAIRA.ethnicity_allowed_entries, attempted=x)
         self._ethnicity = x
 
     @property
@@ -941,6 +953,7 @@ class DatasetBase(abc.ABC):
 
     @healthy.setter
     def healthy(self, x: bool):
+        self.__erasing_protection(attr="healthy", val_old=self._healthy, val_new=x)
         self._healthy = x
 
     @property
@@ -949,6 +962,7 @@ class DatasetBase(abc.ABC):
 
     @healthy_state_healthy.setter
     def healthy_state_healthy(self, x: str):
+        self.__erasing_protection(attr="healthy_state_healthy", val_old=self._healthy_state_healthy, val_new=x)
         self._healthy_state_healthy = x
 
     @property
@@ -962,24 +976,26 @@ class DatasetBase(abc.ABC):
 
     @id.setter
     def id(self, x: str):
+        self.__erasing_protection(attr="id", val_old=self._id, val_new=x)
         self._id = x
 
     @property
-    def meta(self) -> pd.DataFrame:
+    def meta(self) -> Union[None, pd.DataFrame]:
         return self._meta
 
     @meta.setter
-    def meta(self, x: pd.DataFrame):
+    def meta(self, x: Union[None, pd.DataFrame]):
         # Make sure formatting is correct:
-        for k, v in x.items():
-            if k not in self._META_DATA_FIELDS.keys():
-                raise ValueError(f"did not find {k} in format look up table")
-            else:
-                if x[k] is not None:  # None is always allowed.
-                    if not isinstance(v[0], self._META_DATA_FIELDS[k]):
-                        raise ValueError(f"key {k} in meta data table did not match signature "
-                                         f"{str(self._META_DATA_FIELDS[k])}")
-        self.meta = x
+        if x is not None:
+            for k, v in x.items():
+                if k not in self._META_DATA_FIELDS.keys():
+                    raise ValueError(f"did not find {k} in format look up table")
+                else:
+                    if x[k] is not None:  # None is always allowed.
+                        if not isinstance(v[0], self._META_DATA_FIELDS[k]):
+                            raise ValueError(f"key {k} in meta data table did not match signature "
+                                             f"{str(self._META_DATA_FIELDS[k])}")
+        self._meta = x
 
     @property
     def ncells(self) -> int:
@@ -1007,6 +1023,9 @@ class DatasetBase(abc.ABC):
 
     @normalization.setter
     def normalization(self, x: str):
+        self.__erasing_protection(attr="normalization", val_old=self._normalization, val_new=x)
+        self.__value_protection(attr="normalization", allowed=self._ADATA_IDS_SFAIRA.normalization_allowed_entries,
+                                attempted=x)
         self._normalization = x
 
     @property
@@ -1015,6 +1034,7 @@ class DatasetBase(abc.ABC):
 
     @obs_key_age.setter
     def obs_key_age(self, x: str):
+        self.__erasing_protection(attr="obs_key_age", val_old=self._obs_key_age, val_new=x)
         self._obs_key_age = x
 
     @property
@@ -1023,6 +1043,7 @@ class DatasetBase(abc.ABC):
 
     @obs_key_cellontology_id.setter
     def obs_key_cellontology_id(self, x: str):
+        self.__erasing_protection(attr="obs_key_cellontology_id", val_old=self._obs_key_cellontology_id, val_new=x)
         self._obs_key_cellontology_id = x
 
     @property
@@ -1031,6 +1052,8 @@ class DatasetBase(abc.ABC):
 
     @obs_key_cellontology_original.setter
     def obs_key_cellontology_original(self, x: str):
+        self.__erasing_protection(attr="obs_key_cellontology_original", val_old=self._obs_key_cellontology_original,
+                                  val_new=x)
         self._obs_key_cellontology_original = x
 
     @property
@@ -1039,6 +1062,7 @@ class DatasetBase(abc.ABC):
 
     @obs_key_dev_stage.setter
     def obs_key_dev_stage(self, x: str):
+        self.__erasing_protection(attr="obs_key_dev_stage", val_old=self._obs_key_dev_stage, val_new=x)
         self._obs_key_dev_stage = x
 
     @property
@@ -1047,6 +1071,7 @@ class DatasetBase(abc.ABC):
 
     @obs_key_ethnicity.setter
     def obs_key_ethnicity(self, x: str):
+        self.__erasing_protection(attr="obs_key_ethnicity", val_old=self._obs_key_ethnicity, val_new=x)
         self._obs_key_ethnicity = x
 
     @property
@@ -1055,6 +1080,7 @@ class DatasetBase(abc.ABC):
 
     @obs_key_healthy.setter
     def obs_key_healthy(self, x: str):
+        self.__erasing_protection(attr="obs_key_healthy", val_old=self._obs_key_healthy, val_new=x)
         self._obs_key_healthy = x
 
     @property
@@ -1063,6 +1089,7 @@ class DatasetBase(abc.ABC):
 
     @obs_key_organ.setter
     def obs_key_organ(self, x: str):
+        self.__erasing_protection(attr="obs_key_organ", val_old=self._obs_key_organ, val_new=x)
         self._obs_key_organ = x
 
     @property
@@ -1071,6 +1098,7 @@ class DatasetBase(abc.ABC):
 
     @obs_key_organism.setter
     def obs_key_organism(self, x: str):
+        self.__erasing_protection(attr="obs_key_organism", val_old=self._obs_key_organism, val_new=x)
         self._obs_key_organism = x
 
     @property
@@ -1079,6 +1107,7 @@ class DatasetBase(abc.ABC):
 
     @obs_key_protocol.setter
     def obs_key_protocol(self, x: str):
+        self.__erasing_protection(attr="obs_key_protocol", val_old=self._obs_key_protocol, val_new=x)
         self._obs_key_protocol = x
 
     @property
@@ -1087,6 +1116,7 @@ class DatasetBase(abc.ABC):
 
     @obs_key_sex.setter
     def obs_key_sex(self, x: str):
+        self.__erasing_protection(attr="obs_key_sex", val_old=self._obs_key_sex, val_new=x)
         self._obs_key_sex = x
 
     @property
@@ -1095,6 +1125,7 @@ class DatasetBase(abc.ABC):
 
     @obs_key_state_exact.setter
     def obs_key_state_exact(self, x: str):
+        self.__erasing_protection(attr="obs_key_state_exact", val_old=self._obs_key_state_exact, val_new=x)
         self._obs_key_state_exact = x
 
     @property
@@ -1103,6 +1134,7 @@ class DatasetBase(abc.ABC):
 
     @obs_key_subtissue.setter
     def obs_key_subtissue(self, x: str):
+        self.__erasing_protection(attr="obs_key_subtissue", val_old=self._obs_key_subtissue, val_new=x)
         self._obs_key_subtissue = x
 
     @property
@@ -1119,6 +1151,8 @@ class DatasetBase(abc.ABC):
 
     @organ.setter
     def organ(self, x: str):
+        self.__erasing_protection(attr="organ", val_old=self._organ, val_new=x)
+        self.__value_protection(attr="organ", allowed=self._ADATA_IDS_SFAIRA.organ_allowed_entries, attempted=x)
         self._organ = x
 
     @property
@@ -1135,8 +1169,8 @@ class DatasetBase(abc.ABC):
 
     @organism.setter
     def organism(self, x: str):
-        if x not in self._ADATA_IDS_SFAIRA.organism_allowed_entries:
-            raise ValueError(f"{x} is not a valid entry for organism")
+        self.__erasing_protection(attr="organism", val_old=self._organism, val_new=x)
+        self.__value_protection(attr="organism", allowed=self._ADATA_IDS_SFAIRA.organism_allowed_entries, attempted=x)
         self._organism = x
 
     @property
@@ -1153,6 +1187,8 @@ class DatasetBase(abc.ABC):
 
     @protocol.setter
     def protocol(self, x: str):
+        self.__erasing_protection(attr="protocol", val_old=self._protocol, val_new=x)
+        self.__value_protection(attr="protocol", allowed=self._ADATA_IDS_SFAIRA.protocol_allowed_entries, attempted=x)
         self._protocol = x
 
     @property
@@ -1169,6 +1205,8 @@ class DatasetBase(abc.ABC):
 
     @sex.setter
     def sex(self, x: str):
+        self.__erasing_protection(attr="sex", val_old=self._sex, val_new=x)
+        self.__value_protection(attr="sex", allowed=self._ADATA_IDS_SFAIRA.sex_allowed_entries, attempted=x)
         self._sex = x
 
     @property
@@ -1177,6 +1215,7 @@ class DatasetBase(abc.ABC):
 
     @source.setter
     def source(self, x: Union[str, None]):
+        self.__erasing_protection(attr="source", val_old=self._source, val_new=x)
         self._source = x
 
     @property
@@ -1193,6 +1232,7 @@ class DatasetBase(abc.ABC):
 
     @state_exact.setter
     def state_exact(self, x: str):
+        self.__erasing_protection(attr="state_exact", val_old=self._state_exact, val_new=x)
         self._state_exact = x
 
     @property
@@ -1209,6 +1249,8 @@ class DatasetBase(abc.ABC):
 
     @subtissue.setter
     def subtissue(self, x: str):
+        self.__erasing_protection(attr="subtissue", val_old=self._subtissue, val_new=x)
+        self.__value_protection(attr="subtissue", allowed=self._ADATA_IDS_SFAIRA.subtissue_allowed_entries, attempted=x)
         self._subtissue = x
 
     @property
@@ -1217,6 +1259,7 @@ class DatasetBase(abc.ABC):
 
     @var_ensembl_col.setter
     def var_ensembl_col(self, x: str):
+        self.__erasing_protection(attr="var_ensembl_col", val_old=self._var_ensembl_col, val_new=x)
         self._var_ensembl_col = x
 
     @property
@@ -1225,6 +1268,7 @@ class DatasetBase(abc.ABC):
 
     @var_symbol_col.setter
     def var_symbol_col(self, x: str):
+        self.__erasing_protection(attr="var_symbol_col", val_old=self._var_symbol_col, val_new=x)
         self._var_symbol_col = x
 
     @property
@@ -1241,7 +1285,41 @@ class DatasetBase(abc.ABC):
 
     @year.setter
     def year(self, x: int):
+        self.__erasing_protection(attr="year", val_old=self._year, val_new=x)
+        self.__value_protection(attr="year", allowed=self._ADATA_IDS_SFAIRA.year_allowed_entries, attempted=x)
         self._year = x
+
+    # Private methods:
+
+    def __erasing_protection(self, attr, val_old, val_new):
+        """
+        This is called when a erasing protected attribute is set to check whether it was set before.
+
+        :param attr: Attribute to be set.
+        :param val_old: Old value for attribute to be set.
+        :param val_new: New value for attribute to be set.
+        """
+        if val_old is not None:
+            raise ValueError(f"attempted to set erasing protected attribute {attr}: "
+                             f"previously was {str(val_old)}, attempted to set {str(val_new)}")
+
+    def __value_protection(self, attr, allowed, attempted):
+        """
+        Check whether value is from set of allowed values.
+
+        Does not check if allowed is None.
+
+        :param attr:
+        :param allowed:
+        :param attempted:
+        :return:
+        """
+        if allowed is not None:
+            if not isinstance(attempted, list):
+                attempted = list(attempted)
+            for x in attempted:
+                if x not in allowed:
+                    raise ValueError(f"{x} is not a valid entry for {attr}, choose from: {str(allowed)}")
 
 
 class DatasetGroupBase(abc.ABC):

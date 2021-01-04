@@ -196,7 +196,19 @@ class ADATA_IDS_SFAIRA(ADATA_IDS_EXTENDED):
         self._mapped_features = "mapped_features"
         self._remove_gene_version = "remove_gene_version"
 
+        # Allowed field values:
+        self._age_allowed_entries = None
+        self._dev_stage_allowed_entries = None
+        self._ethnicity_allowed_entries = None
+        self._normalization_allowed_entries = None
+        self._organ_allowed_entries = None
         self._organism_allowed_entries = ["mouse", "human"]
+        self._protocol_allowed_entries = None
+        self._sex_allowed_entries = None
+        self._subtissue_allowed_entries = None
+        self._year_allowed_entries = list(range(2000, 3000))
+        # Free fields that are not constrained:
+        # _author, _download, _download_meta, _doi, _id, _state_exact
 
     @property
     def load_raw(self) -> str:
@@ -211,8 +223,44 @@ class ADATA_IDS_SFAIRA(ADATA_IDS_EXTENDED):
         return self._remove_gene_version
 
     @property
+    def age_allowed_entries(self) -> List[str]:
+        return self._age_allowed_entries
+
+    @property
+    def dev_stage_allowed_entries(self) -> List[str]:
+        return self._dev_stage_allowed_entries
+
+    @property
+    def ethnicity_allowed_entries(self) -> List[str]:
+        return self._ethnicity_allowed_entries
+
+    @property
+    def normalization_allowed_entries(self) -> List[str]:
+        return self._normalization_allowed_entries
+
+    @property
+    def organ_allowed_entries(self) -> List[str]:
+        return self._organ_allowed_entries
+
+    @property
     def organism_allowed_entries(self) -> List[str]:
         return self._organism_allowed_entries
+
+    @property
+    def protocol_allowed_entries(self) -> List[str]:
+        return self._protocol_allowed_entries
+
+    @property
+    def sex_allowed_entries(self) -> List[str]:
+        return self._sex_allowed_entries
+
+    @property
+    def subtissue_allowed_entries(self) -> List[str]:
+        return self._subtissue_allowed_entries
+
+    @property
+    def year_allowed_entries(self) -> List[int]:
+        return self._year_allowed_entries
 
 
 class ADATA_IDS_CELLXGENE(ADATA_IDS_EXTENDED):
