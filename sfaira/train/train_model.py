@@ -14,7 +14,7 @@ from .external import ORGANISM_DICT
 
 class TargetZoos:
     """
-    Class that provides access to all available dataset groups in sfaira.
+    Class that provides access to all available dataset anatomical_groups in sfaira.
 
     Parameters
     ----------

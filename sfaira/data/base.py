@@ -556,7 +556,7 @@ class DatasetBase(abc.ABC):
                     adata_backed.obs.loc[np.sort(idx), k] = [self.adata.uns[k] for i in range(len(idx))]
                 else:
                     # Need to fill this instead of throwing an exception as this condition can trigger for one element
-                    # within a loop over multiple data sets (ie in data set groups).
+                    # within a loop over multiple data sets (ie in data set anatomical_groups).
                     adata_backed.obs.loc[idx, k] = ["key_not_found" for i in range(len(idx))]
         elif isinstance(adata_backed.X, anndata._core.sparse_dataset.SparseDataset):  # backed sparse
             # cannot scatter update on backed sparse yet! assert that updated block is meant to be appended:
@@ -1622,14 +1622,15 @@ class DatasetGroupDirectoryOrientedBase(DatasetGroupBase):
         # Collect all data loaders from files in directory:
         datasets = []
         cwd = os.path.dirname(file_base)
+        organism = cwd.split("/")[-2]
+        dataset_module = cwd.split("/")[-1]
         for f in os.listdir(cwd):
             if os.path.isfile(os.path.join(cwd, f)):  # only files
                 # Narrow down to data set files:
                 if f.split(".")[-1] == "py" and f.split(".")[0] not in ["__init__", "base", "group"]:
-                    dataset_directory = cwd.split("/")[-1]
                     file_module = ".".join(f.split(".")[:-1])
                     Dataset = pydoc.locate(
-                        "sfaira.sfaira.data.mouse." + dataset_directory + "." + file_module + ".Dataset")
+                        "sfaira.sfaira.data." + organism + "." + dataset_module + "." + file_module + ".Dataset")
                     datasets.append(Dataset(path=path, meta_path=meta_path, cache_path=cache_path))
         keys = [x.id for x in datasets]
         self.datasets = dict(zip(keys, datasets))
@@ -1705,7 +1706,7 @@ class DatasetSuperGroup:
             allow_caching: bool = True,
     ):
         """
-        Loads data set groups into anndata object.
+        Loads data set anatomical_groups into anndata object.
 
         :param celltype_version: Version of cell type ontology to use.
             Uses most recent within each DatasetGroup if None.
@@ -1747,7 +1748,7 @@ class DatasetSuperGroup:
             allow_caching: bool = True,
     ):
         """
-        Loads data set groups into backed anndata object.
+        Loads data set anatomical_groups into backed anndata object.
 
         Example usage:
 
@@ -1869,3 +1870,28 @@ class DatasetSuperGroup:
         """
         for x in self.dataset_groups:
             x.subset(key=key, values=values)
+
+
+class DatasetSuperGroupDirectoryOrientedBase(DatasetSuperGroup):
+
+    def __init__(
+            self,
+            file_base: str,
+            path: Union[str, None] = None,
+            meta_path: Union[str, None] = None,
+            cache_path: Union[str, None] = None,
+    ):
+        # Collect all data loaders from files in directory:
+        dataset_groups = []
+        cwd = os.path.dirname(file_base)
+        organism = cwd.split("/")[-1]
+        for f in os.listdir(cwd):
+            if os.path.isdir(os.path.join(cwd, f)):  # only directories
+                # Narrow down to data set directories:
+                if f[0] == "d":
+                    DatasetGroupDirectoryOriented = pydoc.locate(
+                        "sfaira.sfaira.data." + organism + "." + f + ".DatasetGroupDirectoryOriented")
+                    dataset_groups.append(
+                        DatasetGroupDirectoryOriented(path=path, meta_path=meta_path, cache_path=cache_path)
+                    )
+        super().__init__(dataset_groups=dataset_groups)
