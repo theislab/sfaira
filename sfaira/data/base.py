@@ -686,13 +686,13 @@ class DatasetBase(abc.ABC):
         # Only load meta data if file exists:
         if os.path.isfile(fn):
             self.meta = pandas.read_csv(fn, usecols=self._META_DATA_FIELDS)
-        # Make sure None entries are formatted as None and not as string "None":
-        keys_to_change = []
-        for k, v in self.meta.items():
-            if isinstance(v[0], str) and v[0] == "None":
-                keys_to_change.append(k)
-        for k in keys_to_change:
-            self.meta[k] = [None]
+            # Make sure None entries are formatted as None and not as string "None":
+            keys_to_change = []
+            for k, v in self.meta.items():
+                if isinstance(v[0], str) and v[0] == "None":
+                    keys_to_change.append(k)
+            for k in keys_to_change:
+                self.meta[k] = [None]
 
     def write_meta(
             self,
