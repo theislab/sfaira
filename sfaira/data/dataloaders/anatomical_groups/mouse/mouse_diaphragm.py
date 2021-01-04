@@ -1,8 +1,9 @@
+import os
 from typing import Union
 
 from .external import DatasetGroupBase
 
-from sfaira.data.dataloaders.loaders.d10_1101_661728 import Dataset as Dataset0001
+from sfaira.data.dataloaders.loaders.d10_1101_661728.mouse_diaphragm_2019_smartseq2_pisco_001 import Dataset as Dataset0001
 
 
 class DatasetGroupDiaphragm(DatasetGroupBase):

@@ -1,9 +1,10 @@
+import os
 from typing import Union
 
 from .external import DatasetGroupBase
 
-from sfaira.data.dataloaders.loaders.d10_1101_661728 import Dataset as Dataset0001
-from sfaira.data.dataloaders.loaders.d10_1101_661728 import Dataset as Dataset0002
+from sfaira.data.dataloaders.loaders.d10_1101_661728.mouse_tongue_2019_10x_pisco_001 import Dataset as Dataset0001
+from sfaira.data.dataloaders.loaders.d10_1101_661728.mouse_tongue_2019_smartseq2_pisco_001 import Dataset as Dataset0002
 
 
 class DatasetGroupTongue(DatasetGroupBase):

@@ -9,8 +9,9 @@ import os
 from typing import List, Union
 import warnings
 
-from .external import EstimatorKerasEmbedding, EstimatorKerasCelltype, DatasetInteractive
-from .model_zoo import ModelZooEmbedding, ModelZooCelltype
+from sfaira.data import DatasetInteractive
+from sfaira.estimators import EstimatorKerasEmbedding, EstimatorKerasCelltype
+from sfaira.interface.model_zoo import ModelZooEmbedding, ModelZooCelltype
 
 
 class UserInterface:

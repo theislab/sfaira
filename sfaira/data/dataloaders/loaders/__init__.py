@@ -1,1 +1,1 @@
-from .super_group import DatasetSuperGroupDirectoryOriented
+from .super_group import DatasetSuperGroupLoaders

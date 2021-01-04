@@ -1624,7 +1624,6 @@ class DatasetGroupDirectoryOrientedBase(DatasetGroupBase):
         # Collect all data loaders from files in directory:
         datasets = []
         cwd = os.path.dirname(file_base)
-        organism = cwd.split("/")[-2]
         dataset_module = cwd.split("/")[-1]
         for f in os.listdir(cwd):
             if os.path.isfile(os.path.join(cwd, f)):  # only files
@@ -1632,7 +1631,7 @@ class DatasetGroupDirectoryOrientedBase(DatasetGroupBase):
                 if f.split(".")[-1] == "py" and f.split(".")[0] not in ["__init__", "base", "group"]:
                     file_module = ".".join(f.split(".")[:-1])
                     Dataset = pydoc.locate(
-                        "sfaira.sfaira.data." + organism + "." + dataset_module + "." + file_module + ".Dataset")
+                        "sfaira.sfaira.data.dataloaders.loaders." + dataset_module + "." + file_module + ".Dataset")
                     datasets.append(Dataset(path=path, meta_path=meta_path, cache_path=cache_path))
         keys = [x.id for x in datasets]
         self.datasets = dict(zip(keys, datasets))
@@ -1893,76 +1892,3 @@ class DatasetSuperGroup:
         """
         for x in self.dataset_groups:
             x.subset(key=key, values=values)
-
-
-class DatasetSuperGroupDirectoryOfGroups(DatasetSuperGroup):
-
-    def __init__(
-            self,
-            file_base: str,
-            dir_prefix: str,
-            dir_exlcude: List[str] = [],
-            path: Union[str, None] = None,
-            meta_path: Union[str, None] = None,
-            cache_path: Union[str, None] = None,
-    ):
-        """
-        Class that sits ontop of a directory of data set directories that each contain a data set group.
-
-        :param file_base:
-        :param dir_prefix: Prefix to subselect directories by. Set to "" for no constraints.
-        :param path:
-        :param meta_path:
-        :param cache_path:
-        """
-        # Collect all data loaders from files in directory:
-        dataset_groups = []
-        cwd = os.path.dirname(file_base)
-        organism = cwd.split("/")[-1]
-        for f in os.listdir(cwd):
-            if os.path.isdir(os.path.join(cwd, f)):  # only directories
-                # Narrow down to data set directories:
-                if f[:len(dir_prefix)] == dir_prefix and f not in dir_exlcude:
-                    DatasetGroupDirectoryOriented = pydoc.locate(
-                        "sfaira.sfaira.data.dataloaders." + organism + "." + f + ".DatasetGroupDirectoryOriented")
-                    dataset_groups.append(
-                        DatasetGroupDirectoryOriented(path=path, meta_path=meta_path, cache_path=cache_path)
-                    )
-        super().__init__(dataset_groups=dataset_groups)
-
-
-class DatasetSuperGroupDirectoryOfSuperGroups(DatasetSuperGroup):
-
-    def __init__(
-            self,
-            file_base: str,
-            dir_prefix: str,
-            dir_exlcude: List[str] = [],
-            path: Union[str, None] = None,
-            meta_path: Union[str, None] = None,
-            cache_path: Union[str, None] = None,
-    ):
-        """
-        Class that sits ontop of a directory of data set directories that each contain a data set super group,
-        instances of this class can be arbitrarily nested as super groups can be nested.
-
-        :param file_base:
-        :param dir_prefix: Prefix to subselect directories by. Set to "" for no constraints.
-        :param path:
-        :param meta_path:
-        :param cache_path:
-        """
-        # Collect all data loaders from files in directory:
-        dataset_groups = []
-        cwd = os.path.dirname(file_base)
-        organism = cwd.split("/")[-1]
-        for f in os.listdir(cwd):
-            if os.path.isdir(os.path.join(cwd, f)):  # only directories
-                # Narrow down to data set directories:
-                if f[:len(dir_prefix)] == dir_prefix and f not in dir_exlcude:
-                    DatasetGroupDirectoryOriented = pydoc.locate(
-                        "sfaira.sfaira.data.dataloaders." + organism + "." + f + ".DatasetSuperGroupDirectoryOriented")
-                    dataset_groups.append(
-                        DatasetGroupDirectoryOriented(path=path, meta_path=meta_path, cache_path=cache_path)
-                    )
-        super().__init__(dataset_groups=dataset_groups)

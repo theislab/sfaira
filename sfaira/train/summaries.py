@@ -6,10 +6,10 @@ import shutil
 import warnings
 from typing import Union, List
 import os
-from .train_model import TargetZoos
-from .external import ORGANISM_DICT
 
-from .external import EstimatorKerasEmbedding
+from sfaira.train.train_model import TargetZoos
+from sfaira.versions.celltype_versions import ORGANISM_DICT
+from sfaira.estimators import EstimatorKerasEmbedding
 
 
 def _tp(yhat, ytrue):

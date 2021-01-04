@@ -1,10 +1,11 @@
 from typing import Union
 
-from sfaira.data import DatasetSuperGroupDirectoryOfSuperGroups
+from sfaira.data.dataloaders.loaders import DatasetSuperGroupLoaders
 from sfaira.data.dataloaders.databases import DatasetSuperGroupDatabases
+from sfaira.data import DatasetSuperGroup
 
 
-class DatasetSuperGroupSfaira(DatasetSuperGroupDirectoryOfSuperGroups):
+class DatasetSuperGroupSfaira(DatasetSuperGroup):
 
     def __init__(
             self,
@@ -12,18 +13,23 @@ class DatasetSuperGroupSfaira(DatasetSuperGroupDirectoryOfSuperGroups):
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
     ):
-        # Load all organisms: (accesses only .loaders/).
-        super().__init__(
-            file_base=__file__,
-            dir_prefix="",
-            dir_exlcude=["databases", "anatomical_groups"],
-            path=path,
-            meta_path=meta_path,
-            cache_path=cache_path,
-        )
-        # Load structured data bases
-        self.extend_dataset_groups([DatasetSuperGroupDatabases(
-            path=path,
-            meta_path=meta_path,
-            cache_path=cache_path,
-        )])
+        """
+        Nested super group of data loaders, unifying data set wise data loader SuperGroup and the database
+        interface SuperGroup.
+
+        :param path:
+        :param meta_path:
+        :param cache_path:
+        """
+        super().__init__(dataset_groups=[
+            DatasetSuperGroupLoaders(
+                path=path,
+                meta_path=meta_path,
+                cache_path=cache_path,
+            ),
+            DatasetSuperGroupDatabases(
+                path=path,
+                meta_path=meta_path,
+                cache_path=cache_path,
+            )
+        ])
