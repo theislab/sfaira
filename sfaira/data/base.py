@@ -662,7 +662,9 @@ class DatasetBase(abc.ABC):
         else:
             if isinstance(fn, str):
                 fn = os.path.normpath(fn)
-        self.meta = pandas.read_csv(fn, usecols=self._META_DATA_FIELDS)
+        # Only load meta data if file exists:
+        if os.path.isfile(fn):
+            self.meta = pandas.read_csv(fn, usecols=self._META_DATA_FIELDS)
 
     def write_meta(
             self,
