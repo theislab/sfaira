@@ -25,20 +25,24 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.organism = "loaders"
         self.id = "human_prostate_2018_10x_henry_001_10.1016/j.celrep.2018.11.086"
+
         self.download = "https://covid19.cog.sanger.ac.uk/henry18_0.processed.h5ad"
         self.download_meta = None
-        self.organ = "prostate"
-        self.sub_tissue = "prostate"
+
         self.author = "Strand"
-        self.year = 2018
         self.doi = "10.1016/j.celrep.2018.11.086"
-        self.protocol = '10x'
-        self.normalization = 'raw'
         self.healthy = True
+        self.normalization = 'raw'
         self.state_exact = 'healthy'
+        self.organ = "prostate"
+        self.organism = "human"
+        self.protocol = '10x'
+        self.sub_tissue = "prostate"
+        self.year = 2018
+
         self.var_symbol_col = 'index'
+
         self.obs_key_cellontology_original = 'CellType'
 
         self.class_maps = {

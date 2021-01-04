@@ -2,7 +2,7 @@ import pydoc
 import os
 from typing import Union
 
-from sfaira.data import DatasetSuperGroup
+from sfaira.data import DatasetSuperGroup, DatasetGroupDirectoryOrientedBase
 
 
 class DatasetSuperGroupLoaders(DatasetSuperGroup):
@@ -32,12 +32,15 @@ class DatasetSuperGroupLoaders(DatasetSuperGroup):
             if os.path.isdir(os.path.join(cwd, f)):  # only directories
                 # Narrow down to data set directories:
                 if f[:len(dir_prefix)] == dir_prefix and f not in dir_exlcude:
-                    DatasetGroupDirectoryOriented = pydoc.locate(
-                        "sfaira.sfaira.data.dataloaders.loaders." + f + ".DatasetGroupDirectoryOriented")
-                    if DatasetGroupDirectoryOriented is not None:
-                        dataset_groups.append(
-                            DatasetGroupDirectoryOriented(path=path, meta_path=meta_path, cache_path=cache_path)
-                        )
+                    path_dsg = pydoc.locate(
+                        "sfaira.sfaira.data.dataloaders.loaders." + f + ".FILE_PATH")
+                    if path_dsg is not None:
+                        dataset_groups.append(DatasetGroupDirectoryOrientedBase(
+                            file_base=path_dsg,
+                            path=path,
+                            meta_path=meta_path,
+                            cache_path=cache_path
+                        ))
                     else:
                         print(f"WARNING: DatasetGroupDirectoryOriented was None for {f}")
         super().__init__(dataset_groups=dataset_groups)

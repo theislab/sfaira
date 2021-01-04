@@ -33,19 +33,22 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.organism = "loaders"
         self.id = "human_lung_2020_10x_travaglini_001_10.1038/s41586-020-2922-4"
+
         self.download = "https://www.synapse.org/#!Synapse:syn21041850"
         self.download_meta = None
-        self.organ = "lung"
-        self.sub_tissue = "proximal, medial, distal, blood"
+
         self.author = 'Krasnow'
-        self.year = 2020
         self.doi = "10.1038/s41586-020-2922-4"
-        self.protocol = '10x'
-        self.normalization = 'raw'
         self.healthy = True
+        self.normalization = 'raw'
+        self.organ = "lung"
+        self.organism = "human"
+        self.protocol = '10x'
         self.state_exact = 'healthy'
+        self.sub_tissue = "proximal, medial, distal, blood"
+        self.year = 2020
+
         self.var_symbol_col = 'index'
 
         self.class_maps = {

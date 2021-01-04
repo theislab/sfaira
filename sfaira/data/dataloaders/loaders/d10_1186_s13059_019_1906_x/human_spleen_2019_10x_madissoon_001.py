@@ -24,21 +24,25 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.organism = "loaders"
         self.id = "human_spleen_2019_10x_madissoon_001_10.1186/s13059-019-1906-x"
+
         self.download = "https://cellgeni.cog.sanger.ac.uk/tissue-stability/tissue-stability/spleen.cellxgene.h5ad"
         self.download_meta = None
-        self.organ = "spleen"
-        self.sub_tissue = "spleen"
+
         self.author = "Meyer"
-        self.year = 2019
         self.doi = "10.1186/s13059-019-1906-x"
-        self.protocol = "10x"
-        self.normalization = 'raw'
         self.healthy = True
+        self.normalization = 'raw'
+        self.organ = "spleen"
+        self.organism = "human"
+        self.protocol = "10x"
         self.state_exact = 'healthy'
+        self.sub_tissue = "spleen"
+        self.year = 2019
+
         self.var_symbol_col = 'index'
         self.var_ensembl_col = 'gene_ids-HCATisStab7463846'
+
         self.obs_key_cellontology_original = 'Celltypes'
 
         self.class_maps = {

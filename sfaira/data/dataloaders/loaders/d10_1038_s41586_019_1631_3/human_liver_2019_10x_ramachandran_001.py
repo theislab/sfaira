@@ -40,18 +40,22 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.organism = "loaders"
         self.id = "human_liver_2019_10x_ramachandran_001_10.1038/s41586-019-1631-3"
+
         self.download = "https://datashare.is.ed.ac.uk/bitstream/handle/10283/3433/tissue.rdata"
         self.download_meta = None
-        self.organ = "liver"
-        self.sub_tissue = "liver"
+
         self.author = 'Henderson'
-        self.year = 2019
         self.doi = '10.1038/s41586-019-1631-3'
-        self.protocol = '10x'
         self.normalization = 'raw'
+        self.organ = "liver"
+        self.organism = "human"
+        self.protocol = '10x'
+        self.sub_tissue = "liver"
+        self.year = 2019
+
         self.var_symbol_col = 'index'
+
         self.obs_key_cellontology_original = 'annotation_lineage'
         self.obs_key_state_exact = 'condition'
         self.obs_key_healthy = self.obs_key_state_exact

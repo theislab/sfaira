@@ -24,20 +24,24 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.organism = "loaders"
         self.id = "human_lung_2019_dropseq_braga_003_10.1038/s41591-019-0468-5"
+
         self.download = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE130nnn/GSE130148/suppl/GSE130148%5Fraw%5Fcounts%2Ecsv%2Egz"
         self.download_meta = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE130nnn/GSE130148/suppl/GSE130148%5Fbarcodes%5Fcell%5Ftypes%2Etxt%2Egz"
-        self.organ = "lung"
-        self.sub_tissue = "parenchymal lung and distal airway specimens"
+
         self.author = 'Teichmann'
-        self.year = 2019
         self.doi = "10.1038/s41591-019-0468-5"
-        self.protocol = 'dropseq'
-        self.normalization = 'raw'
         self.healthy = True
+        self.normalization = 'raw'
+        self.organ = "lung"
+        self.organism = "human"
+        self.protocol = 'dropseq'
         self.state_exact = 'uninvolved areas of tumour resection material'
+        self.sub_tissue = "parenchymal lung and distal airway specimens"
+        self.year = 2019
+
         self.var_symbol_col = 'index'
+
         self.obs_key_cellontology_original = 'celltype'
 
         self.class_maps = {

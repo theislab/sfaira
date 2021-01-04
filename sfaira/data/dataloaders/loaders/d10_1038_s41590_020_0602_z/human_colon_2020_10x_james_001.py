@@ -26,21 +26,25 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.organism = "loaders"
         self.id = "human_colon_2019_10x_james_001_10.1038/s41590-020-0602-z"
+
         self.download = "https://covid19.cog.sanger.ac.uk/james20.processed.h5ad"
         self.download_meta = None
-        self.organ = "colon"
-        self.sub_tissue = "colonic immune cells"
+
         self.author = "Teichmann"
-        self.year = 2020
         self.doi = "10.1038/s41590-020-0602-z"
-        self.protocol = '10x'
-        self.normalization = 'raw'
         self.healthy = True
+        self.normalization = 'raw'
+        self.organ = "colon"
+        self.organism = "human"
+        self.protocol = '10x'
         self.state_exact = 'healthy'
+        self.sub_tissue = "colonic immune cells"
+        self.year = 2020
+
         self.var_symbol_col = 'index'
         self.var_ensembl_col = 'gene_ids'
+
         self.obs_key_cellontology_original = 'cell_type'
 
         self.class_maps = {

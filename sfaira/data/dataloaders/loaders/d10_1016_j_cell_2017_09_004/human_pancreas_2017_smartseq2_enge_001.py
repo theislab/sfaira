@@ -67,20 +67,24 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.organism = "loaders"
         self.id = "human_pancreas_2017_smartseq2_enge_001_10.1016/j.cell.2017.09.004"
+
         self.download = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE81nnn/GSE81547/suppl/GSE81547_RAW.tar"
         self.download_meta = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE81nnn/GSE81547/matrix/GSE81547_series_matrix.txt.gz"
-        self.organ = "pancreas"
-        self.sub_tissue = "islet of Langerhans"
+
         self.author = "Quake"
-        self.year = 2017
         self.doi = "10.1016/j.cell.2017.09.004"
-        self.protocol = 'Smartseq2'
-        self.normalization = 'raw'
         self.healthy = True
+        self.normalization = 'raw'
+        self.protocol = 'Smartseq2'
+        self.organ = "pancreas"
+        self.organism = "human"
         self.state_exact = "healthy"
+        self.sub_tissue = "islet of Langerhans"
+        self.year = 2017
+
         self.var_symbol_col = 'index'
+
         self.obs_key_cellontology_original = 'celltype'
 
         self.class_maps = {

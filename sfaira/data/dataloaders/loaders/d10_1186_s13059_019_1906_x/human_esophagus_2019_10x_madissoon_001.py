@@ -24,22 +24,26 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.organism = "loaders"
         self.id = "human_esophagus_2019_10x_madissoon_001_10.1186/s13059-019-1906-x"
+
         self.download = "https://cellgeni.cog.sanger.ac.uk/tissue-stability/tissue-stability/oesophagus.cellxgene.h5ad"
         # Associated HCA project: https://data.humancellatlas.org/explore/projects/c4077b3c-5c98-4d26-a614-246d12c2e5d7
         self.download_meta = None
-        self.organ = "esophagus"
-        self.sub_tissue = "esophagus"
+
         self.author = "Meyer"
-        self.year = 2019
         self.doi = "10.1186/s13059-019-1906-x"
-        self.protocol = "10x"
-        self.normalization = 'raw'
         self.healthy = True
+        self.normalization = 'raw'
+        self.organ = "esophagus"
+        self.organism = "human"
+        self.protocol = "10x"
         self.state_exact = 'healthy'
+        self.sub_tissue = "esophagus"
+        self.year = 2019
+
         self.var_symbol_col = 'index'
         self.var_ensembl_col = 'gene_ids-HCATisStab7413619'
+
         self.obs_key_cellontology_original = 'Celltypes'
 
         self.class_maps = {

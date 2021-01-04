@@ -24,20 +24,24 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.organism = "loaders"
         self.id = "human_kidney_2019_10xSn_lake_001_10.1038/s41467-019-10861-2"
+
         self.download = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE121nnn/GSE121862/suppl/GSE121862%5FUCSD%2DWU%5FSingle%5FNuclei%5FCluster%5FAnnotated%5FRaw%5FUMI%5FMatrix%2Etsv%2Egz"
         self.download_meta = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE121nnn/GSE121862/suppl/GSE121862%5FUCSD%2DWU%5FSingle%5FNuclei%5FCluster%5FAnnotations%2Ecsv%2Egz"
-        self.organ = "kidney"
-        self.sub_tissue = "kidney"
+
         self.author = 'Jain'
-        self.year = 2019
         self.doi = '10.1038/s41467-019-10861-2'
-        self.protocol = '10xSn'
-        self.normalization = 'raw'
         self.healthy = True
+        self.normalization = 'raw'
+        self.organ = "kidney"
+        self.organism = "human"
+        self.protocol = '10xSn'
         self.state_exact = 'healthy'
+        self.sub_tissue = "kidney"
+        self.year = 2019
+
         self.var_symbol_col = 'index'
+
         self.obs_key_cellontology_original = 'celltype'
 
         self.class_maps = {

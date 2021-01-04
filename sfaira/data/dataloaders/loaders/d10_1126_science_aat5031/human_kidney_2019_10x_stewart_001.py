@@ -24,24 +24,28 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.organism = "loaders"
         self.id = "human_kidney_2019_10x_stewart_001_10.1126/science.aat5031"
+
         self.download = [
             'https://cellgeni.cog.sanger.ac.uk/BenKidney_v2.1/Mature_Full_v2.1.h5ad',
             'https://cellgeni.cog.sanger.ac.uk/BenKidney_v2.1/Fetal_full.h5ad'
         ]
         self.download_meta = None
-        self.organ = "kidney"
-        self.sub_tissue = "renal medulla, renal pelvis, ureter, cortex of kidney"
+
         self.author = 'Clatworthy'
-        self.year = 2019
         self.doi = '10.1126/science.aat5031'
-        self.protocol = '10x'
-        self.normalization = 'norm'
         self.healthy = True
+        self.normalization = 'norm'
+        self.organ = "kidney"
+        self.organism = "human"
+        self.protocol = '10x'
         self.state_exact = 'healthy'
+        self.sub_tissue = "renal medulla, renal pelvis, ureter, cortex of kidney"
+        self.year = 2019
+
         self.var_symbol_col = 'index'
         self.var_ensembl_col = 'ID'
+
         self.obs_key_cellontology_original = 'celltype'
 
         self.class_maps = {

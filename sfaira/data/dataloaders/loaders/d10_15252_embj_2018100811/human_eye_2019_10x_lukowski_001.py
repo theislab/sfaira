@@ -25,21 +25,25 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.organism = "loaders"
         self.id = "human_eye_2019_10x_lukowski_001_10.15252/embj.2018100811"
+
         self.download = "https://covid19.cog.sanger.ac.uk/lukowski19.processed.h5ad"
         self.download_meta = None
-        self.organ = "eye"
-        self.sub_tissue = "retina"
+
         self.author = 'Wong'
-        self.year = 2019
         self.doi = '10.15252/embj.2018100811'
-        self.protocol = '10x'
-        self.normalization = 'raw'
         self.healthy = True
+        self.normalization = 'raw'
+        self.organ = "eye"
+        self.organism = "human"
+        self.protocol = '10x'
         self.state_exact = 'healthy'
+        self.sub_tissue = "retina"
+        self.year = 2019
+
         self.var_symbol_col = 'index'
         self.var_ensembl_col = 'gene_ids'
+
         self.obs_key_cellontology_original = 'CellType'
 
         self.class_maps = {

@@ -1,1 +1,1 @@
-from .group import DatasetGroupDirectoryOriented
+FILE_PATH = __file__

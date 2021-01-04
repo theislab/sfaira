@@ -24,20 +24,24 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.organism = "loaders"
         self.id = "human_lung_2019_10x_braga_001_10.1038/s41591-019-0468-5"
+
         self.download = "https://covid19.cog.sanger.ac.uk/vieira19_Alveoli_and_parenchyma_anonymised.processed.h5ad"
         self.download_meta = None
-        self.organ = "lung"
-        self.sub_tissue = "alveoli, parenchyma"
+
         self.author = 'Teichmann'
-        self.year = 2019
         self.doi = "10.1038/s41591-019-0468-5"
-        self.protocol = '10x'
-        self.normalization = 'norm'
         self.healthy = True
+        self.organ = "lung"
+        self.organism = "human"
+        self.protocol = '10x'
         self.state_exact = 'healthy'
+        self.sub_tissue = "alveoli, parenchyma"
+        self.year = 2019
+        self.normalization = 'norm'
+
         self.var_symbol_col = 'index'
+
         self.obs_key_cellontology_original = 'CellType'
 
         self.class_maps = {

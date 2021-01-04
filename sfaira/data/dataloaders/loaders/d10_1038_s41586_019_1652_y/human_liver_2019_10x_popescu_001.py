@@ -23,20 +23,24 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.organism = "loaders"
         self.id = "human_liver_2019_10x_popescu_001_10.1038/s41586-019-1652-y"
+
         self.download = "https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-7407/"
         self.download_meta = 'private'
-        self.organ = "liver"
-        self.sub_tissue = "liver"
+
         self.author = 'Haniffa'
-        self.year = 2019
         self.doi = '10.1038/s41586-019-1652-y'
-        self.protocol = '10x'
-        self.normalization = 'raw'
         self.healthy = True
+        self.normalization = 'raw'
+        self.organ = "liver"
+        self.organism = "human"
+        self.protocol = '10x'
         self.state_exact = 'healthy'
+        self.sub_tissue = "liver"
+        self.year = 2019
+
         self.var_symbol_col = 'index'
+
         self.obs_key_cellontology_original = 'cell.labels'
 
         self.class_maps = {

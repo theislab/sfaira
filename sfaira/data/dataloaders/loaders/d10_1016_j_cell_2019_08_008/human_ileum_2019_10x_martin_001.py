@@ -25,19 +25,21 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.organism = "loaders"
         self.id = "human_ileum_2019_10x_martin_001_10.1016/j.cell.2019.08.008"
+
         self.download = "https://covid19.cog.sanger.ac.uk/martin19.processed.h5ad"
         self.download_meta = None
-        self.organ = "ileum"
-        self.sub_tissue = "ileum"
+
         self.author = "Kenigsberg"
-        self.year = 2019
         self.doi = "v"
-        self.protocol = '10x'
-        self.normalization = 'raw'
         self.healthy = True
+        self.normalization = 'raw'
+        self.organ = "ileum"
+        self.organism = "human"
+        self.protocol = '10x'
         self.state_exact = 'healthy'
+        self.sub_tissue = "ileum"
+        self.year = 2019
         self.var_symbol_col = 'index'
         self.var_ensembl_col = 'gene_ids'
         self.obs_key_cellontology_original = 'CellType'
