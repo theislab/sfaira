@@ -10,7 +10,7 @@ import zipfile
 from .external import DatasetBase
 
 
-class DatasetHcl(DatasetBase):
+class Dataset_d10_1038_s41586_020_2157_4(DatasetBase):
     """
     This is a dataloader template for human cell landscape data.
     """
@@ -69,7 +69,7 @@ class DatasetHcl(DatasetBase):
         ) as zip_ref:
             zip_ref.extractall(os.path.join(self.path, self._directory_formatted_doi))
 
-    def _load_hcl(self, fn, sample_id: str):
+    def _load_generalized(self, fn, sample_id: str):
         """
         Attempt to find file, cache entire HCL if file was not found.
 

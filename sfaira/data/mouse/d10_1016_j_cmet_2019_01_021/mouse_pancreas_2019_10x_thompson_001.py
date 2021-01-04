@@ -3,10 +3,10 @@ import numpy as np
 import os
 import pandas
 from typing import Union
-from .external import DatasetMca
+from .base import Dataset_d10_1016_j_cmet_2019_01_021
 
 
-class Dataset(DatasetMca):
+class Dataset(Dataset_d10_1016_j_cmet_2019_01_021):
 
     def __init__(
             self,
@@ -16,19 +16,6 @@ class Dataset(DatasetMca):
             **kwargs
     ):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.author = "Bhushan"
-        self.id = "mouse_pancreas_2019_10x_thompson_001_10.1016/j.cmet.2019.01.021"
-        self.doi = "10.1016/j.cmet.2019.01.021"
-        self.download = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE117770"
-        self.healthy = False
-        self.normalization = 'raw'
-        self.organ = "pancreas"
-        self.protocol = "10x"
-        self.state_exact = "diabetic"
-        self.sub_tissue = "pancreas"
-        self.year = 2019
-
-        self.var_symbol_col = "index"
 
         self.class_maps = {
             "0": {

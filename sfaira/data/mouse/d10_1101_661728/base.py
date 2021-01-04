@@ -4,7 +4,7 @@ from typing import Union
 from .external import DatasetBase
 
 
-class DatasetTms(DatasetBase):
+class Dataset_d10_1101_661728(DatasetBase):
     """
     This is a dataloader template for tabula muris data.
     """
@@ -45,7 +45,7 @@ class DatasetTms(DatasetBase):
         self.var_ensembl_col = None
         self.var_symbol_col = "index"
 
-    def _load_tms(self, fn):
+    def _load_generalized(self, fn):
         self.adata = anndata.read_h5ad(fn)
         if self.source == "aws":
             self.adata.X = self.adata.raw.X

@@ -6,7 +6,7 @@ from typing import Union
 from .external import DatasetBase
 
 
-class DatasetMca(DatasetBase):
+class Dataset_d10_1016_j_cell_2018_02_001(DatasetBase):
     """
     This is a dataloader template for mca data.
     """
@@ -35,7 +35,7 @@ class DatasetMca(DatasetBase):
         self.var_ensembl_col = "ensembl"
         self.var_symbol_col = "names"
 
-    def _load_mca(self, fn, fn_meta):
+    def _load_generalized(self, fn, fn_meta):
         celltypes = pandas.read_csv(fn_meta, index_col=1)
         celltypes = celltypes.drop(['Unnamed: 0'], axis=1)
 

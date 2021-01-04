@@ -3,10 +3,10 @@ import numpy as np
 import os
 import pandas
 from typing import Union
-from .external import DatasetMca
+from .base import Dataset_d10_1016_j_cell_2018_02_001
 
 
-class Dataset(DatasetMca):
+class Dataset(Dataset_d10_1016_j_cell_2018_02_001):
 
     def __init__(
             self,
@@ -55,4 +55,4 @@ class Dataset(DatasetMca):
             fn = os.path.join(self.path, "mouse", "temp_mouse_atlas/500more_dge", "Pancreas_dge.txt.gz")
             fn_meta = os.path.join(self.path, "mouse", "temp_mouse_atlas", "MCA_CellAssignments.csv")
 
-        self._load_mca(fn=fn, fn_meta=fn_meta)
+        self._load_generalized(fn=fn, fn_meta=fn_meta)

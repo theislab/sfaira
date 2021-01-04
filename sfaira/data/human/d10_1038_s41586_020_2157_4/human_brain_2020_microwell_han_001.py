@@ -1,9 +1,9 @@
 import os
 from typing import Union
-from .external import DatasetHcl
+from .base import Dataset_d10_1038_s41586_020_2157_4
 
 
-class Dataset(DatasetHcl):
+class Dataset(Dataset_d10_1038_s41586_020_2157_4):
     """
     This is a dataloader for a the Human Cell Landscape dataset (Han et al. 2020. doi: 10.1038/s41586-020-2157-4).
 
@@ -61,4 +61,4 @@ class Dataset(DatasetHcl):
         }
 
     def _load(self, fn=None):
-        self._load_hcl(fn=fn, sample_id="FetalBrain_4")
+        self._load_generalized(fn=fn, sample_id="FetalBrain_4")

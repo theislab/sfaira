@@ -3,10 +3,10 @@ import numpy as np
 import os
 import pandas
 from typing import Union
-from .external import DatasetMca
+from .external import DatasetBase
 
 
-class Dataset(DatasetMca):
+class Dataset(DatasetBase):
 
     def __init__(
             self,

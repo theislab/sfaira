@@ -1,10 +1,10 @@
 import anndata
 import os
 from typing import Union
-from .external import DatasetTms
+from .base import Dataset_d10_1101_661728
 
 
-class Dataset(DatasetTms):
+class Dataset(Dataset_d10_1101_661728):
 
     def __init__(
             self,
@@ -34,5 +34,5 @@ class Dataset(DatasetTms):
                 fn = os.path.join(self.path, "mouse", "bone", "Marrow_droplet.h5ad")
             else:
                 raise ValueError("source %s not recognized" % self.source)
-        self._load_tms(fn=fn)
+        self._load_generalized(fn=fn)
         self.set_unkown_class_id(ids=["unknown cell-1", "unknown cell-2"])
