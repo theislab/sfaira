@@ -20,7 +20,7 @@ class DatasetBase(abc.ABC):
 
     adata: Union[None, anndata.AnnData]
     class_maps: dict
-    meta: Union[None, pandas.DataFrame]
+    _meta: Union[None, pandas.DataFrame]
     path: Union[None, str]
     meta_path: Union[None, str]
     cache_path: Union[None, str]
@@ -685,22 +685,23 @@ class DatasetBase(abc.ABC):
                 fn = os.path.normpath(fn)
         # Only load meta data if file exists:
         if os.path.isfile(fn):
-            self.meta = pandas.read_csv(fn, usecols=self._META_DATA_FIELDS)
+            meta = pandas.read_csv(fn, usecols=self._META_DATA_FIELDS)
             # Formatting:
             # Make sure bool entries are bool:
-            if isinstance(self.meta["healthy"].values[0], str):
-                self.meta["healthy"] = [
+            if isinstance(meta["healthy"].values[0], str):
+                meta["healthy"] = [
                     True if x == "True" else
                     False if x == "False" else None
-                    for x in self.meta["healthy"].values
+                    for x in meta["healthy"].values
                 ]
             # Make sure None entries are formatted as None and not as string "None":
             keys_to_change = []
-            for k, v in self.meta.items():
+            for k, v in meta.items():
                 if isinstance(v[0], str) and v[0] == "None":
                     keys_to_change.append(k)
             for k in keys_to_change:
-                self.meta[k] = [None]
+                meta[k] = [None]
+            self.meta = meta
 
     def write_meta(
             self,
@@ -767,9 +768,9 @@ class DatasetBase(abc.ABC):
             else:
                 meta[x] = self.adata.uns[x]
         # Add cell types into table:
-        meta[self._ADATA_IDS_SFAIRA.cell_ontology_class] = (
+        meta[self._ADATA_IDS_SFAIRA.cell_ontology_class] = str((
             np.sort(np.unique(self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class].values)),
-        )
+        ))
         meta.to_csv(fn_meta)
 
     @property
@@ -963,6 +964,44 @@ class DatasetBase(abc.ABC):
     @id.setter
     def id(self, x: str):
         self._id = x
+
+    @property
+    def meta(self) -> pd.DataFrame:
+        return self._meta
+
+    @meta.setter
+    def meta(self, x: pd.DataFrame):
+        # Make sure formatting is correct:
+        format_dict = {
+            self._ADATA_IDS_SFAIRA.author: [str],
+            self._ADATA_IDS_SFAIRA.age: [str],
+            self._ADATA_IDS_SFAIRA.cell_ontology_class: [str],
+            self._ADATA_IDS_SFAIRA.dev_stage: [str],
+            self._ADATA_IDS_SFAIRA.doi: [str],
+            self._ADATA_IDS_SFAIRA.download: [str],
+            self._ADATA_IDS_SFAIRA.download_meta: [str],
+            self._ADATA_IDS_SFAIRA.ethnicity: [str],
+            self._ADATA_IDS_SFAIRA.healthy: [bool],
+            self._ADATA_IDS_SFAIRA.id: [str],
+            self._ADATA_IDS_SFAIRA.ncells: [str],
+            self._ADATA_IDS_SFAIRA.normalization: [str],
+            self._ADATA_IDS_SFAIRA.organ: [str],
+            self._ADATA_IDS_SFAIRA.protocol: [str],
+            self._ADATA_IDS_SFAIRA.sex: [str],
+            self._ADATA_IDS_SFAIRA.organism: [str],
+            self._ADATA_IDS_SFAIRA.state_exact: [str],
+            self._ADATA_IDS_SFAIRA.subtissue: [str],
+            self._ADATA_IDS_SFAIRA.year: [str],
+        }
+        for k, v in x.items():
+            if k not in format_dict.keys():
+                raise ValueError(f"did not find {k} in format look up table")
+            else:
+                if x[k] is not None:  # None is always allowed.
+                    if not np.any([isinstance(v[0], target_type) for target_type in format_dict[k].values]):
+                        raise ValueError(f"key {k} in meta data table did not match signature "
+                                         f"{str(format_dict[k].values)}")
+        self.meta = x
 
     @property
     def ncells(self) -> int:
