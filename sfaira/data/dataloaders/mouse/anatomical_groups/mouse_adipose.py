@@ -1,12 +1,13 @@
+import os
 from typing import Union
 
 from .external import DatasetGroupBase
 
-from sfaira.data.dataloaders.mouse.d10_1101_661728 import Dataset as Dataset0001
-from sfaira.data.dataloaders.mouse.d10_1101_661728 import Dataset as Dataset0002
-from sfaira.data.dataloaders.mouse.d10_1101_661728 import Dataset as Dataset0003
-from sfaira.data.dataloaders.mouse.d10_1101_661728 import Dataset as Dataset0004
-from sfaira.data.dataloaders.mouse.d10_1101_661728 import Dataset as Dataset0005
+from sfaira.data.dataloaders.mouse.d10_1101_661728.mouse_adipose_2019_10x_pisco_001 import Dataset as Dataset0001
+from sfaira.data.dataloaders.mouse.d10_1101_661728.mouse_adipose_2019_smartseq2_pisco_001 import Dataset as Dataset0002
+from sfaira.data.dataloaders.mouse.d10_1101_661728.mouse_adipose_2019_smartseq2_pisco_002 import Dataset as Dataset0003
+from sfaira.data.dataloaders.mouse.d10_1101_661728.mouse_adipose_2019_smartseq2_pisco_003 import Dataset as Dataset0004
+from sfaira.data.dataloaders.mouse.d10_1101_661728.mouse_adipose_2019_smartseq2_pisco_004 import Dataset as Dataset0005
 
 
 class DatasetGroupAdipose(DatasetGroupBase):

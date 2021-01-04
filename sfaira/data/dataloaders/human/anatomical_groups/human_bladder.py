@@ -3,8 +3,8 @@ from typing import Union
 from .external import DatasetGroupBase
 
 from sfaira.data.dataloaders.human.d10_1038_s41586_020_2157_4.human_bladder_2020_microwell_han_001 import Dataset as Dataset0001
-from sfaira.data.dataloaders.human import Dataset as Dataset0002
-from sfaira.data.dataloaders.human import Dataset as Dataset0003
+from sfaira.data.dataloaders.human.d10_1038_s41586_020_2157_4.human_bladder_2020_microwell_han_002 import Dataset as Dataset0002
+from sfaira.data.dataloaders.human.d10_1038_s41586_020_2157_4.human_bladder_2020_microwell_han_003 import Dataset as Dataset0003
 
 
 class DatasetGroupBladder(DatasetGroupBase):

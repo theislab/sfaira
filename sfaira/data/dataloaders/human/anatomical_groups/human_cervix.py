@@ -2,7 +2,7 @@ from typing import Union
 
 from .external import DatasetGroupBase
 
-from sfaira.data.dataloaders.human import Dataset as Dataset0001
+from sfaira.data.dataloaders.human.d10_1038_s41586_020_2157_4.human_cervix_2020_microwell_han_001 import Dataset as Dataset0001
 
 
 class DatasetGroupCervix(DatasetGroupBase):

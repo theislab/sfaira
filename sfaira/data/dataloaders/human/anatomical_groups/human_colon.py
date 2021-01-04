@@ -3,13 +3,13 @@ from typing import Union
 from .external import DatasetGroupBase
 
 from sfaira.data.dataloaders.human.d10_1016_j_cell_2018_08_067.human_colon_2019_10x_kinchen_001 import Dataset as Dataset0001
-from sfaira.data.dataloaders.human import Dataset as Dataset0002
+from sfaira.data.dataloaders.human.d10_1016_j_cell_2019_06_029.human_colon_2019_10x_smilie_001 import Dataset as Dataset0002
 from sfaira.data.dataloaders.human.d10_1084_jem_20191130.human_colon_2019_10x_wang_001 import Dataset as Dataset0003
 from sfaira.data.dataloaders.human.d10_1038_s41590_020_0602_z.human_colon_2020_10x_james_001 import Dataset as Dataset0004
-from sfaira.data.dataloaders.human import Dataset as Dataset0005
-from sfaira.data.dataloaders.human import Dataset as Dataset0006
+from sfaira.data.dataloaders.human.d10_1038_s41586_020_2157_4.human_colon_2020_microwell_han_001 import Dataset as Dataset0005
+from sfaira.data.dataloaders.human.d10_1038_s41586_020_2157_4.human_colon_2020_microwell_han_002 import Dataset as Dataset0006
 from sfaira.data.dataloaders.human.d10_1038_s41586_020_2157_4.human_colon_2020_microwell_han_003 import Dataset as Dataset0007
-from sfaira.data.dataloaders.human import Dataset as Dataset0008
+from sfaira.data.dataloaders.human.d10_1038_s41586_020_2157_4.human_colon_2020_microwell_han_004 import Dataset as Dataset0008
 
 
 class DatasetGroupColon(DatasetGroupBase):

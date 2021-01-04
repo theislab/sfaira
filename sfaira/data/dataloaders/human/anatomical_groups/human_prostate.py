@@ -2,8 +2,8 @@ from typing import Union
 
 from .external import DatasetGroupBase
 
-from sfaira.data.dataloaders.human import Dataset as Dataset0001
-from sfaira.data.dataloaders.human import Dataset as Dataset0002
+from sfaira.data.dataloaders.human.d10_1016_j_celrep_2018_11_086.human_prostate_2018_10x_henry_001 import Dataset as Dataset0001
+from sfaira.data.dataloaders.human.d10_1038_s41586_020_2157_4.human_prostate_2020_microwell_han_001 import Dataset as Dataset0002
 
 
 class DatasetGroupProstate(DatasetGroupBase):
