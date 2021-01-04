@@ -775,7 +775,7 @@ class DatasetBase(abc.ABC):
     # Properties:
 
     @property
-    def age(self) -> str:
+    def age(self) -> Union[None, str]:
         if self._age is not None:
             return self._age
         else:
@@ -821,7 +821,7 @@ class DatasetBase(abc.ABC):
         self._author = x
 
     @property
-    def dev_stage(self) -> str:
+    def dev_stage(self) -> Union[None, str]:
         if self._dev_stage is not None:
             return self._dev_stage
         else:
@@ -922,7 +922,7 @@ class DatasetBase(abc.ABC):
         self._download_meta = x
 
     @property
-    def ethnicity(self) -> str:
+    def ethnicity(self) -> Union[None, str]:
         if self._ethnicity is not None:
             return self._ethnicity
         else:
@@ -940,7 +940,7 @@ class DatasetBase(abc.ABC):
         self._ethnicity = x
 
     @property
-    def healthy(self) -> bool:
+    def healthy(self) -> Union[None, bool]:
         if self._healthy is not None:
             return self._healthy
         else:
@@ -1010,7 +1010,7 @@ class DatasetBase(abc.ABC):
         return int(x)
 
     @property
-    def normalization(self) -> str:
+    def normalization(self) -> Union[None, str]:
         if self._normalization is not None:
             return self._normalization
         else:
@@ -1138,7 +1138,7 @@ class DatasetBase(abc.ABC):
         self._obs_key_subtissue = x
 
     @property
-    def organ(self) -> str:
+    def organ(self) -> Union[None, str]:
         if self._organ is not None:
             return self._organ
         else:
@@ -1156,7 +1156,7 @@ class DatasetBase(abc.ABC):
         self._organ = x
 
     @property
-    def organism(self) -> str:
+    def organism(self) -> Union[None, str]:
         if self._organism is not None:
             return self._organism
         else:
@@ -1174,7 +1174,7 @@ class DatasetBase(abc.ABC):
         self._organism = x
 
     @property
-    def protocol(self) -> str:
+    def protocol(self) -> Union[None, str]:
         if self._protocol is not None:
             return self._protocol
         else:
@@ -1192,7 +1192,7 @@ class DatasetBase(abc.ABC):
         self._protocol = x
 
     @property
-    def sex(self) -> str:
+    def sex(self) -> Union[None, str]:
         if self._sex is not None:
             return self._sex
         else:
@@ -1219,7 +1219,7 @@ class DatasetBase(abc.ABC):
         self._source = x
 
     @property
-    def state_exact(self) -> str:
+    def state_exact(self) -> Union[None, str]:
         if self._state_exact is not None:
             return self._state_exact
         else:
@@ -1236,7 +1236,7 @@ class DatasetBase(abc.ABC):
         self._state_exact = x
 
     @property
-    def subtissue(self) -> str:
+    def subtissue(self) -> Union[None, str]:
         if self._subtissue is not None:
             return self._subtissue
         else:
@@ -1272,7 +1272,7 @@ class DatasetBase(abc.ABC):
         self._var_symbol_col = x
 
     @property
-    def year(self) -> int:
+    def year(self) -> Union[None, int]:
         if self._year is not None:
             return self._year
         else:
