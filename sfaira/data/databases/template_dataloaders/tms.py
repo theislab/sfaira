@@ -28,9 +28,11 @@ class DatasetTms(DatasetBase):
 
         self.obs_key_cellontology_class = "cell_ontology_class"
         self.obs_key_cellontology_id = "cell_ontology_id"
-        self.obs_key_cellontology_original = "cell_types_original"
+        self.obs_key_cellontology_original = "free_annotation"
         self.obs_key_age = "age"
-        self.obs_key_dev_stage = "development_stage"
+        self.obs_key_dev_stage = "development_stage"  # not given in all data sets
+        self.obs_key_sex = "sex"
+        self.obs_key_subtissue = "subtissue"
 
         self.author = "Quake"
         self.year = "2019"

@@ -442,22 +442,29 @@ class DatasetBase(abc.ABC):
                 [self.state_exact, self._ADATA_IDS_SFAIRA.state_exact, self.obs_key_state_exact],
                 [self.subtissue, self._ADATA_IDS_SFAIRA.subtissue, self.obs_key_subtissue],
         ):
-            if isinstance(x, str):
-                self.adata.uns[y] = x
-            elif x is None and z is None:
+            if x is None and z is None:
                 self.adata.uns[y] = None
-            else:
-                self.adata.uns[y] = UNS_STRING_META_IN_OBS
+            if x is not None and z is not None:
+                raise ValueError(f"attribute {y} of data set {self.id} was set both for full data set and per cell, "
+                                 f"only set one of the two or neither.")
+            elif x is not None and z is None:
+                assert isinstance(x, str), f"data set-wise attribute for {y} must be a string"
+                # Attribute supplied per data set: Write into .uns.
+                self.adata.uns[y] = x
+            else:  # x is None and z is not None
+                # Attribute supplied per cell: Write into .obs.
                 # Search for direct match of the sought-after column name or for attribute specific obs key.
-                if z is not None:
-                    if z not in self.adata.obs.keys():
-                        raise ValueError(f"attribute {y} of data set {self.id}"
-                                         f" was not set to be in column {z} which was not found")
-                    self.adata.obs[y] = self.adata.obs[z].values
-                elif y in self.adata.obs.keys():
-                    pass  # correct column is already set!
+                if z not in self.adata.obs.keys():
+                    # This should not occur in single data set loaders (see warning below) but can occur in
+                    # streamlined data loaders if not all instances of the streamlined data sets have all columns
+                    # in .obs set.
+                    self.adata.uns[y] = None
+                    print(f"WARNING: attribute {y} of data set {self.id} was not found in column {z}")  # debugging
                 else:
-                    raise ValueError(f"attribute {y} of data set {self.id} was not set")
+                    # Include flag in .uns that this attribute is in .obs:
+                    self.adata.uns[y] = UNS_STRING_META_IN_OBS
+                    # Remove potential pd.Categorical formatting:
+                    self.adata.obs[y] = self.adata.obs[z].values.tolist()
         # Process entries which are boolean element matches:
         for x, y in (
                 [self._ADATA_IDS_SFAIRA.healthy, self.healthy_state_healthy],
