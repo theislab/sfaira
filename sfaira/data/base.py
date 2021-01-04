@@ -444,7 +444,7 @@ class DatasetBase(abc.ABC):
         ):
             if x is None and z is None:
                 self.adata.uns[y] = None
-            if x is not None and z is not None:
+            elif x is not None and z is not None:
                 raise ValueError(f"attribute {y} of data set {self.id} was set both for full data set and per cell, "
                                  f"only set one of the two or neither.")
             elif x is not None and z is None:
