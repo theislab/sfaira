@@ -73,7 +73,7 @@ class Dataset(DatasetBase):
 
     def _load(self, fn=None):
         if fn is None:
-            fn = os.path.join(self.path, "loaders", "lung", "miller20.processed.h5ad")
+            fn = os.path.join(self.path, "human", "lung", "miller20.processed.h5ad")
         self.adata = anndata.read(fn)
         self.adata.X = np.expm1(self.adata.X)
         self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs['nUMI'].values[:, None]))\

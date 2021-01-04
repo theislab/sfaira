@@ -73,5 +73,5 @@ class Dataset(DatasetBase):
 
     def _load(self, fn=None):
         if fn is None:
-            fn = os.path.join(self.path, "loaders", "liver", "fetal_liver_alladata_.h5ad")
+            fn = os.path.join(self.path, "human", "liver", "fetal_liver_alladata_.h5ad")
         self.adata = anndata.read(fn)

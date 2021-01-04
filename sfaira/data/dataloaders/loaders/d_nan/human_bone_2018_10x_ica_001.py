@@ -35,19 +35,22 @@ class Dataset(DatasetBase):
     ):
 
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.organism = "loaders"
         self.id = "human_bone_2018_10x_ica_unknown"
+
         self.download = "https://data.humancellatlas.org/project-assets/project-matrices/cc95ff89-2e68-4a08-a234-480eca21ce79.homo_sapiens.loom"
         self.download_meta = None
-        self.organ = "bone"
-        self.sub_tissue = "bone_marrow"
+
         self.author = 'Regev'
-        self.year = 2018
-        self.doi = None
-        self.protocol = '10x'
-        self.normalization = 'raw'
+        self.doi = "d_nan"
         self.healthy = True
+        self.normalization = 'raw'
+        self.organ = "bone"
+        self.organism = "human"
+        self.protocol = '10x'
         self.state_exact = 'healthy'
+        self.sub_tissue = "bone_marrow"
+        self.year = 2018
+
         self.var_symbol_col = 'index'
         self.var_ensembl_col = 'Accession'
 
@@ -57,7 +60,7 @@ class Dataset(DatasetBase):
 
     def _load(self, fn=None):
         if fn is None:
-            fn = os.path.join(self.path, "loaders", "bone", "cc95ff89-2e68-4a08-a234-480eca21ce79.homo_sapiens.loom")
+            fn = os.path.join(self.path, "human", "bone", "cc95ff89-2e68-4a08-a234-480eca21ce79.homo_sapiens.loom")
         self.adata = anndata.read_loom(fn)
         idx = np.logical_and((self.adata.obs['derived_organ_parts_label'] == 'bone marrow').values,
                              (self.adata.obs['emptydrops_is_cell'] == 't').values)

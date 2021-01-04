@@ -106,9 +106,9 @@ class Dataset(DatasetBase):
     def _load(self, fn=None):
         if fn is None:
             fn = [
-                os.path.join(self.path, "loaders", "mixed", "GSE126030_RAW.tar"),
-                os.path.join(self.path, "loaders", "mixed", "donor1.annotation.txt"),
-                os.path.join(self.path, "loaders", "mixed", "donor2.annotation.txt"),
+                os.path.join(self.path, "human", "mixed", "GSE126030_RAW.tar"),
+                os.path.join(self.path, "human", "mixed", "donor1.annotation.txt"),
+                os.path.join(self.path, "human", "mixed", "donor2.annotation.txt"),
             ]
         adatas = []
         with tarfile.open(fn[0]) as tar:

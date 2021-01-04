@@ -65,7 +65,7 @@ class Dataset(DatasetBase):
 
     def _load(self, fn=None):
         if fn is None:
-            fn = os.path.join(self.path, "loaders", "lung", "vieira19_Alveoli_and_parenchyma_anonymised.processed.h5ad")
+            fn = os.path.join(self.path, "human", "lung", "vieira19_Alveoli_and_parenchyma_anonymised.processed.h5ad")
         self.adata = anndata.read(fn)
         self.adata.X = np.expm1(self.adata.X)
 

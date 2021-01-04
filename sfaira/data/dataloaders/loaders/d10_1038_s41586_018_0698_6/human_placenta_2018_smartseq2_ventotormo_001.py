@@ -82,8 +82,8 @@ class Dataset(DatasetBase):
     def _load(self, fn=None):
         if fn is None:
             fn = [
-                os.path.join(self.path, "loaders", "placenta", "E-MTAB-6678.processed.1.zip"),
-                os.path.join(self.path, "loaders", "placenta", "E-MTAB-6678.processed.2.zip"),
+                os.path.join(self.path, "human", "placenta", "E-MTAB-6678.processed.1.zip"),
+                os.path.join(self.path, "human", "placenta", "E-MTAB-6678.processed.2.zip"),
             ]
         self.adata = anndata.AnnData(pd.read_csv(fn[0], sep='\t', index_col='Gene').T)
         df = pd.read_csv(fn[1], sep='\t')

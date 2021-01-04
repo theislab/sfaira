@@ -76,7 +76,7 @@ class Dataset(DatasetBase):
 
     def _load(self, fn=None):
         if fn is None:
-            fn = os.path.join(self.path, "loaders", "kidney", "GSE131685_RAW.tar")
+            fn = os.path.join(self.path, "human", "kidney", "GSE131685_RAW.tar")
         adatas = []
         with tarfile.open(fn) as tar:
             for member in tar.getmembers():
