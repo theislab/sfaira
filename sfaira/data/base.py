@@ -1315,9 +1315,7 @@ class DatasetBase(abc.ABC):
         :return:
         """
         if allowed is not None:
-            if isinstance(attempted, tuple):
-                attempted = list(attempted)
-            else:
+            if not isinstance(attempted, list) and not isinstance(attempted, tuple):
                 attempted = [attempted]
             for x in attempted:
                 if x not in allowed:
