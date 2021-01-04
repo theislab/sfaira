@@ -24,31 +24,31 @@ class Dataset_d10_1038_s41586_020_2157_4(DatasetBase):
     ):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
 
+        self.download = 'https://ndownloader.figshare.com/files/17727365'
+        self.download_meta = [
+            'https://ndownloader.figshare.com/files/21758835',
+            'https://ndownloader.figshare.com/files/22447898',
+        ]
+
+        self.author = 'Guo'
+        self.doi = '10.1038/s41586-020-2157-4'
+        self.healthy = True
+        self.normalization = 'raw'
+        self.organism = "human"
+        self.protocol = 'microwell-seq'
+        self.state_exact = 'healthy'
+        self.year = 2020
+
         self.obs_key_cellontology_class = "cell_ontology_class"
         self.obs_key_cellontology_original = "cell_ontology_class"
         self.obs_key_dev_stage = "dev_stage"
         self.obs_key_sex = "gender"
         self.obs_key_age = "age"
 
-        self.author = 'Guo'
-        self.doi = '10.1038/s41586-020-2157-4'
-        self.organism = "loaders"
-        self.download = 'https://ndownloader.figshare.com/files/17727365'
-        self.download_meta = [
-            'https://ndownloader.figshare.com/files/21758835',
-            'https://ndownloader.figshare.com/files/22447898',
-        ]
-        self.healthy = True
-        self.normalization = 'raw'
-        self.protocol = 'microwell-seq'
-        self.state_exact = 'healthy'
-        self.year = 2020
-
         self.var_ensembl_col = "ensembl"
         self.var_symbol_col = "names"
 
     def _download(self):
-
         # download required files from loaders cell landscape publication data: https://figshare.com/articles/HCL_DGE_Data/7235471
         print(urllib.request.urlretrieve(
             'https://ndownloader.figshare.com/files/17727365',

@@ -24,23 +24,27 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.organism = "loaders"
         self.id = "human_placenta_2018_smartseq2_ventotormo_10.1038/s41586-018-0698-6"
+
         self.download = 'https://www.ebi.ac.uk/arrayexpress/files/E-MTAB-6678/E-MTAB-6678.processed.1.zip'
         self.download_meta = 'https://www.ebi.ac.uk/arrayexpress/files/E-MTAB-6678/E-MTAB-6678.processed.2.zip'
-        self.organ = "placenta"
-        self.sub_tissue = "placenta, decidua, blood"
+
         self.author = 'Teichmann'
-        self.year = 2018
+        self.healthy = True
+        self.normalization = 'raw'
+        self.organ = "placenta"
+        self.organism = "human"
         self.doi = '10.1038/s41586-018-0698-6'
         self.protocol = "Smartseq2"
-        self.normalization = 'raw'
-        self.healthy = True
         self.state_exact = "healthy"
+        self.sub_tissue = "placenta, decidua, blood"
+        self.year = 2018
+
         self.var_symbol_col = 'names'
         self.var_ensembl_col = 'ensembl'
+
         self.obs_key_cellontology_original = 'annotation'
-        self._obs_key_subtissue = 'location'
+        self.obs_key_subtissue = 'location'
 
         self.class_maps = {
             "0": {

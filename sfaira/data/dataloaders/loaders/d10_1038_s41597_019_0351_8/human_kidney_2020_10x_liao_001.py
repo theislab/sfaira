@@ -54,19 +54,22 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.organism = "loaders"
         self.id = "human_kidney_2020_10x_liao_001_10.1038/s41597-019-0351-8"
+
         self.download = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE131nnn/GSE131685/suppl/GSE131685_RAW.tar"
         self.download_meta = None
-        self.organ = "kidney"
-        self.sub_tissue = "kidney"
+
         self.author = 'Mo'
+        self.healthy = True
+        self.normalization = 'raw'
+        self.organ = "kidney"
+        self.organism = "human"
+        self.protocol = '10x'
+        self.state_exact = 'healthy'
+        self.sub_tissue = "kidney"
         self.year = 2020
         self.doi = '10.1038/s41597-019-0351-8'
-        self.protocol = '10x'
-        self.normalization = 'raw'
-        self.healthy = True
-        self.state_exact = 'healthy'
+
         self.var_symbol_col = 'names'
         self.var_ensembl_col = 'ensembl'
 

@@ -37,22 +37,26 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.organism = "loaders"
         self.id = "human_lung_2020_10x_habermann_001_10.1101/753806"
+
         self.download = [
             "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE135nnn/GSE135893/suppl/GSE135893%5Fmatrix%2Emtx%2Egz",
             "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE135nnn/GSE135893/suppl/GSE135893%5Fgenes%2Etsv%2Egz",
             "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE135nnn/GSE135893/suppl/GSE135893%5Fbarcodes%2Etsv%2Egz"
         ]
         self.download_meta = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE135nnn/GSE135893/suppl/GSE135893%5FIPF%5Fmetadata%2Ecsv%2Egz"
-        self.organ = "lung"
-        self.sub_tissue = "parenchyma"
+
         self.author = 'Kropski'
-        self.year = 2020
         self.doi = "10.1101/753806"
-        self.protocol = '10x'
         self.normalization = 'raw'
+        self.organ = "lung"
+        self.organism = "human"
+        self.protocol = '10x'
+        self.sub_tissue = "parenchyma"
+        self.year = 2020
+
         self.var_symbol_col = 'index'
+
         self.obs_key_cellontology_original = 'celltype'
         self.obs_key_state_exact = 'Diagnosis'
         self.obs_key_healthy = 'Status'

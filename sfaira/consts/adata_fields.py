@@ -202,7 +202,7 @@ class ADATA_IDS_SFAIRA(ADATA_IDS_EXTENDED):
         self.ethnicity_allowed_entries = None
         self.normalization_allowed_entries = None
         self.organ_allowed_entries = None
-        self.organism_allowed_entries = ["mouse", "loaders"]
+        self.organism_allowed_entries = ["mouse", "human"]
         self.protocol_allowed_entries = None
         self.sex_allowed_entries = None
         self.subtissue_allowed_entries = None

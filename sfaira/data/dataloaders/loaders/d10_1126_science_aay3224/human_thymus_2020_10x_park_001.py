@@ -24,20 +24,24 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.organism = "loaders"
         self.id = "human_thymus_2020_10x_park_001_10.1126/science.aay3224"
+
         self.download = "https://covid19.cog.sanger.ac.uk/park20.processed.h5ad"
         self.download_meta = None
-        self.organ = "thymus"
-        self.sub_tissue = "fetal thymus"
+
         self.author = "Teichmann"
-        self.year = 2020
         self.doi = "10.1126/science.aay3224"
-        self.protocol = '10x'
-        self.normalization = 'norm'
         self.healthy = True
+        self.normalization = 'norm'
+        self.organ = "thymus"
+        self.organism = "human"
+        self.protocol = '10x'
         self.state_exact = 'healthy'
+        self.sub_tissue = "fetal thymus"
+        self.year = 2020
+
         self.var_symbol_col = 'index'
+
         self.obs_key_cellontology_original = 'Anno_level_fig1'
 
         self.class_maps = {

@@ -80,24 +80,29 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.organism = "loaders"
         self.id = "human_mixed_2019_10x_szabo_001_10.1038/s41467-019-12464-3"
+
         self.download = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE126nnn/GSE126030/suppl/GSE126030_RAW.tar"
         self.download_meta = 'private'
-        self.organ = "mixed"
-        self.sub_tissue = "Bone Marrow, Lung, Lymph Node"
-        self.loaded = False
+
         self.author = "Sims"
-        self.year = 2019
         self.doi = "10.1038/s41467-019-12464-3"
-        self.protocol = "10x"
-        self.normalization = 'raw'
         self.healthy = True
+        self.normalization = 'raw'
+        self.organ = "mixed"
+        self.organism = "human"
+        self.protocol = "10x"
         self.state_exact = 'healthy'
+        self.sub_tissue = "Bone Marrow, Lung, Lymph Node"
+        self.year = 2019
+
         self.var_symbol_col = 'Gene'
         self.var_ensembl_col = 'Accession'
+
         self.obs_key_cellontology_original = 'cell_ontology_class'
         self.obs_key_subtissue = 'organ'
+
+        self.loaded = False  # TODO do this differently?
 
         self.class_maps = {
             "0": {},

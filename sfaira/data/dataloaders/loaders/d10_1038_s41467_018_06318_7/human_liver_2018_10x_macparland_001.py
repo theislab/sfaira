@@ -25,20 +25,24 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.organism = "loaders"
         self.id = "human_liver_2018_10x_macparland_001_10.1038/s41467-018-06318-7"
+
         self.download = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE115469"
         self.download_meta = 'private'
-        self.organ = "liver"
-        self.sub_tissue = "caudate lobe"
+
         self.author = 'McGilvray'
-        self.year = 2018
         self.doi = '10.1038/s41467-018-06318-7'
-        self.protocol = '10x'
-        self.normalization = 'raw'
         self.healthy = True
+        self.normalization = 'raw'
+        self.organ = "liver"
+        self.organism = "human"
+        self.protocol = '10x'
         self.state_exact = 'healthy'
+        self.sub_tissue = "caudate lobe"
+        self.year = 2018
+
         self.var_symbol_col = 'index'
+
         self.obs_key_cellontology_original = 'celltype'
 
         self.class_maps = {

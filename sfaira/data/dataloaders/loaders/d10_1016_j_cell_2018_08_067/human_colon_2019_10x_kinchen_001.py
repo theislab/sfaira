@@ -62,19 +62,23 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.organism = "loaders"
         self.id = "human_colon_2019_10x_kinchen_001_10.1016/j.cell.2018.08.067"
+
         self.download = "https://data.humancellatlas.org/project-assets/project-matrices/f8aa201c-4ff1-45a4-890e-840d63459ca2.homo_sapiens.loom"
         self.download_meta = 'private'
-        self.organ = "colon"
-        self.sub_tissue = "lamina propria of mucosa of colon"
+
         self.author = 'Simmons'
-        self.year = 2019
         self.doi = "10.1016/j.cell.2018.08.067"
-        self.protocol = '10x'
         self.normalization = 'raw'
+        self.organ = "colon"
+        self.organism = "human"
+        self.protocol = '10x'
+        self.sub_tissue = "lamina propria of mucosa of colon"
+        self.year = 2019
+
         self.var_symbol_col = 'names'
         self.var_ensembl_col = 'Accession'
+
         self.obs_key_state_exact = 'donor_organism.diseases.ontology_label'
         self.obs_key_healthy = self.obs_key_state_exact
         self.healthy_state_healthy = 'normal'
