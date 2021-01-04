@@ -1,4 +1,3 @@
-import anndata
 import numpy as np
 import os
 from typing import Union

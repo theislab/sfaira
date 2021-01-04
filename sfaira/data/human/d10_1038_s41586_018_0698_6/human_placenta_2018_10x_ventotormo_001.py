@@ -1,8 +1,9 @@
 import os
 from typing import Union
-from .external import DatasetBase
 import pandas as pd
 import anndata
+
+from sfaira.data import DatasetBase
 
 
 class Dataset(DatasetBase):

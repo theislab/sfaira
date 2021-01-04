@@ -1,13 +1,14 @@
 import anndata
 import os
 from typing import Union
-from .external import DatasetBase
 import tarfile
 import gzip
 from io import StringIO
 import anndata as ad
 import pandas as pd
 import scipy.sparse
+
+from sfaira.data import DatasetBase
 
 
 class Dataset(DatasetBase):

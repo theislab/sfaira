@@ -3,7 +3,7 @@ import numpy as np
 import os
 import pandas
 from typing import Union
-from .external import DatasetBase
+from sfaira.data import DatasetBase
 
 
 class Dataset_d10_1016_j_cmet_2019_01_021(DatasetBase):

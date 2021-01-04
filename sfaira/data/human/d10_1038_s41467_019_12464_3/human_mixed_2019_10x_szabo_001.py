@@ -1,10 +1,11 @@
 import anndata
 import os
 from typing import Union
-from .external import DatasetBase
 import tarfile
 import pandas as pd
 import scipy.sparse
+
+from sfaira.data import DatasetBase
 
 
 class Dataset(DatasetBase):

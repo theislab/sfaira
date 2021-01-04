@@ -7,7 +7,7 @@ from typing import Union
 import urllib.request
 import zipfile
 
-from .external import DatasetBase
+from sfaira.data import DatasetBase
 
 
 class Dataset_d10_1038_s41586_020_2157_4(DatasetBase):

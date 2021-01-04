@@ -1,9 +1,8 @@
 import anndata
 import numpy as np
-import os
 import pandas
 from typing import Union
-from .external import DatasetBase
+from sfaira.data import DatasetBase
 
 
 class Dataset_d10_1016_j_cell_2018_02_001(DatasetBase):

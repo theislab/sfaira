@@ -1,7 +1,6 @@
 import anndata
-import os
 from typing import Union
-from .external import DatasetBase
+from sfaira.data import DatasetBase
 
 
 class Dataset_d10_1101_661728(DatasetBase):
