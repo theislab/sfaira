@@ -717,7 +717,10 @@ class DatasetBase(abc.ABC):
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            return self.meta[self._ADATA_IDS_SFAIRA.age]
+            if self._ADATA_IDS_SFAIRA.age in self.meta.columns:
+                return self.meta[self._ADATA_IDS_SFAIRA.age]
+            else:
+                return None
 
     @age.setter
     def age(self, x: str):
@@ -752,7 +755,10 @@ class DatasetBase(abc.ABC):
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            return self.meta[self._ADATA_IDS_SFAIRA.dev_stage]
+            if self._ADATA_IDS_SFAIRA.dev_stage in self.meta.columns:
+                return self.meta[self._ADATA_IDS_SFAIRA.dev_stage]
+            else:
+                return None
 
     @dev_stage.setter
     def dev_stage(self, x: str):
@@ -843,7 +849,10 @@ class DatasetBase(abc.ABC):
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            return self.meta[self._ADATA_IDS_SFAIRA.ethnicity]
+            if self._ADATA_IDS_SFAIRA.ethnicity in self.meta.columns:
+                return self.meta[self._ADATA_IDS_SFAIRA.ethnicity]
+            else:
+                return None
 
     @ethnicity.setter
     def ethnicity(self, x: str):
@@ -856,7 +865,10 @@ class DatasetBase(abc.ABC):
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            return self.meta[self._ADATA_IDS_SFAIRA.healthy]
+            if self._ADATA_IDS_SFAIRA.healthy in self.meta.columns:
+                return self.meta[self._ADATA_IDS_SFAIRA.healthy]
+            else:
+                return None
 
     @healthy.setter
     def healthy(self, x: str):
@@ -902,7 +914,10 @@ class DatasetBase(abc.ABC):
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            return self.meta[self._ADATA_IDS_SFAIRA.normalization]
+            if self._ADATA_IDS_SFAIRA.normalization in self.meta.columns:
+                return self.meta[self._ADATA_IDS_SFAIRA.normalization]
+            else:
+                return None
 
     @normalization.setter
     def normalization(self, x: str):
@@ -1011,7 +1026,10 @@ class DatasetBase(abc.ABC):
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            return self.meta[self._ADATA_IDS_SFAIRA.organ]
+            if self._ADATA_IDS_SFAIRA.organ in self.meta.columns:
+                return self.meta[self._ADATA_IDS_SFAIRA.organ]
+            else:
+                return None
 
     @organ.setter
     def organ(self, x: str):
@@ -1024,7 +1042,10 @@ class DatasetBase(abc.ABC):
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            return self.meta[self._ADATA_IDS_SFAIRA.organism]
+            if self._ADATA_IDS_SFAIRA.organism in self.meta.columns:
+                return self.meta[self._ADATA_IDS_SFAIRA.organism]
+            else:
+                return None
 
     @organism.setter
     def organism(self, x: str):
@@ -1039,7 +1060,10 @@ class DatasetBase(abc.ABC):
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            return self.meta[self._ADATA_IDS_SFAIRA.protocol]
+            if self._ADATA_IDS_SFAIRA.protocol in self.meta.columns:
+                return self.meta[self._ADATA_IDS_SFAIRA.protocol]
+            else:
+                return None
 
     @protocol.setter
     def protocol(self, x: str):
@@ -1052,7 +1076,10 @@ class DatasetBase(abc.ABC):
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            return self.meta[self._ADATA_IDS_SFAIRA.sex]
+            if self._ADATA_IDS_SFAIRA.sex in self.meta.columns:
+                return self.meta[self._ADATA_IDS_SFAIRA.sex]
+            else:
+                return None
 
     @sex.setter
     def sex(self, x: str):
@@ -1073,7 +1100,10 @@ class DatasetBase(abc.ABC):
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            return self.meta[self._ADATA_IDS_SFAIRA.state_exact]
+            if self._ADATA_IDS_SFAIRA.state_exact in self.meta.columns:
+                return self.meta[self._ADATA_IDS_SFAIRA.state_exact]
+            else:
+                return None
 
     @state_exact.setter
     def state_exact(self, x: str):
@@ -1086,7 +1116,10 @@ class DatasetBase(abc.ABC):
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            return self.meta[self._ADATA_IDS_SFAIRA.subtissue]
+            if self._ADATA_IDS_SFAIRA.subtissue in self.meta.columns:
+                return self.meta[self._ADATA_IDS_SFAIRA.subtissue]
+            else:
+                return None
 
     @subtissue.setter
     def subtissue(self, x: str):
@@ -1115,7 +1148,10 @@ class DatasetBase(abc.ABC):
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            return self.meta[self._ADATA_IDS_SFAIRA.year]
+            if self._ADATA_IDS_SFAIRA.year in self.meta.columns:
+                return self.meta[self._ADATA_IDS_SFAIRA.year]
+            else:
+                return None
 
     @year.setter
     def year(self, x: str):
