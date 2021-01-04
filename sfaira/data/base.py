@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import abc
 import anndata
 import h5py
@@ -1646,12 +1648,36 @@ class DatasetSuperGroup:
     fn_backed: Union[None, PathLike]
     dataset_groups: List[DatasetGroupBase]
 
-    def __init__(self, dataset_groups: Union[None, List[DatasetGroupBase]]):
+    def __init__(self, dataset_groups: Union[None, List[DatasetGroupBase], List[DatasetSuperGroup]]):
         self.adata = None
         self.fn_backed = None
         self.set_dataset_groups(dataset_groups=dataset_groups)
 
         self._ADATA_IDS_SFAIRA = ADATA_IDS_SFAIRA()
+
+    def set_dataset_groups(self, dataset_groups: Union[List[DatasetGroupBase], List[DatasetSuperGroup]]):
+        if isinstance(dataset_groups[0], DatasetGroupBase):
+            self.dataset_groups = dataset_groups
+        elif isinstance(dataset_groups[0], DatasetSuperGroup):
+            # Decompose super groups first
+            dataset_groups_proc = []
+            for x in dataset_groups:
+                dataset_groups_proc.extend(x.dataset_groups)
+            self.dataset_groups = dataset_groups_proc
+        else:
+            assert False
+
+    def extend_dataset_groups(self, dataset_groups: Union[List[DatasetGroupBase], List[DatasetSuperGroup]]):
+        if isinstance(dataset_groups[0], DatasetGroupBase):
+            self.dataset_groups.extend(dataset_groups)
+        elif isinstance(dataset_groups[0], DatasetSuperGroup):
+            # Decompose super groups first
+            dataset_groups_proc = []
+            for x in dataset_groups:
+                dataset_groups_proc.extend(x.dataset_groups)
+            self.dataset_groups.extend(dataset_groups_proc)
+        else:
+            assert False
 
     def get_gc(
             self,
@@ -1687,9 +1713,6 @@ class DatasetSuperGroup:
 
     def ncells(self, annotated_only: bool = False):
         return np.sum(self.ncells_bydataset(annotated_only=annotated_only))
-
-    def set_dataset_groups(self, dataset_groups: List[DatasetGroupBase]):
-        self.dataset_groups = dataset_groups
 
     def subset_organs(self, subset: Union[None, List]):
         for x in self.dataset_groups:
@@ -1872,15 +1895,26 @@ class DatasetSuperGroup:
             x.subset(key=key, values=values)
 
 
-class DatasetSuperGroupDirectoryOrientedBase(DatasetSuperGroup):
+class DatasetSuperGroupOrganismBase(DatasetSuperGroup):
 
     def __init__(
             self,
             file_base: str,
+            dir_prefix: str,
+            dir_exlcude: List[str] = [],
             path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
     ):
+        """
+        Class that sits ontop of a directory of data set directories that each contain a data set group.
+
+        :param file_base:
+        :param dir_prefix: Prefix to subselect directories by. Set to "" for no constraints.
+        :param path:
+        :param meta_path:
+        :param cache_path:
+        """
         # Collect all data loaders from files in directory:
         dataset_groups = []
         cwd = os.path.dirname(file_base)
@@ -1888,9 +1922,46 @@ class DatasetSuperGroupDirectoryOrientedBase(DatasetSuperGroup):
         for f in os.listdir(cwd):
             if os.path.isdir(os.path.join(cwd, f)):  # only directories
                 # Narrow down to data set directories:
-                if f[0] == "d":
+                if f[:len(dir_prefix)] == dir_prefix and f not in dir_exlcude:
                     DatasetGroupDirectoryOriented = pydoc.locate(
-                        "sfaira.sfaira.data." + organism + "." + f + ".DatasetGroupDirectoryOriented")
+                        "sfaira.sfaira.data.dataloaders." + organism + "." + f + ".DatasetGroupDirectoryOriented")
+                    dataset_groups.append(
+                        DatasetGroupDirectoryOriented(path=path, meta_path=meta_path, cache_path=cache_path)
+                    )
+        super().__init__(dataset_groups=dataset_groups)
+
+
+class DatasetSuperGroupSfairaBase(DatasetSuperGroup):
+
+    def __init__(
+            self,
+            file_base: str,
+            dir_prefix: str,
+            dir_exlcude: List[str] = [],
+            path: Union[str, None] = None,
+            meta_path: Union[str, None] = None,
+            cache_path: Union[str, None] = None,
+    ):
+        """
+        Class that sits ontop of a directory of data set directories that each contain a data set super group,
+        instances of this class can be arbitrarily nested as super groups can be nested.
+
+        :param file_base:
+        :param dir_prefix: Prefix to subselect directories by. Set to "" for no constraints.
+        :param path:
+        :param meta_path:
+        :param cache_path:
+        """
+        # Collect all data loaders from files in directory:
+        dataset_groups = []
+        cwd = os.path.dirname(file_base)
+        organism = cwd.split("/")[-1]
+        for f in os.listdir(cwd):
+            if os.path.isdir(os.path.join(cwd, f)):  # only directories
+                # Narrow down to data set directories:
+                if f[:len(dir_prefix)] == dir_prefix and f not in dir_exlcude:
+                    DatasetGroupDirectoryOriented = pydoc.locate(
+                        "sfaira.sfaira.data.dataloaders." + organism + "." + f + ".DatasetSuperGroupDirectoryOriented")
                     dataset_groups.append(
                         DatasetGroupDirectoryOriented(path=path, meta_path=meta_path, cache_path=cache_path)
                     )

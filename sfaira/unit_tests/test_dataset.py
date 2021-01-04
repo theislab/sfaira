@@ -3,7 +3,8 @@ import os
 import scipy.sparse
 import unittest
 
-from sfaira.data import mouse, DatasetSuperGroup
+from sfaira.data import DatasetSuperGroup
+from sfaira.data.dataloaders import mouse
 
 
 class TestDatasetGroups(unittest.TestCase):

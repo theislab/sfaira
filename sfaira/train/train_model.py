@@ -8,7 +8,7 @@ from typing import Union
 from .external import DatasetGroupBase, DatasetSuperGroup
 from .external import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
 from .external import ModelZoo, ModelZooEmbedding, ModelZooCelltype
-from .external import mouse, human
+from sfaira.data.dataloaders import human, mouse
 from .external import ORGANISM_DICT
 
 

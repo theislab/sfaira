@@ -230,6 +230,7 @@ class ADATA_IDS_CELLXGENE(ADATA_IDS_EXTENDED):
     """
     _author_names: str
     _disease_state_healthy: str
+    accepted_file_names: List[str]
 
     def __init__(self):
         self._cell_types_original = "free_annotation"
@@ -264,6 +265,11 @@ class ADATA_IDS_CELLXGENE(ADATA_IDS_EXTENDED):
         # selected element entries used for parsing:
         self._disease_state_healthy = "normal"
         self._author_names = "names"
+
+        # accepted file names
+        self.accepted_file_names = [
+            "krasnow_lab_human_lung_cell_atlas_smartseq2-2-remixed.h5ad",
+        ]
 
     @property
     def author_names(self) -> str:

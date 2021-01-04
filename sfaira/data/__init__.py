@@ -1,6 +1,4 @@
 from .base import DatasetBase, DatasetGroupBase, DatasetGroupDirectoryOrientedBase, \
-    DatasetSuperGroup, DatasetSuperGroupDirectoryOrientedBase
-from .databases import DatasetCellxgene
-from . import mouse
-from . import human
+    DatasetSuperGroup, DatasetSuperGroupOrganismBase, DatasetSuperGroupSfairaBase
+from . import dataloaders
 from .interactive import DatasetInteractive
