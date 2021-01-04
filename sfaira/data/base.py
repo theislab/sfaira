@@ -34,7 +34,7 @@ class DatasetBase(abc.ABC):
     _download: Union[None, str]
     _download_meta: Union[None, str]
     _ethnicity: Union[None, str]
-    _healthy: Union[None, str]
+    _healthy: Union[None, bool]
     _id: Union[None, str]
     _ncells: Union[None, int]
     _normalization: Union[None, str]
@@ -686,6 +686,14 @@ class DatasetBase(abc.ABC):
         # Only load meta data if file exists:
         if os.path.isfile(fn):
             self.meta = pandas.read_csv(fn, usecols=self._META_DATA_FIELDS)
+            # Formatting:
+            # Make sure bool entries are bool:
+            if isinstance(self.meta["healthy"].values[0], str):
+                self.meta["healthy"] = [
+                    True if x == "True" else
+                    False if x == "False" else None
+                    for x in self.meta["healthy"].values
+                ]
             # Make sure None entries are formatted as None and not as string "None":
             keys_to_change = []
             for k, v in self.meta.items():
@@ -920,7 +928,7 @@ class DatasetBase(abc.ABC):
         self._ethnicity = x
 
     @property
-    def healthy(self) -> str:
+    def healthy(self) -> bool:
         if self._healthy is not None:
             return self._healthy
         else:
@@ -932,7 +940,7 @@ class DatasetBase(abc.ABC):
                 return None
 
     @healthy.setter
-    def healthy(self, x: str):
+    def healthy(self, x: bool):
         self._healthy = x
 
     @property
