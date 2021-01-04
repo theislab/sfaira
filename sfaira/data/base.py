@@ -45,7 +45,7 @@ class DatasetBase(abc.ABC):
     _source: Union[None, str]
     _state_exact: Union[None, str]
     _subtissue: Union[None, str]
-    _year: Union[None, str]
+    _year: Union[None, int]
 
     _obs_key_age: Union[None, str]
     _obs_key_cellontology_id: Union[None, str]
@@ -1228,7 +1228,7 @@ class DatasetBase(abc.ABC):
         self._var_symbol_col = x
 
     @property
-    def year(self) -> str:
+    def year(self) -> int:
         if self._year is not None:
             return self._year
         else:
@@ -1240,7 +1240,7 @@ class DatasetBase(abc.ABC):
                 return None
 
     @year.setter
-    def year(self, x: str):
+    def year(self, x: int):
         self._year = x
 
 

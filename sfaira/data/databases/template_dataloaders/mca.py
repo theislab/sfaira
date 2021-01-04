@@ -24,13 +24,13 @@ class DatasetMca(DatasetBase):
         self.obs_key_cellontology_original = "Annotation"
 
         self.author = "Guo"
-        self.year = "2018"
         self.doi = "10.1016/j.cell.2018.02.001"
-        self.protocol = "microwell-seq"
         self.normalization = 'raw'
         self.healthy = True
-        self.state_exact = "healthy"
         self.organism = "mouse"
+        self.protocol = "microwell-seq"
+        self.state_exact = "healthy"
+        self.year = 2018
 
         self.var_ensembl_col = "ensembl"
         self.var_symbol_col = "names"

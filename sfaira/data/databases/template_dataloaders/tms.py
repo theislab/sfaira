@@ -35,12 +35,12 @@ class DatasetTms(DatasetBase):
         self.obs_key_subtissue = "subtissue"
 
         self.author = "Quake"
-        self.year = "2019"
         self.doi = "10.1101/661728"
-        self.normalization = 'norm'
         self.healthy = True
-        self.state_exact = "healthy"
+        self.normalization = 'norm'
         self.organism = "mouse"
+        self.state_exact = "healthy"
+        self.year = 2019
 
         self.var_ensembl_col = None
         self.var_symbol_col = "index"

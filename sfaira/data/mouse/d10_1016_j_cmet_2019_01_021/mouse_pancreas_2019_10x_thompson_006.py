@@ -26,7 +26,7 @@ class Dataset(DatasetMca):
         self.protocol = "10x"
         self.state_exact = "diabetic"
         self.sub_tissue = "pancreas"
-        self.year = "2019"
+        self.year = 2019
 
         self.class_maps = {
             "0": {
