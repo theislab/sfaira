@@ -203,7 +203,7 @@ class DatasetBase(abc.ABC):
         if match_to_reference:
             genome = match_to_reference
             self._set_genome(genome=genome)
-        elif self.organism == "human":
+        elif self.organism == "loaders":
             genome = "Homo_sapiens_GRCh38_97"
             warnings.warn(f"using default genomes {genome}")
             self._set_genome(genome=genome)
@@ -558,7 +558,7 @@ class DatasetBase(abc.ABC):
                     adata_backed.obs.loc[np.sort(idx), k] = [self.adata.uns[k] for i in range(len(idx))]
                 else:
                     # Need to fill this instead of throwing an exception as this condition can trigger for one element
-                    # within a loop over multiple data sets (ie in data set anatomical_groups).
+                    # within a loop over multiple data sets (ie in data set human).
                     adata_backed.obs.loc[idx, k] = ["key_not_found" for i in range(len(idx))]
         elif isinstance(adata_backed.X, anndata._core.sparse_dataset.SparseDataset):  # backed sparse
             # cannot scatter update on backed sparse yet! assert that updated block is meant to be appended:
@@ -601,7 +601,7 @@ class DatasetBase(abc.ABC):
 
         if genome.lower().startswith("homo_sapiens"):
             g = SuperGenomeContainer(
-                organism="human",
+                organism="loaders",
                 genome=genome
             )
         elif genome.lower().startswith("mus_musculus"):
@@ -1330,8 +1330,8 @@ class DatasetGroupBase(abc.ABC):
 
     Example:
 
-    #query human lung
-    #from sfaira.dev.data.human.lung import DatasetGroupLung as DatasetGroup
+    #query loaders lung
+    #from sfaira.dev.data.loaders.lung import DatasetGroupLung as DatasetGroup
     #dsg_humanlung = DatasetGroupHuman(path='path/to/data')
     #dsg_humanlung.load_all(match_to_reference='Homo_sapiens_GRCh38_97')
     #dsg_humanlung[some_id]
@@ -1685,7 +1685,7 @@ class DatasetSuperGroup:
     ):
         if genome.lower().startswith("homo_sapiens"):
             g = SuperGenomeContainer(
-                organism="human",
+                organism="loaders",
                 genome=genome
             )
         elif genome.lower().startswith("mus_musculus"):
@@ -1729,7 +1729,7 @@ class DatasetSuperGroup:
             allow_caching: bool = True,
     ):
         """
-        Loads data set anatomical_groups into anndata object.
+        Loads data set human into anndata object.
 
         :param celltype_version: Version of cell type ontology to use.
             Uses most recent within each DatasetGroup if None.
@@ -1771,7 +1771,7 @@ class DatasetSuperGroup:
             allow_caching: bool = True,
     ):
         """
-        Loads data set anatomical_groups into backed anndata object.
+        Loads data set human into backed anndata object.
 
         Example usage:
 
@@ -1895,7 +1895,7 @@ class DatasetSuperGroup:
             x.subset(key=key, values=values)
 
 
-class DatasetSuperGroupOrganismBase(DatasetSuperGroup):
+class DatasetSuperGroupDirectoryOfGroups(DatasetSuperGroup):
 
     def __init__(
             self,
@@ -1931,7 +1931,7 @@ class DatasetSuperGroupOrganismBase(DatasetSuperGroup):
         super().__init__(dataset_groups=dataset_groups)
 
 
-class DatasetSuperGroupSfairaBase(DatasetSuperGroup):
+class DatasetSuperGroupDirectoryOfSuperGroups(DatasetSuperGroup):
 
     def __init__(
             self,

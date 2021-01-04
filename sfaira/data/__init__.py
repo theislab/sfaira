@@ -1,4 +1,4 @@
 from .base import DatasetBase, DatasetGroupBase, DatasetGroupDirectoryOrientedBase, \
-    DatasetSuperGroup, DatasetSuperGroupOrganismBase, DatasetSuperGroupSfairaBase
+    DatasetSuperGroup, DatasetSuperGroupDirectoryOfGroups, DatasetSuperGroupDirectoryOfSuperGroups
 from . import dataloaders
 from .interactive import DatasetInteractive

@@ -21,18 +21,18 @@ try:
                     mouse[organ].ontology[v] = ORGANISM_DICT_EXTENSION["mouse"][organ].ontology[v]
 
     for organ in human.keys():
-        if organ in ORGANISM_DICT_EXTENSION["human"].keys():
-            for v in ORGANISM_DICT_EXTENSION["human"][organ].versions:
+        if organ in ORGANISM_DICT_EXTENSION["loaders"].keys():
+            for v in ORGANISM_DICT_EXTENSION["loaders"][organ].versions:
                 if v in human[organ].celltype_universe.keys():
-                    raise ValueError(f'Celltype version {v} already defined for human organ {organ} in base sfaira. '
+                    raise ValueError(f'Celltype version {v} already defined for loaders organ {organ} in base sfaira. '
                                      f'Please define a new version in sfaira_extension.')
                 else:
-                    human[organ].celltype_universe[v] = ORGANISM_DICT_EXTENSION["human"][organ].celltype_universe[v]
-                    human[organ].ontology[v] = ORGANISM_DICT_EXTENSION["human"][organ].ontology[v]
+                    human[organ].celltype_universe[v] = ORGANISM_DICT_EXTENSION["loaders"][organ].celltype_universe[v]
+                    human[organ].ontology[v] = ORGANISM_DICT_EXTENSION["loaders"][organ].ontology[v]
 except ImportError:
     pass
 
 ORGANISM_DICT = {
     "mouse": mouse,
-    "human": human
+    "loaders": human
 }

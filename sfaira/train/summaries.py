@@ -878,12 +878,12 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         sns_tab = sns_tab[sns_tab['organ'] == organ]
 
         tz = TargetZoos(path=datapath)
-        if organism == "human":
+        if organism == "loaders":
             dataset = tz.data_human[organ]
         elif organism == "mouse":
             dataset = tz.data_mouse[organ]
         else:
-            raise(ValueError(f"Supplied organism {organism} not recognised. Should be one of ('mouse', 'human')"))
+            raise(ValueError(f"Supplied organism {organism} not recognised. Should be one of ('mouse', 'loaders')"))
         dataset.load_all()
         cell_counts = dataset.obs_concat(keys=['cell_ontology_class'])['cell_ontology_class'].value_counts().to_dict()
 
@@ -1043,12 +1043,12 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         sns_tab = sns_tab[sns_tab['organ'] == organ]
 
         tz = TargetZoos(path=datapath)
-        if organism == "human":
+        if organism == "loaders":
             dataset = tz.data_human[organ]
         elif organism == "mouse":
             dataset = tz.data_mouse[organ]
         else:
-            raise(ValueError(f"Supplied organism {organism} not recognised. Should be one of ('mouse', 'human')"))
+            raise(ValueError(f"Supplied organism {organism} not recognised. Should be one of ('mouse', 'loaders')"))
         dataset.load_all()
         cell_counts = dataset.obs_concat(keys=['cell_ontology_class'])['cell_ontology_class'].value_counts().to_dict()
 
@@ -1376,12 +1376,12 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
             print('Compute gradients (1/3): load data')
             # load data
             tz = TargetZoos(path=datapath)
-            if organism == "human":
+            if organism == "loaders":
                 dataset = tz.data_human[organ]
             elif organism == "mouse":
                 dataset = tz.data_mouse[organ]
             else:
-                raise (ValueError(f"Supplied organism {organism} not recognised. Should be one of ('mouse', 'human')"))
+                raise (ValueError(f"Supplied organism {organism} not recognised. Should be one of ('mouse', 'loaders')"))
             dataset.load_all(annotated_only=True)
 
             print('Compute gradients (2/3): load embedding')

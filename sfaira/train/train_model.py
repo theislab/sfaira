@@ -8,13 +8,13 @@ from typing import Union
 from .external import DatasetGroupBase, DatasetSuperGroup
 from .external import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
 from .external import ModelZoo, ModelZooEmbedding, ModelZooCelltype
-from sfaira.data.dataloaders import human, mouse
+from sfaira.data.dataloaders import loaders, mouse
 from .external import ORGANISM_DICT
 
 
 class TargetZoos:
     """
-    Class that provides access to all available dataset anatomical_groups in sfaira.
+    Class that provides access to all available dataset human in sfaira.
 
     Parameters
     ----------
@@ -56,50 +56,50 @@ class TargetZoos:
                 "uterus": mouse.DatasetGroupUterus(path=path, cache_path=cache_path),
             }
             self.data_human = {
-                'adipose': human.DatasetGroupAdipose(path=path, meta_path=meta_path, cache_path=cache_path),
-                'adrenalgland': human.DatasetGroupAdrenalgland(path=path, meta_path=meta_path, cache_path=cache_path),
-                'mixed': human.DatasetGroupMixed(path=path, meta_path=meta_path, cache_path=cache_path),
-                'artery': human.DatasetGroupArtery(path=path, meta_path=meta_path, cache_path=cache_path),
-                'bladder': human.DatasetGroupBladder(path=path, meta_path=meta_path, cache_path=cache_path),
-                'blood': human.DatasetGroupBlood(path=path, meta_path=meta_path, cache_path=cache_path),
-                'bone': human.DatasetGroupBone(path=path, meta_path=meta_path, cache_path=cache_path),
-                'brain': human.DatasetGroupBrain(path=path, meta_path=meta_path, cache_path=cache_path),
-                'calvaria': human.DatasetGroupCalvaria(path=path, meta_path=meta_path, cache_path=cache_path),
-                'cervix': human.DatasetGroupCervix(path=path, meta_path=meta_path, cache_path=cache_path),
-                'chorionicvillus': human.DatasetGroupChorionicvillus(path=path, meta_path=meta_path, cache_path=cache_path),
-                'colon': human.DatasetGroupColon(path=path, meta_path=meta_path, cache_path=cache_path),
-                'duodenum': human.DatasetGroupDuodenum(path=path, meta_path=meta_path, cache_path=cache_path),
-                'epityphlon': human.DatasetGroupEpityphlon(path=path, meta_path=meta_path, cache_path=cache_path),
-                'esophagus': human.DatasetGroupEsophagus(path=path, meta_path=meta_path, cache_path=cache_path),
-                'eye': human.DatasetGroupEye(path=path, meta_path=meta_path, cache_path=cache_path),
-                'fallopiantube': human.DatasetGroupFallopiantube(path=path, meta_path=meta_path, cache_path=cache_path),
-                'femalegonad': human.DatasetGroupFemalegonad(path=path, meta_path=meta_path, cache_path=cache_path),
-                'gallbladder': human.DatasetGroupGallbladder(path=path, meta_path=meta_path, cache_path=cache_path),
-                'heart': human.DatasetGroupHeart(path=path, meta_path=meta_path, cache_path=cache_path),
-                'hesc': human.DatasetGroupHesc(path=path, meta_path=meta_path, cache_path=cache_path),
-                'ileum': human.DatasetGroupIleum(path=path, meta_path=meta_path, cache_path=cache_path),
-                'jejunum': human.DatasetGroupJejunum(path=path, meta_path=meta_path, cache_path=cache_path),
-                'kidney': human.DatasetGroupKidney(path=path, meta_path=meta_path, cache_path=cache_path),
-                'liver': human.DatasetGroupLiver(path=path, meta_path=meta_path, cache_path=cache_path),
-                'lung': human.DatasetGroupLung(path=path, meta_path=meta_path, cache_path=cache_path),
-                'malegonad': human.DatasetGroupMalegonad(path=path, meta_path=meta_path, cache_path=cache_path),
-                'muscle': human.DatasetGroupMuscle(path=path, meta_path=meta_path, cache_path=cache_path),
-                'omentum': human.DatasetGroupOmentum(path=path, meta_path=meta_path, cache_path=cache_path),
-                'pancreas': human.DatasetGroupPancreas(path=path, meta_path=meta_path, cache_path=cache_path),
-                'placenta': human.DatasetGroupPlacenta(path=path, meta_path=meta_path, cache_path=cache_path),
-                'pleura': human.DatasetGroupPleura(path=path, meta_path=meta_path, cache_path=cache_path),
-                'prostate': human.DatasetGroupProstate(path=path, meta_path=meta_path, cache_path=cache_path),
-                'rectum': human.DatasetGroupRectum(path=path, meta_path=meta_path, cache_path=cache_path),
-                'rib': human.DatasetGroupRib(path=path, meta_path=meta_path, cache_path=cache_path),
-                'skin': human.DatasetGroupSkin(path=path, meta_path=meta_path, cache_path=cache_path),
-                'spinalcord': human.DatasetGroupSpinalcord(path=path, meta_path=meta_path, cache_path=cache_path),
-                'spleen': human.DatasetGroupSpleen(path=path, meta_path=meta_path, cache_path=cache_path),
-                'stomach': human.DatasetGroupStomach(path=path, meta_path=meta_path, cache_path=cache_path),
-                'thymus': human.DatasetGroupThymus(path=path, meta_path=meta_path, cache_path=cache_path),
-                'thyroid': human.DatasetGroupThyroid(path=path, meta_path=meta_path, cache_path=cache_path),
-                'trachea': human.DatasetGroupTrachea(path=path, meta_path=meta_path, cache_path=cache_path),
-                'ureter': human.DatasetGroupUreter(path=path, meta_path=meta_path, cache_path=cache_path),
-                'uterus': human.DatasetGroupUterus(path=path, meta_path=meta_path, cache_path=cache_path),
+                'adipose': loaders.DatasetGroupAdipose(path=path, meta_path=meta_path, cache_path=cache_path),
+                'adrenalgland': loaders.DatasetGroupAdrenalgland(path=path, meta_path=meta_path, cache_path=cache_path),
+                'mixed': loaders.DatasetGroupMixed(path=path, meta_path=meta_path, cache_path=cache_path),
+                'artery': loaders.DatasetGroupArtery(path=path, meta_path=meta_path, cache_path=cache_path),
+                'bladder': loaders.DatasetGroupBladder(path=path, meta_path=meta_path, cache_path=cache_path),
+                'blood': loaders.DatasetGroupBlood(path=path, meta_path=meta_path, cache_path=cache_path),
+                'bone': loaders.DatasetGroupBone(path=path, meta_path=meta_path, cache_path=cache_path),
+                'brain': loaders.DatasetGroupBrain(path=path, meta_path=meta_path, cache_path=cache_path),
+                'calvaria': loaders.DatasetGroupCalvaria(path=path, meta_path=meta_path, cache_path=cache_path),
+                'cervix': loaders.DatasetGroupCervix(path=path, meta_path=meta_path, cache_path=cache_path),
+                'chorionicvillus': loaders.DatasetGroupChorionicvillus(path=path, meta_path=meta_path, cache_path=cache_path),
+                'colon': loaders.DatasetGroupColon(path=path, meta_path=meta_path, cache_path=cache_path),
+                'duodenum': loaders.DatasetGroupDuodenum(path=path, meta_path=meta_path, cache_path=cache_path),
+                'epityphlon': loaders.DatasetGroupEpityphlon(path=path, meta_path=meta_path, cache_path=cache_path),
+                'esophagus': loaders.DatasetGroupEsophagus(path=path, meta_path=meta_path, cache_path=cache_path),
+                'eye': loaders.DatasetGroupEye(path=path, meta_path=meta_path, cache_path=cache_path),
+                'fallopiantube': loaders.DatasetGroupFallopiantube(path=path, meta_path=meta_path, cache_path=cache_path),
+                'femalegonad': loaders.DatasetGroupFemalegonad(path=path, meta_path=meta_path, cache_path=cache_path),
+                'gallbladder': loaders.DatasetGroupGallbladder(path=path, meta_path=meta_path, cache_path=cache_path),
+                'heart': loaders.DatasetGroupHeart(path=path, meta_path=meta_path, cache_path=cache_path),
+                'hesc': loaders.DatasetGroupHesc(path=path, meta_path=meta_path, cache_path=cache_path),
+                'ileum': loaders.DatasetGroupIleum(path=path, meta_path=meta_path, cache_path=cache_path),
+                'jejunum': loaders.DatasetGroupJejunum(path=path, meta_path=meta_path, cache_path=cache_path),
+                'kidney': loaders.DatasetGroupKidney(path=path, meta_path=meta_path, cache_path=cache_path),
+                'liver': loaders.DatasetGroupLiver(path=path, meta_path=meta_path, cache_path=cache_path),
+                'lung': loaders.DatasetGroupLung(path=path, meta_path=meta_path, cache_path=cache_path),
+                'malegonad': loaders.DatasetGroupMalegonad(path=path, meta_path=meta_path, cache_path=cache_path),
+                'muscle': loaders.DatasetGroupMuscle(path=path, meta_path=meta_path, cache_path=cache_path),
+                'omentum': loaders.DatasetGroupOmentum(path=path, meta_path=meta_path, cache_path=cache_path),
+                'pancreas': loaders.DatasetGroupPancreas(path=path, meta_path=meta_path, cache_path=cache_path),
+                'placenta': loaders.DatasetGroupPlacenta(path=path, meta_path=meta_path, cache_path=cache_path),
+                'pleura': loaders.DatasetGroupPleura(path=path, meta_path=meta_path, cache_path=cache_path),
+                'prostate': loaders.DatasetGroupProstate(path=path, meta_path=meta_path, cache_path=cache_path),
+                'rectum': loaders.DatasetGroupRectum(path=path, meta_path=meta_path, cache_path=cache_path),
+                'rib': loaders.DatasetGroupRib(path=path, meta_path=meta_path, cache_path=cache_path),
+                'skin': loaders.DatasetGroupSkin(path=path, meta_path=meta_path, cache_path=cache_path),
+                'spinalcord': loaders.DatasetGroupSpinalcord(path=path, meta_path=meta_path, cache_path=cache_path),
+                'spleen': loaders.DatasetGroupSpleen(path=path, meta_path=meta_path, cache_path=cache_path),
+                'stomach': loaders.DatasetGroupStomach(path=path, meta_path=meta_path, cache_path=cache_path),
+                'thymus': loaders.DatasetGroupThymus(path=path, meta_path=meta_path, cache_path=cache_path),
+                'thyroid': loaders.DatasetGroupThyroid(path=path, meta_path=meta_path, cache_path=cache_path),
+                'trachea': loaders.DatasetGroupTrachea(path=path, meta_path=meta_path, cache_path=cache_path),
+                'ureter': loaders.DatasetGroupUreter(path=path, meta_path=meta_path, cache_path=cache_path),
+                'uterus': loaders.DatasetGroupUterus(path=path, meta_path=meta_path, cache_path=cache_path),
             }
             
         else:

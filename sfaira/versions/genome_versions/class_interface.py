@@ -13,7 +13,7 @@ class SuperGenomeContainer:
             genome: str
     ):
         self.organism = organism
-        if self.organism == "human":
+        if self.organism == "loaders":
             try:
                 from sfaira_extension.versions.genome_versions.human import GenomeContainer
                 if genome not in GenomeContainer.available_genomes:

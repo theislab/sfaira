@@ -70,7 +70,7 @@ class CelltypeVersionsBase:
     @property
     def ids(self):
         """
-        List of all human understandable cell type names of this instance.
+        List of all loaders understandable cell type names of this instance.
 
         :return:
         """
