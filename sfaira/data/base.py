@@ -722,7 +722,7 @@ class DatasetBase(abc.ABC):
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            if self._ADATA_IDS_SFAIRA.age in self.meta.columns:
+            if self.meta is not None and self._ADATA_IDS_SFAIRA.age in self.meta.columns:
                 return self.meta[self._ADATA_IDS_SFAIRA.age]
             else:
                 return None
@@ -738,7 +738,10 @@ class DatasetBase(abc.ABC):
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            return self.meta[self._ADATA_IDS_SFAIRA.annotated]
+            if self.meta is not None and self._ADATA_IDS_SFAIRA.annotated in self.meta.columns:
+                return self.meta[self._ADATA_IDS_SFAIRA.annotated]
+            else:
+                return None
 
     @property
     def author(self) -> str:
@@ -747,6 +750,8 @@ class DatasetBase(abc.ABC):
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
+            if self.meta is None or self._ADATA_IDS_SFAIRA.author not in self.meta.columns:
+                raise ValueError("author must be set but was neither set in constructor nor in meta data")
             return self.meta[self._ADATA_IDS_SFAIRA.author]
 
     @author.setter
@@ -760,7 +765,7 @@ class DatasetBase(abc.ABC):
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            if self._ADATA_IDS_SFAIRA.dev_stage in self.meta.columns:
+            if self.meta is not None and self._ADATA_IDS_SFAIRA.dev_stage in self.meta.columns:
                 return self.meta[self._ADATA_IDS_SFAIRA.dev_stage]
             else:
                 return None
@@ -776,6 +781,8 @@ class DatasetBase(abc.ABC):
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
+            if self.meta is None or self._ADATA_IDS_SFAIRA.healthy not in self.meta.columns:
+                raise ValueError("doi must be set but was neither set in constructor nor in meta data")
             return self.meta[self._ADATA_IDS_SFAIRA.doi]
 
     @doi.setter
@@ -854,7 +861,7 @@ class DatasetBase(abc.ABC):
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            if self._ADATA_IDS_SFAIRA.ethnicity in self.meta.columns:
+            if self.meta is not None and self._ADATA_IDS_SFAIRA.ethnicity in self.meta.columns:
                 return self.meta[self._ADATA_IDS_SFAIRA.ethnicity]
             else:
                 return None
@@ -870,7 +877,7 @@ class DatasetBase(abc.ABC):
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            if self._ADATA_IDS_SFAIRA.healthy in self.meta.columns:
+            if self.meta is not None and self._ADATA_IDS_SFAIRA.healthy in self.meta.columns:
                 return self.meta[self._ADATA_IDS_SFAIRA.healthy]
             else:
                 return None
@@ -919,7 +926,7 @@ class DatasetBase(abc.ABC):
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            if self._ADATA_IDS_SFAIRA.normalization in self.meta.columns:
+            if self.meta is not None and self._ADATA_IDS_SFAIRA.normalization in self.meta.columns:
                 return self.meta[self._ADATA_IDS_SFAIRA.normalization]
             else:
                 return None
@@ -1031,7 +1038,7 @@ class DatasetBase(abc.ABC):
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            if self._ADATA_IDS_SFAIRA.organ in self.meta.columns:
+            if self.meta is not None and self._ADATA_IDS_SFAIRA.organ in self.meta.columns:
                 return self.meta[self._ADATA_IDS_SFAIRA.organ]
             else:
                 return None
@@ -1047,7 +1054,7 @@ class DatasetBase(abc.ABC):
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            if self._ADATA_IDS_SFAIRA.organism in self.meta.columns:
+            if self.meta is not None and self._ADATA_IDS_SFAIRA.organism in self.meta.columns:
                 return self.meta[self._ADATA_IDS_SFAIRA.organism]
             else:
                 return None
@@ -1065,7 +1072,7 @@ class DatasetBase(abc.ABC):
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            if self._ADATA_IDS_SFAIRA.protocol in self.meta.columns:
+            if self.meta is not None and self._ADATA_IDS_SFAIRA.protocol in self.meta.columns:
                 return self.meta[self._ADATA_IDS_SFAIRA.protocol]
             else:
                 return None
@@ -1081,7 +1088,7 @@ class DatasetBase(abc.ABC):
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            if self._ADATA_IDS_SFAIRA.sex in self.meta.columns:
+            if self.meta is not None and self._ADATA_IDS_SFAIRA.sex in self.meta.columns:
                 return self.meta[self._ADATA_IDS_SFAIRA.sex]
             else:
                 return None
@@ -1105,7 +1112,7 @@ class DatasetBase(abc.ABC):
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            if self._ADATA_IDS_SFAIRA.state_exact in self.meta.columns:
+            if self.meta is not None and self._ADATA_IDS_SFAIRA.state_exact in self.meta.columns:
                 return self.meta[self._ADATA_IDS_SFAIRA.state_exact]
             else:
                 return None
@@ -1121,7 +1128,7 @@ class DatasetBase(abc.ABC):
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            if self._ADATA_IDS_SFAIRA.subtissue in self.meta.columns:
+            if self.meta is not None and self._ADATA_IDS_SFAIRA.subtissue in self.meta.columns:
                 return self.meta[self._ADATA_IDS_SFAIRA.subtissue]
             else:
                 return None
@@ -1153,7 +1160,7 @@ class DatasetBase(abc.ABC):
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            if self._ADATA_IDS_SFAIRA.year in self.meta.columns:
+            if self.meta is not None and self._ADATA_IDS_SFAIRA.year in self.meta.columns:
                 return self.meta[self._ADATA_IDS_SFAIRA.year]
             else:
                 return None
