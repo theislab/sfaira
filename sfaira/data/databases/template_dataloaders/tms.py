@@ -13,10 +13,11 @@ class DatasetTms(DatasetBase):
             self,
             path: Union[str, None],
             meta_path: Union[str, None] = None,
+            cache_path: Union[str, None] = None,
             source: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(path=path, meta_path=meta_path, **kwargs)
+        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.source = source
         if self.source == "aws":
             self.download = "https://czb-tabula-muris-senis.s3-us-west-2.amazonaws.com/Data-objects/"

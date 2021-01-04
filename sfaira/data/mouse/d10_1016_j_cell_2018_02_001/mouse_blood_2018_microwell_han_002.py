@@ -12,9 +12,10 @@ class Dataset(DatasetMca):
             self,
             path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
+            cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(path=path, meta_path=meta_path, **kwargs)
+        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "mouse_blood_2018_microwell-seq_han_002_10.1016/j.cell.2018.02.001"
         self.download = "https://ndownloader.figshare.com/articles/5435866?private_link=865e694ad06d5857db4b"
         self.organ = "blood"

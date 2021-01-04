@@ -11,10 +11,11 @@ class Dataset(DatasetTms):
             self,
             path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
+            cache_path: Union[str, None] = None,
             source: str = "aws",
             **kwargs
     ):
-        super().__init__(path=path, meta_path=meta_path, source=source, **kwargs)
+        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, source=source, **kwargs)
         self.id = "mouse_kidney_2019_10x_pisco_001_10.1101/661728"
         self.organ = "kidney"
         self.sub_tissue = "kidney"

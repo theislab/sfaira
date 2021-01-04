@@ -19,9 +19,10 @@ class Dataset(DatasetBase):
             self,
             path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
+            cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(path=path, meta_path=meta_path, **kwargs)
+        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.organism = "human"
         self.id = "human_lung_2019_dropseq_braga_003_10.1038/s41591-019-0468-5"
         self.download = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE130nnn/GSE130148/suppl/GSE130148%5Fraw%5Fcounts%2Ecsv%2Egz"

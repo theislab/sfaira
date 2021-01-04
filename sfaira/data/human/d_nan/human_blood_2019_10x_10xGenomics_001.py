@@ -22,9 +22,10 @@ class Dataset(DatasetBase):
             self,
             path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
+            cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(path=path, meta_path=meta_path, **kwargs)
+        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.organism = "human"
         self.id = "human_blood_2019_10x_10xGenomics_001_unknown"
         self.download = "http://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_10k_v3/pbmc_10k_v3_filtered_feature_bc_matrix.h5"

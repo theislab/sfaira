@@ -11,11 +11,11 @@ class TestDatasetGroups(unittest.TestCase):
     dir_meta: str = "./test_data/meta"
 
     def test_load(self):
-        ds = mouse.DatasetGroupLung(path=self.dir_data, meta_path=self.dir_meta)
+        ds = mouse.DatasetGroupLung(path=self.dir_data, meta_path=self.dir_meta, cache_path=self.dir_data)
         ds.load_all()
 
     def test_adata(self):
-        ds = mouse.DatasetGroupBladder(path=self.dir_data, meta_path=self.dir_meta)
+        ds = mouse.DatasetGroupBladder(path=self.dir_data, meta_path=self.dir_meta, cache_path=self.dir_data)
         _ = ds.adata
 
 
@@ -26,7 +26,7 @@ class TestDatasetSuperGroups(unittest.TestCase):
     def test_load(self):
         ds = DatasetSuperGroup(
             dataset_groups=[
-                mouse.DatasetGroupLung(path=self.dir_data, meta_path=self.dir_meta)
+                mouse.DatasetGroupLung(path=self.dir_data, meta_path=self.dir_meta, cache_path=self.dir_data)
             ]
         )
         ds.load_all()
@@ -34,7 +34,7 @@ class TestDatasetSuperGroups(unittest.TestCase):
     def test_adata(self):
         ds = DatasetSuperGroup(
             dataset_groups=[
-                mouse.DatasetGroupLung(path=self.dir_data, meta_path=self.dir_meta)
+                mouse.DatasetGroupLung(path=self.dir_data, meta_path=self.dir_meta, cache_path=self.dir_data)
             ]
         )
         _ = ds.adata
@@ -42,7 +42,7 @@ class TestDatasetSuperGroups(unittest.TestCase):
     def test_load_backed_dense(self, genome="Mus_musculus_GRCm38_97"):
         ds = DatasetSuperGroup(
             dataset_groups=[
-                mouse.DatasetGroupLung(path=self.dir_data, meta_path=self.dir_meta)
+                mouse.DatasetGroupLung(path=self.dir_data, meta_path=self.dir_meta, cache_path=self.dir_data)
             ]
         )
         ds.load_all_tobacked(
@@ -57,7 +57,7 @@ class TestDatasetSuperGroups(unittest.TestCase):
     def test_load_backed_sparse(self, genome="Mus_musculus_GRCm38_97"):
         ds = DatasetSuperGroup(
             dataset_groups=[
-                mouse.DatasetGroupLung(path=self.dir_data, meta_path=self.dir_meta)
+                mouse.DatasetGroupLung(path=self.dir_data, meta_path=self.dir_meta, cache_path=self.dir_data)
             ]
         )
         ds.load_all_tobacked(

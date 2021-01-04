@@ -19,9 +19,10 @@ class Dataset(DatasetBase):
             self,
             path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
+            cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(path=path, meta_path=meta_path, **kwargs)
+        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.organism = "human"
         self.id = "human_spleen_2019_10x_madissoon_001_10.1186/s13059-019-1906-x"
         self.download = "https://cellgeni.cog.sanger.ac.uk/tissue-stability/tissue-stability/spleen.cellxgene.h5ad"

@@ -20,9 +20,10 @@ class Dataset(DatasetBase):
             self,
             path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
+            cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(path=path, meta_path=meta_path, **kwargs)
+        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.organism = "human"
         self.id = "human_eye_2019_10x_lukowski_001_10.15252/embj.2018100811"
         self.download = "https://covid19.cog.sanger.ac.uk/lukowski19.processed.h5ad"

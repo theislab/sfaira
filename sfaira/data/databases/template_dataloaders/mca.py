@@ -15,9 +15,10 @@ class DatasetMca(DatasetBase):
             self,
             path: Union[str, None],
             meta_path: Union[str, None] = None,
+            cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(path=path, meta_path=meta_path, **kwargs)
+        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
 
         self.obs_key_cellontology_class = "Annotation"
         self.obs_key_cellontology_original = "Annotation"

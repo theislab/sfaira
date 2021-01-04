@@ -146,6 +146,9 @@ class DatasetBase(abc.ABC):
         if fn is None and self.path is None:
             raise ValueError("provide either fn in load or path in constructor")
 
+        assert self.cache_path is not None, "set self.cache_path first"
+        assert self._directory_formatted_doi is not None, "set self.doi first"
+        assert self._directory_formatted_id is not None, "set self.id first"
         fn_cache = os.path.join(
             self.cache_path,
             self._directory_formatted_doi,

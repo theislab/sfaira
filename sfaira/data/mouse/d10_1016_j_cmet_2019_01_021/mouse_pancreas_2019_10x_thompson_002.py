@@ -12,9 +12,10 @@ class Dataset(DatasetMca):
             self,
             path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
+            cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(path=path, meta_path=meta_path, **kwargs)
+        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.author = "Bhushan"
         self.id = "mouse_pancreas_2019_10x_thompson_002_10.1016/j.cmet.2019.01.021"
         self.doi = "10.1016/j.cmet.2019.01.021"

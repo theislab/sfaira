@@ -35,9 +35,10 @@ class Dataset(DatasetBase):
             self,
             path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
+            cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(path=path, meta_path=meta_path, **kwargs)
+        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.organism = "human"
         self.id = "human_liver_2019_10x_ramachandran_001_10.1038/s41586-019-1631-3"
         self.download = "https://datashare.is.ed.ac.uk/bitstream/handle/10283/3433/tissue.rdata"
