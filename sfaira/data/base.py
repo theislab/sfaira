@@ -451,7 +451,7 @@ class DatasetBase(abc.ABC):
                 assert isinstance(x, str), f"data set-wise attribute for {y} must be a string"
                 # Attribute supplied per data set: Write into .uns.
                 self.adata.uns[y] = x
-            else:  # x is None and z is not None
+            elif x is None and z is not None:
                 # Attribute supplied per cell: Write into .obs.
                 # Search for direct match of the sought-after column name or for attribute specific obs key.
                 if z not in self.adata.obs.keys():
@@ -465,6 +465,8 @@ class DatasetBase(abc.ABC):
                     self.adata.uns[y] = UNS_STRING_META_IN_OBS
                     # Remove potential pd.Categorical formatting:
                     self.adata.obs[y] = self.adata.obs[z].values.tolist()
+            else:
+                assert False, "switch option should not occur"
         # Process entries which are boolean element matches:
         for x, y in (
                 [self._ADATA_IDS_SFAIRA.healthy, self.healthy_state_healthy],
@@ -497,8 +499,16 @@ class DatasetBase(abc.ABC):
             warnings.warn("You are trying to subset organs after loading the dataset."
                           "This will have no effect unless the dataset is loaded again.")
 
-    def load_tobacked(self, adata_backed: anndata.AnnData, genome: str, idx: np.ndarray, fn: Union[None, str] = None,
-                      celltype_version: Union[str, None] = None):
+    def load_tobacked(
+            self,
+            adata_backed: anndata.AnnData,
+            genome: str,
+            idx: np.ndarray,
+            fn: Union[None, str] = None,
+            celltype_version: Union[str, None] = None,
+            load_raw: bool = False,
+            allow_caching: bool = True
+    ):
         """
         Loads data set into slice of backed anndata object.
 
@@ -512,13 +522,17 @@ class DatasetBase(abc.ABC):
         :param keys:
         :param fn:
         :param celltype_version: Version of cell type ontology to use. Uses most recent if None.
+        :param load_raw: See .load().
+        :param allow_caching: See .load().
         :return: New row index for next element to be written into backed anndata.
         """
         self.load(
             fn=fn,
             celltype_version=celltype_version,
             remove_gene_version=True,
-            match_to_reference=genome
+            match_to_reference=genome,
+            load_raw=load_raw,
+            allow_caching=allow_caching
         )
         # Check if writing to sparse or dense matrix:
         if isinstance(adata_backed.X, np.ndarray) or \
@@ -672,21 +686,49 @@ class DatasetBase(abc.ABC):
         # Only load meta data if file exists:
         if os.path.isfile(fn):
             self.meta = pandas.read_csv(fn, usecols=self._META_DATA_FIELDS)
+        # Make sure None entries are formatted as None and not as string "None":
+        keys_to_change = []
+        for k, v in self.meta.items():
+            if isinstance(v[0], str) and v[0] == "None":
+                keys_to_change.append(k)
+        for k in keys_to_change:
+            self.meta[k] = [None]
 
     def write_meta(
             self,
             fn_meta: Union[None, str] = None,
-            fn_data: Union[None, str] = None,
             dir_out: Union[None, str] = None,
+            fn_data: Union[None, str] = None,
     ):
-        if fn_meta is None:
-            if self.path is None and dir_out is None:
-                raise ValueError("provide either fn in load or path in constructor")
-            if dir_out is None:
-                dir_out = self.meta_path
+        """
+        Write meta data object for data set.
+
+        Does not cache data and attempts to load raw data.
+
+        :param fn_meta: File to write to, selects automatically based on self.meta_path and self.id otherwise.
+        :param dir_out: Path to write to, file name is selected automatically based on self.id.
+        :param fn_data: See .load()
+        :return:
+        """
+        if fn_meta is not None and dir_out is not None:
+            raise ValueError("supply either fn_meta or dir_out but not both")
+        elif fn_meta is None and dir_out is None:
+            if self.meta_fn is None:
+                raise ValueError("provide either fn in load or via constructor (meta_path)")
             fn_meta = self.meta_fn
+        elif fn_meta is None and dir_out is not None:
+            os.path.join(dir_out, self.doi_cleaned_id + "_meta.csv")
+        elif fn_meta is not None and dir_out is None:
+            pass  # fn_meta is used
+
         if self.adata is None:
-            self.load(fn=fn_data, remove_gene_version=False, match_to_reference=None)
+            self.load(
+                fn=fn_data,
+                remove_gene_version=False,
+                match_to_reference=None,
+                load_raw=True,
+                allow_caching=False,
+            )
         # Add data-set wise meta data into table:
         meta = pandas.DataFrame({
             self._ADATA_IDS_SFAIRA.annotated: self.adata.uns[self._ADATA_IDS_SFAIRA.annotated],
@@ -1203,21 +1245,23 @@ class DatasetGroupBase(abc.ABC):
 
     def load_all(
             self,
-            celltype_version: Union[str, None] = None,
             annotated_only: bool = False,
+            celltype_version: Union[str, None] = None,
             remove_gene_version: bool = True,
             match_to_reference: Union[str, None] = None,
-            load_raw: bool = False
+            load_raw: bool = False,
+            allow_caching: bool = True,
     ):
         """
 
         Subsets self.datasets to the data sets that were found.
 
-        :param celltype_version: Version of cell type ontology to use. Uses most recent if None.
         :param annotated_only:
-        :param remove_gene_version:
-        :param match_to_reference:
-        :param load_raw: Loads unprocessed version of data if available in data loader.
+        :param celltype_version:  See .load().
+        :param remove_gene_version: See .load().
+        :param match_to_reference: See .load().
+        :param load_raw: See .load().
+        :param allow_caching: See .load().
         :return:
         """
         for x in self.ids:
@@ -1227,26 +1271,37 @@ class DatasetGroupBase(abc.ABC):
                         celltype_version=self.format_type_version(celltype_version),
                         remove_gene_version=remove_gene_version,
                         match_to_reference=match_to_reference,
-                        load_raw=load_raw
+                        load_raw=load_raw,
+                        allow_caching=allow_caching
                     )
             except FileNotFoundError as e:
                 print(e)
                 del self.datasets[x]
 
-    def load_all_tobacked(self, adata_backed: anndata.AnnData, genome: str, idx: List[np.ndarray],
-                          annotated_only: bool = False, celltype_version: Union[str, None] = None):
+    def load_all_tobacked(
+            self,
+            adata_backed: anndata.AnnData,
+            genome: str,
+            idx: List[np.ndarray],
+            annotated_only: bool = False,
+            celltype_version: Union[str, None] = None,
+            load_raw: bool = False,
+            allow_caching: bool = True,
+    ):
         """
         Loads data set group into slice of backed anndata object.
 
-        Subsets self.datasets to the data sets that were found.
+        Subsets self.datasets to the data sets that were found. Note that feature space is automatically formatted as
+        this is necessary for concatenation.
 
-        :param adata_backed:
+        :param adata_backed: Anndata instance to load into.
         :param genome: Genome container target genomes loaded.
         :param idx: Indices in adata_backed to write observations to. This can be used to immediately create a
             shuffled object. This has to be a list of the length of self.data, one index array for each dataset.
-        :param keys:
         :param annotated_only:
-        :param celltype_version: Version of cell type ontology to use. Uses most recent if None.
+        :param celltype_version:  See .load().
+        :param load_raw: See .load().
+        :param allow_caching: See .load().
         :return: New row index for next element to be written into backed anndata.
         """
         i = 0
@@ -1255,8 +1310,13 @@ class DatasetGroupBase(abc.ABC):
             try:
                 if self.datasets[x].annotated or not annotated_only:
                     self.datasets[x].load_tobacked(
-                        adata_backed=adata_backed, genome=genome, idx=idx[i],
-                        celltype_version=self.format_type_version(celltype_version))
+                        adata_backed=adata_backed,
+                        genome=genome,
+                        idx=idx[i],
+                        celltype_version=self.format_type_version(celltype_version),
+                        load_raw=load_raw,
+                        allow_caching=allow_caching
+                    )
                     i += 1
             except FileNotFoundError:
                 del self.datasets[x]
@@ -1508,20 +1568,22 @@ class DatasetSuperGroup:
     def load_all(
             self,
             celltype_version: Union[str, None] = None,
+            annotated_only: bool = False,
             match_to_reference: Union[str, None] = None,
             remove_gene_version: bool = True,
-            annotated_only: bool = False,
-            load_raw: bool = False
+            load_raw: bool = False,
+            allow_caching: bool = True,
     ):
         """
         Loads data set groups into anndata object.
 
         :param celltype_version: Version of cell type ontology to use.
             Uses most recent within each DatasetGroup if None.
-        :param match_to_reference:
-        :param remove_gene_version:
         :param annotated_only:
-        :param load_raw:
+        :param match_to_reference: See .load().
+        :param remove_gene_version: See .load().
+        :param load_raw: See .load().
+        :param allow_caching: See .load().
         :return:
         """
         for x in self.dataset_groups:
@@ -1530,7 +1592,8 @@ class DatasetSuperGroup:
                 remove_gene_version=remove_gene_version,
                 match_to_reference=match_to_reference,
                 celltype_version=celltype_version,
-                load_raw=load_raw
+                load_raw=load_raw,
+                allow_caching=allow_caching,
             )
         # making sure that concatenate is not used on a None adata object resulting from organ filtering
         for i in range(len(self.dataset_groups)):
@@ -1550,6 +1613,8 @@ class DatasetSuperGroup:
             as_dense: bool = False,
             annotated_only: bool = False,
             celltype_version: Union[str, None] = None,
+            load_raw: bool = False,
+            allow_caching: bool = True,
     ):
         """
         Loads data set groups into backed anndata object.
@@ -1568,9 +1633,11 @@ class DatasetSuperGroup:
         :param fn_backed: File name to save backed anndata to temporarily.
         :param genome: ID of target genomes.
         :param shuffled: Whether to shuffle data when writing to backed.
-        :param as_dense:
+        :param as_dense: Whether to load into dense count matrix.
         :param annotated_only:
         :param celltype_version: Version of cell type ontology to use. Uses most recent if None.
+        :param load_raw: See .load().
+        :param allow_caching: See .load().
         """
         if shuffled and not as_dense:
             raise ValueError("cannot write backed shuffled and sparse")
@@ -1633,8 +1700,15 @@ class DatasetSuperGroup:
         print(self.ncells_bydataset(annotated_only=annotated_only))
         print([[len(x) for x in xx] for xx in idx_ls])
         for i, x in enumerate(self.dataset_groups):
-            x.load_all_tobacked(adata_backed=self.adata, genome=genome, idx=idx_ls[i], annotated_only=annotated_only,
-                                celltype_version=celltype_version)
+            x.load_all_tobacked(
+                adata_backed=self.adata,
+                genome=genome,
+                idx=idx_ls[i],
+                annotated_only=annotated_only,
+                celltype_version=celltype_version,
+                load_raw=load_raw,
+                allow_caching=allow_caching,
+            )
         # If the sparse non-shuffled approach is used, make sure that self.adata.obs.index is unique() before saving
         if not scatter_update:
             self.adata.obs.index = pd.RangeIndex(0, len(self.adata.obs.index))
