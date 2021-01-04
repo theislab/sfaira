@@ -73,6 +73,9 @@ class DatasetBase(abc.ABC):
             cache_path: Union[str, None] = None,
             **kwargs
     ):
+        self._ADATA_IDS_SFAIRA = ADATA_IDS_SFAIRA()
+        self._META_DATA_FIELDS = META_DATA_FIELDS
+
         self.adata = None
         self.meta = None
         self.genome = None
@@ -117,9 +120,6 @@ class DatasetBase(abc.ABC):
 
         self._var_symbol_col = None
         self._var_ensembl_col = None
-
-        self._ADATA_IDS_SFAIRA = ADATA_IDS_SFAIRA()
-        self._META_DATA_FIELDS = META_DATA_FIELDS
 
     @abc.abstractmethod
     def _load(self, fn):
@@ -685,22 +685,21 @@ class DatasetBase(abc.ABC):
                 fn = os.path.normpath(fn)
         # Only load meta data if file exists:
         if os.path.isfile(fn):
-            meta = pandas.read_csv(fn, usecols=self._META_DATA_FIELDS)
-            # Formatting:
+            meta = pandas.read_csv(
+                fn, usecols=list(self._META_DATA_FIELDS.keys()), dtype=str,
+            )
+            # Formatting: All are read as string to allow dealing wth None entries:
             # Make sure bool entries are bool:
-            if isinstance(meta["healthy"].values[0], str):
-                meta["healthy"] = [
-                    True if x == "True" else
-                    False if x == "False" else None
-                    for x in meta["healthy"].values
-                ]
-            # Make sure None entries are formatted as None and not as string "None":
-            keys_to_change = []
-            for k, v in meta.items():
-                if isinstance(v[0], str) and v[0] == "None":
-                    keys_to_change.append(k)
-            for k in keys_to_change:
-                meta[k] = [None]
+            for k, v in self._META_DATA_FIELDS.items():
+                if v == bool:
+                    meta[k] = [
+                        True if x == "True" else
+                        False if x == "False" else None
+                        for x in meta[k].values
+                    ]
+                else:
+                    # Make sure None entries are formatted as None and not as string "None":
+                    meta[k] = [None if x == "None" else x for x in meta[k].values]
             self.meta = meta
 
     def write_meta(
@@ -972,35 +971,14 @@ class DatasetBase(abc.ABC):
     @meta.setter
     def meta(self, x: pd.DataFrame):
         # Make sure formatting is correct:
-        format_dict = {
-            self._ADATA_IDS_SFAIRA.author: [str],
-            self._ADATA_IDS_SFAIRA.age: [str],
-            self._ADATA_IDS_SFAIRA.cell_ontology_class: [str],
-            self._ADATA_IDS_SFAIRA.dev_stage: [str],
-            self._ADATA_IDS_SFAIRA.doi: [str],
-            self._ADATA_IDS_SFAIRA.download: [str],
-            self._ADATA_IDS_SFAIRA.download_meta: [str],
-            self._ADATA_IDS_SFAIRA.ethnicity: [str],
-            self._ADATA_IDS_SFAIRA.healthy: [bool],
-            self._ADATA_IDS_SFAIRA.id: [str],
-            self._ADATA_IDS_SFAIRA.ncells: [str],
-            self._ADATA_IDS_SFAIRA.normalization: [str],
-            self._ADATA_IDS_SFAIRA.organ: [str],
-            self._ADATA_IDS_SFAIRA.protocol: [str],
-            self._ADATA_IDS_SFAIRA.sex: [str],
-            self._ADATA_IDS_SFAIRA.organism: [str],
-            self._ADATA_IDS_SFAIRA.state_exact: [str],
-            self._ADATA_IDS_SFAIRA.subtissue: [str],
-            self._ADATA_IDS_SFAIRA.year: [str],
-        }
         for k, v in x.items():
-            if k not in format_dict.keys():
+            if k not in self._META_DATA_FIELDS.keys():
                 raise ValueError(f"did not find {k} in format look up table")
             else:
                 if x[k] is not None:  # None is always allowed.
-                    if not np.any([isinstance(v[0], target_type) for target_type in format_dict[k].values]):
+                    if not isinstance(v[0], self._META_DATA_FIELDS[k]):
                         raise ValueError(f"key {k} in meta data table did not match signature "
-                                         f"{str(format_dict[k].values)}")
+                                         f"{str(self._META_DATA_FIELDS[k])}")
         self.meta = x
 
     @property
