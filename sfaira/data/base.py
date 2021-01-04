@@ -6,6 +6,7 @@ import pandas as pd
 import os
 from os import PathLike
 import pandas
+import pydoc
 import scipy.sparse
 from typing import Dict, List, Tuple, Union
 import warnings
@@ -1606,6 +1607,32 @@ class DatasetGroupBase(abc.ABC):
                 raise ValueError(f"{key} not a valid property of data set object")
         for x in ids_del:
             del self.datasets[x]
+
+
+class DatasetGroupDirectoryOrientedBase(DatasetGroupBase):
+
+    def __init__(
+            self,
+            file_base: str,
+            path: Union[str, None] = None,
+            meta_path: Union[str, None] = None,
+            cache_path: Union[str, None] = None,
+    ):
+        super().__init__()
+        # Collect all data loaders from files in directory:
+        datasets = []
+        cwd = os.path.dirname(file_base)
+        for f in os.listdir(cwd):
+            if os.path.isfile(os.path.join(cwd, f)):  # only files
+                # Narrow down to data set files:
+                if f.split(".")[-1] == "py" and f.split(".")[0] not in ["__init__", "base", "group"]:
+                    dataset_directory = cwd.split("/")[-1]
+                    file_module = ".".join(f.split(".")[:-1])
+                    Dataset = pydoc.locate(
+                        "sfaira.sfaira.data.mouse." + dataset_directory + "." + file_module + ".Dataset")
+                    datasets.append(Dataset(path=path, meta_path=meta_path, cache_path=cache_path))
+        keys = [x.id for x in datasets]
+        self.datasets = dict(zip(keys, datasets))
 
 
 class DatasetSuperGroup:

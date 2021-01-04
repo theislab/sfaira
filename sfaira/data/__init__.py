@@ -1,4 +1,4 @@
-from .base import DatasetBase, DatasetGroupBase, DatasetSuperGroup
+from .base import DatasetBase, DatasetGroupBase, DatasetGroupDirectoryOrientedBase, DatasetSuperGroup
 from .databases import DatasetCellxgene
 from . import mouse
 from . import human
