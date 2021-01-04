@@ -1,7 +1,4 @@
-import anndata
-import numpy as np
 import os
-import pandas
 from typing import Union
 from .base import Dataset_d10_1016_j_cmet_2019_01_021
 
@@ -16,24 +13,7 @@ class Dataset(Dataset_d10_1016_j_cmet_2019_01_021):
             **kwargs
     ):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-
-        self.class_maps = {
-            "0": {
-                'acinar': 'pancreatic acinar cell',
-                'ductal': 'pancreatic ductal cell',
-                'leukocyte': 'leukocyte',
-                'T cell(Pancreas)': 't cell',
-                'B cell(Pancreas)': 'b cell',
-                'beta': "pancreatic B cell",
-                'alpha': "pancreatic A cell",
-                'delta': "pancreatic D cell",
-                'pp': "pancreatic PP cell",
-                'smooth_muscle': "smooth muscle cell",
-                'stellate cell': "pancreatic stellate cell",
-                'fibroblast': "stromal cell",
-                'endothelial': "endothelial cell"
-            },
-        }
+        self.id = "mouse_pancreas_2019_10x_thompson_001_10.1016/j.cmet.2019.01.021"
 
     def _load(self, fn=None):
         if fn is None:
@@ -41,14 +21,6 @@ class Dataset(Dataset_d10_1016_j_cmet_2019_01_021):
                 raise ValueError("provide either fn in load or path in constructor")
             fn = os.path.join(self.path, "mouse", "pancreas", "GSM3308545_NOD_08w_A")
             fn_meta = os.path.join(self.path, "mouse", "pancreas", "GSM3308545_NOD_08w_A_annotation.csv")
-
-        celltypes = pandas.read_csv(fn_meta, index_col=0)
-
-        self.adata = anndata.read_mtx(fn + '_matrix.mtx.gz').transpose()
-        self.adata.var_names = np.genfromtxt(fn + '_genes.tsv.gz', dtype=str)[:, 1]
-        self.adata.obs_names = np.genfromtxt(fn + '_barcodes.tsv.gz', dtype=str)
-        self.adata.var_names_make_unique()
-        self.adata = self.adata[celltypes.index]
-        self.set_unkown_class_id(ids=[np.nan, "nan"])
-        self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class] = celltypes
-        self.adata.obs[self._ADATA_IDS_SFAIRA.cell_types_original] = celltypes
+        else:
+            fn_meta = os.path.join(fn, "_annotation.csv")
+        self._load_generalized(fn=fn, fn_meta=fn_meta)
