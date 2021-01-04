@@ -1315,8 +1315,10 @@ class DatasetBase(abc.ABC):
         :return:
         """
         if allowed is not None:
-            if not isinstance(attempted, list):
+            if isinstance(attempted, tuple):
                 attempted = list(attempted)
+            else:
+                attempted = [attempted]
             for x in attempted:
                 if x not in allowed:
                     raise ValueError(f"{x} is not a valid entry for {attr}, choose from: {str(allowed)}")
