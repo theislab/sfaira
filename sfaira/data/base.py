@@ -1357,6 +1357,7 @@ class DatasetGroupBase(abc.ABC):
             match_to_reference: Union[str, None] = None,
             load_raw: bool = False,
             allow_caching: bool = True,
+            processes: int = 1,
     ):
         """
 
@@ -1368,21 +1369,39 @@ class DatasetGroupBase(abc.ABC):
         :param match_to_reference: See .load().
         :param load_raw: See .load().
         :param allow_caching: See .load().
+        :param processes: Processes to parallelise loading over. Uses python multiprocessing if > 1, for loop otherwise.
         :return:
         """
-        for x in self.ids:
-            try:
-                if self.datasets[x].annotated or not annotated_only:
-                    self.datasets[x].load(
-                        celltype_version=self.format_type_version(celltype_version),
-                        remove_gene_version=remove_gene_version,
-                        match_to_reference=match_to_reference,
-                        load_raw=load_raw,
-                        allow_caching=allow_caching
-                    )
-            except FileNotFoundError as e:
-                print(e)
-                del self.datasets[x]
+        if processes > 1:
+            import multiprocessing
+
+            def map_fn(ds):
+                ds.load(
+                    celltype_version=self.format_type_version(celltype_version),
+                    remove_gene_version=remove_gene_version,
+                    match_to_reference=match_to_reference,
+                    load_raw=load_raw,
+                    allow_caching=allow_caching
+                )
+
+            pool = multiprocessing.Pool(processes=processes)
+            _ = pool.starmap_async(map_fn, [x for x in self.datasets if x.annotated or not annotated_only])
+            pool.close()
+            pool.join()
+        else:
+            for x in self.ids:
+                try:
+                    if self.datasets[x].annotated or not annotated_only:
+                        self.datasets[x].load(
+                            celltype_version=self.format_type_version(celltype_version),
+                            remove_gene_version=remove_gene_version,
+                            match_to_reference=match_to_reference,
+                            load_raw=load_raw,
+                            allow_caching=allow_caching
+                        )
+                except FileNotFoundError as e:
+                    print(e)
+                    del self.datasets[x]
 
     def load_all_tobacked(
             self,
@@ -1726,6 +1745,7 @@ class DatasetSuperGroup:
             remove_gene_version: bool = True,
             load_raw: bool = False,
             allow_caching: bool = True,
+            processes: int = 1,
     ):
         """
         Loads data set human into anndata object.
@@ -1737,6 +1757,8 @@ class DatasetSuperGroup:
         :param remove_gene_version: See .load().
         :param load_raw: See .load().
         :param allow_caching: See .load().
+        :param processes: Processes to parallelise loading over. Uses python multiprocessing if > 1, for loop otherwise.
+            Note: parallelises loading of each dataset group, but not across groups.
         :return:
         """
         for x in self.dataset_groups:
@@ -1747,6 +1769,7 @@ class DatasetSuperGroup:
                 celltype_version=celltype_version,
                 load_raw=load_raw,
                 allow_caching=allow_caching,
+                processes=processes,
             )
         # making sure that concatenate is not used on a None adata object resulting from organ filtering
         for i in range(len(self.dataset_groups)):
