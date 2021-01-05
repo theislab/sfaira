@@ -1361,13 +1361,6 @@ class DatasetGroup:
         self.datasets = datasets
         self._ADATA_IDS_SFAIRA = ADATA_IDS_SFAIRA()
 
-    def subset_organs(self, subset: Union[None, List]):
-        for i in self.ids:
-            if self.datasets[i].organ == "mixed":
-                self.datasets[i].subset_organs(subset)
-            else:
-                raise ValueError("Only data that contain multiple organs can be subset.")
-
     def load_all(
             self,
             annotated_only: bool = False,
@@ -1651,6 +1644,13 @@ class DatasetGroup:
         for x in ids_del:
             del self.datasets[x]
 
+    def subset_organs(self, subset: Union[None, List]):
+        for i in self.ids:
+            if self.datasets[i].organ == "mixed":
+                self.datasets[i].subset_organs(subset)
+            else:
+                raise ValueError("Only data that contain multiple organs can be subset.")
+
 
 class DatasetGroupDirectoryOriented(DatasetGroup):
 
@@ -1753,11 +1753,6 @@ class DatasetSuperGroup:
 
     def ncells(self, annotated_only: bool = False):
         return np.sum(self.ncells_bydataset(annotated_only=annotated_only))
-
-    def subset_organs(self, subset: Union[None, List]):
-        for x in self.dataset_groups:
-            if x.datasets[0].organ == "mixed":
-                x.subset_organs(subset)
 
     def flatten(self) -> DatasetGroup:
         """
@@ -1950,3 +1945,9 @@ class DatasetSuperGroup:
         """
         for x in self.dataset_groups:
             x.subset(key=key, values=values)
+
+    def subset_organs(self, subset: Union[None, List]):
+        for x in self.dataset_groups:
+            if x.datasets[0].organ == "mixed":
+                x.subset_organs(subset)
+
