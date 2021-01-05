@@ -1389,7 +1389,7 @@ class DatasetGroup:
         :param processes: Processes to parallelise loading over. Uses python multiprocessing if > 1, for loop otherwise.
         :return:
         """
-        if processes > 1:
+        if processes > 1 and len(self.datasets.items()) > 1:
             import multiprocessing
             formatted_version = self.format_type_version(celltype_version)
 
