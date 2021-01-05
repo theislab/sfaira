@@ -1760,9 +1760,11 @@ class DatasetSuperGroup:
 
         :return:
         """
-        ds = []
+        ds = {}
         for x in self.dataset_groups:
-            ds.extend(x.datasets)
+            for k, v in x.datasets.items():
+                assert k not in ds.keys(), f"{k} was duplicated in super group, purge duplicates before flattening"
+                ds[k] = v
         return DatasetGroup(datasets=ds)
 
     def load_all(
