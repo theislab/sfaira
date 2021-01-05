@@ -1373,22 +1373,32 @@ class DatasetGroupBase(abc.ABC):
         """
         if processes > 1:
             import multiprocessing
+            formatted_version = self.format_type_version(celltype_version)
 
-            def map_fn(ds):
+            def map_fn(inputs):
+                ds, arg_formatted_version, arg_remove_gene_version, arg_match_to_reference, arg_load_raw, \
+                arg_allow_caching = inputs
                 try:
                     ds.load(
-                        celltype_version=self.format_type_version(celltype_version),
-                        remove_gene_version=remove_gene_version,
-                        match_to_reference=match_to_reference,
-                        load_raw=load_raw,
-                        allow_caching=allow_caching
+                        celltype_version=arg_formatted_version,
+                        remove_gene_version=arg_remove_gene_version,
+                        match_to_reference=arg_match_to_reference,
+                        load_raw=arg_load_raw,
+                        allow_caching=arg_allow_caching
                     )
                     return None
                 except FileNotFoundError as e:
                     return (ds.id, e,)
 
             pool = multiprocessing.Pool(processes=processes)
-            res = pool.starmap(map_fn, [v for k, v in self.datasets.items() if v.annotated or not annotated_only])
+            res = pool.starmap(map_fn, [(
+                v,
+                celltype_version,
+                remove_gene_version,
+                match_to_reference,
+                load_raw,
+                allow_caching,
+            ) for k, v in self.datasets.items() if v.annotated or not annotated_only])
             for x in res:
                 if x is not None:
                     print(x[1])
