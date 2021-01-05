@@ -14,7 +14,6 @@ class DatasetGroup(DatasetGroup):
         meta_path: Union[str, None] = None,
         cache_path: Union[str, None] = None
     ):
-        super().__init__()
         self._ADATA_IDS_CELLXGENE = ADATA_IDS_CELLXGENE()
 
         fn_ls = os.listdir(path)
@@ -24,4 +23,4 @@ class DatasetGroup(DatasetGroup):
             for x in fn_ls
         ]
         keys = [x.id for x in datasets]
-        self.datasets = dict(zip(keys, datasets))
+        super().__init__(dict(zip(keys, datasets)))
