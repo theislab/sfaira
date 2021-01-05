@@ -38,17 +38,13 @@ setup(
             "matplotlib",
             "sklearn"
         ],
-        'scanpy': [
-            "scanpy"
-        ],
-        'loompy': [
+        'data': [
+            "scanpy",
             "loompy",
+            "requests"
         ],
         'extension': [
             "sfaira_extension",
-        ],
-        'zenodo': [
-            "requests"
         ],
         'docs': [
             'sphinx',
