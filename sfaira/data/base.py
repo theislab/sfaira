@@ -139,6 +139,8 @@ class DatasetBase(abc.ABC):
         self._var_symbol_col = None
         self._var_ensembl_col = None
 
+        self.class_maps = {"0": {}}
+
     @abc.abstractmethod
     def _load(self, fn):
         pass
