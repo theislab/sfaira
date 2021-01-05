@@ -9,7 +9,7 @@ print("sys.argv", sys.argv)
 
 path = str(sys.argv[1])
 path_meta = str(sys.argv[2])
-processes = int(str(sys.argv[2]))
+processes = int(float(str(sys.argv[2])))
 
 parallelise_across_studies = True
 
