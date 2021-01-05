@@ -1376,16 +1376,24 @@ class DatasetGroupBase(abc.ABC):
             import multiprocessing
 
             def map_fn(ds):
-                ds.load(
-                    celltype_version=self.format_type_version(celltype_version),
-                    remove_gene_version=remove_gene_version,
-                    match_to_reference=match_to_reference,
-                    load_raw=load_raw,
-                    allow_caching=allow_caching
-                )
+                try:
+                    ds.load(
+                        celltype_version=self.format_type_version(celltype_version),
+                        remove_gene_version=remove_gene_version,
+                        match_to_reference=match_to_reference,
+                        load_raw=load_raw,
+                        allow_caching=allow_caching
+                    )
+                    return None
+                except FileNotFoundError as e:
+                    return (ds.id, e,)
 
             pool = multiprocessing.Pool(processes=processes)
-            _ = pool.starmap_async(map_fn, [x for x in self.datasets if x.annotated or not annotated_only])
+            res = pool.starmap_async(map_fn, [x for x in self.datasets if x.annotated or not annotated_only])
+            for x in res:
+                if x is not None:
+                    print(x[1])
+                    del self.datasets[x[0]]
             pool.close()
             pool.join()
         else:
