@@ -27,8 +27,14 @@ if parallelise_across_studies and processes > 1:
         allow_caching=False,
         processes=processes,
     )
-for dsg in list(ds.dataset_groups):
-    if not parallelise_across_studies and processes > 1:
+    for k in ds.ids:
+        print(k)
+        ds.datasets[k].write_meta(dir_out=path_meta)
+        # Free memory:
+        del ds.datasets[k]
+else:
+    for dsg in list(ds.dataset_groups):
+        if not parallelise_across_studies and processes > 1:
             # Need explicit call to load_all to uses multiprocess, otherwise this would be automatically  evoced in meta data
             # writing. Note: paralellisation is once per data set group (ie study, so that not all data is loaded into
             # memory!
@@ -41,8 +47,8 @@ for dsg in list(ds.dataset_groups):
                 allow_caching=False,
                 processes=processes,
             )
-    for k in dsg.ids:
-        print(k)
-        dsg.datasets[k].write_meta(dir_out=path_meta)
-        # Free memory:
-        del dsg.datasets[k]
+        for k in dsg.ids:
+            print(k)
+            dsg.datasets[k].write_meta(dir_out=path_meta)
+            # Free memory:
+            del dsg.datasets[k]
