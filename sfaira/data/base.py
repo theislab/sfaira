@@ -1388,7 +1388,7 @@ class DatasetGroupBase(abc.ABC):
                     return (ds.id, e,)
 
             pool = multiprocessing.Pool(processes=processes)
-            res = pool.starmap_async(map_fn, [v for k, v in self.datasets.items() if v.annotated or not annotated_only])
+            res = pool.starmap(map_fn, [v for k, v in self.datasets.items() if v.annotated or not annotated_only])
             for x in res:
                 if x is not None:
                     print(x[1])
