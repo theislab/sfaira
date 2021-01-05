@@ -451,7 +451,6 @@ class DatasetBase(abc.ABC):
                 raise ValueError(f"attribute {y} of data set {self.id} was set both for full data set and per cell, "
                                  f"only set one of the two or neither.")
             elif x is not None and z is None:
-                assert isinstance(x, str), f"data set-wise attribute for {y} must be a string"
                 # Attribute supplied per data set: Write into .uns.
                 self.adata.uns[y] = x
             elif x is None and z is not None:
