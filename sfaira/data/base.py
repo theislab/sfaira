@@ -216,18 +216,16 @@ class DatasetBase(abc.ABC):
             warnings.warn("it is not recommended to enable matching the feature space to a genomes reference"
                           "while not removing gene versions. this can lead to very poor matching performance")
 
-        # set default genomes if none provided
+        # Set default genomes per organism if none provided:
         if match_to_reference:
             genome = match_to_reference
-            self._set_genome(genome=genome)
-        elif self.organism == "loaders":
+        elif self.organism == "human":
             genome = "Homo_sapiens_GRCh38_97"
             warnings.warn(f"using default genomes {genome}")
-            self._set_genome(genome=genome)
         elif self.organism == "mouse":
             genome = "Mus_musculus_GRCm38_97"
             warnings.warn(f"using default genomes {genome}")
-            self._set_genome(genome=genome)
+        self._set_genome(genome=genome)
 
         # Run data set-specific loading script:
         self._load_cached(fn=fn, load_raw=load_raw, allow_caching=allow_caching)
@@ -617,7 +615,7 @@ class DatasetBase(abc.ABC):
 
         if genome.lower().startswith("homo_sapiens"):
             g = SuperGenomeContainer(
-                organism="loaders",
+                organism="human",
                 genome=genome
             )
         elif genome.lower().startswith("mus_musculus"):
@@ -1725,7 +1723,7 @@ class DatasetSuperGroup:
     ):
         if genome.lower().startswith("homo_sapiens"):
             g = SuperGenomeContainer(
-                organism="loaders",
+                organism="human",
                 genome=genome
             )
         elif genome.lower().startswith("mus_musculus"):

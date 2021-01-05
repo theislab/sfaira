@@ -878,7 +878,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         sns_tab = sns_tab[sns_tab['organ'] == organ]
 
         tz = TargetZoos(path=datapath)
-        if organism == "loaders":
+        if organism == "human":
             dataset = tz.data_human[organ]
         elif organism == "mouse":
             dataset = tz.data_mouse[organ]
@@ -1043,7 +1043,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         sns_tab = sns_tab[sns_tab['organ'] == organ]
 
         tz = TargetZoos(path=datapath)
-        if organism == "loaders":
+        if organism == "human":
             dataset = tz.data_human[organ]
         elif organism == "mouse":
             dataset = tz.data_mouse[organ]
@@ -1376,7 +1376,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
             print('Compute gradients (1/3): load data')
             # load data
             tz = TargetZoos(path=datapath)
-            if organism == "loaders":
+            if organism == "human":
                 dataset = tz.data_human[organ]
             elif organism == "mouse":
                 dataset = tz.data_mouse[organ]

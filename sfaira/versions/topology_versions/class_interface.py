@@ -28,7 +28,7 @@ class Topologies:
                     "vaevamp": mouse.embedding.vaevamp.VAEVAMP_TOPOLOGIES
                 }
             },
-            "loaders": {
+            "human": {
                 "celltype": {
                     "marker": human.celltype.celltypemarker.CELLTYPEMARKER_TOPOLOGIES,
                     "mlp": human.celltype.celltypemlp.CELLTYPEMLP_TOPOLOGIES
