@@ -17,6 +17,7 @@ ds = sfaira.data.dataloaders.DatasetSuperGroupSfaira(
     path=path, meta_path=path_meta, cache_path=path_meta
 )
 if parallelise_across_studies and processes > 1:
+    ds = ds.flatten()  # need to flatten in this case to parallelise across Groups and not just within.
     ds.load_all(
         celltype_version=None,
         annotated_only=False,

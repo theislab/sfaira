@@ -1,6 +1,6 @@
 from typing import Union
 
-from .external import DatasetGroupBase
+from .external import DatasetGroup
 
 from sfaira.data.dataloaders.loaders.d_nan.human_blood_2018_10x_ica_001 import Dataset as Dataset0001
 from sfaira.data.dataloaders.loaders.d_nan.human_blood_2019_10x_10xGenomics_001 import Dataset as Dataset0002
@@ -13,7 +13,7 @@ from sfaira.data.dataloaders.loaders.d10_1038_s41586_020_2157_4.human_blood_2020
 from sfaira.data.dataloaders.loaders.d10_1038_s41586_020_2157_4.human_blood_2020_microwell_han_007 import Dataset as Dataset0009
 
 
-class DatasetGroupBlood(DatasetGroupBase):
+class DatasetGroupBlood(DatasetGroup):
 
     def __init__(
         self, 
@@ -21,7 +21,6 @@ class DatasetGroupBlood(DatasetGroupBase):
         meta_path: Union[str, None] = None,
         cache_path: Union[str, None] = None
     ):
-        super().__init__()
         datasets = [
             Dataset0001(path=path, meta_path=meta_path, cache_path=cache_path),
             Dataset0002(path=path, meta_path=meta_path, cache_path=cache_path),
@@ -34,7 +33,7 @@ class DatasetGroupBlood(DatasetGroupBase):
             Dataset0009(path=path, meta_path=meta_path, cache_path=cache_path)
         ]
         keys = [x.id for x in datasets]
-        self.datasets = dict(zip(keys, datasets))
+        super().__init__(datasets=dict(zip(keys, datasets)))
         # Load versions from extension if available:
         try:
             from sfaira_extension.data.human import DatasetGroupBlood

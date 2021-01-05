@@ -5,7 +5,7 @@ import pandas as pd
 import pickle
 from typing import Union
 
-from sfaira.data import DatasetGroupBase, DatasetSuperGroup
+from sfaira.data import DatasetGroup, DatasetSuperGroup
 from sfaira.estimators import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
 from sfaira.interface import ModelZoo, ModelZooEmbedding, ModelZooCelltype
 from sfaira.versions.celltype_versions import ORGANISM_DICT
@@ -116,7 +116,7 @@ class TargetZoos:
             ds = self.data_human[x]
             self._write_celltypes_tocsv(fn, x, ds)
 
-    def _write_celltypes_tocsv(self, fn: str, x: str, ds: DatasetGroupBase):
+    def _write_celltypes_tocsv(self, fn: str, x: str, ds: DatasetGroup):
         ds.load_all(annotated_only=True, remove_gene_version=False, match_to_reference=None)
         if len(ds.adata_ls) > 0:
             obs = ds.obs_concat(keys=["cell_ontology_class", "cell_ontology_id"])
@@ -159,7 +159,7 @@ class TrainModel(TargetZoos):
     estimator: Union[None, EstimatorKeras]
     zoo: Union[None, ModelZoo]
     model_dir: str
-    data: Union[DatasetGroupBase, DatasetSuperGroup, anndata.AnnData, str, None]
+    data: Union[DatasetGroup, DatasetSuperGroup, anndata.AnnData, str, None]
 
     def __init__(self, data_path: str, meta_path: str):
         # Check if handling backed anndata or base path to directory of raw files:
@@ -187,7 +187,7 @@ class TrainModel(TargetZoos):
             raise ValueError("self.data not set yet")
         elif isinstance(self.data, anndata.AnnData):
             return self.data
-        elif isinstance(self.data, DatasetGroupBase) or isinstance(self.data, DatasetSuperGroup):
+        elif isinstance(self.data, DatasetGroup) or isinstance(self.data, DatasetSuperGroup):
             return self.data.adata
         else:
             raise ValueError("self.data type not recognized: %s " % type(self.data))
@@ -200,7 +200,7 @@ class TrainModel(TargetZoos):
 
     def set_data(
             self,
-            data_group: Union[DatasetGroupBase, DatasetSuperGroup]
+            data_group: Union[DatasetGroup, DatasetSuperGroup]
     ):
         """
         Set input data group.

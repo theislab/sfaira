@@ -1,12 +1,12 @@
 import os
 from typing import Union
 
-from .external import ADATA_IDS_CELLXGENE, DatasetGroupBase
+from .external import ADATA_IDS_CELLXGENE, DatasetGroup
 
 from .cellxgene_loader import Dataset
 
 
-class DatasetGroup(DatasetGroupBase):
+class DatasetGroup(DatasetGroup):
 
     def __init__(
         self,

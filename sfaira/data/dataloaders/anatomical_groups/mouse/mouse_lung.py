@@ -1,7 +1,7 @@
 import os
 from typing import Union
 
-from .external import DatasetGroupBase
+from .external import DatasetGroup
 
 from sfaira.data.dataloaders.loaders.d10_1101_661728.mouse_lung_2019_10x_pisco_001 import Dataset as Dataset0001
 from sfaira.data.dataloaders.loaders.d10_1101_661728.mouse_lung_2019_smartseq2_pisco_001 import Dataset as Dataset0002
@@ -10,7 +10,7 @@ from sfaira.data.dataloaders.loaders.d10_1016_j_cell_2018_02_001.mouse_lung_2018
 from sfaira.data.dataloaders.loaders.d10_1016_j_cell_2018_02_001.mouse_lung_2018_microwell_han_003 import Dataset as Dataset0005
 
 
-class DatasetGroupLung(DatasetGroupBase):
+class DatasetGroupLung(DatasetGroup):
 
     def __init__(
         self, 
@@ -18,7 +18,6 @@ class DatasetGroupLung(DatasetGroupBase):
         meta_path: Union[str, None] = None,
         cache_path: Union[str, None] = None
     ):
-        super().__init__()
         datasets = [
             Dataset0001(path=path, meta_path=meta_path, cache_path=cache_path),
             Dataset0002(path=path, meta_path=meta_path, cache_path=cache_path),
@@ -27,7 +26,7 @@ class DatasetGroupLung(DatasetGroupBase):
             Dataset0005(path=path, meta_path=meta_path, cache_path=cache_path)
         ]
         keys = [x.id for x in datasets]
-        self.datasets = dict(zip(keys, datasets))
+        super().__init__(datasets=dict(zip(keys, datasets)))
         # Load versions from extension if available:
         try:
             from sfaira_extension.data.mouse import DatasetGroupLung

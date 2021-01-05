@@ -1339,7 +1339,7 @@ class DatasetBase(abc.ABC):
                     raise ValueError(f"{x} is not a valid entry for {attr}, choose from: {str(allowed)}")
 
 
-class DatasetGroupBase(abc.ABC):
+class DatasetGroup:
     """
 
     Example:
@@ -1353,7 +1353,8 @@ class DatasetGroupBase(abc.ABC):
     """
     datasets: Dict
 
-    def __init__(self):
+    def __init__(self, datasets: dict):
+        self.datasets = datasets
         self._ADATA_IDS_SFAIRA = ADATA_IDS_SFAIRA()
 
     def subset_organs(self, subset: Union[None, List]):
@@ -1647,7 +1648,7 @@ class DatasetGroupBase(abc.ABC):
             del self.datasets[x]
 
 
-class DatasetGroupDirectoryOrientedBase(DatasetGroupBase):
+class DatasetGroupDirectoryOriented(DatasetGroup):
 
     def __init__(
             self,
@@ -1656,7 +1657,6 @@ class DatasetGroupDirectoryOrientedBase(DatasetGroupBase):
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
     ):
-        super().__init__()
         # Collect all data loaders from files in directory:
         datasets = []
         cwd = os.path.dirname(file_base)
@@ -1670,7 +1670,7 @@ class DatasetGroupDirectoryOrientedBase(DatasetGroupBase):
                         "sfaira.sfaira.data.dataloaders.loaders." + dataset_module + "." + file_module + ".Dataset")
                     datasets.append(Dataset(path=path, meta_path=meta_path, cache_path=cache_path))
         keys = [x.id for x in datasets]
-        self.datasets = dict(zip(keys, datasets))
+        super().__init__(datasets=dict(zip(keys, datasets)))
 
 
 class DatasetSuperGroup:
@@ -1681,17 +1681,17 @@ class DatasetSuperGroup:
     """
     adata: Union[None, anndata.AnnData]
     fn_backed: Union[None, PathLike]
-    dataset_groups: List[DatasetGroupBase]
+    dataset_groups: List[DatasetGroup]
 
-    def __init__(self, dataset_groups: Union[None, List[DatasetGroupBase], List[DatasetSuperGroup]]):
+    def __init__(self, dataset_groups: Union[None, List[DatasetGroup], List[DatasetSuperGroup]]):
         self.adata = None
         self.fn_backed = None
         self.set_dataset_groups(dataset_groups=dataset_groups)
 
         self._ADATA_IDS_SFAIRA = ADATA_IDS_SFAIRA()
 
-    def set_dataset_groups(self, dataset_groups: Union[List[DatasetGroupBase], List[DatasetSuperGroup]]):
-        if isinstance(dataset_groups[0], DatasetGroupBase):
+    def set_dataset_groups(self, dataset_groups: Union[List[DatasetGroup], List[DatasetSuperGroup]]):
+        if isinstance(dataset_groups[0], DatasetGroup):
             self.dataset_groups = dataset_groups
         elif isinstance(dataset_groups[0], DatasetSuperGroup):
             # Decompose super groups first
@@ -1702,8 +1702,8 @@ class DatasetSuperGroup:
         else:
             assert False
 
-    def extend_dataset_groups(self, dataset_groups: Union[List[DatasetGroupBase], List[DatasetSuperGroup]]):
-        if isinstance(dataset_groups[0], DatasetGroupBase):
+    def extend_dataset_groups(self, dataset_groups: Union[List[DatasetGroup], List[DatasetSuperGroup]]):
+        if isinstance(dataset_groups[0], DatasetGroup):
             self.dataset_groups.extend(dataset_groups)
         elif isinstance(dataset_groups[0], DatasetSuperGroup):
             # Decompose super groups first
@@ -1753,6 +1753,17 @@ class DatasetSuperGroup:
         for x in self.dataset_groups:
             if x.datasets[0].organ == "mixed":
                 x.subset_organs(subset)
+
+    def flatten(self) -> DatasetGroup:
+        """
+        Returns DatasetGroup (rather than self = DatasetSuperGroup) containing all listed data sets.
+
+        :return:
+        """
+        ds = []
+        for x in self.dataset_groups:
+            ds.extend(x.datasets)
+        return DatasetGroup(datasets=ds)
 
     def load_all(
             self,

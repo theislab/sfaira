@@ -2,7 +2,7 @@ import pydoc
 import os
 from typing import Union
 
-from sfaira.data import DatasetSuperGroup, DatasetGroupDirectoryOrientedBase
+from sfaira.data import DatasetSuperGroup, DatasetGroupDirectoryOriented
 
 
 class DatasetSuperGroupLoaders(DatasetSuperGroup):
@@ -35,7 +35,7 @@ class DatasetSuperGroupLoaders(DatasetSuperGroup):
                     path_dsg = pydoc.locate(
                         "sfaira.sfaira.data.dataloaders.loaders." + f + ".FILE_PATH")
                     if path_dsg is not None:
-                        dataset_groups.append(DatasetGroupDirectoryOrientedBase(
+                        dataset_groups.append(DatasetGroupDirectoryOriented(
                             file_base=path_dsg,
                             path=path,
                             meta_path=meta_path,
