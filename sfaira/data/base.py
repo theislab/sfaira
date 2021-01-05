@@ -19,6 +19,21 @@ from .external import ADATA_IDS_SFAIRA, META_DATA_FIELDS
 UNS_STRING_META_IN_OBS = "__obs__"
 
 
+def map_fn(inputs):
+    ds, formatted_version, remove_gene_version, match_to_reference, load_raw, allow_caching = inputs
+    try:
+        ds.load(
+            celltype_version=formatted_version,
+            remove_gene_version=remove_gene_version,
+            match_to_reference=match_to_reference,
+            load_raw=load_raw,
+            allow_caching=allow_caching
+        )
+        return None
+    except FileNotFoundError as e:
+        return (ds.id, e,)
+
+
 class DatasetBase(abc.ABC):
 
     adata: Union[None, anndata.AnnData]
@@ -1375,25 +1390,10 @@ class DatasetGroupBase(abc.ABC):
             import multiprocessing
             formatted_version = self.format_type_version(celltype_version)
 
-            def map_fn(inputs):
-                ds, arg_formatted_version, arg_remove_gene_version, arg_match_to_reference, arg_load_raw, \
-                arg_allow_caching = inputs
-                try:
-                    ds.load(
-                        celltype_version=arg_formatted_version,
-                        remove_gene_version=arg_remove_gene_version,
-                        match_to_reference=arg_match_to_reference,
-                        load_raw=arg_load_raw,
-                        allow_caching=arg_allow_caching
-                    )
-                    return None
-                except FileNotFoundError as e:
-                    return (ds.id, e,)
-
             pool = multiprocessing.Pool(processes=processes)
             res = pool.starmap(map_fn, [(
                 v,
-                celltype_version,
+                formatted_version,
                 remove_gene_version,
                 match_to_reference,
                 load_raw,
