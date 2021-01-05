@@ -1341,6 +1341,8 @@ class DatasetBase(abc.ABC):
 
 class DatasetGroup:
     """
+    Container class that co-manages multiple data sets, removing need to call Dataset() methods directly through
+    wrapping them.
 
     Example:
 
@@ -1677,7 +1679,8 @@ class DatasetSuperGroup:
     """
     Container for multiple DatasetGroup instances.
 
-    Can be used to grid_searches models across organs. Supports backed anndata objects.
+    Used to manipulate structured dataset collections. Primarly designed for this manipulation, convert to DatasetGroup
+    via flatten() for more functionalities.
     """
     adata: Union[None, anndata.AnnData]
     fn_backed: Union[None, PathLike]
