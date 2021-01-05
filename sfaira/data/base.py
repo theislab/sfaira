@@ -1391,14 +1391,14 @@ class DatasetGroupBase(abc.ABC):
             formatted_version = self.format_type_version(celltype_version)
 
             pool = multiprocessing.Pool(processes=processes)
-            res = pool.starmap(map_fn, [(
+            res = pool.starmap(map_fn, [((
                 v,
                 formatted_version,
                 remove_gene_version,
                 match_to_reference,
                 load_raw,
                 allow_caching,
-            ) for k, v in self.datasets.items() if v.annotated or not annotated_only])
+            ),) for k, v in self.datasets.items() if v.annotated or not annotated_only])
             for x in res:
                 if x is not None:
                     print(x[1])
