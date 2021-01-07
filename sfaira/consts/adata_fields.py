@@ -1,3 +1,4 @@
+import numpy as np
 from typing import List
 
 """
@@ -209,6 +210,9 @@ class ADATA_IDS_SFAIRA(ADATA_IDS_EXTENDED):
         self.year_allowed_entries = list(range(2000, 3000))
         # Free fields that are not constrained:
         # _author, _download, _download_meta, _doi, _id, _state_exact
+
+        self.unknown_celltype_name = "unknown"
+        self.unknown_celltype_identifiers = ["nan", "none", "unknown", np.nan, None]
 
     @property
     def load_raw(self) -> str:

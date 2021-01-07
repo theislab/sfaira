@@ -612,23 +612,16 @@ class DatasetBase(abc.ABC):
         else:
             raise ValueError(f"Did not reccognize backed AnnData.X format {type(adata_backed.X)}")
 
-    def set_unkown_class_id(self, ids: list):
+    def set_unkown_class_id(self, ids: List[str]):
         """
-        Sets list of custom identifiers of unknown cell types in adata.obs["cell_ontology_class"] to the target one.
+        Sets list of custom identifiers of unknown cell types data annotation.
 
-        :param ids: IDs in adata.obs["cell_ontology_class"] to replace.
+        :param ids: IDs in cell type name column to replace by "unknown identifier.
         :return:
         """
-        target_id = "unknown"
-        ontology_classes = [
-            x if x not in ids else target_id
-            for x in self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class].tolist()
-        ]
-        self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class] = ontology_classes
+        self._unknown_celltypes.extend([x for x in ids if x not in self._ADATA_IDS_SFAIRA.unknown_celltype_identifiers])
 
-    def _set_genome(self,
-                    genome: str
-    ):
+    def _set_genome(self, genome: str):
 
         if genome.lower().startswith("homo_sapiens"):
             g = SuperGenomeContainer(
@@ -686,7 +679,8 @@ class DatasetBase(abc.ABC):
             celltype_version = self.set_default_type_version()
         self.assert_celltype_version_key(celltype_version=celltype_version)
         return [
-            self.class_maps[celltype_version][x] if x in self.class_maps[celltype_version].keys() else x
+            self.class_maps[celltype_version][x] if x in self.class_maps[celltype_version].keys() else
+            self._ADATA_IDS_SFAIRA.unknown_celltype_name if x.lower() in self._unknown_celltypes else x
             for x in raw_ids
         ]
 

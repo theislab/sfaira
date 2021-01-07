@@ -57,6 +57,4 @@ class Dataset_d10_1016_j_cmet_2019_01_021(DatasetBase):
         self.adata.obs_names = np.genfromtxt(fn + '_barcodes.tsv.gz', dtype=str)
         self.adata.var_names_make_unique()
         self.adata = self.adata[celltypes.index]
-        self.set_unkown_class_id(ids=[np.nan, "nan"])
-        self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class] = celltypes
         self.adata.obs[self._ADATA_IDS_SFAIRA.cell_types_original] = celltypes

@@ -35,4 +35,4 @@ class Dataset(Dataset_d10_1101_661728):
                 raise ValueError("source %s not recognized" % self.source)
         self._load_generalized(fn=fn)
 
-        self.set_unkown_class_id(ids=["nan", "Il6 expressing cells"])
+        self.set_unkown_class_id(ids=["Il6 expressing cells"])

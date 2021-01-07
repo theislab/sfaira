@@ -80,5 +80,3 @@ class Dataset(DatasetBase):
         self.adata.var = var
         self.adata.obs = obs
         assert np.all(self.adata.obs_names == self.adata.obs["cell"].values)
-
-        self.set_unkown_class_id(ids=["nan"])

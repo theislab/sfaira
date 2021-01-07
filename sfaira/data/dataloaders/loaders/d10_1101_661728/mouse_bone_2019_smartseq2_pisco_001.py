@@ -34,4 +34,4 @@ class Dataset(Dataset_d10_1101_661728):
             else:
                 raise ValueError("source %s not recognized" % self.source)
         self._load_generalized(fn=fn)
-        self.set_unkown_class_id(ids=["unknown", "nan-marrow-needs-subclustering"])
+        self.set_unkown_class_id(ids=["nan-marrow-needs-subclustering"])
