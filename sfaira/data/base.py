@@ -3,6 +3,7 @@ from __future__ import annotations
 import abc
 import anndata
 import h5py
+import multiprocessing
 import numpy as np
 import pandas as pd
 import os
@@ -1425,13 +1426,11 @@ class DatasetGroup:
         if processes > 1 and len(self.datasets.items()) > 1:  # multiprocessing parallelisation
             print(f"using python multiprocessing (processes={processes}), "
                   f"for easier debugging revert to sequential execution (processes=1)")
-            import multiprocessing
-
-            pool = multiprocessing.Pool(processes=processes)
-            res = pool.starmap(map_fn, [
-                (tuple([v] + args),)
-                for k, v in self.datasets.items() if v.annotated or not annotated_only
-            ])
+            with multiprocessing.Pool(processes=processes) as pool:
+                res = pool.starmap(map_fn, [
+                    (tuple([v] + args),)
+                    for k, v in self.datasets.items() if v.annotated or not annotated_only
+                ])
             # Clear data sets that were not successfully loaded because of missing data:
             for x in res:
                 if x is not None:
