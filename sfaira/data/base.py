@@ -293,6 +293,7 @@ class DatasetBase(abc.ABC):
         # If only symbol or ensembl was supplied, the other one is inferred ia a genome mapping dictionary.
         if not ensembl_col:
             id_dict = self.genome_container.names_to_id_dict
+            id_strip_dict = self.genome_container.strippednames_to_id_dict
             # Matching gene names to ensembl ids in the following way: if the gene is present in the ensembl dictionary,
             # match it straight away, if it is not in there we try to match everything in front of the first period in
             # the gene name with a dictionary that was modified in the same way, if there is still no match we append na
