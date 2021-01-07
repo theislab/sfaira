@@ -800,10 +800,13 @@ class DatasetBase(abc.ABC):
                 meta[x] = (np.sort(np.unique(self.adata.obs[x].values)),)
             else:
                 meta[x] = self.adata.uns[x]
-        # Add cell types into table:
-        meta[self._ADATA_IDS_SFAIRA.cell_ontology_class] = str((
-            np.sort(np.unique(self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class].values)),
-        ))
+        # Add cell types into table if available:
+        if self._ADATA_IDS_SFAIRA.cell_ontology_class in self.adata.obs.keys():
+            meta[self._ADATA_IDS_SFAIRA.cell_ontology_class] = str((
+                np.sort(np.unique(self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class].values)),
+            ))
+        else:
+            meta[self._ADATA_IDS_SFAIRA.cell_ontology_class] = " "
         meta.to_csv(fn_meta)
 
     # Properties:
