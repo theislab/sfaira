@@ -358,8 +358,8 @@ class DatasetBase(abc.ABC):
             # Collapse if necessary:
             new_index_collapsed = list(np.unique(new_index))
             if len(new_index_collapsed) < self.adata.n_vars:
-                raise ValueError("duplicate features detected after removing gene versions."
-                                 "the code to collapse these features is implemented but not tested.")
+                print("WARNING: duplicate features detected after removing gene versions."
+                      "the code to collapse these features is implemented but not tested.")
                 idx_map = np.array([new_index_collapsed.index(x) for x in new_index])
                 # Need reverse sorting to find index of last element in sorted list to split array using list index().
                 idx_map_sorted_rev = np.argsort(idx_map)[::-1]
@@ -370,8 +370,8 @@ class DatasetBase(abc.ABC):
                 # n_genes - 1 - idx_map_sorted_rev.index(x)
                 # Note that the blocks are named as positive integers starting at 1, without gaps.
                 counts = np.concatenate([
-                                            np.sum(x, axis=1, keepdims=True)
-                                            for x in np.split(
+                    np.sum(x, axis=1, keepdims=True)
+                    for x in np.split(
                         self.adata[:, idx_map_sorted_rev[::-1]].X,  # forward ordered data
                         indices_or_sections=[
                             n_genes - 1 - idx_map_sorted_rev.index(x)  # last occurrence of element in forward order
@@ -379,7 +379,7 @@ class DatasetBase(abc.ABC):
                         ],
                         axis=1
                     )
-                                        ][::-1], axis=1)
+                ][::-1], axis=1)
                 # Remove varm and populate var with first occurrence only:
                 obs_names = self.adata.obs_names
                 self.adata = anndata.AnnData(
