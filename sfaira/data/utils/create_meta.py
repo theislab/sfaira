@@ -20,7 +20,7 @@ ds = sfaira.data.dataloaders.DatasetSuperGroupSfaira(
     path=path, meta_path=path_meta, cache_path=path_meta
 )
 ds = ds.flatten()  # need to flatten in this case to parallelise across Groups and not just within.
-ds.load_all(
+ds.load(
     celltype_version=None,
     annotated_only=False,
     match_to_reference=None,

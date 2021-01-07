@@ -1375,7 +1375,7 @@ class DatasetGroup:
         self.datasets = datasets
         self._ADATA_IDS_SFAIRA = ADATA_IDS_SFAIRA()
 
-    def load_all(
+    def load(
             self,
             annotated_only: bool = False,
             celltype_version: Union[str, None] = None,
@@ -1447,7 +1447,7 @@ class DatasetGroup:
                     print(x[1])
                     del self.datasets[x[0]]
 
-    def load_all_tobacked(
+    def load_tobacked(
             self,
             adata_backed: anndata.AnnData,
             genome: str,
@@ -1821,7 +1821,7 @@ class DatasetSuperGroup:
         :return:
         """
         for x in self.dataset_groups:
-            x.load_all(
+            x.load(
                 annotated_only=annotated_only,
                 remove_gene_version=remove_gene_version,
                 match_to_reference=match_to_reference,
@@ -1935,7 +1935,7 @@ class DatasetSuperGroup:
         print(self.ncells_bydataset(annotated_only=annotated_only))
         print([[len(x) for x in xx] for xx in idx_ls])
         for i, x in enumerate(self.dataset_groups):
-            x.load_all_tobacked(
+            x.load_tobacked(
                 adata_backed=self.adata,
                 genome=genome,
                 idx=idx_ls[i],

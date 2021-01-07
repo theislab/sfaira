@@ -117,7 +117,7 @@ class TargetZoos:
             self._write_celltypes_tocsv(fn, x, ds)
 
     def _write_celltypes_tocsv(self, fn: str, x: str, ds: DatasetGroup):
-        ds.load_all(annotated_only=True, remove_gene_version=False, match_to_reference=None)
+        ds.load(annotated_only=True, remove_gene_version=False, match_to_reference=None)
         if len(ds.adata_ls) > 0:
             obs = ds.obs_concat(keys=["cell_ontology_class", "cell_ontology_id"])
             obs.index = range(0, obs.shape[0])
