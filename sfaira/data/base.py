@@ -263,50 +263,36 @@ class DatasetBase(abc.ABC):
             symbol_col: str = None,
             ensembl_col: str = None,
     ):
+        # Use defaults defined in data loader if none given to this function.
         if symbol_col is None:
             symbol_col = self.var_symbol_col
         if ensembl_col is None:
             ensembl_col = self.var_ensembl_col
-        if symbol_col and ensembl_col:
+        if not ensembl_col and not symbol_col:
+            raise ValueError('Please provide the name of at least the name of the var column containing ensembl ids or'
+                             'the name of the var column containing gene symbols')
+        # Process given gene names: Full gene names ("symbol") or ENSEMBL IDs ("ensembl").
+        # Below the .var column that contain the target IDs are renamed to follow streamlined naming.
+        # If the IDs were contained in the index, a new column is added to .var.
+        if symbol_col:
             if symbol_col == 'index':
-                self.adata.var.index.name = 'index'
-                self.adata.var = self.adata.var.reset_index().rename(
-                    {'index': self._ADATA_IDS_SFAIRA.gene_id_names},
-                    axis='columns'
-                )
+                self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_names] = self.adata.var.index.values.tolist()
             else:
                 self.adata.var = self.adata.var.rename(
                     {symbol_col:  self._ADATA_IDS_SFAIRA.gene_id_names},
                     axis='columns'
                 )
-
+        if ensembl_col:
             if ensembl_col == 'index':
-                self.adata.var.index.name = 'index'
-                self.adata.var = self.adata.var.reset_index().rename(
-                    {'index': self._ADATA_IDS_SFAIRA.gene_id_ensembl},
-                    axis='columns'
-                )
+                self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_ensembl] = self.adata.var.index.values.tolist()
             else:
                 self.adata.var = self.adata.var.rename(
                     {ensembl_col: self._ADATA_IDS_SFAIRA.gene_id_ensembl},
                     axis='columns'
                 )
-
-        elif symbol_col:
+        # If only symbol or ensembl was supplied, the other one is inferred ia a genome mapping dictionary.
+        if not ensembl_col:
             id_dict = self.genome_container.names_to_id_dict
-            id_strip_dict = self.genome_container.strippednames_to_id_dict
-            if symbol_col == 'index':
-                self.adata.var.index.name = 'index'
-                self.adata.var = self.adata.var.reset_index().rename(
-                    {'index': self._ADATA_IDS_SFAIRA.gene_id_names},
-                    axis='columns'
-                )
-            else:
-                self.adata.var = self.adata.var.rename(
-                    {symbol_col: self._ADATA_IDS_SFAIRA.gene_id_names},
-                    axis='columns'
-                )
-
             # Matching gene names to ensembl ids in the following way: if the gene is present in the ensembl dictionary,
             # match it straight away, if it is not in there we try to match everything in front of the first period in
             # the gene name with a dictionary that was modified in the same way, if there is still no match we append na
@@ -320,29 +306,14 @@ class DatasetBase(abc.ABC):
                     ensids.append('n/a')
             self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_ensembl] = ensids
 
-        elif ensembl_col:
+        if not symbol_col:
             id_dict = self.genome_container.id_to_names_dict
-            if ensembl_col == 'index':
-                self.adata.var.index.name = 'index'
-                self.adata.var = self.adata.var.reset_index().rename(
-                    {'index': self._ADATA_IDS_SFAIRA.gene_id_ensembl},
-                    axis='columns'
-                )
-            else:
-                self.adata.var = self.adata.var.rename(
-                    {ensembl_col: self._ADATA_IDS_SFAIRA.gene_id_names},
-                    axis='columns'
-                )
-
             self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_names] = [
                 id_dict[n.split(".")[0]] if n.split(".")[0] in id_dict.keys() else 'n/a'
                 for n in self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_ensembl]
             ]
 
-        else:
-            raise ValueError('Please provide the name of at least the name of the var column containing ensembl ids or'
-                             'the name of the var column containing gene symbols')
-
+        # Lastly, the index of .var is set to ensembl IDs.
         self.adata.var.index = self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_index].values.tolist()
         self.adata.var_names_make_unique()
 
