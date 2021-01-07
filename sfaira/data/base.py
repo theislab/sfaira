@@ -1690,6 +1690,17 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
     ):
+        """
+        Automatically collects Datasets from python files in directory.
+
+        Uses a pre-built DatasetGroup if this is defined in a group.py file, otherwise, the DatasetGroup is initialised
+        here.
+
+        :param file_base:
+        :param path:
+        :param meta_path:
+        :param cache_path:
+        """
         # Collect all data loaders from files in directory:
         datasets = []
         cwd = os.path.dirname(file_base)
@@ -1699,9 +1710,14 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                 # Narrow down to data set files:
                 if f.split(".")[-1] == "py" and f.split(".")[0] not in ["__init__", "base", "group"]:
                     file_module = ".".join(f.split(".")[:-1])
-                    Dataset = pydoc.locate(
+                    DatasetFound = pydoc.locate(
                         "sfaira.sfaira.data.dataloaders.loaders." + dataset_module + "." + file_module + ".Dataset")
-                    datasets.append(Dataset(path=path, meta_path=meta_path, cache_path=cache_path))
+                    datasets.append(DatasetFound(path=path, meta_path=meta_path, cache_path=cache_path))
+                if f.split(".")[0] == "group":
+                    DatasetGroupFound = pydoc.locate(
+                        "sfaira.sfaira.data.dataloaders.loaders." + dataset_module + ".group.DatasetGroup")
+                    dsg = DatasetGroupFound(path=path, meta_path=meta_path, cache_path=cache_path)
+                    datasets.extend(list(dsg.datasets.values))
         keys = [x.id for x in datasets]
         super().__init__(datasets=dict(zip(keys, datasets)))
 
