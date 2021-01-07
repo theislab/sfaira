@@ -19,7 +19,7 @@ from .external import ADATA_IDS_SFAIRA, META_DATA_FIELDS
 UNS_STRING_META_IN_OBS = "__obs__"
 
 
-def map_fn(inputs):
+def map_fn_permanent(inputs):
     ds, formatted_version, remove_gene_version, match_to_reference, load_raw, allow_caching = inputs
     try:
         ds.load(
@@ -30,6 +30,23 @@ def map_fn(inputs):
             allow_caching=allow_caching
         )
         return None
+    except FileNotFoundError as e:
+        return (ds.id, e,)
+
+
+def map_fn_temporary(inputs):
+    ds, formatted_version, remove_gene_version, match_to_reference, load_raw, allow_caching, func, kwargs_func = inputs
+    try:
+        ds.load(
+            celltype_version=formatted_version,
+            remove_gene_version=remove_gene_version,
+            match_to_reference=match_to_reference,
+            load_raw=load_raw,
+            allow_caching=allow_caching
+        )
+        x = func(ds, **kwargs_func)
+        ds.clear()
+        return x
     except FileNotFoundError as e:
         return (ds.id, e,)
 
@@ -155,6 +172,14 @@ class DatasetBase(abc.ABC):
     @property
     def _directory_formatted_id(self) -> str:
         return "_".join("_".join(self.id.split("/")).split("."))
+
+    def clear(self):
+        """
+        Remove loaded .adata to reduce memory footprint.
+
+        :return:
+        """
+        self.adata = None
 
     def _load_cached(self, fn: str, load_raw: bool, allow_caching: bool):
         """
@@ -1371,10 +1396,16 @@ class DatasetGroup:
             load_raw: bool = False,
             allow_caching: bool = True,
             processes: int = 1,
+            func = None,
+            kwargs_func = None,
     ):
         """
+        Load all datasets in group (option for temporary loading).
 
-        Subsets self.datasets to the data sets that were found.
+        Note: This method automatically subsets to the group to the data sets for which input files were found.
+
+        This method also allows temporarily loading data sets to execute function on loaded data sets (supply func).
+        In this setting, datasets are removed from memory after the function has been executed.
 
         :param annotated_only:
         :param celltype_version:  See .load().
@@ -1383,41 +1414,58 @@ class DatasetGroup:
         :param load_raw: See .load().
         :param allow_caching: See .load().
         :param processes: Processes to parallelise loading over. Uses python multiprocessing if > 1, for loop otherwise.
+        :param func: Function to run on loaded datasets. map_fun should only take one argument, which is a Dataset
+            instance. The return can be empty:
+
+                def func(dataset):
+                    # code manipulating dataset and generating output x.
+                    return x
+        :param kwargs_func: Kwargs of func.
         :return:
         """
-        if processes > 1 and len(self.datasets.items()) > 1:
-            import multiprocessing
-            formatted_version = self.format_type_version(celltype_version)
-
-            pool = multiprocessing.Pool(processes=processes)
-            res = pool.starmap(map_fn, [((
-                v,
+        formatted_version = self.format_type_version(celltype_version)
+        if func is None:
+            map_fn = map_fn_permanent
+            args = [
                 formatted_version,
                 remove_gene_version,
                 match_to_reference,
                 load_raw,
                 allow_caching,
-            ),) for k, v in self.datasets.items() if v.annotated or not annotated_only])
+            ]
+        else:
+            kwargs_func = kwargs_func if kwargs_func is not None else {}
+            map_fn = map_fn_temporary
+            args = [
+                formatted_version,
+                remove_gene_version,
+                match_to_reference,
+                load_raw,
+                allow_caching,
+                func,
+                kwargs_func
+            ]
+
+        if processes > 1 and len(self.datasets.items()) > 1:  # multiprocessing parallelisation
+            import multiprocessing
+
+            pool = multiprocessing.Pool(processes=processes)
+            res = pool.starmap(map_fn, [
+                (tuple([v] + args),)
+                for k, v in self.datasets.items() if v.annotated or not annotated_only
+            ])
             for x in res:
                 if x is not None:
                     print(x[1])
                     del self.datasets[x[0]]
             pool.close()
             pool.join()
-        else:
-            for x in self.ids:
-                try:
-                    if self.datasets[x].annotated or not annotated_only:
-                        self.datasets[x].load(
-                            celltype_version=self.format_type_version(celltype_version),
-                            remove_gene_version=remove_gene_version,
-                            match_to_reference=match_to_reference,
-                            load_raw=load_raw,
-                            allow_caching=allow_caching
-                        )
-                except FileNotFoundError as e:
-                    print(e)
-                    del self.datasets[x]
+        else:  # for loop
+            for k, v in self.datasets.items():
+                x = map_fn((tuple([v] + args),))
+                if x is not None:
+                    print(x[1])
+                    del self.datasets[x[0]]
 
     def load_all_tobacked(
             self,
