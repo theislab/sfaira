@@ -146,6 +146,7 @@ class DatasetBase(abc.ABC):
         self._var_ensembl_col = None
 
         self.class_maps = {"0": {}}
+        self._unknown_celltype_identifiers = self._ADATA_IDS_SFAIRA.unknown_celltype_identifiers
 
     @abc.abstractmethod
     def _load(self, fn):
@@ -619,7 +620,9 @@ class DatasetBase(abc.ABC):
         :param ids: IDs in cell type name column to replace by "unknown identifier.
         :return:
         """
-        self._unknown_celltypes.extend([x for x in ids if x not in self._ADATA_IDS_SFAIRA.unknown_celltype_identifiers])
+        self._unknown_celltype_identifiers.extend(
+            [x for x in ids if x not in self._ADATA_IDS_SFAIRA.unknown_celltype_identifiers]
+        )
 
     def _set_genome(self, genome: str):
 
@@ -679,8 +682,8 @@ class DatasetBase(abc.ABC):
             celltype_version = self.set_default_type_version()
         self.assert_celltype_version_key(celltype_version=celltype_version)
         return [
-            self.class_maps[celltype_version][x] if x in self.class_maps[celltype_version].keys() else
-            self._ADATA_IDS_SFAIRA.unknown_celltype_name if x.lower() in self._unknown_celltypes else x
+            self.class_maps[celltype_version][x] if x in self.class_maps[celltype_version].keys()
+            else self._ADATA_IDS_SFAIRA.unknown_celltype_name if x.lower() in self._unknown_celltype_identifiers else x
             for x in raw_ids
         ]
 
