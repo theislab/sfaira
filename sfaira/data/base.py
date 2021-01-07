@@ -1705,19 +1705,21 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
         datasets = []
         cwd = os.path.dirname(file_base)
         dataset_module = cwd.split("/")[-1]
-        for f in os.listdir(cwd):
-            if os.path.isfile(os.path.join(cwd, f)):  # only files
-                # Narrow down to data set files:
-                if f.split(".")[-1] == "py" and f.split(".")[0] not in ["__init__", "base", "group"]:
-                    file_module = ".".join(f.split(".")[:-1])
-                    DatasetFound = pydoc.locate(
-                        "sfaira.sfaira.data.dataloaders.loaders." + dataset_module + "." + file_module + ".Dataset")
-                    datasets.append(DatasetFound(path=path, meta_path=meta_path, cache_path=cache_path))
-                if f.split(".")[0] == "group":
-                    DatasetGroupFound = pydoc.locate(
-                        "sfaira.sfaira.data.dataloaders.loaders." + dataset_module + ".group.DatasetGroup")
-                    dsg = DatasetGroupFound(path=path, meta_path=meta_path, cache_path=cache_path)
-                    datasets.extend(list(dsg.datasets.values))
+        if "group.py" in os.listdir(cwd):
+            DatasetGroupFound = pydoc.locate(
+                "sfaira.sfaira.data.dataloaders.loaders." + dataset_module + ".group.DatasetGroup")
+            dsg = DatasetGroupFound(path=path, meta_path=meta_path, cache_path=cache_path)
+            datasets.extend(list(dsg.datasets.values))
+        else:
+            for f in os.listdir(cwd):
+                if os.path.isfile(os.path.join(cwd, f)):  # only files
+                    # Narrow down to data set files:
+                    if f.split(".")[-1] == "py" and f.split(".")[0] not in ["__init__", "base", "group"]:
+                        file_module = ".".join(f.split(".")[:-1])
+                        DatasetFound = pydoc.locate(
+                            "sfaira.sfaira.data.dataloaders.loaders." + dataset_module + "." + file_module + ".Dataset")
+                        datasets.append(DatasetFound(path=path, meta_path=meta_path, cache_path=cache_path))
+
         keys = [x.id for x in datasets]
         super().__init__(datasets=dict(zip(keys, datasets)))
 
