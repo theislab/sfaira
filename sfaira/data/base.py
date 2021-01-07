@@ -225,6 +225,9 @@ class DatasetBase(abc.ABC):
         elif self.organism == "mouse":
             genome = "Mus_musculus_GRCm38_97"
             warnings.warn(f"using default genomes {genome}")
+        else:
+            raise ValueError(f"genome was not supplied and organism {self.organism} "
+                             f"was not matched to a default choice")
         self._set_genome(genome=genome)
 
         # Run data set-specific loading script:

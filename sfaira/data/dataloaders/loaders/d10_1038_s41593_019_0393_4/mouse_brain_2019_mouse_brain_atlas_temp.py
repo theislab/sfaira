@@ -16,16 +16,19 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.author = "Movahedi"
-        self.doi = "10.1038/s41593-019-0393-4"
+        self.id = "mouse_brain_2019_10x_hove_001_10.1038/s41593-019-0393-4"
+
         self.download = \
             "www.brainimmuneatlas.org/data_files/toDownload/filtered_gene_bc_matrices_mex_WT_fullAggr.zip"
         self.download_meta = \
             "www.brainimmuneatlas.org/data_files/toDownload/annot_fullAggr.csv"
+
+        self.author = "Movahedi"
+        self.doi = "10.1038/s41593-019-0393-4"
         self.healthy = True
-        self.id = "mouse_brain_2019_10x_hove_001_10.1038/s41593-019-0393-4"
         self.normalization = 'raw'
         self.organ = "brain"
+        self.organism = "mouse"
         self.protocol = "microwell"
         self.state_exact = "healthy"
         self.sub_tissue = "brain"
