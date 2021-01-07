@@ -1436,8 +1436,6 @@ class DatasetGroup:
                 if x is not None:
                     print(x[1])
                     del self.datasets[x[0]]
-            pool.close()
-            pool.join()
         else:  # for loop
             for k, v in self.datasets.items():
                 x = map_fn((tuple([v] + args),))
