@@ -19,22 +19,7 @@ from .external import ADATA_IDS_SFAIRA, META_DATA_FIELDS
 UNS_STRING_META_IN_OBS = "__obs__"
 
 
-def map_fn_permanent(inputs):
-    ds, formatted_version, remove_gene_version, match_to_reference, load_raw, allow_caching = inputs
-    try:
-        ds.load(
-            celltype_version=formatted_version,
-            remove_gene_version=remove_gene_version,
-            match_to_reference=match_to_reference,
-            load_raw=load_raw,
-            allow_caching=allow_caching
-        )
-        return None
-    except FileNotFoundError as e:
-        return (ds.id, e,)
-
-
-def map_fn_temporary(inputs):
+def map_fn(inputs):
     ds, formatted_version, remove_gene_version, match_to_reference, load_raw, allow_caching, func, kwargs_func = inputs
     try:
         ds.load(
@@ -44,9 +29,12 @@ def map_fn_temporary(inputs):
             load_raw=load_raw,
             allow_caching=allow_caching
         )
-        x = func(ds, **kwargs_func)
-        ds.clear()
-        return x
+        if func is not None:
+            x = func(ds, **kwargs_func)
+            ds.clear()
+            return x
+        else:
+            return None
     except FileNotFoundError as e:
         return (ds.id, e,)
 
@@ -1396,8 +1384,8 @@ class DatasetGroup:
             load_raw: bool = False,
             allow_caching: bool = True,
             processes: int = 1,
-            func = None,
-            kwargs_func = None,
+            func=None,
+            kwargs_func: Union[None, dict] = None,
     ):
         """
         Load all datasets in group (option for temporary loading).
@@ -1417,36 +1405,26 @@ class DatasetGroup:
         :param func: Function to run on loaded datasets. map_fun should only take one argument, which is a Dataset
             instance. The return can be empty:
 
-                def func(dataset):
+                def func(dataset, **kwargs_func):
                     # code manipulating dataset and generating output x.
                     return x
         :param kwargs_func: Kwargs of func.
         :return:
         """
         formatted_version = self.format_type_version(celltype_version)
-        if func is None:
-            map_fn = map_fn_permanent
-            args = [
-                formatted_version,
-                remove_gene_version,
-                match_to_reference,
-                load_raw,
-                allow_caching,
-            ]
-        else:
-            kwargs_func = kwargs_func if kwargs_func is not None else {}
-            map_fn = map_fn_temporary
-            args = [
-                formatted_version,
-                remove_gene_version,
-                match_to_reference,
-                load_raw,
-                allow_caching,
-                func,
-                kwargs_func
-            ]
+        args = [
+            formatted_version,
+            remove_gene_version,
+            match_to_reference,
+            load_raw,
+            allow_caching,
+            func,
+            kwargs_func
+        ]
 
         if processes > 1 and len(self.datasets.items()) > 1:  # multiprocessing parallelisation
+            print(f"using python multiprocessing (processes={processes}), "
+                  f"for easier debugging revert to sequential execution (processes=1)")
             import multiprocessing
 
             pool = multiprocessing.Pool(processes=processes)
@@ -1454,6 +1432,7 @@ class DatasetGroup:
                 (tuple([v] + args),)
                 for k, v in self.datasets.items() if v.annotated or not annotated_only
             ])
+            # Clear data sets that were not successfully loaded because of missing data:
             for x in res:
                 if x is not None:
                     print(x[1])
@@ -1463,6 +1442,7 @@ class DatasetGroup:
         else:  # for loop
             for k, v in self.datasets.items():
                 x = map_fn((tuple([v] + args),))
+                # Clear data sets that were not successfully loaded because of missing data:
                 if x is not None:
                     print(x[1])
                     del self.datasets[x[0]]
