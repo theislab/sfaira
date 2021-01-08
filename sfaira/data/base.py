@@ -315,7 +315,19 @@ class DatasetBase(abc.ABC):
             ]
 
         # Lastly, the index of .var is set to ensembl IDs.
-        self.adata.var.index = self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_index].values.tolist()
+        try:  # debugging
+            self.adata.var.index = self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_index].values.tolist()
+        except KeyError as e:
+            print(self.adata.var.columns)
+            print(self._ADATA_IDS_SFAIRA.gene_id_index)
+            print(self._ADATA_IDS_SFAIRA.gene_id_names)
+            print(self._ADATA_IDS_SFAIRA.gene_id_ensembl)
+            print(ensembl_col)
+            print(symbol_col)
+            print(self.var_ensembl_col)
+            print(self.var_symbol_col)
+            raise KeyError(e)
+
         self.adata.var_names_make_unique()
 
     def _collapse_gene_versions(self, remove_gene_version):
