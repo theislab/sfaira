@@ -1422,7 +1422,8 @@ class DatasetGroup:
                     del self.datasets[x[0]]
         else:  # for loop
             for k, v in self.datasets.items():
-                x = map_fn((tuple([v] + args),))
+                print(k)
+                x = map_fn(tuple([v] + args))
                 # Clear data sets that were not successfully loaded because of missing data:
                 if x is not None:
                     print(x[1])
