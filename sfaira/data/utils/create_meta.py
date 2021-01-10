@@ -6,7 +6,7 @@ print(tf.__version__)
 
 
 def write_meta(args0, args1):
-    args0.write_meta(dir_out=args1)
+    args0.write_meta(fn_meta=None, dir_out=args1, fn_data=None)
     return None
 
 
@@ -17,13 +17,10 @@ path = str(sys.argv[1])
 path_meta = str(sys.argv[2])
 processes = int(str(sys.argv[3]))
 
-print("start initialising")
 ds = sfaira.data.dataloaders.DatasetSuperGroupSfaira(
     path=path, meta_path=path_meta, cache_path=path_meta
 )
-print("start flattening")
 dsg = ds.flatten()  # need to flatten in this case to parallelise across Groups and not just within.
-print("start loading")
 dsg.load(
     celltype_version=None,
     annotated_only=False,

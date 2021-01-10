@@ -31,6 +31,8 @@ def map_fn(inputs):
             allow_caching=allow_caching
         )
         if func is not None:
+            print("map fn")
+            print(kwargs_func)
             x = func(ds, **kwargs_func)
             ds.clear()
             return x
@@ -346,7 +348,8 @@ class DatasetBase(abc.ABC):
                       "the code to collapse these features is implemented but not tested.")
                 idx_map = np.array([new_index_collapsed.index(x) for x in new_index])
                 # Need reverse sorting to find index of last element in sorted list to split array using list index().
-                idx_map_sorted_rev = np.argsort(idx_map)[::-1]
+                idx_map_sorted_fwd = np.argsort(idx_map)
+                idx_map_sorted_rev = idx_map_sorted_fwd[::-1].tolist()
                 n_genes = len(idx_map_sorted_rev)
                 # 1. Sort array in non-reversed order: idx_map_sorted_rev[::-1]
                 # 2. Split into chunks based on blocks of identical entries in idx_map, using the occurrence of the
@@ -356,7 +359,7 @@ class DatasetBase(abc.ABC):
                 counts = np.concatenate([
                     np.sum(x, axis=1, keepdims=True)
                     for x in np.split(
-                        self.adata[:, idx_map_sorted_rev[::-1]].X,  # forward ordered data
+                        self.adata[:, idx_map_sorted_fwd].X,  # forward ordered data
                         indices_or_sections=[
                             n_genes - 1 - idx_map_sorted_rev.index(x)  # last occurrence of element in forward order
                             for x in np.arange(0, len(new_index_collapsed) - 1)  # -1: do not need end of last partition
@@ -733,6 +736,9 @@ class DatasetBase(abc.ABC):
         :param fn_data: See .load()
         :return:
         """
+        print("write meta")  # ToDo debugging
+        print(fn_meta)
+        print(dir_out)
         if fn_meta is not None and dir_out is not None:
             raise ValueError("supply either fn_meta or dir_out but not both")
         elif fn_meta is None and dir_out is None:
@@ -743,7 +749,10 @@ class DatasetBase(abc.ABC):
             os.path.join(dir_out, self.doi_cleaned_id + "_meta.csv")
         elif fn_meta is not None and dir_out is None:
             pass  # fn_meta is used
+        else:
+            assert False, "bug in switch"
         print(fn_meta)  # ToDo debugging
+        print(self.adata is None)
 
         if self.adata is None:
             self.load(
@@ -1425,9 +1434,6 @@ class DatasetGroup:
             for k, v in self.datasets.items():
                 print(f"loading {k}")
                 x = map_fn(tuple([v] + args))
-                if self.datasets[k].adata is not None and func is not None:  # ToDo debugging: fix of data set deletion in map_fn
-                    print("flag map_fn deletion")
-                    self.datasets[k].clear()
                 # Clear data sets that were not successfully loaded because of missing data:
                 if x is not None:
                     print(x[1])
