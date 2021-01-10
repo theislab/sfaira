@@ -33,7 +33,7 @@ class Dataset(DatasetBase):
         self.download_meta = None
 
         self.author = '10x Genomics'
-        self.doi = None
+        self.doi = "d_nan"
         self.healthy = True
         self.normalization = 'raw'
         self.organ = "blood"
