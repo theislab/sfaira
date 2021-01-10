@@ -2,12 +2,13 @@ import sfaira
 import sys
 import tensorflow as tf
 
+print(tf.__version__)
 
-def write_meta(x, y):
-    x.write_meta(dir_out=y)
+
+def write_meta(args0, args1):
+    args0.write_meta(dir_out=args1)
     return None
 
-print(tf.__version__)
 
 # Set global variables.
 print("sys.argv", sys.argv)
@@ -32,5 +33,5 @@ dsg.load(
     allow_caching=False,
     processes=processes,
     func=write_meta,
-    kwargs_func={"path_meta": path_meta},
+    kwargs_func={"args1": path_meta},
 )
