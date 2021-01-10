@@ -1422,9 +1422,11 @@ class DatasetGroup:
                     del self.datasets[x[0]]
         else:  # for loop
             for k, v in self.datasets.items():
-                print(k)
+                print(f"loading {k}")
                 x = map_fn(tuple([v] + args))
-                # ToDo is delete in map_fn successfull?
+                if k in self.datasets[k].adata is not None and func is not None:  # ToDo debugging: fix of data set deletion in map_fn
+                    print("flag map_fn deletion")
+                    self.datasets[k].clear()
                 # Clear data sets that were not successfully loaded because of missing data:
                 if x is not None:
                     print(x[1])

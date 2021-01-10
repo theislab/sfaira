@@ -3,8 +3,9 @@ import sys
 import tensorflow as tf
 
 
-def write_meta(ds, path_meta):
-    ds.write_meta(dir_out=path_meta)
+def write_meta(x, path_meta):
+    print("entering function")
+    x.write_meta(dir_out=path_meta)
     return None
 
 print(tf.__version__)
@@ -21,9 +22,9 @@ ds = sfaira.data.dataloaders.DatasetSuperGroupSfaira(
     path=path, meta_path=path_meta, cache_path=path_meta
 )
 print("start flattening")
-ds = ds.flatten()  # need to flatten in this case to parallelise across Groups and not just within.
+dsg = ds.flatten()  # need to flatten in this case to parallelise across Groups and not just within.
 print("start loading")
-ds.load(
+dsg.load(
     celltype_version=None,
     annotated_only=False,
     match_to_reference=None,
