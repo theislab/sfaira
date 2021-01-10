@@ -743,6 +743,7 @@ class DatasetBase(abc.ABC):
             os.path.join(dir_out, self.doi_cleaned_id + "_meta.csv")
         elif fn_meta is not None and dir_out is None:
             pass  # fn_meta is used
+        print(fn_meta)  # ToDo debugging
 
         if self.adata is None:
             self.load(
@@ -1424,7 +1425,7 @@ class DatasetGroup:
             for k, v in self.datasets.items():
                 print(f"loading {k}")
                 x = map_fn(tuple([v] + args))
-                if k in self.datasets[k].adata is not None and func is not None:  # ToDo debugging: fix of data set deletion in map_fn
+                if self.datasets[k].adata is not None and func is not None:  # ToDo debugging: fix of data set deletion in map_fn
                     print("flag map_fn deletion")
                     self.datasets[k].clear()
                 # Clear data sets that were not successfully loaded because of missing data:

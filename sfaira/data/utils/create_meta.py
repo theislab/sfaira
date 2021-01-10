@@ -3,9 +3,8 @@ import sys
 import tensorflow as tf
 
 
-def write_meta(x, path_meta):
-    print("entering function")
-    x.write_meta(dir_out=path_meta)
+def write_meta(x, y):
+    x.write_meta(dir_out=y)
     return None
 
 print(tf.__version__)
