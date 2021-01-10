@@ -16,10 +16,13 @@ path = str(sys.argv[1])
 path_meta = str(sys.argv[2])
 processes = int(str(sys.argv[3]))
 
+print("start initialising")
 ds = sfaira.data.dataloaders.DatasetSuperGroupSfaira(
     path=path, meta_path=path_meta, cache_path=path_meta
 )
+print("start flattening")
 ds = ds.flatten()  # need to flatten in this case to parallelise across Groups and not just within.
+print("start loading")
 ds.load(
     celltype_version=None,
     annotated_only=False,
