@@ -68,7 +68,6 @@ class DatasetBase(abc.ABC):
     _sex: Union[None, str]
     _source: Union[None, str]
     _state_exact: Union[None, str]
-    _subtissue: Union[None, str]
     _year: Union[None, int]
 
     _obs_key_age: Union[None, str]
@@ -83,7 +82,6 @@ class DatasetBase(abc.ABC):
     _obs_key_protocol: Union[None, str]
     _obs_key_sex: Union[None, str]
     _obs_key_state_exact: Union[None, str]
-    _obs_key_subtissue: Union[None, str]
 
     _healthy_state_healthy: Union[None, str]
 
@@ -124,7 +122,6 @@ class DatasetBase(abc.ABC):
         self._sex = None
         self._source = None
         self._state_exact = None
-        self._subtissue = None
         self._year = None
 
         self._obs_key_age = None
@@ -138,7 +135,6 @@ class DatasetBase(abc.ABC):
         self._obs_key_protocol = None
         self._obs_key_sex = None
         self._obs_key_state_exact = None
-        self._obs_key_subtissue = None
 
         self._healthy_state_healthy = None
 
@@ -455,7 +451,6 @@ class DatasetBase(abc.ABC):
                 [self.sex, self._ADATA_IDS_SFAIRA.sex, self.obs_key_sex],
                 [self.organism, self._ADATA_IDS_SFAIRA.organism, self.obs_key_organism],
                 [self.state_exact, self._ADATA_IDS_SFAIRA.state_exact, self.obs_key_state_exact],
-                [self.subtissue, self._ADATA_IDS_SFAIRA.subtissue, self.obs_key_subtissue],
         ):
             if x is None and z is None:
                 self.adata.uns[y] = None
@@ -773,7 +768,6 @@ class DatasetBase(abc.ABC):
             self._ADATA_IDS_SFAIRA.sex,
             self._ADATA_IDS_SFAIRA.organism,
             self._ADATA_IDS_SFAIRA.state_exact,
-            self._ADATA_IDS_SFAIRA.subtissue,
         ]:
             if self.adata.uns[x] == UNS_STRING_META_IN_OBS:
                 meta[x] = (np.sort(np.unique(self.adata.obs[x].values)),)
@@ -1145,15 +1139,6 @@ class DatasetBase(abc.ABC):
         self._obs_key_state_exact = x
 
     @property
-    def obs_key_subtissue(self) -> str:
-        return self._obs_key_subtissue
-
-    @obs_key_subtissue.setter
-    def obs_key_subtissue(self, x: str):
-        self.__erasing_protection(attr="obs_key_subtissue", val_old=self._obs_key_subtissue, val_new=x)
-        self._obs_key_subtissue = x
-
-    @property
     def organ(self) -> Union[None, str]:
         if self._organ is not None:
             return self._organ
@@ -1250,24 +1235,6 @@ class DatasetBase(abc.ABC):
     def state_exact(self, x: str):
         self.__erasing_protection(attr="state_exact", val_old=self._state_exact, val_new=x)
         self._state_exact = x
-
-    @property
-    def subtissue(self) -> Union[None, str]:
-        if self._subtissue is not None:
-            return self._subtissue
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._ADATA_IDS_SFAIRA.subtissue in self.meta.columns:
-                return self.meta[self._ADATA_IDS_SFAIRA.subtissue]
-            else:
-                return None
-
-    @subtissue.setter
-    def subtissue(self, x: str):
-        self.__erasing_protection(attr="subtissue", val_old=self._subtissue, val_new=x)
-        self.__value_protection(attr="subtissue", allowed=self._ADATA_IDS_SFAIRA.subtissue_allowed_entries, attempted=x)
-        self._subtissue = x
 
     @property
     def var_ensembl_col(self) -> str:
@@ -1493,7 +1460,6 @@ class DatasetGroup:
             adata.obs[self._ADATA_IDS_SFAIRA.author] = adata.uns[self._ADATA_IDS_SFAIRA.author]
             adata.obs[self._ADATA_IDS_SFAIRA.year] = adata.uns[self._ADATA_IDS_SFAIRA.year]
             adata.obs[self._ADATA_IDS_SFAIRA.protocol] = adata.uns[self._ADATA_IDS_SFAIRA.protocol]
-            adata.obs[self._ADATA_IDS_SFAIRA.subtissue] = adata.uns[self._ADATA_IDS_SFAIRA.subtissue]
             if self._ADATA_IDS_SFAIRA.normalization in adata.uns.keys():
                 adata.obs[self._ADATA_IDS_SFAIRA.normalization] = adata.uns[self._ADATA_IDS_SFAIRA.normalization]
             if self._ADATA_IDS_SFAIRA.dev_stage in adata.obs.columns:
@@ -1511,7 +1477,6 @@ class DatasetGroup:
                     self._ADATA_IDS_SFAIRA.author,
                     self._ADATA_IDS_SFAIRA.year,
                     self._ADATA_IDS_SFAIRA.protocol,
-                    self._ADATA_IDS_SFAIRA.subtissue,
                     self._ADATA_IDS_SFAIRA.normalization,
                     self._ADATA_IDS_SFAIRA.dev_stage,
                     self._ADATA_IDS_SFAIRA.annotated,
@@ -1904,7 +1869,6 @@ class DatasetSuperGroup:
             self._ADATA_IDS_SFAIRA.organ,
             self._ADATA_IDS_SFAIRA.protocol,
             self._ADATA_IDS_SFAIRA.state_exact,
-            self._ADATA_IDS_SFAIRA.subtissue,
             self._ADATA_IDS_SFAIRA.year,
         ]
         if scatter_update:

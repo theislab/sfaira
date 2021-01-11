@@ -101,12 +101,11 @@ before it is loaded into memory:
         self.ethnicity = x  # (*, optional) ethnicity of sample
         self.healthy = x  # (*, optional) whether sample represents a healthy organism
         self.normalisation = x  # (optional) normalisation applied to raw data loaded (ideally counts, "raw")
-        self.organ = x  # (*, optional) organ
+        self.organ = x  # (*, optional) organ (anatomical structure)
         self.organism = x  # (*) species / organism
         self.protocol = x  # (*, optional) protocol used to sample data (e.g. smart-seq2)
         self.sex = x  # (*, optional) sex
         self.state_exact = x  # (*, optional) exact disease, treatment or perturbation state of sample
-        self.sub_tissue = x # (*, optional) sub-tissue name, otherwise organ
         self.year = x  # year in which sample was acquired
 
         # The following meta data may instead also be supplied on a cell level if an appropriate column is present in the
@@ -123,7 +122,6 @@ before it is loaded into memory:
         self.obs_key_protocol = x  # (optional, see above, do not provide if .protocol is provided)
         self.obs_key_sex = x  # (optional, see above, do not provide if .sex is provided)
         self.obs_key_state_exact = x  # (optional, see above, do not provide if .state_exact is provided)
-        self.obs_key_subtissue = x  # (optional, see above, do not provide if .sub_tissue is provided)
         # Additionally, cell type annotation is ALWAYS provided per cell in .obs, this annotation is optional though.
         # name of column which contain streamlined cell ontology cell type classes:
         self.obs_key_cellontology_class = x  # (optional)

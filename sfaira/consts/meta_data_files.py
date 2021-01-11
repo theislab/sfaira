@@ -17,6 +17,5 @@ META_DATA_FIELDS = {
     "protocol": str,
     "organism": str,
     "state_exact": str,
-    "sub_tissue": str,
     "year": int,
 }

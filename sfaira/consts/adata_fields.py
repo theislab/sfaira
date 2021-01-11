@@ -31,7 +31,6 @@ class ADATA_IDS_BASE:
     _organ: str
     _organism: str
     _protocol: str
-    _subtissue: str
     _year: str
 
     @property
@@ -119,10 +118,6 @@ class ADATA_IDS_BASE:
         return self._protocol
 
     @property
-    def subtissue(self) -> str:
-        return self._subtissue
-
-    @property
     def year(self) -> str:
         return self._year
 
@@ -184,7 +179,6 @@ class ADATA_IDS_SFAIRA(ADATA_IDS_EXTENDED):
         self._organ = "organ"
         self._organism = "organism"
         self._protocol = "protocol"
-        self._subtissue = "subtissue"
         self._year = "year"
 
         self._age = "age"
@@ -256,7 +250,6 @@ class ADATA_IDS_CELLXGENE(ADATA_IDS_EXTENDED):
         self._organ = ""  # TODO
         self._organism = "organism"
         self._protocol = "assay"
-        self._subtissue = ""  # TODO
         self._year = ""  # TODO
 
         self._age = "age"

@@ -34,7 +34,6 @@ class Dataset(DatasetBase):
         self.obs_key_sex = self._ADATA_IDS_CELLXGENE.sex
         self.obs_key_organism = self._ADATA_IDS_CELLXGENE.organism
         self.obs_key_state_exact = self._ADATA_IDS_CELLXGENE.state_exact
-        self.obs_key_subtissue = self._ADATA_IDS_CELLXGENE.subtissue
 
         self.healthy_state_healthy = self._ADATA_IDS_CELLXGENE.disease_state_healthy
 

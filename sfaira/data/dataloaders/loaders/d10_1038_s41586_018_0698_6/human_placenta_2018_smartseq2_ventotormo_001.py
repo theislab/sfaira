@@ -32,19 +32,18 @@ class Dataset(DatasetBase):
         self.author = 'Teichmann'
         self.healthy = True
         self.normalization = 'raw'
-        self.organ = "placenta"
+        self.organ = "placenta,decidua,blood"  # ToDo: move this into .obs_key_organ?
         self.organism = "human"
         self.doi = '10.1038/s41586-018-0698-6'
         self.protocol = "Smartseq2"
         self.state_exact = "healthy"
-        self.sub_tissue = "placenta, decidua, blood"
         self.year = 2018
 
         self.var_symbol_col = 'names'
         self.var_ensembl_col = 'ensembl'
 
         self.obs_key_cellontology_original = 'annotation'
-        self.obs_key_subtissue = 'location'
+        # ToDo: further anatomical information for subtissue in 'location'
 
         self.class_maps = {
             "0": {

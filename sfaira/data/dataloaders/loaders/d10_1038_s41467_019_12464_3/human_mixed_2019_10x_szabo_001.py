@@ -89,18 +89,17 @@ class Dataset(DatasetBase):
         self.doi = "10.1038/s41467-019-12464-3"
         self.healthy = True
         self.normalization = 'raw'
-        self.organ = "mixed"
+        self.organ = "bone marrow,lung,lymph node"  # ToDo: move this into .obs_key_organ?
         self.organism = "human"
         self.protocol = "10x"
         self.state_exact = 'healthy'
-        self.sub_tissue = "Bone Marrow, Lung, Lymph Node"
         self.year = 2019
 
         self.var_symbol_col = 'Gene'
         self.var_ensembl_col = 'Accession'
 
         self.obs_key_cellontology_original = 'cell_ontology_class'
-        self.obs_key_subtissue = 'organ'
+        # ToDo: further anatomical information for subtissue in 'organ'
 
         self.loaded = False  # TODO do this differently?
 
