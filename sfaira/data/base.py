@@ -476,17 +476,6 @@ class DatasetBase(abc.ABC):
                     self.adata.obs[y] = self.adata.obs[z].values.tolist()
             else:
                 assert False, "switch option should not occur"
-        # Process entries which are boolean element matches:
-        for x, y in (
-                [self._ADATA_IDS_SFAIRA.healthy, self.healthy_state_healthy],
-        ):
-            if self.adata.uns[x] == UNS_STRING_META_IN_OBS:
-                self.adata.obs[x] = self.adata.obs[x].values == y
-            else:
-                if not isinstance(self.adata.uns[x], bool):
-                    raise ValueError(
-                        f"entry in .uns {self._ADATA_IDS_SFAIRA.healthy} is not boolean in data set {self.id}"
-                    )
         # Set cell-wise attributes (.obs):
         # None so far other than celltypes.
         # Set cell types:
