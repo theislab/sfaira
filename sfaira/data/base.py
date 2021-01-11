@@ -153,7 +153,7 @@ class DatasetBase(abc.ABC):
 
     @property
     def _directory_formatted_doi(self) -> str:
-        return "_".join("_".join(self.doi.split("/")).split("."))
+        return "d" + "_".join("_".join("_".join(self.doi.split("/")).split(".")).split("-"))
 
     @property
     def _directory_formatted_id(self) -> str:
