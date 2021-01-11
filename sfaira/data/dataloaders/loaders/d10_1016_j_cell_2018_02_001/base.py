@@ -31,8 +31,7 @@ class Dataset_d10_1016_j_cell_2018_02_001(DatasetBase):
         self.state_exact = "healthy"
         self.year = 2018
 
-        self.var_ensembl_col = "ensembl"
-        self.var_symbol_col = "names"
+        self.var_symbol_col = "index"
 
     def _load_generalized(self, fn, fn_meta):
         celltypes = pandas.read_csv(fn_meta, index_col=1)

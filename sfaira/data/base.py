@@ -280,6 +280,7 @@ class DatasetBase(abc.ABC):
             if symbol_col == 'index':
                 self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_names] = self.adata.var.index.values.tolist()
             else:
+                assert symbol_col in self.adata.var.columns, f"symbol_col {symbol_col} not found in .var"
                 self.adata.var = self.adata.var.rename(
                     {symbol_col:  self._ADATA_IDS_SFAIRA.gene_id_names},
                     axis='columns'
@@ -288,6 +289,7 @@ class DatasetBase(abc.ABC):
             if ensembl_col == 'index':
                 self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_ensembl] = self.adata.var.index.values.tolist()
             else:
+                assert ensembl_col in self.adata.var.columns, f"ensembl_col {ensembl_col} not found in .var"
                 self.adata.var = self.adata.var.rename(
                     {ensembl_col: self._ADATA_IDS_SFAIRA.gene_id_ensembl},
                     axis='columns'
@@ -736,9 +738,6 @@ class DatasetBase(abc.ABC):
         :param fn_data: See .load()
         :return:
         """
-        print("write meta")  # ToDo debugging
-        print(fn_meta)
-        print(dir_out)
         if fn_meta is not None and dir_out is not None:
             raise ValueError("supply either fn_meta or dir_out but not both")
         elif fn_meta is None and dir_out is None:
@@ -746,13 +745,11 @@ class DatasetBase(abc.ABC):
                 raise ValueError("provide either fn in load or via constructor (meta_path)")
             fn_meta = self.meta_fn
         elif fn_meta is None and dir_out is not None:
-            os.path.join(dir_out, self.doi_cleaned_id + "_meta.csv")
+            fn_meta = os.path.join(dir_out, self.doi_cleaned_id + "_meta.csv")
         elif fn_meta is not None and dir_out is None:
             pass  # fn_meta is used
         else:
             assert False, "bug in switch"
-        print(fn_meta)  # ToDo debugging
-        print(self.adata is None)
 
         if self.adata is None:
             self.load(
