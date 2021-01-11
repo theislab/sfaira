@@ -31,8 +31,6 @@ def map_fn(inputs):
             allow_caching=allow_caching
         )
         if func is not None:
-            print("map fn")
-            print(kwargs_func)
             x = func(ds, **kwargs_func)
             ds.clear()
             return x
