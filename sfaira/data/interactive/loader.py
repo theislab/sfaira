@@ -14,7 +14,9 @@ class DatasetInteractive(DatasetBase):
             gene_ens_col: Union[str, None] = None,
             class_maps: dict = {},
             dataset_id: str = "interactive",
-            **kwargs
+            path: Union[str, None] = ".",
+            meta_path: Union[str, None] = ".",
+            cache_path: Union[str, None] = ".",
     ):
         """
         Load data set into sfaira data format.
@@ -26,9 +28,11 @@ class DatasetInteractive(DatasetBase):
         :param gene_ens_col:  Column name in .var which contains ENSG symbols. Set to "index" to use the index.
         :param class_maps: Cell type class maps.
         :param dataset_id: Identifer of data set.
-        :param kwargs:
+        :param path:
+        :param meta_path:
+        :param cache_path:
         """
-        super().__init__(path=None, meta_path=None, **kwargs)
+        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path)
         self.adata = data
 
         self.id = dataset_id

@@ -270,16 +270,22 @@ class UserInterface:
             self,
             data: anndata.AnnData,
             gene_symbol_col: Union[str, None] = None,
-            gene_ens_col: Union[str, None] = None
+            gene_ens_col: Union[str, None] = None,
+            remove_gene_version: bool = True,
+            match_to_reference: Union[str, None] = None,
     ):
         """
         Loads the provided AnnData object into sfaira.
+
         If genes in the provided AnnData object are annotated as gene symbols, please provide the name of the corresponding var column (or 'index') through the gene_symbol_col argument.
         If genes in the provided AnnData object are annotated as ensembl ids, please provide the name of the corresponding var column (or 'index') through the gene_ens_col argument.
         You need to provide at least one of the two.
         :param data: AnnData object to load
         :param gene_symbol_col: Var column name (or 'index') which contains gene symbols
         :param gene_ens_col: ar column name (or 'index') which contains ensembl ids
+        :param remove_gene_version: Remove gene version string from ENSEMBL ID so that different versions in different
+            data sets are superimposed.
+        :param match_to_reference: Reference genomes name.
         """
         if self.zoo_embedding.organism is not None:
             organism = self.zoo_embedding.organism
@@ -294,13 +300,20 @@ class UserInterface:
             raise ValueError("Please provide either the gene_ens_col or the gene_symbol_col argument.")
 
         dataset = DatasetInteractive(
-                    data=data,
-                    organism=organism,
-                    organ=organ,
-                    gene_symbol_col=gene_symbol_col,
-                    gene_ens_col=gene_ens_col
-                )
-        dataset.load()
+            data=data,
+            organism=organism,
+            organ=organ,
+            gene_symbol_col=gene_symbol_col,
+            gene_ens_col=gene_ens_col
+        )
+        dataset.load(
+            celltype_version=None,
+            fn=None,
+            remove_gene_version=remove_gene_version,
+            match_to_reference=match_to_reference,
+            load_raw=False,
+            allow_caching=False,
+        )
         self.data = dataset.adata
 
     def filter_cells(self):
