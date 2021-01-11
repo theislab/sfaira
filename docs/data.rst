@@ -12,11 +12,11 @@ Build a repository structure
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     1. Choose a directory to dedicate to the data base, called root in the following.
-    2. Make subfolders in root for each organism for which you want to build a data base.
-    3. Make subfolders for each organ whithin each organism for which you want to build a data base.
+    2. Run the sfaira download script (sfaira.data.utils.download_all). Alternatively, you can manually set up a data base by making subfolders for each study.
 
-We maintain a couple of download scripts that automatise this process, which have to be executed in a shell once to download specific subsets of the full data zoo.
-These scripts can be found in sfaira.data.download_scripts.
+Note that the automated download is a feature of sfaira but not the core purpose of the package:
+Sfaira allows you efficiently interact with such a local data repository.
+Some data sets cannot be automatically downloaded and need you manual intervention, which we report in the download script output.
 
 Use 3rd party repositories
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -31,26 +31,40 @@ Contact us for support of any other repositories.
 Add data sets
 ~~~~~~~~~~~~~
 
-    4. For each species and organ combination, choose the data sets that you want to use.
-    5. Identify the raw files as indicated in the data loader classes and copy them into the folder. Use processed data
-    using the described processing if this is required: This is usually done to speed up loading for file
-    formats that are difficult to access.
-
-Data loaders
-------------
+    1. Write a data loader as outlined below.
+    2. Identify the raw files as indicated in the data loader classes and copy them into your directory structure as required by your data laoder.
+    3. You can contribute the data loader to public sfaira, we do not manage data upload though. During publication, you would upload this data set to a server like GEO and the dataloader contributed to sfaira would use this download link.
 
 Use data loaders on existing data repository
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------------
 
 You only want to use data sets with existing data loaders and have adapted your directory structure as above?
 In that case, you can immediately start using the data loader functions, you just need to supply the root directory
 of the directory structure as `path to the constructor of the class that you are using.
-Depending on the functionalities you want to use, you need to create a directory with data set meta data first. This
-can be easily done via the data set api itself, example python scripts are under benchmarks/data_preparation. This
-meta information is necessary to anticipate file sizes for backing merged adata objects for example.
+Depending on the functionalities you want to use, you would often want to create a directory with cached meta data
+first. This can be easily done via the script sfaira.data.utils.create_meta.py. This meta information is necessary to
+anticipate file sizes for backing merged adata objects, for example, and is used for lazy loading.
 
-Contribute data loaders
-~~~~~~~~~~~~~~~~~~~~~~~
+Write data loaders
+------------------
+
+The study-centric data loader module
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In the sfaira code, data loaders are organised into directories, which correspond to publications.
+All data loaders corresponding to data sets of one study are grouped into this directory.
+This directory contains an `__init__.py` file which makes these data loaders visible to sfaira:
+
+.. code-block:: python
+
+    FILE_PATH = __file__
+
+
+Next, each data set is represented by one data loader python file in this directory.
+See below for more complex set ups with repetitive data loader code.
+
+The data loader python file
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Each data set (organsism, organ, protocol, optionally also batches) has its own data loader class. Each such class is
 in a separate file and inherits from a base class that contains most functionalities. Accordingly, the data loader class
@@ -71,51 +85,50 @@ before it is loaded into memory:
         super().__init__(path=path, meta_path=meta_path, **kwargs)
         # Data set meta data: You do not have to include all of these and can simply skip lines corresponding
         # to attritbutes that you do not have access to. These are meta data on a sample level.
-        # The meta data attributes labeled with (!) may als be supplied per cell, see below,
+        # The meta data attributes labeled with (*) may als be supplied per cell, see below,
         # in this case, if you supply a .obs_key* attribute, you ccan leave out the sample-wise attribute.
-        self.age = x  # (!) age of sample
+
+        self.id = x  # unique identifier of data set (Organism_Organ_Year_Protocol_NumberOfDataset_FirstAuthorLastname_doi).
+
         self.author = x  # author (list) who sampled / created the data set
         self.doi = x  # doi of data set accompanying manuscript
+
         self.download = x  # download website(s) of data files
         self.download_meta = x  # download website(s) of meta data files
-        self.dev_stage = x  # (!) developmental stage of organism
-        self.ethnicity = x  # (!) ethnicity of sample
-        self.healthy = x  # (!) whether sample represents a healthy organism
-        self.id = x  # "organism_organ_year_protocoll_first-author_doi"
-        self.normalisation = x  # normalisation applied to raw data loaded (ideally counts, "raw")
-        self.organ = x  # (!) organ
-        self.organism = x  # (!) species / organism
-        self.protocol = x  # (!) protocol used to sample data (e.g. smart-seq2)
-        self.sex = x  # (!) sex
-        self.state_exact = x  # (!) exact disease, treatment or perturbation state of sample
-        self.sub_tissue = x # (!) sub-tissue name, otherwise organ
+
+        self.age = x  # (*, optional) age of sample
+        self.dev_stage = x  # (*, optional) developmental stage of organism
+        self.ethnicity = x  # (*, optional) ethnicity of sample
+        self.healthy = x  # (*, optional) whether sample represents a healthy organism
+        self.normalisation = x  # (optional) normalisation applied to raw data loaded (ideally counts, "raw")
+        self.organ = x  # (*, optional) organ
+        self.organism = x  # (*) species / organism
+        self.protocol = x  # (*, optional) protocol used to sample data (e.g. smart-seq2)
+        self.sex = x  # (*, optional) sex
+        self.state_exact = x  # (*, optional) exact disease, treatment or perturbation state of sample
+        self.sub_tissue = x # (*, optional) sub-tissue name, otherwise organ
         self.year = x  # year in which sample was acquired
 
-        # (!):
-        # The followin meta data may instead also be supplied on a cell level if an appropriate column is present in the
-        # anndata instance (specifically in .obs) after loading
-        # (ie you need to make sure this is loaded in the loading script)!
+        # The following meta data may instead also be supplied on a cell level if an appropriate column is present in the
+        # anndata instance (specifically in .obs) after loading.
+        # You need to make sure this is loaded in the loading script)!
         # See above for a description what these meta data attributes mean.
         # Again, if these attributes are note available, you can simply leave this out.
-        self.obs_key_age = x
-        self.obs_key_dev_stage = x
-        self.obs_key_ethnicity = x
-        self.obs_key_healthy = x
-        self.obs_key_healthy = x
-        self.obs_key_organ = x
-        self.obs_key_organism = x
-        self.obs_key_protocol = x
-        self.obs_key_sex = x
-        self.obs_key_state_exact = x
-        self.obs_key_subtissue = x
-        # Additionally, cell type annotation is ALWAYS provided per cell in .obs:
-        self.obs_key_cellontology_class = x  # name of column which contain streamlined cell ontology cell type classes
-        self.obs_key_cellontology_id = x  # name of column which contain streamlined cell ontology cell type IDs
-        self.obs_key_cellontology_original = x  # name of column which contain raw cell type labels
-        # In a simple setting in which you only have non-streamlined annotation,
-        # you would only set obs_key_cellontology_original and ignore the other two, sfaira than takes care of that
-        # via class_maps below.
-
+        self.obs_key_age = x  # (optional, see above, do not provide if .age is provided)
+        self.obs_key_dev_stage = x  # (optional, see above, do not provide if .dev_stage is provided)
+        self.obs_key_ethnicity = x  # (optional, see above, do not provide if .ethnicity is provided)
+        self.obs_key_healthy = x  # (optional, see above, do not provide if .healthy is provided)
+        self.obs_key_organ = x  # (optional, see above, do not provide if .organ is provided)
+        self.obs_key_organism = x  # (optional, see above, do not provide if .organism is provided)
+        self.obs_key_protocol = x  # (optional, see above, do not provide if .protocol is provided)
+        self.obs_key_sex = x  # (optional, see above, do not provide if .sex is provided)
+        self.obs_key_state_exact = x  # (optional, see above, do not provide if .state_exact is provided)
+        self.obs_key_subtissue = x  # (optional, see above, do not provide if .sub_tissue is provided)
+        # Additionally, cell type annotation is ALWAYS provided per cell in .obs, this annotation is optional though.
+        # name of column which contain streamlined cell ontology cell type classes:
+        self.obs_key_cellontology_class = x  # (optional)
+        # This cell type annotation is free text but is mapped to an ontology via a .csv file with the same name and
+        # directory as the python file of this data loader (see below).
 
         # A dictionary of dictionaries with:
         # One item for each annotation label that is not contained in the ontology.
@@ -160,12 +173,6 @@ In summary, a simply example data loader for a mouse lung data set could look li
 
             self.obs_key_cellontology_original = "louvain_named"  # i save my cell type names in here
 
-            self.class_maps = {
-                "0": {  # one entry for each cell type version for this species and organ
-                    'my weird name for T cells': 'T cell',  # one map from a custom ID to an ontology supported ID
-                },
-            }
-
         def _load(self, fn=None):
             # assuming that i uploaded an h5ad somewhere (in self.download)
             if fn is None:
@@ -180,43 +187,51 @@ in which local data and cell type annotation can be managed separately but still
 The data loaders and cell type annotation formats between sfaira and sfaira_extensions are identical and can be easily
 copied over.
 
-Ontology management
--------------------
+Map cell type labels to ontology
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Sfaira maintains versioned cell type universes and ontologies by species and organ.
-A cell type universe is a list of the unique, most fine-grained cell type definitions available.
-These cell types can be referred to by a human readable cell type name or a structure identifier within an ontology,
-an ontology ID.
-Often, one is also interested in access to more coarse grained groups of cell types, for example if the data quality
-does not allow to distinguish between T cell subtypes.
-To allow coarser type definition, sfaira maintains hierarchies of cell types, in which each hierarchical level is again
-defined by a cell type identifier.
-Such a hierarchy can be writted as directed acyclic graph which has the cell type universe as its leave nodes.
-Intuitively, the cell type hierarchy graph depends on the cell type universe.
-Accordingly, both are versioned together in sfaira:
-Updates in the cell type universe, such as discovery of a new cell type, lead to an update of the ontology and an
-incrementation in both of their versions.
-These versioned changes materialise as a distinct list (universe) and dictionary (ontology) for each version in the
-file that harbors the species- and organ-specific class that inherits from CelltypeVersionsBase and thus are available
-even after updates.
-This versioning without depreceation of the old objects allows sfaira to execute and train models that were designed
-for older cell type universes and thus ensures reproducibility.
+The entries in `self.obs_key_cellontology_original` are free text but are mapped to an ontology via a .csv file with
+the same name and directory as the python file in which the data loader is located.
+This .csv contains two columns with one row for each unique cell type label and their free text identifiers in the first
+column, and the corresponding ontology term in the second column.
+You could write this file entirely from scratch.
+Sfaira also allows you to generate a first guess of this file using fuzzy string matching via ToDo.
+Conflicts are not resolved in this first guess and you have to manually decide which free text field corresponds to which
+ontology term in the case of conflicts.
+Still, this first guess usually drastically speeds up this annotation harmonization.
 
-Contribute cell types to ontologies
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To contibute new cell types or change existing cell type universe entries, the cell type universe version has to be
-incremented and the new entry can simply be added to the list or modified in the list.
-We do not increment the universe version if a change does not influence the identity of a leave node with respect to
-the other types in the universe, ie if it simply changes the spelling of a cell type or if an onology ID is added to
-a type that previously did not have one.
+Repetitive data loader code
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Contribute hierarchies to ontologies
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+There are instances in which you find yourself copying code between data loader files corresponding to one study.
+In most of these cases, you can avoid the copy operations and share the code more efficiently.
 
-To contribute a term to a cell type ontology, one just has to add a dictionary item that defines the new term as a set
-of the leave nodes (cell type universe) of the corresponding universe version.
+If you have multiple data files which each correspond to a data set and are structured similarly, you can define a super
+class which contains the shared constructor and `_load()` code, from which each data set specific loader inherits.
+ToDo: Example.
 
+If you have a single file which contains the data from multiple data sets which belong to a data loader each,
+because of different meta data or batches for example,
+you can set up a `group.py` file which defines a DatasetGroup for this study, which controls the generation of Datasets.
+ToDo: Example.
+
+Cell type ontology management
+-----------------------------
+
+Sfaira maintains a wrapper of the Cell Ontology as a class which allows additions to this ontology.
+This allows us to use the core ontology used in the community as a backbone and to keep up with newly identifed cell types on our own.
+We require all extensions of the core ontology not to break the directed acyclic graph that is the ontology:
+Usually, such extensions would be additional leave nodes.
+
+Second, we maintain cell type universes for anatomic structures.
+These are dedicated for cell type-dependent models which require a defined set of cell types.
+Such a universe is a set of nodes in the ontology.
+
+Contribute cell types to ontology
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Please open an issue on the sfaira repo with a description what type of cell type you want to add.
 
 Using ontologies to train cell type classifiers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -225,6 +240,17 @@ Cell type classifiers can be trained on data sets with different coarsity of cel
 cross-entropy as a loss and aggregate accuracy as a metric.
 The one-hot encoded cell type label matrix is accordingly modified in the estimator class in data loading if terms
 that correspond to intermediate nodes (rather than leave nodes) are encountered in the label set.
+
+Metadata management
+-------------------
+
+We constrain meta data by ontologies where possible. The current restrictions are:
+
+    - .organism must either mouse or human.
+
+Follow this issue_ for details on upcoming ontology integrations.
+
+.. _issue: https://github.com/theislab/sfaira/issues/16
 
 Genome management
 -----------------
