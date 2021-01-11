@@ -124,7 +124,7 @@ before it is loaded into memory:
         self.obs_key_state_exact = x  # (optional, see above, do not provide if .state_exact is provided)
         # Additionally, cell type annotation is ALWAYS provided per cell in .obs, this annotation is optional though.
         # name of column which contain streamlined cell ontology cell type classes:
-        self.obs_key_cellontology_class = x  # (optional)
+        self.obs_key_cellontology_original = x  # (optional)
         # This cell type annotation is free text but is mapped to an ontology via a .csv file with the same name and
         # directory as the python file of this data loader (see below).
 
