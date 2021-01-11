@@ -599,8 +599,9 @@ class DatasetBase(abc.ABC):
                     for k in adata_backed.obs.columns
                 ]))
             )
+            self.clear()
         else:
-            raise ValueError(f"Did not reccognize backed AnnData.X format {type(adata_backed.X)}")
+            raise ValueError(f"Did not recognize backed AnnData.X format {type(adata_backed.X)}")
 
     def set_unkown_class_id(self, ids: List[str]):
         """
@@ -1986,4 +1987,3 @@ class DatasetSuperGroup:
         for x in self.dataset_groups:
             if x.datasets[0].organ == "mixed":
                 x.subset_organs(subset)
-
