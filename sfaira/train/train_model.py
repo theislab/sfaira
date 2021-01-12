@@ -72,7 +72,7 @@ class TargetZoos:
                 'epityphlon': human.DatasetGroupEpityphlon(path=path, meta_path=meta_path, cache_path=cache_path),
                 'esophagus': human.DatasetGroupEsophagus(path=path, meta_path=meta_path, cache_path=cache_path),
                 'eye': human.DatasetGroupEye(path=path, meta_path=meta_path, cache_path=cache_path),
-                'fallopiantube': loaders.DatasetGroupFallopiantube(path=path, meta_path=meta_path, cache_path=cache_path),
+                'fallopiantube': human.DatasetGroupFallopiantube(path=path, meta_path=meta_path, cache_path=cache_path),
                 'femalegonad': human.DatasetGroupFemalegonad(path=path, meta_path=meta_path, cache_path=cache_path),
                 'gallbladder': human.DatasetGroupGallbladder(path=path, meta_path=meta_path, cache_path=cache_path),
                 'heart': human.DatasetGroupHeart(path=path, meta_path=meta_path, cache_path=cache_path),
