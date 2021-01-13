@@ -41,7 +41,8 @@ setup(
         'data': [
             "scanpy",
             "loompy",
-            "requests"
+            "requests",
+            "xlrd>=1.0.0"
         ],
         'extension': [
             "sfaira_extension",
