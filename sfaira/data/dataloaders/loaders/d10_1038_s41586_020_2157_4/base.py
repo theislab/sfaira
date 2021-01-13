@@ -58,6 +58,7 @@ class Dataset_d10_1038_s41586_020_2157_4(DatasetBase):
             'https://ndownloader.figshare.com/files/21758835',
             os.path.join(self.path, "human", self._directory_formatted_doi, 'HCL_Fig1_cell_Info.xlsx')
         ))
+
         print(urllib.request.urlretrieve(
             'https://ndownloader.figshare.com/files/22447898',
             os.path.join(self.path, "human", self._directory_formatted_doi, 'annotation_rmbatch_data_revised417.zip')
@@ -91,9 +92,11 @@ class Dataset_d10_1038_s41586_020_2157_4(DatasetBase):
         adata.obs.index = ["-".join(i.split('-')[:-1]) for i in adata.obs.index]
 
         # load celltype labels and harmonise them
+        # This pandas code should work with pandas 1.2 but it does not and yields an empty data frame:
         fig1_anno = pd.read_excel(
             os.path.join(self.path, "human", self._directory_formatted_doi, 'HCL_Fig1_cell_Info.xlsx'),
-            index_col='cellnames'
+            index_col='cellnames',
+            engine="xlrd",  # ToDo: Update when pandas xlsx reading with openpyxl is fixed: yields empty tables
         )
         fig1_anno.index = fig1_anno.index.str.replace('AdultJeJunum', 'AdultJejunum', regex=True).str.replace(
             'AdultGallBladder', 'AdultGallbladder', regex=True).str.replace(

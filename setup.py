@@ -42,7 +42,8 @@ setup(
             "scanpy",
             "loompy",
             "requests",
-            "xlrd>=1.0.0"
+            "xlrd==1.*",
+            "openpyxl",
         ],
         'extension': [
             "sfaira_extension",
