@@ -193,7 +193,7 @@ class DatasetBase(abc.ABC):
             self._load(fn=fn)
         else:
             assert self.cache_path is not None, "set cache_path to use caching"
-            assert os.path.exists(fn_cache),  f"did not find cache file {fn_cache}, consider caching first"
+            assert os.path.exists(fn_cache), f"did not find cache file {fn_cache}, consider caching first"
             self.adata = anndata.read_h5ad(fn_cache)
         # Check if file needs to be cached:
         if allow_caching and not os.path.exists(fn_cache):
@@ -276,7 +276,7 @@ class DatasetBase(abc.ABC):
             else:
                 assert symbol_col in self.adata.var.columns, f"symbol_col {symbol_col} not found in .var"
                 self.adata.var = self.adata.var.rename(
-                    {symbol_col:  self._ADATA_IDS_SFAIRA.gene_id_names},
+                    {symbol_col: self._ADATA_IDS_SFAIRA.gene_id_names},
                     axis='columns'
                 )
         if ensembl_col:
@@ -895,9 +895,9 @@ class DatasetBase(abc.ABC):
         :return:
         """
         x = self._download_meta
-        #if self._download_meta is not None:  # TODO add this back in once download_meta is routineyl set in datasets
+        # if self._download_meta is not None:  # TODO add this back in once download_meta is routineyl set in datasets
         #    x = self._download_meta
-        #else:
+        # else:
         #    if self.meta is None:
         #        self.load_meta(fn=None)
         #    x = self.meta[self._ADATA_IDS_SFAIRA.download_meta]
@@ -1881,7 +1881,7 @@ class DatasetSuperGroup:
         for x in ncells:
             temp_ls = []
             for y in x:
-                temp_ls.append(idx_vector[row:(row+y)])
+                temp_ls.append(idx_vector[row:(row + y)])
                 row += y
             idx_ls.append(temp_ls)
         print("checking expected and received data set sizes, rerun meta data generation if mismatch is found:")
@@ -1904,7 +1904,7 @@ class DatasetSuperGroup:
         self.adata.write()
         # Saving obs separately below is therefore no longer required (hence commented out)
         #fn_backed_obs = ".".join(self.fn_backed.split(".")[:-1]) + "_obs.csv"
-        #self.adata.obs.to_csv(fn_backed_obs)
+        # self.adata.obs.to_csv(fn_backed_obs)
 
     def delete_backed(self):
         del self.adata

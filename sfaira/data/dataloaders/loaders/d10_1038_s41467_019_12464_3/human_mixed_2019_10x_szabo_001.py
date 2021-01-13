@@ -156,7 +156,7 @@ class Dataset(DatasetBase):
         for i in df2.index:
             self.adata.obs['cell_ontology_class'].loc[i] = df2.loc[i][1]
         self.adata.X = scipy.sparse.csc_matrix(self.adata.X)
-        
+
         # TODO we should move this code into the base class
         # If the subset_organs() method has been run before, subset to specified organs
         if "organsubset" in self.__dict__:

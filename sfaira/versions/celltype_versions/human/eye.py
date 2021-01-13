@@ -50,7 +50,7 @@ CELLTYPES_HUMAN_EYE_V0 = [
 ONTOLOGIES_HUMAN_EYE_V0 = {
     "names": {
         'BPs': ['Retinal bipolar neuron type A', 'Retinal bipolar neuron type B', 'Retinal bipolar neuron type C', 'Retinal bipolar neuron type D'],
-        'Rods': ['Retinal rod cell type A', 'Retinal rod cell type B', 'Retinal rod cell type C',]
+        'Rods': ['Retinal rod cell type A', 'Retinal rod cell type B', 'Retinal rod cell type C', ]
     },
     "ontology_ids": {},
 }

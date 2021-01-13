@@ -27,7 +27,7 @@ class CelltypeVersionsBase:
             )
         # Check that ontology terms are unique also between ontologies
         if np.sum([len(x) for x in self.ontology.values()]) != \
-            len(np.unique(np.array([list(x) for x in self.ontology.values()]))):
+                len(np.unique(np.array([list(x) for x in self.ontology.values()]))):
             raise ValueError(
                 "duplicated ontology terms found between ontologies in %s" %
                 type(self)
@@ -65,7 +65,6 @@ class CelltypeVersionsBase:
             self.version = version
         else:
             raise ValueError("version supplied should be either in format `a.b.c` or `a`")
-
 
     @property
     def ids(self):

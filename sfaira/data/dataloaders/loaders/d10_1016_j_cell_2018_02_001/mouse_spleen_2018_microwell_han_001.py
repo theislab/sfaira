@@ -42,4 +42,3 @@ class Dataset(Dataset_d10_1016_j_cell_2018_02_001):
             fn_meta = os.path.join(self.path, "mouse", "temp_mouse_atlas", "MCA_CellAssignments.csv")
 
         self._load_generalized(fn=fn, fn_meta=fn_meta)
-        

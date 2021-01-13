@@ -11,6 +11,7 @@ class LearnedThresholdLayer(tf.keras.layers.Layer):
     """
     A layer that thresholds the input with a learned threshold.
     """
+
     def __init__(
         self,
         out_dim,

@@ -143,9 +143,9 @@ class UserInterface:
 
         if ids:
             pd.DataFrame(
-                    list(zip(ids_cleaned, model_paths, file_paths, md5)),
-                    columns=['model_id', 'model_path', 'model_file_path', 'md5']
-                )\
+                list(zip(ids_cleaned, model_paths, file_paths, md5)),
+                columns=['model_id', 'model_path', 'model_file_path', 'md5']
+            )\
                 .sort_values('model_id')\
                 .reset_index(drop=True)\
                 .to_csv(os.path.join(repo_path, 'model_lookuptable.csv'))
@@ -234,7 +234,7 @@ class UserInterface:
             'license': 'cc-by-4.0',
             'upload_type': 'dataset',
             'access_right': 'open'
-            }
+        }
         meta = {**meta_core, **metadata}
         r = requests.put(f'https://{sandbox}zenodo.org/api/deposit/depositions/{deposition_id}',
                          params=params,

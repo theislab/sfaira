@@ -29,6 +29,7 @@ ONTOLOGIES_HUMAN_MIXED_V0 = {
     "ontology_ids": {},
 }
 
+
 class CelltypeVersionsHumanMixed(CelltypeVersionsBase):
 
     def __init__(self, **kwargs):

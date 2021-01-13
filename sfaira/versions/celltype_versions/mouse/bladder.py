@@ -18,7 +18,7 @@ CELLTYPES_MOUSE_BLADDER_V0 = [
 ONTOLOGIES_MOUSE_BLADDER_V0 = {
     "names": {
         "bladder cell": ["basal epithelial cell", "epithelial cell", "mesenchymal stromal cell", "smooth muscle cell",
-            "stromal cell", "umbrella cell"],
+                         "stromal cell", "umbrella cell"],
         "leukocyte": ["dendritic cell", "macrophage", "NK cell"]
     },
     "ontology_ids": {},

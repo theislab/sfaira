@@ -19,7 +19,7 @@ from sfaira.data.dataloaders.loaders.d10_1016_j_cmet_2019_01_021.mouse_pancreas_
 class DatasetGroupPancreas(DatasetGroup):
 
     def __init__(
-        self, 
+        self,
         path: Union[str, None] = None,
         meta_path: Union[str, None] = None,
         cache_path: Union[str, None] = None

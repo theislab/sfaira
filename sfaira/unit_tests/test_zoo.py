@@ -56,7 +56,7 @@ class _TestZoo:
         np.random.seed(1)
         self.simulate()
         self.init_zoo()
-        #self._test_kipoi_call()
+        # self._test_kipoi_call()
         self.zoo_manual.set_model_id(id)
 
 

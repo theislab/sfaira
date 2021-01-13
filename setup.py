@@ -6,7 +6,7 @@ author_email = 'david.fischer@helmholtz-muenchen.de'
 description = "sfaira is a model and a data repository for single-cell data in a single python package. "
 
 with open("README.rst", "r") as fh:
-     long_description = fh.read()
+    long_description = fh.read()
 
 setup(
     name='sfaira',
