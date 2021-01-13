@@ -1,5 +1,9 @@
-|Stars| |PyPI| |PyPIDownloads|
+|Build| |Stars| |PyPI| |PyPIDownloads|
 
+
+.. |Build| image::https://github.com/theislab/sfaira/workflows/Build%20sfaira%20Package/badge.svg
+    :target: https://github.com/theislab/sfaira/workflows/Build%20sfaira%20Package/badge.svg
+    :alt: Github Workflow Build sfaira Status
 .. |Stars| image:: https://img.shields.io/github/stars/theislab/sfaira?logo=GitHub&color=yellow
    :target: https://github.com/theislab/sfaira/stargazers
 .. |PyPI| image:: https://img.shields.io/pypi/v/sfaira?logo=PyPI

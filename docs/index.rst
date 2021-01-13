@@ -43,4 +43,4 @@ Latest additions
    models
    ecosystem
    roadmap
-   release-notes
+   changelog
