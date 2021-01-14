@@ -27,4 +27,4 @@ jobs:
         run: pip install bandit
 
       - name: Run bandit
-        run: bandit -r sfaira .bandit.yml
+        run: bandit -r sfaira -c .bandit.yml

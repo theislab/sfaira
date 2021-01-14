@@ -860,9 +860,11 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 tape.watch(x)
                 model_out = model((x, sf))
             if abs_gradients:
-                def f(x): return abs(x)
+                def f(x):
+                    return abs(x)
             else:
-                def f(x): return x
+                def f(x):
+                    return x
             # marginalize on batch level and then accumulate batches
             # batch_jacobian gives output of size: (batch_size, latent_dim, input_dim)
             batch_gradients = f(tape.batch_jacobian(model_out, x))
@@ -1225,9 +1227,11 @@ class EstimatorKerasCelltype(EstimatorKeras):
                 tape.watch(x)
                 model_out = model(x)
             if abs_gradients:
-                def f(x): return abs(x)
+                def f(x):
+                    return abs(x)
             else:
-                def f(x): return x
+                def f(x):
+                    return x
             # marginalize on batch level and then accumulate batches
             # batch_jacobian gives output of size: (batch_size, latent_dim, input_dim)
             batch_gradients = f(tape.batch_jacobian(model_out, x).numpy())

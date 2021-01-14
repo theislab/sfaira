@@ -21,8 +21,8 @@ class _TestEstimator:
 
     """
     Contains functions _test* to test individual functions and attributes of estimator class.
-    
-    TODO for everybody working on this, add one _test* function in here and add it into 
+
+    TODO for everybody working on this, add one _test* function in here and add it into
     basic_estimator_test(). See _test_call() for an example.
     """
 

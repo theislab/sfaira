@@ -1903,7 +1903,7 @@ class DatasetSuperGroup:
         # Explicitly write backed file to disk again to make sure that obs are included and that n_obs is set correctly
         self.adata.write()
         # Saving obs separately below is therefore no longer required (hence commented out)
-        #fn_backed_obs = ".".join(self.fn_backed.split(".")[:-1]) + "_obs.csv"
+        # fn_backed_obs = ".".join(self.fn_backed.split(".")[:-1]) + "_obs.csv"
         # self.adata.obs.to_csv(fn_backed_obs)
 
     def delete_backed(self):

@@ -172,11 +172,17 @@ class UserInterface:
 
         :param zenodo_access_token: Your personal Zenodo API access token. Create one here: https://zenodo.org/account/settings/applications/tokens/new/
         :param title: Title of the Zenodo deposition
-        :param authors: List of dicts, where each dict defines one author (dict keys: name: Name of creator in the format "Family name, Given names", affiliation: Affiliation of creator (optional), orcid: ORCID identifier of creator (optional), gnd: GND identifier of creator (optional)
+        :param authors: List of dicts, where each dict defines one author (dict keys:
+         name: Name of creator in the format "Family name, Given names",
+         affiliation: Affiliation of creator (optional), orcid: ORCID identifier of creator (optional),
+         gnd: GND identifier of creator (optional)
         :param description: Description of the Zenodo deposition.
-        :param metadata: Dictionary with further metadata attributes of the deposit. See the Zenodo API refenrece for accepted keys: https://developers.zenodo.org/#representation
-        :param publish: Set this to True to directly publish the weights on Zenodo. When set to False a draft will be created, which can be edited in the browser before publishing.
-        :param sandbox: If True, use the Zenodo testing platform at https://sandbox.zenodo.org for your deposition. We recommend testing your upload with sandbox first as depositions cannot be deleted from the main Zenodo platfowm once created.
+        :param metadata: Dictionary with further metadata attributes of the deposit.
+         See the Zenodo API refenrece for accepted keys: https://developers.zenodo.org/#representation
+        :param publish: Set this to True to directly publish the weights on Zenodo.
+         When set to False a draft will be created, which can be edited in the browser before publishing.
+        :param sandbox: If True, use the Zenodo testing platform at https://sandbox.zenodo.org for your deposition.
+         We recommend testing your upload with sandbox first as depositions cannot be deleted from the main Zenodo platfowm once created.
         """
 
         import requests
@@ -277,8 +283,10 @@ class UserInterface:
         """
         Loads the provided AnnData object into sfaira.
 
-        If genes in the provided AnnData object are annotated as gene symbols, please provide the name of the corresponding var column (or 'index') through the gene_symbol_col argument.
-        If genes in the provided AnnData object are annotated as ensembl ids, please provide the name of the corresponding var column (or 'index') through the gene_ens_col argument.
+        If genes in the provided AnnData object are annotated as gene symbols,
+         please provide the name of the corresponding var column (or 'index') through the gene_symbol_col argument.
+        If genes in the provided AnnData object are annotated as ensembl ids,
+         please provide the name of the corresponding var column (or 'index') through the gene_ens_col argument.
         You need to provide at least one of the two.
         :param data: AnnData object to load
         :param gene_symbol_col: Var column name (or 'index') which contains gene symbols

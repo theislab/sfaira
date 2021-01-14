@@ -246,7 +246,7 @@ class ModelVaeVersioned(ModelVae):
         self.model_class = topology_container.model_class
         self.model_type = topology_container.model_type
         self.hyperparam = dict(
-            list(hyperpar.items()) +
+            list(hyperpar.items()) +  # noqa: W504
             [
                 ("topology_id", self._topology_id),
                 ("genome_size", self.genome_size),
