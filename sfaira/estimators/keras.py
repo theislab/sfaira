@@ -104,7 +104,7 @@ class EstimatorKeras:
                                                    )
                         fn = os.path.join(self.cache_path, f"{self.model_id}_weights.data-00000-of-00001")
                     except HTTPError:
-                        raise FileNotFoundError(f'cannot find remote weightsfile')
+                        raise FileNotFoundError('cannot find remote weightsfile')
         else:
             # Local repo
             if not self.model_dir:
