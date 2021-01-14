@@ -62,7 +62,6 @@ class Dataset(DatasetBase):
         self.obs_key_healthy = 'Status'
         self.healthy_state_healthy = 'Control'
 
-
         self.class_maps = {
             "0": {
                 'Proliferating Macrophages': 'Macrophages',

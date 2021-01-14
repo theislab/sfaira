@@ -8,7 +8,7 @@ from sfaira.data.dataloaders.loaders.d10_1038_s41467_019_12464_3.human_mixed_201
 class DatasetGroupMixed(DatasetGroup):
 
     def __init__(
-        self, 
+        self,
         path: Union[str, None] = None,
         meta_path: Union[str, None] = None,
         cache_path: Union[str, None] = None

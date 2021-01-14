@@ -52,7 +52,7 @@ class Dataset_d10_1038_s41586_020_2157_4(DatasetBase):
         # download required files from loaders cell landscape publication data: https://figshare.com/articles/HCL_DGE_Data/7235471
         print(urllib.request.urlretrieve(
             'https://ndownloader.figshare.com/files/17727365',
-            os.path.join(self.path, "human",  self._directory_formatted_doi, 'HCL_Fig1_adata.h5ad')
+            os.path.join(self.path, "human", self._directory_formatted_doi, 'HCL_Fig1_adata.h5ad')
         ))
         print(urllib.request.urlretrieve(
             'https://ndownloader.figshare.com/files/21758835',

@@ -130,7 +130,8 @@ class ModelZoo(abc.ABC):
             with_dataloader=True
         )  # TODO make sure that this is in line with kipoi_experimental model names
         # alternatively:
-        #return kipoi_experimental.get_model("https://github.com/kipoi/models/tree/7d3ea7800184de414aac16811deba6c8eefef2b6/pwm_HOCOMOCO/human/CTCF", source='github-permalink')
+        # return kipoi_experimental.get_model("https://github.com/kipoi/models/tree/7d3ea7800184de414aac16811deba6c8eefef2b6/pwm_HOCOMOCO/human/CTCF",
+        #                                     source='github-permalink')
 
     def organism(self) -> List[str]:
         """

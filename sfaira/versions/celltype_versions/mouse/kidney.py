@@ -47,7 +47,7 @@ ONTOLOGIES_MOUSE_KIDNEY_V0 = {
         ],
         "lymphocyte": ["B cell", "dendritic cell", "macrophage", "NK cell", "T cell"],
         "leukocyte": [
-            "B cell", "dendritic cell", "macrophage", "neutrophil progenitor", 
+            "B cell", "dendritic cell", "macrophage", "neutrophil progenitor",
             "NK cell", "plasma cell", "T cell"
         ],
     },

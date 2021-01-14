@@ -104,7 +104,7 @@ class EstimatorKeras:
                                                    )
                         fn = os.path.join(self.cache_path, f"{self.model_id}_weights.data-00000-of-00001")
                     except HTTPError:
-                        raise FileNotFoundError(f'cannot find remote weightsfile')
+                        raise FileNotFoundError('cannot find remote weightsfile')
         else:
             # Local repo
             if not self.model_dir:
@@ -482,16 +482,16 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             cache_path: str = os.path.join('cache', '')
     ):
         super(EstimatorKerasEmbedding, self).__init__(
-                data=data,
-                model_dir=model_dir,
-                model_id=model_id,
-                model_class="embedding",
-                organism=organism,
-                organ=organ,
-                model_type=model_type,
-                model_topology=model_topology,
-                weights_md5=weights_md5,
-                cache_path=cache_path
+            data=data,
+            model_dir=model_dir,
+            model_id=model_id,
+            model_class="embedding",
+            organism=organism,
+            organ=organ,
+            model_type=model_type,
+            model_topology=model_topology,
+            weights_md5=weights_md5,
+            cache_path=cache_path
         )
 
     def init_model(
@@ -624,7 +624,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 return (x, sf), (x, sf)
             else:
                 return (x, sf), x
-        
+
         elif mode == 'gradient_method':
             # Prepare data reading according to whether anndata is backed or not:
             if self.data.isbacked:
@@ -644,9 +644,9 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 sf = self._prepare_sf(x=x)
                 cell_to_class = self._get_class_dict()
                 y = self.data.obs['cell_ontology_class'][idx]  # for gradients per celltype in compute_gradients_input()
-                n_features = x.shape[1]                
+                n_features = x.shape[1]
                 output_types, output_shapes = self._get_output_dim(n_features, 'vae')
-                
+
                 def generator():
                     for i in range(x.shape[0]):
                         yield (x[i, :].toarray().flatten(), sf[i]), (x[i, :].toarray().flatten(), cell_to_class[y[i]])
@@ -712,7 +712,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         :param idx: Indices of observations to evaluate on. Evaluates on all observations if None.
         :return: Dictionary of metric names and values.
         """
-        if idx is None or idx.any():   # true if the array is not empty or if the passed value is None 
+        if idx is None or idx.any():   # true if the array is not empty or if the passed value is None
             x, y = self._get_dataset(
                 idx=idx,
                 batch_size=None,
@@ -816,7 +816,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             idx = self.idx_test
             if self.idx_test is None:
                 num_samples = 10000
-                idx = np.random.randint(0,self.data.X.shape[0],num_samples)
+                idx = np.random.randint(0, self.data.X.shape[0], num_samples)
             n_obs = len(idx)
         else:
             idx = None
@@ -843,14 +843,14 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 self.model.training_model.input,
                 self.model.encoder_model.output[0]
             )
-            latent_dim = self.model.encoder_model.output[0].shape[1] 
+            latent_dim = self.model.encoder_model.output[0].shape[1]
             input_dim = self.model.training_model.input[0].shape[1]
         else:
             model = tf.keras.Model(
                 self.model.training_model.input,
                 self.model.encoder_model.output
             )
-            latent_dim = self.model.encoder_model.output[0].shape[0] 
+            latent_dim = self.model.encoder_model.output[0].shape[0]
             input_dim = self.model.training_model.input[0].shape[1]
 
         @tf.function
@@ -860,14 +860,16 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 tape.watch(x)
                 model_out = model((x, sf))
             if abs_gradients:
-                f = lambda x: abs(x)
+                def f(x):
+                    return abs(x)
             else:
-                f = lambda x: x
+                def f(x):
+                    return x
             # marginalize on batch level and then accumulate batches
             # batch_jacobian gives output of size: (batch_size, latent_dim, input_dim)
             batch_gradients = f(tape.batch_jacobian(model_out, x))
             return batch_gradients
- 
+
         for step, (x_batch, y_batch) in tqdm(enumerate(ds), total=np.ceil(n_obs / batch_size)):
             batch_gradients = get_gradients(x_batch).numpy()
             _, y = y_batch
@@ -880,11 +882,11 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         if per_celltype:
             for cell in cell_names:
                 print(f'{cell} with {counts[cell]} observations')
-                grads_x[cell] = grads_x[cell]/counts[cell] if counts[cell] > 0 else np.zeros((latent_dim, input_dim))
-            
+                grads_x[cell] = grads_x[cell] / counts[cell] if counts[cell] > 0 else np.zeros((latent_dim, input_dim))
+
             return {'gradients': grads_x, 'counts': counts}
         else:
-            return grads_x/n_obs
+            return grads_x / n_obs
 
 
 class EstimatorKerasCelltype(EstimatorKeras):
@@ -908,16 +910,16 @@ class EstimatorKerasCelltype(EstimatorKeras):
             max_class_weight: float = 1e3
     ):
         super(EstimatorKerasCelltype, self).__init__(
-                data=data,
-                model_dir=model_dir,
-                model_id=model_id,
-                model_class="celltype",
-                organism=organism,
-                organ=organ,
-                model_type=model_type,
-                model_topology=model_topology,
-                weights_md5=weights_md5,
-                cache_path=cache_path
+            data=data,
+            model_dir=model_dir,
+            model_id=model_id,
+            model_class="celltype",
+            organism=organism,
+            organ=organ,
+            model_type=model_type,
+            model_topology=model_topology,
+            weights_md5=weights_md5,
+            cache_path=cache_path
         )
         self.max_class_weight = max_class_weight
 
@@ -1219,15 +1221,17 @@ class EstimatorKerasCelltype(EstimatorKeras):
         )
 
         for step, (x_batch, _, _) in enumerate(ds):
-            print("compute gradients wrt. input: batch %i / %i." % (step+1, np.ceil(n_obs / 64)))
+            print("compute gradients wrt. input: batch %i / %i." % (step + 1, np.ceil(n_obs / 64)))
             x = x_batch
             with tf.GradientTape(persistent=True) as tape:
                 tape.watch(x)
                 model_out = model(x)
             if abs_gradients:
-                f = lambda x: abs(x)
+                def f(x):
+                    return abs(x)
             else:
-                f = lambda x: x
+                def f(x):
+                    return x
             # marginalize on batch level and then accumulate batches
             # batch_jacobian gives output of size: (batch_size, latent_dim, input_dim)
             batch_gradients = f(tape.batch_jacobian(model_out, x).numpy())

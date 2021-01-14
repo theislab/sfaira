@@ -16,8 +16,8 @@ class Dataset(Dataset_d10_1101_661728):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, source=source, **kwargs)
         self.id = "mouse_adipose_2019_smartseq2_pisco_002_10.1101/661728"
         self.organ = "adipose"
-        self.sub_tissue = "adipose"        
-        self.protocol = self._get_protocol_tms(self.id)        
+        self.sub_tissue = "adipose"
+        self.protocol = self._get_protocol_tms(self.id)
 
         self.class_maps = {
             "0": {},
