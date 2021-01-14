@@ -165,7 +165,9 @@ class DatasetBase(abc.ABC):
 
         :return:
         """
+        import gc
         self.adata = None
+        gc.collect()
 
     def _load_cached(self, fn: str, load_raw: bool, allow_caching: bool):
         """
