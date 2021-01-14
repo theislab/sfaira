@@ -1,4 +1,5 @@
 sphinx
 matplotlib
 sphinx_rtd_theme
+sphinx-autodoc-typehints
 -r ../requirements.txt
