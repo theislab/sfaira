@@ -4,12 +4,22 @@
 .. |Build| image:: https://github.com/theislab/sfaira/workflows/Build%20sfaira%20Package/badge.svg
     :target: https://github.com/theislab/sfaira/workflows/Build%20sfaira%20Package/badge.svg
     :alt: Github Workflow Build sfaira Status
+
+.. image:: https://readthedocs.org/projects/sfaira/badge/?version=latest
+    :target: https://sfaira.readthedocs.io/en/latest/
+    :alt: Documentation Status
+
 .. |Stars| image:: https://img.shields.io/github/stars/theislab/sfaira?logo=GitHub&color=yellow
    :target: https://github.com/theislab/sfaira/stargazers
+    :alt: Github Stars
+
 .. |PyPI| image:: https://img.shields.io/pypi/v/sfaira?logo=PyPI
    :target: https://pypi.org/project/sfaira
+    :alt: PyPI Version
+
 .. |PyPIDownloads| image:: https://pepy.tech/badge/sfaira
    :target: https://pepy.tech/project/sfaira
+    :alt: Number of downloads
 
 
 sfaira - data and model repository for single-cell data
