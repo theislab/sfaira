@@ -1,7 +1,7 @@
 |Build| |Stars| |PyPI| |PyPIDownloads|
 
 
-.. |Build| image::https://github.com/theislab/sfaira/workflows/Build%20sfaira%20Package/badge.svg
+.. |Build| image:: https://github.com/theislab/sfaira/workflows/Build%20sfaira%20Package/badge.svg
     :target: https://github.com/theislab/sfaira/workflows/Build%20sfaira%20Package/badge.svg
     :alt: Github Workflow Build sfaira Status
 .. |Stars| image:: https://img.shields.io/github/stars/theislab/sfaira?logo=GitHub&color=yellow
