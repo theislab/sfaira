@@ -23,11 +23,11 @@ setup(
         'pandas',
         'scipy>=1.2.1',
         'tqdm',
-        'tensorflow>=2.0.0'  # TODO Remove and add to tensorflow profile
+        'tensorflow'  # TODO Remove and add to tensorflow profile
     ],
     extras_require={
         'tensorflow': [
-            # TODO Add Tensorflow here again
+            # 'tensorflow>=2.0.0'  # TODO Add Tensorflow here again
         ],
         'kipoi': [
             'kipoi',
