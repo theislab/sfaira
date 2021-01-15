@@ -114,8 +114,13 @@ class Dataset_d10_1038_s41586_020_2157_4(DatasetBase):
         df = pd.DataFrame(
             columns=['Cell_barcode', 'Sample', 'Batch', 'Cell_id', 'Cluster_id', 'Ages', 'Development_stage', 'Method',
                      'Gender', 'Source', 'Biomaterial', 'Name', 'ident', 'Celltype'])
-        for f in os.listdir('annotation_rmbatch_data_revised417/'):
-            df1 = pd.read_csv('annotation_rmbatch_data_revised417/' + f, encoding='unicode_escape')
+        for f in os.listdir(
+                os.path.join(self.path, "human", self._directory_formatted_doi, 'annotation_rmbatch_data_revised417')
+        ):
+            df1 = pd.read_csv(
+                os.path.join(
+                    self.path, "human", self._directory_formatted_doi, 'annotation_rmbatch_data_revised417', f
+                ), encoding='unicode_escape')
             df = pd.concat([df, df1], sort=True)
         df = df.set_index('Cell_id')
         adata = adata[[i in df.index for i in adata.obs.index]].copy()
