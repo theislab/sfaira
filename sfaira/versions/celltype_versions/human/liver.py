@@ -72,8 +72,8 @@ ONTOLOGIES_HUMAN_LIVER_V0 = {
     "names": {
         'Erythroid cells': ['Early Erythroid', 'Mid Erythroid', 'Late Erythroid'],
         'Endothelial cell': ['Liver sinusoidal endothelial cells', 'Macrovascular endothelial cells', 'Other endothelial cells'],
-        'Hepatocyte': ['Hepatocyte 1','Hepatocyte 2','Hepatocyte 3','Hepatocyte 4','Hepatocyte 5','Hepatocyte 6'],
-        'Hepatocytes': ['Hepatocyte 1','Hepatocyte 2','Hepatocyte 3','Hepatocyte 4','Hepatocyte 5','Hepatocyte 6'],
+        'Hepatocyte': ['Hepatocyte 1', 'Hepatocyte 2', 'Hepatocyte 3', 'Hepatocyte 4', 'Hepatocyte 5', 'Hepatocyte 6'],
+        'Hepatocytes': ['Hepatocyte 1', 'Hepatocyte 2', 'Hepatocyte 3', 'Hepatocyte 4', 'Hepatocyte 5', 'Hepatocyte 6'],
         'Endothelia': ['Liver sinusoidal endothelial cells', 'Macrovascular endothelial cells', 'Other endothelial cells'],
         'Bcells': ['pro B cell', 'Pre pro B cell', 'Mature B cells', 'pre B cell', 'Plasma B cell'],
         'Tcells': ['Gamma delta T cells 2', 'Gamma delta T cells 1', 'Alpha beta T cells'],

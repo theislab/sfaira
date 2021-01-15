@@ -70,4 +70,4 @@ class Dataset(DatasetBase):
         self.adata = anndata.read(fn)
         self.adata.X = np.expm1(self.adata.X)
         self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs['n_counts'].values[:, None]))\
-                                   .multiply(1/10000)
+                                   .multiply(1 / 10000)

@@ -23,7 +23,7 @@ CELLTYPES_MOUSE_SPLEEN_V0 = [
 ONTOLOGIES_MOUSE_SPLEEN_V0 = {
     "names": {
         "T cell": [
-            "CD4-positive, alpha-beta T cell", "CD8-positive, alpha-beta T cell", 
+            "CD4-positive, alpha-beta T cell", "CD8-positive, alpha-beta T cell",
             "immature NKT cell", "mature NK T cell"
         ]
     },

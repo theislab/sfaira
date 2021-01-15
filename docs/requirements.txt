@@ -1,0 +1,7 @@
+sphinx
+matplotlib
+sphinx_rtd_theme
+sphinx-autodoc-typehints
+jinja2
+docutils
+-r ../requirements.txt

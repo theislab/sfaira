@@ -161,7 +161,6 @@ class ModelVae(BasicModel):
         else:
             raise ValueError("len(latent_dim)=%i should be uneven to provide a defined bottleneck" % len(latent_dim))
 
-
         inputs_encoder = tf.keras.Input(shape=(in_dim,), name='counts')
         inputs_sf = tf.keras.Input(shape=(1,), name='size_factors')
         inputs_encoder_pp = PreprocInput()(inputs_encoder)
@@ -247,7 +246,7 @@ class ModelVaeVersioned(ModelVae):
         self.model_class = topology_container.model_class
         self.model_type = topology_container.model_type
         self.hyperparam = dict(
-            list(hyperpar.items()) +
+            list(hyperpar.items()) +  # noqa: W504
             [
                 ("topology_id", self._topology_id),
                 ("genome_size", self.genome_size),

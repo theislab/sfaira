@@ -666,15 +666,15 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         metrics = list(self.evals.values())[0]['val'].keys()
         self.summary_tab = pandas.DataFrame(dict(
             list({
-                "depth":   [id_i.split("_")[self.model_id_len + 0] for id_i in self.run_ids],
-                "width":   [id_i.split("_")[self.model_id_len + 1] for id_i in self.run_ids],
-                "lr":      [id_i.split("_")[self.model_id_len + 2] for id_i in self.run_ids],
+                "depth": [id_i.split("_")[self.model_id_len + 0] for id_i in self.run_ids],
+                "width": [id_i.split("_")[self.model_id_len + 1] for id_i in self.run_ids],
+                "lr": [id_i.split("_")[self.model_id_len + 2] for id_i in self.run_ids],
                 "dropout": [id_i.split("_")[self.model_id_len + 3] for id_i in self.run_ids],
-                "l1":      [id_i.split("_")[self.model_id_len + 4] for id_i in self.run_ids],
-                "l2":      [id_i.split("_")[self.model_id_len + 5] for id_i in self.run_ids],
-                "cv":      [id_i.split("_")[-1] if self.cv else "cv0" for id_i in self.run_ids],
-                "model":   ["_".join(id_i.split("_")[:self.model_id_len]) for id_i in self.run_ids],
-                "organ":   [id_i.split("_")[2] for id_i in self.run_ids],
+                "l1": [id_i.split("_")[self.model_id_len + 4] for id_i in self.run_ids],
+                "l2": [id_i.split("_")[self.model_id_len + 5] for id_i in self.run_ids],
+                "cv": [id_i.split("_")[-1] if self.cv else "cv0" for id_i in self.run_ids],
+                "model": ["_".join(id_i.split("_")[:self.model_id_len]) for id_i in self.run_ids],
+                "organ": [id_i.split("_")[2] for id_i in self.run_ids],
                 "model_type": [
                     "linear" if (id_i.split("_")[3] == "mlp" and id_i.split("_")[5].split(".")[1] == "0")
                     else id_i.split("_")[3]
@@ -682,10 +682,10 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
                 ],
                 "model_gs_id": ["_".join(id_i.split("_")[:(self.model_id_len + 6)]) for id_i in self.run_ids],
                 "run": self.run_ids
-            }.items()) +
-            list(dict([("train_" + m, [self.evals[x]["train"][m] for x in self.run_ids]) for m in metrics]).items()) +
-            list(dict([("test_" + m, [self.evals[x]["test"][m] for x in self.run_ids]) for m in metrics]).items()) +
-            list(dict([("val_" + m, [self.evals[x]["val"][m] for x in self.run_ids]) for m in metrics]).items()) +
+            }.items()) +  # noqa: W504
+            list(dict([("train_" + m, [self.evals[x]["train"][m] for x in self.run_ids]) for m in metrics]).items()) +  # noqa: W504
+            list(dict([("test_" + m, [self.evals[x]["test"][m] for x in self.run_ids]) for m in metrics]).items()) +  # noqa: W504
+            list(dict([("val_" + m, [self.evals[x]["val"][m] for x in self.run_ids]) for m in metrics]).items()) +  # noqa: W504
             list(dict([("all_" + m, [self.evals[x]["all"][m] for x in self.run_ids]) for m in metrics]).items())
         ))
         if self.summary_tab.shape[0] == 0:
@@ -808,7 +808,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         fig, axs = plt.subplots(1, 1, figsize=(height_fig, width_fig))
         with sns.axes_style("dark"):
             axs = sns.heatmap(
-                sns_data_heatmap, #mask=mask,
+                sns_data_heatmap,  # mask=mask,
                 annot=True, fmt=".2f",
                 ax=axs, vmin=0, vmax=1,
                 xticklabels=True, yticklabels=True,
@@ -900,7 +900,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
                 for leaf in ontology[k]:
                     if leaf not in cell_counts.keys():
                         cell_counts[leaf] = 0
-                    cell_counts[leaf] += 1/len(ontology[k])
+                    cell_counts[leaf] += 1 / len(ontology[k])
                 del cell_counts[k]
 
         # Compute class-wise metrics
@@ -1065,7 +1065,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
                 for leaf in ontology[k]:
                     if leaf not in cell_counts.keys():
                         cell_counts[leaf] = 0
-                    cell_counts[leaf] += 1/len(ontology[k])
+                    cell_counts[leaf] += 1 / len(ontology[k])
                 del cell_counts[k]
 
         # Compute class-wise metrics
@@ -1175,23 +1175,31 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         metrics = list(self.evals.values())[0]['val'].keys()
         self.summary_tab = pandas.DataFrame(dict(
             list({
-                "depth":       [id_i.split("_")[self.model_id_len + 0] for id_i in self.run_ids],
-                "width":       [id_i.split("_")[self.model_id_len + 1] for id_i in self.run_ids],
-                "lr":          [id_i.split("_")[self.model_id_len + 2] for id_i in self.run_ids],
-                "dropout":     [id_i.split("_")[self.model_id_len + 3] for id_i in self.run_ids],
-                "l1":          [id_i.split("_")[self.model_id_len + 4] for id_i in self.run_ids],
-                "l2":          [id_i.split("_")[self.model_id_len + 5] for id_i in self.run_ids],
-                "cv":          [id_i.split("_")[-1] if self.cv else "1" for id_i in self.run_ids],
-                "model":       ["_".join(id_i.split("_")[:self.model_id_len]) for id_i in self.run_ids],
-                "organ":       [id_i.split("_")[2] for id_i in self.run_ids],
-                "model_type":  [id_i.split("_")[3] for id_i in self.run_ids],
+                "depth": [id_i.split("_")[self.model_id_len + 0] for id_i in self.run_ids],
+                "width": [id_i.split("_")[self.model_id_len + 1] for id_i in self.run_ids],
+                "lr": [id_i.split("_")[self.model_id_len + 2] for id_i in self.run_ids],
+                "dropout": [id_i.split("_")[self.model_id_len + 3] for id_i in self.run_ids],
+                "l1": [id_i.split("_")[self.model_id_len + 4] for id_i in self.run_ids],
+                "l2": [id_i.split("_")[self.model_id_len + 5] for id_i in self.run_ids],
+                "cv": [id_i.split("_")[-1] if self.cv else "1" for id_i in self.run_ids],
+                "model": ["_".join(id_i.split("_")[:self.model_id_len]) for id_i in self.run_ids],
+                "organ": [id_i.split("_")[2] for id_i in self.run_ids],
+                "model_type": [id_i.split("_")[3] for id_i in self.run_ids],
                 "model_gs_id": ["_".join(id_i.split("_")[:(self.model_id_len + 6)]) for id_i in self.run_ids],
                 "run": self.run_ids,
-        }.items()) +
-            list(dict([("train_" + m, [self.evals[x]["train"][m] if m in self.evals[x]["train"].keys() else self.evals[x]["train"]['neg_ll_'+m] for x in self.run_ids]) for m in metrics]).items()) +  # TODO: Hacky solution to make sure metrics are called the same in VAE and other models
-            list(dict([("test_" + m, [self.evals[x]["test"][m] if m in self.evals[x]["test"].keys() else self.evals[x]["test"]['neg_ll_'+m] for x in self.run_ids]) for m in metrics]).items()) +  # TODO: Hacky solution to make sure metrics are called the same in VAE and other models
-            list(dict([("val_" + m, [self.evals[x]["val"][m] if m in self.evals[x]["val"].keys() else self.evals[x]["val"]['neg_ll_'+m] for x in self.run_ids]) for m in metrics]).items()) +  # TODO: Hacky solution to make sure metrics are called the same in VAE and other models
-            list(dict([("all_" + m, [self.evals[x]["all"][m] if m in self.evals[x]["all"].keys() else self.evals[x]["all"]['neg_ll_'+m] for x in self.run_ids]) for m in metrics]).items())  # TODO: Hacky solution to make sure metrics are called the same in VAE and other models
+            }.items()) +
+            # TODO: Hacky solution to make sure metrics are called the same in VAE and other models
+            list(dict([("train_" + m, [self.evals[x]["train"][m] if m in self.evals[x]["train"].keys()
+                                       else self.evals[x]["train"]['neg_ll_' + m] for x in self.run_ids]) for m in metrics]).items()) +
+            # TODO: Hacky solution to make sure metrics are called the same in VAE and other models
+            list(dict([("test_" + m, [self.evals[x]["test"][m] if m in self.evals[x]["test"].keys()
+                                      else self.evals[x]["test"]['neg_ll_' + m] for x in self.run_ids]) for m in metrics]).items()) +
+            # TODO: Hacky solution to make sure metrics are called the same in VAE and other models
+            list(dict([("val_" + m, [self.evals[x]["val"][m] if m in self.evals[x]["val"].keys()
+                                     else self.evals[x]["val"]['neg_ll_' + m] for x in self.run_ids]) for m in metrics]).items()) +
+            list(dict([("all_" + m, [self.evals[x]["all"][m] if m in self.evals[x]["all"].keys()
+                                     else self.evals[x]["all"]['neg_ll_' + m] for x in self.run_ids])
+                       for m in metrics]).items())  # TODO: Hacky solution to make sure metrics are called the same in VAE and other models
         ))
 
         # TODO: Hacky solution to make sure metrics are called the same in VAE and other models
@@ -1292,7 +1300,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                     np.logical_and(
                         sns_tab["model_type"].values == m,
                         sns_tab["organ"].values == o
-                    ),  f"{partition_show}_{metric_show}"
+                    ), f"{partition_show}_{metric_show}"
                 ]
                 if data_temp.shape[0] > 0:
                     if self.cv:
@@ -1319,7 +1327,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         fig, axs = plt.subplots(1, 1, figsize=(height_fig, width_fig))
         with sns.axes_style("dark"):
             axs = sns.heatmap(
-                sns_data_heatmap, #mask=mask,
+                sns_data_heatmap,  # mask=mask,
                 annot=True, fmt=".2f",
                 ax=axs,
                 xticklabels=True, yticklabels=True,
@@ -1387,7 +1395,6 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
             print('Compute gradients (2/3): load embedding')
             # load embedding
             adata = dataset.adata
-            topology = model_id
             embedding = EstimatorKerasEmbedding(
                 data=adata,
                 model_dir="",
@@ -1471,10 +1478,10 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
             if normalize:
                 avg_grads[modelt] = np.abs(avg_grads[modelt])
                 avg_grads[modelt] = (avg_grads[modelt] - np.min(avg_grads[modelt], axis=1, keepdims=True)) / \
-                                    np.maximum(
-                                        np.max(avg_grads[modelt], axis=1, keepdims=True) - np.min(avg_grads[modelt],
-                                                                                                  axis=1,
-                                                                                                  keepdims=True), 1e-8)
+                    np.maximum(
+                    np.max(avg_grads[modelt], axis=1, keepdims=True) - np.min(avg_grads[modelt],
+                                                                              axis=1,
+                                                                              keepdims=True), 1e-8)
 
         fig, axs = plt.subplots(1, 1, figsize=(width_fig, height_fig))
 
@@ -1613,10 +1620,10 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         """
         import matplotlib.pyplot as plt
         if self.summary_tab is None:
-            self.create_summary_tab() 
+            self.create_summary_tab()
         models = np.unique(self.summary_tab["model_type"]).tolist()
         self.summary_tab["topology"] = [x.split("_")[5] for x in self.summary_tab["model_gs_id"].values]
-        
+
         with plt.style.context("seaborn-whitegrid"):
             plt.figure(figsize=(12, 6))
             for model in models:
@@ -1635,7 +1642,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                 eig_sum = sum(eig_vals)
                 var_exp = [(i / eig_sum) for i in sorted(eig_vals, reverse=True)]
                 cum_var_exp = np.cumsum([0] + var_exp)
-                plt.step(range(0, eig_vals.shape[0]+1), cum_var_exp, where="post", linewidth=3,
+                plt.step(range(0, eig_vals.shape[0] + 1), cum_var_exp, where="post", linewidth=3,
                          label="%s cumulative explained variance (95%%: %s / 99%%: %s)" % (model, np.sum(cum_var_exp < .95), np.sum(cum_var_exp < .99)))
             plt.yticks([0.0, .25, .50, .75, .95, .99])
             plt.ylabel("Explained variance ratio", fontsize=16)
@@ -1645,8 +1652,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
             plt.show()
 
     def plot_active_latent_units(
-        self, 
-        organ, 
+        self,
+        organ,
         topology_version,
         cvs=None
     ):
@@ -1664,7 +1671,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
             min_var_x = 0.01
             active_units_mask = var_x > min_var_x
             return active_units_mask
-        
+
         import matplotlib.pyplot as plt
         if self.summary_tab is None:
             self.create_summary_tab()
@@ -1676,11 +1683,11 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
             plt.axhline(np.log(0.01), color="k", linestyle='dashed', linewidth=2, label="active unit threshold")
             for i, model in enumerate(models):
                 model_id, embedding, covar = self.best_model_embedding(
-                        subset={"model_type": model, "organ": organ, "topology": topology_version},
-                        partition="val",
-                        metric="loss",
-                        cvs=cvs,
-                    )
+                    subset={"model_type": model, "organ": organ, "topology": topology_version},
+                    partition="val",
+                    metric="loss",
+                    cvs=cvs,
+                )
                 if len(embedding[0].shape) == 3:
                     z = embedding[0][0]  # in case of three-dimensional VAE embedding (z, z_mean, z_var), use z
                 else:
@@ -1690,7 +1697,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                 log_var = np.log(var)
                 active_units = np.log(var[active_latent_units_mask(z)])
 
-                plt.plot(range(1,log_var.shape[0]+1), log_var, color=colors[i], alpha=1.0, linewidth=3,
+                plt.plot(range(1, log_var.shape[0] + 1), log_var, color=colors[i], alpha=1.0, linewidth=3,
                          label="%s active units: %i" % (model, len(active_units)))
                 # to plot vertical lines
                 log_var_cut = var.copy()
@@ -1698,13 +1705,13 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                 log_var_cut = np.log(log_var_cut)
                 num_active = np.argmax(log_var_cut)
                 if num_active > 0:
-                    plt.vlines(num_active, ymin = -.15, ymax = 0.15, color=colors[i], linestyle='solid', linewidth=3)
+                    plt.vlines(num_active, ymin=-.15, ymax=0.15, color=colors[i], linestyle='solid', linewidth=3)
                 if model == "vaevamp":
-                    z1, z2 = np.split(np.log(np.diagonal(np.cov(z.T))),2)
-                    plt.plot(range(1, int(latent_dim/2)+1), np.sort(z2)[::-1], color=colors[i], alpha=1.0,
-                             label=r"%s $z_2$ active units: %i" % (model, len(z2[z2>np.log(0.01)])), linestyle='dashed',
+                    z1, z2 = np.split(np.log(np.diagonal(np.cov(z.T))), 2)
+                    plt.plot(range(1, int(latent_dim / 2) + 1), np.sort(z2)[::-1], color=colors[i], alpha=1.0,
+                             label=r"%s $z_2$ active units: %i" % (model, len(z2[z2 > np.log(0.01)])), linestyle='dashed',
                              linewidth=3)
-                    plt.plot(range(1, int(latent_dim/2)+1), np.sort(z1)[::-1], color=colors[i], alpha=1.0,
+                    plt.plot(range(1, int(latent_dim / 2) + 1), np.sort(z1)[::-1], color=colors[i], alpha=1.0,
                              label=r"%s $z_1$ active units: %i" % (model, len(z1[z1 > np.log(0.01)])),
                              linestyle='dotted', linewidth=3)
             plt.xlabel(r'Latent unit $i$', fontsize=16)

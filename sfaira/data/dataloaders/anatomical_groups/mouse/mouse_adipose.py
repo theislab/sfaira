@@ -13,7 +13,7 @@ from sfaira.data.dataloaders.loaders.d10_1101_661728.mouse_adipose_2019_smartseq
 class DatasetGroupAdipose(DatasetGroup):
 
     def __init__(
-        self, 
+        self,
         path: Union[str, None] = None,
         meta_path: Union[str, None] = None,
         cache_path: Union[str, None] = None

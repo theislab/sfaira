@@ -13,7 +13,7 @@ from sfaira.data.dataloaders.loaders.d10_1016_j_cell_2018_02_001.mouse_blood_201
 class DatasetGroupBlood (DatasetGroup):
 
     def __init__(
-        self, 
+        self,
         path: Union[str, None] = None,
         meta_path: Union[str, None] = None,
         cache_path: Union[str, None] = None

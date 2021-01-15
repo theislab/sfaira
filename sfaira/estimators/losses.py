@@ -52,7 +52,7 @@ class LossLoglikelihoodGaussian(tf.keras.losses.Loss):
         """Implements the gaussian log likelihood loss as VAE reconstruction loss"""
         loc, scale = tf.split(y_pred, num_or_size_splits=2, axis=1)
 
-        ll = -tf.math.log(scale*tf.math.sqrt(2.*np.pi)) - 0.5*tf.math.square((y_true - loc) / scale)
+        ll = -tf.math.log(scale * tf.math.sqrt(2. * np.pi)) - 0.5 * tf.math.square((y_true - loc) / scale)
         ll = tf.clip_by_value(ll, -300, 300, "log_probs")
         neg_ll = -ll
         if self.average:

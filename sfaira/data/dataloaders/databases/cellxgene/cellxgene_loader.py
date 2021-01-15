@@ -64,7 +64,7 @@ class Dataset(DatasetBase):
         self.id = self.id
         self.normalization = 'raw'
         self.organ = str(self.fn).split("_")[3]  # TODO interface this properly
-        #self.organ = adata.obs["tissue"].values[0]
+        # self.organ = adata.obs["tissue"].values[0]
         self.organism = adata.obs[self._ADATA_IDS_CELLXGENE.organism].values[0]
         self.protocol = adata.obs[self._ADATA_IDS_CELLXGENE.protocol].values[0]
         self.year = adata.uns[self._ADATA_IDS_CELLXGENE.year]

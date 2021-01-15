@@ -101,7 +101,7 @@ class TargetZoos:
                 'ureter': human.DatasetGroupUreter(path=path, meta_path=meta_path, cache_path=cache_path),
                 'uterus': human.DatasetGroupUterus(path=path, meta_path=meta_path, cache_path=cache_path),
             }
-            
+
         else:
             self.data_human = None
             self.data_mouse = None
@@ -390,7 +390,7 @@ class TrainModelCelltype(TrainModel):
                 for leaf in ontology[k]:
                     if leaf not in cell_counts_leaf.keys():
                         cell_counts_leaf[leaf] = 0
-                    cell_counts_leaf[leaf] += 1/len(ontology[k])
+                    cell_counts_leaf[leaf] += 1 / len(ontology[k])
                 del cell_counts_leaf[k]
         with open(fn + '_celltypes_valuecounts_wholedata.pickle', 'wb') as f:
             pickle.dump(obj=[cell_counts, cell_counts_leaf], file=f)

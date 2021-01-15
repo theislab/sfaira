@@ -10,7 +10,7 @@ from sfaira.data.dataloaders.loaders.d10_1101_661728.mouse_skin_2019_smartseq2_p
 class DatasetGroupSkin(DatasetGroup):
 
     def __init__(
-        self, 
+        self,
         path: Union[str, None] = None,
         meta_path: Union[str, None] = None,
         cache_path: Union[str, None] = None

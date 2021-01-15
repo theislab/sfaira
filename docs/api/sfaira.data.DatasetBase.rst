@@ -1,0 +1,75 @@
+﻿sfaira.data.DatasetBase
+=======================
+
+.. currentmodule:: sfaira.data
+
+.. autoclass:: DatasetBase
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~DatasetBase.__init__
+      ~DatasetBase.assert_celltype_version_key
+      ~DatasetBase.clear
+      ~DatasetBase.load
+      ~DatasetBase.load_meta
+      ~DatasetBase.load_tobacked
+      ~DatasetBase.map_ontology_class
+      ~DatasetBase.set_default_type_version
+      ~DatasetBase.set_unkown_class_id
+      ~DatasetBase.subset_organs
+      ~DatasetBase.write_meta
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~DatasetBase.age
+      ~DatasetBase.annotated
+      ~DatasetBase.author
+      ~DatasetBase.available_type_versions
+      ~DatasetBase.citation
+      ~DatasetBase.dev_stage
+      ~DatasetBase.doi
+      ~DatasetBase.doi_cleaned_id
+      ~DatasetBase.download
+      ~DatasetBase.download_meta
+      ~DatasetBase.ethnicity
+      ~DatasetBase.healthy
+      ~DatasetBase.healthy_state_healthy
+      ~DatasetBase.id
+      ~DatasetBase.meta
+      ~DatasetBase.meta_fn
+      ~DatasetBase.ncells
+      ~DatasetBase.normalization
+      ~DatasetBase.obs_key_age
+      ~DatasetBase.obs_key_cellontology_id
+      ~DatasetBase.obs_key_cellontology_original
+      ~DatasetBase.obs_key_dev_stage
+      ~DatasetBase.obs_key_ethnicity
+      ~DatasetBase.obs_key_healthy
+      ~DatasetBase.obs_key_organ
+      ~DatasetBase.obs_key_organism
+      ~DatasetBase.obs_key_protocol
+      ~DatasetBase.obs_key_sex
+      ~DatasetBase.obs_key_state_exact
+      ~DatasetBase.organ
+      ~DatasetBase.organism
+      ~DatasetBase.protocol
+      ~DatasetBase.sex
+      ~DatasetBase.source
+      ~DatasetBase.state_exact
+      ~DatasetBase.var_ensembl_col
+      ~DatasetBase.var_symbol_col
+      ~DatasetBase.year
+   
+   
