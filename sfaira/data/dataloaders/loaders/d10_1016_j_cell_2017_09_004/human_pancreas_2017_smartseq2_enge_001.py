@@ -116,11 +116,11 @@ class Dataset(DatasetBase):
             file_content = [i.decode("utf-8") for i in f.readlines()]
         inputstring = ""
         for line in file_content:
-            if ""ID_REF"" in line:
+            if "ID_REF" in line:
                 inputstring += line
             if "!Sample_title" in line:
                 inputstring += line[1:]
-            if "!Sample_characteristics_ch1\t"inferred_cell_type: alpha" in line:
+            if "!Sample_characteristics_ch1\t\"inferred_cell_type: alpha" in line:
                 inputstring += line[1:]
         data = StringIO(inputstring)
         d = pd.read_csv(data, sep="\t").T
