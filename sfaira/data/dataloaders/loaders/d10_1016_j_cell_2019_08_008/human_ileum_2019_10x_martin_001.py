@@ -33,38 +33,38 @@ class Dataset(DatasetBase):
         self.author = "Kenigsberg"
         self.doi = "v"
         self.healthy = True
-        self.normalization = 'raw'
+        self.normalization = "raw"
         self.organ = "ileum"
         self.organism = "human"
-        self.protocol = '10x'
-        self.state_exact = 'healthy'
+        self.protocol = "10x"
+        self.state_exact = "healthy"
         self.year = 2019
-        self.var_symbol_col = 'index'
-        self.var_ensembl_col = 'gene_ids'
-        self.obs_key_cellontology_original = 'CellType'
+        self.var_symbol_col = "index"
+        self.var_ensembl_col = "gene_ids"
+        self.obs_key_cellontology_original = "CellType"
 
         self.class_maps = {
             "0": {
-                'T cells': 'T cells',
-                'Plasma cells': 'Plasma Cells',
-                'B cells': 'B cells',
-                'MNP': 'MNP',
-                'ILC': 'ILC',
-                'Enterocytes': 'Enterocytes',
-                'Fibs': 'Fibroblasts',
-                'CD36+ endothelium': 'CD36+ endothelium',
-                'Progenitors': 'Progenitors',
-                'Goblets': 'Goblet cells',
-                'Glial cells': 'Glial cells',
-                'Cycling': 'Cycling',
-                'ACKR1+ endothelium': 'ACKR1+ endothelium',
-                'Pericytes': 'Pericytes',
-                'Lymphatics': 'Lymphatics',
-                'Mast cells': 'Mast cells',
-                'SM': 'Smooth muscle cell',
-                'TA': 'TA',
-                'Paneth cells': 'Paneth cells',
-                'Enteroendocrines': 'Enteroendocrine cells',
+                "T cells": "T cells",
+                "Plasma cells": "Plasma Cells",
+                "B cells": "B cells",
+                "MNP": "MNP",
+                "ILC": "ILC",
+                "Enterocytes": "Enterocytes",
+                "Fibs": "Fibroblasts",
+                "CD36+ endothelium": "CD36+ endothelium",
+                "Progenitors": "Progenitors",
+                "Goblets": "Goblet cells",
+                "Glial cells": "Glial cells",
+                "Cycling": "Cycling",
+                "ACKR1+ endothelium": "ACKR1+ endothelium",
+                "Pericytes": "Pericytes",
+                "Lymphatics": "Lymphatics",
+                "Mast cells": "Mast cells",
+                "SM": "Smooth muscle cell",
+                "TA": "TA",
+                "Paneth cells": "Paneth cells",
+                "Enteroendocrines": "Enteroendocrine cells",
             },
         }
 
@@ -73,6 +73,6 @@ class Dataset(DatasetBase):
             fn = os.path.join(self.path, "human", "ileum", "martin19.processed.h5ad")
         self.adata = anndata.read(fn)
         self.adata.X = np.expm1(self.adata.X)
-        self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs['n_counts'].values[:, None]))\
+        self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs["n_counts"].values[:, None]))\
                                    .multiply(1 / 10000)
-        self.adata = self.adata[self.adata.obs['CellType'] != 'Doublets'].copy()
+        self.adata = self.adata[self.adata.obs["CellType"] != "Doublets"].copy()

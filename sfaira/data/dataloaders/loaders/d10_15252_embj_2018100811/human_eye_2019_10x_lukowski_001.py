@@ -30,37 +30,37 @@ class Dataset(DatasetBase):
         self.download = "https://covid19.cog.sanger.ac.uk/lukowski19.processed.h5ad"
         self.download_meta = None
 
-        self.author = 'Wong'
-        self.doi = '10.15252/embj.2018100811'
+        self.author = "Wong"
+        self.doi = "10.15252/embj.2018100811"
         self.healthy = True
-        self.normalization = 'raw'
+        self.normalization = "raw"
         self.organ = "eye"  # ToDo: "retina"
         self.organism = "human"
-        self.protocol = '10x'
-        self.state_exact = 'healthy'
+        self.protocol = "10x"
+        self.state_exact = "healthy"
         self.year = 2019
 
-        self.var_symbol_col = 'index'
-        self.var_ensembl_col = 'gene_ids'
+        self.var_symbol_col = "index"
+        self.var_ensembl_col = "gene_ids"
 
-        self.obs_key_cellontology_original = 'CellType'
+        self.obs_key_cellontology_original = "CellType"
 
         self.class_maps = {
             "0": {
-                'Muller cell': 'Muller cell',
-                'amacrine cell': 'Amacrine cell',
-                'microglial cell': 'Microglia',
-                'retinal bipolar neuron type A': 'Retinal bipolar neuron type A',
-                'retinal bipolar neuron type B': 'Retinal bipolar neuron type B',
-                'retinal bipolar neuron type C': 'Retinal bipolar neuron type C',
-                'retinal bipolar neuron type D': 'Retinal bipolar neuron type D',
-                'retinal cone cell': 'Retinal cone cell',
-                'retinal ganglion cell': 'Retinal ganglion cell',
-                'retinal rod cell type A': 'Retinal rod cell type A',
-                'retinal rod cell type B': 'Retinal rod cell type B',
-                'retinal rod cell type C': 'Retinal rod cell type C',
-                'unannotated': 'Unknown',
-                'unspecified': 'Unknown',
+                "Muller cell": "Muller cell",
+                "amacrine cell": "Amacrine cell",
+                "microglial cell": "Microglia",
+                "retinal bipolar neuron type A": "Retinal bipolar neuron type A",
+                "retinal bipolar neuron type B": "Retinal bipolar neuron type B",
+                "retinal bipolar neuron type C": "Retinal bipolar neuron type C",
+                "retinal bipolar neuron type D": "Retinal bipolar neuron type D",
+                "retinal cone cell": "Retinal cone cell",
+                "retinal ganglion cell": "Retinal ganglion cell",
+                "retinal rod cell type A": "Retinal rod cell type A",
+                "retinal rod cell type B": "Retinal rod cell type B",
+                "retinal rod cell type C": "Retinal rod cell type C",
+                "unannotated": "Unknown",
+                "unspecified": "Unknown",
             },
         }
 
@@ -69,5 +69,5 @@ class Dataset(DatasetBase):
             fn = os.path.join(self.path, "human", "eye", "lukowski19.processed.h5ad")
         self.adata = anndata.read(fn)
         self.adata.X = np.expm1(self.adata.X)
-        self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs['n_counts'].values[:, None]))\
+        self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs["n_counts"].values[:, None]))\
                                    .multiply(1 / 10000)

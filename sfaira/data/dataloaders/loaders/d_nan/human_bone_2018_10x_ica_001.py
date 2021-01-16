@@ -16,10 +16,10 @@ class Dataset(DatasetBase):
 
     import anndata
     import numpy as np
-    adata = anndata.read_loom('c95ff89-2e68-4a08-a234-480eca21ce79.homo_sapiens.loom')
-    idx = np.logical_and((adata.obs['derived_organ_parts_label'] == 'bone marrow').values, (adata.obs['emptydrops_is_cell'] == 't').values)
+    adata = anndata.read_loom("c95ff89-2e68-4a08-a234-480eca21ce79.homo_sapiens.loom")
+    idx = np.logical_and((adata.obs["derived_organ_parts_label"] == "bone marrow").values, (adata.obs["emptydrops_is_cell"] == "t").values)
     adata = adata[idx].copy()
-    adata.write('ica_bone.h5ad')
+    adata.write("ica_bone.h5ad")
 
     :param path:
     :param meta_path:
@@ -40,18 +40,18 @@ class Dataset(DatasetBase):
         self.download = "https://data.humancellatlas.org/project-assets/project-matrices/cc95ff89-2e68-4a08-a234-480eca21ce79.homo_sapiens.loom"
         self.download_meta = None
 
-        self.author = 'Regev'
+        self.author = "Regev"
         self.doi = "d_nan"
         self.healthy = True
-        self.normalization = 'raw'
+        self.normalization = "raw"
         self.organ = "bone"
         self.organism = "human"
-        self.protocol = '10x'
-        self.state_exact = 'healthy'
+        self.protocol = "10x"
+        self.state_exact = "healthy"
         self.year = 2018
 
-        self.var_symbol_col = 'index'
-        self.var_ensembl_col = 'Accession'
+        self.var_symbol_col = "index"
+        self.var_ensembl_col = "Accession"
 
         self.class_maps = {
             "0": {},
@@ -61,6 +61,6 @@ class Dataset(DatasetBase):
         if fn is None:
             fn = os.path.join(self.path, "human", "bone", "cc95ff89-2e68-4a08-a234-480eca21ce79.homo_sapiens.loom")
         self.adata = anndata.read_loom(fn)
-        idx = np.logical_and((self.adata.obs['derived_organ_parts_label'] == 'bone marrow').values,
-                             (self.adata.obs['emptydrops_is_cell'] == 't').values)
+        idx = np.logical_and((self.adata.obs["derived_organ_parts_label"] == "bone marrow").values,
+                             (self.adata.obs["emptydrops_is_cell"] == "t").values)
         self.adata = self.adata[idx].copy()

@@ -26,7 +26,7 @@ class Dataset(DatasetBase):
         self.author = "Movahedi"
         self.doi = "10.1038/s41593-019-0393-4"
         self.healthy = True
-        self.normalization = 'raw'
+        self.normalization = "raw"
         self.organ = "brain"
         self.organism = "mouse"
         self.protocol = "microwell"

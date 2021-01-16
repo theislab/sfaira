@@ -34,7 +34,7 @@ class Dataset_d10_1101_661728(DatasetBase):
         self.author = "Quake"
         self.doi = "10.1101/661728"
         self.healthy = True
-        self.normalization = 'norm'
+        self.normalization = "norm"
         self.organism = "mouse"
         self.state_exact = "healthy"
         self.year = 2019

@@ -33,17 +33,17 @@ class Dataset(DatasetBase):
         self.author = "Meyer"
         self.doi = "10.1186/s13059-019-1906-x"
         self.healthy = True
-        self.normalization = 'raw'
+        self.normalization = "raw"
         self.organ = "esophagus"
         self.organism = "human"
         self.protocol = "10x"
-        self.state_exact = 'healthy'
+        self.state_exact = "healthy"
         self.year = 2019
 
-        self.var_symbol_col = 'index'
-        self.var_ensembl_col = 'gene_ids-HCATisStab7413619'
+        self.var_symbol_col = "index"
+        self.var_ensembl_col = "gene_ids-HCATisStab7413619"
 
-        self.obs_key_cellontology_original = 'Celltypes'
+        self.obs_key_cellontology_original = "Celltypes"
 
         self.class_maps = {
             "0": {
@@ -72,5 +72,5 @@ class Dataset(DatasetBase):
         if fn is None:
             fn = os.path.join(self.path, "human", "esophagus", "oesophagus.cellxgene.h5ad")
         self.adata = anndata.read(fn)
-        self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs['n_counts'].values[:, None]))\
+        self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs["n_counts"].values[:, None]))\
                                    .multiply(1 / 10000)

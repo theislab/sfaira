@@ -33,30 +33,30 @@ class Dataset(DatasetBase):
         self.author = "Cairns"
         self.doi = "10.1038/s41422-018-0099-2"
         self.healthy = True
-        self.normalization = 'raw'
+        self.normalization = "raw"
         self.organ = "malegonad"
         self.organism = "human"
-        self.protocol = '10x'
-        self.state_exact = 'healthy'
+        self.protocol = "10x"
+        self.state_exact = "healthy"
         self.year = 2018
 
-        self.var_symbol_col = 'index'
+        self.var_symbol_col = "index"
 
-        self.obs_key_cellontology_original = 'CellType'
+        self.obs_key_cellontology_original = "CellType"
 
         self.class_maps = {
             "0": {
-                'Elongated Spermatids': 'Elongated Spermatids',
-                'Leydig cells': 'Leydig cells',
-                'Early Primary Spermatocytes': 'Early Primary Spermatocytes',
-                'Round Spermatids': 'Round Spermatids',
-                'Endothelial cells': 'Endothelial cells',
-                'Macrophages': 'Macrophages',
-                'Myoid cells': 'Myoid cells',
-                'Differentiating Spermatogonia': 'Differentiating Spermatogonia',
-                'Late primary Spermatocytes': 'Late primary Spermatocytes',
-                'Spermatogonial Stem cell': 'Spermatogonial Stem cell',
-                'Sertoli cells': 'Sertoli cells',
+                "Elongated Spermatids": "Elongated Spermatids",
+                "Leydig cells": "Leydig cells",
+                "Early Primary Spermatocytes": "Early Primary Spermatocytes",
+                "Round Spermatids": "Round Spermatids",
+                "Endothelial cells": "Endothelial cells",
+                "Macrophages": "Macrophages",
+                "Myoid cells": "Myoid cells",
+                "Differentiating Spermatogonia": "Differentiating Spermatogonia",
+                "Late primary Spermatocytes": "Late primary Spermatocytes",
+                "Spermatogonial Stem cell": "Spermatogonial Stem cell",
+                "Sertoli cells": "Sertoli cells",
             },
         }
 
@@ -65,5 +65,5 @@ class Dataset(DatasetBase):
             fn = os.path.join(self.path, "human", "malegonad", "guo18_donor.processed.h5ad")
         self.adata = anndata.read(fn)
         self.adata.X = np.expm1(self.adata.X)
-        self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs['n_counts'].values[:, None]))\
+        self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs["n_counts"].values[:, None]))\
                                    .multiply(1 / 10000)

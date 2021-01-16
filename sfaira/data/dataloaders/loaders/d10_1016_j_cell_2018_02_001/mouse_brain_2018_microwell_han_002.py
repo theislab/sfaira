@@ -19,20 +19,20 @@ class Dataset(Dataset_d10_1016_j_cell_2018_02_001):
 
         self.class_maps = {
             "0": {
-                'Astroglial cell(Bergman glia)(Brain)': 'Bergmann glial cell',
-                'Astrocyte_Atp1b2 high(Brain)': 'astrocyte',
-                'Astrocyte_Mfe8 high(Brain)': 'astrocyte',
-                'Astrocyte_Pla2g7 high(Brain)': 'astrocyte',
-                'Granulocyte_Ngp high(Brain)': 'granulocyte',
-                'Hypothalamic ependymal cell(Brain)': 'ependymal cell',
-                'Macrophage_Klf2 high(Brain)': 'macrophage',
-                'Macrophage_Lyz2 high(Brain)': 'macrophage',
-                'Microglia(Brain)': 'microglial cell',
-                'Myelinating oligodendrocyte(Brain)': 'oligodendrocyte',
-                'Oligodendrocyte precursor cell(Brain)': 'oligodendrocyte precursor cell',
-                'Neuron(Brain)': 'neuron',
-                'Pan-GABAergic(Brain)': 'GABAergic cell',
-                'Schwann cell(Brain)': 'schwann cell'
+                "Astroglial cell(Bergman glia)(Brain)": "Bergmann glial cell",
+                "Astrocyte_Atp1b2 high(Brain)": "astrocyte",
+                "Astrocyte_Mfe8 high(Brain)": "astrocyte",
+                "Astrocyte_Pla2g7 high(Brain)": "astrocyte",
+                "Granulocyte_Ngp high(Brain)": "granulocyte",
+                "Hypothalamic ependymal cell(Brain)": "ependymal cell",
+                "Macrophage_Klf2 high(Brain)": "macrophage",
+                "Macrophage_Lyz2 high(Brain)": "macrophage",
+                "Microglia(Brain)": "microglial cell",
+                "Myelinating oligodendrocyte(Brain)": "oligodendrocyte",
+                "Oligodendrocyte precursor cell(Brain)": "oligodendrocyte precursor cell",
+                "Neuron(Brain)": "neuron",
+                "Pan-GABAergic(Brain)": "GABAergic cell",
+                "Schwann cell(Brain)": "schwann cell"
             },
         }
 

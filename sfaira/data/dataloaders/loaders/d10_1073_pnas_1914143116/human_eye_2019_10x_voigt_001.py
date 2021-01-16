@@ -29,33 +29,33 @@ class Dataset(DatasetBase):
         self.download = "https://covid19.cog.sanger.ac.uk/voigt19.processed.h5ad"
         self.download_meta = None
 
-        self.author = 'Mullins'
-        self.doi = '10.1073/pnas.1914143116'
+        self.author = "Mullins"
+        self.doi = "10.1073/pnas.1914143116"
         self.healthy = True
-        self.normalization = 'norm'
+        self.normalization = "norm"
         self.organ = "eye"  # ToDo: "retina"
         self.organism = "human"
-        self.protocol = '10x'
-        self.state_exact = 'healthy'
+        self.protocol = "10x"
+        self.state_exact = "healthy"
         self.year = 2019
 
-        self.var_symbol_col = 'index'
+        self.var_symbol_col = "index"
 
-        self.obs_key_cellontology_original = 'CellType'
+        self.obs_key_cellontology_original = "CellType"
 
         self.class_maps = {
             "0": {
-                'B-cell': 'B-cell',
-                'Endothelial': 'Endothelial cell',
-                'Fibroblast': 'Fibroblast',
-                'Macrophage': 'Macrophage',
-                'Mast-cell': 'Mast-cell',
-                'Melanocyte': 'Melanocyte',
-                'Pericyte': 'Pericyte',
-                'RPE': 'Retinal pigment epithelium',
-                'Schwann1': 'Schwann1',
-                'Schwann2': 'Schwann2',
-                'T/NK-cell': 'T/NK-cell',
+                "B-cell": "B-cell",
+                "Endothelial": "Endothelial cell",
+                "Fibroblast": "Fibroblast",
+                "Macrophage": "Macrophage",
+                "Mast-cell": "Mast-cell",
+                "Melanocyte": "Melanocyte",
+                "Pericyte": "Pericyte",
+                "RPE": "Retinal pigment epithelium",
+                "Schwann1": "Schwann1",
+                "Schwann2": "Schwann2",
+                "T/NK-cell": "T/NK-cell",
             },
         }
 

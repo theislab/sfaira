@@ -34,45 +34,45 @@ class Dataset(DatasetBase):
         self.author = "Teichmann"
         self.doi = "10.1038/s41590-020-0602-z"
         self.healthy = True
-        self.normalization = 'raw'
+        self.normalization = "raw"
         self.organ = "colon"
         self.organism = "human"
-        self.protocol = '10x'
-        self.state_exact = 'healthy'
+        self.protocol = "10x"
+        self.state_exact = "healthy"
         self.year = 2020
 
-        self.var_symbol_col = 'index'
-        self.var_ensembl_col = 'gene_ids'
+        self.var_symbol_col = "index"
+        self.var_ensembl_col = "gene_ids"
 
-        self.obs_key_cellontology_original = 'cell_type'
+        self.obs_key_cellontology_original = "cell_type"
 
         self.class_maps = {
             "0": {
-                'Activated CD4 T': 'Activated CD4 T',
-                'B cell IgA Plasma': 'B cell IgA Plasma',
-                'B cell IgG Plasma': 'B cell IgG Plasma',
-                'B cell cycling': 'B cell cycling',
-                'B cell memory': 'B cell memory',
-                'CD8 T': 'CD8 T',
-                'Follicular B cell': 'Follicular',
-                'ILC': 'ILC',
-                'LYVE1 Macrophage': 'LYVE1 Macrophage',
-                'Lymphoid DC': 'Lymphoid DC',
-                'Macrophage': 'Macrophage',
-                'Mast': 'Mast cell',
-                'Monocyte': 'Monocyte',
-                'NK': 'NK',
-                'Tcm': 'Tcm',
-                'Tfh': 'Tfh',
-                'Th1': 'Th1',
-                'Th17': 'Th17',
-                'Treg': 'Treg',
-                'cDC1': 'DC1',
-                'cDC2': 'DC2',
-                'cycling DCs': 'cycling DCs',
-                'cycling gd T': 'cycling gd T',
-                'gd T': 'gd T',
-                'pDC': 'pDC',
+                "Activated CD4 T": "Activated CD4 T",
+                "B cell IgA Plasma": "B cell IgA Plasma",
+                "B cell IgG Plasma": "B cell IgG Plasma",
+                "B cell cycling": "B cell cycling",
+                "B cell memory": "B cell memory",
+                "CD8 T": "CD8 T",
+                "Follicular B cell": "Follicular",
+                "ILC": "ILC",
+                "LYVE1 Macrophage": "LYVE1 Macrophage",
+                "Lymphoid DC": "Lymphoid DC",
+                "Macrophage": "Macrophage",
+                "Mast": "Mast cell",
+                "Monocyte": "Monocyte",
+                "NK": "NK",
+                "Tcm": "Tcm",
+                "Tfh": "Tfh",
+                "Th1": "Th1",
+                "Th17": "Th17",
+                "Treg": "Treg",
+                "cDC1": "DC1",
+                "cDC2": "DC2",
+                "cycling DCs": "cycling DCs",
+                "cycling gd T": "cycling gd T",
+                "gd T": "gd T",
+                "pDC": "pDC",
             },
         }
 
@@ -81,5 +81,5 @@ class Dataset(DatasetBase):
             fn = os.path.join(self.path, "human", "colon", "james20.processed.h5ad")
         self.adata = anndata.read(fn)
         self.adata.X = np.expm1(self.adata.X)
-        self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs['n_counts'].values[:, None]))\
+        self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs["n_counts"].values[:, None]))\
                                    .multiply(1 / 10000)

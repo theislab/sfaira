@@ -19,22 +19,22 @@ class Dataset(Dataset_d10_1016_j_cell_2018_02_001):
 
         self.class_maps = {
             "0": {
-                "Endothelial cell_Ly6c1 high(Bladder)": 'endothelial cell',
-                "Vascular endothelial cell(Bladder)": 'endothelial cell',
-                'Urothelium(Bladder)': 'bladder urothelial cell',
-                'Dendritic cell_Cd74 high(Bladder)': 'dendritic cell',
-                'Dendritic cell_Lyz2 high(Bladder)': 'dendritic cell',
-                'Macrophage_Pf4 high(Bladder)': 'macrophage',
-                'NK cell(Bladder)': 'NK cell',
-                'Basal epithelial cell(Bladder)': 'basal epithelial cell',
-                'Epithelial cell_Upk3a high(Bladder)': 'epithelial cell',
-                'Epithelial cell_Gm23935 high(Bladder)': 'epithelial cell',
-                'Mesenchymal stromal cell(Bladder)': 'mesenchymal stromal cell',
-                'Stromal cell_Dpt high(Bladder)': 'stromal cell',
-                'Stromal cell_Car3 high(Bladder)': 'stromal cell',
-                'Smooth muscle cell(Bladder)': 'smooth muscle cell',
-                'Vascular smooth muscle progenitor cell(Bladder)': 'smooth muscle cell',
-                'Umbrella cell(Bladder)': 'umbrella cell'
+                "Endothelial cell_Ly6c1 high(Bladder)": "endothelial cell",
+                "Vascular endothelial cell(Bladder)": "endothelial cell",
+                "Urothelium(Bladder)": "bladder urothelial cell",
+                "Dendritic cell_Cd74 high(Bladder)": "dendritic cell",
+                "Dendritic cell_Lyz2 high(Bladder)": "dendritic cell",
+                "Macrophage_Pf4 high(Bladder)": "macrophage",
+                "NK cell(Bladder)": "NK cell",
+                "Basal epithelial cell(Bladder)": "basal epithelial cell",
+                "Epithelial cell_Upk3a high(Bladder)": "epithelial cell",
+                "Epithelial cell_Gm23935 high(Bladder)": "epithelial cell",
+                "Mesenchymal stromal cell(Bladder)": "mesenchymal stromal cell",
+                "Stromal cell_Dpt high(Bladder)": "stromal cell",
+                "Stromal cell_Car3 high(Bladder)": "stromal cell",
+                "Smooth muscle cell(Bladder)": "smooth muscle cell",
+                "Vascular smooth muscle progenitor cell(Bladder)": "smooth muscle cell",
+                "Umbrella cell(Bladder)": "umbrella cell"
             },
         }
 

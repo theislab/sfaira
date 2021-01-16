@@ -19,17 +19,17 @@ class Dataset(Dataset_d10_1016_j_cell_2018_02_001):
 
         self.class_maps = {
             "0": {
-                'Erythroblast(Spleen)': 'proerythroblast',
-                'Dendritic cell_S100a4 high(Spleen)': 'dendritic cell',
-                'Dendritic cell_Siglech high(Spleen)': 'dendritic cell',
-                'Granulocyte(Spleen)': 'granulocyte',
-                'Macrophage(Spleen)': 'macrophage',
-                'Monocyte(Spleen)': 'monocyte',
-                'NK cell(Spleen)': 'NK cell',
-                'Neutrophil(Spleen)': 'neutrophil',
-                'Plasma cell(Spleen)': 'plasma cell',
-                'T cell(Spleen)': 'T cell',
-                'Marginal zone B cell(Spleen)': 'B cell'
+                "Erythroblast(Spleen)": "proerythroblast",
+                "Dendritic cell_S100a4 high(Spleen)": "dendritic cell",
+                "Dendritic cell_Siglech high(Spleen)": "dendritic cell",
+                "Granulocyte(Spleen)": "granulocyte",
+                "Macrophage(Spleen)": "macrophage",
+                "Monocyte(Spleen)": "monocyte",
+                "NK cell(Spleen)": "NK cell",
+                "Neutrophil(Spleen)": "neutrophil",
+                "Plasma cell(Spleen)": "plasma cell",
+                "T cell(Spleen)": "T cell",
+                "Marginal zone B cell(Spleen)": "B cell"
             },
         }
 

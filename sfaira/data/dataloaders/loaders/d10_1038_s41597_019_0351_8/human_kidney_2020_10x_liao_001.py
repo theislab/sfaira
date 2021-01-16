@@ -25,21 +25,21 @@ class Dataset(DatasetBase):
     adatas = []
     with tarfile.open("GSE131685_RAW.tar") as tar:
         for member in tar.getmembers():
-            if '_matrix.mtx.gz' in member.name:
-                name = '_'.join(member.name.split('_')[:-1])
-                with gzip.open(tar.extractfile(member), 'rb') as mm:
+            if "_matrix.mtx.gz" in member.name:
+                name = "_".join(member.name.split("_")[:-1])
+                with gzip.open(tar.extractfile(member), "rb") as mm:
                     X = scipy.io.mmread(mm).T.tocsr()
-                obs = pd.read_csv(tar.extractfile(name+'_barcodes.tsv.gz'), compression='gzip', header=None, sep='\t', index_col=0)
+                obs = pd.read_csv(tar.extractfile(name+"_barcodes.tsv.gz"), compression="gzip", header=None, sep="\t", index_col=0)
                 obs.index.name = None
-                var = pd.read_csv(tar.extractfile(name+'_features.tsv.gz'), compression='gzip', header=None, sep='\t').iloc[:,:2]
-                var.columns = ['ensembl', 'names']
-                var.index = var['ensembl'].values
+                var = pd.read_csv(tar.extractfile(name+"_features.tsv.gz"), compression="gzip", header=None, sep="\t").iloc[:,:2]
+                var.columns = ["ensembl", "names"]
+                var.index = var["ensembl"].values
                 adata = anndata.AnnData(X=X, obs=obs, var=var)
-                adata.obs['sample'] = name
+                adata.obs["sample"] = name
                 adatas.append(adata)
     adata = adatas[0].concatenate(adatas[1:])
-    del adata.obs['batch']
-    adata.write('GSE131685.h5ad')
+    del adata.obs["batch"]
+    adata.write("GSE131685.h5ad")
 
     :param path:
     :param meta_path:
@@ -59,18 +59,18 @@ class Dataset(DatasetBase):
         self.download = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE131nnn/GSE131685/suppl/GSE131685_RAW.tar"
         self.download_meta = None
 
-        self.author = 'Mo'
+        self.author = "Mo"
         self.healthy = True
-        self.normalization = 'raw'
+        self.normalization = "raw"
         self.organ = "kidney"
         self.organism = "human"
-        self.protocol = '10x'
-        self.state_exact = 'healthy'
+        self.protocol = "10x"
+        self.state_exact = "healthy"
         self.year = 2020
-        self.doi = '10.1038/s41597-019-0351-8'
+        self.doi = "10.1038/s41597-019-0351-8"
 
-        self.var_symbol_col = 'names'
-        self.var_ensembl_col = 'ensembl'
+        self.var_symbol_col = "names"
+        self.var_ensembl_col = "ensembl"
 
         self.class_maps = {
             "0": {},
@@ -82,19 +82,19 @@ class Dataset(DatasetBase):
         adatas = []
         with tarfile.open(fn) as tar:
             for member in tar.getmembers():
-                if '_matrix.mtx.gz' in member.name:
-                    name = '_'.join(member.name.split('_')[:-1])
-                    with gzip.open(tar.extractfile(member), 'rb') as mm:
+                if "_matrix.mtx.gz" in member.name:
+                    name = "_".join(member.name.split("_")[:-1])
+                    with gzip.open(tar.extractfile(member), "rb") as mm:
                         X = scipy.io.mmread(mm).T.tocsr()
-                    obs = pd.read_csv(tar.extractfile(name + '_barcodes.tsv.gz'), compression='gzip', header=None,
-                                      sep='\t', index_col=0)
+                    obs = pd.read_csv(tar.extractfile(name + "_barcodes.tsv.gz"), compression="gzip", header=None,
+                                      sep="\t", index_col=0)
                     obs.index.name = None
-                    var = pd.read_csv(tar.extractfile(name + '_features.tsv.gz'), compression='gzip', header=None,
-                                      sep='\t').iloc[:, :2]
-                    var.columns = ['ensembl', 'names']
-                    var.index = var['ensembl'].values
+                    var = pd.read_csv(tar.extractfile(name + "_features.tsv.gz"), compression="gzip", header=None,
+                                      sep="\t").iloc[:, :2]
+                    var.columns = ["ensembl", "names"]
+                    var.index = var["ensembl"].values
                     self.adata = anndata.AnnData(X=X, obs=obs, var=var)
-                    self.adata.obs['sample'] = name
+                    self.adata.obs["sample"] = name
                     adatas.append(self.adata)
         self.adata = adatas[0].concatenate(adatas[1:])
-        del self.adata.obs['batch']
+        del self.adata.obs["batch"]

@@ -29,40 +29,40 @@ class Dataset(DatasetBase):
         self.download = "https://covid19.cog.sanger.ac.uk/vieira19_Alveoli_and_parenchyma_anonymised.processed.h5ad"
         self.download_meta = None
 
-        self.author = 'Teichmann'
+        self.author = "Teichmann"
         self.doi = "10.1038/s41591-019-0468-5"
         self.healthy = True
         self.organ = "lung"  # ToDo: "alveoli, parenchyma"
         self.organism = "human"
-        self.protocol = '10x'
-        self.state_exact = 'healthy'
+        self.protocol = "10x"
+        self.state_exact = "healthy"
         self.year = 2019
-        self.normalization = 'norm'
+        self.normalization = "norm"
 
-        self.var_symbol_col = 'index'
+        self.var_symbol_col = "index"
 
-        self.obs_key_cellontology_original = 'CellType'
+        self.obs_key_cellontology_original = "CellType"
 
         self.class_maps = {
             "0": {
-                'Ciliated 2': 'Multiciliated lineage',
-                'Luminal_Macrophages': 'Macrophages',
-                'Basal 1': 'Basal',
-                'Dendritic cells': 'Dendritic cells',
-                'Endothelial': '1_Endothelial',
-                'Lymphatic': 'Lymphatic EC',
-                'Ciliated 1': 'Multiciliated lineage',
-                'Smooth muscle': '2_Smooth Muscle',
-                'Type_1_alveolar': 'AT1',
-                'Neutrophils': 'Monocytes',
-                'Club': 'Secretory',
-                'Basal 2': 'Basal',
-                'B cells': 'B cell lineage',
-                'T and NK': '2_Lymphoid',
-                'Mesothelium': 'Mesothelium',
-                'Mast cells': 'Mast cells',
-                'Fibroblasts': '2_Fibroblast lineage',
-                'Type 2 alveolar': 'AT2',
+                "Ciliated 2": "Multiciliated lineage",
+                "Luminal_Macrophages": "Macrophages",
+                "Basal 1": "Basal",
+                "Dendritic cells": "Dendritic cells",
+                "Endothelial": "1_Endothelial",
+                "Lymphatic": "Lymphatic EC",
+                "Ciliated 1": "Multiciliated lineage",
+                "Smooth muscle": "2_Smooth Muscle",
+                "Type_1_alveolar": "AT1",
+                "Neutrophils": "Monocytes",
+                "Club": "Secretory",
+                "Basal 2": "Basal",
+                "B cells": "B cell lineage",
+                "T and NK": "2_Lymphoid",
+                "Mesothelium": "Mesothelium",
+                "Mast cells": "Mast cells",
+                "Fibroblasts": "2_Fibroblast lineage",
+                "Type 2 alveolar": "AT2",
             },
         }
 

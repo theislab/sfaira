@@ -19,12 +19,12 @@ class Dataset(Dataset_d10_1016_j_cell_2018_02_001):
 
         self.class_maps = {
             "0": {
-                'Dendritic cell(Prostate)': 'dendritic cell',
-                'Epithelial cell(Prostate)': 'epithelial cell',
-                'Glandular epithelium(Prostate)': 'glandular epithelial cell',
-                'Prostate gland cell(Prostate)': 'glandular cell',
-                'Stromal cell(Prostate)': 'stromal cell',
-                'T cell(Prostate)': 'T cell',
+                "Dendritic cell(Prostate)": "dendritic cell",
+                "Epithelial cell(Prostate)": "epithelial cell",
+                "Glandular epithelium(Prostate)": "glandular epithelial cell",
+                "Prostate gland cell(Prostate)": "glandular cell",
+                "Stromal cell(Prostate)": "stromal cell",
+                "T cell(Prostate)": "T cell",
             },
         }
 

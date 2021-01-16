@@ -33,27 +33,27 @@ class Dataset(DatasetBase):
         self.author = "Strand"
         self.doi = "10.1016/j.celrep.2018.11.086"
         self.healthy = True
-        self.normalization = 'raw'
-        self.state_exact = 'healthy'
+        self.normalization = "raw"
+        self.state_exact = "healthy"
         self.organ = "prostate"
         self.organism = "human"
-        self.protocol = '10x'
+        self.protocol = "10x"
         self.year = 2018
 
-        self.var_symbol_col = 'index'
+        self.var_symbol_col = "index"
 
-        self.obs_key_cellontology_original = 'CellType'
+        self.obs_key_cellontology_original = "CellType"
 
         self.class_maps = {
             "0": {
-                'Basal': 'Basal cell',
-                'Hillock': 'Hillock',
-                'Luminal': 'Luminal',
-                'Endothelia': 'Endothelial cell',
-                'Club': 'Club',
-                'Fibroblast': 'Fibroblast',
-                'Smooth muscle': 'Smooth muscle cell',
-                'Leukocytes': 'Leukocytes',
+                "Basal": "Basal cell",
+                "Hillock": "Hillock",
+                "Luminal": "Luminal",
+                "Endothelia": "Endothelial cell",
+                "Club": "Club",
+                "Fibroblast": "Fibroblast",
+                "Smooth muscle": "Smooth muscle cell",
+                "Leukocytes": "Leukocytes",
             },
         }
 
@@ -62,5 +62,5 @@ class Dataset(DatasetBase):
             fn = os.path.join(self.path, "human", "prostate", "henry18_0.processed.h5ad")
         self.adata = anndata.read(fn)
         self.adata.X = np.expm1(self.adata.X)
-        self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs['n_counts'].values[:, None]))\
+        self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs["n_counts"].values[:, None]))\
                                    .multiply(1 / 10000)

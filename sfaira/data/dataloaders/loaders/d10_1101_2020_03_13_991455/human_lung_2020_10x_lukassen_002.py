@@ -30,36 +30,36 @@ class Dataset(DatasetBase):
         self.download = "https://covid19.cog.sanger.ac.uk/lukassen20_airway_orig.processed.h5ad"
         self.download_meta = None
 
-        self.author = 'Eils'
+        self.author = "Eils"
         self.doi = "10.1101/2020.03.13.991455"
         self.healthy = True
-        self.normalization = 'raw'
+        self.normalization = "raw"
         self.organ = "lung"  # ToDo: "bronchial epithelial cells"
         self.organism = "human"
-        self.protocol = '10x'
-        self.state_exact = 'healthy'
+        self.protocol = "10x"
+        self.state_exact = "healthy"
         self.year = 2020
 
-        self.var_symbol_col = 'index'
+        self.var_symbol_col = "index"
 
-        self.obs_key_cellontology_original = 'CellType'
+        self.obs_key_cellontology_original = "CellType"
 
         self.class_maps = {
             "0": {
-                'Secretory3': 'Secretory',
-                'Ciliated1': 'Multiciliated lineage',
-                'Goblet': 'Secretory',
-                'Ciliated2': 'Multiciliated lineage',
-                'Club': 'Secretory',
-                'Secretory2': 'Secretory',
-                'FOXN4': 'Rare',
-                'Basal1': 'Basal',
-                'Secretory1': 'Secretory',
-                'Fibroblast': '2_Fibroblast lineage',
-                'Ionocyte': 'Rare',
-                'Basal3': 'Basal',
-                'Basal_Mitotic': 'Basal',
-                'Basal2': 'Basal',
+                "Secretory3": "Secretory",
+                "Ciliated1": "Multiciliated lineage",
+                "Goblet": "Secretory",
+                "Ciliated2": "Multiciliated lineage",
+                "Club": "Secretory",
+                "Secretory2": "Secretory",
+                "FOXN4": "Rare",
+                "Basal1": "Basal",
+                "Secretory1": "Secretory",
+                "Fibroblast": "2_Fibroblast lineage",
+                "Ionocyte": "Rare",
+                "Basal3": "Basal",
+                "Basal_Mitotic": "Basal",
+                "Basal2": "Basal",
             },
         }
 
@@ -68,7 +68,7 @@ class Dataset(DatasetBase):
             fn = os.path.join(self.path, "human", "lung", "lukassen20_airway_orig.processed.h5ad")
         self.adata = anndata.read(fn)
         self.adata.X = np.expm1(self.adata.X)
-        self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs['nCount_RNA'].values[:, None]))\
+        self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs["nCount_RNA"].values[:, None]))\
                                    .multiply(1 / 10000)
 
         self.set_unkown_class_id(ids=["1_Unicorns and artifacts"])

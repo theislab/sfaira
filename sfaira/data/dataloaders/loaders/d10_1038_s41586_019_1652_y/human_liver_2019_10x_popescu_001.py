@@ -26,51 +26,51 @@ class Dataset(DatasetBase):
         self.id = "human_liver_2019_10x_popescu_001_10.1038/s41586-019-1652-y"
 
         self.download = "https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-7407/"
-        self.download_meta = 'private'
+        self.download_meta = "private"
 
-        self.author = 'Haniffa'
-        self.doi = '10.1038/s41586-019-1652-y'
+        self.author = "Haniffa"
+        self.doi = "10.1038/s41586-019-1652-y"
         self.healthy = True
-        self.normalization = 'raw'
+        self.normalization = "raw"
         self.organ = "liver"
         self.organism = "human"
-        self.protocol = '10x'
-        self.state_exact = 'healthy'
+        self.protocol = "10x"
+        self.state_exact = "healthy"
         self.year = 2019
 
-        self.var_symbol_col = 'index'
+        self.var_symbol_col = "index"
 
-        self.obs_key_cellontology_original = 'cell.labels'
+        self.obs_key_cellontology_original = "cell.labels"
 
         self.class_maps = {
             "0": {
-                'B cell': 'Mature B cells',
-                'DC1': 'Dendritic cell 1',
-                'DC2': 'Dendritic cell 2',
-                'DC precursor': 'Dendritic cell precursor',
-                'Early Erythroid': 'Early Erythroid',
-                'Early lymphoid_T lymphocyte': 'Early lymphoid T lymphocyte',
-                'Endothelial cell': 'Endothelial cell',
-                'Fibroblast': 'Fibroblast',
-                'HSC_MPP': 'HSC MPP',
-                'Hepatocyte': 'Hepatocyte',
-                'ILC precursor': 'ILC precursor',
-                'Kupffer Cell': 'Kupffer Cell',
-                'Late Erythroid': 'Late Erythroid',
-                'MEMP': 'MEMP',
-                'Mast cell': 'Mast cell',
-                'Megakaryocyte': 'Megakaryocyte',
-                'Mid Erythroid': 'Mid Erythroid',
-                'Mono-Mac': 'Mono Macrophage',
-                'Monocyte': 'Monocyte',
-                'Monocyte precursor': 'Monocyte precursor',
-                'NK': 'NK cell',
-                'Neutrophil-myeloid progenitor': 'Neutrophil myeloid progenitor',
-                'Pre pro B cell': 'Pre pro B cell',
-                'VCAM1+ EI macrophage': 'VCAM1pos EI macrophage',
-                'pDC precursor': 'pDendritic cell precursor',
-                'pre-B cell': 'pre B cell',
-                'pro-B cell': 'pro B cell'
+                "B cell": "Mature B cells",
+                "DC1": "Dendritic cell 1",
+                "DC2": "Dendritic cell 2",
+                "DC precursor": "Dendritic cell precursor",
+                "Early Erythroid": "Early Erythroid",
+                "Early lymphoid_T lymphocyte": "Early lymphoid T lymphocyte",
+                "Endothelial cell": "Endothelial cell",
+                "Fibroblast": "Fibroblast",
+                "HSC_MPP": "HSC MPP",
+                "Hepatocyte": "Hepatocyte",
+                "ILC precursor": "ILC precursor",
+                "Kupffer Cell": "Kupffer Cell",
+                "Late Erythroid": "Late Erythroid",
+                "MEMP": "MEMP",
+                "Mast cell": "Mast cell",
+                "Megakaryocyte": "Megakaryocyte",
+                "Mid Erythroid": "Mid Erythroid",
+                "Mono-Mac": "Mono Macrophage",
+                "Monocyte": "Monocyte",
+                "Monocyte precursor": "Monocyte precursor",
+                "NK": "NK cell",
+                "Neutrophil-myeloid progenitor": "Neutrophil myeloid progenitor",
+                "Pre pro B cell": "Pre pro B cell",
+                "VCAM1+ EI macrophage": "VCAM1pos EI macrophage",
+                "pDC precursor": "pDendritic cell precursor",
+                "pre-B cell": "pre B cell",
+                "pro-B cell": "pro B cell"
             },
         }
 

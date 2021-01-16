@@ -20,8 +20,8 @@ class Dataset(Dataset_d10_1016_j_cell_2018_02_001):
 
         self.class_maps = {
             "0": {
-                'Cell in cell cycle(Fetal_Kidney)': 'fetal proliferative cell',
-                'Metanephric mesenchyme(Fetal_Kidney)': 'fetal mesenchymal cell'
+                "Cell in cell cycle(Fetal_Kidney)": "fetal proliferative cell",
+                "Metanephric mesenchyme(Fetal_Kidney)": "fetal mesenchymal cell"
             },
         }
 

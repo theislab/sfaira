@@ -19,23 +19,23 @@ class Dataset(Dataset_d10_1016_j_cell_2018_02_001):
 
         self.class_maps = {
             "0": {
-                'Antral mucous cell (Stomach)': 'antral mucous cell',
-                'Dendritic cell(Stomach)': 'dendritic cell',
-                'Dividing cell(Stomach)': 'proliferative cell',
-                'Epithelial cell_Gkn3 high(Stomach)': 'epithelial cell',
-                'Epithelial cell_Krt20 high(Stomach)': 'epithelial cell',
-                'Epithelial cell_Pla2g1b high(Stomach)': 'epithelial cell',
-                'G cell(Stomach)': 'G cell',
-                'Gastric mucosal cell(Stomach)': 'gastric mucosal cell',
-                'Macrophage(Stomach)': 'macrophage',
-                'Muscle cell(Stomach)': 'muscle cell',
-                'Parietal cell (Stomach)': 'parietal cell',
-                'Pit cell_Gm26917 high(Stomach)': 'pit cell',
-                'Pit cell_Ifrd1 high(Stomach)': 'pit cell',
-                'Stomach cell_Gkn2 high(Stomach)': 'stomach cell',
-                'Stomach cell_Mt2 high(Stomach)': 'stomach cell',
-                'Stomach cell_Muc5ac high(Stomach)': 'stomach cell',
-                'Tuft cell(Stomach)': 'tuft cell'
+                "Antral mucous cell (Stomach)": "antral mucous cell",
+                "Dendritic cell(Stomach)": "dendritic cell",
+                "Dividing cell(Stomach)": "proliferative cell",
+                "Epithelial cell_Gkn3 high(Stomach)": "epithelial cell",
+                "Epithelial cell_Krt20 high(Stomach)": "epithelial cell",
+                "Epithelial cell_Pla2g1b high(Stomach)": "epithelial cell",
+                "G cell(Stomach)": "G cell",
+                "Gastric mucosal cell(Stomach)": "gastric mucosal cell",
+                "Macrophage(Stomach)": "macrophage",
+                "Muscle cell(Stomach)": "muscle cell",
+                "Parietal cell (Stomach)": "parietal cell",
+                "Pit cell_Gm26917 high(Stomach)": "pit cell",
+                "Pit cell_Ifrd1 high(Stomach)": "pit cell",
+                "Stomach cell_Gkn2 high(Stomach)": "stomach cell",
+                "Stomach cell_Mt2 high(Stomach)": "stomach cell",
+                "Stomach cell_Muc5ac high(Stomach)": "stomach cell",
+                "Tuft cell(Stomach)": "tuft cell"
             },
         }
 

@@ -12,7 +12,7 @@ class Dataset(DatasetBase):
     python code:
 
     import scanpy
-    scanpy.read_10x_h5('pbmc_10k_v3_filtered_feature_bc_matrix.h5').write('pbmc_10k_v3_filtered_feature_bc_matrix.h5ad')
+    scanpy.read_10x_h5("pbmc_10k_v3_filtered_feature_bc_matrix.h5").write("pbmc_10k_v3_filtered_feature_bc_matrix.h5ad")
 
     :param path:
     :param meta_path:
@@ -32,18 +32,18 @@ class Dataset(DatasetBase):
         self.download = "http://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_10k_v3/pbmc_10k_v3_filtered_feature_bc_matrix.h5"
         self.download_meta = None
 
-        self.author = '10x Genomics'
+        self.author = "10x Genomics"
         self.doi = "d_nan"
         self.healthy = True
-        self.normalization = 'raw'
+        self.normalization = "raw"
         self.organ = "blood"
         self.organism = "human"
-        self.protocol = '10x'
-        self.state_exact = 'healthy'
+        self.protocol = "10x"
+        self.state_exact = "healthy"
         self.year = 2019
 
-        self.var_symbol_col = 'index'
-        self.var_ensembl_col = 'gene_ids'
+        self.var_symbol_col = "index"
+        self.var_ensembl_col = "gene_ids"
 
         self.class_maps = {
             "0": {},

@@ -28,31 +28,31 @@ class Dataset(DatasetBase):
         self.download = "https://covid19.cog.sanger.ac.uk/menon19.processed.h5ad"
         self.download_meta = None
 
-        self.author = 'Hafler'
-        self.doi = '10.1038/s41467-019-12780-8'
+        self.author = "Hafler"
+        self.doi = "10.1038/s41467-019-12780-8"
         self.healthy = True
-        self.normalization = 'raw'
+        self.normalization = "raw"
         self.organ = "eye"  # ToDo: "retina"
         self.organism = "human"
-        self.protocol = '10x'
-        self.state_exact = 'healthy'
+        self.protocol = "10x"
+        self.state_exact = "healthy"
         self.year = 2019
 
-        self.var_symbol_col = 'index'
+        self.var_symbol_col = "index"
 
-        self.obs_key_cellontology_original = 'CellType'
+        self.obs_key_cellontology_original = "CellType"
 
         self.class_maps = {
             "0": {
-                'ACs': 'Amacrine cell',
-                'BPs': 'BPs',
-                'Cones': 'Retinal cone cell',
-                'Endo': 'Endothelial cell',
-                'HCs': 'Horizontal cells',
-                'Macroglia': 'Macroglia',
-                'Microglia': 'Microglia',
-                'RGCs': 'Retinal ganglion cell',
-                'Rods': 'Rods',
+                "ACs": "Amacrine cell",
+                "BPs": "BPs",
+                "Cones": "Retinal cone cell",
+                "Endo": "Endothelial cell",
+                "HCs": "Horizontal cells",
+                "Macroglia": "Macroglia",
+                "Microglia": "Microglia",
+                "RGCs": "Retinal ganglion cell",
+                "Rods": "Rods",
             },
         }
 

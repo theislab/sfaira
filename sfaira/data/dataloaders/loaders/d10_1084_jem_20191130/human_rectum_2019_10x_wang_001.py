@@ -32,26 +32,26 @@ class Dataset(DatasetBase):
         self.author = "Chen"
         self.doi = "10.1084/jem.20191130"
         self.healthy = True
-        self.normalization = 'raw'
+        self.normalization = "raw"
         self.organ = "rectum"
         self.organism = "human"
-        self.protocol = '10x'
-        self.state_exact = 'healthy'
+        self.protocol = "10x"
+        self.state_exact = "healthy"
         self.year = 2019
 
-        self.var_symbol_col = 'index'
+        self.var_symbol_col = "index"
 
-        self.obs_key_cellontology_original = 'CellType'
+        self.obs_key_cellontology_original = "CellType"
 
         self.class_maps = {
             "0": {
-                'Progenitor': 'Enterocyte progenitor',
-                'Goblet': 'Goblet',
-                'Enterocyte': 'Enterocyte',
-                'Paneth-like': 'Paneth-like',
-                'Stem Cell': 'Stem Cell',
-                'TA': 'TA',
-                'Enteriendocrine': 'Enteroendocrine',
+                "Progenitor": "Enterocyte progenitor",
+                "Goblet": "Goblet",
+                "Enterocyte": "Enterocyte",
+                "Paneth-like": "Paneth-like",
+                "Stem Cell": "Stem Cell",
+                "TA": "TA",
+                "Enteriendocrine": "Enteroendocrine",
             },
         }
 
@@ -60,5 +60,5 @@ class Dataset(DatasetBase):
             fn = os.path.join(self.path, "human", "rectum", "wang20_rectum.processed.h5ad")
         self.adata = anndata.read(fn)
         self.adata.X = np.expm1(self.adata.X)
-        self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs['n_counts'].values[:, None]))\
+        self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs["n_counts"].values[:, None]))\
                                    .multiply(1 / 10000)

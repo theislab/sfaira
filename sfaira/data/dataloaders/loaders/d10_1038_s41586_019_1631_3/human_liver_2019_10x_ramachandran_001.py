@@ -19,13 +19,13 @@ class Dataset(DatasetBase):
     ## Notebook Cell 2
     %%R -o sce
     library(Seurat)
-    load('tissue.rdata')
+    load("tissue.rdata")
     new_obj = CreateSeuratObject(counts = tissue@raw.data)
     new_obj@meta.data = tissue@meta.data
     sce <- as.SingleCellExperiment(new_obj)
 
     ## Notebook cell 3
-    sce.write('ramachandran.h5ad')
+    sce.write("ramachandran.h5ad")
 
     :param path:
     :param meta_path:
@@ -45,35 +45,35 @@ class Dataset(DatasetBase):
         self.download = "https://datashare.is.ed.ac.uk/bitstream/handle/10283/3433/tissue.rdata"
         self.download_meta = None
 
-        self.author = 'Henderson'
-        self.doi = '10.1038/s41586-019-1631-3'
-        self.normalization = 'raw'
+        self.author = "Henderson"
+        self.doi = "10.1038/s41586-019-1631-3"
+        self.normalization = "raw"
         self.organ = "liver"
         self.organism = "human"
-        self.protocol = '10x'
+        self.protocol = "10x"
         self.year = 2019
 
-        self.var_symbol_col = 'index'
+        self.var_symbol_col = "index"
 
-        self.obs_key_cellontology_original = 'annotation_lineage'
-        self.obs_key_state_exact = 'condition'
+        self.obs_key_cellontology_original = "annotation_lineage"
+        self.obs_key_state_exact = "condition"
         self.obs_key_healthy = self.obs_key_state_exact
-        self.healthy_state_healthy = 'Uninjured'
+        self.healthy_state_healthy = "Uninjured"
 
         self.class_maps = {
             "0": {
-                'MPs': 'MP',
-                'Tcells': 'Tcells',
-                'ILCs': 'ILC',
-                'Endothelia': 'Endothelia',
-                'Bcells': 'Bcells',
-                'pDCs': 'pDCs',
-                'Plasma Bcells': 'Plasma B cell',
-                'Mast cells': 'Mast cell',
-                'Mesenchyme': 'Mesenchyme',
-                'Cholangiocytes': 'Cholangiocytes',
-                'Hepatocytes': 'Hepatocytes',
-                'Mesothelia': 'Mesothelia',
+                "MPs": "MP",
+                "Tcells": "Tcells",
+                "ILCs": "ILC",
+                "Endothelia": "Endothelia",
+                "Bcells": "Bcells",
+                "pDCs": "pDCs",
+                "Plasma Bcells": "Plasma B cell",
+                "Mast cells": "Mast cell",
+                "Mesenchyme": "Mesenchyme",
+                "Cholangiocytes": "Cholangiocytes",
+                "Hepatocytes": "Hepatocytes",
+                "Mesothelia": "Mesothelia",
             },
         }
 

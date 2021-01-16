@@ -19,14 +19,14 @@ class Dataset(Dataset_d10_1016_j_cell_2018_02_001):
 
         self.class_maps = {
             "0": {
-                'abT cell(Thymus)': 'abT cell',
-                'B cell(Thymus)': "B cell",
-                'DPT cell(Thymus)': "double positive T cell",
-                'gdT cell (Thymus)': 'gdT cell',
-                'Pre T cell(Thymus)': 'immature T cell',
-                'Proliferating thymocyte(Thymus)': "immature T cell",
-                'T cell_Id2 high(Thymus)': 'abT cell',  # TODO check, not sure about this gene
-                'T cell_Ms4a4b high(Thymus)': 'abT cell'  # TODO check, not sure about this gene
+                "abT cell(Thymus)": "abT cell",
+                "B cell(Thymus)": "B cell",
+                "DPT cell(Thymus)": "double positive T cell",
+                "gdT cell (Thymus)": "gdT cell",
+                "Pre T cell(Thymus)": "immature T cell",
+                "Proliferating thymocyte(Thymus)": "immature T cell",
+                "T cell_Id2 high(Thymus)": "abT cell",  # TODO check, not sure about this gene
+                "T cell_Ms4a4b high(Thymus)": "abT cell"  # TODO check, not sure about this gene
             },
         }
 

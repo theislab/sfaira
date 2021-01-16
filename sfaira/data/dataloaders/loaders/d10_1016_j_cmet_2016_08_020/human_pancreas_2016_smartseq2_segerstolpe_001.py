@@ -31,36 +31,36 @@ class Dataset(DatasetBase):
 
         self.author = "Sandberg"
         self.doi = "10.1016/j.cmet.2016.08.020"
-        self.normalization = 'raw'
+        self.normalization = "raw"
         self.organ = "pancreas"
         self.organism = "human"
-        self.protocol = 'Smartseq2'
+        self.protocol = "Smartseq2"
         self.year = 2016
 
-        self.var_symbol_col = 'index'
+        self.var_symbol_col = "index"
 
-        self.obs_key_cellontology_original = 'Characteristics[cell type]'
-        self.obs_key_state_exact = 'Characteristics[disease]'
+        self.obs_key_cellontology_original = "Characteristics[cell type]"
+        self.obs_key_state_exact = "Characteristics[disease]"
         self.obs_key_healthy = self.obs_key_state_exact
 
-        self.healthy_state_healthy = 'normal'
+        self.healthy_state_healthy = "normal"
 
         self.class_maps = {
             "0": {
-                'alpha cell': 'Alpha cell',
-                'ductal cell': 'Ductal cell',
-                'beta cell': 'Beta cell',
-                'gamma cell': 'Gamma cell',
-                'acinar cell': 'Acinar cell',
-                'delta cell': 'Delta cell',
-                'PSC cell': 'PSC cell',
-                'unclassified endocrine cell': 'Unclassified endocrine cell',
-                'co-expression cell': 'Co-expression cell',
-                'endothelial cell': 'Endothelial cell',
-                'epsilon cell': 'Epsilon cell',
-                'mast cell': 'Mast cell',
-                'MHC class II cell': 'MHC class II cell',
-                'unclassified cell': 'Unknown',
+                "alpha cell": "Alpha cell",
+                "ductal cell": "Ductal cell",
+                "beta cell": "Beta cell",
+                "gamma cell": "Gamma cell",
+                "acinar cell": "Acinar cell",
+                "delta cell": "Delta cell",
+                "PSC cell": "PSC cell",
+                "unclassified endocrine cell": "Unclassified endocrine cell",
+                "co-expression cell": "Co-expression cell",
+                "endothelial cell": "Endothelial cell",
+                "epsilon cell": "Epsilon cell",
+                "mast cell": "Mast cell",
+                "MHC class II cell": "MHC class II cell",
+                "unclassified cell": "Unknown",
             },
         }
 
@@ -70,11 +70,11 @@ class Dataset(DatasetBase):
                 os.path.join(self.path, "human", "pancreas", "E-MTAB-5061.processed.1.zip"),
                 os.path.join(self.path, "human", "pancreas", "E-MTAB-5061.sdrf.txt")
             ]
-        df = pd.read_csv(fn[0], sep='\t')
+        df = pd.read_csv(fn[0], sep="\t")
         df.index = df.index.get_level_values(0)
-        df = df.drop('#samples', axis=1)
+        df = df.drop("#samples", axis=1)
         df = df.T.iloc[:, :26178]
         self.adata = anndata.AnnData(df)
-        self.adata.obs = pd.read_csv(fn[1], sep='\t').set_index('Source Name').loc[self.adata.obs.index]
+        self.adata.obs = pd.read_csv(fn[1], sep="\t").set_index("Source Name").loc[self.adata.obs.index]
         # filter observations which are not cells (empty wells, low quality cells etc.)
-        self.adata = self.adata[self.adata.obs['Characteristics[cell type]'] != 'not applicable'].copy()
+        self.adata = self.adata[self.adata.obs["Characteristics[cell type]"] != "not applicable"].copy()

@@ -24,7 +24,7 @@ class Dataset_d10_1016_j_cell_2018_02_001(DatasetBase):
 
         self.author = "Guo"
         self.doi = "10.1016/j.cell.2018.02.001"
-        self.normalization = 'raw'
+        self.normalization = "raw"
         self.healthy = True
         self.organism = "mouse"
         self.protocol = "microwell-seq"
@@ -35,9 +35,9 @@ class Dataset_d10_1016_j_cell_2018_02_001(DatasetBase):
 
     def _load_generalized(self, fn, fn_meta):
         celltypes = pandas.read_csv(fn_meta, index_col=1)
-        celltypes = celltypes.drop(['Unnamed: 0'], axis=1)
+        celltypes = celltypes.drop(["Unnamed: 0"], axis=1)
 
-        data = pandas.read_csv(fn, sep=' ', header=0)
+        data = pandas.read_csv(fn, sep=" ", header=0)
         self.adata = anndata.AnnData(data.T)
         self.adata = self.adata[np.array([x in celltypes.index for x in self.adata.obs_names])].copy()
         self.adata.obs = celltypes.loc[self.adata.obs_names, :]

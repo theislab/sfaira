@@ -33,33 +33,33 @@ class Dataset(DatasetBase):
         self.author = "Yanai"
         self.doi = "10.1016/j.cels.2016.08.011"
         self.healthy = True
-        self.normalization = 'raw'
+        self.normalization = "raw"
         self.organ = "pancreas"
         self.organism = "human"
-        self.protocol = 'inDrop'
-        self.state_exact = 'healthy'
+        self.protocol = "inDrop"
+        self.state_exact = "healthy"
         self.year = 2016
 
-        self.var_symbol_col = 'index'
+        self.var_symbol_col = "index"
 
-        self.obs_key_cellontology_original = 'CellType'
+        self.obs_key_cellontology_original = "CellType"
 
         self.class_maps = {
             "0": {
-                't_cell': 'T cell',
-                'quiescent_stellate': 'Quiescent Stellate cell',
-                'mast': 'Mast cell',
-                'delta': 'Delta cell',
-                'beta': 'Beta cell',
-                'endothelial': 'Endothelial cell',
-                'macrophage': 'Macrophage',
-                'epsilon': 'Epsilon cell',
-                'activated_stellate': 'Activated Stellate cell',
-                'acinar': 'Acinar cell',
-                'alpha': 'Alpha cell',
-                'ductal': 'Ductal cell',
-                'schwann': 'Schwann cell',
-                'gamma': 'Gamma cell',
+                "t_cell": "T cell",
+                "quiescent_stellate": "Quiescent Stellate cell",
+                "mast": "Mast cell",
+                "delta": "Delta cell",
+                "beta": "Beta cell",
+                "endothelial": "Endothelial cell",
+                "macrophage": "Macrophage",
+                "epsilon": "Epsilon cell",
+                "activated_stellate": "Activated Stellate cell",
+                "acinar": "Acinar cell",
+                "alpha": "Alpha cell",
+                "ductal": "Ductal cell",
+                "schwann": "Schwann cell",
+                "gamma": "Gamma cell",
             },
         }
 
@@ -68,5 +68,5 @@ class Dataset(DatasetBase):
             fn = os.path.join(self.path, "human", "pancreas", "baron16.processed.h5ad")
         self.adata = anndata.read(fn)
         self.adata.X = np.expm1(self.adata.X)
-        self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs['n_counts'].values[:, None]))\
+        self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs["n_counts"].values[:, None]))\
                                    .multiply(1 / 10000)
