@@ -70,10 +70,9 @@ class Dataset(DatasetBase):
         self.author = 'Simmons'
         self.doi = "10.1016/j.cell.2018.08.067"
         self.normalization = 'raw'
-        self.organ = "colon"
+        self.organ = "colon"  # ToDo: "lamina propria of mucosa of colon"
         self.organism = "human"
         self.protocol = '10x'
-        self.sub_tissue = "lamina propria of mucosa of colon"
         self.year = 2019
 
         self.var_symbol_col = 'names'

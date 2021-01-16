@@ -33,11 +33,10 @@ class Dataset(DatasetBase):
         self.doi = "10.1038/s41591-019-0468-5"
         self.healthy = True
         self.normalization = 'raw'
-        self.organ = "lung"
+        self.organ = "lung"  # ToDo: "parenchymal lung and distal airway specimens"
         self.organism = "human"
         self.protocol = 'dropseq'
         self.state_exact = 'uninvolved areas of tumour resection material'
-        self.sub_tissue = "parenchymal lung and distal airway specimens"
         self.year = 2019
 
         self.var_symbol_col = 'index'

@@ -33,10 +33,9 @@ class Dataset(DatasetBase):
         self.healthy = True
         self.normalization = 'raw'
         self.state_exact = 'healthy'
-        self.organ = "lung"
+        self.organ = "lung"  # ToDo: "parenchyma"
         self.organism = "human"
         self.protocol = '10x'
-        self.sub_tissue = "parenchyma"
         self.year = 2020
 
         self.var_symbol_col = 'index'

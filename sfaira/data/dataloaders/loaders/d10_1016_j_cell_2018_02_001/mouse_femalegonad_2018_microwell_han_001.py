@@ -16,7 +16,6 @@ class Dataset(Dataset_d10_1016_j_cell_2018_02_001):
         self.id = "mouse_femalegonad_2018_microwell-seq_han_001_10.1016/j.cell.2018.02.001"
         self.download = "https://ndownloader.figshare.com/articles/5435866?private_link=865e694ad06d5857db4b"
         self.organ = "femalegonad"
-        self.sub_tissue = "femalegonad"
 
         self.class_maps = {
             "0": {

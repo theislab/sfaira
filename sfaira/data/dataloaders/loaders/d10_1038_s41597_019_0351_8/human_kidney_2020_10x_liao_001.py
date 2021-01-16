@@ -66,7 +66,6 @@ class Dataset(DatasetBase):
         self.organism = "human"
         self.protocol = '10x'
         self.state_exact = 'healthy'
-        self.sub_tissue = "kidney"
         self.year = 2020
         self.doi = '10.1038/s41597-019-0351-8'
 

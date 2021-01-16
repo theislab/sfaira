@@ -44,11 +44,10 @@ class Dataset(DatasetBase):
         self.doi = "d_nan"
         self.healthy = True
         self.normalization = 'raw'
-        self.organ = "blood"
+        self.organ = "blood" 
         self.organism = "human"
         self.protocol = '10x'
         self.state_exact = 'healthy'
-        self.sub_tissue = "umbilical_cord_blood"
         self.year = 2018
 
         self.var_symbol_col = 'index'

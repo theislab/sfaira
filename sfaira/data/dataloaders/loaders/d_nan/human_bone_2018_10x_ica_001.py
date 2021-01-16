@@ -48,7 +48,6 @@ class Dataset(DatasetBase):
         self.organism = "human"
         self.protocol = '10x'
         self.state_exact = 'healthy'
-        self.sub_tissue = "bone_marrow"
         self.year = 2018
 
         self.var_symbol_col = 'index'

@@ -49,10 +49,9 @@ class Dataset(DatasetBase):
         self.author = 'Kropski'
         self.doi = "10.1101/753806"
         self.normalization = 'raw'
-        self.organ = "lung"
+        self.organ = "lung"  # ToDo: "parenchyma"
         self.organism = "human"
         self.protocol = '10x'
-        self.sub_tissue = "parenchyma"
         self.year = 2020
 
         self.var_symbol_col = 'index'

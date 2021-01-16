@@ -38,7 +38,6 @@ class Dataset(DatasetBase):
         self.doi = "10.1084/jem.20191130"
         self.protocol = '10x'
         self.state_exact = 'healthy'
-        self.sub_tissue = "colon"
         self.year = 2019
 
         self.var_symbol_col = 'index'

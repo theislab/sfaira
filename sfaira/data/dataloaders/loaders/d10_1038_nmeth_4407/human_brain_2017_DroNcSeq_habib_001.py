@@ -37,7 +37,6 @@ class Dataset(DatasetBase):
         self.organism = "human"
         self.protocol = 'DroNcSeq'
         self.state_exact = 'healthy'
-        self.sub_tissue = "hippocampus, prefrontal cortex"
         self.year = 2017
 
         self.var_symbol_col = 'index'

@@ -32,11 +32,10 @@ class Dataset(DatasetBase):
         self.author = 'Teichmann'
         self.doi = "10.1038/s41591-019-0468-5"
         self.healthy = True
-        self.organ = "lung"
+        self.organ = "lung"  # ToDo: "alveoli, parenchyma"
         self.organism = "human"
         self.protocol = '10x'
         self.state_exact = 'healthy'
-        self.sub_tissue = "alveoli, parenchyma"
         self.year = 2019
         self.normalization = 'norm'
 

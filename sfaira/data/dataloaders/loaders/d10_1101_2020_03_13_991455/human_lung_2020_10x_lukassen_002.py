@@ -34,11 +34,10 @@ class Dataset(DatasetBase):
         self.doi = "10.1101/2020.03.13.991455"
         self.healthy = True
         self.normalization = 'raw'
-        self.organ = "lung"
+        self.organ = "lung"  # ToDo: "bronchial epithelial cells"
         self.organism = "human"
         self.protocol = '10x'
         self.state_exact = 'healthy'
-        self.sub_tissue = "bronchial epithelial cells"
         self.year = 2020
 
         self.var_symbol_col = 'index'

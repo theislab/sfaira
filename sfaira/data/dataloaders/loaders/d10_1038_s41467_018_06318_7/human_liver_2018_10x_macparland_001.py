@@ -34,11 +34,10 @@ class Dataset(DatasetBase):
         self.doi = '10.1038/s41467-018-06318-7'
         self.healthy = True
         self.normalization = 'raw'
-        self.organ = "liver"
+        self.organ = "liver"  # ToDo: "caudate lobe"
         self.organism = "human"
         self.protocol = '10x'
         self.state_exact = 'healthy'
-        self.sub_tissue = "caudate lobe"
         self.year = 2018
 
         self.var_symbol_col = 'index'

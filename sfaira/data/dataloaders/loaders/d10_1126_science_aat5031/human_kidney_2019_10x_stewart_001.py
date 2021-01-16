@@ -36,11 +36,10 @@ class Dataset(DatasetBase):
         self.doi = '10.1126/science.aat5031'
         self.healthy = True
         self.normalization = 'norm'
-        self.organ = "kidney"
+        self.organ = "kidney"  # ToDo: "renal medulla, renal pelvis, ureter, cortex of kidney"
         self.organism = "human"
         self.protocol = '10x'
         self.state_exact = 'healthy'
-        self.sub_tissue = "renal medulla, renal pelvis, ureter, cortex of kidney"
         self.year = 2019
 
         self.var_symbol_col = 'index'

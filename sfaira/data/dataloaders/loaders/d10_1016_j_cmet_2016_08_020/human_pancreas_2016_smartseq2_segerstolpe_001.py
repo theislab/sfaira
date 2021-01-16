@@ -35,7 +35,6 @@ class Dataset(DatasetBase):
         self.organ = "pancreas"
         self.organism = "human"
         self.protocol = 'Smartseq2'
-        self.sub_tissue = "pancreas"
         self.year = 2016
 
         self.var_symbol_col = 'index'

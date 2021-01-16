@@ -31,7 +31,6 @@ class Dataset(DatasetBase):
         self.organism = "mouse"
         self.protocol = "microwell"
         self.state_exact = "healthy"
-        self.sub_tissue = "brain"
         self.year = 2019
 
         self.var_ensembl_col = "ensembl"

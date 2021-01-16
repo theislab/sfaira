@@ -16,7 +16,6 @@ class Dataset(Dataset_d10_1101_661728):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, source=source, **kwargs)
         self.id = "mouse_spleen_2019_smartseq2_pisco_001_10.1101/661728"
         self.organ = "spleen"
-        self.sub_tissue = "spleen"
         self.class_maps = {
             "0": {},
         }

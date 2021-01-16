@@ -26,7 +26,6 @@ class Dataset_d10_1016_j_cmet_2019_01_021(DatasetBase):
         self.organism = "mouse"
         self.protocol = "10x"
         self.state_exact = "diabetic"
-        self.sub_tissue = "pancreas"
         self.year = 2019
 
         self.var_symbol_col = "index"

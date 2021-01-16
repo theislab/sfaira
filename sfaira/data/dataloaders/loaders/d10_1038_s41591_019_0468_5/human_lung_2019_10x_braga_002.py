@@ -33,11 +33,10 @@ class Dataset(DatasetBase):
         self.doi = "10.1038/s41591-019-0468-5"
         self.healthy = True
         self.normalization = 'norm'
-        self.organ = "lung"
+        self.organ = "lung"  # ToDo "bronchi"
         self.organism = "human"
         self.protocol = '10x'
         self.state_exact = 'healthy'
-        self.sub_tissue = "bronchi"
         self.year = 2019
 
         self.var_symbol_col = 'index'

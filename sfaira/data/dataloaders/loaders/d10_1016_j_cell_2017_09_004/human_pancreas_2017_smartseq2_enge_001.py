@@ -77,10 +77,9 @@ class Dataset(DatasetBase):
         self.healthy = True
         self.normalization = 'raw'
         self.protocol = 'Smartseq2'
-        self.organ = "pancreas"
+        self.organ = "pancreas". # ToDo: "islet of Langerhans"
         self.organism = "human"
         self.state_exact = "healthy"
-        self.sub_tissue = "islet of Langerhans"
         self.year = 2017
 
         self.var_symbol_col = 'index'

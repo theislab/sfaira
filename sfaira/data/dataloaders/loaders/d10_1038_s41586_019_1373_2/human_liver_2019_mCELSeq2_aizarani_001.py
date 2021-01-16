@@ -37,7 +37,6 @@ class Dataset(DatasetBase):
         self.organism = "human"
         self.protocol = 'mCEL-Seq2'
         self.state_exact = 'healthy'
-        self.sub_tissue = "liver"
         self.year = 2019
 
         self.var_symbol_col = 'index'

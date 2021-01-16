@@ -33,11 +33,10 @@ class Dataset(DatasetBase):
         self.doi = '10.1073/pnas.1914143116'
         self.healthy = True
         self.normalization = 'norm'
-        self.organ = "eye"
+        self.organ = "eye"  # ToDo: "retina"
         self.organism = "human"
         self.protocol = '10x'
         self.state_exact = 'healthy'
-        self.sub_tissue = "retina"
         self.year = 2019
 
         self.var_symbol_col = 'index'
