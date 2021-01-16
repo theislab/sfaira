@@ -135,6 +135,8 @@ class Dataset_d10_1038_s41586_020_2157_4(DatasetBase):
                              "donor", "celltype_global", "age", "celltype_specific", "cluster_specific", "gender",
                              "protocol", "source"]
 
+        adata.var = adata.var.reset_index().rename({'index': 'names'}, axis='columns')  # ToDo: can this go?
+
         # create a tidy organ annotation which is then used in sfaira
         adata.obs["organ"] = adata.obs["sub_tissue"] \
             .str.replace("Adult", "") \
