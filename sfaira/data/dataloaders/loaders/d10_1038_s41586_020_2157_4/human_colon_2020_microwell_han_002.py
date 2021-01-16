@@ -21,8 +21,6 @@ class Dataset(Dataset_d10_1038_s41586_020_2157_4):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "human_colon_2020_microwell_han_002_10.1038/s41586-020-2157-4"
         self.organ = 'Colon'
-        self.sub_tissue = 'AdultTransverseColon'
-        self.dev_stage = 'Adult'
         self.class_maps = {
             "0": {
                 'Enterocyte progenitor': 'Enterocyte Progenitors',

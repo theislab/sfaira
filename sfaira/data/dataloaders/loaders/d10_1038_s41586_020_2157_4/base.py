@@ -39,7 +39,6 @@ class Dataset_d10_1038_s41586_020_2157_4(DatasetBase):
         self.state_exact = 'healthy'
         self.year = 2020
 
-        self.obs_key_cellontology_class = "cell_ontology_class"
         self.obs_key_cellontology_original = "cell_ontology_class"
         self.obs_key_dev_stage = "dev_stage"
         self.obs_key_sex = "gender"
@@ -128,20 +127,13 @@ class Dataset_d10_1038_s41586_020_2157_4(DatasetBase):
         adata.obs = pd.concat([adata.obs, df[['Ages', 'Celltype', 'Cluster_id', 'Gender', 'Method', 'Source']]], axis=1)
         assert np.all(a_idx == adata.obs.index)
 
-        # remove mouse cells from the object
+        # remove mouse cells from the object  # ToDo: add this back in as mouse data sets?
         adata = adata[adata.obs['Source'] != 'MCA2.0'].copy()
 
         # tidy up the column names of the obs annotations
         adata.obs.columns = ['sample', 'sub_tissue', 'n_genes', 'n_counts', 'cluster_global', 'dev_stage',
                              'donor', 'celltype_global', 'age', 'celltype_specific', 'cluster_specific', 'gender',
                              'protocol', 'source']
-
-        # create some annotations that are used in sfaira
-        adata.obs["healthy"] = True
-        adata.obs["state_exact"] = 'healthy'
-        adata.obs["cell_ontology_class"] = adata.obs["celltype_global"]
-        adata.obs["cell_ontology_id"] = None
-        adata.var = adata.var.reset_index().rename({'index': 'names'}, axis='columns')
 
         # create a tidy organ annotation which is then used in sfaira
         adata.obs['organ'] = adata.obs['sub_tissue'] \
