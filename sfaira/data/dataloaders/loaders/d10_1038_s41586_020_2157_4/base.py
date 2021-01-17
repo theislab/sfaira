@@ -44,8 +44,7 @@ class Dataset_d10_1038_s41586_020_2157_4(DatasetBase):
         self.obs_key_sex = "gender"
         self.obs_key_age = "age"
 
-        self.var_ensembl_col = "ensembl"
-        self.var_symbol_col = "names"
+        self.var_symbol_col = "index"
 
     def _download(self):
         # download required files from loaders cell landscape publication data: https://figshare.com/articles/HCL_DGE_Data/7235471
@@ -134,8 +133,6 @@ class Dataset_d10_1038_s41586_020_2157_4(DatasetBase):
         adata.obs.columns = ["sample", "sub_tissue", "n_genes", "n_counts", "cluster_global", "dev_stage",
                              "donor", "celltype_global", "age", "celltype_specific", "cluster_specific", "gender",
                              "protocol", "source"]
-
-        adata.var = adata.var.reset_index().rename({'index': 'names'}, axis='columns')  # ToDo: can this go?
 
         # create a tidy organ annotation which is then used in sfaira
         adata.obs["organ"] = adata.obs["sub_tissue"] \
