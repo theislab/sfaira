@@ -21,14 +21,15 @@ UNS_STRING_META_IN_OBS = "__obs__"
 
 
 def map_fn(inputs):
-    ds, formatted_version, remove_gene_version, match_to_reference, load_raw, allow_caching, func, kwargs_func = inputs
+    ds, formatted_version, remove_gene_version, match_to_reference, load_raw, allow_caching, func, \
+    kwargs_func = inputs
     try:
         ds.load(
             celltype_version=formatted_version,
             remove_gene_version=remove_gene_version,
             match_to_reference=match_to_reference,
             load_raw=load_raw,
-            allow_caching=allow_caching
+            allow_caching=allow_caching,
         )
         if func is not None:
             x = func(ds, **kwargs_func)
@@ -169,7 +170,23 @@ class DatasetBase(abc.ABC):
         self.adata = None
         gc.collect()
 
-    def _load_cached(self, fn: str, load_raw: bool, allow_caching: bool):
+    def set_raw_full_group_object(self, fn=None, adata_group: Union[None, anndata.AnnData] = None) -> bool:
+        """
+        Only relevant for DatasetBaseGroupLoading but has to be a method of this class
+        because it is used in DatasetGroup.
+
+        :param fn:
+        :param adata_group:
+        :return: Whether group loading is used.
+        """
+        return False
+
+    def _load_cached(
+            self,
+            fn: str,
+            load_raw: bool,
+            allow_caching: bool,
+    ):
         """
         Wraps data set specific load and allows for caching.
 
@@ -212,7 +229,7 @@ class DatasetBase(abc.ABC):
             remove_gene_version: bool = True,
             match_to_reference: Union[str, None] = None,
             load_raw: bool = False,
-            allow_caching: bool = True
+            allow_caching: bool = True,
     ):
         """
 
@@ -1298,6 +1315,75 @@ class DatasetBase(abc.ABC):
                     raise ValueError(f"{x} is not a valid entry for {attr}, choose from: {str(allowed)}")
 
 
+class DatasetBaseGroupLoading(DatasetBase):
+    """
+    Container class specific to datasets which come in groups and require specialised loading.
+    """
+    _unprocessed_full_group_object: bool
+
+    def __init__(
+            self,
+            path: Union[str, None],
+            meta_path: Union[str, None] = None,
+            cache_path: Union[str, None] = None,
+            **kwargs
+    ):
+        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        self._unprocessed_full_group_object = False
+
+    @abc.abstractmethod
+    def _load_full_group_object(self, fn=None) -> Union[None, anndata.AnnData]:
+        """
+        Loads a raw anndata object that correponds to a superset of the data belonging to this Dataset.
+
+        Override this method in the Dataset if this is relevant.
+        :return: adata_group
+        """
+        pass
+
+    def set_raw_full_group_object(self, fn=None, adata_group: Union[None, anndata.AnnData] = None):
+        if self.adata is None and adata_group is not None:
+            self.adata = adata_group
+        elif self.adata is None and adata_group is not None:
+            self.adata = self._load_full_group_object(fn=fn)
+        elif self.adata is not None and self._unprocessed_full_group_object:
+            pass
+        else:
+            assert False, "switch error"
+        self._unprocessed_full_group_object = True
+        return True
+
+    def _load_from_group(self):
+        """
+        Sets .adata based on a raw anndata object that correponds to a superset of the data belonging to this Dataset,
+        including subsetting.
+
+        Override this method in the Dataset if this is relevant.
+        """
+        pass
+
+    def _subset_from_group(
+            self,
+            subset_items: dict,
+    ):
+        """
+        Subsets a raw anndata object to the data corresponding to this Dataset.
+
+        :param subset_items: Key-value pairs for subsetting: Keys are columns in .obs, values are entries that should
+            be kept. If the dictionary has multiple entries, these are sequentially subsetted (AND-gate).
+        :return:
+        """
+        assert self.adata is not None, "this method should only be called if .adata is not None"
+        for k, v in subset_items:
+            self.adata = self.adata[[x in v for x in self.adata.obs[k].values], :]
+
+    def _load(self, fn):
+        _ = self.set_raw_full_group_object(fn=fn, adata_group=None)
+        if self._unprocessed_full_group_object:
+            self._load_from_group()
+        self._unprocessed_full_group_object = False
+
+
 class DatasetGroup:
     """
     Container class that co-manages multiple data sets, removing need to call Dataset() methods directly through
@@ -1317,6 +1403,14 @@ class DatasetGroup:
     def __init__(self, datasets: dict):
         self.datasets = datasets
         self._ADATA_IDS_SFAIRA = ADATA_IDS_SFAIRA()
+
+    def _load_group(self, load_raw: bool):
+        """
+
+        :param load_raw: See .load().
+        :return:
+        """
+        return None
 
     def load(
             self,
@@ -1379,13 +1473,18 @@ class DatasetGroup:
                     print(x[1])
                     del self.datasets[x[0]]
         else:  # for loop
+            adata_group = None
             for k, v in self.datasets.items():
                 print(f"loading {k}")
+                group_loading = v.set_raw_full_group_object(fn=None, adata_group=adata_group)
+                if adata_group is None and group_loading:  # cache full adata object for subsequent Datasets
+                    adata_group = v.adata.copy()
                 x = map_fn(tuple([v] + args))
                 # Clear data sets that were not successfully loaded because of missing data:
                 if x is not None:
                     print(x[1])
                     del self.datasets[x[0]]
+            del adata_group
 
     def load_tobacked(
             self,
