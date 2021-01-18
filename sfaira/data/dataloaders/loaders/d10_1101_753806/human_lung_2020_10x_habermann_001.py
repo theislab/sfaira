@@ -7,27 +7,6 @@ from sfaira.data import DatasetBase
 
 
 class Dataset(DatasetBase):
-    """
-    This data loader supports reading of the downloaded raw data files if `load_raw=True` is passed to self.load()
-    To download the datafiles required by this dataloader, use the links provided as the `download_website` and
-    `download_website_meta` attribute of this class. For (up to 100-fold faster) repeated data loading, please pass
-    `load_raw=False` when calling the self.load() method. For this, you need to preprocess the raw files as below and
-    place the resulting h5ad file in the data folder of this organ:
-
-    import anndata
-    import pandas as pd
-    adata = anndata.read_mtx("GSE135893_matrix.mtx.gz").T
-    adata.var = pd.read_csv("GSE135893_genes.tsv.gz", index_col=0, header=None, names=["ids"])
-    adata.obs = pd.read_csv("GSE135893_barcodes.tsv.gz", index_col=0, header=None, names=["barcodes"])
-    obs = pd.read_csv("GSE135893_IPF_metadata.csv.gz", index_col=0)
-    adata = adata[obs.index.tolist(),:].copy()
-    adata.obs = obs
-    adata.write("habermann_processed.h5ad")
-
-    :param path:
-    :param meta_path:
-    :param kwargs:
-    """
 
     def __init__(
             self,

@@ -3,13 +3,6 @@ from .base import Dataset_d10_1038_s41586_020_2157_4
 
 
 class Dataset(Dataset_d10_1038_s41586_020_2157_4):
-    """
-    This is a dataloader for a the Human Cell Landscape dataset (Han et al. 2020. doi: 10.1038/s41586-020-2157-4).
-
-    :param path:
-    :param meta_path:
-    :param kwargs:
-    """
 
     def __init__(
             self,

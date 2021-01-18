@@ -9,68 +9,6 @@ from sfaira.data import DatasetBase
 
 
 class Dataset(DatasetBase):
-    """
-    This data loader supports reading of the downloaded raw data files if `load_raw=True` is passed to self.load()
-    To download the datafile required by this dataloader, use the link provided as the `download_website` attribute of
-    this class. The required celltype annotations for the data were kindly provided to us by the authors of the paper.
-    Please contact them directly to pbtain the required annotation files (donor1.annotation.txt and
-    donor2.annotation.txt). For (up to 100-fold faster) repeated data loading, please pass `load_raw=False` when calling
-    the self.load() method. For this, you need to preprocess the raw files as below and place the resulting h5ad file in
-    the data folder of this organ:
-
-    import anndata
-    import tarfile
-    import pandas as pd
-    import scipy.sparse
-    adatas = []
-    with tarfile.open("GSE126030_RAW.tar") as tar:
-        for member in tar.getmembers():
-            df = pd.read_csv(tar.extractfile(member.name), compression="gzip", sep="\t")
-            df.index = [i.split(".")[0] for i in df["Accession"]]
-            var = pd.concat([df.pop(x) for x in ["Gene", "Accession"]], 1)
-            if df.columns[-1].startswith("Un"):
-                df.drop(df.columns[len(df.columns)-1], axis=1, inplace=True)
-            adata = anndata.AnnData(df.T)
-            adata.var = var
-            if "PP001" in member.name or "PP002" in member.name:
-                adata.obs["donor"] = "Donor1"
-                adata.obs["organ"] = "Lung"
-            elif "PP003" in member.name or "PP004" in member.name:
-                adata.obs["donor"] = "Donor1"
-                adata.obs["organ"] = "Bone Marrow"
-            elif "PP005" in member.name or "PP006" in member.name:
-                adata.obs["donor"] = "Donor1"
-                adata.obs["organ"] = "Lymph Node"
-            elif "PP009" in member.name or "PP010" in member.name:
-                adata.obs["donor"] = "Donor2"
-                adata.obs["organ"] = "Lung"
-            elif "PP011" in member.name or "PP012" in member.name:
-                adata.obs["donor"] = "Donor2"
-                adata.obs["organ"] = "Bone Marrow"
-            elif "PP013" in member.name or "PP014" in member.name:
-                adata.obs["donor"] = "Donor2"
-                adata.obs["organ"] = "Lymph Node"
-            else:
-                continue
-            adata.obs.index = member.name.split("_")[1].split("s")[0]+"nskept."+adata.obs.index
-            adatas.append(adata)
-    adata = adatas[0].concatenate(adatas[1:], index_unique=None)
-    adata.obs.drop("batch", axis=1, inplace=True)
-    adata = adata[:,adata.X.sum(axis=0) > 0].copy()
-    adata.obs["cell_ontology_class"] = "Unknown"
-    df1 = pd.read_csv("donor1.annotation.txt", sep="\t", index_col=0, header=None)
-    df2 = pd.read_csv("donor2.annotation.txt", sep="\t", index_col=0, header=None)
-    for i in df1.index:
-        adata.obs["cell_ontology_class"].loc[i] = df1.loc[i][1]
-    for i in df2.index:
-        adata.obs["cell_ontology_class"].loc[i] = df2.loc[i][1]
-    adata.X = scipy.sparse.csc_matrix(adata.X)
-    adata.write("GSE126030.h5ad")
-
-    :param path:
-    :param meta_path:
-    :param kwargs:
-    """
 
     def __init__(
             self,

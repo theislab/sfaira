@@ -7,14 +7,6 @@ from sfaira.data import DatasetBase
 
 
 class Dataset(DatasetBase):
-    """
-    This data loader directly processes the two raw data files which can be obtained from the `download_website`
-    attribute of this class.
-
-    :param path:
-    :param meta_path:
-    :param kwargs:
-    """
 
     def __init__(
             self,

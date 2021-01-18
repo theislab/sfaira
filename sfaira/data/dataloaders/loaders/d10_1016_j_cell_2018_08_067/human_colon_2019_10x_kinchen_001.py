@@ -7,52 +7,6 @@ from sfaira.data import DatasetBase
 
 
 class Dataset(DatasetBase):
-    """
-    This data loader supports reading of the downloaded raw data file if `load_raw=True` is passed to self.load()
-    To download the datafile required by this dataloader, use the link provided as the `download_website` attribute of
-    this class and obtain cell type annotations ("hc_meta_data_stromal_with_donor.txt" and
-    "uc_meta_data_stromal_with_donor.txt") directly from the authors of the paper. For (up
-    to 100-fold faster) repeated data loading, please pass `load_raw=False` when calling the self.load() method. For
-    this, you need to preprocess the raw files as below and place the resulting h5ad file in the data folder of this
-    organ:
-
-    import anndata
-    import pandas as pd
-
-    adata = anndata.read_loom("f8aa201c-4ff1-45a4-890e-840d63459ca2.homo_sapiens.loom")
-    ctuc = pd.read_csv("uc_meta_data_stromal_with_donor.txt", sep="\t")
-    cthealthy = pd.read_csv("hc_meta_data_stromal_with_donor.txt", sep="\t")
-
-    adata = adata[adata.obs["emptydrops_is_cell"] == "t"].copy()
-    adata = adata[adata.X.sum(axis=1).flatten() >= 250].copy()
-
-    uc = adata[adata.obs["donor_organism.diseases.ontology_label"] == "ulcerative colitis (disease)"].copy()
-    bcuc = [i.split("-")[0] for i in ctuc["Barcode"]]
-    seluc = []
-    for i in uc.obs["barcode"]:
-        seluc.append((uc.obs["barcode"].str.count(i).sum() == 1) and i in bcuc)
-    uc = uc[seluc].copy()
-    ctuc.index = [i.split("-")[0] for i in ctuc["Barcode"]]
-    uc.obs["celltype"] = [ctuc.loc[i]["Cluster"] for i in uc.obs["barcode"]]
-    uc.var = uc.var.reset_index().rename(columns={"index": "names"}).set_index("featurekey")
-
-    healthy = adata[adata.obs["donor_organism.diseases.ontology_label"] == "normal"].copy()
-    bchealthy = [i.split("-")[0] for i in cthealthy["Barcode"]]
-    selhealthy = []
-    for i in healthy.obs["barcode"]:
-        selhealthy.append((healthy.obs["barcode"].str.count(i).sum() == 1) and i in bchealthy)
-    healthy = healthy[selhealthy].copy()
-    cthealthy.index = [i.split("-")[0] for i in cthealthy["Barcode"]]
-    healthy.obs["celltype"] = [cthealthy.loc[i]["Cluster"] for i in healthy.obs["barcode"]]
-    healthy.var = healthy.var.reset_index().rename(columns={"index": "names"}).set_index("featurekey")
-
-    adata = healthy.concatenate(uc)
-    adata.write("kinchenetal.h5ad")
-
-    :param path:
-    :param meta_path:
-    :param kwargs:
-    """
 
     def __init__(
             self,

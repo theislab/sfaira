@@ -6,14 +6,6 @@ from sfaira.data import DatasetBase
 
 
 class Dataset(DatasetBase):
-    """
-    The input file for this dataloader (fetal_liver_alladata_.h5ad) was kindly provided to us by the
-    authors of the publication. Please contact them directly to obtain the required file.
-
-    :param path:
-    :param meta_path:
-    :param kwargs:
-    """
 
     def __init__(
             self,
@@ -25,7 +17,7 @@ class Dataset(DatasetBase):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "human_liver_2019_10x_popescu_001_10.1038/s41586-019-1652-y"
 
-        self.download = "https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-7407/"
+        self.download = "private"
         self.download_meta = "private"
 
         self.author = "Haniffa"

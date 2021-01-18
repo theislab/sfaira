@@ -10,41 +10,6 @@ from sfaira.data import DatasetBase
 
 
 class Dataset(DatasetBase):
-    """
-    This data loader supports reading of the downloaded raw data file if `load_raw=True` is passed to self.load()
-    To download the datafile required by this dataloader, use the link provided as the `download_website` attribute of
-    this class. For (up to 100-fold faster) repeated data loading, please pass `load_raw=False` when calling the
-    self.load() method. For this, you need to preprocess the raw files as below and place the resulting h5ad file in the
-    data folder of this organ:
-
-    import anndata
-    import pandas as pd
-    import scipy.io
-    import gzip
-    import tarfile
-    adatas = []
-    with tarfile.open("GSE131685_RAW.tar") as tar:
-        for member in tar.getmembers():
-            if "_matrix.mtx.gz" in member.name:
-                name = "_".join(member.name.split("_")[:-1])
-                with gzip.open(tar.extractfile(member), "rb") as mm:
-                    X = scipy.io.mmread(mm).T.tocsr()
-                obs = pd.read_csv(tar.extractfile(name+"_barcodes.tsv.gz"), compression="gzip", header=None, sep="\t", index_col=0)
-                obs.index.name = None
-                var = pd.read_csv(tar.extractfile(name+"_features.tsv.gz"), compression="gzip", header=None, sep="\t").iloc[:,:2]
-                var.columns = ["ensembl", "names"]
-                var.index = var["ensembl"].values
-                adata = anndata.AnnData(X=X, obs=obs, var=var)
-                adata.obs["sample"] = name
-                adatas.append(adata)
-    adata = adatas[0].concatenate(adatas[1:])
-    del adata.obs["batch"]
-    adata.write("GSE131685.h5ad")
-
-    :param path:
-    :param meta_path:
-    :param kwargs:
-    """
 
     def __init__(
             self,

@@ -9,7 +9,7 @@ from sfaira.data import DatasetBase
 
 class Dataset(DatasetBase):
     """
-    This data loader directly processes the data file provided by the authors. To obtain the file, you need to create a
+    This data loader directly processes the data file provided under the download link. To obtain the file, you need to create a
     free account at https://www.synapse.org. You can then use those login credentials to download the file with python
     using the synapse client, installable via `pip install synapseclient`:
 

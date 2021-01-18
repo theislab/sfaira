@@ -8,15 +8,6 @@ from sfaira.data import DatasetBase
 
 
 class Dataset(DatasetBase):
-    """
-    This data loader directly processes the raw data file which can be obtained from the `download_website` attribute of
-    this class. This dataloader only provides the subset of the published sata which has been made available through the
-    covid-19 Cell Atlas.
-
-    :param path:
-    :param meta_path:
-    :param kwargs:
-    """
 
     def __init__(
             self,

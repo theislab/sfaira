@@ -7,24 +7,6 @@ from sfaira.data import DatasetBase
 
 
 class Dataset(DatasetBase):
-    """
-    This data loader supports reading of the downloaded raw data file if `load_raw=True` is passed to self.load()
-    To download the datafile required by this dataloader, use the link provided as the `download_website` attribute of
-    this class. For (up to 100-fold faster) repeated data loading, please pass `load_raw=False` when calling the
-    self.load() method. For this, you need to preprocess the raw files as below and place the resulting h5ad file in the
-    data folder of this organ:
-
-    import anndata
-    import numpy as np
-    adata = anndata.read_loom("c95ff89-2e68-4a08-a234-480eca21ce79.homo_sapiens.loom")
-    idx = np.logical_and((adata.obs["derived_organ_parts_label"] == "umbilical cord blood").values, (adata.obs["emptydrops_is_cell"] == "t").values)
-    adata = adata[idx].copy()
-    adata.write("ica_bone.h5ad")
-
-    :param path:
-    :param meta_path:
-    :param kwargs:
-    """
 
     def __init__(
             self,

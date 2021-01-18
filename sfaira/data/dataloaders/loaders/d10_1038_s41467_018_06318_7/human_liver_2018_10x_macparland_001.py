@@ -7,15 +7,6 @@ from sfaira.data import DatasetBase
 
 
 class Dataset(DatasetBase):
-    """
-    The input files for this dataloader (GSE115469.csv.gz and GSE115469_labels.txt) were kindly provided to us by the
-    authors of the publication. Please contact them directly to obtain the required
-    files.
-
-    :param path:
-    :param meta_path:
-    :param kwargs:
-    """
 
     def __init__(
             self,
@@ -27,7 +18,7 @@ class Dataset(DatasetBase):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "human_liver_2018_10x_macparland_001_10.1038/s41467-018-06318-7"
 
-        self.download = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE115469"
+        self.download = "private"
         self.download_meta = "private"
 
         self.author = "McGilvray"
