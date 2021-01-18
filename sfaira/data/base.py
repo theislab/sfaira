@@ -22,7 +22,7 @@ UNS_STRING_META_IN_OBS = "__obs__"
 
 def map_fn(inputs):
     ds, formatted_version, remove_gene_version, match_to_reference, load_raw, allow_caching, func, \
-    kwargs_func = inputs
+        kwargs_func = inputs
     try:
         ds.load(
             celltype_version=formatted_version,
@@ -38,7 +38,7 @@ def map_fn(inputs):
         else:
             return None
     except FileNotFoundError as e:
-        return (ds.id, e,)
+        return ds.id, e,
 
 
 class DatasetBase(abc.ABC):
@@ -56,8 +56,8 @@ class DatasetBase(abc.ABC):
     _author: Union[None, str]
     _dev_stage: Union[None, str]
     _doi: Union[None, str]
-    _download: Union[None, str]
-    _download_meta: Union[None, str]
+    _download: Union[Tuple[List[None]], Tuple[List[str]]]
+    _download_meta: Union[Tuple[List[None]], Tuple[List[str]]]
     _ethnicity: Union[None, str]
     _healthy: Union[None, bool]
     _id: Union[None, str]
@@ -587,8 +587,8 @@ class DatasetBase(abc.ABC):
                 pandas.DataFrame(dict([
                     (k, [self.id for i in range(len(idx))]) if k == self._ADATA_IDS_SFAIRA.dataset
                     else (k, self.adata.obs[k].values[np.argsort(idx)]) if k in self.adata.obs.columns
-                    else (k, [self.adata.uns[k] for i in range(len(idx))]) if k in list(self.adata.uns.keys())
-                    else (k, ["key_not_found" for i in range(len(idx))])
+                    else (k, [self.adata.uns[k] for _ in range(len(idx))]) if k in list(self.adata.uns.keys())
+                    else (k, ["key_not_found" for _ in range(len(idx))])
                     for k in adata_backed.obs.columns
                 ]))
             )
@@ -689,7 +689,7 @@ class DatasetBase(abc.ABC):
         else:
             return os.path.join(self.meta_path, self.doi_cleaned_id + "_meta.csv")
 
-    def load_meta(self, fn: Union[PathLike, str]):
+    def load_meta(self, fn: Union[PathLike, str, None]):
         if fn is None:
             if self.meta_fn is None:
                 raise ValueError("provide either fn in load or path in constructor")
@@ -873,7 +873,7 @@ class DatasetBase(abc.ABC):
         self._doi = x
 
     @property
-    def download(self) -> Tuple[List[str]]:
+    def download(self) -> Union[Tuple[List[str]], Tuple[List[None]]]:
         """
         Data download website(s).
 
@@ -890,12 +890,10 @@ class DatasetBase(abc.ABC):
             x = [x]
         if isinstance(x, list):
             x = (x,)
-        assert isinstance(x, tuple)
-        assert len(x) == 1
         return x
 
     @download.setter
-    def download(self, x: Union[str, List[str], Tuple[List[str]], None]):
+    def download(self, x: Union[str, None, List[str], Tuple[str], List[None], Tuple[None]]):
         self.__erasing_protection(attr="download", val_old=self._download, val_new=x)
         # Formats to tuple with single element, which is a list of all download websites relevant to dataset,
         # which can be used as a single element column in a pandas data frame.
@@ -903,10 +901,10 @@ class DatasetBase(abc.ABC):
             x = [x]
         if isinstance(x, list):
             x = (x,)
-        self._download = x
+        self._download = (x,)
 
     @property
-    def download_meta(self) -> Tuple[List[str]]:
+    def download_meta(self) -> Union[Tuple[List[str]], Tuple[List[None]]]:
         """
         Meta data download website(s).
 
@@ -924,12 +922,10 @@ class DatasetBase(abc.ABC):
             x = [x]
         if isinstance(x, list):
             x = (x,)
-        assert isinstance(x, tuple)
-        assert len(x) == 1
         return x
 
     @download_meta.setter
-    def download_meta(self, x: Union[str, List[str], Tuple[List[str]], None]):
+    def download_meta(self, x: Union[str, None, List[str], Tuple[str], List[None], Tuple[None]]):
         self.__erasing_protection(attr="download_meta", val_old=self._download_meta, val_new=x)
         # Formats to tuple with single element, which is a list of all download websites relevant to dataset,
         # which can be used as a single element column in a pandas data frame.
@@ -937,7 +933,7 @@ class DatasetBase(abc.ABC):
             x = [x]
         if isinstance(x, list):
             x = (x,)
-        self._download_meta = x
+        self._download_meta = (x,)
 
     @property
     def ethnicity(self) -> Union[None, str]:
@@ -1646,7 +1642,7 @@ class DatasetGroup:
                     cells.append(self.datasets[x].ncells)
             except FileNotFoundError:
                 del self.datasets[x]
-        return cells
+        return np.asarray(cells)
 
     def ncells(self, annotated_only: bool = False):
         cells = self.ncells_bydataset(annotated_only=annotated_only)
@@ -1681,7 +1677,7 @@ class DatasetGroup:
             versions = np.array(list(versions))
             return versions[np.argmax([int(x) for x in versions])]
         else:
-            self.assert_celltype_version_key()
+            self.assert_celltype_version_key(celltype_version=version)
             return version
 
     def subset(self, key, values):
@@ -1741,7 +1737,7 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
         # Collect all data loaders from files in directory:
         datasets = []
         cwd = os.path.dirname(file_base)
-        dataset_module = cwd.split("/")[-1]
+        dataset_module = str(cwd.split("/")[-1])
         if "group.py" in os.listdir(cwd):
             DatasetGroupFound = pydoc.locate(
                 "sfaira.sfaira.data.dataloaders.loaders." + dataset_module + ".group.DatasetGroup")
@@ -1770,7 +1766,7 @@ class DatasetSuperGroup:
     """
     adata: Union[None, anndata.AnnData]
     fn_backed: Union[None, PathLike]
-    dataset_groups: List[DatasetGroup]
+    dataset_groups: Union[List[DatasetGroup], List[DatasetSuperGroup]]
 
     def __init__(self, dataset_groups: Union[None, List[DatasetGroup], List[DatasetSuperGroup]]):
         self.adata = None
