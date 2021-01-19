@@ -153,10 +153,6 @@ class DatasetBase(abc.ABC):
         pass
 
     @property
-    def _directory_formatted_doi(self) -> str:
-        return "d" + "_".join("_".join("_".join(self.doi.split("/")).split(".")).split("-"))
-
-    @property
     def _directory_formatted_id(self) -> str:
         return "_".join("_".join(self.id.split("/")).split("."))
 
@@ -200,11 +196,11 @@ class DatasetBase(abc.ABC):
             raise ValueError("provide either fn in load or path in constructor")
 
         assert self.cache_path is not None, "set self.cache_path first"
-        assert self._directory_formatted_doi is not None, "set self.doi first"
+        assert self.directory_formatted_doi is not None, "set self.doi first"
         assert self._directory_formatted_id is not None, "set self.id first"
         fn_cache = os.path.join(
             self.cache_path,
-            self._directory_formatted_doi,
+            self.directory_formatted_doi,
             self._directory_formatted_id + ".h5ad"
         )
         # Check if raw loader has to be called:
@@ -871,6 +867,10 @@ class DatasetBase(abc.ABC):
     def doi(self, x: str):
         self.__erasing_protection(attr="doi", val_old=self._doi, val_new=x)
         self._doi = x
+
+    @property
+    def directory_formatted_doi(self) -> str:
+        return "d" + "_".join("_".join("_".join(self.doi.split("/")).split(".")).split("-"))
 
     @property
     def download(self) -> Union[Tuple[List[str]], Tuple[List[None]]]:

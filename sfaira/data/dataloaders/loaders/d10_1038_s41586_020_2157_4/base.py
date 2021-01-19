@@ -50,23 +50,23 @@ class Dataset_d10_1038_s41586_020_2157_4(DatasetBase):
         # download required files from loaders cell landscape publication data: https://figshare.com/articles/HCL_DGE_Data/7235471
         print(urllib.request.urlretrieve(
             "https://ndownloader.figshare.com/files/17727365",
-            os.path.join(self.path, "human", self._directory_formatted_doi, "HCL_Fig1_adata.h5ad")
+            os.path.join(self.path, "human", self.directory_formatted_doi, "HCL_Fig1_adata.h5ad")
         ))
         print(urllib.request.urlretrieve(
             "https://ndownloader.figshare.com/files/21758835",
-            os.path.join(self.path, "human", self._directory_formatted_doi, "HCL_Fig1_cell_Info.xlsx")
+            os.path.join(self.path, "human", self.directory_formatted_doi, "HCL_Fig1_cell_Info.xlsx")
         ))
 
         print(urllib.request.urlretrieve(
             "https://ndownloader.figshare.com/files/22447898",
-            os.path.join(self.path, "human", self._directory_formatted_doi, "annotation_rmbatch_data_revised417.zip")
+            os.path.join(self.path, "human", self.directory_formatted_doi, "annotation_rmbatch_data_revised417.zip")
         ))
         # extract the downloaded zip archive
         with zipfile.ZipFile(
-                os.path.join(self.path, "human", self._directory_formatted_doi, "annotation_rmbatch_data_revised417.zip"),
+                os.path.join(self.path, "human", self.directory_formatted_doi, "annotation_rmbatch_data_revised417.zip"),
                 "r"
         ) as zip_ref:
-            zip_ref.extractall(os.path.join(self.path, self._directory_formatted_doi))
+            zip_ref.extractall(os.path.join(self.path, self.directory_formatted_doi))
 
     def _load_generalized(self, fn, sample_id: str):
         """
@@ -75,7 +75,7 @@ class Dataset_d10_1038_s41586_020_2157_4(DatasetBase):
         :param fn:
         :return:
         """
-        adata = anndata.read(os.path.join(self.path, "human", self._directory_formatted_doi, "HCL_Fig1_adata.h5ad"))
+        adata = anndata.read(os.path.join(self.path, "human", self.directory_formatted_doi, "HCL_Fig1_adata.h5ad"))
         # convert to sparse matrix
         adata.X = scipy.sparse.csr_matrix(adata.X).copy()
 
@@ -92,7 +92,7 @@ class Dataset_d10_1038_s41586_020_2157_4(DatasetBase):
         # load celltype labels and harmonise them
         # This pandas code should work with pandas 1.2 but it does not and yields an empty data frame:
         fig1_anno = pd.read_excel(
-            os.path.join(self.path, "human", self._directory_formatted_doi, "HCL_Fig1_cell_Info.xlsx"),
+            os.path.join(self.path, "human", self.directory_formatted_doi, "HCL_Fig1_cell_Info.xlsx"),
             index_col="cellnames",
             engine="xlrd",  # ToDo: Update when pandas xlsx reading with openpyxl is fixed: yields empty tables
         )
@@ -113,11 +113,11 @@ class Dataset_d10_1038_s41586_020_2157_4(DatasetBase):
             columns=["Cell_barcode", "Sample", "Batch", "Cell_id", "Cluster_id", "Ages", "Development_stage", "Method",
                      "Gender", "Source", "Biomaterial", "Name", "ident", "Celltype"])
         for f in os.listdir(
-                os.path.join(self.path, "human", self._directory_formatted_doi, "annotation_rmbatch_data_revised417")
+                os.path.join(self.path, "human", self.directory_formatted_doi, "annotation_rmbatch_data_revised417")
         ):
             df1 = pd.read_csv(
                 os.path.join(
-                    self.path, "human", self._directory_formatted_doi, "annotation_rmbatch_data_revised417", f
+                    self.path, "human", self.directory_formatted_doi, "annotation_rmbatch_data_revised417", f
                 ), encoding="unicode_escape")
             df = pd.concat([df, df1], sort=True)
         df = df.set_index("Cell_id")
