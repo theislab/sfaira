@@ -19,8 +19,8 @@ class Dataset(DatasetBase):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "human_lung_2020_10x_lukassen_001_10.1101/2020.03.13.991455"
 
-        self.download = "https://covid19.cog.sanger.ac.uk/lukassen20_lung_orig.processed.h5ad"
-        self.download_meta = None
+        self.download_url_data = "https://covid19.cog.sanger.ac.uk/lukassen20_lung_orig.processed.h5ad"
+        self.download_url_meta = None
 
         self.author = "Eils"
         self.doi = "10.1101/2020.03.13.991455"

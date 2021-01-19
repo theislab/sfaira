@@ -18,9 +18,9 @@ class Dataset(DatasetBase):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "mouse_brain_2019_10x_hove_001_10.1038/s41593-019-0393-4"
 
-        self.download = \
+        self.download_url_data = \
             "www.brainimmuneatlas.org/data_files/toDownload/filtered_gene_bc_matrices_mex_WT_fullAggr.zip"
-        self.download_meta = \
+        self.download_url_meta = \
             "www.brainimmuneatlas.org/data_files/toDownload/annot_fullAggr.csv"
 
         self.author = "Movahedi"

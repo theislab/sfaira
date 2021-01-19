@@ -24,8 +24,8 @@ class Dataset_d10_1038_s41586_020_2157_4(DatasetBase):
     ):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
 
-        self.download = "https://ndownloader.figshare.com/files/17727365"
-        self.download_meta = [
+        self.download_url_data = "https://ndownloader.figshare.com/files/17727365"
+        self.download_url_meta = [
             "https://ndownloader.figshare.com/files/21758835",
             "https://ndownloader.figshare.com/files/22447898",
         ]
@@ -46,7 +46,7 @@ class Dataset_d10_1038_s41586_020_2157_4(DatasetBase):
 
         self.var_symbol_col = "index"
 
-    def _download(self):
+    def _download_url_data(self):
         # download required files from loaders cell landscape publication data: https://figshare.com/articles/HCL_DGE_Data/7235471
         print(urllib.request.urlretrieve(
             "https://ndownloader.figshare.com/files/17727365",

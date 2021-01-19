@@ -19,9 +19,9 @@ class Dataset_d10_1101_661728(DatasetBase):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.source = source
         if self.source == "aws":
-            self.download = "https://czb-tabula-muris-senis.s3-us-west-2.amazonaws.com/Data-objects/"
+            self.download_url_data = "https://czb-tabula-muris-senis.s3-us-west-2.amazonaws.com/Data-objects/"
         elif self.source == "figshare":
-            self.download = "https://ndownloader.figshare.com/articles/8273102/versions/2"
+            self.download_url_data = "https://ndownloader.figshare.com/articles/8273102/versions/2"
         else:
             raise ValueError("source %s not recognized" % self.source)
 

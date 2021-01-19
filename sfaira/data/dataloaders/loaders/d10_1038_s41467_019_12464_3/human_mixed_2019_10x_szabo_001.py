@@ -20,8 +20,8 @@ class Dataset(DatasetBase):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "human_mixed_2019_10x_szabo_001_10.1038/s41467-019-12464-3"
 
-        self.download = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE126nnn/GSE126030/suppl/GSE126030_RAW.tar"
-        self.download_meta = "private"
+        self.download_url_data = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE126nnn/GSE126030/suppl/GSE126030_RAW.tar"
+        self.download_url_meta = "private"
 
         self.author = "Sims"
         self.doi = "10.1038/s41467-019-12464-3"

@@ -17,8 +17,8 @@ class ADATA_IDS_BASE:
     _cell_ontology_class: str
     _cell_ontology_id: str
     _doi: str
-    _download: str
-    _download_meta: str
+    _download_url_data: str
+    _download_url_meta: str
     _dataset: str
     _dataset_group: str
     _gene_id_ensembl: str
@@ -66,12 +66,12 @@ class ADATA_IDS_BASE:
         return self._doi
 
     @property
-    def download(self) -> str:
-        return self._download
+    def download_url_data(self) -> str:
+        return self._download_url_data
 
     @property
-    def download_meta(self) -> str:
-        return self._download_meta
+    def download_url_meta(self) -> str:
+        return self._download_url_meta
 
     @property
     def gene_id_ensembl(self) -> str:
@@ -167,8 +167,8 @@ class ADATA_IDS_SFAIRA(ADATA_IDS_EXTENDED):
         self._doi = "doi"
         self._dataset = "dataset"
         self._dataset_group = "dataset_group"
-        self._download = "download"
-        self._download_meta = "download_meta"
+        self._download_url_data = "download_url_data"
+        self._download_url_meta = "download_url_meta"
         self._gene_id_ensembl = "ensembl"
         self._gene_id_index = "ensembl"
         self._gene_id_names = "names"
@@ -203,7 +203,7 @@ class ADATA_IDS_SFAIRA(ADATA_IDS_EXTENDED):
         self.subtissue_allowed_entries = None
         self.year_allowed_entries = list(range(2000, 3000))
         # Free fields that are not constrained:
-        # _author, _download, _download_meta, _doi, _id, _state_exact
+        # _author, _download_url_data, _download_url_meta, _doi, _id, _state_exact
 
         self.unknown_celltype_name = "unknown"
         self.unknown_celltype_identifiers = ["nan", "none", "unknown", np.nan, None]
@@ -237,8 +237,8 @@ class ADATA_IDS_CELLXGENE(ADATA_IDS_EXTENDED):
         self._doi = ""  # TODO
         self._dataset = "dataset"
         self._dataset_group = "dataset_group"
-        self._download = ""  # TODO
-        self._download_meta = ""  # never necessary as we interface via anndata objects
+        self._download_url_data = ""  # TODO
+        self._download_url_meta = ""  # never necessary as we interface via anndata objects
         self._gene_id_ensembl = ""  # TODO
         self._gene_id_index = "ensembl"
         self._gene_id_names = ""  # TODO

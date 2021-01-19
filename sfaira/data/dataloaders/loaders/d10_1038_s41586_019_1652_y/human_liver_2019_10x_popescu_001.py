@@ -17,8 +17,8 @@ class Dataset(DatasetBase):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "human_liver_2019_10x_popescu_001_10.1038/s41586-019-1652-y"
 
-        self.download = "private"
-        self.download_meta = "private"
+        self.download_url_data = "private"
+        self.download_url_meta = "private"
 
         self.author = "Haniffa"
         self.doi = "10.1038/s41586-019-1652-y"

@@ -16,7 +16,7 @@ class Dataset_d10_1016_j_cmet_2019_01_021(DatasetBase):
             **kwargs
     ):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.download = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE117770"
+        self.download_url_data = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE117770"
 
         self.author = "Bhushan"
         self.doi = "10.1016/j.cmet.2019.01.021"

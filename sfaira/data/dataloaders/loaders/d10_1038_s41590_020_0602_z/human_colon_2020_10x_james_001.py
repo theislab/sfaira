@@ -19,8 +19,8 @@ class Dataset(DatasetBase):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "human_colon_2019_10x_james_001_10.1038/s41590-020-0602-z"
 
-        self.download = "https://covid19.cog.sanger.ac.uk/james20.processed.h5ad"
-        self.download_meta = None
+        self.download_url_data = "https://covid19.cog.sanger.ac.uk/james20.processed.h5ad"
+        self.download_url_meta = None
 
         self.author = "Teichmann"
         self.doi = "10.1038/s41590-020-0602-z"

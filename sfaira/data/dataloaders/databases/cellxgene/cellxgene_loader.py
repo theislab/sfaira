@@ -60,7 +60,7 @@ class Dataset(DatasetBase):
 
         self.author = adata.uns[self._ADATA_IDS_CELLXGENE.author][self._ADATA_IDS_CELLXGENE.author_names]
         self.doi = adata.uns[self._ADATA_IDS_CELLXGENE.doi]
-        self.download = self.download
+        self.download_url_data = self.download_url_data
         self.id = self.id
         self.normalization = 'raw'
         self.organ = str(self.fn).split("_")[3]  # TODO interface this properly

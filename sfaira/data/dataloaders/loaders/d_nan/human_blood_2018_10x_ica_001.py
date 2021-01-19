@@ -19,8 +19,8 @@ class Dataset(DatasetBase):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "human_blood_2018_10x_ica_001_unknown"
 
-        self.download = "https://data.humancellatlas.org/project-assets/project-matrices/cc95ff89-2e68-4a08-a234-480eca21ce79.homo_sapiens.loom"
-        self.download_meta = None
+        self.download_url_data = "https://data.humancellatlas.org/project-assets/project-matrices/cc95ff89-2e68-4a08-a234-480eca21ce79.homo_sapiens.loom"
+        self.download_url_meta = None
 
         self.author = "Regev"
         self.doi = "d_nan"

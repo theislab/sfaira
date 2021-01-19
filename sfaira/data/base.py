@@ -56,8 +56,8 @@ class DatasetBase(abc.ABC):
     _author: Union[None, str]
     _dev_stage: Union[None, str]
     _doi: Union[None, str]
-    _download: Union[Tuple[List[None]], Tuple[List[str]]]
-    _download_meta: Union[Tuple[List[None]], Tuple[List[str]]]
+    _download_url_data: Union[Tuple[List[None]], Tuple[List[str]]]
+    _download_url_meta: Union[Tuple[List[None]], Tuple[List[str]]]
     _ethnicity: Union[None, str]
     _healthy: Union[None, bool]
     _id: Union[None, str]
@@ -110,8 +110,8 @@ class DatasetBase(abc.ABC):
         self._author = None
         self._dev_stage = None
         self._doi = None
-        self._download = None
-        self._download_meta = None
+        self._download_url_data = None
+        self._download_url_meta = None
         self._ethnicity = None
         self._healthy = None
         self._id = None
@@ -147,9 +147,6 @@ class DatasetBase(abc.ABC):
 
     @abc.abstractmethod
     def _load(self, fn):
-        pass
-
-    def _download(self, fn):
         pass
 
     @property
@@ -448,8 +445,8 @@ class DatasetBase(abc.ABC):
         self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
         self.adata.uns[self._ADATA_IDS_SFAIRA.author] = self.author
         self.adata.uns[self._ADATA_IDS_SFAIRA.doi] = self.doi
-        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download
-        self.adata.uns[self._ADATA_IDS_SFAIRA.download_meta] = self.download_meta
+        self.adata.uns[self._ADATA_IDS_SFAIRA.download_url_data] = self.download_url_data
+        self.adata.uns[self._ADATA_IDS_SFAIRA.download_url_meta] = self.download_url_meta
         self.adata.uns[self._ADATA_IDS_SFAIRA.id] = self.id
         self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = self.normalization
         self.adata.uns[self._ADATA_IDS_SFAIRA.year] = self.year
@@ -754,8 +751,8 @@ class DatasetBase(abc.ABC):
             self._ADATA_IDS_SFAIRA.annotated: self.adata.uns[self._ADATA_IDS_SFAIRA.annotated],
             self._ADATA_IDS_SFAIRA.author: self.adata.uns[self._ADATA_IDS_SFAIRA.author],
             self._ADATA_IDS_SFAIRA.doi: self.adata.uns[self._ADATA_IDS_SFAIRA.doi],
-            self._ADATA_IDS_SFAIRA.download: self.adata.uns[self._ADATA_IDS_SFAIRA.download],
-            self._ADATA_IDS_SFAIRA.download_meta: self.adata.uns[self._ADATA_IDS_SFAIRA.download_meta],
+            self._ADATA_IDS_SFAIRA.download_url_data: self.adata.uns[self._ADATA_IDS_SFAIRA.download_url_data],
+            self._ADATA_IDS_SFAIRA.download_url_meta: self.adata.uns[self._ADATA_IDS_SFAIRA.download_url_meta],
             self._ADATA_IDS_SFAIRA.id: self.adata.uns[self._ADATA_IDS_SFAIRA.id],
             self._ADATA_IDS_SFAIRA.ncells: self.adata.n_obs,
             self._ADATA_IDS_SFAIRA.normalization: self.adata.uns[self._ADATA_IDS_SFAIRA.normalization],
@@ -873,67 +870,67 @@ class DatasetBase(abc.ABC):
         return "d" + "_".join("_".join("_".join(self.doi.split("/")).split(".")).split("-"))
 
     @property
-    def download(self) -> Union[Tuple[List[str]], Tuple[List[None]]]:
+    def download_url_data(self) -> Union[Tuple[List[str]], Tuple[List[None]]]:
         """
         Data download website(s).
 
         Save as tuple with single element, which is a list of all download websites relevant to dataset.
         :return:
         """
-        if self._download is not None:
-            x = self._download
+        if self._download_url_data is not None:
+            x = self._download_url_data
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            x = self.meta[self._ADATA_IDS_SFAIRA.download]
+            x = self.meta[self._ADATA_IDS_SFAIRA.download_url_data]
         if isinstance(x, str) or x is None:
             x = [x]
         if isinstance(x, list):
             x = (x,)
         return x
 
-    @download.setter
-    def download(self, x: Union[str, None, List[str], Tuple[str], List[None], Tuple[None]]):
-        self.__erasing_protection(attr="download", val_old=self._download, val_new=x)
+    @download_url_data.setter
+    def download_url_data(self, x: Union[str, None, List[str], Tuple[str], List[None], Tuple[None]]):
+        self.__erasing_protection(attr="download_url_data", val_old=self._download_url_data, val_new=x)
         # Formats to tuple with single element, which is a list of all download websites relevant to dataset,
         # which can be used as a single element column in a pandas data frame.
         if isinstance(x, str) or x is None:
             x = [x]
         if isinstance(x, list):
             x = (x,)
-        self._download = (x,)
+        self._download_url_data = (x,)
 
     @property
-    def download_meta(self) -> Union[Tuple[List[str]], Tuple[List[None]]]:
+    def download_url_meta(self) -> Union[Tuple[List[str]], Tuple[List[None]]]:
         """
         Meta data download website(s).
 
         Save as tuple with single element, which is a list of all download websites relevant to dataset.
         :return:
         """
-        x = self._download_meta
-        # if self._download_meta is not None:  # TODO add this back in once download_meta is routineyl set in datasets
-        #    x = self._download_meta
+        x = self._download_url_meta
+        # if self._download_url_meta is not None:  # TODO add this back in once download_meta is set in all datasets
+        #    x = self._download_url_meta
         # else:
         #    if self.meta is None:
         #        self.load_meta(fn=None)
-        #    x = self.meta[self._ADATA_IDS_SFAIRA.download_meta]
+        #    x = self.meta[self._ADATA_IDS_SFAIRA.download_url_meta]
         if isinstance(x, str) or x is None:
             x = [x]
         if isinstance(x, list):
             x = (x,)
         return x
 
-    @download_meta.setter
-    def download_meta(self, x: Union[str, None, List[str], Tuple[str], List[None], Tuple[None]]):
-        self.__erasing_protection(attr="download_meta", val_old=self._download_meta, val_new=x)
+    @download_url_meta.setter
+    def download_url_meta(self, x: Union[str, None, List[str], Tuple[str], List[None], Tuple[None]]):
+        self.__erasing_protection(attr="download_url_meta", val_old=self._download_url_meta, val_new=x)
         # Formats to tuple with single element, which is a list of all download websites relevant to dataset,
         # which can be used as a single element column in a pandas data frame.
         if isinstance(x, str) or x is None:
             x = [x]
         if isinstance(x, list):
             x = (x,)
-        self._download_meta = (x,)
+        self._download_url_meta = (x,)
 
     @property
     def ethnicity(self) -> Union[None, str]:
