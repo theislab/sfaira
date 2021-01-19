@@ -3,6 +3,7 @@ import tensorflow as tf
 
 class NegBinOutput(tf.keras.layers.Layer):
     """Negative binomial output layer"""
+
     def __init__(
             self,
             original_dim=None,

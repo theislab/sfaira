@@ -96,17 +96,17 @@ class Encoder(tf.keras.layers.Layer):
 
 class IAF(tf.keras.layers.Layer):
     def __init__(
-                self,
-                bottleneck: int,
-                n_iaf: int,
-                l1_coef: float,
-                l2_coef: float,
-                masking_dim=320,
-                n_made=2,
-                activation="relu",
-                name='iaf',
-                **kwargs
-        ):
+        self,
+        bottleneck: int,
+        n_iaf: int,
+        l1_coef: float,
+        l2_coef: float,
+        masking_dim=320,
+        n_made=2,
+        activation="relu",
+        name='iaf',
+        **kwargs
+    ):
         """
         Transforms latent space with simple distribution to one with a more flexible one.
 
@@ -241,7 +241,6 @@ class ModelVaeIAF(BasicModel):
         else:
             raise ValueError("len(latent_dim)=%i should be uneven to provide a defined bottleneck" % len(latent_dim))
 
-
         inputs_encoder = tf.keras.Input(shape=(in_dim,), name='counts')
         inputs_sf = tf.keras.Input(shape=(1,), name='size_factors')
         inputs_encoder_pp = PreprocInput()(inputs_encoder)
@@ -255,7 +254,7 @@ class ModelVaeIAF(BasicModel):
             kernel_initializer=init
         )
         iaf = IAF(
-            bottleneck=latent_dim[n_layers_enc-1],
+            bottleneck=latent_dim[n_layers_enc - 1],
             n_iaf=n_iaf,
             l1_coef=l1_coef,
             l2_coef=l2_coef
@@ -284,8 +283,8 @@ class ModelVaeIAF(BasicModel):
             z, s_t_sigmas = iaf([z, h])
             z_t_square_mc += tf.square(z)
             z_t_mean += z
-        z_t_square_mc = z_t_square_mc/mc_samples
-        z_t_mean = z_t_mean/mc_samples
+        z_t_square_mc = z_t_square_mc / mc_samples
+        z_t_mean = z_t_mean / mc_samples
 
         cum_s_t_log_var = 0
         for s_t_sigma in s_t_sigmas:
@@ -355,8 +354,7 @@ class ModelVaeIAFVersioned(ModelVaeIAF):
         if override_hyperpar is not None:
             for k in list(override_hyperpar.keys()):
                 hyperpar[k] = override_hyperpar[k]
-        ModelVaeIAF.__init__(
-            self=self,
+        super().__init__(
             in_dim=topology_container.ngenes,
             **hyperpar
         )
@@ -366,7 +364,7 @@ class ModelVaeIAFVersioned(ModelVaeIAF):
         self.model_class = topology_container.model_class
         self.model_type = topology_container.model_type
         self.hyperparam = dict(
-            list(hyperpar.items()) +
+            list(hyperpar.items()) +  # noqa: W504
             [
                 ("topology_id", self._topology_id),
                 ("genome_size", self.genome_size),

@@ -12,8 +12,8 @@ class TestUi(unittest.TestCase):
 
     """
     Contains functions _test* to test individual functions and attributes of the user interface class.
-    
-    TODO for everybody working on this, add one _test* function in here and add it into 
+
+    TODO for everybody working on this, add one _test* function in here and add it into
     basic_estimator_test(). See _test_call() for an example.
     """
 

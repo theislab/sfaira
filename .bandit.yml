@@ -1,0 +1,7 @@
+### profile may optionally select or skip tests
+
+# (optional) list included tests here:
+tests: []
+
+# (optional) list skipped tests here:
+skips: ['B101', 'B403', 'B404', 'B603', 'B607', 'B301', 'B303', 'B311', 'B310']

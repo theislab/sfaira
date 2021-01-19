@@ -58,8 +58,8 @@ class Encoder(tf.keras.layers.Layer):
                     self.layer_list.append(tf.keras.layers.Dropout(hid_drop, name='enc_%s_drop' % i))
 
     def call(self, x, **kwargs):
-        for l in self.layer_list:
-            x = l(x)
+        for layer in self.layer_list:
+            x = layer(x)
         return x
 
 
@@ -105,8 +105,8 @@ class Decoder(tf.keras.layers.Layer):
                     self.layer_list.append(tf.keras.layers.Dropout(hid_drop, name='dec_%s_drop' % i))
 
     def call(self, x, **kwargs):
-        for l in self.layer_list:
-            x = l(x)
+        for layer in self.layer_list:
+            x = layer(x)
         return x
 
 
@@ -214,8 +214,7 @@ class ModelAeVersioned(ModelAe):
         if override_hyperpar is not None:
             for k in list(override_hyperpar.keys()):
                 hyperpar[k] = override_hyperpar[k]
-        ModelAe.__init__(
-            self=self,
+        super().__init__(
             in_dim=topology_container.ngenes,
             **hyperpar
         )
@@ -225,7 +224,7 @@ class ModelAeVersioned(ModelAe):
         self.model_class = topology_container.model_class
         self.model_type = topology_container.model_type
         self.hyperparam = dict(
-            list(hyperpar.items()) +
+            list(hyperpar.items()) +  # noqa: W504
             [
                 ("topology_id", self._topology_id),
                 ("genome_size", self.genome_size),

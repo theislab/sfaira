@@ -1,6 +1,7 @@
 import anndata
 from typing import Union
-from .external import DatasetBase
+
+from sfaira.data import DatasetBase
 
 
 class DatasetInteractive(DatasetBase):
@@ -8,37 +9,71 @@ class DatasetInteractive(DatasetBase):
     def __init__(
             self,
             data: anndata.AnnData,
-            species: str,
+            organism: str,
             organ: str,
             gene_symbol_col: Union[str, None] = 'index',
             gene_ens_col: Union[str, None] = None,
+            obs_key_celltypes: Union[str, None] = None,
             class_maps: dict = {},
-            dataset_id: str = "interactive",
-            **kwargs
+            dataset_id: str = "interactive_dataset",
+            path: Union[str, None] = ".",
+            meta_path: Union[str, None] = ".",
+            cache_path: Union[str, None] = ".",
     ):
         """
+        Load data set into sfaira data format.
 
-        :param data:
-        :param species:
-        :param organ:
-        :param class_maps:
-        :param id:
-        :param kwargs:
+        :param data: Data set.
+        :param organism: Organism of data set.
+        :param organ: Organ of data set.
+        :param gene_symbol_col: Column name in .var which contains gene symbols. Set to "index" to use the index.
+        :param gene_ens_col:  Column name in .var which contains ENSG symbols. Set to "index" to use the index.
+        :param obs_key_celltypes: .obs column name which contains cell type labels.
+        :param class_maps: Cell type class maps.
+        :param dataset_id: Identifer of data set.
+        :param path:
+        :param meta_path:
+        :param cache_path:
         """
-        DatasetBase.__init__(self=self, path=None, meta_path=None, **kwargs)
-        self.adata = data
-        self.species = species
+        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path)
         self.id = dataset_id
-        self.organ = organ
 
-        self.gene_symbol_col = gene_symbol_col
-        self.gene_ensg_col = gene_ens_col
+        self.author = "interactive_dataset"
+        self.doi = "interactive_dataset"
+
+        self.download = "."
+        self.download_meta = "."
+
+        # self.age  # not currently supported
+        # self.dev_stage  # not currently supported
+        # self.ethnicity  # not currently supported
+        # self.healthy  # not currently supported
+        # self.normalisation  # not currently supported
+        self.organ = organ
+        self.organism = organism
+        # self.protocol  # not currently supported
+        # self.sex  # not currently supported
+        # self.state_exact  # not currently supported
+        # self.year  # not currently supported
+
+        self.obs_key_cellontology_original = obs_key_celltypes
+
+        # self.obs_key_age  # not currently supported
+        # self.obs_key_dev_stage  # not currently supported
+        # self.obs_key_ethnicity  # not currently supported
+        # self.obs_key_healthy  # not currently supported
+        # self.obs_key_organ  # not currently supported
+        # self.obs_key_organism  # not currently supported
+        # self.obs_key_protocol  # not currently supported
+        # self.obs_key_sex  # not currently supported
+        # self.obs_key_state_exact  # not currently supported
+
+        self.var_symbol_col = gene_symbol_col
+        self.var_ensembl_col = gene_ens_col
 
         self.class_maps = class_maps
 
+        self.adata = data
+
     def _load(self, fn=None):
-        self._convert_and_set_var_names(
-            symbol_col=self.gene_symbol_col,
-            ensembl_col=self.gene_ensg_col,
-            new_index='ensembl'
-        )
+        pass

@@ -17,7 +17,7 @@ CELLTYPES_MOUSE_ADIPOSE_V0 = [
 ONTOLOGIES_MOUSE_ADIPOSE_V0 = {
     "names": {
         "lymphocyte": [
-            "B cell", "CD4-positive, alpha-beta T cell", "CD8-positive, alpha-beta T cell", 
+            "B cell", "CD4-positive, alpha-beta T cell", "CD8-positive, alpha-beta T cell",
             "myeloid cell", "NK cell"
         ],
         "T cell": ["CD4-positive, alpha-beta T cell", "CD8-positive, alpha-beta T cell"]

@@ -11,6 +11,7 @@ class LearnedThresholdLayer(tf.keras.layers.Layer):
     """
     A layer that thresholds the input with a learned threshold.
     """
+
     def __init__(
         self,
         out_dim,
@@ -97,7 +98,7 @@ class CellTypeMarkerVersioned(CellTypeMarker):
 
     def __init__(
             self,
-            species: str,
+            organism: str,
             organ: str,
             topology_container: Topologies,
             override_hyperpar: Union[dict, None] = None
@@ -110,8 +111,8 @@ class CellTypeMarkerVersioned(CellTypeMarker):
         :param override_hyperpar: Dictionary with hyper-parameters of model to override in preset hyper-parameter
             dictionary that is queried based on the topology_id. Can contain a subset of all hyperparameters.
         """
-        # Get cell type version instance based on topology ID, species and organ.
-        self.celltypes_version = celltype_versions.SPECIES_DICT[species.lower()][organ.lower()]
+        # Get cell type version instance based on topology ID, organism and organ.
+        self.celltypes_version = celltype_versions.ORGANISM_DICT[organism.lower()][organ.lower()]
         self.celltypes_version.set_version(version=topology_container.topology_id)
 
         unkown_already_included = np.any([x.lower() == "unknown" for x in self.celltypes_version.ids])
@@ -119,8 +120,7 @@ class CellTypeMarkerVersioned(CellTypeMarker):
         if override_hyperpar is not None:
             for k in list(override_hyperpar.keys()):
                 hyperpar[k] = override_hyperpar[k]
-        CellTypeMarker.__init__(
-            self=self,
+        super().__init__(
             in_dim=topology_container.ngenes,
             out_dim=self.celltypes_version.ntypes if unkown_already_included else self.celltypes_version.ntypes + 1,
             **hyperpar
@@ -131,7 +131,7 @@ class CellTypeMarkerVersioned(CellTypeMarker):
         self.model_class = topology_container.model_class
         self.model_type = topology_container.model_type
         self.hyperparam = dict(
-            list(hyperpar.items()) +
+            list(hyperpar.items()) +  # noqa: W504
             [
                 ("topology_id", self._topology_id),
                 ("genome_size", self.genome_size),
