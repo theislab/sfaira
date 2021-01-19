@@ -9,8 +9,9 @@ import os
 from typing import List, Union
 import warnings
 
-from .external import EstimatorKerasEmbedding, EstimatorKerasCelltype, DatasetInteractive
-from .model_zoo import ModelZooEmbedding, ModelZooCelltype
+from sfaira.data import DatasetInteractive
+from sfaira.estimators import EstimatorKerasEmbedding, EstimatorKerasCelltype
+from sfaira.interface.model_zoo import ModelZooEmbedding, ModelZooCelltype
 
 
 class UserInterface:
@@ -25,8 +26,8 @@ class UserInterface:
     # initialise your sfaira instance with a model lookuptable.
     # instead of setting `custom_repo` when initialising the UI you can also use `sfaira_repo=True` to use public weights
     ui = sfaira.ui.UserInterface(custom_repo="/path/to/local/repo/folder/or/zenodo/repo/URL", sfaira_repo=False)
-    ui.zoo_embedding.set_latest(species, organ, model_type, organisation, model_topology)
-    ui.zoo_celltype.set_latest(species, organ, model_type, organisation, model_topology)
+    ui.zoo_embedding.set_latest(organism, organ, model_type, organisation, model_topology)
+    ui.zoo_celltype.set_latest(organism, organ, model_type, organisation, model_topology)
     ui.load_data(anndata.read("/path/to/file.h5ad"))  # load your dataset into sfaira
     ui.load_model_embedding()
     ui.load_model_celltype()
@@ -142,9 +143,9 @@ class UserInterface:
 
         if ids:
             pd.DataFrame(
-                    list(zip(ids_cleaned, model_paths, file_paths, md5)),
-                    columns=['model_id', 'model_path', 'model_file_path', 'md5']
-                )\
+                list(zip(ids_cleaned, model_paths, file_paths, md5)),
+                columns=['model_id', 'model_path', 'model_file_path', 'md5']
+            )\
                 .sort_values('model_id')\
                 .reset_index(drop=True)\
                 .to_csv(os.path.join(repo_path, 'model_lookuptable.csv'))
@@ -171,11 +172,17 @@ class UserInterface:
 
         :param zenodo_access_token: Your personal Zenodo API access token. Create one here: https://zenodo.org/account/settings/applications/tokens/new/
         :param title: Title of the Zenodo deposition
-        :param authors: List of dicts, where each dict defines one author (dict keys: name: Name of creator in the format "Family name, Given names", affiliation: Affiliation of creator (optional), orcid: ORCID identifier of creator (optional), gnd: GND identifier of creator (optional)
+        :param authors: List of dicts, where each dict defines one author (dict keys:
+         name: Name of creator in the format "Family name, Given names",
+         affiliation: Affiliation of creator (optional), orcid: ORCID identifier of creator (optional),
+         gnd: GND identifier of creator (optional)
         :param description: Description of the Zenodo deposition.
-        :param metadata: Dictionary with further metadata attributes of the deposit. See the Zenodo API refenrece for accepted keys: https://developers.zenodo.org/#representation
-        :param publish: Set this to True to directly publish the weights on Zenodo. When set to False a draft will be created, which can be edited in the browser before publishing.
-        :param sandbox: If True, use the Zenodo testing platform at https://sandbox.zenodo.org for your deposition. We recommend testing your upload with sandbox first as depositions cannot be deleted from the main Zenodo platfowm once created.
+        :param metadata: Dictionary with further metadata attributes of the deposit.
+         See the Zenodo API refenrece for accepted keys: https://developers.zenodo.org/#representation
+        :param publish: Set this to True to directly publish the weights on Zenodo.
+         When set to False a draft will be created, which can be edited in the browser before publishing.
+        :param sandbox: If True, use the Zenodo testing platform at https://sandbox.zenodo.org for your deposition.
+         We recommend testing your upload with sandbox first as depositions cannot be deleted from the main Zenodo platfowm once created.
         """
 
         import requests
@@ -233,7 +240,7 @@ class UserInterface:
             'license': 'cc-by-4.0',
             'upload_type': 'dataset',
             'access_right': 'open'
-            }
+        }
         meta = {**meta_core, **metadata}
         r = requests.put(f'https://{sandbox}zenodo.org/api/deposit/depositions/{deposition_id}',
                          params=params,
@@ -269,22 +276,30 @@ class UserInterface:
             self,
             data: anndata.AnnData,
             gene_symbol_col: Union[str, None] = None,
-            gene_ens_col: Union[str, None] = None
+            gene_ens_col: Union[str, None] = None,
+            remove_gene_version: bool = True,
+            match_to_reference: Union[str, None] = None,
     ):
         """
         Loads the provided AnnData object into sfaira.
-        If genes in the provided AnnData object are annotated as gene symbols, please provide the name of the corresponding var column (or 'index') through the gene_symbol_col argument.
-        If genes in the provided AnnData object are annotated as ensembl ids, please provide the name of the corresponding var column (or 'index') through the gene_ens_col argument.
+
+        If genes in the provided AnnData object are annotated as gene symbols,
+         please provide the name of the corresponding var column (or 'index') through the gene_symbol_col argument.
+        If genes in the provided AnnData object are annotated as ensembl ids,
+         please provide the name of the corresponding var column (or 'index') through the gene_ens_col argument.
         You need to provide at least one of the two.
         :param data: AnnData object to load
         :param gene_symbol_col: Var column name (or 'index') which contains gene symbols
         :param gene_ens_col: ar column name (or 'index') which contains ensembl ids
+        :param remove_gene_version: Remove gene version string from ENSEMBL ID so that different versions in different
+            data sets are superimposed.
+        :param match_to_reference: Reference genomes name.
         """
-        if self.zoo_embedding.species is not None:
-            species = self.zoo_embedding.species
+        if self.zoo_embedding.organism is not None:
+            organism = self.zoo_embedding.organism
             organ = self.zoo_embedding.organ
-        elif self.zoo_celltype.species is not None:
-            species = self.zoo_celltype.species
+        elif self.zoo_celltype.organism is not None:
+            organism = self.zoo_celltype.organism
             organ = self.zoo_celltype.organ
         else:
             raise ValueError("Please first set which model_id to use via the model zoo before loading the data")
@@ -293,13 +308,20 @@ class UserInterface:
             raise ValueError("Please provide either the gene_ens_col or the gene_symbol_col argument.")
 
         dataset = DatasetInteractive(
-                    data=data,
-                    species=species,
-                    organ=organ,
-                    gene_symbol_col=gene_symbol_col,
-                    gene_ens_col=gene_ens_col
-                )
-        dataset.load()
+            data=data,
+            organism=organism,
+            organ=organ,
+            gene_symbol_col=gene_symbol_col,
+            gene_ens_col=gene_ens_col
+        )
+        dataset.load(
+            celltype_version=None,
+            fn=None,
+            remove_gene_version=remove_gene_version,
+            match_to_reference=match_to_reference,
+            load_raw=False,
+            allow_caching=False,
+        )
         self.data = dataset.adata
 
     def filter_cells(self):
@@ -326,7 +348,7 @@ class UserInterface:
             data=self.data,
             model_dir=model_dir,
             model_id=self.zoo_embedding.model_id,
-            species=self.zoo_embedding.species,
+            organism=self.zoo_embedding.organism,
             organ=self.zoo_embedding.organ,
             model_type=self.zoo_embedding.model_type,
             model_topology=self.zoo_embedding.model_topology,
@@ -351,7 +373,7 @@ class UserInterface:
             data=self.data,
             model_dir=model_dir,
             model_id=self.zoo_celltype.model_id,
-            species=self.zoo_celltype.species,
+            organism=self.zoo_celltype.organism,
             organ=self.zoo_celltype.organ,
             model_type=self.zoo_celltype.model_type,
             model_topology=self.zoo_celltype.model_topology,

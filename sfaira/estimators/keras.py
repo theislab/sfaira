@@ -40,7 +40,7 @@ class EstimatorKeras:
             model_dir: Union[str, None],
             model_id: Union[str, None],
             model_class: Union[str, None],
-            species: Union[str, None],
+            organism: Union[str, None],
             organ: Union[str, None],
             model_type: Union[str, None],
             model_topology: Union[str, None],
@@ -55,12 +55,12 @@ class EstimatorKeras:
         self.model_dir = model_dir
         self.model_id = model_id
         self.model_class = model_class.lower()
-        self.species = species.lower()
+        self.organism = organism.lower()
         self.organ = organ.lower()
         self.model_type = model_type.lower()
         self.model_topology = model_topology
         self.topology_container = Topologies(
-            species=species,
+            organism=organism,
             model_class=model_class,
             model_type=model_type,
             topology_id=model_topology
@@ -104,7 +104,7 @@ class EstimatorKeras:
                                                    )
                         fn = os.path.join(self.cache_path, f"{self.model_id}_weights.data-00000-of-00001")
                     except HTTPError:
-                        raise FileNotFoundError(f'cannot find remote weightsfile')
+                        raise FileNotFoundError('cannot find remote weightsfile')
         else:
             # Local repo
             if not self.model_dir:
@@ -474,7 +474,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             data: Union[anndata.AnnData, np.ndarray],
             model_dir: Union[str, None],
             model_id: Union[str, None],
-            species: Union[str, None],
+            organism: Union[str, None],
             organ: Union[str, None],
             model_type: Union[str, None],
             model_topology: Union[str, None],
@@ -482,16 +482,16 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             cache_path: str = os.path.join('cache', '')
     ):
         super(EstimatorKerasEmbedding, self).__init__(
-                data=data,
-                model_dir=model_dir,
-                model_id=model_id,
-                model_class="embedding",
-                species=species,
-                organ=organ,
-                model_type=model_type,
-                model_topology=model_topology,
-                weights_md5=weights_md5,
-                cache_path=cache_path
+            data=data,
+            model_dir=model_dir,
+            model_id=model_id,
+            model_class="embedding",
+            organism=organism,
+            organ=organ,
+            model_type=model_type,
+            model_topology=model_topology,
+            weights_md5=weights_md5,
+            cache_path=cache_path
         )
 
     def init_model(
@@ -522,8 +522,11 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         )
 
     @staticmethod
-    def _get_output_dim(n_features, model_type):
-        if model_type == "vae":
+    def _get_output_dim(n_features, model_type, mode='train'):
+        if mode == 'predict':  # Output shape is same for predict mode regardless of model type
+            output_types = (tf.float32, tf.float32)
+            output_shapes = (n_features, ())
+        elif model_type == "vae":
             output_types = ((tf.float32, tf.float32), (tf.float32, tf.float32))
             output_shapes = ((n_features, ()), (n_features, ()))
         else:
@@ -556,75 +559,43 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         if idx is None:
             idx = np.arange(0, self.data.n_obs)
 
-        if mode == 'train' or mode == 'train_val':
+        if mode in ['train', 'train_val', 'eval', 'predict']:
             # Prepare data reading according to whether anndata is backed or not:
-            if self.data.isbacked:
-                n_features = self.data.X.shape[1]
-                output_types, output_shapes = self._get_output_dim(n_features, model_type)
+            x = self.data.X if self.data.isbacked else self._prepare_data_matrix(idx=idx)
 
-                if model_type == "vae":
-                    def generator():
-                        sparse = isinstance(self.data.X[0, :], scipy.sparse.spmatrix)
-                        for i in idx:
-                            # (_,_), (_,sf) is dummy for kl loss
-                            x = self.data.X[i, :].toarray().flatten() if sparse else self.data.X[i, :].flatten()
-                            sf = self._prepare_sf(x=x)[0]
-                            yield (x, sf), (x, sf)
-                else:
-                    def generator():
-                        sparse = isinstance(self.data.X[0, :], scipy.sparse.spmatrix)
-                        for i in idx:
-                            x = self.data.X[i, :].toarray().flatten() if sparse else self.data.X[i, :].flatten()
-                            sf = self._prepare_sf(x=x)[0]
-                            yield (x, sf), x
-            else:
-                x = self._prepare_data_matrix(idx=idx)
-                sf = self._prepare_sf(x=x)
-                n_features = x.shape[1]
-                output_types, output_shapes = self._get_output_dim(n_features, model_type)
+            def generator():
+                is_sparse = isinstance(x[0, :], scipy.sparse.spmatrix)
+                indices = idx if self.data.isbacked else range(x.shape[0])
+                for i in indices:
+                    x_sample = x[i, :].toarray().flatten() if is_sparse else x[i, :].flatten()
+                    sf = self._prepare_sf(x=x_sample)[0]
+                    if mode == 'predict':  # If predicting, only return X regardless of model type
+                        yield x_sample, sf
+                    elif model_type == "vae":
+                        yield (x_sample, sf), (x_sample, sf)
+                    else:
+                        yield (x_sample, sf), x_sample
 
-                if model_type == "vae":
-                    def generator():
-                        for i in range(x.shape[0]):
-                            # (_,_), (_,sf) is dummy for kl loss
-                            yield (x[i, :].toarray().flatten(), sf[i]), (x[i, :].toarray().flatten(), sf[i])
-                else:
-                    def generator():
-                        for i in range(x.shape[0]):
-                            yield (x[i, :].toarray().flatten(), sf[i]), x[i, :].toarray().flatten()
+            n_features = x.shape[1]
+            n_samples = x.shape[0]
+            output_types, output_shapes = self._get_output_dim(n_features, model_type, mode=mode)
 
             dataset = tf.data.Dataset.from_generator(
                 generator=generator,
                 output_types=output_types,
                 output_shapes=output_shapes
             )
-            if mode == 'train':
+            # Only shuffle in train modes
+            if mode in ['train', 'train_val']:
                 dataset = dataset.repeat()
-            dataset = dataset.shuffle(
-                buffer_size=min(self.data.X.shape[0], shuffle_buffer_size),
-                seed=None,
-                reshuffle_each_iteration=True
-            ).batch(batch_size).prefetch(prefetch)
+                dataset = dataset.shuffle(
+                    buffer_size=min(n_samples, shuffle_buffer_size),
+                    seed=None,
+                    reshuffle_each_iteration=True)
+            dataset = dataset.batch(batch_size).prefetch(prefetch)
 
             return dataset
 
-        elif mode == 'eval' or mode == 'predict':
-            # Prepare data reading according to whether anndata is backed or not:
-            if self.data.isbacked:
-                # Need to supply sorted indices to backed anndata:
-                x = self.data.X[np.sort(idx), :]
-                # Sort back in original order of indices.
-                x = x[[np.where(np.sort(idx) == i)[0][0] for i in idx], :]
-            else:
-                x = self._prepare_data_matrix(idx=idx)
-                x = x.toarray()
-
-            sf = self._prepare_sf(x=x)
-            if self.model_type[:3] == "vae":
-                return (x, sf), (x, sf)
-            else:
-                return (x, sf), x
-        
         elif mode == 'gradient_method':
             # Prepare data reading according to whether anndata is backed or not:
             if self.data.isbacked:
@@ -644,9 +615,9 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 sf = self._prepare_sf(x=x)
                 cell_to_class = self._get_class_dict()
                 y = self.data.obs['cell_ontology_class'][idx]  # for gradients per celltype in compute_gradients_input()
-                n_features = x.shape[1]                
+                n_features = x.shape[1]
                 output_types, output_shapes = self._get_output_dim(n_features, 'vae')
-                
+
                 def generator():
                     for i in range(x.shape[0]):
                         yield (x[i, :].toarray().flatten(), sf[i]), (x[i, :].toarray().flatten(), cell_to_class[y[i]])
@@ -705,27 +676,31 @@ class EstimatorKerasEmbedding(EstimatorKeras):
 
         return {"neg_ll": [custom_mse, custom_negll]}
 
-    def evaluate_any(self, idx):
+    def evaluate_any(self, idx, batch_size=64, max_steps=20):
         """
         Evaluate the custom model on any local data.
 
         :param idx: Indices of observations to evaluate on. Evaluates on all observations if None.
+        :param batch_size: Batch size for evaluation.
+        :param max_steps: Maximum steps before evaluation round is considered complete.
         :return: Dictionary of metric names and values.
         """
-        if idx is None or idx.any():   # true if the array is not empty or if the passed value is None 
-            x, y = self._get_dataset(
+        if idx is None or idx.any():  # true if the array is not empty or if the passed value is None
+            idx = np.arange(0, self.data.n_obs) if idx is None else idx
+            dataset = self._get_dataset(
                 idx=idx,
-                batch_size=None,
+                batch_size=batch_size,
                 mode='eval'
             )
+            steps = min(max(len(idx) // batch_size, 1), max_steps)
             results = self.model.training_model.evaluate(
-                x=x, y=y
+                x=dataset, steps=steps
             )
             return dict(zip(self.model.training_model.metrics_names, results))
         else:
             return {}
 
-    def evaluate(self):
+    def evaluate(self, batch_size=64, max_steps=20):
         """
         Evaluate the custom model on local data.
 
@@ -733,14 +708,16 @@ class EstimatorKerasEmbedding(EstimatorKeras):
 
         :return: Dictionary of metric names and values.
         """
-        if self.idx_test is None or self.idx_test.any():   # true if the array is not empty or if the passed value is None
-            x, y = self._get_dataset(
-                idx=self.idx_test,
-                batch_size=None,
+        if self.idx_test is None or self.idx_test.any():  # true if the array is not empty or if the passed value is None
+            idx = np.arange(0, self.data.n_obs) if self.idx_test is None else self.idx_test
+            dataset = self._get_dataset(
+                idx=idx,
+                batch_size=batch_size,
                 mode='eval'
             )
+            steps = min(max(len(idx) // batch_size, 1), max_steps)
             results = self.model.training_model.evaluate(
-                x=x, y=y
+                x=dataset, steps=steps
             )
             return dict(zip(self.model.training_model.metrics_names, results))
         else:
@@ -753,10 +730,10 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         :return:
         prediction
         """
-        if self.idx_test is None or self.idx_test.any():   # true if the array is not empty or if the passed value is None
-            x, y = self._get_dataset(
+        if self.idx_test is None or self.idx_test.any():  # true if the array is not empty or if the passed value is None
+            x = self._get_dataset(
                 idx=self.idx_test,
-                batch_size=None,
+                batch_size=64,
                 mode='predict'
             )
             return self.model.predict_reconstructed(
@@ -772,10 +749,10 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         :return:
         latent space
         """
-        if self.idx_test is None or self.idx_test.any():   # true if the array is not empty or if the passed value is None
-            x, y = self._get_dataset(
+        if self.idx_test is None or self.idx_test.any():  # true if the array is not empty or if the passed value is None
+            x = self._get_dataset(
                 idx=self.idx_test,
-                batch_size=None,
+                batch_size=64,
                 mode='predict'
             )
             return self.model.predict_embedding(
@@ -792,10 +769,10 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         :return:
         sample of latent space, mean of latent space, variance of latent space
         """
-        if self.idx_test is None or self.idx_test:   # true if the array is not empty or if the passed value is None
-            x, y = self._get_dataset(
+        if self.idx_test is None or self.idx_test:  # true if the array is not empty or if the passed value is None
+            x = self._get_dataset(
                 idx=self.idx_test,
-                batch_size=None,
+                batch_size=64,
                 mode='predict'
             )
             return self.model.predict_embedding(
@@ -816,7 +793,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             idx = self.idx_test
             if self.idx_test is None:
                 num_samples = 10000
-                idx = np.random.randint(0,self.data.X.shape[0],num_samples)
+                idx = np.random.randint(0, self.data.X.shape[0], num_samples)
             n_obs = len(idx)
         else:
             idx = None
@@ -843,14 +820,14 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 self.model.training_model.input,
                 self.model.encoder_model.output[0]
             )
-            latent_dim = self.model.encoder_model.output[0].shape[1] 
+            latent_dim = self.model.encoder_model.output[0].shape[1]
             input_dim = self.model.training_model.input[0].shape[1]
         else:
             model = tf.keras.Model(
                 self.model.training_model.input,
                 self.model.encoder_model.output
             )
-            latent_dim = self.model.encoder_model.output[0].shape[0] 
+            latent_dim = self.model.encoder_model.output[0].shape[0]
             input_dim = self.model.training_model.input[0].shape[1]
 
         @tf.function
@@ -860,14 +837,16 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 tape.watch(x)
                 model_out = model((x, sf))
             if abs_gradients:
-                f = lambda x: abs(x)
+                def f(x):
+                    return abs(x)
             else:
-                f = lambda x: x
+                def f(x):
+                    return x
             # marginalize on batch level and then accumulate batches
             # batch_jacobian gives output of size: (batch_size, latent_dim, input_dim)
             batch_gradients = f(tape.batch_jacobian(model_out, x))
             return batch_gradients
- 
+
         for step, (x_batch, y_batch) in tqdm(enumerate(ds), total=np.ceil(n_obs / batch_size)):
             batch_gradients = get_gradients(x_batch).numpy()
             _, y = y_batch
@@ -880,11 +859,11 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         if per_celltype:
             for cell in cell_names:
                 print(f'{cell} with {counts[cell]} observations')
-                grads_x[cell] = grads_x[cell]/counts[cell] if counts[cell] > 0 else np.zeros((latent_dim, input_dim))
-            
+                grads_x[cell] = grads_x[cell] / counts[cell] if counts[cell] > 0 else np.zeros((latent_dim, input_dim))
+
             return {'gradients': grads_x, 'counts': counts}
         else:
-            return grads_x/n_obs
+            return grads_x / n_obs
 
 
 class EstimatorKerasCelltype(EstimatorKeras):
@@ -899,7 +878,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             data: Union[anndata.AnnData, np.ndarray],
             model_dir: Union[str, None],
             model_id: Union[str, None],
-            species: Union[str, None],
+            organism: Union[str, None],
             organ: Union[str, None],
             model_type: Union[str, None],
             model_topology: Union[str, None],
@@ -908,16 +887,16 @@ class EstimatorKerasCelltype(EstimatorKeras):
             max_class_weight: float = 1e3
     ):
         super(EstimatorKerasCelltype, self).__init__(
-                data=data,
-                model_dir=model_dir,
-                model_id=model_id,
-                model_class="celltype",
-                species=species,
-                organ=organ,
-                model_type=model_type,
-                model_topology=model_topology,
-                weights_md5=weights_md5,
-                cache_path=cache_path
+            data=data,
+            model_dir=model_dir,
+            model_id=model_id,
+            model_class="celltype",
+            organism=organism,
+            organ=organ,
+            model_type=model_type,
+            model_topology=model_topology,
+            weights_md5=weights_md5,
+            cache_path=cache_path
         )
         self.max_class_weight = max_class_weight
 
@@ -939,7 +918,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             raise ValueError('unknown topology %s for EstimatorKerasCelltype' % self.model_type)
 
         self.model = Model(
-            species=self.species,
+            organism=self.organism,
             organ=self.organ,
             topology_container=self.topology_container,
             override_hyperpar=override_hyperpar
@@ -1216,15 +1195,17 @@ class EstimatorKerasCelltype(EstimatorKeras):
         )
 
         for step, (x_batch, _, _) in enumerate(ds):
-            print("compute gradients wrt. input: batch %i / %i." % (step+1, np.ceil(n_obs / 64)))
+            print("compute gradients wrt. input: batch %i / %i." % (step + 1, np.ceil(n_obs / 64)))
             x = x_batch
             with tf.GradientTape(persistent=True) as tape:
                 tape.watch(x)
                 model_out = model(x)
             if abs_gradients:
-                f = lambda x: abs(x)
+                def f(x):
+                    return abs(x)
             else:
-                f = lambda x: x
+                def f(x):
+                    return x
             # marginalize on batch level and then accumulate batches
             # batch_jacobian gives output of size: (batch_size, latent_dim, input_dim)
             batch_gradients = f(tape.batch_jacobian(model_out, x).numpy())

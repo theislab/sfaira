@@ -1,0 +1,30 @@
+name: Run bandit
+
+on:
+  push:
+    paths:
+      - "**/*.py"
+  pull_request:
+    paths:
+      - "**/*.py"
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[skip ci]') && !contains(github.event.head_commit.message, '[ci skip]')"
+
+    steps:
+      - uses: actions/checkout@v2
+        name: Check out source-code repository
+
+      - name: Setup Python
+        uses: actions/setup-python@v2.1.4
+        with:
+          python-version: 3.9
+
+      - name: Install bandit
+        run: pip install bandit
+
+      - name: Run bandit
+        run: bandit -r sfaira -c .bandit.yml

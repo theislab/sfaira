@@ -59,6 +59,7 @@ class MaskingDense(Layer):
         self.kernel_constraint = constraints.get(kernel_constraint)
         self.bias_constraint = constraints.get(bias_constraint)
         self.batchnorm = batchnorm
+
     def dropout_wrapper(self, inputs, training):
         if 0. < self.rate < 1.:
             def dropped_inputs():

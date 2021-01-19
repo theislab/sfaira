@@ -1,4 +1,6 @@
-from .base import DatasetBase, DatasetGroupBase, DatasetSuperGroup
-from . import mouse
-from . import human
+from .base import DatasetBase, DatasetBaseGroupLoading, \
+    DatasetGroup, DatasetGroupDirectoryOriented, \
+    DatasetSuperGroup
+from . import dataloaders
+from .dataloaders import DatasetSuperGroupSfaira
 from .interactive import DatasetInteractive

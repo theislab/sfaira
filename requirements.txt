@@ -4,16 +4,18 @@ fuzzywuzzy
 jinja2
 loompy
 matplotlib
-numpy>=1.14.0
 networkx
+numpy>=1.14.0
 obonet
+openpyxl
 pandas
 python-Levenshtein
 scanpy
 scipy
 seaborn
 sphinx
-sphinx-autodoc-typehints
 sphinx_rtd_theme
+tensorflow  # TODO remove as soon as # 70 is solved
 tqdm
 requests
+xlrd==1.*

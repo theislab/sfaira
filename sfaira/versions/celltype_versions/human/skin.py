@@ -2,7 +2,8 @@ from .external import CelltypeVersionsBase
 
 ONTOLOGIES_HUMAN_SKIN_V0 = {
     "names": {
-        'immune': ['B cell', 'T cell', 'Dendritic cell', 'Erythroid cell', 'Erythroid progenitor cell (RP high)', 'Macrophage', 'Mast cell', 'Monocyte', 'Neutrophil', 'Neutrophil (RPS high)', 'Proliferating T cell'],
+        'immune': ['B cell', 'T cell', 'Dendritic cell', 'Erythroid cell', 'Erythroid progenitor cell (RP high)', 'Macrophage',
+                   'Mast cell', 'Monocyte', 'Neutrophil', 'Neutrophil (RPS high)', 'Proliferating T cell'],
         'Basal cell': ['Basal cell 1', 'Basal cell 2']
     },
     "ontology_ids": {},

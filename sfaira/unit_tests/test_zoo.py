@@ -14,8 +14,8 @@ class _TestZoo:
 
     """
     Contains functions _test* to test individual functions and attributes of estimator class.
-    
-    TODO for everybody working on this, add one _test* function in here and add it into 
+
+    TODO for everybody working on this, add one _test* function in here and add it into
     basic_estimator_test(). See _test_kipoi_call() for an example.
     """
 
@@ -56,7 +56,7 @@ class _TestZoo:
         np.random.seed(1)
         self.simulate()
         self.init_zoo()
-        #self._test_kipoi_call()
+        # self._test_kipoi_call()
         self.zoo_manual.set_model_id(id)
 
 

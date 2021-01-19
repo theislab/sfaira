@@ -3,10 +3,10 @@ import versioneer
 
 author = 'theislab'
 author_email = 'david.fischer@helmholtz-muenchen.de'
-description = ""
+description = "sfaira is a model and a data repository for single-cell data in a single python package."
 
 with open("README.rst", "r") as fh:
-     long_description = fh.read()
+    long_description = fh.read()
 
 setup(
     name='sfaira',
@@ -15,6 +15,15 @@ setup(
     description=description,
     long_description=long_description,
     long_description_content_type="text/markdown",
+    classifiers=[
+        'Development Status :: 5 - Production/Stable',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: BSD License',
+        'Natural Language :: English',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+    ],
     packages=find_packages(),
     install_requires=[
         'anndata>=0.7',
@@ -27,11 +36,11 @@ setup(
         'python-Levenshtein',
         'scipy>=1.2.1',
         'tqdm',
+        'tensorflow>=2.0.0'  # TODO Remove and add to tensorflow profile
     ],
     extras_require={
         'tensorflow': [
-            'tensorflow>=2.0.0',
-            'tensorflow-gpu>=2.0.0'
+            # 'tensorflow>=2.0.0'  # TODO Add Tensorflow here again
         ],
         'kipoi': [
             'kipoi',
@@ -42,24 +51,15 @@ setup(
             "matplotlib",
             "sklearn"
         ],
-        'scanpy': [
-            "scanpy"
-        ],
-        'loompy': [
+        'data': [
+            "scanpy",
             "loompy",
+            "requests",
+            "xlrd==1.*",
+            "openpyxl",
         ],
         'extension': [
             "sfaira_extension",
-        ],
-        'zenodo': [
-            "requests"
-        ],
-        'docs': [
-            'sphinx',
-            'sphinx-autodoc-typehints',
-            'sphinx_rtd_theme',
-            'jinja2',
-            'docutils',
         ],
     },
     version=versioneer.get_version(),
