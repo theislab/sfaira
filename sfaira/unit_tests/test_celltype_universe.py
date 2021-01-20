@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import unittest
 
-from sfaira.versions.celltype_versions import OntologyObo, SPECIES_DICT
+from sfaira.versions.celltype_versions import OntologyObo, ORGANISM_DICT
 
 
 class TestCellTypeUniverse(unittest.TestCase):
@@ -13,7 +13,7 @@ class TestCellTypeUniverse(unittest.TestCase):
     def test_debugging(self, reduced=False):
         import csv
         onto = OntologyObo()
-        for k, v in SPECIES_DICT.items():
+        for k, v in ORGANISM_DICT.items():
             for kk, vv in v.items():
                 universe = vv.celltype_universe["0"]
                 tab = onto.fuzzymatch_nodes(universe, match_only=True)
@@ -33,7 +33,7 @@ class TestCellTypeUniverse(unittest.TestCase):
     def test_debugging2(self):
         import csv
         onto = OntologyObo()
-        for k, v in SPECIES_DICT.items():
+        for k, v in ORGANISM_DICT.items():
             for kk, vv in v.items():
                 names = list(vv.ontology["0"]["names"].keys())
                 tab = onto.fuzzymatch_nodes(names, match_only=True)
@@ -58,7 +58,7 @@ class TestCellTypeUniverse(unittest.TestCase):
 
     def test_only(self):
         onto = OntologyObo()
-        for k, v in SPECIES_DICT.items():
+        for k, v in ORGANISM_DICT.items():
             for kk, vv in v.items():
                 universe = vv.celltype_universe["0"]
                 tab = onto.fuzzymatch_nodes(universe, match_only=True)
