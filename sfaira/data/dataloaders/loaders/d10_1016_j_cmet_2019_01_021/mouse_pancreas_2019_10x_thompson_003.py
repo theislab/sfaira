@@ -23,4 +23,6 @@ class Dataset(Dataset_d10_1016_j_cmet_2019_01_021):
             fn_meta = os.path.join(self.path, "mouse", "pancreas", "GSM3308548_NOD_14w_A_annotation.csv")
         else:
             fn_meta = os.path.join(fn, "_annotation.csv")
-        self._load_generalized(fn=fn, fn_meta=fn_meta)
+
+        data_path, sample_name = os.path.split(fn)
+        self._load_generalized(data_path=data_path, sample_name=sample_name, path_meta=fn_meta)
