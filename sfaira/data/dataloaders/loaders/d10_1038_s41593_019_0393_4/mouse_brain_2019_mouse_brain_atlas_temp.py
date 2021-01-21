@@ -2,6 +2,8 @@ import anndata
 import numpy as np
 import os
 import pandas
+import zipfile
+import scipy.io
 from typing import Union
 from sfaira.data import DatasetBase
 
@@ -19,9 +21,9 @@ class Dataset(DatasetBase):
         self.id = "mouse_brain_2019_10x_hove_001_10.1038/s41593-019-0393-4"
 
         self.download_url_data = \
-            "www.brainimmuneatlas.org/data_files/toDownload/filtered_gene_bc_matrices_mex_WT_fullAggr.zip"
+            "https://www.brainimmuneatlas.org/data_files/toDownload/filtered_gene_bc_matrices_mex_WT_fullAggr.zip"
         self.download_url_meta = \
-            "www.brainimmuneatlas.org/data_files/toDownload/annot_fullAggr.csv"
+            "https://www.brainimmuneatlas.org/data_files/toDownload/annot_fullAggr.csv"
 
         self.author = "Movahedi"
         self.doi = "10.1038/s41593-019-0393-4"
@@ -50,16 +52,18 @@ class Dataset(DatasetBase):
 
     def _load(self, fn=None):
         if fn is None:
-            fn = os.path.join(self.path, "mouse", "temp_mouse_brain_atlas", "matrix.mtx")
-        fn_barcodes = os.path.join(self.path, "mouse", "temp_mouse_brain_atlas", "barcodes.tsv")
-        fn_var = os.path.join(self.path, "mouse", "temp_mouse_brain_atlas", "genes.tsv")
+            fn = os.path.join(self.path, "mouse", "temp_mouse_brain_atlas", "filtered_gene_bc_matrices_mex_WT_fullAggr.zip")
         fn_meta = os.path.join(self.path, "mouse", "temp_mouse_brain_atlas", "annot_fullAggr.csv")
 
-        self.adata = anndata.read_mtx(fn)
-        self.adata = anndata.AnnData(self.adata.X.T)
-        var = pandas.read_csv(fn_var, sep="\t", header=None)
+        archive = zipfile.ZipFile(fn)
+        X = scipy.io.mmread(archive.open('filtered_gene_bc_matrices_mex/mm10/matrix.mtx')).T.tocsr()
+        self.adata = anndata.AnnData(X)
+        var = pandas.read_csv(archive.open('filtered_gene_bc_matrices_mex/mm10/genes.tsv'), sep="\t", header=None)
         var.columns = ["ensembl", "name"]
-        obs_names = pandas.read_csv(fn_barcodes, sep="\t", header=None)[0].values
+        obs_names = pandas.read_csv(archive.open('filtered_gene_bc_matrices_mex/mm10/barcodes.tsv'),
+                                    sep="\t",
+                                    header=None
+                                    )[0].values
         assert len(obs_names) == self.adata.shape[0]
         assert var.shape[0] == self.adata.shape[1]
         obs = pandas.read_csv(self.path + fn_meta)
