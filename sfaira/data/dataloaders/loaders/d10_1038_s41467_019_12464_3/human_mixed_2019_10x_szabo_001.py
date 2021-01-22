@@ -21,7 +21,7 @@ class Dataset(DatasetBase):
         self.id = "human_mixed_2019_10x_szabo_001_10.1038/s41467-019-12464-3"
 
         self.download_url_data = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE126nnn/GSE126030/suppl/GSE126030_RAW.tar"
-        self.download_url_meta =[
+        self.download_url_meta = [
             "private,donor1.annotation.txt",
             "private,donor2.annotation.txt"
         ]
