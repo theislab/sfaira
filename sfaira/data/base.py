@@ -167,7 +167,7 @@ class DatasetBase(abc.ABC):
         gc.collect()
 
     def download(self, savedir):
-        assert self.download_url_data is not None, f"Download_url_data is None, cannot download dataset."
+        assert self.download_url_data is not None, f"Download_url_data for dataset {self.id} is None, cannot download dataset."
         urls = [self.download_url_data] if isinstance(self.download_url_data, str) else self.download_url_data
 
         if isinstance(self.download_url_meta, str):
