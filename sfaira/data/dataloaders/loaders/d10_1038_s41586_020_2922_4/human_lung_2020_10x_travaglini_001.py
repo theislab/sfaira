@@ -35,7 +35,7 @@ class Dataset(DatasetBase):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "human_lung_2020_10x_travaglini_001_10.1038/s41586-020-2922-4"
 
-        self.download_url_data = "https://www.synapse.org/#!Synapse:syn21041850"
+        self.download_url_data = "synapse,droplet_normal_lung_blood_scanpy.20200205.RC4.h5ad"
         self.download_url_meta = None
 
         self.author = "Krasnow"

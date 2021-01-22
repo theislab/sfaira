@@ -19,7 +19,10 @@ class Dataset(DatasetBase):
         self.id = "human_colon_2019_10x_kinchen_001_10.1016/j.cell.2018.08.067"
 
         self.download_url_data = "https://data.humancellatlas.org/project-assets/project-matrices/f8aa201c-4ff1-45a4-890e-840d63459ca2.homo_sapiens.loom"
-        self.download_url_meta = "private"
+        self.download_url_meta = [
+            "private,uc_meta_data_stromal_with_donor.txt",
+            "private,hc_meta_data_stromal_with_donor.txt",
+        ]
 
         self.author = "Simmons"
         self.doi = "10.1016/j.cell.2018.08.067"

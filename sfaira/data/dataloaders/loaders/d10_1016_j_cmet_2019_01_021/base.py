@@ -1,5 +1,4 @@
 import anndata
-import numpy as np
 import tarfile
 import gzip
 import scipy.io
@@ -21,6 +20,7 @@ class Dataset_d10_1016_j_cmet_2019_01_021(DatasetBase):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.download_url_data = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE117nnn/GSE117770/suppl/GSE117770_RAW.tar"
         self.download_url_meta = "private"
+
         self.author = "Bhushan"
         self.doi = "10.1016/j.cmet.2019.01.021"
         self.healthy = False
