@@ -13,6 +13,9 @@ import pydoc
 import scipy.sparse
 from typing import Dict, List, Tuple, Union
 import warnings
+import urllib.parse
+import urllib.request
+import cgi
 
 from .external import SuperGenomeContainer
 from .external import ADATA_IDS_SFAIRA, META_DATA_FIELDS
@@ -56,8 +59,8 @@ class DatasetBase(abc.ABC):
     _author: Union[None, str]
     _dev_stage: Union[None, str]
     _doi: Union[None, str]
-    _download_url_data: Union[Tuple[List[None]], Tuple[List[str]]]
-    _download_url_meta: Union[Tuple[List[None]], Tuple[List[str]]]
+    _download_url_data: Union[Tuple[List[None]], Tuple[List[str]], None]
+    _download_url_meta: Union[Tuple[List[None]], Tuple[List[str]], None]
     _ethnicity: Union[None, str]
     _healthy: Union[None, bool]
     _id: Union[None, str]
@@ -162,6 +165,50 @@ class DatasetBase(abc.ABC):
         import gc
         self.adata = None
         gc.collect()
+
+    def download(self, savedir):
+        assert self.download_url_data is not None, f"Download_url_data is None, cannot download dataset."
+        urls = [self.download_url_data] if isinstance(self.download_url_data, str) else self.download_url_data
+
+        if isinstance(self.download_url_meta, str):
+            urls.append(self.download_url_meta)
+        elif isinstance(self.download_url_meta, list):
+            urls += self.download_url_meta
+
+        for url in urls:
+            if url.split(",")[0] == 'private':
+                if "," in url:
+                    print(f"Warning: Dataset {self.id} is not available for automatic download, please manually copy "
+                          f"the file {','.join(url.split(',')[1:])} to the following location: {savedir}")
+                else:
+                    print(f"Warning: A file for dataset {self.id} is not available for automatic download, please"
+                          f"manually copy the associated file to the following location: {savedir}")
+                continue
+
+            if url.split(",")[0] == 'synapse':
+                fn = ",".join(url.split(",")[1:])
+                self._download_synapse(url.split(",")[0], savedir + fn)
+                continue
+
+            url = urllib.parse.unquote(url)
+            if 'Content-Disposition' in urllib.request.urlopen(url).info().keys():
+                fn = cgi.parse_header(urllib.request.urlopen(url).info()['Content-Disposition'])[1]["filename"]
+            else:
+                fn = url.split("/")[-1]
+
+            urllib.request.urlretrieve(url, savedir + fn)
+
+    def _download_synapse(self, synapse_entity, savepath):
+        try:
+            import synapseclient
+        except ImportError:
+            raise ImportError("synapseclient not found. This package is required to download some of the selected "
+                              "datasets. Run `pip install synapseclient` to install it.")
+        import shutil
+        syn = synapseclient.Synapse()
+        syn.login("synapse_username", "password")  # TODO: add a way to store these values in sfaira
+        dataset = syn.get(entity=synapse_entity)
+        shutil.move(dataset.path, savepath)
 
     def set_raw_full_group_object(self, fn=None, adata_group: Union[None, anndata.AnnData] = None) -> bool:
         """
