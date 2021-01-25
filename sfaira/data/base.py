@@ -205,7 +205,7 @@ class DatasetBase(abc.ABC):
                 else:  # self._directory_formatted_id is None
                     w = "self.id"
                 warnings.warn(f"Caching enabled, but cannot find caching directory. Set {w} first. "
-                              f"Disabling caching for now")
+                              f"Disabling caching for now.")
                 return None
 
             cache = os.path.join(
@@ -223,6 +223,8 @@ class DatasetBase(abc.ABC):
                     warnings.warn(f"Cached loading enabled, but cache file {fn_cache} not found. "
                                   f"Loading from raw files.")
                     self._load(fn=fn)
+            else:
+                self._load(fn=fn)
 
         def _cached_writing(fn_cache):
             if fn_cache is not None:
@@ -277,10 +279,10 @@ class DatasetBase(abc.ABC):
             genome = match_to_reference
         elif self.organism == "human":
             genome = "Homo_sapiens_GRCh38_97"
-            warnings.warn(f"using default genomes {genome}")
+            warnings.warn(f"using default genome {genome}")
         elif self.organism == "mouse":
             genome = "Mus_musculus_GRCm38_97"
-            warnings.warn(f"using default genomes {genome}")
+            warnings.warn(f"using default genome {genome}")
         else:
             raise ValueError(f"genome was not supplied and organism {self.organism} "
                              f"was not matched to a default choice")
@@ -942,7 +944,7 @@ class DatasetBase(abc.ABC):
         :return:
         """
         x = self._download_meta
-        # if self._download_meta is not None:  # TODO add this back in once download_meta is routineyl set in datasets
+        # if self._download_meta is not None:  # TODO add this back in once download_meta is routinely set in datasets
         #    x = self._download_meta
         # else:
         #    if self.meta is None:
