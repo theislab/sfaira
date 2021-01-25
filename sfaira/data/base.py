@@ -839,7 +839,7 @@ class DatasetBase(abc.ABC):
         self._age = x
 
     @property
-    def annotated(self) -> bool:
+    def annotated(self) -> Union[bool, None]:
         if self.obs_key_cellontology_id is not None or self.obs_key_cellontology_original is not None:
             return True
         else:
@@ -847,7 +847,12 @@ class DatasetBase(abc.ABC):
                 self.load_meta(fn=None)
             if self.meta is not None and self._ADATA_IDS_SFAIRA.annotated in self.meta.columns:
                 return self.meta[self._ADATA_IDS_SFAIRA.annotated]
+            elif self.loaded:
+                # If data set was loaded and there is still no annotation indicated, it is declared unannotated.
+                return False
             else:
+                # If data set was not yet loaded, it is unclear if annotation would be loaded in ._load(),
+                # if also no meta data is available, we do not know the status of the data set.
                 return None
 
     @property
@@ -1024,6 +1029,13 @@ class DatasetBase(abc.ABC):
     def id(self, x: str):
         self.__erasing_protection(attr="id", val_old=self._id, val_new=x)
         self._id = x
+
+    @property
+    def loaded(self) -> bool:
+        """
+        :return: Whether DataSet was loaded into memory.
+        """
+        return self.adata is not None
 
     @property
     def meta(self) -> Union[None, pd.DataFrame]:
