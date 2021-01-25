@@ -192,31 +192,61 @@ class DatasetBase(abc.ABC):
         :param allow_caching: Whether to allow method to cache adata object for faster re-loading.
         :return:
         """
+        def _get_cache_fn():
+            if None in [
+                self.cache_path,
+                self.directory_formatted_doi,
+                self._directory_formatted_id
+            ]:
+                if self.cache_path is None:
+                    w = "cache path"
+                elif self.directory_formatted_doi is None:
+                    w = "self.doi"
+                else:  # self._directory_formatted_id is None
+                    w = "self.id"
+                warnings.warn(f"Caching enabled, but cannot find caching directory. Set {w} first. "
+                              f"Disabling caching for now")
+                return None
+
+            cache = os.path.join(
+                self.cache_path,
+                self.directory_formatted_doi,
+                self._directory_formatted_id + ".h5ad"
+            )
+            return cache
+
+        def _cached_reading(fn, fn_cache):
+            if fn_cache is not None:
+                if os.path.exists(fn_cache):
+                    self.adata = anndata.read_h5ad(fn_cache)
+                else:
+                    warnings.warn(f"Cached loading enabled, but cache file {fn_cache} not found. "
+                                  f"Loading from raw files.")
+                    self._load(fn=fn)
+
+        def _cached_writing(fn_cache):
+            if fn_cache is not None:
+                dir_cache = os.path.dirname(fn_cache)
+                if not os.path.exists(dir_cache):
+                    os.makedirs(dir_cache)
+                self.adata.write_h5ad(fn_cache)
+
         if fn is None and self.path is None:
             raise ValueError("provide either fn in load or path in constructor")
 
-        assert self.cache_path is not None, "set self.cache_path first"
-        assert self.directory_formatted_doi is not None, "set self.doi first"
-        assert self._directory_formatted_id is not None, "set self.id first"
-        fn_cache = os.path.join(
-            self.cache_path,
-            self.directory_formatted_doi,
-            self._directory_formatted_id + ".h5ad"
-        )
-        # Check if raw loader has to be called:
-        if load_raw or not os.path.exists(fn_cache):
+        if load_raw and allow_caching:
             self._load(fn=fn)
-        else:
-            assert self.cache_path is not None, "set cache_path to use caching"
-            assert os.path.exists(fn_cache), f"did not find cache file {fn_cache}, consider caching first"
-            self.adata = anndata.read_h5ad(fn_cache)
-        # Check if file needs to be cached:
-        if allow_caching and not os.path.exists(fn_cache):
-            assert self.cache_path is not None, "set cache_path to use caching"
-            dir_cache = os.path.dirname(fn_cache)
-            if not os.path.exists(dir_cache):
-                os.makedirs(dir_cache)
-            self.adata.write_h5ad(fn_cache)
+            fn_cache = _get_cache_fn()
+            _cached_writing(fn_cache)
+        elif load_raw and not allow_caching:
+            self._load(fn=fn)
+        elif not load_raw and allow_caching:
+            fn_cache = _get_cache_fn()
+            _cached_reading(fn, fn_cache)
+            _cached_writing(fn_cache)
+        else:  # not load_raw and not allow_caching
+            fn_cache = _get_cache_fn()
+            _cached_reading(fn, fn_cache)
 
     def load(
             self,
@@ -240,7 +270,7 @@ class DatasetBase(abc.ABC):
         """
         if match_to_reference and not remove_gene_version:
             warnings.warn("it is not recommended to enable matching the feature space to a genomes reference"
-                          "while not removing gene versions. this can lead to very poor matching performance")
+                          "while not removing gene versions. this can lead to very poor matching results")
 
         # Set default genomes per organism if none provided:
         if match_to_reference:
