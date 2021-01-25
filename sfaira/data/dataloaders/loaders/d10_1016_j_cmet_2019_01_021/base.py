@@ -30,6 +30,8 @@ class Dataset_d10_1016_j_cmet_2019_01_021(DatasetBase):
 
         self.var_symbol_col = "index"
 
+        self.obs_key_cellontology_original = "celltypes"
+
         self.class_maps = {
             "0": {
                 "acinar": "pancreatic acinar cell",
@@ -56,4 +58,4 @@ class Dataset_d10_1016_j_cmet_2019_01_021(DatasetBase):
         self.adata.obs_names = np.genfromtxt(fn + "_barcodes.tsv.gz", dtype=str)
         self.adata.var_names_make_unique()
         self.adata = self.adata[celltypes.index]
-        self.adata.obs[self._ADATA_IDS_SFAIRA.cell_types_original] = celltypes
+        self.adata.obs["celltypes"] = celltypes
