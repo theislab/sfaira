@@ -38,7 +38,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             **kwargs
     ):
         super().__init__(sample_fn=sample_fn, path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.id = "human_mixed_2019_10x_szabo_001_10.1038/s41467-019-12464-3"
+        self.id = f"human_mixed_2019_10x_szabo_{str(SAMPLE_FNS.index(sample_fn)).zfill(3)}_10.1038/s41467-019-12464-3"
 
         self.download = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE126nnn/GSE126030/suppl/GSE126030_RAW.tar"
         self.download_meta = "private"
@@ -62,14 +62,14 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             "0": {},
         }
 
-    def _load(self, fn):
+    def _load(self, fn=None):
         fn_tar = os.path.join(self.path, "human", "mixed", "GSE126030_RAW.tar"),
         fn_annot = [
             os.path.join(self.path, "human", "mixed", "donor1.annotation.txt"),
             os.path.join(self.path, "human", "mixed", "donor2.annotation.txt")
         ]
         with tarfile.open(fn_tar) as tar:
-            df = pd.read_csv(tar.extractfile(fn), compression="gzip", sep="\t")
+            df = pd.read_csv(tar.extractfile(self.sample_fn), compression="gzip", sep="\t")
             df.index = [i.split(".")[0] for i in df["Accession"]]
             var = pd.concat([df.pop(x) for x in ["Gene", "Accession"]], 1)
             if df.columns[-1].startswith("Un"):

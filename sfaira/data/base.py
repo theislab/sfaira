@@ -1450,6 +1450,10 @@ class DatasetBaseGroupLoadingManyFiles(DatasetBase, abc.ABC):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self._sample_fn = sample_fn
 
+    @property
+    def sample_fn(self):
+        return self._sample_fn
+
 
 class DatasetGroup:
     """
