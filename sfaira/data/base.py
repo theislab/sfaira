@@ -535,15 +535,6 @@ class DatasetBase(abc.ABC):
                 celltype_version=celltype_version
             )
 
-    def subset_organs(self, subset: Union[None, List]):
-        if self.organ == "mixed":
-            self.organsubset = subset
-        else:
-            raise ValueError("Only data that contain multiple organs can be subset.")
-        if self.adata is not None:
-            warnings.warn("You are trying to subset organs after loading the dataset."
-                          "This will have no effect unless the dataset is loaded again.")
-
     def load_tobacked(
             self,
             adata_backed: anndata.AnnData,
@@ -1771,7 +1762,7 @@ class DatasetGroup:
 
     def subset(self, key, values):
         """
-        Subset list of adata objects based on match to values in key property.
+        Subset list of adata objects based on sample-wise properties.
 
         These keys are properties that are available in lazy model.
         Subsetting happens on .datasets.
@@ -1795,12 +1786,138 @@ class DatasetGroup:
         for x in ids_del:
             del self.datasets[x]
 
-    def subset_organs(self, subset: Union[None, List]):
+    def subset_cells(self, key, values):
+        """
+        Subset list of adata objects based on cell-wise properties.
+
+        These keys are properties that are not available in lazy model and require loading first because the
+        subsetting works on the cell-level: .adata are maintained but reduced to matches.
+
+        :param key: Property to subset by. Options:
+
+            - "age" points to self.obs_key_age
+            - "cell_ontology_class" points to self.obs_key_cellontology_original
+            - "dev_stage" points to self.obs_key_dev_stage
+            - "ethnicity" points to self.obs_key_ethnicity
+            - "healthy" points to self.obs_key_healthy
+            - "organ" points to self.obs_key_organ
+            - "organism" points to self.obs_key_organism
+            - "protocol" points to self.obs_key_protocol
+            - "sex" points to self.obs_key_sex
+            - "state_exact" points to self.obs_key_state_exact
+        :param values: Classes to overlap to.
+        :return:
+        """
         for i in self.ids:
-            if self.datasets[i].organ == "mixed":
-                self.datasets[i].subset_organs(subset)
+            if key == "age":
+                if self.datasets[i].obs_key_age is not None:
+                    self.datasets[i].adata = self.datasets[i].adata[
+                        [x in values for x in self.datasets[i].adata.obs[self.datasets[i].obs_key_age].values]
+                    ].copy()
+                else:  # Property was not annotated by cell.
+                    # Check if property annotation by sample matches target, discard all cells (data set) otherwise.
+                    if self.datasets[i].age in values:
+                        pass
+                    else:
+                        del self.datasets[i]
+            elif key == "cell_ontology_class":
+                if self.datasets[i].obs_key_cell_ontology_class is not None:
+                    self.datasets[i].adata = self.datasets[i].adata[
+                        [x in values for x in
+                         self.datasets[i].adata.obs[self.datasets[i].obs_key_cell_ontology_class].values]
+                    ].copy()
+                else:  # Property was not annotated by cell.
+                    del self.datasets[i]
+            elif key == "dev_stage":
+                if self.datasets[i].obs_key_dev_stage is not None:
+                    self.datasets[i].adata = self.datasets[i].adata[
+                        [x in values for x in self.datasets[i].adata.obs[self.datasets[i].obs_key_dev_stage].values]
+                    ].copy()
+                else:  # Property was not annotated by cell.
+                    # Check if property annotation by sample matches target, discard all cells (data set) otherwise.
+                    if self.datasets[i].dev_stage in values:
+                        pass
+                    else:
+                        del self.datasets[i]
+            elif key == "ethnicity":
+                if self.datasets[i].obs_key_ethnicity is not None:
+                    self.datasets[i].adata = self.datasets[i].adata[
+                        [x in values for x in self.datasets[i].adata.obs[self.datasets[i].obs_key_ethnicity].values]
+                    ].copy()
+                else:  # Property was not annotated by cell.
+                    # Check if property annotation by sample matches target, discard all cells (data set) otherwise.
+                    if self.datasets[i].ethnicity in values:
+                        pass
+                    else:
+                        del self.datasets[i]
+            elif key == "healthy":
+                if self.datasets[i].obs_key_healthy is not None:
+                    self.datasets[i].adata = self.datasets[i].adata[
+                        [x in values for x in self.datasets[i].adata.obs[self.datasets[i].obs_key_healthy].values]
+                    ].copy()
+                else:  # Property was not annotated by cell.
+                    # Check if property annotation by sample matches target, discard all cells (data set) otherwise.
+                    if self.datasets[i].healthy in values:
+                        pass
+                    else:
+                        del self.datasets[i]
+            elif key == "organ":
+                if self.datasets[i].obs_key_organ is not None:
+                    self.datasets[i].adata = self.datasets[i].adata[
+                        [x in values for x in self.datasets[i].adata.obs[self.datasets[i].obs_key_organ].values]
+                    ].copy()
+                else:  # Property was not annotated by cell.
+                    # Check if property annotation by sample matches target, discard all cells (data set) otherwise.
+                    if self.datasets[i].organ in values:
+                        pass
+                    else:
+                        del self.datasets[i]
+            elif key == "organism":
+                if self.datasets[i].obs_key_organism is not None:
+                    self.datasets[i].adata = self.datasets[i].adata[
+                        [x in values for x in self.datasets[i].adata.obs[self.datasets[i].obs_key_organism].values]
+                    ].copy()
+                else:  # Property was not annotated by cell.
+                    # Check if property annotation by sample matches target, discard all cells (data set) otherwise.
+                    if self.datasets[i].organism in values:
+                        pass
+                    else:
+                        del self.datasets[i]
+            elif key == "protocol":
+                if self.datasets[i].obs_key_protocol is not None:
+                    self.datasets[i].adata = self.datasets[i].adata[
+                        [x in values for x in self.datasets[i].adata.obs[self.datasets[i].obs_key_protocol].values]
+                    ].copy()
+                else:  # Property was not annotated by cell.
+                    # Check if property annotation by sample matches target, discard all cells (data set) otherwise.
+                    if self.datasets[i].protocol in values:
+                        pass
+                    else:
+                        del self.datasets[i]
+            elif key == "sex":
+                if self.datasets[i].obs_key_sex is not None:
+                    self.datasets[i].adata = self.datasets[i].adata[
+                        [x in values for x in self.datasets[i].adata.obs[self.datasets[i].obs_key_sex].values]
+                    ].copy()
+                else:  # Property was not annotated by cell.
+                    # Check if property annotation by sample matches target, discard all cells (data set) otherwise.
+                    if self.datasets[i].sex in values:
+                        pass
+                    else:
+                        del self.datasets[i]
+            elif key == "state_exact":
+                if self.datasets[i].obs_key_state_exact is not None:
+                    self.datasets[i].adata = self.datasets[i].adata[
+                        [x in values for x in self.datasets[i].adata.obs[self.datasets[i].obs_key_state_exact].values]
+                    ].copy()
+                else:  # Property was not annotated by cell.
+                    # Check if property annotation by sample matches target, discard all cells (data set) otherwise.
+                    if self.datasets[i].state_exact in values:
+                        pass
+                    else:
+                        del self.datasets[i]
             else:
-                raise ValueError("Only data that contain multiple organs can be subset.")
+                raise ValueError(f"did not recognise key {key}")
 
 
 class DatasetGroupLoadingOneFile(DatasetGroup):
