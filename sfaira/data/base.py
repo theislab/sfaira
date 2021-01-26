@@ -205,7 +205,7 @@ class DatasetBase(abc.ABC):
                 else:  # self._directory_formatted_id is None
                     w = "self.id"
                 warnings.warn(f"Caching enabled, but cannot find caching directory. Set {w} first. "
-                              f"Disabling caching for now")
+                              f"Disabling caching for now.")
                 return None
 
             cache = os.path.join(
@@ -223,6 +223,8 @@ class DatasetBase(abc.ABC):
                     warnings.warn(f"Cached loading enabled, but cache file {fn_cache} not found. "
                                   f"Loading from raw files.")
                     self._load(fn=fn)
+            else:
+                self._load(fn=fn)
 
         def _cached_writing(fn_cache):
             if fn_cache is not None:
@@ -277,10 +279,10 @@ class DatasetBase(abc.ABC):
             genome = match_to_reference
         elif self.organism == "human":
             genome = "Homo_sapiens_GRCh38_97"
-            warnings.warn(f"using default genomes {genome}")
+            warnings.warn(f"using default genome {genome}")
         elif self.organism == "mouse":
             genome = "Mus_musculus_GRCm38_97"
-            warnings.warn(f"using default genomes {genome}")
+            warnings.warn(f"using default genome {genome}")
         else:
             raise ValueError(f"genome was not supplied and organism {self.organism} "
                              f"was not matched to a default choice")
@@ -726,21 +728,11 @@ class DatasetBase(abc.ABC):
         # Only load meta data if file exists:
         if os.path.isfile(fn):
             meta = pandas.read_csv(
-                fn, usecols=list(self._META_DATA_FIELDS.keys()), dtype=str,
+                fn,
+                usecols=list(self._META_DATA_FIELDS.keys()),
+                dtype=self._META_DATA_FIELDS,
             )
-            # Formatting: All are read as string to allow dealing wth None entries:
-            # Make sure bool entries are bool:
-            for k, v in self._META_DATA_FIELDS.items():
-                if v == bool:
-                    meta[k] = [
-                        True if x == "True" else
-                        False if x == "False" else None
-                        for x in meta[k].values.tolist()
-                    ]
-                else:
-                    # Make sure None entries are formatted as None and not as string "None":
-                    meta[k] = [None if x == "None" else x for x in meta[k].values.tolist()]
-            self.meta = meta
+            self.meta = meta.fillna("None").replace({"None": None})
 
     def write_meta(
             self,
@@ -947,7 +939,7 @@ class DatasetBase(abc.ABC):
         :return:
         """
         x = self._download_meta
-        # if self._download_meta is not None:  # TODO add this back in once download_meta is routineyl set in datasets
+        # if self._download_meta is not None:  # TODO add this back in once download_meta is routinely set in datasets
         #    x = self._download_meta
         # else:
         #    if self.meta is None:
@@ -1050,7 +1042,7 @@ class DatasetBase(abc.ABC):
                 else:
                     if x[k] is not None:  # None is always allowed.
                         if not isinstance(v[0], self._META_DATA_FIELDS[k]):
-                            raise ValueError(f"key {k} of signature {str(v[0])} "
+                            raise ValueError(f"key '{k}' of value `{v[0]}` and signature `{type(v[0])}` "
                                              f"in meta data table did not match signature "
                                              f"{str(self._META_DATA_FIELDS[k])}")
         self._meta = x
@@ -1874,7 +1866,7 @@ class DatasetSuperGroup:
         return [xx for x in self.ncells_bydataset(annotated_only=annotated_only) for xx in x]
 
     def ncells(self, annotated_only: bool = False):
-        return np.sum(self.ncells_bydataset(annotated_only=annotated_only))
+        return np.sum(self.ncells_bydataset_flat(annotated_only=annotated_only))
 
     def flatten(self) -> DatasetGroup:
         """
@@ -2066,6 +2058,8 @@ class DatasetSuperGroup:
         """
         for x in self.dataset_groups:
             x.subset(key=key, values=values)
+
+        self.dataset_groups = [x for x in self.dataset_groups if x.datasets]  # Delete empty DatasetGroups
 
     def subset_organs(self, subset: Union[None, List]):
         for x in self.dataset_groups:
