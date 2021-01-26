@@ -1866,7 +1866,7 @@ class DatasetSuperGroup:
         return [xx for x in self.ncells_bydataset(annotated_only=annotated_only) for xx in x]
 
     def ncells(self, annotated_only: bool = False):
-        return np.sum(self.ncells_bydataset(annotated_only=annotated_only))
+        return np.sum(self.ncells_bydataset_flat(annotated_only=annotated_only))
 
     def flatten(self) -> DatasetGroup:
         """
