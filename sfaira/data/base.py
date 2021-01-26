@@ -81,6 +81,7 @@ class DatasetBase(abc.ABC):
     _obs_key_organ: Union[None, str]
     _obs_key_organism: Union[None, str]
     _obs_key_protocol: Union[None, str]
+    _obs_key_sample: Union[None, str]
     _obs_key_sex: Union[None, str]
     _obs_key_state_exact: Union[None, str]
 
@@ -134,6 +135,7 @@ class DatasetBase(abc.ABC):
         self._obs_key_organ = None
         self._obs_key_organism = None
         self._obs_key_protocol = None
+        self._obs_key_sample = None
         self._obs_key_sex = None
         self._obs_key_state_exact = None
 
@@ -1169,6 +1171,15 @@ class DatasetBase(abc.ABC):
         self._obs_key_protocol = x
 
     @property
+    def obs_key_sample(self) -> str:
+        return self._obs_key_sample
+
+    @obs_key_sample.setter
+    def obs_key_sample(self, x: str):
+        self.__erasing_protection(attr="obs_key_sample", val_old=self._obs_key_sample, val_new=x)
+        self._obs_key_sample = x
+
+    @property
     def obs_key_sex(self) -> str:
         return self._obs_key_sex
 
@@ -1353,14 +1364,16 @@ class DatasetBase(abc.ABC):
                     raise ValueError(f"{x} is not a valid entry for {attr}, choose from: {str(allowed)}")
 
 
-class DatasetBaseGroupLoading(DatasetBase):
+class DatasetBaseGroupLoadingOneFile(DatasetBase):
     """
-    Container class specific to datasets which come in groups and require specialised loading.
+    Container class specific to datasets which come in groups and in which data sets are saved in a single file.
     """
     _unprocessed_full_group_object: bool
+    _sample_id: str
 
     def __init__(
             self,
+            sample_id: str,
             path: Union[str, None],
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
@@ -1368,9 +1381,14 @@ class DatasetBaseGroupLoading(DatasetBase):
     ):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self._unprocessed_full_group_object = False
+        self._sample_id = sample_id
+
+    @property
+    def sample_id(self):
+        return self._sample_id
 
     @abc.abstractmethod
-    def _load_full_group_object(self, fn=None) -> Union[None, anndata.AnnData]:
+    def _load_full_group_object(self, fn=None) -> anndata.AnnData:
         """
         Loads a raw anndata object that correponds to a superset of the data belonging to this Dataset.
 
@@ -1398,7 +1416,8 @@ class DatasetBaseGroupLoading(DatasetBase):
 
         Override this method in the Dataset if this is relevant.
         """
-        pass
+        assert self.obs_key_sample is not None, f"self.obs_key_sample needs to be set"
+        self._subset_from_group(subset_items={self.obs_key_sample: self.sample_id})
 
     def _subset_from_group(
             self,
@@ -1420,6 +1439,34 @@ class DatasetBaseGroupLoading(DatasetBase):
         if self._unprocessed_full_group_object:
             self._load_from_group()
         self._unprocessed_full_group_object = False
+
+
+class DatasetBaseGroupLoadingManyFiles(DatasetBase):
+    """
+    Container class specific to datasets which come in groups and in which data sets are saved in separate but
+    streamlined files.
+    """
+    _sample_fn: str
+
+    def __init__(
+            self,
+            sample_fn: str,
+            path: Union[str, None] = None,
+            meta_path: Union[str, None] = None,
+            cache_path: Union[str, None] = None,
+            **kwargs
+    ):
+        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        self._sample_fn = sample_fn
+
+    def _load(self, fn=None):
+        if fn is None:
+            fn = self._sample_fn
+        self._load_any_object(fn=fn)
+
+    @abc.abstractmethod
+    def _load_any_object(self, fn):
+        pass
 
 
 class DatasetGroup:
@@ -1754,6 +1801,73 @@ class DatasetGroup:
                 self.datasets[i].subset_organs(subset)
             else:
                 raise ValueError("Only data that contain multiple organs can be subset.")
+
+
+class DatasetGroupLoadingOneFile(DatasetGroup):
+    """
+    Container class specific to dataset groups which consist of data sets which are saved in one file."""
+
+    def __init__(
+            self,
+            cls,
+            sample_ids: List[str],
+            path: Union[str, None] = None,
+            meta_path: Union[str, None] = None,
+            cache_path: Union[str, None] = None,
+    ):
+        """
+
+        :param cls: Needs to be a subclass of DatasetBaseGroupLoadingOneFile.
+        :param sample_ids:
+        :param path:
+        :param meta_path:
+        :param cache_path:
+        """
+        datasets = [
+            cls(
+                sample_id=x,
+                path=path,
+                meta_path=meta_path,
+                cache_path=cache_path,
+            )
+            for x in sample_ids
+        ]
+        keys = [x.id for x in datasets]
+        super().__init__(dict(zip(keys, datasets)))
+
+
+class DatasetGroupLoadingManyFiles(DatasetGroup):
+    """
+    Container class specific to dataset groups which consist of data sets which are saved in separate but streamlined
+    files.
+    """
+    def __init__(
+            self,
+            cls,
+            sample_fns: List[str],
+            path: Union[str, None] = None,
+            meta_path: Union[str, None] = None,
+            cache_path: Union[str, None] = None,
+    ):
+        """
+
+        :param cls: Needs to be a subclass of DatasetBaseGroupLoadingManyFiles.
+        :param sample_fns:
+        :param path:
+        :param meta_path:
+        :param cache_path:
+        """
+        datasets = [
+            cls(
+                sample_fn=x,
+                path=path,
+                meta_path=meta_path,
+                cache_path=cache_path,
+            )
+            for x in sample_fns
+        ]
+        keys = [x.id for x in datasets]
+        super().__init__(dict(zip(keys, datasets)))
 
 
 class DatasetGroupDirectoryOriented(DatasetGroup):
