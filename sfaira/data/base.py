@@ -2069,7 +2069,7 @@ class DatasetSuperGroup:
         for x in self.dataset_groups:
             x.subset(key=key, values=values)
 
-        self.dataset_groups = [x for x in self.dataset_groups if x]  # Delete empty DatasetGroups after subsetting
+        self.dataset_groups = [x for x in self.dataset_groups if x.datasets]  # Delete empty DatasetGroups after subsetting
 
     def subset_organs(self, subset: Union[None, List]):
         for x in self.dataset_groups:
