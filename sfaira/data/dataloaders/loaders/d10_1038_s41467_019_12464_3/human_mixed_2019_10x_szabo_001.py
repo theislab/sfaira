@@ -38,7 +38,7 @@ class Dataset(DatasetBase):
         self.obs_key_cellontology_original = "cell_ontology_class"
         self.obs_key_organ = "organ"
 
-        #self.loaded = False  # TODO do this differently?
+        # self.loaded = False  # TODO do this differently?
 
         self.class_maps = {
             "0": {},
@@ -97,12 +97,12 @@ class Dataset(DatasetBase):
 
         # TODO we should move this code into the base class
         # If the subset_organs() method has been run before, subset to specified organs
-        #if "organsubset" in self.__dict__:
+        # if "organsubset" in self.__dict__:
         #    self.adata = self.adata[self.adata.obs["organ"].isin(self.organsubset)]
         # If adata object is empty, set it to None
-        #if not len(self.adata):
+        # if not len(self.adata):
         #    self.adata = None
-        #self.loaded = True
+        # self.loaded = True
 
     @property
     def ncells(self):
