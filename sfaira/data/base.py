@@ -1054,7 +1054,7 @@ class DatasetBase(abc.ABC):
                 else:
                     if x[k] is not None:  # None is always allowed.
                         if not isinstance(v[0], self._META_DATA_FIELDS[k]):
-                            raise ValueError(f"key '{k}' of signature `{type(v[0])}` "
+                            raise ValueError(f"key '{k}' of value `{v[0]}` and signature `{type(v[0])}` "
                                              f"in meta data table did not match signature "
                                              f"{str(self._META_DATA_FIELDS[k])}")
         self._meta = x
