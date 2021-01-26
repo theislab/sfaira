@@ -1379,7 +1379,7 @@ class DatasetBaseGroupLoadingOneFile(DatasetBase):
         return self._sample_id
 
     @abc.abstractmethod
-    def _load_full_group_object(self, fn=None) -> anndata.AnnData:
+    def _load_full(self, fn=None) -> anndata.AnnData:
         """
         Loads a raw anndata object that correponds to a superset of the data belonging to this Dataset.
 
@@ -1432,7 +1432,7 @@ class DatasetBaseGroupLoadingOneFile(DatasetBase):
         self._unprocessed_full_group_object = False
 
 
-class DatasetBaseGroupLoadingManyFiles(DatasetBase):
+class DatasetBaseGroupLoadingManyFiles(DatasetBase, abc.ABC):
     """
     Container class specific to datasets which come in groups and in which data sets are saved in separate but
     streamlined files.
@@ -1449,15 +1449,6 @@ class DatasetBaseGroupLoadingManyFiles(DatasetBase):
     ):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self._sample_fn = sample_fn
-
-    def _load(self, fn=None):
-        if fn is None:
-            fn = self._sample_fn
-        self._load_any_object(fn=fn)
-
-    @abc.abstractmethod
-    def _load_any_object(self, fn):
-        pass
 
 
 class DatasetGroup:
@@ -1920,73 +1911,6 @@ class DatasetGroup:
                 raise ValueError(f"did not recognise key {key}")
 
 
-class DatasetGroupLoadingOneFile(DatasetGroup):
-    """
-    Container class specific to dataset groups which consist of data sets which are saved in one file."""
-
-    def __init__(
-            self,
-            cls,
-            sample_ids: List[str],
-            path: Union[str, None] = None,
-            meta_path: Union[str, None] = None,
-            cache_path: Union[str, None] = None,
-    ):
-        """
-
-        :param cls: Needs to be a subclass of DatasetBaseGroupLoadingOneFile.
-        :param sample_ids:
-        :param path:
-        :param meta_path:
-        :param cache_path:
-        """
-        datasets = [
-            cls(
-                sample_id=x,
-                path=path,
-                meta_path=meta_path,
-                cache_path=cache_path,
-            )
-            for x in sample_ids
-        ]
-        keys = [x.id for x in datasets]
-        super().__init__(dict(zip(keys, datasets)))
-
-
-class DatasetGroupLoadingManyFiles(DatasetGroup):
-    """
-    Container class specific to dataset groups which consist of data sets which are saved in separate but streamlined
-    files.
-    """
-    def __init__(
-            self,
-            cls,
-            sample_fns: List[str],
-            path: Union[str, None] = None,
-            meta_path: Union[str, None] = None,
-            cache_path: Union[str, None] = None,
-    ):
-        """
-
-        :param cls: Needs to be a subclass of DatasetBaseGroupLoadingManyFiles.
-        :param sample_fns:
-        :param path:
-        :param meta_path:
-        :param cache_path:
-        """
-        datasets = [
-            cls(
-                sample_fn=x,
-                path=path,
-                meta_path=meta_path,
-                cache_path=cache_path,
-            )
-            for x in sample_fns
-        ]
-        keys = [x.id for x in datasets]
-        super().__init__(dict(zip(keys, datasets)))
-
-
 class DatasetGroupDirectoryOriented(DatasetGroup):
 
     def __init__(
@@ -2023,8 +1947,43 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                     if f.split(".")[-1] == "py" and f.split(".")[0] not in ["__init__", "base", "group"]:
                         file_module = ".".join(f.split(".")[:-1])
                         DatasetFound = pydoc.locate(
-                            "sfaira.sfaira.data.dataloaders.loaders." + dataset_module + "." + file_module + ".Dataset")
-                        datasets.append(DatasetFound(path=path, meta_path=meta_path, cache_path=cache_path))
+                            "sfaira.sfaira.data.dataloaders.loaders." + dataset_module + "." +
+                            file_module + ".Dataset")
+                        # Check if global objects are available:
+                        # - SAMPLE_FNS: for DatasetBaseGroupLoadingManyFiles
+                        # - SAMPLE_IDS: for DatasetBaseGroupLoadingOneFile
+                        sample_fns = pydoc.locate(
+                            "sfaira.sfaira.data.dataloaders.loaders." + dataset_module + "." +
+                            file_module + ".SAMPLE_FNS")
+                        sample_ids = pydoc.locate(
+                            "sfaira.sfaira.data.dataloaders.loaders." + dataset_module + "." +
+                            file_module + ".SAMPLE_IDS")
+                        if sample_fns is not None and sample_ids is None:
+                            # DatasetBaseGroupLoadingManyFiles:
+                            datasets.extend([
+                                DatasetFound(
+                                    sample_fn=x,
+                                    path=path,
+                                    meta_path=meta_path,
+                                    cache_path=cache_path,
+                                )
+                                for x in sample_fns
+                            ])
+                        elif sample_fns is None and sample_ids is not None:
+                            # DatasetBaseGroupLoadingManyFiles:
+                            datasets.extend([
+                                DatasetFound(
+                                    sample_id=x,
+                                    path=path,
+                                    meta_path=meta_path,
+                                    cache_path=cache_path,
+                                )
+                                for x in sample_ids
+                            ])
+                        elif sample_fns is not None and sample_ids is not None:
+                            raise ValueError(f"sample_fns and sample_ids both found for {f}")
+                        else:
+                            datasets.append(DatasetFound(path=path, meta_path=meta_path, cache_path=cache_path))
 
         keys = [x.id for x in datasets]
         super().__init__(datasets=dict(zip(keys, datasets)))

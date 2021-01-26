@@ -3,6 +3,11 @@ from typing import Union
 
 from sfaira.data import DatasetBaseGroupLoadingManyFiles
 
+SAMPLE_IDS = [  # ToDo Add correct sample IDs here.
+    "your_sample_id_1",
+    "your_sample_id_2"
+]
+
 
 class Dataset(DatasetBaseGroupLoadingManyFiles):
 

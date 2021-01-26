@@ -2,6 +2,11 @@ from typing import Union
 
 from sfaira.data import DatasetBaseGroupLoadingManyFiles
 
+SAMPLE_FNS = [  # ToDo Add correct sample file names here.
+    "your_sample_fn_1",
+    "your_sample_fn_2"
+]
+
 
 class Dataset(DatasetBaseGroupLoadingManyFiles):
 

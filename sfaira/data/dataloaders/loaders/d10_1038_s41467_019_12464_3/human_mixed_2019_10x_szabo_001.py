@@ -7,6 +7,25 @@ import scipy.sparse
 
 from sfaira.data import DatasetBaseGroupLoadingManyFiles
 
+SAMPLE_FNS = [
+    "GSM3589406_PP001swap.filtered.matrix.txt.gz",
+    "GSM3589407_PP002swap.filtered.matrix.txt.gz",
+    "GSM3589408_PP003swap.filtered.matrix.txt.gz",
+    "GSM3589409_PP004swap.filtered.matrix.txt.gz",
+    "GSM3589410_PP005swap.filtered.matrix.txt.gz",
+    "GSM3589411_PP006swap.filtered.matrix.txt.gz",
+    "GSM3589412_PP009swap.filtered.matrix.txt.gz",
+    "GSM3589413_PP010swap.filtered.matrix.txt.gz",
+    "GSM3589414_PP011swap.filtered.matrix.txt.gz",
+    "GSM3589415_PP012swap.filtered.matrix.txt.gz",
+    "GSM3589416_PP013swap.filtered.matrix.txt.gz",
+    "GSM3589417_PP014swap.filtered.matrix.txt.gz",
+    "GSM3589418_PP017swap.filtered.matrix.txt.gz",
+    "GSM3589419_PP018swap.filtered.matrix.txt.gz",
+    "GSM3589420_PP019swap.filtered.matrix.txt.gz",
+    "GSM3589421_PP020swap.filtered.matrix.txt.gz",
+]
+
 
 class Dataset(DatasetBaseGroupLoadingManyFiles):
 
@@ -18,9 +37,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(
-            sample_fn=sample_fn,
-            path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        super().__init__(sample_fn=sample_fn, path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "human_mixed_2019_10x_szabo_001_10.1038/s41467-019-12464-3"
 
         self.download = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE126nnn/GSE126030/suppl/GSE126030_RAW.tar"
@@ -45,7 +62,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             "0": {},
         }
 
-    def _load_any_object(self, fn):
+    def _load(self, fn):
         fn_tar = os.path.join(self.path, "human", "mixed", "GSE126030_RAW.tar"),
         fn_annot = [
             os.path.join(self.path, "human", "mixed", "donor1.annotation.txt"),
