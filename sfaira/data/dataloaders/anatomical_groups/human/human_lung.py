@@ -1,6 +1,7 @@
 from typing import Union
 
-from sfaira.data import DatasetGroup, DatasetSuperGroupSfaira
+from sfaira.data.base import DatasetGroup
+from sfaira.data.dataloaders.super_group import DatasetSuperGroupSfaira
 
 
 class DatasetGroupLung(DatasetGroup):

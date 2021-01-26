@@ -1,6 +1,7 @@
 from typing import Union
 
-from sfaira.data import DatasetGroup, DatasetSuperGroupSfaira
+from sfaira.data.base import DatasetGroup
+from sfaira.data.dataloaders.super_group import DatasetSuperGroupSfaira
 
 
 class DatasetGroupSkin(DatasetGroup):
@@ -19,4 +20,3 @@ class DatasetGroupSkin(DatasetGroup):
         datasets = dsg.flatten().datasets
         keys = [x.id for x in datasets]
         super().__init__(datasets=dict(zip(keys, datasets)))
- 

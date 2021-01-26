@@ -14,8 +14,8 @@ import scipy.sparse
 from typing import Dict, List, Tuple, Union
 import warnings
 
-from .external import SuperGenomeContainer
-from .external import ADATA_IDS_SFAIRA, META_DATA_FIELDS
+from sfaira.versions.genome_versions import SuperGenomeContainer
+from sfaira.consts import ADATA_IDS_SFAIRA, META_DATA_FIELDS
 
 UNS_STRING_META_IN_OBS = "__obs__"
 
