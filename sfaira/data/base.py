@@ -1407,7 +1407,7 @@ class DatasetBaseGroupLoadingOneFile(DatasetBase):
 
         Override this method in the Dataset if this is relevant.
         """
-        assert self.obs_key_sample is not None, f"self.obs_key_sample needs to be set"
+        assert self.obs_key_sample is not None, "self.obs_key_sample needs to be set"
         self._subset_from_group(subset_items={self.obs_key_sample: self.sample_id})
 
     def _subset_from_group(
