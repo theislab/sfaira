@@ -1376,20 +1376,22 @@ class DatasetBase(abc.ABC):
             sample_attr = getattr(self, samplewise_key)
             if sample_attr is not None and obs_key is None:
                 if not isinstance(sample_attr, list):
-                    values_found = [sample_attr]
-                if np.any([x in values for x in values_found]):
-                    idx_keep = np.arange(1, self.ncells)
+                    sample_attr = [sample_attr]
+                if np.any([x in values for x in sample_attr]):
+                    idx = np.arange(1, self.ncells)
                 else:
-                    idx_keep = np.array([])
+                    idx = np.array([])
             elif sample_attr is None and obs_key is not None:
                 assert self.adata is not None, "adata was not yet loaded"
                 values_found = self.adata.obs[obs_key].values
-                idx_keep = np.where([x in values for x in values_found])
+                idx = np.where([x in values for x in values_found])
             elif sample_attr is not None and obs_key is not None:
                 assert False, f"both cell-wise and sample-wise attribute {samplewise_key} given"
-            return idx_keep
+            else:
+                assert False, "no subset chosen"
+            return idx
 
-        idx_keep = get_subset_idx(samplewise_key="obs_key_"+key, cellwise_key=key)
+        idx_keep = get_subset_idx(samplewise_key="obs_key_" + key, cellwise_key=key)
         self.adata = self.adata[idx_keep, :].copy()
 
 
