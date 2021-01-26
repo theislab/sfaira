@@ -728,23 +728,11 @@ class DatasetBase(abc.ABC):
         # Only load meta data if file exists:
         if os.path.isfile(fn):
             meta = pandas.read_csv(
-                fn, usecols=list(self._META_DATA_FIELDS.keys()), dtype=str,
+                fn,
+                usecols=list(self._META_DATA_FIELDS.keys()),
+                dtype=self._META_DATA_FIELDS,
             )
-            # Formatting: All are read as string to allow dealing wth None entries:
-            # Make sure int and bool entries have the right dtype:
-            for k, v in self._META_DATA_FIELDS.items():
-                if v == bool:
-                    meta[k] = [
-                        True if x == "True" else
-                        False if x == "False" else None
-                        for x in meta[k].values.tolist()
-                    ]
-                if v == int:
-                    meta[k] = [int(x) for x in meta[k].values.tolist()]
-                else:
-                    # Make sure None entries are formatted as None and not as string "None":
-                    meta[k] = [None if x == "None" else x for x in meta[k].values.tolist()]
-            self.meta = meta
+            self.meta = meta.fillna("None").replace({"None": None})
 
     def write_meta(
             self,
