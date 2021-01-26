@@ -731,7 +731,7 @@ class DatasetBase(abc.ABC):
                 fn, usecols=list(self._META_DATA_FIELDS.keys()), dtype=str,
             )
             # Formatting: All are read as string to allow dealing wth None entries:
-            # Make sure bool entries are bool:
+            # Make sure int and bool entries have the right dtype:
             for k, v in self._META_DATA_FIELDS.items():
                 if v == bool:
                     meta[k] = [
@@ -739,6 +739,8 @@ class DatasetBase(abc.ABC):
                         False if x == "False" else None
                         for x in meta[k].values.tolist()
                     ]
+                if v == int:
+                    meta[k] = [int(x) for x in meta[k].values.tolist()]
                 else:
                     # Make sure None entries are formatted as None and not as string "None":
                     meta[k] = [None if x == "None" else x for x in meta[k].values.tolist()]
@@ -1052,7 +1054,7 @@ class DatasetBase(abc.ABC):
                 else:
                     if x[k] is not None:  # None is always allowed.
                         if not isinstance(v[0], self._META_DATA_FIELDS[k]):
-                            raise ValueError(f"key {k} of signature {str(v[0])} "
+                            raise ValueError(f"key '{k}' of signature `{type(v[0])}` "
                                              f"in meta data table did not match signature "
                                              f"{str(self._META_DATA_FIELDS[k])}")
         self._meta = x
@@ -2069,7 +2071,7 @@ class DatasetSuperGroup:
         for x in self.dataset_groups:
             x.subset(key=key, values=values)
 
-        self.dataset_groups = [x for x in self.dataset_groups if x.datasets]  # Delete empty DatasetGroups after subsetting
+        self.dataset_groups = [x for x in self.dataset_groups if x.datasets]  # Delete empty DatasetGroups
 
     def subset_organs(self, subset: Union[None, List]):
         for x in self.dataset_groups:
