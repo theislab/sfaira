@@ -69,7 +69,7 @@ class CellTypeMlp(BasicModel):
 
 
 class CellTypeMlpVersioned(CellTypeMlp):
-    cell_type_version: celltype_versions.CelltypeVersionsBase
+    cell_type_version: celltype_versions.CelltypeUniverse
 
     def __init__(
             self,

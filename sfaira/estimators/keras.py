@@ -9,7 +9,7 @@ from typing import Union
 import os
 import warnings
 from tqdm import tqdm
-from .external import CelltypeVersionsBase, Topologies, BasicModel
+from .external import CelltypeUniverse, Topologies, BasicModel
 from .losses import LossLoglikelihoodNb, LossLoglikelihoodGaussian, LossCrossentropyAgg, KLLoss
 from .metrics import custom_mse, custom_negll_nb, custom_negll_gaussian, custom_kl, \
     CustomAccAgg, CustomF1Classwise, CustomFprClasswise, CustomTprClasswise, custom_cce_agg
@@ -871,7 +871,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
     Estimator class for the cell type model.
     """
 
-    celltypes_version: CelltypeVersionsBase
+    celltypes_version: CelltypeUniverse
 
     def __init__(
             self,
@@ -959,7 +959,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
         else:
             type_classes = self.ntypes + 1
         y = np.zeros((len(idx), type_classes), dtype="float32")
-        celltype_idx = self.model.celltypes_version.map_to_leaves(
+        celltype_idx = self.model.celltypes_version.map_to_target_leaves(
             nodes=self.data.obs["cell_ontology_class"].values[idx].tolist(),
             ontology="custom",
             ontology_id=lookup_ontology,

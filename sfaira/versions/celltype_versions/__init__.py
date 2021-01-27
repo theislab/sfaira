@@ -1,4 +1,4 @@
-from .base import CelltypeVersionsBase, OntologyObo
+from .base import CelltypeUniverse, OntologyObo
 from . import mouse
 from . import human
 

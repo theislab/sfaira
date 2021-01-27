@@ -21,11 +21,10 @@ UNS_STRING_META_IN_OBS = "__obs__"
 
 
 def map_fn(inputs):
-    ds, formatted_version, remove_gene_version, match_to_reference, load_raw, allow_caching, func, \
+    ds, remove_gene_version, match_to_reference, load_raw, allow_caching, func, \
         kwargs_func = inputs
     try:
         ds.load(
-            celltype_version=formatted_version,
             remove_gene_version=remove_gene_version,
             match_to_reference=match_to_reference,
             load_raw=load_raw,
@@ -254,7 +253,6 @@ class DatasetBase(abc.ABC):
 
     def load(
             self,
-            celltype_version: Union[str, None] = None,
             fn: Union[str, None] = None,
             remove_gene_version: bool = True,
             match_to_reference: Union[str, None] = None,
@@ -263,7 +261,6 @@ class DatasetBase(abc.ABC):
     ):
         """
 
-        :param celltype_version: Version of cell type ontology to use. Uses most recent if None.
         :param fn: Optional target file name, otherwise infers from defined directory structure.
         :param remove_gene_version: Remove gene version string from ENSEMBL ID so that different versions in different
             data sets are superimposed.
@@ -293,7 +290,7 @@ class DatasetBase(abc.ABC):
         # Run data set-specific loading script:
         self._load_cached(fn=fn, load_raw=load_raw, allow_caching=allow_caching)
         # Set data-specific meta data in .adata:
-        self._set_metadata_in_adata(celltype_version=celltype_version)
+        self._set_metadata_in_adata()
         # Set loading hyper-parameter-specific meta data:
         self.adata.uns[self._ADATA_IDS_SFAIRA.load_raw] = load_raw
         self.adata.uns[self._ADATA_IDS_SFAIRA.mapped_features] = match_to_reference
@@ -471,11 +468,10 @@ class DatasetBase(abc.ABC):
                 uns=self.adata.uns
             )
 
-    def _set_metadata_in_adata(self, celltype_version):
+    def _set_metadata_in_adata(self):
         """
         Copy meta data from dataset class in .anndata.
 
-        :param celltype_version:
         :return:
         """
         # Set data set-wide attributes (.uns):
@@ -533,8 +529,7 @@ class DatasetBase(abc.ABC):
         # Map cell type names from raw IDs to ontology maintained ones::
         if self._ADATA_IDS_SFAIRA.cell_ontology_class in self.adata.obs.columns:
             self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class] = self.map_ontology_class(
-                raw_ids=self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class].values,
-                celltype_version=celltype_version
+                raw_ids=self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class].values
             )
 
     def load_tobacked(
@@ -543,7 +538,6 @@ class DatasetBase(abc.ABC):
             genome: str,
             idx: np.ndarray,
             fn: Union[None, str] = None,
-            celltype_version: Union[str, None] = None,
             load_raw: bool = False,
             allow_caching: bool = True
     ):
@@ -559,14 +553,12 @@ class DatasetBase(abc.ABC):
             shuffled object.
         :param keys:
         :param fn:
-        :param celltype_version: Version of cell type ontology to use. Uses most recent if None.
         :param load_raw: See .load().
         :param allow_caching: See .load().
         :return: New row index for next element to be written into backed anndata.
         """
         self.load(
             fn=fn,
-            celltype_version=celltype_version,
             remove_gene_version=True,
             match_to_reference=genome,
             load_raw=load_raw,
@@ -661,32 +653,19 @@ class DatasetBase(abc.ABC):
         """
         return self.available_type_versions[np.argmax([int(x) for x in self.available_type_versions])]
 
-    def assert_celltype_version_key(
-            self,
-            celltype_version
-    ):
-        if celltype_version not in self.available_type_versions:
-            raise ValueError(
-                "required celltype version %s not found. available are: %s" %
-                (celltype_version, str(self.available_type_versions))
-            )
-
     def map_ontology_class(
             self,
             raw_ids,
-            celltype_version
     ):
         """
 
+        ToDo adapt this method to new ontology handling.
+
         :param raw_ids:
-        :param celltype_version: Version of cell type ontology to use. Uses most recent if None.
         :return:
         """
-        if celltype_version is None:
-            celltype_version = self.set_default_type_version()
-        self.assert_celltype_version_key(celltype_version=celltype_version)
         return [
-            self.class_maps[celltype_version][x] if x in self.class_maps[celltype_version].keys()
+            self.class_maps[x] if x in self.class_maps.keys()
             else self._ADATA_IDS_SFAIRA.unknown_celltype_name if x.lower() in self._unknown_celltype_identifiers else x
             for x in raw_ids
         ]
@@ -1526,7 +1505,6 @@ class DatasetGroup:
     def load(
             self,
             annotated_only: bool = False,
-            celltype_version: Union[str, None] = None,
             remove_gene_version: bool = True,
             match_to_reference: Union[str, None] = None,
             load_raw: bool = False,
@@ -1544,7 +1522,6 @@ class DatasetGroup:
         In this setting, datasets are removed from memory after the function has been executed.
 
         :param annotated_only:
-        :param celltype_version:  See .load().
         :param remove_gene_version: See .load().
         :param match_to_reference: See .load().
         :param load_raw: See .load().
@@ -1559,9 +1536,7 @@ class DatasetGroup:
         :param kwargs_func: Kwargs of func.
         :return:
         """
-        formatted_version = self.format_type_version(celltype_version)
         args = [
-            formatted_version,
             remove_gene_version,
             match_to_reference,
             load_raw,
@@ -1603,7 +1578,6 @@ class DatasetGroup:
             genome: str,
             idx: List[np.ndarray],
             annotated_only: bool = False,
-            celltype_version: Union[str, None] = None,
             load_raw: bool = False,
             allow_caching: bool = True,
     ):
@@ -1618,7 +1592,6 @@ class DatasetGroup:
         :param idx: Indices in adata_backed to write observations to. This can be used to immediately create a
             shuffled object. This has to be a list of the length of self.data, one index array for each dataset.
         :param annotated_only:
-        :param celltype_version:  See .load().
         :param load_raw: See .load().
         :param allow_caching: See .load().
         :return: New row index for next element to be written into backed anndata.
@@ -1632,7 +1605,6 @@ class DatasetGroup:
                         adata_backed=adata_backed,
                         genome=genome,
                         idx=idx[i],
-                        celltype_version=self.format_type_version(celltype_version),
                         load_raw=load_raw,
                         allow_caching=allow_caching
                     )
@@ -1762,38 +1734,6 @@ class DatasetGroup:
     def ncells(self, annotated_only: bool = False):
         cells = self.ncells_bydataset(annotated_only=annotated_only)
         return np.sum(cells)
-
-    def assert_celltype_version_key(
-            self,
-            celltype_version
-    ):
-        """
-        Assert that version key exists in each data set.
-        :param celltype_version:
-        :return:
-        """
-        for x in self.ids:
-            if celltype_version not in self.datasets[x].available_type_versions:
-                raise ValueError(
-                    "required celltype version %s not found in data set %s. available are: %s" %
-                    (celltype_version, x, str(self.datasets[x].available_type_versions))
-                )
-
-    def format_type_version(self, version):
-        """
-        Choose most recent version available in each dataset if None, otherwise return input version after checking.
-
-        :return: Version key corresponding to default version.
-        """
-        if version is None:
-            versions = set(self.datasets[self.ids[0]].available_type_versions)
-            for x in self.ids[1:]:
-                versions = versions.intersection(set(self.datasets[x].available_type_versions))
-            versions = np.array(list(versions))
-            return versions[np.argmax([int(x) for x in versions])]
-        else:
-            self.assert_celltype_version_key(celltype_version=version)
-            return version
 
     def subset(self, key, values):
         """
@@ -2019,7 +1959,6 @@ class DatasetSuperGroup:
 
     def load_all(
             self,
-            celltype_version: Union[str, None] = None,
             annotated_only: bool = False,
             match_to_reference: Union[str, None] = None,
             remove_gene_version: bool = True,
@@ -2030,8 +1969,6 @@ class DatasetSuperGroup:
         """
         Loads data set human into anndata object.
 
-        :param celltype_version: Version of cell type ontology to use.
-            Uses most recent within each DatasetGroup if None.
         :param annotated_only:
         :param match_to_reference: See .load().
         :param remove_gene_version: See .load().
@@ -2046,7 +1983,6 @@ class DatasetSuperGroup:
                 annotated_only=annotated_only,
                 remove_gene_version=remove_gene_version,
                 match_to_reference=match_to_reference,
-                celltype_version=celltype_version,
                 load_raw=load_raw,
                 allow_caching=allow_caching,
                 processes=processes,
@@ -2068,7 +2004,6 @@ class DatasetSuperGroup:
             shuffled: bool = False,
             as_dense: bool = False,
             annotated_only: bool = False,
-            celltype_version: Union[str, None] = None,
             load_raw: bool = False,
             allow_caching: bool = True,
     ):
@@ -2091,7 +2026,6 @@ class DatasetSuperGroup:
         :param shuffled: Whether to shuffle data when writing to backed.
         :param as_dense: Whether to load into dense count matrix.
         :param annotated_only:
-        :param celltype_version: Version of cell type ontology to use. Uses most recent if None.
         :param load_raw: See .load().
         :param allow_caching: See .load().
         """
@@ -2160,7 +2094,6 @@ class DatasetSuperGroup:
                 genome=genome,
                 idx=idx_ls[i],
                 annotated_only=annotated_only,
-                celltype_version=celltype_version,
                 load_raw=load_raw,
                 allow_caching=allow_caching,
             )

@@ -94,7 +94,7 @@ class CellTypeMarker(BasicModel):
 
 
 class CellTypeMarkerVersioned(CellTypeMarker):
-    cell_type_version: celltype_versions.CelltypeVersionsBase
+    cell_type_version: celltype_versions.CelltypeUniverse
 
     def __init__(
             self,
