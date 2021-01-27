@@ -209,6 +209,12 @@ Alternatively, we also provide the optional dependency sfaira_extensions (https:
 in which local data and cell type annotation can be managed separately but still be loaded as usual through sfaira.
 The data loaders and cell type annotation formats between sfaira and sfaira_extensions are identical and can be easily
 copied over.
+To get going, consider copying over code from our collection of template_ study-centric data loader directories.
+In these templates, it is clearly annotated which code fragment can remain constant
+and which have to be addressed by you.
+
+.. _template: https://github.com/theislab/sfaira/tree/dev/sfaira/data/templates/dataloaders
+
 
 Map cell type labels to ontology
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -230,14 +236,30 @@ Repetitive data loader code
 There are instances in which you find yourself copying code between data loader files corresponding to one study.
 In most of these cases, you can avoid the copy operations and share the code more efficiently.
 
-If you have multiple data files which each correspond to a data set and are structured similarly, you can define a super
-class which contains the shared constructor and `_load()` code, from which each data set specific loader inherits.
-ToDo: Example.
+If you have multiple data sets in a study which are all saved in separate files which come in similar formats:
+You can subclass `DatasetBaseGroupLoadingManyFiles` instead of `DatasetBase` and proceed as usual,
+only with adding `SAMPLE_FNS` in the data loader file name space,
+which is a list of all file names addressed with this file.
+You can then refer to an additional property of the Dataset class, `self.sample_fn` during loading
+or when dynamically defining meta data in the constructor.
+Consider also this template_ and this example_.
+Note that you can always add additional data loaders for further, less streamlined, data sets to such a study.
 
-If you have a single file which contains the data from multiple data sets which belong to a data loader each,
-because of different meta data or batches for example,
-you can set up a `group.py` file which defines a DatasetGroup for this study, which controls the generation of Datasets.
-ToDo: Example.
+.. _template: https://github.com/theislab/sfaira/tree/dev/sfaira/data/templates/dataloaders/many_samples_many_files_streamlined
+.. _example: https://github.com/theislab/sfaira/tree/dev/sfaira/data/dataloaders/loaders/d10_1084_jem_20191130
+
+If you have multiple data sets in a study which are all saved in one file:
+You can subclass `DatasetBaseGroupLoadingOneFile` instead of `DatasetBase` and proceed as usual,
+only with adding `SAMPLE_IDS` in the data loader file name space,
+which is a list of all sample IDs addressed with this file.
+You can then refer to an additional property of the Dataset class, `self.sample_id` during loading
+or when dynamically defining meta data in the constructor.
+Note that `self.sample_id` refers to a `self.adata.obs` column in the loaded data set,
+this column has to be defined in `self.obs_key_sample`, which needs to be defined in the constructor.
+Consider also this template_.
+Note that you can always add additional data loaders for further, less streamlined, data sets to such a study.
+
+.. _template: https://github.com/theislab/sfaira/tree/dev/sfaira/data/templates/dataloaders/many_samples_many_files_streamlined
 
 Cell type ontology management
 -----------------------------

@@ -3,23 +3,31 @@ from typing import Union
 import pandas as pd
 import anndata
 
-from sfaira.data import DatasetBase
+from sfaira.data import DatasetBaseGroupLoadingManyFiles
+
+SAMPLE_FNS = [
+    "E-MTAB-6678.processed",
+    "E-MTAB-6701.processed",
+]
 
 
-class Dataset(DatasetBase):
+class Dataset(DatasetBaseGroupLoadingManyFiles):
 
     def __init__(
             self,
+            sample_fn: str,
             path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.id = "human_placenta_2018_10x_ventotormo_10.1038/s41586-018-0698-6"
+        super().__init__(sample_fn=sample_fn, path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        protocol = "10x" if self.sample_fn == "E-MTAB-6678.processed" else "smartseq2"
+        self.id = f"human_placenta_2018_{protocol}_ventotormo_{str(SAMPLE_FNS.index(self.sample_fn)).zfill(3)}_" \
+                  f"10.1038/s41586-018-0698-6"
 
-        self.download = "https://www.ebi.ac.uk/arrayexpress/files/E-MTAB-6701/E-MTAB-6701.processed.1.zip"
-        self.download_meta = "https://www.ebi.ac.uk/arrayexpress/files/E-MTAB-6701/E-MTAB-6701.processed.2.zip"
+        self.download = f"https://www.ebi.ac.uk/arrayexpress/files/E-MTAB-6701/{self.sample_fn}.1.zip"
+        self.download_meta = f"https://www.ebi.ac.uk/arrayexpress/files/E-MTAB-6701/{self.sample_fn}.2.zip"
 
         self.author = "Teichmann"
         self.healthy = True
@@ -27,7 +35,7 @@ class Dataset(DatasetBase):
         self.organ = "placenta,decidua,blood"  # ToDo: move this into .obs_key_organ?
         self.organism = "human"
         self.doi = "10.1038/s41586-018-0698-6"
-        self.protocol = "10x"
+        self.protocol = protocol
         self.state_exact = "healthy"
         self.year = 2018
 
@@ -75,11 +83,11 @@ class Dataset(DatasetBase):
         }
 
     def _load(self, fn=None):
-        if fn is None:
-            fn = [
-                os.path.join(self.path, "human", "placenta", "E-MTAB-6701.processed.1.zip"),
-                os.path.join(self.path, "human", "placenta", "E-MTAB-6701.processed.2.zip"),
-            ]
+        base_path = os.path.join(self.path, "human", "placenta")
+        fn = [
+            os.path.join(base_path, f"{self.sample_fn}.1.zip"),
+            os.path.join(base_path, f"{self.sample_fn}.2.zip"),
+        ]
         self.adata = anndata.AnnData(pd.read_csv(fn[0], sep="\t", index_col="Gene").T)
         df = pd.read_csv(fn[1], sep="\t")
         for i in df.columns:
