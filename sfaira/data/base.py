@@ -1876,7 +1876,7 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
         print(cwd)
         if "group.py" in os.listdir(cwd):
             DatasetGroupFound = pydoc.locate(
-                "sfaira.sfaira.data.dataloaders.loaders." + dataset_module + ".group.DatasetGroup")
+                "sfaira.data.dataloaders.loaders." + dataset_module + ".group.DatasetGroup")
             dsg = DatasetGroupFound(path=path, meta_path=meta_path, cache_path=cache_path)
             datasets.extend(list(dsg.datasets.values))
         else:
@@ -1887,16 +1887,16 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                     if f.split(".")[-1] == "py" and f.split(".")[0] not in ["__init__", "base", "group"]:
                         file_module = ".".join(f.split(".")[:-1])
                         DatasetFound = pydoc.locate(
-                            "sfaira.sfaira.data.dataloaders.loaders." + dataset_module + "." +
+                            "sfaira.data.dataloaders.loaders." + dataset_module + "." +
                             file_module + ".Dataset")
                         # Check if global objects are available:
                         # - SAMPLE_FNS: for DatasetBaseGroupLoadingManyFiles
                         # - SAMPLE_IDS: for DatasetBaseGroupLoadingOneFile
                         sample_fns = pydoc.locate(
-                            "sfaira.sfaira.data.dataloaders.loaders." + dataset_module + "." +
+                            "sfaira.data.dataloaders.loaders." + dataset_module + "." +
                             file_module + ".SAMPLE_FNS")
                         sample_ids = pydoc.locate(
-                            "sfaira.sfaira.data.dataloaders.loaders." + dataset_module + "." +
+                            "sfaira.data.dataloaders.loaders." + dataset_module + "." +
                             file_module + ".SAMPLE_IDS")
                         if sample_fns is not None and sample_ids is None:
                             # DatasetBaseGroupLoadingManyFiles:
