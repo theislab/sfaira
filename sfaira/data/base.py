@@ -1873,7 +1873,6 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
         datasets = []
         cwd = os.path.dirname(file_base)
         dataset_module = str(cwd.split("/")[-1])
-        print(cwd)
         if "group.py" in os.listdir(cwd):
             DatasetGroupFound = pydoc.locate(
                 "sfaira.data.dataloaders.loaders." + dataset_module + ".group.DatasetGroup")
@@ -1881,7 +1880,6 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
             datasets.extend(list(dsg.datasets.values))
         else:
             for f in os.listdir(cwd):
-                print(f)
                 if os.path.isfile(os.path.join(cwd, f)):  # only files
                     # Narrow down to data set files:
                     if f.split(".")[-1] == "py" and f.split(".")[0] not in ["__init__", "base", "group"]:

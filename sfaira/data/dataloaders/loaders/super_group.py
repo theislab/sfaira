@@ -28,17 +28,10 @@ class DatasetSuperGroupLoaders(DatasetSuperGroup):
         # Collect all data loaders from files in directory:
         dataset_groups = []
         cwd = os.path.dirname(__file__)
-        print("super group")
-        print(cwd)
         for f in os.listdir(cwd):
-            print("super group -> file")
-            print(f)
-            print(os.path.join(cwd, f))
             if os.path.isdir(os.path.join(cwd, f)):  # only directories
-                print(f[:len(dir_prefix)])
                 if f[:len(dir_prefix)] == dir_prefix and f not in dir_exlcude:  # Narrow down to data set directories
                     path_dsg = pydoc.locate(f"sfaira.data.dataloaders.loaders.{f}.FILE_PATH")
-                    print(path_dsg)
                     if path_dsg is not None:
                         dataset_groups.append(DatasetGroupDirectoryOriented(
                             file_base=path_dsg,

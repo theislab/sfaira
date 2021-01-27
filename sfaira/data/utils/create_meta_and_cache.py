@@ -11,12 +11,10 @@ def write_meta(args0, args1):
     # Test load from cache.
     args0.load(
         celltype_version=None,
-        annotated_only=False,
         match_to_reference=True,
         remove_gene_version=True,
         load_raw=False,
-        allow_caching=True,
-        processes=1,
+        allow_caching=False,
     )
     return None
 
