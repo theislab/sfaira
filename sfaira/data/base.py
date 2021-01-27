@@ -14,8 +14,8 @@ import scipy.sparse
 from typing import Dict, List, Tuple, Union
 import warnings
 
-from .external import SuperGenomeContainer
-from .external import ADATA_IDS_SFAIRA, META_DATA_FIELDS
+from sfaira.versions.genome_versions import SuperGenomeContainer
+from sfaira.consts import ADATA_IDS_SFAIRA, META_DATA_FIELDS
 
 UNS_STRING_META_IN_OBS = "__obs__"
 
@@ -81,6 +81,7 @@ class DatasetBase(abc.ABC):
     _obs_key_organ: Union[None, str]
     _obs_key_organism: Union[None, str]
     _obs_key_protocol: Union[None, str]
+    _obs_key_sample: Union[None, str]
     _obs_key_sex: Union[None, str]
     _obs_key_state_exact: Union[None, str]
 
@@ -134,6 +135,7 @@ class DatasetBase(abc.ABC):
         self._obs_key_organ = None
         self._obs_key_organism = None
         self._obs_key_protocol = None
+        self._obs_key_sample = None
         self._obs_key_sex = None
         self._obs_key_state_exact = None
 
@@ -151,10 +153,6 @@ class DatasetBase(abc.ABC):
 
     def _download(self, fn):
         pass
-
-    @property
-    def _directory_formatted_doi(self) -> str:
-        return "d" + "_".join("_".join("_".join(self.doi.split("/")).split(".")).split("-"))
 
     @property
     def _directory_formatted_id(self) -> str:
@@ -196,31 +194,63 @@ class DatasetBase(abc.ABC):
         :param allow_caching: Whether to allow method to cache adata object for faster re-loading.
         :return:
         """
+        def _get_cache_fn():
+            if None in [
+                self.cache_path,
+                self.directory_formatted_doi,
+                self._directory_formatted_id
+            ]:
+                if self.cache_path is None:
+                    w = "cache path"
+                elif self.directory_formatted_doi is None:
+                    w = "self.doi"
+                else:  # self._directory_formatted_id is None
+                    w = "self.id"
+                warnings.warn(f"Caching enabled, but cannot find caching directory. Set {w} first. "
+                              f"Disabling caching for now.")
+                return None
+
+            cache = os.path.join(
+                self.cache_path,
+                self.directory_formatted_doi,
+                self._directory_formatted_id + ".h5ad"
+            )
+            return cache
+
+        def _cached_reading(fn, fn_cache):
+            if fn_cache is not None:
+                if os.path.exists(fn_cache):
+                    self.adata = anndata.read_h5ad(fn_cache)
+                else:
+                    warnings.warn(f"Cached loading enabled, but cache file {fn_cache} not found. "
+                                  f"Loading from raw files.")
+                    self._load(fn=fn)
+            else:
+                self._load(fn=fn)
+
+        def _cached_writing(fn_cache):
+            if fn_cache is not None:
+                dir_cache = os.path.dirname(fn_cache)
+                if not os.path.exists(dir_cache):
+                    os.makedirs(dir_cache)
+                self.adata.write_h5ad(fn_cache)
+
         if fn is None and self.path is None:
             raise ValueError("provide either fn in load or path in constructor")
 
-        assert self.cache_path is not None, "set self.cache_path first"
-        assert self._directory_formatted_doi is not None, "set self.doi first"
-        assert self._directory_formatted_id is not None, "set self.id first"
-        fn_cache = os.path.join(
-            self.cache_path,
-            self._directory_formatted_doi,
-            self._directory_formatted_id + ".h5ad"
-        )
-        # Check if raw loader has to be called:
-        if load_raw or not os.path.exists(fn_cache):
+        if load_raw and allow_caching:
             self._load(fn=fn)
-        else:
-            assert self.cache_path is not None, "set cache_path to use caching"
-            assert os.path.exists(fn_cache), f"did not find cache file {fn_cache}, consider caching first"
-            self.adata = anndata.read_h5ad(fn_cache)
-        # Check if file needs to be cached:
-        if allow_caching and not os.path.exists(fn_cache):
-            assert self.cache_path is not None, "set cache_path to use caching"
-            dir_cache = os.path.dirname(fn_cache)
-            if not os.path.exists(dir_cache):
-                os.makedirs(dir_cache)
-            self.adata.write_h5ad(fn_cache)
+            fn_cache = _get_cache_fn()
+            _cached_writing(fn_cache)
+        elif load_raw and not allow_caching:
+            self._load(fn=fn)
+        elif not load_raw and allow_caching:
+            fn_cache = _get_cache_fn()
+            _cached_reading(fn, fn_cache)
+            _cached_writing(fn_cache)
+        else:  # not load_raw and not allow_caching
+            fn_cache = _get_cache_fn()
+            _cached_reading(fn, fn_cache)
 
     def load(
             self,
@@ -244,17 +274,17 @@ class DatasetBase(abc.ABC):
         """
         if match_to_reference and not remove_gene_version:
             warnings.warn("it is not recommended to enable matching the feature space to a genomes reference"
-                          "while not removing gene versions. this can lead to very poor matching performance")
+                          "while not removing gene versions. this can lead to very poor matching results")
 
         # Set default genomes per organism if none provided:
         if match_to_reference:
             genome = match_to_reference
         elif self.organism == "human":
             genome = "Homo_sapiens_GRCh38_97"
-            warnings.warn(f"using default genomes {genome}")
+            warnings.warn(f"using default genome {genome}")
         elif self.organism == "mouse":
             genome = "Mus_musculus_GRCm38_97"
-            warnings.warn(f"using default genomes {genome}")
+            warnings.warn(f"using default genome {genome}")
         else:
             raise ValueError(f"genome was not supplied and organism {self.organism} "
                              f"was not matched to a default choice")
@@ -507,15 +537,6 @@ class DatasetBase(abc.ABC):
                 celltype_version=celltype_version
             )
 
-    def subset_organs(self, subset: Union[None, List]):
-        if self.organ == "mixed":
-            self.organsubset = subset
-        else:
-            raise ValueError("Only data that contain multiple organs can be subset.")
-        if self.adata is not None:
-            warnings.warn("You are trying to subset organs after loading the dataset."
-                          "This will have no effect unless the dataset is loaded again.")
-
     def load_tobacked(
             self,
             adata_backed: anndata.AnnData,
@@ -700,21 +721,11 @@ class DatasetBase(abc.ABC):
         # Only load meta data if file exists:
         if os.path.isfile(fn):
             meta = pandas.read_csv(
-                fn, usecols=list(self._META_DATA_FIELDS.keys()), dtype=str,
+                fn,
+                usecols=list(self._META_DATA_FIELDS.keys()),
+                dtype=self._META_DATA_FIELDS,
             )
-            # Formatting: All are read as string to allow dealing wth None entries:
-            # Make sure bool entries are bool:
-            for k, v in self._META_DATA_FIELDS.items():
-                if v == bool:
-                    meta[k] = [
-                        True if x == "True" else
-                        False if x == "False" else None
-                        for x in meta[k].values.tolist()
-                    ]
-                else:
-                    # Make sure None entries are formatted as None and not as string "None":
-                    meta[k] = [None if x == "None" else x for x in meta[k].values.tolist()]
-            self.meta = meta
+            self.meta = meta.fillna("None").replace({"None": None})
 
     def write_meta(
             self,
@@ -811,7 +822,7 @@ class DatasetBase(abc.ABC):
         self._age = x
 
     @property
-    def annotated(self) -> bool:
+    def annotated(self) -> Union[bool, None]:
         if self.obs_key_cellontology_id is not None or self.obs_key_cellontology_original is not None:
             return True
         else:
@@ -819,7 +830,12 @@ class DatasetBase(abc.ABC):
                 self.load_meta(fn=None)
             if self.meta is not None and self._ADATA_IDS_SFAIRA.annotated in self.meta.columns:
                 return self.meta[self._ADATA_IDS_SFAIRA.annotated]
+            elif self.loaded:
+                # If data set was loaded and there is still no annotation indicated, it is declared unannotated.
+                return False
             else:
+                # If data set was not yet loaded, it is unclear if annotation would be loaded in ._load(),
+                # if also no meta data is available, we do not know the status of the data set.
                 return None
 
     @property
@@ -873,6 +889,10 @@ class DatasetBase(abc.ABC):
         self._doi = x
 
     @property
+    def directory_formatted_doi(self) -> str:
+        return "d" + "_".join("_".join("_".join(self.doi.split("/")).split(".")).split("-"))
+
+    @property
     def download(self) -> Union[Tuple[List[str]], Tuple[List[None]]]:
         """
         Data download website(s).
@@ -912,7 +932,7 @@ class DatasetBase(abc.ABC):
         :return:
         """
         x = self._download_meta
-        # if self._download_meta is not None:  # TODO add this back in once download_meta is routineyl set in datasets
+        # if self._download_meta is not None:  # TODO add this back in once download_meta is routinely set in datasets
         #    x = self._download_meta
         # else:
         #    if self.meta is None:
@@ -994,6 +1014,13 @@ class DatasetBase(abc.ABC):
         self._id = x
 
     @property
+    def loaded(self) -> bool:
+        """
+        :return: Whether DataSet was loaded into memory.
+        """
+        return self.adata is not None
+
+    @property
     def meta(self) -> Union[None, pd.DataFrame]:
         return self._meta
 
@@ -1008,7 +1035,7 @@ class DatasetBase(abc.ABC):
                 else:
                     if x[k] is not None:  # None is always allowed.
                         if not isinstance(v[0], self._META_DATA_FIELDS[k]):
-                            raise ValueError(f"key {k} of signature {str(v[0])} "
+                            raise ValueError(f"key '{k}' of value `{v[0]}` and signature `{type(v[0])}` "
                                              f"in meta data table did not match signature "
                                              f"{str(self._META_DATA_FIELDS[k])}")
         self._meta = x
@@ -1125,6 +1152,15 @@ class DatasetBase(abc.ABC):
     def obs_key_protocol(self, x: str):
         self.__erasing_protection(attr="obs_key_protocol", val_old=self._obs_key_protocol, val_new=x)
         self._obs_key_protocol = x
+
+    @property
+    def obs_key_sample(self) -> str:
+        return self._obs_key_sample
+
+    @obs_key_sample.setter
+    def obs_key_sample(self, x: str):
+        self.__erasing_protection(attr="obs_key_sample", val_old=self._obs_key_sample, val_new=x)
+        self._obs_key_sample = x
 
     @property
     def obs_key_sex(self) -> str:
@@ -1310,15 +1346,65 @@ class DatasetBase(abc.ABC):
                 if x not in allowed:
                     raise ValueError(f"{x} is not a valid entry for {attr}, choose from: {str(allowed)}")
 
+    def subset_cells(self, key, values):
+        """
+        Subset list of adata objects based on cell-wise properties.
 
-class DatasetBaseGroupLoading(DatasetBase):
+        These keys are properties that are not available in lazy model and require loading first because the
+        subsetting works on the cell-level: .adata are maintained but reduced to matches.
+
+        :param key: Property to subset by. Options:
+
+            - "age" points to self.obs_key_age
+            - "cell_ontology_class" points to self.obs_key_cellontology_original
+            - "dev_stage" points to self.obs_key_dev_stage
+            - "ethnicity" points to self.obs_key_ethnicity
+            - "healthy" points to self.obs_key_healthy
+            - "organ" points to self.obs_key_organ
+            - "organism" points to self.obs_key_organism
+            - "protocol" points to self.obs_key_protocol
+            - "sex" points to self.obs_key_sex
+            - "state_exact" points to self.obs_key_state_exact
+        :param values: Classes to overlap to.
+        :return:
+        """
+        if not isinstance(values, list):
+            values = [values]
+
+        def get_subset_idx(samplewise_key, cellwise_key):
+            obs_key = getattr(self, cellwise_key)
+            sample_attr = getattr(self, samplewise_key)
+            if sample_attr is not None and obs_key is None:
+                if not isinstance(sample_attr, list):
+                    sample_attr = [sample_attr]
+                if np.any([x in values for x in sample_attr]):
+                    idx = np.arange(1, self.ncells)
+                else:
+                    idx = np.array([])
+            elif sample_attr is None and obs_key is not None:
+                assert self.adata is not None, "adata was not yet loaded"
+                values_found = self.adata.obs[obs_key].values
+                idx = np.where([x in values for x in values_found])
+            elif sample_attr is not None and obs_key is not None:
+                assert False, f"both cell-wise and sample-wise attribute {samplewise_key} given"
+            else:
+                assert False, "no subset chosen"
+            return idx
+
+        idx_keep = get_subset_idx(samplewise_key="obs_key_" + key, cellwise_key=key)
+        self.adata = self.adata[idx_keep, :].copy()
+
+
+class DatasetBaseGroupLoadingOneFile(DatasetBase):
     """
-    Container class specific to datasets which come in groups and require specialised loading.
+    Container class specific to datasets which come in groups and in which data sets are saved in a single file.
     """
     _unprocessed_full_group_object: bool
+    _sample_id: str
 
     def __init__(
             self,
+            sample_id: str,
             path: Union[str, None],
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
@@ -1326,9 +1412,14 @@ class DatasetBaseGroupLoading(DatasetBase):
     ):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self._unprocessed_full_group_object = False
+        self._sample_id = sample_id
+
+    @property
+    def sample_id(self):
+        return self._sample_id
 
     @abc.abstractmethod
-    def _load_full_group_object(self, fn=None) -> Union[None, anndata.AnnData]:
+    def _load_full(self, fn=None) -> anndata.AnnData:
         """
         Loads a raw anndata object that correponds to a superset of the data belonging to this Dataset.
 
@@ -1341,7 +1432,7 @@ class DatasetBaseGroupLoading(DatasetBase):
         if self.adata is None and adata_group is not None:
             self.adata = adata_group
         elif self.adata is None and adata_group is not None:
-            self.adata = self._load_full_group_object(fn=fn)
+            self.adata = self._load_full(fn=fn)
         elif self.adata is not None and self._unprocessed_full_group_object:
             pass
         else:
@@ -1356,7 +1447,8 @@ class DatasetBaseGroupLoading(DatasetBase):
 
         Override this method in the Dataset if this is relevant.
         """
-        pass
+        assert self.obs_key_sample is not None, "self.obs_key_sample needs to be set"
+        self._subset_from_group(subset_items={self.obs_key_sample: self.sample_id})
 
     def _subset_from_group(
             self,
@@ -1378,6 +1470,29 @@ class DatasetBaseGroupLoading(DatasetBase):
         if self._unprocessed_full_group_object:
             self._load_from_group()
         self._unprocessed_full_group_object = False
+
+
+class DatasetBaseGroupLoadingManyFiles(DatasetBase, abc.ABC):
+    """
+    Container class specific to datasets which come in groups and in which data sets are saved in separate but
+    streamlined files.
+    """
+    _sample_fn: str
+
+    def __init__(
+            self,
+            sample_fn: str,
+            path: Union[str, None] = None,
+            meta_path: Union[str, None] = None,
+            cache_path: Union[str, None] = None,
+            **kwargs
+    ):
+        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        self._sample_fn = sample_fn
+
+    @property
+    def sample_fn(self):
+        return self._sample_fn
 
 
 class DatasetGroup:
@@ -1682,7 +1797,7 @@ class DatasetGroup:
 
     def subset(self, key, values):
         """
-        Subset list of adata objects based on match to values in key property.
+        Subset list of adata objects based on sample-wise properties.
 
         These keys are properties that are available in lazy model.
         Subsetting happens on .datasets.
@@ -1706,12 +1821,32 @@ class DatasetGroup:
         for x in ids_del:
             del self.datasets[x]
 
-    def subset_organs(self, subset: Union[None, List]):
-        for i in self.ids:
-            if self.datasets[i].organ == "mixed":
-                self.datasets[i].subset_organs(subset)
-            else:
-                raise ValueError("Only data that contain multiple organs can be subset.")
+    def subset_cells(self, key, values: Union[str, List[str]]):
+        """
+        Subset list of adata objects based on cell-wise properties.
+
+        These keys are properties that are not available in lazy model and require loading first because the
+        subsetting works on the cell-level: .adata are maintained but reduced to matches.
+
+        :param key: Property to subset by. Options:
+
+            - "age" points to self.obs_key_age
+            - "cell_ontology_class" points to self.obs_key_cellontology_original
+            - "dev_stage" points to self.obs_key_dev_stage
+            - "ethnicity" points to self.obs_key_ethnicity
+            - "healthy" points to self.obs_key_healthy
+            - "organ" points to self.obs_key_organ
+            - "organism" points to self.obs_key_organism
+            - "protocol" points to self.obs_key_protocol
+            - "sex" points to self.obs_key_sex
+            - "state_exact" points to self.obs_key_state_exact
+        :param values: Classes to overlap to.
+        :return:
+        """
+        for x in self.ids:
+            self.datasets[x].subset_cells(key=key, values=values)
+            if self.datasets[x].ncells == 0:  # none left
+                del self.datasets[x]
 
 
 class DatasetGroupDirectoryOriented(DatasetGroup):
@@ -1740,7 +1875,7 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
         dataset_module = str(cwd.split("/")[-1])
         if "group.py" in os.listdir(cwd):
             DatasetGroupFound = pydoc.locate(
-                "sfaira.sfaira.data.dataloaders.loaders." + dataset_module + ".group.DatasetGroup")
+                "sfaira.data.dataloaders.loaders." + dataset_module + ".group.DatasetGroup")
             dsg = DatasetGroupFound(path=path, meta_path=meta_path, cache_path=cache_path)
             datasets.extend(list(dsg.datasets.values))
         else:
@@ -1750,8 +1885,43 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                     if f.split(".")[-1] == "py" and f.split(".")[0] not in ["__init__", "base", "group"]:
                         file_module = ".".join(f.split(".")[:-1])
                         DatasetFound = pydoc.locate(
-                            "sfaira.sfaira.data.dataloaders.loaders." + dataset_module + "." + file_module + ".Dataset")
-                        datasets.append(DatasetFound(path=path, meta_path=meta_path, cache_path=cache_path))
+                            "sfaira.data.dataloaders.loaders." + dataset_module + "." +
+                            file_module + ".Dataset")
+                        # Check if global objects are available:
+                        # - SAMPLE_FNS: for DatasetBaseGroupLoadingManyFiles
+                        # - SAMPLE_IDS: for DatasetBaseGroupLoadingOneFile
+                        sample_fns = pydoc.locate(
+                            "sfaira.data.dataloaders.loaders." + dataset_module + "." +
+                            file_module + ".SAMPLE_FNS")
+                        sample_ids = pydoc.locate(
+                            "sfaira.data.dataloaders.loaders." + dataset_module + "." +
+                            file_module + ".SAMPLE_IDS")
+                        if sample_fns is not None and sample_ids is None:
+                            # DatasetBaseGroupLoadingManyFiles:
+                            datasets.extend([
+                                DatasetFound(
+                                    sample_fn=x,
+                                    path=path,
+                                    meta_path=meta_path,
+                                    cache_path=cache_path,
+                                )
+                                for x in sample_fns
+                            ])
+                        elif sample_fns is None and sample_ids is not None:
+                            # DatasetBaseGroupLoadingManyFiles:
+                            datasets.extend([
+                                DatasetFound(
+                                    sample_id=x,
+                                    path=path,
+                                    meta_path=meta_path,
+                                    cache_path=cache_path,
+                                )
+                                for x in sample_ids
+                            ])
+                        elif sample_fns is not None and sample_ids is not None:
+                            raise ValueError(f"sample_fns and sample_ids both found for {f}")
+                        else:
+                            datasets.append(DatasetFound(path=path, meta_path=meta_path, cache_path=cache_path))
 
         keys = [x.id for x in datasets]
         super().__init__(datasets=dict(zip(keys, datasets)))
@@ -1832,7 +2002,7 @@ class DatasetSuperGroup:
         return [xx for x in self.ncells_bydataset(annotated_only=annotated_only) for xx in x]
 
     def ncells(self, annotated_only: bool = False):
-        return np.sum(self.ncells_bydataset(annotated_only=annotated_only))
+        return np.sum(self.ncells_bydataset_flat(annotated_only=annotated_only))
 
     def flatten(self) -> DatasetGroup:
         """
@@ -2024,8 +2194,29 @@ class DatasetSuperGroup:
         """
         for x in self.dataset_groups:
             x.subset(key=key, values=values)
+        self.dataset_groups = [x for x in self.dataset_groups if x.datasets]  # Delete empty DatasetGroups
 
-    def subset_organs(self, subset: Union[None, List]):
-        for x in self.dataset_groups:
-            if x.datasets[0].organ == "mixed":
-                x.subset_organs(subset)
+    def subset_cells(self, key, values: Union[str, List[str]]):
+        """
+        Subset list of adata objects based on cell-wise properties.
+
+        These keys are properties that are not available in lazy model and require loading first because the
+        subsetting works on the cell-level: .adata are maintained but reduced to matches.
+
+        :param key: Property to subset by. Options:
+
+            - "age" points to self.obs_key_age
+            - "cell_ontology_class" points to self.obs_key_cellontology_original
+            - "dev_stage" points to self.obs_key_dev_stage
+            - "ethnicity" points to self.obs_key_ethnicity
+            - "healthy" points to self.obs_key_healthy
+            - "organ" points to self.obs_key_organ
+            - "organism" points to self.obs_key_organism
+            - "protocol" points to self.obs_key_protocol
+            - "sex" points to self.obs_key_sex
+            - "state_exact" points to self.obs_key_state_exact
+        :param values: Classes to overlap to.
+        :return:
+        """
+        for x in self.dataset_groups.ids:
+            self.dataset_groups[x].subset_cells(key=key, values=values)

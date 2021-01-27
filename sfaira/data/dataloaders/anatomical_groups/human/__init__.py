@@ -1,6 +1,5 @@
 from .human_adipose import DatasetGroupAdipose
 from .human_adrenalgland import DatasetGroupAdrenalgland
-from .human_mixed import DatasetGroupMixed
 from .human_artery import DatasetGroupArtery
 from .human_bladder import DatasetGroupBladder
 from .human_blood import DatasetGroupBlood
