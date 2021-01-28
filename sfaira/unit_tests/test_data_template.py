@@ -23,10 +23,11 @@ class TestDatasetTemplate(unittest.TestCase):
             meta_path=self.dir_meta,
             cache_path=self.dir_data
         )
+        # Create cell type conversion table:
+        for x in ds.datasets:
+            x.write_ontology_class_map(fn=x.fn_ontology_class_map_csv, protected_writing=True)
         # Test raw loading and caching:
         ds.load(
-            celltype_version=celltype_version,
-            fn=None,
             remove_gene_version=remove_gene_version,
             match_to_reference=match_to_reference,
             load_raw=True,  # tests raw loading
@@ -34,8 +35,6 @@ class TestDatasetTemplate(unittest.TestCase):
         )
         # Test loading from cache:
         ds.load(
-            celltype_version=celltype_version,
-            fn=None,
             remove_gene_version=remove_gene_version,
             match_to_reference=match_to_reference,
             load_raw=False,

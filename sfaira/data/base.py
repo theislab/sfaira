@@ -15,6 +15,7 @@ from typing import Dict, List, Tuple, Union
 import warnings
 
 from sfaira.versions.genome_versions import SuperGenomeContainer
+from sfaira.versions.celltype_versions import CelltypeUniverse
 from sfaira.consts import ADATA_IDS_SFAIRA, META_DATA_FIELDS
 
 UNS_STRING_META_IN_OBS = "__obs__"
@@ -89,6 +90,9 @@ class DatasetBase(abc.ABC):
     _var_symbol_col: Union[None, str]
     _var_ensembl_col: Union[None, str]
 
+    _ontology_celltypes: Union[None, CelltypeUniverse]
+    _ontology_class_map: Union[None, dict]
+
     def __init__(
             self,
             path: Union[str, None] = None,
@@ -145,6 +149,9 @@ class DatasetBase(abc.ABC):
 
         self.class_maps = {"0": {}}
         self._unknown_celltype_identifiers = self._ADATA_IDS_SFAIRA.unknown_celltype_identifiers
+
+        self._ontology_celltypes = None
+        self._ontology_class_map = None
 
     @abc.abstractmethod
     def _load(self, fn):
@@ -524,13 +531,9 @@ class DatasetBase(abc.ABC):
         # Set cell-wise attributes (.obs):
         # None so far other than celltypes.
         # Set cell types:
-        if self._ADATA_IDS_SFAIRA.cell_ontology_id not in self.adata.obs.columns:
-            self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_id] = None
         # Map cell type names from raw IDs to ontology maintained ones::
-        if self._ADATA_IDS_SFAIRA.cell_ontology_class in self.adata.obs.columns:
-            self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class] = self.map_ontology_class(
-                raw_ids=self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class].values
-            )
+        if self.obs_key_cellontology_original is not None:
+            self.project_celltypes_to_ontology()
 
     def load_tobacked(
             self,
@@ -642,33 +645,55 @@ class DatasetBase(abc.ABC):
         return "_".join(self.id.split("_")[:-1])
 
     @property
-    def available_type_versions(self):
-        return np.array(list(self.class_maps.keys()))
+    def fn_ontology_class_map_csv(self):
+        """Standardised file name under which cell type conversion tables are saved."""
+        return self.doi_cleaned_id
 
-    def set_default_type_version(self):
+    def write_ontology_class_map(self, fn, protected_writing: bool = True):
         """
-        Choose most recent version.
+        Load class maps of free text cell types to ontology classes.
 
-        :return: Version key corresponding to most recent version.
-        """
-        return self.available_type_versions[np.argmax([int(x) for x in self.available_type_versions])]
-
-    def map_ontology_class(
-            self,
-            raw_ids,
-    ):
-        """
-
-        ToDo adapt this method to new ontology handling.
-
-        :param raw_ids:
+        :param fn: File name of csv to load class maps from.
+        :param protected_writing: Only write if file was not already found.
         :return:
         """
-        return [
-            self.class_maps[x] if x in self.class_maps.keys()
-            else self._ADATA_IDS_SFAIRA.unknown_celltype_name if x.lower() in self._unknown_celltype_identifiers else x
-            for x in raw_ids
+        labels_original = np.sort(np.unique(self.adata.obs[self.obs_key_cellontology_original].values))
+        tab = self.ontology_celltypes.fuzzy_match_nodes(
+            source=labels_original,
+            match_only=False,
+            include_old=False,
+            include_synonyms=True,
+            remove=self._unknown_celltype_identifiers,
+        )
+        if not os.path.exists(fn) or not protected_writing:
+            tab.to_csv(fn)
+
+    def load_ontology_class_map(self, fn):
+        """
+        Load class maps of free text cell types to ontology classes.
+
+        :param fn: File name of csv to load class maps from.
+        :return:
+        """
+        self.ontology_class_map = pd.read_csv(fn, header=0)
+
+    def project_celltypes_to_ontology(self):
+        """
+        Project free text cell type names to ontology based on mapping table.
+
+        ToDo: add ontology ID setting here.
+
+        :return:
+        """
+        labels_original = self.adata.obs[self.obs_key_cellontology_original].values
+        labels_mapped = [
+            self.ontology_class_map[x] if x in self.ontology_class_map.keys()
+            else self._ADATA_IDS_SFAIRA.unknown_celltype_name if x.lower() in self._unknown_celltype_identifiers
+            else x for x in labels_original
         ]
+        del self.adata.obs[self.obs_key_cellontology_original]
+        self.adata.obs[self._ADATA_IDS_SFAIRA.cell_types_original] = labels_original
+        self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class] = labels_mapped
 
     @property
     def citation(self):
@@ -1298,6 +1323,29 @@ class DatasetBase(abc.ABC):
         self.__value_protection(attr="year", allowed=self._ADATA_IDS_SFAIRA.year_allowed_entries, attempted=x)
         self._year = x
 
+    @property
+    def ontology_celltypes(self):
+        if self._ontology_celltypes is None:
+            assert self.organism is not None, "set organism before using ontology_celltypes"
+            self._ontology_celltypes = CelltypeUniverse(organism=self.organism)
+        return self._ontology_celltypes
+
+    @property
+    def ontology_class_map(self) -> dict:
+        return self._ontology_class_map
+
+    @ontology_class_map.setter
+    def ontology_class_map(self, x: pd.DataFrame):
+        self.__erasing_protection(attr="ontology_class_map", val_old=self._ontology_class_map, val_new=x)
+        assert x.shape[1] == 2
+        assert x.colnames[0] == "source"
+        assert x.colnames[0] == "target"
+        # Transform data frame into a mapping dictionary:
+        self._ontology_class_map = dict(list(zip(
+            x["source"].values.tolist(),
+            x["target"].values.tolist()
+        )))
+
     # Private methods:
 
     def __erasing_protection(self, attr, val_old, val_new):
@@ -1828,6 +1876,7 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                 if os.path.isfile(os.path.join(cwd, f)):  # only files
                     # Narrow down to data set files:
                     if f.split(".")[-1] == "py" and f.split(".")[0] not in ["__init__", "base", "group"]:
+                        datasets_f = []
                         file_module = ".".join(f.split(".")[:-1])
                         DatasetFound = pydoc.locate(
                             "sfaira.data.dataloaders.loaders." + dataset_module + "." +
@@ -1843,7 +1892,7 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                             file_module + ".SAMPLE_IDS")
                         if sample_fns is not None and sample_ids is None:
                             # DatasetBaseGroupLoadingManyFiles:
-                            datasets.extend([
+                            datasets_f.extend([
                                 DatasetFound(
                                     sample_fn=x,
                                     path=path,
@@ -1854,7 +1903,7 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                             ])
                         elif sample_fns is None and sample_ids is not None:
                             # DatasetBaseGroupLoadingManyFiles:
-                            datasets.extend([
+                            datasets_f.extend([
                                 DatasetFound(
                                     sample_id=x,
                                     path=path,
@@ -1866,7 +1915,11 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                         elif sample_fns is not None and sample_ids is not None:
                             raise ValueError(f"sample_fns and sample_ids both found for {f}")
                         else:
-                            datasets.append(DatasetFound(path=path, meta_path=meta_path, cache_path=cache_path))
+                            datasets_f.append(DatasetFound(path=path, meta_path=meta_path, cache_path=cache_path))
+                        # Load cell type maps:
+                        for x in datasets_f:
+                            x.load_ontology_class_map(fn=os.path.join(cwd, x.fn_ontology_class_map_csv))
+                        datasets.extend(datasets_f)
 
         keys = [x.id for x in datasets]
         super().__init__(datasets=dict(zip(keys, datasets)))

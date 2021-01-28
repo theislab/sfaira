@@ -106,7 +106,17 @@ class OntologyObo(OntologyBase):
             include_old: bool = False,
             include_synonyms: bool = True,
             remove: list = []
-    ):
+    ) -> pd.DataFrame:
+        """
+        Map free text node names to ontology node names.
+
+        :param source: Free text node labels which are to be matched to ontology nodes.
+        :param match_only: Whether to include strict matches only in output.
+        :param include_old: Whether to include previous (free text) node label in output.
+        :param include_synonyms: Whether to include synonym nodes.
+        :param remove: Free text node labels to omit in map.
+        :return: Table with source and target node names. Columns: "source", "target"
+        """
         from fuzzywuzzy import fuzz
         matches = []
         nodes = [(k, v) for k, v in self.graph.nodes.items()]
@@ -144,9 +154,12 @@ class OntologyObo(OntologyBase):
                         matchesi = matchesi + [(x[0].upper(), x[1])]
                     matches.append(matchesi)
         if match_only:
-            tab = pd.DataFrame({"name": source, "matched": matches})
+            tab = pd.DataFrame({"source": source, "target": matches})
         else:
-            tab = pd.DataFrame({"name,id": [" ".join([",".join(zz) for zz in z]) for z in matches]})
+            tab = pd.DataFrame({
+                "source": source,
+                "target": [" ".join([",".join(zz) for zz in z]) for z in matches]
+            })
         return tab.loc[include]
 
 
