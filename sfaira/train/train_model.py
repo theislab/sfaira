@@ -58,7 +58,6 @@ class TargetZoos:
             self.data_human = {
                 'adipose': human.DatasetGroupAdipose(path=path, meta_path=meta_path, cache_path=cache_path),
                 'adrenalgland': human.DatasetGroupAdrenalgland(path=path, meta_path=meta_path, cache_path=cache_path),
-                'mixed': human.DatasetGroupMixed(path=path, meta_path=meta_path, cache_path=cache_path),
                 'artery': human.DatasetGroupArtery(path=path, meta_path=meta_path, cache_path=cache_path),
                 'bladder': human.DatasetGroupBladder(path=path, meta_path=meta_path, cache_path=cache_path),
                 'blood': human.DatasetGroupBlood(path=path, meta_path=meta_path, cache_path=cache_path),

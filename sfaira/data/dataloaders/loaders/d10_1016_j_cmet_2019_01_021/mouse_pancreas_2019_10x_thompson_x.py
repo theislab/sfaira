@@ -7,7 +7,7 @@ from sfaira.data import DatasetBaseGroupLoadingManyFiles
 
 SAMPLE_FNS = [
     "GSM3308545_NOD_08w_A",
-    "GSM3308547_NOD_08w_A",
+    "GSM3308547_NOD_08w_C",
     "GSM3308548_NOD_14w_A",
     "GSM3308549_NOD_14w_B",
     "GSM3308550_NOD_14w_C",

@@ -702,8 +702,12 @@ class DatasetBase(abc.ABC):
             meta = pandas.read_csv(
                 fn,
                 usecols=list(self._META_DATA_FIELDS.keys()),
-                dtype=self._META_DATA_FIELDS,
             )
+            # using dtype in read_csv through errors some times.
+            for k, v in self._META_DATA_FIELDS.items():
+                if k in meta.columns:
+                    if meta[k].values[0] is not None:
+                        meta[k] = v(meta[k])
             self.meta = meta.fillna("None").replace({"None": None})
 
     def write_meta(
@@ -1021,6 +1025,7 @@ class DatasetBase(abc.ABC):
 
     @property
     def ncells(self) -> int:
+        # ToDo cache this if it was loaded from meta?
         if self.adata is not None:
             x = self.adata.n_obs
         elif self._ncells is not None:

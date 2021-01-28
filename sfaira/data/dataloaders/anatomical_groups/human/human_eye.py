@@ -19,6 +19,4 @@ class DatasetGroupEye(DatasetGroup):
             "human_eye_2019_10x_voigt_001",
             "human_eye_2020_microwell_han_001_10.1038/s41586-020-2157-4",
         ])
-        datasets = dsg.flatten().datasets
-        keys = [x.id for x in datasets]
-        super().__init__(datasets=dict(zip(keys, datasets)))
+        super().__init__(datasets=dsg.flatten().datasets)

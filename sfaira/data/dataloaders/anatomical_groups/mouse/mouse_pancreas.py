@@ -26,6 +26,4 @@ class DatasetGroupPancreas(DatasetGroup):
             "mouse_pancreas_2019_10x_thompson_007",
             "mouse_pancreas_2019_10x_thompson_008",
         ])
-        datasets = dsg.flatten().datasets
-        keys = [x.id for x in datasets]
-        super().__init__(datasets=dict(zip(keys, datasets)))
+        super().__init__(datasets=dsg.flatten().datasets)
