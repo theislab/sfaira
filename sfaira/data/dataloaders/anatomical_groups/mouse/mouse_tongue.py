@@ -17,6 +17,4 @@ class DatasetGroupTongue(DatasetGroup):
             "mouse_tongue_2019_10x_pisco_001_10.1101/661728",
             "mouse_tongue_2019_smartseq2_pisco_001_10.1101/661728"
         ])
-        datasets = dsg.flatten().datasets
-        keys = [x.id for x in datasets]
-        super().__init__(datasets=dict(zip(keys, datasets)))
+        super().__init__(datasets=dsg.flatten().datasets)

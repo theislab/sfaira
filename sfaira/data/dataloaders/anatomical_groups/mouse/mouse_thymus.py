@@ -18,6 +18,4 @@ class DatasetGroupThymus(DatasetGroup):
             "mouse_thymus_2019_smartseq2_pisco_001_10.1101/661728",
             "mouse_thymus_2018_microwell-seq_han_001_10.1016/j.cell.2018.02.001"
         ])
-        datasets = dsg.flatten().datasets
-        keys = [x.id for x in datasets]
-        super().__init__(datasets=dict(zip(keys, datasets)))
+        super().__init__(datasets=dsg.flatten().datasets)

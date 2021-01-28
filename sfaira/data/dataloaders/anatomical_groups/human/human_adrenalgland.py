@@ -21,6 +21,4 @@ class DatasetGroupAdrenalgland(DatasetGroup):
             "human_adrenalgland_2020_microwell_han_005_10.1038/s41586-020-2157-4",
             "human_adrenalgland_2020_microwell_han_006_10.1038/s41586-020-2157-4",
         ])
-        datasets = dsg.flatten().datasets
-        keys = [x.id for x in datasets]
-        super().__init__(datasets=dict(zip(keys, datasets)))
+        super().__init__(datasets=dsg.flatten().datasets)

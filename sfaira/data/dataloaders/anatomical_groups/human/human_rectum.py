@@ -17,6 +17,4 @@ class DatasetGroupRectum(DatasetGroup):
             "human_rectum_2019_10x_wang_001",
             "human_rectum_2020_microwell_han_001_10.1038/s41586-020-2157-4",
         ])
-        datasets = dsg.flatten().datasets
-        keys = [x.id for x in datasets]
-        super().__init__(datasets=dict(zip(keys, datasets)))
+        super().__init__(datasets=dsg.flatten().datasets)
