@@ -24,6 +24,4 @@ class DatasetGroupBlood(DatasetGroup):
             "human_blood_2020_microwell_han_006_10.1038/s41586-020-2157-4",
             "human_blood_2020_microwell_han_007_10.1038/s41586-020-2157-4",
         ])
-        datasets = dsg.flatten().datasets
-        keys = [x.id for x in datasets]
-        super().__init__(datasets=dict(zip(keys, datasets)))
+        super().__init__(datasets=dsg.flatten().datasets)

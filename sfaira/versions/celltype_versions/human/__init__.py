@@ -47,7 +47,6 @@ from .uterus import CelltypeVersionsHumanUterus
 ORGAN_DICT = {
     'adipose': CelltypeVersionsHumanAdipose(),
     'adrenalgland': CelltypeVersionsHumanAdrenalgland(),
-    'mixed': CelltypeVersionsHumanMixed(),
     'artery': CelltypeVersionsHumanArtery(),
     'bladder': CelltypeVersionsHumanBladder(),
     'blood': CelltypeVersionsHumanBlood(),
