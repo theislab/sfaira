@@ -70,11 +70,21 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
 
     def _load(self, fn=None):
         path_base = os.path.join(self.path, "mouse", "pancreas")
-        celltypes = pandas.read_csv(os.path.join(path_base, self.sample_fn + "_annotation.csv"), index_col=0)
-
-        self.adata = anndata.read_mtx(os.path.join(path_base, self.sample_fn + "_matrix.mtx.gz")).transpose()
-        self.adata.var_names = np.genfromtxt(os.path.join(path_base, self.sample_fn + "_genes.tsv.gz"), dtype=str)[:, 1]
-        self.adata.obs_names = np.genfromtxt(os.path.join(path_base, self.sample_fn + "_barcodes.tsv.gz"), dtype=str)
+        with tarfile.open(os.path.join(path_base, 'GSE117770_RAW.tar')) as tar:
+            for member in tar.getmembers():
+                if "_matrix.mtx.gz" in member.name and self.sample_fn in member.name:
+                    name = "_".join(member.name.split("_")[:-1])
+                    with gzip.open(tar.extractfile(member), "rb") as mm:
+                        x = scipy.io.mmread(mm).T.tocsr()
+                    obs = pd.read_csv(tar.extractfile(name + "_barcodes.tsv.gz"), compression="gzip", header=None,
+                                      sep="\t", index_col=0)
+                    obs.index.name = None
+                    var = pd.read_csv(tar.extractfile(name + "_genes.tsv.gz"), compression="gzip", header=None,
+                                      sep="\t")
+                    var.columns = ["ensembl", "names"]
+                    var.index = var["ensembl"].values
+                    self.adata = anndata.AnnData(X=x, obs=obs, var=var)
         self.adata.var_names_make_unique()
+        celltypes = pd.read_csv(os.path.join(path_base, self.sample_fn + "_annotation.csv"), index_col=0)
         self.adata = self.adata[celltypes.index]
         self.adata.obs["celltypes"] = celltypes
