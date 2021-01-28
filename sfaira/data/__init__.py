@@ -1,4 +1,4 @@
-from .base import DatasetBase, DatasetBaseGroupLoading, \
+from .base import DatasetBase, DatasetBaseGroupLoadingOneFile, DatasetBaseGroupLoadingManyFiles, \
     DatasetGroup, DatasetGroupDirectoryOriented, \
     DatasetSuperGroup
 from . import dataloaders

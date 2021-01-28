@@ -23,7 +23,7 @@ class Dataset(DatasetBase):
         self.download_url_meta = None
 
         self.author = "Regev"
-        self.doi = "d_nan"
+        self.doi = "no_doi"
         self.healthy = True
         self.normalization = "raw"
         self.organ = "blood"

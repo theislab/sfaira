@@ -4,14 +4,20 @@ from typing import Union
 import scipy.sparse
 import numpy as np
 
-from sfaira.data import DatasetBase
+from sfaira.data import DatasetBaseGroupLoadingManyFiles
+
+SAMPLE_FNS = [
+    "droplet_normal_lung_blood_scanpy.20200205.RC4.h5ad",
+    "facs_normal_lung_blood_scanpy.20200205.RC4.h5ad"
+]
 
 
-class Dataset(DatasetBase):
+class Dataset(DatasetBaseGroupLoadingManyFiles):
     """
-    This data loader directly processes the data file provided under the download link. To obtain the file, you need to create a
-    free account at https://www.synapse.org. You can then use those login credentials to download the file with python
-    using the synapse client, installable via `pip install synapseclient`:
+    This data loader directly processes the data file provided under the download link.
+    To obtain the file, you need to create a free account at https://www.synapse.org.
+    You can then use those login credentials to download the file with python using the synapse client,
+    installable via `pip install synapseclient`:
 
     import synapseclient
     import shutil
@@ -27,13 +33,16 @@ class Dataset(DatasetBase):
 
     def __init__(
             self,
+            sample_fn: str,
             path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.id = "human_lung_2020_10x_travaglini_001_10.1038/s41586-020-2922-4"
+        super().__init__(sample_fn=sample_fn, path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        protocol = "10x" if self.sample_fn.split("_")[0] == "droplet" else "smartseq2"
+        self.id = f"human_lung_2020_{protocol}_travaglini_{str(SAMPLE_FNS.index(self.sample_fn)).zfill(3)}_" \
+                  f"10.1038/s41586-020-2922-4"
 
         self.download_url_data = "synapse,droplet_normal_lung_blood_scanpy.20200205.RC4.h5ad"
         self.download_url_meta = None
@@ -44,7 +53,7 @@ class Dataset(DatasetBase):
         self.normalization = "raw"
         self.organ = "lung"
         self.organism = "human"
-        self.protocol = "10x"
+        self.protocol = protocol
         self.state_exact = "healthy"
         self.year = 2020
 
@@ -186,11 +195,15 @@ class Dataset(DatasetBase):
 
     def _load(self, fn=None):
         if fn is None:
-            fn = os.path.join(self.path, "human", "lung", "droplet_normal_lung_blood_scanpy.20200205.RC4.h5ad")
+            fn = os.path.join(self.path, "human", "lung", self.sample_fn)
+        if self.sample_fn.split("_")[0] == "droplet":
+            norm_const = 1000000
+        else:
+            norm_const = 10000
         self.adata = anndata.read(fn)
         self.adata.X = scipy.sparse.csc_matrix(self.adata.X)
         self.adata.X = np.expm1(self.adata.X)
         self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs["nUMI"].values[:, None])) \
-            .multiply(1 / 10000)
+            .multiply(1 / norm_const)
 
         self.set_unkown_class_id(ids=["1_Unicorns and artifacts"])

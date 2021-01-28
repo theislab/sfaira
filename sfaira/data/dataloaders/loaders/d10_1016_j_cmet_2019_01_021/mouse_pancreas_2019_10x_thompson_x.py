@@ -5,19 +5,34 @@ import scipy.io
 import os
 import pandas as pd
 from typing import Union
-from sfaira.data import DatasetBase
+from sfaira.data import DatasetBaseGroupLoadingManyFiles
+
+SAMPLE_FNS = [
+    "GSM3308545_NOD_08w_A",
+    "GSM3308547_NOD_08w_C",
+    "GSM3308548_NOD_14w_A",
+    "GSM3308549_NOD_14w_B",
+    "GSM3308550_NOD_14w_C",
+    "GSM3308551_NOD_16w_A",
+    "GSM3308552_NOD_16w_B",
+    "GSM3308553_NOD_16w_C"
+]
 
 
-class Dataset_d10_1016_j_cmet_2019_01_021(DatasetBase):
+class Dataset(DatasetBaseGroupLoadingManyFiles):
 
     def __init__(
             self,
+            sample_fn: str,
             path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        super().__init__(sample_fn=sample_fn, path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        self.id = f"mouse_pancreas_2019_10x_thompson_{str(SAMPLE_FNS.index(sample_fn)).zfill(3)}_" \
+                  f"10.1016/j.cmet.2019.01.021"
+
         self.download_url_data = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE117nnn/GSE117770/suppl/GSE117770_RAW.tar"
         self.download_url_meta = "private"
 
@@ -32,6 +47,8 @@ class Dataset_d10_1016_j_cmet_2019_01_021(DatasetBase):
         self.year = 2019
 
         self.var_symbol_col = "index"
+
+        self.obs_key_cellontology_original = "celltypes"
 
         self.class_maps = {
             "0": {
@@ -51,23 +68,13 @@ class Dataset_d10_1016_j_cmet_2019_01_021(DatasetBase):
             },
         }
 
-    def _load_generalized(self, data_path, sample_name, path_meta):
+    def _load(self, fn=None):
+        path_base = os.path.join(self.path, "mouse", "pancreas")
+        celltypes = pandas.read_csv(os.path.join(path_base, self.sample_fn + "_annotation.csv"), index_col=0)
 
-        with tarfile.open(os.path.join(data_path, 'GSE117770_RAW.tar')) as tar:
-            for member in tar.getmembers():
-                if "_matrix.mtx.gz" in member.name and sample_name in member.name:
-                    name = "_".join(member.name.split("_")[:-1])
-                    with gzip.open(tar.extractfile(member), "rb") as mm:
-                        X = scipy.io.mmread(mm).T.tocsr()
-                    obs = pd.read_csv(tar.extractfile(name + "_barcodes.tsv.gz"), compression="gzip", header=None,
-                                      sep="\t", index_col=0)
-                    obs.index.name = None
-                    var = pd.read_csv(tar.extractfile(name + "_genes.tsv.gz"), compression="gzip", header=None,
-                                      sep="\t")
-                    var.columns = ["ensembl", "names"]
-                    var.index = var["ensembl"].values
-                    self.adata = anndata.AnnData(X=X, obs=obs, var=var)
+        self.adata = anndata.read_mtx(os.path.join(path_base, self.sample_fn + "_matrix.mtx.gz")).transpose()
+        self.adata.var_names = np.genfromtxt(os.path.join(path_base, self.sample_fn + "_genes.tsv.gz"), dtype=str)[:, 1]
+        self.adata.obs_names = np.genfromtxt(os.path.join(path_base, self.sample_fn + "_barcodes.tsv.gz"), dtype=str)
         self.adata.var_names_make_unique()
-        celltypes = pd.read_csv(path_meta, index_col=0)
         self.adata = self.adata[celltypes.index]
-        self.adata.obs[self._ADATA_IDS_SFAIRA.cell_types_original] = celltypes
+        self.adata.obs["celltypes"] = celltypes
