@@ -675,7 +675,10 @@ class DatasetBase(abc.ABC):
         :param fn: File name of csv to load class maps from.
         :return:
         """
-        self.ontology_class_map = pd.read_csv(fn, header=0)
+        if os.path.exists(fn):
+            self.ontology_class_map = pd.read_csv(fn, header=0)
+        else:
+            raise ValueError(f"file {fn} does not exist")
 
     def project_celltypes_to_ontology(self):
         """
