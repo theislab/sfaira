@@ -4,6 +4,7 @@ import numpy as np
 import obonet
 import pandas as pd
 from typing import Dict, List, Tuple, Union
+import warnings
 
 from sfaira.versions.celltype_versions.extensions import ONTOLOGIY_EXTENSION_HUMAN, ONTOLOGIY_EXTENSION_MOUSE
 
@@ -62,7 +63,9 @@ class OntologyObo(OntologyBase):
         self._check_graph()
 
     def _check_graph(self):
-        assert networkx.is_directed_acyclic_graph(self.graph), "DAG was broken"
+        # ToDo OBO from obolibrary is not DAG?
+        if not networkx.is_directed_acyclic_graph(self.graph):
+            warnings.warn("DAG was broken")
 
     @property
     def nodes(self):
@@ -129,10 +132,14 @@ class OntologyObo(OntologyBase):
             scores = np.array([
                 np.max([
                     fuzz.ratio(x[0].lower().strip("'").strip("\""), y[1]["name"].lower())
-                ] + ([
+                ] + [
                     fuzz.ratio(x[0].lower().strip("'").strip("\"").strip("]").strip("["), yy.lower())
                     for yy in y[1]["synonym"]
-                ] if "synonym" in y[1].keys() and include_synonyms else []))
+                ]) if "synonym" in y[1].keys() and include_synonyms else
+                np.max([
+                    fuzz.ratio(x[0].lower().strip("'").strip("\""), y[1]["name"].lower())
+                ])
+                if "name" in y[1].keys() else 0  # ToDo: these are empty nodes, where are they coming from?
                 for y in nodes
             ])
             include.append(x[0].lower().strip("'").strip("\"") not in remove)

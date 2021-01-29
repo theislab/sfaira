@@ -1,5 +1,6 @@
 sfaira/unit_tests/test_data_loaders/*
 sfaira/unit_tests/test_data/*
+sfaira/unit_tests/template_data/*
 sfaira/unit_tests/test_data_template.py
 git abuild
 cache

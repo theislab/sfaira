@@ -22,6 +22,12 @@ UNS_STRING_META_IN_OBS = "__obs__"
 
 
 def map_fn(inputs):
+    """
+    Functional to load data set with predefined additional actions.
+
+    :param inputs:
+    :return: None if function ran, error report otherwise
+    """
     ds, remove_gene_version, match_to_reference, load_raw, allow_caching, func, \
         kwargs_func = inputs
     try:
@@ -219,6 +225,7 @@ class DatasetBase(abc.ABC):
             cache = os.path.join(
                 self.cache_path,
                 self.directory_formatted_doi,
+                "cache",
                 self._directory_formatted_id + ".h5ad"
             )
             return cache
@@ -647,7 +654,7 @@ class DatasetBase(abc.ABC):
     @property
     def fn_ontology_class_map_csv(self):
         """Standardised file name under which cell type conversion tables are saved."""
-        return self.doi_cleaned_id
+        return self.doi_cleaned_id + ".csv"
 
     def write_ontology_class_map(self, fn, protected_writing: bool = True):
         """
@@ -657,16 +664,16 @@ class DatasetBase(abc.ABC):
         :param protected_writing: Only write if file was not already found.
         :return:
         """
-        labels_original = np.sort(np.unique(self.adata.obs[self.obs_key_cellontology_original].values))
-        tab = self.ontology_celltypes.fuzzy_match_nodes(
+        labels_original = np.sort(np.unique(self.adata.obs[self._ADATA_IDS_SFAIRA.cell_types_original].values))
+        tab = self.ontology_celltypes.onto.fuzzy_match_nodes(
             source=labels_original,
             match_only=False,
             include_old=False,
-            include_synonyms=True,
+            include_synonyms=False,
             remove=self._unknown_celltype_identifiers,
         )
         if not os.path.exists(fn) or not protected_writing:
-            tab.to_csv(fn)
+            tab.to_csv(fn, index=None)
 
     def load_ontology_class_map(self, fn):
         """
@@ -676,9 +683,9 @@ class DatasetBase(abc.ABC):
         :return:
         """
         if os.path.exists(fn):
-            self.ontology_class_map = pd.read_csv(fn, header=0)
+            self.ontology_class_map = pd.read_csv(fn, header=0, index_col=None)
         else:
-            raise ValueError(f"file {fn} does not exist")
+            warnings.warn(f"file {fn} does not exist")
 
     def project_celltypes_to_ontology(self):
         """
@@ -689,14 +696,15 @@ class DatasetBase(abc.ABC):
         :return:
         """
         labels_original = self.adata.obs[self.obs_key_cellontology_original].values
-        labels_mapped = [
-            self.ontology_class_map[x] if x in self.ontology_class_map.keys()
-            else self._ADATA_IDS_SFAIRA.unknown_celltype_name if x.lower() in self._unknown_celltype_identifiers
-            else x for x in labels_original
-        ]
-        del self.adata.obs[self.obs_key_cellontology_original]
+        if self.ontology_class_map is not None:  # only if this was defined
+            labels_mapped = [
+                self.ontology_class_map[x] if x in self.ontology_class_map.keys()
+                else self._ADATA_IDS_SFAIRA.unknown_celltype_name if x.lower() in self._unknown_celltype_identifiers
+                else x for x in labels_original
+            ]
+            del self.adata.obs[self.obs_key_cellontology_original]
+            self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class] = labels_mapped
         self.adata.obs[self._ADATA_IDS_SFAIRA.cell_types_original] = labels_original
-        self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class] = labels_mapped
 
     @property
     def citation(self):
@@ -1341,8 +1349,8 @@ class DatasetBase(abc.ABC):
     def ontology_class_map(self, x: pd.DataFrame):
         self.__erasing_protection(attr="ontology_class_map", val_old=self._ontology_class_map, val_new=x)
         assert x.shape[1] == 2
-        assert x.colnames[0] == "source"
-        assert x.colnames[0] == "target"
+        assert x.columns[0] == "source"
+        assert x.columns[1] == "target"
         # Transform data frame into a mapping dictionary:
         self._ontology_class_map = dict(list(zip(
             x["source"].values.tolist(),
@@ -1616,6 +1624,7 @@ class DatasetGroup:
                     del self.datasets[x[0]]
         else:  # for loop
             adata_group = None
+            datasets_to_remove = []
             for k, v in self.datasets.items():
                 print(f"loading {k}")
                 group_loading = v.set_raw_full_group_object(fn=None, adata_group=adata_group)
@@ -1624,8 +1633,10 @@ class DatasetGroup:
                 x = map_fn(tuple([v] + args))
                 # Clear data sets that were not successfully loaded because of missing data:
                 if x is not None:
-                    print(x[1])
-                    del self.datasets[x[0]]
+                    warnings.warn(f"data set {k} not loaded")
+                    datasets_to_remove.append(k)
+            for k in datasets_to_remove:
+                del self.datasets[k]
             del adata_group
 
     def load_tobacked(
