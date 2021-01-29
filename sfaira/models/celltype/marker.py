@@ -94,7 +94,7 @@ class CellTypeMarker(BasicModel):
 
 
 class CellTypeMarkerVersioned(CellTypeMarker):
-    cell_type_version: celltype_versions.CelltypeVersionsBase
+    cell_type_version: celltype_versions.CelltypeUniverse
 
     def __init__(
             self,
@@ -112,9 +112,6 @@ class CellTypeMarkerVersioned(CellTypeMarker):
             dictionary that is queried based on the topology_id. Can contain a subset of all hyperparameters.
         """
         # Get cell type version instance based on topology ID, organism and organ.
-        self.celltypes_version = celltype_versions.ORGANISM_DICT[organism.lower()][organ.lower()]
-        self.celltypes_version.set_version(version=topology_container.topology_id)
-
         unkown_already_included = np.any([x.lower() == "unknown" for x in self.celltypes_version.ids])
         hyperpar = topology_container.topology["hyper_parameters"]
         if override_hyperpar is not None:

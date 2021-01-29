@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from typing import List, Union
 
-from sfaira.versions.celltype_versions import ORGANISM_DICT
+from sfaira.versions.celltype_versions import CelltypeUniverse
 from sfaira.versions.topology_versions import Topologies
 
 
@@ -25,7 +25,7 @@ class ModelZoo(abc.ABC):
     model_type: Union[str, None]
     model_topology: Union[str, None]
     model_version: Union[str, None]
-    celltypes: Union[List, None]
+    celltypes: Union[CelltypeUniverse, None]
 
     def __init__(
             self,
@@ -472,4 +472,4 @@ class ModelZooCelltype(ModelZoo):
             model_type=self.model_type,
             topology_id=self.model_topology
         )
-        self.celltypes = ORGANISM_DICT[self.organism][self.organ].celltype_universe[self.model_version.split(".")[0]]
+        self.celltypes = CelltypeUniverse(organism=self.organism).load_target_universe(organ=self.organ)

@@ -10,11 +10,11 @@ def write_meta(args0, args1):
     args0.write_meta(fn_meta=None, dir_out=args1, fn_data=None)
     # Test load from cache.
     args0.load(
-        celltype_version=None,
         remove_gene_version=True,
         load_raw=False,
         allow_caching=False,
     )
+    args0.write_ontology_class_map(fn=args0.fn_ontology_class_map_csv)
     return None
 
 
@@ -32,7 +32,6 @@ ds = sfaira.data.dataloaders.DatasetSuperGroupSfaira(
 dsg = ds.flatten()  # need to flatten in this case to parallelise across Groups and not just within.
 # Write meta data, cache and test load from cache:
 dsg.load(
-    celltype_version=None,
     annotated_only=False,
     match_to_reference=None,
     remove_gene_version=True,

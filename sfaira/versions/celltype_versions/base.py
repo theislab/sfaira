@@ -1,109 +1,316 @@
+import abc
+import networkx
 import numpy as np
+import obonet
+import pandas as pd
+from typing import Dict, List, Tuple, Union
+import warnings
+
+from sfaira.versions.celltype_versions.extensions import ONTOLOGIY_EXTENSION_HUMAN, ONTOLOGIY_EXTENSION_MOUSE
 
 
-class CelltypeVersionsBase:
+class OntologyBase:
+    leaves: list
+
+    @abc.abstractmethod
+    def set_leaves(self, nodes: list = None):
+        pass
+
+    @abc.abstractmethod
+    def get_ancestors(self, node: str) -> List[str]:
+        pass
+
+    def map_to_leaves(self, node: str, return_type: str = "elements", include_self: bool = True):
+        """
+        Map a given list of nodes to leave nodes.
+
+        :param node:
+        :param return_type:
+
+            "elements": names of mapped leave nodes
+            "idx": indicies in leave note list of of mapped leave nodes
+        :param include_self: whether to include node itself
+        :return:
+        """
+        assert self.leaves is not None
+        ancestors = self.get_ancestors(node)
+        if include_self:
+            ancestors = ancestors + [node]
+        if return_type == "elements":
+            return [x for x in self.leaves if x in ancestors]
+        if return_type == "idx":
+            return np.array([i for i, (x, y) in enumerate(self.leaves) if x in ancestors])
+
+
+class OntologyDict(OntologyBase):
+
+    def __init__(self, onto: dict):
+        self.onto = onto
+
+    def set_leaves(self, nodes: list = None):
+        self.leaves = nodes
+
+    def get_ancestors(self, node: str) -> List[str]:
+        return self.onto[node] if node in self.onto.keys() else [node]
+
+
+class OntologyObo(OntologyBase):
+
+    graph: networkx.MultiDiGraph
+
+    def __init__(self, obo: str = "http://purl.obolibrary.org/obo/cl.obo", **kwargs):
+        self.graph = obonet.read_obo(obo)
+        self._check_graph()
+
+    def _check_graph(self):
+        # ToDo OBO from obolibrary is not DAG?
+        if not networkx.is_directed_acyclic_graph(self.graph):
+            warnings.warn("DAG was broken")
+
+    @property
+    def nodes(self):
+        return self.graph.nodes()
+
+    def set_leaves(self, nodes: list = None):
+        # ToDo check that these are not include parents of each other!
+        if nodes is not None:
+            for x in nodes:
+                assert x in self.graph.nodes, f"{x} not found"
+            self.leaves = nodes
+        else:
+            self.leaves = self.get_all_roots()
+
+    def get_all_roots(self) -> List[str]:
+        return [x for x in self.graph.nodes() if self.graph.in_degree(x) == 0]
+
+    def get_ancestors(self, node: str) -> List[str]:
+        return list(networkx.ancestors(self.graph, node))
+
+    def map_class_to_id(self, x):
+        """
+        Map ontology class to ID.
+        :param x:
+        :return:
+        """
+        assert False  # ToDo
+
+    def map_id_to_class(self, x):
+        """
+        Map ontology ID to class.
+        :param x:
+        :return:
+        """
+        assert False  # ToDo
+
+    def fuzzy_match_nodes(
+            self,
+            source,
+            match_only: bool = False,
+            include_old: bool = False,
+            include_synonyms: bool = True,
+            remove: list = []
+    ) -> pd.DataFrame:
+        """
+        Map free text node names to ontology node names.
+
+        :param source: Free text node labels which are to be matched to ontology nodes.
+        :param match_only: Whether to include strict matches only in output.
+        :param include_old: Whether to include previous (free text) node label in output.
+        :param include_synonyms: Whether to include synonym nodes.
+        :param remove: Free text node labels to omit in map.
+        :return: Table with source and target node names. Columns: "source", "target"
+        """
+        from fuzzywuzzy import fuzz
+        matches = []
+        nodes = [(k, v) for k, v in self.graph.nodes.items()]
+        include = []
+        if isinstance(source, pd.DataFrame):
+            source = list(zip(source.iloc[:, 0].values, source.iloc[:, 1].values))
+        for x in source:
+            if not isinstance(x, list) and not isinstance(x, tuple):
+                x = [x, "nan"]
+            scores = np.array([
+                np.max([
+                    fuzz.ratio(x[0].lower().strip("'").strip("\""), y[1]["name"].lower())
+                ] + [
+                    fuzz.ratio(x[0].lower().strip("'").strip("\"").strip("]").strip("["), yy.lower())
+                    for yy in y[1]["synonym"]
+                ]) if "synonym" in y[1].keys() and include_synonyms else
+                np.max([
+                    fuzz.ratio(x[0].lower().strip("'").strip("\""), y[1]["name"].lower())
+                ])
+                if "name" in y[1].keys() else 0  # ToDo: these are empty nodes, where are they coming from?
+                for y in nodes
+            ])
+            include.append(x[0].lower().strip("'").strip("\"") not in remove)
+            if match_only:
+                matches.append(np.any(scores == 100))  # perfect match
+            else:
+                if np.any(scores == 100):
+                    matches.append([(nodes[i][1]["name"], nodes[i][0]) for i in np.where(scores == 100)[0]])
+                else:
+                    matchesi = [(
+                        nodes[i][1]["name"] + "[" + ";".join([
+                            yy.strip("'").strip("\"").strip("]").strip("[")
+                            for yy in nodes[i][1]["synonym"]
+                        ]) + "}"
+                        if "synonym" in nodes[i][1].keys() and include_synonyms else nodes[i][1]["name"],
+                        nodes[i][0]
+                    ) for i in np.argsort(scores)[-10:]]
+                    if include_old:
+                        matchesi = matchesi + [(x[0].upper(), x[1])]
+                    matches.append(matchesi)
+        if match_only:
+            tab = pd.DataFrame({"source": source, "target": matches})
+        else:
+            tab = pd.DataFrame({
+                "source": source,
+                "target": [" ".join([",".join(zz) for zz in z]) for z in matches]
+            })
+        return tab.loc[include]
+
+
+class OntologyExtendedObo(OntologyObo):
     """
-    Versioned cell type universe (list) and ontology (hierarchy) container class.
+    Basic .obo ontology extended by additional nodes and edges without breaking DAG.
+    """
 
-    This class is subclassed once for each anatomical structure (organ).
-    Cell type versions take the form x.y:
-        - x is a major version and is incremented if the cell type identities or number changes.
-        - y is a minor version and is incremented if cell type annotation such as names are altered without changing
-            the described cell type or adding cell types.
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.add_extension(dict_ontology=ONTOLOGIY_EXTENSION_HUMAN)  # ToDo distinguish here
+
+    def add_extension(self, dict_ontology: Dict[str, List[str]]):
+        """
+        Extend ontology by additional edges and nodes defined in a dictionary.
+
+        Checks that DAG is not broken after graph assembly.
+
+        :param dict_ontology: Dictionary of nodes and edges to add to ontology. Parsing:
+
+            - keys: parent nodes (which must be in ontology)
+            - values: children nodes (which can be in ontology), must be given as list of stringd.
+                If these are in the ontology, an edge is added, otherwise, an edge and the node are added.
+        :return:
+        """
+        for k, v in dict_ontology.items():
+            assert isinstance(v, list), "dictionary values should be list of strings"
+            # Check that parent node is present:
+            if k not in self.nodes:
+                raise ValueError(f"key {k} was not in reference ontology")
+            # Check if edge is added only, or edge and node.
+            for child_node in v:
+                if child_node not in self.nodes:  # Add node.
+                    self.graph.add_node(child_node)
+                # Add edge.
+                self.graph.add_edge(k, child_node)
+        # Check that DAG was not broken:
+        self._check_graph()
+
+
+class CelltypeUniverse:
+    """
+    Cell type universe (list) and ontology (hierarchy) container class.
+
 
     Basic checks on the organ specific instance are performed in the constructor.
     """
+    ontology: OntologyBase
+    _target_universe: Union[List[str], None]
 
-    celltype_universe: dict
-    ontology: dict
-    version: str
-
-    def __init__(self, **kwargs):
-        # Check that versions are consistent.
-        if not list(self.celltype_universe.keys()) == list(self.ontology.keys()):
-            raise ValueError(
-                "error in matching versions of cell type universe and ontology in %s" %
-                type(self)
-            )
-        # Check that ontology terms are unique also between ontologies
-        if np.sum([len(x) for x in self.ontology.values()]) != \
-                len(np.unique(np.array([list(x) for x in self.ontology.values()]))):
-            raise ValueError(
-                "duplicated ontology terms found between ontologies in %s" %
-                type(self)
-            )
-
-    @property
-    def versions(self):
+    def __init__(self, organism: str, **kwargs):
         """
-        Available cell type universe versions loaded in this instance.
 
-        :return:
+        :param organism: Organism, defines ontology extension used.
+        :param kwargs:
         """
-        return self.celltype_universe.keys()
+        self.onto = OntologyExtendedObo(**kwargs)
+        self._target_universe = None
+        self._set_extension(organism=organism)
 
-    def _check_version(self, version: str):
-        if version not in self.celltype_universe.keys():
-            raise ValueError("Version %s not found. Check self.version for available versions." % version)
-
-    def set_version(
-            self,
-            version: str
-    ):
+    def _set_extension(self, organism):
         """
-        Set a cell type universe version for this instance.
 
-        :param version: Full version string "a.b.c" or celltype version "a".
-        :return:
+        :param organism: Organism, defines ontology extension used.
         """
-        if len(version.split(".")) == 3:
-            version = version.split(".")[0]
-            self._check_version(version=version)
-            self.version = version
-        elif len(version.split(".")) == 1:
-            self._check_version(version=version)
-            self.version = version
+        if organism == "human":
+            self.onto.add_extension(ONTOLOGIY_EXTENSION_HUMAN)
+        elif organism == "mouse":
+            self.onto.add_extension(ONTOLOGIY_EXTENSION_MOUSE)
         else:
-            raise ValueError("version supplied should be either in format `a.b.c` or `a`")
+            raise ValueError(f"organism {organism} not found")
 
     @property
-    def ids(self):
+    def target_universe(self):
         """
-        List of all loaders understandable cell type names of this instance.
+        Ontology classes of target universe (understandable cell type names).
 
         :return:
         """
-        return self._ids(self.version)
+        return self._target_universe
 
-    def _ids(self, version: str):
-        return [x[0] for x in self.celltype_universe[version]]
+    @target_universe.setter
+    def target_universe(self, x: List[str]):
+        # Check that all nodes are valid:
+        for xx in x:
+            if xx not in self.onto.nodes:
+                raise ValueError(f"cell type {xx} was not in ontology")
+        # Default universe is the full set of leave nodes of ontology:
+        self.target_universe = self.onto.leaves
+        self.onto.set_leaves(self.target_universe)
 
     @property
-    def ontology_ids(self):
+    def target_universe_ids(self):
         """
-        List of all cell type IDs (based on an ontology ID scheme) of this instance.
+        Ontology IDs of target universe (codified cell type names).
 
         :return:
         """
-        return self._ontology_ids(self.version)
-
-    def _ontology_ids(self, version: str):
-        return [x[1] for x in self.celltype_universe[version]]
+        return [self.onto.map_class_to_id(x) for x in self._target_universe]
 
     @property
     def ntypes(self):
         """
-        Number of different cell types in this instance.
+        Number of different cell types in target universe.
+        """
+        return len(self.target_universe)
 
+    def __validate_target_universe_table(self, tab: pd.DataFrame):
+        assert len(tab.columns) == 2
+        assert tab.columns[0] == "name" and tab.columns[1] == "id"
+
+    def load_target_universe(self, organ):
+        """
+
+        :param organ: Anatomic structure to load target universe for.
         :return:
         """
-        return self._ntypes(self.version)
+        # ToDo: Use pydoc based query of universes stored in ./target_universes/..
+        tab = None
+        self.__validate_target_universe_table(tab=tab)
+        self.target_universe = None  # ToDo
 
-    def _ntypes(self, version: str):
-        return len(self.celltype_universe[version])
+    def read_target_universe_csv(self, fn):
+        """
 
-    def to_csv(
+        :param fn: File containing target universe.
+        :return:
+        """
+        tab = pd.read_csv(fn)
+        self.__validate_target_universe_table(tab=tab)
+        self.target_universe = tab["name"].values
+
+    def map_to_target_leaves(
             self,
-            fn: str
+            nodes: List[str],
+            return_type: str = "elements"
     ):
-        pass
+        """
+        Map a given list of nodes to leave nodes defined for this ontology.
+        :param nodes:
+        :param return_type:
+
+            "elements": names of mapped leave nodes
+            "idx": indices in leave note list of of mapped leave nodes
+        :return:
+        """
+        return [self.onto.map_to_leaves(x, return_type=return_type) for x in nodes]

@@ -8,7 +8,6 @@ from typing import Union
 from sfaira.data import DatasetGroup, DatasetSuperGroup
 from sfaira.estimators import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
 from sfaira.interface import ModelZoo, ModelZooEmbedding, ModelZooCelltype
-from sfaira.versions.celltype_versions import ORGANISM_DICT
 
 
 class TargetZoos:
@@ -378,7 +377,7 @@ class TrainModelCelltype(TrainModel):
 
         cell_counts = self.data.obs_concat(keys=['cell_ontology_class'])['cell_ontology_class'].value_counts().to_dict()
         cell_counts_leaf = cell_counts.copy()
-        celltype_versions = ORGANISM_DICT.copy()
+        assert False, "fix celltyp versions code here, depreceate"
         celltype_versions[self.zoo.organism][self.zoo.organ].set_version(self.zoo.model_version.split(".")[0])
         leafnodes = celltype_versions[self.zoo.organism][self.zoo.organ].ids
         ontology = celltype_versions[self.zoo.organism][self.zoo.organ].ontology[self.zoo.model_version.split(".")[0]]["names"]
