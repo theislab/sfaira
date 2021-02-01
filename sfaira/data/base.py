@@ -675,7 +675,7 @@ class DatasetBase(abc.ABC):
             tab = self.ontology_celltypes.onto.find_nodes_fuzzy(
                 source=labels_original,
                 match_only=False,
-                constrain_by_definition=self.organ,
+                constrain_by_anatomy=self.organ,
                 include_synonyms=True,
                 omit_list=self._unknown_celltype_identifiers,
                 **kwargs

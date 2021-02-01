@@ -65,16 +65,39 @@ class OntologyObo(OntologyBase):
             **kwargs
     ):
         self.graph = obonet.read_obo(obo)
+
+        # Clean up nodes:
         nodes_to_delete = []
         for k, v in self.graph.nodes.items():
             if "namespace" not in v.keys() or v["namespace"] != namespace_id:
                 nodes_to_delete.append(k)
+            elif "name" not in v.keys():
+                nodes_to_delete.append(k)
         for k in nodes_to_delete:
             self.graph.remove_node(k)
+
+        # Clean up edges:
+        # The graph object can hold different types of edges, assert that they are "is_a" edges:
+        # All edge types (based on previous download, assert below that this is not extended):
+        edge_types = [
+            'is_a',  # nomenclature DAG -> include because of annotation coarseness differences
+            'develops_from',  # developmental DAG -> include because of developmental differences
+            'has_part',  # ?
+            'develops_into',  # inverse developmental DAG -> do not include
+            'RO:0002120',  # ?
+            'RO:0002103',  # ?
+            'lacks_plasma_membrane_part'  # ?
+        ]
+        edges_to_delete = []
+        for i, x in enumerate(self.graph.edges):
+            assert x[2] in edge_types, x
+            if x[2] not in ["is_a", "develops_from"]:
+                edges_to_delete.append((x[0], x[1]))
+        for x in edges_to_delete:
+            self.graph.remove_edge(u=x[0], v=x[1])
         self._check_graph()
 
     def _check_graph(self):
-        # ToDo OBO from obolibrary is not DAG?
         if not networkx.is_directed_acyclic_graph(self.graph):
             warnings.warn("DAG was broken")
 
@@ -118,17 +141,20 @@ class OntologyObo(OntologyBase):
             source,
             match_only: bool = False,
             include_synonyms: bool = True,
-            constrain_by_definition: Union[str, None] = None,
+            constrain_by_anatomy: Union[str, None] = None,
             omit_list: list = [],
             n_suggest: int = 10,
     ) -> pd.DataFrame:
         """
         Map free text node names to ontology node names via fuzzy string matching.
 
+        If this function does not yield good matches, consider querying this web interface:
+        https://www.ebi.ac.uk/ols/index
+
         :param source: Free text node labels which are to be matched to ontology nodes.
         :param match_only: Whether to include strict matches only in output.
         :param include_synonyms: Whether to include synonyms of nodes in string search.
-        :param constrain_by_definition: Whether to extend fuzzy search by matches to cell description (e.g. anatomy).
+        :param constrain_by_anatomy: Whether to require suggestions to be within a target anatomy defined within UBERON.
         :param omit_list: Free text node labels to omit in map.
         :param n_suggest: Number of cell types to suggest.
         :return: Table with source and target node names. Columns: "source", "target"
@@ -152,7 +178,6 @@ class OntologyObo(OntologyBase):
                 np.max([
                     fuzz.ratio(x[0].lower().strip("'").strip("\""), y[1]["name"].lower())
                 ])
-                if "name" in y[1].keys() else 0  # ToDo: these are empty nodes, where are they coming from?
                 for y in nodes
             ])
             include.append(x[0].lower().strip("'").strip("\"") not in omit_list)
@@ -162,16 +187,27 @@ class OntologyObo(OntologyBase):
                 if np.any(scores == 100):
                     matches.append([nodes[i][1]["name"] for i in np.where(scores == 100)[0]])
                 else:
-                    if constrain_by_definition is not None:
-                        # Add 5 best matches that contain additional string in definition and overall 5 best fits.
+                    if constrain_by_anatomy is not None:
+                        # Select up to 5 nodes which match the anatomical constraint:
+                        # ToDo: need to check if constrain_by_anatomy is a parent or child node of:
+                        # v['relationship'] = ['part_of UBERON:0001885']
+                        # This then implies that the suggested cell type occurs in
+                        # a) parent -> a more general setting across anatomies from which one was sampled
+                        # b) child -> a sub anatomy of the sampled tissue.
                         matchesi = [
                             nodes[i][1]["name"]
                             for i in np.argsort(scores)
-                            if "def" in nodes[i][1].keys() and constrain_by_definition in nodes[i][1]["def"]
-                        ][-5:] + [nodes[i][1]["name"] for i in np.argsort(scores)[-np.max(n_suggest - 5, 0):]]
+                            if "def" in nodes[i][1].keys() and constrain_by_anatomy in nodes[i][1]["def"]
+                        ][-5:][::-1]
+                        # Select best remaining matches until n_suggests:
+                        matchesi = matchesi + [
+                            nodes[i][1]["name"]
+                            for i in np.argsort(scores)
+                            if nodes[i][1]["name"] not in matchesi
+                        ][-np.max(n_suggest - len(matchesi), 0):][::-1]
                     else:
                         # Suggest top 10 hits by string match:
-                        matchesi = [nodes[i][1]["name"] for i in np.argsort(scores)[-n_suggest:]]
+                        matchesi = [nodes[i][1]["name"] for i in np.argsort(scores)[-n_suggest:]][::-1]
                     matches.append(matchesi)
         tab = pd.DataFrame({
             "source": source,
