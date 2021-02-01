@@ -58,8 +58,19 @@ class OntologyObo(OntologyBase):
 
     graph: networkx.MultiDiGraph
 
-    def __init__(self, obo: str = "http://purl.obolibrary.org/obo/cl.obo", **kwargs):
+    def __init__(
+            self,
+            obo: str = "http://purl.obolibrary.org/obo/cl.obo",
+            namespace_id: str = "cell",
+            **kwargs
+    ):
         self.graph = obonet.read_obo(obo)
+        nodes_to_delete = []
+        for k, v in self.graph.nodes.items():
+            if "namespace" not in v.keys() or v["namespace"] != namespace_id:
+                nodes_to_delete.append(k)
+        for k in nodes_to_delete:
+            self.graph.remove_node(k)
         self._check_graph()
 
     def _check_graph(self):
@@ -102,22 +113,24 @@ class OntologyObo(OntologyBase):
         """
         assert False  # ToDo
 
-    def fuzzy_match_nodes(
+    def find_nodes_fuzzy(
             self,
             source,
             match_only: bool = False,
-            include_old: bool = False,
             include_synonyms: bool = True,
-            remove: list = []
+            constrain_by_definition: Union[str, None] = None,
+            omit_list: list = [],
+            n_suggest: int = 10,
     ) -> pd.DataFrame:
         """
-        Map free text node names to ontology node names.
+        Map free text node names to ontology node names via fuzzy string matching.
 
         :param source: Free text node labels which are to be matched to ontology nodes.
         :param match_only: Whether to include strict matches only in output.
-        :param include_old: Whether to include previous (free text) node label in output.
-        :param include_synonyms: Whether to include synonym nodes.
-        :param remove: Free text node labels to omit in map.
+        :param include_synonyms: Whether to include synonyms of nodes in string search.
+        :param constrain_by_definition: Whether to extend fuzzy search by matches to cell description (e.g. anatomy).
+        :param omit_list: Free text node labels to omit in map.
+        :param n_suggest: Number of cell types to suggest.
         :return: Table with source and target node names. Columns: "source", "target"
         """
         from fuzzywuzzy import fuzz
@@ -142,31 +155,28 @@ class OntologyObo(OntologyBase):
                 if "name" in y[1].keys() else 0  # ToDo: these are empty nodes, where are they coming from?
                 for y in nodes
             ])
-            include.append(x[0].lower().strip("'").strip("\"") not in remove)
+            include.append(x[0].lower().strip("'").strip("\"") not in omit_list)
             if match_only:
                 matches.append(np.any(scores == 100))  # perfect match
             else:
                 if np.any(scores == 100):
-                    matches.append([(nodes[i][1]["name"], nodes[i][0]) for i in np.where(scores == 100)[0]])
+                    matches.append([nodes[i][1]["name"] for i in np.where(scores == 100)[0]])
                 else:
-                    matchesi = [(
-                        nodes[i][1]["name"] + "[" + ";".join([
-                            yy.strip("'").strip("\"").strip("]").strip("[")
-                            for yy in nodes[i][1]["synonym"]
-                        ]) + "}"
-                        if "synonym" in nodes[i][1].keys() and include_synonyms else nodes[i][1]["name"],
-                        nodes[i][0]
-                    ) for i in np.argsort(scores)[-10:]]
-                    if include_old:
-                        matchesi = matchesi + [(x[0].upper(), x[1])]
+                    if constrain_by_definition is not None:
+                        # Add 5 best matches that contain additional string in definition and overall 5 best fits.
+                        matchesi = [
+                            nodes[i][1]["name"]
+                            for i in np.argsort(scores)
+                            if "def" in nodes[i][1].keys() and constrain_by_definition in nodes[i][1]["def"]
+                        ][-5:] + [nodes[i][1]["name"] for i in np.argsort(scores)[-np.max(n_suggest - 5, 0):]]
+                    else:
+                        # Suggest top 10 hits by string match:
+                        matchesi = [nodes[i][1]["name"] for i in np.argsort(scores)[-n_suggest:]]
                     matches.append(matchesi)
-        if match_only:
-            tab = pd.DataFrame({"source": source, "target": matches})
-        else:
-            tab = pd.DataFrame({
-                "source": source,
-                "target": [" ".join([",".join(zz) for zz in z]) for z in matches]
-            })
+        tab = pd.DataFrame({
+            "source": source,
+            "target": [":".join(z) for z in matches]
+        })
         return tab.loc[include]
 
 

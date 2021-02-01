@@ -656,7 +656,13 @@ class DatasetBase(abc.ABC):
         """Standardised file name under which cell type conversion tables are saved."""
         return self.doi_cleaned_id + ".csv"
 
-    def write_ontology_class_map(self, fn, protected_writing: bool = True):
+    def write_ontology_class_map(
+            self, 
+            fn, 
+            method: str = "fuzzy",
+            protected_writing: bool = True,
+            **kwargs
+    ):
         """
         Load class maps of free text cell types to ontology classes.
 
@@ -665,13 +671,23 @@ class DatasetBase(abc.ABC):
         :return:
         """
         labels_original = np.sort(np.unique(self.adata.obs[self._ADATA_IDS_SFAIRA.cell_types_original].values))
-        tab = self.ontology_celltypes.onto.fuzzy_match_nodes(
-            source=labels_original,
-            match_only=False,
-            include_old=False,
-            include_synonyms=False,
-            remove=self._unknown_celltype_identifiers,
-        )
+        if method == "fuzzy":
+            tab = self.ontology_celltypes.onto.find_nodes_fuzzy(
+                source=labels_original,
+                match_only=False,
+                constrain_by_definition=self.organ,
+                include_synonyms=True,
+                omit_list=self._unknown_celltype_identifiers,
+                **kwargs
+            )
+        elif method == "ebi":
+            tab = self.ontology_celltypes.onto.find_nodes_ebi_api(
+                source=labels_original,
+                match_only=False,
+                omit_list=self._unknown_celltype_identifiers,
+            )
+        else:
+            raise ValueError(f"did not recognize {method}")
         if not os.path.exists(fn) or not protected_writing:
             tab.to_csv(fn, index=None)
 

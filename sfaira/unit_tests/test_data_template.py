@@ -39,7 +39,9 @@ class TestDatasetTemplate(unittest.TestCase):
             # Write this directly into sfaira installation so that it can be committed via git.
             v.write_ontology_class_map(
                 fn=os.path.join("/".join(FILE_PATH.split("/")[:-1]), v.fn_ontology_class_map_csv),
-                protected_writing=False
+                method="fuzzy",
+                protected_writing=False,
+                n_suggest=10,
             )
             # ToDo: conflicts are not automatically resolved, please go back to https://www.ebi.ac.uk/ols/ontologies/cl
             # for every mismatch or conflict and add the correct cell ontology class name into the .csv "target" column.

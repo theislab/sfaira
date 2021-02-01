@@ -16,9 +16,9 @@ class TestCellTypeUniverse(unittest.TestCase):
         for k, v in ORGANISM_DICT.items():
             for kk, vv in v.items():
                 universe = vv.celltype_universe["0"]
-                tab = onto.fuzzy_match_nodes(universe, match_only=True)
+                tab = onto.find_nodes_fuzzy(universe, match_only=True)
                 if not np.all(tab["matched"].values):
-                    tab2 = onto.fuzzy_match_nodes(universe, match_only=False, include_old=True, remove=["unkown"])
+                    tab2 = onto.find_nodes_fuzzy(universe, match_only=False, include_old=True, omit_list=["unkown"])
                     if not reduced:
                         tab2.to_csv(
                             self.dir_debugging + k + "_" + kk + "_universe.csv",
@@ -36,9 +36,9 @@ class TestCellTypeUniverse(unittest.TestCase):
         for k, v in ORGANISM_DICT.items():
             for kk, vv in v.items():
                 names = list(vv.ontology["0"]["names"].keys())
-                tab = onto.fuzzy_match_nodes(names, match_only=True)
+                tab = onto.find_nodes_fuzzy(names, match_only=True)
                 if not np.all(tab["matched"].values):
-                    tab = onto.fuzzy_match_nodes(names, match_only=False, include_old=True, remove=["unkown"])
+                    tab = onto.find_nodes_fuzzy(names, match_only=False, include_old=True, omit_list=["unkown"])
                     tab.to_csv(
                         self.dir_debugging2 + k + "_" + kk + "_universe.csv",
                         index=False, quoting=csv.QUOTE_NONE, sep=";"
@@ -61,7 +61,7 @@ class TestCellTypeUniverse(unittest.TestCase):
         for k, v in ORGANISM_DICT.items():
             for kk, vv in v.items():
                 universe = vv.celltype_universe["0"]
-                tab = onto.fuzzy_match_nodes(universe, match_only=True)
+                tab = onto.find_nodes_fuzzy(universe, match_only=True)
                 print(tab.loc[tab["matched"].values == False])
                 assert np.all(tab["matched"].values), f"{k} {kk}"
 
