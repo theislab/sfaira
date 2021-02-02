@@ -66,7 +66,8 @@ def sfaira_cli(ctx, verbose, log_file):
 
 @sfaira_cli.command()
 def create_dataloader():
-    pass
+    with open(f'{WD}/templates/test.txt') as f:
+        print(f.readlines())
 
 
 @sfaira_cli.command()
