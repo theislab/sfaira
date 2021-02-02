@@ -8,7 +8,7 @@ author = 'theislab'
 author_email = 'david.fischer@helmholtz-muenchen.de'
 description = "sfaira is a model and a data repository for single-cell data in a single python package."
 sfaira_module_path_init_py = importlib.util.find_spec("sfaira")
-sfaira_module_path = sfaira_module_path_init_py[:-12]
+sfaira_module_path = sfaira_module_path_init_py.origin[:-12]
 
 
 def walker(base, *paths):
