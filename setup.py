@@ -1,12 +1,14 @@
+import importlib
 import os
 
 from setuptools import setup, find_packages
 import versioneer
-import sfaira as module
 
 author = 'theislab'
 author_email = 'david.fischer@helmholtz-muenchen.de'
 description = "sfaira is a model and a data repository for single-cell data in a single python package."
+sfaira_module_path_init_py = importlib.util.find_spec("sfaira")
+sfaira_module_path = sfaira_module_path_init_py[:-12]
 
 
 def walker(base, *paths):
@@ -49,9 +51,9 @@ setup(
     ],
     packages=find_packages(),
     package_data={
-        module.__name__: walker(
-            os.path.dirname(module.__file__),
-            'create/templates'
+        'sfaira': walker(
+            os.path.dirname(sfaira_module_path),
+            'create/templates'  # TODO LH
         ),
     },
     entry_points={
