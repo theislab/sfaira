@@ -1,21 +1,22 @@
 anndata>=0.7
 docutils
 fuzzywuzzy
-jinja2
 loompy
 matplotlib
 networkx
-numpy>=1.14.0
+numpy>=1.16.4
 obonet
 openpyxl
 pandas
 python-Levenshtein
 scanpy
-scipy
+scipy>=1.2.1
 seaborn
-sphinx
-sphinx_rtd_theme
-tensorflow  # TODO remove as soon as # 70 is solved
+tensorflow>=2.0.0  # TODO remove as soon as # 70 is solved
 tqdm
 requests
+versioneer
 xlrd==1.*
+rich==9.10.0
+click==7.1.2
+h5py

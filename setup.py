@@ -1,12 +1,35 @@
+import os
+
 from setuptools import setup, find_packages
 import versioneer
+import sfaira as module
 
 author = 'theislab'
 author_email = 'david.fischer@helmholtz-muenchen.de'
 description = "sfaira is a model and a data repository for single-cell data in a single python package."
 
+
+def walker(base, *paths):
+    file_list = set([])
+    cur_dir = os.path.abspath(os.curdir)
+
+    os.chdir(base)
+    try:
+        for path in paths:
+            for dname, dirs, files in os.walk(path):
+                for f in files:
+                    file_list.add(os.path.join(dname, f))
+    finally:
+        os.chdir(cur_dir)
+
+    return list(file_list)
+
+
 with open("README.rst", "r") as fh:
     long_description = fh.read()
+
+with open('requirements.txt') as f:
+    requirements = f.read().splitlines()
 
 setup(
     name='sfaira',
@@ -25,19 +48,18 @@ setup(
         'Programming Language :: Python :: 3.8',
     ],
     packages=find_packages(),
-    install_requires=[
-        'anndata>=0.7',
-        'fuzzywuzzy',
-        'h5py',
-        'networkx',
-        'numpy>=1.16.4',
-        'obonet',
-        'pandas',
-        'python-Levenshtein',
-        'scipy>=1.2.1',
-        'tqdm',
-        'tensorflow>=2.0.0'  # TODO Remove and add to tensorflow profile
-    ],
+    package_data={
+        module.__name__: walker(
+            os.path.dirname(module.__file__),
+            'create/templates'
+        ),
+    },
+    entry_points={
+        'console_scripts': [
+            'sfaira=sfaira.cli:main',
+        ],
+    },
+    install_requires=requirements,
     extras_require={
         'tensorflow': [
             # 'tensorflow>=2.0.0'  # TODO Add Tensorflow here again

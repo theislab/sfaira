@@ -886,8 +886,8 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         dataset.load()
         cell_counts = dataset.obs_concat(keys=['cell_ontology_class'])['cell_ontology_class'].value_counts().to_dict()
 
-        assert False, "depreceat celltype_versions code here"
-        celltype_versions = ORGANISM_DICT.copy()
+        assert False, "deprecated celltype_versions code here"
+        celltype_versions = ORGANISM_DICT.copy()  # noqa F821
         celltype_versions[organism][organ].set_version(celltype_version)
         leafnodes = celltype_versions[organism][organ].ids
         ontology = celltype_versions[organism][organ].ontology[celltype_version]["names"]
@@ -1052,7 +1052,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         dataset.load()
         cell_counts = dataset.obs_concat(keys=['cell_ontology_class'])['cell_ontology_class'].value_counts().to_dict()
 
-        celltype_versions = ORGANISM_DICT.copy()
+        celltype_versions = ORGANISM_DICT.copy()  # noqa F821
         celltype_versions[organism][organ].set_version(celltype_version)
         leafnodes = celltype_versions[organism][organ].ids
         ontology = celltype_versions[organism][organ].ontology[celltype_version]["names"]
