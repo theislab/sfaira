@@ -39,7 +39,6 @@ class TestDatasetTemplate(unittest.TestCase):
             # Write this directly into sfaira installation so that it can be committed via git.
             v.write_ontology_class_map(
                 fn=os.path.join("/".join(FILE_PATH.split("/")[:-1]), v.fn_ontology_class_map_csv),
-                method="fuzzy",
                 protected_writing=False,
                 n_suggest=10,
             )

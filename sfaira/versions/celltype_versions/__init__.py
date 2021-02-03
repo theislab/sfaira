@@ -1,1 +1,2 @@
-from .base import CelltypeUniverse, OntologyObo
+from .base import OntologyObo, CelltypeUniverse, OntologyCelltypes, OntologyUberon
+ONTOLOGY_UBERON = OntologyUberon()

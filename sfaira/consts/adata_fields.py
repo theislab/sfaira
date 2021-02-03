@@ -1,6 +1,8 @@
 import numpy as np
 from typing import List
 
+from sfaira.versions.celltype_versions import CelltypeUniverse, ONTOLOGY_UBERON
+
 """
 The classes in this file are containers of field names and element entries that are used in streamlined adata objects
 in sfaira and in associated data bases.
@@ -196,7 +198,7 @@ class ADATA_IDS_SFAIRA(ADATA_IDS_EXTENDED):
         self.dev_stage_allowed_entries = None
         self.ethnicity_allowed_entries = None
         self.normalization_allowed_entries = None
-        self.organ_allowed_entries = None
+        self.organ_allowed_entries = ONTOLOGY_UBERON
         self.organism_allowed_entries = ["mouse", "human"]
         self.protocol_allowed_entries = None
         self.sex_allowed_entries = ["female", "male"]
