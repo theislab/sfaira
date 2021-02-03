@@ -657,8 +657,8 @@ class DatasetBase(abc.ABC):
         return self.doi_cleaned_id + ".csv"
 
     def write_ontology_class_map(
-            self, 
-            fn, 
+            self,
+            fn,
             protected_writing: bool = True,
             **kwargs
     ):

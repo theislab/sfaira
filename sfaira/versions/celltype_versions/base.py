@@ -170,8 +170,7 @@ class OntologyUberon(OntologyExtendedObo):
         nodes_to_delete = []
         for k, v in self.graph.nodes.items():
             # Only retain nodes which are  "anatomical collection" 'UBERON:0034925':
-            #if "is_a" not in v.keys() or 'UBERON:0034925' not in v["is_a"]:
-            #    nodes_to_delete.append(k)
+            # ToDo this seems to narrow, need to check if we need to constrain the nodes we use.
             if "name" not in v.keys():
                 nodes_to_delete.append(k)
         for k in nodes_to_delete:
@@ -539,9 +538,9 @@ class CelltypeUniverse:
                         # node.value['relationship'] = ['part_of UBERON:0001885']
                         # Find nodes that can be matched to UBERON:
                         anatomical_subselection = [
-                            "relationship" in y[1].keys()
-                            and np.any(["part_of UBERON" in yy for yy in y[1]["relationship"]])
-                            and np.any([
+                            "relationship" in y[1].keys() and
+                            np.any(["part_of UBERON" in yy for yy in y[1]["relationship"]]) and
+                            np.any([
                                 yy.split("part_of ")[-1] in self.onto_anatomy.node_ids
                                 for yy in y[1]["relationship"]
                             ])
