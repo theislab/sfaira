@@ -15,7 +15,7 @@ from typing import Dict, List, Tuple, Union
 import warnings
 
 from sfaira.versions.genome_versions import SuperGenomeContainer
-from sfaira.versions.celltype_versions import OntologyObo, CelltypeUniverse, ONTOLOGY_UBERON
+from sfaira.versions.celltype_versions import Ontology, CelltypeUniverse, ONTOLOGY_UBERON
 from sfaira.consts import ADATA_IDS_SFAIRA, META_DATA_FIELDS
 
 UNS_STRING_META_IN_OBS = "__obs__"
@@ -1397,7 +1397,7 @@ class DatasetBase(abc.ABC):
         if allowed is not None:
             if not isinstance(attempted, list) and not isinstance(attempted, tuple):
                 attempted = [attempted]
-            if isinstance(allowed, OntologyObo):
+            if isinstance(allowed, Ontology):
                 for x in attempted:
                     allowed.validate_node(x)
             else:

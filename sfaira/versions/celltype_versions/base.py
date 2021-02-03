@@ -2,14 +2,129 @@ import abc
 import networkx
 import numpy as np
 import obonet
+#import owlready2
 import pandas as pd
+import requests
 from typing import Dict, List, Tuple, Union
 import warnings
 
 from sfaira.versions.celltype_versions.extensions import ONTOLOGIY_EXTENSION_HUMAN, ONTOLOGIY_EXTENSION_MOUSE
 
 
-class OntologyObo:
+class Ontology:
+    leaves: List[str]
+
+    @abc.abstractmethod
+    def node_names(self):
+        pass
+    
+    @abc.abstractmethod
+    def map_node_suggestion(self, x: str, include_synonyms: bool = True, n_suggest: int = 10):
+        """
+        Map free text node name to ontology node names via fuzzy string matching.
+
+        :param x: Free text node label which is to be matched to ontology nodes.
+        :param include_synonyms: Whether to search for meaches in synonyms field of node instances, too.
+        :return List of proposed matches in ontology.
+        """
+        pass
+
+    def validate_node(self, x: str):
+        if x not in self.node_names:
+            suggestions = self.map_node_suggestion(x=x, include_synonyms=False)
+            raise ValueError(f"Node label {x} not found. Did you mean any of {suggestions}?")
+
+
+class OntologyEbi(Ontology):
+    """
+    Recursively assembles ontology by querying EBI web interface.
+
+    Not recommended for large ontologies.
+    """
+
+    def __init__(
+            self,
+            ontology: str,
+            root_term: str,
+            **kwargs
+    ):
+        def get_url(iri):
+            return f"https://www.ebi.ac.uk/ols/api/ontologies/{ontology}/terms/" \
+                   f"http%253A%252F%252Fwww.ebi.ac.uk%252F{ontology}%252F{iri}/children"
+
+        def recursive_search(iri):
+            terms = requests.get(get_url(iri=iri)).json()["_embedded"]["terms"]
+            nodes_new = {}
+            for x in terms:
+                nodes_new[x["iri"].split("/")[-1]] = {
+                    "name": x["label"],
+                    "description": x["description"],
+                    "synonyms": x["synonyms"],
+                    "has_children": x["has_children"],
+                }
+                if x["has_children"]:
+                    nodes_new.update(recursive_search(iri=x["iri"].split("/")[-1]))
+            return nodes_new
+
+        self.nodes = recursive_search(iri=root_term)
+
+    @property
+    def node_names(self):
+        return [v["name"] for k, v in self.nodes.items()]
+
+    def map_node_suggestion(self, x: str, include_synonyms: bool = True, n_suggest: int = 10):
+        """
+        Map free text node name to ontology node names via fuzzy string matching.
+
+        :param x: Free text node label which is to be matched to ontology nodes.
+        :param include_synonyms: Whether to search for meaches in synonyms field of node instances, too.
+        :return List of proposed matches in ontology.
+        """
+        from fuzzywuzzy import fuzz
+        scores = np.array([
+            np.max(
+                [
+                    fuzz.ratio(x.lower(), v["name"].lower())
+                ] + [
+                    fuzz.ratio(x.lower(), yyy.lower())
+                    for yy in self.synonym_node_properties if yy in v.keys() for yyy in v[yy]
+                ]
+            ) if include_synonyms else
+            np.max([
+                fuzz.ratio(x.lower(), v["name"].lower())
+            ])
+            for k, v in self.nodes.items()
+        ])
+        # Suggest top n_suggest hits by string match:
+        return [self.node_names[i] for i in np.argsort(scores)[-n_suggest:]][::-1]
+
+    def validate_node(self, x: str):
+        if x not in self.node_names:
+            suggestions = self.map_node_suggestion(x=x, include_synonyms=False)
+            raise ValueError(f"Node label {x} not found. Did you mean any of {suggestions}?")
+
+    def synonym_node_properties(self) -> List[str]:
+        return ["synonyms"]
+
+#class OntologyOwl(Ontology):
+#
+#    onto: owlready2.Ontology
+#
+#    def __init__(
+#            self,
+#            owl: str,
+#            **kwargs
+#    ):
+#        self.onto = owlready2.get_ontology(owl)
+#        self.onto.load()
+#        # ToDo build support here
+#
+#    @property
+#    def node_names(self):
+#        pass
+
+
+class OntologyObo(Ontology):
 
     graph: networkx.MultiDiGraph
     leaves: List[str]
@@ -81,6 +196,10 @@ class OntologyObo:
         if return_type == "idx":
             return np.array([i for i, (x, y) in enumerate(self.leaves) if x in ancestors])
 
+    @abc.abstractmethod
+    def synonym_node_properties(self) -> List[str]:
+        pass
+    
     def map_node_suggestion(self, x: str, include_synonyms: bool = True, n_suggest: int = 10):
         """
         Map free text node name to ontology node names via fuzzy string matching.
@@ -111,10 +230,6 @@ class OntologyObo:
         if x not in self.node_names:
             suggestions = self.map_node_suggestion(x=x, include_synonyms=False)
             raise ValueError(f"Node label {x} not found. Did you mean any of {suggestions}?")
-
-    @abc.abstractmethod
-    def synonym_node_properties(self) -> List[str]:
-        pass
 
 
 class OntologyExtendedObo(OntologyObo):
@@ -353,21 +468,96 @@ class OntologyCelltypes(OntologyExtendedObo):
             self.graph.remove_edge(u=x[0], v=x[1])
         self._check_graph()
 
-    def map_class_to_id(self, x):
-        """
-        Map ontology class to ID.
-        :param x:
-        :return:
-        """
-        assert False  # ToDo
+    @property
+    def synonym_node_properties(self) -> List[str]:
+        return ["synonym"]
 
-    def map_id_to_class(self, x):
-        """
-        Map ontology ID to class.
-        :param x:
-        :return:
-        """
-        assert False  # ToDo
+
+class OntologyHancestro(OntologyExtendedObo):
+
+    def __init__(
+            self,
+            **kwargs
+    ):
+        super().__init__(obo="http://purl.obolibrary.org/obo/hancestro.obo")
+
+        # Clean up nodes:
+        nodes_to_delete = []
+        for k, v in self.graph.nodes.items():
+            if "name" not in v.keys():
+                nodes_to_delete.append(k)
+        for k in nodes_to_delete:
+            self.graph.remove_node(k)
+
+        # Clean up edges:
+        # The graph object can hold different types of edges,
+        # and multiple types are loaded from the obo, not all of which are relevant for us:
+        # All edge types (based on previous download, assert below that this is not extended):
+        edge_types = []  # ToDo
+        edges_to_delete = []
+        for i, x in enumerate(self.graph.edges):
+            assert x[2] in edge_types, x
+            if x[2] not in []:
+                edges_to_delete.append((x[0], x[1]))
+        for x in edges_to_delete:
+            self.graph.remove_edge(u=x[0], v=x[1])
+        self._check_graph()
+
+    @property
+    def synonym_node_properties(self) -> List[str]:
+        return ["synonym"]
+
+
+class OntologyHsapdv(OntologyExtendedObo):
+
+    def __init__(
+            self,
+            **kwargs
+    ):
+        super().__init__(obo="http://purl.obolibrary.org/obo/hsapdv.obo")
+
+        # Clean up nodes:
+        nodes_to_delete = []
+        for k, v in self.graph.nodes.items():
+            if "name" not in v.keys():
+                nodes_to_delete.append(k)
+        for k in nodes_to_delete:
+            self.graph.remove_node(k)
+
+    @property
+    def synonym_node_properties(self) -> List[str]:
+        return ["synonym"]
+
+
+class OntologyMmusdv(OntologyExtendedObo):
+
+    def __init__(
+            self,
+            **kwargs
+    ):
+        super().__init__(obo="http://purl.obolibrary.org/obo/mmusdv.obo")
+
+        # Clean up nodes:
+        nodes_to_delete = []
+        for k, v in self.graph.nodes.items():
+            if "name" not in v.keys():
+                nodes_to_delete.append(k)
+        for k in nodes_to_delete:
+            self.graph.remove_node(k)
+
+    @property
+    def synonym_node_properties(self) -> List[str]:
+        return ["synonym"]
+
+
+class OntologySinglecellLibraryConstruction(OntologyEbi):
+
+        def __init__(
+                self,
+                ontology: str = "efo",
+                root_term: str = "EFO_0010183",
+        ):
+            super().__init__(ontology=ontology, root_term=root_term)
 
 
 class CelltypeUniverse:
