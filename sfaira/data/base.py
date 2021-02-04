@@ -1865,8 +1865,8 @@ class DatasetGroup:
         organism = np.unique([v.organism for _, v in self.datasets.items()])
         if len(organism) > 1:
             # ToDo: think about whether this should be handled differently.
-            warnings.warn(f"found more than one organism in group, this could cause problems with using a joined cell "
-                          f"type ontology. Using only the ontology of the first data set in the group.")
+            warnings.warn("found more than one organism in group, this could cause problems with using a joined cell "
+                          "type ontology. Using only the ontology of the first data set in the group.")
         return self.datasets[self.ids[0]].ontology_celltypes
 
     def project_celltypes_to_ontology(self):

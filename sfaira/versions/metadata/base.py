@@ -2,7 +2,6 @@ import abc
 import networkx
 import numpy as np
 import obonet
-#import owlready2
 import pandas as pd
 import requests
 from typing import Dict, List, Tuple, Union
@@ -18,7 +17,7 @@ data here.
 
 - All classes inherit from Ontology()
 - Onotlogies can be read as follows:
-    - from string lists which are typically hardcoded in sfaira (OntologyList), 
+    - from string lists which are typically hardcoded in sfaira (OntologyList),
     - from .obo files which are emitted by obofoundry for example (OntologyObo)),
     - ToDo from .owl files which are emitted from EBI for example (OntologyOwl)),
     - from the EBI web API via direct queries (OntologyEbi)).
