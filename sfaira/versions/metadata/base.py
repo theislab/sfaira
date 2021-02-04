@@ -64,7 +64,7 @@ class OntologyList(Ontology):
         self.nodes = terms
 
     @property
-    def node_names(self):
+    def node_names(self) -> List[str]:
         return self.nodes
 
     def map_node_suggestion(self, x: str, include_synonyms: bool = True, n_suggest: int = 10):
@@ -123,7 +123,7 @@ class OntologyEbi(Ontology):
         self.nodes = recursive_search(iri=root_term)
 
     @property
-    def node_names(self):
+    def node_names(self) -> List[str]:
         return [v["name"] for k, v in self.nodes.items()]
 
     def map_node_suggestion(self, x: str, include_synonyms: bool = True, n_suggest: int = 10):
@@ -138,14 +138,14 @@ class OntologyEbi(Ontology):
         scores = np.array([
             np.max(
                 [
-                    fuzz.ratio(x.lower(), v["name"].lower())
+                    fuzz.partial_ratio(x.lower(), v["name"].lower())
                 ] + [
-                    fuzz.ratio(x.lower(), yyy.lower())
+                    fuzz.partial_ratio(x.lower(), yyy.lower())
                     for yy in self.synonym_node_properties if yy in v.keys() for yyy in v[yy]
                 ]
             ) if include_synonyms else
             np.max([
-                fuzz.ratio(x.lower(), v["name"].lower())
+                fuzz.partial_ratio(x.lower(), v["name"].lower())
             ])
             for k, v in self.nodes.items()
         ])
@@ -190,22 +190,22 @@ class OntologyObo(Ontology):
             warnings.warn("DAG was broken")
 
     @property
-    def nodes(self):
+    def nodes(self) -> List[Tuple[str, dict]]:
         return list(self.graph.nodes.items())
 
     @property
-    def nodes_dict(self):
+    def nodes_dict(self) -> dict:
         return self.graph.nodes.items()
 
     @property
-    def node_names(self):
+    def node_names(self) -> List[str]:
         return [x["name"] for x in self.graph.nodes.values()]
 
     @property
-    def node_ids(self):
+    def node_ids(self) -> List[str]:
         return list(self.graph.nodes())
 
-    def id_from_name(self, x: str):
+    def id_from_name(self, x: str) -> str:
         self.validate_node(x=x)
         return [k for k, v in self.graph.nodes.items() if v["name"] == x][0]
 
@@ -729,6 +729,15 @@ class CelltypeUniverse:
         If this function does not yield good matches, consider querying this web interface:
         https://www.ebi.ac.uk/ols/index
 
+        We use anatomical constraints as follows;
+        An anatomic constraint is a name of an anatomical structure that can be mapped to UBERON.
+        1. We select cell types expected in this UBERON clade based on the link between CL and UBERON.
+        2. We perform an additional fuzzy string matching with the anatomical structure added to the proposed label.
+            This is often beneficial because analysts do not always prefix such extension (e.g. pancreatic) to the
+            free text cell type labels if the entire sample consists only of cells from this anatomical structure.
+            Note that if the maps from 1) were perfect, this would not be necessary. In practice, we find this to still
+            recover some hits that are otherwise missed.
+
         :param source: Free text node labels which are to be matched to ontology nodes.
         :param match_only: Whether to include strict matches only in output.
         :param include_synonyms: Whether to include synonyms of nodes in string search.
@@ -746,26 +755,44 @@ class CelltypeUniverse:
         for x in source:
             if not isinstance(x, list) and not isinstance(x, tuple):
                 x = [x, "nan"]
+            term = x[0].lower().strip("'").strip("\"").strip("]").strip("[")
+            # fuzz ratio and partial_ratio capture different types of matches well, we use both here:
             scores = np.array([
                 np.max([
-                    fuzz.ratio(x[0].lower().strip("'").strip("\""), y[1]["name"].lower())
+                    fuzz.ratio(term, y[1]["name"].lower()),
+                    fuzz.partial_ratio(term, y[1]["name"].lower())
                 ] + [
-                    fuzz.ratio(x[0].lower().strip("'").strip("\"").strip("]").strip("["), yy.lower())
+                    fuzz.ratio(term, yy.lower())
+                    for yy in y[1]["synonym"]
+                ] + [
+                    fuzz.partial_ratio(term, yy.lower())
                     for yy in y[1]["synonym"]
                 ]) if "synonym" in y[1].keys() and include_synonyms else
                 np.max([
-                    fuzz.ratio(x[0].lower().strip("'").strip("\""), y[1]["name"].lower())
+                    fuzz.ratio(term, y[1]["name"].lower()),
+                    fuzz.partial_ratio(term, y[1]["name"].lower())
                 ])
                 for y in nodes
             ])
             include.append(x[0].lower().strip("'").strip("\"") not in omit_list)
-            if match_only:
+            if match_only and not anatomical_constraint:
                 matches.append(np.any(scores == 100))  # perfect match
             else:
-                if np.any(scores == 100):
+                if np.any(scores == 100) and not anatomical_constraint:
                     matches.append([nodes[i][1]["name"] for i in np.where(scores == 100)[0]])
                 else:
                     if anatomical_constraint is not None:
+                        # Select best overall matches:
+                        matchesi = ":".join([
+                            nodes[i][1]["name"]
+                            for i in np.argsort(scores)
+                        ][-np.max(n_suggest - 7, 0):][::-1])
+
+                        # Use anatomical constraints two fold:
+                        # 1. Select cell types that are in the correct ontology.
+                        # 2. Run a second string matching with the anatomical word included.
+
+                        # 1. Select cell types that are in the correct ontology.
                         # Check that anatomical constraint is a term in UBERON and get UBERON ID:
                         anatomical_constraint_id = self.onto_anatomy.id_from_name(anatomical_constraint)
                         # Select up to 5 nodes which match the anatomical constraint:
@@ -800,23 +827,39 @@ class CelltypeUniverse:
                             for y, z in zip(uberon_ids, anatomical_subselection)
                         ]
                         # Iterate over nodes sorted by string match score and masked by constraint:
-                        matchesi = [
+                        matchesi = matchesi + ":|||:" + ":".join([
                             nodes[i][1]["name"]
                             for i in np.argsort(scores)
-                            if anatomical_subselection[i]
-                        ][-5:][::-1]
-                        # Select best remaining matches until n_suggests:
-                        matchesi = matchesi + [
+                            if anatomical_subselection[i] and nodes[i][1]["name"] not in matchesi
+                        ][-4:][::-1])
+
+                        # 2. Run a second string matching with the anatomical word included.
+                        modified_term = anatomical_constraint + " " + x[0].lower().strip("'").strip("\"").strip("]").\
+                            strip("[")
+                        scores_anatomy = np.array([
+                            np.max([
+                                fuzz.partial_ratio(modified_term, y[1]["name"].lower())
+                            ] + [
+                                fuzz.partial_ratio(modified_term, yy.lower())
+                                for yy in y[1]["synonym"]
+                            ]) if "synonym" in y[1].keys() and include_synonyms else
+                            np.max([
+                                fuzz.partial_ratio(modified_term, y[1]["name"].lower())
+                            ])
+                            for y in nodes
+                        ])
+                        matchesi = matchesi + ":|||:" + ":".join([
                             nodes[i][1]["name"]
-                            for i in np.argsort(scores)
+                            for i in np.argsort(scores_anatomy)
                             if nodes[i][1]["name"] not in matchesi
-                        ][-np.max(n_suggest - len(matchesi), 0):][::-1]
+                        ][-7:][::-1])
                     else:
                         # Suggest top 10 hits by string match:
                         matchesi = [nodes[i][1]["name"] for i in np.argsort(scores)[-n_suggest:]][::-1]
+                        matchesi = ":".join(matchesi)
                     matches.append(matchesi)
         tab = pd.DataFrame({
             "source": source,
-            "target": [":".join(z) for z in matches]
+            "target": matches
         })
         return tab.loc[include]
