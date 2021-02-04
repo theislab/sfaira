@@ -679,7 +679,7 @@ class DatasetBase(abc.ABC):
             **kwargs
         )
         if not os.path.exists(fn) or not protected_writing:
-            tab.to_csv(fn, index=None)
+            tab.to_csv(fn, index=False)
 
     def load_ontology_class_map(self, fn):
         """
@@ -708,6 +708,11 @@ class DatasetBase(abc.ABC):
                 else self._ADATA_IDS_SFAIRA.unknown_celltype_name if x.lower() in self._unknown_celltype_identifiers
                 else x for x in labels_original
             ]
+            # Validate mapped IDs based on ontology:
+            # This aborts with a readable error if there was a target in the mapping file that does not match the
+            # ontology.
+            for x in labels_mapped:
+                self.ontology_celltypes.onto_cl.validate_node(x)
             del self.adata.obs[self.obs_key_cellontology_original]
             self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class] = labels_mapped
         self.adata.obs[self._ADATA_IDS_SFAIRA.cell_types_original] = labels_original
@@ -1574,6 +1579,10 @@ class DatasetGroup:
         self.datasets = datasets
         self._ADATA_IDS_SFAIRA = ADATA_IDS_SFAIRA()
 
+    @property
+    def _unknown_celltype_identifiers(self):
+        return np.unqiue(np.concatenate([v._unknown_celltype_identifiers for _, v in self.datasets.items()]))
+
     def _load_group(self, load_raw: bool):
         """
 
@@ -1694,6 +1703,39 @@ class DatasetGroup:
                     i += 1
             except FileNotFoundError:
                 del self.datasets[x]
+
+    def write_ontology_class_map(
+            self,
+            fn,
+            protected_writing: bool = True,
+            **kwargs
+    ):
+        """
+        Write cell type maps of free text cell types to ontology classes.
+
+        :param fn: File name of csv to load class maps from.
+        :param protected_writing: Only write if file was not already found.
+        :return:
+        """
+        tab = []
+        for k, v in self.datasets.items():
+            labels_original = np.sort(np.unique(np.concatenate([
+                v.adata.obs[self._ADATA_IDS_SFAIRA.cell_types_original].values
+            ])))
+            tab.append(v.ontology_celltypes.prepare_celltype_map_fuzzy(
+                source=labels_original,
+                match_only=False,
+                anatomical_constraint=v.organ,
+                include_synonyms=True,
+                omit_list=v._unknown_celltype_identifiers,
+                **kwargs
+            ))
+        tab = pandas.concat(tab, axis=0)
+        # Take out columns with the same source:
+        tab = tab.loc[[x not in tab.iloc[:i, 0].values for i, x in enumerate(tab.iloc[:, 0].values)], :].copy()
+        tab = tab.sort_values("source")
+        if not os.path.exists(fn) or not protected_writing:
+            tab.to_csv(fn, index=False)
 
     @property
     def ids(self):
@@ -1817,6 +1859,23 @@ class DatasetGroup:
     def ncells(self, annotated_only: bool = False):
         cells = self.ncells_bydataset(annotated_only=annotated_only)
         return np.sum(cells)
+
+    @property
+    def ontology_celltypes(self):
+        organism = np.unique([v.organism for _, v in self.datasets.items()])
+        if len(organism) > 1:
+            # ToDo: think about whether this should be handled differently.
+            warnings.warn("found more than one organism in group, this could cause problems with using a joined cell "
+                          "type ontology. Using only the ontology of the first data set in the group.")
+        return self.datasets[self.ids[0]].ontology_celltypes
+
+    def project_celltypes_to_ontology(self):
+        """
+        Project free text cell type names to ontology based on mapping table.
+        :return:
+        """
+        for _, v in self.datasets.items():
+            v.project_celltypes_to_ontology()
 
     def subset(self, key, values):
         """
@@ -1948,7 +2007,7 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                             datasets_f.append(DatasetFound(path=path, meta_path=meta_path, cache_path=cache_path))
                         # Load cell type maps:
                         for x in datasets_f:
-                            x.load_ontology_class_map(fn=os.path.join(cwd, x.fn_ontology_class_map_csv))
+                            x.load_ontology_class_map(fn=os.path.join(cwd, file_module + ".csv"))
                         datasets.extend(datasets_f)
 
         keys = [x.id for x in datasets]
@@ -2241,3 +2300,11 @@ class DatasetSuperGroup:
         """
         for x in self.dataset_groups.ids:
             self.dataset_groups[x].subset_cells(key=key, values=values)
+
+    def project_celltypes_to_ontology(self):
+        """
+        Project free text cell type names to ontology based on mapping table.
+        :return:
+        """
+        for _, v in self.dataset_groups:
+            v.project_celltypes_to_ontology()
