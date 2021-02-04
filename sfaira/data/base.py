@@ -1380,7 +1380,7 @@ class DatasetBase(abc.ABC):
     def __value_protection(
             self,
             attr: str,
-            allowed: Union[OntologyObo, bool, int, float, str, List[bool], List[int], List[float], List[str]],
+            allowed: Union[Ontology, bool, int, float, str, List[bool], List[int], List[float], List[str]],
             attempted
     ):
         """

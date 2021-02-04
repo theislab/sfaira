@@ -155,7 +155,7 @@ class OntologyEbi(Ontology):
     def synonym_node_properties(self) -> List[str]:
         return ["synonyms"]
 
-#class OntologyOwl(Ontology):
+# class OntologyOwl(Ontology):
 #
 #    onto: owlready2.Ontology
 #
@@ -283,7 +283,8 @@ class OntologyExtendedObo(OntologyObo):
 
     def __init__(self, obo, **kwargs):
         super().__init__(obo=obo, **kwargs)
-        self.add_extension(dict_ontology=ONTOLOGIY_EXTENSION_HUMAN)  # ToDo distinguish here
+        # ToDo distinguish here:
+        self.add_extension(dict_ontology=ONTOLOGIY_EXTENSION_HUMAN)
 
     def add_extension(self, dict_ontology: Dict[str, List[str]]):
         """
@@ -596,12 +597,12 @@ class OntologyMmusdv(OntologyExtendedObo):
 
 class OntologySinglecellLibraryConstruction(OntologyEbi):
 
-        def __init__(
-                self,
-                ontology: str = "efo",
-                root_term: str = "EFO_0010183",
-        ):
-            super().__init__(ontology=ontology, root_term=root_term)
+    def __init__(
+            self,
+            ontology: str = "efo",
+            root_term: str = "EFO_0010183",
+    ):
+        super().__init__(ontology=ontology, root_term=root_term)
 
 
 class CelltypeUniverse:
