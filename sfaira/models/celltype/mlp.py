@@ -2,9 +2,10 @@ import numpy as np
 import tensorflow as tf
 from typing import List, Union
 
-from sfaira.models.celltype.external import BasicModel
-from sfaira.models.celltype.external import PreprocInput
-from sfaira.models.celltype.external import celltype_versions, Topologies
+import sfaira.versions.metadata as metadata
+from sfaira.versions.topology_versions import Topologies
+from sfaira.models.base import BasicModel
+from sfaira.models.pp_layer import PreprocInput
 
 
 class CellTypeMlp(BasicModel):
@@ -69,7 +70,7 @@ class CellTypeMlp(BasicModel):
 
 
 class CellTypeMlpVersioned(CellTypeMlp):
-    cell_type_version: celltype_versions.CelltypeUniverse
+    cell_type_version: metadata.CelltypeUniverse
 
     def __init__(
             self,

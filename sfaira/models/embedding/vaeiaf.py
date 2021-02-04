@@ -4,10 +4,10 @@ from typing import Union, Tuple
 
 from sfaira.models.embedding.output_layers import NegBinOutput, NegBinSharedDispOutput, NegBinConstDispOutput, \
     GaussianOutput, GaussianSharedStdOutput, GaussianConstStdOutput
-from sfaira.models.embedding.external import BasicModel
-from sfaira.models.embedding.external import PreprocInput
-from sfaira.models.embedding.external import Topologies
-from sfaira.models.embedding.external import MaskingDense
+from sfaira.versions.topology_versions import Topologies
+from sfaira.models.base import BasicModel
+from sfaira.models.pp_layer import PreprocInput
+from sfaira.models.made import MaskingDense
 
 
 class Sampling(tf.keras.layers.Layer):

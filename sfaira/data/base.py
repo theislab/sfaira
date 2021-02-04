@@ -15,7 +15,7 @@ from typing import Dict, List, Tuple, Union
 import warnings
 
 from sfaira.versions.genome_versions import SuperGenomeContainer
-from sfaira.versions.celltype_versions import Ontology, CelltypeUniverse, ONTOLOGY_UBERON
+from sfaira.versions.metadata import Ontology, CelltypeUniverse, ONTOLOGY_UBERON
 from sfaira.consts import ADATA_IDS_SFAIRA, META_DATA_FIELDS
 
 UNS_STRING_META_IN_OBS = "__obs__"

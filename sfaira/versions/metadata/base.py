@@ -8,7 +8,23 @@ import requests
 from typing import Dict, List, Tuple, Union
 import warnings
 
-from sfaira.versions.celltype_versions.extensions import ONTOLOGIY_EXTENSION_HUMAN, ONTOLOGIY_EXTENSION_MOUSE
+from sfaira.versions.metadata.extensions import ONTOLOGIY_EXTENSION_HUMAN, ONTOLOGIY_EXTENSION_MOUSE
+
+"""
+Ontology managament classes.
+
+We consider any structured collection of meta data identifiers an ontology and define classes to interact with such
+data here.
+
+- All classes inherit from Ontology()
+- Onotlogies can be read 
+    - from string lists which are typically hardcoded in sfaira (OntologyList), 
+    - from .obo files which are emitted by obofoundry for example (OntologyObo)),
+    - ToDo from .owl files which are emitted from EBI for example (OntologyOwl)),
+    - from the EBI web API via direct queries (OntologyEbi)).
+    
+ToDo explain usage of ontology extension.
+"""
 
 
 class Ontology:
@@ -33,6 +49,44 @@ class Ontology:
         if x not in self.node_names:
             suggestions = self.map_node_suggestion(x=x, include_synonyms=False)
             raise ValueError(f"Node label {x} not found. Did you mean any of {suggestions}?")
+
+
+class OntologyList(Ontology):
+    """
+    Basic unordered ontology container
+    """
+
+    def __init__(
+            self,
+            terms: List[str],
+            **kwargs
+    ):
+        self.nodes = terms
+
+    @property
+    def node_names(self):
+        return self.nodes
+
+    def map_node_suggestion(self, x: str, include_synonyms: bool = True, n_suggest: int = 10):
+        """
+        Map free text node name to ontology node names via fuzzy string matching.
+
+        :param x: Free text node label which is to be matched to ontology nodes.
+        :param include_synonyms: Whether to search for meaches in synonyms field of node instances, too.
+        :return List of proposed matches in ontology.
+        """
+        from fuzzywuzzy import fuzz
+        scores = np.array([
+            np.max([
+                fuzz.ratio(x.lower(), y.lower())
+            ])
+            for y in self.node_names
+        ])
+        # Suggest top n_suggest hits by string match:
+        return [self.node_names[i] for i in np.argsort(scores)[-n_suggest:]][::-1]
+
+    def synonym_node_properties(self) -> List[str]:
+        return []
 
 
 class OntologyEbi(Ontology):
@@ -97,11 +151,6 @@ class OntologyEbi(Ontology):
         ])
         # Suggest top n_suggest hits by string match:
         return [self.node_names[i] for i in np.argsort(scores)[-n_suggest:]][::-1]
-
-    def validate_node(self, x: str):
-        if x not in self.node_names:
-            suggestions = self.map_node_suggestion(x=x, include_synonyms=False)
-            raise ValueError(f"Node label {x} not found. Did you mean any of {suggestions}?")
 
     def synonym_node_properties(self) -> List[str]:
         return ["synonyms"]
@@ -225,11 +274,6 @@ class OntologyObo(Ontology):
         ])
         # Suggest top n_suggest hits by string match:
         return [self.nodes[i][1]["name"] for i in np.argsort(scores)[-n_suggest:]][::-1]
-
-    def validate_node(self, x: str):
-        if x not in self.node_names:
-            suggestions = self.map_node_suggestion(x=x, include_synonyms=False)
-            raise ValueError(f"Node label {x} not found. Did you mean any of {suggestions}?")
 
 
 class OntologyExtendedObo(OntologyObo):

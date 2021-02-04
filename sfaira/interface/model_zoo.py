@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from typing import List, Union
 
-from sfaira.versions.celltype_versions import CelltypeUniverse
+from sfaira.versions.metadata import CelltypeUniverse
 from sfaira.versions.topology_versions import Topologies
 
 

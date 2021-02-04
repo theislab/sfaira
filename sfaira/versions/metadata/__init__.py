@@ -1,4 +1,4 @@
-from .base import Ontology, OntologyObo, CelltypeUniverse, \
+from .base import Ontology, OntologyList, OntologyObo, CelltypeUniverse, \
     OntologyCelltypes, OntologyUberon, OntologyHancestro, OntologyHsapdv, OntologyMmusdv, \
     OntologySinglecellLibraryConstruction
 ONTOLOGY_UBERON = OntologyUberon()
