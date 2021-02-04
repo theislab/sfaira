@@ -15,7 +15,7 @@ from typing import Dict, List, Tuple, Union
 import warnings
 
 from sfaira.versions.genome_versions import SuperGenomeContainer
-from sfaira.versions.celltype_versions import CelltypeUniverse
+from sfaira.versions.metadata import Ontology, CelltypeUniverse, ONTOLOGY_UBERON
 from sfaira.consts import ADATA_IDS_SFAIRA, META_DATA_FIELDS
 
 UNS_STRING_META_IN_OBS = "__obs__"
@@ -656,7 +656,12 @@ class DatasetBase(abc.ABC):
         """Standardised file name under which cell type conversion tables are saved."""
         return self.doi_cleaned_id + ".csv"
 
-    def write_ontology_class_map(self, fn, protected_writing: bool = True):
+    def write_ontology_class_map(
+            self,
+            fn,
+            protected_writing: bool = True,
+            **kwargs
+    ):
         """
         Load class maps of free text cell types to ontology classes.
 
@@ -665,12 +670,13 @@ class DatasetBase(abc.ABC):
         :return:
         """
         labels_original = np.sort(np.unique(self.adata.obs[self._ADATA_IDS_SFAIRA.cell_types_original].values))
-        tab = self.ontology_celltypes.onto.fuzzy_match_nodes(
+        tab = self.ontology_celltypes.prepare_celltype_map_fuzzy(
             source=labels_original,
             match_only=False,
-            include_old=False,
-            include_synonyms=False,
-            remove=self._unknown_celltype_identifiers,
+            anatomical_constraint=self.organ,
+            include_synonyms=True,
+            omit_list=self._unknown_celltype_identifiers,
+            **kwargs
         )
         if not os.path.exists(fn) or not protected_writing:
             tab.to_csv(fn, index=None)
@@ -1371,23 +1377,33 @@ class DatasetBase(abc.ABC):
             raise ValueError(f"attempted to set erasing protected attribute {attr}: "
                              f"previously was {str(val_old)}, attempted to set {str(val_new)}")
 
-    def __value_protection(self, attr, allowed, attempted):
+    def __value_protection(
+            self,
+            attr: str,
+            allowed: Union[Ontology, bool, int, float, str, List[bool], List[int], List[float], List[str]],
+            attempted
+    ):
         """
         Check whether value is from set of allowed values.
 
         Does not check if allowed is None.
 
-        :param attr:
-        :param allowed:
-        :param attempted:
+        :param attr: Attribut to set.
+        :param allowed: Constraint for values of `attr`.
+            Either ontology instance used to constrain entries, or list of allowed values.
+        :param attempted: Value to attempt to set in `attr`.
         :return:
         """
         if allowed is not None:
             if not isinstance(attempted, list) and not isinstance(attempted, tuple):
                 attempted = [attempted]
-            for x in attempted:
-                if x not in allowed:
-                    raise ValueError(f"{x} is not a valid entry for {attr}, choose from: {str(allowed)}")
+            if isinstance(allowed, Ontology):
+                for x in attempted:
+                    allowed.validate_node(x)
+            else:
+                for x in attempted:
+                    if x not in allowed:
+                        raise ValueError(f"{x} is not a valid entry for {attr}, choose from: {str(allowed)}")
 
     def subset_cells(self, key, values):
         """

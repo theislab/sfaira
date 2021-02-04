@@ -7,6 +7,7 @@ import sfaira.models
 import sfaira.genomes
 import sfaira.data
 import sfaira.consts as consts
+import sfaira.versions
 from ._version import get_versions
 
 __version__ = get_versions()['version']
