@@ -17,12 +17,12 @@ We consider any structured collection of meta data identifiers an ontology and d
 data here.
 
 - All classes inherit from Ontology()
-- Onotlogies can be read 
+- Onotlogies can be read as follows:
     - from string lists which are typically hardcoded in sfaira (OntologyList), 
     - from .obo files which are emitted by obofoundry for example (OntologyObo)),
     - ToDo from .owl files which are emitted from EBI for example (OntologyOwl)),
     - from the EBI web API via direct queries (OntologyEbi)).
-    
+
 ToDo explain usage of ontology extension.
 """
 
@@ -33,7 +33,7 @@ class Ontology:
     @abc.abstractmethod
     def node_names(self):
         pass
-    
+
     @abc.abstractmethod
     def map_node_suggestion(self, x: str, include_synonyms: bool = True, n_suggest: int = 10):
         """
@@ -248,7 +248,7 @@ class OntologyObo(Ontology):
     @abc.abstractmethod
     def synonym_node_properties(self) -> List[str]:
         pass
-    
+
     def map_node_suggestion(self, x: str, include_synonyms: bool = True, n_suggest: int = 10):
         """
         Map free text node name to ontology node names via fuzzy string matching.
