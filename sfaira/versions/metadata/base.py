@@ -93,14 +93,28 @@ class OntologyEbi(Ontology):
     Recursively assembles ontology by querying EBI web interface.
 
     Not recommended for large ontologies.
+    Yields unstructured list of terms.
     """
 
     def __init__(
             self,
             ontology: str,
             root_term: str,
+            additional_terms: Union[Dict[str, Dict[str, str]], None] = None,
             **kwargs
     ):
+        """
+
+        :param ontology:
+        :param root_term:
+        :param additional_terms: Dictionary with additional terms, values should be
+
+            - "name" necessary
+            - "description" optional
+            - "synonyms" optional
+            - "has_children" optional
+        :param kwargs:
+        """
         def get_url(iri):
             return f"https://www.ebi.ac.uk/ols/api/ontologies/{ontology}/terms/" \
                    f"http%253A%252F%252Fwww.ebi.ac.uk%252F{ontology}%252F{iri}/children"
@@ -120,6 +134,7 @@ class OntologyEbi(Ontology):
             return nodes_new
 
         self.nodes = recursive_search(iri=root_term)
+        self.nodes.update(additional_terms)
 
     @property
     def node_names(self) -> List[str]:
@@ -601,7 +616,13 @@ class OntologySinglecellLibraryConstruction(OntologyEbi):
             ontology: str = "efo",
             root_term: str = "EFO_0010183",
     ):
-        super().__init__(ontology=ontology, root_term=root_term)
+        super().__init__(
+            ontology=ontology,
+            root_term=root_term,
+            additional_terms={
+                "microwell-seq": {"name": "microwell-seq"}
+            }
+        )
 
 
 class CelltypeUniverse:

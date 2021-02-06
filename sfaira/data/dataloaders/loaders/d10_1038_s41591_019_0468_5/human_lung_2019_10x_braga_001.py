@@ -34,7 +34,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         # ToDo: 1->"alveoli, parenchyma"
         # ToDo: 2->"bronchi"
         self.organism = "human"
-        self.protocol = "10x"
+        self.protocol = "10X sequencing"
         self.state_exact = "healthy"
         self.year = 2019
         self.normalization = "norm"
