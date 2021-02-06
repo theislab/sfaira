@@ -9,14 +9,16 @@ obonet
 openpyxl
 pandas
 python-Levenshtein
-scanpy
+scanpy==1.7.0
 scipy>=1.2.1
 seaborn
 tensorflow>=2.0.0  # TODO remove as soon as # 70 is solved
 tqdm
 requests
 versioneer
+h5py
 xlrd==1.*
 rich==9.10.0
 click==7.1.2
-h5py
+questionary==1.8.1
+packaging==20.8
