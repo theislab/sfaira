@@ -10,8 +10,9 @@ from rich import traceback
 from rich import print
 
 import sfaira
+from sfaira.commands.create_dataloader import CreateDataloader
+from sfaira.commands.questionary import sfaira_questionary
 from sfaira.commands.upgrade import UpgradeCommand
-from sfaira.custom_cli.questionary import sfaira_questionary
 
 WD = os.path.dirname(__file__)
 log = logging.getLogger()
@@ -68,13 +69,9 @@ def sfaira_cli(ctx, verbose, log_file):
 
 @sfaira_cli.command()
 def create_dataloader():
-    answer = sfaira_questionary(function='select',
-                                question='what do you want',
-                                choices=['Apple', 'Banana'],
-                                default='Apple')
-    print(answer)
-    with open(f'{WD}/templates/test.txt') as f:
-        print(f.readlines())
+    creator = CreateDataloader()
+    creator.test()
+
 
 
 @sfaira_cli.command()

@@ -3,12 +3,13 @@ import logging
 import urllib
 import sys
 from pkg_resources import parse_version
-from sfaira.custom_cli.questionary import sfaira_questionary
 
 import sfaira
 from urllib.error import HTTPError, URLError
 from subprocess import Popen, PIPE, check_call
 from rich import print
+
+from sfaira.commands.questionary import sfaira_questionary
 
 log = logging.getLogger(__name__)
 

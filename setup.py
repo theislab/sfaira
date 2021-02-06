@@ -30,7 +30,7 @@ setup(
     ],
     packages=find_packages(include=['sfaira', 'sfaira.*']),
     package_data={
-        'sfaira': ['templates/*']
+        'sfaira': ['commands/templates/*']
     },
     entry_points={
         'console_scripts': [
