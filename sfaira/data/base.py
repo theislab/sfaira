@@ -754,7 +754,7 @@ class DatasetBase(abc.ABC):
             for k, v in self._META_DATA_FIELDS.items():
                 if k in meta.columns:
                     if meta[k].values[0] is not None:
-                        meta[k] = v(meta[k])
+                        meta[k] = np.asarray(meta[k].values, dtype=v)
             self.meta = meta.fillna("None").replace({"None": None})
 
     def write_meta(
