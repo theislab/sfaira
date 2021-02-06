@@ -6,7 +6,7 @@ from typing import Union
 import unittest
 
 from sfaira.unit_tests.external import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
-from sfaira.unit_tests.external import celltype_versions, SuperGenomeContainer, Topologies
+from sfaira.unit_tests.external import metadata, SuperGenomeContainer, Topologies
 
 
 class _TestEstimator:

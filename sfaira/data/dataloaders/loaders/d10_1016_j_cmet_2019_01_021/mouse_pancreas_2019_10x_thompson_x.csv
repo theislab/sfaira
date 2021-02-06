@@ -1,0 +1,14 @@
+source,target
+acinar,pancreatic acinar cell
+alpha,pancreatic A cell
+beta,type B pancreatic cell
+delta,pancreatic D cell
+ductal,pancreatic ductal cell
+endothelial,endothelial cell
+erythroblast,erythroblast
+fibroblast,fibroblast
+leukocyte,leukocyte
+lymphatic endothelial cell,endothelial cell of lymphatic vessel
+pp,pancreatic PP cell
+smooth_muscle,smooth muscle cell
+stellate cell,pancreatic stellate cell
