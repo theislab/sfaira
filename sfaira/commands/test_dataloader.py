@@ -22,5 +22,3 @@ class DataloaderTester:
     @classmethod
     def _run_unittest(cls, doi: str):
         pass
-
-
