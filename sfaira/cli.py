@@ -10,7 +10,7 @@ from rich import traceback
 from rich import print
 
 import sfaira
-from sfaira.commands.create_dataloader import CreateDataloader
+from sfaira.commands.create_dataloader import DataloaderCreator
 from sfaira.commands.questionary import sfaira_questionary
 from sfaira.commands.upgrade import UpgradeCommand
 
@@ -69,7 +69,7 @@ def sfaira_cli(ctx, verbose, log_file):
 
 @sfaira_cli.command()
 def create_dataloader():
-    CreateDataloader.create_dataloader()
+    DataloaderCreator.create_dataloader()
 
 
 @sfaira_cli.command()

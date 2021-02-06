@@ -7,12 +7,17 @@ from rich import print
 log = logging.getLogger(__name__)
 
 
-class CreateDataloader:
+class DataloaderCreator:
     WD = os.path.dirname(__file__)
     TEMPLATES_PATH = f'{WD}/templates'
 
     @classmethod
     def create_dataloader(cls):
+        """
+        Prompts and guides the user through a number of possible dataloader choices.
+        Prompts the user for required attributes which must be present in the dataloader.
+        Finally creates the specific cookiecutter dataloader template.
+        """
         cls._prompt_dataloader_template()
         cls._prompt_dataloader_configuration()
         cls._create_dataloader_template()
