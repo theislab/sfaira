@@ -28,7 +28,7 @@ studys_separate_csvs = []
 #    "d10_1038_s41586_020_2157_4"
 # ]
 
-dir_sfaira_dataloaders = os.path.join(*str(os.path.dirname(FILE_PATH)).split("/")[:-1])
+dir_sfaira_dataloaders = "/" + str(os.path.join(*str(os.path.dirname(FILE_PATH)).split("/")[:-1]))
 
 dir_prefix = "d"
 dir_exlcude = []
