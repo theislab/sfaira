@@ -4,6 +4,9 @@ import sfaira
 import sys
 import tensorflow as tf
 
+# Any data loader here to extract path:
+from sfaira.data.dataloaders.loaders.d10_1016_j_cmet_2019_01_021 import FILE_PATH
+
 print(tf.__version__)
 
 # Set global variables.
@@ -23,10 +26,8 @@ studys_separate_csvs = []
 #    "d10_1101_661728",
 #    "d10_1016_j_cell_2018_02_001",
 #    "d10_1038_s41586_020_2157_4"
-#]
+# ]
 
-# Any data loader here to extract path:
-from sfaira.data.dataloaders.loaders.d10_1016_j_cmet_2019_01_021 import FILE_PATH
 dir_sfaira_dataloaders = os.path.join(*str(os.path.dirname(FILE_PATH)).split("/")[:-1])
 
 dir_prefix = "d"
