@@ -10,6 +10,7 @@ from rich import traceback
 from rich import print
 
 import sfaira
+from sfaira.commands.upgrade import UpgradeCommand
 from sfaira.custom_cli.questionary import sfaira_questionary
 
 WD = os.path.dirname(__file__)
@@ -29,9 +30,9 @@ def main():
 
     print('[bold blue]Run [green]sfaira --help [blue]for an overview of all commands\n')
 
-    # Is the latest mlf-core version installed? Upgrade if not!
-    # if not UpgradeCommand.check_mlf_core_latest():
-    #     print('[bold blue]Run [green]sfaira upgrade [blue]to get the latest version.')
+    # Is the latest sfaira version installed? Upgrade if not!
+    if not UpgradeCommand.check_sfaira_latest():
+        print('[bold blue]Run [green]sfaira upgrade [blue]to get the latest version.')
     sfaira_cli()
 
 

@@ -22,3 +22,4 @@ rich==9.10.0
 click==7.1.2
 questionary==1.8.1
 packaging==20.8
+requests>=2.25.1
