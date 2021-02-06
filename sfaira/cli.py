@@ -73,6 +73,11 @@ def create_dataloader():
 
 
 @sfaira_cli.command()
+def lint_dataloader():
+    pass
+
+
+@sfaira_cli.command()
 def test_dataloader():
     pass
 
