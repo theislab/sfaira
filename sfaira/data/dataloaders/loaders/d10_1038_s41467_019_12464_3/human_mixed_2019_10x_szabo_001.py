@@ -48,7 +48,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.healthy = True
         self.normalization = "raw"
         self.organism = "human"
-        self.protocol = "10x"
+        self.protocol = "10X sequencing"
         self.state_exact = "healthy"
         self.year = 2019
 
@@ -81,7 +81,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
                 self.adata.obs["organ"] = "Lung"
             elif "PP003" in fn or "PP004" in fn:
                 self.adata.obs["donor"] = "Donor1"
-                self.adata.obs["organ"] = "Bone Marrow"
+                self.adata.obs["organ"] = "bone marrow"
             elif "PP005" in fn or "PP006" in fn:
                 self.adata.obs["donor"] = "Donor1"
                 self.adata.obs["organ"] = "Lymph Node"
@@ -90,7 +90,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
                 self.adata.obs["organ"] = "Lung"
             elif "PP011" in fn or "PP012" in fn:
                 self.adata.obs["donor"] = "Donor2"
-                self.adata.obs["organ"] = "Bone Marrow"
+                self.adata.obs["organ"] = "bone marrow"
             elif "PP013" in fn or "PP014" in fn:
                 self.adata.obs["donor"] = "Donor2"
                 self.adata.obs["organ"] = "Lymph Node"
