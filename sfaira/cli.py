@@ -69,7 +69,8 @@ def sfaira_cli(ctx, verbose, log_file):
 
 @sfaira_cli.command()
 def create_dataloader():
-    DataloaderCreator.create_dataloader()
+    dataloader_creator = DataloaderCreator()
+    dataloader_creator.create_dataloader()
 
 
 @sfaira_cli.command()

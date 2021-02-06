@@ -1,5 +1,6 @@
 import logging
 import os
+from dataclasses import dataclass
 
 from sfaira.commands.questionary import sfaira_questionary
 from rich import print
@@ -8,71 +9,82 @@ from switchlang import switch
 log = logging.getLogger(__name__)
 
 
-class DataloaderCreator:
-    WD = os.path.dirname(__file__)
-    TEMPLATES_PATH = f'{WD}/templates'
+@dataclass
+class TemplateAttributes:
+    dataloader_type: str = ''
 
-    @classmethod
-    def create_dataloader(cls):
+
+class DataloaderCreator:
+
+    def __init__(self):
+        self.WD = os.path.dirname(__file__)
+        self.TEMPLATES_PATH = f'{self.WD}/templates'
+        self.template_attributes = TemplateAttributes()
+
+    def create_dataloader(self):
         """
         Prompts and guides the user through a number of possible dataloader choices.
         Prompts the user for required attributes which must be present in the dataloader.
         Finally creates the specific cookiecutter dataloader template.
         """
-        dataloader_template_type = cls._prompt_dataloader_template()
-        cls._prompt_dataloader_configuration(dataloader_template_type)
-        cls._create_dataloader_template()
+        self._prompt_dataloader_template()
+        self._prompt_dataloader_configuration()
+        self._create_dataloader_template()
 
-    @classmethod
-    def _prompt_dataloader_template(cls) -> str:
+    def _prompt_dataloader_template(self) -> None:
         """
         Guides the user to select the appropriate dataloader template for his dataset.
-
-        :return: Type of desired dataloader. One of
-            single_dataset
-            multiple_datasets_single_file
-            multiple_datasets_streamlined
-            multiple_datasets_not_streamlined
+        Sets the dataloader_type
         """
         number_datasets = sfaira_questionary(function='select',
                                              question='How many datasets does your project have?',
                                              choices=['One', 'More than one'])
         # One dataset
         if number_datasets == 'One':
-            return 'single_dataset'
+            self.template_attributes.dataloader_type = 'single_dataset'
 
         # More than one dataset
         dataset_counts = sfaira_questionary(function='select',
                                             question='Are your datasets in a single file or is there one file per dataset?',
                                             choices=['Single dataset file', 'Multiple dataset files'])
         if dataset_counts == 'Single dataset file':
-            return 'multiple_datasets_single_file'
+            self.template_attributes.dataloader_type = 'multiple_datasets_single_file'
 
         # streamlined?
         streamlined_datasets = sfaira_questionary(function='select',
                                                   question='Are your datasets in a similar format?',
                                                   choices=['Same format', 'Different formats'])
         if streamlined_datasets == 'Same format':
-            return 'multiple_datasets_streamlined'
+            self.template_attributes.dataloader_type = 'multiple_datasets_streamlined'
         else:
-            return 'multiple_datasets_not_streamlined'
+            self.template_attributes.dataloader_type = 'multiple_datasets_not_streamlined'
 
-    @classmethod
-    def _prompt_dataloader_configuration(cls, dataloader_template_type: str):
+    def _prompt_dataloader_configuration(self):
         """
         Prompts the user for all required attributes for a dataloader such as DOI, author, etc.
-
-        :param dataloader_template_type: One of
-            single_dataset
-            multiple_datasets_single_file
-            multiple_datasets_streamlined
-            multiple_datasets_not_streamlined
         """
-        with switch(dataloader_template_type) as s:
-            s.case('single_dataset', lambda: print('selected single dataset'))
-            s.case('multiple_datasets_single_file', lambda: print('selected multiple datasets single file'))
-            s.case('multiple_datasets_streamlined', lambda: print('selected streamlined'))
-            s.case('multiple_datasets_not_streamlined', lambda: print('selected not streamlined'))
+
+        # Prompts shared by all templates
+        # TODO
+
+        # Prompts which are dataloader type specific
+        def _single_dataset_prompts():
+            pass
+
+        def _multiple_datasets_single_file_prompts():
+            pass
+
+        def _multiple_datasets_streamlined():
+            pass
+
+        def _multiple_datasets_not_streamlined():
+            pass
+
+        with switch(self.template_attributes.dataloader_type) as s:
+            s.case('single_dataset', _single_dataset_prompts)
+            s.case('multiple_datasets_single_file', _multiple_datasets_single_file_prompts)
+            s.case('multiple_datasets_streamlined', _multiple_datasets_streamlined)
+            s.case('multiple_datasets_not_streamlined', _multiple_datasets_not_streamlined)
             s.default(lambda error: print('[bold red] Invalid dataloader type select. Internal error!'))
 
     @classmethod
