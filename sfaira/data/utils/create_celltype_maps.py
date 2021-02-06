@@ -33,11 +33,13 @@ dir_sfaira_dataloaders = "/" + str(os.path.join(*str(os.path.dirname(FILE_PATH))
 dir_prefix = "d"
 dir_exlcude = []
 for dir_study in os.listdir(dir_sfaira_dataloaders):
+    print(dir_study)
     if os.path.isdir(os.path.join(dir_sfaira_dataloaders, dir_study)):  # only directories
         # Narrow down to data set directories:
         if dir_study[:len(dir_prefix)] == dir_prefix and dir_study not in dir_exlcude:
             for f_dataset in os.listdir(os.path.join(dir_sfaira_dataloaders, dir_study)):
                 if os.path.isfile(os.path.join(dir_sfaira_dataloaders, dir_study, f_dataset)):  # only files
+                    print(f_dataset)
                     # Narrow down to data set files:
                     if f_dataset.split(".")[-1] == "py" and \
                             f_dataset.split(".")[0] not in ["__init__", "base", "group"]:
