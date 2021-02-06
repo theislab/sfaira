@@ -6,7 +6,6 @@ from sfaira.data import DatasetGroupDirectoryOriented, DatasetGroup
 
 
 class TestDatasetTemplate(unittest.TestCase):
-
     dir_template: str = "./template_data"
 
     def test_load(self):
@@ -102,9 +101,9 @@ class TestDatasetTemplate(unittest.TestCase):
                             raise ValueError(f"sample_fns and sample_ids both found for {f}")
                         else:
                             datasets_f = [DatasetFound(
-                                    path=self.dir_template,
-                                    meta_path=self.dir_template,
-                                    cache_path=self.dir_template
+                                path=self.dir_template,
+                                meta_path=self.dir_template,
+                                cache_path=self.dir_template
                             )]
                         # Build a data set group from the already loaded data sets and use the group ontology writing
                         # function.
