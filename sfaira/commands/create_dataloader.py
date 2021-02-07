@@ -16,7 +16,7 @@ class TemplateAttributes:
     dataloader_type: str = ''
     id: str = ''  # unique identifier of data set (Organism_Organ_Year_Protocol_NumberOfDataset_FirstAuthorLastname_doi).
 
-    author: Union[str, list] = ''  # author (list) who sampled / created the data set
+    authors: Union[str, list] = ''  # author (list) who sampled / created the data set
     doi: str = ''  # doi of data set accompanying manuscript
 
     download_url_data: str = ''  # download website(s) of data files
@@ -99,8 +99,10 @@ class DataloaderCreator:
         """
         Prompts the user for all required attributes for a dataloader such as DOI, author, etc.
         """
-        # Prompts shared by all templates
-        # self.author = "Last name, first name"  # or ["Last name, first name", "Last name, first name"]
+        authors = sfaira_questionary(function='text',
+                                     question='Author(s):',
+                                     default='Einstein, Albert; Hawking, Stephen')
+        self.template_attributes.authors = authors.split(';') if ';' in authors > 1 else authors
 
         doi = sfaira_questionary(function='text',
                                  question='DOI:',
@@ -113,9 +115,6 @@ class DataloaderCreator:
         self.template_attributes.doi = doi
 
         id: str = ''  # unique identifier of data set (Organism_Organ_Year_Protocol_NumberOfDataset_FirstAuthorLastname_doi).
-
-        author: str = ''  # author (list) who sampled / created the data set
-        doi: str = ''  # doi of data set accompanying manuscript
 
         download_url_data: str = ''  # download website(s) of data files
         download_url_meta: str = ''  # download website(s) of meta data files
@@ -132,25 +131,6 @@ class DataloaderCreator:
         state_exact: str = ''  # (*, optional) exact disease, treatment or perturbation state of sample
         year: int = 2021  # year in which sample was acquired
 
-        # Prompts which are dataloader type specific
-        def _single_dataset_prompts():
-            pass
-
-        def _multiple_datasets_single_file_prompts():
-            pass
-
-        def _multiple_datasets_streamlined():
-            pass
-
-        def _multiple_datasets_not_streamlined():
-            pass
-
-        with switch(self.template_attributes.dataloader_type) as s:
-            s.case('single_dataset', _single_dataset_prompts)
-            s.case('multiple_datasets_single_file', _multiple_datasets_single_file_prompts)
-            s.case('multiple_datasets_streamlined', _multiple_datasets_streamlined)
-            s.case('multiple_datasets_not_streamlined', _multiple_datasets_not_streamlined)
-            s.default(lambda error: print('[bold red] Invalid dataloader type select. Internal error!'))
 
     @classmethod
     def _create_dataloader_template(cls):
