@@ -1,6 +1,8 @@
 import logging
 import os
+import re
 from dataclasses import dataclass
+from typing import Union
 
 from sfaira.commands.questionary import sfaira_questionary
 from rich import print
@@ -12,6 +14,40 @@ log = logging.getLogger(__name__)
 @dataclass
 class TemplateAttributes:
     dataloader_type: str = ''
+    id: str = ''  # unique identifier of data set (Organism_Organ_Year_Protocol_NumberOfDataset_FirstAuthorLastname_doi).
+
+    author: Union[str, list] = ''  # author (list) who sampled / created the data set
+    doi: str = ''  # doi of data set accompanying manuscript
+
+    download_url_data: str = ''  # download website(s) of data files
+    download_url_meta: str = ''  # download website(s) of meta data files
+
+    age: str = '0'  # (*, optional) age of sample
+    dev_stage: str = ''  # (*, optional) developmental stage of organism
+    ethnicity: str = ''  # (*, optional) ethnicity of sample
+    healthy: bool = True  # (*, optional) whether sample represents a healthy organism
+    normalisation: str = ''  # (optional) normalisation applied to raw data loaded (ideally counts, "raw")
+    organ: str = ''  # (*, optional) organ (anatomical structure)
+    organism: str = ''  # (*) species / organism
+    protocol: str = ''  # (*, optional) protocol used to sample data (e.g. smart-seq2)
+    sex: str = ''  # (*, optional) sex
+    state_exact: str = ''  # (*, optional) exact disease, treatment or perturbation state of sample
+    year: int = 2021  # year in which sample was acquired
+
+    # The following meta data may instead also be supplied on a cell level if an appropriate column is present in the
+    # anndata instance (specifically in .obs) after loading. You need to make sure this is loaded in the loading script)!
+    obs_key_age: int = 0  # (optional, see above, do not provide if .age is provided)
+    obs_key_dev_stage: str = ''  # (optional, see above, do not provide if .dev_stage is provided)
+    obs_key_ethnicity: str = ''  # (optional, see above, do not provide if .ethnicity is provided)
+    obs_key_healthy: str = ''  # (optional, see above, do not provide if .healthy is provided)
+    obs_key_organ: str = ''  # (optional, see above, do not provide if .organ is provided)
+    obs_key_organism: str = ''  # (optional, see above, do not provide if .organism is provided)
+    obs_key_protocol: str = ''  # (optional, see above, do not provide if .protocol is provided)
+    obs_key_sex: str = ''  # (optional, see above, do not provide if .sex is provided)
+    obs_key_state_exact: str = ''  # (optional, see above, do not provide if .state_exact is provided)
+    # Additionally, cell type annotation is ALWAYS provided per cell in .obs, this annotation is optional though.
+    # name of column which contain streamlined cell ontology cell type classes:
+    obs_key_cellontology_original: str = ''  # (optional)
 
 
 class DataloaderCreator:
@@ -63,9 +99,38 @@ class DataloaderCreator:
         """
         Prompts the user for all required attributes for a dataloader such as DOI, author, etc.
         """
-
         # Prompts shared by all templates
-        # TODO
+        # self.author = "Last name, first name"  # or ["Last name, first name", "Last name, first name"]
+
+        doi = sfaira_questionary(function='text',
+                                 question='DOI:',
+                                 default='10.1000/j.journal.2021.01.001')
+        while not re.match(r'\b10\.\d+/[\w.]+\b', doi):
+            print('[bold red]The entered DOI is malformed!')  # noqa: W605
+            doi = sfaira_questionary(function='text',
+                                     question='DOI:',
+                                     default='10.1000/j.journal.2021.01.001')
+        self.template_attributes.doi = doi
+
+        id: str = ''  # unique identifier of data set (Organism_Organ_Year_Protocol_NumberOfDataset_FirstAuthorLastname_doi).
+
+        author: str = ''  # author (list) who sampled / created the data set
+        doi: str = ''  # doi of data set accompanying manuscript
+
+        download_url_data: str = ''  # download website(s) of data files
+        download_url_meta: str = ''  # download website(s) of meta data files
+
+        age: str = '0'  # (*, optional) age of sample
+        dev_stage: str = ''  # (*, optional) developmental stage of organism
+        ethnicity: str = ''  # (*, optional) ethnicity of sample
+        healthy: bool = True  # (*, optional) whether sample represents a healthy organism
+        normalisation: str = ''  # (optional) normalisation applied to raw data loaded (ideally counts, "raw")
+        organ: str = ''  # (*, optional) organ (anatomical structure)
+        organism: str = ''  # (*) species / organism
+        protocol: str = ''  # (*, optional) protocol used to sample data (e.g. smart-seq2)
+        sex: str = ''  # (*, optional) sex
+        state_exact: str = ''  # (*, optional) exact disease, treatment or perturbation state of sample
+        year: int = 2021  # year in which sample was acquired
 
         # Prompts which are dataloader type specific
         def _single_dataset_prompts():
