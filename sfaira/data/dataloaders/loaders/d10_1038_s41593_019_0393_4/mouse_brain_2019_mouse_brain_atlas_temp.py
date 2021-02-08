@@ -56,8 +56,8 @@ class Dataset(DatasetBase):
         fn_meta = os.path.join(self.path, "mouse", "temp_mouse_brain_atlas", "annot_fullAggr.csv")
 
         archive = zipfile.ZipFile(fn)
-        X = scipy.io.mmread(archive.open('filtered_gene_bc_matrices_mex/mm10/matrix.mtx')).T.tocsr()
-        self.adata = anndata.AnnData(X)
+        x = scipy.io.mmread(archive.open('filtered_gene_bc_matrices_mex/mm10/matrix.mtx')).T.tocsr()
+        self.adata = anndata.AnnData(x)
         var = pandas.read_csv(archive.open('filtered_gene_bc_matrices_mex/mm10/genes.tsv'), sep="\t", header=None)
         var.columns = ["ensembl", "name"]
         obs_names = pandas.read_csv(archive.open('filtered_gene_bc_matrices_mex/mm10/barcodes.tsv'),
@@ -70,11 +70,11 @@ class Dataset(DatasetBase):
 
         # Match annotation to raw data.
         obs.index = obs["cell"].values
-        obs = obs.loc[[x in obs_names for x in obs.index], :]
-        idx_tokeep = np.where([x in obs.index for x in obs_names])[0]
+        obs = obs.loc[[i in obs_names for i in obs.index], :]
+        idx_tokeep = np.where([i in obs.index for i in obs_names])[0]
         self.adata = self.adata[idx_tokeep, :]
         obs_names = obs_names[idx_tokeep]
-        idx_map = np.array([obs.index.tolist().index(x) for x in obs_names])
+        idx_map = np.array([obs.index.tolist().index(i) for i in obs_names])
         self.adata = self.adata[idx_map, :]
         obs_names = obs_names[idx_map]
 
