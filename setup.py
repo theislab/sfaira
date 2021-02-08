@@ -1,3 +1,5 @@
+import os
+
 from setuptools import setup, find_packages
 import versioneer
 
@@ -5,12 +7,23 @@ author = 'theislab'
 author_email = 'david.fischer@helmholtz-muenchen.de'
 description = "sfaira is a model and a data repository for single-cell data in a single python package."
 
-
 with open("README.rst", "r") as fh:
     long_description = fh.read()
 
 with open('requirements.txt') as f:
     requirements = f.read().splitlines()
+
+
+def package_files(directory):
+    paths = []
+    for (path, directories, filenames) in os.walk(directory):
+        for filename in filenames:
+            paths.append(os.path.join('..', path, filename))
+    return paths
+
+
+WD = os.path.dirname(__file__)
+templates = package_files(f'{WD}/sfaira/commands/templates')
 
 setup(
     name='sfaira',
@@ -29,9 +42,7 @@ setup(
         'Programming Language :: Python :: 3.8',
     ],
     packages=find_packages(include=['sfaira', 'sfaira.*']),
-    package_data={
-        'sfaira': ['commands/templates/*']
-    },
+    package_data={'': templates},
     entry_points={
         'console_scripts': [
             'sfaira=sfaira.cli:main',

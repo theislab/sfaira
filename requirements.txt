@@ -24,3 +24,4 @@ questionary==1.8.1
 packaging==20.8
 requests>=2.25.1
 switchlang==0.1.0
+cookiecutter==1.7.2
