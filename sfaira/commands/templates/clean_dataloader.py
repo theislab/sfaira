@@ -8,7 +8,13 @@ class DataloaderCleaner:
     def __init__(self, path):
         self.path = path
 
-    def clean_dataloader(self):
+    def clean_dataloader(self) -> None:
+        """
+        Removes any unwanted artifacts from a dataloader Python script.
+        1. Any line that starts with # self.      <- outcommented attribute
+        2. Any line that starts with # SFARA:     <- explicitly marked full comments
+        3. Any line with             # something  <- comments after attributes
+        """
         cleaned_content = []
 
         with open(self.path, 'r') as data_loader_file:
@@ -21,7 +27,10 @@ class DataloaderCleaner:
                     continue
                 else:
                     if '#' in line:
-                        cleaned_content += f'{line.split("#")[0]}\n'
+                        try:
+                            cleaned_content += f'{line.split("#")[0]}\n'
+                        except KeyError:
+                            cleaned_content += line
                     else:
                         cleaned_content += line
 
