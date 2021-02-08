@@ -513,13 +513,10 @@ class DatasetBase(abc.ABC):
         ):
             if x is None and z is None:
                 self.adata.uns[y] = None
-            elif x is not None and z is not None:
-                raise ValueError(f"attribute {y} of data set {self.id} was set both for full data set and per cell, "
-                                 f"only set one of the two or neither.")
             elif x is not None and z is None:
                 # Attribute supplied per data set: Write into .uns.
                 self.adata.uns[y] = x
-            elif x is None and z is not None:
+            elif z is not None:
                 # Attribute supplied per cell: Write into .obs.
                 # Search for direct match of the sought-after column name or for attribute specific obs key.
                 if z not in self.adata.obs.keys():
