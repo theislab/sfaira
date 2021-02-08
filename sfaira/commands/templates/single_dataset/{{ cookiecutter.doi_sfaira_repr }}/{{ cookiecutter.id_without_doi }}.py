@@ -1,4 +1,7 @@
+import os
 from typing import Union
+import anndata as ad
+
 
 from sfaira.data import DatasetBase
 
@@ -33,9 +36,9 @@ class Dataset(DatasetBase):
         # self.sex = x  # (*, optional) sex
         # self.state_exact = x  # (*, optional) exact disease, treatment or perturbation state of sample
 
-        # The following meta data may instead also be supplied on a cell level if an appropriate column
-        # is present in the anndata instance (specifically in .obs) after loading. You need to make sure this is loaded in the loading script)!
-        # See above for a description what these meta data attributes mean. Again, if these attributes are note available, you can simply leave this out.
+        # SFAIRA: The following meta data may instead also be supplied on a cell level if an appropriate column
+        # SFAIRA: is present in the anndata instance (specifically in .obs) after loading. You need to make sure this is loaded in the loading script)!
+        # SFAIRA: See above for a description what these meta data attributes mean. If these attributes are note available, you can simply leave this out.
         # self.obs_key_age = x  # (optional, see above, do not provide if .age is provided)
         # self.obs_key_dev_stage = x  # (optional, see above, do not provide if .dev_stage is provided)
         # self.obs_key_ethnicity = x  # (optional, see above, do not provide if .ethnicity is provided)
@@ -45,9 +48,11 @@ class Dataset(DatasetBase):
         # self.obs_key_protocol = x  # (optional, see above, do not provide if .protocol is provided)
         # self.obs_key_sex = x  # (optional, see above, do not provide if .sex is provided)
         # self.obs_key_state_exact = x  # (optional, see above, do not provide if .state_exact is provided)
-        # Additionally, cell type annotation is ALWAYS provided per cell in .obs, this annotation is optional though.
-        # name of column which contain streamlined cell ontology cell type classes:
+        # SFAIRA: Additionally, cell type annotation is ALWAYS provided per cell in .obs, this annotation is optional though.
+        # SFAIRA: name of column which contain streamlined cell ontology cell type classes:
         # self.obs_key_cellontology_original = x  # (optional)
 
     def _load(self, fn):
-        pass  # ToDo: load file fn into self.adata.
+        if fn is None:
+            fn = os.path.join(self.path, self.directory_formatted_doi, "my.h5ad")
+        self.adata = ad.anndata.read(fn)

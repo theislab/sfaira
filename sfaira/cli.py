@@ -12,6 +12,7 @@ from rich import print
 import sfaira
 from sfaira.commands.create_dataloader import DataloaderCreator
 from sfaira.commands.questionary import sfaira_questionary
+from sfaira.commands.templates.clean_dataloader import DataloaderCleaner
 from sfaira.commands.upgrade import UpgradeCommand
 
 WD = os.path.dirname(__file__)
@@ -71,6 +72,13 @@ def sfaira_cli(ctx, verbose, log_file):
 def create_dataloader():
     dataloader_creator = DataloaderCreator()
     dataloader_creator.create_dataloader()
+
+
+@sfaira_cli.command()
+@click.argument('path', type=click.Path(exists=True))
+def clean_dataloader(path):
+    dataloader_cleaner = DataloaderCleaner(path)
+    dataloader_cleaner.clean_dataloader()
 
 
 @sfaira_cli.command()
