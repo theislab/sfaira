@@ -9,7 +9,7 @@ from typing import Union
 import os
 import warnings
 from tqdm import tqdm
-from .external import CelltypeVersionsBase, Topologies, BasicModel
+from .external import CelltypeUniverse, Topologies, BasicModel
 from .losses import LossLoglikelihoodNb, LossLoglikelihoodGaussian, LossCrossentropyAgg, KLLoss
 from .metrics import custom_mse, custom_negll_nb, custom_negll_gaussian, custom_kl, \
     CustomAccAgg, CustomF1Classwise, CustomFprClasswise, CustomTprClasswise, custom_cce_agg
@@ -871,7 +871,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
     Estimator class for the cell type model.
     """
 
-    celltypes_version: CelltypeVersionsBase
+    celltypes_version: CelltypeUniverse
 
     def __init__(
             self,
@@ -943,12 +943,12 @@ class EstimatorKerasCelltype(EstimatorKeras):
     def _get_celltype_out(
             self,
             idx: Union[np.ndarray, None],
-            lookup_ontology=["names"]
+            lookup_ontology="names"
     ):
         """
         Build one hot encoded cell type output tensor and observation-wise weight matrix.
 
-        :param lookup_ontology: list of ontology names to conisder.
+        :param lookup_ontology: list of ontology names to consider.
         :return:
         """
         if idx is None:
@@ -959,18 +959,15 @@ class EstimatorKerasCelltype(EstimatorKeras):
         else:
             type_classes = self.ntypes + 1
         y = np.zeros((len(idx), type_classes), dtype="float32")
-        for i, x in enumerate(idx):
-            label = self.data.obs["cell_ontology_class"].values[x]
-            if label not in self.ids:
-                if not np.any([label in self.ontology[ont].keys() for ont in lookup_ontology]):
-                    raise ValueError("%s not found in cell type universe and ontology sets" % label)
-                # Distribute probability mass uniformly across classes if multiple classes match.
-                for ont in lookup_ontology:
-                    if label in self.ontology[ont].keys():
-                        leave_nodes = self.ontology[ont][label]
-                        y[i, np.where([jj in leave_nodes for jj in self.ids])[0]] = 1.
-            else:
-                y[i, self.ids.index(label)] = 1.
+        celltype_idx = self.model.celltypes_version.map_to_target_leaves(
+            nodes=self.data.obs["cell_ontology_class"].values[idx].tolist(),
+            ontology="custom",
+            ontology_id=lookup_ontology,
+            return_type="idx"
+        )
+        for i, x in enumerate(celltype_idx):
+            # Distribute probability mass uniformly across classes if multiple classes match:
+            y[i, x] = 1. / len(x)
         # Distribute aggregated class weight for computation of weights:
         freq = np.mean(y / np.sum(y, axis=1, keepdims=True), axis=0, keepdims=True)
         weights = 1. / np.matmul(y, freq.T)  # observation wise weight matrix

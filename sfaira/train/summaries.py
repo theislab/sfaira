@@ -8,7 +8,6 @@ from typing import Union, List
 import os
 
 from sfaira.train.train_model import TargetZoos
-from sfaira.versions.celltype_versions import ORGANISM_DICT
 from sfaira.estimators import EstimatorKerasEmbedding
 
 
@@ -887,6 +886,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         dataset.load()
         cell_counts = dataset.obs_concat(keys=['cell_ontology_class'])['cell_ontology_class'].value_counts().to_dict()
 
+        assert False, "depreceat metadata code here"
         celltype_versions = ORGANISM_DICT.copy()
         celltype_versions[organism][organ].set_version(celltype_version)
         leafnodes = celltype_versions[organism][organ].ids

@@ -17,7 +17,7 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.id = "human_malegonad_2018_10x_guo_001_10.1038/s41422-018-0099-2"
+        self.id = "human_testis_2018_10x_guo_001_10.1038/s41422-018-0099-2"
 
         self.download_url_data = "https://covid19.cog.sanger.ac.uk/guo18_donor.processed.h5ad"
         self.download_url_meta = None
@@ -26,9 +26,9 @@ class Dataset(DatasetBase):
         self.doi = "10.1038/s41422-018-0099-2"
         self.healthy = True
         self.normalization = "raw"
-        self.organ = "malegonad"
+        self.organ = "testis"
         self.organism = "human"
-        self.protocol = "10x"
+        self.protocol = "10X sequencing"
         self.state_exact = "healthy"
         self.year = 2018
 

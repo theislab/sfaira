@@ -1,5 +1,10 @@
 from typing import Union
 
+try:
+    import sfaira_extension as sfairae
+except ImportError:
+    sfairae = None
+
 from sfaira.data.dataloaders.loaders import DatasetSuperGroupLoaders
 from sfaira.data.dataloaders.databases import DatasetSuperGroupDatabases
 from sfaira.data import DatasetSuperGroup
@@ -21,7 +26,7 @@ class DatasetSuperGroupSfaira(DatasetSuperGroup):
         :param meta_path:
         :param cache_path:
         """
-        super().__init__(dataset_groups=[
+        dsgs = [
             DatasetSuperGroupLoaders(
                 path=path,
                 meta_path=meta_path,
@@ -32,4 +37,11 @@ class DatasetSuperGroupSfaira(DatasetSuperGroup):
                 meta_path=meta_path,
                 cache_path=cache_path,
             )
-        ])
+        ]
+        if sfairae is not None:
+            dsgs.append(sfairae.data.loaders.DatasetSuperGroupLoaders(
+                path=path,
+                meta_path=meta_path,
+                cache_path=cache_path,
+            ))
+        super().__init__(dataset_groups=dsgs)

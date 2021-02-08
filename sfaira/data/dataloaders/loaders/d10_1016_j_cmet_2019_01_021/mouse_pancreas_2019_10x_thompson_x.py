@@ -42,31 +42,13 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.normalization = "raw"
         self.organ = "pancreas"
         self.organism = "mouse"
-        self.protocol = "10x"
+        self.protocol = "10X sequencing"
         self.state_exact = "diabetic"
         self.year = 2019
 
         self.var_symbol_col = "index"
 
         self.obs_key_cellontology_original = "celltypes"
-
-        self.class_maps = {
-            "0": {
-                "acinar": "pancreatic acinar cell",
-                "ductal": "pancreatic ductal cell",
-                "leukocyte": "leukocyte",
-                "T cell(Pancreas)": "t cell",
-                "B cell(Pancreas)": "b cell",
-                "beta": "pancreatic B cell",
-                "alpha": "pancreatic A cell",
-                "delta": "pancreatic D cell",
-                "pp": "pancreatic PP cell",
-                "smooth_muscle": "smooth muscle cell",
-                "stellate cell": "pancreatic stellate cell",
-                "fibroblast": "stromal cell",
-                "endothelial": "endothelial cell"
-            },
-        }
 
     def _load(self, fn=None):
         path_base = os.path.join(self.path, "mouse", "pancreas")

@@ -26,9 +26,9 @@ class Dataset(DatasetBase):
         self.doi = "no_doi"
         self.healthy = True
         self.normalization = "raw"
-        self.organ = "bone"
+        self.organ = "bone tissue"
         self.organism = "human"
-        self.protocol = "10x"
+        self.protocol = "10X sequencing"
         self.state_exact = "healthy"
         self.year = 2018
 

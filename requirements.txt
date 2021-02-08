@@ -1,11 +1,15 @@
 anndata>=0.7
 docutils
+fuzzywuzzy
 jinja2
 loompy
-numpy>=1.14.0
 matplotlib
+networkx
+numpy>=1.14.0
+obonet
 openpyxl
 pandas
+python-Levenshtein
 scanpy
 scipy
 seaborn

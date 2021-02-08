@@ -2,9 +2,10 @@ import numpy as np
 import tensorflow as tf
 from typing import List, Union
 
-from sfaira.models.celltype.external import BasicModel
-from sfaira.models.celltype.external import PreprocInput
-from sfaira.models.celltype.external import celltype_versions, Topologies
+import sfaira.versions.metadata as metadata
+from sfaira.versions.topology_versions import Topologies
+from sfaira.models.base import BasicModel
+from sfaira.models.pp_layer import PreprocInput
 
 
 class LearnedThresholdLayer(tf.keras.layers.Layer):
@@ -94,7 +95,7 @@ class CellTypeMarker(BasicModel):
 
 
 class CellTypeMarkerVersioned(CellTypeMarker):
-    cell_type_version: celltype_versions.CelltypeVersionsBase
+    cell_type_version: metadata.CelltypeUniverse
 
     def __init__(
             self,
@@ -112,9 +113,6 @@ class CellTypeMarkerVersioned(CellTypeMarker):
             dictionary that is queried based on the topology_id. Can contain a subset of all hyperparameters.
         """
         # Get cell type version instance based on topology ID, organism and organ.
-        self.celltypes_version = celltype_versions.ORGANISM_DICT[organism.lower()][organ.lower()]
-        self.celltypes_version.set_version(version=topology_container.topology_id)
-
         unkown_already_included = np.any([x.lower() == "unknown" for x in self.celltypes_version.ids])
         hyperpar = topology_container.topology["hyper_parameters"]
         if override_hyperpar is not None:

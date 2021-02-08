@@ -22,7 +22,6 @@ ds = sfaira.data.dataloaders.DatasetSuperGroupSfaira(
 )
 dsg = ds.flatten()  # need to flatten in this case to parallelise across Groups and not just within.
 dsg.load(
-    celltype_version=None,
     annotated_only=False,
     match_to_reference=None,
     remove_gene_version=True,

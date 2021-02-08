@@ -29,7 +29,7 @@ class Dataset(DatasetBase):
         self.normalization = "raw"
         self.organ = "colon"  # ToDo: "lamina propria of mucosa of colon"
         self.organism = "human"
-        self.protocol = "10x"
+        self.protocol = "10X sequencing"
         self.year = 2019
 
         self.var_symbol_col = "names"

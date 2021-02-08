@@ -144,16 +144,6 @@ before it is loaded into memory:
         # This cell type annotation is free text but is mapped to an ontology via a .csv file with the same name and
         # directory as the python file of this data loader (see below).
 
-        # A dictionary of dictionaries with:
-        # One item for each annotation label that is not contained in the ontology.
-        # This item maps a custom ID to an ontology supported ID.
-        # Note that you have to load your custom IDs, to which this refers to, in load().
-        self.class_maps = {
-            "0": {  # one entry for each cell type version for this species and organ
-                'my weird name for T cells': 'T cell',  # one map from a custom ID to an ontology supported ID
-            },
-        }
-
 
 2. A function called to load the data set into memory:
 It is important to set an automated path indicating the location of the raw files here.
@@ -221,10 +211,12 @@ Map cell type labels to ontology
 
 The entries in `self.obs_key_cellontology_original` are free text but are mapped to an ontology via a .csv file with
 the same name and directory as the python file in which the data loader is located.
-This .csv contains two columns with one row for each unique cell type label and their free text identifiers in the first
-column, and the corresponding ontology term in the second column.
-You could write this file entirely from scratch.
-Sfaira also allows you to generate a first guess of this file using fuzzy string matching via ToDo.
+This .csv contains two columns with one row for each unique cell type label.
+The free text identifiers in the first column "source",
+and the corresponding ontology term in the second column "target".
+You can write this file entirely from scratch.
+Sfaira also allows you to generate a first guess of this file using fuzzy string matching
+which is automatically executed when you run the template data loader unit test for the first time with you new loader.
 Conflicts are not resolved in this first guess and you have to manually decide which free text field corresponds to which
 ontology term in the case of conflicts.
 Still, this first guess usually drastically speeds up this annotation harmonization.
@@ -260,6 +252,20 @@ Consider also this template_.
 Note that you can always add additional data loaders for further, less streamlined, data sets to such a study.
 
 .. _template: https://github.com/theislab/sfaira/tree/dev/sfaira/data/templates/dataloaders/many_samples_many_files_streamlined
+
+
+Test your data loader
+~~~~~~~~~~~~~~~~~~~~~
+
+Sfaira has a local data loader unit test_ with which you can debug your data loader and which aids with meta data
+assignments, such as cell types.
+You can use this test with pytest in an IDE.
+You can simply place the raw data into `sfaira/unit_tests/template_data/` with the correct sub path,
+as indicated in the `._load()`,
+for the test to access this data.
+
+.. _test: https://github.com/theislab/sfaira/tree/dev/sfaira/unit_tests/test_data_template.py
+
 
 Cell type ontology management
 -----------------------------

@@ -26,7 +26,7 @@ class Dataset(DatasetBase):
         self.normalization = "raw"
         self.organ = "pancreas"
         self.organism = "human"
-        self.protocol = "Smartseq2"
+        self.protocol = "Smart-seq2"
         self.year = 2016
 
         self.var_symbol_col = "index"

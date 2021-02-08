@@ -30,7 +30,7 @@ class Dataset(DatasetBase):
         self.normalization = "norm"
         self.organ = "kidney"  # ToDo: "renal medulla, renal pelvis, ureter, cortex of kidney"
         self.organism = "human"
-        self.protocol = "10x"
+        self.protocol = "10X sequencing"
         self.state_exact = "healthy"
         self.year = 2019
 

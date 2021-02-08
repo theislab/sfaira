@@ -27,7 +27,7 @@ class Dataset(DatasetBase):
         self.normalization = "raw"
         self.organ = "lung"  # ToDo: "parenchymal lung and distal airway specimens"
         self.organism = "human"
-        self.protocol = "dropseq"
+        self.protocol = "Drop-seq"
         self.state_exact = "uninvolved areas of tumour resection material"
         self.year = 2019
 
