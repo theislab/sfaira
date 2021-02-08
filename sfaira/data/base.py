@@ -713,7 +713,6 @@ class DatasetBase(abc.ABC):
             # ontology.
             for x in labels_mapped:
                 self.ontology_celltypes.onto_cl.validate_node(x)
-            del self.adata.obs[self.obs_key_cellontology_original]
             self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class] = labels_mapped
         self.adata.obs[self._ADATA_IDS_SFAIRA.cell_types_original] = labels_original
 
