@@ -669,17 +669,20 @@ class DatasetBase(abc.ABC):
         :param protected_writing: Only write if file was not already found.
         :return:
         """
-        labels_original = np.sort(np.unique(self.adata.obs[self._ADATA_IDS_SFAIRA.cell_types_original].values))
-        tab = self.ontology_celltypes.prepare_celltype_map_fuzzy(
-            source=labels_original,
-            match_only=False,
-            anatomical_constraint=self.organ,
-            include_synonyms=True,
-            omit_list=self._unknown_celltype_identifiers,
-            **kwargs
-        )
-        if not os.path.exists(fn) or not protected_writing:
-            tab.to_csv(fn, index=False)
+        if not self.annotated:
+            warnings.warn(f"attempted to write ontology classmaps for data set {self.id} without annotation")
+        else:
+            labels_original = np.sort(np.unique(self.adata.obs[self._ADATA_IDS_SFAIRA.cell_types_original].values))
+            tab = self.ontology_celltypes.prepare_celltype_map_fuzzy(
+                source=labels_original,
+                match_only=False,
+                anatomical_constraint=self.organ,
+                include_synonyms=True,
+                omit_list=self._unknown_celltype_identifiers,
+                **kwargs
+            )
+            if not os.path.exists(fn) or not protected_writing:
+                tab.to_csv(fn, index=False)
 
     def load_ontology_class_map(self, fn):
         """
@@ -1718,23 +1721,27 @@ class DatasetGroup:
         """
         tab = []
         for k, v in self.datasets.items():
-            labels_original = np.sort(np.unique(np.concatenate([
-                v.adata.obs[self._ADATA_IDS_SFAIRA.cell_types_original].values
-            ])))
-            tab.append(v.ontology_celltypes.prepare_celltype_map_fuzzy(
-                source=labels_original,
-                match_only=False,
-                anatomical_constraint=v.organ,
-                include_synonyms=True,
-                omit_list=v._unknown_celltype_identifiers,
-                **kwargs
-            ))
-        tab = pandas.concat(tab, axis=0)
-        # Take out columns with the same source:
-        tab = tab.loc[[x not in tab.iloc[:i, 0].values for i, x in enumerate(tab.iloc[:, 0].values)], :].copy()
-        tab = tab.sort_values("source")
-        if not os.path.exists(fn) or not protected_writing:
-            tab.to_csv(fn, index=False)
+            if v.annotated:
+                labels_original = np.sort(np.unique(np.concatenate([
+                    v.adata.obs[self._ADATA_IDS_SFAIRA.cell_types_original].values
+                ])))
+                tab.append(v.ontology_celltypes.prepare_celltype_map_fuzzy(
+                    source=labels_original,
+                    match_only=False,
+                    anatomical_constraint=v.organ,
+                    include_synonyms=True,
+                    omit_list=v._unknown_celltype_identifiers,
+                    **kwargs
+                ))
+        if len(tab) == 0:
+            warnings.warn(f"attempted to write ontology classmaps for group without annotated data sets")
+        else:
+            tab = pandas.concat(tab, axis=0)
+            # Take out columns with the same source:
+            tab = tab.loc[[x not in tab.iloc[:i, 0].values for i, x in enumerate(tab.iloc[:, 0].values)], :].copy()
+            tab = tab.sort_values("source")
+            if not os.path.exists(fn) or not protected_writing:
+                tab.to_csv(fn, index=False)
 
     @property
     def ids(self):
