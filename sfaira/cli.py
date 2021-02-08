@@ -11,7 +11,6 @@ from rich import print
 
 import sfaira
 from sfaira.commands.create_dataloader import DataloaderCreator
-from sfaira.commands.questionary import sfaira_questionary
 from sfaira.commands.templates.clean_dataloader import DataloaderCleaner
 from sfaira.commands.upgrade import UpgradeCommand
 

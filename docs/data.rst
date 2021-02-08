@@ -48,6 +48,16 @@ anticipate file sizes for backing merged adata objects, for example, and is used
 Write data loaders
 ------------------
 
+Creating dataloaders with the commandline interface
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A new way of writing and testing dataloaders is currently under development. The next iteration of sfaira will feature an intuitive command line interface.
+It will provide several commands to create and test dataloaders. Expect something like the following:
+```sfaira create-dataloader``` will guide interactively to create a new dataloader.
+```sfaira clean-dataloader <path>``` will remove any outcommented attributes and comments from a dataloader.
+```sfaira lint-dataloader <path>``` will verify the integrity of a dataloader.
+```sfaira test-dataloader <path>``` will test a dataloader to ensure that it works properly.
+
 The study-centric data loader module
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

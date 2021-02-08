@@ -141,5 +141,3 @@ class DataloaderCreator:
                      overwrite_if_exists=True,
                      extra_context=self.template_attributes_to_dict())
         # ensure that it handles multiple dataloaders on the same DOI
-
-        # mb add a clean command which gets rids of outcommented self.whatever -> provide everything by default and then just clean it up
