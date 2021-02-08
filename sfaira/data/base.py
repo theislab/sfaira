@@ -861,7 +861,7 @@ class DatasetBase(abc.ABC):
             if self.meta is None:
                 self.load_meta(fn=None)
             if self.meta is not None and self._ADATA_IDS_SFAIRA.annotated in self.meta.columns:
-                return self.meta[self._ADATA_IDS_SFAIRA.annotated]
+                return self.meta[self._ADATA_IDS_SFAIRA.annotated].values[0]
             elif self.loaded:
                 # If data set was loaded and there is still no annotation indicated, it is declared unannotated.
                 return False
