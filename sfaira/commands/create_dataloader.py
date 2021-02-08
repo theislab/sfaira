@@ -31,7 +31,6 @@ class TemplateAttributes:
     number_of_datasets: str = 1  # Required to determine the file names
 
 
-
 class DataloaderCreator:
 
     def __init__(self):
