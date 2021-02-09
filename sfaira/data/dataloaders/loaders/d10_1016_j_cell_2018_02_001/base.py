@@ -23,6 +23,8 @@ class Dataset_d10_1016_j_cell_2018_02_001(DatasetBase):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
 
         self.download_url_data = "https://ndownloader.figshare.com/articles/5435866?private_link=865e694ad06d5857db4b"
+        self.download_url_meta = None
+
         self.obs_key_cellontology_class = "Annotation"
         self.obs_key_cellontology_original = "Annotation"
 
