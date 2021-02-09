@@ -53,7 +53,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.normalization = "raw"
         self.organ = "lung"
         self.organism = "human"
-        self.protocol = protocol
+        self.protocol = "10X sequencing" if self.sample_fn.split("_")[0] == "droplet" else "Smart-seq2"
         self.state_exact = "healthy"
         self.year = 2020
 
