@@ -2,6 +2,7 @@ import logging
 import os
 import re
 from dataclasses import dataclass, asdict
+from shutil import copyfile
 from typing import Union
 
 from sfaira.commands.questionary import sfaira_questionary
@@ -112,7 +113,7 @@ class DataloaderCreator:
                                                            default='2021')
         self.template_attributes.number_of_datasets = sfaira_questionary(function='text',
                                                                          question='Number of datasets:',
-                                                                         default='1')
+                                                                         default='1').zfill(3)
         first_author = author[0] if isinstance(author, list) else author
         try:
             first_author_lastname = first_author.split(',')[0]
@@ -121,7 +122,7 @@ class DataloaderCreator:
             first_author_lastname = first_author
         self.template_attributes.id_without_doi = f'{self.template_attributes.organism}_{self.template_attributes.organ}_' \
                                                   f'{self.template_attributes.year}_{self.template_attributes.protocol}_' \
-                                                  f'{self.template_attributes.number_of_datasets}_{first_author_lastname}'
+                                                  f'{first_author_lastname}_001'
         self.template_attributes.id = self.template_attributes.id_without_doi + f'_{self.template_attributes.doi_sfaira_repr}'
         self.template_attributes.download_url_data = sfaira_questionary(function='text',
                                                                         question='URL to download the data',
@@ -140,4 +141,9 @@ class DataloaderCreator:
                      no_input=True,
                      overwrite_if_exists=True,
                      extra_context=self._template_attributes_to_dict())
-        # ensure that it handles multiple dataloaders on the same DOI
+
+        if self.template_attributes.dataloader_type == 'multiple_datasets_not_streamlined':
+            for i in range(2, int(self.template_attributes.number_of_datasets.lstrip('0')) + 1):
+                copyfile(f'{self.template_attributes.doi_sfaira_repr}/{self.template_attributes.id_without_doi}.py',
+                         f'{self.template_attributes.doi_sfaira_repr}/{self.template_attributes.id_without_doi[:-3]}{str(i).zfill(3)}.py')
+            # move them into the required folder
