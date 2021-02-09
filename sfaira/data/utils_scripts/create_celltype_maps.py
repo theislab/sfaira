@@ -92,5 +92,5 @@ for dir_study in os.listdir(dir_sfaira_dataloaders):
                             dsg_f.write_ontology_class_map(
                                 fn=os.path.join(dir_sfaira_dataloaders, dir_study, file_module + ".csv"),
                                 protected_writing=True,
-                                n_suggest=10,
+                                n_suggest=4,
                             )
