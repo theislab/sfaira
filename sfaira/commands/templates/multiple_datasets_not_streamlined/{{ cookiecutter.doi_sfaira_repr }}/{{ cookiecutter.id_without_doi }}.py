@@ -2,8 +2,13 @@ import os
 from typing import Union
 import anndata as ad
 
-
 from sfaira.data import DatasetBase
+
+"""
+Author: {{ cookiecutter.dataloader_author_name }}
+Email: {{ cookiecutter.dataloader_author_email }}
+Version: 1.0.0
+"""
 
 
 class Dataset(DatasetBase):
@@ -20,7 +25,7 @@ class Dataset(DatasetBase):
         # SFAIRA TODO Add your meta data here
         self.id = '{{ cookiecutter.id }}'  # unique identifier of data set (Organism_Organ_Year_Protocol_NumberOfDataset_FirstAuthorLastname_doi).
 
-        self.author = {{ cookiecutter.author }}  # author (list) who sampled / created the data set
+        self.author = {{cookiecutter.author}}  # author (list) who sampled / created the data set
         self.doi = '{{ cookiecutter.doi }}'  # doi of data set accompanying manuscript
 
         self.download_url_data = '{{ cookiecutter.download_url_data }}'  # download website(s) of data files
@@ -29,7 +34,7 @@ class Dataset(DatasetBase):
         self.organ = '{{ cookiecutter.organ }}'  # organ (anatomical structure)
         self.organism = '{{ cookiecutter.organism }}'  # (*) species / organism
         self.protocol = '{{ cookiecutter.protocol }}'  # (*, optional) protocol used to sample data (e.g. smart-seq2)
-        self.year = {{ cookiecutter.year }}  # year in which sample was acquired
+        self.year = {{cookiecutter.year}}  # year in which sample was acquired
         # self.age = 'x'  # (*, optional) age of sample
         # self.dev_stage = x  # (*, optional) developmental stage of organism
         # self.ethnicity = x  # (*, optional) ethnicity of sample

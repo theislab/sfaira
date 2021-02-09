@@ -2,7 +2,13 @@ from typing import Union
 
 from sfaira.data import DatasetBaseGroupLoadingManyFiles
 
-# SFARA TODO Add correct sample IDs here.
+"""
+Author: {{ cookiecutter.dataloader_author_name }}
+Email: {{ cookiecutter.dataloader_author_email }}
+Version: 1.0.0
+"""
+
+# SFARA TODO: Add correct sample IDs here.
 SAMPLE_FNS = [
     "your_sample_fn_1",
     "your_sample_fn_2"

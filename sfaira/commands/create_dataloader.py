@@ -14,6 +14,9 @@ log = logging.getLogger(__name__)
 
 @dataclass
 class TemplateAttributes:
+    dataloader_author_name: str = ''  # name of the author writing the dataloader
+    dataloader_author_email: str = ''  # email of the author writing the dataloader
+
     dataloader_type: str = ''  # One of single_dataset, multiple_datasets_single_file, multiple_datasets_streamlined, multiple_datasets_not_streamlined
     id: str = ''  # unique identifier of data set (Organism_Organ_Year_Protocol_NumberOfDataset_FirstAuthorLastname_doi).
     id_without_doi: str = ''  # complete id without the doi -> usually used to name the python scripts
@@ -84,6 +87,12 @@ class DataloaderCreator:
         """
         Prompts the user for all required attributes for a dataloader such as DOI, author, etc.
         """
+        self.template_attributes.dataloader_author_name = sfaira_questionary(function='text',
+                                                                             question='Your name:',
+                                                                             default='Homer Simpson')
+        self.template_attributes.dataloader_author_email = sfaira_questionary(function='text',
+                                                                              question='Your email:',
+                                                                              default='homer.simpson@springfield.com')
         author = sfaira_questionary(function='text',
                                     question='Author(s):',
                                     default='Einstein, Albert; Hawking, Stephen')
@@ -111,9 +120,6 @@ class DataloaderCreator:
         self.template_attributes.year = sfaira_questionary(function='text',
                                                            question='Year:',
                                                            default='2021')
-        self.template_attributes.number_of_datasets = sfaira_questionary(function='text',
-                                                                         question='Number of datasets:',
-                                                                         default='1').zfill(3)
         first_author = author[0] if isinstance(author, list) else author
         try:
             first_author_lastname = first_author.split(',')[0]
@@ -127,6 +133,9 @@ class DataloaderCreator:
         self.template_attributes.download_url_data = sfaira_questionary(function='text',
                                                                         question='URL to download the data',
                                                                         default='https://ftp.ncbi.nlm.nih.gov/geo/')
+        self.template_attributes.number_of_datasets = sfaira_questionary(function='text',
+                                                                         question='Number of datasets:',
+                                                                         default='1').zfill(3)
 
     def _template_attributes_to_dict(self) -> dict:
         """

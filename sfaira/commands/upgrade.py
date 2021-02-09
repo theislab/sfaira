@@ -54,7 +54,7 @@ class UpgradeCommand:
                 latest_pypi_version = data['info']['version']
         except (HTTPError, TimeoutError, URLError):
             print('[bold red]Unable to contact PyPI to check for the latest sfaira version. Do you have an internet connection?')
-            # Returning true by default, since this is not a serious issue
+            # Returning true by default since this is not a serious issue
             return True
 
         if parse_version(sliced_local_version) > parse_version(latest_pypi_version):
