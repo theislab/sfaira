@@ -60,7 +60,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         super().__init__(sample_fn=sample_fn, path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         protocol = "10x" if sample_fn.split("-")[3] == "droplet" else "smartseq2"
         organ = sample_fn.split("-")[-1].split(".")[0].lower()
-        organ = "adipose" if organ in ["fat", "bat", "gat", "mat", "scat"] else \
+        organ = "adipose tissue" if organ in ["fat", "bat", "gat", "mat", "scat"] else \
             "bladder" if organ in ["bladder"] else \
             "marrow" if organ in ["marrow"] else \
             "brain" if organ in ["brain_non-myeloid", "brain_myeloid"] else \
@@ -70,8 +70,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             "kidney" if organ in ["kidney"] else \
             "liver" if organ in ["liver"] else \
             "lung" if organ in ["lung"] else \
-            "mammary_gland" if organ in ["mammary_gland"] else \
-            "muscle" if organ in ["limb_muscle"] else \
+            "mammary gland" if organ in ["mammary_gland"] else \
+            "muscle organ" if organ in ["limb_muscle"] else \
             "pancreas" if organ in ["pancreas"] else \
             "skin" if organ in ["skin"] else \
             "spleen" if organ in ["spleen"] else \
@@ -79,7 +79,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             "tongue" if organ in ["tongue"] else \
             "trachea" if organ in ["trachea"] else "error"
 
-        self.id = f"mouse_{organ}_2019_{protocol}_pisco_{str(SAMPLE_FNS.index(self.sample_fn)).zfill(3)}_" \
+        self.id = f"mouse_{"".join(organ.split(" "))}_2019_{protocol}_pisco_{str(SAMPLE_FNS.index(self.sample_fn)).zfill(3)}_" \
                   f"10.1101/661728"
 
         self.download = "https://czb-tabula-muris-senis.s3-us-west-2.amazonaws.com/Data-objects/"
@@ -88,7 +88,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.obs_key_age = "age"
         self.obs_key_dev_stage = "development_stage"  # not given in all data sets
         self.obs_key_sex = "sex"
-        # ToDo: further anatomical information for subtissue in "subtissue"
+        # ToDo: further anatomical information for subtissue in "subtissue"?
 
         self.author = "Quake"
         self.doi = "10.1101/661728"
