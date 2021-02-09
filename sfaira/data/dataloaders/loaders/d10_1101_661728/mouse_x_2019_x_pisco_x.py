@@ -61,7 +61,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         protocol = "10x" if sample_fn.split("-")[3] == "droplet" else "smartseq2"
         organ = sample_fn.split("-")[-1].split(".")[0].lower()
         organ = "adipose tissue" if organ in ["fat", "bat", "gat", "mat", "scat"] else \
-            "bladder" if organ in ["bladder"] else \
+            "bladder organ" if organ in ["bladder"] else \
             "marrow" if organ in ["marrow"] else \
             "brain" if organ in ["brain_non-myeloid", "brain_myeloid"] else \
             "colon" if organ in ["large_intestine"] else \
