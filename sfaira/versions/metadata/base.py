@@ -876,7 +876,7 @@ class CelltypeUniverse:
                             for y, z in zip(uberon_ids, anatomical_subselection)
                         ]
                         # Iterate over nodes sorted by string match score and masked by constraint:
-                        matchesi = matchesi.update({"anatomic_onotolgy_match": [
+                        matchesi.update({"anatomic_onotolgy_match": [
                             nodes[i][1]["name"]
                             for i in np.argsort(scores_lenient)
                             if anatomical_subselection[i] and not np.any(
@@ -899,7 +899,7 @@ class CelltypeUniverse:
                             ])
                             for y in nodes
                         ])
-                        matchesi = matchesi.update({"anatomic_string_match": [
+                        matchesi.update({"anatomic_string_match": [
                             nodes[i][1]["name"]
                             for i in np.argsort(scores_anatomy)
                             if nodes[i][1]["name"] and not np.any(
