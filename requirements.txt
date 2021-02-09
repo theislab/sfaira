@@ -9,6 +9,7 @@ numpy>=1.14.0
 obonet
 openpyxl
 pandas
+pytest
 python-Levenshtein
 scanpy
 scipy

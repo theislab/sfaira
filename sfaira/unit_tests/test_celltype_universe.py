@@ -25,7 +25,7 @@ class TestCellTypeUniverse(unittest.TestCase):
                             index=False, quoting=csv.QUOTE_NONE, sep=";"
                         )
                     else:
-                        tab2.loc[tab["matched"].values == False].to_csv(
+                        tab2.loc[tab["matched"].values is False].to_csv(
                             self.dir_debugging + k + "_" + kk + "_universe.csv",
                             index=False, quoting=csv.QUOTE_NONE
                         )
@@ -62,7 +62,7 @@ class TestCellTypeUniverse(unittest.TestCase):
             for kk, vv in v.items():
                 universe = vv.celltype_universe["0"]
                 tab = onto.find_nodes_fuzzy(universe, match_only=True)
-                print(tab.loc[tab["matched"].values == False])
+                print(tab.loc[tab["matched"].values is False])
                 assert np.all(tab["matched"].values), f"{k} {kk}"
 
 

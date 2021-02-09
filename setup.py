@@ -33,6 +33,7 @@ setup(
         'numpy>=1.16.4',
         'obonet',
         'pandas',
+        'pytest',
         'python-Levenshtein',
         'scipy>=1.2.1',
         'tqdm',
