@@ -4,3 +4,4 @@ from .base import DatasetBase, DatasetBaseGroupLoadingOneFile, DatasetBaseGroupL
 from . import dataloaders
 from .dataloaders import DatasetSuperGroupSfaira
 from .interactive import DatasetInteractive
+from . import utils

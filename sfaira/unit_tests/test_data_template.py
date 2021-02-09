@@ -114,7 +114,7 @@ class TestDatasetTemplate(unittest.TestCase):
                         dsg_f.write_ontology_class_map(
                             fn=os.path.join(cwd, file_module + ".csv"),
                             protected_writing=True,
-                            n_suggest=10,
+                            n_suggest=4,
                         )
         else:
             for k, v in ds.datasets.items():

@@ -714,7 +714,7 @@ class DatasetBase(abc.ABC):
         :return:
         """
         labels_original = np.sort(np.unique(self.adata.obs[self._ADATA_IDS_SFAIRA.cell_types_original].values))
-        tab = self.ontology_celltypes.prepare_celltype_map_fuzzy(
+        tab = self.ontology_celltypes.prepare_celltype_map_tab(
             source=labels_original,
             match_only=False,
             anatomical_constraint=self.organ,
@@ -1766,7 +1766,7 @@ class DatasetGroup:
             labels_original = np.sort(np.unique(np.concatenate([
                 v.adata.obs[self._ADATA_IDS_SFAIRA.cell_types_original].values
             ])))
-            tab.append(v.ontology_celltypes.prepare_celltype_map_fuzzy(
+            tab.append(v.ontology_celltypes.prepare_celltype_map_tab(
                 source=labels_original,
                 match_only=False,
                 anatomical_constraint=v.organ,
