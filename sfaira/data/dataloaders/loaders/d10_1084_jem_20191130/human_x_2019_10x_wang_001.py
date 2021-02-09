@@ -35,7 +35,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.normalization = "raw"
         self.organ = "colon" if organ == "colon" else "ileum" if organ == "ileum" else "rectum"
         self.organism = "human"
-        self.protocol = "10x"
+        self.protocol = "10X sequencing"
         self.state_exact = "healthy"
         self.year = 2019
 

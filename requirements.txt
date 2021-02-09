@@ -8,6 +8,7 @@ numpy>=1.16.4
 obonet
 openpyxl
 pandas
+pytest
 python-Levenshtein
 scanpy==1.7.0
 scipy>=1.2.1

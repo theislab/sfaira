@@ -29,7 +29,7 @@ class Dataset(DatasetBase):
         self.doi = "10.1016/j.cell.2017.09.004"
         self.healthy = True
         self.normalization = "raw"
-        self.protocol = "Smartseq2"
+        self.protocol = "Smart-seq2"
         self.organ = "pancreas"  # ToDo: "islet of Langerhans"
         self.organism = "human"
         self.state_exact = "healthy"

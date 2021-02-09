@@ -93,14 +93,28 @@ class OntologyEbi(Ontology):
     Recursively assembles ontology by querying EBI web interface.
 
     Not recommended for large ontologies.
+    Yields unstructured list of terms.
     """
 
     def __init__(
             self,
             ontology: str,
             root_term: str,
+            additional_terms: Union[Dict[str, Dict[str, str]], None] = None,
             **kwargs
     ):
+        """
+
+        :param ontology:
+        :param root_term:
+        :param additional_terms: Dictionary with additional terms, values should be
+
+            - "name" necessary
+            - "description" optional
+            - "synonyms" optional
+            - "has_children" optional
+        :param kwargs:
+        """
         def get_url(iri):
             return f"https://www.ebi.ac.uk/ols/api/ontologies/{ontology}/terms/" \
                    f"http%253A%252F%252Fwww.ebi.ac.uk%252F{ontology}%252F{iri}/children"
@@ -120,6 +134,7 @@ class OntologyEbi(Ontology):
             return nodes_new
 
         self.nodes = recursive_search(iri=root_term)
+        self.nodes.update(additional_terms)
 
     @property
     def node_names(self) -> List[str]:
@@ -601,7 +616,13 @@ class OntologySinglecellLibraryConstruction(OntologyEbi):
             ontology: str = "efo",
             root_term: str = "EFO_0010183",
     ):
-        super().__init__(ontology=ontology, root_term=root_term)
+        super().__init__(
+            ontology=ontology,
+            root_term=root_term,
+            additional_terms={
+                "microwell-seq": {"name": "microwell-seq"}
+            }
+        )
 
 
 class CelltypeUniverse:
@@ -720,10 +741,13 @@ class CelltypeUniverse:
             include_synonyms: bool = True,
             anatomical_constraint: Union[str, None] = None,
             omit_list: list = [],
-            n_suggest: int = 10,
-    ) -> pd.DataFrame:
+            n_suggest: int = 4,
+    ) -> Tuple[
+        List[Dict[str, List[str]]],
+        List[bool]
+    ]:
         """
-        Map free text node names to ontology node names via fuzzy string matching.
+        Map free text node names to ontology node names via fuzzy string matching and return as list
 
         If this function does not yield good matches, consider querying this web interface:
         https://www.ebi.ac.uk/ols/index
@@ -742,21 +766,37 @@ class CelltypeUniverse:
         :param include_synonyms: Whether to include synonyms of nodes in string search.
         :param anatomical_constraint: Whether to require suggestions to be within a target anatomy defined within UBERON.
         :param omit_list: Free text node labels to omit in map.
-        :param n_suggest: Number of cell types to suggest.
-        :return: Table with source and target node names. Columns: "source", "target"
+        :param n_suggest: Number of cell types to suggest per search strategy.
+        :return: Tuple
+
+            - List with matches for each source, each entry is a dictionary,
+                of lists of search strategies named by strategy name.
+            - List with boolean indicator whether or not this output should be reported.
         """
         from fuzzywuzzy import fuzz
         matches = []
         nodes = self.onto_cl.nodes
-        include = []
+        include_terms = []
         if isinstance(source, pd.DataFrame):
             source = list(zip(source.iloc[:, 0].values, source.iloc[:, 1].values))
         for x in source:
             if not isinstance(x, list) and not isinstance(x, tuple):
                 x = [x, "nan"]
             term = x[0].lower().strip("'").strip("\"").strip("]").strip("[")
+            # Test for perfect string matching:
+            scores_strict = np.array([
+                np.max([
+                    100 if term == y[1]["name"].lower() else 0
+                ] + [
+                    100 if term == yy.lower() else 0
+                    for yy in y[1]["synonym"]
+                ]) if "synonym" in y[1].keys() and include_synonyms else
+                100 if term == y[1]["name"].lower() else 0
+                for y in nodes
+            ])
+            # Test for partial string matching:
             # fuzz ratio and partial_ratio capture different types of matches well, we use both here:
-            scores = np.array([
+            scores_lenient = np.array([
                 np.max([
                     fuzz.ratio(term, y[1]["name"].lower()),
                     fuzz.partial_ratio(term, y[1]["name"].lower())
@@ -773,19 +813,29 @@ class CelltypeUniverse:
                 ])
                 for y in nodes
             ])
-            include.append(x[0].lower().strip("'").strip("\"") not in omit_list)
+            include_terms.append(x[0].lower().strip("'").strip("\"") not in omit_list)
             if match_only and not anatomical_constraint:
-                matches.append(np.any(scores == 100))  # perfect match
+                matches.append({"perfect_match": [
+                    [nodes[i][1]["name"] for i in np.where(scores_strict == 100)[0]]
+                ]})  # perfect match
             else:
-                if np.any(scores == 100) and not anatomical_constraint:
-                    matches.append([nodes[i][1]["name"] for i in np.where(scores == 100)[0]])
+                matchesi = {}
+                if np.any(scores_strict == 100) and not anatomical_constraint:
+                    matchesi.update({"perfect_match": [nodes[i][1]["name"] for i in np.where(scores_strict == 100)[0]]})
                 else:
                     if anatomical_constraint is not None:
-                        # Select best overall matches:
-                        matchesi = ":".join([
+                        # Select best overall matches based on lenient and strict matching:
+                        matchesi.update({"perfect_match": [
                             nodes[i][1]["name"]
-                            for i in np.argsort(scores)
-                        ][-np.max(n_suggest - 7, 0):][::-1])
+                            for i in np.argsort(scores_strict)
+                        ][-n_suggest:][::-1]})
+                        matchesi.update({"lenient_match": [
+                            nodes[i][1]["name"]
+                            for i in np.argsort(scores_lenient)
+                            if not np.any(
+                                nodes[i][1]["name"] in v for v in matchesi.values()
+                            )
+                        ][-n_suggest:][::-1]})
 
                         # Use anatomical constraints two fold:
                         # 1. Select cell types that are in the correct ontology.
@@ -826,11 +876,13 @@ class CelltypeUniverse:
                             for y, z in zip(uberon_ids, anatomical_subselection)
                         ]
                         # Iterate over nodes sorted by string match score and masked by constraint:
-                        matchesi = matchesi + ":|||:" + ":".join([
+                        matchesi = matchesi.update({"anatomic_onotolgy_match": [
                             nodes[i][1]["name"]
-                            for i in np.argsort(scores)
-                            if anatomical_subselection[i] and nodes[i][1]["name"] not in matchesi
-                        ][-4:][::-1])
+                            for i in np.argsort(scores_lenient)
+                            if anatomical_subselection[i] and not np.any(
+                                nodes[i][1]["name"] in v for v in matchesi.values()
+                            )
+                        ][-n_suggest:][::-1]})
 
                         # 2. Run a second string matching with the anatomical word included.
                         modified_term = anatomical_constraint + " " + x[0].lower().strip("'").strip("\"").strip("]").\
@@ -847,18 +899,55 @@ class CelltypeUniverse:
                             ])
                             for y in nodes
                         ])
-                        matchesi = matchesi + ":|||:" + ":".join([
+                        matchesi = matchesi.update({"anatomic_string_match": [
                             nodes[i][1]["name"]
                             for i in np.argsort(scores_anatomy)
-                            if nodes[i][1]["name"] not in matchesi
-                        ][-7:][::-1])
+                            if nodes[i][1]["name"] and not np.any(
+                                nodes[i][1]["name"] in v for v in matchesi.values()
+                            )
+                        ][-n_suggest:][::-1]})
                     else:
                         # Suggest top 10 hits by string match:
-                        matchesi = [nodes[i][1]["name"] for i in np.argsort(scores)[-n_suggest:]][::-1]
-                        matchesi = ":".join(matchesi)
-                    matches.append(matchesi)
+                        matchesi.update({"lenient_match": [
+                            [nodes[i][1]["name"] for i in np.argsort(scores_lenient)[-n_suggest:]][::-1]
+                        ]})
+                matches.append(matchesi)
+        return matches, include_terms
+
+    def prepare_celltype_map_tab(
+            self,
+            source,
+            match_only: bool = False,
+            include_synonyms: bool = True,
+            anatomical_constraint: Union[str, None] = None,
+            omit_list: list = [],
+            n_suggest: int = 10,
+            separator_suggestions: str = ":",
+            separator_groups: str = ":|||:",
+    ) -> pd.DataFrame:
+        """
+        Map free text node names to ontology node names via fuzzy string matching and return as matching table.
+
+        :param source: Free text node labels which are to be matched to ontology nodes.
+        :param match_only: Whether to include strict matches only in output.
+        :param include_synonyms: Whether to include synonyms of nodes in string search.
+        :param anatomical_constraint: Whether to require suggestions to be within a target anatomy defined within UBERON.
+        :param omit_list: Free text node labels to omit in map.
+        :param n_suggest: Number of cell types to suggest per search strategy.
+        :param separator_suggestions: String separator for matches of a single strategy in output target column.
+        :param separator_groups: String separator for search strategy grouped matches in output target column.
+        :return: Table with source and target node names. Columns: "source", "target"
+        """
+        matches, include_terms = self.prepare_celltype_map_fuzzy(
+            source=source,
+            match_only=match_only,
+            include_synonyms=include_synonyms,
+            anatomical_constraint=anatomical_constraint,
+            omit_list=omit_list,
+            n_suggest=n_suggest,
+        )
         tab = pd.DataFrame({
             "source": source,
-            "target": matches
+            "target": [separator_groups.join([separator_suggestions.join(v) for v in x.values()]) for x in matches]
         })
-        return tab.loc[include]
+        return tab.loc[include_terms]
