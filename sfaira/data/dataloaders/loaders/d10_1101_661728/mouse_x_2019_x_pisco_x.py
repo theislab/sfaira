@@ -58,7 +58,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             **kwargs
     ):
         super().__init__(sample_fn=sample_fn, path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        protocol = "10X sequencing" if sample_fn.split("-")[3] == "droplet" else "Smart-seq2"
+        protocol = "10x" if sample_fn.split("-")[3] == "droplet" else "smartseq2"
         organ = sample_fn.split("-")[-1].split(".")[0].lower()
         organ = "adipose tissue" if organ in ["fat", "bat", "gat", "mat", "scat"] else \
             "bladder" if organ in ["bladder"] else \
@@ -79,8 +79,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             "tongue" if organ in ["tongue"] else \
             "trachea" if organ in ["trachea"] else "error"
 
-        self.id = f"mouse_{"".join(organ.split(" "))}_2019_{protocol}_pisco_{str(SAMPLE_FNS.index(self.sample_fn)).zfill(3)}_" \
-                  f"10.1101/661728"
+        self.id = f"mouse_{''.join(organ.split(' '))}_2019_{protocol}_pisco_" \
+                  f"{str(SAMPLE_FNS.index(self.sample_fn)).zfill(3)}_10.1101/661728"
 
         self.download = "https://czb-tabula-muris-senis.s3-us-west-2.amazonaws.com/Data-objects/"
 
@@ -96,7 +96,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.normalization = "norm"
         self.organism = "mouse"
         self.organ = organ
-        self.protocol = protocol
+        self.protocol = "10X sequencing" if sample_fn.split("-")[3] == "droplet" else "Smart-seq2"
         self.state_exact = "healthy"
         self.year = 2019
 
