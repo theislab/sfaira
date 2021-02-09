@@ -59,14 +59,15 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
     ):
         super().__init__(sample_fn=sample_fn, path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         protocol = "10x" if sample_fn.split("-")[3] == "droplet" else "smartseq2"
-        organ = sample_fn.split("-")[-1].split(".")[0].lower()
+        organ = "-".join(sample_fn.split("-")[7:]).split(".")[0].lower()
         organ = "adipose tissue" if organ in ["fat", "bat", "gat", "mat", "scat"] else \
+            "aorta" if organ in ["aorta"] else \
             "bladder organ" if organ in ["bladder"] else \
             "bone marrow" if organ in ["marrow"] else \
             "brain" if organ in ["brain_non-myeloid", "brain_myeloid"] else \
             "colon" if organ in ["large_intestine"] else \
             "diaphragm" if organ in ["diaphragm"] else \
-            "heart" if organ in ["heart_and_aorta", "heart", "aorta"] else \
+            "heart" if organ in ["heart_and_aorta", "heart"] else \
             "kidney" if organ in ["kidney"] else \
             "liver" if organ in ["liver"] else \
             "lung" if organ in ["lung"] else \
@@ -77,7 +78,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             "spleen" if organ in ["spleen"] else \
             "thymus" if organ in ["thymus"] else \
             "tongue" if organ in ["tongue"] else \
-            "trachea" if organ in ["trachea"] else "error"
+            "trachea" if organ in ["trachea"] else organ
+        # ToDo: heart_and_aorta could be a distinct UBERON term, e.g. cardiovascular system?
 
         self.id = f"mouse_{''.join(organ.split(' '))}_2019_{protocol}_pisco_" \
                   f"{str(SAMPLE_FNS.index(self.sample_fn)).zfill(3)}_10.1101/661728"
