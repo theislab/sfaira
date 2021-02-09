@@ -82,7 +82,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.id = f"mouse_{organ}_2019_{protocol}_pisco_{str(SAMPLE_FNS.index(self.sample_fn)).zfill(3)}_" \
                   f"10.1101/661728"
 
-        self.download = "https://czb-tabula-muris-senis.s3-us-west-2.amazonaws.com/Data-objects/"
+        self.download_url_data = f"https://czb-tabula-muris-senis.s3-us-west-2.amazonaws.com/Data-objects/{sample_fn}"
+        self.download_url_meta = None
 
         self.obs_key_cellontology_original = "free_annotation"
         self.obs_key_age = "age"
@@ -103,9 +104,9 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.var_ensembl_col = None
         self.var_symbol_col = "index"
 
-    def _load(self, fn):
-        base_path = os.path.join(self.path, "mouse", self.organ)
-        fn = os.path.join(base_path, self.sample_fn)
+    def _load(self, fn=None):
+        if fn is None:
+            fn = os.path.join(self.path, "raw", self.directory_formatted_doi, self.sample_fn)
 
         self.adata = anndata.read_h5ad(fn)
         self.adata.X = self.adata.raw.X

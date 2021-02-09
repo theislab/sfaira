@@ -41,8 +41,6 @@ class Dataset_d10_1016_j_cell_2018_02_001(DatasetBase):
 
     def _load_generalized(self, fn, samplename):
         if fn is None:
-            if self.path is None:
-                raise ValueError("provide either fn in load or path in constructor")
             fn = os.path.join(self.path, "mouse", "temp_mouse_atlas")
 
         with zipfile.ZipFile(os.path.join(fn, '5435866.zip')) as archive:
