@@ -34,11 +34,4 @@ class DataloaderLinter:
         """
         pass
 
-    def run_flake8(self):
-        """
-        Runs flake8 on the provided dataloader.
-        Check
-            passes if flake8 returns exitcode 0
-            fails if flake8 returns an exitcode != 0
-        """
-        pass
+

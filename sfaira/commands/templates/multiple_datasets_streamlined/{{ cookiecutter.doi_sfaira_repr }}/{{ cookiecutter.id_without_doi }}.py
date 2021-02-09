@@ -1,26 +1,31 @@
-import os
 from typing import Union
-import anndata as ad
+
+from sfaira.data import DatasetBaseGroupLoadingManyFiles
+
+# SFARA TODO Add correct sample IDs here.
+SAMPLE_FNS = [
+    "your_sample_fn_1",
+    "your_sample_fn_2"
+]
 
 
-from sfaira.data import DatasetBase
-
-
-class Dataset(DatasetBase):
+class Dataset(DatasetBaseGroupLoadingManyFiles):
 
     def __init__(
             self,
+            sample_fn: str,
             path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        super().__init__(sample_fn=sample_fn, path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
 
-        # SFAIRA TODO Add your meta data here
+        # SFAIRA TODO: Add you meta data here.
+        # SFAIRA TODO: Increase index ID by file -> f"sth_{str(SAMPLE_FNS.index(sample_fn)).zfill(3)}_doi"
         self.id = '{{ cookiecutter.id }}'  # unique identifier of data set (Organism_Organ_Year_Protocol_NumberOfDataset_FirstAuthorLastname_doi).
 
-        self.author = {{ cookiecutter.author }}  # author (list) who sampled / created the data set
+        self.author = {{cookiecutter.author}}  # author (list) who sampled / created the data set
         self.doi = '{{ cookiecutter.doi }}'  # doi of data set accompanying manuscript
 
         self.download_url_data = '{{ cookiecutter.download_url_data }}'  # download website(s) of data files
@@ -29,7 +34,7 @@ class Dataset(DatasetBase):
         self.organ = '{{ cookiecutter.organ }}'  # organ (anatomical structure)
         self.organism = '{{ cookiecutter.organism }}'  # (*) species / organism
         self.protocol = '{{ cookiecutter.protocol }}'  # (*, optional) protocol used to sample data (e.g. smart-seq2)
-        self.year = {{ cookiecutter.year }}  # year in which sample was acquired
+        self.year = {{cookiecutter.year}}  # year in which sample was acquired
         # self.age = 'x'  # (*, optional) age of sample
         # self.dev_stage = x  # (*, optional) developmental stage of organism
         # self.ethnicity = x  # (*, optional) ethnicity of sample
@@ -54,7 +59,5 @@ class Dataset(DatasetBase):
         # SFAIRA: name of column which contain streamlined cell ontology cell type classes:
         # self.obs_key_cellontology_original = x  # (optional)
 
-    def _load(self, fn):
-        if fn is None:
-            fn = os.path.join(self.path, self.directory_formatted_doi, "my.h5ad")
-        self.adata = ad.anndata.read(fn)
+    def _load_any_object(self, fn=None):
+        pass  # SFIRA TODO: load file fn into self.adata, using self.sample_fn, ie the current sample file.

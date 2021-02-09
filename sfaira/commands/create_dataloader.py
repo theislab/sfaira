@@ -13,7 +13,7 @@ log = logging.getLogger(__name__)
 
 @dataclass
 class TemplateAttributes:
-    dataloader_type: str = ''
+    dataloader_type: str = ''  # One of single_dataset, multiple_datasets_single_file, multiple_datasets_streamlined, multiple_datasets_not_streamlined
     id: str = ''  # unique identifier of data set (Organism_Organ_Year_Protocol_NumberOfDataset_FirstAuthorLastname_doi).
     id_without_doi: str = ''  # complete id without the doi -> usually used to name the python scripts
 
@@ -127,7 +127,7 @@ class DataloaderCreator:
                                                                         question='URL to download the data',
                                                                         default='https://ftp.ncbi.nlm.nih.gov/geo/')
 
-    def template_attributes_to_dict(self) -> dict:
+    def _template_attributes_to_dict(self) -> dict:
         """
         Create a dict from the our Template Structure dataclass
         :return: The dict containing all key-value pairs with non empty values
@@ -139,5 +139,5 @@ class DataloaderCreator:
         cookiecutter(f'{template_path}',
                      no_input=True,
                      overwrite_if_exists=True,
-                     extra_context=self.template_attributes_to_dict())
+                     extra_context=self._template_attributes_to_dict())
         # ensure that it handles multiple dataloaders on the same DOI
