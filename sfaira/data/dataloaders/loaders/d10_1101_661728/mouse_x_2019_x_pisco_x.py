@@ -74,7 +74,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             "mammary gland" if organ in ["mammary_gland"] else \
             "muscle organ" if organ in ["limb_muscle"] else \
             "pancreas" if organ in ["pancreas"] else \
-            "skin" if organ in ["skin"] else \
+            "skin of body" if organ in ["skin"] else \
             "spleen" if organ in ["spleen"] else \
             "thymus" if organ in ["thymus"] else \
             "tongue" if organ in ["tongue"] else \
