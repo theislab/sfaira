@@ -58,7 +58,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             **kwargs
     ):
         super().__init__(sample_fn=sample_fn, path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        protocol = "10x" if sample_fn.split("-")[3] == "droplet" else "smartseq2"
+        protocol = "10X sequencing" if sample_fn.split("-")[3] == "droplet" else "Smart-seq2"
         organ = sample_fn.split("-")[-1].split(".")[0].lower()
         organ = "adipose tissue" if organ in ["fat", "bat", "gat", "mat", "scat"] else \
             "bladder" if organ in ["bladder"] else \
