@@ -34,7 +34,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
                   f"10.1016/j.cmet.2019.01.021"
 
         self.download_url_data = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE117nnn/GSE117770/suppl/GSE117770_RAW.tar"
-        self.download_url_meta = "private"
+        self.download_url_meta = f"private,{self.sample_fn}_annotation.csv"
 
         self.author = "Bhushan"
         self.doi = "10.1016/j.cmet.2019.01.021"
