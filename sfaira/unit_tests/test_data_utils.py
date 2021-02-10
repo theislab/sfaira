@@ -1,14 +1,28 @@
 import pytest
+from typing import Union
 
 from sfaira.data.utils import map_celltype_to_ontology
 
 
-@pytest.mark.parametrize("perfect_match", [True, False])
-def test_map_celltype_to_ontology(perfect_match: bool):
-    trial_cell_type = "T cell" if perfect_match else "T cells"
-    x = map_celltype_to_ontology(source=trial_cell_type, organism="human", choices_for_perfect_match=False)
-    print(x)
-    if perfect_match:
-        assert isinstance(x, str)
+@pytest.mark.parametrize("perfectly_matched_query", [True, False])
+@pytest.mark.parametrize("choices_for_perfect_match", [True, False])
+@pytest.mark.parametrize("anatomical_constraint", [None, "blood"])
+def test_map_celltype_to_ontology(
+        perfectly_matched_query: bool,
+        choices_for_perfect_match: bool,
+        anatomical_constraint: Union[str, None]
+):
+    trial_cell_type = "type B pancreatic cell" if perfectly_matched_query else "beta"
+    x = map_celltype_to_ontology(
+        queries=[trial_cell_type],
+        organism="human",
+        include_synonyms=True,
+        anatomical_constraint=anatomical_constraint,
+        choices_for_perfect_match=choices_for_perfect_match
+    )
+    if perfectly_matched_query and not choices_for_perfect_match and not anatomical_constraint:
+        assert isinstance(x[trial_cell_type], str), x
+        assert x[trial_cell_type] == "type B pancreatic cell"
     else:
-        assert isinstance(x, list)
+        assert isinstance(x[trial_cell_type], list), x
+        assert "type B pancreatic cell" in x[trial_cell_type]
