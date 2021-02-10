@@ -50,23 +50,24 @@ class Dataset(DatasetBase):
             },
         }
 
-    def _load(self, fn=None):
-        if fn is None:
-            fn = os.path.join(self.path, "mouse", "temp_mouse_brain_atlas", "filtered_gene_bc_matrices_mex_WT_fullAggr.zip")
-        fn_meta = os.path.join(self.path, "mouse", "temp_mouse_brain_atlas", "annot_fullAggr.csv")
+    def _load(self):
+        fn = [
+            os.path.join(self.full_path, "filtered_gene_bc_matrices_mex_WT_fullAggr.zip"),
+            os.path.join(self.full_path, "annot_fullAggr.csv")
+        ]
 
-        archive = zipfile.ZipFile(fn)
-        x = scipy.io.mmread(archive.open('filtered_gene_bc_matrices_mex/mm10/matrix.mtx')).T.tocsr()
-        self.adata = anndata.AnnData(x)
-        var = pandas.read_csv(archive.open('filtered_gene_bc_matrices_mex/mm10/genes.tsv'), sep="\t", header=None)
-        var.columns = ["ensembl", "name"]
-        obs_names = pandas.read_csv(archive.open('filtered_gene_bc_matrices_mex/mm10/barcodes.tsv'),
-                                    sep="\t",
-                                    header=None
-                                    )[0].values
+        with zipfile.Zipfile(fn[0]) as archive:
+            x = scipy.io.mmread(archive.open('filtered_gene_bc_matrices_mex/mm10/matrix.mtx')).T.tocsr()
+            self.adata = anndata.AnnData(x)
+            var = pandas.read_csv(archive.open('filtered_gene_bc_matrices_mex/mm10/genes.tsv'), sep="\t", header=None)
+            var.columns = ["ensembl", "name"]
+            obs_names = pandas.read_csv(archive.open('filtered_gene_bc_matrices_mex/mm10/barcodes.tsv'),
+                                        sep="\t",
+                                        header=None
+                                        )[0].values
         assert len(obs_names) == self.adata.shape[0]
         assert var.shape[0] == self.adata.shape[1]
-        obs = pandas.read_csv(self.path + fn_meta)
+        obs = pandas.read_csv(fn[1])
 
         # Match annotation to raw data.
         obs.index = obs["cell"].values

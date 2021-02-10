@@ -4,7 +4,6 @@ import os
 import pandas as pd
 import scipy.sparse
 from typing import Union
-import urllib.request
 import zipfile
 
 from sfaira.data import DatasetBase
@@ -46,7 +45,7 @@ class Dataset_d10_1038_s41586_020_2157_4(DatasetBase):
 
         self.var_symbol_col = "index"
 
-    def _load_generalized(self, fn, sample_id: str):
+    def _load_generalized(self, sample_id: str):
         """
         Attempt to find file, cache entire HCL if file was not found.
 

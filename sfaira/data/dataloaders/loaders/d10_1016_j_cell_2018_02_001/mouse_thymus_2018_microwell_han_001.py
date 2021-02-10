@@ -29,5 +29,5 @@ class Dataset(Dataset_d10_1016_j_cell_2018_02_001):
             },
         }
 
-    def _load(self, fn=None):
-        self._load_generalized(fn=fn, samplename="Thymus1_dge")
+    def _load(self):
+        self._load_generalized(samplename="Thymus1_dge")

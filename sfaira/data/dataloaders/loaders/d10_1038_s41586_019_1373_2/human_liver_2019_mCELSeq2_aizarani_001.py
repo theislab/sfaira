@@ -79,12 +79,11 @@ class Dataset(DatasetBase):
             },
         }
 
-    def _load(self, fn=None):
-        if fn is None:
-            fn = [
-                os.path.join(self.path, "human", "liver", "GSE124395_Normalhumanlivercellatlasdata.txt.gz"),
-                os.path.join(self.path, "human", "liver", "GSE124395_clusterpartition.txt.gz")
-            ]
+    def _load(self):
+        fn = [
+            os.path.join(self.full_path, "GSE124395_Normalhumanlivercellatlasdata.txt.gz"),
+            os.path.join(self.full_path, "GSE124395_clusterpartition.txt.gz")
+        ]
         self.adata = anndata.AnnData(pd.read_csv(fn[0], sep="\t").T)
         celltype_df = pd.read_csv(fn[1], sep=" ")
         self.adata = self.adata[[i in celltype_df.index for i in self.adata.obs.index]].copy()

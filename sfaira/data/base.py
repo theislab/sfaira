@@ -118,6 +118,7 @@ class DatasetBase(abc.ABC):
         self.path = path
         self.meta_path = meta_path
         self.cache_path = cache_path
+        self.full_path = None
 
         self._age = None
         self._author = None
@@ -163,7 +164,7 @@ class DatasetBase(abc.ABC):
         self._ontology_class_map = None
 
     @abc.abstractmethod
-    def _load(self, fn):
+    def _load(self):
         pass
 
     @property
@@ -224,12 +225,11 @@ class DatasetBase(abc.ABC):
         dataset = syn.get(entity=synapse_entity)
         shutil.move(dataset.path, savepath)
 
-    def set_raw_full_group_object(self, fn=None, adata_group: Union[None, anndata.AnnData] = None) -> bool:
+    def set_raw_full_group_object(self, adata_group: Union[None, anndata.AnnData] = None) -> bool:
         """
         Only relevant for DatasetBaseGroupLoading but has to be a method of this class
         because it is used in DatasetGroup.
 
-        :param fn:
         :param adata_group:
         :return: Whether group loading is used.
         """
@@ -281,9 +281,9 @@ class DatasetBase(abc.ABC):
                 else:
                     warnings.warn(f"Cached loading enabled, but cache file {fn_cache} not found. "
                                   f"Loading from raw files.")
-                    self._load(fn=fn)
+                    self._load()
             else:
-                self._load(fn=fn)
+                self._load()
 
         def _cached_writing(fn_cache):
             if fn_cache is not None:
@@ -292,15 +292,12 @@ class DatasetBase(abc.ABC):
                     os.makedirs(dir_cache)
                 self.adata.write_h5ad(fn_cache)
 
-        if fn is None and self.path is None:
-            raise ValueError("provide either fn in load or path in constructor")
-
         if load_raw and allow_caching:
-            self._load(fn=fn)
+            self._load()
             fn_cache = _get_cache_fn()
             _cached_writing(fn_cache)
         elif load_raw and not allow_caching:
-            self._load(fn=fn)
+            self._load()
         elif not load_raw and allow_caching:
             fn_cache = _get_cache_fn()
             _cached_reading(fn, fn_cache)
@@ -341,9 +338,16 @@ class DatasetBase(abc.ABC):
             genome = "Mus_musculus_GRCm38_97"
             warnings.warn(f"using default genome {genome}")
         else:
-            raise ValueError(f"genome was not supplied and organism {self.organism} "
-                             f"was not matched to a default choice")
+            raise ValueError(f"genome was not supplied and no default genome found for organism {self.organism}")
         self._set_genome(genome=genome)
+
+        # Set path to dataset directory
+        if fn is None:
+            if self.path is None:
+                raise ValueError("Neither sfaira data repo path nor custom dataset path provided.")
+            self.full_path = os.path.join(self.path, "raw", self.directory_formatted_doi)
+        else:
+            self.full_path = fn
 
         # Run data set-specific loading script:
         self._load_cached(fn=fn, load_raw=load_raw, allow_caching=allow_caching)
@@ -1527,7 +1531,7 @@ class DatasetBaseGroupLoadingOneFile(DatasetBase):
         return self._sample_id
 
     @abc.abstractmethod
-    def _load_full(self, fn=None) -> anndata.AnnData:
+    def _load_full(self) -> anndata.AnnData:
         """
         Loads a raw anndata object that correponds to a superset of the data belonging to this Dataset.
 
@@ -1536,11 +1540,11 @@ class DatasetBaseGroupLoadingOneFile(DatasetBase):
         """
         pass
 
-    def set_raw_full_group_object(self, fn=None, adata_group: Union[None, anndata.AnnData] = None):
+    def set_raw_full_group_object(self, adata_group: Union[None, anndata.AnnData] = None):
         if self.adata is None and adata_group is not None:
             self.adata = adata_group
         elif self.adata is None and adata_group is not None:
-            self.adata = self._load_full(fn=fn)
+            self.adata = self._load_full()
         elif self.adata is not None and self._unprocessed_full_group_object:
             pass
         else:
@@ -1573,8 +1577,8 @@ class DatasetBaseGroupLoadingOneFile(DatasetBase):
         for k, v in subset_items:
             self.adata = self.adata[[x in v for x in self.adata.obs[k].values], :]
 
-    def _load(self, fn):
-        _ = self.set_raw_full_group_object(fn=fn, adata_group=None)
+    def _load(self):
+        _ = self.set_raw_full_group_object(adata_group=None)
         if self._unprocessed_full_group_object:
             self._load_from_group()
         self._unprocessed_full_group_object = False

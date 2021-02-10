@@ -41,9 +41,8 @@ class Dataset(DatasetBase):
             "0": {},
         }
 
-    def _load(self, fn=None):
-        if fn is None:
-            fn = os.path.join(self.path, "human", "kidney", "GSE131685_RAW.tar")
+    def _load(self):
+        fn = os.path.join(self.full_path, "GSE131685_RAW.tar")
         adatas = []
         with tarfile.open(fn) as tar:
             for member in tar.getmembers():

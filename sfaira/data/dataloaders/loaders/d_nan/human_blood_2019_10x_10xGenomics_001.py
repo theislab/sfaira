@@ -49,7 +49,6 @@ class Dataset(DatasetBase):
             "0": {},
         }
 
-    def _load(self, fn=None):
-        if fn is None:
-            fn = os.path.join(self.path, "human", "blood", "pbmc_10k_v3_filtered_feature_bc_matrix.h5ad")
+    def _load(self):
+        fn = os.path.join(self.full_path, "pbmc_10k_v3_filtered_feature_bc_matrix.h5ad")
         self.adata = anndata.read(fn)

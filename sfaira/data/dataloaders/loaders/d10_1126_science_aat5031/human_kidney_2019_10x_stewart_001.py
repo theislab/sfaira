@@ -114,12 +114,11 @@ class Dataset(DatasetBase):
             },
         }
 
-    def _load(self, fn=None):
-        if fn is None:
-            fn = [
-                os.path.join(self.path, "human", "kidney", "Mature_Full_v2.1.h5ad"),
-                os.path.join(self.path, "human", "kidney", "Fetal_full.h5ad")
-            ]
+    def _load(self):
+        fn = [
+            os.path.join(self.full_path, "Mature_Full_v2.1.h5ad"),
+            os.path.join(self.full_path, "Fetal_full.h5ad")
+        ]
         adult = anndata.read(fn[0])
         fetal = anndata.read(fn[1])
         adult.obs["development"] = "adult"

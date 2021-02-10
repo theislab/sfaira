@@ -91,9 +91,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
                 },
             }
 
-    def _load(self, fn=None):
-        base_path = os.path.join(self.path, "human", "placenta")
-        fn = os.path.join(base_path, self.sample_fn)
+    def _load(self):
+        fn = os.path.join(self.full_path, self.sample_fn)
         self.adata = anndata.read(fn)
         self.adata.X = np.expm1(self.adata.X)
 

@@ -48,7 +48,6 @@ class Dataset(DatasetBase):
             },
         }
 
-    def _load(self, fn=None):
-        if fn is None:
-            fn = os.path.join(self.path, "human", "eye", "menon19.processed.h5ad")
+    def _load(self):
+        fn = os.path.join(self.full_path, "menon19.processed.h5ad")
         self.adata = anndata.read(fn)

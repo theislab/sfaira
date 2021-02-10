@@ -193,9 +193,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             },
         }
 
-    def _load(self, fn=None):
-        if fn is None:
-            fn = os.path.join(self.path, "human", "lung", self.sample_fn)
+    def _load(self):
+        fn = os.path.join(self.full_path, self.sample_fn)
         if self.sample_fn.split("_")[0] == "droplet":
             norm_const = 1000000
         else:

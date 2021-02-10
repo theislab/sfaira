@@ -75,5 +75,5 @@ class DatasetInteractive(DatasetBase):
 
         self.adata = data
 
-    def _load(self, fn=None):
+    def _load(self):
         pass

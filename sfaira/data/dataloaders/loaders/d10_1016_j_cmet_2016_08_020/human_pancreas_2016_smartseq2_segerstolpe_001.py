@@ -56,12 +56,11 @@ class Dataset(DatasetBase):
             },
         }
 
-    def _load(self, fn=None):
-        if fn is None:
-            fn = [
-                os.path.join(self.path, "human", "pancreas", "E-MTAB-5061.processed.1.zip"),
-                os.path.join(self.path, "human", "pancreas", "E-MTAB-5061.sdrf.txt")
-            ]
+    def _load(self):
+        fn = [
+            os.path.join(self.full_path, "E-MTAB-5061.processed.1.zip"),
+            os.path.join(self.full_path, "E-MTAB-5061.sdrf.txt")
+        ]
         df = pd.read_csv(fn[0], sep="\t")
         df.index = df.index.get_level_values(0)
         df = df.drop("#samples", axis=1)

@@ -39,11 +39,10 @@ class Dataset_d10_1016_j_cell_2018_02_001(DatasetBase):
 
         self.var_symbol_col = "index"
 
-    def _load_generalized(self, fn, samplename):
-        if fn is None:
-            fn = os.path.join(self.path, "mouse", "temp_mouse_atlas")
+    def _load_generalized(self, samplename):
+        fn = os.path.join(self.full_path, '5435866.zip')
 
-        with zipfile.ZipFile(os.path.join(fn, '5435866.zip')) as archive:
+        with zipfile.ZipFile(fn) as archive:
             celltypes = pandas.read_csv(archive.open('MCA_CellAssignments.csv'), index_col=1)
             celltypes = celltypes.drop(["Unnamed: 0"], axis=1)
 

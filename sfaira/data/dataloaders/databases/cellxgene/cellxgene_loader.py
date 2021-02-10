@@ -44,13 +44,12 @@ class Dataset(DatasetBase):
             "0": {},
         }
 
-    def _load(self, fn=None):
+    def _load(self):
         """
         Note that in contrast to data set specific data loaders, here, the core attributes are only identified from
         the data in this function and are not already set in the constructor. These attributes can still be
         used through meta data containers after the data was loaded once.
 
-        :param fn:
         :return:
         """
         fn = os.path.join(self.path, self.fn)

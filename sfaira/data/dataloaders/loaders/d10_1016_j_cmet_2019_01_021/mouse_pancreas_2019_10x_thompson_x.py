@@ -50,9 +50,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
 
         self.obs_key_cellontology_original = "celltypes"
 
-    def _load(self, fn=None):
-        path_base = os.path.join(self.path, "mouse", "pancreas")
-        with tarfile.open(os.path.join(path_base, 'GSE117770_RAW.tar')) as tar:
+    def _load(self):
+        with tarfile.open(os.path.join(self.full_path, 'GSE117770_RAW.tar')) as tar:
             for member in tar.getmembers():
                 if "_matrix.mtx.gz" in member.name and self.sample_fn in member.name:
                     name = "_".join(member.name.split("_")[:-1])
@@ -67,6 +66,6 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
                     var.index = var["ensembl"].values
                     self.adata = anndata.AnnData(X=x, obs=obs, var=var)
         self.adata.var_names_make_unique()
-        celltypes = pd.read_csv(os.path.join(path_base, self.sample_fn + "_annotation.csv"), index_col=0)
+        celltypes = pd.read_csv(os.path.join(self.full_path, self.sample_fn + "_annotation.csv"), index_col=0)
         self.adata = self.adata[celltypes.index]
         self.adata.obs["celltypes"] = celltypes

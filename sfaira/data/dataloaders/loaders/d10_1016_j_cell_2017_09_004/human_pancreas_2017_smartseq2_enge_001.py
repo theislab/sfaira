@@ -52,12 +52,11 @@ class Dataset(DatasetBase):
             },
         }
 
-    def _load(self, fn=None):
-        if fn is None:
-            fn = [
-                os.path.join(self.path, "human", "pancreas", "GSE81547_RAW.tar"),
-                os.path.join(self.path, "human", "pancreas", "GSE81547_series_matrix.txt.gz")
-            ]
+    def _load(self):
+        fn = [
+            os.path.join(self.full_path, "GSE81547_RAW.tar"),
+            os.path.join(self.full_path, "GSE81547_series_matrix.txt.gz")
+        ]
         dfs = []
         with tarfile.open(fn[0]) as tar:
             for member in tar.getmembers():

@@ -53,11 +53,10 @@ class Dataset(DatasetBase):
             },
         }
 
-    def _load(self, fn=None):
-        base_path = os.path.join(self.path, "human", "placenta")
+    def _load(self):
         fn = [
-            os.path.join(base_path, "GSE130148_raw_counts.csv.gz"),
-            os.path.join(base_path, "GSE130148_barcodes_cell_types.txt.gz"),
+            os.path.join(self.full_path, "GSE130148_raw_counts.csv.gz"),
+            os.path.join(self.full_path, "GSE130148_barcodes_cell_types.txt.gz"),
         ]
         self.adata = anndata.read_csv(fn[0]).T
         self.adata.obs = pd.read_csv(fn[1], sep="\t", index_col=0)
