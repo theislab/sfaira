@@ -41,7 +41,7 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
         self.doi = "no_doi"
         self.healthy = True
         self.normalization = "raw"
-        self.organ = "blood" if sample_id == "umbilical cord blood" else "bone tissue"
+        self.organ = "blood" if sample_id == "umbilical cord blood" else "bone marrow"
         self.organism = "human"
         self.protocol = "10X sequencing"
         self.state_exact = "healthy"
