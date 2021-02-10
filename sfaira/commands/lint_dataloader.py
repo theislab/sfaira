@@ -19,7 +19,8 @@ class DataloaderLinter:
             '_lint_header',
             '_lint_dataloader_object',
             '_lint_required_attributes',
-            '_lint_sfaira_todos'
+            '_lint_sfaira_todos',
+            '_lint_load'
         ]
 
     def lint(self, path) -> None:
@@ -79,6 +80,22 @@ class DataloaderLinter:
             self.failed['-1'] = 'Missing one of class Dataset(DatasetBase) or class Dataset(DatasetBaseGroupLoadingManyFiles)'
 
         if passed_lint_dataloader_object:
+            self.passed[line] = 'Passed dataloader object checks.'
+
+    def _lint_load(self):
+        """
+        Verifies that the method _load_any_object(self, fn=None) is present.
+        """
+        passed_load = True
+
+        try:
+            line, dl_object = list(filter(lambda line_dl_object: line_dl_object[1].startswith(('def _load_any_object(self, fn=None):', 'def _load(self, fn):')),
+                                          enumerate(self.content)))[0]
+        except IndexError:
+            passed_load = False
+            self.failed['-1'] = 'Missing one of methods    _load_any_object(self, fn=None)  or    def _load(self, fn)'
+
+        if passed_load:
             self.passed[line] = 'Passed dataloader object checks.'
 
     def _lint_required_attributes(self):
