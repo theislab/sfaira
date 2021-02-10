@@ -1536,7 +1536,7 @@ class DatasetBaseGroupLoadingOneFile(DatasetBase):
         """
         Loads a raw anndata object that correponds to a superset of the data belonging to this Dataset.
 
-        Override this method in the Dataset if this is relevant.
+        Overload this method in the Dataset if this is relevant.
         :return: adata_group
         """
         pass
