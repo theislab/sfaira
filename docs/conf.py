@@ -113,6 +113,9 @@ html_context = dict(
     conf_py_path='/docs/',    # Path in the checkout to the docs root
 )
 html_static_path = ['_static']
+html_css_files = [
+    'custom_sfaira.css',
+]
 html_show_sphinx = False
 gh_url = 'https://github.com/{github_user}/{github_repo}'.format_map(html_context)
 

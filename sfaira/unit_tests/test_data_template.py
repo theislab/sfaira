@@ -23,7 +23,7 @@ class TestDatasetTemplate(unittest.TestCase):
 
         4. Moderate the suggestions made here: Choose the best fit cell ontology label for your cells.
         Sfaira uses multiple mechanisms of finding matches, depending on how the free text was generated, these might be
-        differentially successfull. The proposed IDs groups are separate by ":|||:" strings to give you a visial anchor
+        differentially successful. The proposed IDs groups are separate by ":|||:" strings to give you a visual anchor
         when going through these lists. You need to delete all of these division strings and all labels in the second
         columns other than the best fit label. Do not change the first column,
         (Note that columns are separated by ",")

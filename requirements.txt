@@ -10,7 +10,7 @@ openpyxl
 pandas
 pytest
 python-Levenshtein
-scanpy==1.7.0
+scanpy>=1.7.0
 scipy>=1.2.1
 seaborn
 tensorflow>=2.0.0  # TODO remove as soon as # 70 is solved
@@ -19,11 +19,11 @@ requests
 versioneer
 h5py
 xlrd==1.*
-rich==9.10.0
-click==7.1.2
-questionary==1.8.1
-packaging==20.8
+rich>=9.10.0
+click>=7.1.2
+questionary>=1.8.1
+packaging>=20.8
 requests>=2.25.1
-switchlang==0.1.0
+switchlang>=0.1.0
 cookiecutter==1.7.2
 black==20.8b1
