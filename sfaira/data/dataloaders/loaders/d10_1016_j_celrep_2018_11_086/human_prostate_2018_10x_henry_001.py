@@ -27,7 +27,7 @@ class Dataset(DatasetBase):
         self.healthy = True
         self.normalization = "raw"
         self.state_exact = "healthy"
-        self.organ = "prostate"
+        self.organ = "prostate gland"
         self.organism = "human"
         self.protocol = "10X sequencing"
         self.year = 2018
