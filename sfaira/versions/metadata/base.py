@@ -808,7 +808,7 @@ class CelltypeUniverse:
         for x in source:
             if not isinstance(x, list) and not isinstance(x, tuple):
                 x = [x, "nan"]
-            term = x[0].lower().strip("'").strip("\"").strip("]").strip("[")
+            term = x[0].lower().strip("'").strip("\"").strip("'").strip("\"").strip("]").strip("[")
             # Test for perfect string matching:
             scores_strict = np.array([
                 np.max([
@@ -826,12 +826,13 @@ class CelltypeUniverse:
             # Formatting of synonyms: These are richly annotated, we strip references following after either:
             # BROAD, EXACT
             # in the synonym string and characters: "'
+
+            def synonym_string_processing(y):
+                return y.lower().split("broad")[0].split("exact")[0].lower().strip("'").strip("\"").split("\" ")[0]
+
             scores_lenient = np.array([
                 np.max([fuzz.ratio(term, y[1]["name"].lower())] + [
-                    fuzz.ratio(
-                        term,
-                        yy.lower().split("broad")[0].split("exact")[0].lower().strip("'").strip("\"").split("\" ")[0]
-                    )
+                    fuzz.ratio(term, synonym_string_processing(yy))
                     for yy in y[1]["synonym"]
                 ]) if "synonym" in y[1].keys() and include_synonyms else
                 fuzz.ratio(term, y[1]["name"].lower())
@@ -839,16 +840,13 @@ class CelltypeUniverse:
             ])
             scores_very_lenient = np.array([
                 np.max([fuzz.partial_ratio(term, y[1]["name"].lower())] + [
-                    fuzz.partial_ratio(
-                        term,
-                        yy.lower().split("broad")[0].split("exact")[0].lower().strip("'").strip("\"").split("\" ")[0]
-                    )
+                    fuzz.partial_ratio(term, synonym_string_processing(yy))
                     for yy in y[1]["synonym"]
                 ]) if "synonym" in y[1].keys() and include_synonyms else
                 fuzz.partial_ratio(term, y[1]["name"].lower())
                 for y in nodes
             ])
-            include_terms.append(x[0].lower().strip("'").strip("\"") not in omit_list)
+            include_terms.append(term not in omit_list)
             if match_only and not anatomical_constraint:
                 # Explicitly trying to report perfect matches (match_only is True).
                 matches.append({"perfect_match": [nodes[i][1]["name"] for i in np.where(scores_strict == 100)[0]][0]})
@@ -874,23 +872,6 @@ class CelltypeUniverse:
                             ][:n_suggest]})
                 else:
                     if anatomical_constraint is not None:
-                        # Select best overall matches based on lenient and strict matching:
-                        matches_i.update({"perfect_match": [
-                            nodes[i][1]["name"]
-                            for i in np.argsort(scores_strict)[::-1]
-                        ][:n_suggest]})
-                        matches_i.update({"lenient_match": [
-                            nodes[i][1]["name"]
-                            for i in np.argsort(scores_lenient)[::-1]
-                            if not np.any([nodes[i][1]["name"] in v for v in matches_i.values()])
-                        ][:n_suggest]})
-                        if np.max(scores_lenient) < threshold_for_partial_matching:
-                            matches_i.update({"very_lenient_match": [
-                                nodes[i][1]["name"]
-                                for i in np.argsort(scores_very_lenient)[::-1]
-                                if not np.any([nodes[i][1]["name"] in v for v in matches_i.values()])
-                            ][:n_suggest]})
-
                         # Use anatomical constraints two fold:
                         # 1. Select cell types that are in the correct ontology.
                         # 2. Run a second string matching with the anatomical word included.
@@ -924,40 +905,58 @@ class CelltypeUniverse:
                         # Check this by checking if one is an ancestor of the other:
                         anatomical_subselection = [
                             z and (
-                                anatomical_constraint_id in self.onto_anatomy.get_ancestors(node=y) or
-                                y in self.onto_anatomy.get_ancestors(node=anatomical_constraint_id)
+                                    anatomical_constraint_id in self.onto_anatomy.get_ancestors(node=y) or
+                                    y in self.onto_anatomy.get_ancestors(node=anatomical_constraint_id)
                             )
                             for y, z in zip(uberon_ids, anatomical_subselection)
                         ]
                         # Iterate over nodes sorted by string match score and masked by constraint:
-                        matches_i.update({"anatomic_onotolgy_match": [
-                            nodes[i][1]["name"]
-                            for i in np.argsort(scores_lenient)
-                            if anatomical_subselection[i] and not
-                            np.any([nodes[i][1]["name"] in v for v in matches_i.values()])
+                        matches_i.update({
+                            "anatomic_onotolgy_match": [
+                                nodes[i][1]["name"]
+                                for i in np.argsort(scores_lenient)
+                                if anatomical_subselection[i] and not
+                                np.any([nodes[i][1]["name"] in v for v in matches_i.values()])
                         ][-n_suggest:][::-1]})
 
                         # 2. Run a second string matching with the anatomical word included.
-                        modified_term = anatomical_constraint + " " + x[0].lower().strip("'").strip("\"").strip("]").\
+                        modified_term = anatomical_constraint + " " + x[0].lower().strip("'").strip("\"").strip("]"). \
                             strip("[")
                         scores_anatomy = np.array([
                             np.max([
                                 fuzz.partial_ratio(modified_term, y[1]["name"].lower())
                             ] + [
-                                fuzz.partial_ratio(modified_term, yy.lower())
+                                fuzz.partial_ratio(modified_term, synonym_string_processing(yy))
                                 for yy in y[1]["synonym"]
                             ]) if "synonym" in y[1].keys() and include_synonyms else
-                            np.max([
-                                fuzz.partial_ratio(modified_term, y[1]["name"].lower())
-                            ])
+                            fuzz.partial_ratio(modified_term, y[1]["name"].lower())
                             for y in nodes
                         ])
-                        matches_i.update({"anatomic_string_match": [
+                        matches_i.update({
+                            "anatomic_string_match": [
+                                nodes[i][1]["name"]
+                                for i in np.argsort(scores_anatomy)
+                                if nodes[i][1]["name"] and not
+                                np.any([nodes[i][1]["name"] in v for v in matches_i.values()])
+                            ][-n_suggest:][::-1]
+                        })
+
+                        # Select best overall matches based on lenient and strict matching:
+                        matches_i.update({"perfect_match": [
                             nodes[i][1]["name"]
-                            for i in np.argsort(scores_anatomy)
-                            if nodes[i][1]["name"] and not
-                            np.any([nodes[i][1]["name"] in v for v in matches_i.values()])
-                        ][-n_suggest:][::-1]})
+                            for i in np.argsort(scores_strict)[::-1]
+                        ][:n_suggest]})
+                        matches_i.update({"lenient_match": [
+                            nodes[i][1]["name"]
+                            for i in np.argsort(scores_lenient)[::-1]
+                            if not np.any([nodes[i][1]["name"] in v for v in matches_i.values()])
+                        ][:n_suggest]})
+                        if np.max(scores_lenient) < threshold_for_partial_matching:
+                            matches_i.update({"very_lenient_match": [
+                                nodes[i][1]["name"]
+                                for i in np.argsort(scores_very_lenient)[::-1]
+                                if not np.any([nodes[i][1]["name"] in v for v in matches_i.values()])
+                            ][:n_suggest]})
                     else:
                         # Suggest top hits by string match:
                         matches_i.update({"lenient_match": [

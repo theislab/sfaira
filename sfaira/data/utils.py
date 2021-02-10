@@ -60,6 +60,7 @@ def map_celltype_to_ontology(
     )
     # Prepare the output:
     for x, matches_i in zip(queries, matches):
+        print(matches_i)
         matches_i = matches_i[0]
         # Flatten list of lists:
         # Flatten dictionary of lists and account for string rather than list entries.

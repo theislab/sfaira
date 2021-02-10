@@ -6,7 +6,7 @@ from sfaira.data.utils import map_celltype_to_ontology
 
 @pytest.mark.parametrize("perfectly_matched_query", [True, False])
 @pytest.mark.parametrize("choices_for_perfect_match", [True, False])
-@pytest.mark.parametrize("anatomical_constraint", [None, "blood"])
+@pytest.mark.parametrize("anatomical_constraint", [None, "pancreas"])
 def test_map_celltype_to_ontology(
         perfectly_matched_query: bool,
         choices_for_perfect_match: bool,
@@ -20,7 +20,7 @@ def test_map_celltype_to_ontology(
         anatomical_constraint=anatomical_constraint,
         choices_for_perfect_match=choices_for_perfect_match
     )
-    if perfectly_matched_query and not choices_for_perfect_match and not anatomical_constraint:
+    if perfectly_matched_query and (not choices_for_perfect_match or not anatomical_constraint):
         assert isinstance(x[trial_cell_type], str), x
         assert x[trial_cell_type] == "type B pancreatic cell"
     else:
