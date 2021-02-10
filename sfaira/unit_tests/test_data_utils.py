@@ -20,7 +20,7 @@ def test_map_celltype_to_ontology(
         anatomical_constraint=anatomical_constraint,
         choices_for_perfect_match=choices_for_perfect_match
     )
-    if perfectly_matched_query and (not choices_for_perfect_match or not anatomical_constraint):
+    if perfectly_matched_query and not choices_for_perfect_match:
         assert isinstance(x[trial_cell_type], str), x
         assert x[trial_cell_type] == "type B pancreatic cell"
     else:
