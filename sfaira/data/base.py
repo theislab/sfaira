@@ -190,9 +190,11 @@ class DatasetBase(abc.ABC):
 
         self.doi_path = os.path.join(self.path, "raw", self.directory_formatted_doi)
 
-        urls = self.download_url_data[0] + self.download_url_meta[0]
+        urls = self.download_url_data[0][0] + self.download_url_meta[0][0]
 
         for url in urls:
+            if url is None:
+                continue
             if url.split(",")[0] == 'private':
                 if "," in url:
                     if os.path.isfile(os.path.join(self.doi_path, fn)):
