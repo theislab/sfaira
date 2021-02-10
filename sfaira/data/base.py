@@ -119,7 +119,7 @@ class DatasetBase(abc.ABC):
         self.path = path
         self.meta_path = meta_path
         self.cache_path = cache_path
-        self.doi_path = None
+        self.doi_path = None if path is None else os.path.join(path, "raw", self.directory_formatted_doi)
 
         self._age = None
         self._author = None
@@ -182,7 +182,7 @@ class DatasetBase(abc.ABC):
         self.adata = None
         gc.collect()
 
-    def download(self, savedir):
+    def download(self, **kwargs):
         assert self.download_url_data is not None, f"Download_url_data for dataset {self.id} is None, cannot download dataset."
         urls = [self.download_url_data] if isinstance(self.download_url_data, str) else self.download_url_data
 
@@ -201,9 +201,9 @@ class DatasetBase(abc.ABC):
                           f"manually copy the associated file to the following location: {savedir}")
                 continue
 
-            if url.split(",")[0] == 'synapse':
+            if url.split(",")[0].startswith('syn'):
                 fn = ",".join(url.split(",")[1:])
-                self._download_synapse(url.split(",")[0], savedir + fn)
+                self._download_synapse(url.split(",")[0], fn, **kwargs)
                 continue
 
             url = urllib.parse.unquote(url)
@@ -212,19 +212,27 @@ class DatasetBase(abc.ABC):
             else:
                 fn = url.split("/")[-1]
 
-            urllib.request.urlretrieve(url, savedir + fn)
+            urllib.request.urlretrieve(url, os.path.join(self.doi_path, fn))
 
-    def _download_synapse(self, synapse_entity, savepath):
+    def _download_synapse(self, synapse_entity, fn, **kwargs):
         try:
             import synapseclient
         except ImportError:
             raise ImportError("synapseclient not found. This package is required to download some of the selected "
                               "datasets. Run `pip install synapseclient` to install it.")
         import shutil
+        if "synapse_user" not in kwargs.keys():
+            warnings.warn(f"No synapse username provided, skipping download of synapse dataset {fn}."
+                          f"Provide your synapse username as the `synapse_user` argument to the download method.")
+            return
+        if "synapse_pw" not in kwargs.keys():
+            warnings.warn(f"No synapse password provided, skipping download of synapse dataset {fn}."
+                          f"Provide your synapse password as the `synapse_pw` argument to the download method.")
+            return
         syn = synapseclient.Synapse()
-        syn.login("synapse_username", "password")  # TODO: add a way to store these values in sfaira
+        syn.login(kwargs['synapse_user'], kwargs['synapse_pw'])
         dataset = syn.get(entity=synapse_entity)
-        shutil.move(dataset.path, savepath)
+        shutil.move(dataset.path, os.path.join(self.doi_path, fn))
 
     def set_raw_full_group_object(self, adata_group: Union[None, anndata.AnnData] = None) -> bool:
         """
@@ -344,9 +352,8 @@ class DatasetBase(abc.ABC):
 
         # Set path to dataset directory
         if fn is None:
-            if self.path is None:
+            if self.doi_path is None:
                 raise ValueError("Neither sfaira data repo path nor custom dataset path provided.")
-            self.doi_path = os.path.join(self.path, "raw", self.directory_formatted_doi)
         else:
             self.doi_path = fn
 
