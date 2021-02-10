@@ -1731,7 +1731,7 @@ class DatasetGroup:
                     **kwargs
                 ))
         if len(tab) == 0:
-            warnings.warn(f"attempted to write ontology classmaps for group without annotated data sets")
+            warnings.warn("attempted to write ontology classmaps for group without annotated data sets")
         else:
             tab = pandas.concat(tab, axis=0)
             # Take out columns with the same source:

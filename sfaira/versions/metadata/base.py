@@ -905,7 +905,7 @@ class CelltypeUniverse:
                         # Check this by checking if one is an ancestor of the other:
                         anatomical_subselection = [
                             z and (
-                                    anatomical_constraint_id in self.onto_anatomy.get_ancestors(node=y) or
+                                    anatomical_constraint_id in self.onto_anatomy.get_ancestors(node=y) or  # noqa: E126
                                     y in self.onto_anatomy.get_ancestors(node=anatomical_constraint_id)
                             )
                             for y, z in zip(uberon_ids, anatomical_subselection)
@@ -917,7 +917,7 @@ class CelltypeUniverse:
                                 for i in np.argsort(scores_lenient)
                                 if anatomical_subselection[i] and not
                                 np.any([nodes[i][1]["name"] in v for v in matches_i.values()])
-                        ][-n_suggest:][::-1]})
+                        ][-n_suggest:][::-1]})  # noqa: E122
 
                         # 2. Run a second string matching with the anatomical word included.
                         modified_term = anatomical_constraint + " " + x[0].lower().strip("'").strip("\"").strip("]"). \
