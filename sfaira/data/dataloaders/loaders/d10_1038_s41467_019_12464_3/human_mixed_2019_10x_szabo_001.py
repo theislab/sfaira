@@ -78,22 +78,22 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             self.adata.var = var
             if "PP001" in fn or "PP002" in fn:
                 self.adata.obs["donor"] = "Donor1"
-                self.adata.obs["organ"] = "Lung"
+                self.adata.obs["organ"] = "lung"
             elif "PP003" in fn or "PP004" in fn:
                 self.adata.obs["donor"] = "Donor1"
                 self.adata.obs["organ"] = "bone marrow"
             elif "PP005" in fn or "PP006" in fn:
                 self.adata.obs["donor"] = "Donor1"
-                self.adata.obs["organ"] = "Lymph Node"
+                self.adata.obs["organ"] = "lymph node"
             elif "PP009" in fn or "PP010" in fn:
                 self.adata.obs["donor"] = "Donor2"
-                self.adata.obs["organ"] = "Lung"
+                self.adata.obs["organ"] = "lung"
             elif "PP011" in fn or "PP012" in fn:
                 self.adata.obs["donor"] = "Donor2"
                 self.adata.obs["organ"] = "bone marrow"
             elif "PP013" in fn or "PP014" in fn:
                 self.adata.obs["donor"] = "Donor2"
-                self.adata.obs["organ"] = "Lymph Node"
+                self.adata.obs["organ"] = "lymph node"
             self.adata.obs.index = fn.split("_")[1].split("s")[0] + "nskept." + self.adata.obs.index
         self.adata.obs["cell_ontology_class"] = "Unknown"
         df1 = pd.read_csv(fn_annot[0], sep="\t", index_col=0, header=None)

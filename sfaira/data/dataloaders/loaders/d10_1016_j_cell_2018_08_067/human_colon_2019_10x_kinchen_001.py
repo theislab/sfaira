@@ -24,7 +24,7 @@ class Dataset(DatasetBase):
         self.author = "Simmons"
         self.doi = "10.1016/j.cell.2018.08.067"
         self.normalization = "raw"
-        self.organ = "colon"  # ToDo: "lamina propria of mucosa of colon"
+        self.organ = "lamina propria of mucosa of colon"
         self.organism = "human"
         self.protocol = "10X sequencing"
         self.year = 2019
