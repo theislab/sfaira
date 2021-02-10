@@ -30,7 +30,7 @@ class Dataset(DatasetBase):
         self.healthy = True
         self.normalization = "raw"
         self.protocol = "Smart-seq2"
-        self.organ = "pancreas"  # ToDo: "islet of Langerhans"
+        self.organ = "islet of Langerhans"
         self.organism = "human"
         self.state_exact = "healthy"
         self.year = 2017
