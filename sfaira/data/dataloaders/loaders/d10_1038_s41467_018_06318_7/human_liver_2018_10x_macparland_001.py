@@ -25,7 +25,7 @@ class Dataset(DatasetBase):
         self.doi = "10.1038/s41467-018-06318-7"
         self.healthy = True
         self.normalization = "raw"
-        self.organ = "liver"  # ToDo: "caudate lobe"
+        self.organ = "caudate lobe of liver"
         self.organism = "human"
         self.protocol = "10X sequencing"
         self.state_exact = "healthy"

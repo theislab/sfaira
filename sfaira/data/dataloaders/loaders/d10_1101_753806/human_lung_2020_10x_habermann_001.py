@@ -28,7 +28,7 @@ class Dataset(DatasetBase):
         self.author = "Kropski"
         self.doi = "10.1101/753806"
         self.normalization = "raw"
-        self.organ = "lung"  # ToDo: "parenchyma"
+        self.organ = "lung parenchyma"
         self.organism = "human"
         self.protocol = "10X sequencing"
         self.year = 2020

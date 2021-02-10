@@ -23,10 +23,9 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             **kwargs
     ):
         super().__init__(sample_fn=sample_fn, path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        organ = "lung" if self.sample_fn == "madissoon19_lung.processed.h5ad" else \
-            "oesophagus" if self.sample_fn == "oesophagus.cellxgene.h5ad" else "spleen"
-        # ToDo: lung to "parenchyma"?
-        self.id = f"human_{organ}_2019_10x_madissoon_{str(SAMPLE_FNS.index(self.sample_fn)).zfill(3)}_" \
+        organ = "lung parenchyma" if self.sample_fn == "madissoon19_lung.processed.h5ad" else \
+            "esophagus" if self.sample_fn == "oesophagus.cellxgene.h5ad" else "spleen"
+        self.id = f"human_{"".join(organ.split(" "))}_2019_10x_madissoon_{str(SAMPLE_FNS.index(self.sample_fn)).zfill(3)}_" \
                   f"10.1186/s13059-019-1906-x"
 
         if self.sample_fn == "madissoon19_lung.processed.h5ad":

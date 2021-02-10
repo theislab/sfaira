@@ -14,7 +14,7 @@ class Dataset(Dataset_d10_1016_j_cell_2018_02_001):
     ):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "mouse_bladder_2018_microwell-seq_han_001_10.1016/j.cell.2018.02.001"
-        self.organ = "bladder"
+        self.organ = "bladder organ"
 
         self.class_maps = {
             "0": {

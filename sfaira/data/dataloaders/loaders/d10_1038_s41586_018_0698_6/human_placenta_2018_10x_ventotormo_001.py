@@ -32,10 +32,10 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.author = "Teichmann"
         self.healthy = True
         self.normalization = "raw"
-        self.organ = "placenta,decidua,blood"  # ToDo: move this into .obs_key_organ?
+        self.organ = "placenta"
         self.organism = "human"
         self.doi = "10.1038/s41586-018-0698-6"
-        self.protocol = protocol
+        self.protocol = "10X sequencing" if self.sample_fn == "E-MTAB-6678.processed" else "Smart-seq2"
         self.state_exact = "healthy"
         self.year = 2018
 
@@ -43,7 +43,6 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.var_ensembl_col = "ensembl"
 
         self.obs_key_cellontology_original = "annotation"
-        # ToDo: further anatomical information for subtissue in "location"
 
         self.class_maps = {
             "0": {

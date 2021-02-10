@@ -28,7 +28,7 @@ class Dataset(DatasetBase):
         self.doi = "10.1126/science.aat5031"
         self.healthy = True
         self.normalization = "norm"
-        self.organ = "kidney"  # ToDo: "renal medulla, renal pelvis, ureter, cortex of kidney"
+        self.organ = "kidney"
         self.organism = "human"
         self.protocol = "10X sequencing"
         self.state_exact = "healthy"

@@ -26,7 +26,7 @@ class Dataset(DatasetBase):
         self.doi = "10.1016/j.cell.2019.06.029"
         self.healthy = True
         self.normalization = "raw"
-        self.organ = "colon"  # ToDo: "colonic epithelium"
+        self.organ = "colonic epithelium"
         self.organism = "human"
         self.protocol = "10X sequencing"
         self.state_exact = "healthy"

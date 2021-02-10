@@ -31,9 +31,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.author = "Teichmann"
         self.doi = "10.1038/s41591-019-0468-5"
         self.healthy = True
-        self.organ = "lung"
-        # ToDo: 1->"alveoli, parenchyma"
-        # ToDo: 2->"bronchi"
+        self.organ = "bronchus" if sample_fn == "vieira19_Bronchi_anonymised.processed.h5ad" else "lung parenchyma"
         self.organism = "human"
         self.protocol = "10X sequencing"
         self.state_exact = "healthy"

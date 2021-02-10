@@ -26,7 +26,7 @@ class Dataset(DatasetBase):
         self.doi = "10.15252/embj.2018100811"
         self.healthy = True
         self.normalization = "raw"
-        self.organ = "eye"  # ToDo: "retina"
+        self.organ = "retina"
         self.organism = "human"
         self.protocol = "10X sequencing"
         self.state_exact = "healthy"
