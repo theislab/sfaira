@@ -190,12 +190,7 @@ class DatasetBase(abc.ABC):
 
         self.doi_path = os.path.join(self.path, "raw", self.directory_formatted_doi)
 
-        urls = [self.download_url_data] if isinstance(self.download_url_data, str) else self.download_url_data
-
-        if isinstance(self.download_url_meta, str):
-            urls.append(self.download_url_meta)
-        elif isinstance(self.download_url_meta, list):
-            urls += self.download_url_meta
+        urls = self.download_url_data[0] + self.download_url_meta[0]
 
         for url in urls:
             if url.split(",")[0] == 'private':
