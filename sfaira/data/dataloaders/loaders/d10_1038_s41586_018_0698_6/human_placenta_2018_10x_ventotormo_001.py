@@ -84,8 +84,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
 
     def _load(self):
         fn = [
-            os.path.join(self.full_path, f"{self.sample_fn}.1.zip"),
-            os.path.join(self.full_path, f"{self.sample_fn}.2.zip"),
+            os.path.join(self.doi_path, f"{self.sample_fn}.1.zip"),
+            os.path.join(self.doi_path, f"{self.sample_fn}.2.zip"),
         ]
         self.adata = anndata.AnnData(pd.read_csv(fn[0], sep="\t", index_col="Gene").T)
         df = pd.read_csv(fn[1], sep="\t")

@@ -54,8 +54,8 @@ class Dataset(DatasetBase):
 
     def _load(self):
         fn = [
-            os.path.join(self.full_path, "GSE81547_RAW.tar"),
-            os.path.join(self.full_path, "GSE81547_series_matrix.txt.gz")
+            os.path.join(self.doi_path, "GSE81547_RAW.tar"),
+            os.path.join(self.doi_path, "GSE81547_series_matrix.txt.gz")
         ]
         dfs = []
         with tarfile.open(fn[0]) as tar:

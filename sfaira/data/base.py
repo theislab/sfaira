@@ -58,6 +58,7 @@ class DatasetBase(abc.ABC):
     path: Union[None, str]
     meta_path: Union[None, str]
     cache_path: Union[None, str]
+    doi_path: Union[None, str]
     id: Union[None, str]
     genome: Union[None, str]
 
@@ -118,7 +119,7 @@ class DatasetBase(abc.ABC):
         self.path = path
         self.meta_path = meta_path
         self.cache_path = cache_path
-        self.full_path = None
+        self.doi_path = None
 
         self._age = None
         self._author = None
@@ -345,9 +346,9 @@ class DatasetBase(abc.ABC):
         if fn is None:
             if self.path is None:
                 raise ValueError("Neither sfaira data repo path nor custom dataset path provided.")
-            self.full_path = os.path.join(self.path, "raw", self.directory_formatted_doi)
+            self.doi_path = os.path.join(self.path, "raw", self.directory_formatted_doi)
         else:
-            self.full_path = fn
+            self.doi_path = fn
 
         # Run data set-specific loading script:
         self._load_cached(fn=fn, load_raw=load_raw, allow_caching=allow_caching)

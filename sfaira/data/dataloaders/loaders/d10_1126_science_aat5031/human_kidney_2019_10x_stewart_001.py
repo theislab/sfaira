@@ -116,8 +116,8 @@ class Dataset(DatasetBase):
 
     def _load(self):
         fn = [
-            os.path.join(self.full_path, "Mature_Full_v2.1.h5ad"),
-            os.path.join(self.full_path, "Fetal_full.h5ad")
+            os.path.join(self.doi_path, "Mature_Full_v2.1.h5ad"),
+            os.path.join(self.doi_path, "Fetal_full.h5ad")
         ]
         adult = anndata.read(fn[0])
         fetal = anndata.read(fn[1])

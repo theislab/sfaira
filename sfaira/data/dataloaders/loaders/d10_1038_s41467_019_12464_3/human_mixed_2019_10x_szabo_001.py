@@ -67,9 +67,9 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
 
     def _load(self):
         fn = [
-            os.path.join(self.full_path, "GSE126030_RAW.tar"),
-            os.path.join(self.full_path, "donor1.annotation.txt"),
-            os.path.join(self.full_path, "donor2.annotation.txt")
+            os.path.join(self.doi_path, "GSE126030_RAW.tar"),
+            os.path.join(self.doi_path, "donor1.annotation.txt"),
+            os.path.join(self.doi_path, "donor2.annotation.txt")
         ]
         with tarfile.open(fn[0]) as tar:
             df = pd.read_csv(tar.extractfile(self.sample_fn), compression="gzip", sep="\t")

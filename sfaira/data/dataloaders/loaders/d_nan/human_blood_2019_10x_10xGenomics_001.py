@@ -50,5 +50,5 @@ class Dataset(DatasetBase):
         }
 
     def _load(self):
-        fn = os.path.join(self.full_path, "pbmc_10k_v3_filtered_feature_bc_matrix.h5ad")
+        fn = os.path.join(self.doi_path, "pbmc_10k_v3_filtered_feature_bc_matrix.h5ad")
         self.adata = anndata.read(fn)

@@ -71,8 +71,8 @@ class Dataset(DatasetBase):
 
     def _load(self):
         fn = [
-            os.path.join(self.full_path, "GSE121862_UCSD-WU_Single_Nuclei_Cluster_Annotated_Raw_UMI_Matrix.tsv.gz"),
-            os.path.join(self.full_path, "GSE121862_UCSD-WU_Single_Nuclei_Cluster_Annotations.csv.gz")
+            os.path.join(self.doi_path, "GSE121862_UCSD-WU_Single_Nuclei_Cluster_Annotated_Raw_UMI_Matrix.tsv.gz"),
+            os.path.join(self.doi_path, "GSE121862_UCSD-WU_Single_Nuclei_Cluster_Annotations.csv.gz")
         ]
         self.adata = anndata.AnnData(pd.read_csv(fn[0], sep="\t").T)
         annot = pd.read_csv(fn[1], index_col=0, dtype="category")

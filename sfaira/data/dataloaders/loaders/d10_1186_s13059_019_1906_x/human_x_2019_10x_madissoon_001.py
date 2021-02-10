@@ -142,7 +142,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             }
 
     def _load(self):
-        fn = os.path.join(self.full_path, self.sample_fn)
+        fn = os.path.join(self.doi_path, self.sample_fn)
         self.adata = anndata.read(fn)
         if self.sample_fn == "oesophagus.cellxgene.h5ad" or self.sample_fn == "spleen.cellxgene.h5ad":
             self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs["n_counts"].values[:, None]))\

@@ -52,8 +52,8 @@ class Dataset(DatasetBase):
 
     def _load(self):
         fn = [
-            os.path.join(self.full_path, "filtered_gene_bc_matrices_mex_WT_fullAggr.zip"),
-            os.path.join(self.full_path, "annot_fullAggr.csv")
+            os.path.join(self.doi_path, "filtered_gene_bc_matrices_mex_WT_fullAggr.zip"),
+            os.path.join(self.doi_path, "annot_fullAggr.csv")
         ]
 
         with zipfile.Zipfile(fn[0]) as archive:

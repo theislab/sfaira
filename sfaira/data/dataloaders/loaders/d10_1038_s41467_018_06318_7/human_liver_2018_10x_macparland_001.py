@@ -62,8 +62,8 @@ class Dataset(DatasetBase):
 
     def _load(self):
         fn = [
-            os.path.join(self.full_path, "GSE115469.csv.gz"),
-            os.path.join(self.full_path, "GSE115469_labels.txt")
+            os.path.join(self.doi_path, "GSE115469.csv.gz"),
+            os.path.join(self.doi_path, "GSE115469_labels.txt")
         ]
         self.adata = anndata.read_csv(fn[0]).T
         celltype_df = pd.read_csv(fn[1], sep="\t").set_index("CellName")

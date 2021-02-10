@@ -42,7 +42,7 @@ class Dataset(DatasetBase):
         }
 
     def _load(self):
-        fn = os.path.join(self.full_path, "GSE131685_RAW.tar")
+        fn = os.path.join(self.doi_path, "GSE131685_RAW.tar")
         adatas = []
         with tarfile.open(fn) as tar:
             for member in tar.getmembers():

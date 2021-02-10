@@ -61,9 +61,9 @@ class Dataset(DatasetBase):
 
     def _load(self):
         fn = [
-            os.path.join(self.full_path, "f8aa201c-4ff1-45a4-890e-840d63459ca2.homo_sapiens.loom"),
-            os.path.join(self.full_path, "uc_meta_data_stromal_with_donor.txt"),
-            os.path.join(self.full_path, "hc_meta_data_stromal_with_donor.txt")
+            os.path.join(self.doi_path, "f8aa201c-4ff1-45a4-890e-840d63459ca2.homo_sapiens.loom"),
+            os.path.join(self.doi_path, "uc_meta_data_stromal_with_donor.txt"),
+            os.path.join(self.doi_path, "hc_meta_data_stromal_with_donor.txt")
         ]
         adata = anndata.read_loom(fn[0])
         ctuc = pd.read_csv(fn[1], sep="\t")

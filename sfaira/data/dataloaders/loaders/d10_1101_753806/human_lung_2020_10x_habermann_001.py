@@ -78,10 +78,10 @@ class Dataset(DatasetBase):
 
     def _load(self):
         fn = [
-            os.path.join(self.full_path, "GSE135893_matrix.mtx.gz"),
-            os.path.join(self.full_path, "GSE135893_genes.tsv.gz"),
-            os.path.join(self.full_path, "GSE135893_barcodes.tsv.gz"),
-            os.path.join(self.full_path, "GSE135893_IPF_metadata.csv.gz"),
+            os.path.join(self.doi_path, "GSE135893_matrix.mtx.gz"),
+            os.path.join(self.doi_path, "GSE135893_genes.tsv.gz"),
+            os.path.join(self.doi_path, "GSE135893_barcodes.tsv.gz"),
+            os.path.join(self.doi_path, "GSE135893_IPF_metadata.csv.gz"),
         ]
         self.adata = anndata.read_mtx(fn[0]).T
         self.adata.var = pd.read_csv(fn[1], index_col=0, header=None, names=["ids"])

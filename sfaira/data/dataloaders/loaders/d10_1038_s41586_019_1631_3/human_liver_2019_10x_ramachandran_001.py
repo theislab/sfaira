@@ -78,5 +78,5 @@ class Dataset(DatasetBase):
         }
 
     def _load(self):
-        fn = os.path.join(self.full_path, "ramachandran.h5ad")
+        fn = os.path.join(self.doi_path, "ramachandran.h5ad")
         self.adata = anndata.read(fn)
