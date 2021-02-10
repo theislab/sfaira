@@ -119,6 +119,7 @@ class DatasetBase(abc.ABC):
         self.path = path
         self.meta_path = meta_path
         self.cache_path = cache_path
+        self.doi_path = None
 
         self._age = None
         self._author = None
@@ -163,8 +164,6 @@ class DatasetBase(abc.ABC):
         self._ontology_celltypes = None
         self._ontology_class_map = None
 
-        self.doi_path = None if path is None else os.path.join(path, "raw", self.directory_formatted_doi)
-
     @abc.abstractmethod
     def _load(self):
         pass
@@ -186,8 +185,10 @@ class DatasetBase(abc.ABC):
     def download(self, **kwargs):
         assert self.download_url_data is not None, f"The `download_url_data` attribute of dataset {self.id} " \
                                                    f"is not set, cannot download dataset."
-        assert self.doi_path is not None, f"No path was provided when instantiating the dataset container, " \
-                                          f"cannot download datasets."
+        assert self.path is not None, f"No path was provided when instantiating the dataset container, " \
+                                      f"cannot download datasets."
+
+        self.doi_path = os.path.join(self.path, "raw", self.directory_formatted_doi)
 
         urls = [self.download_url_data] if isinstance(self.download_url_data, str) else self.download_url_data
 
