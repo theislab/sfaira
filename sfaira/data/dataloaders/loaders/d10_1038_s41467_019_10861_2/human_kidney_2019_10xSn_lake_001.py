@@ -29,7 +29,7 @@ class Dataset(DatasetBase):
         self.normalization = "raw"
         self.organ = "kidney"
         self.organism = "human"
-        self.protocol = "10x sequencing"
+        self.protocol = "10X sequencing"
         self.state_exact = "healthy"
         self.year = 2019
 
