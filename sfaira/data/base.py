@@ -289,8 +289,8 @@ class DatasetBase(abc.ABC):
 
             cache = os.path.join(
                 self.cache_path,
-                self.directory_formatted_doi,
                 "cache",
+                self.directory_formatted_doi,
                 self._directory_formatted_id + ".h5ad"
             )
             return cache
