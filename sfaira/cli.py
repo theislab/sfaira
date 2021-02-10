@@ -82,7 +82,8 @@ def create_dataloader() -> None:
 def clean_dataloader(path) -> None:
     """
     Clean a just written sfaira dataloader to adhere to sfaira's standards.
-    :param path: Path to an existing dataloader
+
+    PATH to the dataloader script.
     """
     dataloader_cleaner = DataloaderCleaner(path)
     dataloader_cleaner.clean_dataloader()
@@ -93,7 +94,8 @@ def clean_dataloader(path) -> None:
 def lint_dataloader(path) -> None:
     """
     Verifies the dataloader against sfaira's requirements.
-    :param path: Path to an existing dataloader
+
+    PATH to the dataloader script.
     """
     dataloader_linter = DataloaderLinter()
     dataloader_linter.lint(path)
