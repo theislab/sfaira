@@ -34,5 +34,4 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
 
     def _load_full(self) -> anndata.AnnData:
         fn = os.path.join(self.doi_path, )  # ToDo: add the name of the raw file
-        adata = anndata.AnnData()  # ToDo: load full data into AnnData object and return it (no subsetting!)
-        return adata
+        # ToDo: load full data into AnnData object (no subsetting!)
