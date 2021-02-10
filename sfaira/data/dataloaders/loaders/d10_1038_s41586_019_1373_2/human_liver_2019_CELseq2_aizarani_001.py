@@ -27,7 +27,7 @@ class Dataset(DatasetBase):
         self.normalization = "raw"
         self.organ = "liver"
         self.organism = "human"
-        self.protocol = "CEL-Seq2"
+        self.protocol = "CEL-seq2"
         self.state_exact = "healthy"
         self.year = 2019
 
