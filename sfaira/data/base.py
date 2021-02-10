@@ -183,7 +183,11 @@ class DatasetBase(abc.ABC):
         gc.collect()
 
     def download(self, **kwargs):
-        assert self.download_url_data is not None, f"Download_url_data for dataset {self.id} is None, cannot download dataset."
+        assert self.download_url_data is not None, f"The `download_url_data` attribute of dataset {self.id} " \
+                                                   f"is not set, cannot download dataset."
+        assert self.doi_path is not None, f"No path was provided when instantiating the dataset container, " \
+                                          f"cannot download datasets."
+
         urls = [self.download_url_data] if isinstance(self.download_url_data, str) else self.download_url_data
 
         if isinstance(self.download_url_meta, str):
@@ -194,25 +198,33 @@ class DatasetBase(abc.ABC):
         for url in urls:
             if url.split(",")[0] == 'private':
                 if "," in url:
-                    print(f"Warning: Dataset {self.id} is not available for automatic download, please manually copy "
-                          f"the file {','.join(url.split(',')[1:])} to the following location: {savedir}")
+                    if os.path.isfile(os.path.join(self.doi_path, fn)):
+                        warnings.warn(f"File {fn} already found on disk, skipping download.")
+                    else:
+                        warnings.warn(f"Dataset {self.id} is not available for automatic download, please manually "
+                                      f"copy the file {','.join(url.split(',')[1:])} to the following location: "
+                                      f"{self.doi_path}")
                 else:
-                    print(f"Warning: A file for dataset {self.id} is not available for automatic download, please"
-                          f"manually copy the associated file to the following location: {savedir}")
-                continue
+                    warnings.warn(f"A file for dataset {self.id} is not available for automatic download, please"
+                                  f"manually copy the associated file to the following location: {self.doi_path}")
 
-            if url.split(",")[0].startswith('syn'):
+            elif url.split(",")[0].startswith('syn'):
                 fn = ",".join(url.split(",")[1:])
-                self._download_synapse(url.split(",")[0], fn, **kwargs)
-                continue
+                if os.path.isfile(os.path.join(self.doi_path, fn)):
+                    warnings.warn(f"File {fn} already found on disk, skipping download.")
+                else:
+                    self._download_synapse(url.split(",")[0], fn, **kwargs)
 
-            url = urllib.parse.unquote(url)
-            if 'Content-Disposition' in urllib.request.urlopen(url).info().keys():
-                fn = cgi.parse_header(urllib.request.urlopen(url).info()['Content-Disposition'])[1]["filename"]
             else:
-                fn = url.split("/")[-1]
-
-            urllib.request.urlretrieve(url, os.path.join(self.doi_path, fn))
+                url = urllib.parse.unquote(url)
+                if 'Content-Disposition' in urllib.request.urlopen(url).info().keys():
+                    fn = cgi.parse_header(urllib.request.urlopen(url).info()['Content-Disposition'])[1]["filename"]
+                else:
+                    fn = url.split("/")[-1]
+                if os.path.isfile(os.path.join(self.doi_path, fn)):
+                    warnings.warn(f"File {fn} already found on disk, skipping download.")
+                else:
+                    urllib.request.urlretrieve(url, os.path.join(self.doi_path, fn))
 
     def _download_synapse(self, synapse_entity, fn, **kwargs):
         try:
@@ -1796,6 +1808,10 @@ class DatasetGroup:
             if not os.path.exists(fn) or not protected_writing:
                 tab.to_csv(fn, index=False)
 
+    def download(self, **kwargs):
+        for _, v in self.datasets.items():
+            v.download(**kwargs)
+
     @property
     def ids(self):
         return list(self.datasets.keys())
@@ -2162,6 +2178,10 @@ class DatasetSuperGroup:
                 assert k not in ds.keys(), f"{k} was duplicated in super group, purge duplicates before flattening"
                 ds[k] = v
         return DatasetGroup(datasets=ds)
+
+    def download(self, **kwargs):
+        for x in self.dataset_groups:
+            x.download(**kwargs)
 
     def load_all(
             self,
