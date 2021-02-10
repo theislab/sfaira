@@ -119,7 +119,6 @@ class DatasetBase(abc.ABC):
         self.path = path
         self.meta_path = meta_path
         self.cache_path = cache_path
-        self.doi_path = None if path is None else os.path.join(path, "raw", self.directory_formatted_doi)
 
         self._age = None
         self._author = None
@@ -163,6 +162,8 @@ class DatasetBase(abc.ABC):
 
         self._ontology_celltypes = None
         self._ontology_class_map = None
+
+        self.doi_path = None if path is None else os.path.join(path, "raw", self.directory_formatted_doi)
 
     @abc.abstractmethod
     def _load(self):
