@@ -3,7 +3,7 @@ name: Create sfaira data-loader templates
 on: [push, pull_request]
 
 jobs:
-  build:
+  create-templates:
     runs-on: ${{ matrix.os }}
     if: "!contains(github.event.head_commit.message, '[skip ci]') && !contains(github.event.head_commit.message, '[ci skip]')"
     strategy:
@@ -43,7 +43,7 @@ jobs:
       - name: Create multiple_datasets_streamlined template
         run: |
           cd ..
-          echo -e "\033[B\n\033[B\n\n\n\n\n\n\n\n\n\n" | sfaira create-dataloader
+          echo -e "\033[B\n\033[B\n\n\n\n\n\n\n\n\n\n\n" | sfaira create-dataloader
           rm -rf d10_1000_j_journal_2021_01_001/
 
       - name: Create multiple_datasets_not_streamlined template
