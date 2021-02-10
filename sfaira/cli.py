@@ -1,4 +1,3 @@
-import importlib
 import logging
 import os
 import sys
@@ -8,11 +7,12 @@ import rich
 import rich.logging
 from rich import traceback
 from rich import print
+
+from sfaira.commands.clean_dataloader import DataloaderCleaner
 from sfaira.commands.lint_dataloader import DataloaderLinter
 
 import sfaira
 from sfaira.commands.create_dataloader import DataloaderCreator
-from sfaira.commands.templates.clean_dataloader import DataloaderCleaner
 from sfaira.commands.upgrade import UpgradeCommand
 
 WD = os.path.dirname(__file__)
