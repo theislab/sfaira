@@ -106,7 +106,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.var_symbol_col = "index"
 
     def _load(self, fn):
-        base_path = os.path.join(self.path, "mouse", self.organ)
+        base_path = os.path.join(self.path, "raw", self.directory_formatted_doi)
         fn = os.path.join(base_path, self.sample_fn)
 
         self.adata = anndata.read_h5ad(fn)
