@@ -8,6 +8,7 @@ import rich
 import rich.logging
 from rich import traceback
 from rich import print
+from sfaira.commands.lint_dataloader import DataloaderLinter
 
 import sfaira
 from sfaira.commands.create_dataloader import DataloaderCreator
@@ -44,7 +45,7 @@ def main():
 @click.pass_context
 def sfaira_cli(ctx, verbose, log_file):
     """
-    Create state of the art projects from production ready templates.
+    Create and manage sfaira dataloaders.
     """
     # Set the base logger to output DEBUG
     log.setLevel(logging.DEBUG)
@@ -68,25 +69,41 @@ def sfaira_cli(ctx, verbose, log_file):
 
 
 @sfaira_cli.command()
-def create_dataloader():
+def create_dataloader() -> None:
+    """
+    Interactively create a new sfaira dataloader.
+    """
     dataloader_creator = DataloaderCreator()
     dataloader_creator.create_dataloader()
 
 
 @sfaira_cli.command()
 @click.argument('path', type=click.Path(exists=True))
-def clean_dataloader(path):
+def clean_dataloader(path) -> None:
+    """
+    Clean a just written sfaira dataloader to adhere to sfaira's standards.
+    :param path: Path to an existing dataloader
+    """
     dataloader_cleaner = DataloaderCleaner(path)
     dataloader_cleaner.clean_dataloader()
 
 
 @sfaira_cli.command()
-def lint_dataloader():
-    pass
+@click.argument('path', type=click.Path(exists=True))
+def lint_dataloader(path) -> None:
+    """
+    Verifies the dataloader against sfaira's requirements.
+    :param path: Path to an existing dataloader
+    """
+    dataloader_linter = DataloaderLinter()
+    dataloader_linter.lint(path)
 
 
 @sfaira_cli.command()
 def test_dataloader():
+    """
+    Runs a dataloader unit test.
+    """
     pass
 
 
