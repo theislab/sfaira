@@ -189,6 +189,8 @@ class DatasetBase(abc.ABC):
                                       f"cannot download datasets."
 
         self.doi_path = os.path.join(self.path, "raw", self.directory_formatted_doi)
+        if not os.path.exists(self.doi_path):
+            os.makedirs(self.doi_path)
 
         urls = self.download_url_data[0][0] + self.download_url_meta[0][0]
 
