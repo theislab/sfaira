@@ -23,7 +23,7 @@ class Dataset(DatasetBase):
         self.download_url_meta = None
 
         self.author = "Kenigsberg"
-        self.doi = "v"
+        self.doi = "10.1016/j.cell.2019.08.008"
         self.healthy = True
         self.normalization = "raw"
         self.organ = "ileum"
