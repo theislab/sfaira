@@ -249,11 +249,11 @@ class DatasetBase(abc.ABC):
             return
         import shutil
         if "synapse_user" not in kwargs.keys():
-            warnings.warn(f"No synapse username provided, skipping download of synapse dataset {fn}."
+            print(f"No synapse username provided, skipping download of synapse dataset {fn}."
                           f"Provide your synapse username as the `synapse_user` argument to the download method.")
             return
         if "synapse_pw" not in kwargs.keys():
-            warnings.warn(f"No synapse password provided, skipping download of synapse dataset {fn}."
+            print(f"No synapse password provided, skipping download of synapse dataset {fn}."
                           f"Provide your synapse password as the `synapse_pw` argument to the download method.")
             return
         print(f"Downloading from synapse: {fn}")
