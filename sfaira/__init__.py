@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """A Data and Model Zoo for Single-Cell Genomics."""
 
-import warnings
-
 # import sfaira.interface as ui
 # import sfaira.train
 # import sfaira.models
@@ -26,12 +24,3 @@ __email__ = ', '.join([
     "leander.dony@helmholtz-muenchen.de",
     "david.fischer@helmholtz-muenchen.de"
 ])
-
-
-# Monkey-patching warnings to prettify warning messages
-def custom_formatwarning(msg, *args, **kwargs):
-    # ignore everything except the message
-    return str(msg) + '\n'
-
-
-warnings.formatwarning = custom_formatwarning
