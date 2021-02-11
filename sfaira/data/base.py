@@ -13,9 +13,11 @@ import pydoc
 import scipy.sparse
 from typing import Dict, List, Tuple, Union
 import warnings
-import urllib.parse
 import urllib.request
+import urllib.parse
+import urllib.error
 import cgi
+import ssl
 
 from sfaira.versions.genome_versions import SuperGenomeContainer
 from sfaira.versions.metadata import Ontology, CelltypeUniverse, ONTOLOGY_UBERON
@@ -218,6 +220,14 @@ class DatasetBase(abc.ABC):
 
             else:
                 url = urllib.parse.unquote(url)
+
+                # Catch SSLCertVerificationError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed:
+                # unable to get local issuer certificate (_ssl.c:1124)
+                try:
+                    urllib.request.urlopen(url)
+                except urllib.error.URLError:
+                    ssl._create_default_https_context = ssl._create_unverified_context
+
                 if 'Content-Disposition' in urllib.request.urlopen(url).info().keys():
                     fn = cgi.parse_header(urllib.request.urlopen(url).info()['Content-Disposition'])[1]["filename"]
                 else:
