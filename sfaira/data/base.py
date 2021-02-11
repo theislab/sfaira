@@ -217,7 +217,6 @@ class DatasetBase(abc.ABC):
                 if os.path.isfile(os.path.join(self.doi_path, fn)):
                     print(f"File {fn} already found on disk, skipping download.")
                 else:
-                    print(f"Downloading from synapse: {fn}")
                     self._download_synapse(url.split(",")[0], fn, **kwargs)
 
             else:
@@ -257,6 +256,7 @@ class DatasetBase(abc.ABC):
             warnings.warn(f"No synapse password provided, skipping download of synapse dataset {fn}."
                           f"Provide your synapse password as the `synapse_pw` argument to the download method.")
             return
+        print(f"Downloading from synapse: {fn}")
         syn = synapseclient.Synapse()
         syn.login(kwargs['synapse_user'], kwargs['synapse_pw'])
         dataset = syn.get(entity=synapse_entity)
