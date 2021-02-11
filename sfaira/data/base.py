@@ -247,14 +247,16 @@ class DatasetBase(abc.ABC):
                           "selected datasets. Run `pip install synapseclient` to install it. Skipping download of the "
                           f"following dataset: {self.id}")
             return
+        finally:  # without this statements the warnings below are not displayed properly
+            pass
         import shutil
         if "synapse_user" not in kwargs.keys():
-            print(f"No synapse username provided, skipping download of synapse dataset {fn}."
-                          f"Provide your synapse username as the `synapse_user` argument to the download method.")
+            warnings.warn(f"No synapse username provided, skipping download of synapse dataset {fn}."
+                  f"Provide your synapse username as the `synapse_user` argument to the download method.")
             return
         if "synapse_pw" not in kwargs.keys():
-            print(f"No synapse password provided, skipping download of synapse dataset {fn}."
-                          f"Provide your synapse password as the `synapse_pw` argument to the download method.")
+            warnings.warn(f"No synapse password provided, skipping download of synapse dataset {fn}."
+                  f"Provide your synapse password as the `synapse_pw` argument to the download method.")
             return
         print(f"Downloading from synapse: {fn}")
         syn = synapseclient.Synapse()
