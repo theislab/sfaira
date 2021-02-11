@@ -202,7 +202,7 @@ class DatasetBase(abc.ABC):
             if url.split(",")[0] == 'private':
                 if "," in url:
                     if os.path.isfile(os.path.join(self.doi_path, fn)):
-                        warnings.warn(f"File {fn} already found on disk, skipping download.")
+                        print(f"File {fn} already found on disk, skipping download.")
                     else:
                         warnings.warn(f"Dataset {self.id} is not available for automatic download, please manually "
                                       f"copy the file {','.join(url.split(',')[1:])} to the following location: "
@@ -214,8 +214,9 @@ class DatasetBase(abc.ABC):
             elif url.split(",")[0].startswith('syn'):
                 fn = ",".join(url.split(",")[1:])
                 if os.path.isfile(os.path.join(self.doi_path, fn)):
-                    warnings.warn(f"File {fn} already found on disk, skipping download.")
+                    print(f"File {fn} already found on disk, skipping download.")
                 else:
+                    print(f"Downloading from synapse: {fn}")
                     self._download_synapse(url.split(",")[0], fn, **kwargs)
 
             else:
@@ -233,8 +234,9 @@ class DatasetBase(abc.ABC):
                 else:
                     fn = url.split("/")[-1]
                 if os.path.isfile(os.path.join(self.doi_path, fn)):
-                    warnings.warn(f"File {fn} already found on disk, skipping download.")
+                    print(f"File {fn} already found on disk, skipping download.")
                 else:
+                    print(f"Downloading: {fn}")
                     urllib.request.urlretrieve(url, os.path.join(self.doi_path, fn))
 
     def _download_synapse(self, synapse_entity, fn, **kwargs):
