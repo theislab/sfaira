@@ -201,11 +201,12 @@ class DatasetBase(abc.ABC):
                 continue
             if url.split(",")[0] == 'private':
                 if "," in url:
+                    fn = ','.join(url.split(',')[1:])
                     if os.path.isfile(os.path.join(self.doi_path, fn)):
                         print(f"File {fn} already found on disk, skipping download.")
                     else:
                         warnings.warn(f"Dataset {self.id} is not available for automatic download, please manually "
-                                      f"copy the file {','.join(url.split(',')[1:])} to the following location: "
+                                      f"copy the file {fn} to the following location: "
                                       f"{self.doi_path}")
                 else:
                     warnings.warn(f"A file for dataset {self.id} is not available for automatic download, please"
