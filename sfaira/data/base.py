@@ -247,6 +247,7 @@ class DatasetBase(abc.ABC):
             warnings.warn("synapseclient python package not found. This package is required to download some of the "
                           "selected datasets. Run `pip install synapseclient` to install it. Skipping download of the "
                           f"following dataset: {self.id}")
+            return
         import shutil
         if "synapse_user" not in kwargs.keys():
             warnings.warn(f"No synapse username provided, skipping download of synapse dataset {fn}."
