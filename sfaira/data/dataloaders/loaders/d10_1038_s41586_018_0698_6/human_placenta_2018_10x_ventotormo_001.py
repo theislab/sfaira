@@ -26,8 +26,10 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.id = f"human_placenta_2018_{protocol}_ventotormo_{str(SAMPLE_FNS.index(self.sample_fn)).zfill(3)}_" \
                   f"10.1038/s41586-018-0698-6"
 
-        self.download_url_data = f"https://www.ebi.ac.uk/arrayexpress/files/E-MTAB-6701/{self.sample_fn}.1.zip"
-        self.download_url_meta = f"https://www.ebi.ac.uk/arrayexpress/files/E-MTAB-6701/{self.sample_fn}.2.zip"
+        self.download_url_data = f"https://www.ebi.ac.uk/arrayexpress/files/{self.sample_fn.split('.')[0]}/" \
+                                 f"{self.sample_fn}.1.zip"
+        self.download_url_meta = f"https://www.ebi.ac.uk/arrayexpress/files/{self.sample_fn.split('.')[0]}/" \
+                                 f"{self.sample_fn}.2.zip"
 
         self.author = "Teichmann"
         self.healthy = True
