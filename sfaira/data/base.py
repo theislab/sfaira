@@ -240,21 +240,27 @@ class DatasetBase(abc.ABC):
                     urllib.request.urlretrieve(url, os.path.join(self.doi_path, fn))
 
     def _download_synapse(self, synapse_entity, fn, **kwargs):
-        print(f"Downloading files for dataset {self.id} from synapse. If this fails, you either have not installed the "
-              f"python synapseclient (pip install synapseclient) or your provided synapse credentials are incorrect.")
-        import synapseclient
+        try:
+            import synapseclient
+        except ImportError:
+            warnings.warn("synapseclient python package not found. This package is required to download some of the "
+                          "selected datasets. Run `pip install synapseclient` to install it. Skipping download of the "
+                          f"following dataset: {self.id}")
+            return
+        finally:  # without this statements the warnings below are not displayed properly
+            pass
         import shutil
         if "synapse_user" not in kwargs.keys():
             warnings.warn(f"No synapse username provided, skipping download of synapse dataset {fn}."
-                          f"Provide your synapse username as the `synapse_user` argument to the download method.")
+                  f"Provide your synapse username as the `synapse_user` argument to the download method.")
             return
         if "synapse_pw" not in kwargs.keys():
             warnings.warn(f"No synapse password provided, skipping download of synapse dataset {fn}."
-                          f"Provide your synapse password as the `synapse_pw` argument to the download method.")
+                  f"Provide your synapse password as the `synapse_pw` argument to the download method.")
             return
+        print(f"Downloading from synapse: {fn}")
         syn = synapseclient.Synapse()
         syn.login(kwargs['synapse_user'], kwargs['synapse_pw'])
-        print(f"Successfully connected to synapse repository. Now downloading: {fn}")
         dataset = syn.get(entity=synapse_entity)
         shutil.move(dataset.path, os.path.join(self.doi_path, fn))
 
