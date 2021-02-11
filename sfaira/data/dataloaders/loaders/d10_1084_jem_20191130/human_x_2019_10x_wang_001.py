@@ -27,7 +27,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         organ = self.sample_fn.split("_")[1].split(".")[0]
         self.id = f"human_{organ}_2019_10x_wang_{str(SAMPLE_FNS.index(self.sample_fn)).zfill(3)}_10.1084/jem.20191130"
 
-        self.download = f"https://covid19.cog.sanger.ac.uk/wang20_{organ}.processed.h5ad"
+        self.download_url_data = f"https://covid19.cog.sanger.ac.uk/wang20_{organ}.processed.h5ad"
+        self.download_url_meta = None
 
         self.author = "Chen"
         self.doi = "10.1084/jem.20191130"
