@@ -18,12 +18,12 @@ class Dataset(DatasetBase):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "human_lung_2020_10x_habermann_001_10.1101/753806"
 
-        self.download = [
+        self.download_url_data = [
             "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE135nnn/GSE135893/suppl/GSE135893%5Fmatrix%2Emtx%2Egz",
             "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE135nnn/GSE135893/suppl/GSE135893%5Fgenes%2Etsv%2Egz",
             "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE135nnn/GSE135893/suppl/GSE135893%5Fbarcodes%2Etsv%2Egz"
         ]
-        self.download_meta = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE135nnn/GSE135893/suppl/GSE135893%5FIPF%5Fmetadata%2Ecsv%2Egz"
+        self.download_url_meta = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE135nnn/GSE135893/suppl/GSE135893%5FIPF%5Fmetadata%2Ecsv%2Egz"
 
         self.author = "Kropski"
         self.doi = "10.1101/753806"
@@ -76,14 +76,13 @@ class Dataset(DatasetBase):
             },
         }
 
-    def _load(self, fn=None):
-        if fn is None:
-            fn = [
-                os.path.join(self.path, "human", "lung", "GSE135893_matrix.mtx.gz"),
-                os.path.join(self.path, "human", "lung", "GSE135893_genes.tsv.gz"),
-                os.path.join(self.path, "human", "lung", "GSE135893_barcodes.tsv.gz"),
-                os.path.join(self.path, "human", "lung", "GSE135893_IPF_metadata.csv.gz"),
-            ]
+    def _load(self):
+        fn = [
+            os.path.join(self.doi_path, "GSE135893_matrix.mtx.gz"),
+            os.path.join(self.doi_path, "GSE135893_genes.tsv.gz"),
+            os.path.join(self.doi_path, "GSE135893_barcodes.tsv.gz"),
+            os.path.join(self.doi_path, "GSE135893_IPF_metadata.csv.gz"),
+        ]
         self.adata = anndata.read_mtx(fn[0]).T
         self.adata.var = pd.read_csv(fn[1], index_col=0, header=None, names=["ids"])
         self.adata.obs = pd.read_csv(fn[2], index_col=0, header=None, names=["barcodes"])

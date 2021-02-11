@@ -41,8 +41,8 @@ class DatasetInteractive(DatasetBase):
         self.author = "interactive_dataset"
         self.doi = "interactive_dataset"
 
-        self.download = "."
-        self.download_meta = "."
+        self.download_url_data = "."
+        self.download_url_meta = "."
 
         # self.age  # not currently supported
         # self.dev_stage  # not currently supported
@@ -75,5 +75,5 @@ class DatasetInteractive(DatasetBase):
 
         self.adata = data
 
-    def _load(self, fn=None):
+    def _load(self):
         pass

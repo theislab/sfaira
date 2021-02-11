@@ -18,8 +18,8 @@ class Dataset(DatasetBase):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "human_thymus_2020_10x_park_001_10.1126/science.aay3224"
 
-        self.download = "https://covid19.cog.sanger.ac.uk/park20.processed.h5ad"
-        self.download_meta = None
+        self.download_url_data = "https://covid19.cog.sanger.ac.uk/park20.processed.h5ad"
+        self.download_url_meta = None
 
         self.author = "Teichmann"
         self.doi = "10.1126/science.aay3224"
@@ -84,8 +84,7 @@ class Dataset(DatasetBase):
             },
         }
 
-    def _load(self, fn=None):
-        if fn is None:
-            fn = os.path.join(self.path, "human", "thymus", "park20.processed.h5ad")
+    def _load(self):
+        fn = os.path.join(self.doi_path, "park20.processed.h5ad")
         self.adata = anndata.read(fn)
         self.adata.X = np.expm1(self.adata.X)

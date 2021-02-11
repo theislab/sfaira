@@ -17,8 +17,8 @@ class Dataset(DatasetBase):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "human_liver_2019_10x_popescu_001_10.1038/s41586-019-1652-y"
 
-        self.download = "private"
-        self.download_meta = "private"
+        self.download_url_data = "private,fetal_liver_alladata_.h5ad"
+        self.download_url_meta = None
 
         self.author = "Haniffa"
         self.doi = "10.1038/s41586-019-1652-y"
@@ -66,7 +66,6 @@ class Dataset(DatasetBase):
             },
         }
 
-    def _load(self, fn=None):
-        if fn is None:
-            fn = os.path.join(self.path, "human", "liver", "fetal_liver_alladata_.h5ad")
+    def _load(self):
+        fn = os.path.join(self.doi_path, "fetal_liver_alladata_.h5ad")
         self.adata = anndata.read(fn)

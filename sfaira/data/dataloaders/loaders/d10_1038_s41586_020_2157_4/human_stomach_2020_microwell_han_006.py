@@ -18,5 +18,5 @@ class Dataset(Dataset_d10_1038_s41586_020_2157_4):
             "0": {},
         }
 
-    def _load(self, fn=None):
-        self._load_generalized(fn=fn, sample_id="FetalIntestine_2")
+    def _load(self):
+        self._load_generalized(sample_id="FetalIntestine_2")

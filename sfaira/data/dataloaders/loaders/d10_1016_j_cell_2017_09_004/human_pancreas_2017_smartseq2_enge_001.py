@@ -23,8 +23,8 @@ class Dataset(DatasetBase):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "human_pancreas_2017_smartseq2_enge_001_10.1016/j.cell.2017.09.004"
 
-        self.download = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE81nnn/GSE81547/suppl/GSE81547_RAW.tar"
-        self.download_meta = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE81nnn/GSE81547/matrix/GSE81547_series_matrix.txt.gz"
+        self.download_url_data = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE81nnn/GSE81547/suppl/GSE81547_RAW.tar"
+        self.download_url_meta = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE81nnn/GSE81547/matrix/GSE81547_series_matrix.txt.gz"
 
         self.author = "Quake"
         self.doi = "10.1016/j.cell.2017.09.004"
@@ -52,12 +52,11 @@ class Dataset(DatasetBase):
             },
         }
 
-    def _load(self, fn=None):
-        if fn is None:
-            fn = [
-                os.path.join(self.path, "human", "pancreas", "GSE81547_RAW.tar"),
-                os.path.join(self.path, "human", "pancreas", "GSE81547_series_matrix.txt.gz")
-            ]
+    def _load(self):
+        fn = [
+            os.path.join(self.doi_path, "GSE81547_RAW.tar"),
+            os.path.join(self.doi_path, "GSE81547_series_matrix.txt.gz")
+        ]
         dfs = []
         with tarfile.open(fn[0]) as tar:
             for member in tar.getmembers():

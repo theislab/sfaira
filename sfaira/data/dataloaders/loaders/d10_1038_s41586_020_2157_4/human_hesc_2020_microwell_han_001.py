@@ -15,5 +15,5 @@ class Dataset(Dataset_d10_1038_s41586_020_2157_4):
         self.id = "human_hesc_2020_microwell_han_001_10.1038/s41586-020-2157-4"
         self.organ = "hesc"
 
-    def _load(self, fn=None):
-        self._load_generalized(fn=fn, sample_id="HESC_1")
+    def _load(self):
+        self._load_generalized(sample_id="HESC_1")

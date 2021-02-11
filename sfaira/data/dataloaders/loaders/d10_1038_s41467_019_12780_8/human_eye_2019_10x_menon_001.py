@@ -17,8 +17,8 @@ class Dataset(DatasetBase):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "human_eye_2019_10x_menon_001_10.1038/s41467-019-12780-8"
 
-        self.download = "https://covid19.cog.sanger.ac.uk/menon19.processed.h5ad"
-        self.download_meta = None
+        self.download_url_data = "https://covid19.cog.sanger.ac.uk/menon19.processed.h5ad"
+        self.download_url_meta = None
 
         self.author = "Hafler"
         self.doi = "10.1038/s41467-019-12780-8"
@@ -48,7 +48,6 @@ class Dataset(DatasetBase):
             },
         }
 
-    def _load(self, fn=None):
-        if fn is None:
-            fn = os.path.join(self.path, "human", "eye", "menon19.processed.h5ad")
+    def _load(self):
+        fn = os.path.join(self.doi_path, "menon19.processed.h5ad")
         self.adata = anndata.read(fn)

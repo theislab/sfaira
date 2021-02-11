@@ -18,8 +18,8 @@ class Dataset(DatasetBase):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "human_pancreas_2016_smartseq2_segerstolpe_001_10.1016/j.cmet.2016.08.020"
 
-        self.download = "https://www.ebi.ac.uk/arrayexpress/files/E-MTAB-5061/E-MTAB-5061.processed.1.zip"
-        self.download_meta = "https://www.ebi.ac.uk/arrayexpress/files/E-MTAB-5061/E-MTAB-5061.sdrf.txt"
+        self.download_url_data = "https://www.ebi.ac.uk/arrayexpress/files/E-MTAB-5061/E-MTAB-5061.processed.1.zip"
+        self.download_url_meta = "https://www.ebi.ac.uk/arrayexpress/files/E-MTAB-5061/E-MTAB-5061.sdrf.txt"
 
         self.author = "Sandberg"
         self.doi = "10.1016/j.cmet.2016.08.020"
@@ -56,12 +56,11 @@ class Dataset(DatasetBase):
             },
         }
 
-    def _load(self, fn=None):
-        if fn is None:
-            fn = [
-                os.path.join(self.path, "human", "pancreas", "E-MTAB-5061.processed.1.zip"),
-                os.path.join(self.path, "human", "pancreas", "E-MTAB-5061.sdrf.txt")
-            ]
+    def _load(self):
+        fn = [
+            os.path.join(self.doi_path, "E-MTAB-5061.processed.1.zip"),
+            os.path.join(self.doi_path, "E-MTAB-5061.sdrf.txt")
+        ]
         df = pd.read_csv(fn[0], sep="\t")
         df.index = df.index.get_level_values(0)
         df = df.drop("#samples", axis=1)

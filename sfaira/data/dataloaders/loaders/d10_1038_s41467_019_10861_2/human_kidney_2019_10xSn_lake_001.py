@@ -18,10 +18,10 @@ class Dataset(DatasetBase):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "human_kidney_2019_10xSn_lake_001_10.1038/s41467-019-10861-2"
 
-        self.download = "https://ftp.ncbi.nlm.nih.gov/geo/series/" \
-                        "GSE121nnn/GSE121862/suppl/GSE121862%5FUCSD%2DWU%5FSingle%5FNuclei%5FCluster%5FAnnotated%5FRaw%5FUMI%5FMatrix%2Etsv%2Egz"
-        self.download_meta = "https://ftp.ncbi.nlm.nih.gov/geo/series/" \
-                             "GSE121nnn/GSE121862/suppl/GSE121862%5FUCSD%2DWU%5FSingle%5FNuclei%5FCluster%5FAnnotations%2Ecsv%2Egz"
+        self.download_url_data = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE121nnn/GSE121862/suppl/" \
+            "GSE121862%5FUCSD%2DWU%5FSingle%5FNuclei%5FCluster%5FAnnotated%5FRaw%5FUMI%5FMatrix%2Etsv%2Egz"
+        self.download_url_meta = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE121nnn/GSE121862/suppl/" \
+            "GSE121862%5FUCSD%2DWU%5FSingle%5FNuclei%5FCluster%5FAnnotations%2Ecsv%2Egz"
 
         self.author = "Jain"
         self.doi = "10.1038/s41467-019-10861-2"
@@ -29,7 +29,7 @@ class Dataset(DatasetBase):
         self.normalization = "raw"
         self.organ = "kidney"
         self.organism = "human"
-        self.protocol = "10xSn"
+        self.protocol = "10X sequencing"
         self.state_exact = "healthy"
         self.year = 2019
 
@@ -69,12 +69,11 @@ class Dataset(DatasetBase):
             },
         }
 
-    def _load(self, fn=None):
-        if fn is None:
-            fn = [
-                os.path.join(self.path, "human", "kidney", "GSE121862_UCSD-WU_Single_Nuclei_Cluster_Annotated_Raw_UMI_Matrix.tsv.gz"),
-                os.path.join(self.path, "human", "kidney", "GSE121862_UCSD-WU_Single_Nuclei_Cluster_Annotations.csv.gz")
-            ]
+    def _load(self):
+        fn = [
+            os.path.join(self.doi_path, "GSE121862_UCSD-WU_Single_Nuclei_Cluster_Annotated_Raw_UMI_Matrix.tsv.gz"),
+            os.path.join(self.doi_path, "GSE121862_UCSD-WU_Single_Nuclei_Cluster_Annotations.csv.gz")
+        ]
         self.adata = anndata.AnnData(pd.read_csv(fn[0], sep="\t").T)
         annot = pd.read_csv(fn[1], index_col=0, dtype="category")
         self.adata.obs["celltype"] = [annot.loc[i.split("_")[0][1:]]["Annotation"] for i in self.adata.obs.index]
