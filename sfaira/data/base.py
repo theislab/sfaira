@@ -1610,7 +1610,7 @@ class DatasetBaseGroupLoadingOneFile(DatasetBase):
         :return:
         """
         assert self.adata is not None, "this method should only be called if .adata is not None"
-        for k, v in subset_items:
+        for k, v in subset_items.items():
             self.adata = self.adata[[x in v for x in self.adata.obs[k].values], :]
         self._unprocessed_full_group_object = False
 
