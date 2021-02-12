@@ -52,7 +52,7 @@ class Dataset(DatasetBase):
 
         :return:
         """
-        fn = os.path.join(self.data_path, self.fn)
+        fn = os.path.join(self.data_dir_base, self.fn)
         adata = anndata.read(fn)
         adata.X = adata.raw.X
         # TODO delete raw?
