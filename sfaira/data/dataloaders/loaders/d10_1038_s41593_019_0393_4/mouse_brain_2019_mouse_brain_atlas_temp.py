@@ -12,12 +12,12 @@ class Dataset(DatasetBase):
 
     def __init__(
             self,
-            path: Union[str, None] = None,
+            data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "mouse_brain_2019_10x_hove_001_10.1038/s41593-019-0393-4"
 
         self.download_url_data = \
@@ -52,8 +52,8 @@ class Dataset(DatasetBase):
 
     def _load(self):
         fn = [
-            os.path.join(self.doi_path, "filtered_gene_bc_matrices_mex_WT_fullAggr.zip"),
-            os.path.join(self.doi_path, "annot_fullAggr.csv")
+            os.path.join(self.data_dir, "filtered_gene_bc_matrices_mex_WT_fullAggr.zip"),
+            os.path.join(self.data_dir, "annot_fullAggr.csv")
         ]
 
         with zipfile.Zipfile(fn[0]) as archive:

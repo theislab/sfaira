@@ -32,12 +32,12 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
     def __init__(
             self,
             sample_fn: str,
-            path: Union[str, None] = None,
+            data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(sample_fn=sample_fn, path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        super().__init__(sample_fn=sample_fn, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = f"human_mixed_2019_10x_szabo_{str(SAMPLE_FNS.index(sample_fn)).zfill(3)}_10.1038/s41467-019-12464-3"
 
         self.download_url_data = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE126nnn/GSE126030/suppl/GSE126030_RAW.tar"
@@ -67,9 +67,9 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
 
     def _load(self):
         fn = [
-            os.path.join(self.doi_path, "GSE126030_RAW.tar"),
-            os.path.join(self.doi_path, "donor1.annotation.txt"),
-            os.path.join(self.doi_path, "donor2.annotation.txt")
+            os.path.join(self.data_dir, "GSE126030_RAW.tar"),
+            os.path.join(self.data_dir, "donor1.annotation.txt"),
+            os.path.join(self.data_dir, "donor2.annotation.txt")
         ]
         with tarfile.open(fn[0]) as tar:
             df = pd.read_csv(tar.extractfile(self.sample_fn), compression="gzip", sep="\t")
