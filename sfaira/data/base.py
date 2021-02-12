@@ -186,7 +186,7 @@ class DatasetBase(abc.ABC):
         assert self.download_url_data is not None, f"The `download_url_data` attribute of dataset {self.id} " \
                                                    f"is not set, cannot download dataset."
         assert self.data_dir_base is not None, "No path was provided when instantiating the dataset container, " \
-                                           "cannot download datasets."
+                                               "cannot download datasets."
 
         if not os.path.exists(self.data_dir):
             os.makedirs(self.data_dir)
