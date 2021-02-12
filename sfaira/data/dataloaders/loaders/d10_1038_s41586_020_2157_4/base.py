@@ -122,7 +122,7 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
     def __init__(
             self,
             sample_id: str,
-            path: Union[str, None] = None,
+            data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
@@ -130,7 +130,7 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
 
         super().__init__(
             sample_id=sample_id,
-            path=path,
+            data_path=data_path,
             meta_path=meta_path,
             cache_path=cache_path,
             **kwargs
@@ -290,7 +290,7 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
         # load celltype labels and harmonise them
         # This pandas code should work with pandas 1.2 but it does not and yields an empty data frame:
         fig1_anno = pd.read_excel(
-            os.path.join(self.path, "human", self.directory_formatted_doi, "HCL_Fig1_cell_Info.xlsx"),
+            os.path.join(self.data_dir_base, "human", self.directory_formatted_doi, "HCL_Fig1_cell_Info.xlsx"),
             index_col="cellnames",
             engine="xlrd",  # ToDo: Update when pandas xlsx reading with openpyxl is fixed: yields empty tables
         )
@@ -311,7 +311,7 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
             columns=["Cell_barcode", "Sample", "Batch", "Cell_id", "Cluster_id", "Ages", "Development_stage", "Method",
                      "Gender", "Source", "Biomaterial", "Name", "ident", "Celltype"])
         archive = zipfile.ZipFile(
-            os.path.join(self.path, "human", self.directory_formatted_doi, "annotation_rmbatch_data_revised417.zip")
+            os.path.join(self.data_dir_base, "human", self.directory_formatted_doi, "annotation_rmbatch_data_revised417.zip")
         )
         for f in archive.namelist():
             df1 = pd.read_csv(archive.open(f), encoding="unicode_escape")

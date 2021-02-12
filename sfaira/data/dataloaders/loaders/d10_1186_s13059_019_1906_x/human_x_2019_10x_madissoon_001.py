@@ -17,12 +17,12 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
     def __init__(
             self,
             sample_fn: str,
-            path: Union[str, None] = None,
+            data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(sample_fn=sample_fn, path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        super().__init__(sample_fn=sample_fn, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         organ = "lung parenchyma" if self.sample_fn == "madissoon19_lung.processed.h5ad" else \
             "esophagus" if self.sample_fn == "oesophagus.cellxgene.h5ad" else "spleen"
         self.id = f"human_{''.join(organ.split(' '))}_2019_10x_madissoon_" \
@@ -144,7 +144,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             }
 
     def _load(self):
-        fn = os.path.join(self.doi_path, self.sample_fn)
+        fn = os.path.join(self.data_dir, self.sample_fn)
         self.adata = anndata.read(fn)
         if self.sample_fn == "oesophagus.cellxgene.h5ad" or self.sample_fn == "spleen.cellxgene.h5ad":
             self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs["n_counts"].values[:, None]))\

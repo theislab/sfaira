@@ -12,13 +12,13 @@ class TestDatasetGroups(unittest.TestCase):
     dir_meta: str = "./test_data/meta"
 
     def test_load(self):
-        ds = DatasetSuperGroupSfaira(path=self.dir_data, meta_path=self.dir_meta, cache_path=self.dir_data)
+        ds = DatasetSuperGroupSfaira(data_path=self.dir_data, meta_path=self.dir_meta, cache_path=self.dir_data)
         ds.subset(key="organism", values=["mouse"])
         ds.subset(key="organ", values=["lung"])
         ds.load_all()
 
     def test_adata(self):
-        ds = DatasetSuperGroupSfaira(path=self.dir_data, meta_path=self.dir_meta, cache_path=self.dir_data)
+        ds = DatasetSuperGroupSfaira(data_path=self.dir_data, meta_path=self.dir_meta, cache_path=self.dir_data)
         ds.subset(key="organism", values=["mouse"])
         ds.subset(key="organ", values=["bladder"])
         _ = ds.adata
@@ -29,21 +29,21 @@ class TestDatasetSuperGroups(unittest.TestCase):
     dir_meta: str = "./test_data/meta"
 
     def test_load(self):
-        ds = DatasetSuperGroupSfaira(path=self.dir_data, meta_path=self.dir_meta, cache_path=self.dir_data)
+        ds = DatasetSuperGroupSfaira(data_path=self.dir_data, meta_path=self.dir_meta, cache_path=self.dir_data)
         ds.subset(key="organism", values=["mouse"])
         ds.subset(key="organ", values=["lung"])
         ds = DatasetSuperGroup(dataset_groups=[ds])
         ds.load_all()
 
     def test_adata(self):
-        ds = DatasetSuperGroupSfaira(path=self.dir_data, meta_path=self.dir_meta, cache_path=self.dir_data)
+        ds = DatasetSuperGroupSfaira(data_path=self.dir_data, meta_path=self.dir_meta, cache_path=self.dir_data)
         ds.subset(key="organism", values=["mouse"])
         ds.subset(key="organ", values=["lung"])
         ds = DatasetSuperGroup(dataset_groups=[ds])
         _ = ds.adata
 
     def test_load_backed_dense(self, genome="Mus_musculus_GRCm38_97"):
-        ds = DatasetSuperGroupSfaira(path=self.dir_data, meta_path=self.dir_meta, cache_path=self.dir_data)
+        ds = DatasetSuperGroupSfaira(data_path=self.dir_data, meta_path=self.dir_meta, cache_path=self.dir_data)
         ds.subset(key="organism", values=["mouse"])
         ds.subset(key="organ", values=["lung"])
         ds = DatasetSuperGroup(dataset_groups=[ds])
@@ -57,7 +57,7 @@ class TestDatasetSuperGroups(unittest.TestCase):
         assert isinstance(ds.adata.X[:], np.ndarray), "%s" % type(ds.adata.X)
 
     def test_load_backed_sparse(self, genome="Mus_musculus_GRCm38_97"):
-        ds = DatasetSuperGroupSfaira(path=self.dir_data, meta_path=self.dir_meta, cache_path=self.dir_data)
+        ds = DatasetSuperGroupSfaira(data_path=self.dir_data, meta_path=self.dir_meta, cache_path=self.dir_data)
         ds.subset(key="organism", values=["mouse"])
         ds.subset(key="organ", values=["lung"])
         ds = DatasetSuperGroup(dataset_groups=[ds])

@@ -8,11 +8,11 @@ class DatasetGroupPancreas(DatasetGroup):
 
     def __init__(
         self,
-        path: Union[str, None] = None,
+        data_path: Union[str, None] = None,
         meta_path: Union[str, None] = None,
         cache_path: Union[str, None] = None
     ):
-        dsg = DatasetSuperGroupSfaira(path=path, meta_path=meta_path, cache_path=cache_path)
+        dsg = DatasetSuperGroupSfaira(data_path=data_path, meta_path=meta_path, cache_path=cache_path)
         dsg.subset(key="id", values=[
             "human_pancreas_2016_indrop_baron_001",
             "human_pancreas_2016_smartseq2_segerstolpe_001",

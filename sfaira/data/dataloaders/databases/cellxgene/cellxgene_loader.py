@@ -9,19 +9,19 @@ class Dataset(DatasetBase):
     """
     This is a dataloader for downloaded h5ad from cellxgene.
 
-    :param path:
+    :param data_path:
     :param meta_path:
     :param kwargs:
     """
 
     def __init__(
             self,
-            path: Union[str, None],
+            data_path: Union[str, None],
             fn: str,
             meta_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(path=path, meta_path=meta_path, **kwargs)
+        super().__init__(data_path=data_path, meta_path=meta_path, **kwargs)
         self._ADATA_IDS_CELLXGENE = ADATA_IDS_CELLXGENE()
         self.fn = fn
 
@@ -52,7 +52,7 @@ class Dataset(DatasetBase):
 
         :return:
         """
-        fn = os.path.join(self.path, self.fn)
+        fn = os.path.join(self.data_dir_base, self.fn)
         adata = anndata.read(fn)
         adata.X = adata.raw.X
         # TODO delete raw?

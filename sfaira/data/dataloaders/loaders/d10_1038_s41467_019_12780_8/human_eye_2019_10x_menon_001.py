@@ -9,12 +9,12 @@ class Dataset(DatasetBase):
 
     def __init__(
             self,
-            path: Union[str, None] = None,
+            data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "human_eye_2019_10x_menon_001_10.1038/s41467-019-12780-8"
 
         self.download_url_data = "https://covid19.cog.sanger.ac.uk/menon19.processed.h5ad"
@@ -49,5 +49,5 @@ class Dataset(DatasetBase):
         }
 
     def _load(self):
-        fn = os.path.join(self.doi_path, "menon19.processed.h5ad")
+        fn = os.path.join(self.data_dir, "menon19.processed.h5ad")
         self.adata = anndata.read(fn)

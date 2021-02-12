@@ -13,18 +13,18 @@ class Dataset(DatasetBase):
 
     def __init__(
             self,
-            path: Union[str, None] = None,
+            data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "human_kidney_2020_10x_liao_001_10.1038/s41597-019-0351-8"
 
         self.download_url_data = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE131nnn/GSE131685/suppl/GSE131685_RAW.tar"
         self.download_url_meta = None
 
-        self.author = "Mo"
+        self.author = "Liao"
         self.healthy = True
         self.normalization = "raw"
         self.organ = "kidney"
@@ -37,12 +37,8 @@ class Dataset(DatasetBase):
         self.var_symbol_col = "names"
         self.var_ensembl_col = "ensembl"
 
-        self.class_maps = {
-            "0": {},
-        }
-
     def _load(self):
-        fn = os.path.join(self.doi_path, "GSE131685_RAW.tar")
+        fn = os.path.join(self.data_dir, "GSE131685_RAW.tar")
         adatas = []
         with tarfile.open(fn) as tar:
             for member in tar.getmembers():
@@ -61,4 +57,3 @@ class Dataset(DatasetBase):
                     self.adata.obs["sample"] = name
                     adatas.append(self.adata)
         self.adata = adatas[0].concatenate(adatas[1:])
-        del self.adata.obs["batch"]

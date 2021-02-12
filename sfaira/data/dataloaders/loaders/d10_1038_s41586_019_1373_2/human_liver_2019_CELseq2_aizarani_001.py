@@ -10,12 +10,12 @@ class Dataset(DatasetBase):
 
     def __init__(
             self,
-            path: Union[str, None] = None,
+            data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "human_liver_2019_mCELSeq2_aizarani_001_10.1038/s41586-019-1373-2"
 
         self.download_url_data = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE124nnn/GSE124395/suppl/GSE124395%5FNormalhumanlivercellatlasdata%2Etxt%2Egz"
@@ -81,8 +81,8 @@ class Dataset(DatasetBase):
 
     def _load(self):
         fn = [
-            os.path.join(self.doi_path, "GSE124395_Normalhumanlivercellatlasdata.txt.gz"),
-            os.path.join(self.doi_path, "GSE124395_clusterpartition.txt.gz")
+            os.path.join(self.data_dir, "GSE124395_Normalhumanlivercellatlasdata.txt.gz"),
+            os.path.join(self.data_dir, "GSE124395_clusterpartition.txt.gz")
         ]
         self.adata = anndata.AnnData(pd.read_csv(fn[0], sep="\t").T)
         celltype_df = pd.read_csv(fn[1], sep=" ")

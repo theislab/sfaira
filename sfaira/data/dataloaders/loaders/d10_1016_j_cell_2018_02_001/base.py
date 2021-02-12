@@ -15,12 +15,12 @@ class Dataset_d10_1016_j_cell_2018_02_001(DatasetBase):
 
     def __init__(
             self,
-            path: Union[str, None],
+            data_path: Union[str, None],
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
 
         self.download_url_data = "https://ndownloader.figshare.com/articles/5435866?private_link=865e694ad06d5857db4b"
         self.download_url_meta = None
@@ -40,7 +40,7 @@ class Dataset_d10_1016_j_cell_2018_02_001(DatasetBase):
         self.var_symbol_col = "index"
 
     def _load_generalized(self, samplename):
-        fn = os.path.join(self.doi_path, '5435866.zip')
+        fn = os.path.join(self.data_dir, '5435866.zip')
 
         with zipfile.ZipFile(fn) as archive:
             celltypes = pandas.read_csv(archive.open('MCA_CellAssignments.csv'), index_col=1)

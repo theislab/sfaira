@@ -316,7 +316,7 @@ class UserInterface:
         )
         dataset.load(
             celltype_version=None,
-            fn=None,
+            data_dir=None,
             remove_gene_version=remove_gene_version,
             match_to_reference=match_to_reference,
             load_raw=False,
