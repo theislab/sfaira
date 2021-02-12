@@ -20,7 +20,6 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-
         super().__init__(
             sample_id=sample_id,
             data_path=data_path,
@@ -28,7 +27,6 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
             cache_path=cache_path,
             **kwargs
         )
-
         self.obs_key_sample = "derived_organ_parts_label"
         self.id = f"human_{'blood' if sample_id == 'umbilical cord blood' else 'bone'}_2018_10x_ica_" \
                   f"{str(SAMPLE_IDS.index(self.sample_id)).zfill(3)}_unknown"
@@ -38,7 +36,7 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
         self.download_url_meta = None
 
         self.author = "Regev"
-        self.doi = "no_doi"
+        self.doi = "no_doi_10x_genomics"
         self.healthy = True
         self.normalization = "raw"
         self.organ = "blood" if sample_id == "umbilical cord blood" else "bone marrow"
