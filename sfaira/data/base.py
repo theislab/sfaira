@@ -1565,7 +1565,7 @@ class DatasetBaseGroupLoadingOneFile(DatasetBase):
         return self._sample_id
 
     @abc.abstractmethod
-    def _load_full(self) -> anndata.AnnData:
+    def _load_full(self):
         """
         Loads a raw anndata object that correponds to a superset of the data belonging to this Dataset.
 
@@ -1577,7 +1577,9 @@ class DatasetBaseGroupLoadingOneFile(DatasetBase):
     def set_raw_full_group_object(self, adata_group: Union[None, anndata.AnnData] = None):
         if self.adata is None and adata_group is not None:
             self.adata = adata_group
-        elif self.adata is None and adata_group is not None:
+        elif self.adata is None and adata_group is None:
+            self._load_full()
+        elif self.adata is not None and not self._unprocessed_full_group_object:
             self._load_full()
         elif self.adata is not None and self._unprocessed_full_group_object:
             pass
@@ -1610,12 +1612,12 @@ class DatasetBaseGroupLoadingOneFile(DatasetBase):
         assert self.adata is not None, "this method should only be called if .adata is not None"
         for k, v in subset_items:
             self.adata = self.adata[[x in v for x in self.adata.obs[k].values], :]
+        self._unprocessed_full_group_object = False
 
     def _load(self):
         _ = self.set_raw_full_group_object(adata_group=None)
         if self._unprocessed_full_group_object:
             self._load_from_group()
-        self._unprocessed_full_group_object = False
 
 
 class DatasetBaseGroupLoadingManyFiles(DatasetBase, abc.ABC):

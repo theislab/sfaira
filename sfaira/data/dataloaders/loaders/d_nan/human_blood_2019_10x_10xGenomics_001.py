@@ -46,10 +46,6 @@ class Dataset(DatasetBase):
         self.var_symbol_col = "index"
         self.var_ensembl_col = "gene_ids"
 
-        self.class_maps = {
-            "0": {},
-        }
-
     def _load(self):
         fn = os.path.join(self.data_dir, "pbmc_10k_v3_filtered_feature_bc_matrix.h5ad")
         self.adata = anndata.read(fn)
