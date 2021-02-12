@@ -50,10 +50,6 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
         self.var_symbol_col = "index"
         self.var_ensembl_col = "Accession"
 
-        self.class_maps = {
-            "0": {},
-        }
-
     def _load_full(self):
         fn = os.path.join(self.data_dir, "cc95ff89-2e68-4a08-a234-480eca21ce79.homo_sapiens.loom")
         self.adata = anndata.read_loom(fn)
