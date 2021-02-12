@@ -273,7 +273,7 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
         self.var_symbol_col = "index"
 
     def _load_full(self):
-        self.adata = anndata.read(os.path.join(self.path, "human", self.directory_formatted_doi, "HCL_Fig1_self.adata.h5ad"))
+        self.adata = anndata.read(os.path.join(self.data_dir, "HCL_Fig1_self.adata.h5ad"))
         # convert to sparse matrix
         self.adata.X = scipy.sparse.csr_matrix(self.adata.X).copy()
 
@@ -284,7 +284,7 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
             "AdultGallBladder", "AdultGallbladder", regex=True).str.replace(
             "FetalFemaleGonald", "FetalFemaleGonad", regex=True)
         self.adata.obs.replace({"AdultJeJunum": "AdultJejunum", "AdultGallBladder": "AdultGallbladder",
-                           "FetalFemaleGonald": "FetalFemaleGonad"}, regex=True, inplace=True)
+                                "FetalFemaleGonald": "FetalFemaleGonad"}, regex=True, inplace=True)
         self.adata.obs.index = ["-".join(i.split("-")[:-1]) for i in self.adata.obs.index]
 
         # load celltype labels and harmonise them
@@ -304,28 +304,28 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
         # add annotations to self.adata object and rename columns
         self.adata.obs = pd.concat([self.adata.obs, fig1_anno[["cluster", "stage", "donor", "celltype"]]], axis=1)
         self.adata.obs.columns = ["sample", "tissue", "n_genes", "n_counts", "cluster_global", "stage", "donor",
-                             "celltype_global"]
+                                  "celltype_global"]
 
         # add sample-wise annotations to the full self.adata object
         df = pd.DataFrame(
             columns=["Cell_barcode", "Sample", "Batch", "Cell_id", "Cluster_id", "Ages", "Development_stage", "Method",
                      "Gender", "Source", "Biomaterial", "Name", "ident", "Celltype"])
-        archive = zipfile.ZipFile(
-            os.path.join(self.data_dir_base, "human", self.directory_formatted_doi, "annotation_rmbatch_data_revised417.zip")
-        )
+        archive = zipfile.ZipFile(os.path.join(self.data_dir, "annotation_rmbatch_data_revised417.zip"))
         for f in archive.namelist():
             df1 = pd.read_csv(archive.open(f), encoding="unicode_escape")
             df = pd.concat([df, df1], sort=True)
         df = df.set_index("Cell_id")
         self.adata = self.adata[[i in df.index for i in self.adata.obs.index]].copy()
         a_idx = self.adata.obs.index.copy()
-        self.adata.obs = pd.concat([self.adata.obs, df[["Ages", "Celltype", "Cluster_id", "Gender", "Method", "Source"]]], axis=1)
+        self.adata.obs = pd.concat([self.adata.obs, df[
+            ["Ages", "Celltype", "Cluster_id", "Gender", "Method", "Source"]
+        ]], axis=1)
         assert np.all(a_idx == self.adata.obs.index)
 
         # remove mouse cells from the object  # ToDo: add this back in as mouse data sets?
         self.adata = self.adata[self.adata.obs["Source"] != "MCA2.0"].copy()
 
         # tidy up the column names of the obs annotations
-        self.adata.obs.columns = ["sample", "sub_tissue", "n_genes", "n_counts", "cluster_global", "dev_stage",
-                             "donor", "celltype_global", "age", "celltype_specific", "cluster_specific", "gender",
-                             "protocol", "source"]
+        self.adata.obs.columns = [
+            "sample", "sub_tissue", "n_genes", "n_counts", "cluster_global", "dev_stage", "donor", "celltype_global",
+            "age", "celltype_specific", "cluster_specific", "gender", "protocol", "source"]
