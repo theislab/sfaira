@@ -14,23 +14,24 @@ class Dataset(DatasetBase):
     import scanpy
     scanpy.read_10x_h5("pbmc_10k_v3_filtered_feature_bc_matrix.h5").write("pbmc_10k_v3_filtered_feature_bc_matrix.h5ad")
 
-    :param path:
+    :param data_path:
     :param meta_path:
     :param kwargs:
     """
 
     def __init__(
             self,
-            path: Union[str, None] = None,
+            data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "human_blood_2019_10x_10xGenomics_001_unknown"
 
-        self.download = "http://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_10k_v3/pbmc_10k_v3_filtered_feature_bc_matrix.h5"
-        self.download_meta = None
+        self.download_url_data = \
+            "http://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_10k_v3/pbmc_10k_v3_filtered_feature_bc_matrix.h5"
+        self.download_url_meta = None
 
         self.author = "10x Genomics"
         self.doi = "no_doi"
@@ -49,7 +50,6 @@ class Dataset(DatasetBase):
             "0": {},
         }
 
-    def _load(self, fn=None):
-        if fn is None:
-            fn = os.path.join(self.path, "human", "blood", "pbmc_10k_v3_filtered_feature_bc_matrix.h5ad")
+    def _load(self):
+        fn = os.path.join(self.data_dir, "pbmc_10k_v3_filtered_feature_bc_matrix.h5ad")
         self.adata = anndata.read(fn)

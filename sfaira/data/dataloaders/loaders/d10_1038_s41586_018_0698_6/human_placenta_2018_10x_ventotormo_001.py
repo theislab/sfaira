@@ -16,18 +16,20 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
     def __init__(
             self,
             sample_fn: str,
-            path: Union[str, None] = None,
+            data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(sample_fn=sample_fn, path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        super().__init__(sample_fn=sample_fn, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         protocol = "10x" if self.sample_fn == "E-MTAB-6678.processed" else "smartseq2"
         self.id = f"human_placenta_2018_{protocol}_ventotormo_{str(SAMPLE_FNS.index(self.sample_fn)).zfill(3)}_" \
                   f"10.1038/s41586-018-0698-6"
 
-        self.download = f"https://www.ebi.ac.uk/arrayexpress/files/E-MTAB-6701/{self.sample_fn}.1.zip"
-        self.download_meta = f"https://www.ebi.ac.uk/arrayexpress/files/E-MTAB-6701/{self.sample_fn}.2.zip"
+        self.download_url_data = f"https://www.ebi.ac.uk/arrayexpress/files/{self.sample_fn.split('.')[0]}/" \
+                                 f"{self.sample_fn}.1.zip"
+        self.download_url_meta = f"https://www.ebi.ac.uk/arrayexpress/files/{self.sample_fn.split('.')[0]}/" \
+                                 f"{self.sample_fn}.2.zip"
 
         self.author = "Teichmann"
         self.healthy = True
@@ -81,11 +83,10 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             },
         }
 
-    def _load(self, fn=None):
-        base_path = os.path.join(self.path, "human", "placenta")
+    def _load(self):
         fn = [
-            os.path.join(base_path, f"{self.sample_fn}.1.zip"),
-            os.path.join(base_path, f"{self.sample_fn}.2.zip"),
+            os.path.join(self.data_dir, f"{self.sample_fn}.1.zip"),
+            os.path.join(self.data_dir, f"{self.sample_fn}.2.zip"),
         ]
         self.adata = anndata.AnnData(pd.read_csv(fn[0], sep="\t", index_col="Gene").T)
         df = pd.read_csv(fn[1], sep="\t")

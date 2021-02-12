@@ -16,7 +16,7 @@ class DatasetInteractive(DatasetBase):
             obs_key_celltypes: Union[str, None] = None,
             class_maps: dict = {},
             dataset_id: str = "interactive_dataset",
-            path: Union[str, None] = ".",
+            data_path: Union[str, None] = ".",
             meta_path: Union[str, None] = ".",
             cache_path: Union[str, None] = ".",
     ):
@@ -31,18 +31,18 @@ class DatasetInteractive(DatasetBase):
         :param obs_key_celltypes: .obs column name which contains cell type labels.
         :param class_maps: Cell type class maps.
         :param dataset_id: Identifer of data set.
-        :param path:
+        :param data_path:
         :param meta_path:
         :param cache_path:
         """
-        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path)
+        super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path)
         self.id = dataset_id
 
         self.author = "interactive_dataset"
         self.doi = "interactive_dataset"
 
-        self.download = "."
-        self.download_meta = "."
+        self.download_url_data = "."
+        self.download_url_meta = "."
 
         # self.age  # not currently supported
         # self.dev_stage  # not currently supported
@@ -75,5 +75,5 @@ class DatasetInteractive(DatasetBase):
 
         self.adata = data
 
-    def _load(self, fn=None):
+    def _load(self):
         pass

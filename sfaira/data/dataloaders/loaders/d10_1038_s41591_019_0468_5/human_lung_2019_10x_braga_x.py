@@ -16,16 +16,17 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
     def __init__(
             self,
             sample_fn: str,
-            path: Union[str, None] = None,
+            data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(sample_fn=sample_fn, path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        super().__init__(sample_fn=sample_fn, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = f"human_lung_2019_10x_braga_{str(SAMPLE_FNS.index(self.sample_fn)).zfill(3)}_" \
                   f"10.1038/s41591-019-0468-5"
 
-        self.download = f"https://covid19.cog.sanger.ac.uk/{self.sample_fn}"
+        self.download_url_data = f"https://covid19.cog.sanger.ac.uk/{self.sample_fn}"
+        self.download_url_meta = None
 
         self.author = "Teichmann"
         self.doi = "10.1038/s41591-019-0468-5"
@@ -88,9 +89,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
                 },
             }
 
-    def _load(self, fn=None):
-        base_path = os.path.join(self.path, "human", "placenta")
-        fn = os.path.join(base_path, self.sample_fn)
+    def _load(self):
+        fn = os.path.join(self.data_dir, self.sample_fn)
         self.adata = anndata.read(fn)
         self.adata.X = np.expm1(self.adata.X)
 

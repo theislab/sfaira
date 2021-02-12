@@ -10,16 +10,16 @@ class Dataset(DatasetBase):
 
     def __init__(
             self,
-            path: Union[str, None] = None,
+            data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "human_liver_2018_10x_macparland_001_10.1038/s41467-018-06318-7"
 
-        self.download = "private"
-        self.download_meta = "private"
+        self.download_url_data = "private,GSE115469.csv.gz"
+        self.download_url_meta = "private,GSE115469_labels.txt"
 
         self.author = "McGilvray"
         self.doi = "10.1038/s41467-018-06318-7"
@@ -60,12 +60,11 @@ class Dataset(DatasetBase):
             },
         }
 
-    def _load(self, fn=None):
-        if fn is None:
-            fn = [
-                os.path.join(self.path, "human", "liver", "GSE115469.csv.gz"),
-                os.path.join(self.path, "human", "liver", "GSE115469_labels.txt")
-            ]
+    def _load(self):
+        fn = [
+            os.path.join(self.data_dir, "GSE115469.csv.gz"),
+            os.path.join(self.data_dir, "GSE115469_labels.txt")
+        ]
         self.adata = anndata.read_csv(fn[0]).T
         celltype_df = pd.read_csv(fn[1], sep="\t").set_index("CellName")
         self.adata.obs["celltype"] = [str(celltype_df.loc[i]["Cluster#"]) for i in self.adata.obs.index]

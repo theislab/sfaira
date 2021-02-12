@@ -9,19 +9,19 @@ class Dataset(DatasetBase):
     """
     This is a dataloader for downloaded h5ad from cellxgene.
 
-    :param path:
+    :param data_path:
     :param meta_path:
     :param kwargs:
     """
 
     def __init__(
             self,
-            path: Union[str, None],
+            data_path: Union[str, None],
             fn: str,
             meta_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(path=path, meta_path=meta_path, **kwargs)
+        super().__init__(data_path=data_path, meta_path=meta_path, **kwargs)
         self._ADATA_IDS_CELLXGENE = ADATA_IDS_CELLXGENE()
         self.fn = fn
 
@@ -44,23 +44,22 @@ class Dataset(DatasetBase):
             "0": {},
         }
 
-    def _load(self, fn=None):
+    def _load(self):
         """
         Note that in contrast to data set specific data loaders, here, the core attributes are only identified from
         the data in this function and are not already set in the constructor. These attributes can still be
         used through meta data containers after the data was loaded once.
 
-        :param fn:
         :return:
         """
-        fn = os.path.join(self.path, self.fn)
+        fn = os.path.join(self.data_path, self.fn)
         adata = anndata.read(fn)
         adata.X = adata.raw.X
         # TODO delete raw?
 
         self.author = adata.uns[self._ADATA_IDS_CELLXGENE.author][self._ADATA_IDS_CELLXGENE.author_names]
         self.doi = adata.uns[self._ADATA_IDS_CELLXGENE.doi]
-        self.download = self.download
+        self.download_url_data = self.download_url_data
         self.id = self.id
         self.normalization = 'raw'
         self.organ = str(self.fn).split("_")[3]  # TODO interface this properly

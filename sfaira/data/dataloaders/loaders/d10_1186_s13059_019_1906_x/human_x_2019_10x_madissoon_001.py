@@ -17,27 +17,31 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
     def __init__(
             self,
             sample_fn: str,
-            path: Union[str, None] = None,
+            data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(sample_fn=sample_fn, path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        super().__init__(sample_fn=sample_fn, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         organ = "lung parenchyma" if self.sample_fn == "madissoon19_lung.processed.h5ad" else \
             "esophagus" if self.sample_fn == "oesophagus.cellxgene.h5ad" else "spleen"
-        self.id = f'human_{"".join(organ.split(" "))}_2019_10x_madissoon_{str(SAMPLE_FNS.index(self.sample_fn)).zfill(3)}_10.1186/s13059-019-1906-x'
+        self.id = f"human_{''.join(organ.split(' '))}_2019_10x_madissoon_" \
+                  f"{str(SAMPLE_FNS.index(self.sample_fn)).zfill(3)}_10.1186/s13059-019-1906-x"
 
         if self.sample_fn == "madissoon19_lung.processed.h5ad":
-            "https://covid19.cog.sanger.ac.uk/madissoon19_lung.processed.h5ad"
+            self.download_url_data = "https://covid19.cog.sanger.ac.uk/madissoon19_lung.processed.h5ad"
             self.var_ensembl_col = "gene.ids.HCATisStab7509734"
         elif self.sample_fn == "oesophagus.cellxgene.h5ad":
-            self.download = "https://cellgeni.cog.sanger.ac.uk/tissue-stability/tissue-stability/oesophagus.cellxgene.h5ad"
-            # Associated HCA project: https://data.humancellatlas.org/explore/projects/c4077b3c-5c98-4d26-a614-246d12c2e5d7
+            self.download_url_data = \
+                "https://cellgeni.cog.sanger.ac.uk/tissue-stability/tissue-stability/oesophagus.cellxgene.h5ad"
+            # Associated DCP: https://data.humancellatlas.org/explore/projects/c4077b3c-5c98-4d26-a614-246d12c2e5d7
             self.var_ensembl_col = "gene_ids-HCATisStab7413619"
         else:
-            "https://cellgeni.cog.sanger.ac.uk/tissue-stability/tissue-stability/spleen.cellxgene.h5ad"
+            self.download_url_data = \
+                "https://cellgeni.cog.sanger.ac.uk/tissue-stability/tissue-stability/spleen.cellxgene.h5ad"
             self.var_ensembl_col = "gene_ids-HCATisStab7463846"
 
+        self.download_url_meta = None
         self.author = "Meyer"
         self.doi = "10.1186/s13059-019-1906-x"
         self.healthy = True
@@ -139,9 +143,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
                 },
             }
 
-    def _load(self, fn=None):
-        base_path = os.path.join(self.path, "human", self.organ)
-        fn = os.path.join(base_path, self.sample_fn)
+    def _load(self):
+        fn = os.path.join(self.data_dir, self.sample_fn)
         self.adata = anndata.read(fn)
         if self.sample_fn == "oesophagus.cellxgene.h5ad" or self.sample_fn == "spleen.cellxgene.h5ad":
             self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs["n_counts"].values[:, None]))\

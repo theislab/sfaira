@@ -11,16 +11,16 @@ class Dataset(DatasetBase):
 
     def __init__(
             self,
-            path: Union[str, None] = None,
+            data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "human_colon_2019_10x_smilie_001_10.1016/j.cell.2019.06.029"
 
-        self.download = "https://covid19.cog.sanger.ac.uk/smillie19_epi.processed.h5ad"
-        self.download_meta = None
+        self.download_url_data = "https://covid19.cog.sanger.ac.uk/smillie19_epi.processed.h5ad"
+        self.download_url_meta = None
 
         self.author = "Regev"
         self.doi = "10.1016/j.cell.2019.06.029"
@@ -79,9 +79,8 @@ class Dataset(DatasetBase):
             },
         }
 
-    def _load(self, fn=None):
-        if fn is None:
-            fn = os.path.join(self.path, "human", "colon", "smillie19_epi.processed.h5ad")
+    def _load(self):
+        fn = os.path.join(self.data_dir, "smillie19_epi.processed.h5ad")
         self.adata = anndata.read(fn)
         self.adata.X = np.expm1(self.adata.X)
         self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs["n_counts"].values[:, None]))\

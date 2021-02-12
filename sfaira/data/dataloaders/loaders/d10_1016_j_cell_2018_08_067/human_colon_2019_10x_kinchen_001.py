@@ -10,16 +10,19 @@ class Dataset(DatasetBase):
 
     def __init__(
             self,
-            path: Union[str, None] = None,
+            data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "human_colon_2019_10x_kinchen_001_10.1016/j.cell.2018.08.067"
 
-        self.download = "https://data.humancellatlas.org/project-assets/project-matrices/f8aa201c-4ff1-45a4-890e-840d63459ca2.homo_sapiens.loom"
-        self.download_meta = "private"
+        self.download_url_data = "https://data.humancellatlas.org/project-assets/project-matrices/f8aa201c-4ff1-45a4-890e-840d63459ca2.homo_sapiens.loom"
+        self.download_url_meta = [
+            "private,uc_meta_data_stromal_with_donor.txt",
+            "private,hc_meta_data_stromal_with_donor.txt",
+        ]
 
         self.author = "Simmons"
         self.doi = "10.1016/j.cell.2018.08.067"
@@ -56,13 +59,12 @@ class Dataset(DatasetBase):
             },
         }
 
-    def _load(self, fn=None):
-        if fn is None:
-            fn = [
-                os.path.join(self.path, "human", "colon", "f8aa201c-4ff1-45a4-890e-840d63459ca2.homo_sapiens.loom"),
-                os.path.join(self.path, "human", "colon", "uc_meta_data_stromal_with_donor.txt"),
-                os.path.join(self.path, "human", "colon", "hc_meta_data_stromal_with_donor.txt")
-            ]
+    def _load(self):
+        fn = [
+            os.path.join(self.data_dir, "f8aa201c-4ff1-45a4-890e-840d63459ca2.homo_sapiens.loom"),
+            os.path.join(self.data_dir, "uc_meta_data_stromal_with_donor.txt"),
+            os.path.join(self.data_dir, "hc_meta_data_stromal_with_donor.txt")
+        ]
         adata = anndata.read_loom(fn[0])
         ctuc = pd.read_csv(fn[1], sep="\t")
         cthealthy = pd.read_csv(fn[2], sep="\t")

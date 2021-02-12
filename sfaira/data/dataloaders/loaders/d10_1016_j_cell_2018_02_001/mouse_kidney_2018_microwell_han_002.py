@@ -7,15 +7,13 @@ class Dataset(Dataset_d10_1016_j_cell_2018_02_001):
 
     def __init__(
             self,
-            path: Union[str, None] = None,
+            data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-
+        super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "mouse_kidney_2018_microwell-seq_han_002_10.1016/j.cell.2018.02.001"
-        self.download = "https://ndownloader.figshare.com/articles/5435866?private_link=865e694ad06d5857db4b"
         self.organ = "kidney"
 
         self.class_maps = {
@@ -56,11 +54,5 @@ class Dataset(Dataset_d10_1016_j_cell_2018_02_001):
             },
         }
 
-    def _load(self, fn=None):
-        if fn is None:
-            if self.path is None:
-                raise ValueError("provide either fn in load or path in constructor")
-            fn = os.path.join(self.path, "mouse", "temp_mouse_atlas/500more_dge", "Kidney2_dge.txt.gz")
-            fn_meta = os.path.join(self.path, "mouse", "temp_mouse_atlas", "MCA_CellAssignments.csv")
-
-        self._load_generalized(fn=fn, fn_meta=fn_meta)
+    def _load(self):
+        self._load_generalized(samplename="Kidney2_dge")

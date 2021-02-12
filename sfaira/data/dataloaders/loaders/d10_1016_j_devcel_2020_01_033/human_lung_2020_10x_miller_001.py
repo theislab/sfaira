@@ -11,16 +11,16 @@ class Dataset(DatasetBase):
 
     def __init__(
             self,
-            path: Union[str, None] = None,
+            data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "human_lung_2020_10x_miller_001_10.1016/j.devcel.2020.01.033"
 
-        self.download = "https://covid19.cog.sanger.ac.uk/miller20.processed.h5ad"
-        self.download_meta = None
+        self.download_url_data = "https://covid19.cog.sanger.ac.uk/miller20.processed.h5ad"
+        self.download_url_meta = None
 
         self.author = "Spence"
         self.doi = "10.1016/j.devcel.2020.01.033"
@@ -66,9 +66,8 @@ class Dataset(DatasetBase):
             },
         }
 
-    def _load(self, fn=None):
-        if fn is None:
-            fn = os.path.join(self.path, "human", "lung", "miller20.processed.h5ad")
+    def _load(self):
+        fn = os.path.join(self.data_dir, "miller20.processed.h5ad")
         self.adata = anndata.read(fn)
         self.adata.X = np.expm1(self.adata.X)
         self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs["nUMI"].values[:, None]))\

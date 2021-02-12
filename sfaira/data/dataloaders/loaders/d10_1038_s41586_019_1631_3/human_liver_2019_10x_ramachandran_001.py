@@ -27,23 +27,23 @@ class Dataset(DatasetBase):
     ## Notebook cell 3
     sce.write("ramachandran.h5ad")
 
-    :param path:
+    :param data_path:
     :param meta_path:
     :param kwargs:
     """
 
     def __init__(
             self,
-            path: Union[str, None] = None,
+            data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "human_liver_2019_10x_ramachandran_001_10.1038/s41586-019-1631-3"
 
-        self.download = "https://datashare.is.ed.ac.uk/bitstream/handle/10283/3433/tissue.rdata"
-        self.download_meta = None
+        self.download_url_data = "https://datashare.is.ed.ac.uk/bitstream/handle/10283/3433/tissue.rdata"
+        self.download_url_meta = None
 
         self.author = "Henderson"
         self.doi = "10.1038/s41586-019-1631-3"
@@ -77,7 +77,6 @@ class Dataset(DatasetBase):
             },
         }
 
-    def _load(self, fn=None):
-        if fn is None:
-            fn = os.path.join(self.path, "human", "liver", "ramachandran.h5ad")
+    def _load(self):
+        fn = os.path.join(self.data_dir, "ramachandran.h5ad")
         self.adata = anndata.read(fn)
