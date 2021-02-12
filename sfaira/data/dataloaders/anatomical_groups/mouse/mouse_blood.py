@@ -8,11 +8,11 @@ class DatasetGroupBlood (DatasetGroup):
 
     def __init__(
         self,
-        path: Union[str, None] = None,
-        meta_path: Union[str, None] = None,
+        data_path: Union[str, None] = None,
+        meta_data_path: Union[str, None] = None,
         cache_path: Union[str, None] = None
     ):
-        dsg = DatasetSuperGroupSfaira(path=path, meta_path=meta_path, cache_path=cache_path)
+        dsg = DatasetSuperGroupSfaira(data_path=data_path, meta_path=meta_path, cache_path=cache_path)
         dsg.subset(key="id", values=[
             "mouse_blood_2018_microwell-seq_han_001_10.1016/j.cell.2018.02.001",
             "mouse_blood_2018_microwell-seq_han_002_10.1016/j.cell.2018.02.001",

@@ -10,12 +10,12 @@ class Dataset(DatasetBase):
 
     def __init__(
             self,
-            path: Union[str, None] = None,
+            data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "human_kidney_2019_10x_stewart_001_10.1126/science.aat5031"
 
         self.download_url_data = [
@@ -116,8 +116,8 @@ class Dataset(DatasetBase):
 
     def _load(self):
         fn = [
-            os.path.join(self.doi_path, "Mature_Full_v2.1.h5ad"),
-            os.path.join(self.doi_path, "Fetal_full.h5ad")
+            os.path.join(self.data_dir, "Mature_Full_v2.1.h5ad"),
+            os.path.join(self.data_dir, "Fetal_full.h5ad")
         ]
         adult = anndata.read(fn[0])
         fetal = anndata.read(fn[1])

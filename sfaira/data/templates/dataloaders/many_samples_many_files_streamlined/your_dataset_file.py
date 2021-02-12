@@ -14,14 +14,14 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
     def __init__(
             self,
             sample_fn: str,
-            path: Union[str, None] = None,
+            data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
     ):
         super().__init__(
             sample_fn=sample_fn,
-            path=path,
+            data_path=data_path,
             meta_path=meta_path,
             cache_path=cache_path,
             **kwargs
@@ -31,5 +31,5 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         # ToDo Add you meta data here.
 
     def _load(self):
-        fn = os.path.join(self.doi_path, self.sample_fn)
+        fn = os.path.join(self.data_dir, self.sample_fn)
         # ToDo: load file fn into self.adata, self.sample_fn represents the current filename.

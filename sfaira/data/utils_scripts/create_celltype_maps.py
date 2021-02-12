@@ -12,7 +12,7 @@ print(tf.__version__)
 # Set global variables.
 print("sys.argv", sys.argv)
 
-path = str(sys.argv[1])
+data_path = str(sys.argv[1])
 path_meta = str(sys.argv[2])
 path_cache = str(sys.argv[3])
 processes = int(str(sys.argv[4]))
@@ -58,7 +58,7 @@ for dir_study in os.listdir(dir_sfaira_dataloaders):
                             datasets_f = [
                                 DatasetFound(
                                     sample_fn=x,
-                                    path=path,
+                                    data_path=data_path,
                                     meta_path=path_meta,
                                     cache_path=path_cache
                                 )
@@ -69,7 +69,7 @@ for dir_study in os.listdir(dir_sfaira_dataloaders):
                             datasets_f = [
                                 DatasetFound(
                                     sample_id=x,
-                                    path=path,
+                                    data_path=data_path,
                                     meta_path=path_meta,
                                     cache_path=path_cache
                                 )
@@ -79,7 +79,7 @@ for dir_study in os.listdir(dir_sfaira_dataloaders):
                             raise ValueError(f"sample_fns and sample_ids both found for {f_dataset}")
                         else:
                             datasets_f = [DatasetFound(
-                                path=path,
+                                data_path=data_path,
                                 meta_path=path_meta,
                                 cache_path=path_cache
                             )]

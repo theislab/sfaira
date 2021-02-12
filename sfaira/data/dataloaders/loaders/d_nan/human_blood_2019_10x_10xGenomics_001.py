@@ -14,19 +14,19 @@ class Dataset(DatasetBase):
     import scanpy
     scanpy.read_10x_h5("pbmc_10k_v3_filtered_feature_bc_matrix.h5").write("pbmc_10k_v3_filtered_feature_bc_matrix.h5ad")
 
-    :param path:
+    :param data_path:
     :param meta_path:
     :param kwargs:
     """
 
     def __init__(
             self,
-            path: Union[str, None] = None,
+            data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "human_blood_2019_10x_10xGenomics_001_unknown"
 
         self.download_url_data = \
@@ -51,5 +51,5 @@ class Dataset(DatasetBase):
         }
 
     def _load(self):
-        fn = os.path.join(self.doi_path, "pbmc_10k_v3_filtered_feature_bc_matrix.h5ad")
+        fn = os.path.join(self.data_dir, "pbmc_10k_v3_filtered_feature_bc_matrix.h5ad")
         self.adata = anndata.read(fn)

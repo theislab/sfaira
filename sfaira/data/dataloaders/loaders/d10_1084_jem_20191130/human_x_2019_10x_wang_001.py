@@ -18,12 +18,12 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
     def __init__(
             self,
             sample_fn: str,
-            path: Union[str, None] = None,
+            data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(sample_fn=sample_fn, path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        super().__init__(sample_fn=sample_fn, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         organ = self.sample_fn.split("_")[1].split(".")[0]
         self.id = f"human_{organ}_2019_10x_wang_{str(SAMPLE_FNS.index(self.sample_fn)).zfill(3)}_10.1084/jem.20191130"
 
@@ -82,7 +82,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             }
 
     def _load(self):
-        fn = os.path.join(self.doi_path, self.sample_fn)
+        fn = os.path.join(self.data_dir, self.sample_fn)
         self.adata = anndata.read(fn)
         self.adata.X = np.expm1(self.adata.X)
         self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs["n_counts"].values[:, None]))\

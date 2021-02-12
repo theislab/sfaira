@@ -15,14 +15,14 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
     def __init__(
             self,
             sample_id: str,
-            path: Union[str, None] = None,
+            data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
     ):
         super().__init__(
             sample_id=sample_id,
-            path=path,
+            data_path=data_path,
             meta_path=meta_path,
             cache_path=cache_path,
             **kwargs
@@ -33,5 +33,5 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
         # self.adata in which you saved the sample IDs based on which the full adata object is subsetted.
 
     def _load_full(self) -> anndata.AnnData:
-        fn = os.path.join(self.doi_path, )  # ToDo: add the name of the raw file
+        fn = os.path.join(self.data_dir, )  # ToDo: add the name of the raw file
         # ToDo: load full data into AnnData object (no subsetting!)

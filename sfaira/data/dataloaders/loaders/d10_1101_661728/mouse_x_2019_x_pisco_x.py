@@ -52,12 +52,12 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
     def __init__(
             self,
             sample_fn: str,
-            path: Union[str, None] = None,
+            data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(sample_fn=sample_fn, path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        super().__init__(sample_fn=sample_fn, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         protocol = "10x" if sample_fn.split("-")[3] == "droplet" else "smartseq2"
         organ = "-".join(sample_fn.split("-")[7:]).split(".")[0].lower()
         organ = "adipose tissue" if organ in ["fat", "bat", "gat", "mat", "scat"] else \
@@ -107,7 +107,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.var_symbol_col = "index"
 
     def _load(self):
-        fn = os.path.join(self.doi_path, self.sample_fn)
+        fn = os.path.join(self.data_dir, self.sample_fn)
         self.adata = anndata.read_h5ad(fn)
         self.adata.X = self.adata.raw.X
         self.adata.var = self.adata.raw.var

@@ -8,11 +8,11 @@ class DatasetGroupEye(DatasetGroup):
 
     def __init__(
         self,
-        path: Union[str, None] = None,
-        meta_path: Union[str, None] = None,
+        data_path: Union[str, None] = None,
+        meta_data_path: Union[str, None] = None,
         cache_path: Union[str, None] = None
     ):
-        dsg = DatasetSuperGroupSfaira(path=path, meta_path=meta_path, cache_path=cache_path)
+        dsg = DatasetSuperGroupSfaira(data_path=data_path, meta_path=meta_path, cache_path=cache_path)
         dsg.subset(key="id", values=[
             "human_eye_2019_10x_lukowski_001",
             "human_eye_2019_10x_menon_001",

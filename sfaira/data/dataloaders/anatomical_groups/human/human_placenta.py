@@ -8,11 +8,11 @@ class DatasetGroupPlacenta(DatasetGroup):
 
     def __init__(
         self,
-        path: Union[str, None] = None,
-        meta_path: Union[str, None] = None,
+        data_path: Union[str, None] = None,
+        meta_data_path: Union[str, None] = None,
         cache_path: Union[str, None] = None
     ):
-        dsg = DatasetSuperGroupSfaira(path=path, meta_path=meta_path, cache_path=cache_path)
+        dsg = DatasetSuperGroupSfaira(data_path=data_path, meta_path=meta_path, cache_path=cache_path)
         dsg.subset(key="id", values=[
             "human_placenta_2018_smartseq2_ventotormo_001",
             "human_placenta_2018_10x_ventotormo_002",

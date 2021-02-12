@@ -26,7 +26,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
     syn21625095 = syn.get(entity="syn21625095")
     shutil.move(syn21625095.path, "droplet_normal_lung_blood_scanpy.20200205.RC4.h5ad")
 
-    :param path:
+    :param data_path:
     :param meta_path:
     :param kwargs:
     """
@@ -34,12 +34,12 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
     def __init__(
             self,
             sample_fn: str,
-            path: Union[str, None] = None,
+            data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(sample_fn=sample_fn, path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        super().__init__(sample_fn=sample_fn, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         protocol = "10x" if self.sample_fn.split("_")[0] == "droplet" else "smartseq2"
         self.id = f"human_lung_2020_{protocol}_travaglini_{str(SAMPLE_FNS.index(self.sample_fn)).zfill(3)}_" \
                   f"10.1038/s41586-020-2922-4"
@@ -199,7 +199,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         }
 
     def _load(self):
-        fn = os.path.join(self.doi_path, self.sample_fn)
+        fn = os.path.join(self.data_dir, self.sample_fn)
         if self.sample_fn.split("_")[0] == "droplet":
             norm_const = 1000000
         else:
