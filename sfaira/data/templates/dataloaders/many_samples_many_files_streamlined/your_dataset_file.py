@@ -31,5 +31,6 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         # ToDo Add you meta data here.
 
     def _load(self):
-        fn = os.path.join(self.data_dir, self.sample_fn)
+        # fn = os.path.join(self.data_dir, self.sample_fn)  # ToDo: add the name of the raw file
         # ToDo: load file fn into self.adata, self.sample_fn represents the current filename.
+        pass

@@ -54,7 +54,7 @@ def test_load(dir_template: str = "./template_data"):
     elif flattened_doi in os.listdir(file_path_sfairae):
         dir_loader = dir_loader_sfairae + "." + flattened_doi
     else:
-        raise ValueError(f"data loader not found in sfaira and also not in sfaira_extension")
+        raise ValueError("data loader not found in sfaira and also not in sfaira_extension")
     file_path = pydoc.locate(dir_loader + ".FILE_PATH")
 
     ds = DatasetGroupDirectoryOriented(

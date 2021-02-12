@@ -33,5 +33,6 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
         # self.adata in which you saved the sample IDs based on which the full adata object is subsetted.
 
     def _load_full(self) -> anndata.AnnData:
-        fn = os.path.join(self.data_dir, )  # ToDo: add the name of the raw file
+        # fn = os.path.join(self.data_dir,)  # ToDo: add the name of the raw file
         # ToDo: load full data into AnnData object (no subsetting!)
+        pass

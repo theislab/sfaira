@@ -9,7 +9,7 @@ class DatasetGroupSkin(DatasetGroup):
     def __init__(
         self,
         data_path: Union[str, None] = None,
-        meta_data_path: Union[str, None] = None,
+        meta_path: Union[str, None] = None,
         cache_path: Union[str, None] = None
     ):
         dsg = DatasetSuperGroupSfaira(data_path=data_path, meta_path=meta_path, cache_path=cache_path)
