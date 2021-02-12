@@ -1,7 +1,8 @@
 import anndata
 from typing import Union
+import os
 
-from sfaira.data import DatasetBaseGroupLoadingManyFiles
+from sfaira.data import DatasetBaseGroupLoadingOneFile
 
 SAMPLE_IDS = [  # ToDo Add correct sample IDs here.
     "your_sample_id_1",
@@ -9,23 +10,28 @@ SAMPLE_IDS = [  # ToDo Add correct sample IDs here.
 ]
 
 
-class Dataset(DatasetBaseGroupLoadingManyFiles):
+class Dataset(DatasetBaseGroupLoadingOneFile):
 
     def __init__(
             self,
-            sample_fn: str,
+            sample_id: str,
             path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
     ):
         super().__init__(
-            sample_fn=sample_fn,
-            path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+            sample_id=sample_id,
+            path=path,
+            meta_path=meta_path,
+            cache_path=cache_path,
+            **kwargs
+        )
 
         # ToDo Add you meta data here.
         self.obs_key_sample = 'Sample'  # ToDo: Make sure to include this attribute which indicates the column in
         # self.adata in which you saved the sample IDs based on which the full adata object is subsetted.
 
-    def _load_full_group_object(self, fn=None) -> anndata.AnnData:
-        pass  # ToDo: load full data object and return (no subsetting!)
+    def _load_full(self) -> anndata.AnnData:
+        fn = os.path.join(self.doi_path, )  # ToDo: add the name of the raw file
+        # ToDo: load full data into AnnData object (no subsetting!)

@@ -18,8 +18,8 @@ class Dataset(DatasetBase):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "human_liver_2019_mCELSeq2_aizarani_001_10.1038/s41586-019-1373-2"
 
-        self.download = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE124nnn/GSE124395/suppl/GSE124395%5FNormalhumanlivercellatlasdata%2Etxt%2Egz"
-        self.download_meta = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE124nnn/GSE124395/suppl/GSE124395%5Fclusterpartition%2Etxt%2Egz"
+        self.download_url_data = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE124nnn/GSE124395/suppl/GSE124395%5FNormalhumanlivercellatlasdata%2Etxt%2Egz"
+        self.download_url_meta = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE124nnn/GSE124395/suppl/GSE124395%5Fclusterpartition%2Etxt%2Egz"
 
         self.author = "Gruen"
         self.doi = "10.1038/s41586-019-1373-2"
@@ -27,7 +27,7 @@ class Dataset(DatasetBase):
         self.normalization = "raw"
         self.organ = "liver"
         self.organism = "human"
-        self.protocol = "mCEL-Seq2"
+        self.protocol = "CEL-seq2"
         self.state_exact = "healthy"
         self.year = 2019
 
@@ -79,12 +79,11 @@ class Dataset(DatasetBase):
             },
         }
 
-    def _load(self, fn=None):
-        if fn is None:
-            fn = [
-                os.path.join(self.path, "human", "liver", "GSE124395_Normalhumanlivercellatlasdata.txt.gz"),
-                os.path.join(self.path, "human", "liver", "GSE124395_clusterpartition.txt.gz")
-            ]
+    def _load(self):
+        fn = [
+            os.path.join(self.doi_path, "GSE124395_Normalhumanlivercellatlasdata.txt.gz"),
+            os.path.join(self.doi_path, "GSE124395_clusterpartition.txt.gz")
+        ]
         self.adata = anndata.AnnData(pd.read_csv(fn[0], sep="\t").T)
         celltype_df = pd.read_csv(fn[1], sep=" ")
         self.adata = self.adata[[i in celltype_df.index for i in self.adata.obs.index]].copy()

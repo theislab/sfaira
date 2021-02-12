@@ -44,13 +44,12 @@ class Dataset(DatasetBase):
             "0": {},
         }
 
-    def _load(self, fn=None):
+    def _load(self):
         """
         Note that in contrast to data set specific data loaders, here, the core attributes are only identified from
         the data in this function and are not already set in the constructor. These attributes can still be
         used through meta data containers after the data was loaded once.
 
-        :param fn:
         :return:
         """
         fn = os.path.join(self.path, self.fn)
@@ -60,7 +59,7 @@ class Dataset(DatasetBase):
 
         self.author = adata.uns[self._ADATA_IDS_CELLXGENE.author][self._ADATA_IDS_CELLXGENE.author_names]
         self.doi = adata.uns[self._ADATA_IDS_CELLXGENE.doi]
-        self.download = self.download
+        self.download_url_data = self.download_url_data
         self.id = self.id
         self.normalization = 'raw'
         self.organ = str(self.fn).split("_")[3]  # TODO interface this properly

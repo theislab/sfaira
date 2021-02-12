@@ -13,10 +13,10 @@ class Dataset(Dataset_d10_1038_s41586_020_2157_4):
     ):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "human_epityphlon_2020_microwell_han_001_10.1038/s41586-020-2157-4"
-        self.organ = "epityphlon"
+        self.organ = "caecum"
         self.class_maps = {
             "0": {},
         }
 
-    def _load(self, fn=None):
-        self._load_generalized(fn=fn, sample_id="AdultEpityphlon_1")
+    def _load(self):
+        self._load_generalized(sample_id="AdultEpityphlon_1")

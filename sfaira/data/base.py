@@ -13,6 +13,11 @@ import pydoc
 import scipy.sparse
 from typing import Dict, List, Tuple, Union
 import warnings
+import urllib.request
+import urllib.parse
+import urllib.error
+import cgi
+import ssl
 
 from sfaira.versions.genome_versions import SuperGenomeContainer
 from sfaira.versions.metadata import Ontology, CelltypeUniverse, ONTOLOGY_UBERON
@@ -55,6 +60,7 @@ class DatasetBase(abc.ABC):
     path: Union[None, str]
     meta_path: Union[None, str]
     cache_path: Union[None, str]
+    doi_path: Union[None, str]
     id: Union[None, str]
     genome: Union[None, str]
 
@@ -62,8 +68,8 @@ class DatasetBase(abc.ABC):
     _author: Union[None, str]
     _dev_stage: Union[None, str]
     _doi: Union[None, str]
-    _download: Union[Tuple[List[None]], Tuple[List[str]]]
-    _download_meta: Union[Tuple[List[None]], Tuple[List[str]]]
+    _download_url_data: Union[Tuple[List[None]], Tuple[List[str]], None]
+    _download_url_meta: Union[Tuple[List[None]], Tuple[List[str]], None]
     _ethnicity: Union[None, str]
     _healthy: Union[None, bool]
     _id: Union[None, str]
@@ -115,13 +121,14 @@ class DatasetBase(abc.ABC):
         self.path = path
         self.meta_path = meta_path
         self.cache_path = cache_path
+        self.doi_path = None
 
         self._age = None
         self._author = None
         self._dev_stage = None
         self._doi = None
-        self._download = None
-        self._download_meta = None
+        self._download_url_data = None
+        self._download_url_meta = None
         self._ethnicity = None
         self._healthy = None
         self._id = None
@@ -160,10 +167,7 @@ class DatasetBase(abc.ABC):
         self._ontology_class_map = None
 
     @abc.abstractmethod
-    def _load(self, fn):
-        pass
-
-    def _download(self, fn):
+    def _load(self):
         pass
 
     @property
@@ -180,12 +184,93 @@ class DatasetBase(abc.ABC):
         self.adata = None
         gc.collect()
 
-    def set_raw_full_group_object(self, fn=None, adata_group: Union[None, anndata.AnnData] = None) -> bool:
+    def download(self, **kwargs):
+        assert self.download_url_data is not None, f"The `download_url_data` attribute of dataset {self.id} " \
+                                                   f"is not set, cannot download dataset."
+        assert self.path is not None, f"No path was provided when instantiating the dataset container, " \
+                                      f"cannot download datasets."
+
+        self.doi_path = os.path.join(self.path, "raw", self.directory_formatted_doi)
+        if not os.path.exists(self.doi_path):
+            os.makedirs(self.doi_path)
+
+        urls = self.download_url_data[0][0] + self.download_url_meta[0][0]
+
+        for url in urls:
+            if url is None:
+                continue
+            if url.split(",")[0] == 'private':
+                if "," in url:
+                    fn = ','.join(url.split(',')[1:])
+                    if os.path.isfile(os.path.join(self.doi_path, fn)):
+                        print(f"File {fn} already found on disk, skipping download.")
+                    else:
+                        warnings.warn(f"Dataset {self.id} is not available for automatic download, please manually "
+                                      f"copy the file {fn} to the following location: "
+                                      f"{self.doi_path}")
+                else:
+                    warnings.warn(f"A file for dataset {self.id} is not available for automatic download, please"
+                                  f"manually copy the associated file to the following location: {self.doi_path}")
+
+            elif url.split(",")[0].startswith('syn'):
+                fn = ",".join(url.split(",")[1:])
+                if os.path.isfile(os.path.join(self.doi_path, fn)):
+                    print(f"File {fn} already found on disk, skipping download.")
+                else:
+                    self._download_synapse(url.split(",")[0], fn, **kwargs)
+
+            else:
+                url = urllib.parse.unquote(url)
+
+                # Catch SSLCertVerificationError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed:
+                # unable to get local issuer certificate (_ssl.c:1124)
+                try:
+                    urllib.request.urlopen(url)
+                except urllib.error.URLError:
+                    ssl._create_default_https_context = ssl._create_unverified_context
+
+                if 'Content-Disposition' in urllib.request.urlopen(url).info().keys():
+                    fn = cgi.parse_header(urllib.request.urlopen(url).info()['Content-Disposition'])[1]["filename"]
+                else:
+                    fn = url.split("/")[-1]
+                if os.path.isfile(os.path.join(self.doi_path, fn)):
+                    print(f"File {fn} already found on disk, skipping download.")
+                else:
+                    print(f"Downloading: {fn}")
+                    urllib.request.urlretrieve(url, os.path.join(self.doi_path, fn))
+
+    def _download_synapse(self, synapse_entity, fn, **kwargs):
+        try:
+            import synapseclient
+        except ImportError:
+            warnings.warn("synapseclient python package not found. This package is required to download some of the "
+                          "selected datasets. Run `pip install synapseclient` to install it. Skipping download of the "
+                          f"following dataset: {self.id}")
+            return
+        import shutil
+        import logging
+        logging.captureWarnings(False)  # required to properly display warning messages below with sypaseclient loaded
+
+        if "synapse_user" not in kwargs.keys():
+            warnings.warn(f"No synapse username provided, skipping download of synapse dataset {fn}."
+                          f"Provide your synapse username as the `synapse_user` argument to the download method.")
+            return
+        if "synapse_pw" not in kwargs.keys():
+            warnings.warn(f"No synapse password provided, skipping download of synapse dataset {fn}."
+                          f"Provide your synapse password as the `synapse_pw` argument to the download method.")
+            return
+
+        print(f"Downloading from synapse: {fn}")
+        syn = synapseclient.Synapse()
+        syn.login(kwargs['synapse_user'], kwargs['synapse_pw'])
+        dataset = syn.get(entity=synapse_entity)
+        shutil.move(dataset.path, os.path.join(self.doi_path, fn))
+
+    def set_raw_full_group_object(self, adata_group: Union[None, anndata.AnnData] = None) -> bool:
         """
         Only relevant for DatasetBaseGroupLoading but has to be a method of this class
         because it is used in DatasetGroup.
 
-        :param fn:
         :param adata_group:
         :return: Whether group loading is used.
         """
@@ -224,8 +309,8 @@ class DatasetBase(abc.ABC):
 
             cache = os.path.join(
                 self.cache_path,
-                self.directory_formatted_doi,
                 "cache",
+                self.directory_formatted_doi,
                 self._directory_formatted_id + ".h5ad"
             )
             return cache
@@ -237,9 +322,9 @@ class DatasetBase(abc.ABC):
                 else:
                     warnings.warn(f"Cached loading enabled, but cache file {fn_cache} not found. "
                                   f"Loading from raw files.")
-                    self._load(fn=fn)
+                    self._load()
             else:
-                self._load(fn=fn)
+                self._load()
 
         def _cached_writing(fn_cache):
             if fn_cache is not None:
@@ -248,15 +333,12 @@ class DatasetBase(abc.ABC):
                     os.makedirs(dir_cache)
                 self.adata.write_h5ad(fn_cache)
 
-        if fn is None and self.path is None:
-            raise ValueError("provide either fn in load or path in constructor")
-
         if load_raw and allow_caching:
-            self._load(fn=fn)
+            self._load()
             fn_cache = _get_cache_fn()
             _cached_writing(fn_cache)
         elif load_raw and not allow_caching:
-            self._load(fn=fn)
+            self._load()
         elif not load_raw and allow_caching:
             fn_cache = _get_cache_fn()
             _cached_reading(fn, fn_cache)
@@ -297,9 +379,15 @@ class DatasetBase(abc.ABC):
             genome = "Mus_musculus_GRCm38_97"
             warnings.warn(f"using default genome {genome}")
         else:
-            raise ValueError(f"genome was not supplied and organism {self.organism} "
-                             f"was not matched to a default choice")
+            raise ValueError(f"genome was not supplied and no default genome found for organism {self.organism}")
         self._set_genome(genome=genome)
+
+        # Set path to dataset directory
+        if fn is None:
+            if self.doi_path is None:
+                raise ValueError("Neither sfaira data repo path nor custom dataset path provided.")
+        else:
+            self.doi_path = fn
 
         # Run data set-specific loading script:
         self._load_cached(fn=fn, load_raw=load_raw, allow_caching=allow_caching)
@@ -492,8 +580,8 @@ class DatasetBase(abc.ABC):
         self.adata.uns[self._ADATA_IDS_SFAIRA.annotated] = self.annotated
         self.adata.uns[self._ADATA_IDS_SFAIRA.author] = self.author
         self.adata.uns[self._ADATA_IDS_SFAIRA.doi] = self.doi
-        self.adata.uns[self._ADATA_IDS_SFAIRA.download] = self.download
-        self.adata.uns[self._ADATA_IDS_SFAIRA.download_meta] = self.download_meta
+        self.adata.uns[self._ADATA_IDS_SFAIRA.download_url_data] = self.download_url_data
+        self.adata.uns[self._ADATA_IDS_SFAIRA.download_url_meta] = self.download_url_meta
         self.adata.uns[self._ADATA_IDS_SFAIRA.id] = self.id
         self.adata.uns[self._ADATA_IDS_SFAIRA.normalization] = self.normalization
         self.adata.uns[self._ADATA_IDS_SFAIRA.year] = self.year
@@ -798,8 +886,8 @@ class DatasetBase(abc.ABC):
             self._ADATA_IDS_SFAIRA.annotated: self.adata.uns[self._ADATA_IDS_SFAIRA.annotated],
             self._ADATA_IDS_SFAIRA.author: self.adata.uns[self._ADATA_IDS_SFAIRA.author],
             self._ADATA_IDS_SFAIRA.doi: self.adata.uns[self._ADATA_IDS_SFAIRA.doi],
-            self._ADATA_IDS_SFAIRA.download: self.adata.uns[self._ADATA_IDS_SFAIRA.download],
-            self._ADATA_IDS_SFAIRA.download_meta: self.adata.uns[self._ADATA_IDS_SFAIRA.download_meta],
+            self._ADATA_IDS_SFAIRA.download_url_data: self.adata.uns[self._ADATA_IDS_SFAIRA.download_url_data],
+            self._ADATA_IDS_SFAIRA.download_url_meta: self.adata.uns[self._ADATA_IDS_SFAIRA.download_url_meta],
             self._ADATA_IDS_SFAIRA.id: self.adata.uns[self._ADATA_IDS_SFAIRA.id],
             self._ADATA_IDS_SFAIRA.ncells: self.adata.n_obs,
             self._ADATA_IDS_SFAIRA.normalization: self.adata.uns[self._ADATA_IDS_SFAIRA.normalization],
@@ -922,67 +1010,67 @@ class DatasetBase(abc.ABC):
         return "d" + "_".join("_".join("_".join(self.doi.split("/")).split(".")).split("-"))
 
     @property
-    def download(self) -> Union[Tuple[List[str]], Tuple[List[None]]]:
+    def download_url_data(self) -> Union[Tuple[List[str]], Tuple[List[None]]]:
         """
         Data download website(s).
 
         Save as tuple with single element, which is a list of all download websites relevant to dataset.
         :return:
         """
-        if self._download is not None:
-            x = self._download
+        if self._download_url_data is not None:
+            x = self._download_url_data
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            x = self.meta[self._ADATA_IDS_SFAIRA.download]
+            x = self.meta[self._ADATA_IDS_SFAIRA.download_url_data]
         if isinstance(x, str) or x is None:
             x = [x]
         if isinstance(x, list):
             x = (x,)
         return x
 
-    @download.setter
-    def download(self, x: Union[str, None, List[str], Tuple[str], List[None], Tuple[None]]):
-        self.__erasing_protection(attr="download", val_old=self._download, val_new=x)
+    @download_url_data.setter
+    def download_url_data(self, x: Union[str, None, List[str], Tuple[str], List[None], Tuple[None]]):
+        self.__erasing_protection(attr="download_url_data", val_old=self._download_url_data, val_new=x)
         # Formats to tuple with single element, which is a list of all download websites relevant to dataset,
         # which can be used as a single element column in a pandas data frame.
         if isinstance(x, str) or x is None:
             x = [x]
         if isinstance(x, list):
             x = (x,)
-        self._download = (x,)
+        self._download_url_data = (x,)
 
     @property
-    def download_meta(self) -> Union[Tuple[List[str]], Tuple[List[None]]]:
+    def download_url_meta(self) -> Union[Tuple[List[str]], Tuple[List[None]]]:
         """
         Meta data download website(s).
 
         Save as tuple with single element, which is a list of all download websites relevant to dataset.
         :return:
         """
-        x = self._download_meta
-        # if self._download_meta is not None:  # TODO add this back in once download_meta is routinely set in datasets
-        #    x = self._download_meta
+        x = self._download_url_meta
+        # if self._download_url_meta is not None:  # TODO add this back in once download_meta is set in all datasets
+        #    x = self._download_url_meta
         # else:
         #    if self.meta is None:
         #        self.load_meta(fn=None)
-        #    x = self.meta[self._ADATA_IDS_SFAIRA.download_meta]
+        #    x = self.meta[self._ADATA_IDS_SFAIRA.download_url_meta]
         if isinstance(x, str) or x is None:
             x = [x]
         if isinstance(x, list):
             x = (x,)
         return x
 
-    @download_meta.setter
-    def download_meta(self, x: Union[str, None, List[str], Tuple[str], List[None], Tuple[None]]):
-        self.__erasing_protection(attr="download_meta", val_old=self._download_meta, val_new=x)
+    @download_url_meta.setter
+    def download_url_meta(self, x: Union[str, None, List[str], Tuple[str], List[None], Tuple[None]]):
+        self.__erasing_protection(attr="download_url_meta", val_old=self._download_url_meta, val_new=x)
         # Formats to tuple with single element, which is a list of all download websites relevant to dataset,
         # which can be used as a single element column in a pandas data frame.
         if isinstance(x, str) or x is None:
             x = [x]
         if isinstance(x, list):
             x = (x,)
-        self._download_meta = (x,)
+        self._download_url_meta = (x,)
 
     @property
     def ethnicity(self) -> Union[None, str]:
@@ -1482,20 +1570,20 @@ class DatasetBaseGroupLoadingOneFile(DatasetBase):
         return self._sample_id
 
     @abc.abstractmethod
-    def _load_full(self, fn=None) -> anndata.AnnData:
+    def _load_full(self) -> anndata.AnnData:
         """
         Loads a raw anndata object that correponds to a superset of the data belonging to this Dataset.
 
-        Override this method in the Dataset if this is relevant.
+        Overload this method in the Dataset if this is relevant.
         :return: adata_group
         """
         pass
 
-    def set_raw_full_group_object(self, fn=None, adata_group: Union[None, anndata.AnnData] = None):
+    def set_raw_full_group_object(self, adata_group: Union[None, anndata.AnnData] = None):
         if self.adata is None and adata_group is not None:
             self.adata = adata_group
         elif self.adata is None and adata_group is not None:
-            self.adata = self._load_full(fn=fn)
+            self._load_full()
         elif self.adata is not None and self._unprocessed_full_group_object:
             pass
         else:
@@ -1528,8 +1616,8 @@ class DatasetBaseGroupLoadingOneFile(DatasetBase):
         for k, v in subset_items:
             self.adata = self.adata[[x in v for x in self.adata.obs[k].values], :]
 
-    def _load(self, fn):
-        _ = self.set_raw_full_group_object(fn=fn, adata_group=None)
+    def _load(self):
+        _ = self.set_raw_full_group_object(adata_group=None)
         if self._unprocessed_full_group_object:
             self._load_from_group()
         self._unprocessed_full_group_object = False
@@ -1739,6 +1827,10 @@ class DatasetGroup:
             tab = tab.sort_values("source")
             if not os.path.exists(fn) or not protected_writing:
                 tab.to_csv(fn, index=False)
+
+    def download(self, **kwargs):
+        for _, v in self.datasets.items():
+            v.download(**kwargs)
 
     @property
     def ids(self):
@@ -2106,6 +2198,10 @@ class DatasetSuperGroup:
                 assert k not in ds.keys(), f"{k} was duplicated in super group, purge duplicates before flattening"
                 ds[k] = v
         return DatasetGroup(datasets=ds)
+
+    def download(self, **kwargs):
+        for x in self.dataset_groups:
+            x.download(**kwargs)
 
     def load_all(
             self,

@@ -44,8 +44,13 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.id = f"human_lung_2020_{protocol}_travaglini_{str(SAMPLE_FNS.index(self.sample_fn)).zfill(3)}_" \
                   f"10.1038/s41586-020-2922-4"
 
-        self.download = "https://www.synapse.org/#!Synapse:syn21041850"
-        self.download_meta = None
+        synapse_id = {
+            "droplet_normal_lung_blood_scanpy.20200205.RC4.h5ad": "syn21625095",
+            "facs_normal_lung_blood_scanpy.20200205.RC4.h5ad": "syn21625142"
+        }
+
+        self.download_url_data = f"{synapse_id[self.sample_fn]},{self.sample_fn}"
+        self.download_url_meta = None
 
         self.author = "Krasnow"
         self.doi = "10.1038/s41586-020-2922-4"
@@ -193,9 +198,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             },
         }
 
-    def _load(self, fn=None):
-        if fn is None:
-            fn = os.path.join(self.path, "human", "lung", self.sample_fn)
+    def _load(self):
+        fn = os.path.join(self.doi_path, self.sample_fn)
         if self.sample_fn.split("_")[0] == "droplet":
             norm_const = 1000000
         else:

@@ -50,5 +50,5 @@ class Dataset(Dataset_d10_1038_s41586_020_2157_4):
             },
         }
 
-    def _load(self, fn=None):
-        self._load_generalized(fn=fn, sample_id="FetalBrain_3")
+    def _load(self):
+        self._load_generalized(sample_id="FetalBrain_3")

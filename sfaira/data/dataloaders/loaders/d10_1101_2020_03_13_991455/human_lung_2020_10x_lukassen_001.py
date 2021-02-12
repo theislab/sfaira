@@ -26,7 +26,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.id = f"human_lung_2020_10x_lukassen_{str(SAMPLE_FNS.index(self.sample_fn)).zfill(3)}_" \
                   f"10.1101/2020.03.13.991455"
 
-        self.download = f"https://covid19.cog.sanger.ac.uk/{self.sample_fn}"
+        self.download_url_data = f"https://covid19.cog.sanger.ac.uk/{self.sample_fn}"
+        self.download_url_meta = None
 
         self.author = "Eils"
         self.doi = "10.1101/2020.03.13.991455"
@@ -76,9 +77,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
                 },
             }
 
-    def _load(self, fn=None):
-        base_path = os.path.join(self.path, "human", "lung")
-        fn = os.path.join(base_path, self.sample_fn)
+    def _load(self):
+        fn = os.path.join(self.doi_path, self.sample_fn)
         self.adata = anndata.read(fn)
         self.adata.X = np.expm1(self.adata.X)
         self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs["nCount_RNA"].values[:, None]))\

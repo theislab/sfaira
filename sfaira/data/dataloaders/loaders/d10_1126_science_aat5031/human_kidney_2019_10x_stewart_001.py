@@ -18,11 +18,11 @@ class Dataset(DatasetBase):
         super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "human_kidney_2019_10x_stewart_001_10.1126/science.aat5031"
 
-        self.download = [
+        self.download_url_data = [
             "https://cellgeni.cog.sanger.ac.uk/BenKidney_v2.1/Mature_Full_v2.1.h5ad",
             "https://cellgeni.cog.sanger.ac.uk/BenKidney_v2.1/Fetal_full.h5ad"
         ]
-        self.download_meta = None
+        self.download_url_meta = None
 
         self.author = "Clatworthy"
         self.doi = "10.1126/science.aat5031"
@@ -114,12 +114,11 @@ class Dataset(DatasetBase):
             },
         }
 
-    def _load(self, fn=None):
-        if fn is None:
-            fn = [
-                os.path.join(self.path, "human", "kidney", "Mature_Full_v2.1.h5ad"),
-                os.path.join(self.path, "human", "kidney", "Fetal_full.h5ad")
-            ]
+    def _load(self):
+        fn = [
+            os.path.join(self.doi_path, "Mature_Full_v2.1.h5ad"),
+            os.path.join(self.doi_path, "Fetal_full.h5ad")
+        ]
         adult = anndata.read(fn[0])
         fetal = anndata.read(fn[1])
         adult.obs["development"] = "adult"
