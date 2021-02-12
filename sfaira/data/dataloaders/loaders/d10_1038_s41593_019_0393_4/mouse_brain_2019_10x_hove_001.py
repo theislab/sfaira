@@ -25,13 +25,13 @@ class Dataset(DatasetBase):
         self.download_url_meta = \
             "https://www.brainimmuneatlas.org/data_files/toDownload/annot_fullAggr.csv"
 
-        self.author = "Movahedi"
+        self.author = "Hove"
         self.doi = "10.1038/s41593-019-0393-4"
         self.healthy = True
         self.normalization = "raw"
         self.organ = "brain"
         self.organism = "mouse"
-        self.protocol = "microwell-seq"
+        self.protocol = "10X sequencing"
         self.state_exact = "healthy"
         self.year = 2019
 
@@ -56,7 +56,7 @@ class Dataset(DatasetBase):
             os.path.join(self.data_dir, "annot_fullAggr.csv")
         ]
 
-        with zipfile.Zipfile(fn[0]) as archive:
+        with zipfile.ZipFile(fn[0]) as archive:
             x = scipy.io.mmread(archive.open('filtered_gene_bc_matrices_mex/mm10/matrix.mtx')).T.tocsr()
             self.adata = anndata.AnnData(x)
             var = pandas.read_csv(archive.open('filtered_gene_bc_matrices_mex/mm10/genes.tsv'), sep="\t", header=None)
