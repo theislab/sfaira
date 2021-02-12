@@ -24,12 +24,12 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
     def __init__(
             self,
             sample_fn: str,
-            path: Union[str, None] = None,
+            data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(sample_fn=sample_fn, path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        super().__init__(sample_fn=sample_fn, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = f"mouse_pancreas_2019_10x_thompson_{str(SAMPLE_FNS.index(sample_fn)).zfill(3)}_" \
                   f"10.1016/j.cmet.2019.01.021"
 
@@ -51,7 +51,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.obs_key_cellontology_original = "celltypes"
 
     def _load(self):
-        with tarfile.open(os.path.join(self.doi_path, 'GSE117770_RAW.tar')) as tar:
+        with tarfile.open(os.path.join(self.data_dir, 'GSE117770_RAW.tar')) as tar:
             for member in tar.getmembers():
                 if "_matrix.mtx.gz" in member.name and self.sample_fn in member.name:
                     name = "_".join(member.name.split("_")[:-1])
@@ -66,6 +66,6 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
                     var.index = var["ensembl"].values
                     self.adata = anndata.AnnData(X=x, obs=obs, var=var)
         self.adata.var_names_make_unique()
-        celltypes = pd.read_csv(os.path.join(self.doi_path, self.sample_fn + "_annotation.csv"), index_col=0)
+        celltypes = pd.read_csv(os.path.join(self.data_dir, self.sample_fn + "_annotation.csv"), index_col=0)
         self.adata = self.adata[celltypes.index]
         self.adata.obs["celltypes"] = celltypes

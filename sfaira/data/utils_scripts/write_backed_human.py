@@ -14,7 +14,7 @@ genome = str(sys.argv[3])
 
 path_meta = os.path.join(path, "meta")
 ds = sfaira.data.dataloaders.DatasetSuperGroupSfaira(
-    path=path, meta_path=path_meta, cache_path=path_meta
+    data_path=path, meta_path=path_meta, cache_path=path_meta
 )
 ds.subset(key="organism", values=["human"])
 ds.load_all_tobacked(

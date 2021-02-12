@@ -9,7 +9,7 @@ class DatasetSuperGroupLoaders(DatasetSuperGroup):
 
     def __init__(
             self,
-            path: Union[str, None] = None,
+            data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
     ):
@@ -18,7 +18,7 @@ class DatasetSuperGroupLoaders(DatasetSuperGroup):
 
         :param file_base:
         :param dir_prefix: Prefix to sub-select directories by. Set to "" for no constraints.
-        :param path:
+        :param data_path:
         :param meta_path:
         :param cache_path:
         """
@@ -35,7 +35,7 @@ class DatasetSuperGroupLoaders(DatasetSuperGroup):
                     if path_dsg is not None:
                         dataset_groups.append(DatasetGroupDirectoryOriented(
                             file_base=path_dsg,
-                            path=path,
+                            data_path=data_path,
                             meta_path=meta_path,
                             cache_path=cache_path
                         ))

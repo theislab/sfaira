@@ -14,7 +14,7 @@ class DatasetSuperGroupSfaira(DatasetSuperGroup):
 
     def __init__(
             self,
-            path: Union[str, None] = None,
+            data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
     ):
@@ -22,25 +22,25 @@ class DatasetSuperGroupSfaira(DatasetSuperGroup):
         Nested super group of data loaders, unifying data set wise data loader SuperGroup and the database
         interface SuperGroup.
 
-        :param path:
+        :param data_path:
         :param meta_path:
         :param cache_path:
         """
         dsgs = [
             DatasetSuperGroupLoaders(
-                path=path,
+                data_path=data_path,
                 meta_path=meta_path,
                 cache_path=cache_path,
             ),
             DatasetSuperGroupDatabases(
-                path=path,
+                data_path=data_path,
                 meta_path=meta_path,
                 cache_path=cache_path,
             )
         ]
         if sfairae is not None:
             dsgs.append(sfairae.data.loaders.DatasetSuperGroupLoaders(
-                path=path,
+                data_path=data_path,
                 meta_path=meta_path,
                 cache_path=cache_path,
             ))

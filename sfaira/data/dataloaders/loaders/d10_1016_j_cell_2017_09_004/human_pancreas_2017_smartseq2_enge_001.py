@@ -15,12 +15,12 @@ class Dataset(DatasetBase):
 
     def __init__(
             self,
-            path: Union[str, None] = None,
+            data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "human_pancreas_2017_smartseq2_enge_001_10.1016/j.cell.2017.09.004"
 
         self.download_url_data = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE81nnn/GSE81547/suppl/GSE81547_RAW.tar"
@@ -54,8 +54,8 @@ class Dataset(DatasetBase):
 
     def _load(self):
         fn = [
-            os.path.join(self.doi_path, "GSE81547_RAW.tar"),
-            os.path.join(self.doi_path, "GSE81547_series_matrix.txt.gz")
+            os.path.join(self.data_dir, "GSE81547_RAW.tar"),
+            os.path.join(self.data_dir, "GSE81547_series_matrix.txt.gz")
         ]
         dfs = []
         with tarfile.open(fn[0]) as tar:

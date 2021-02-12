@@ -10,12 +10,12 @@ class Dataset(DatasetBase):
 
     def __init__(
             self,
-            path: Union[str, None] = None,
+            data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = "human_lung_2020_10x_habermann_001_10.1101/753806"
 
         self.download_url_data = [
@@ -78,10 +78,10 @@ class Dataset(DatasetBase):
 
     def _load(self):
         fn = [
-            os.path.join(self.doi_path, "GSE135893_matrix.mtx.gz"),
-            os.path.join(self.doi_path, "GSE135893_genes.tsv.gz"),
-            os.path.join(self.doi_path, "GSE135893_barcodes.tsv.gz"),
-            os.path.join(self.doi_path, "GSE135893_IPF_metadata.csv.gz"),
+            os.path.join(self.data_dir, "GSE135893_matrix.mtx.gz"),
+            os.path.join(self.data_dir, "GSE135893_genes.tsv.gz"),
+            os.path.join(self.data_dir, "GSE135893_barcodes.tsv.gz"),
+            os.path.join(self.data_dir, "GSE135893_IPF_metadata.csv.gz"),
         ]
         self.adata = anndata.read_mtx(fn[0]).T
         self.adata.var = pd.read_csv(fn[1], index_col=0, header=None, names=["ids"])

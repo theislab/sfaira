@@ -57,10 +57,9 @@ class DatasetBase(abc.ABC):
     adata: Union[None, anndata.AnnData]
     class_maps: dict
     _meta: Union[None, pandas.DataFrame]
-    path: Union[None, str]
+    data_path: Union[None, str]
     meta_path: Union[None, str]
     cache_path: Union[None, str]
-    doi_path: Union[None, str]
     id: Union[None, str]
     genome: Union[None, str]
 
@@ -107,7 +106,7 @@ class DatasetBase(abc.ABC):
 
     def __init__(
             self,
-            path: Union[str, None] = None,
+            data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
@@ -118,10 +117,9 @@ class DatasetBase(abc.ABC):
         self.adata = None
         self.meta = None
         self.genome = None
-        self.path = path
+        self.data_path = data_path
         self.meta_path = meta_path
         self.cache_path = cache_path
-        self.doi_path = None
 
         self._age = None
         self._author = None
@@ -187,12 +185,11 @@ class DatasetBase(abc.ABC):
     def download(self, **kwargs):
         assert self.download_url_data is not None, f"The `download_url_data` attribute of dataset {self.id} " \
                                                    f"is not set, cannot download dataset."
-        assert self.path is not None, f"No path was provided when instantiating the dataset container, " \
-                                      f"cannot download datasets."
+        assert self.data_path is not None, "No path was provided when instantiating the dataset container, " \
+                                           "cannot download datasets."
 
-        self.doi_path = os.path.join(self.path, "raw", self.directory_formatted_doi)
-        if not os.path.exists(self.doi_path):
-            os.makedirs(self.doi_path)
+        if not os.path.exists(self.data_dir):
+            os.makedirs(self.data_dir)
 
         urls = self.download_url_data[0][0] + self.download_url_meta[0][0]
 
@@ -202,19 +199,19 @@ class DatasetBase(abc.ABC):
             if url.split(",")[0] == 'private':
                 if "," in url:
                     fn = ','.join(url.split(',')[1:])
-                    if os.path.isfile(os.path.join(self.doi_path, fn)):
+                    if os.path.isfile(os.path.join(self.data_dir, fn)):
                         print(f"File {fn} already found on disk, skipping download.")
                     else:
                         warnings.warn(f"Dataset {self.id} is not available for automatic download, please manually "
                                       f"copy the file {fn} to the following location: "
-                                      f"{self.doi_path}")
+                                      f"{self.data_dir}")
                 else:
                     warnings.warn(f"A file for dataset {self.id} is not available for automatic download, please"
-                                  f"manually copy the associated file to the following location: {self.doi_path}")
+                                  f"manually copy the associated file to the following location: {self.data_dir}")
 
             elif url.split(",")[0].startswith('syn'):
                 fn = ",".join(url.split(",")[1:])
-                if os.path.isfile(os.path.join(self.doi_path, fn)):
+                if os.path.isfile(os.path.join(self.data_dir, fn)):
                     print(f"File {fn} already found on disk, skipping download.")
                 else:
                     self._download_synapse(url.split(",")[0], fn, **kwargs)
@@ -233,11 +230,11 @@ class DatasetBase(abc.ABC):
                     fn = cgi.parse_header(urllib.request.urlopen(url).info()['Content-Disposition'])[1]["filename"]
                 else:
                     fn = url.split("/")[-1]
-                if os.path.isfile(os.path.join(self.doi_path, fn)):
+                if os.path.isfile(os.path.join(self.data_dir, fn)):
                     print(f"File {fn} already found on disk, skipping download.")
                 else:
                     print(f"Downloading: {fn}")
-                    urllib.request.urlretrieve(url, os.path.join(self.doi_path, fn))
+                    urllib.request.urlretrieve(url, os.path.join(self.data_dir, fn))
 
     def _download_synapse(self, synapse_entity, fn, **kwargs):
         try:
@@ -264,7 +261,7 @@ class DatasetBase(abc.ABC):
         syn = synapseclient.Synapse()
         syn.login(kwargs['synapse_user'], kwargs['synapse_pw'])
         dataset = syn.get(entity=synapse_entity)
-        shutil.move(dataset.path, os.path.join(self.doi_path, fn))
+        shutil.move(dataset.data_path, os.path.join(self.data_dir, fn))
 
     def set_raw_full_group_object(self, adata_group: Union[None, anndata.AnnData] = None) -> bool:
         """
@@ -278,7 +275,6 @@ class DatasetBase(abc.ABC):
 
     def _load_cached(
             self,
-            fn: str,
             load_raw: bool,
             allow_caching: bool,
     ):
@@ -315,7 +311,7 @@ class DatasetBase(abc.ABC):
             )
             return cache
 
-        def _cached_reading(fn, fn_cache):
+        def _cached_reading(fn_cache):
             if fn_cache is not None:
                 if os.path.exists(fn_cache):
                     self.adata = anndata.read_h5ad(fn_cache)
@@ -341,15 +337,14 @@ class DatasetBase(abc.ABC):
             self._load()
         elif not load_raw and allow_caching:
             fn_cache = _get_cache_fn()
-            _cached_reading(fn, fn_cache)
+            _cached_reading(fn_cache)
             _cached_writing(fn_cache)
         else:  # not load_raw and not allow_caching
             fn_cache = _get_cache_fn()
-            _cached_reading(fn, fn_cache)
+            _cached_reading(fn_cache)
 
     def load(
             self,
-            fn: Union[str, None] = None,
             remove_gene_version: bool = True,
             match_to_reference: Union[str, None] = None,
             load_raw: bool = False,
@@ -357,7 +352,6 @@ class DatasetBase(abc.ABC):
     ):
         """
 
-        :param fn: Optional target file name, otherwise infers from defined directory structure.
         :param remove_gene_version: Remove gene version string from ENSEMBL ID so that different versions in different
             data sets are superimposed.
         :param match_to_reference: Reference genomes name.
@@ -383,14 +377,11 @@ class DatasetBase(abc.ABC):
         self._set_genome(genome=genome)
 
         # Set path to dataset directory
-        if fn is None:
-            if self.doi_path is None:
-                raise ValueError("Neither sfaira data repo path nor custom dataset path provided.")
-        else:
-            self.doi_path = fn
+        if self.data_dir is None:
+            raise ValueError("No sfaira data repo path provided in constructor.")
 
         # Run data set-specific loading script:
-        self._load_cached(fn=fn, load_raw=load_raw, allow_caching=allow_caching)
+        self._load_cached(load_raw=load_raw, allow_caching=allow_caching)
         # Set data-specific meta data in .adata:
         self._set_metadata_in_adata()
         # Set loading hyper-parameter-specific meta data:
@@ -632,7 +623,6 @@ class DatasetBase(abc.ABC):
             adata_backed: anndata.AnnData,
             genome: str,
             idx: np.ndarray,
-            fn: Union[None, str] = None,
             load_raw: bool = False,
             allow_caching: bool = True
     ):
@@ -647,13 +637,11 @@ class DatasetBase(abc.ABC):
         :param idx: Indices in adata_backed to write observations to. This can be used to immediately create a
             shuffled object.
         :param keys:
-        :param fn:
         :param load_raw: See .load().
         :param allow_caching: See .load().
         :return: New row index for next element to be written into backed anndata.
         """
         self.load(
-            fn=fn,
             remove_gene_version=True,
             match_to_reference=genome,
             load_raw=load_raw,
@@ -848,7 +836,6 @@ class DatasetBase(abc.ABC):
             self,
             fn_meta: Union[None, str] = None,
             dir_out: Union[None, str] = None,
-            fn_data: Union[None, str] = None,
     ):
         """
         Write meta data object for data set.
@@ -857,7 +844,6 @@ class DatasetBase(abc.ABC):
 
         :param fn_meta: File to write to, selects automatically based on self.meta_path and self.id otherwise.
         :param dir_out: Path to write to, file name is selected automatically based on self.id.
-        :param fn_data: See .load()
         :return:
         """
         if fn_meta is not None and dir_out is not None:
@@ -875,7 +861,6 @@ class DatasetBase(abc.ABC):
 
         if self.adata is None:
             self.load(
-                fn=fn_data,
                 remove_gene_version=False,
                 match_to_reference=None,
                 load_raw=True,
@@ -970,6 +955,16 @@ class DatasetBase(abc.ABC):
     def author(self, x: str):
         self.__erasing_protection(attr="author", val_old=self._author, val_new=x)
         self._author = x
+
+    @property
+    def data_dir(self):
+        # Data is either directly in user supplied directory or in a sub directory if the overall directory is managed
+        # by sfaira: In this case, the sub directory is named after the doi of the data set.
+        sfaira_path = os.path.join(self.data_path, self.directory_formatted_doi)
+        if os.path.exists(sfaira_path):
+            return sfaira_path
+        else:
+            return self.data_path
 
     @property
     def dev_stage(self) -> Union[None, str]:
@@ -1556,12 +1551,12 @@ class DatasetBaseGroupLoadingOneFile(DatasetBase):
     def __init__(
             self,
             sample_id: str,
-            path: Union[str, None],
+            data_path: Union[str, None],
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self._unprocessed_full_group_object = False
         self._sample_id = sample_id
 
@@ -1633,12 +1628,12 @@ class DatasetBaseGroupLoadingManyFiles(DatasetBase, abc.ABC):
     def __init__(
             self,
             sample_fn: str,
-            path: Union[str, None] = None,
+            data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self._sample_fn = sample_fn
 
     @property
@@ -1739,7 +1734,7 @@ class DatasetGroup:
             datasets_to_remove = []
             for k, v in self.datasets.items():
                 print(f"loading {k}")
-                group_loading = v.set_raw_full_group_object(fn=None, adata_group=adata_group)
+                group_loading = v.set_raw_full_group_object(adata_group=adata_group)
                 if adata_group is None and group_loading:  # cache full adata object for subsequent Datasets
                     adata_group = v.adata.copy()
                 x = map_fn(tuple([v] + args))
@@ -1819,7 +1814,7 @@ class DatasetGroup:
                     **kwargs
                 ))
         if len(tab) == 0:
-            warnings.warn(f"attempted to write ontology classmaps for group without annotated data sets")
+            warnings.warn("attempted to write ontology classmaps for group without annotated data sets")
         else:
             tab = pandas.concat(tab, axis=0)
             # Take out columns with the same source:
@@ -2031,7 +2026,7 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
     def __init__(
             self,
             file_base: str,
-            path: Union[str, None] = None,
+            data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
     ):
@@ -2042,7 +2037,7 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
         here.
 
         :param file_base:
-        :param path:
+        :param data_path:
         :param meta_path:
         :param cache_path:
         """
@@ -2050,10 +2045,11 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
         datasets = []
         cwd = os.path.dirname(file_base)
         dataset_module = str(cwd.split("/")[-1])
+        loader_pydoc_path = "sfaira.data.dataloaders.loaders." if str(cwd.split("/")[-5]) == "sfaira" else \
+            "sfaira_extension.data.dataloaders.loaders."
         if "group.py" in os.listdir(cwd):
-            DatasetGroupFound = pydoc.locate(
-                "sfaira.data.dataloaders.loaders." + dataset_module + ".group.DatasetGroup")
-            dsg = DatasetGroupFound(path=path, meta_path=meta_path, cache_path=cache_path)
+            DatasetGroupFound = pydoc.locate(loader_pydoc_path + dataset_module + ".group.DatasetGroup")
+            dsg = DatasetGroupFound(data_path=data_path, meta_path=meta_path, cache_path=cache_path)
             datasets.extend(list(dsg.datasets.values))
         else:
             for f in os.listdir(cwd):
@@ -2062,24 +2058,20 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                     if f.split(".")[-1] == "py" and f.split(".")[0] not in ["__init__", "base", "group"]:
                         datasets_f = []
                         file_module = ".".join(f.split(".")[:-1])
-                        DatasetFound = pydoc.locate(
-                            "sfaira.data.dataloaders.loaders." + dataset_module + "." +
-                            file_module + ".Dataset")
+                        DatasetFound = pydoc.locate(loader_pydoc_path + dataset_module + "." + file_module + ".Dataset")
                         # Check if global objects are available:
                         # - SAMPLE_FNS: for DatasetBaseGroupLoadingManyFiles
                         # - SAMPLE_IDS: for DatasetBaseGroupLoadingOneFile
-                        sample_fns = pydoc.locate(
-                            "sfaira.data.dataloaders.loaders." + dataset_module + "." +
-                            file_module + ".SAMPLE_FNS")
-                        sample_ids = pydoc.locate(
-                            "sfaira.data.dataloaders.loaders." + dataset_module + "." +
-                            file_module + ".SAMPLE_IDS")
+                        sample_fns = pydoc.locate(loader_pydoc_path + dataset_module + "." + file_module +
+                                                  ".SAMPLE_FNS")
+                        sample_ids = pydoc.locate(loader_pydoc_path + dataset_module + "." + file_module +
+                                                  ".SAMPLE_IDS")
                         if sample_fns is not None and sample_ids is None:
                             # DatasetBaseGroupLoadingManyFiles:
                             datasets_f.extend([
                                 DatasetFound(
                                     sample_fn=x,
-                                    path=path,
+                                    data_path=data_path,
                                     meta_path=meta_path,
                                     cache_path=cache_path,
                                 )
@@ -2090,7 +2082,7 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                             datasets_f.extend([
                                 DatasetFound(
                                     sample_id=x,
-                                    path=path,
+                                    data_path=data_path,
                                     meta_path=meta_path,
                                     cache_path=cache_path,
                                 )
@@ -2099,7 +2091,8 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                         elif sample_fns is not None and sample_ids is not None:
                             raise ValueError(f"sample_fns and sample_ids both found for {f}")
                         else:
-                            datasets_f.append(DatasetFound(path=path, meta_path=meta_path, cache_path=cache_path))
+                            datasets_f.append(
+                                DatasetFound(data_path=data_path, meta_path=meta_path, cache_path=cache_path))
                         # Load cell type maps:
                         for x in datasets_f:
                             x.load_ontology_class_map(fn=os.path.join(cwd, file_module + ".csv"))
