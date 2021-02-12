@@ -5,20 +5,38 @@ import pandas
 import zipfile
 import scipy.io
 from typing import Union
-from sfaira.data import DatasetBase
+from sfaira.data import DatasetBaseGroupLoadingOneFile
+
+SAMPLE_IDS = [
+    "Choroid plexus",
+    "Dura mater",
+    "Enr. SDM",
+    "Whole brain",
+]
 
 
-class Dataset(DatasetBase):
+class Dataset(DatasetBaseGroupLoadingOneFile):
 
     def __init__(
             self,
+            sample_id: str,
             data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.id = "mouse_brain_2019_10x_hove_001_10.1038/s41593-019-0393-4"
+        super().__init__(sample_id=sample_id, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        sample_organ_dict = {
+            "Choroid plexus": "choroid plexus",
+            "Dura mater": "dura mater",
+            "Enr. SDM": "brain meninx",
+            "Whole brain": "brain",
+        }
+        self.obs_key_sample = "sample"
+        self.organ = sample_organ_dict[self.sample_id]
+
+        self.id = f"mouse_{''.join(self.organ.split(' '))}_2019_10x_hove_" \
+                  f"{str(SAMPLE_IDS.index(self.sample_id)).zfill(3)}_10.1038/s41593-019-0393-4"
 
         self.download_url_data = \
             "https://www.brainimmuneatlas.org/data_files/toDownload/filtered_gene_bc_matrices_mex_WT_fullAggr.zip"
@@ -35,7 +53,7 @@ class Dataset(DatasetBase):
         self.year = 2019
 
         self.var_ensembl_col = "ensembl"
-        self.var_symbol_col = "names"
+        self.var_symbol_col = "name"
 
         self.obs_key_cellontology_original = "cluster"
         self.obs_key_organ = "sample_anatomy"
@@ -48,7 +66,7 @@ class Dataset(DatasetBase):
             },
         }
 
-    def _load(self):
+    def _load_full(self):
         fn = [
             os.path.join(self.data_dir, "filtered_gene_bc_matrices_mex_WT_fullAggr.zip"),
             os.path.join(self.data_dir, "annot_fullAggr.csv")
@@ -76,15 +94,6 @@ class Dataset(DatasetBase):
         idx_map = np.array([obs.index.tolist().index(i) for i in obs_names])
         self.adata = self.adata[idx_map, :]
         obs_names = obs_names[idx_map]
-
-        # Map anatomic locations to UBERON:
-        map_anatomy = {
-            "Choroid plexus": "choroid plexu",
-            "Dura mater": "dura mater",
-            'Enr. SDM': "brain meninx",
-            "Whole brain": "brain",
-        }
-        obs["sample_anatomy"] = [map_anatomy[x] for x in obs["sample"].values]
 
         # Assign attributes
         self.adata.obs_names = obs_names
