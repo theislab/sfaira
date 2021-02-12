@@ -1570,7 +1570,7 @@ class DatasetBaseGroupLoadingOneFile(DatasetBase):
         return self._sample_id
 
     @abc.abstractmethod
-    def _load_full(self) -> anndata.AnnData:
+    def _load_full(self):
         """
         Loads a raw anndata object that correponds to a superset of the data belonging to this Dataset.
 
