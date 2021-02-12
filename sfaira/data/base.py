@@ -57,7 +57,7 @@ class DatasetBase(abc.ABC):
     adata: Union[None, anndata.AnnData]
     class_maps: dict
     _meta: Union[None, pandas.DataFrame]
-    data_path: Union[None, str]
+    data_dir_base: Union[None, str]
     meta_path: Union[None, str]
     cache_path: Union[None, str]
     id: Union[None, str]
@@ -117,7 +117,7 @@ class DatasetBase(abc.ABC):
         self.adata = None
         self.meta = None
         self.genome = None
-        self.data_path = data_path
+        self.data_dir_base = data_path
         self.meta_path = meta_path
         self.cache_path = cache_path
 
@@ -185,8 +185,8 @@ class DatasetBase(abc.ABC):
     def download(self, **kwargs):
         assert self.download_url_data is not None, f"The `download_url_data` attribute of dataset {self.id} " \
                                                    f"is not set, cannot download dataset."
-        assert self.data_path is not None, "No path was provided when instantiating the dataset container, " \
-                                           "cannot download datasets."
+        assert self.data_dir_base is not None, "No path was provided when instantiating the dataset container, " \
+                                               "cannot download datasets."
 
         if not os.path.exists(self.data_dir):
             os.makedirs(self.data_dir)
@@ -261,7 +261,7 @@ class DatasetBase(abc.ABC):
         syn = synapseclient.Synapse()
         syn.login(kwargs['synapse_user'], kwargs['synapse_pw'])
         dataset = syn.get(entity=synapse_entity)
-        shutil.move(dataset.data_path, os.path.join(self.data_dir, fn))
+        shutil.move(dataset.data_dir_base, os.path.join(self.data_dir, fn))
 
     def set_raw_full_group_object(self, adata_group: Union[None, anndata.AnnData] = None) -> bool:
         """
@@ -960,11 +960,11 @@ class DatasetBase(abc.ABC):
     def data_dir(self):
         # Data is either directly in user supplied directory or in a sub directory if the overall directory is managed
         # by sfaira: In this case, the sub directory is named after the doi of the data set.
-        sfaira_path = os.path.join(self.data_path, self.directory_formatted_doi)
+        sfaira_path = os.path.join(self.data_dir_base, self.directory_formatted_doi)
         if os.path.exists(sfaira_path):
             return sfaira_path
         else:
-            return self.data_path
+            return self.data_dir_base
 
     @property
     def dev_stage(self) -> Union[None, str]:
