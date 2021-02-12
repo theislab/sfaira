@@ -52,7 +52,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.download_url_data = f"{synapse_id[self.sample_fn]},{self.sample_fn}"
         self.download_url_meta = None
 
-        self.author = "Krasnow"
+        self.author = "Travaglini"
         self.doi = "10.1038/s41586-020-2922-4"
         self.healthy = True
         self.normalization = "raw"
