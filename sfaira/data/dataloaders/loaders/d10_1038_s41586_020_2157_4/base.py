@@ -273,11 +273,6 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
         self.var_symbol_col = "index"
 
     def _load_full(self):
-        """
-        Attempt to find file, cache entire HCL if file was not found.
-
-        :return:
-        """
         self.adata = anndata.read(os.path.join(self.path, "human", self.directory_formatted_doi, "HCL_Fig1_self.adata.h5ad"))
         # convert to sparse matrix
         self.adata.X = scipy.sparse.csr_matrix(self.adata.X).copy()
@@ -334,22 +329,3 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
         self.adata.obs.columns = ["sample", "sub_tissue", "n_genes", "n_counts", "cluster_global", "dev_stage",
                              "donor", "celltype_global", "age", "celltype_specific", "cluster_specific", "gender",
                              "protocol", "source"]
-
-        # create a tidy organ annotation which is then used in sfaira
-        self.adata.obs["organ"] = self.adata.obs["sub_tissue"] \
-            .str.replace("Adult", "") \
-            .str.replace("Fetal", "") \
-            .str.replace("Neonatal", "") \
-            .str.replace("Transverse", "") \
-            .str.replace("Sigmoid", "") \
-            .str.replace("Ascending", "") \
-            .str.replace("Cord", "") \
-            .str.replace("Peripheral", "") \
-            .str.replace("CD34P", "") \
-            .str.replace("Cerebellum", "Brain") \
-            .str.replace("TemporalLobe", "Brain") \
-            .str.replace("BoneMarrow", "Bone") \
-            .str.replace("Spinal", "SpinalCord") \
-            .str.replace("Intestine", "Stomach") \
-            .str.replace("Eyes", "Eye") \
-            .str.lower()
