@@ -29,7 +29,6 @@ class Dataset(DatasetBase):
         self.doi = "10.1038/s41593-019-0393-4"
         self.healthy = True
         self.normalization = "raw"
-        self.organ = "brain"
         self.organism = "mouse"
         self.protocol = "10X sequencing"
         self.state_exact = "healthy"
@@ -38,9 +37,8 @@ class Dataset(DatasetBase):
         self.var_ensembl_col = "ensembl"
         self.var_symbol_col = "names"
 
-        self.obs_key_cellontology_class = self._ADATA_IDS_SFAIRA.cell_ontology_class
-        self.obs_key_cellontology_id = self._ADATA_IDS_SFAIRA.cell_ontology_id
-        self.obs_key_cellontology_original = self._ADATA_IDS_SFAIRA.cell_ontology_class
+        self.obs_key_cellontology_original = "cluster"
+        self.obs_key_organ = "sample_anatomy"
 
         self.class_maps = {
             "0": {
@@ -65,8 +63,8 @@ class Dataset(DatasetBase):
                                         sep="\t",
                                         header=None
                                         )[0].values
-        assert len(obs_names) == self.adata.shape[0]
-        assert var.shape[0] == self.adata.shape[1]
+        assert len(obs_names) == self.adata.shape[0]  # ToDo take asserts out
+        assert var.shape[0] == self.adata.shape[1]  # ToDo take asserts out
         obs = pandas.read_csv(fn[1])
 
         # Match annotation to raw data.
@@ -79,8 +77,17 @@ class Dataset(DatasetBase):
         self.adata = self.adata[idx_map, :]
         obs_names = obs_names[idx_map]
 
+        # Map anatomic locations to UBERON:
+        map_anatomy = {
+            "Choroid plexus": "choroid plexu",
+            "Dura mater": "dura mater",
+            'Enr. SDM': "brain meninx",
+            "Whole brain": "brain",
+        }
+        obs["sample_anatomy"] = [map_anatomy[x] for x in obs["sample"].values]
+
         # Assign attributes
         self.adata.obs_names = obs_names
         self.adata.var = var
         self.adata.obs = obs
-        assert np.all(self.adata.obs_names == self.adata.obs["cell"].values)
+        assert np.all(self.adata.obs_names == self.adata.obs["cell"].values)  # ToDo take asserts out
