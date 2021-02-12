@@ -34,7 +34,7 @@ class Dataset(DatasetBase):
         self.download_url_meta = None
 
         self.author = "10x Genomics"
-        self.doi = "no_doi"
+        self.doi = "no_doi_10x_genomics"
         self.healthy = True
         self.normalization = "raw"
         self.organ = "blood"
