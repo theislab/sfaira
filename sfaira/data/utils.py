@@ -12,7 +12,7 @@ def map_celltype_to_ontology(
         n_suggest: int = 4,
         choices_for_perfect_match: bool = True,
         keep_strategy: bool = False,
-        always_return_list: bool = False,
+        always_return_dict: bool = False,
         threshold_for_partial_matching: float = 90.,
         **kwargs
 ) -> Union[List[str], Dict[str, List[str]], str]:
@@ -34,10 +34,10 @@ def map_celltype_to_ontology(
         returned as a string, rather than as a list.
     :param keep_strategy: Whether to keep search results structured by search strategy.
         For details, see also sfaira.versions.metadata.CelltypeUniverse.prepare_celltype_map_fuzzy()
-    :param always_return_list: Also return a list over queries if only one query was given.
+    :param always_return_dict: Also return a dictionary over queries if only one query was given.
     :param threshold_for_partial_matching: Maximum fuzzy match score below which lenient matching (ratio) is
         extended through partial_ratio.
-    :param **kwargs: Additional parameters to CelltypeUniverse.
+    :param kwargs: Additional parameters to CelltypeUniverse.
     :return: List over queries, each entry is:
         A list of high priority matches or perfect match (see choices_for_perfect_match) or, if keep_strategy,
         dictionary of lists of search strategies named by strategy name. If a search strategy yields perfect matches, it
@@ -58,9 +58,10 @@ def map_celltype_to_ontology(
         n_suggest=n_suggest,
         threshold_for_partial_matching=threshold_for_partial_matching,
     )
+    matches = matches[0]
     # Prepare the output:
     for x, matches_i in zip(queries, matches):
-        matches_i = matches_i[0]
+        matches_i = matches_i
         # Flatten list of lists:
         # Flatten dictionary of lists and account for string rather than list entries.
         if len(matches_i.values()) == 1 and isinstance(list(matches_i.values())[0], str):
@@ -80,7 +81,7 @@ def map_celltype_to_ontology(
         else:
             matches_to_return.update({x: matches_flat})
     # Only return a list over queries if more than one query was given.
-    if len(queries) == 1 and not always_return_list:
-        return matches_to_return
-    else:
+    if len(queries) == 1 and not always_return_dict:
         return matches_to_return[queries[0]]
+    else:
+        return matches_to_return
