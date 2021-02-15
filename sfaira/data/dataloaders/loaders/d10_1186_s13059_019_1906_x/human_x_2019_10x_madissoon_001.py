@@ -55,6 +55,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.var_symbol_col = "index"
 
         self.obs_key_cellontology_original = "Celltypes"
+        # ToDo: patient information in .obs["patient"] and sample information in .obs["sample"] (more samples than
+        #  patients)
 
         if self.sample_fn == "madissoon19_lung.processed.h5ad":
             self.class_maps = {
@@ -146,7 +148,10 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
     def _load(self):
         fn = os.path.join(self.data_dir, self.sample_fn)
         self.adata = anndata.read(fn)
-        if self.sample_fn == "oesophagus.cellxgene.h5ad" or self.sample_fn == "spleen.cellxgene.h5ad":
-            self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs["n_counts"].values[:, None]))\
-                                       .multiply(1 / 10000)
+        self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs["n_counts"].values[:, None]))\
+                                   .multiply(1 / 10000)
+        # Cell type column called differently in madissoon19_lung.processed.h5ad:
+        if self.sample_fn == "madissoon19_lung.processed.h5ad":
+            self.adata.obs["Celltypes"] = self.adata.obs["CellType"]
+            del self.adata.obs["CellType"]
         self.set_unkown_class_id(ids=["1_Unicorns and artifacts"])
