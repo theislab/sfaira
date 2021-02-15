@@ -394,12 +394,14 @@ class DatasetBase(abc.ABC):
         self.adata.uns[self._ADATA_IDS_SFAIRA.mapped_features] = match_to_reference
         self.adata.uns[self._ADATA_IDS_SFAIRA.remove_gene_version] = remove_gene_version
         # Streamline feature space:
-        self._convert_and_set_var_names()
+        self._convert_and_set_var_names(match_to_reference=match_to_reference)
         self._collapse_gene_versions(remove_gene_version=remove_gene_version)
-        self._match_features_to_reference(match_to_reference=match_to_reference)
+        if match_to_reference:
+            self._match_features_to_reference()
 
     def _convert_and_set_var_names(
             self,
+            match_to_reference: Union[str, bool, None],
             symbol_col: str = None,
             ensembl_col: str = None,
     ):
@@ -432,8 +434,8 @@ class DatasetBase(abc.ABC):
                     {ensembl_col: self._ADATA_IDS_SFAIRA.gene_id_ensembl},
                     axis='columns'
                 )
-        # If only symbol or ensembl was supplied, the other one is inferred ia a genome mapping dictionary.
-        if not ensembl_col:
+        # If only symbol or ensembl was supplied, the other one is inferred from a genome mapping dictionary.
+        if not ensembl_col and match_to_reference:
             id_dict = self.genome_container.names_to_id_dict
             id_strip_dict = self.genome_container.strippednames_to_id_dict
             # Matching gene names to ensembl ids in the following way: if the gene is present in the ensembl dictionary,
@@ -449,20 +451,20 @@ class DatasetBase(abc.ABC):
                     ensids.append('n/a')
             self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_ensembl] = ensids
 
-        if not symbol_col:
+        if not symbol_col and match_to_reference:
             id_dict = self.genome_container.id_to_names_dict
             self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_names] = [
                 id_dict[n.split(".")[0]] if n.split(".")[0] in id_dict.keys() else 'n/a'
                 for n in self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_ensembl]
             ]
 
-        # Lastly, the index of .var is set to ensembl IDs.
-        try:  # debugging
-            self.adata.var.index = self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_index].values.tolist()
-        except KeyError as e:
-            raise KeyError(e)
-
-        self.adata.var_names_make_unique()
+        if match_to_reference:
+            # Lastly, the index of .var is set to ensembl IDs.
+            try:  # debugging
+                self.adata.var.index = self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_index].values.tolist()
+            except KeyError as e:
+                raise KeyError(e)
+            self.adata.var_names_make_unique()
 
     def _collapse_gene_versions(self, remove_gene_version):
         """
@@ -514,57 +516,53 @@ class DatasetBase(abc.ABC):
             self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_ensembl] = new_index
             self.adata.var.index = self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_ensembl].values
 
-    def _match_features_to_reference(self, match_to_reference):
+    def _match_features_to_reference(self):
         """
         Match feature space to a genomes provided with sfaira
-
-        :param match_to_reference:
-        :return:
         """
-        if match_to_reference:
-            # Convert data matrix to csc matrix
-            if isinstance(self.adata.X, np.ndarray):
-                # Change NaN to zero. This occurs for example in concatenation of anndata instances.
-                if np.any(np.isnan(self.adata.X)):
-                    self.adata.X[np.isnan(self.adata.X)] = 0
-                x = scipy.sparse.csc_matrix(self.adata.X)
-            elif isinstance(self.adata.X, scipy.sparse.spmatrix):
-                x = self.adata.X.tocsc()
-            else:
-                raise ValueError(f"Data type {type(self.adata.X)} not recognized.")
+        # Convert data matrix to csc matrix
+        if isinstance(self.adata.X, np.ndarray):
+            # Change NaN to zero. This occurs for example in concatenation of anndata instances.
+            if np.any(np.isnan(self.adata.X)):
+                self.adata.X[np.isnan(self.adata.X)] = 0
+            x = scipy.sparse.csc_matrix(self.adata.X)
+        elif isinstance(self.adata.X, scipy.sparse.spmatrix):
+            x = self.adata.X.tocsc()
+        else:
+            raise ValueError(f"Data type {type(self.adata.X)} not recognized.")
 
-            # Compute indices of genes to keep
-            data_ids = self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_ensembl].values
-            idx_feature_kept = np.where([x in self.genome_container.ensembl for x in data_ids])[0]
-            idx_feature_map = np.array([self.genome_container.ensembl.index(x)
-                                        for x in data_ids[idx_feature_kept]])
-            # Remove unmapped genes
-            x = x[:, idx_feature_kept]
+        # Compute indices of genes to keep
+        data_ids = self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_ensembl].values
+        idx_feature_kept = np.where([x in self.genome_container.ensembl for x in data_ids])[0]
+        idx_feature_map = np.array([self.genome_container.ensembl.index(x)
+                                    for x in data_ids[idx_feature_kept]])
+        # Remove unmapped genes
+        x = x[:, idx_feature_kept]
 
-            # Create reordered feature matrix based on reference and convert to csr
-            x_new = scipy.sparse.csc_matrix((x.shape[0], self.genome_container.ngenes), dtype=x.dtype)
-            # copying this over to the new matrix in chunks of size `steps` prevents a strange scipy error:
-            # ... scipy/sparse/compressed.py", line 922, in _zero_many i, j, offsets)
-            # ValueError: could not convert integer scalar
-            step = 2000
-            if step < len(idx_feature_map):
-                for i in range(0, len(idx_feature_map), step):
-                    x_new[:, idx_feature_map[i:i + step]] = x[:, i:i + step]
-                x_new[:, idx_feature_map[i + step:]] = x[:, i + step:]
-            else:
-                x_new[:, idx_feature_map] = x
+        # Create reordered feature matrix based on reference and convert to csr
+        x_new = scipy.sparse.csc_matrix((x.shape[0], self.genome_container.ngenes), dtype=x.dtype)
+        # copying this over to the new matrix in chunks of size `steps` prevents a strange scipy error:
+        # ... scipy/sparse/compressed.py", line 922, in _zero_many i, j, offsets)
+        # ValueError: could not convert integer scalar
+        step = 2000
+        if step < len(idx_feature_map):
+            for i in range(0, len(idx_feature_map), step):
+                x_new[:, idx_feature_map[i:i + step]] = x[:, i:i + step]
+            x_new[:, idx_feature_map[i + step:]] = x[:, i + step:]
+        else:
+            x_new[:, idx_feature_map] = x
 
-            x_new = x_new.tocsr()
+        x_new = x_new.tocsr()
 
-            self.adata = anndata.AnnData(
-                X=x_new,
-                obs=self.adata.obs,
-                obsm=self.adata.obsm,
-                var=pd.DataFrame(data={'names': self.genome_container.names,
-                                       self._ADATA_IDS_SFAIRA.gene_id_ensembl: self.genome_container.ensembl},
-                                 index=self.genome_container.ensembl),
-                uns=self.adata.uns
-            )
+        self.adata = anndata.AnnData(
+            X=x_new,
+            obs=self.adata.obs,
+            obsm=self.adata.obsm,
+            var=pd.DataFrame(data={'names': self.genome_container.names,
+                                   self._ADATA_IDS_SFAIRA.gene_id_ensembl: self.genome_container.ensembl},
+                             index=self.genome_container.ensembl),
+            uns=self.adata.uns
+        )
 
     def _set_metadata_in_adata(self):
         """
