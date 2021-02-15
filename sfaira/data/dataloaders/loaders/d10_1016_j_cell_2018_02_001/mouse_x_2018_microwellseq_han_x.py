@@ -9,97 +9,97 @@ import os
 from sfaira.data import DatasetBaseGroupLoadingManyFiles
 
 SAMPLE_FNS = [
-    "Bladder_dge.txt.gz"
-    "BoneMarrow1_dge.txt.gz"
-    "BoneMarrow2_dge.txt.gz"
-    "BoneMarrow3_dge.txt.gz"
-    "BoneMarrowcKit1_dge.txt.gz"
-    "BoneMarrowcKit2_dge.txt.gz"
-    "BoneMarrowcKit3_dge.txt.gz"
-    "Brain1_dge.txt.gz"
-    "Brain2_dge.txt.gz"
-    # "CJ7.EB14.Ezh2.1_dge.txt.gz"  # ToDo: sort out meta data for these
-    # "CJ7.EB14.WT.1_dge.txt.gz"  # ToDo: sort out meta data for these
-    # "CJ7.EB14.WT.2_dge.txt.gz"  # ToDo: sort out meta data for these
-    # "EB.Ezh2_dge.txt.gz"  # ToDo: sort out meta data for these
-    # "EB.WT_dge.txt.gz"  # ToDo: sort out meta data for these
-    "EmbryonicMesenchymeE14.5_dge.txt.gz"
-    "EmbryonicStemCell.CJ7_Deep_dge.txt.gz"
-    "EmbryonicStemCells_dge.txt.gz"
-    "FetalBrain_dge.txt.gz"
-    "FetalFemaleGonad_dge.txt.gz"
-    "FetalIntestine_dge.txt.gz"
-    "FetalKidney1_dge.txt.gz"
-    "FetalKidney2_dge.txt.gz"
-    "FetalLiverE14.1_dge.txt.gz"
-    "FetalLung_dge.txt.gz"
-    "FetalMaleGonad_dge.txt.gz"
-    "FetalPancreas_dge.txt.gz"
-    "FetalStomach_dge.txt.gz"
-    # "human-293T_dge.txt.gz"  # ToDo: sort out meta data for these
-    "Kidney1_dge.txt.gz"
-    "Kidney2_dge.txt.gz"
-    "Liver1_dge.txt.gz"
-    "Liver2_dge.txt.gz"
-    "Lung1_dge.txt.gz"
-    "Lung2_dge.txt.gz"
-    "Lung3_dge.txt.gz"
-    "MammaryGland.Involution.CD45.1_dge.txt.gz"
-    "MammaryGland.Involution.CD45.2_dge.txt.gz"
-    "MammaryGland.Involution1_dge.txt.gz"
-    "MammaryGland.Involution2_dge.txt.gz"
-    "MammaryGland.Lactation1_dge.txt.gz"
-    "MammaryGland.Lactation2_dge.txt.gz"
-    "MammaryGland.Pregnancy_dge.txt.gz"
-    "MammaryGland.Virgin.CD45.1_dge.txt.gz"
-    "MammaryGland.Virgin.CD45.2_dge.txt.gz"
-    "MammaryGland.Virgin1_dge.txt.gz"
-    "MammaryGland.Virgin2_dge.txt.gz"
-    "MammaryGland.Virgin3_dge.txt.gz"
-    "MammaryGland.Virgin4_dge.txt.gz"
-    # "mES.CJ7_dge.txt.gz"  # ToDo: sort out meta data for these
-    "MesenchymalStemCells_dge.txt.gz"
-    "MesenchymalStemCellsPrimary_dge.txt.gz"
-    # "mouse-3T3_dge.txt.gz"  # ToDo: sort out meta data for these
-    "Muscle_dge.txt.gz"
-    "NeonatalCalvaria1_dge.txt.gz"
-    "NeonatalCalvaria2_dge.txt.gz"
-    "NeonatalHeart_dge.txt.gz"
-    "NeonatalMuscle1_dge.txt.gz"
-    "NeonatalMuscle2_dge.txt.gz"
-    "NeonatalPancreas_dge.txt.zip"
-    "NeonatalRib1_dge.txt.gz"
-    "NeonatalRib2_dge.txt.gz"
-    "NeonatalRib3_dge.txt.gz"
-    "NeonatalSkin_dge.txt.gz"
-    "NeontalBrain1_dge.txt.gz"
-    "NeontalBrain2_dge.txt.gz"
-    "Ovary1_dge.txt.gz"
-    "Ovary2_dge.txt.gz"
-    "Pancreas_dge.txt.gz"
-    "PeripheralBlood1_dge.txt.gz"
-    "PeripheralBlood2_dge.txt.gz"
-    "PeripheralBlood3_dge.txt.gz"
-    "PeripheralBlood4_dge.txt.gz"
-    "PeripheralBlood5_dge.txt.gz"
-    "PeripheralBlood6_dge.txt.gz"
-    "PlacentaE14.1_dge.txt.gz"
-    "PlacentaE14.2_dge.txt.gz"
-    "Prostate1_dge.txt.gz"
-    "Prostate2_dge.txt.gz"
-    "SmallIntestine.CD45_dge.txt.gz"
-    "SmallIntestine1_dge.txt.gz"
-    "SmallIntestine2_dge.txt.gz"
-    "SmallIntestine3_dge.txt.gz"
-    "Spleen_dge.txt.gz"
-    "Stomach_dge.txt.gz"
-    "Testis1_dge.txt.gz"
-    "Testis2_dge.txt.gz"
-    "Thymus1_dge.txt.gz"
-    "Thymus2_dge.txt.gz"
-    "TrophoblastStemCells_dge.txt.gz"
-    "Uterus1_dge.txt.gz"
-    "Uterus2_dge.txt.gz"
+    "Bladder_dge.txt.gz",
+    "BoneMarrow1_dge.txt.gz",
+    "BoneMarrow2_dge.txt.gz",
+    "BoneMarrow3_dge.txt.gz",
+    "BoneMarrowcKit1_dge.txt.gz",
+    "BoneMarrowcKit2_dge.txt.gz",
+    "BoneMarrowcKit3_dge.txt.gz",
+    "Brain1_dge.txt.gz",
+    "Brain2_dge.txt.gz",
+    # "CJ7.EB14.Ezh2.1_dge.txt.gz",  # ToDo: sort out meta data for these
+    # "CJ7.EB14.WT.1_dge.txt.gz",  # ToDo: sort out meta data for these
+    # "CJ7.EB14.WT.2_dge.txt.gz",  # ToDo: sort out meta data for these
+    # "EB.Ezh2_dge.txt.gz",  # ToDo: sort out meta data for these
+    # "EB.WT_dge.txt.gz",  # ToDo: sort out meta data for these
+    "EmbryonicMesenchymeE14.5_dge.txt.gz",
+    "EmbryonicStemCell.CJ7_Deep_dge.txt.gz",
+    "EmbryonicStemCells_dge.txt.gz",
+    "FetalBrain_dge.txt.gz",
+    "FetalFemaleGonad_dge.txt.gz",
+    "FetalIntestine_dge.txt.gz",
+    "FetalKidney1_dge.txt.gz",
+    "FetalKidney2_dge.txt.gz",
+    "FetalLiverE14.1_dge.txt.gz",
+    "FetalLung_dge.txt.gz",
+    "FetalMaleGonad_dge.txt.gz",
+    "FetalPancreas_dge.txt.gz",
+    "FetalStomach_dge.txt.gz",
+    # "human-293T_dge.txt.gz",  # ToDo: sort out meta data for these
+    "Kidney1_dge.txt.gz",
+    "Kidney2_dge.txt.gz",
+    "Liver1_dge.txt.gz",
+    "Liver2_dge.txt.gz",
+    "Lung1_dge.txt.gz",
+    "Lung2_dge.txt.gz",
+    "Lung3_dge.txt.gz",
+    "MammaryGland.Involution.CD45.1_dge.txt.gz",
+    "MammaryGland.Involution.CD45.2_dge.txt.gz",
+    "MammaryGland.Involution1_dge.txt.gz",
+    "MammaryGland.Involution2_dge.txt.gz",
+    "MammaryGland.Lactation1_dge.txt.gz",
+    "MammaryGland.Lactation2_dge.txt.gz",
+    "MammaryGland.Pregnancy_dge.txt.gz",
+    "MammaryGland.Virgin.CD45.1_dge.txt.gz",
+    "MammaryGland.Virgin.CD45.2_dge.txt.gz",
+    "MammaryGland.Virgin1_dge.txt.gz",
+    "MammaryGland.Virgin2_dge.txt.gz",
+    "MammaryGland.Virgin3_dge.txt.gz",
+    "MammaryGland.Virgin4_dge.txt.gz",
+    # "mES.CJ7_dge.txt.gz",  # ToDo: sort out meta data for these
+    "MesenchymalStemCells_dge.txt.gz",
+    "MesenchymalStemCellsPrimary_dge.txt.gz",
+    # "mouse-3T3_dge.txt.gz",  # ToDo: sort out meta data for these
+    "Muscle_dge.txt.gz",
+    "NeonatalCalvaria1_dge.txt.gz",
+    "NeonatalCalvaria2_dge.txt.gz",
+    "NeonatalHeart_dge.txt.gz",
+    "NeonatalMuscle1_dge.txt.gz",
+    "NeonatalMuscle2_dge.txt.gz",
+    "NeonatalPancreas_dge.txt.zip",
+    "NeonatalRib1_dge.txt.gz",
+    "NeonatalRib2_dge.txt.gz",
+    "NeonatalRib3_dge.txt.gz",
+    "NeonatalSkin_dge.txt.gz",
+    "NeontalBrain1_dge.txt.gz",
+    "NeontalBrain2_dge.txt.gz",
+    "Ovary1_dge.txt.gz",
+    "Ovary2_dge.txt.gz",
+    "Pancreas_dge.txt.gz",
+    "PeripheralBlood1_dge.txt.gz",
+    "PeripheralBlood2_dge.txt.gz",
+    "PeripheralBlood3_dge.txt.gz",
+    "PeripheralBlood4_dge.txt.gz",
+    "PeripheralBlood5_dge.txt.gz",
+    "PeripheralBlood6_dge.txt.gz",
+    "PlacentaE14.1_dge.txt.gz",
+    "PlacentaE14.2_dge.txt.gz",
+    "Prostate1_dge.txt.gz",
+    "Prostate2_dge.txt.gz",
+    "SmallIntestine.CD45_dge.txt.gz",
+    "SmallIntestine1_dge.txt.gz",
+    "SmallIntestine2_dge.txt.gz",
+    "SmallIntestine3_dge.txt.gz",
+    "Spleen_dge.txt.gz",
+    "Stomach_dge.txt.gz",
+    "Testis1_dge.txt.gz",
+    "Testis2_dge.txt.gz",
+    "Thymus1_dge.txt.gz",
+    "Thymus2_dge.txt.gz",
+    "TrophoblastStemCells_dge.txt.gz",
+    "Uterus1_dge.txt.gz",
+    "Uterus2_dge.txt.gz",
 ]
 
 
