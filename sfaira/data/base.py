@@ -478,7 +478,7 @@ class DatasetBase(abc.ABC):
             # Collapse if necessary:
             new_index_collapsed = list(np.unique(new_index))
             if len(new_index_collapsed) < self.adata.n_vars:
-                print("WARNING: duplicate features detected after removing gene versions."
+                print("WARNING: duplicate features detected after removing gene versions. "
                       "the code to collapse these features is implemented but not tested.")
                 idx_map = np.array([new_index_collapsed.index(x) for x in new_index])
                 # Need reverse sorting to find index of last element in sorted list to split array using list index().
