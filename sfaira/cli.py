@@ -7,6 +7,7 @@ import rich
 import rich.logging
 from rich import traceback
 from rich import print
+from sfaira.commands.test_dataloader import DataloaderTester
 
 from sfaira.commands.clean_dataloader import DataloaderCleaner
 from sfaira.commands.lint_dataloader import DataloaderLinter
@@ -102,11 +103,13 @@ def lint_dataloader(path) -> None:
 
 
 @sfaira_cli.command()
-def test_dataloader():
+@click.argument('path', type=click.Path(exists=True))
+def test_dataloader(path) -> None:
     """
     Runs a dataloader unit test.
     """
-    pass
+    dataloader_tester = DataloaderTester(path)
+    dataloader_tester.test_dataloader()
 
 
 if __name__ == "__main__":

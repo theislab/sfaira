@@ -8,7 +8,7 @@ except ImportError:
     sfairae = None
 
 
-def test_load(dir_template: str = "./template_data"):
+def test_load(dir_template: str = "./template_data", doi_sfaira_repr="10.1000/j.journal.2021.01.001"):
     """
     Unit test to assist with data set contribution.
 
@@ -37,7 +37,7 @@ def test_load(dir_template: str = "./template_data"):
     classmap_by_file = True
     # ToDo build one class map per file or per data loader (potentially many per file)
 
-    flattened_doi = "d10_1016_j_cmet_2019_01_021"  # ToDo: add correct module here as "YOUR_STUDY"
+    flattened_doi = doi_sfaira_repr  # ToDo: add correct module here as "YOUR_STUDY"
     # Define file names and loader paths in sfaira or sfaira_extension:
     # Define base paths of loader collections in sfaira and sfaira_extension:
     dir_loader_sfaira = "sfaira.data.dataloaders.loaders."
