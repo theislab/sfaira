@@ -62,7 +62,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         organ = "-".join(sample_fn.split("-")[7:]).split(".")[0].lower()
         organ = "adipose tissue" if organ in ["fat", "bat", "gat", "mat", "scat"] else \
             "aorta" if organ in ["aorta"] else \
-            "bladder organ" if organ in ["bladder"] else \
+            "urinary bladder" if organ in ["bladder"] else \
             "bone marrow" if organ in ["marrow"] else \
             "brain" if organ in ["brain_non-myeloid", "brain_myeloid"] else \
             "colon" if organ in ["large_intestine"] else \
