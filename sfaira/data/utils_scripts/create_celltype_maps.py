@@ -88,6 +88,7 @@ for dir_study in os.listdir(dir_sfaira_dataloaders):
                             load_raw=False,
                             allow_caching=True,
                             match_to_reference=False,
+                            remove_gene_version=False,
                         )
                         if str(dir_study) in studys_separate_csvs:
                             pass
