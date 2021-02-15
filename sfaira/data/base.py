@@ -305,8 +305,8 @@ class DatasetBase(abc.ABC):
 
             cache = os.path.join(
                 self.cache_path,
-                "cache",
                 self.directory_formatted_doi,
+                "cache",
                 self._directory_formatted_id + ".h5ad"
             )
             return cache
@@ -346,7 +346,7 @@ class DatasetBase(abc.ABC):
     def load(
             self,
             remove_gene_version: bool = True,
-            match_to_reference: Union[str, None] = None,
+            match_to_reference: Union[str, bool, None] = None,
             load_raw: bool = False,
             allow_caching: bool = True,
     ):
@@ -354,7 +354,7 @@ class DatasetBase(abc.ABC):
 
         :param remove_gene_version: Remove gene version string from ENSEMBL ID so that different versions in different
             data sets are superimposed.
-        :param match_to_reference: Reference genomes name.
+        :param match_to_reference: Reference genomes name or False to keep original feature space.
         :param load_raw: Loads unprocessed version of data if available in data loader.
         :param allow_caching: Whether to allow method to cache adata object for faster re-loading.
         :return:
@@ -364,16 +364,21 @@ class DatasetBase(abc.ABC):
                           "while not removing gene versions. this can lead to very poor matching results")
 
         # Set default genomes per organism if none provided:
-        if match_to_reference:
+        if isinstance(match_to_reference, str):
             genome = match_to_reference
-        elif self.organism == "human":
-            genome = "Homo_sapiens_GRCh38_97"
-            warnings.warn(f"using default genome {genome}")
-        elif self.organism == "mouse":
-            genome = "Mus_musculus_GRCm38_97"
-            warnings.warn(f"using default genome {genome}")
+        elif match_to_reference is None or (isinstance(match_to_reference, bool) and match_to_reference):
+            if self.organism == "human":
+                genome = "Homo_sapiens_GRCh38_97"
+                warnings.warn(f"using default genome {genome}")
+            elif self.organism == "mouse":
+                genome = "Mus_musculus_GRCm38_97"
+                warnings.warn(f"using default genome {genome}")
+            else:
+                raise ValueError(f"genome was not supplied and no default genome found for organism {self.organism}")
+        elif not match_to_reference:
+            genome = None
         else:
-            raise ValueError(f"genome was not supplied and no default genome found for organism {self.organism}")
+            raise ValueError(f"invalid choice for match_to_reference={match_to_reference}")
         self._set_genome(genome=genome)
 
         # Set path to dataset directory
@@ -703,21 +708,23 @@ class DatasetBase(abc.ABC):
             [x for x in ids if x not in self._ADATA_IDS_SFAIRA.unknown_celltype_identifiers]
         )
 
-    def _set_genome(self, genome: str):
-
-        if genome.lower().startswith("homo_sapiens"):
-            g = SuperGenomeContainer(
-                organism="human",
-                genome=genome
-            )
-        elif genome.lower().startswith("mus_musculus"):
-            g = SuperGenomeContainer(
-                organism="mouse",
-                genome=genome
-            )
+    def _set_genome(self, genome: Union[str, None]):
+        if genome is not None:
+            if genome.lower().startswith("homo_sapiens"):
+                g = SuperGenomeContainer(
+                    organism="human",
+                    genome=genome
+                )
+            elif genome.lower().startswith("mus_musculus"):
+                g = SuperGenomeContainer(
+                    organism="mouse",
+                    genome=genome
+                )
+            else:
+                raise ValueError(f"Genome {genome} not recognised. Needs to start with 'Mus_Musculus' or "
+                                 f"'Homo_Sapiens'.")
         else:
-            raise ValueError(f"Genome {genome} not recognised. Needs to start with 'Mus_Musculus' or 'Homo_Sapiens'.")
-
+            g = None
         self.genome_container = g
 
     @property
@@ -1679,7 +1686,7 @@ class DatasetGroup:
             self,
             annotated_only: bool = False,
             remove_gene_version: bool = True,
-            match_to_reference: Union[str, None] = None,
+            match_to_reference: Union[str, bool, None] = None,
             load_raw: bool = False,
             allow_caching: bool = True,
             processes: int = 1,
@@ -2201,7 +2208,7 @@ class DatasetSuperGroup:
     def load_all(
             self,
             annotated_only: bool = False,
-            match_to_reference: Union[str, None] = None,
+            match_to_reference: Union[str, bool, None] = None,
             remove_gene_version: bool = True,
             load_raw: bool = False,
             allow_caching: bool = True,
