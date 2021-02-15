@@ -4,12 +4,18 @@ import hashlib
 import numpy as np
 import pandas
 import scipy.sparse
-import tensorflow as tf
+try:
+    import tensorflow as tf
+except ImportError:
+    tf = None
 from typing import Union
 import os
 import warnings
 from tqdm import tqdm
-from .external import CelltypeUniverse, Topologies, BasicModel
+
+from sfaira.models import BasicModel
+from sfaira.versions.metadata import CelltypeUniverse
+from sfaira.versions.topology_versions import Topologies
 from .losses import LossLoglikelihoodNb, LossLoglikelihoodGaussian, LossCrossentropyAgg, KLLoss
 from .metrics import custom_mse, custom_negll_nb, custom_negll_gaussian, custom_kl, \
     CustomAccAgg, CustomF1Classwise, CustomFprClasswise, CustomTprClasswise, custom_cce_agg

@@ -2,15 +2,14 @@ from random import randint
 
 import numpy as np
 
-import tensorflow.keras.backend as K
-from tensorflow.keras.layers import Layer, BatchNormalization
-from tensorflow.keras import initializers
-from tensorflow.keras import activations
-from tensorflow.keras import regularizers
-from tensorflow.keras import constraints
+try:
+    import tensorflow as tf
+except ImportError:
+    tf = None
+# ToDo: we are using a lot of tf.keras.backend modules below, can we use tf core instead?
 
 
-class MaskingDense(Layer):
+class MaskingDense(tf.keras.layers.Layer):
     """ Just copied code from keras Dense layer and added masking and a few other tricks:
         - Direct auto-regressive connections to output
         - Allows a second (non-autoregressive) input that is fully connected to first hidden
@@ -47,25 +46,24 @@ class MaskingDense(Layer):
         self.units = units
         self.out_units = out_units
         self.hidden_layers = hidden_layers
-        self.activation = activations.get(activation)
-        self.out_activation = activations.get(out_activation)  # None gives linear activation
-        self.kernel_initializer = initializers.get(kernel_initializer)
-        self.bias_initializer = initializers.get(bias_initializer)
-        self.out_kernel_initializer = initializers.get(out_kernel_initializer)
-        self.out_bias_initializer = initializers.get(out_bias_initializer)
-        self.kernel_regularizer = regularizers.get(kernel_regularizer)
-        self.bias_regularizer = regularizers.get(bias_regularizer)
-        self.activity_regularizer = regularizers.get(activity_regularizer)
-        self.kernel_constraint = constraints.get(kernel_constraint)
-        self.bias_constraint = constraints.get(bias_constraint)
+        self.activation = tf.keras.activations.get(activation)
+        self.out_activation = tf.keras.activations.get(out_activation)  # None gives linear activation
+        self.kernel_initializer = tf.keras.initializers.get(kernel_initializer)
+        self.bias_initializer = tf.keras.initializers.get(bias_initializer)
+        self.out_kernel_initializer = tf.keras.initializers.get(out_kernel_initializer)
+        self.out_bias_initializer = tf.keras.initializers.get(out_bias_initializer)
+        self.kernel_regularizer = tf.keras.regularizers.get(kernel_regularizer)
+        self.bias_regularizer = tf.keras.regularizers.get(bias_regularizer)
+        self.activity_regularizer = tf.keras.regularizers.get(activity_regularizer)
+        self.kernel_constraint = tf.keras.constraints.get(kernel_constraint)
+        self.bias_constraint = tf.keras.constraints.get(bias_constraint)
         self.batchnorm = batchnorm
 
     def dropout_wrapper(self, inputs, training):
         if 0. < self.rate < 1.:
             def dropped_inputs():
-                return K.dropout(inputs, self.rate, noise_shape=None, seed=None)
-            return K.in_train_phase(dropped_inputs, inputs,
-                                    training=training)
+                return tf.keras.backend.dropout(inputs, self.rate, noise_shape=None, seed=None)
+            return tf.keras.backend.in_train_phase(dropped_inputs, inputs, training=training)
 
         return inputs
 
@@ -119,7 +117,7 @@ class MaskingDense(Layer):
                     else:
                         yield 1 if prev_sel[x] <= input_sel[y] else 0
 
-        return K.constant(list(vals()), dtype='float32', shape=shape), input_sel
+        return tf.keras.backend.constant(list(vals()), dtype='float32', shape=shape), input_sel
 
     def build(self, input_shape):
         if isinstance(input_shape, list):
@@ -156,7 +154,7 @@ class MaskingDense(Layer):
 
             prev_sel = kernel_sel
             shape = (self.units, self.units)
-            self.batch_norms.append(BatchNormalization(center=True, scale=True))
+            self.batch_norms.append(tf.keras.layers.BatchNormalization(center=True, scale=True))
 
         # Direct connection between input/output
         if self.hidden_layers > 0:
@@ -190,8 +188,8 @@ class MaskingDense(Layer):
         output = inputs
 
         if other_input is not None:
-            other = K.dot(other_input, self.other_kernel)
-            other = K.bias_add(other, self.other_bias)
+            other = tf.keras.backend.dot(other_input, self.other_kernel)
+            other = tf.keras.backend.bias_add(other, self.other_bias)
             other = self.activation(other)
 
         # Hidden layer + mask
@@ -199,13 +197,13 @@ class MaskingDense(Layer):
             # i=0: input_dim -> masking_dim
             # i>0: masking_dim -> masking_dim
             weight = self.kernels[i] * self.kernel_masks[i]
-            output = K.dot(output, weight)
+            output = tf.keras.backend.dot(output, weight)
 
             # "other" input
             if i == 0 and other_input is not None:
                 output = output + other
 
-            output = K.bias_add(output, self.biases[i])
+            output = tf.keras.backend.bias_add(output, self.biases[i])
             output = self.activation(output)
             if self.batchnorm:
                 output = self.batch_norms[i](output)
@@ -213,15 +211,15 @@ class MaskingDense(Layer):
 
         # out_act(bias + (V dot M_v)h(x) + (A dot M_a)x + (other dot M_other)other)
         # masking_dim -> input_dim
-        output = K.dot(output, self.out_kernel * self.out_kernel_mask)
+        output = tf.keras.backend.dot(output, self.out_kernel * self.out_kernel_mask)
 
         # Direct connection
         if self.hidden_layers > 0:
             # input_dim -> input_dim
-            direct = K.dot(inputs, self.direct_kernel * self.direct_kernel_mask)
+            direct = tf.keras.backend.dot(inputs, self.direct_kernel * self.direct_kernel_mask)
             output = output + direct
 
-        output = K.bias_add(output, self.out_bias)
+        output = tf.keras.backend.bias_add(output, self.out_bias)
         output = self.out_activation(output)
         output = self.dropout_wrapper(output, training)
 

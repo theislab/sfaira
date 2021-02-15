@@ -1,5 +1,8 @@
 import numpy as np
-import tensorflow as tf
+try:
+    import tensorflow as tf
+except ImportError:
+    tf = None
 from typing import List, Union
 
 import sfaira.versions.metadata as metadata
