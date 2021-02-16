@@ -115,3 +115,4 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.adata.obsm = {}
         self.adata.varm = {}
         self.adata.uns = {}
+        self.set_unkown_class_id(ids=["proliferating"])
