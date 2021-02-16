@@ -7,6 +7,9 @@ from sfaira.data import DatasetBase
 
 
 class Dataset(DatasetBase):
+    """
+    ToDo: revisit gamma cell missing in CO
+    """
 
     def __init__(
             self,
@@ -37,25 +40,6 @@ class Dataset(DatasetBase):
 
         self.healthy_state_healthy = "normal"
 
-        self.class_maps = {
-            "0": {
-                "alpha cell": "Alpha cell",
-                "ductal cell": "Ductal cell",
-                "beta cell": "Beta cell",
-                "gamma cell": "Gamma cell",
-                "acinar cell": "Acinar cell",
-                "delta cell": "Delta cell",
-                "PSC cell": "PSC cell",
-                "unclassified endocrine cell": "Unclassified endocrine cell",
-                "co-expression cell": "Co-expression cell",
-                "endothelial cell": "Endothelial cell",
-                "epsilon cell": "Epsilon cell",
-                "mast cell": "Mast cell",
-                "MHC class II cell": "MHC class II cell",
-                "unclassified cell": "Unknown",
-            },
-        }
-
     def _load(self):
         fn = [
             os.path.join(self.data_dir, "E-MTAB-5061.processed.1.zip"),
@@ -69,3 +53,4 @@ class Dataset(DatasetBase):
         self.adata.obs = pd.read_csv(fn[1], sep="\t").set_index("Source Name").loc[self.adata.obs.index]
         # filter observations which are not cells (empty wells, low quality cells etc.)
         self.adata = self.adata[self.adata.obs["Characteristics[cell type]"] != "not applicable"].copy()
+        self.set_unkown_class_id(ids=["unclassified cell", "MHC class II cell"])
