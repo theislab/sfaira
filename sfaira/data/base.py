@@ -218,12 +218,13 @@ class DatasetBase(abc.ABC):
 
             else:
                 url = urllib.parse.unquote(url)
-
-                # Catch SSLCertVerificationError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed:
-                # unable to get local issuer certificate (_ssl.c:1124)
                 try:
                     urllib.request.urlopen(url)
-                except urllib.error.URLError:
+                except urllib.error.HTTPError as err:  # modify headers if urllib useragent is blocked (eg.10x datasets)
+                    opener = urllib.request.build_opener()
+                    opener.addheaders = [('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64)')]
+                    urllib.request.install_opener(opener)
+                except urllib.error.URLError:  # Catch SSLCertVerificationError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1124)
                     ssl._create_default_https_context = ssl._create_unverified_context
 
                 if 'Content-Disposition' in urllib.request.urlopen(url).info().keys():
