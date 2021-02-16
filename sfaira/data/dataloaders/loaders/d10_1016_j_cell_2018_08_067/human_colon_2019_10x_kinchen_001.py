@@ -23,7 +23,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        super().__init__(sample_fn=sample_fn, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.id = f"human_colon_2019_10x_kinchen_{str(SAMPLE_FNS.index(sample_fn)).zfill(3)}_10.1016/j.cell.2018.08.067"
 
         self.download_url_data = "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE114374&format=file&" \
