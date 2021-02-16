@@ -236,7 +236,7 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
             'FetalStomach_2': 'stomach',
             'FetalThymus_1': 'thymus',
             'FetalThymus_2': 'thymus',
-            'HESC_1': '',
+            'HESC_1': 'blastocyst',
             'Liver_1': 'liver',
             'Liver_2': 'liver',
             'NeonatalAdrenalGland_1': 'adrenal gland',
