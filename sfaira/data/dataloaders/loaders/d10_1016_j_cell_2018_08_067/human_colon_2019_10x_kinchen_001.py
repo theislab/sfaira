@@ -40,25 +40,6 @@ class Dataset(DatasetBase):
         self.healthy_state_healthy = "normal"
         self.obs_key_cellontology_original = "celltype"
 
-        self.class_maps = {
-            "0": {
-                "Endothelial 1": "Endothelial",
-                "Endothelial 2": "Endothelial",
-                "Glial": "Glial cells",
-                "Myofibroblasts": "Myofibroblasts",
-                "Pericyte 1": "Pericytes",
-                "Pericyte 2": "Pericytes",
-                "Pericytes": "Pericytes",
-                "Plasma Cells": "Plasma Cells",
-                "Smooth Muscle": "Smooth Muscle",
-                "Stromal 1": "Stromal",
-                "Stromal 2a": "Stromal",
-                "Stromal 2b": "Stromal",
-                "Stromal 3": "Stromal",
-                "Stromal 4": "Stromal",
-            },
-        }
-
     def _load(self):
         fn = [
             os.path.join(self.data_dir, "f8aa201c-4ff1-45a4-890e-840d63459ca2.homo_sapiens.loom"),
