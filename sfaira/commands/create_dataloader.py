@@ -14,9 +14,6 @@ log = logging.getLogger(__name__)
 
 @dataclass
 class TemplateAttributes:
-    dataloader_author_name: str = ''  # name of the author writing the dataloader
-    dataloader_author_email: str = ''  # email of the author writing the dataloader
-
     dataloader_type: str = ''  # One of single_dataset, multiple_datasets_single_file, multiple_datasets_streamlined, multiple_datasets_not_streamlined
     id: str = ''  # unique identifier of data set (Organism_Organ_Year_Protocol_NumberOfDataset_FirstAuthorLastname_doi).
     id_without_doi: str = ''  # complete id without the doi -> usually used to name the python scripts
@@ -87,12 +84,6 @@ class DataloaderCreator:
         """
         Prompts the user for all required attributes for a dataloader such as DOI, author, etc.
         """
-        self.template_attributes.dataloader_author_name = sfaira_questionary(function='text',
-                                                                             question='Your name:',
-                                                                             default='Homer Simpson')
-        self.template_attributes.dataloader_author_email = sfaira_questionary(function='text',
-                                                                              question='Your email:',
-                                                                              default='homer.simpson@springfield.com')
         author = sfaira_questionary(function='text',
                                     question='Author(s):',
                                     default='Einstein, Albert; Hawking, Stephen')
@@ -155,4 +146,3 @@ class DataloaderCreator:
             for i in range(2, int(self.template_attributes.number_of_datasets.lstrip('0')) + 1):
                 copyfile(f'{self.template_attributes.doi_sfaira_repr}/{self.template_attributes.id_without_doi}.py',
                          f'{self.template_attributes.doi_sfaira_repr}/{self.template_attributes.id_without_doi[:-3]}{str(i).zfill(3)}.py')
-            # move them into the required folder

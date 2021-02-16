@@ -16,7 +16,6 @@ class DataloaderLinter:
         self.warned: dict = {}
         self.failed: dict = {}
         self.linting_functions: list = [
-            '_lint_header',
             '_lint_dataloader_object',
             '_lint_required_attributes',
             '_lint_sfaira_todos',
@@ -43,27 +42,6 @@ class DataloaderLinter:
                 getattr(self, fun_name)()
 
         self._print_results()
-
-    def _lint_header(self):
-        """
-        Verifies the docstring header against all requirements.
-        Expected are
-            Author: str
-            Email: valid mail
-            Version: semantic ver
-        """
-        passed_lint_header = True
-
-        try:
-            line, author = list(filter(lambda line_author: line_author[1].startswith('Author:'), enumerate(self.content)))[0]
-            line, email = list(filter(lambda line_author: line_author[1].startswith('Email:'), enumerate(self.content)))[0]
-            line, version = list(filter(lambda line_author: line_author[1].startswith('Version:'), enumerate(self.content)))[0]
-        except IndexError:
-            passed_lint_header = False
-            self.failed['-1'] = 'Docstring for Author, Email and Version is invalid.'
-
-        if passed_lint_header:
-            self.passed[line] = 'Passed header checks.'
 
     def _lint_dataloader_object(self):
         """

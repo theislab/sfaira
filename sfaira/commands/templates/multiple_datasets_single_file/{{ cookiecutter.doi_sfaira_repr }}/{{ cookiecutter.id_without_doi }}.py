@@ -3,11 +3,6 @@ from typing import Union
 
 from sfaira.data import DatasetBaseGroupLoadingManyFiles
 
-"""
-Author: {{ cookiecutter.dataloader_author_name }}
-Email: {{ cookiecutter.dataloader_author_email }}
-Version: 1.0.0
-"""
 
 # SFAIRA TODO: Add correct sample IDs here.
 SAMPLE_IDS = [

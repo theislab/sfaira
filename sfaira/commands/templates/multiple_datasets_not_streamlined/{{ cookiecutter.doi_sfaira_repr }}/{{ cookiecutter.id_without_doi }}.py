@@ -4,12 +4,6 @@ import anndata as ad
 
 from sfaira.data import DatasetBase
 
-"""
-Author: {{ cookiecutter.dataloader_author_name }}
-Email: {{ cookiecutter.dataloader_author_email }}
-Version: 1.0.0
-"""
-
 
 class Dataset(DatasetBase):
 
