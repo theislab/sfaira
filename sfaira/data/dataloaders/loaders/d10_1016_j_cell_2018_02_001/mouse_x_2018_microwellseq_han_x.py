@@ -11,8 +11,8 @@ from sfaira.data import DatasetBaseGroupLoadingManyFiles
 SAMPLE_FNS = [
     "Bladder_dge.txt.gz",
     "BoneMarrow1_dge.txt.gz",
-    # "BoneMarrow2_dge.txt.gz",  # ToDo: not annotated, potentially bad quality?
-    "BoneMarrow3_dge.txt.gz",
+    # "BoneMarrow2_dge.txt.gz",  # not annotated, potentially bad quality
+    # "BoneMarrow3_dge.txt.gz",  # not annotated, potentially bad quality
     "BoneMarrowcKit1_dge.txt.gz",
     "BoneMarrowcKit2_dge.txt.gz",
     "BoneMarrowcKit3_dge.txt.gz",
@@ -343,4 +343,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
 
         self.adata = anndata.AnnData(data.T)
         self.adata = self.adata[np.array([x in celltypes.index for x in self.adata.obs_names])].copy()
-        self.adata.obs = celltypes.loc[self.adata.obs_names, :]
+        # Debugging:
+        if len(self.adata.obs_names) > 0:
+            self.adata.obs = celltypes.loc[self.adata.obs_names, :]
+        else:
+            print(f"remove {self.sample_fn}")
