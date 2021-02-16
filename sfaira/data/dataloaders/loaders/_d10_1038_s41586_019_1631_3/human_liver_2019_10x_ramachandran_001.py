@@ -60,23 +60,6 @@ class Dataset(DatasetBase):
         self.obs_key_healthy = self.obs_key_state_exact
         self.healthy_state_healthy = "Uninjured"
 
-        self.class_maps = {
-            "0": {
-                "MPs": "MP",
-                "Tcells": "Tcells",
-                "ILCs": "ILC",
-                "Endothelia": "Endothelia",
-                "Bcells": "Bcells",
-                "pDCs": "pDCs",
-                "Plasma Bcells": "Plasma B cell",
-                "Mast cells": "Mast cell",
-                "Mesenchyme": "Mesenchyme",
-                "Cholangiocytes": "Cholangiocytes",
-                "Hepatocytes": "Hepatocytes",
-                "Mesothelia": "Mesothelia",
-            },
-        }
-
     def _load(self):
         fn = os.path.join(self.data_dir, "ramachandran.h5ad")
         self.adata = anndata.read(fn)
