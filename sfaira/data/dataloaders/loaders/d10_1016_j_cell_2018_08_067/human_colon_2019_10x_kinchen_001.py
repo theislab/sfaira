@@ -1,44 +1,50 @@
-import anndata
 import os
 from typing import Union
 import pandas as pd
+import anndata as ad
+import scipy.sparse
+import numpy as np
 
-from sfaira.data import DatasetBase
+from sfaira.data import DatasetBaseGroupLoadingManyFiles
+
+SAMPLE_FNS = [
+    "HC",
+    "UC",
+]
 
 
-class Dataset(DatasetBase):
+class Dataset(DatasetBaseGroupLoadingManyFiles):
 
     def __init__(
             self,
+            sample_fn: str,
             data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             **kwargs
     ):
         super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.id = "human_colon_2019_10x_kinchen_001_10.1016/j.cell.2018.08.067"
+        self.id = f"human_colon_2019_10x_kinchen_{str(SAMPLE_FNS.index(sample_fn)).zfill(3)}_10.1016/j.cell.2018.08.067"
 
-        self.download_url_data = "https://data.humancellatlas.org/project-assets/project-matrices/f8aa201c-4ff1-45a4-890e-840d63459ca2.homo_sapiens.loom"
-        self.download_url_meta = [
-            "private,uc_meta_data_stromal_with_donor.txt",
-            "private,hc_meta_data_stromal_with_donor.txt",
-        ]
+        self.download_url_data = "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE114374&format=file&" \
+                                 f"file=GSE114374%5FHuman%5F{sample_fn}%5Fexpression%5Fmatrix%2Etxt%2Egz"
+        self.download_url_meta = f"private,{sample_fn.lower()}_meta_data_stromal_with_donor.txt"
 
         self.author = "Simmons"
         self.doi = "10.1016/j.cell.2018.08.067"
-        self.normalization = "raw"
+        self.normalization = "norm"
         self.organ = "lamina propria of mucosa of colon"
         self.organism = "human"
         self.protocol = "10X sequencing"
         self.year = 2019
 
-        self.var_symbol_col = "names"
-        self.var_ensembl_col = "Accession"
-
-        self.obs_key_state_exact = "donor_organism.diseases.ontology_label"
+        self.var_symbol_col = "index"
+        self.obs_key_state_exact = "state_exact"
         self.obs_key_healthy = self.obs_key_state_exact
-        self.healthy_state_healthy = "normal"
-        self.obs_key_cellontology_original = "celltype"
+        self.healthy_state_healthy = "healthy colon"
+        self.obs_key_cellontology_original = "Cluster"
+        self.obs_key_age = "Age"
+        self.obs_key_sex = "Sex"
 
         self.class_maps = {
             "0": {
@@ -61,31 +67,14 @@ class Dataset(DatasetBase):
 
     def _load(self):
         fn = [
-            os.path.join(self.data_dir, "f8aa201c-4ff1-45a4-890e-840d63459ca2.homo_sapiens.loom"),
-            os.path.join(self.data_dir, "uc_meta_data_stromal_with_donor.txt"),
-            os.path.join(self.data_dir, "hc_meta_data_stromal_with_donor.txt")
+            os.path.join(self.data_dir, f"GSE114374_Human_{self.sample_fn}_expression_matrix.txt.gz"),
+            os.path.join(self.data_dir, f"{self.sample_fn.lower()}_meta_data_stromal_with_donor.txt"),
         ]
-        adata = anndata.read_loom(fn[0])
-        ctuc = pd.read_csv(fn[1], sep="\t")
-        cthealthy = pd.read_csv(fn[2], sep="\t")
-        adata = adata[adata.obs["emptydrops_is_cell"] == "t"].copy()
-        adata = adata[adata.X.sum(axis=1).flatten() >= 250].copy()
-        uc = adata[adata.obs["donor_organism.diseases.ontology_label"] == "ulcerative colitis (disease)"].copy()
-        bcuc = [i.split("-")[0] for i in ctuc["Barcode"]]
-        seluc = []
-        for i in uc.obs["barcode"]:
-            seluc.append((uc.obs["barcode"].str.count(i).sum() == 1) and i in bcuc)
-        uc = uc[seluc].copy()
-        ctuc.index = [i.split("-")[0] for i in ctuc["Barcode"]]
-        uc.obs["celltype"] = [ctuc.loc[i]["Cluster"] for i in uc.obs["barcode"]]
-        uc.var = uc.var.reset_index().rename(columns={"index": "names"}).set_index("featurekey")
-        healthy = adata[adata.obs["donor_organism.diseases.ontology_label"] == "normal"].copy()
-        bchealthy = [i.split("-")[0] for i in cthealthy["Barcode"]]
-        selhealthy = []
-        for i in healthy.obs["barcode"]:
-            selhealthy.append((healthy.obs["barcode"].str.count(i).sum() == 1) and i in bchealthy)
-        healthy = healthy[selhealthy].copy()
-        cthealthy.index = [i.split("-")[0] for i in cthealthy["Barcode"]]
-        healthy.obs["celltype"] = [cthealthy.loc[i]["Cluster"] for i in healthy.obs["barcode"]]
-        healthy.var = healthy.var.reset_index().rename(columns={"index": "names"}).set_index("featurekey")
-        self.adata = healthy.concatenate(uc)
+        matrix = pd.read_csv(fn[0], sep="\t")
+        obs = pd.read_csv(fn[1], sep="\t", index_col=3)
+        self.adata = ad.AnnData(matrix.T)
+        self.adata.X = scipy.sparse.csc_matrix(np.expm1(self.adata.X))
+        self.adata.obs = obs
+        self.adata.obs['state_exact'] = "healthy colon" if self.sample_fn == "HC" else "ulcerative colitis"
+        s_dict = {"F": "female", "M": "male"}
+        self.adata.obs['Sex'] = [s_dict[i] for i in self.adata.obs['Sex']]
