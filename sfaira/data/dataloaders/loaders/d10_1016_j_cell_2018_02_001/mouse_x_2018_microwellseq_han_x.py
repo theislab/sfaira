@@ -11,7 +11,7 @@ from sfaira.data import DatasetBaseGroupLoadingManyFiles
 SAMPLE_FNS = [
     "Bladder_dge.txt.gz",
     "BoneMarrow1_dge.txt.gz",
-    "BoneMarrow2_dge.txt.gz",
+    # "BoneMarrow2_dge.txt.gz",  # ToDo: not annotated, potentially bad quality?
     "BoneMarrow3_dge.txt.gz",
     "BoneMarrowcKit1_dge.txt.gz",
     "BoneMarrowcKit2_dge.txt.gz",
