@@ -8,6 +8,11 @@ from sfaira.data import DatasetBase
 
 
 class Dataset(DatasetBase):
+    """
+    ToDo: revisit these cell type maps, Club and Hillock are described in this paper.
+      Club,epithelial cell of prostate
+      Hillock,epithelial cell of prostate
+    """
 
     def __init__(
             self,
@@ -35,19 +40,6 @@ class Dataset(DatasetBase):
         self.var_symbol_col = "index"
 
         self.obs_key_cellontology_original = "CellType"
-
-        self.class_maps = {
-            "0": {
-                "Basal": "Basal cell",
-                "Hillock": "Hillock",
-                "Luminal": "Luminal",
-                "Endothelia": "Endothelial cell",
-                "Club": "Club",
-                "Fibroblast": "Fibroblast",
-                "Smooth muscle": "Smooth muscle cell",
-                "Leukocytes": "Leukocytes",
-            },
-        }
 
     def _load(self):
         fn = os.path.join(self.data_dir, "henry18_0.processed.h5ad")
