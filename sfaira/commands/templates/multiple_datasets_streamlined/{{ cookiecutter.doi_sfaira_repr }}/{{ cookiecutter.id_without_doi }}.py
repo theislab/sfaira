@@ -63,6 +63,6 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         # self.obs_key_cellontology_original = x  # (optional)
 
     def _load(self) -> ad.AnnData:
-        # fn = os.path.join(self.data_dir, self.sample_fn)  # SFAIRA ToDo: add the name of the raw file
-        # SFAIRA ToDo: load file fn into self.adata and return it, self.sample_fn represents the current filename.
+        # fn = os.path.join(self.data_dir, self.sample_fn)  # SFAIRA TODO: add the name of the raw file
+        # SFAIRA TODO: load file fn into self.adata and return it, self.sample_fn represents the current filename.
         pass
