@@ -23,9 +23,9 @@ SAMPLE_FNS = [
     # "CJ7.EB14.WT.2_dge.txt.gz",  # ToDo: sort out meta data for these
     # "EB.Ezh2_dge.txt.gz",  # ToDo: sort out meta data for these
     # "EB.WT_dge.txt.gz",  # ToDo: sort out meta data for these
-    "EmbryonicMesenchymeE14.5_dge.txt.gz",
-    "EmbryonicStemCell.CJ7_Deep_dge.txt.gz",
-    "EmbryonicStemCells_dge.txt.gz",
+    # "EmbryonicMesenchymeE14.5_dge.txt.gz",  # ToDo: sort out meta data for these
+    # "EmbryonicStemCell.CJ7_Deep_dge.txt.gz",  # ToDo: sort out meta data for these
+    # "EmbryonicStemCells_dge.txt.gz",  # ToDo: sort out meta data for these
     "FetalBrain_dge.txt.gz",
     "FetalFemaleGonad_dge.txt.gz",
     "FetalIntestine_dge.txt.gz",
