@@ -377,7 +377,8 @@ class TrainModelCelltype(TrainModel):
 
         cell_counts = self.data.obs_concat(keys=['cell_ontology_class'])['cell_ontology_class'].value_counts().to_dict()
         cell_counts_leaf = cell_counts.copy()
-        assert False, "fix celltyp versions code here, depreceate"
+        raise NotImplementedError("fix celltype versions code here, deprecated")
+        """
         celltype_versions[self.zoo.organism][self.zoo.organ].set_version(self.zoo.model_version.split(".")[0])
         leafnodes = celltype_versions[self.zoo.organism][self.zoo.organ].ids
         ontology = celltype_versions[self.zoo.organism][self.zoo.organ].ontology[self.zoo.model_version.split(".")[0]]["names"]
@@ -392,3 +393,4 @@ class TrainModelCelltype(TrainModel):
                 del cell_counts_leaf[k]
         with open(fn + '_celltypes_valuecounts_wholedata.pickle', 'wb') as f:
             pickle.dump(obj=[cell_counts, cell_counts_leaf], file=f)
+        """

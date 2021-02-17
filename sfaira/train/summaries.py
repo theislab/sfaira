@@ -886,7 +886,8 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         dataset.load()
         cell_counts = dataset.obs_concat(keys=['cell_ontology_class'])['cell_ontology_class'].value_counts().to_dict()
 
-        assert False, "depreceat metadata code here"
+        raise NotImplementedError("deprecated metadata code here")
+        """
         celltype_versions = ORGANISM_DICT.copy()
         celltype_versions[organism][organ].set_version(celltype_version)
         leafnodes = celltype_versions[organism][organ].ids
@@ -977,6 +978,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
                 cbar=False
             )
         return fig, axs, sns_data_heatmap
+        """
 
     def plot_best_classwise_scatter(
             self,
@@ -1052,6 +1054,8 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         dataset.load()
         cell_counts = dataset.obs_concat(keys=['cell_ontology_class'])['cell_ontology_class'].value_counts().to_dict()
 
+        raise NotImplementedError("deprecated metadata code here")
+        """
         celltype_versions = ORGANISM_DICT.copy()
         celltype_versions[organism][organ].set_version(celltype_version)
         leafnodes = celltype_versions[organism][organ].ids
@@ -1149,6 +1153,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
                              )
 
         return fig, axs, sns_data_scatter
+        """
 
 
 class SummarizeGridsearchEmbedding(GridsearchContainer):

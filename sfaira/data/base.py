@@ -281,8 +281,7 @@ class DatasetBase(abc.ABC):
     @property
     def cache_fn(self):
         if self.directory_formatted_doi is None or self._directory_formatted_id is None:
-            warnings.warn(f"Caching enabled, but  Dataset.id or Dataset.doi not set. "
-                          f"Disabling caching for now.")
+            warnings.warn("Caching enabled, but Dataset.id or Dataset.doi not set. Disabling caching for now.")
             return None
         else:
             if self.cache_path is None:
