@@ -86,7 +86,9 @@ for dir_study in os.listdir(dir_sfaira_dataloaders):
                         dsg_f = sfaira.data.DatasetGroup(datasets=dict([(x.id, x) for x in datasets_f]))
                         dsg_f.load(
                             load_raw=False,
-                            allow_caching=True
+                            allow_caching=True,
+                            match_to_reference=False,
+                            remove_gene_version=False,
                         )
                         if str(dir_study) in studys_separate_csvs:
                             pass

@@ -305,8 +305,8 @@ class DatasetBase(abc.ABC):
 
             cache = os.path.join(
                 self.cache_path,
-                "cache",
                 self.directory_formatted_doi,
+                "cache",
                 self._directory_formatted_id + ".h5ad"
             )
             return cache
@@ -346,7 +346,7 @@ class DatasetBase(abc.ABC):
     def load(
             self,
             remove_gene_version: bool = True,
-            match_to_reference: Union[str, None] = None,
+            match_to_reference: Union[str, bool, None] = None,
             load_raw: bool = False,
             allow_caching: bool = True,
     ):
@@ -354,7 +354,7 @@ class DatasetBase(abc.ABC):
 
         :param remove_gene_version: Remove gene version string from ENSEMBL ID so that different versions in different
             data sets are superimposed.
-        :param match_to_reference: Reference genomes name.
+        :param match_to_reference: Reference genomes name or False to keep original feature space.
         :param load_raw: Loads unprocessed version of data if available in data loader.
         :param allow_caching: Whether to allow method to cache adata object for faster re-loading.
         :return:
@@ -364,16 +364,21 @@ class DatasetBase(abc.ABC):
                           "while not removing gene versions. this can lead to very poor matching results")
 
         # Set default genomes per organism if none provided:
-        if match_to_reference:
+        if isinstance(match_to_reference, str):
             genome = match_to_reference
-        elif self.organism == "human":
-            genome = "Homo_sapiens_GRCh38_97"
-            warnings.warn(f"using default genome {genome}")
-        elif self.organism == "mouse":
-            genome = "Mus_musculus_GRCm38_97"
-            warnings.warn(f"using default genome {genome}")
+        elif match_to_reference is None or (isinstance(match_to_reference, bool) and match_to_reference):
+            if self.organism == "human":
+                genome = "Homo_sapiens_GRCh38_97"
+                warnings.warn(f"using default genome {genome}")
+            elif self.organism == "mouse":
+                genome = "Mus_musculus_GRCm38_97"
+                warnings.warn(f"using default genome {genome}")
+            else:
+                raise ValueError(f"genome was not supplied and no default genome found for organism {self.organism}")
+        elif not match_to_reference:
+            genome = None
         else:
-            raise ValueError(f"genome was not supplied and no default genome found for organism {self.organism}")
+            raise ValueError(f"invalid choice for match_to_reference={match_to_reference}")
         self._set_genome(genome=genome)
 
         # Set path to dataset directory
@@ -389,12 +394,14 @@ class DatasetBase(abc.ABC):
         self.adata.uns[self._ADATA_IDS_SFAIRA.mapped_features] = match_to_reference
         self.adata.uns[self._ADATA_IDS_SFAIRA.remove_gene_version] = remove_gene_version
         # Streamline feature space:
-        self._convert_and_set_var_names()
+        self._convert_and_set_var_names(match_to_reference=match_to_reference)
         self._collapse_gene_versions(remove_gene_version=remove_gene_version)
-        self._match_features_to_reference(match_to_reference=match_to_reference)
+        if match_to_reference:
+            self._match_features_to_reference()
 
     def _convert_and_set_var_names(
             self,
+            match_to_reference: Union[str, bool, None],
             symbol_col: str = None,
             ensembl_col: str = None,
     ):
@@ -427,8 +434,8 @@ class DatasetBase(abc.ABC):
                     {ensembl_col: self._ADATA_IDS_SFAIRA.gene_id_ensembl},
                     axis='columns'
                 )
-        # If only symbol or ensembl was supplied, the other one is inferred ia a genome mapping dictionary.
-        if not ensembl_col:
+        # If only symbol or ensembl was supplied, the other one is inferred from a genome mapping dictionary.
+        if not ensembl_col and match_to_reference:
             id_dict = self.genome_container.names_to_id_dict
             id_strip_dict = self.genome_container.strippednames_to_id_dict
             # Matching gene names to ensembl ids in the following way: if the gene is present in the ensembl dictionary,
@@ -444,20 +451,20 @@ class DatasetBase(abc.ABC):
                     ensids.append('n/a')
             self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_ensembl] = ensids
 
-        if not symbol_col:
+        if not symbol_col and match_to_reference:
             id_dict = self.genome_container.id_to_names_dict
             self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_names] = [
                 id_dict[n.split(".")[0]] if n.split(".")[0] in id_dict.keys() else 'n/a'
                 for n in self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_ensembl]
             ]
 
-        # Lastly, the index of .var is set to ensembl IDs.
-        try:  # debugging
-            self.adata.var.index = self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_index].values.tolist()
-        except KeyError as e:
-            raise KeyError(e)
-
-        self.adata.var_names_make_unique()
+        if match_to_reference:
+            # Lastly, the index of .var is set to ensembl IDs.
+            try:  # debugging
+                self.adata.var.index = self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_index].values.tolist()
+            except KeyError as e:
+                raise KeyError(e)
+            self.adata.var_names_make_unique()
 
     def _collapse_gene_versions(self, remove_gene_version):
         """
@@ -471,7 +478,7 @@ class DatasetBase(abc.ABC):
             # Collapse if necessary:
             new_index_collapsed = list(np.unique(new_index))
             if len(new_index_collapsed) < self.adata.n_vars:
-                print("WARNING: duplicate features detected after removing gene versions."
+                print("WARNING: duplicate features detected after removing gene versions. "
                       "the code to collapse these features is implemented but not tested.")
                 idx_map = np.array([new_index_collapsed.index(x) for x in new_index])
                 # Need reverse sorting to find index of last element in sorted list to split array using list index().
@@ -509,57 +516,53 @@ class DatasetBase(abc.ABC):
             self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_ensembl] = new_index
             self.adata.var.index = self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_ensembl].values
 
-    def _match_features_to_reference(self, match_to_reference):
+    def _match_features_to_reference(self):
         """
         Match feature space to a genomes provided with sfaira
-
-        :param match_to_reference:
-        :return:
         """
-        if match_to_reference:
-            # Convert data matrix to csc matrix
-            if isinstance(self.adata.X, np.ndarray):
-                # Change NaN to zero. This occurs for example in concatenation of anndata instances.
-                if np.any(np.isnan(self.adata.X)):
-                    self.adata.X[np.isnan(self.adata.X)] = 0
-                x = scipy.sparse.csc_matrix(self.adata.X)
-            elif isinstance(self.adata.X, scipy.sparse.spmatrix):
-                x = self.adata.X.tocsc()
-            else:
-                raise ValueError(f"Data type {type(self.adata.X)} not recognized.")
+        # Convert data matrix to csc matrix
+        if isinstance(self.adata.X, np.ndarray):
+            # Change NaN to zero. This occurs for example in concatenation of anndata instances.
+            if np.any(np.isnan(self.adata.X)):
+                self.adata.X[np.isnan(self.adata.X)] = 0
+            x = scipy.sparse.csc_matrix(self.adata.X)
+        elif isinstance(self.adata.X, scipy.sparse.spmatrix):
+            x = self.adata.X.tocsc()
+        else:
+            raise ValueError(f"Data type {type(self.adata.X)} not recognized.")
 
-            # Compute indices of genes to keep
-            data_ids = self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_ensembl].values
-            idx_feature_kept = np.where([x in self.genome_container.ensembl for x in data_ids])[0]
-            idx_feature_map = np.array([self.genome_container.ensembl.index(x)
-                                        for x in data_ids[idx_feature_kept]])
-            # Remove unmapped genes
-            x = x[:, idx_feature_kept]
+        # Compute indices of genes to keep
+        data_ids = self.adata.var[self._ADATA_IDS_SFAIRA.gene_id_ensembl].values
+        idx_feature_kept = np.where([x in self.genome_container.ensembl for x in data_ids])[0]
+        idx_feature_map = np.array([self.genome_container.ensembl.index(x)
+                                    for x in data_ids[idx_feature_kept]])
+        # Remove unmapped genes
+        x = x[:, idx_feature_kept]
 
-            # Create reordered feature matrix based on reference and convert to csr
-            x_new = scipy.sparse.csc_matrix((x.shape[0], self.genome_container.ngenes), dtype=x.dtype)
-            # copying this over to the new matrix in chunks of size `steps` prevents a strange scipy error:
-            # ... scipy/sparse/compressed.py", line 922, in _zero_many i, j, offsets)
-            # ValueError: could not convert integer scalar
-            step = 2000
-            if step < len(idx_feature_map):
-                for i in range(0, len(idx_feature_map), step):
-                    x_new[:, idx_feature_map[i:i + step]] = x[:, i:i + step]
-                x_new[:, idx_feature_map[i + step:]] = x[:, i + step:]
-            else:
-                x_new[:, idx_feature_map] = x
+        # Create reordered feature matrix based on reference and convert to csr
+        x_new = scipy.sparse.csc_matrix((x.shape[0], self.genome_container.ngenes), dtype=x.dtype)
+        # copying this over to the new matrix in chunks of size `steps` prevents a strange scipy error:
+        # ... scipy/sparse/compressed.py", line 922, in _zero_many i, j, offsets)
+        # ValueError: could not convert integer scalar
+        step = 2000
+        if step < len(idx_feature_map):
+            for i in range(0, len(idx_feature_map), step):
+                x_new[:, idx_feature_map[i:i + step]] = x[:, i:i + step]
+            x_new[:, idx_feature_map[i + step:]] = x[:, i + step:]
+        else:
+            x_new[:, idx_feature_map] = x
 
-            x_new = x_new.tocsr()
+        x_new = x_new.tocsr()
 
-            self.adata = anndata.AnnData(
-                X=x_new,
-                obs=self.adata.obs,
-                obsm=self.adata.obsm,
-                var=pd.DataFrame(data={'names': self.genome_container.names,
-                                       self._ADATA_IDS_SFAIRA.gene_id_ensembl: self.genome_container.ensembl},
-                                 index=self.genome_container.ensembl),
-                uns=self.adata.uns
-            )
+        self.adata = anndata.AnnData(
+            X=x_new,
+            obs=self.adata.obs,
+            obsm=self.adata.obsm,
+            var=pd.DataFrame(data={'names': self.genome_container.names,
+                                   self._ADATA_IDS_SFAIRA.gene_id_ensembl: self.genome_container.ensembl},
+                             index=self.genome_container.ensembl),
+            uns=self.adata.uns
+        )
 
     def _set_metadata_in_adata(self):
         """
@@ -703,21 +706,23 @@ class DatasetBase(abc.ABC):
             [x for x in ids if x not in self._ADATA_IDS_SFAIRA.unknown_celltype_identifiers]
         )
 
-    def _set_genome(self, genome: str):
-
-        if genome.lower().startswith("homo_sapiens"):
-            g = SuperGenomeContainer(
-                organism="human",
-                genome=genome
-            )
-        elif genome.lower().startswith("mus_musculus"):
-            g = SuperGenomeContainer(
-                organism="mouse",
-                genome=genome
-            )
+    def _set_genome(self, genome: Union[str, None]):
+        if genome is not None:
+            if genome.lower().startswith("homo_sapiens"):
+                g = SuperGenomeContainer(
+                    organism="human",
+                    genome=genome
+                )
+            elif genome.lower().startswith("mus_musculus"):
+                g = SuperGenomeContainer(
+                    organism="mouse",
+                    genome=genome
+                )
+            else:
+                raise ValueError(f"Genome {genome} not recognised. Needs to start with 'Mus_Musculus' or "
+                                 f"'Homo_Sapiens'.")
         else:
-            raise ValueError(f"Genome {genome} not recognised. Needs to start with 'Mus_Musculus' or 'Homo_Sapiens'.")
-
+            g = None
         self.genome_container = g
 
     @property
@@ -1679,7 +1684,7 @@ class DatasetGroup:
             self,
             annotated_only: bool = False,
             remove_gene_version: bool = True,
-            match_to_reference: Union[str, None] = None,
+            match_to_reference: Union[str, bool, None] = None,
             load_raw: bool = False,
             allow_caching: bool = True,
             processes: int = 1,
@@ -2201,7 +2206,7 @@ class DatasetSuperGroup:
     def load_all(
             self,
             annotated_only: bool = False,
-            match_to_reference: Union[str, None] = None,
+            match_to_reference: Union[str, bool, None] = None,
             remove_gene_version: bool = True,
             load_raw: bool = False,
             allow_caching: bool = True,
