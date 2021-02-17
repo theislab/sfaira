@@ -36,7 +36,7 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
         self.download_url_meta = None
 
         self.author = "Regev"
-        self.doi = "no_doi_10x_genomics"
+        self.doi = "no_doi_regev"
         self.healthy = True
         self.normalization = "raw"
         self.organ = "blood" if sample_id == "umbilical cord blood" else "bone marrow"
