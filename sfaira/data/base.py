@@ -278,6 +278,19 @@ class DatasetBase(abc.ABC):
         """
         return False
 
+    @property
+    def cache_fn(self):
+        if self.directory_formatted_doi is None or self._directory_formatted_id is None:
+            warnings.warn(f"Caching enabled, but  Dataset.id or Dataset.doi not set. "
+                          f"Disabling caching for now.")
+            return None
+        else:
+            if self.cache_path is None:
+                cache = self.data_dir
+            else:
+                cache = os.path.join(self.cache_path, self.directory_formatted_doi)
+            return os.path.join(cache, "cache", self._directory_formatted_id + ".h5ad")
+
     def _load_cached(
             self,
             load_raw: bool,
@@ -292,24 +305,6 @@ class DatasetBase(abc.ABC):
         :param allow_caching: Whether to allow method to cache adata object for faster re-loading.
         :return:
         """
-        def _get_cache_fn():
-
-            if self.directory_formatted_doi is None or self._directory_formatted_id is None:
-                warnings.warn(f"Caching enabled, but  Dataset.id or Dataset.doi not set. "
-                              f"Disabling caching for now.")
-                return None
-
-            if self.cache_path is None:
-                cache_dir = os.path.join(self.data_dir)
-            else:
-                cache_dir = os.path.join(self.cache_path, self.directory_formatted_doi)
-
-            cache_fn = os.path.join(
-                cache_dir,
-                "cache",
-                self._directory_formatted_id + ".h5ad"
-            )
-            return cache_fn
 
         def _cached_reading(filename):
             if filename is not None:
@@ -331,17 +326,14 @@ class DatasetBase(abc.ABC):
 
         if load_raw and allow_caching:
             self._load()
-            fn_cache = _get_cache_fn()
-            _cached_writing(fn_cache)
+            _cached_writing(self.cache_fn)
         elif load_raw and not allow_caching:
             self._load()
         elif not load_raw and allow_caching:
-            fn_cache = _get_cache_fn()
-            _cached_reading(fn_cache)
-            _cached_writing(fn_cache)
+            _cached_reading(self.cache_fn)
+            _cached_writing(self.cache_fn)
         else:  # not load_raw and not allow_caching
-            fn_cache = _get_cache_fn()
-            _cached_reading(fn_cache)
+            _cached_reading(self.cache_fn)
 
     def load(
             self,
