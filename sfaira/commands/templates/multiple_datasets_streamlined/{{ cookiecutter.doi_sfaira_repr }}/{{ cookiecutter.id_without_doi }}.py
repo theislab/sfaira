@@ -1,3 +1,5 @@
+import anndata as ad
+import os
 from typing import Union
 
 from sfaira.data import DatasetBaseGroupLoadingManyFiles
@@ -60,7 +62,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         # SFAIRA: name of column which contain streamlined cell ontology cell type classes:
         # self.obs_key_cellontology_original = x  # (optional)
 
-    def _load(self):
+    def _load(self) -> ad.AnnData:
         # fn = os.path.join(self.data_dir, self.sample_fn)  # SFAIRA ToDo: add the name of the raw file
-        # SFAIRA ToDo: load file fn into self.adata, self.sample_fn represents the current filename.
+        # SFAIRA ToDo: load file fn into self.adata and return it, self.sample_fn represents the current filename.
         pass

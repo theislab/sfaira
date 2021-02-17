@@ -53,7 +53,7 @@ class Dataset(DatasetBase):
         # SFAIRA: name of column which contain streamlined cell ontology cell type classes:
         # self.obs_key_cellontology_original = x  # (optional)
 
-    def _load(self):
+    def _load(self) -> ad.AnnData:
         # fn = os.path.join(self.data_dir, )  # SFAIRA ToDo: add the name of the raw file
-        # SFAIRA ToDo: add code that loads to raw file into an AnnData object
+        # SFAIRA ToDo: add code that loads to raw file into an AnnData object and return it
         pass

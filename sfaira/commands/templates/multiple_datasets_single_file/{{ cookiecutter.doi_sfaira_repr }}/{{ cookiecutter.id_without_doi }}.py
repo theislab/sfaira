@@ -1,4 +1,5 @@
-import anndata
+import os
+import anndata as ad
 from typing import Union
 
 from sfaira.data import DatasetBaseGroupLoadingManyFiles
@@ -63,7 +64,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         # SFAIRA TODO: Make sure to include this attribute which indicates the column in self.adata in which you saved the sample IDs.
         self.obs_key_sample = 'x'
 
-    def _load_full(self):
+    def _load_full(self) -> ad.AnnData:
         # fn = os.path.join(self.data_dir,)  # SFAIRA ToDo: add the name of the raw file
-        # SFAIRA ToDo: load full data into AnnData object (no subsetting!)
+        # SFAIRA ToDo: load full data into AnnData object (no subsetting!) and return it
         pass
