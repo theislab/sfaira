@@ -284,7 +284,7 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
             "AdultGallBladder", "AdultGallbladder", regex=True).str.replace(
             "FetalFemaleGonald", "FetalFemaleGonad", regex=True)
         adata.obs.replace({"AdultJeJunum": "AdultJejunum", "AdultGallBladder": "AdultGallbladder",
-                                "FetalFemaleGonald": "FetalFemaleGonad"}, regex=True, inplace=True)
+                           "FetalFemaleGonald": "FetalFemaleGonad"}, regex=True, inplace=True)
         adata.obs.index = ["-".join(i.split("-")[:-1]) for i in adata.obs.index]
 
         # load celltype labels and harmonise them
@@ -304,7 +304,7 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
         # add annotations to adata object and rename columns
         adata.obs = pd.concat([adata.obs, fig1_anno[["cluster", "stage", "donor", "celltype"]]], axis=1)
         adata.obs.columns = ["sample", "tissue", "n_genes", "n_counts", "cluster_global", "stage", "donor",
-                                  "celltype_global"]
+                             "celltype_global"]
 
         # add sample-wise annotations to the full adata object
         df = pd.DataFrame(

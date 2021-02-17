@@ -149,8 +149,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         fn = os.path.join(self.data_dir, self.sample_fn)
         adata = anndata.read(fn)
         if self.sample_fn != "madissoon19_lung.processed.h5ad":
-            adata.X = adata.X.multiply(scipy.sparse.csc_matrix(adata.obs["n_counts"].values[:, None]))\
-                                       .multiply(1 / 10000)
+            adata.X = adata.X.multiply(scipy.sparse.csc_matrix(adata.obs["n_counts"].values[:, None])).multiply(1/10000)
         # Cell type column called differently in madissoon19_lung.processed.h5ad:
         if self.sample_fn == "madissoon19_lung.processed.h5ad":
             adata.obs["Celltypes"] = adata.obs["CellType"]

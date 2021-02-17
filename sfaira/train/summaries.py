@@ -884,10 +884,10 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         else:
             raise(ValueError(f"Supplied organism {organism} not recognised. Should be one of ('mouse', 'loaders')"))
         dataset.load()
-        cell_counts = dataset.obs_concat(keys=['cell_ontology_class'])['cell_ontology_class'].value_counts().to_dict()
 
         raise NotImplementedError("deprecated metadata code here")
         """
+        cell_counts = dataset.obs_concat(keys=['cell_ontology_class'])['cell_ontology_class'].value_counts().to_dict()
         celltype_versions = ORGANISM_DICT.copy()
         celltype_versions[organism][organ].set_version(celltype_version)
         leafnodes = celltype_versions[organism][organ].ids
@@ -1052,10 +1052,10 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         else:
             raise(ValueError(f"Supplied organism {organism} not recognised. Should be one of ('mouse', 'loaders')"))
         dataset.load()
-        cell_counts = dataset.obs_concat(keys=['cell_ontology_class'])['cell_ontology_class'].value_counts().to_dict()
 
         raise NotImplementedError("deprecated metadata code here")
         """
+        cell_counts = dataset.obs_concat(keys=['cell_ontology_class'])['cell_ontology_class'].value_counts().to_dict()
         celltype_versions = ORGANISM_DICT.copy()
         celltype_versions[organism][organ].set_version(celltype_version)
         leafnodes = celltype_versions[organism][organ].ids
