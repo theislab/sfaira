@@ -52,7 +52,7 @@ class Dataset(DatasetBase):
         adata = anndata.AnnData(df)
         adata.obs = pd.read_csv(fn[1], sep="\t").set_index("Source Name").loc[adata.obs.index]
         # filter observations which are not cells (empty wells, low quality cells etc.)
-        adata = adata[self.adata.obs["Characteristics[cell type]"] != "not applicable"].copy()
+        adata = adata[adata.obs["Characteristics[cell type]"] != "not applicable"].copy()
         self.set_unkown_class_id(ids=["unclassified cell", "MHC class II cell"])
 
         return adata
