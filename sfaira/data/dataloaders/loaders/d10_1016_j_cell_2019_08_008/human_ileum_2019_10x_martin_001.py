@@ -62,8 +62,10 @@ class Dataset(DatasetBase):
 
     def _load(self):
         fn = os.path.join(self.data_dir, "martin19.processed.h5ad")
-        self.adata = anndata.read(fn)
-        self.adata.X = np.expm1(self.adata.X)
-        self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs["n_counts"].values[:, None]))\
+        adata = anndata.read(fn)
+        adata.X = np.expm1(adata.X)
+        adata.X = adata.X.multiply(scipy.sparse.csc_matrix(adata.obs["n_counts"].values[:, None]))\
                                    .multiply(1 / 10000)
-        self.adata = self.adata[self.adata.obs["CellType"] != "Doublets"].copy()
+        adata = adata[adata.obs["CellType"] != "Doublets"].copy()
+
+        return adata

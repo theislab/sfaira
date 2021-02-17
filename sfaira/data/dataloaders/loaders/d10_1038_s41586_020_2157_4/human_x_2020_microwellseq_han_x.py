@@ -246,7 +246,7 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
 
         self.download_url_data = "https://ndownloader.figshare.com/files/17727365"
         self.download_url_meta = [
-            "https://ndownloader.figshare.com/files/21758835",
+            "adata",
             "https://ndownloader.figshare.com/files/22447898",
         ]
 
@@ -273,19 +273,19 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
         self.var_symbol_col = "index"
 
     def _load_full(self):
-        self.adata = anndata.read(os.path.join(self.data_dir, "HCL_Fig1_self.adata.h5ad"))
+        adata = anndata.read(os.path.join(self.data_dir, "HCL_Fig1_adata.h5ad"))
         # convert to sparse matrix
-        self.adata.X = scipy.sparse.csr_matrix(self.adata.X).copy()
+        adata.X = scipy.sparse.csr_matrix(adata.X).copy()
 
         # harmonise annotations
         for col in ["batch", "tissue"]:
-            self.adata.obs[col] = self.adata.obs[col].astype("str")
-        self.adata.obs.index = self.adata.obs.index.str.replace("AdultJeJunum", "AdultJejunum", regex=True).str.replace(
+            adata.obs[col] = adata.obs[col].astype("str")
+        adata.obs.index = adata.obs.index.str.replace("AdultJeJunum", "AdultJejunum", regex=True).str.replace(
             "AdultGallBladder", "AdultGallbladder", regex=True).str.replace(
             "FetalFemaleGonald", "FetalFemaleGonad", regex=True)
-        self.adata.obs.replace({"AdultJeJunum": "AdultJejunum", "AdultGallBladder": "AdultGallbladder",
+        adata.obs.replace({"AdultJeJunum": "AdultJejunum", "AdultGallBladder": "AdultGallbladder",
                                 "FetalFemaleGonald": "FetalFemaleGonad"}, regex=True, inplace=True)
-        self.adata.obs.index = ["-".join(i.split("-")[:-1]) for i in self.adata.obs.index]
+        adata.obs.index = ["-".join(i.split("-")[:-1]) for i in adata.obs.index]
 
         # load celltype labels and harmonise them
         # This pandas code should work with pandas 1.2 but it does not and yields an empty data frame:
@@ -299,14 +299,14 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
             "FetalFemaleGonald", "FetalFemaleGonad", regex=True)
 
         # check that the order of cells and cell labels is the same
-        assert np.all(fig1_anno.index == self.adata.obs.index)
+        assert np.all(fig1_anno.index == adata.obs.index)
 
-        # add annotations to self.adata object and rename columns
-        self.adata.obs = pd.concat([self.adata.obs, fig1_anno[["cluster", "stage", "donor", "celltype"]]], axis=1)
-        self.adata.obs.columns = ["sample", "tissue", "n_genes", "n_counts", "cluster_global", "stage", "donor",
+        # add annotations to adata object and rename columns
+        adata.obs = pd.concat([adata.obs, fig1_anno[["cluster", "stage", "donor", "celltype"]]], axis=1)
+        adata.obs.columns = ["sample", "tissue", "n_genes", "n_counts", "cluster_global", "stage", "donor",
                                   "celltype_global"]
 
-        # add sample-wise annotations to the full self.adata object
+        # add sample-wise annotations to the full adata object
         df = pd.DataFrame(
             columns=["Cell_barcode", "Sample", "Batch", "Cell_id", "Cluster_id", "Ages", "Development_stage", "Method",
                      "Gender", "Source", "Biomaterial", "Name", "ident", "Celltype"])
@@ -315,17 +315,19 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
             df1 = pd.read_csv(archive.open(f), encoding="unicode_escape")
             df = pd.concat([df, df1], sort=True)
         df = df.set_index("Cell_id")
-        self.adata = self.adata[[i in df.index for i in self.adata.obs.index]].copy()
-        a_idx = self.adata.obs.index.copy()
-        self.adata.obs = pd.concat([self.adata.obs, df[
+        adata = adata[[i in df.index for i in adata.obs.index]].copy()
+        a_idx = adata.obs.index.copy()
+        adata.obs = pd.concat([adata.obs, df[
             ["Ages", "Celltype", "Cluster_id", "Gender", "Method", "Source"]
         ]], axis=1)
-        assert np.all(a_idx == self.adata.obs.index)
+        assert np.all(a_idx == adata.obs.index)
 
         # remove mouse cells from the object  # ToDo: add this back in as mouse data sets?
-        self.adata = self.adata[self.adata.obs["Source"] != "MCA2.0"].copy()
+        adata = adata[adata.obs["Source"] != "MCA2.0"].copy()
 
         # tidy up the column names of the obs annotations
-        self.adata.obs.columns = [
+        adata.obs.columns = [
             "sample", "sub_tissue", "n_genes", "n_counts", "cluster_global", "dev_stage", "donor", "celltype_global",
             "age", "celltype_specific", "cluster_specific", "gender", "protocol", "source"]
+
+        return adata

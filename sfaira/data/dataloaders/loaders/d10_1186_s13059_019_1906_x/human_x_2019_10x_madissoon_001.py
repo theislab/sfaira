@@ -147,12 +147,14 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
 
     def _load(self):
         fn = os.path.join(self.data_dir, self.sample_fn)
-        self.adata = anndata.read(fn)
+        adata = anndata.read(fn)
         if self.sample_fn != "madissoon19_lung.processed.h5ad":
-            self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs["n_counts"].values[:, None]))\
+            adata.X = adata.X.multiply(scipy.sparse.csc_matrix(adata.obs["n_counts"].values[:, None]))\
                                        .multiply(1 / 10000)
         # Cell type column called differently in madissoon19_lung.processed.h5ad:
         if self.sample_fn == "madissoon19_lung.processed.h5ad":
-            self.adata.obs["Celltypes"] = self.adata.obs["CellType"]
-            del self.adata.obs["CellType"]
+            adata.obs["Celltypes"] = adata.obs["CellType"]
+            del adata.obs["CellType"]
         self.set_unkown_class_id(ids=["1_Unicorns and artifacts"])
+
+        return adata

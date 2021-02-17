@@ -83,11 +83,12 @@ class Dataset(DatasetBase):
             os.path.join(self.data_dir, "GSE135893_barcodes.tsv.gz"),
             os.path.join(self.data_dir, "GSE135893_IPF_metadata.csv.gz"),
         ]
-        self.adata = anndata.read_mtx(fn[0]).T
-        self.adata.var = pd.read_csv(fn[1], index_col=0, header=None, names=["ids"])
-        self.adata.obs = pd.read_csv(fn[2], index_col=0, header=None, names=["barcodes"])
+        adata = anndata.read_mtx(fn[0]).T
+        adata.var = pd.read_csv(fn[1], index_col=0, header=None, names=["ids"])
+        adata.obs = pd.read_csv(fn[2], index_col=0, header=None, names=["barcodes"])
         obs = pd.read_csv(fn[3], index_col=0)
-        self.adata = self.adata[obs.index.tolist(), :].copy()
-        self.adata.obs = obs
-
+        adata = adata[obs.index.tolist(), :].copy()
+        adata.obs = obs
         self.set_unkown_class_id(ids=["1_Unicorns and artifacts"])
+
+        return adata
