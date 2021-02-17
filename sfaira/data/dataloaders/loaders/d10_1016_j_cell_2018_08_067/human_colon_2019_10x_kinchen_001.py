@@ -72,9 +72,11 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         ]
         matrix = pd.read_csv(fn[0], sep="\t")
         obs = pd.read_csv(fn[1], sep="\t", index_col=3)
-        self.adata = ad.AnnData(matrix.T)
-        self.adata.X = scipy.sparse.csc_matrix(np.expm1(self.adata.X))
-        self.adata.obs = obs
-        self.adata.obs['state_exact'] = "healthy colon" if self.sample_fn == "HC" else "ulcerative colitis"
+        adata = ad.AnnData(matrix.T)
+        adata.X = scipy.sparse.csc_matrix(np.expm1(adata.X))
+        adata.obs = obs
+        adata.obs['state_exact'] = "healthy colon" if self.sample_fn == "HC" else "ulcerative colitis"
         s_dict = {"F": "female", "M": "male"}
-        self.adata.obs['Sex'] = [s_dict[i] for i in self.adata.obs['Sex']]
+        adata.obs['Sex'] = [s_dict[i] for i in adata.obs['Sex']]
+
+        return adata

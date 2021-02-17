@@ -65,6 +65,8 @@ class Dataset(DatasetBase):
             os.path.join(self.data_dir, "GSE115469.csv.gz"),
             os.path.join(self.data_dir, "GSE115469_labels.txt")
         ]
-        self.adata = anndata.read_csv(fn[0]).T
+        adata = anndata.read_csv(fn[0]).T
         celltype_df = pd.read_csv(fn[1], sep="\t").set_index("CellName")
-        self.adata.obs["celltype"] = [str(celltype_df.loc[i]["Cluster#"]) for i in self.adata.obs.index]
+        adata.obs["celltype"] = [str(celltype_df.loc[i]["Cluster#"]) for i in adata.obs.index]
+
+        return adata

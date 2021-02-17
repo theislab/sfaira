@@ -68,4 +68,6 @@ class Dataset(DatasetBase):
 
     def _load(self):
         fn = os.path.join(self.data_dir, "fetal_liver_alladata_.h5ad")
-        self.adata = anndata.read(fn)
+        adata = anndata.read(fn)
+
+        return adata
