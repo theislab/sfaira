@@ -2,6 +2,7 @@ sphinx
 matplotlib
 sphinx_rtd_theme
 sphinx-autodoc-typehints
+sphinx-click
 jinja2
 docutils
 -r ../requirements.txt

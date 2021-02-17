@@ -30,14 +30,13 @@ News
 Latest additions
 ----------------
 
-.. include:: release-latest.rst
-
 .. toctree::
    :maxdepth: 1
    :hidden:
 
    installation
    api/index
+   commandline_interface
    tutorials
    data
    models
