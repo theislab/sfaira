@@ -804,9 +804,11 @@ class DatasetBase(abc.ABC):
     @property
     def meta_fn(self):
         if self.meta_path is None:
-            return None
+            meta = self.data_dir
         else:
-            return os.path.join(self.meta_path, self.doi_cleaned_id + "_meta.csv")
+            meta = os.path.join(self.meta_path, self.directory_formatted_doi)
+
+        return os.path.join(meta, "meta", self.doi_cleaned_id + "_meta.csv")
 
     def load_meta(self, fn: Union[PathLike, str, None]):
         if fn is None:
