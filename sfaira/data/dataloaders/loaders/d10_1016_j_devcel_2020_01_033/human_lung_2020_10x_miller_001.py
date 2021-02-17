@@ -68,9 +68,9 @@ class Dataset(DatasetBase):
 
     def _load(self):
         fn = os.path.join(self.data_dir, "miller20.processed.h5ad")
-        self.adata = anndata.read(fn)
-        self.adata.X = np.expm1(self.adata.X)
-        self.adata.X = self.adata.X.multiply(scipy.sparse.csc_matrix(self.adata.obs["nUMI"].values[:, None]))\
-                                   .multiply(1 / 10000)
-
+        adata = anndata.read(fn)
+        adata.X = np.expm1(adata.X)
+        adata.X = adata.X.multiply(scipy.sparse.csc_matrix(adata.obs["nUMI"].values[:, None])).multiply(1 / 10000)
         self.set_unkown_class_id(ids=["1_Unicorns and artifacts"])
+
+        return adata

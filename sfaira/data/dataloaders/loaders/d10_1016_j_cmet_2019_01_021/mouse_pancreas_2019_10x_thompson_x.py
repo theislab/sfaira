@@ -64,8 +64,10 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
                                       sep="\t")
                     var.columns = ["ensembl", "names"]
                     var.index = var["ensembl"].values
-                    self.adata = anndata.AnnData(X=x, obs=obs, var=var)
-        self.adata.var_names_make_unique()
+                    adata = anndata.AnnData(X=x, obs=obs, var=var)
+        adata.var_names_make_unique()
         celltypes = pd.read_csv(os.path.join(self.data_dir, self.sample_fn + "_annotation.csv"), index_col=0)
-        self.adata = self.adata[celltypes.index]
-        self.adata.obs["celltypes"] = celltypes
+        adata = adata[celltypes.index]
+        adata.obs["celltypes"] = celltypes
+
+        return adata

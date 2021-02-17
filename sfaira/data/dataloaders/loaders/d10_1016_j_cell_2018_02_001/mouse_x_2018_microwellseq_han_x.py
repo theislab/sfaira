@@ -341,6 +341,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
                                        header=0
                                        )
 
-        self.adata = anndata.AnnData(data.T)
-        self.adata = self.adata[np.array([x in celltypes.index for x in self.adata.obs_names])].copy()
-        self.adata.obs = celltypes.loc[self.adata.obs_names, :]
+        adata = anndata.AnnData(data.T)
+        adata = adata[np.array([x in celltypes.index for x in adata.obs_names])].copy()
+        adata.obs = celltypes.loc[adata.obs_names, :]
+
+        return adata

@@ -53,7 +53,9 @@ class Dataset(DatasetBase):
                                       sep="\t").iloc[:, :2]
                     var.columns = ["ensembl", "names"]
                     var.index = var["ensembl"].values
-                    self.adata = anndata.AnnData(X=X, obs=obs, var=var)
-                    self.adata.obs["sample"] = name
-                    adatas.append(self.adata)
-        self.adata = adatas[0].concatenate(adatas[1:])
+                    adata = anndata.AnnData(X=X, obs=obs, var=var)
+                    adata.obs["sample"] = name
+                    adatas.append(adata)
+        adata = adatas[0].concatenate(adatas[1:])
+
+        return adata

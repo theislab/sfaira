@@ -62,8 +62,8 @@ class Dataset(DatasetBase):
                 d = pd.read_csv(tar.extractfile(member), compression="gzip", header=None, sep="\t", index_col=0,
                                 names=[member.name.split("_")[0]])
                 dfs.append(d)
-        self.adata = ad.AnnData(pd.concat(dfs, axis=1).iloc[1:-6].T)
-        self.adata.X = scipy.sparse.csc_matrix(self.adata.X)
+        adata = ad.AnnData(pd.concat(dfs, axis=1).iloc[1:-6].T)
+        adata.X = scipy.sparse.csc_matrix(adata.X)
         with gzip.open(fn[1]) as f:
             file_content = [i.decode("utf-8") for i in f.readlines()]
         inputstring = ""
@@ -81,5 +81,7 @@ class Dataset(DatasetBase):
         d = d.reset_index().set_index("ID_REF")
         d.columns.name = None
         d.index.name = None
-        self.adata.obs["celltype"] = [d.loc[i]["Sample_characteristics_ch1"].split(": ")[1] for i in self.adata.obs.index]
-        self.adata.obs["patient"] = ["_".join(d.loc[i]["index"].split("_")[:2]) for i in self.adata.obs.index]
+        adata.obs["celltype"] = [d.loc[i]["Sample_characteristics_ch1"].split(": ")[1] for i in adata.obs.index]
+        adata.obs["patient"] = ["_".join(d.loc[i]["index"].split("_")[:2]) for i in adata.obs.index]
+
+        return adata
