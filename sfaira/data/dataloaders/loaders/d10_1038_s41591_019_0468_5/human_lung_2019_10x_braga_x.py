@@ -91,7 +91,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
 
     def _load(self):
         fn = os.path.join(self.data_dir, self.sample_fn)
-        self.adata = anndata.read(fn)
-        self.adata.X = np.expm1(self.adata.X)
-
+        adata = anndata.read(fn)
+        adata.X = np.expm1(adata.X)
         self.set_unkown_class_id(ids=["1_Unicorns and artifacts"])
+
+        return adata

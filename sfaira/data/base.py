@@ -165,7 +165,7 @@ class DatasetBase(abc.ABC):
         self._ontology_class_map = None
 
     @abc.abstractmethod
-    def _load(self):
+    def _load(self) -> anndata.AnnData:
         pass
 
     @property
@@ -188,8 +188,8 @@ class DatasetBase(abc.ABC):
         assert self.data_dir_base is not None, "No path was provided when instantiating the dataset container, " \
                                                "cannot download datasets."
 
-        if not os.path.exists(self.data_dir):
-            os.makedirs(self.data_dir)
+        if not os.path.exists(os.path.join(self.data_dir_base, self.directory_formatted_doi)):
+            os.makedirs(os.path.join(self.data_dir_base, self.directory_formatted_doi))
 
         urls = self.download_url_data[0][0] + self.download_url_meta[0][0]
 
@@ -218,12 +218,17 @@ class DatasetBase(abc.ABC):
 
             else:
                 url = urllib.parse.unquote(url)
-
-                # Catch SSLCertVerificationError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed:
-                # unable to get local issuer certificate (_ssl.c:1124)
                 try:
                     urllib.request.urlopen(url)
+                except urllib.error.HTTPError as err:
+                    # modify headers if urllib useragent is blocked (eg.10x datasets)
+                    if err.code == 403:
+                        opener = urllib.request.build_opener()
+                        opener.addheaders = [('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64)')]
+                        urllib.request.install_opener(opener)
                 except urllib.error.URLError:
+                    # Catch SSLCertVerificationError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable
+                    # to get local issuer certificate (_ssl.c:1124)
                     ssl._create_default_https_context = ssl._create_unverified_context
 
                 if 'Content-Disposition' in urllib.request.urlopen(url).info().keys():
@@ -273,6 +278,18 @@ class DatasetBase(abc.ABC):
         """
         return False
 
+    @property
+    def cache_fn(self):
+        if self.directory_formatted_doi is None or self._directory_formatted_id is None:
+            warnings.warn("Caching enabled, but Dataset.id or Dataset.doi not set. Disabling caching for now.")
+            return None
+        else:
+            if self.cache_path is None:
+                cache = self.data_dir
+            else:
+                cache = os.path.join(self.cache_path, self.directory_formatted_doi)
+            return os.path.join(cache, "cache", self._directory_formatted_id + ".h5ad")
+
     def _load_cached(
             self,
             load_raw: bool,
@@ -287,61 +304,35 @@ class DatasetBase(abc.ABC):
         :param allow_caching: Whether to allow method to cache adata object for faster re-loading.
         :return:
         """
-        def _get_cache_fn():
-            if None in [
-                self.cache_path,
-                self.directory_formatted_doi,
-                self._directory_formatted_id
-            ]:
-                if self.cache_path is None:
-                    w = "cache path"
-                elif self.directory_formatted_doi is None:
-                    w = "self.doi"
-                else:  # self._directory_formatted_id is None
-                    w = "self.id"
-                warnings.warn(f"Caching enabled, but cannot find caching directory. Set {w} first. "
-                              f"Disabling caching for now.")
-                return None
 
-            cache = os.path.join(
-                self.cache_path,
-                self.directory_formatted_doi,
-                "cache",
-                self._directory_formatted_id + ".h5ad"
-            )
-            return cache
-
-        def _cached_reading(fn_cache):
-            if fn_cache is not None:
-                if os.path.exists(fn_cache):
-                    self.adata = anndata.read_h5ad(fn_cache)
+        def _cached_reading(filename):
+            if filename is not None:
+                if os.path.exists(filename):
+                    self.adata = anndata.read_h5ad(filename)
                 else:
-                    warnings.warn(f"Cached loading enabled, but cache file {fn_cache} not found. "
+                    warnings.warn(f"Cached loading enabled, but cache file {filename} not found. "
                                   f"Loading from raw files.")
-                    self._load()
+                    self.adata = self._load()
             else:
-                self._load()
+                self.adata = self._load()
 
-        def _cached_writing(fn_cache):
-            if fn_cache is not None:
-                dir_cache = os.path.dirname(fn_cache)
+        def _cached_writing(filename):
+            if filename is not None:
+                dir_cache = os.path.dirname(filename)
                 if not os.path.exists(dir_cache):
                     os.makedirs(dir_cache)
-                self.adata.write_h5ad(fn_cache)
+                self.adata.write_h5ad(filename)
 
         if load_raw and allow_caching:
-            self._load()
-            fn_cache = _get_cache_fn()
-            _cached_writing(fn_cache)
+            self.adata = self._load()
+            _cached_writing(self.cache_fn)
         elif load_raw and not allow_caching:
-            self._load()
+            self.adata = self._load()
         elif not load_raw and allow_caching:
-            fn_cache = _get_cache_fn()
-            _cached_reading(fn_cache)
-            _cached_writing(fn_cache)
+            _cached_reading(self.cache_fn)
+            _cached_writing(self.cache_fn)
         else:  # not load_raw and not allow_caching
-            fn_cache = _get_cache_fn()
-            _cached_reading(fn_cache)
+            _cached_reading(self.cache_fn)
 
     def load(
             self,
@@ -812,9 +803,11 @@ class DatasetBase(abc.ABC):
     @property
     def meta_fn(self):
         if self.meta_path is None:
-            return None
+            meta = self.data_dir
         else:
-            return os.path.join(self.meta_path, self.doi_cleaned_id + "_meta.csv")
+            meta = os.path.join(self.meta_path, self.directory_formatted_doi)
+
+        return os.path.join(meta, "meta", self.doi_cleaned_id + "_meta.csv")
 
     def load_meta(self, fn: Union[PathLike, str, None]):
         if fn is None:

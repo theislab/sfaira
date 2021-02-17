@@ -86,5 +86,7 @@ class Dataset(DatasetBase):
 
     def _load(self):
         fn = os.path.join(self.data_dir, "park20.processed.h5ad")
-        self.adata = anndata.read(fn)
-        self.adata.X = np.expm1(self.adata.X)
+        adata = anndata.read(fn)
+        adata.X = np.expm1(adata.X)
+
+        return adata

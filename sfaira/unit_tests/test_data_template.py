@@ -8,7 +8,7 @@ except ImportError:
     sfairae = None
 
 
-def test_load(dir_template: str = "./template_data"):
+def test_load(dir_template: str = "./template_data", doi_sfaira_repr="10.1000/j.journal.2021.01.001"):
     """
     Unit test to assist with data set contribution.
 
@@ -23,7 +23,7 @@ def test_load(dir_template: str = "./template_data"):
 
     4. Moderate the suggestions made here: Choose the best fit cell ontology label for your cells.
     Sfaira uses multiple mechanisms of finding matches, depending on how the free text was generated, these might be
-    differentially successfull. The proposed IDs groups are separate by ":|||:" strings to give you a visial anchor
+    differentially successful. The proposed IDs groups are separate by ":|||:" strings to give you a visual anchor
     when going through these lists. You need to delete all of these division strings and all labels in the second
     columns other than the best fit label. Do not change the first column,
     (Note that columns are separated by ",")
@@ -37,7 +37,7 @@ def test_load(dir_template: str = "./template_data"):
     classmap_by_file = True
     # ToDo build one class map per file or per data loader (potentially many per file)
 
-    flattened_doi = "d10_1016_j_cmet_2019_01_021"  # ToDo: add correct module here as "YOUR_STUDY"
+    flattened_doi = doi_sfaira_repr  # ToDo: add correct module here as "YOUR_STUDY"
     # Define file names and loader paths in sfaira or sfaira_extension:
     # Define base paths of loader collections in sfaira and sfaira_extension:
     dir_loader_sfaira = "sfaira.data.dataloaders.loaders."

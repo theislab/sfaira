@@ -62,4 +62,6 @@ class Dataset(DatasetBase):
 
     def _load(self):
         fn = os.path.join(self.data_dir, "ramachandran.h5ad")
-        self.adata = anndata.read(fn)
+        adata = anndata.read(fn)
+
+        return adata

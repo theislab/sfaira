@@ -58,7 +58,8 @@ class Dataset(DatasetBase):
             os.path.join(self.data_dir, "GSE130148_raw_counts.csv.gz"),
             os.path.join(self.data_dir, "GSE130148_barcodes_cell_types.txt.gz"),
         ]
-        self.adata = anndata.read_csv(fn[0]).T
-        self.adata.obs = pd.read_csv(fn[1], sep="\t", index_col=0)
-
+        adata = anndata.read_csv(fn[0]).T
+        adata.obs = pd.read_csv(fn[1], sep="\t", index_col=0)
         self.set_unkown_class_id(ids=["1_Unicorns and artifacts"])
+
+        return adata

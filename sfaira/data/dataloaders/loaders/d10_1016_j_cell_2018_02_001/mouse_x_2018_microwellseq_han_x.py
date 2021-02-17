@@ -133,8 +133,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             "CJ7.EB14.Ezh2.1_dge.txt.gz": None,
             "CJ7.EB14.WT.1_dge.txt.gz": None,
             "CJ7.EB14.WT.2_dge.txt.gz": None,
-            "EB.Ezh2_dge.txt.gz":  None,
-            "EB.WT_dge.txt.gz":  None,
+            "EB.Ezh2_dge.txt.gz": None,
+            "EB.WT_dge.txt.gz": None,
             "EmbryonicMesenchymeE14.5_dge.txt.gz": "mesenchyme",
             "EmbryonicStemCell.CJ7_Deep_dge.txt.gz": "blastocyst",
             "EmbryonicStemCells_dge.txt.gz": "blastocyst",
@@ -226,8 +226,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             "CJ7.EB14.Ezh2.1_dge.txt.gz": None,
             "CJ7.EB14.WT.1_dge.txt.gz": None,
             "CJ7.EB14.WT.2_dge.txt.gz": None,
-            "EB.Ezh2_dge.txt.gz":  None,
-            "EB.WT_dge.txt.gz":  None,
+            "EB.Ezh2_dge.txt.gz": None,
+            "EB.WT_dge.txt.gz": None,
             "EmbryonicMesenchymeE14.5_dge.txt.gz": "embryonic",
             "EmbryonicStemCell.CJ7_Deep_dge.txt.gz": "embryonic",
             "EmbryonicStemCells_dge.txt.gz": "embryonic",
@@ -343,8 +343,11 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
                                        header=0
                                        )
 
-        self.adata = anndata.AnnData(data.T)
+        adata = anndata.AnnData(data.T)
         annotated_cells = np.array([x in celltypes.index for x in self.adata.obs_names])
         # Subset to annotated cells if any are annotated:
         if np.sum(annotated_cells) > 0:
-            self.adata = self.adata[annotated_cells].copy()
+            adata = adata[annotated_cells].copy()
+            adata.obs = celltypes.loc[adata.obs_names, :]
+
+        return adata

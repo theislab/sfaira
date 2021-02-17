@@ -14,16 +14,17 @@
    .. autosummary::
    
       ~DatasetInteractive.__init__
-      ~DatasetInteractive.assert_celltype_version_key
       ~DatasetInteractive.clear
       ~DatasetInteractive.load
       ~DatasetInteractive.load_meta
+      ~DatasetInteractive.load_ontology_class_map
       ~DatasetInteractive.load_tobacked
-      ~DatasetInteractive.map_ontology_class
-      ~DatasetInteractive.set_default_type_version
+      ~DatasetInteractive.project_celltypes_to_ontology
+      ~DatasetInteractive.set_raw_full_group_object
       ~DatasetInteractive.set_unkown_class_id
-      ~DatasetInteractive.subset_organs
+      ~DatasetInteractive.subset_cells
       ~DatasetInteractive.write_meta
+      ~DatasetInteractive.write_ontology_class_map
    
    
 
@@ -36,17 +37,19 @@
       ~DatasetInteractive.age
       ~DatasetInteractive.annotated
       ~DatasetInteractive.author
-      ~DatasetInteractive.available_type_versions
       ~DatasetInteractive.citation
       ~DatasetInteractive.dev_stage
+      ~DatasetInteractive.directory_formatted_doi
       ~DatasetInteractive.doi
       ~DatasetInteractive.doi_cleaned_id
       ~DatasetInteractive.download
       ~DatasetInteractive.download_meta
       ~DatasetInteractive.ethnicity
+      ~DatasetInteractive.fn_ontology_class_map_csv
       ~DatasetInteractive.healthy
       ~DatasetInteractive.healthy_state_healthy
       ~DatasetInteractive.id
+      ~DatasetInteractive.loaded
       ~DatasetInteractive.meta
       ~DatasetInteractive.meta_fn
       ~DatasetInteractive.ncells
@@ -60,8 +63,11 @@
       ~DatasetInteractive.obs_key_organ
       ~DatasetInteractive.obs_key_organism
       ~DatasetInteractive.obs_key_protocol
+      ~DatasetInteractive.obs_key_sample
       ~DatasetInteractive.obs_key_sex
       ~DatasetInteractive.obs_key_state_exact
+      ~DatasetInteractive.ontology_celltypes
+      ~DatasetInteractive.ontology_class_map
       ~DatasetInteractive.organ
       ~DatasetInteractive.organism
       ~DatasetInteractive.protocol

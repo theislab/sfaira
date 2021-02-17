@@ -18,9 +18,11 @@ __maintainer__ = ', '.join([
 ])
 __author__ = ', '.join([
     "Leander Dony",
-    "David S. Fischer"
+    "David S. Fischer",
+    "Lukas Heumos"
 ])
 __email__ = ', '.join([
     "leander.dony@helmholtz-muenchen.de",
-    "david.fischer@helmholtz-muenchen.de"
+    "david.fischer@helmholtz-muenchen.de",
+    "lukas.heumos@helmholtz-muenchen.de"
 ])

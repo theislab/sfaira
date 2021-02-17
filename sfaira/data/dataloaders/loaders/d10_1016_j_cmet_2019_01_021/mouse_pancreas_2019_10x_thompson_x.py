@@ -30,7 +30,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             **kwargs
     ):
         super().__init__(sample_fn=sample_fn, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.id = f"mouse_pancreas_2019_10x_thompson_{str(SAMPLE_FNS.index(sample_fn)).zfill(3)}_" \
+        self.id = f"mouse_pancreas_2019_10x_thompson_{str(SAMPLE_FNS.index(sample_fn)+1).zfill(3)}_" \
                   f"10.1016/j.cmet.2019.01.021"
 
         self.download_url_data = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE117nnn/GSE117770/suppl/GSE117770_RAW.tar"
@@ -64,8 +64,10 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
                                       sep="\t")
                     var.columns = ["ensembl", "names"]
                     var.index = var["ensembl"].values
-                    self.adata = anndata.AnnData(X=x, obs=obs, var=var)
-        self.adata.var_names_make_unique()
+                    adata = anndata.AnnData(X=x, obs=obs, var=var)
+        adata.var_names_make_unique()
         celltypes = pd.read_csv(os.path.join(self.data_dir, self.sample_fn + "_annotation.csv"), index_col=0)
-        self.adata = self.adata[celltypes.index]
-        self.adata.obs["celltypes"] = celltypes
+        adata = adata[celltypes.index]
+        adata.obs["celltypes"] = celltypes
+
+        return adata

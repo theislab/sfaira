@@ -28,12 +28,19 @@ Contact us for support of any other repositories.
 
 .. _cellxgene: https://cellxgene.cziscience.com/
 
-Add data sets
-~~~~~~~~~~~~~
+Adding data sets
+~~~~~~~~~~~~~~~~~
 
-    1. Write a data loader as outlined below.
-    2. Identify the raw files as indicated in the data loader classes and copy them into your directory structure as required by your data loader.
-    3. You can contribute the data loader to public sfaira, we do not manage data upload though. During publication, you would upload this data set to a server like GEO and the data loader contributed to sfaira would use this download link.
+Adding datasets to sfaira is a great way to increase the visibility of your dataset and to make it available to a large audience.
+This process requires a couple of steps as outlined in the following sections.
+
+    1. Write a dataloader as outlined below.
+    2. Identify the raw files as indicated in the dataloader classes and copy them into your directory structure as required by your data loader.
+    3. You can contribute the data loader to public sfaira, we do not manage data upload though.
+       During publication, you would upload this data set to a server like GEO and the data loader contributed to sfaira would use this download link.
+
+The following sections will first describe the underlying design principles of sfaira dataloaders and
+then explain how to interactively create, validate and test dataloaders.
 
 Use data loaders on existing data repository
 --------------------------------------------
@@ -45,21 +52,14 @@ Depending on the functionalities you want to use, you would often want to create
 first. This can be easily done via the script sfaira.data.utils.create_meta.py. This meta information is necessary to
 anticipate file sizes for backing merged adata objects, for example, and is used for lazy loading.
 
-Write data loaders
-------------------
+Writing dataloaders
+---------------------
 
 The study-centric data loader module
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In the sfaira code, data loaders are organised into directories, which correspond to publications.
 All data loaders corresponding to data sets of one study are grouped into this directory.
-This directory contains an `__init__.py` file which makes these data loaders visible to sfaira:
-
-.. code-block:: python
-
-    FILE_PATH = __file__
-
-
 Next, each data set is represented by one data loader python file in this directory.
 See below for more complex set ups with repetitive data loader code.
 
@@ -71,8 +71,7 @@ The core data loader identified is the directory compatible doi,
 which is the doi with all special characters replaced by "_" and a "d" prefix is used:
 "10.1016/j.cell.2019.06.029" becomes "d10_1016_j_cell_2019_06_029".
 Searching for this string should yield a match if it is already implemented, take care to look for both
-preprint and publication DOIs if both are available.
-We will also mention publication names in issues, you will however not find these in the code.
+preprint and publication DOIs if both are available. We will also mention publication names in issues, you will however not find these in the code.
 
 .. _code: https://github.com/theislab/sfaira/tree/dev
 .. _issues: https://github.com/theislab/sfaira/issues
@@ -83,8 +82,7 @@ The data loader python file
 
 Each data set (organsism, organ, protocol, optionally also batches) has its own data loader class. Each such class is
 in a separate file and inherits from a base class that contains most functionalities. Accordingly, the data loader class
-looks very similar in parts to a cell in a juypter notebook that performs data loading. We suggest to copy a data loader
-class file and simply adapt to the new data. The core features that must be included are:
+looks very similar in parts to a cell in a juypter notebook that performs data loading. The core features that must be included are:
 
 1. A constructor of the following form that can be used to interact with the data set
 before it is loaded into memory:
@@ -199,12 +197,55 @@ Alternatively, we also provide the optional dependency sfaira_extensions (https:
 in which local data and cell type annotation can be managed separately but still be loaded as usual through sfaira.
 The data loaders and cell type annotation formats between sfaira and sfaira_extensions are identical and can be easily
 copied over.
-To get going, consider copying over code from our collection of template_ study-centric data loader directories.
-In these templates, it is clearly annotated which code fragment can remain constant
-and which have to be addressed by you.
 
-.. _template: https://github.com/theislab/sfaira/tree/dev/sfaira/data/templates/dataloaders
+Handling multiple data sources
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+If you have multiple data sets in a study which are all saved in separate files which come in similar formats:
+You can subclass `DatasetBaseGroupLoadingManyFiles` instead of `DatasetBase` and proceed as usual,
+only with adding `SAMPLE_FNS` in the data loader file name space,
+which is a list of all file names addressed with this file.
+You can then refer to an additional property of the Dataset class, `self.sample_fn` during loading
+or when dynamically defining meta data in the constructor.
+Note that you can always add additional data loaders for further, less streamlined, data sets to such a study.
+
+If you have multiple data sets in a study which are all saved in one file:
+You can subclass `DatasetBaseGroupLoadingOneFile` instead of `DatasetBase` and proceed as usual,
+only with adding `SAMPLE_IDS` in the data loader file name space,
+which is a list of all sample IDs addressed with this file.
+You can then refer to an additional property of the Dataset class, `self.sample_id` during loading
+or when dynamically defining meta data in the constructor.
+Note that `self.sample_id` refers to a `self.adata.obs` column in the loaded data set,
+this column has to be defined in `self.obs_key_sample`, which needs to be defined in the constructor.
+Note that you can always add additional data loaders for further, less streamlined, data sets to such a study.
+
+Creating dataloaders with the commandline interface
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+sfaira features an interactive way of creating, formatting and testing dataloaders.
+The common workflow look as follows:
+
+1. Create a new dataloader with ``sfaira create-dataloader``
+2. Format and clean the dataloader with ``sfaira clean-dataloader <path>``
+3. Validate the dataloader with ``sfaira lint-dataloader <path>``
+4. Test the dataloader using ``sfaira test-dataloader <path>``
+
+When creating a dataloader with ``sfaira create-dataloader`` you are first asked for the dataloader type
+which will be determined by the structure of your data (one vs many files etc). Next, common information such as
+your name and email are prompted for followed by dataloader specific attributes such as organ, organism and many more.
+If the requested information is not available simply hit enter and continue until done. If you have mixed organ or organism
+data you will have to resolve this manually. Your dataloader template will be created in your current working directory
+in a folder resembling your doi.
+
+Now simply fill in all missing properties in your dataloader script(s). Leave all unneeded properties outcommented.
+When done run ``sfaira clean-dataloader <path>`` on the just filled out dataloader script.
+All unused attributes will be removed and the file is reformatted.
+
+Next validate the integrity of your dataloader with ``sfaira lint-dataloader <path>``.
+All tests must pass! If any of the tests fail please revisit your dataloader and add the missing information/function.
+
+Finally, test your dataloader with ``sfaira test-dataloader <path>``.
+If all tests pass you can proceed to use your dataloader or to submit a pull request to sfaira.
 
 Map cell type labels to ontology
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -220,52 +261,6 @@ which is automatically executed when you run the template data loader unit test 
 Conflicts are not resolved in this first guess and you have to manually decide which free text field corresponds to which
 ontology term in the case of conflicts.
 Still, this first guess usually drastically speeds up this annotation harmonization.
-
-
-Repetitive data loader code
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-There are instances in which you find yourself copying code between data loader files corresponding to one study.
-In most of these cases, you can avoid the copy operations and share the code more efficiently.
-
-If you have multiple data sets in a study which are all saved in separate files which come in similar formats:
-You can subclass `DatasetBaseGroupLoadingManyFiles` instead of `DatasetBase` and proceed as usual,
-only with adding `SAMPLE_FNS` in the data loader file name space,
-which is a list of all file names addressed with this file.
-You can then refer to an additional property of the Dataset class, `self.sample_fn` during loading
-or when dynamically defining meta data in the constructor.
-Consider also this template_ and this example_.
-Note that you can always add additional data loaders for further, less streamlined, data sets to such a study.
-
-.. _template: https://github.com/theislab/sfaira/tree/dev/sfaira/data/templates/dataloaders/many_samples_many_files_streamlined
-.. _example: https://github.com/theislab/sfaira/tree/dev/sfaira/data/dataloaders/loaders/d10_1084_jem_20191130
-
-If you have multiple data sets in a study which are all saved in one file:
-You can subclass `DatasetBaseGroupLoadingOneFile` instead of `DatasetBase` and proceed as usual,
-only with adding `SAMPLE_IDS` in the data loader file name space,
-which is a list of all sample IDs addressed with this file.
-You can then refer to an additional property of the Dataset class, `self.sample_id` during loading
-or when dynamically defining meta data in the constructor.
-Note that `self.sample_id` refers to a `self.adata.obs` column in the loaded data set,
-this column has to be defined in `self.obs_key_sample`, which needs to be defined in the constructor.
-Consider also this template_.
-Note that you can always add additional data loaders for further, less streamlined, data sets to such a study.
-
-.. _template: https://github.com/theislab/sfaira/tree/dev/sfaira/data/templates/dataloaders/many_samples_many_files_streamlined
-
-
-Test your data loader
-~~~~~~~~~~~~~~~~~~~~~
-
-Sfaira has a local data loader unit test_ with which you can debug your data loader and which aids with meta data
-assignments, such as cell types.
-You can use this test with pytest in an IDE.
-You can simply place the raw data into `sfaira/unit_tests/template_data/` with the correct sub path,
-as indicated in the `._load()`,
-for the test to access this data.
-
-.. _test: https://github.com/theislab/sfaira/tree/dev/sfaira/unit_tests/test_data_template.py
-
 
 Cell type ontology management
 -----------------------------

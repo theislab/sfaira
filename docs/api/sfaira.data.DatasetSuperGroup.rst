@@ -24,9 +24,10 @@
       ~DatasetSuperGroup.ncells
       ~DatasetSuperGroup.ncells_bydataset
       ~DatasetSuperGroup.ncells_bydataset_flat
+      ~DatasetSuperGroup.project_celltypes_to_ontology
       ~DatasetSuperGroup.set_dataset_groups
       ~DatasetSuperGroup.subset
-      ~DatasetSuperGroup.subset_organs
+      ~DatasetSuperGroup.subset_cells
    
    
 
