@@ -38,7 +38,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             **kwargs
     ):
         super().__init__(sample_fn=sample_fn, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.id = f"human_mixed_2019_10x_szabo_{str(SAMPLE_FNS.index(sample_fn)).zfill(3)}_10.1038/s41467-019-12464-3"
+        self.id = f"human_mixed_2019_10x_szabo_{str(SAMPLE_FNS.index(sample_fn)+1).zfill(3)}_10.1038/s41467-019-12464-3"
 
         self.download_url_data = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE126nnn/GSE126030/suppl/GSE126030_RAW.tar"
         self.download_url_meta = [

@@ -8,14 +8,14 @@ class DatasetSuperGroupDatabases(DatasetSuperGroup):
 
     def __init__(
             self,
-            path: Union[str, None] = None,
+            data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
     ):
         dataset_groups = []
         # List all data bases here:
         dataset_groups.append(DatasetGroupCellxgene(
-            path=path,
+            data_path=data_path,
             meta_path=meta_path,
             cache_path=cache_path
         ))
