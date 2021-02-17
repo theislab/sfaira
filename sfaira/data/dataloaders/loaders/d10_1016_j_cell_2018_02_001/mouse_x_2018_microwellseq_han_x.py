@@ -344,7 +344,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
                                        )
 
         adata = anndata.AnnData(data.T)
-        annotated_cells = np.array([x in celltypes.index for x in self.adata.obs_names])
+        annotated_cells = np.array([x in celltypes.index for x in adata.obs_names])
         # Subset to annotated cells if any are annotated:
         if np.sum(annotated_cells) > 0:
             adata = adata[annotated_cells].copy()
