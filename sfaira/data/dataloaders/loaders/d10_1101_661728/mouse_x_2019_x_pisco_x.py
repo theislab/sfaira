@@ -108,10 +108,12 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
 
     def _load(self):
         fn = os.path.join(self.data_dir, self.sample_fn)
-        self.adata = anndata.read_h5ad(fn)
-        self.adata.X = self.adata.raw.X
-        self.adata.var = self.adata.raw.var
-        del self.adata.raw
-        self.adata.obsm = {}
-        self.adata.varm = {}
-        self.adata.uns = {}
+        adata = anndata.read_h5ad(fn)
+        adata.X = adata.raw.X
+        adata.var = adata.raw.var
+        del adata.raw
+        adata.obsm = {}
+        adata.varm = {}
+        adata.uns = {}
+
+        return adata

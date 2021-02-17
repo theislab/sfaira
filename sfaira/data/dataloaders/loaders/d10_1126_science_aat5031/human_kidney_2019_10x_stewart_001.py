@@ -123,5 +123,7 @@ class Dataset(DatasetBase):
         fetal = anndata.read(fn[1])
         adult.obs["development"] = "adult"
         fetal.obs["development"] = "fetal"
-        self.adata = adult.concatenate(fetal)
-        self.adata.X = np.expm1(self.adata.X)
+        adata = adult.concatenate(fetal)
+        adata.X = np.expm1(adata.X)
+
+        return adata
