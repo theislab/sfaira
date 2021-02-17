@@ -1576,7 +1576,7 @@ class DatasetBaseGroupLoadingOneFile(DatasetBase):
         if self.adata is None and adata_group is not None:
             self.adata = adata_group
         elif self.adata is None and adata_group is None:
-            self._load_full()
+            self.adata = self._load_full()
         elif self.adata is not None and not self._unprocessed_full_group_object:
             self.adata = self._load_full()
         elif self.adata is not None and self._unprocessed_full_group_object:
