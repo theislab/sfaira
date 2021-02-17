@@ -326,7 +326,9 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
 
         self.var_symbol_col = "index"
 
-        self.obs_key_cellontology_original = "Annotation"
+        # Only adult and neonatal samples are annotated:
+        self.obs_key_cellontology_original = "Annotation" \
+            if sample_dev_stage_dict[self.sample_fn] in ["adult", "neonatal"] else None
 
     def _load(self):
         fn = os.path.join(self.data_dir, '5435866.zip')
@@ -342,9 +344,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
                                        )
 
         self.adata = anndata.AnnData(data.T)
-        self.adata = self.adata[np.array([x in celltypes.index for x in self.adata.obs_names])].copy()
-        # Debugging:
-        if len(self.adata.obs_names) > 0:
-            self.adata.obs = celltypes.loc[self.adata.obs_names, :]
-        else:
-            print(f"remove {self.sample_fn}")
+        annotated_cells = np.array([x in celltypes.index for x in self.adata.obs_names])
+        # Subset to annotated cells if any are annotated:
+        if np.sum(annotated_cells) > 0:
+            self.adata = self.adata[annotated_cells].copy()
