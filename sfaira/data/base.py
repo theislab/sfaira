@@ -188,8 +188,8 @@ class DatasetBase(abc.ABC):
         assert self.data_dir_base is not None, "No path was provided when instantiating the dataset container, " \
                                                "cannot download datasets."
 
-        if not os.path.exists(self.data_dir):
-            os.makedirs(self.data_dir)
+        if not os.path.exists(os.path.join(self.data_dir_base, self.directory_formatted_doi)):
+            os.makedirs(os.path.join(self.data_dir_base, self.directory_formatted_doi))
 
         urls = self.download_url_data[0][0] + self.download_url_meta[0][0]
 
