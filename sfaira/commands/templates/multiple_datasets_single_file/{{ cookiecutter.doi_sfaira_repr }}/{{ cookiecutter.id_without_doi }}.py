@@ -63,5 +63,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         # SFAIRA TODO: Make sure to include this attribute which indicates the column in self.adata in which you saved the sample IDs.
         self.obs_key_sample = 'x'
 
-    def _load_full_group_object(self, fn=None) -> anndata.AnnData:
-        pass  # SFAIRA TODO: load full data object and return (no subsetting!)
+    def _load_full(self):
+        # fn = os.path.join(self.data_dir,)  # SFAIRA ToDo: add the name of the raw file
+        # SFAIRA ToDo: load full data into AnnData object (no subsetting!)
+        pass

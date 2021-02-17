@@ -60,5 +60,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         # SFAIRA: name of column which contain streamlined cell ontology cell type classes:
         # self.obs_key_cellontology_original = x  # (optional)
 
-    def _load_any_object(self, fn=None):
-        pass  # SFIRA TODO: load file fn into self.adata, using self.sample_fn, ie the current sample file.
+    def _load(self):
+        # fn = os.path.join(self.data_dir, self.sample_fn)  # SFAIRA ToDo: add the name of the raw file
+        # SFAIRA ToDo: load file fn into self.adata, self.sample_fn represents the current filename.
+        pass
