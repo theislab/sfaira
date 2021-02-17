@@ -165,7 +165,7 @@ class DatasetBase(abc.ABC):
         self._ontology_class_map = None
 
     @abc.abstractmethod
-    def _load(self):
+    def _load(self) -> anndata.AnnData:
         pass
 
     @property
@@ -312,9 +312,9 @@ class DatasetBase(abc.ABC):
                 else:
                     warnings.warn(f"Cached loading enabled, but cache file {filename} not found. "
                                   f"Loading from raw files.")
-                    self._load()
+                    self.adata = self._load()
             else:
-                self._load()
+                self.adata = self._load()
 
         def _cached_writing(filename):
             if filename is not None:
@@ -324,10 +324,10 @@ class DatasetBase(abc.ABC):
                 self.adata.write_h5ad(filename)
 
         if load_raw and allow_caching:
-            self._load()
+            self.adata = self._load()
             _cached_writing(self.cache_fn)
         elif load_raw and not allow_caching:
-            self._load()
+            self.adata = self._load()
         elif not load_raw and allow_caching:
             _cached_reading(self.cache_fn)
             _cached_writing(self.cache_fn)
