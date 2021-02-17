@@ -293,46 +293,41 @@ class DatasetBase(abc.ABC):
         :return:
         """
         def _get_cache_fn():
-            if None in [
-                self.cache_path,
-                self.directory_formatted_doi,
-                self._directory_formatted_id
-            ]:
-                if self.cache_path is None:
-                    w = "cache path"
-                elif self.directory_formatted_doi is None:
-                    w = "self.doi"
-                else:  # self._directory_formatted_id is None
-                    w = "self.id"
-                warnings.warn(f"Caching enabled, but cannot find caching directory. Set {w} first. "
+
+            if self.directory_formatted_doi is None or self._directory_formatted_id is None:
+                warnings.warn(f"Caching enabled, but  Dataset.id or Dataset.doi not set. "
                               f"Disabling caching for now.")
                 return None
 
-            cache = os.path.join(
-                self.cache_path,
-                self.directory_formatted_doi,
+            if self.cache_path is None:
+                cache_dir = os.path.join(self.data_dir)
+            else:
+                cache_dir = os.path.join(self.cache_path, self.directory_formatted_doi)
+
+            cache_fn = os.path.join(
+                cache_dir,
                 "cache",
                 self._directory_formatted_id + ".h5ad"
             )
-            return cache
+            return cache_fn
 
-        def _cached_reading(fn_cache):
-            if fn_cache is not None:
-                if os.path.exists(fn_cache):
-                    self.adata = anndata.read_h5ad(fn_cache)
+        def _cached_reading(filename):
+            if filename is not None:
+                if os.path.exists(filename):
+                    self.adata = anndata.read_h5ad(filename)
                 else:
-                    warnings.warn(f"Cached loading enabled, but cache file {fn_cache} not found. "
+                    warnings.warn(f"Cached loading enabled, but cache file {filename} not found. "
                                   f"Loading from raw files.")
                     self._load()
             else:
                 self._load()
 
-        def _cached_writing(fn_cache):
-            if fn_cache is not None:
-                dir_cache = os.path.dirname(fn_cache)
+        def _cached_writing(filename):
+            if filename is not None:
+                dir_cache = os.path.dirname(filename)
                 if not os.path.exists(dir_cache):
                     os.makedirs(dir_cache)
-                self.adata.write_h5ad(fn_cache)
+                self.adata.write_h5ad(filename)
 
         if load_raw and allow_caching:
             self._load()
