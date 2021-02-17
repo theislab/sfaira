@@ -27,7 +27,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             **kwargs
         )
 
-        self.id = f"sth_{str(SAMPLE_FNS.index(sample_fn)).zfill(3)}_doi"  # ToDo: Index the Dataset ID by the file.
+        self.id = f"sth_{str(SAMPLE_FNS.index(sample_fn)+1).zfill(3)}_doi"  # ToDo: Index the Dataset ID by the file.
         # ToDo Add you meta data here.
 
     def _load(self):

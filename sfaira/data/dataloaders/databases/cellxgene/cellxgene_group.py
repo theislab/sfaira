@@ -10,13 +10,13 @@ class DatasetGroup(DatasetGroup):
 
     def __init__(
         self,
-        path: Union[str, None] = None,
+        data_path: Union[str, None] = None,
         meta_path: Union[str, None] = None,
         cache_path: Union[str, None] = None
     ):
         self._ADATA_IDS_CELLXGENE = ADATA_IDS_CELLXGENE()
 
-        fn_ls = os.listdir(path)
+        fn_ls = os.listdir(data_path)
         fn_ls = [x for x in fn_ls if x in self._ADATA_IDS_CELLXGENE.accepted_file_names]
         datasets = [
             Dataset(data_path=path, fn=x, meta_path=meta_path, cache_path=cache_path)
