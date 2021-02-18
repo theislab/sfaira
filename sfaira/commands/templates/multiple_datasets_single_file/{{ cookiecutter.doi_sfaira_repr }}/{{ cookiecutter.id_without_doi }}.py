@@ -65,6 +65,6 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.obs_key_sample = 'x'
 
     def _load_full(self) -> ad.AnnData:
-        # fn = os.path.join(self.data_dir,)  # SFAIRA ToDo: add the name of the raw file
-        # SFAIRA ToDo: load full data into AnnData object (no subsetting!) and return it
+        # fn = os.path.join(self.data_dir,)  # SFAIRA TODO: add the name of the raw file
+        # SFAIRA TODO: load full data into AnnData object (no subsetting!) and return it
         pass

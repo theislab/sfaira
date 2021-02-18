@@ -989,7 +989,7 @@ class DatasetBase(abc.ABC):
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            if self.meta is None or self._ADATA_IDS_SFAIRA.healthy not in self.meta.columns:
+            if self.meta is None or self._ADATA_IDS_SFAIRA.doi not in self.meta.columns:
                 raise ValueError("doi must be set but was neither set in constructor nor in meta data")
             return self.meta[self._ADATA_IDS_SFAIRA.doi]
 
