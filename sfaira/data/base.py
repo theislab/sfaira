@@ -1563,7 +1563,7 @@ class DatasetBaseGroupLoadingOneFile(DatasetBase):
         return self._sample_id
 
     @abc.abstractmethod
-    def _load_full(self):
+    def _load_full(self) -> anndata.AnnData:
         """
         Loads a raw anndata object that correponds to a superset of the data belonging to this Dataset.
 
@@ -1612,10 +1612,11 @@ class DatasetBaseGroupLoadingOneFile(DatasetBase):
             self.adata = self.adata[[x in v for x in self.adata.obs[k].values], :]
         self._unprocessed_full_group_object = False
 
-    def _load(self):
+    def _load(self) -> anndata.AnnData:
         _ = self.set_raw_full_group_object(adata_group=None)
         if self._unprocessed_full_group_object:
             self._load_from_group()
+        return self.adata
 
 
 class DatasetBaseGroupLoadingManyFiles(DatasetBase, abc.ABC):
