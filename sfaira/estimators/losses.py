@@ -4,6 +4,7 @@ try:
 except ImportError:
     tf = None
 
+
 class LossLoglikelihoodNb(tf.keras.losses.Loss):
 
     def __init__(self, average=True, *args, **kwargs):

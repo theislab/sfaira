@@ -54,6 +54,6 @@ class Dataset(DatasetBase):
         # self.obs_key_cellontology_original = x  # (optional)
 
     def _load(self) -> ad.AnnData:
-        # fn = os.path.join(self.data_dir, )  # SFAIRA ToDo: add the name of the raw file
-        # SFAIRA ToDo: add code that loads to raw file into an AnnData object and return it
+        # fn = os.path.join(self.data_dir, )  # SFAIRA TODO: add the name of the raw file
+        # SFAIRA TODO: add code that loads to raw file into an AnnData object and return it
         pass
