@@ -67,7 +67,7 @@ SAMPLE_FNS = [
     "NeonatalHeart_dge.txt.gz",
     "NeonatalMuscle1_dge.txt.gz",
     "NeonatalMuscle2_dge.txt.gz",
-    "NeonatalPancreas_dge.txt.zip",
+    # "NeonatalPancreas_dge.txt.zip",  # TODO enable zip file here
     "NeonatalRib1_dge.txt.gz",
     "NeonatalRib2_dge.txt.gz",
     "NeonatalRib3_dge.txt.gz",
