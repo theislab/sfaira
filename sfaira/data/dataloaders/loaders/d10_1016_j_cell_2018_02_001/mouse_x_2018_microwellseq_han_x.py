@@ -18,14 +18,14 @@ SAMPLE_FNS = [
     "BoneMarrowcKit3_dge.txt.gz",
     "Brain1_dge.txt.gz",
     "Brain2_dge.txt.gz",
-    # "CJ7.EB14.Ezh2.1_dge.txt.gz",  # ToDo: sort out meta data for these
-    # "CJ7.EB14.WT.1_dge.txt.gz",  # ToDo: sort out meta data for these
-    # "CJ7.EB14.WT.2_dge.txt.gz",  # ToDo: sort out meta data for these
-    # "EB.Ezh2_dge.txt.gz",  # ToDo: sort out meta data for these
-    # "EB.WT_dge.txt.gz",  # ToDo: sort out meta data for these
-    # "EmbryonicMesenchymeE14.5_dge.txt.gz",  # ToDo: sort out meta data for these
-    # "EmbryonicStemCell.CJ7_Deep_dge.txt.gz",  # ToDo: sort out meta data for these
-    # "EmbryonicStemCells_dge.txt.gz",  # ToDo: sort out meta data for these
+    # "CJ7.EB14.Ezh2.1_dge.txt.gz",  # TODO: sort out meta data for these
+    # "CJ7.EB14.WT.1_dge.txt.gz",  # TODO: sort out meta data for these
+    # "CJ7.EB14.WT.2_dge.txt.gz",  # TODO: sort out meta data for these
+    # "EB.Ezh2_dge.txt.gz",  # TODO: sort out meta data for these
+    # "EB.WT_dge.txt.gz",  # TODO: sort out meta data for these
+    # "EmbryonicMesenchymeE14.5_dge.txt.gz",  # TODO: sort out meta data for these
+    # "EmbryonicStemCell.CJ7_Deep_dge.txt.gz",  # TODO: sort out meta data for these
+    # "EmbryonicStemCells_dge.txt.gz",  # TODO: sort out meta data for these
     "FetalBrain_dge.txt.gz",
     "FetalFemaleGonad_dge.txt.gz",
     "FetalIntestine_dge.txt.gz",
@@ -44,23 +44,23 @@ SAMPLE_FNS = [
     "Lung1_dge.txt.gz",
     "Lung2_dge.txt.gz",
     "Lung3_dge.txt.gz",
-    "MammaryGland.Involution.CD45.1_dge.txt.gz",
-    "MammaryGland.Involution.CD45.2_dge.txt.gz",
-    "MammaryGland.Involution1_dge.txt.gz",
-    "MammaryGland.Involution2_dge.txt.gz",
-    "MammaryGland.Lactation1_dge.txt.gz",
-    "MammaryGland.Lactation2_dge.txt.gz",
-    "MammaryGland.Pregnancy_dge.txt.gz",
-    "MammaryGland.Virgin.CD45.1_dge.txt.gz",
-    "MammaryGland.Virgin.CD45.2_dge.txt.gz",
+    # "MammaryGland.Involution.CD45.1_dge.txt.gz",  # TODO not annotated?
+    # "MammaryGland.Involution.CD45.2_dge.txt.gz",  # TODO not annotated?
+    # "MammaryGland.Involution1_dge.txt.gz",  # TODO not annotated?
+    # "MammaryGland.Involution2_dge.txt.gz",  # TODO not annotated?
+    # "MammaryGland.Lactation1_dge.txt.gz",  # TODO not annotated?
+    # "MammaryGland.Lactation2_dge.txt.gz",  # TODO not annotated?
+    # "MammaryGland.Pregnancy_dge.txt.gz",  # TODO not annotated?
+    # "MammaryGland.Virgin.CD45.1_dge.txt.gz",  # TODO not annotated?
+    # "MammaryGland.Virgin.CD45.2_dge.txt.gz",  # TODO not annotated?
     "MammaryGland.Virgin1_dge.txt.gz",
     "MammaryGland.Virgin2_dge.txt.gz",
     "MammaryGland.Virgin3_dge.txt.gz",
     "MammaryGland.Virgin4_dge.txt.gz",
-    # "mES.CJ7_dge.txt.gz",  # ToDo: sort out meta data for these
+    # "mES.CJ7_dge.txt.gz",  # TODO: sort out meta data for these
     "MesenchymalStemCells_dge.txt.gz",
     "MesenchymalStemCellsPrimary_dge.txt.gz",
-    # "mouse-3T3_dge.txt.gz",  # ToDo: sort out meta data for these
+    # "mouse-3T3_dge.txt.gz",  # TODO: sort out meta data for these
     "Muscle_dge.txt.gz",
     "NeonatalCalvaria1_dge.txt.gz",
     "NeonatalCalvaria2_dge.txt.gz",
