@@ -288,8 +288,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             "PeripheralBlood4_dge.txt.gz": "adult",
             "PeripheralBlood5_dge.txt.gz": "adult",
             "PeripheralBlood6_dge.txt.gz": "adult",
-            "PlacentaE14.1_dge.txt.gz": "adult",
-            "PlacentaE14.2_dge.txt.gz": "adult",
+            "PlacentaE14.1_dge.txt.gz": "fetal",
+            "PlacentaE14.2_dge.txt.gz": "fetal",
             "Prostate1_dge.txt.gz": "adult",
             "Prostate2_dge.txt.gz": "adult",
             "SmallIntestine.CD45_dge.txt.gz": "adult",
@@ -328,7 +328,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
 
         # Only adult and neonatal samples are annotated:
         self.obs_key_cellontology_original = "Annotation" \
-            if sample_dev_stage_dict[self.sample_fn] in ["adult", "neonatal"] else None
+            if sample_dev_stage_dict[self.sample_fn] in ["adult", "neonatal"] and \
+            self.sample_fn not in ["NeontalBrain1_dge.txt.gz", "NeontalBrain2_dge.txt.gz"] else None
 
     def _load(self):
         fn = os.path.join(self.data_dir, '5435866.zip')
