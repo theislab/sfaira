@@ -332,7 +332,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             self.sample_fn not in [
                 "NeontalBrain1_dge.txt.gz",
                 "NeontalBrain2_dge.txt.gz",
-                "SmallIntestine.CD45_dge.txt.gz"
+                "SmallIntestine.CD45_dge.txt.gz",
+                "Thymus2_dge.txt.gz",
             ] else None
 
     def _load(self):
