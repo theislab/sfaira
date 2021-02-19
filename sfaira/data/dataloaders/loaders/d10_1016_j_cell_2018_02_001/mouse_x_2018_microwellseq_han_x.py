@@ -329,7 +329,11 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         # Only adult and neonatal samples are annotated:
         self.obs_key_cellontology_original = "Annotation" \
             if sample_dev_stage_dict[self.sample_fn] in ["adult", "neonatal"] and \
-            self.sample_fn not in ["NeontalBrain1_dge.txt.gz", "NeontalBrain2_dge.txt.gz"] else None
+            self.sample_fn not in [
+                "NeontalBrain1_dge.txt.gz",
+                "NeontalBrain2_dge.txt.gz",
+                "SmallIntestine.CD45_dge.txt.gz"
+            ] else None
 
     def _load(self):
         fn = os.path.join(self.data_dir, '5435866.zip')
