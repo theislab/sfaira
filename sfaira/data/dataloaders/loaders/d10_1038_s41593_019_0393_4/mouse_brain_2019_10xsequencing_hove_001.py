@@ -58,14 +58,6 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
         self.obs_key_cellontology_original = "cluster"
         self.obs_key_organ = "sample_anatomy"
 
-        self.class_maps = {
-            "0": {
-                "Microglia": "microglial cell",
-                "T/NKT cells": "CD8-positive, alpha-beta T cell",
-                "Monocytes": "monocyte"
-            },
-        }
-
     def _load_full(self):
         fn = [
             os.path.join(self.data_dir, "filtered_gene_bc_matrices_mex_WT_fullAggr.zip"),
