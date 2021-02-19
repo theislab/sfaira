@@ -290,7 +290,7 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
         # load celltype labels and harmonise them
         # This pandas code should work with pandas 1.2 but it does not and yields an empty data frame:
         fig1_anno = pd.read_excel(
-            os.path.join(self.data_dir_base, "human", self.directory_formatted_doi, "HCL_Fig1_cell_Info.xlsx"),
+            os.path.join(self.data_dir_base, self.directory_formatted_doi, "HCL_Fig1_cell_Info.xlsx"),
             index_col="cellnames",
             engine="xlrd",  # ToDo: Update when pandas xlsx reading with openpyxl is fixed: yields empty tables
         )
