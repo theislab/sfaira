@@ -16,12 +16,12 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.id = "human_liver_2018_10x_macparland_001_10.1038/s41467-018-06318-7"
+        self.id = "human_liver_2018_10xsequencing_macparland_001_10.1038/s41467-018-06318-7"
 
         self.download_url_data = "private,GSE115469.csv.gz"
         self.download_url_meta = "private,GSE115469_labels.txt"
 
-        self.author = "McGilvray"
+        self.author = "MacParland"
         self.doi = "10.1038/s41467-018-06318-7"
         self.healthy = True
         self.normalization = "raw"
@@ -34,31 +34,6 @@ class Dataset(DatasetBase):
         self.var_symbol_col = "index"
 
         self.obs_key_cellontology_original = "celltype"
-
-        self.class_maps = {
-            "0": {
-                "1": "Hepatocyte 1",
-                "2": "Alpha beta T cells",
-                "3": "Hepatocyte 2",
-                "4": "Inflammatory macrophages",
-                "5": "Hepatocyte 3",
-                "6": "Hepatocyte 4",
-                "7": "Plasma cells",
-                "8": "NK cell",
-                "9": "Gamma delta T cells 1",
-                "10": "Non inflammatory macrophages",
-                "11": "Periportal LSECs",
-                "12": "Central venous LSECs",
-                "13": "Endothelial cell",
-                "14": "Hepatocyte 5",
-                "15": "Hepatocyte 6",
-                "16": "Mature B cells",
-                "17": "Cholangiocytes",
-                "18": "Gamma delta T cells 2",
-                "19": "Erythroid cells",
-                "20": "Hepatic stellate cells"
-            },
-        }
 
     def _load(self):
         fn = [
