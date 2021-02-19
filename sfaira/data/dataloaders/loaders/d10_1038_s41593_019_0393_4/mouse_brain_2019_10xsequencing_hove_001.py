@@ -35,7 +35,7 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
         self.obs_key_sample = "sample"
         self.organ = sample_organ_dict[self.sample_id]
 
-        self.id = f"mouse_{''.join(self.organ.split(' '))}_2019_10x_hove_" \
+        self.id = f"mouse_{''.join(self.organ.split(' '))}_2019_10xsequencing_hove_" \
                   f"{str(SAMPLE_IDS.index(self.sample_id)).zfill(3)}_10.1038/s41593-019-0393-4"
 
         self.download_url_data = \

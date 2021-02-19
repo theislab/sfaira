@@ -17,7 +17,7 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.id = "human_testis_2018_10x_guo_001_10.1038/s41422-018-0099-2"
+        self.id = "human_testis_2018_10xsequencing_guo_001_10.1038/s41422-018-0099-2"
 
         self.download_url_data = "https://covid19.cog.sanger.ac.uk/guo18_donor.processed.h5ad"
         self.download_url_meta = None

@@ -22,7 +22,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             **kwargs
     ):
         super().__init__(sample_fn=sample_fn, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        protocol = "10x" if self.sample_fn == "E-MTAB-6678.processed" else "smartseq2"
+        protocol = "10xsequencing" if self.sample_fn == "E-MTAB-6678.processed" else "smartseq2"
         self.id = f"human_placenta_2018_{protocol}_ventotormo_{str(SAMPLE_FNS.index(self.sample_fn)).zfill(3)}_" \
                   f"10.1038/s41586-018-0698-6"
 
