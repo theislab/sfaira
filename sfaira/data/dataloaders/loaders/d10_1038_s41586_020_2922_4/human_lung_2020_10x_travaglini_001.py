@@ -40,7 +40,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             **kwargs
     ):
         super().__init__(sample_fn=sample_fn, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        protocol = "10x" if self.sample_fn.split("_")[0] == "droplet" else "smartseq2"
+        protocol = "10xsequencing" if self.sample_fn.split("_")[0] == "droplet" else "smartseq2"
         self.id = f"human_lung_2020_{protocol}_travaglini_{str(SAMPLE_FNS.index(self.sample_fn)).zfill(3)}_" \
                   f"10.1038/s41586-020-2922-4"
 
@@ -201,13 +201,15 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
     def _load(self):
         fn = os.path.join(self.data_dir, self.sample_fn)
         if self.sample_fn.split("_")[0] == "droplet":
-            norm_const = 1000000
-        else:
             norm_const = 10000
+            sf_key = "nUMI"
+        else:
+            norm_const = 1000000
+            sf_key = "nReads"
         adata = anndata.read(fn)
         adata.X = scipy.sparse.csc_matrix(adata.X)
         adata.X = np.expm1(adata.X)
-        adata.X = adata.X.multiply(scipy.sparse.csc_matrix(adata.obs["nUMI"].values[:, None])).multiply(1 / norm_const)
+        adata.X = adata.X.multiply(scipy.sparse.csc_matrix(adata.obs[sf_key].values[:, None])).multiply(1 / norm_const)
         self.set_unkown_class_id(ids=["1_Unicorns and artifacts"])
 
         return adata
