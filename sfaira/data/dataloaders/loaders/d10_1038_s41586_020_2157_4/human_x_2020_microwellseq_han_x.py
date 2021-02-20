@@ -265,7 +265,7 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
         self.state_exact = "healthy"
         self.year = 2020
 
-        self.obs_key_cellontology_original = "cell_ontology_class"
+        self.obs_key_cellontology_original = "celltype_specific"
         self.obs_key_dev_stage = "dev_stage"
         self.obs_key_sex = "gender"
         self.obs_key_age = "age"
