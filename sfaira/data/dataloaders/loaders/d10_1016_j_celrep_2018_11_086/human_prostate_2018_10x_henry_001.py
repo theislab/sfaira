@@ -22,8 +22,6 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.id = "human_prostate_2018_10x_henry_001_10.1016/j.celrep.2018.11.086"
-
         self.download_url_data = "https://covid19.cog.sanger.ac.uk/henry18_0.processed.h5ad"
         self.download_url_meta = None
 

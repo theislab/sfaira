@@ -16,8 +16,6 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.id = "human_eye_2019_10x_voigt_001_10.1073/pnas.1914143116"
-
         self.download_url_data = "https://covid19.cog.sanger.ac.uk/voigt19.processed.h5ad"
         self.download_url_meta = None
 

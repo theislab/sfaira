@@ -22,7 +22,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(sample_fn=sample_fn, path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        super().__init__(sample_fn=sample_fn, sample_fns=SAMPLE_FNS, meta_path=meta_path, cache_path=cache_path,
+                         path=path, **kwargs)
 
         # SFAIRA TODO: Add you meta data here.
         # SFAIRA TODO: Increase index ID by file -> f"sth_{str(SAMPLE_FNS.index(sample_fn)).zfill(3)}_doi"

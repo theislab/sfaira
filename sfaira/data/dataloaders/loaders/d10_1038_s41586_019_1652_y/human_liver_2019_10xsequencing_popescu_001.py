@@ -15,8 +15,6 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.id = "human_liver_2019_10xsequencing_popescu_001_10.1038/s41586-019-1652-y"
-
         self.download_url_data = "private,fetal_liver_alladata_.h5ad"
         self.download_url_meta = None
 

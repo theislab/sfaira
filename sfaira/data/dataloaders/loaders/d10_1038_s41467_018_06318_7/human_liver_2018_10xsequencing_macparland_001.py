@@ -16,8 +16,6 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.id = "human_liver_2018_10xsequencing_macparland_001_10.1038/s41467-018-06318-7"
-
         self.download_url_data = "private,GSE115469.csv.gz"
         self.download_url_meta = "private,GSE115469_labels.txt"
 

@@ -113,13 +113,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(
-            sample_fn=sample_fn,
-            data_path=data_path,
-            meta_path=meta_path,
-            cache_path=cache_path,
-            **kwargs
-        )
+        super().__init__(sample_fn=sample_fn, sample_fns=SAMPLE_FNS, data_path=data_path, meta_path=meta_path,
+                         cache_path=cache_path, **kwargs)
         sample_organ_dict = {
             "Bladder_dge.txt.gz": "urinary bladder",
             "BoneMarrow1_dge.txt.gz": "bone marrow",
@@ -308,8 +303,6 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         }
 
         self.organ = sample_organ_dict[self.sample_fn]
-        self.id = f"mouse_{''.join(self.organ.split(' '))}_2018_microwellseq_han_" \
-                  f"{str(SAMPLE_FNS.index(self.sample_fn)).zfill(3)}_10.1016/j.cell.2018.02.001"
 
         self.download_url_data = "https://ndownloader.figshare.com/articles/5435866?private_link=865e694ad06d5857db4b"
         self.download_url_meta = None

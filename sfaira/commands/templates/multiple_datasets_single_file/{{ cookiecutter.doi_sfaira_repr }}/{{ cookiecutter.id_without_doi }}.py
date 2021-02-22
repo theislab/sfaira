@@ -2,7 +2,7 @@ import os
 import anndata as ad
 from typing import Union
 
-from sfaira.data import DatasetBaseGroupLoadingManyFiles
+from sfaira.data import DatasetBaseGroupLoadingOneFile
 
 
 # SFAIRA TODO: Add correct sample IDs here.
@@ -12,7 +12,7 @@ SAMPLE_IDS = [
 ]
 
 
-class Dataset(DatasetBaseGroupLoadingManyFiles):
+class Dataset(DatasetBaseGroupLoadingOneFile):
 
     def __init__(
             self,
@@ -22,7 +22,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(sample_fn=sample_fn, path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        super().__init__(sample_fn=sample_fn, sample_ids=SAMPLE_IDS, meta_path=meta_path, cache_path=cache_path,
+                         path=path, **kwargs)
 
         # SFAIRA TODO: Add you meta data here.
         self.id = '{{ cookiecutter.id }}'  # unique identifier of data set (Organism_Organ_Year_Protocol_NumberOfDataset_FirstAuthorLastname_doi).

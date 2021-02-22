@@ -17,8 +17,6 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.id = "human_ileum_2019_10x_martin_001_10.1016/j.cell.2019.08.008"
-
         self.download_url_data = "https://covid19.cog.sanger.ac.uk/martin19.processed.h5ad"
         self.download_url_meta = None
 

@@ -20,8 +20,6 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.id = "human_pancreas_2016_indrop_baron_001_10.1016/j.cels.2016.08.011"
-
         self.download_url_data = "https://covid19.cog.sanger.ac.uk/baron16.processed.h5ad"
         self.download_url_meta = None
 

@@ -904,6 +904,29 @@ class DatasetBase(abc.ABC):
     # Properties:
 
     @property
+    def id(self) -> str:
+        def clean(s):
+            return s.replace(' ', '').replace('-', '').replace('_', '').lower()
+
+        if hasattr(self, 'idx'):
+            idx = self.idx
+        else:
+            idx = "000"
+
+        if isinstance(self.author, List):
+            author = self.author[0]
+        else:
+            author = self.author
+
+        return f"{clean(self.organism)}_" \
+               f"{clean(self.organ)}_" \
+               f"{self.year}_" \
+               f"{clean(self.protocol)}_" \
+               f"{clean(author)}_" \
+               f"{idx}_" \
+               f"{self.doi}"
+
+    @property
     def age(self) -> Union[None, str]:
         if self._age is not None:
             return self._age
@@ -1546,21 +1569,26 @@ class DatasetBaseGroupLoadingOneFile(DatasetBase):
     _unprocessed_full_group_object: bool
     _sample_id: str
 
-    def __init__(
-            self,
-            sample_id: str,
-            data_path: Union[str, None],
-            meta_path: Union[str, None] = None,
-            cache_path: Union[str, None] = None,
-            **kwargs
-    ):
+    def __init__(self,
+                 sample_id: str,
+                 sample_ids: List,
+                 data_path: Union[str, None],
+                 meta_path: Union[str, None] = None,
+                 cache_path: Union[str, None] = None,
+                 **kwargs
+                 ):
         super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self._unprocessed_full_group_object = False
         self._sample_id = sample_id
+        self._SAMPLE_IDS = sample_ids
 
     @property
     def sample_id(self):
         return self._sample_id
+
+    @property
+    def idx(self):
+        return str(self._SAMPLE_IDS.index(self.sample_id) + 1).zfill(3)
 
     @abc.abstractmethod
     def _load_full(self) -> anndata.AnnData:
@@ -1626,20 +1654,25 @@ class DatasetBaseGroupLoadingManyFiles(DatasetBase, abc.ABC):
     """
     _sample_fn: str
 
-    def __init__(
-            self,
-            sample_fn: str,
-            data_path: Union[str, None] = None,
-            meta_path: Union[str, None] = None,
-            cache_path: Union[str, None] = None,
-            **kwargs
-    ):
+    def __init__(self,
+                 sample_fn: str,
+                 sample_fns: List,
+                 data_path: Union[str, None] = None,
+                 meta_path: Union[str, None] = None,
+                 cache_path: Union[str, None] = None,
+                 **kwargs
+                 ):
         super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self._sample_fn = sample_fn
+        self._SAMPLE_FNS = sample_fns
 
     @property
     def sample_fn(self):
         return self._sample_fn
+
+    @property
+    def idx(self):
+        return str(self._SAMPLE_FNS.index(self.sample_fn)+1).zfill(3)
 
 
 class DatasetGroup:

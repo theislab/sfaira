@@ -128,13 +128,8 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
             **kwargs
     ):
 
-        super().__init__(
-            sample_id=sample_id,
-            data_path=data_path,
-            meta_path=meta_path,
-            cache_path=cache_path,
-            **kwargs
-        )
+        super().__init__(sample_id=sample_id, sample_ids=SAMPLE_IDS, data_path=data_path, meta_path=meta_path,
+                         cache_path=cache_path, **kwargs)
 
         sample_organ_dict = {
             'AdultAdipose_1': 'adipose tissue of abdominal region',
@@ -253,8 +248,6 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
         self.obs_key_sample = "sample"
 
         self.organ = sample_organ_dict[self.sample_id]
-        self.id = f"human_{''.join(self.organ.split(' '))}_2020_microwellseq_han_" \
-                  f"{str(SAMPLE_IDS.index(self.sample_id)).zfill(3)}_10.1038/s41586-020-2157-4"
 
         self.author = "Han"
         self.doi = "10.1038/s41586-020-2157-4"

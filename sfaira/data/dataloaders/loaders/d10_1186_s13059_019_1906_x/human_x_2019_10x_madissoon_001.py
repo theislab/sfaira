@@ -22,12 +22,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(sample_fn=sample_fn, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        organ = "lung parenchyma" if self.sample_fn == "madissoon19_lung.processed.h5ad" else \
-            "esophagus" if self.sample_fn == "oesophagus.cellxgene.h5ad" else "spleen"
-        self.id = f"human_{''.join(organ.split(' '))}_2019_10x_madissoon_" \
-                  f"{str(SAMPLE_FNS.index(self.sample_fn)).zfill(3)}_10.1186/s13059-019-1906-x"
-
+        super().__init__(sample_fn=sample_fn, sample_fns=SAMPLE_FNS, data_path=data_path, meta_path=meta_path,
+                         cache_path=cache_path, **kwargs)
         if self.sample_fn == "madissoon19_lung.processed.h5ad":
             self.download_url_data = "https://covid19.cog.sanger.ac.uk/madissoon19_lung.processed.h5ad"
             self.var_ensembl_col = "gene.ids.HCATisStab7509734"
@@ -46,7 +42,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.doi = "10.1186/s13059-019-1906-x"
         self.healthy = True
         self.normalization = "raw"  # ToDo "madissoon19_lung.processed.h5ad" is close to integer but not quire (~1e-4)
-        self.organ = organ
+        self.organ = "lung parenchyma" if self.sample_fn == "madissoon19_lung.processed.h5ad" else \
+            "esophagus" if self.sample_fn == "oesophagus.cellxgene.h5ad" else "spleen"
         self.organism = "human"
         self.protocol = "10X sequencing"
         self.state_exact = "healthy"

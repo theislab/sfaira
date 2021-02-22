@@ -25,7 +25,8 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(sample_id=sample_id, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+        super().__init__(sample_id=sample_id, sample_ids=SAMPLE_IDS, data_path=data_path, meta_path=meta_path,
+                         cache_path=cache_path, **kwargs)
         sample_organ_dict = {
             "Choroid plexus": "choroid plexus",
             "Dura mater": "dura mater",
@@ -34,9 +35,6 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
         }
         self.obs_key_sample = "sample"
         self.organ = sample_organ_dict[self.sample_id]
-
-        self.id = f"mouse_{''.join(self.organ.split(' '))}_2019_10xsequencing_hove_" \
-                  f"{str(SAMPLE_IDS.index(self.sample_id)).zfill(3)}_10.1038/s41593-019-0393-4"
 
         self.download_url_data = \
             "https://www.brainimmuneatlas.org/data_files/toDownload/filtered_gene_bc_matrices_mex_WT_fullAggr.zip"

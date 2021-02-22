@@ -20,16 +20,9 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(
-            sample_id=sample_id,
-            data_path=data_path,
-            meta_path=meta_path,
-            cache_path=cache_path,
-            **kwargs
-        )
+        super().__init__(sample_id=sample_id, sample_ids=SAMPLE_IDS, data_path=data_path, meta_path=meta_path,
+                         cache_path=cache_path, **kwargs)
         self.obs_key_sample = "derived_organ_parts_label"
-        self.id = f"human_{'blood' if sample_id == 'umbilical cord blood' else 'bone'}_2018_10x_ica_" \
-                  f"{str(SAMPLE_IDS.index(self.sample_id)).zfill(3)}_unknown"
 
         self.download_url_data = "https://data.humancellatlas.org/project-assets/project-matrices/" \
                                  "cc95ff89-2e68-4a08-a234-480eca21ce79.homo_sapiens.loom"
