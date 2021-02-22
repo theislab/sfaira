@@ -45,6 +45,6 @@ class Dataset(DatasetBase):
         adata = adata[[i in celltype_df.index for i in adata.obs.index]].copy()
         adata.obs["CellType"] = [str(celltype_df.loc[i]["sct@cpart"]) for i in adata.obs.index]
 
-        self.set_unkown_class_id(ids=["16", "19", "27", "36", "37"])
+        self.set_unknown_class_id(ids=["16", "19", "27", "36", "37"])
 
         return adata

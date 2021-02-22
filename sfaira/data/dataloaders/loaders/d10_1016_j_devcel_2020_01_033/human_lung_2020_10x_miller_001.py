@@ -71,6 +71,6 @@ class Dataset(DatasetBase):
         adata = anndata.read(fn)
         adata.X = np.expm1(adata.X)
         adata.X = adata.X.multiply(scipy.sparse.csc_matrix(adata.obs["nUMI"].values[:, None])).multiply(1 / 10000)
-        self.set_unkown_class_id(ids=["1_Unicorns and artifacts"])
+        self.set_unknown_class_id(ids=["1_Unicorns and artifacts"])
 
         return adata
