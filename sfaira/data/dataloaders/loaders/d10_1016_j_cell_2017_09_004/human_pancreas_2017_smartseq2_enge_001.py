@@ -25,7 +25,7 @@ class Dataset(DatasetBase):
         self.download_url_data = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE81nnn/GSE81547/suppl/GSE81547_RAW.tar"
         self.download_url_meta = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE81nnn/GSE81547/matrix/GSE81547_series_matrix.txt.gz"
 
-        self.author = "Quake"
+        self.author = "Enge"
         self.doi = "10.1016/j.cell.2017.09.004"
         self.healthy = True
         self.normalization = "raw"
@@ -34,22 +34,8 @@ class Dataset(DatasetBase):
         self.organism = "human"
         self.state_exact = "healthy"
         self.year = 2017
-
         self.var_symbol_col = "index"
-
         self.obs_key_cellontology_original = "celltype"
-
-        self.class_maps = {
-            "0": {
-                "alpha": "Alpha cell",
-                "acinar": "Acinar cell",
-                "ductal": "Ductal cell",
-                "beta": "Beta cell",
-                "unsure": "Unknown",
-                "delta": "Delta cell",
-                "mesenchymal": "Mesenchymal Cell"
-            },
-        }
 
     def _load(self):
         fn = [
