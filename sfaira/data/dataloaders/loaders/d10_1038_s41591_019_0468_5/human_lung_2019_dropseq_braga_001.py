@@ -35,24 +35,6 @@ class Dataset(DatasetBase):
 
         self.obs_key_cellontology_original = "celltype"
 
-        self.class_maps = {
-            "0": {
-                "Fibroblast": "Fibroblasts",
-                "Type 2": "AT2",
-                "B cell": "B cell lineage",
-                "Macrophages": "Macrophages",
-                "NK cell": "Innate lymphoid cells",
-                "T cell": "T cell lineage",
-                "Ciliated": "Multiciliated lineage",
-                "Lymphatic": "Lymphatic EC",
-                "Type 1": "AT1",
-                "Transformed epithelium": "1_Epithelial",
-                "Secretory": "Secretory",
-                "Endothelium": "1_Endothelial",
-                "Mast cell": "Mast cells",
-            },
-        }
-
     def _load(self):
         fn = [
             os.path.join(self.data_dir, "GSE130148_raw_counts.csv.gz"),

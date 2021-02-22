@@ -36,41 +36,16 @@ class Dataset(DatasetBase):
 
         self.obs_key_cellontology_original = "Cell_type"
 
-        self.class_maps = {
-            "0": {
-                "Airway Smooth Muscle": "Airway smooth muscle",
-                "Basal cell": "Basal",
-                "Bud tip adjacent": "Fetal airway progenitors",
-                "Bud tip progenitor": "Fetal airway progenitors",
-                "Cartilage": "Cartilage",
-                "Club-like secretory": "Secretory",
-                "Endothelial": "1_Endothelial",
-                "Epithelial": "1_Epithelial",
-                "Goblet-like secretory": "Secretory",
-                "Hematopoietic, B Cells": "B cell lineage",
-                "Hematopoietic, Macrophage": "Macrophages",
-                "Hematopoietic, Natural Killer Cell": "Innate lymphoid cells",
-                "Hematopoietic, T Cells": "T cell lineage",
-                "Immune": "1_Immune",
-                "Intermediate ciliated": "Multiciliated lineage",
-                "Mesenchyme RSPO2+": "1_Stroma",
-                "Mesenchyme SERPINF1-high": "1_Stroma",
-                "Multiciliated cell": "Multiciliated lineage",
-                "Multiciliated precursor": "Multiciliated lineage",
-                "Neuroendocrine": "Rare",
-                "Pericyte": "Fibroblasts",
-                "RBC": "Erythrocytes",
-                "Secretory progenitor": "Secretory",
-                "Submucosal gland": "Submucosal Secretory",
-                "Submucosal gland basal": "Submucosal Secretory",
-            },
-        }
-
     def _load(self):
         fn = os.path.join(self.data_dir, "miller20.processed.h5ad")
         adata = anndata.read(fn)
         adata.X = np.expm1(adata.X)
         adata.X = adata.X.multiply(scipy.sparse.csc_matrix(adata.obs["nUMI"].values[:, None])).multiply(1 / 10000)
-        self.set_unknown_class_id(ids=["1_Unicorns and artifacts"])
+        self.set_unknown_class_id(ids=[
+            "Bud tip adjacent",
+            "Bud tip progenitor",
+            "Submucosal gland",
+            "Submucosal gland basal",
+        ])
 
         return adata

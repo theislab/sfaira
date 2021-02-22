@@ -29,7 +29,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.download_url_data = f"https://covid19.cog.sanger.ac.uk/{self.sample_fn}"
         self.download_url_meta = None
 
-        self.author = "Eils"
+        self.author = "Lukassen"
         self.doi = "10.1101/2020.03.13.991455"
         self.healthy = True
         self.normalization = "raw"
@@ -42,40 +42,6 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.var_symbol_col = "index"
 
         self.obs_key_cellontology_original = "CellType"
-
-        if self.sample_fn == "lukassen20_lung_orig.processed.h5ad":
-            self.class_maps = {
-                "0": {
-                    "AT1": "AT1",
-                    "AT2": "AT2",
-                    "Ciliated": "Multiciliated lineage",
-                    "Club": "Secretory",
-                    "Endothelial": "1_Endothelial",
-                    "Fibroblasts": "2_Fibroblast lineage",
-                    "Immuno_TCells": "T cell lineage",
-                    "Immuno_Monocytes": "Monocytes",
-                    "LymphaticEndothelium": "Lymphatic EC",
-                }
-            }
-        else:
-            self.class_maps = {
-                "0": {
-                    "Basal_Mitotic": "Basal",
-                    "Basal1": "Basal",
-                    "Basal2": "Basal",
-                    "Basal3": "Basal",
-                    "Ciliated1": "Multiciliated lineage",
-                    "Ciliated2": "Multiciliated lineage",
-                    "Club": "Secretory",
-                    "Fibroblast": "2_Fibroblast lineage",
-                    "FOXN4": "Rare",
-                    "Ionocyte": "Rare",
-                    "Goblet": "Secretory",
-                    "Secretory3": "Secretory",
-                    "Secretory2": "Secretory",
-                    "Secretory1": "Secretory",
-                },
-            }
 
     def _load(self):
         fn = os.path.join(self.data_dir, self.sample_fn)

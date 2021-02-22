@@ -42,53 +42,6 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
 
         self.obs_key_cellontology_original = "CellType"
 
-        if self.sample_fn == "vieira19_Alveoli_and_parenchyma_anonymised.processed.h5ad":
-            self.class_maps = {
-                "0": {
-                    "Ciliated 2": "Multiciliated lineage",
-                    "Luminal_Macrophages": "Macrophages",
-                    "Basal 1": "Basal",
-                    "Dendritic cells": "Dendritic cells",
-                    "Endothelial": "1_Endothelial",
-                    "Lymphatic": "Lymphatic EC",
-                    "Ciliated 1": "Multiciliated lineage",
-                    "Smooth muscle": "2_Smooth Muscle",
-                    "Type_1_alveolar": "AT1",
-                    "Neutrophils": "Monocytes",
-                    "Club": "Secretory",
-                    "Basal 2": "Basal",
-                    "B cells": "B cell lineage",
-                    "T and NK": "2_Lymphoid",
-                    "Mesothelium": "Mesothelium",
-                    "Mast cells": "Mast cells",
-                    "Fibroblasts": "2_Fibroblast lineage",
-                    "Type 2 alveolar": "AT2",
-                },
-            }
-        else:
-            self.class_maps = {
-                "0": {
-                    "Ciliated 1": "Multiciliated lineage",
-                    "Club": "Secretory",
-                    "Ciliated 2": "Multiciliated lineage",
-                    "Ionocytes": "Rare",
-                    "Basal 2": "Basal",
-                    "Goblet_1": "Secretory",
-                    "Goblet 2": "Secretory",
-                    "Basal 1": "Basal",
-                    "Dendritic cells": "Dendritic cells",
-                    "B cells": "B cell lineage",
-                    "Luminal_Macrophages": "Macrophages",
-                    "Neutrophils": "Monocytes",
-                    "Endothelial": "1_Endothelial",
-                    "Smooth muscle": "2_Smooth Muscle",
-                    "T and NK": "2_Lymphoid",
-                    "Fibroblasts": "2_Fibroblast lineage",
-                    "Lymphatic": "Lymphatic EC",
-                    "Mast cells": "Mast cells",
-                },
-            }
-
     def _load(self):
         fn = os.path.join(self.data_dir, self.sample_fn)
         adata = anndata.read(fn)

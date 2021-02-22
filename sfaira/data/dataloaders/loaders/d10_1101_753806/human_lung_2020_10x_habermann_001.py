@@ -25,7 +25,7 @@ class Dataset(DatasetBase):
         ]
         self.download_url_meta = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE135nnn/GSE135893/suppl/GSE135893%5FIPF%5Fmetadata%2Ecsv%2Egz"
 
-        self.author = "Kropski"
+        self.author = "Habermann"
         self.doi = "10.1101/753806"
         self.normalization = "raw"
         self.organ = "lung parenchyma"
@@ -39,42 +39,6 @@ class Dataset(DatasetBase):
         self.obs_key_state_exact = "Diagnosis"
         self.obs_key_healthy = "Status"
         self.healthy_state_healthy = "Control"
-
-        self.class_maps = {
-            "0": {
-                "Proliferating Macrophages": "Macrophages",
-                "Myofibroblasts": "Myofibroblasts",
-                "Proliferating Epithelial Cells": "Proliferating Epithelial Cells",
-                "Mesothelial Cells": "Mesothelium",
-                "cDCs": "Dendritic cells",
-                "Mast Cells": "Mast cells",
-                "Ciliated": "Multiciliated lineage",
-                "T Cells": "T cell lineage",
-                "pDCs": "Dendritic cells",
-                "Smooth Muscle Cells": "2_Smooth Muscle",
-                "Transitional AT2": "AT2",
-                "AT2": "AT2",
-                "B Cells": "B cell lineage",
-                "NK Cells": "Innate lymphoid cells",
-                "Monocytes": "Monocytes",
-                "Basal": "Basal",
-                "Plasma Cells": "B cell lineage",
-                "Differentiating Ciliated": "Multiciliated lineage",
-                "Macrophages": "Macrophages",
-                "MUC5B+": "Secretory",
-                "SCGB3A2+": "Secretory",
-                "Fibroblasts": "Fibroblasts",
-                "Lymphatic Endothelial Cells": "Lymphatic EC",
-                "Endothelial Cells": "2_Blood vessels",
-                "SCGB3A2+ SCGB1A1+": "Secretory",
-                "PLIN2+ Fibroblasts": "Fibroblasts",
-                "KRT5-/KRT17+": "KRT5-/KRT17+",
-                "MUC5AC+ High": "Secretory",
-                "Proliferating T Cells": "T cell lineage",
-                "AT1": "AT1",
-                "HAS1 High Fibroblasts": "Fibroblasts"
-            },
-        }
 
     def _load(self):
         fn = [

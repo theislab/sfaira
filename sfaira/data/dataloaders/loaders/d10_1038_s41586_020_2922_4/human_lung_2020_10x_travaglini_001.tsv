@@ -1,0 +1,140 @@
+source,target
+Adventitial Fibroblast_P1	adventitial cell
+Adventitial Fibroblast_P2	adventitial cell
+Adventitial Fibroblast_P3	adventitial cell
+Airway Smooth Muscle_P1	tracheobronchial smooth muscle cell
+Airway Smooth Muscle_P2	tracheobronchial smooth muscle cell
+Airway Smooth Muscle_P3	tracheobronchial smooth muscle cell
+Alveolar Epithelial Type 1_P1	type I pneumocyte
+Alveolar Epithelial Type 1_P2	type I pneumocyte
+Alveolar Epithelial Type 1_P3	type I pneumocyte
+Alveolar Epithelial Type 2_P1	type II pneumocyte
+Alveolar Epithelial Type 2_P2	type II pneumocyte
+Alveolar Epithelial Type 2_P3	type II pneumocyte
+Alveolar Fibroblast_P1	fibroblast of lung
+Alveolar Fibroblast_P2	fibroblast of lung
+Alveolar Fibroblast_P3	fibroblast of lung
+Artery_P1	endothelial cell
+Artery_P2	endothelial cell
+Artery_P3	endothelial cell
+B_P1	B cell
+B_P2	B cell
+B_P3	B cell
+Basal_P1	respiratory basal cell
+Basal_P2	respiratory basal cell
+Basal_P3	respiratory basal cell
+Basophil/Mast 1_P1	myeloid leukocyte
+Basophil/Mast 1_P2	myeloid leukocyte
+Basophil/Mast 1_P3	myeloid leukocyte
+Basophil/Mast 2_P3	myeloid leukocyte
+Bronchial Vessel 1_P1	endothelial cell
+Bronchial Vessel 1_P3	endothelial cell
+Bronchial Vessel 2_P1	endothelial cell
+Bronchial Vessel 2_P3	endothelial cell
+CD4+ Memory/Effector T_P1	effector memory CD4-positive, alpha-beta T cell, terminally differentiated
+CD4+ Memory/Effector T_P2	effector memory CD4-positive, alpha-beta T cell, terminally differentiated
+CD4+ Memory/Effector T_P3	effector memory CD4-positive, alpha-beta T cell, terminally differentiated
+CD4+ Naive T_P1	naive thymus-derived CD4-positive, alpha-beta T cell
+CD4+ Naive T_P2	naive thymus-derived CD4-positive, alpha-beta T cell
+CD4+ Naive T_P3	naive thymus-derived CD4-positive, alpha-beta T cell
+CD8+ Memory/Effector T_P1	effector memory CD8-positive, alpha-beta T cell, terminally differentiated
+CD8+ Memory/Effector T_P2	effector memory CD8-positive, alpha-beta T cell, terminally differentiated
+CD8+ Memory/Effector T_P3	effector memory CD8-positive, alpha-beta T cell, terminally differentiated
+CD8+ Naive T_P1	naive thymus-derived CD8-positive, alpha-beta T cell
+CD8+ Naive T_P2	naive thymus-derived CD8-positive, alpha-beta T cell
+CD8+ Naive T_P3	naive thymus-derived CD8-positive, alpha-beta T cell
+Capillary Aerocyte_P1	endothelial cell
+Capillary Aerocyte_P2	endothelial cell
+Capillary Aerocyte_P3	endothelial cell
+Capillary Intermediate 1_P2	endothelial cell
+Capillary Intermediate 2_P2	endothelial cell
+Capillary_P1	endothelial cell
+Capillary_P2	endothelial cell
+Capillary_P3	endothelial cell
+Ciliated_P1	lung ciliated cell
+Ciliated_P2	lung ciliated cell
+Ciliated_P3	lung ciliated cell
+Classical Monocyte_P1	classical monocyte
+Classical Monocyte_P2	classical monocyte
+Classical Monocyte_P3	classical monocyte
+Club_P1	club cell
+Club_P2	club cell
+Club_P3	club cell
+Dendritic_P1	dendritic cell
+Differentiating Basal_P1	respiratory basal cell
+Differentiating Basal_P3	respiratory basal cell
+EREG+ Dendritic_P1	dendritic cell
+EREG+ Dendritic_P2	dendritic cell
+Fibromyocyte_P3	myofibroblast cell
+Goblet_P1	lung goblet cell
+Goblet_P2	lung goblet cell
+Goblet_P3	lung goblet cell
+IGSF21+ Dendritic_P1	dendritic cell
+IGSF21+ Dendritic_P2	dendritic cell
+IGSF21+ Dendritic_P3	dendritic cell
+Intermediate Monocyte_P2	intermediate monocyte
+Intermediate Monocyte_P3	intermediate monocyte
+Ionocyte_P3	ionocyte
+Lipofibroblast_P1	fibroblast of lung
+Lymphatic_P1	endothelial cell of lymphatic vessel
+Lymphatic_P2	endothelial cell of lymphatic vessel
+Lymphatic_P3	endothelial cell of lymphatic vessel
+Macrophage_P1	lung macrophage
+Macrophage_P2	lung macrophage
+Macrophage_P3	lung macrophage
+Mesothelial_P1	mesothelial cell
+Mucous_P2	mucus secreting cell
+Mucous_P3	mucus secreting cell
+Myeloid Dendritic Type 1_P1	myeloid dendritic cell
+Myeloid Dendritic Type 1_P2	myeloid dendritic cell
+Myeloid Dendritic Type 1_P3	myeloid dendritic cell
+Myeloid Dendritic Type 2_P1	myeloid dendritic cell
+Myeloid Dendritic Type 2_P2	myeloid dendritic cell
+Myeloid Dendritic Type 2_P3	myeloid dendritic cell
+Myofibroblast_P1	myofibroblast cell
+Myofibroblast_P2	myofibroblast cell
+Myofibroblast_P3	myofibroblast cell
+Natural Killer T_P2	mature NK T cell
+Natural Killer T_P3	mature NK T cell
+Natural Killer_P1	natural killer cell
+Natural Killer_P2	natural killer cell
+Natural Killer_P3	natural killer cell
+Neuroendocrine_P1	neuroendocrine cell
+Neuroendocrine_P3	neuroendocrine cell
+Neutrophil_P1	neutrophil
+Neutrophil_P2	neutrophil
+Neutrophil_P3	neutrophil
+Nonclassical Monocyte_P1	non-classical monocyte
+Nonclassical Monocyte_P2	non-classical monocyte
+Nonclassical Monocyte_P3	non-classical monocyte
+OLR1+ Classical Monocyte_P2	classical monocyte
+Pericyte_P1	pericyte cell
+Pericyte_P2	pericyte cell
+Pericyte_P3	pericyte cell
+Plasma_P1	plasma cell
+Plasma_P3	plasma cell
+Plasmacytoid Dendritic_P1	plasmacytoid dendritic cell
+Plasmacytoid Dendritic_P2	plasmacytoid dendritic cell
+Plasmacytoid Dendritic_P3	plasmacytoid dendritic cell
+Platelet/Megakaryocyte_P1	megakaryocyte
+Platelet/Megakaryocyte_P3	megakaryocyte
+Proliferating Basal_P1	respiratory basal cell
+Proliferating Basal_P3	respiratory basal cell
+Proliferating Macrophage_P1	macrophage
+Proliferating Macrophage_P2	macrophage
+Proliferating Macrophage_P3	macrophage
+Proliferating NK/T_P2	mature NK T cell
+Proliferating NK/T_P3	mature NK T cell
+Proximal Basal_P3	respiratory basal cell
+Proximal Ciliated_P3	lung ciliated cell
+Serous_P3	serous secreting cell
+Signaling Alveolar Epithelial Type 2_P1	type II pneumocyte
+Signaling Alveolar Epithelial Type 2_P3	type II pneumocyte
+TREM2+ Dendritic_P1	dendritic cell
+TREM2+ Dendritic_P3	dendritic cell
+Vascular Smooth Muscle_P1	vascular associated smooth muscle cell
+Vascular Smooth Muscle_P2	vascular associated smooth muscle cell
+Vascular Smooth Muscle_P3	vascular associated smooth muscle cell
+Vein_P1	endothelial cell
+Vein_P2	endothelial cell
+Vein_P3	endothelial cell
