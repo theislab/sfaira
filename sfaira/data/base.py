@@ -1569,14 +1569,15 @@ class DatasetBaseGroupLoadingOneFile(DatasetBase):
     _unprocessed_full_group_object: bool
     _sample_id: str
 
-    def __init__(self,
-                 sample_id: str,
-                 sample_ids: List,
-                 data_path: Union[str, None],
-                 meta_path: Union[str, None] = None,
-                 cache_path: Union[str, None] = None,
-                 **kwargs
-                 ):
+    def __init__(
+            self,
+            sample_id: str,
+            sample_ids: List,
+            data_path: Union[str, None],
+            meta_path: Union[str, None] = None,
+            cache_path: Union[str, None] = None,
+            **kwargs
+    ):
         super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self._unprocessed_full_group_object = False
         self._sample_id = sample_id
@@ -1654,14 +1655,15 @@ class DatasetBaseGroupLoadingManyFiles(DatasetBase, abc.ABC):
     """
     _sample_fn: str
 
-    def __init__(self,
-                 sample_fn: str,
-                 sample_fns: List,
-                 data_path: Union[str, None] = None,
-                 meta_path: Union[str, None] = None,
-                 cache_path: Union[str, None] = None,
-                 **kwargs
-                 ):
+    def __init__(
+            self,
+            sample_fn: str,
+            sample_fns: List,
+            data_path: Union[str, None] = None,
+            meta_path: Union[str, None] = None,
+            cache_path: Union[str, None] = None,
+            **kwargs
+    ):
         super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self._sample_fn = sample_fn
         self._SAMPLE_FNS = sample_fns
