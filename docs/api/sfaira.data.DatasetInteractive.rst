@@ -45,7 +45,7 @@
       ~DatasetInteractive.download
       ~DatasetInteractive.download_meta
       ~DatasetInteractive.ethnicity
-      ~DatasetInteractive.fn_ontology_class_map_csv
+      ~DatasetInteractive.fn_ontology_class_map_tsv
       ~DatasetInteractive.healthy
       ~DatasetInteractive.healthy_state_healthy
       ~DatasetInteractive.id

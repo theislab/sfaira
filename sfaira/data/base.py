@@ -721,9 +721,9 @@ class DatasetBase(abc.ABC):
         return "_".join(self.id.split("_")[:-1])
 
     @property
-    def fn_ontology_class_map_csv(self):
+    def fn_ontology_class_map_tsv(self):
         """Standardised file name under which cell type conversion tables are saved."""
-        return self.doi_cleaned_id + ".csv"
+        return self.doi_cleaned_id + ".tsv"
 
     def write_ontology_class_map(
             self,
@@ -751,7 +751,7 @@ class DatasetBase(abc.ABC):
                 **kwargs
             )
             if not os.path.exists(fn) or not protected_writing:
-                tab.to_csv(fn, index=False)
+                tab.to_csv(fn, index=False, sep="\t")
 
     def load_ontology_class_map(self, fn):
         """
@@ -1822,7 +1822,7 @@ class DatasetGroup:
             tab = tab.loc[[x not in tab.iloc[:i, 0].values for i, x in enumerate(tab.iloc[:, 0].values)], :].copy()
             tab = tab.sort_values("source")
             if not os.path.exists(fn) or not protected_writing:
-                tab.to_csv(fn, index=False)
+                tab.to_csv(fn, index=False, sep="\t")
 
     def download(self, **kwargs):
         for _, v in self.datasets.items():

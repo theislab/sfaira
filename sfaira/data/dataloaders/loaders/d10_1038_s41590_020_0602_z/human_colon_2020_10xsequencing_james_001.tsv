@@ -1,0 +1,26 @@
+source	target
+Activated CD4 T	activated CD4-positive, alpha-beta T cell
+B cell IgA Plasma	IgA plasma cell
+B cell IgG Plasma	IgG plasma cell
+B cell cycling	B cell
+B cell memory	memory B cell
+CD8 T	CD8-positive, alpha-beta T cell
+Follicular B cell	follicular B cell
+ILC	innate lymphoid cell
+LYVE1 Macrophage	macrophage
+Lymphoid DC	plasmacytoid dendritic cell
+Macrophage	macrophage
+Mast	mast cell
+Monocyte	monocyte
+NK	natural killer cell
+Tcm	memory T cell
+Tfh	T follicular helper cell
+Th1	T-helper 1 cell
+Th17	T-helper 17 cell
+Treg	regulatory T cell
+cDC1	conventional dendritic cell
+cDC2	conventional dendritic cell
+cycling DCs	dendritic cell
+cycling gd T	gamma-delta T cell
+gd T	gamma-delta T cell
+pDC	plasmacytoid dendritic cell

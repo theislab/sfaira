@@ -1,0 +1,39 @@
+source	target
+Best4+ Enterocytes	enterocyte
+CD4+ Activated Fos-hi	activated CD4-positive, alpha-beta T cell
+CD4+ Activated Fos-lo	activated CD4-positive, alpha-beta T cell
+CD4+ Memory	CD4-positive, alpha-beta memory T cell
+CD4+ PD1+	CD4-positive, alpha-beta T cell
+CD69+ Mast	mast cell
+CD69- Mast	mast cell
+CD8+ IELs	CD8-alpha-beta-positive, alpha-beta intraepithelial T cell
+CD8+ IL17+	CD8-positive, alpha-beta thymocyte
+CD8+ LP	CD8-positive, alpha-beta thymocyte
+Cycling B	B cell
+Cycling T	T cell
+Cycling TA	transit amplifying cell of large intestine
+DC1	dendritic cell
+DC2	dendritic cell
+Enterocyte Progenitors	enterocyte
+Enterocytes	enterocyte
+Enteroendocrine	enteroendocrine cell
+Follicular	follicular B cell
+GC	goblet cell
+Goblet	goblet cell
+ILCs	innate lymphoid cell
+Immature Enterocytes 1	enterocyte
+Immature Enterocytes 2	enterocyte
+Immature Goblet	goblet cell
+M cells	M cell of gut
+MT-hi	T cell
+Macrophages	macrophage
+NKs	natural killer cell
+Plasma	plasma cell
+Secretory TA	transit amplifying cell of large intestine
+Stem	intestinal crypt stem cell
+TA 1	transit amplifying cell of large intestine
+TA 2	transit amplifying cell of large intestine
+Tregs	regulatory T cell
+Tuft	intestinal tuft cell
+WNT2B+ Fos-lo 1	fibroblast
+WNT5B+ 2	fibroblast

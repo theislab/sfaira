@@ -130,7 +130,7 @@ def test_load(dir_template: str = "./template_data", doi_sfaira_repr="10.1000/j.
         for k, v in ds.datasets.items():
             # Write this directly into sfaira installation so that it can be committed via git.
             v.write_ontology_class_map(
-                fn=os.path.join("/".join(file_path.split("/")[:-1]), v.fn_ontology_class_map_csv),
+                fn=os.path.join("/".join(file_path.split("/")[:-1]), v.fn_ontology_class_map_tsv),
                 protected_writing=True,
                 n_suggest=10,
             )

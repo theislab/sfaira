@@ -1,0 +1,35 @@
+source	target
+1	alpha-beta T cell
+10	endothelial cell
+11	hepatocyte
+12	alpha-beta T cell
+13	endothelial cell of hepatic sinusoid
+14	hepatocyte
+15	endothelial cell
+17	hepatocyte
+18	alpha-beta T cell
+2	Kupffer Cell
+20	endothelial cell of hepatic sinusoid
+21	endothelial cell
+22	B cell
+23	Kupffer cell
+24	cholangiocyte
+25	Kupffer cell
+26	endothelial cell
+28	alpha-beta T cell
+29	Macrovascular endothelial cell
+3	alpha-beta T cell
+30	hepatocyte
+31	Kupffer cell
+32	endothelial cell of hepatic sinusoid
+33	hepatic stellate cell
+34	B Cell
+35	endothelial cell
+38	B cell
+39	cholangiocyte
+4	cholangiocyte
+5	alpha-beta T cell
+6	Kupffer Cell
+7	cholangiocyte
+8	B Cell
+9	endothelial cell of hepatic sinusoid
