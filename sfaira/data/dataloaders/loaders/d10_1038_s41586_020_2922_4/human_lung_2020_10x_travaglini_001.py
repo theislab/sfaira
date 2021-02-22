@@ -14,21 +14,11 @@ SAMPLE_FNS = [
 
 class Dataset(DatasetBaseGroupLoadingManyFiles):
     """
-    This data loader directly processes the data file provided under the download link.
-    To obtain the file, you need to create a free account at https://www.synapse.org.
-    You can then use those login credentials to download the file with python using the synapse client,
-    installable via `pip install synapseclient`:
-
-    import synapseclient
-    import shutil
-    syn = synapseclient.Synapse()
-    syn.login("synapse_username","password")
-    syn21625095 = syn.get(entity="syn21625095")
-    shutil.move(syn21625095.path, "droplet_normal_lung_blood_scanpy.20200205.RC4.h5ad")
-
-    :param data_path:
-    :param meta_path:
-    :param kwargs:
+    ToDo split by sample / patient in obs columns:
+      bio replicates droplet file "orig.ident"+"sample"+"magnetic.selection",
+      bio replicates facs file "patient"+"sample"
+      tech replicates droplet file "channel",
+      tech replicates facs file "plate.barcode"
     """
 
     def __init__(
@@ -61,6 +51,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.protocol = "10X sequencing" if self.sample_fn.split("_")[0] == "droplet" else "Smart-seq2"
         self.state_exact = "healthy"
         self.year = 2020
+
+        self.obs_key_cellontology_original = "free_annotation"
 
         self.var_symbol_col = "index"
 
