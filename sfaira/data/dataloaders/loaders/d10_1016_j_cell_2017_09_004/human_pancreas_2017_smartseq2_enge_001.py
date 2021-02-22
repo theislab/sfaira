@@ -84,4 +84,6 @@ class Dataset(DatasetBase):
         adata.obs["celltype"] = [d.loc[i]["Sample_characteristics_ch1"].split(": ")[1] for i in adata.obs.index]
         adata.obs["patient"] = ["_".join(d.loc[i]["index"].split("_")[:2]) for i in adata.obs.index]
 
+        self.set_unknown_class_id(ids=["unsure"])
+
         return adata
