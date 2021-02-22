@@ -22,7 +22,7 @@ class Dataset(DatasetBase):
         self.download_url_data = "https://covid19.cog.sanger.ac.uk/martin19.processed.h5ad"
         self.download_url_meta = None
 
-        self.author = "Kenigsberg"
+        self.author = "Martin"
         self.doi = "10.1016/j.cell.2019.08.008"
         self.healthy = True
         self.normalization = "raw"
@@ -35,36 +35,12 @@ class Dataset(DatasetBase):
         self.var_ensembl_col = "gene_ids"
         self.obs_key_cellontology_original = "CellType"
 
-        self.class_maps = {
-            "0": {
-                "T cells": "T cells",
-                "Plasma cells": "Plasma Cells",
-                "B cells": "B cells",
-                "MNP": "MNP",
-                "ILC": "ILC",
-                "Enterocytes": "Enterocytes",
-                "Fibs": "Fibroblasts",
-                "CD36+ endothelium": "CD36+ endothelium",
-                "Progenitors": "Progenitors",
-                "Goblets": "Goblet cells",
-                "Glial cells": "Glial cells",
-                "Cycling": "Cycling",
-                "ACKR1+ endothelium": "ACKR1+ endothelium",
-                "Pericytes": "Pericytes",
-                "Lymphatics": "Lymphatics",
-                "Mast cells": "Mast cells",
-                "SM": "Smooth muscle cell",
-                "TA": "TA",
-                "Paneth cells": "Paneth cells",
-                "Enteroendocrines": "Enteroendocrine cells",
-            },
-        }
-
     def _load(self):
         fn = os.path.join(self.data_dir, "martin19.processed.h5ad")
         adata = anndata.read(fn)
         adata.X = np.expm1(adata.X)
         adata.X = adata.X.multiply(scipy.sparse.csc_matrix(adata.obs["n_counts"].values[:, None])).multiply(1 / 10000)
         adata = adata[adata.obs["CellType"] != "Doublets"].copy()
+        self.set_unknown_class_id(ids=["Cycling"])
 
         return adata

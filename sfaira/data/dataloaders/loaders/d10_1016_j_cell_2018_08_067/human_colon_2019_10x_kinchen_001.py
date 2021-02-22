@@ -30,7 +30,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
                                  f"file=GSE114374%5FHuman%5F{sample_fn}%5Fexpression%5Fmatrix%2Etxt%2Egz"
         self.download_url_meta = f"private,{sample_fn.lower()}_meta_data_stromal_with_donor.txt"
 
-        self.author = "Simmons"
+        self.author = "Kinchen"
         self.doi = "10.1016/j.cell.2018.08.067"
         self.normalization = "norm"
         self.organ = "lamina propria of mucosa of colon"

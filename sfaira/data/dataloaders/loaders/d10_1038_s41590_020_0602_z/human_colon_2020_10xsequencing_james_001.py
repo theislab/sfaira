@@ -22,7 +22,7 @@ class Dataset(DatasetBase):
         self.download_url_data = "https://covid19.cog.sanger.ac.uk/james20.processed.h5ad"
         self.download_url_meta = None
 
-        self.author = "Teichmann"
+        self.author = "James"
         self.doi = "10.1038/s41590-020-0602-z"
         self.healthy = True
         self.normalization = "raw"
@@ -36,36 +36,6 @@ class Dataset(DatasetBase):
         self.var_ensembl_col = "gene_ids"
 
         self.obs_key_cellontology_original = "cell_type"
-
-        self.class_maps = {
-            "0": {
-                "Activated CD4 T": "Activated CD4 T",
-                "B cell IgA Plasma": "B cell IgA Plasma",
-                "B cell IgG Plasma": "B cell IgG Plasma",
-                "B cell cycling": "B cell cycling",
-                "B cell memory": "B cell memory",
-                "CD8 T": "CD8 T",
-                "Follicular B cell": "Follicular",
-                "ILC": "ILC",
-                "LYVE1 Macrophage": "LYVE1 Macrophage",
-                "Lymphoid DC": "Lymphoid DC",
-                "Macrophage": "Macrophage",
-                "Mast": "Mast cell",
-                "Monocyte": "Monocyte",
-                "NK": "NK",
-                "Tcm": "Tcm",
-                "Tfh": "Tfh",
-                "Th1": "Th1",
-                "Th17": "Th17",
-                "Treg": "Treg",
-                "cDC1": "DC1",
-                "cDC2": "DC2",
-                "cycling DCs": "cycling DCs",
-                "cycling gd T": "cycling gd T",
-                "gd T": "gd T",
-                "pDC": "pDC",
-            },
-        }
 
     def _load(self):
         fn = os.path.join(self.data_dir, "james20.processed.h5ad")
