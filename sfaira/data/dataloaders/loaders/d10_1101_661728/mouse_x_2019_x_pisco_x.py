@@ -93,7 +93,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.obs_key_sex = "sex"
         # ToDo: further anatomical information for subtissue in "subtissue"?
 
-        self.author = "Quake"
+        self.author = "Pisco"
         self.doi = "10.1101/661728"
         self.healthy = True
         self.normalization = "norm"

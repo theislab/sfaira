@@ -46,7 +46,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             "private,donor2.annotation.txt"
         ]
 
-        self.author = "Sims"
+        self.author = "Szabo"
         self.doi = "10.1038/s41467-019-12464-3"
         self.healthy = True
         self.normalization = "raw"

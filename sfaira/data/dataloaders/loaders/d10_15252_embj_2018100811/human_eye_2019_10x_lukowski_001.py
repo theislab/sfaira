@@ -22,7 +22,7 @@ class Dataset(DatasetBase):
         self.download_url_data = "https://covid19.cog.sanger.ac.uk/lukowski19.processed.h5ad"
         self.download_url_meta = None
 
-        self.author = "Wong"
+        self.author = "Lukowski"
         self.doi = "10.15252/embj.2018100811"
         self.healthy = True
         self.normalization = "raw"

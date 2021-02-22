@@ -30,7 +30,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.download_url_data = f"https://covid19.cog.sanger.ac.uk/wang20_{organ}.processed.h5ad"
         self.download_url_meta = None
 
-        self.author = "Chen"
+        self.author = "Wang"
         self.doi = "10.1084/jem.20191130"
         self.healthy = True
         self.normalization = "raw"

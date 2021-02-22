@@ -314,7 +314,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.download_url_data = "https://ndownloader.figshare.com/articles/5435866?private_link=865e694ad06d5857db4b"
         self.download_url_meta = None
 
-        self.author = "Guo"
+        self.author = "Han"
         self.dev_stage = sample_dev_stage_dict[self.sample_fn]
         self.doi = "10.1016/j.cell.2018.02.001"
         self.normalization = "raw"

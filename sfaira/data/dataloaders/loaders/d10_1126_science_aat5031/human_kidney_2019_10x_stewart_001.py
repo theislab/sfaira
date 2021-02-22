@@ -24,7 +24,7 @@ class Dataset(DatasetBase):
         ]
         self.download_url_meta = None
 
-        self.author = "Clatworthy"
+        self.author = "Stewart"
         self.doi = "10.1126/science.aat5031"
         self.healthy = True
         self.normalization = "norm"

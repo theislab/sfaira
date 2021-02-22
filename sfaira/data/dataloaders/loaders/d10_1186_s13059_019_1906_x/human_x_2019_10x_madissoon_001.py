@@ -42,7 +42,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             self.var_ensembl_col = "gene_ids-HCATisStab7463846"
 
         self.download_url_meta = None
-        self.author = "Meyer"
+        self.author = "Madissoon"
         self.doi = "10.1186/s13059-019-1906-x"
         self.healthy = True
         self.normalization = "raw"  # ToDo "madissoon19_lung.processed.h5ad" is close to integer but not quire (~1e-4)

@@ -45,7 +45,7 @@ class Dataset(DatasetBase):
         self.download_url_data = "https://datashare.is.ed.ac.uk/bitstream/handle/10283/3433/tissue.rdata"
         self.download_url_meta = None
 
-        self.author = "Henderson"
+        self.author = "Ramachandran"
         self.doi = "10.1038/s41586-019-1631-3"
         self.normalization = "raw"
         self.organ = "liver"

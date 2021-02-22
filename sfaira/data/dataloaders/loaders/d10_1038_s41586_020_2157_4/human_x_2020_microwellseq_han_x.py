@@ -256,7 +256,7 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
         self.id = f"human_{''.join(self.organ.split(' '))}_2020_microwellseq_han_" \
                   f"{str(SAMPLE_IDS.index(self.sample_id)).zfill(3)}_10.1038/s41586-020-2157-4"
 
-        self.author = "Guo"
+        self.author = "Han"
         self.doi = "10.1038/s41586-020-2157-4"
         self.healthy = True
         self.normalization = "raw"

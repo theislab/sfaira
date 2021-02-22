@@ -23,7 +23,7 @@ class Dataset(DatasetBase):
         self.download_url_meta = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE121nnn/GSE121862/suppl/" \
             "GSE121862%5FUCSD%2DWU%5FSingle%5FNuclei%5FCluster%5FAnnotations%2Ecsv%2Egz"
 
-        self.author = "Jain"
+        self.author = "Lake"
         self.doi = "10.1038/s41467-019-10861-2"
         self.healthy = True
         self.normalization = "raw"

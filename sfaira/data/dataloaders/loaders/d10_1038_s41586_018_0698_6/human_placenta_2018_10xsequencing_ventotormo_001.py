@@ -31,7 +31,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.download_url_meta = f"https://www.ebi.ac.uk/arrayexpress/files/{self.sample_fn.split('.')[0]}/" \
                                  f"{self.sample_fn}.2.zip"
 
-        self.author = "Teichmann"
+        self.author = "Ventotormo"
         self.healthy = True
         self.normalization = "raw"
         self.organ = "placenta"

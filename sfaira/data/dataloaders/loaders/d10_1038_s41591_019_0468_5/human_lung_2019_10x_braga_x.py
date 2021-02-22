@@ -28,7 +28,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.download_url_data = f"https://covid19.cog.sanger.ac.uk/{self.sample_fn}"
         self.download_url_meta = None
 
-        self.author = "Teichmann"
+        self.author = "Braga"
         self.doi = "10.1038/s41591-019-0468-5"
         self.healthy = True
         self.organ = "bronchus" if sample_fn == "vieira19_Bronchi_anonymised.processed.h5ad" else "lung parenchyma"
