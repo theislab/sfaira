@@ -155,6 +155,6 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         if self.sample_fn == "madissoon19_lung.processed.h5ad":
             adata.obs["Celltypes"] = adata.obs["CellType"]
             del adata.obs["CellType"]
-        self.set_unkown_class_id(ids=["1_Unicorns and artifacts"])
+        self.set_unknown_class_id(ids=["1_Unicorns and artifacts"])
 
         return adata

@@ -60,6 +60,6 @@ class Dataset(DatasetBase):
         ]
         adata = anndata.read_csv(fn[0]).T
         adata.obs = pd.read_csv(fn[1], sep="\t", index_col=0)
-        self.set_unkown_class_id(ids=["1_Unicorns and artifacts"])
+        self.set_unknown_class_id(ids=["1_Unicorns and artifacts"])
 
         return adata

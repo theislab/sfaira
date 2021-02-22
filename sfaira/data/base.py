@@ -686,7 +686,7 @@ class DatasetBase(abc.ABC):
         else:
             raise ValueError(f"Did not recognize backed AnnData.X format {type(adata_backed.X)}")
 
-    def set_unkown_class_id(self, ids: List[str]):
+    def set_unknown_class_id(self, ids: List[str]):
         """
         Sets list of custom identifiers of unknown cell types data annotation.
 

@@ -89,6 +89,6 @@ class Dataset(DatasetBase):
         obs = pd.read_csv(fn[3], index_col=0)
         adata = adata[obs.index.tolist(), :].copy()
         adata.obs = obs
-        self.set_unkown_class_id(ids=["1_Unicorns and artifacts"])
+        self.set_unknown_class_id(ids=["1_Unicorns and artifacts"])
 
         return adata

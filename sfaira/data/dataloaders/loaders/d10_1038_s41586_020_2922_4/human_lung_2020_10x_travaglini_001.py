@@ -210,6 +210,6 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         adata.X = scipy.sparse.csc_matrix(adata.X)
         adata.X = np.expm1(adata.X)
         adata.X = adata.X.multiply(scipy.sparse.csc_matrix(adata.obs[sf_key].values[:, None])).multiply(1 / norm_const)
-        self.set_unkown_class_id(ids=["1_Unicorns and artifacts"])
+        self.set_unknown_class_id(ids=["1_Unicorns and artifacts"])
 
         return adata
