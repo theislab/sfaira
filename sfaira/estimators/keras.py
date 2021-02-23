@@ -356,21 +356,22 @@ class EstimatorKeras:
         }
 
         # Set callbacks.
-        cbs = [
-            tf.keras.callbacks.EarlyStopping(
+        cbs = []
+        if patience is not None and patience > 0:
+            cbs.append(tf.keras.callbacks.EarlyStopping(
                 monitor='val_loss',
                 patience=patience,
                 restore_best_weights=True,
                 verbose=verbose
-            ),
-            tf.keras.callbacks.ReduceLROnPlateau(
+            ))
+        if lr_schedule_factor is not None and lr_schedule_factor < 1.:
+            cbs.append(tf.keras.callbacks.ReduceLROnPlateau(
                 monitor='val_loss',
                 factor=lr_schedule_factor,
                 patience=lr_schedule_patience,
                 min_lr=lr_schedule_min_lr,
                 verbose=verbose
-            )
-        ]
+            ))
         if log_dir is not None:
             cbs.append(tf.keras.callbacks.TensorBoard(
                 log_dir=log_dir,
