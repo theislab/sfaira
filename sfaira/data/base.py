@@ -1657,7 +1657,7 @@ class DatasetBaseGroupLoadingManyFiles(DatasetBase, abc.ABC):
 
     @property
     def idx(self):
-        return str(self._SAMPLE_FNS.index(self.sample_fn)+1).zfill(3)
+        return str(self._SAMPLE_FNS.index(self.sample_fn) + 1).zfill(3)
 
 
 class DatasetGroup:
