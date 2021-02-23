@@ -761,7 +761,7 @@ class DatasetBase(abc.ABC):
         :return:
         """
         if os.path.exists(fn):
-            self.ontology_class_map = pd.read_csv(fn, header=0, index_col=None)
+            self.ontology_class_map = pd.read_csv(fn, header=0, index_col=None, sep="\t")
         else:
             warnings.warn(f"file {fn} does not exist")
 
