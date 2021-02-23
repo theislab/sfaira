@@ -5,7 +5,7 @@ except ImportError:
     tf = None
 from typing import List, Union
 
-import sfaira.versions.metadata as metadata
+from sfaira.versions.metadata import CelltypeUniverse
 from sfaira.versions.topology_versions import Topologies
 from sfaira.models.base import BasicModel
 from sfaira.models.pp_layer import PreprocInput
@@ -98,12 +98,10 @@ class CellTypeMarker(BasicModel):
 
 
 class CellTypeMarkerVersioned(CellTypeMarker):
-    cell_type_version: metadata.CelltypeUniverse
 
     def __init__(
             self,
-            organism: str,
-            organ: str,
+            celltypes_version: CelltypeUniverse,
             topology_container: Topologies,
             override_hyperpar: Union[dict, None] = None
     ):
@@ -116,14 +114,14 @@ class CellTypeMarkerVersioned(CellTypeMarker):
             dictionary that is queried based on the topology_id. Can contain a subset of all hyperparameters.
         """
         # Get cell type version instance based on topology ID, organism and organ.
-        unkown_already_included = np.any([x.lower() == "unknown" for x in self.celltypes_version.ids])
+        unkown_already_included = np.any([x.lower() == "unknown" for x in celltypes_version.target_universe])
         hyperpar = topology_container.topology["hyper_parameters"]
         if override_hyperpar is not None:
             for k in list(override_hyperpar.keys()):
                 hyperpar[k] = override_hyperpar[k]
         super().__init__(
             in_dim=topology_container.ngenes,
-            out_dim=self.celltypes_version.ntypes if unkown_already_included else self.celltypes_version.ntypes + 1,
+            out_dim=celltypes_version.ntypes if unkown_already_included else celltypes_version.ntypes + 1,
             **hyperpar
         )
         print('passed hyperpar: \n', hyperpar)
@@ -138,7 +136,6 @@ class CellTypeMarkerVersioned(CellTypeMarker):
                 ("genome_size", self.genome_size),
                 ("model_class", self.model_class),
                 ("model_type", self.model_type),
-                ("ntypes", self.celltypes_version.ntypes),
-                ("celltypes_version", self.celltypes_version.version)
+                ("ntypes", celltypes_version.ntypes),
             ]
         )

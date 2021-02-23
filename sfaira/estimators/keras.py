@@ -905,6 +905,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             cache_path=cache_path
         )
         self.max_class_weight = max_class_weight
+        self.celltypes_version = CelltypeUniverse(organism=organism)
 
     def init_model(
             self,
@@ -924,27 +925,22 @@ class EstimatorKerasCelltype(EstimatorKeras):
             raise ValueError('unknown topology %s for EstimatorKerasCelltype' % self.model_type)
 
         self.model = Model(
-            organism=self.organism,
-            organ=self.organ,
+            celltypes_version=self.celltypes_version,
             topology_container=self.topology_container,
             override_hyperpar=override_hyperpar
         )
 
     @property
     def ids(self):
-        return self.model.celltypes_version.ids
+        return self.celltypes_version.target_universe
 
     @property
     def ntypes(self):
-        return self.model.celltypes_version.ntypes
+        return self.celltypes_version.ntypes
 
     @property
     def ontology_ids(self):
-        return self.model.celltypes_version.ontology_ids
-
-    @property
-    def ontology(self):
-        return self.model.celltypes_version.ontology[self.model.celltypes_version.version]
+        return self.celltypes_version.target_universe
 
     def _get_celltype_out(
             self,
