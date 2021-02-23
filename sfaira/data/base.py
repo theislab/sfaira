@@ -2096,7 +2096,7 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                                 DatasetFound(data_path=data_path, meta_path=meta_path, cache_path=cache_path))
                         # Load cell type maps:
                         for x in datasets_f:
-                            x.load_ontology_class_map(fn=os.path.join(cwd, file_module + ".csv"))
+                            x.load_ontology_class_map(fn=os.path.join(cwd, file_module + ".tsv"))
                         datasets.extend(datasets_f)
 
         keys = [x.id for x in datasets]
