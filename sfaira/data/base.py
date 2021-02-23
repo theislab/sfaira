@@ -1591,7 +1591,7 @@ class DatasetBaseGroupLoadingOneFile(DatasetBase):
 
     @property
     def sample_idx(self):
-        return 1 + self._SAMPLE_IDS.index(self.sample_id)
+        return self._SAMPLE_IDS.index(self.sample_id)
 
     @abc.abstractmethod
     def _load_full(self) -> anndata.AnnData:
@@ -1676,7 +1676,7 @@ class DatasetBaseGroupLoadingManyFiles(DatasetBase, abc.ABC):
 
     @property
     def sample_idx(self):
-        return 1 + self._SAMPLE_FNS.index(self.sample_fn)
+        return self._SAMPLE_FNS.index(self.sample_fn)
 
 
 class DatasetGroup:
