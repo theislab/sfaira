@@ -901,30 +901,33 @@ class DatasetBase(abc.ABC):
             meta[self._ADATA_IDS_SFAIRA.cell_ontology_class] = " "
         meta.to_csv(fn_meta)
 
-    # Properties:
-
-    @property
-    def id(self) -> str:
+    def set_dataset_id(
+            self,
+            idx: int = 1
+    ):
         def clean(s):
-            return s.replace(' ', '').replace('-', '').replace('_', '').lower()
+            if s is not None:
+                s = s.replace(' ', '').replace('-', '').replace('_', '').lower()
+            return s
 
-        if hasattr(self, 'idx'):
-            idx = self.idx
-        else:
-            idx = "000"
+        if hasattr(self, 'sample_idx'):
+            idx += self.sample_idx
+        idx = str(idx).zfill(3)
 
         if isinstance(self.author, List):
             author = self.author[0]
         else:
             author = self.author
 
-        return f"{clean(self.organism)}_" \
-               f"{clean(self.organ)}_" \
-               f"{self.year}_" \
-               f"{clean(self.protocol)}_" \
-               f"{clean(author)}_" \
-               f"{idx}_" \
-               f"{self.doi}"
+        self.id = f"{clean(self.organism)}_" \
+                  f"{clean(self.organ)}_" \
+                  f"{self.year}_" \
+                  f"{clean(self.protocol)}_" \
+                  f"{clean(author)}_" \
+                  f"{idx}_" \
+                  f"{self.doi}"
+
+    # Properties:
 
     @property
     def age(self) -> Union[None, str]:
@@ -1137,9 +1140,8 @@ class DatasetBase(abc.ABC):
         if self._id is not None:
             return self._id
         else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            return self.meta[self._ADATA_IDS_SFAIRA.id]
+            raise AttributeError("Dataset ID was not set in dataloader, please ensure the dataloader constructor of "
+                                 "this dataset contains a call to self.set_dataset_id()")
 
     @id.setter
     def id(self, x: str):
@@ -1588,8 +1590,8 @@ class DatasetBaseGroupLoadingOneFile(DatasetBase):
         return self._sample_id
 
     @property
-    def idx(self):
-        return str(self._SAMPLE_IDS.index(self.sample_id) + 1).zfill(3)
+    def sample_idx(self):
+        return 1 + self._SAMPLE_IDS.index(self.sample_id)
 
     @abc.abstractmethod
     def _load_full(self) -> anndata.AnnData:
@@ -1673,8 +1675,8 @@ class DatasetBaseGroupLoadingManyFiles(DatasetBase, abc.ABC):
         return self._sample_fn
 
     @property
-    def idx(self):
-        return str(self._SAMPLE_FNS.index(self.sample_fn) + 1).zfill(3)
+    def sample_idx(self):
+        return 1 + self._SAMPLE_FNS.index(self.sample_fn)
 
 
 class DatasetGroup:
