@@ -44,5 +44,5 @@ class Dataset(DatasetBase):
         adata.X = adata.X.multiply(scipy.sparse.csc_matrix(adata.obs["n_counts"].values[:, None])).multiply(1 / 10000)
 
         self.set_unknown_class_id(ids=["unannotated", "unspecified"])
-        
+
         return adata
