@@ -129,6 +129,7 @@ class DatasetBase(abc.ABC):
         self._download_url_meta = None
         self._ethnicity = None
         self._healthy = None
+        self._id = None
         self._ncells = None
         self._normalization = None
         self._organ = None
@@ -1107,6 +1108,20 @@ class DatasetBase(abc.ABC):
     def healthy_state_healthy(self, x: str):
         self.__erasing_protection(attr="healthy_state_healthy", val_old=self._healthy_state_healthy, val_new=x)
         self._healthy_state_healthy = x
+
+    @property
+    def id(self) -> str:
+        if self._id is not None:
+            return self._id
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            return self.meta[self._ADATA_IDS_SFAIRA.id]
+
+    @id.setter
+    def id(self, x: str):
+        self.__erasing_protection(attr="id", val_old=self._id, val_new=x)
+        self._id = x
 
     @property
     def loaded(self) -> bool:

@@ -28,6 +28,7 @@ class ADATA_IDS_BASE:
     _gene_id_index: str
     _gene_id_names: str
     _healthy: str
+    _id: str
     _ncells: str
     _normalization: str
     _organ: str
@@ -94,6 +95,10 @@ class ADATA_IDS_BASE:
     @property
     def healthy(self) -> str:
         return self._healthy
+
+    @property
+    def id(self) -> str:
+        return self._id
 
     @property
     def ncells(self) -> str:
