@@ -40,8 +40,9 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
 
         self.var_symbol_col = "names"
         self.var_ensembl_col = "ensembl"
-
         self.obs_key_cellontology_original = "annotation"
+
+        self.set_dataset_id(idx=1)
 
         self.class_maps = {
             "0": {

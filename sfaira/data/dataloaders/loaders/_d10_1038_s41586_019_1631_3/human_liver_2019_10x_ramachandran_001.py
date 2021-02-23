@@ -58,6 +58,8 @@ class Dataset(DatasetBase):
         self.obs_key_healthy = self.obs_key_state_exact
         self.healthy_state_healthy = "Uninjured"
 
+        self.set_dataset_id(idx=1)
+
     def _load(self):
         fn = os.path.join(self.data_dir, "ramachandran.h5ad")
         adata = anndata.read(fn)

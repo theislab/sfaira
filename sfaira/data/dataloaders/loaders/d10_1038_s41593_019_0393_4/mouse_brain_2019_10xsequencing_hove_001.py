@@ -52,9 +52,10 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
 
         self.var_ensembl_col = "ensembl"
         self.var_symbol_col = "name"
-
         self.obs_key_cellontology_original = "cluster"
         self.obs_key_organ = "sample_anatomy"
+
+        self.set_dataset_id(idx=1)
 
     def _load_full(self):
         fn = [

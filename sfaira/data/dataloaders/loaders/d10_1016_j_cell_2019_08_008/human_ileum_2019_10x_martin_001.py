@@ -33,6 +33,8 @@ class Dataset(DatasetBase):
         self.var_ensembl_col = "gene_ids"
         self.obs_key_cellontology_original = "CellType"
 
+        self.set_dataset_id(idx=1)
+
     def _load(self):
         fn = os.path.join(self.data_dir, "martin19.processed.h5ad")
         adata = anndata.read(fn)

@@ -32,8 +32,9 @@ class Dataset(DatasetBase):
         self.year = 2019
 
         self.var_symbol_col = "index"
-
         self.obs_key_cellontology_original = "celltype"
+
+        self.set_dataset_id(idx=1)
 
         self.class_maps = {
             "0": {

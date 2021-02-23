@@ -35,6 +35,8 @@ class Dataset(DatasetBase):
         self.var_symbol_col = "index"
         self.var_ensembl_col = "gene_ids"
 
+        self.set_dataset_id(idx=1)
+
     def _load(self):
         fn = os.path.join(self.data_dir, "pbmc_10k_v3_filtered_feature_bc_matrix.h5")
         with tables.open_file(str(fn), 'r') as f:

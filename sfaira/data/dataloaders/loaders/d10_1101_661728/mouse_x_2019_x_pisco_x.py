@@ -103,6 +103,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.var_ensembl_col = None
         self.var_symbol_col = "index"
 
+        self.set_dataset_id(idx=1)
+
     def _load(self):
         fn = os.path.join(self.data_dir, self.sample_fn)
         adata = anndata.read_h5ad(fn)

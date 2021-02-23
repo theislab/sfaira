@@ -50,10 +50,11 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.year = 2019
 
         self.var_symbol_col = "index"
-
         self.obs_key_cellontology_original = "Celltypes"
         # ToDo: patient information in .obs["patient"] and sample information in .obs["sample"] (more samples than
         #  patients)
+
+        self.set_dataset_id(idx=1)
 
         if self.sample_fn == "madissoon19_lung.processed.h5ad":
             self.class_maps = {

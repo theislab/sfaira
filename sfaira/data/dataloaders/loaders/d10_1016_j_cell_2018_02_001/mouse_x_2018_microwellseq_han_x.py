@@ -329,6 +329,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
                 "Thymus2_dge.txt.gz",
             ] else None
 
+        self.set_dataset_id(idx=1)
+
     def _load(self):
         fn = os.path.join(self.data_dir, '5435866.zip')
         with zipfile.ZipFile(fn) as archive:

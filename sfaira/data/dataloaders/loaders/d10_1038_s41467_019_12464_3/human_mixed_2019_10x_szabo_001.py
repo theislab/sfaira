@@ -76,9 +76,10 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
 
         self.var_symbol_col = "Gene"
         self.var_ensembl_col = "Accession"
-
         self.obs_key_cellontology_original = "cell_ontology_class"
         self.obs_key_organ = "organ"
+
+        self.set_dataset_id(idx=1)
 
         self.class_maps = {
             "0": {},

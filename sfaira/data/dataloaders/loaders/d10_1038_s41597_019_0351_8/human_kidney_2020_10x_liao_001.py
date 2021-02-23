@@ -35,6 +35,8 @@ class Dataset(DatasetBase):
         self.var_symbol_col = "names"
         self.var_ensembl_col = "ensembl"
 
+        self.set_dataset_id(idx=1)
+
     def _load(self):
         fn = os.path.join(self.data_dir, "GSE131685_RAW.tar")
         adatas = []

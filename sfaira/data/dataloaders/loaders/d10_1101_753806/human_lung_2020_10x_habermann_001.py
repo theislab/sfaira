@@ -32,11 +32,12 @@ class Dataset(DatasetBase):
         self.year = 2020
 
         self.var_symbol_col = "index"
-
         self.obs_key_cellontology_original = "celltype"
         self.obs_key_state_exact = "Diagnosis"
         self.obs_key_healthy = "Status"
         self.healthy_state_healthy = "Control"
+
+        self.set_dataset_id(idx=1)
 
     def _load(self):
         fn = [

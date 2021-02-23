@@ -45,6 +45,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.obs_key_age = "Age"
         self.obs_key_sex = "Sex"
 
+        self.set_dataset_id(idx=1)
+
     def _load(self):
         fn = [
             os.path.join(self.data_dir, f"GSE114374_Human_{self.sample_fn}_expression_matrix.txt.gz"),

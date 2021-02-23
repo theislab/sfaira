@@ -33,8 +33,9 @@ class Dataset(DatasetBase):
 
         self.var_symbol_col = "index"
         self.var_ensembl_col = "gene_ids"
-
         self.obs_key_cellontology_original = "CellType"
+
+        self.set_dataset_id(idx=1)
 
         self.class_maps = {
             "0": {

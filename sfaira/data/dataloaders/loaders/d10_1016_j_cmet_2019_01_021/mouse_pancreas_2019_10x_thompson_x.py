@@ -45,8 +45,9 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.year = 2019
 
         self.var_symbol_col = "index"
-
         self.obs_key_cellontology_original = "celltypes"
+
+        self.set_dataset_id(idx=1)
 
     def _load(self):
         with tarfile.open(os.path.join(self.data_dir, 'GSE117770_RAW.tar')) as tar:

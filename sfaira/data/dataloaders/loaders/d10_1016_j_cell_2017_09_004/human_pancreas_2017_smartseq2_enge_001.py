@@ -35,6 +35,8 @@ class Dataset(DatasetBase):
         self.var_symbol_col = "index"
         self.obs_key_cellontology_original = "celltype"
 
+        self.set_dataset_id(idx=1)
+
     def _load(self):
         fn = [
             os.path.join(self.data_dir, "GSE81547_RAW.tar"),

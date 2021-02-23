@@ -262,8 +262,9 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
         self.obs_key_dev_stage = "dev_stage"
         self.obs_key_sex = "gender"
         self.obs_key_age = "age"
-
         self.var_symbol_col = "index"
+
+        self.set_dataset_id(idx=1)
 
     def _load_full(self):
         adata = anndata.read(os.path.join(self.data_dir, "HCL_Fig1_adata.h5ad"))

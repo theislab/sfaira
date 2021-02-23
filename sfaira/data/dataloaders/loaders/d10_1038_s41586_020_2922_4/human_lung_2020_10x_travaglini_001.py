@@ -50,8 +50,9 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.year = 2020
 
         self.obs_key_cellontology_original = "free_annotation"
-
         self.var_symbol_col = "index"
+
+        self.set_dataset_id(idx=1)
 
     def _load(self):
         fn = os.path.join(self.data_dir, self.sample_fn)
