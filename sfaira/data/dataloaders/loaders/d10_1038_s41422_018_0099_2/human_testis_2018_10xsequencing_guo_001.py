@@ -36,22 +36,6 @@ class Dataset(DatasetBase):
 
         self.obs_key_cellontology_original = "CellType"
 
-        self.class_maps = {
-            "0": {
-                "Elongated Spermatids": "Elongated Spermatids",
-                "Leydig cells": "Leydig cells",
-                "Early Primary Spermatocytes": "Early Primary Spermatocytes",
-                "Round Spermatids": "Round Spermatids",
-                "Endothelial cells": "Endothelial cells",
-                "Macrophages": "Macrophages",
-                "Myoid cells": "Myoid cells",
-                "Differentiating Spermatogonia": "Differentiating Spermatogonia",
-                "Late primary Spermatocytes": "Late primary Spermatocytes",
-                "Spermatogonial Stem cell": "Spermatogonial Stem cell",
-                "Sertoli cells": "Sertoli cells",
-            },
-        }
-
     def _load(self):
         fn = os.path.join(self.data_dir, "guo18_donor.processed.h5ad")
         adata = anndata.read(fn)
