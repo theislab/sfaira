@@ -37,29 +37,12 @@ class Dataset(DatasetBase):
 
         self.set_dataset_id(idx=1)
 
-        self.class_maps = {
-            "0": {
-                "Muller cell": "Muller cell",
-                "amacrine cell": "Amacrine cell",
-                "microglial cell": "Microglia",
-                "retinal bipolar neuron type A": "Retinal bipolar neuron type A",
-                "retinal bipolar neuron type B": "Retinal bipolar neuron type B",
-                "retinal bipolar neuron type C": "Retinal bipolar neuron type C",
-                "retinal bipolar neuron type D": "Retinal bipolar neuron type D",
-                "retinal cone cell": "Retinal cone cell",
-                "retinal ganglion cell": "Retinal ganglion cell",
-                "retinal rod cell type A": "Retinal rod cell type A",
-                "retinal rod cell type B": "Retinal rod cell type B",
-                "retinal rod cell type C": "Retinal rod cell type C",
-                "unannotated": "Unknown",
-                "unspecified": "Unknown",
-            },
-        }
-
     def _load(self):
         fn = os.path.join(self.data_dir, "lukowski19.processed.h5ad")
         adata = anndata.read(fn)
         adata.X = np.expm1(adata.X)
         adata.X = adata.X.multiply(scipy.sparse.csc_matrix(adata.obs["n_counts"].values[:, None])).multiply(1 / 10000)
+
+        self.set_unknown_class_id(ids=["unannotated", "unspecified"])
 
         return adata

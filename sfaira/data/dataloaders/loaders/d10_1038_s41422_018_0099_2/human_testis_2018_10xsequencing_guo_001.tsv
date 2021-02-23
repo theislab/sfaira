@@ -1,13 +1,13 @@
 source	target
-Differentiating Spermatogonia	sperm:spermatogonium:spermatid:|||:gestational hematopoietic stem cell:fetal derived definitive erythrocyte:Leydig cell:primitive red blood cell:|||:spermatocyte:primary spermatocyte:brain pericyte:testosterone secreting cell:secondary spermatocyte:spheroplast:lining cell
-Early Primary Spermatocytes	spermatocyte:primary spermatocyte:sperm:|||:primordial germ cell:fetal derived definitive erythrocyte:primitive red blood cell:gestational hematopoietic stem cell:|||:keratocyte:oocyte:hepatocyte:spermatid:astrocyte:plasmatocyte:keratinocyte
-Elongated Spermatids	spermatid:sperm:gamete:|||:gestational hematopoietic stem cell:primordial germ cell:fetal derived definitive erythrocyte:Leydig cell:|||:spermatocyte:tip cell:secondary spermatocyte:fungal spore:spermatogonium:Bm3 B cell:endospore
-Endothelial cells	cell:endometrial microvascular endothelial cells:endothelial cell:|||:seminiferous tubule epithelial cell:Leydig cell:primordial germ cell:primitive red blood cell:|||:glial cell:gut endothelial cell:mesothelial cell:urothelial cell:vein endothelial cell:endothelial tip cell:dermis microvascular lymphatic vessel endothelial cell
-Late primary Spermatocytes	sperm:primary spermatocyte:spermatocyte:|||:primordial germ cell:gestational hematopoietic stem cell:fetal derived definitive erythrocyte:primitive red blood cell:|||:keratocyte:oocyte:hepatocyte:astrocyte:spermatid:secondary spermatocyte:plasmatocyte
-Leydig cells	cell:Leydig cell:B cell:|||:primordial germ cell:seminiferous tubule epithelial cell:primitive red blood cell:gestational hematopoietic stem cell:|||:T cell:GIP cell:tip cell:egg cell:GLR cell:lining cell:Be cell
-Macrophages	macrophage:suppressor macrophage:alternatively activated macrophage:|||:fetal derived definitive erythrocyte:gestational hematopoietic stem cell:primordial germ cell:embryonic fibroblast:|||:kidney interstitial suppressor macrophage:nasal and broncial associated lymphoid tissue macrophage:gut-associated lymphoid tissue macrophage:mucosa-associated lymphoid tissue macrophage:lymph node subcapsular sinus macrophage:epithelioid macrophage:Kupffer cell
-Myoid cells	cell:peritubular myoid cell:myeloid cell:|||:primitive red blood cell:Leydig cell:gestational hematopoietic stem cell:seminiferous tubule epithelial cell:|||:B cell:T cell:yolk cell:tip cell:GIP cell:motile cell:PP cell
-Round Spermatids	spermatid:sperm:secondary spermatocyte:|||:gestational hematopoietic stem cell:embryonic fibroblast:primordial germ cell:seminiferous tubule epithelial cell:|||:spermatogonium:male gonocyte:testosterone secreting cell:peptide hormone secreting cell:fibroblast of subepithelial connective tissue of prostatic gland:growth hormone releasing hormone secreting cell:steroid hormone secreting cell
-Sertoli cells	cell:Sertoli cell:T cell:|||:primitive red blood cell:seminiferous tubule epithelial cell:Leydig cell:primordial germ cell:|||:B cell:pole cell:yolk cell:GIP cell:GLR cell:tip cell:scleral cell
-Sperm	primary spermatocyte:spermatocyte:male germ line stem cell (sensu Vertebrata):|||:seminiferous tubule epithelial cell:primordial germ cell:gestational hematopoietic stem cell:primitive red blood cell:|||:male gonocyte:small intestine serosal dendritic cell:single fate stem cell:vasoactive intestinal peptide secreting cell:totipotent stem cell:enteric smooth muscle cell:Y chromosome-bearing sperm cell
-Spermatogonial Stem cell	cell:male germ line stem cell (sensu Vertebrata):stem cell:|||:gestational hematopoietic stem cell:primordial germ cell:Leydig cell:primitive red blood cell:|||:sperm:seam cell:spermatogonium:Be cell:T cell:B cell:spermatid
+Differentiating Spermatogonia	spermatogonium
+Early Primary Spermatocytes	primary spermatocyte
+Elongated Spermatids	spermatid
+Endothelial cells	endothelial cell
+Late primary Spermatocytes	primary spermatocyte
+Leydig cells	Leydig cell
+Macrophages	macrophage
+Myoid cells	peritubular myoid cell
+Round Spermatids	spermatid
+Sertoli cells	Sertoli cell
+Sperm	sperm
+Spermatogonial Stem cell	male germ line stem cell (sensu Vertebrata)

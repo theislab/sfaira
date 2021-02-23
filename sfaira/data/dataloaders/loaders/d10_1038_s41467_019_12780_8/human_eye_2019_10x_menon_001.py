@@ -33,20 +33,6 @@ class Dataset(DatasetBase):
 
         self.set_dataset_id(idx=1)
 
-        self.class_maps = {
-            "0": {
-                "ACs": "Amacrine cell",
-                "BPs": "BPs",
-                "Cones": "Retinal cone cell",
-                "Endo": "Endothelial cell",
-                "HCs": "Horizontal cells",
-                "Macroglia": "Macroglia",
-                "Microglia": "Microglia",
-                "RGCs": "Retinal ganglion cell",
-                "Rods": "Rods",
-            },
-        }
-
     def _load(self):
         fn = os.path.join(self.data_dir, "menon19.processed.h5ad")
         adata = anndata.read(fn)

@@ -34,22 +34,6 @@ class Dataset(DatasetBase):
 
         self.set_dataset_id(idx=1)
 
-        self.class_maps = {
-            "0": {
-                "B-cell": "B-cell",
-                "Endothelial": "Endothelial cell",
-                "Fibroblast": "Fibroblast",
-                "Macrophage": "Macrophage",
-                "Mast-cell": "Mast-cell",
-                "Melanocyte": "Melanocyte",
-                "Pericyte": "Pericyte",
-                "RPE": "Retinal pigment epithelium",
-                "Schwann1": "Schwann1",
-                "Schwann2": "Schwann2",
-                "T/NK-cell": "T/NK-cell",
-            },
-        }
-
     def _load(self):
         fn = os.path.join(self.data_dir, "voigt19.processed.h5ad")
         adata = anndata.read(fn)

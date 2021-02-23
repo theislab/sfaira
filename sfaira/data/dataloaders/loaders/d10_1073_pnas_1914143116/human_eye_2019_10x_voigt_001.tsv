@@ -1,12 +1,12 @@
 source	target
-B-cell	"gastrula cell:|||:B cell:type B pancreatic cell:calcitonin secreting cell:substance P secreting cell:|||:cartwheel heterochromatin:naive T cell:gamma-delta intraepithelial T cell:CD8-alpha alpha positive, gamma-delta intraepithelial T cell:|||:B-1 B cell:M cell of gut:T cell:T3 B cell"
-Endothelial	"gastrula cell:|||:aortic endothelial cell:corneal endothelial cell:interlobulary vein endothelial cell:thoracic aorta endothelial cell:|||:cartwheel heterochromatin:naive T cell:gamma-delta intraepithelial T cell:CD8-alpha alpha positive, gamma-delta intraepithelial T cell:|||:endothelial cell:endo-epithelial cell:gut endothelial cell:endothelial tip cell:|||:circulating endothelial cell:endothelial cell of arteriole:endothelial cell of venule:blood vessel endothelial cell"
-Fibroblast	gastrula cell:|||:fibroblast:perijunctional fibroblast:skin fibroblast:ooblast:|||:fibroblast:cartwheel heterochromatin:gamma-delta intraepithelial T cell:CD4-negative CD8-negative gamma-delta intraepithelial T cell:|||:iridoblast:glioblast:marrow fibroblast:fibroblast of arm
-Macrophage	gastrula cell:|||:macrophage:thymic cortical macrophage:central nervous system macrophage:inflammatory macrophage:|||:macrophage:cartwheel heterochromatin:transitional stage B cell:CD4-negative CD8-negative gamma-delta intraepithelial T cell:|||:alternatively activated macrophage:elicited macrophage:tissue-resident macrophage:microglial cell
-Mast-cell	"gastrula cell:|||:T cell:mast cell:B cell:M cell of gut:|||:cartwheel heterochromatin:naive T cell:gamma-delta intraepithelial T cell:CD8-alpha alpha positive, gamma-delta intraepithelial T cell:|||:mucosal type mast cell:non-terminally differentiated cell:mature T cell:mature B cell:|||:Fc-epsilon RIalpha-low mast cell progenitor:connective tissue type mast cell:interneuromast cell:mast cell progenitor"
-Melanocyte	gastrula cell:|||:melanocyte:retinal melanocyte:foreskin melanocyte:melanocyte of skin:|||:melanocyte:cartwheel heterochromatin:transitional stage B cell:CD4-negative CD8-negative gamma-delta intraepithelial T cell:|||:myelocyte:ameloblast:primitive reticulocyte:dark melanocyte
-Pericyte	"gastrula cell:|||:pigmented ciliary epithelial cell:pericyte cell:renal interstitial pericyte:placental pericyte:|||:cartwheel heterochromatin:naive T cell:gamma-delta intraepithelial T cell:CD8-alpha alpha positive, gamma-delta intraepithelial T cell:|||:brain pericyte:polychromatophilic erythroblast:pituicyte:preadipocyte"
-RPE	"gastrula cell:|||:pigmented ciliary epithelial cell:retinal progenitor cell:retinal pigment epithelial cell:retinal melanocyte:|||:cartwheel heterochromatin:naive T cell:gamma-delta intraepithelial T cell:CD8-alpha alpha positive, gamma-delta intraepithelial T cell:|||:non-pigmented ciliary epithelial cell:regulatory B cell:CD4-positive, CD25-positive, alpha-beta regulatory T cell:regulatory T cell:|||:type I cell of adrenal medulla:type I pneumocyte:Fraction D precursor B cell:CD22-positive, CD38-low small pre-B cell"
-Schwann1	"gastrula cell:|||:terminal Schwann cell:bronchioalveolar stem cell:pancreatic stellate cell:myelinating Schwann cell:|||:cartwheel heterochromatin:naive T cell:gamma-delta intraepithelial T cell:CD8-alpha alpha positive, gamma-delta intraepithelial T cell:|||:immature Schwann cell:non-myelinating Schwann cell:Schwann cell:Schwann cell precursor:|||:embryonic stem cell:mesenchymal stem cell:placental amniotic mesenchymal stromal cell:subcutaneous fat cell"
-Schwann2	"gastrula cell:|||:terminal Schwann cell:pancreatic stellate cell:bronchioalveolar stem cell:non-myelinating Schwann cell:|||:cartwheel heterochromatin:naive T cell:gamma-delta intraepithelial T cell:CD8-alpha alpha positive, gamma-delta intraepithelial T cell:|||:myelinating Schwann cell:immature Schwann cell:Schwann cell:Schwann cell precursor:|||:embryonic stem cell:mesenchymal stem cell:placental amniotic mesenchymal stromal cell:subcutaneous fat cell"
-T/NK-cell	"gastrula cell:|||:natural killer cell:T cell:B cell:M cell of gut:|||:cartwheel heterochromatin:naive T cell:gamma-delta intraepithelial T cell:CD8-alpha alpha positive, gamma-delta intraepithelial T cell:|||:DN3 thymocyte:pro-T cell:decidual natural killer cell, human:DN2 thymocyte:|||:CD16-negative, CD56-bright natural killer cell, human:type II NK T cell secreting interleukin-4:type II NK T cell secreting interferon-gamma:activated type II NK T cell"
+B-cell	B cell
+Endothelial	endothelial cell
+Fibroblast	fibroblast
+Macrophage	macrophage
+Mast-cell	mast cell
+Melanocyte	retinal melanocyte
+Pericyte	pericyte cell
+RPE	retinal pigment epithelial
+Schwann1	terminal Schwann cell
+Schwann2	terminal Schwann cell
+T/NK-cell	alpha-beta T cell
