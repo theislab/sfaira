@@ -61,10 +61,6 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.obs_key_cellontology_original = "cell_ontology_class"
         self.obs_key_organ = "organ"
 
-        self.class_maps = {
-            "0": {},
-        }
-
     def _load(self):
         fn = [
             os.path.join(self.data_dir, "GSE126030_RAW.tar"),

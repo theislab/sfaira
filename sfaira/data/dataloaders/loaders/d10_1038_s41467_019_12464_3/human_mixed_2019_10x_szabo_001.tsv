@@ -1,21 +1,21 @@
 source	target
-1.CD4rest	angioblastic mesenchymal cell:chondroblast:osteoclast:DN4 thymocyte:|||:early T lineage precursor:common dendritic progenitor:embryonic stem cell:conventional dendritic cell
-10.CD8EM/TRMact	"effector memory CD8-positive, alpha-beta T cell, terminally differentiated:effector memory CD4-positive, alpha-beta T cell, terminally differentiated:Bm4 B cell:CD1a-positive dermal dendritic cell:|||:connective tissue type mast cell:professional antigen presenting cell:type II pneumocyte:conventional dendritic cell"
-10.CD8TEMRAact	"effector memory CD8-positive, alpha-beta T cell, terminally differentiated:effector memory CD4-positive, alpha-beta T cell, terminally differentiated:CD86-positive plasmablast:dermal melanocyte:|||:pericyte cell:type II pneumocyte:mucosal type mast cell:professional antigen presenting cell"
-11.CD8TEMRA	"effector memory CD8-positive, alpha-beta T cell, terminally differentiated:effector memory CD4-positive, alpha-beta T cell, terminally differentiated:CD8-positive, alpha-beta regulatory T cell:Tc1 cell:|||:common dendritic progenitor:conventional dendritic cell:CD4-positive, CD8-intermediate double-positive thymocyte:medullary thymic epithelial cell"
-2.CD4act1	conventional dendritic cell:CD1a-positive Langerhans cell:type I pneumocyte:DN4 thymocyte:|||:common dendritic progenitor:mucosal type mast cell:professional antigen presenting cell:pericyte cell
-2.CD4rest2	chondroblast:angioblastic mesenchymal cell:osteoclast:DN4 thymocyte:|||:embryonic stem cell:common dendritic progenitor:type II pneumocyte:conventional dendritic cell
-3.CD4act1	type I pneumocyte:conventional dendritic cell:CD1a-positive Langerhans cell:DN4 thymocyte:|||:common dendritic progenitor:pericyte cell:type II pneumocyte:mucosal type mast cell
-3.CD4act2	conventional dendritic cell:CD1a-positive Langerhans cell:type II pneumocyte:plasmacytoid dendritic cell:|||:mucosal type mast cell:type I pneumocyte:pericyte cell:professional antigen presenting cell
-4.CD4act2	type II pneumocyte:plasmacytoid dendritic cell:conventional dendritic cell:CD1a-positive Langerhans cell:|||:professional antigen presenting cell:mucosal type mast cell:common dendritic progenitor:type I pneumocyte
-4.CD4act3	"CD1a-positive Langerhans cell:conventional dendritic cell:DN4 thymocyte:effector memory CD4-positive, alpha-beta T cell, terminally differentiated:|||:type II pneumocyte:type I pneumocyte:common dendritic progenitor:pericyte cell"
-5.CD4TRMrest	"effector memory CD4-positive, alpha-beta T cell, terminally differentiated:CD8-positive, alpha-beta regulatory T cell:effector memory CD8-positive, alpha-beta T cell, terminally differentiated:Bm3 B cell:|||:early T lineage precursor:embryonic stem cell:common dendritic progenitor:megakaryocyte-erythroid progenitor cell"
-5.CD4act3	CD1a-positive Langerhans cell:conventional dendritic cell:DN4 thymocyte:CD14-positive dermal dendritic cell:|||:common dendritic progenitor:mucosal type mast cell:professional antigen presenting cell:pericyte cell
-6.CD4TRMact	"effector memory CD4-positive, alpha-beta T cell, terminally differentiated:CD14-positive dermal dendritic cell:pigment cell:DN4 thymocyte:|||:connective tissue type mast cell:mast cell progenitor:common dendritic progenitor:mesenchymal stem cell"
-6.CD4Treg	"CD8-positive, alpha-beta regulatory T cell:regulatory T cell:CD4-positive, CD25-positive, alpha-beta regulatory T cell:induced T-regulatory cell:|||:natural T-regulatory cell:regulatory B cell:common dendritic progenitor:retinal ganglion cell"
-7.CD4Treg	"CD8-positive, alpha-beta regulatory T cell:CD4-positive, CD25-positive, alpha-beta regulatory T cell:regulatory T cell:natural T-regulatory cell:|||:induced T-regulatory cell:regulatory B cell:naive CCR4-positive regulatory T cell:memory CCR4-positive regulatory T cell"
-7.CD8EM/TRMrest	"CD8-positive, alpha-beta regulatory T cell:effector memory CD8-positive, alpha-beta T cell, terminally differentiated:Bm3 B cell:cementoblast:|||:conventional dendritic cell:mucosal type mast cell:common dendritic progenitor:early T lineage precursor"
-8.CD8EM/TRMact	"effector memory CD8-positive, alpha-beta T cell, terminally differentiated:Bm4 B cell:effector memory CD4-positive, alpha-beta T cell, terminally differentiated:CD1a-positive dermal dendritic cell:|||:connective tissue type mast cell:mucosal type mast cell:professional antigen presenting cell:type II pneumocyte"
-8.CD8EM/TRMrest	"CD8-positive, alpha-beta regulatory T cell:CD8-positive, CD28-negative, alpha-beta regulatory T cell:effector memory CD8-positive, alpha-beta T cell, terminally differentiated:Bm3 B cell:|||:mucosal type mast cell:conventional dendritic cell:early T lineage precursor:embryonic stem cell"
-9.CD8TEMRArest	"effector memory CD8-positive, alpha-beta T cell, terminally differentiated:effector memory CD4-positive, alpha-beta T cell, terminally differentiated:CD8-positive, alpha-beta regulatory T cell:Bm3 B cell:|||:common dendritic progenitor:conventional dendritic cell:pericyte cell:early T lineage precursor"
-9.CD8TRMrest	"CD8-positive, alpha-beta regulatory T cell:effector memory CD8-positive, alpha-beta T cell, terminally differentiated:CD8-positive, alpha-beta memory T cell:CD8-positive, CD28-negative, alpha-beta regulatory T cell:|||:common dendritic progenitor:conventional dendritic cell:early T lineage precursor:megakaryocyte-erythroid progenitor cell"
+1.CD4rest	CD4-positive, alpha-beta T cell
+10.CD8EM/TRMact	effector memory CD8-positive, alpha-beta T cell
+10.CD8TEMRAact	effector memory CD8-positive, alpha-beta T cell
+11.CD8TEMRA	effector memory CD8-positive, alpha-beta T cell
+2.CD4act1	CD4-positive, alpha-beta T cell
+2.CD4rest2	CD4-positive, alpha-beta T cell
+3.CD4act1	CD4-positive, alpha-beta T cell
+3.CD4act2	CD4-positive, alpha-beta T cell
+4.CD4act2	CD4-positive, alpha-beta T cell
+4.CD4act3	CD4-positive, alpha-beta T cell
+5.CD4TRMrest	CD4-positive, alpha-beta T cell
+5.CD4act3	CD4-positive, alpha-beta T cell
+6.CD4TRMact	CD4-positive, alpha-beta T cell
+6.CD4Treg	CD4-positive, alpha-beta regulatory T cell
+7.CD4Treg	CD4-positive, alpha-beta regulatory T cell
+7.CD8EM/TRMrest	effector memory CD8-positive, alpha-beta T cell
+8.CD8EM/TRMact	effector memory CD8-positive, alpha-beta T cell
+8.CD8EM/TRMrest	effector memory CD8-positive, alpha-beta T cell
+9.CD8TEMRArest	effector memory CD8-positive, alpha-beta T cell
+9.CD8TRMrest	effector memory CD8-positive, alpha-beta T cell
