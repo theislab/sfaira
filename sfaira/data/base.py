@@ -60,6 +60,7 @@ class DatasetBase(abc.ABC):
     data_dir_base: Union[None, str]
     meta_path: Union[None, str]
     cache_path: Union[None, str]
+    id: Union[None, str]
     genome: Union[None, str]
 
     _age: Union[None, str]
@@ -70,6 +71,7 @@ class DatasetBase(abc.ABC):
     _download_url_meta: Union[Tuple[List[None]], Tuple[List[str]], None]
     _ethnicity: Union[None, str]
     _healthy: Union[None, bool]
+    _id: Union[None, str]
     _ncells: Union[None, int]
     _normalization: Union[None, str]
     _organ: Union[None, str]
@@ -127,6 +129,7 @@ class DatasetBase(abc.ABC):
         self._download_url_meta = None
         self._ethnicity = None
         self._healthy = None
+        self._id = None
         self._ncells = None
         self._normalization = None
         self._organ = None
@@ -1128,6 +1131,20 @@ class DatasetBase(abc.ABC):
     def healthy_state_healthy(self, x: str):
         self.__erasing_protection(attr="healthy_state_healthy", val_old=self._healthy_state_healthy, val_new=x)
         self._healthy_state_healthy = x
+
+    @property
+    def id(self) -> str:
+        if self._id is not None:
+            return self._id
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            return self.meta[self._ADATA_IDS_SFAIRA.id]
+
+    @id.setter
+    def id(self, x: str):
+        self.__erasing_protection(attr="id", val_old=self._id, val_new=x)
+        self._id = x
 
     @property
     def loaded(self) -> bool:
