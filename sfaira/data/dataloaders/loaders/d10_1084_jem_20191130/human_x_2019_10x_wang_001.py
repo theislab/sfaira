@@ -25,14 +25,16 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
     ):
         super().__init__(sample_fn=sample_fn, sample_fns=SAMPLE_FNS, data_path=data_path, meta_path=meta_path,
                          cache_path=cache_path, **kwargs)
-        self.download_url_data = f"https://covid19.cog.sanger.ac.uk/wang20_{organ}.processed.h5ad"
+        self.download_url_data = f"https://covid19.cog.sanger.ac.uk/{self.sample_fn}"
         self.download_url_meta = None
+
+        organ = self.sample_fn.split("_")[1].split(".")[0]
 
         self.author = "Wang"
         self.doi = "10.1084/jem.20191130"
         self.healthy = True
         self.normalization = "raw"
-        self.organ = self.sample_fn.split("_")[1].split(".")[0]
+        self.organ = organ
         self.organism = "human"
         self.protocol = "10X sequencing"
         self.state_exact = "healthy"
