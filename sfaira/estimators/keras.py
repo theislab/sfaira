@@ -356,21 +356,22 @@ class EstimatorKeras:
         }
 
         # Set callbacks.
-        cbs = [
-            tf.keras.callbacks.EarlyStopping(
+        cbs = []
+        if patience is not None and patience > 0:
+            cbs.append(tf.keras.callbacks.EarlyStopping(
                 monitor='val_loss',
                 patience=patience,
                 restore_best_weights=True,
                 verbose=verbose
-            ),
-            tf.keras.callbacks.ReduceLROnPlateau(
+            ))
+        if lr_schedule_factor is not None and lr_schedule_factor < 1.:
+            cbs.append(tf.keras.callbacks.ReduceLROnPlateau(
                 monitor='val_loss',
                 factor=lr_schedule_factor,
                 patience=lr_schedule_patience,
                 min_lr=lr_schedule_min_lr,
                 verbose=verbose
-            )
-        ]
+            ))
         if log_dir is not None:
             cbs.append(tf.keras.callbacks.TensorBoard(
                 log_dir=log_dir,
@@ -905,6 +906,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             cache_path=cache_path
         )
         self.max_class_weight = max_class_weight
+        self.celltypes_version = CelltypeUniverse(organism=organism)
 
     def init_model(
             self,
@@ -924,27 +926,22 @@ class EstimatorKerasCelltype(EstimatorKeras):
             raise ValueError('unknown topology %s for EstimatorKerasCelltype' % self.model_type)
 
         self.model = Model(
-            organism=self.organism,
-            organ=self.organ,
+            celltypes_version=self.celltypes_version,
             topology_container=self.topology_container,
             override_hyperpar=override_hyperpar
         )
 
     @property
     def ids(self):
-        return self.model.celltypes_version.ids
+        return self.celltypes_version.target_universe
 
     @property
     def ntypes(self):
-        return self.model.celltypes_version.ntypes
+        return self.celltypes_version.ntypes
 
     @property
     def ontology_ids(self):
-        return self.model.celltypes_version.ontology_ids
-
-    @property
-    def ontology(self):
-        return self.model.celltypes_version.ontology[self.model.celltypes_version.version]
+        return self.celltypes_version.target_universe
 
     def _get_celltype_out(
             self,

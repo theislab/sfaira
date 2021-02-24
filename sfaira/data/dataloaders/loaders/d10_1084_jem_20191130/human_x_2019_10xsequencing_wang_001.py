@@ -45,43 +45,6 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
 
         self.set_dataset_id(idx=1)
 
-        if organ == "colon":
-            self.class_maps = {
-                "0": {
-                    "Progenitor": "Enterocyte Progenitors",
-                    "Enterocyte": "Enterocytes",
-                    "Goblet": "Goblet cells",
-                    "TA": "TA",
-                    "Paneth-like": "Paneth cells",
-                    "Stem Cell": "Stem cells",
-                    "Enteriendocrine": "Enteroendocrine cells",
-                },
-            }
-        elif organ == "ileum":
-            self.class_maps = {
-                "0": {
-                    "Progenitor": "Progenitors",
-                    "Goblet": "Goblet cells",
-                    "Enterocyte": "Enterocytes",
-                    "Paneth-like": "Paneth cells",
-                    "Stem Cell": "Stem Cell",
-                    "TA": "TA",
-                    "Enteriendocrine": "Enteroendocrine cells",
-                },
-            }
-        else:
-            self.class_maps = {
-                "0": {
-                    "Progenitor": "Enterocyte progenitor",
-                    "Goblet": "Goblet",
-                    "Enterocyte": "Enterocyte",
-                    "Paneth-like": "Paneth-like",
-                    "Stem Cell": "Stem Cell",
-                    "TA": "TA",
-                    "Enteriendocrine": "Enteroendocrine",
-                },
-            }
-
     def _load(self):
         fn = os.path.join(self.data_dir, self.sample_fn)
         adata = anndata.read(fn)

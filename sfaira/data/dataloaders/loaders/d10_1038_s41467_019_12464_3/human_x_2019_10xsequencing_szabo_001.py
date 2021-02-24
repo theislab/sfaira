@@ -81,10 +81,6 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
 
         self.set_dataset_id(idx=1)
 
-        self.class_maps = {
-            "0": {},
-        }
-
     def _load(self):
         fn = [
             os.path.join(self.data_dir, "GSE126030_RAW.tar"),
