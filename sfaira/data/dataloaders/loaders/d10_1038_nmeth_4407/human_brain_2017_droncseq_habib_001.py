@@ -17,8 +17,6 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.id = "human_brain_2017_droncseq_habib_001_10.1038/nmeth.4407"
-
         self.download_url_data = "https://covid19.cog.sanger.ac.uk/habib17.processed.h5ad"
         self.download_url_meta = None
 
@@ -33,8 +31,9 @@ class Dataset(DatasetBase):
         self.year = 2017
 
         self.var_symbol_col = "index"
-
         self.obs_key_cellontology_original = "CellType"
+
+        self.set_dataset_id(idx=1)
 
         self.class_maps = {
             "0": {

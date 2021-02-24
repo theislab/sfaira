@@ -23,9 +23,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(sample_fn=sample_fn, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.id = f"human_colon_2019_10x_kinchen_{str(SAMPLE_FNS.index(sample_fn)+1).zfill(3)}_10.1016/j.cell.2018.08.067"
-
+        super().__init__(sample_fn=sample_fn, sample_fns=SAMPLE_FNS, data_path=data_path, meta_path=meta_path,
+                         cache_path=cache_path, **kwargs)
         self.download_url_data = "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE114374&format=file&" \
                                  f"file=GSE114374%5FHuman%5F{sample_fn}%5Fexpression%5Fmatrix%2Etxt%2Egz"
         self.download_url_meta = f"private,{sample_fn.lower()}_meta_data_stromal_with_donor.txt"
@@ -45,6 +44,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.obs_key_cellontology_original = "Cluster"
         self.obs_key_age = "Age"
         self.obs_key_sex = "Sex"
+
+        self.set_dataset_id(idx=1)
 
     def _load(self):
         fn = [

@@ -29,11 +29,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(sample_fn=sample_fn, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        protocol = "10xsequencing" if self.sample_fn.split("_")[0] == "droplet" else "smartseq2"
-        self.id = f"human_lung_2020_{protocol}_travaglini_{str(SAMPLE_FNS.index(self.sample_fn)).zfill(3)}_" \
-                  f"10.1038/s41586-020-2922-4"
-
+        super().__init__(sample_fn=sample_fn, sample_fns=SAMPLE_FNS, data_path=data_path, meta_path=meta_path,
+                         cache_path=cache_path, **kwargs)
         synapse_id = {
             "droplet_normal_lung_blood_scanpy.20200205.RC4.h5ad": "syn21625095",
             "facs_normal_lung_blood_scanpy.20200205.RC4.h5ad": "syn21625142"
@@ -53,8 +50,9 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.year = 2020
 
         self.obs_key_cellontology_original = "free_annotation"
-
         self.var_symbol_col = "index"
+
+        self.set_dataset_id(idx=1)
 
     def _load(self):
         fn = os.path.join(self.data_dir, self.sample_fn)

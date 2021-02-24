@@ -19,8 +19,6 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.id = "human_kidney_2020_10x_liao_001_10.1038/s41597-019-0351-8"
-
         self.download_url_data = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE131nnn/GSE131685/suppl/GSE131685_RAW.tar"
         self.download_url_meta = None
 
@@ -36,6 +34,8 @@ class Dataset(DatasetBase):
 
         self.var_symbol_col = "names"
         self.var_ensembl_col = "ensembl"
+
+        self.set_dataset_id(idx=1)
 
     def _load(self):
         fn = os.path.join(self.data_dir, "GSE131685_RAW.tar")

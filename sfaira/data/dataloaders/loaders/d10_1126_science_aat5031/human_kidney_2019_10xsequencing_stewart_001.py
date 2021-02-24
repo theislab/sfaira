@@ -20,8 +20,6 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.id = "human_kidney_2019_10x_stewart_001_10.1126/science.aat5031"
-
         self.download_url_data = [
             "https://cellgeni.cog.sanger.ac.uk/BenKidney_v2.1/Mature_Full_v2.1.h5ad",
             "https://cellgeni.cog.sanger.ac.uk/BenKidney_v2.1/Fetal_full.h5ad"
@@ -40,8 +38,9 @@ class Dataset(DatasetBase):
 
         self.var_symbol_col = "index"
         self.var_ensembl_col = "ID"
-
         self.obs_key_cellontology_original = "celltype"
+
+        self.set_dataset_id(idx=1)
 
     def _load(self):
         fn = [

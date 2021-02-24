@@ -18,8 +18,6 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.id = "human_blood_2019_10x_10xGenomics_001_unknown"
-
         self.download_url_data = \
             "http://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_10k_v3/pbmc_10k_v3_filtered_feature_bc_matrix.h5"
         self.download_url_meta = None
@@ -36,6 +34,8 @@ class Dataset(DatasetBase):
 
         self.var_symbol_col = "index"
         self.var_ensembl_col = "gene_ids"
+
+        self.set_dataset_id(idx=1)
 
     def _load(self):
         fn = os.path.join(self.data_dir, "pbmc_10k_v3_filtered_feature_bc_matrix.h5")

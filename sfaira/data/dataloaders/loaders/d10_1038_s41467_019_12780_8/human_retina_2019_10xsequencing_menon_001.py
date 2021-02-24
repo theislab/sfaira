@@ -15,8 +15,6 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.id = "human_eye_2019_10x_menon_001_10.1038/s41467-019-12780-8"
-
         self.download_url_data = "https://covid19.cog.sanger.ac.uk/menon19.processed.h5ad"
         self.download_url_meta = None
 
@@ -31,8 +29,9 @@ class Dataset(DatasetBase):
         self.year = 2019
 
         self.var_symbol_col = "index"
-
         self.obs_key_cellontology_original = "CellType"
+
+        self.set_dataset_id(idx=1)
 
     def _load(self):
         fn = os.path.join(self.data_dir, "menon19.processed.h5ad")

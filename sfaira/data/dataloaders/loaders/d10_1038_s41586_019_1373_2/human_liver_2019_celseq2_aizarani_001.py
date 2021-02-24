@@ -16,8 +16,6 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.id = "human_liver_2019_celseq2_aizarani_001_10.1038/s41586-019-1373-2"
-
         self.download_url_data = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE124nnn/GSE124395/suppl/GSE124395%5FNormalhumanlivercellatlasdata%2Etxt%2Egz"
         self.download_url_meta = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE124nnn/GSE124395/suppl/GSE124395%5Fclusterpartition%2Etxt%2Egz"
 
@@ -32,8 +30,9 @@ class Dataset(DatasetBase):
         self.year = 2019
 
         self.var_symbol_col = "index"
-
         self.obs_key_cellontology_original = "CellType"
+
+        self.set_dataset_id(idx=1)
 
     def _load(self):
         fn = [

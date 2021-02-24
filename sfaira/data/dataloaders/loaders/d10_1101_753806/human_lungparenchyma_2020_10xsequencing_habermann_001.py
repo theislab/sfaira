@@ -16,8 +16,6 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.id = "human_lung_2020_10x_habermann_001_10.1101/753806"
-
         self.download_url_data = [
             "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE135nnn/GSE135893/suppl/GSE135893%5Fmatrix%2Emtx%2Egz",
             "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE135nnn/GSE135893/suppl/GSE135893%5Fgenes%2Etsv%2Egz",
@@ -34,11 +32,12 @@ class Dataset(DatasetBase):
         self.year = 2020
 
         self.var_symbol_col = "index"
-
         self.obs_key_cellontology_original = "celltype"
         self.obs_key_state_exact = "Diagnosis"
         self.obs_key_healthy = "Status"
         self.healthy_state_healthy = "Control"
+
+        self.set_dataset_id(idx=1)
 
     def _load(self):
         fn = [

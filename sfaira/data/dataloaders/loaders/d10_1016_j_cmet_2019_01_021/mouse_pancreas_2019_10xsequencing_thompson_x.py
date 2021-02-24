@@ -29,10 +29,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(sample_fn=sample_fn, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.id = f"mouse_pancreas_2019_10x_thompson_{str(SAMPLE_FNS.index(sample_fn)+1).zfill(3)}_" \
-                  f"10.1016/j.cmet.2019.01.021"
-
+        super().__init__(sample_fn=sample_fn, sample_fns=SAMPLE_FNS, data_path=data_path, meta_path=meta_path,
+                         cache_path=cache_path, **kwargs)
         self.download_url_data = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE117nnn/GSE117770/suppl/GSE117770_RAW.tar"
         self.download_url_meta = f"private,{self.sample_fn}_annotation.csv"
 
@@ -47,8 +45,9 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.year = 2019
 
         self.var_symbol_col = "index"
-
         self.obs_key_cellontology_original = "celltypes"
+
+        self.set_dataset_id(idx=1)
 
     def _load(self):
         with tarfile.open(os.path.join(self.data_dir, 'GSE117770_RAW.tar')) as tar:

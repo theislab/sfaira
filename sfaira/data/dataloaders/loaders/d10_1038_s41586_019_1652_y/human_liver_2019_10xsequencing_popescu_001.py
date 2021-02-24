@@ -15,8 +15,6 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.id = "human_liver_2019_10xsequencing_popescu_001_10.1038/s41586-019-1652-y"
-
         self.download_url_data = "private,fetal_liver_alladata_.h5ad"
         self.download_url_meta = None
 
@@ -31,8 +29,9 @@ class Dataset(DatasetBase):
         self.year = 2019
 
         self.var_symbol_col = "index"
-
         self.obs_key_cellontology_original = "cell.labels"
+
+        self.set_dataset_id(idx=1)
 
     def _load(self):
         fn = os.path.join(self.data_dir, "fetal_liver_alladata_.h5ad")

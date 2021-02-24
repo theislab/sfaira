@@ -22,10 +22,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(sample_fn=sample_fn, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.id = f"human_lung_2020_10x_lukassen_{str(SAMPLE_FNS.index(self.sample_fn)).zfill(3)}_" \
-                  f"10.1101/2020.03.13.991455"
-
+        super().__init__(sample_fn=sample_fn, sample_fns=SAMPLE_FNS, data_path=data_path, meta_path=meta_path,
+                         cache_path=cache_path, **kwargs)
         self.download_url_data = f"https://covid19.cog.sanger.ac.uk/{self.sample_fn}"
         self.download_url_meta = None
 
@@ -40,8 +38,9 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.year = 2020
 
         self.var_symbol_col = "index"
-
         self.obs_key_cellontology_original = "CellType"
+
+        self.set_dataset_id(idx=1)
 
     def _load(self):
         fn = os.path.join(self.data_dir, self.sample_fn)

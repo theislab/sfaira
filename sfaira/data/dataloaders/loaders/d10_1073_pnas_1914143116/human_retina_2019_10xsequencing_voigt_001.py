@@ -2,17 +2,11 @@ import anndata
 import os
 from typing import Union
 import numpy as np
-import scipy.sparse
 
 from sfaira.data import DatasetBase
 
 
 class Dataset(DatasetBase):
-    """
-    ToDo: revisit these cell type maps, Club and Hillock are described in this paper.
-      Club,epithelial cell of prostate
-      Hillock,epithelial cell of prostate
-    """
 
     def __init__(
             self,
@@ -22,29 +16,27 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.id = "human_prostate_2018_10x_henry_001_10.1016/j.celrep.2018.11.086"
-
-        self.download_url_data = "https://covid19.cog.sanger.ac.uk/henry18_0.processed.h5ad"
+        self.download_url_data = "https://covid19.cog.sanger.ac.uk/voigt19.processed.h5ad"
         self.download_url_meta = None
 
-        self.author = "Henry"
-        self.doi = "10.1016/j.celrep.2018.11.086"
+        self.author = "Voigt"
+        self.doi = "10.1073/pnas.1914143116"
         self.healthy = True
-        self.normalization = "raw"
-        self.state_exact = "healthy"
-        self.organ = "prostate gland"
+        self.normalization = "norm"
+        self.organ = "retina"
         self.organism = "human"
         self.protocol = "10X sequencing"
-        self.year = 2018
+        self.state_exact = "healthy"
+        self.year = 2019
 
         self.var_symbol_col = "index"
-
         self.obs_key_cellontology_original = "CellType"
 
+        self.set_dataset_id(idx=1)
+
     def _load(self):
-        fn = os.path.join(self.data_dir, "henry18_0.processed.h5ad")
+        fn = os.path.join(self.data_dir, "voigt19.processed.h5ad")
         adata = anndata.read(fn)
         adata.X = np.expm1(adata.X)
-        adata.X = adata.X.multiply(scipy.sparse.csc_matrix(adata.obs["n_counts"].values[:, None])).multiply(1 / 10000)
 
         return adata

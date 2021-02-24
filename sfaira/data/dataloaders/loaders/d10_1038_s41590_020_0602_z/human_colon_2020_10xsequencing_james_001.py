@@ -17,8 +17,6 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.id = "human_colon_2019_10xsequencing_james_001_10.1038/s41590-020-0602-z"
-
         self.download_url_data = "https://covid19.cog.sanger.ac.uk/james20.processed.h5ad"
         self.download_url_meta = None
 
@@ -34,8 +32,9 @@ class Dataset(DatasetBase):
 
         self.var_symbol_col = "index"
         self.var_ensembl_col = "gene_ids"
-
         self.obs_key_cellontology_original = "cell_type"
+
+        self.set_dataset_id(idx=1)
 
     def _load(self):
         fn = os.path.join(self.data_dir, "james20.processed.h5ad")

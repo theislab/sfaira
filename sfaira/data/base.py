@@ -901,6 +901,32 @@ class DatasetBase(abc.ABC):
             meta[self._ADATA_IDS_SFAIRA.cell_ontology_class] = " "
         meta.to_csv(fn_meta)
 
+    def set_dataset_id(
+            self,
+            idx: int = 1
+    ):
+        def clean(s):
+            if s is not None:
+                s = s.replace(' ', '').replace('-', '').replace('_', '').lower()
+            return s
+
+        if hasattr(self, 'sample_idx'):
+            idx += self.sample_idx
+        idx = str(idx).zfill(3)
+
+        if isinstance(self.author, List):
+            author = self.author[0]
+        else:
+            author = self.author
+
+        self.id = f"{clean(self.organism)}_" \
+                  f"{clean(self.organ)}_" \
+                  f"{self.year}_" \
+                  f"{clean(self.protocol)}_" \
+                  f"{clean(author)}_" \
+                  f"{idx}_" \
+                  f"{self.doi}"
+
     # Properties:
 
     @property
@@ -1114,9 +1140,8 @@ class DatasetBase(abc.ABC):
         if self._id is not None:
             return self._id
         else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            return self.meta[self._ADATA_IDS_SFAIRA.id]
+            raise AttributeError("Dataset ID was not set in dataloader, please ensure the dataloader constructor of "
+                                 "this dataset contains a call to self.set_dataset_id()")
 
     @id.setter
     def id(self, x: str):
@@ -1549,6 +1574,7 @@ class DatasetBaseGroupLoadingOneFile(DatasetBase):
     def __init__(
             self,
             sample_id: str,
+            sample_ids: List,
             data_path: Union[str, None],
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
@@ -1557,10 +1583,15 @@ class DatasetBaseGroupLoadingOneFile(DatasetBase):
         super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self._unprocessed_full_group_object = False
         self._sample_id = sample_id
+        self._SAMPLE_IDS = sample_ids
 
     @property
     def sample_id(self):
         return self._sample_id
+
+    @property
+    def sample_idx(self):
+        return self._SAMPLE_IDS.index(self.sample_id)
 
     @abc.abstractmethod
     def _load_full(self) -> anndata.AnnData:
@@ -1629,6 +1660,7 @@ class DatasetBaseGroupLoadingManyFiles(DatasetBase, abc.ABC):
     def __init__(
             self,
             sample_fn: str,
+            sample_fns: List,
             data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
@@ -1636,10 +1668,15 @@ class DatasetBaseGroupLoadingManyFiles(DatasetBase, abc.ABC):
     ):
         super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self._sample_fn = sample_fn
+        self._SAMPLE_FNS = sample_fns
 
     @property
     def sample_fn(self):
         return self._sample_fn
+
+    @property
+    def sample_idx(self):
+        return self._SAMPLE_FNS.index(self.sample_fn)
 
 
 class DatasetGroup:
