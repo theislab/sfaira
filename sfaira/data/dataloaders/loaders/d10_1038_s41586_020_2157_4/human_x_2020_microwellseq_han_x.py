@@ -241,7 +241,7 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
 
         self.download_url_data = "https://ndownloader.figshare.com/files/17727365"
         self.download_url_meta = [
-            "adata",
+            "https://ndownloader.figshare.com/files/21758835",
             "https://ndownloader.figshare.com/files/22447898",
         ]
 
@@ -323,5 +323,7 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
         adata.obs.columns = [
             "sample", "sub_tissue", "n_genes", "n_counts", "cluster_global", "dev_stage", "donor", "celltype_global",
             "age", "celltype_specific", "cluster_specific", "gender", "protocol", "source"]
+
+        self.set_unknown_class_id(ids=["0", "Unknown1", "Unknown2"])
 
         return adata
