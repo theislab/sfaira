@@ -2,7 +2,6 @@ import logging
 import os
 import re
 from dataclasses import dataclass, asdict
-from fileinput import FileInput
 from shutil import copyfile
 from typing import Union
 
