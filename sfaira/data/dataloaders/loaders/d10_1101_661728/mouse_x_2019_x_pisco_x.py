@@ -84,7 +84,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         self.download_url_data = f"https://czb-tabula-muris-senis.s3-us-west-2.amazonaws.com/Data-objects/{sample_fn}"
         self.download_url_meta = None
 
-        self.obs_key_cellontology_original = "free_annotation"
+        self.obs_key_cellontology_original = "cell_ontology_class"
         self.obs_key_age = "age"
         self.obs_key_dev_stage = "development_stage"  # not given in all data sets
         self.obs_key_sex = "sex"
@@ -114,6 +114,5 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         adata.obsm = {}
         adata.varm = {}
         adata.uns = {}
-        self.set_unknown_class_id(ids=["proliferating"])
-
+        
         return adata
