@@ -573,16 +573,22 @@ class DatasetBase(abc.ABC):
 
         # Set cell-wise or data set-wide attributes (.uns / .obs):
         # These are saved in .uns if they are data set wide to save memory.
-        for x, y, z in (
-                [self.age, self._ADATA_IDS_SFAIRA.age, self.obs_key_age],
-                [self.dev_stage, self._ADATA_IDS_SFAIRA.dev_stage, self.obs_key_dev_stage],
-                [self.ethnicity, self._ADATA_IDS_SFAIRA.ethnicity, self.obs_key_ethnicity],
-                [self.healthy, self._ADATA_IDS_SFAIRA.healthy, self.obs_key_healthy],
-                [self.organ, self._ADATA_IDS_SFAIRA.organ, self.obs_key_organ],
-                [self.protocol, self._ADATA_IDS_SFAIRA.protocol, self.obs_key_protocol],
-                [self.sex, self._ADATA_IDS_SFAIRA.sex, self.obs_key_sex],
-                [self.organism, self._ADATA_IDS_SFAIRA.organism, self.obs_key_organism],
-                [self.state_exact, self._ADATA_IDS_SFAIRA.state_exact, self.obs_key_state_exact],
+        for x, y, z, v in (
+                [self.age, self._ADATA_IDS_SFAIRA.age, self.obs_key_age, self._ADATA_IDS_SFAIRA.age_allowed_entries],
+                [self.dev_stage, self._ADATA_IDS_SFAIRA.dev_stage, self.obs_key_dev_stage,
+                 self._ADATA_IDS_SFAIRA.dev_stage_allowed_entries],
+                [self.ethnicity, self._ADATA_IDS_SFAIRA.ethnicity, self.obs_key_ethnicity,
+                 self._ADATA_IDS_SFAIRA.ethnicity_allowed_entries],
+                [self.healthy, self._ADATA_IDS_SFAIRA.healthy, self.obs_key_healthy,
+                 self._ADATA_IDS_SFAIRA.healthy_allowed_entries],
+                [self.organ, self._ADATA_IDS_SFAIRA.organ, self.obs_key_organ,
+                 self._ADATA_IDS_SFAIRA.organism_allowed_entries],
+                [self.protocol, self._ADATA_IDS_SFAIRA.protocol, self.obs_key_protocol,
+                 self._ADATA_IDS_SFAIRA.protocol_allowed_entries],
+                [self.sex, self._ADATA_IDS_SFAIRA.sex, self.obs_key_sex, self._ADATA_IDS_SFAIRA.sex_allowed_entries],
+                [self.organism, self._ADATA_IDS_SFAIRA.organism, self.obs_key_organism,
+                 self._ADATA_IDS_SFAIRA.organism_allowed_entries],
+                [self.state_exact, self._ADATA_IDS_SFAIRA.state_exact, self.obs_key_state_exact, None],
         ):
             if x is None and z is None:
                 self.adata.uns[y] = None
@@ -602,6 +608,8 @@ class DatasetBase(abc.ABC):
                     # Include flag in .uns that this attribute is in .obs:
                     self.adata.uns[y] = UNS_STRING_META_IN_OBS
                     # Remove potential pd.Categorical formatting:
+                    self.__value_protection(
+                        attr="obs", allowed=v, attempted=np.unique(self.adata.obs[z].values).tolist())
                     self.adata.obs[y] = self.adata.obs[z].values.tolist()
             else:
                 assert False, "switch option should not occur"
@@ -780,12 +788,17 @@ class DatasetBase(abc.ABC):
                 else self._ADATA_IDS_SFAIRA.unknown_celltype_name if x.lower() in self._unknown_celltype_identifiers
                 else x for x in labels_original
             ]
-            # Validate mapped IDs based on ontology:
-            # This aborts with a readable error if there was a target in the mapping file that does not match the
-            # ontology.
-            for x in labels_mapped:
-                self.ontology_celltypes.onto_cl.validate_node(x)
-            self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class] = labels_mapped
+        else:
+            labels_mapped = labels_original
+        # Validate mapped IDs based on ontology:
+        # This aborts with a readable error if there was a target in the mapping file that does not match the
+        # ontology.
+        self.__value_protection(
+            attr="celltypes",
+            allowed=self.ontology_celltypes.onto_cl,
+            attempted=np.unique(labels_mapped).tolist()
+        )
+        self.adata.obs[self._ADATA_IDS_SFAIRA.cell_ontology_class] = labels_mapped
         self.adata.obs[self._ADATA_IDS_SFAIRA.cell_types_original] = labels_original
 
     @property
@@ -1501,7 +1514,7 @@ class DatasetBase(abc.ABC):
         :param attr: Attribut to set.
         :param allowed: Constraint for values of `attr`.
             Either ontology instance used to constrain entries, or list of allowed values.
-        :param attempted: Value to attempt to set in `attr`.
+        :param attempted: Value(s) to attempt to set in `attr`.
         :return:
         """
         if allowed is not None:

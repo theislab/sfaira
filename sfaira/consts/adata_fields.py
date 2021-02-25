@@ -1,8 +1,8 @@
 import numpy as np
 from typing import List
 
-from sfaira.versions.metadata import CelltypeUniverse, OntologyList
-from sfaira.versions.metadata import ONTOLOGY_UBERON, ONTOLOGY_HSAPDV, ONTOLOGY_MMUSDV, ONTOLOGY_SLC
+from sfaira.versions.metadata import OntologyList
+from sfaira.versions.metadata import ONTOLOGY_CELLTYPES, ONTOLOGY_UBERON, ONTOLOGY_HSAPDV, ONTOLOGY_MMUSDV, ONTOLOGY_SLC
 
 """
 The classes in this file are containers of field names and element entries that are used in streamlined adata objects
@@ -196,8 +196,10 @@ class ADATA_IDS_SFAIRA(ADATA_IDS_EXTENDED):
 
         # Allowed field values:
         self.age_allowed_entries = None
+        self.cell_ontology_class_allowed_entries = ONTOLOGY_CELLTYPES
         self.dev_stage_allowed_entries = None
         self.ethnicity_allowed_entries = None
+        self.healthy_allowed_entries = [True, False]
         self.normalization_allowed_entries = None
         self.organ_allowed_entries = ONTOLOGY_UBERON
         self.organism_allowed_entries = OntologyList(terms=["mouse", "human"])
