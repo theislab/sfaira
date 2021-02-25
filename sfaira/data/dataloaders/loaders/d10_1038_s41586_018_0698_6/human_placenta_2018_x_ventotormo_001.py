@@ -44,43 +44,6 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
 
         self.set_dataset_id(idx=1)
 
-        self.class_maps = {
-            "0": {
-                "DC1": "Dendritic Cells 1",
-                "DC2": "Dendritic Cells 2",
-                "EVT": "Extravillous Trophoblasts",
-                "Endo (f)": "Endothelial Cells f",
-                "Endo (m)": "Endothelial Cells m",
-                "Endo L": "Endothelial Cells L",
-                "Epi1": "Epithelial Glandular Cells 1",
-                "Epi2": "Epithelial Glandular Cells 2",
-                "Granulocytes": "Granulocytes",
-                "HB": "Hofbauer Cells",
-                "ILC3": "ILC3",
-                "MO": "Monocyte",
-                "NK CD16+": "NK Cells CD16+",
-                "NK CD16-": "NK Cells CD16-",
-                "Plasma": "B cell (Plasmocyte)",
-                "SCT": "Syncytiotrophoblasts",
-                "Tcells": "T cell",
-                "VCT": "Villous Cytotrophoblasts",
-                "dM1": "Decidual Macrophages 1",
-                "dM2": "Decidual Macrophages 2",
-                "dM3": "Decidual Macrophages 3",
-                "dNK p": "Decidual NK Cells p",
-                "dNK1": "Decidual NK Cells 1",
-                "dNK2": "Decidual NK Cells 2",
-                "dNK3": "Decidual NK Cells 3",
-                "dP1": "Perivascular Cells 1",
-                "dP2": "Perivascular Cells 2",
-                "dS1": "Decidual Stromal Cells 1",
-                "dS2": "Decidual Stromal Cells 2",
-                "dS3": "Decidual Stromal Cells 3",
-                "fFB1": "Fibroblasts 1",
-                "fFB2": "Fibroblasts 2",
-            },
-        }
-
     def _load(self):
         fn = [
             os.path.join(self.data_dir, f"{self.sample_fn}.1.zip"),

@@ -35,30 +35,11 @@ class Dataset(DatasetBase):
 
         self.set_dataset_id(idx=1)
 
-        self.class_maps = {
-            "0": {
-                "exPFC1": "Glutamatergic neurons from the PFC 1",
-                "exPFC2": "Glutamatergic neurons from the PFC 2",
-                "exDG": "Granule neurons from the hip dentate gyrus region",
-                "GABA1": "GABAergic interneurons 1",
-                "GABA2": "GABAergic interneurons 2",
-                "exCA3": "Pyramidal neurons from the hip CA region 1",
-                "exCA1": "Pyramidal neurons from the hip CA region 2",
-                "ODC1": "Oligodendrocytes",
-                "ASC1": "Astrocytes 1",
-                "OPC": "Oligodendrocyte precursors",
-                "ASC2": "Astrocytes 2",
-                "Unclassified": "Unknown",
-                "MG": "Microglia",
-                "NSC": "Neuronal stem cells",
-                "END": "Endothelial cells",
-            },
-        }
-
     def _load(self):
         fn = os.path.join(self.data_dir, "habib17.processed.h5ad")
         adata = anndata.read(fn)
         adata.X = np.expm1(adata.X)
         adata.X = adata.X.multiply(scipy.sparse.csc_matrix(adata.obs["n_counts"].values[:, None])).multiply(1 / 10000)
 
+        self.set_unknown_class_id(ids=["Unclassified"])
         return adata
