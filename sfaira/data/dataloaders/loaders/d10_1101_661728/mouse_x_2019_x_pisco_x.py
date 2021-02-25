@@ -114,5 +114,5 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         adata.obsm = {}
         adata.varm = {}
         adata.uns = {}
-        
+
         return adata

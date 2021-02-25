@@ -351,4 +351,11 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             adata = adata[annotated_cells].copy()
             adata.obs = celltypes.loc[adata.obs_names, :]
 
+        self.set_unknown_class_id(ids=[
+            "Cell in cell cycle(Fetal_Kidney)", "Stomach cell_Gkn2 high(Stomach)", "Stomach cell_Mt2 high(Stomach)",
+            "Dividing cell(Mammary-Gland-Virgin)", "Dividing cell(Neonatal-Heart)", "Dividing cell(Neonatal-Rib)",
+            "Dividing cell(Neonatal-Skin)", "Dividing cell(Pancreas)", "Dividing cell(Stomach)", "Dividing cells(Lung)",
+            "Dividng cell(Neonatal-Calvaria)"
+        ])
+
         return adata
