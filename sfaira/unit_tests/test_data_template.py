@@ -122,7 +122,7 @@ def test_load(dir_template: str = "./template_data", doi_sfaira_repr="10.1000/j.
                     dsg_f = DatasetGroup(datasets=dict([(x.id, ds.datasets[x.id]) for x in datasets_f]))
                     # Write this directly into sfaira installation so that it can be committed via git.
                     dsg_f.write_ontology_class_map(
-                        fn=os.path.join(cwd, file_module + ".csv"),
+                        fn=os.path.join(cwd, file_module + ".tsv"),
                         protected_writing=True,
                         n_suggest=4,
                     )
