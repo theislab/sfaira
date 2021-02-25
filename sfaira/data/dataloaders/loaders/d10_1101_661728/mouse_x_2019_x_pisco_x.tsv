@@ -1,0 +1,154 @@
+source	target
+B cell	B cell
+Bergmann glial cell	Bergmann glial cell
+Brush cell of epithelium proper of large intestine	Brush cell of epithelium proper of large intestine
+CD4-positive, alpha-beta T cell	CD4-positive, alpha-beta T cell
+CD8-positive, alpha-beta T cell	CD8-positive, alpha-beta T cell
+DN3 thymocyte	DN3 thymocyte
+DN4 thymocyte	DN4 thymocyte
+Kupffer cell	Kupffer cell
+Langerhans cell	Langerhans cell
+NK cell	natural killer cell
+Schwann cell	Schwann cell
+T cell	T cell
+adventitial cell	adventitial cell
+alveolar macrophage	alveolar macrophage
+aortic endothelial cell	aortic endothelial cell
+astrocyte	astrocyte
+atrial myocyte	regular atrial cardiac myocyteC
+basal cell	basal cell
+basal cell of epidermis	basal cell of epidermis
+basal epithelial cell of tracheobronchial tree	basal epithelial cell of tracheobronchial tree
+basophil	basophil
+bladder cell	bladder cell
+bladder urothelial cell	bladder urothelial cell
+blood cell	blood cell
+brain pericyte	brain pericyte
+bronchial smooth muscle cell	bronchial smooth muscle cell
+brush cell	brush cell
+bulge keratinocyte	keratinocyte stem cell
+cardiac neuron	cardiac neuron
+cardiomyocyte	cardiac muscle cell
+chondrocyte	chondrocyte
+ciliated columnar cell of tracheobronchial tree	ciliated columnar cell of tracheobronchial tree
+classical monocyte	classical monocyte
+club cell of bronchiole	club cell
+dendritic cell	dendritic cell
+double negative T cell	double negative thymocyte
+duct epithelial cell	duct epithelial cell
+early pro-B cell	early pro-B cell
+endocardial cell	endocardial cell
+endothelial cell	endothelial cell
+endothelial cell of coronary artery	endothelial cell of coronary artery
+endothelial cell of hepatic sinusoid	endothelial cell of hepatic sinusoid
+endothelial cell of lymphatic vessel	endothelial cell of lymphatic vessel
+enterocyte of epithelium of large intestine	enterocyte of epithelium of large intestine
+enteroendocrine cell	enteroendocrine cell
+ependymal cell	ependymal cell
+epidermal cell	epidermal cell
+epithelial cell	epithelial cell
+epithelial cell of large intestine	epithelial cell of large intestine
+epithelial cell of proximal tubule	epithelial cell of proximal tubule
+epithelial cell of thymus	epithelial cell of thymus
+erythroblast	erythroblast
+erythrocyte	erythrocyte
+erythroid progenitor	erythroid progenitor cell
+fenestrated cell	fenestrated cell
+fibroblast	fibroblast
+fibroblast of cardiac tissue	fibroblast of cardiac tissue
+fibroblast of lung	fibroblast of lung
+fibrocyte	fibrocyte
+granulocyte	granulocyte
+granulocyte monocyte progenitor cell	granulocyte monocyte progenitor cell
+granulocytopoietic cell	granulocytopoietic cell
+hematopoietic precursor cell	hematopoietic precursor cell
+hematopoietic stem cell	hematopoietic stem cell
+hepatic stellate cell	hepatic stellate cell
+hepatocyte	hepatocyte
+immature B cell	immature B cell
+immature T cell	immature T cell
+intermediate monocyte	intermediate monocyte
+interneuron	interneuron
+intestinal crypt stem cell	intestinal crypt stem cell
+keratinocyte	keratinocyte
+keratinocyte stem cell	keratinocyte stem cell
+kidney capillary endothelial cell	kidney capillary endothelial cell
+kidney cell	kidney cell
+kidney collecting duct epithelial cell	kidney collecting duct epithelial cell
+kidney collecting duct principal cell	kidney collecting duct principal cell
+kidney cortex artery cell	kidney cortex artery cell
+kidney distal convoluted tubule epithelial cell	kidney distal convoluted tubule epithelial cell
+kidney interstitial fibroblast	kidney interstitial fibroblast
+kidney loop of Henle ascending limb epithelial cell	kidney loop of Henle ascending limb epithelial cell
+kidney loop of Henle thick ascending limb epithelial cell	kidney loop of Henle thick ascending limb epithelial cell
+kidney mesangial cell	mesangial cell
+kidney proximal convoluted tubule epithelial cell	kidney proximal straight tubule epithelial cell
+kidney proximal straight tubule epithelial cell	kidney proximal straight tubule epithelial cell
+large intestine goblet cell	large intestine goblet cell
+late pro-B cell	late pro-B cell
+leukocyte	leukocyte
+luminal epithelial cell of mammary gland	mammary alveolar cell
+lung macrophage	macrophage
+lung neuroendocrine cell	lung neuroendocrine cell
+lymphocyte	lymphocyte
+lymphoid progenitor cell	common lymphoid progenitor
+macrophage	macrophage
+mast cell	mast cell
+mature NK T cell	mature NK T cell
+mature alpha-beta T cell	mature alpha-beta T cell
+medium spiny neuron	medium spiny neuro
+megakaryocyte-erythroid progenitor cell	megakaryocyte-erythroid progenitor cell
+mesangial cell	mesangial cell
+mesenchymal cell	mesenchymal cell
+mesenchymal progenitor cell	mesenchymal cell
+mesenchymal stem cell	mesenchymal stem cell
+mesenchymal stem cell of adipose	mesenchymal stem cell of adipose
+microglial cell	microglial cell
+monocyte	monocyte
+mucus secreting cell	mucus secreting cell
+myeloid cell	myeloid cell
+myeloid dendritic cell	myeloid dendritic cell
+myeloid leukocyte	myeloid leukocyte
+naive B cell	naive B cell
+naive T cell	naive T cell
+neuroendocrine cell	neuroendocrine cell
+neuroepithelial cell	neuroepithelial stem cell
+neuron	neuron
+neuronal stem cell	neuronal stem cell
+neutrophil	neutrophil
+non-classical monocyte	non-classical monocyte
+oligodendrocyte	oligodendrocyte
+oligodendrocyte precursor cell	oligodendrocyte precursor cell
+pancreatic A cell	pancreatic A cell
+pancreatic B cell	type B pancreatic cell
+pancreatic D cell	pancreatic D cell
+pancreatic PP cell	pancreatic PP cell
+pancreatic acinar cell	pancreatic acinar cell
+pancreatic ductal cel	pancreatic ductal cell
+pancreatic ductal cell	pancreatic ductal cell
+pancreatic stellate cell	pancreatic stellate cell
+pericyte cell	pericyte cell
+plasma cell	plasma cell
+plasmacytoid dendritic cell	plasmacytoid dendritic cell
+podocyte	glomerular visceral epithelial cell
+precursor B cell	precursor B cell
+proerythroblast	proerythroblast
+professional antigen presenting cell	professional antigen presenting cell
+promonocyte	promonocyte
+pulmonary interstitial fibroblast	pulmonary interstitial fibroblast
+regulatory T cell	regulatory T cell
+respiratory basal cell	respiratory basal cell
+secretory cell	secretory cell
+skeletal muscle cell	cell of skeletal muscle
+skeletal muscle satellite cell	skeletal muscle satellite cell
+smooth muscle cell	smooth muscle cell
+smooth muscle cell of the pulmonary artery	smooth muscle cell of the pulmonary artery
+smooth muscle cell of trachea	smooth muscle cell of trachea
+stem cell of epidermis	stem cell of epidermis
+stromal cell	stromal cell
+thymocyte	thymocyte
+type I pneumocyte	type I pneumocyte
+type II pneumocyte	type II pneumocyte
+valve cell	valve cell
+vein endothelial cell	vein endothelial cell
+ventricular myocyte	regular ventricular cardiac myocyte
