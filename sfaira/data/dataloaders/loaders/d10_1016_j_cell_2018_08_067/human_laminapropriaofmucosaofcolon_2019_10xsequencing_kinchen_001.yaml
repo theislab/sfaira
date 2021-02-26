@@ -1,8 +1,10 @@
-dataset_wise:
+dataset_structure:
     sample_ids:
     sample_fns:
         - "HC"
         - "UC"
+    dataset_index: 1
+dataset_wise:
     download_url_data:
         - "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE114374&format=file&file=GSE114374%5FHuman%5FHC%5Fexpression%5Fmatrix%2Etxt%2Egz"
         - "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE114374&format=file&file=GSE114374%5FHuman%5FUC%5Fexpression%5Fmatrix%2Etxt%2Egz"

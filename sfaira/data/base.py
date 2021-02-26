@@ -176,11 +176,11 @@ class DatasetBase(abc.ABC):
         if yaml_path is not None:
             assert os.path.exists(yaml_path), f"did not find yaml {yaml_path}"
             yaml_vals = read_yaml(fn=yaml_path)
-            for k, v in yaml_vals.items():
-                if v is not None and k not in ["sample_fns", "sample_ids"]:
+            for k, v in yaml_vals["attr"].items():
+                if v is not None and k not in ["sample_fns", "sample_ids", "dataset_index"]:
                     setattr(self, k, v)
             # ID can be set now already because YAML was used as input instead of child class constructor.
-            self.set_dataset_id(idx=1)
+            self.set_dataset_id(idx=yaml_vals["meta"]["dataset_index"])
 
     @abc.abstractmethod
     def _load(self) -> anndata.AnnData:
@@ -2252,10 +2252,10 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                         if fn_yaml is not None:
                             assert os.path.exists(fn_yaml), f"did not find yaml {fn_yaml}"
                             yaml_vals = read_yaml(fn=fn_yaml)
-                            if sample_fns is None and yaml_vals["sample_fns"] is not None:
-                                sample_fns = yaml_vals["sample_fns"]
-                            if sample_ids is None and yaml_vals["sample_ids"] is not None:
-                                sample_ids = yaml_vals["sample_ids"]
+                            if sample_fns is None and yaml_vals["meta"]["sample_fns"] is not None:
+                                sample_fns = yaml_vals["meta"]["sample_fns"]
+                            if sample_ids is None and yaml_vals["meta"]["sample_ids"] is not None:
+                                sample_ids = yaml_vals["meta"]["sample_ids"]
                         if sample_fns is not None and sample_ids is None:
                             # DatasetBaseGroupLoadingManyFiles:
                             datasets_f.extend([
