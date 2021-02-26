@@ -291,8 +291,8 @@ class CelltypeUniverse:
                         # Check this by checking if one is an ancestor of the other:
                         anatomical_subselection = [
                             z and (
-                                    anatomical_constraint_id in self.onto_uberon.get_ancestors(node=y) or
-                                    y in self.onto_uberon.get_ancestors(node=anatomical_constraint_id)
+                                anatomical_constraint_id in self.onto_uberon.get_ancestors(node=y) or
+                                y in self.onto_uberon.get_ancestors(node=anatomical_constraint_id)
                             )
                             for y, z in zip(uberon_ids, anatomical_subselection)
                         ]
@@ -313,8 +313,8 @@ class CelltypeUniverse:
                             np.max([
                                 fuzz.partial_ratio(modified_term, y[1]["name"].lower())
                             ] + [
-                               fuzz.partial_ratio(modified_term, synonym_string_processing(yy))
-                               for yy in y[1]["synonym"]
+                                fuzz.partial_ratio(modified_term, synonym_string_processing(yy))
+                                for yy in y[1]["synonym"]
                             ]) if "synonym" in y[1].keys() and include_synonyms else
                             fuzz.partial_ratio(modified_term, y[1]["name"].lower())
                             for y in nodes
@@ -330,8 +330,8 @@ class CelltypeUniverse:
                         # Select best overall matches based on lenient and strict matching:
                         matches_i.update({
                             "perfect_match": [
-                               nodes[i][1]["name"]
-                               for i in np.argsort(scores_strict)[::-1]
+                                nodes[i][1]["name"]
+                                for i in np.argsort(scores_strict)[::-1]
                             ][:n_suggest]
                         })
                         matches_i.update({
