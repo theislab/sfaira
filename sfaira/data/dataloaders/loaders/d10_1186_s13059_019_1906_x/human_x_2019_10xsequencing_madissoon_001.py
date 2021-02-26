@@ -25,8 +25,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(sample_fn=sample_fn, sample_fns=SAMPLE_FNS, data_path=data_path, meta_path=meta_path,
-                         cache_path=cache_path, **kwargs)
+        super().__init__(sample_fn=sample_fn, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         if self.sample_fn == "madissoon19_lung.processed.h5ad":
             self.download_url_data = "https://covid19.cog.sanger.ac.uk/madissoon19_lung.processed.h5ad"
             self.var_ensembl_col = "gene.ids.HCATisStab7509734"

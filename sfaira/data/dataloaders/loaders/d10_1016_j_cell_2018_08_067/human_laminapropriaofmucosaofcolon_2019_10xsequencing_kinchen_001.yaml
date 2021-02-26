@@ -1,0 +1,47 @@
+dataset_wise:
+    sample_ids:
+    sample_fns:
+        - "HC"
+        - "UC"
+    download_url_data:
+        - "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE114374&format=file&file=GSE114374%5FHuman%5FHC%5Fexpression%5Fmatrix%2Etxt%2Egz"
+        - "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE114374&format=file&file=GSE114374%5FHuman%5FUC%5Fexpression%5Fmatrix%2Etxt%2Egz"
+    download_url_meta:
+        - "private,hc_meta_data_stromal_with_donor.txt"
+        - "private,uc_meta_data_stromal_with_donor.txt"
+    author:
+        - "Kinchen"
+    doi:
+        - "10.1016/j.cell.2018.08.067"
+    normalization: "norm"
+    year: 2019
+dataset_or_observation_wise:
+    age:
+    age_obs_key: "Age"
+    dev_stage:
+    dev_stage_obs_key:
+    ethnicity:
+    ethnicity_obs_key:
+    healthy:
+    healthy_obs_key: "state_exact"
+    organ: "lamina propria of mucosa of colon"
+    organ_obs_key:
+    organism: "human"
+    organism_obs_key:
+    protocol: "10X sequencing"
+    protocol_obs_key:
+    sex:
+    sex_obs_key: "Sex"
+    state_exact:
+    state_exact_obs_key: "state_exact"
+observation_wise:
+    cellontology_original_obs_key: "Cluster"
+    bio_sample_obs_key:
+    tech_sample_obs_key:
+feature_wise:
+    var_ensembl_col:
+    var_symbol_col: "index"
+misc:
+    healthy_state_healthy: "healthy colon"
+meta:
+    version: "1.0"

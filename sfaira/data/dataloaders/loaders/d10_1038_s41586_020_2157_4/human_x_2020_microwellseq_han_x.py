@@ -128,8 +128,7 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
             **kwargs
     ):
 
-        super().__init__(sample_id=sample_id, sample_ids=SAMPLE_IDS, data_path=data_path, meta_path=meta_path,
-                         cache_path=cache_path, **kwargs)
+        super().__init__(sample_id=sample_id, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
 
         sample_organ_dict = {
             'AdultAdipose_1': 'adipose tissue of abdominal region',

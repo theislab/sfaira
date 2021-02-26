@@ -29,8 +29,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(sample_fn=sample_fn, sample_fns=SAMPLE_FNS, data_path=data_path, meta_path=meta_path,
-                         cache_path=cache_path, **kwargs)
+        super().__init__(sample_fn=sample_fn, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         synapse_id = {
             "droplet_normal_lung_blood_scanpy.20200205.RC4.h5ad": "syn21625095",
             "facs_normal_lung_blood_scanpy.20200205.RC4.h5ad": "syn21625142"

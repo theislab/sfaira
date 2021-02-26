@@ -11,6 +11,9 @@ class TestDatasetGroupSfaira(unittest.TestCase):
     dir_data: str = "../test_data"
     dir_meta: str = "../test_data/meta"
 
+    def test_instantiate(self):
+        _ = DatasetSuperGroupSfaira(data_path=self.dir_data, meta_path=self.dir_meta, cache_path=self.dir_data)
+
     def test_load(self):
         ds = DatasetSuperGroupSfaira(data_path=self.dir_data, meta_path=self.dir_meta, cache_path=self.dir_data)
         ds.subset(key="organism", values=["mouse"])

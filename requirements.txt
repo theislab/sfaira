@@ -10,6 +10,7 @@ openpyxl
 pandas
 pytest>=6.2.2
 python-Levenshtein
+PyYAML
 scanpy>=1.7.0
 scipy>=1.2.1
 seaborn

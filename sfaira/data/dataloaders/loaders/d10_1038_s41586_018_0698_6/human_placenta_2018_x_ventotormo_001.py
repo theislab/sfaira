@@ -21,8 +21,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(sample_fn=sample_fn, sample_fns=SAMPLE_FNS, data_path=data_path, meta_path=meta_path,
-                         cache_path=cache_path, **kwargs)
+        super().__init__(sample_fn=sample_fn, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         self.download_url_data = f"https://www.ebi.ac.uk/arrayexpress/files/{self.sample_fn.split('.')[0]}/" \
                                  f"{self.sample_fn}.1.zip"
         self.download_url_meta = f"https://www.ebi.ac.uk/arrayexpress/files/{self.sample_fn.split('.')[0]}/" \

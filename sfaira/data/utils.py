@@ -1,3 +1,4 @@
+import yaml
 from typing import Dict, List, Union
 
 from sfaira.consts import OntologyContainerSfaira
@@ -92,3 +93,20 @@ def map_celltype_to_ontology(
         return matches_to_return[queries[0]]
     else:
         return matches_to_return
+
+
+def read_yaml(fn) -> Dict[str, str]:
+    """
+    Read data yaml file.
+
+    Matches format names to Dataset attribute names.
+
+    :param fn: YAML file name.
+    :return: Dictionary of names of Dataset attributes and their values.
+    """
+    with open(fn) as f:
+        yaml_dict = yaml.safe_load(f)
+    attr_dict = {}
+    for k, v in yaml_dict.items():
+        attr_dict.update(v)
+    return attr_dict

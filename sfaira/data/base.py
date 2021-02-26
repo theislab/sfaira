@@ -22,6 +22,7 @@ import ssl
 from sfaira.versions.genome_versions import SuperGenomeContainer
 from sfaira.versions.metadata import Ontology, CelltypeUniverse
 from sfaira.consts import AdataIdsSfaira, META_DATA_FIELDS, OCS
+from sfaira.data.utils import read_yaml
 
 UNS_STRING_META_IN_OBS = "__obs__"
 
@@ -109,6 +110,7 @@ class DatasetBase(abc.ABC):
             data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
+            yaml_path: Union[str, None] = None,
             **kwargs
     ):
         self._adata_ids_sfaira = AdataIdsSfaira()
@@ -163,6 +165,16 @@ class DatasetBase(abc.ABC):
 
         self._celltype_universe = None
         self._ontology_class_map = None
+
+        # Check if YAML files exists, read meta data from there if available:
+        if yaml_path is not None:
+            assert os.path.exists(yaml_path), f"did not find yaml {yaml_path}"
+            yaml_vals = read_yaml(fn=yaml_path)
+            for k, v in yaml_vals.items():
+                if v is not None and k not in ["sample_fns", "sample_ids"]:
+                    setattr(self, k, v)
+            # ID can be set now already because YAML was used as input instead of child class constructor.
+            self.set_dataset_id(idx=1)
 
     @abc.abstractmethod
     def _load(self) -> anndata.AnnData:
@@ -575,23 +587,23 @@ class DatasetBase(abc.ABC):
         # Set cell-wise or data set-wide attributes (.uns / .obs):
         # These are saved in .uns if they are data set wide to save memory.
         for x, y, z, v in (
-                [self.age, self._adata_ids_sfaira.age, self.obs_key_age,
+                [self.age, self._adata_ids_sfaira.age, self.age_obs_key,
                  self._ontology_container_sfaira.ontology_age],
-                [self.dev_stage, self._adata_ids_sfaira.dev_stage, self.obs_key_dev_stage,
+                [self.dev_stage, self._adata_ids_sfaira.dev_stage, self.dev_stage_obs_key,
                  self._ontology_container_sfaira.ontology_dev_stage],
-                [self.ethnicity, self._adata_ids_sfaira.ethnicity, self.obs_key_ethnicity,
+                [self.ethnicity, self._adata_ids_sfaira.ethnicity, self.ethnicity_obs_key,
                  self._ontology_container_sfaira.ontology_ethnicity],
-                [self.healthy, self._adata_ids_sfaira.healthy, self.obs_key_healthy,
+                [self.healthy, self._adata_ids_sfaira.healthy, self.healthy_obs_key,
                  self._ontology_container_sfaira.ontology_healthy],
-                [self.organ, self._adata_ids_sfaira.organ, self.obs_key_organ,
+                [self.organ, self._adata_ids_sfaira.organ, self.organ_obs_key,
                  self._ontology_container_sfaira.ontology_organism],
-                [self.protocol, self._adata_ids_sfaira.protocol, self.obs_key_protocol,
+                [self.protocol, self._adata_ids_sfaira.protocol, self.protocol_obs_key,
                  self._ontology_container_sfaira.ontology_protocol],
-                [self.sex, self._adata_ids_sfaira.sex, self.obs_key_sex,
+                [self.sex, self._adata_ids_sfaira.sex, self.sex_obs_key,
                  self._ontology_container_sfaira.ontology_sex],
-                [self.organism, self._adata_ids_sfaira.organism, self.obs_key_organism,
+                [self.organism, self._adata_ids_sfaira.organism, self.organism_obs_key,
                  self._ontology_container_sfaira.ontology_organism],
-                [self.state_exact, self._adata_ids_sfaira.state_exact, self.obs_key_state_exact, None],
+                [self.state_exact, self._adata_ids_sfaira.state_exact, self.state_exact_obs_key, None],
         ):
             if x is None and z is None:
                 self.adata.uns[y] = None
@@ -620,7 +632,7 @@ class DatasetBase(abc.ABC):
         # None so far other than celltypes.
         # Set cell types:
         # Map cell type names from raw IDs to ontology maintained ones::
-        if self.obs_key_cellontology_original is not None:
+        if self.cellontology_original_obs_key is not None:
             self.project_celltypes_to_ontology()
 
     def load_tobacked(
@@ -826,7 +838,7 @@ class DatasetBase(abc.ABC):
 
         :return:
         """
-        labels_original = self.adata.obs[self.obs_key_cellontology_original].values
+        labels_original = self.adata.obs[self.cellontology_original_obs_key].values
         if self.cell_ontology_map is not None:  # only if this was defined
             labels_mapped = [
                 self.cell_ontology_map[x] if x in self.cell_ontology_map.keys()
@@ -1018,7 +1030,7 @@ class DatasetBase(abc.ABC):
 
     @property
     def annotated(self) -> Union[bool, None]:
-        if self.obs_key_cellontology_id is not None or self.obs_key_cellontology_original is not None:
+        if self.cellontology_id_obs_key is not None or self.cellontology_original_obs_key is not None:
             return True
         else:
             if self.meta is None:
@@ -1278,113 +1290,123 @@ class DatasetBase(abc.ABC):
         self._normalization = x
 
     @property
-    def obs_key_age(self) -> str:
+    def age_obs_key(self) -> str:
         return self._obs_key_age
 
-    @obs_key_age.setter
-    def obs_key_age(self, x: str):
-        self.__erasing_protection(attr="obs_key_age", val_old=self._obs_key_age, val_new=x)
+    @age_obs_key.setter
+    def age_obs_key(self, x: str):
+        self.__erasing_protection(attr="age_obs_key", val_old=self._obs_key_age, val_new=x)
         self._obs_key_age = x
 
     @property
-    def obs_key_cellontology_id(self) -> str:
+    def bio_sample_obs_key(self) -> str:
+        return self._obs_key_sample
+
+    @bio_sample_obs_key.setter
+    def bio_sample_obs_key(self, x: str):
+        self.__erasing_protection(attr="bio_sample_obs_key", val_old=self._obs_key_sample, val_new=x)
+        self._obs_key_sample = x
+
+    @property
+    def cellontology_id_obs_key(self) -> str:
         return self._obs_key_cellontology_id
 
-    @obs_key_cellontology_id.setter
-    def obs_key_cellontology_id(self, x: str):
-        self.__erasing_protection(attr="obs_key_cellontology_id", val_old=self._obs_key_cellontology_id, val_new=x)
+    @cellontology_id_obs_key.setter
+    def cellontology_id_obs_key(self, x: str):
+        self.__erasing_protection(attr="cellontology_id_obs_key", val_old=self._obs_key_cellontology_id, val_new=x)
         self._obs_key_cellontology_id = x
 
     @property
-    def obs_key_cellontology_original(self) -> str:
+    def cellontology_original_obs_key(self) -> str:
         return self._obs_key_cellontology_original
 
-    @obs_key_cellontology_original.setter
-    def obs_key_cellontology_original(self, x: str):
-        self.__erasing_protection(attr="obs_key_cellontology_original", val_old=self._obs_key_cellontology_original,
+    @cellontology_original_obs_key.setter
+    def cellontology_original_obs_key(self, x: str):
+        self.__erasing_protection(attr="cellontology_original_obs_key", val_old=self._obs_key_cellontology_original,
                                   val_new=x)
         self._obs_key_cellontology_original = x
 
     @property
-    def obs_key_dev_stage(self) -> str:
+    def dev_stage_obs_key(self) -> str:
         return self._obs_key_dev_stage
 
-    @obs_key_dev_stage.setter
-    def obs_key_dev_stage(self, x: str):
-        self.__erasing_protection(attr="obs_key_dev_stage", val_old=self._obs_key_dev_stage, val_new=x)
+    @dev_stage_obs_key.setter
+    def dev_stage_obs_key(self, x: str):
+        self.__erasing_protection(attr="dev_stage_obs_key", val_old=self._obs_key_dev_stage, val_new=x)
         self._obs_key_dev_stage = x
 
     @property
-    def obs_key_ethnicity(self) -> str:
+    def ethnicity_obs_key(self) -> str:
         return self._obs_key_ethnicity
 
-    @obs_key_ethnicity.setter
-    def obs_key_ethnicity(self, x: str):
-        self.__erasing_protection(attr="obs_key_ethnicity", val_old=self._obs_key_ethnicity, val_new=x)
+    @ethnicity_obs_key.setter
+    def ethnicity_obs_key(self, x: str):
+        self.__erasing_protection(attr="ethnicity_obs_key", val_old=self._obs_key_ethnicity, val_new=x)
         self._obs_key_ethnicity = x
 
     @property
-    def obs_key_healthy(self) -> str:
+    def healthy_obs_key(self) -> str:
         return self._obs_key_healthy
 
-    @obs_key_healthy.setter
-    def obs_key_healthy(self, x: str):
-        self.__erasing_protection(attr="obs_key_healthy", val_old=self._obs_key_healthy, val_new=x)
+    @healthy_obs_key.setter
+    def healthy_obs_key(self, x: str):
+        self.__erasing_protection(attr="healthy_obs_key", val_old=self._obs_key_healthy, val_new=x)
         self._obs_key_healthy = x
 
     @property
-    def obs_key_organ(self) -> str:
+    def organ_obs_key(self) -> str:
         return self._obs_key_organ
 
-    @obs_key_organ.setter
-    def obs_key_organ(self, x: str):
-        self.__erasing_protection(attr="obs_key_organ", val_old=self._obs_key_organ, val_new=x)
+    @organ_obs_key.setter
+    def organ_obs_key(self, x: str):
+        self.__erasing_protection(attr="organ_obs_key", val_old=self._obs_key_organ, val_new=x)
         self._obs_key_organ = x
 
     @property
-    def obs_key_organism(self) -> str:
+    def organism_obs_key(self) -> str:
         return self._obs_key_organism
 
-    @obs_key_organism.setter
-    def obs_key_organism(self, x: str):
-        self.__erasing_protection(attr="obs_key_organism", val_old=self._obs_key_organism, val_new=x)
+    @organism_obs_key.setter
+    def organism_obs_key(self, x: str):
+        self.__erasing_protection(attr="organism_obs_key", val_old=self._obs_key_organism, val_new=x)
         self._obs_key_organism = x
 
     @property
-    def obs_key_protocol(self) -> str:
+    def protocol_obs_key(self) -> str:
         return self._obs_key_protocol
 
-    @obs_key_protocol.setter
-    def obs_key_protocol(self, x: str):
-        self.__erasing_protection(attr="obs_key_protocol", val_old=self._obs_key_protocol, val_new=x)
+    @protocol_obs_key.setter
+    def protocol_obs_key(self, x: str):
+        self.__erasing_protection(attr="protocol_obs_key", val_old=self._obs_key_protocol, val_new=x)
         self._obs_key_protocol = x
 
     @property
-    def obs_key_sample(self) -> str:
-        return self._obs_key_sample
-
-    @obs_key_sample.setter
-    def obs_key_sample(self, x: str):
-        self.__erasing_protection(attr="obs_key_sample", val_old=self._obs_key_sample, val_new=x)
-        self._obs_key_sample = x
-
-    @property
-    def obs_key_sex(self) -> str:
+    def sex_obs_key(self) -> str:
         return self._obs_key_sex
 
-    @obs_key_sex.setter
-    def obs_key_sex(self, x: str):
-        self.__erasing_protection(attr="obs_key_sex", val_old=self._obs_key_sex, val_new=x)
+    @sex_obs_key.setter
+    def sex_obs_key(self, x: str):
+        self.__erasing_protection(attr="sex_obs_key", val_old=self._obs_key_sex, val_new=x)
         self._obs_key_sex = x
 
     @property
-    def obs_key_state_exact(self) -> str:
+    def state_exact_obs_key(self) -> str:
         return self._obs_key_state_exact
 
-    @obs_key_state_exact.setter
-    def obs_key_state_exact(self, x: str):
-        self.__erasing_protection(attr="obs_key_state_exact", val_old=self._obs_key_state_exact, val_new=x)
+    @state_exact_obs_key.setter
+    def state_exact_obs_key(self, x: str):
+        self.__erasing_protection(attr="state_exact_obs_key", val_old=self._obs_key_state_exact, val_new=x)
         self._obs_key_state_exact = x
+
+    @property
+    def tech_sample_obs_key(self) -> str:
+        return self._obs_key_sample
+
+    @bio_sample_obs_key.setter
+    def tech_sample_obs_key(self, x: str):
+        self.__erasing_protection(attr="tech_sample_obs_key", val_old=self._obs_key_sample, val_new=x)
+        self._obs_key_sample = x
+
 
     @property
     def organ(self) -> Union[None, str]:
@@ -1706,8 +1728,8 @@ class DatasetBaseGroupLoadingOneFile(DatasetBase):
 
         Override this method in the Dataset if this is relevant.
         """
-        assert self.obs_key_sample is not None, "self.obs_key_sample needs to be set"
-        self._subset_from_group(subset_items={self.obs_key_sample: self.sample_id})
+        assert self.bio_sample_obs_key is not None, "self.obs_key_sample needs to be set"
+        self._subset_from_group(subset_items={self.bio_sample_obs_key: self.sample_id})
 
     def _subset_from_group(
             self,
@@ -2181,6 +2203,16 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                                                   ".SAMPLE_FNS")
                         sample_ids = pydoc.locate(loader_pydoc_path + dataset_module + "." + file_module +
                                                   ".SAMPLE_IDS")
+                        fn_yaml = os.path.join(cwd, file_module + ".yaml")
+                        fn_yaml = fn_yaml if os.path.exists(fn_yaml) else None
+                        # Check for sample_fns and sample_ids in yaml:
+                        if fn_yaml is not None:
+                            assert os.path.exists(fn_yaml), f"did not find yaml {fn_yaml}"
+                            yaml_vals = read_yaml(fn=fn_yaml)
+                            if sample_fns is None and yaml_vals["sample_fns"] is not None:
+                                sample_fns = yaml_vals["sample_fns"]
+                            if sample_ids is None and yaml_vals["sample_ids"] is not None:
+                                sample_ids = yaml_vals["sample_ids"]
                         if sample_fns is not None and sample_ids is None:
                             # DatasetBaseGroupLoadingManyFiles:
                             datasets_f.extend([
@@ -2189,6 +2221,8 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                                     data_path=data_path,
                                     meta_path=meta_path,
                                     cache_path=cache_path,
+                                    sample_fns=sample_fns,
+                                    yaml_path=fn_yaml,
                                 )
                                 for x in sample_fns
                             ])
@@ -2200,6 +2234,8 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                                     data_path=data_path,
                                     meta_path=meta_path,
                                     cache_path=cache_path,
+                                    sample_ids=sample_ids,
+                                    yaml_path=fn_yaml,
                                 )
                                 for x in sample_ids
                             ])
@@ -2207,7 +2243,12 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                             raise ValueError(f"sample_fns and sample_ids both found for {f}")
                         else:
                             datasets_f.append(
-                                DatasetFound(data_path=data_path, meta_path=meta_path, cache_path=cache_path))
+                                DatasetFound(
+                                    data_path=data_path,
+                                    meta_path=meta_path,
+                                    cache_path=cache_path,
+                                    yaml_path=fn_yaml,
+                                ))
                         # Load cell type maps:
                         for x in datasets_f:
                             x.load_ontology_class_map(fn=os.path.join(cwd, file_module + ".tsv"))

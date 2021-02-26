@@ -113,8 +113,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(sample_fn=sample_fn, sample_fns=SAMPLE_FNS, data_path=data_path, meta_path=meta_path,
-                         cache_path=cache_path, **kwargs)
+        super().__init__(sample_fn=sample_fn, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         sample_organ_dict = {
             "Bladder_dge.txt.gz": "urinary bladder",
             "BoneMarrow1_dge.txt.gz": "bone marrow",

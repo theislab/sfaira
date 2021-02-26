@@ -57,8 +57,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(sample_fn=sample_fn, sample_fns=SAMPLE_FNS, data_path=data_path, meta_path=meta_path,
-                         cache_path=cache_path, **kwargs)
+        super().__init__(sample_fn=sample_fn, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         organ = "-".join(sample_fn.split("-")[7:]).split(".")[0].lower()
         organ = "adipose tissue" if organ in ["fat", "bat", "gat", "mat", "scat"] else \
             "aorta" if organ in ["aorta"] else \
