@@ -211,7 +211,7 @@ class AdataIdsSfaira(AdataIdsExtended):
         return self._remove_gene_version
 
 
-class ADATA_IDS_CELLXGENE(AdataIdsExtended):
+class AdataIdsCellxgene(AdataIdsExtended):
     """
     Class of constant field names of anndata.AnnData object entries, such as .uns keys and .obs columns in cellxgene
     objects.
@@ -268,3 +268,4 @@ class ADATA_IDS_CELLXGENE(AdataIdsExtended):
 
 
 ADATA_IDS_SFAIRA = AdataIdsSfaira()
+ADATA_IDS_CELLXGENE = AdataIdsCellxgene()
