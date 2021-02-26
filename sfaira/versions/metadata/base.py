@@ -497,7 +497,7 @@ class OntologyCelltypes(OntologyExtendedObo):
             **kwargs
     ):
         # Identify cache:
-        ontology_cache_dir = os.path.join("/".join(FILE_PATH.split("/")[:-3]), "cache/ontologies/cl/")
+        ontology_cache_dir = os.path.join("/".join(FILE_PATH.split("/")[:-4]), "cache/ontologies/cl/")
         fn = f"{branch}_cl.obo"
         fn_path = os.path.join(ontology_cache_dir, fn)
         # Download if necessary:
@@ -506,6 +506,8 @@ class OntologyCelltypes(OntologyExtendedObo):
             def download_cl():
                 url = f"https://raw.github.com/obophenotype/cell-ontology/{branch}/cl.obo"
                 print(f"Downloading: {fn}")
+                if not os.path.exists(ontology_cache_dir):
+                    os.makedirs(ontology_cache_dir)
                 r = requests.get(url, allow_redirects=True)
                 open(fn_path, 'wb').write(r.content)
 

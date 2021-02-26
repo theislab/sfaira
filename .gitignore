@@ -1,4 +1,4 @@
-sfaira/cache/ontologies/cl/*
+cache/ontologies/cl/*
 sfaira/unit_tests/test_data_loaders/*
 sfaira/unit_tests/test_data/*
 sfaira/unit_tests/template_data/*
