@@ -1,9 +1,4 @@
-from .base import Ontology, OntologyList, OntologyObo, CelltypeUniverse, \
+from sfaira.versions.metadata.base import Ontology, OntologyList, OntologyObo, \
     OntologyCelltypes, OntologyUberon, OntologyHancestro, OntologyHsapdv, OntologyMmusdv, \
     OntologySinglecellLibraryConstruction
-
-ONTOLOGY_CELLTYPES = OntologyCelltypes()
-ONTOLOGY_HSAPDV = OntologyHsapdv()
-ONTOLOGY_MMUSDV = OntologyMmusdv()
-ONTOLOGY_SLC = OntologySinglecellLibraryConstruction()
-ONTOLOGY_UBERON = OntologyUberon()
+from sfaira.versions.metadata.universe import CelltypeUniverse

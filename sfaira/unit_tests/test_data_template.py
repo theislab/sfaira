@@ -121,19 +121,23 @@ def test_load(dir_template: str = "./template_data", doi_sfaira_repr="10.1000/j.
                     # function.
                     dsg_f = DatasetGroup(datasets=dict([(x.id, ds.datasets[x.id]) for x in datasets_f]))
                     # Write this directly into sfaira installation so that it can be committed via git.
+                    fn = os.path.join(cwd, file_module + ".tsv")
                     dsg_f.write_ontology_class_map(
-                        fn=os.path.join(cwd, file_module + ".tsv"),
+                        fn=fn,
                         protected_writing=True,
                         n_suggest=4,
                     )
+                    dsg_f.clean_ontology_class_map(fn=fn)
     else:
         for k, v in ds.datasets.items():
             # Write this directly into sfaira installation so that it can be committed via git.
+            fn = os.path.join("/".join(file_path.split("/")[:-1]), v.fn_ontology_class_map_tsv)
             v.write_ontology_class_map(
-                fn=os.path.join("/".join(file_path.split("/")[:-1]), v.fn_ontology_class_map_tsv),
+                fn=fn,
                 protected_writing=True,
                 n_suggest=10,
             )
+            v.clean_ontology_class_map(fn=fn)
 
     # ToDo: conflicts are not automatically resolved, please go back to
     #  https://www.ebi.ac.uk/ols/ontologies/cl

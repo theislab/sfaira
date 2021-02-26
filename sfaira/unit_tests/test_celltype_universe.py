@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import unittest
 
-from sfaira.versions.metadata import OntologyObo, ORGANISM_DICT
+from sfaira.versions.metadata import OntologyObo
 
 
 class TestCellTypeUniverse(unittest.TestCase):

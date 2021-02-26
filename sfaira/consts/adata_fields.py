@@ -1,16 +1,13 @@
 import numpy as np
 from typing import List
 
-from sfaira.versions.metadata import OntologyList
-from sfaira.versions.metadata import ONTOLOGY_CELLTYPES, ONTOLOGY_UBERON, ONTOLOGY_HSAPDV, ONTOLOGY_MMUSDV, ONTOLOGY_SLC
-
 """
 The classes in this file are containers of field names and element entries that are used in streamlined adata objects
 in sfaira and in associated data bases.
 """
 
 
-class ADATA_IDS_BASE:
+class AdataIdsBase:
     """
     Base class of minimal constant field names of anndata.AnnData object entries, such as .uns keys and .obs columns.
     """
@@ -125,7 +122,7 @@ class ADATA_IDS_BASE:
         return self._year
 
 
-class ADATA_IDS_EXTENDED(ADATA_IDS_BASE):
+class AdataIdsExtended(AdataIdsBase):
     """
     Base class with extended set of constant field names of anndata.AnnData object entries, such as .uns keys and .obs columns.
     """
@@ -156,7 +153,7 @@ class ADATA_IDS_EXTENDED(ADATA_IDS_BASE):
         return self._state_exact
 
 
-class ADATA_IDS_SFAIRA(ADATA_IDS_EXTENDED):
+class AdataIdsSfaira(AdataIdsExtended):
     """
     Class of constant field names of anndata.AnnData object entries, such as .uns keys and .obs columns.
     """
@@ -194,21 +191,9 @@ class ADATA_IDS_SFAIRA(ADATA_IDS_EXTENDED):
         self._mapped_features = "mapped_features"
         self._remove_gene_version = "remove_gene_version"
 
-        # Allowed field values:
-        self.age_allowed_entries = None
-        self.cell_ontology_class_allowed_entries = ONTOLOGY_CELLTYPES
-        self.dev_stage_allowed_entries = None
-        self.ethnicity_allowed_entries = None
-        self.healthy_allowed_entries = [True, False]
-        self.normalization_allowed_entries = None
-        self.organ_allowed_entries = ONTOLOGY_UBERON
-        self.organism_allowed_entries = OntologyList(terms=["mouse", "human"])
-        self.protocol_allowed_entries = ONTOLOGY_SLC
-        self.sex_allowed_entries = OntologyList(terms=["female", "male"])
-        self.subtissue_allowed_entries = None
-        self.year_allowed_entries = list(range(2000, 3000))
-        # Free fields that are not constrained:
-        # _author, _download_url_data, _download_url_meta, _doi, _id, _state_exact
+        self.classmap_source_key = "source"
+        self.classmap_target_key = "target"
+        self.classmap_target_id_key = "target_id"
 
         self.unknown_celltype_name = "unknown"
         self.unknown_celltype_identifiers = ["nan", "none", "unknown", np.nan, None]
@@ -226,7 +211,7 @@ class ADATA_IDS_SFAIRA(ADATA_IDS_EXTENDED):
         return self._remove_gene_version
 
 
-class ADATA_IDS_CELLXGENE(ADATA_IDS_EXTENDED):
+class ADATA_IDS_CELLXGENE(AdataIdsExtended):
     """
     Class of constant field names of anndata.AnnData object entries, such as .uns keys and .obs columns in cellxgene
     objects.
@@ -280,3 +265,6 @@ class ADATA_IDS_CELLXGENE(ADATA_IDS_EXTENDED):
     @property
     def disease_state_healthy(self) -> str:
         return self._disease_state_healthy
+
+
+ADATA_IDS_SFAIRA = AdataIdsSfaira()
