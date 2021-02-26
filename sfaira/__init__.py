@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """A Data and Model Zoo for Single-Cell Genomics."""
 
-import sfaira.consts as consts
+import sfaira.consts
 import sfaira.data
 import sfaira.genomes
 import sfaira.interface as ui

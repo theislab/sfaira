@@ -5,7 +5,7 @@ import pandas as pd
 from typing import Union
 import unittest
 
-from sfaira.unit_tests.external import ModelZoo, ModelZooCelltype, ModelZooEmbedding
+from sfaira.interface.model_zoo import ModelZoo, ModelZooCelltype, ModelZooEmbedding
 
 
 class _TestZoo:

@@ -6,7 +6,7 @@ from sfaira.versions.metadata import OntologyUberon, OntologyHsapdv, OntologyMmu
 class OntologyContainerSfaira:
 
     def __init__(self):
-        self.age_allowed_entries = None
+        self.ontology_age = None
         self._ontology_cell_types = None
         self.ontology_cell_types = "v2021-02-01"
         self.ontology_dev_stage = None

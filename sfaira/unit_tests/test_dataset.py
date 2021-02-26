@@ -7,7 +7,7 @@ from sfaira.data import DatasetSuperGroup
 from sfaira.data import DatasetSuperGroupSfaira
 
 
-class TestDatasetGroups(unittest.TestCase):
+class TestDatasetGroupSfaira(unittest.TestCase):
     dir_data: str = "./test_data"
     dir_meta: str = "./test_data/meta"
 
