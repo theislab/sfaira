@@ -8,6 +8,7 @@ import pandas as pd
 from typing import List, Union
 
 from sfaira.versions.metadata import CelltypeUniverse
+from sfaira.consts import ONTOLOGY_CONTAINER
 from sfaira.versions.topology_versions import Topologies
 
 
@@ -472,4 +473,8 @@ class ModelZooCelltype(ModelZoo):
             model_type=self.model_type,
             topology_id=self.model_topology
         )
-        self.celltypes = CelltypeUniverse(organism=self.organism).load_target_universe(organ=self.organ)
+        self.celltypes = CelltypeUniverse(
+            cl=ONTOLOGY_CONTAINER.ontology_cell_types,
+            uberon=ONTOLOGY_CONTAINER.ontology_organ,
+            organism=self.organism
+        ).load_target_universe(organ=self.organ)
