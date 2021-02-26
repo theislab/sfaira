@@ -65,9 +65,10 @@ class DatasetBase(abc.ABC):
     genome: Union[None, str]
 
     _age: Union[None, str]
+    _assay: Union[None, str]
     _author: Union[None, str]
     _bio_sample: Union[None, str]
-    _dev_stage: Union[None, str]
+    _development_stage: Union[None, str]
     _doi: Union[None, str]
     _download_url_data: Union[Tuple[List[None]], Tuple[List[str]], None]
     _download_url_meta: Union[Tuple[List[None]], Tuple[List[str]], None]
@@ -79,7 +80,6 @@ class DatasetBase(abc.ABC):
     _normalization: Union[None, str]
     _organ: Union[None, str]
     _organism: Union[None, str]
-    _protocol: Union[None, str]
     _sex: Union[None, str]
     _source: Union[None, str]
     _state_exact: Union[None, str]
@@ -87,16 +87,16 @@ class DatasetBase(abc.ABC):
     _year: Union[None, int]
 
     _age_obs_key: Union[None, str]
+    _assay_obs_key: Union[None, str]
     _cellontology_id_obs_key: Union[None, str]
     _cellontology_original_obs_key: Union[None, str]
-    _dev_stage_obs_key: Union[None, str]
+    _development_stage_obs_key: Union[None, str]
     _ethnicity_obs_key: Union[None, str]
     _healthy_obs_key: Union[None, str]
     _healthy_obs_key: Union[None, str]
     _individual: Union[None, str]
     _organ_obs_key: Union[None, str]
     _organism_obs_key: Union[None, str]
-    _protocol_obs_key: Union[None, str]
     _bio_sample_obs_key: Union[None, str]
     _sex_obs_key: Union[None, str]
     _state_exact_obs_key: Union[None, str]
@@ -131,7 +131,7 @@ class DatasetBase(abc.ABC):
         self._age = None
         self._author = None
         self._bio_sample = None
-        self._dev_stage = None
+        self._development_stage = None
         self._doi = None
         self._download_url_data = None
         self._download_url_meta = None
@@ -143,7 +143,7 @@ class DatasetBase(abc.ABC):
         self._normalization = None
         self._organ = None
         self._organism = None
-        self._protocol = None
+        self._assay = None
         self._sex = None
         self._source = None
         self._state_exact = None
@@ -153,13 +153,13 @@ class DatasetBase(abc.ABC):
         self._age_obs_key = None
         self._cellontology_id_obs_key = None
         self._cellontology_original_obs_key = None
-        self._dev_stage_obs_key = None
+        self._development_stage_obs_key = None
         self._ethnicity_obs_key = None
         self._healthy_obs_key = None
         self._individual_obs_key = None
         self._organ_obs_key = None
         self._organism_obs_key = None
-        self._protocol_obs_key = None
+        self._assay_obs_key = None
         self._bio_sample_obs_key = None
         self._sex_obs_key = None
         self._state_exact_obs_key = None
@@ -600,7 +600,7 @@ class DatasetBase(abc.ABC):
             [self.age, self._adata_ids_sfaira.age, self.age_obs_key,
              self._ontology_container_sfaira.ontology_age],
             [self.bio_sample, self._adata_ids_sfaira.bio_sample, self.bio_sample_obs_key, None],
-            [self.dev_stage, self._adata_ids_sfaira.dev_stage, self.dev_stage_obs_key,
+            [self.development_stage, self._adata_ids_sfaira.dev_stage, self.development_stage_obs_key,
              self._ontology_container_sfaira.ontology_dev_stage],
             [self.ethnicity, self._adata_ids_sfaira.ethnicity, self.ethnicity_obs_key,
              self._ontology_container_sfaira.ontology_ethnicity],
@@ -609,7 +609,7 @@ class DatasetBase(abc.ABC):
             [self.individual, self._adata_ids_sfaira.individual, self.individual_obs_key, None],
             [self.organ, self._adata_ids_sfaira.organ, self.organ_obs_key,
              self._ontology_container_sfaira.ontology_organism],
-            [self.protocol, self._adata_ids_sfaira.protocol, self.protocol_obs_key,
+            [self.assay, self._adata_ids_sfaira.protocol, self.assay_obs_key,
              self._ontology_container_sfaira.ontology_protocol],
             [self.sex, self._adata_ids_sfaira.sex, self.sex_obs_key,
              self._ontology_container_sfaira.ontology_sex],
@@ -1019,7 +1019,7 @@ class DatasetBase(abc.ABC):
         self.id = f"{clean(self.organism)}_" \
                   f"{clean(self.organ)}_" \
                   f"{self.year}_" \
-                  f"{clean(self.protocol)}_" \
+                  f"{clean(self.assay)}_" \
                   f"{clean(author)}_" \
                   f"{idx}_" \
                   f"{self.doi}"
@@ -1060,6 +1060,25 @@ class DatasetBase(abc.ABC):
                 # If data set was not yet loaded, it is unclear if annotation would be loaded in ._load(),
                 # if also no meta data is available, we do not know the status of the data set.
                 return None
+
+    @property
+    def assay(self) -> Union[None, str]:
+        if self._assay is not None:
+            return self._assay
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            if self.meta is not None and self._adata_ids_sfaira.protocol in self.meta.columns:
+                return self.meta[self._adata_ids_sfaira.protocol]
+            else:
+                return None
+
+    @assay.setter
+    def assay(self, x: str):
+        self.__erasing_protection(attr="protocol", val_old=self._assay, val_new=x)
+        self.__value_protection(attr="protocol", allowed=self._ontology_container_sfaira.ontology_protocol,
+                                attempted=x)
+        self._assay = x
 
     @property
     def author(self) -> str:
@@ -1105,9 +1124,9 @@ class DatasetBase(abc.ABC):
             return self.data_dir_base
 
     @property
-    def dev_stage(self) -> Union[None, str]:
-        if self._dev_stage is not None:
-            return self._dev_stage
+    def development_stage(self) -> Union[None, str]:
+        if self._development_stage is not None:
+            return self._development_stage
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
@@ -1116,12 +1135,12 @@ class DatasetBase(abc.ABC):
             else:
                 return None
 
-    @dev_stage.setter
-    def dev_stage(self, x: str):
-        self.__erasing_protection(attr="dev_stage", val_old=self._dev_stage, val_new=x)
+    @development_stage.setter
+    def development_stage(self, x: str):
+        self.__erasing_protection(attr="dev_stage", val_old=self._development_stage, val_new=x)
         self.__value_protection(attr="dev_stage", allowed=self._ontology_container_sfaira.ontology_dev_stage,
                                 attempted=x)
-        self._dev_stage = x
+        self._development_stage = x
 
     @property
     def doi(self) -> str:
@@ -1348,6 +1367,16 @@ class DatasetBase(abc.ABC):
         self.__erasing_protection(attr="age_obs_key", val_old=self._age_obs_key, val_new=x)
         self._age_obs_key = x
 
+
+    @property
+    def assay_obs_key(self) -> str:
+        return self._assay_obs_key
+
+    @assay_obs_key.setter
+    def assay_obs_key(self, x: str):
+        self.__erasing_protection(attr="assay_obs_key", val_old=self._assay_obs_key, val_new=x)
+        self._assay_obs_key = x
+
     @property
     def bio_sample_obs_key(self) -> str:
         return self._bio_sample_obs_key
@@ -1377,13 +1406,13 @@ class DatasetBase(abc.ABC):
         self._cellontology_original_obs_key = x
 
     @property
-    def dev_stage_obs_key(self) -> str:
-        return self._dev_stage_obs_key
+    def development_stage_obs_key(self) -> str:
+        return self._development_stage_obs_key
 
-    @dev_stage_obs_key.setter
-    def dev_stage_obs_key(self, x: str):
-        self.__erasing_protection(attr="dev_stage_obs_key", val_old=self._dev_stage_obs_key, val_new=x)
-        self._dev_stage_obs_key = x
+    @development_stage_obs_key.setter
+    def development_stage_obs_key(self, x: str):
+        self.__erasing_protection(attr="dev_stage_obs_key", val_old=self._development_stage_obs_key, val_new=x)
+        self._development_stage_obs_key = x
 
     @property
     def ethnicity_obs_key(self) -> str:
@@ -1429,15 +1458,6 @@ class DatasetBase(abc.ABC):
     def organism_obs_key(self, x: str):
         self.__erasing_protection(attr="organism_obs_key", val_old=self._organism_obs_key, val_new=x)
         self._organism_obs_key = x
-
-    @property
-    def protocol_obs_key(self) -> str:
-        return self._protocol_obs_key
-
-    @protocol_obs_key.setter
-    def protocol_obs_key(self, x: str):
-        self.__erasing_protection(attr="protocol_obs_key", val_old=self._protocol_obs_key, val_new=x)
-        self._protocol_obs_key = x
 
     @property
     def sex_obs_key(self) -> str:
@@ -1501,25 +1521,6 @@ class DatasetBase(abc.ABC):
         self.__erasing_protection(attr="organism", val_old=self._organism, val_new=x)
         self.__value_protection(attr="organism", allowed=self._ontology_container_sfaira.ontology_organism, attempted=x)
         self._organism = x
-
-    @property
-    def protocol(self) -> Union[None, str]:
-        if self._protocol is not None:
-            return self._protocol
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids_sfaira.protocol in self.meta.columns:
-                return self.meta[self._adata_ids_sfaira.protocol]
-            else:
-                return None
-
-    @protocol.setter
-    def protocol(self, x: str):
-        self.__erasing_protection(attr="protocol", val_old=self._protocol, val_new=x)
-        self.__value_protection(attr="protocol", allowed=self._ontology_container_sfaira.ontology_protocol,
-                                attempted=x)
-        self._protocol = x
 
     @property
     def sex(self) -> Union[None, str]:
