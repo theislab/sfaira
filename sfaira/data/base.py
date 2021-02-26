@@ -33,8 +33,7 @@ def map_fn(inputs):
     :param inputs:
     :return: None if function ran, error report otherwise
     """
-    ds, remove_gene_version, match_to_reference, load_raw, allow_caching, func, \
-    kwargs_func = inputs
+    ds, remove_gene_version, match_to_reference, load_raw, allow_caching, func, kwargs_func = inputs
     try:
         ds.load(
             remove_gene_version=remove_gene_version,
@@ -482,17 +481,14 @@ class DatasetBase(abc.ABC):
                 # last element of each block as block boundaries:
                 # n_genes - 1 - idx_map_sorted_rev.index(x)
                 # Note that the blocks are named as positive integers starting at 1, without gaps.
-                counts = np.concatenate([
-                                            np.sum(x, axis=1, keepdims=True)
-                                            for x in np.split(
-                        self.adata[:, idx_map_sorted_fwd].X,  # forward ordered data
-                        indices_or_sections=[
-                            n_genes - 1 - idx_map_sorted_rev.index(x)  # last occurrence of element in forward order
-                            for x in np.arange(0, len(new_index_collapsed) - 1)  # -1: do not need end of last partition
-                        ],
-                        axis=1
-                    )
-                                        ][::-1], axis=1)
+                counts = np.concatenate([np.sum(x, axis=1, keepdims=True)
+                                         for x in np.split(self.adata[:, idx_map_sorted_fwd].X,  # forward ordered data
+                                                           indices_or_sections=[
+                                                               n_genes - 1 - idx_map_sorted_rev.index(x)  # last occurrence of element in forward order
+                                                               for x in np.arange(0, len(new_index_collapsed) - 1)],  # -1: do not need end of last partition
+                                                           axis=1
+                                                           )
+                                         ][::-1], axis=1)
                 # Remove varm and populate var with first occurrence only:
                 obs_names = self.adata.obs_names
                 self.adata = anndata.AnnData(
