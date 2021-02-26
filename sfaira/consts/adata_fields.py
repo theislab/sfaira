@@ -30,12 +30,16 @@ class AdataIdsBase:
     _normalization: str
     _organ: str
     _organism: str
-    _protocol: str
+    _assay: str
     _year: str
 
     @property
     def annotated(self) -> str:
         return self._annotated
+
+    @property
+    def assay(self) -> str:
+        return self._assay
 
     @property
     def author(self) -> str:
@@ -114,10 +118,6 @@ class AdataIdsBase:
         return self._organism
 
     @property
-    def protocol(self) -> str:
-        return self._protocol
-
-    @property
     def year(self) -> str:
         return self._year
 
@@ -128,7 +128,7 @@ class AdataIdsExtended(AdataIdsBase):
     """
     _age: str
     _bio_sample: str
-    _dev_stage: str
+    _development_stage: str
     _ethnicity: str
     _individual: str
     _sex: str
@@ -144,8 +144,8 @@ class AdataIdsExtended(AdataIdsBase):
         return self._bio_sample
 
     @property
-    def dev_stage(self) -> str:
-        return self._dev_stage
+    def development_stage(self) -> str:
+        return self._development_stage
 
     @property
     def ethnicity(self) -> str:
@@ -200,7 +200,7 @@ class AdataIdsSfaira(AdataIdsExtended):
         self._year = "year"
 
         self._age = "age"
-        self._dev_stage = "dev_stage"
+        self._development_stage = "development_stage"
         self._ethnicity = "ethnicity"
         self._sex = "sex"
         self._state_exact = "state_exact"
@@ -239,6 +239,7 @@ class AdataIdsCellxgene(AdataIdsExtended):
     accepted_file_names: List[str]
 
     def __init__(self):
+        self._assay = "assay"
         self._cell_types_original = "free_annotation"
         self._cell_ontology_class = "cell_type"
         self._cell_ontology_id = "cell_type_ontology_term_id"
@@ -257,12 +258,11 @@ class AdataIdsCellxgene(AdataIdsExtended):
         self._normalization = ""  # is always "raw"
         self._organ = ""  # TODO
         self._organism = "organism"
-        self._protocol = "assay"
         self._year = ""  # TODO
 
         self._age = "age"
         self._author = "contributors"
-        self._dev_stage = "development_stage"
+        self._development_stage = "development_stage"
         self._ethnicity = "ethnicity"
         self._sex = "sex"
         self._state_exact = "disease"

@@ -600,7 +600,7 @@ class DatasetBase(abc.ABC):
             [self.age, self._adata_ids_sfaira.age, self.age_obs_key,
              self._ontology_container_sfaira.ontology_age],
             [self.bio_sample, self._adata_ids_sfaira.bio_sample, self.bio_sample_obs_key, None],
-            [self.development_stage, self._adata_ids_sfaira.dev_stage, self.development_stage_obs_key,
+            [self.development_stage, self._adata_ids_sfaira.development_stage, self.development_stage_obs_key,
              self._ontology_container_sfaira.ontology_dev_stage],
             [self.ethnicity, self._adata_ids_sfaira.ethnicity, self.ethnicity_obs_key,
              self._ontology_container_sfaira.ontology_ethnicity],
@@ -609,7 +609,7 @@ class DatasetBase(abc.ABC):
             [self.individual, self._adata_ids_sfaira.individual, self.individual_obs_key, None],
             [self.organ, self._adata_ids_sfaira.organ, self.organ_obs_key,
              self._ontology_container_sfaira.ontology_organism],
-            [self.assay, self._adata_ids_sfaira.protocol, self.assay_obs_key,
+            [self.assay, self._adata_ids_sfaira.assay, self.assay_obs_key,
              self._ontology_container_sfaira.ontology_protocol],
             [self.sex, self._adata_ids_sfaira.sex, self.sex_obs_key,
              self._ontology_container_sfaira.ontology_sex],
@@ -974,13 +974,13 @@ class DatasetBase(abc.ABC):
         for x in [
             self._adata_ids_sfaira.age,
             self._adata_ids_sfaira.bio_sample,
-            self._adata_ids_sfaira.dev_stage,
+            self._adata_ids_sfaira.development_stage,
             self._adata_ids_sfaira.ethnicity,
             self._adata_ids_sfaira.healthy,
             self._adata_ids_sfaira.individual,
             self._adata_ids_sfaira.organ,
             self._adata_ids_sfaira.organism,
-            self._adata_ids_sfaira.protocol,
+            self._adata_ids_sfaira.assay,
             self._adata_ids_sfaira.sex,
             self._adata_ids_sfaira.state_exact,
             self._adata_ids_sfaira.tech_sample,
@@ -1068,8 +1068,8 @@ class DatasetBase(abc.ABC):
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids_sfaira.protocol in self.meta.columns:
-                return self.meta[self._adata_ids_sfaira.protocol]
+            if self.meta is not None and self._adata_ids_sfaira.assay in self.meta.columns:
+                return self.meta[self._adata_ids_sfaira.assay]
             else:
                 return None
 
@@ -1130,8 +1130,8 @@ class DatasetBase(abc.ABC):
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids_sfaira.dev_stage in self.meta.columns:
-                return self.meta[self._adata_ids_sfaira.dev_stage]
+            if self.meta is not None and self._adata_ids_sfaira.development_stage in self.meta.columns:
+                return self.meta[self._adata_ids_sfaira.development_stage]
             else:
                 return None
 
@@ -2062,11 +2062,11 @@ class DatasetGroup:
         for adata in adata_ls:
             adata.obs[self._adata_ids_sfaira.author] = adata.uns[self._adata_ids_sfaira.author]
             adata.obs[self._adata_ids_sfaira.year] = adata.uns[self._adata_ids_sfaira.year]
-            adata.obs[self._adata_ids_sfaira.protocol] = adata.uns[self._adata_ids_sfaira.protocol]
+            adata.obs[self._adata_ids_sfaira.assay] = adata.uns[self._adata_ids_sfaira.assay]
             if self._adata_ids_sfaira.normalization in adata.uns.keys():
                 adata.obs[self._adata_ids_sfaira.normalization] = adata.uns[self._adata_ids_sfaira.normalization]
-            if self._adata_ids_sfaira.dev_stage in adata.obs.columns:
-                adata.obs[self._adata_ids_sfaira.dev_stage] = adata.uns[self._adata_ids_sfaira.dev_stage]
+            if self._adata_ids_sfaira.development_stage in adata.obs.columns:
+                adata.obs[self._adata_ids_sfaira.development_stage] = adata.uns[self._adata_ids_sfaira.development_stage]
             adata.obs[self._adata_ids_sfaira.annotated] = adata.uns[self._adata_ids_sfaira.annotated]
         # Workaround related to anndata bugs:  # TODO remove this in future.
         for adata in adata_ls:
@@ -2079,9 +2079,9 @@ class DatasetGroup:
                     'neighbors',
                     self._adata_ids_sfaira.author,
                     self._adata_ids_sfaira.year,
-                    self._adata_ids_sfaira.protocol,
+                    self._adata_ids_sfaira.assay,
                     self._adata_ids_sfaira.normalization,
-                    self._adata_ids_sfaira.dev_stage,
+                    self._adata_ids_sfaira.development_stage,
                     self._adata_ids_sfaira.annotated,
                     self._adata_ids_sfaira.mapped_features,
                 ]
@@ -2533,10 +2533,10 @@ class DatasetSuperGroup:
             self._adata_ids_sfaira.author,
             self._adata_ids_sfaira.dataset,
             self._adata_ids_sfaira.cell_ontology_class,
-            self._adata_ids_sfaira.dev_stage,
+            self._adata_ids_sfaira.development_stage,
             self._adata_ids_sfaira.normalization,
             self._adata_ids_sfaira.organ,
-            self._adata_ids_sfaira.protocol,
+            self._adata_ids_sfaira.assay,
             self._adata_ids_sfaira.state_exact,
             self._adata_ids_sfaira.year,
         ]
