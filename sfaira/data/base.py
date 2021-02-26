@@ -388,8 +388,8 @@ class DatasetBase(abc.ABC):
         self._collapse_gene_versions(remove_gene_version=remove_gene_version)
         if match_to_reference:
             self._match_features_to_reference()
-    load.__doc__ += load_doc
 
+    load.__doc__ = load_doc
 
     def _convert_and_set_var_names(
             self,
@@ -1742,6 +1742,7 @@ class DatasetGroup:
             for k in datasets_to_remove:
                 del self.datasets[k]
             del adata_group
+
     load.__doc__ += load_doc
 
     def load_tobacked(
