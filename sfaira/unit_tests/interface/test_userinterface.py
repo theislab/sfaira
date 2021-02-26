@@ -3,7 +3,7 @@ import os
 from typing import Union
 import unittest
 
-from sfaira.unit_tests.external import UserInterface
+from sfaira.interface import UserInterface
 
 
 class TestUi(unittest.TestCase):
@@ -34,7 +34,7 @@ class TestUi(unittest.TestCase):
 
         :return:
         """
-        temp_fn = os.path.join(str(os.path.dirname(os.path.abspath(__file__))), 'test_data')
+        temp_fn = os.path.join(str(os.path.dirname(os.path.abspath(__file__))), '../test_data')
         self.ui = UserInterface(custom_repo=temp_fn, sfaira_repo=False)
 
     def _test_kipoi(self):
@@ -44,7 +44,7 @@ class TestUi(unittest.TestCase):
 
         :return:
         """
-        temp_fn = os.path.join(str(os.path.dirname(os.path.abspath(__file__))), 'test_data')
+        temp_fn = os.path.join(str(os.path.dirname(os.path.abspath(__file__))), '../test_data')
         self.ui = UserInterface(custom_repo=temp_fn, sfaira_repo=False)
         self.ui.compute_embedding_kipoi()
 

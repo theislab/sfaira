@@ -65,7 +65,7 @@ class TestZooKerasEmbedding(unittest.TestCase, _TestZoo):
     def init_zoo(self):
         package_dir = str(os.path.dirname(os.path.abspath(__file__)))
         lookup_table = pd.read_csv(
-            os.path.join(package_dir, 'test_data', 'model_lookuptable.csv'),
+            os.path.join(package_dir, '../test_data', 'model_lookuptable.csv'),
             header=0, index_col=0
         )
         self.zoo = ModelZooEmbedding(model_lookuptable=lookup_table)
@@ -83,7 +83,7 @@ class TestZooKerasCelltype(unittest.TestCase, _TestZoo):
     def init_zoo(self):
         package_dir = str(os.path.dirname(os.path.abspath(__file__)))
         lookup_table = pd.read_csv(
-            os.path.join(package_dir, 'test_data', 'model_lookuptable.csv'),
+            os.path.join(package_dir, '../test_data', 'model_lookuptable.csv'),
             header=0, index_col=0
         )
         self.zoo = ModelZooCelltype(model_lookuptable=lookup_table)

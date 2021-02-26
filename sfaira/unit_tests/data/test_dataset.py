@@ -8,8 +8,8 @@ from sfaira.data import DatasetSuperGroupSfaira
 
 
 class TestDatasetGroupSfaira(unittest.TestCase):
-    dir_data: str = "./test_data"
-    dir_meta: str = "./test_data/meta"
+    dir_data: str = "../test_data"
+    dir_meta: str = "../test_data/meta"
 
     def test_load(self):
         ds = DatasetSuperGroupSfaira(data_path=self.dir_data, meta_path=self.dir_meta, cache_path=self.dir_data)
@@ -25,8 +25,8 @@ class TestDatasetGroupSfaira(unittest.TestCase):
 
 
 class TestDatasetSuperGroups(unittest.TestCase):
-    dir_data: str = "./test_data"
-    dir_meta: str = "./test_data/meta"
+    dir_data: str = "../test_data"
+    dir_meta: str = "../test_data/meta"
 
     def test_load(self):
         ds = DatasetSuperGroupSfaira(data_path=self.dir_data, meta_path=self.dir_meta, cache_path=self.dir_data)

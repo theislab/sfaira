@@ -5,8 +5,8 @@ import tensorflow as tf
 from typing import Union
 import unittest
 
-from sfaira.unit_tests.external import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
-from sfaira.unit_tests.external import Topologies
+from sfaira.estimators import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
+from sfaira.versions.topology_versions import Topologies
 
 
 class _TestEstimator:
