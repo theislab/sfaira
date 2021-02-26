@@ -74,6 +74,7 @@ class DatasetBase(abc.ABC):
     _ethnicity: Union[None, str]
     _healthy: Union[None, bool]
     _id: Union[None, str]
+    _individual: Union[None, str]
     _ncells: Union[None, int]
     _normalization: Union[None, str]
     _organ: Union[None, str]
@@ -92,6 +93,7 @@ class DatasetBase(abc.ABC):
     _ethnicity_obs_key: Union[None, str]
     _healthy_obs_key: Union[None, str]
     _healthy_obs_key: Union[None, str]
+    _individual: Union[None, str]
     _organ_obs_key: Union[None, str]
     _organism_obs_key: Union[None, str]
     _protocol_obs_key: Union[None, str]
@@ -136,6 +138,7 @@ class DatasetBase(abc.ABC):
         self._ethnicity = None
         self._healthy = None
         self._id = None
+        self._individual = None
         self._ncells = None
         self._normalization = None
         self._organ = None
@@ -153,6 +156,7 @@ class DatasetBase(abc.ABC):
         self._dev_stage_obs_key = None
         self._ethnicity_obs_key = None
         self._healthy_obs_key = None
+        self._individual_obs_key = None
         self._organ_obs_key = None
         self._organism_obs_key = None
         self._protocol_obs_key = None
@@ -602,6 +606,7 @@ class DatasetBase(abc.ABC):
              self._ontology_container_sfaira.ontology_ethnicity],
             [self.healthy, self._adata_ids_sfaira.healthy, self.healthy_obs_key,
              self._ontology_container_sfaira.ontology_healthy],
+            [self.individual, self._adata_ids_sfaira.individual, self.individual_obs_key, None],
             [self.organ, self._adata_ids_sfaira.organ, self.organ_obs_key,
              self._ontology_container_sfaira.ontology_organism],
             [self.protocol, self._adata_ids_sfaira.protocol, self.protocol_obs_key,
@@ -972,6 +977,7 @@ class DatasetBase(abc.ABC):
             self._adata_ids_sfaira.dev_stage,
             self._adata_ids_sfaira.ethnicity,
             self._adata_ids_sfaira.healthy,
+            self._adata_ids_sfaira.individual,
             self._adata_ids_sfaira.organ,
             self._adata_ids_sfaira.organism,
             self._adata_ids_sfaira.protocol,
@@ -1258,6 +1264,23 @@ class DatasetBase(abc.ABC):
         self._id = x
 
     @property
+    def individual(self) -> Union[None, str]:
+        if self._individual is not None:
+            return self._individual
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            if self.meta is not None and self._adata_ids_sfaira.individual in self.meta.columns:
+                return self.meta[self._adata_ids_sfaira.individual]
+            else:
+                return None
+
+    @individual.setter
+    def individual(self, x: str):
+        self.__erasing_protection(attr="bio_sample", val_old=self._individual, val_new=x)
+        self._individual = x
+
+    @property
     def loaded(self) -> bool:
         """
         :return: Whether DataSet was loaded into memory.
@@ -1379,6 +1402,15 @@ class DatasetBase(abc.ABC):
     def healthy_obs_key(self, x: str):
         self.__erasing_protection(attr="healthy_obs_key", val_old=self._healthy_obs_key, val_new=x)
         self._healthy_obs_key = x
+
+    @property
+    def individual_obs_key(self) -> str:
+        return self._individual_obs_key
+
+    @individual_obs_key.setter
+    def individual_obs_key(self, x: str):
+        self.__erasing_protection(attr="individual_obs_key", val_old=self._individual_obs_key, val_new=x)
+        self._individual_obs_key = x
 
     @property
     def organ_obs_key(self) -> str:

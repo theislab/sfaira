@@ -130,6 +130,7 @@ class AdataIdsExtended(AdataIdsBase):
     _bio_sample: str
     _dev_stage: str
     _ethnicity: str
+    _individual: str
     _sex: str
     _state_exact: str
     _tech_sample: str
@@ -149,6 +150,10 @@ class AdataIdsExtended(AdataIdsBase):
     @property
     def ethnicity(self) -> str:
         return self._ethnicity
+
+    @property
+    def individual(self) -> str:
+        return self._individual
 
     @property
     def sex(self) -> str:
@@ -185,6 +190,7 @@ class AdataIdsSfaira(AdataIdsExtended):
         self._gene_id_names = "names"
         self._healthy = "healthy"
         self._id = "id"
+        self._individual = "individual"
         self._ncells = "ncells"
         self._normalization = "normalization"
         self._organ = "organ"
