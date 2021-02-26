@@ -265,7 +265,3 @@ class AdataIdsCellxgene(AdataIdsExtended):
     @property
     def disease_state_healthy(self) -> str:
         return self._disease_state_healthy
-
-
-ADATA_IDS_SFAIRA = AdataIdsSfaira()
-ADATA_IDS_CELLXGENE = AdataIdsCellxgene()

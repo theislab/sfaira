@@ -27,6 +27,3 @@ class OntologyContainerSfaira:
     @ontology_cell_types.setter
     def ontology_cell_types(self, x: str):
         self._ontology_cell_types = OntologyCelltypes(branch=x)
-
-
-ONTOLOGY_CONTAINER = OntologyContainerSfaira()
