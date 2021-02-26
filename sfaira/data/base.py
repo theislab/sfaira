@@ -33,8 +33,7 @@ def map_fn(inputs):
     :param inputs:
     :return: None if function ran, error report otherwise
     """
-    ds, remove_gene_version, match_to_reference, load_raw, allow_caching, func, \
-        kwargs_func = inputs
+    ds, remove_gene_version, match_to_reference, load_raw, allow_caching, func, kwargs_func = inputs
     try:
         ds.load(
             remove_gene_version=remove_gene_version,
@@ -52,8 +51,16 @@ def map_fn(inputs):
         return ds.id, e,
 
 
-class DatasetBase(abc.ABC):
+load_doc = \
+    """
+    :param remove_gene_version: Remove gene version string from ENSEMBL ID so that different versions in different data sets are superimposed.
+    :param match_to_reference: Reference genomes name or False to keep original feature space.
+    :param load_raw: Loads unprocessed version of data if available in data loader.
+    :param allow_caching: Whether to allow method to cache adata object for faster re-loading.
+    """
 
+
+class DatasetBase(abc.ABC):
     adata: Union[None, anndata.AnnData]
     class_maps: dict
     _meta: Union[None, pandas.DataFrame]
@@ -341,15 +348,6 @@ class DatasetBase(abc.ABC):
             load_raw: bool = False,
             allow_caching: bool = True,
     ):
-        """
-
-        :param remove_gene_version: Remove gene version string from ENSEMBL ID so that different versions in different
-            data sets are superimposed.
-        :param match_to_reference: Reference genomes name or False to keep original feature space.
-        :param load_raw: Loads unprocessed version of data if available in data loader.
-        :param allow_caching: Whether to allow method to cache adata object for faster re-loading.
-        :return:
-        """
         if match_to_reference and not remove_gene_version:
             warnings.warn("it is not recommended to enable matching the feature space to a genomes reference"
                           "while not removing gene versions. this can lead to very poor matching results")
@@ -389,6 +387,8 @@ class DatasetBase(abc.ABC):
         self._collapse_gene_versions(remove_gene_version=remove_gene_version)
         if match_to_reference:
             self._match_features_to_reference()
+
+    load.__doc__ = load_doc
 
     def _convert_and_set_var_names(
             self,
@@ -481,17 +481,14 @@ class DatasetBase(abc.ABC):
                 # last element of each block as block boundaries:
                 # n_genes - 1 - idx_map_sorted_rev.index(x)
                 # Note that the blocks are named as positive integers starting at 1, without gaps.
-                counts = np.concatenate([
-                    np.sum(x, axis=1, keepdims=True)
-                    for x in np.split(
-                        self.adata[:, idx_map_sorted_fwd].X,  # forward ordered data
-                        indices_or_sections=[
-                            n_genes - 1 - idx_map_sorted_rev.index(x)  # last occurrence of element in forward order
-                            for x in np.arange(0, len(new_index_collapsed) - 1)  # -1: do not need end of last partition
-                        ],
-                        axis=1
-                    )
-                ][::-1], axis=1)
+                counts = np.concatenate([np.sum(x, axis=1, keepdims=True)
+                                         for x in np.split(self.adata[:, idx_map_sorted_fwd].X,  # forward ordered data
+                                                           indices_or_sections=[
+                                                               n_genes - 1 - idx_map_sorted_rev.index(x)  # last occurrence of element in forward order
+                                                               for x in np.arange(0, len(new_index_collapsed) - 1)],  # -1: do not need end of last partition
+                                                           axis=1
+                                                           )
+                                         ][::-1], axis=1)
                 # Remove varm and populate var with first occurrence only:
                 obs_names = self.adata.obs_names
                 self.adata = anndata.AnnData(
@@ -1694,10 +1691,6 @@ class DatasetGroup:
         In this setting, datasets are removed from memory after the function has been executed.
 
         :param annotated_only:
-        :param remove_gene_version: See .load().
-        :param match_to_reference: See .load().
-        :param load_raw: See .load().
-        :param allow_caching: See .load().
         :param processes: Processes to parallelise loading over. Uses python multiprocessing if > 1, for loop otherwise.
         :param func: Function to run on loaded datasets. map_fun should only take one argument, which is a Dataset
             instance. The return can be empty:
@@ -1706,7 +1699,6 @@ class DatasetGroup:
                     # code manipulating dataset and generating output x.
                     return x
         :param kwargs_func: Kwargs of func.
-        :return:
         """
         args = [
             remove_gene_version,
@@ -1746,6 +1738,8 @@ class DatasetGroup:
             for k in datasets_to_remove:
                 del self.datasets[k]
             del adata_group
+
+    load.__doc__ += load_doc
 
     def load_tobacked(
             self,
@@ -1798,7 +1792,6 @@ class DatasetGroup:
 
         :param fn: File name of csv to load class maps from.
         :param protected_writing: Only write if file was not already found.
-        :return:
         """
         tab = []
         for k, v in self.datasets.items():
