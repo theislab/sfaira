@@ -18,6 +18,8 @@ dataset_wise:
 dataset_or_observation_wise:
     age:
     age_obs_key: "Age"
+    bio_sample:
+    bio_sample_obs_key:
     dev_stage:
     dev_stage_obs_key:
     ethnicity:
@@ -34,10 +36,10 @@ dataset_or_observation_wise:
     sex_obs_key: "Sex"
     state_exact:
     state_exact_obs_key: "state_exact"
+    tech_sample:
+    tech_sample_obs_key:
 observation_wise:
     cellontology_original_obs_key: "Cluster"
-    bio_sample_obs_key:
-    tech_sample_obs_key:
 feature_wise:
     var_ensembl_col:
     var_symbol_col: "index"

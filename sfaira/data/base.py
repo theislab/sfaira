@@ -66,6 +66,7 @@ class DatasetBase(abc.ABC):
 
     _age: Union[None, str]
     _author: Union[None, str]
+    _bio_sample: Union[None, str]
     _dev_stage: Union[None, str]
     _doi: Union[None, str]
     _download_url_data: Union[Tuple[List[None]], Tuple[List[str]], None]
@@ -81,21 +82,23 @@ class DatasetBase(abc.ABC):
     _sex: Union[None, str]
     _source: Union[None, str]
     _state_exact: Union[None, str]
+    _bio_sample: Union[None, str]
     _year: Union[None, int]
 
-    _obs_key_age: Union[None, str]
-    _obs_key_cellontology_id: Union[None, str]
-    _obs_key_cellontology_original: Union[None, str]
-    _obs_key_dev_stage: Union[None, str]
-    _obs_key_ethnicity: Union[None, str]
-    _obs_key_healthy: Union[None, str]
-    _obs_key_healthy: Union[None, str]
-    _obs_key_organ: Union[None, str]
-    _obs_key_organism: Union[None, str]
-    _obs_key_protocol: Union[None, str]
-    _obs_key_sample: Union[None, str]
-    _obs_key_sex: Union[None, str]
-    _obs_key_state_exact: Union[None, str]
+    _age_obs_key: Union[None, str]
+    _cellontology_id_obs_key: Union[None, str]
+    _cellontology_original_obs_key: Union[None, str]
+    _dev_stage_obs_key: Union[None, str]
+    _ethnicity_obs_key: Union[None, str]
+    _healthy_obs_key: Union[None, str]
+    _healthy_obs_key: Union[None, str]
+    _organ_obs_key: Union[None, str]
+    _organism_obs_key: Union[None, str]
+    _protocol_obs_key: Union[None, str]
+    _bio_sample_obs_key: Union[None, str]
+    _sex_obs_key: Union[None, str]
+    _state_exact_obs_key: Union[None, str]
+    _tech_sample_obs_key: Union[None, str]
 
     _healthy_state_healthy: Union[None, str]
 
@@ -125,6 +128,7 @@ class DatasetBase(abc.ABC):
 
         self._age = None
         self._author = None
+        self._bio_sample = None
         self._dev_stage = None
         self._doi = None
         self._download_url_data = None
@@ -140,20 +144,22 @@ class DatasetBase(abc.ABC):
         self._sex = None
         self._source = None
         self._state_exact = None
+        self._tech_sample = None
         self._year = None
 
-        self._obs_key_age = None
-        self._obs_key_cellontology_id = None
-        self._obs_key_cellontology_original = None
-        self._obs_key_dev_stage = None
-        self._obs_key_ethnicity = None
-        self._obs_key_healthy = None
-        self._obs_key_organ = None
-        self._obs_key_organism = None
-        self._obs_key_protocol = None
-        self._obs_key_sample = None
-        self._obs_key_sex = None
-        self._obs_key_state_exact = None
+        self._age_obs_key = None
+        self._cellontology_id_obs_key = None
+        self._cellontology_original_obs_key = None
+        self._dev_stage_obs_key = None
+        self._ethnicity_obs_key = None
+        self._healthy_obs_key = None
+        self._organ_obs_key = None
+        self._organism_obs_key = None
+        self._protocol_obs_key = None
+        self._bio_sample_obs_key = None
+        self._sex_obs_key = None
+        self._state_exact_obs_key = None
+        self._tech_sample_obs_key = None
 
         self._healthy_state_healthy = None
 
@@ -587,23 +593,25 @@ class DatasetBase(abc.ABC):
         # Set cell-wise or data set-wide attributes (.uns / .obs):
         # These are saved in .uns if they are data set wide to save memory.
         for x, y, z, v in (
-                [self.age, self._adata_ids_sfaira.age, self.age_obs_key,
-                 self._ontology_container_sfaira.ontology_age],
-                [self.dev_stage, self._adata_ids_sfaira.dev_stage, self.dev_stage_obs_key,
-                 self._ontology_container_sfaira.ontology_dev_stage],
-                [self.ethnicity, self._adata_ids_sfaira.ethnicity, self.ethnicity_obs_key,
-                 self._ontology_container_sfaira.ontology_ethnicity],
-                [self.healthy, self._adata_ids_sfaira.healthy, self.healthy_obs_key,
-                 self._ontology_container_sfaira.ontology_healthy],
-                [self.organ, self._adata_ids_sfaira.organ, self.organ_obs_key,
-                 self._ontology_container_sfaira.ontology_organism],
-                [self.protocol, self._adata_ids_sfaira.protocol, self.protocol_obs_key,
-                 self._ontology_container_sfaira.ontology_protocol],
-                [self.sex, self._adata_ids_sfaira.sex, self.sex_obs_key,
-                 self._ontology_container_sfaira.ontology_sex],
-                [self.organism, self._adata_ids_sfaira.organism, self.organism_obs_key,
-                 self._ontology_container_sfaira.ontology_organism],
-                [self.state_exact, self._adata_ids_sfaira.state_exact, self.state_exact_obs_key, None],
+            [self.age, self._adata_ids_sfaira.age, self.age_obs_key,
+             self._ontology_container_sfaira.ontology_age],
+            [self.bio_sample, self._adata_ids_sfaira.bio_sample, self.bio_sample_obs_key, None],
+            [self.dev_stage, self._adata_ids_sfaira.dev_stage, self.dev_stage_obs_key,
+             self._ontology_container_sfaira.ontology_dev_stage],
+            [self.ethnicity, self._adata_ids_sfaira.ethnicity, self.ethnicity_obs_key,
+             self._ontology_container_sfaira.ontology_ethnicity],
+            [self.healthy, self._adata_ids_sfaira.healthy, self.healthy_obs_key,
+             self._ontology_container_sfaira.ontology_healthy],
+            [self.organ, self._adata_ids_sfaira.organ, self.organ_obs_key,
+             self._ontology_container_sfaira.ontology_organism],
+            [self.protocol, self._adata_ids_sfaira.protocol, self.protocol_obs_key,
+             self._ontology_container_sfaira.ontology_protocol],
+            [self.sex, self._adata_ids_sfaira.sex, self.sex_obs_key,
+             self._ontology_container_sfaira.ontology_sex],
+            [self.organism, self._adata_ids_sfaira.organism, self.organism_obs_key,
+             self._ontology_container_sfaira.ontology_organism],
+            [self.state_exact, self._adata_ids_sfaira.state_exact, self.state_exact_obs_key, None],
+            [self.tech_sample, self._adata_ids_sfaira.tech_sample, self.tech_sample_obs_key, None],
         ):
             if x is None and z is None:
                 self.adata.uns[y] = None
@@ -960,14 +968,16 @@ class DatasetBase(abc.ABC):
         # Expand table by variably cell-wise or data set-wise meta data:
         for x in [
             self._adata_ids_sfaira.age,
+            self._adata_ids_sfaira.bio_sample,
             self._adata_ids_sfaira.dev_stage,
             self._adata_ids_sfaira.ethnicity,
             self._adata_ids_sfaira.healthy,
             self._adata_ids_sfaira.organ,
+            self._adata_ids_sfaira.organism,
             self._adata_ids_sfaira.protocol,
             self._adata_ids_sfaira.sex,
-            self._adata_ids_sfaira.organism,
             self._adata_ids_sfaira.state_exact,
+            self._adata_ids_sfaira.tech_sample,
         ]:
             if self.adata.uns[x] == UNS_STRING_META_IN_OBS:
                 meta[x] = (np.sort(np.unique(self.adata.obs[x].values)),)
@@ -1060,6 +1070,23 @@ class DatasetBase(abc.ABC):
     def author(self, x: str):
         self.__erasing_protection(attr="author", val_old=self._author, val_new=x)
         self._author = x
+
+    @property
+    def bio_sample(self) -> Union[None, str]:
+        if self._bio_sample is not None:
+            return self._bio_sample
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            if self.meta is not None and self._adata_ids_sfaira.bio_sample in self.meta.columns:
+                return self.meta[self._adata_ids_sfaira.bio_sample]
+            else:
+                return None
+
+    @bio_sample.setter
+    def bio_sample(self, x: str):
+        self.__erasing_protection(attr="bio_sample", val_old=self._bio_sample, val_new=x)
+        self._bio_sample = x
 
     @property
     def data_dir(self):
@@ -1291,122 +1318,121 @@ class DatasetBase(abc.ABC):
 
     @property
     def age_obs_key(self) -> str:
-        return self._obs_key_age
+        return self._age_obs_key
 
     @age_obs_key.setter
     def age_obs_key(self, x: str):
-        self.__erasing_protection(attr="age_obs_key", val_old=self._obs_key_age, val_new=x)
-        self._obs_key_age = x
+        self.__erasing_protection(attr="age_obs_key", val_old=self._age_obs_key, val_new=x)
+        self._age_obs_key = x
 
     @property
     def bio_sample_obs_key(self) -> str:
-        return self._obs_key_sample
+        return self._bio_sample_obs_key
 
     @bio_sample_obs_key.setter
     def bio_sample_obs_key(self, x: str):
-        self.__erasing_protection(attr="bio_sample_obs_key", val_old=self._obs_key_sample, val_new=x)
-        self._obs_key_sample = x
+        self.__erasing_protection(attr="bio_sample_obs_key", val_old=self._bio_sample_obs_key, val_new=x)
+        self._bio_sample_obs_key = x
 
     @property
     def cellontology_id_obs_key(self) -> str:
-        return self._obs_key_cellontology_id
+        return self._cellontology_id_obs_key
 
     @cellontology_id_obs_key.setter
     def cellontology_id_obs_key(self, x: str):
-        self.__erasing_protection(attr="cellontology_id_obs_key", val_old=self._obs_key_cellontology_id, val_new=x)
-        self._obs_key_cellontology_id = x
+        self.__erasing_protection(attr="cellontology_id_obs_key", val_old=self._cellontology_id_obs_key, val_new=x)
+        self._cellontology_id_obs_key = x
 
     @property
     def cellontology_original_obs_key(self) -> str:
-        return self._obs_key_cellontology_original
+        return self._cellontology_original_obs_key
 
     @cellontology_original_obs_key.setter
     def cellontology_original_obs_key(self, x: str):
-        self.__erasing_protection(attr="cellontology_original_obs_key", val_old=self._obs_key_cellontology_original,
+        self.__erasing_protection(attr="cellontology_original_obs_key", val_old=self._cellontology_original_obs_key,
                                   val_new=x)
-        self._obs_key_cellontology_original = x
+        self._cellontology_original_obs_key = x
 
     @property
     def dev_stage_obs_key(self) -> str:
-        return self._obs_key_dev_stage
+        return self._dev_stage_obs_key
 
     @dev_stage_obs_key.setter
     def dev_stage_obs_key(self, x: str):
-        self.__erasing_protection(attr="dev_stage_obs_key", val_old=self._obs_key_dev_stage, val_new=x)
-        self._obs_key_dev_stage = x
+        self.__erasing_protection(attr="dev_stage_obs_key", val_old=self._dev_stage_obs_key, val_new=x)
+        self._dev_stage_obs_key = x
 
     @property
     def ethnicity_obs_key(self) -> str:
-        return self._obs_key_ethnicity
+        return self._ethnicity_obs_key
 
     @ethnicity_obs_key.setter
     def ethnicity_obs_key(self, x: str):
-        self.__erasing_protection(attr="ethnicity_obs_key", val_old=self._obs_key_ethnicity, val_new=x)
-        self._obs_key_ethnicity = x
+        self.__erasing_protection(attr="ethnicity_obs_key", val_old=self._ethnicity_obs_key, val_new=x)
+        self._ethnicity_obs_key = x
 
     @property
     def healthy_obs_key(self) -> str:
-        return self._obs_key_healthy
+        return self._healthy_obs_key
 
     @healthy_obs_key.setter
     def healthy_obs_key(self, x: str):
-        self.__erasing_protection(attr="healthy_obs_key", val_old=self._obs_key_healthy, val_new=x)
-        self._obs_key_healthy = x
+        self.__erasing_protection(attr="healthy_obs_key", val_old=self._healthy_obs_key, val_new=x)
+        self._healthy_obs_key = x
 
     @property
     def organ_obs_key(self) -> str:
-        return self._obs_key_organ
+        return self._organ_obs_key
 
     @organ_obs_key.setter
     def organ_obs_key(self, x: str):
-        self.__erasing_protection(attr="organ_obs_key", val_old=self._obs_key_organ, val_new=x)
-        self._obs_key_organ = x
+        self.__erasing_protection(attr="organ_obs_key", val_old=self._organ_obs_key, val_new=x)
+        self._organ_obs_key = x
 
     @property
     def organism_obs_key(self) -> str:
-        return self._obs_key_organism
+        return self._organism_obs_key
 
     @organism_obs_key.setter
     def organism_obs_key(self, x: str):
-        self.__erasing_protection(attr="organism_obs_key", val_old=self._obs_key_organism, val_new=x)
-        self._obs_key_organism = x
+        self.__erasing_protection(attr="organism_obs_key", val_old=self._organism_obs_key, val_new=x)
+        self._organism_obs_key = x
 
     @property
     def protocol_obs_key(self) -> str:
-        return self._obs_key_protocol
+        return self._protocol_obs_key
 
     @protocol_obs_key.setter
     def protocol_obs_key(self, x: str):
-        self.__erasing_protection(attr="protocol_obs_key", val_old=self._obs_key_protocol, val_new=x)
-        self._obs_key_protocol = x
+        self.__erasing_protection(attr="protocol_obs_key", val_old=self._protocol_obs_key, val_new=x)
+        self._protocol_obs_key = x
 
     @property
     def sex_obs_key(self) -> str:
-        return self._obs_key_sex
+        return self._sex_obs_key
 
     @sex_obs_key.setter
     def sex_obs_key(self, x: str):
-        self.__erasing_protection(attr="sex_obs_key", val_old=self._obs_key_sex, val_new=x)
-        self._obs_key_sex = x
+        self.__erasing_protection(attr="sex_obs_key", val_old=self._sex_obs_key, val_new=x)
+        self._sex_obs_key = x
 
     @property
     def state_exact_obs_key(self) -> str:
-        return self._obs_key_state_exact
+        return self._state_exact_obs_key
 
     @state_exact_obs_key.setter
     def state_exact_obs_key(self, x: str):
-        self.__erasing_protection(attr="state_exact_obs_key", val_old=self._obs_key_state_exact, val_new=x)
-        self._obs_key_state_exact = x
+        self.__erasing_protection(attr="state_exact_obs_key", val_old=self._state_exact_obs_key, val_new=x)
+        self._state_exact_obs_key = x
 
     @property
     def tech_sample_obs_key(self) -> str:
-        return self._obs_key_sample
+        return self._tech_sample_obs_key
 
-    @bio_sample_obs_key.setter
+    @tech_sample_obs_key.setter
     def tech_sample_obs_key(self, x: str):
-        self.__erasing_protection(attr="tech_sample_obs_key", val_old=self._obs_key_sample, val_new=x)
-        self._obs_key_sample = x
-
+        self.__erasing_protection(attr="tech_sample_obs_key", val_old=self._tech_sample_obs_key, val_new=x)
+        self._tech_sample_obs_key = x
 
     @property
     def organ(self) -> Union[None, str]:
@@ -1506,6 +1532,23 @@ class DatasetBase(abc.ABC):
     def state_exact(self, x: str):
         self.__erasing_protection(attr="state_exact", val_old=self._state_exact, val_new=x)
         self._state_exact = x
+
+    @property
+    def tech_sample(self) -> Union[None, str]:
+        if self._tech_sample is not None:
+            return self._tech_sample
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            if self.meta is not None and self._adata_ids_sfaira.tech_sample in self.meta.columns:
+                return self.meta[self._adata_ids_sfaira.tech_sample]
+            else:
+                return None
+
+    @tech_sample.setter
+    def tech_sample(self, x: str):
+        self.__erasing_protection(attr="tech_sample", val_old=self._tech_sample, val_new=x)
+        self._tech_sample = x
 
     @property
     def var_ensembl_col(self) -> str:

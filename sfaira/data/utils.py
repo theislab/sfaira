@@ -108,5 +108,6 @@ def read_yaml(fn) -> Dict[str, str]:
         yaml_dict = yaml.safe_load(f)
     attr_dict = {}
     for k, v in yaml_dict.items():
-        attr_dict.update(v)
+        if k not in ["meta"]:
+            attr_dict.update(v)
     return attr_dict
