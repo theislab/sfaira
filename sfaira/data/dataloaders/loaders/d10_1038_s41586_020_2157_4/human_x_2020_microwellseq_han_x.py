@@ -324,6 +324,6 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
             "sample", "sub_tissue", "n_genes", "n_counts", "cluster_global", "dev_stage", "donor", "celltype_global",
             "age", "celltype_specific", "cluster_specific", "gender", "protocol", "source"]
 
-        self.set_unknown_class_id(ids=["0", "Unknown1", "Unknown2"])
+        self.set_unknown_class_id(ids=["0", "Unknown1", "Unknown2", "Intermediated cell", "MT high", "MT-gene high cell"])
 
         return adata
