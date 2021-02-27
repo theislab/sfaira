@@ -324,6 +324,28 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
             "sample", "sub_tissue", "n_genes", "n_counts", "cluster_global", "dev_stage", "donor", "celltype_global",
             "age", "celltype_specific", "cluster_specific", "gender", "protocol", "source"]
 
-        self.set_unknown_class_id(ids=["0", "Unknown1", "Unknown2", "Intermediated cell", "MT high", "MT-gene high cell"])
+        self.set_unknown_class_id(
+            ids=[
+                "0",
+                "Unknown1",
+                "Unknown2",
+                "Intermediated cell",
+                "MT high",
+                "MT-gene high cell",
+                "Proliferating  cell",
+                "Proliferating cell",
+                "Proliferating cell_C7 high",
+                "Proliferating cell_CCNB1 high",
+                "Proliferating cell_FABP5 high",
+                "Proliferating cell_HMGB2 high",
+                "Proliferating cell_KIAA0101 high",
+                "Proliferating cell_KIAA0101_high",
+                "Proliferating cell_PTTG1 high",
+                "Proliferating cell_TOP2A high",
+                "Proliferating cell_UBE2C  high",
+                "Proliferating cell_UBE2C high",
+                "Proliferating cell_UBE2C_high"
+            ]
+        )
 
         return adata
