@@ -1,36 +1,13 @@
 import anndata
 import os
 from typing import Union
+import anndata2ri
+from rpy2.robjects import r
 
 from sfaira.data import DatasetBase
 
 
 class Dataset(DatasetBase):
-    """
-    This dataloader requires manual preprocessing of the Rdata file that can be obtained from the link in the
-    `download_website` attribute of this class. The preprocessing code below uses the rpy2 and anndata2ri python
-    packages to convert the R object to anndata (pip install anndata2ri), run it in a jupyter notebook:
-
-    ## Notebook Cell 1
-    import anndata2ri
-    anndata2ri.activate()
-    %load_ext rpy2.ipython
-
-    ## Notebook Cell 2
-    %%R -o sce
-    library(Seurat)
-    load("tissue.rdata")
-    new_obj = CreateSeuratObject(counts = tissue@raw.data)
-    new_obj@meta.data = tissue@meta.data
-    sce <- as.SingleCellExperiment(new_obj)
-
-    ## Notebook cell 3
-    sce.write("ramachandran.h5ad")
-
-    :param data_path:
-    :param meta_path:
-    :param kwargs:
-    """
 
     def __init__(
             self,
@@ -61,7 +38,14 @@ class Dataset(DatasetBase):
         self.set_dataset_id(idx=1)
 
     def _load(self):
-        fn = os.path.join(self.data_dir, "ramachandran.h5ad")
-        adata = anndata.read(fn)
+        fn = os.path.join(self.data_dir, "tissue.rdata")
+        anndata2ri.activate()  # TODO: remove global activation of anndata2ri and use localconverter once it's fixed
+        adata = r(
+            f"library(Seurat)\n"
+            f"load('{fn}')\n"
+            f"new_obj = CreateSeuratObject(counts = tissue@raw.data)\n"
+            f"new_obj@meta.data = tissue@meta.data\n"
+            f"as.SingleCellExperiment(new_obj)\n"
+        )
 
         return adata
