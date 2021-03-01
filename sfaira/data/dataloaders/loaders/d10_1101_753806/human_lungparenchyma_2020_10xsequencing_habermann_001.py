@@ -39,19 +39,19 @@ class Dataset(DatasetBase):
 
         self.set_dataset_id(idx=1)
 
-    def _load(self):
-        fn = [
-            os.path.join(self.data_dir, "GSE135893_matrix.mtx.gz"),
-            os.path.join(self.data_dir, "GSE135893_genes.tsv.gz"),
-            os.path.join(self.data_dir, "GSE135893_barcodes.tsv.gz"),
-            os.path.join(self.data_dir, "GSE135893_IPF_metadata.csv.gz"),
-        ]
-        adata = anndata.read_mtx(fn[0]).T
-        adata.var = pd.read_csv(fn[1], index_col=0, header=None, names=["ids"])
-        adata.obs = pd.read_csv(fn[2], index_col=0, header=None, names=["barcodes"])
-        obs = pd.read_csv(fn[3], index_col=0)
-        adata = adata[obs.index.tolist(), :].copy()
-        adata.obs = obs
-        self.set_unknown_class_id(ids=["1_Unicorns and artifacts"])
 
-        return adata
+def load(data_dir, **kwargs):
+    fn = [
+        os.path.join(data_dir, "GSE135893_matrix.mtx.gz"),
+        os.path.join(data_dir, "GSE135893_genes.tsv.gz"),
+        os.path.join(data_dir, "GSE135893_barcodes.tsv.gz"),
+        os.path.join(data_dir, "GSE135893_IPF_metadata.csv.gz"),
+    ]
+    adata = anndata.read_mtx(fn[0]).T
+    adata.var = pd.read_csv(fn[1], index_col=0, header=None, names=["ids"])
+    adata.obs = pd.read_csv(fn[2], index_col=0, header=None, names=["barcodes"])
+    obs = pd.read_csv(fn[3], index_col=0)
+    adata = adata[obs.index.tolist(), :].copy()
+    adata.obs = obs
+
+    return adata

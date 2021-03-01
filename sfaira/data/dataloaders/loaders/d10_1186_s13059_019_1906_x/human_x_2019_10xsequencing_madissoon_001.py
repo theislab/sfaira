@@ -56,17 +56,18 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
 
         self.set_dataset_id(idx=1)
 
-    def _load(self):
-        fn = os.path.join(self.data_dir, self.sample_fn)
-        adata = anndata.read(fn)
-        if self.sample_fn != "madissoon19_lung.processed.h5ad":
-            adata.X = adata.X.multiply(scipy.sparse.csc_matrix(adata.obs["n_counts"].values[:, None]))\
-                .multiply(1 / 10000)
-        # Cell type column called differently in madissoon19_lung.processed.h5ad:
-        if self.sample_fn == "madissoon19_lung.processed.h5ad":
-            adata.obs["Celltypes"] = adata.obs["CellType"]
-            del adata.obs["CellType"]
-
         self.set_unknown_class_id(ids=["B_T_doublet", "CD34_progenitor", "Stroma"])
 
-        return adata
+
+def load(data_dir, sample_fn, **kwargs):
+    fn = os.path.join(data_dir, sample_fn)
+    adata = anndata.read(fn)
+    if sample_fn != "madissoon19_lung.processed.h5ad":
+        adata.X = adata.X.multiply(scipy.sparse.csc_matrix(adata.obs["n_counts"].values[:, None]))\
+            .multiply(1 / 10000)
+    # Cell type column called differently in madissoon19_lung.processed.h5ad:
+    if sample_fn == "madissoon19_lung.processed.h5ad":
+        adata.obs["Celltypes"] = adata.obs["CellType"]
+        del adata.obs["CellType"]
+
+    return adata

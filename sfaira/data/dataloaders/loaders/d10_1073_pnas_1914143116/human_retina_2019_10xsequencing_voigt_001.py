@@ -34,9 +34,10 @@ class Dataset(DatasetBase):
 
         self.set_dataset_id(idx=1)
 
-    def _load(self):
-        fn = os.path.join(self.data_dir, "voigt19.processed.h5ad")
-        adata = anndata.read(fn)
-        adata.X = np.expm1(adata.X)
 
-        return adata
+def load(data_dir, **kwargs):
+    fn = os.path.join(data_dir, "voigt19.processed.h5ad")
+    adata = anndata.read(fn)
+    adata.X = np.expm1(adata.X)
+
+    return adata

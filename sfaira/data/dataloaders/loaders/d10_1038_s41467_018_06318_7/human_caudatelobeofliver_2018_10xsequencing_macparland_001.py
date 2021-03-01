@@ -34,13 +34,14 @@ class Dataset(DatasetBase):
 
         self.set_dataset_id(idx=1)
 
-    def _load(self):
-        fn = [
-            os.path.join(self.data_dir, "GSE115469.csv.gz"),
-            os.path.join(self.data_dir, "GSE115469_labels.txt")
-        ]
-        adata = anndata.read_csv(fn[0]).T
-        celltype_df = pd.read_csv(fn[1], sep="\t").set_index("CellName")
-        adata.obs["celltype"] = [str(celltype_df.loc[i]["Cluster#"]) for i in adata.obs.index]
 
-        return adata
+def load(data_dir, **kwargs):
+    fn = [
+        os.path.join(data_dir, "GSE115469.csv.gz"),
+        os.path.join(data_dir, "GSE115469_labels.txt")
+    ]
+    adata = anndata.read_csv(fn[0]).T
+    celltype_df = pd.read_csv(fn[1], sep="\t").set_index("CellName")
+    adata.obs["celltype"] = [str(celltype_df.loc[i]["Cluster#"]) for i in adata.obs.index]
+
+    return adata

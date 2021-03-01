@@ -38,19 +38,21 @@ class Dataset(DatasetBase):
 
         self.set_dataset_id(idx=1)
 
-    def _load(self):
-        fn = [
-            os.path.join(self.data_dir, "E-MTAB-5061.processed.1.zip"),
-            os.path.join(self.data_dir, "E-MTAB-5061.sdrf.txt")
-        ]
-        df = pd.read_csv(fn[0], sep="\t")
-        df.index = df.index.get_level_values(0)
-        df = df.drop("#samples", axis=1)
-        df = df.T.iloc[:, :26178]
-        adata = anndata.AnnData(df)
-        adata.obs = pd.read_csv(fn[1], sep="\t").set_index("Source Name").loc[adata.obs.index]
-        # filter observations which are not cells (empty wells, low quality cells etc.)
-        adata = adata[adata.obs["Characteristics[cell type]"] != "not applicable"].copy()
         self.set_unknown_class_id(ids=["unclassified cell", "MHC class II cell"])
 
-        return adata
+
+def load(data_dir, **kwargs):
+    fn = [
+        os.path.join(data_dir, "E-MTAB-5061.processed.1.zip"),
+        os.path.join(data_dir, "E-MTAB-5061.sdrf.txt")
+    ]
+    df = pd.read_csv(fn[0], sep="\t")
+    df.index = df.index.get_level_values(0)
+    df = df.drop("#samples", axis=1)
+    df = df.T.iloc[:, :26178]
+    adata = anndata.AnnData(df)
+    adata.obs = pd.read_csv(fn[1], sep="\t").set_index("Source Name").loc[adata.obs.index]
+    # filter observations which are not cells (empty wells, low quality cells etc.)
+    adata = adata[adata.obs["Characteristics[cell type]"] != "not applicable"].copy()
+
+    return adata

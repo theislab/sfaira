@@ -33,8 +33,9 @@ class Dataset(DatasetBase):
 
         self.set_dataset_id(idx=1)
 
-    def _load(self):
-        fn = os.path.join(self.data_dir, "fetal_liver_alladata_.h5ad")
-        adata = anndata.read(fn)
 
-        return adata
+def load(data_dir, **kwargs):
+    fn = os.path.join(data_dir, "fetal_liver_alladata_.h5ad")
+    adata = anndata.read(fn)
+
+    return adata

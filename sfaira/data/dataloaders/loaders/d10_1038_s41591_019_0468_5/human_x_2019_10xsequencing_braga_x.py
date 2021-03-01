@@ -40,10 +40,10 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
 
         self.set_dataset_id(idx=1)
 
-    def _load(self):
-        fn = os.path.join(self.data_dir, self.sample_fn)
-        adata = anndata.read(fn)
-        adata.X = np.expm1(adata.X)
-        self.set_unknown_class_id(ids=["1_Unicorns and artifacts"])
 
-        return adata
+def load(data_dir, sample_fn, **kwargs):
+    fn = os.path.join(data_dir, sample_fn)
+    adata = anndata.read(fn)
+    adata.X = np.expm1(adata.X)
+
+    return adata

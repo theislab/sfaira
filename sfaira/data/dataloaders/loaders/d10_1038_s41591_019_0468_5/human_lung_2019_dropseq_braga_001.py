@@ -34,13 +34,15 @@ class Dataset(DatasetBase):
 
         self.set_dataset_id(idx=1)
 
-    def _load(self):
-        fn = [
-            os.path.join(self.data_dir, "GSE130148_raw_counts.csv.gz"),
-            os.path.join(self.data_dir, "GSE130148_barcodes_cell_types.txt.gz"),
-        ]
-        adata = anndata.read_csv(fn[0]).T
-        adata.obs = pd.read_csv(fn[1], sep="\t", index_col=0)
         self.set_unknown_class_id(ids=["1_Unicorns and artifacts"])
 
-        return adata
+
+def load(data_dir, **kwargs):
+    fn = [
+        os.path.join(data_dir, "GSE130148_raw_counts.csv.gz"),
+        os.path.join(data_dir, "GSE130148_barcodes_cell_types.txt.gz"),
+    ]
+    adata = anndata.read_csv(fn[0]).T
+    adata.obs = pd.read_csv(fn[1], sep="\t", index_col=0)
+
+    return adata
