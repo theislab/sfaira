@@ -29,7 +29,7 @@ class Dataset(DatasetBase):
         self.obs_key_cellontology_class = self._adata_ids_cellxgene.cell_ontology_class
         self.obs_key_cellontology_id = self._adata_ids_cellxgene.cell_ontology_id
         self.obs_key_cellontology_original = self._adata_ids_cellxgene.cell_types_original
-        self.obs_key_dev_stage = self._adata_ids_cellxgene.dev_stage
+        self.obs_key_dev_stage = self._adata_ids_cellxgene.development_stage
         self.obs_key_ethnicity = self._adata_ids_cellxgene.ethnicity
         self.obs_key_healthy = self._adata_ids_cellxgene.healthy
         self.obs_key_sex = self._adata_ids_cellxgene.sex
@@ -66,5 +66,5 @@ class Dataset(DatasetBase):
         self.organ = str(self.fn).split("_")[3]  # TODO interface this properly
         # self.organ = adata.obs["tissue"].values[0]
         self.organism = adata.obs[self._adata_ids_cellxgene.organism].values[0]
-        self.protocol = adata.obs[self._adata_ids_cellxgene.protocol].values[0]
+        self.protocol = adata.obs[self._adata_ids_cellxgene.assay].values[0]
         self.year = adata.uns[self._adata_ids_cellxgene.year]
