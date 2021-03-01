@@ -10,7 +10,7 @@ CD8+Tmem	effector memory CD8-positive, alpha-beta T cell
 CD8αα	CD8-positive, alpha-beta thymocyte
 DC1	dendritic cell
 DC2	dendritic cell
-DN	immature NK T cell
+DN	double negative thymocyte
 DP	double-positive, alpha-beta thymocyte
 ETP	early lymphoid progenitor
 Endo	endothelial cell
@@ -25,8 +25,8 @@ Mac	thymic medullary macrophage
 Mast	mast cell
 Mgk	megakaryocyte
 Mono	monocyte
-NK	immature NK T cell
-NKT	l immature NK T cell
+NK	natural killer cell
+NKT	immature NK T cell
 NMP	common myeloid progenitor
 T(agonist)	T cell
 TEC(myo)	epithelial cell of thymus
