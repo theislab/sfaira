@@ -3,7 +3,7 @@ from sfaira.versions.metadata import OntologyUberon, OntologyCelltypes, Ontology
 
 
 def test_cl():
-    _ = OntologyCelltypes()
+    _ = OntologyCelltypes(branch="v2021-02-01")
 
 
 def test_uberon():

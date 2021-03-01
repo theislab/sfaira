@@ -493,7 +493,7 @@ class OntologyCelltypes(OntologyExtendedObo):
 
     def __init__(
             self,
-            branch: str = "master",
+            branch: str,
             **kwargs
     ):
         # Identify cache:
@@ -519,7 +519,8 @@ class OntologyCelltypes(OntologyExtendedObo):
         for k, v in self.graph.nodes.items():
             # Some terms are not associated with the namespace cell but are cell types,
             # we identify these based on their ID nomenclature here.
-            if ("namespace" in v.keys() and v["namespace"] != "cell") or str(k)[:2] == "CL":
+            if ("namespace" in v.keys() and v["namespace"] != "cell") or \
+                    ("namespace" not in v.keys() and str(k)[:2] != "CL"):
                 nodes_to_delete.append(k)
             elif "name" not in v.keys():
                 nodes_to_delete.append(k)
@@ -532,13 +533,14 @@ class OntologyCelltypes(OntologyExtendedObo):
         # All edge types (based on previous download, assert below that this is not extended):
         edge_types = [
             'is_a',  # nomenclature DAG -> include because of annotation coarseness differences
+            'derives_from',
             'develops_from',  # developmental DAG -> include because of developmental differences
             'has_part',  # ?
             'develops_into',  # inverse developmental DAG -> do not include
             'part_of',
             'RO:0002120',  # ?
             'RO:0002103',  # ?
-            'lacks_plasma_membrane_part'  # ?
+            'lacks_plasma_membrane_part',  # ?
         ]
         edges_to_delete = []
         for i, x in enumerate(self.graph.edges):
