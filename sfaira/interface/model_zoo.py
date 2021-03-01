@@ -78,8 +78,9 @@ class ModelZoo(abc.ABC):
         Set model ID to a manually supplied ID.
 
         :param model_id: Model ID to set. Format: pipeline_genome_organ_model_organisation_topology_version
-        :return:
         """
+        if len(model_id.split('_')) < 7:
+            raise RuntimeError(f'Model ID {model_id} is invalid! Must follow the format: pipeline_genome_organ_model_organisation_topology_version')
         self.model_id = model_id
         ixs = self.model_id.split('_')
         self.model_class = ixs[0]
@@ -102,8 +103,6 @@ class ModelZoo(abc.ABC):
         Saves model weights to repository XY.
         Increments 3rd digit of version number.
         Adds model_id to the text file, updates model_index
-
-        :return:
         """
         raise NotImplementedError()
 
@@ -112,8 +111,6 @@ class ModelZoo(abc.ABC):
         Saves model weights to cloud under an organization name.
         Increments 2nd digit of version number.
         Adds model_id to the text file, updates model_index
-
-        :return:
         """
         raise NotImplementedError()
 
