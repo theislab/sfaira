@@ -34,8 +34,7 @@ def map_fn(inputs):
     :param inputs:
     :return: None if function ran, error report otherwise
     """
-    ds, remove_gene_version, match_to_reference, load_raw, allow_caching, func, \
-        kwargs_func = inputs
+    ds, remove_gene_version, match_to_reference, load_raw, allow_caching, func, kwargs_func = inputs
     try:
         ds.load(
             remove_gene_version=remove_gene_version,
@@ -53,8 +52,16 @@ def map_fn(inputs):
         return ds.id, e,
 
 
-class DatasetBase(abc.ABC):
+load_doc = \
+    """
+    :param remove_gene_version: Remove gene version string from ENSEMBL ID so that different versions in different data sets are superimposed.
+    :param match_to_reference: Reference genomes name or False to keep original feature space.
+    :param load_raw: Loads unprocessed version of data if available in data loader.
+    :param allow_caching: Whether to allow method to cache adata object for faster re-loading.
+    """
 
+
+class DatasetBase(abc.ABC):
     adata: Union[None, anndata.AnnData]
     class_maps: dict
     _meta: Union[None, pandas.DataFrame]
@@ -363,15 +370,6 @@ class DatasetBase(abc.ABC):
             load_raw: bool = False,
             allow_caching: bool = True,
     ):
-        """
-
-        :param remove_gene_version: Remove gene version string from ENSEMBL ID so that different versions in different
-            data sets are superimposed.
-        :param match_to_reference: Reference genomes name or False to keep original feature space.
-        :param load_raw: Loads unprocessed version of data if available in data loader.
-        :param allow_caching: Whether to allow method to cache adata object for faster re-loading.
-        :return:
-        """
         if match_to_reference and not remove_gene_version:
             warnings.warn("it is not recommended to enable matching the feature space to a genomes reference"
                           "while not removing gene versions. this can lead to very poor matching results")
@@ -411,6 +409,8 @@ class DatasetBase(abc.ABC):
         self._collapse_gene_versions(remove_gene_version=remove_gene_version)
         if match_to_reference:
             self._match_features_to_reference()
+
+    load.__doc__ = load_doc
 
     def _convert_and_set_var_names(
             self,
@@ -503,17 +503,14 @@ class DatasetBase(abc.ABC):
                 # last element of each block as block boundaries:
                 # n_genes - 1 - idx_map_sorted_rev.index(x)
                 # Note that the blocks are named as positive integers starting at 1, without gaps.
-                counts = np.concatenate([
-                    np.sum(x, axis=1, keepdims=True)
-                    for x in np.split(
-                        self.adata[:, idx_map_sorted_fwd].X,  # forward ordered data
-                        indices_or_sections=[
-                            n_genes - 1 - idx_map_sorted_rev.index(x)  # last occurrence of element in forward order
-                            for x in np.arange(0, len(new_index_collapsed) - 1)  # -1: do not need end of last partition
-                        ],
-                        axis=1
-                    )
-                ][::-1], axis=1)
+                counts = np.concatenate([np.sum(x, axis=1, keepdims=True)
+                                         for x in np.split(self.adata[:, idx_map_sorted_fwd].X,  # forward ordered data
+                                                           indices_or_sections=[
+                                                               n_genes - 1 - idx_map_sorted_rev.index(x)  # last occurrence of element in forward order
+                                                               for x in np.arange(0, len(new_index_collapsed) - 1)],  # -1: do not need end of last partition
+                                                           axis=1
+                                                           )
+                                         ][::-1], axis=1)
                 # Remove varm and populate var with first occurrence only:
                 obs_names = self.adata.obs_names
                 self.adata = anndata.AnnData(
@@ -636,7 +633,7 @@ class DatasetBase(abc.ABC):
                     # Include flag in .uns that this attribute is in .obs:
                     self.adata.uns[y] = UNS_STRING_META_IN_OBS
                     # Remove potential pd.Categorical formatting:
-                    self.__value_protection(
+                    self._value_protection(
                         attr="obs", allowed=v, attempted=np.unique(self.adata.obs[z].values).tolist())
                     self.adata.obs[y] = self.adata.obs[z].values.tolist()
             else:
@@ -787,9 +784,19 @@ class DatasetBase(abc.ABC):
                 **kwargs
             )
             if not os.path.exists(fn) or not protected_writing:
-                tab.to_csv(fn, index=False, sep="\t")
+                self._write_class_map(fn=fn, tab=tab)
 
-    def __read_class_map(self, fn):
+    def _write_class_map(self, fn, tab):
+        """
+        Write class map.
+
+        :param fn: File name of csv to write class maps to.
+        :param tab: Table to write
+        :return:
+        """
+        tab.to_csv(fn, index=False, sep="\t")
+
+    def _read_class_map(self, fn) -> pd.DataFrame:
         """
         Read class map.
 
@@ -803,34 +810,6 @@ class DatasetBase(abc.ABC):
             raise pandas.errors.ParserError(e)
         return tab
 
-    def clean_ontology_class_map(self, fn):
-        """
-        Finalises processed class maps of free text cell types to ontology classes.
-
-        Checks that the assigned ontology class names appear in the ontology.
-        Adds a third column with the corresponding ontology IDs into the file.
-
-        :param fn: File name of csv to load class maps from and write to.
-        :return:
-        """
-        if not os.path.exists(fn):
-            warnings.warng(f"did not find cell type class map file {fn}")
-        else:
-            tab = self.__read_class_map(fn=fn)
-            # Checks that the assigned ontology class names appear in the ontology.
-            self.__value_protection(
-                attr="celltypes",
-                allowed=self.ontology_celltypes,
-                attempted=np.unique(tab[self._adata_ids_sfaira.classmap_target_key].values).tolist()
-            )
-            # Adds a third column with the corresponding ontology IDs into the file.
-            tab[self._adata_ids_sfaira.classmap_target_id_key] = [
-                self.ontology_celltypes.id_from_name(x) if x != self._adata_ids_sfaira.unknown_celltype_name
-                else self._adata_ids_sfaira.unknown_celltype_name
-                for x in tab[self._adata_ids_sfaira.classmap_target_key].values
-            ]
-            tab.to_csv(fn, index=False, sep="\t")
-
     def load_ontology_class_map(self, fn):
         """
         Load class maps of free text cell types to ontology classes.
@@ -839,7 +818,7 @@ class DatasetBase(abc.ABC):
         :return:
         """
         if os.path.exists(fn):
-            self.cell_ontology_map = self.__read_class_map(fn=fn)
+            self.cell_ontology_map = self._read_class_map(fn=fn)
         else:
             warnings.warn(f"file {fn} does not exist")
 
@@ -851,7 +830,7 @@ class DatasetBase(abc.ABC):
 
         :return:
         """
-        labels_original = self.adata.obs[self.cellontology_original_obs_key].values
+        labels_original = self.adata.obs[self.obs_key_cellontology_original].values
         if self.cell_ontology_map is not None:  # only if this was defined
             labels_mapped = [
                 self.cell_ontology_map[x] if x in self.cell_ontology_map.keys()
@@ -863,7 +842,7 @@ class DatasetBase(abc.ABC):
         # Validate mapped IDs based on ontology:
         # This aborts with a readable error if there was a target in the mapping file that does not match the
         # ontology.
-        self.__value_protection(
+        self._value_protection(
             attr="celltypes",
             allowed=self.ontology_celltypes,
             attempted=np.unique(labels_mapped).tolist()
@@ -1019,7 +998,7 @@ class DatasetBase(abc.ABC):
         self.id = f"{clean(self.organism)}_" \
                   f"{clean(self.organ)}_" \
                   f"{self.year}_" \
-                  f"{clean(self.assay)}_" \
+                  f"{clean(self.protocol)}_" \
                   f"{clean(author)}_" \
                   f"{idx}_" \
                   f"{self.doi}"
@@ -1041,7 +1020,7 @@ class DatasetBase(abc.ABC):
     @age.setter
     def age(self, x: str):
         self.__erasing_protection(attr="age", val_old=self._age, val_new=x)
-        self.__value_protection(attr="age", allowed=self._ontology_container_sfaira.ontology_age, attempted=x)
+        self._value_protection(attr="age", allowed=self._ontology_container_sfaira.ontology_age, attempted=x)
         self._age = x
 
     @property
@@ -1076,7 +1055,7 @@ class DatasetBase(abc.ABC):
     @assay.setter
     def assay(self, x: str):
         self.__erasing_protection(attr="protocol", val_old=self._assay, val_new=x)
-        self.__value_protection(attr="protocol", allowed=self._ontology_container_sfaira.ontology_protocol,
+        self._value_protection(attr="protocol", allowed=self._ontology_container_sfaira.ontology_protocol,
                                 attempted=x)
         self._assay = x
 
@@ -1138,7 +1117,7 @@ class DatasetBase(abc.ABC):
     @development_stage.setter
     def development_stage(self, x: str):
         self.__erasing_protection(attr="dev_stage", val_old=self._development_stage, val_new=x)
-        self.__value_protection(attr="dev_stage", allowed=self._ontology_container_sfaira.ontology_dev_stage,
+        self._value_protection(attr="dev_stage", allowed=self._ontology_container_sfaira.ontology_dev_stage,
                                 attempted=x)
         self._development_stage = x
 
@@ -1240,7 +1219,7 @@ class DatasetBase(abc.ABC):
     @ethnicity.setter
     def ethnicity(self, x: str):
         self.__erasing_protection(attr="ethnicity", val_old=self._ethnicity, val_new=x)
-        self.__value_protection(attr="ethnicity", allowed=self._adata_ids_sfaira.ontology_ethnicity, attempted=x)
+        self._value_protection(attr="ethnicity", allowed=self._adata_ids_sfaira.ontology_ethnicity, attempted=x)
         self._ethnicity = x
 
     @property
@@ -1354,7 +1333,7 @@ class DatasetBase(abc.ABC):
     @normalization.setter
     def normalization(self, x: str):
         self.__erasing_protection(attr="normalization", val_old=self._normalization, val_new=x)
-        self.__value_protection(attr="normalization", allowed=self._ontology_container_sfaira.ontology_normalization,
+        self._value_protection(attr="normalization", allowed=self._ontology_container_sfaira.ontology_normalization,
                                 attempted=x)
         self._normalization = x
 
@@ -1501,7 +1480,7 @@ class DatasetBase(abc.ABC):
     @organ.setter
     def organ(self, x: str):
         self.__erasing_protection(attr="organ", val_old=self._organ, val_new=x)
-        self.__value_protection(attr="organ", allowed=self._ontology_container_sfaira.ontology_organ, attempted=x)
+        self._value_protection(attr="organ", allowed=self._ontology_container_sfaira.ontology_organ, attempted=x)
         self._organ = x
 
     @property
@@ -1519,7 +1498,7 @@ class DatasetBase(abc.ABC):
     @organism.setter
     def organism(self, x: str):
         self.__erasing_protection(attr="organism", val_old=self._organism, val_new=x)
-        self.__value_protection(attr="organism", allowed=self._ontology_container_sfaira.ontology_organism, attempted=x)
+        self._value_protection(attr="organism", allowed=self._ontology_container_sfaira.ontology_organism, attempted=x)
         self._organism = x
 
     @property
@@ -1537,7 +1516,7 @@ class DatasetBase(abc.ABC):
     @sex.setter
     def sex(self, x: str):
         self.__erasing_protection(attr="sex", val_old=self._sex, val_new=x)
-        self.__value_protection(attr="sex", allowed=self._ontology_container_sfaira.ontology_sex, attempted=x)
+        self._value_protection(attr="sex", allowed=self._ontology_container_sfaira.ontology_sex, attempted=x)
         self._sex = x
 
     @property
@@ -1616,7 +1595,7 @@ class DatasetBase(abc.ABC):
     @year.setter
     def year(self, x: int):
         self.__erasing_protection(attr="year", val_old=self._year, val_new=x)
-        self.__value_protection(attr="year", allowed=self._ontology_container_sfaira.ontology_year, attempted=x)
+        self._value_protection(attr="year", allowed=self._ontology_container_sfaira.ontology_year, attempted=x)
         self._year = x
 
     @property
@@ -1626,6 +1605,16 @@ class DatasetBase(abc.ABC):
     @property
     def ontology_organ(self):
         return self._ontology_container_sfaira.ontology_organ
+
+    @property
+    def celltypes_universe(self):
+        if self._celltype_universe:
+            self._celltype_universe = CelltypeUniverse(
+                cl=self.ontology_celltypes,
+                uberon=self._ontology_container_sfaira.ontology_organ,
+                organism=self.organism,
+            )
+        return self._celltype_universe
 
     @property
     def celltypes_universe(self):
@@ -1667,7 +1656,7 @@ class DatasetBase(abc.ABC):
             raise ValueError(f"attempted to set erasing protected attribute {attr}: "
                              f"previously was {str(val_old)}, attempted to set {str(val_new)}")
 
-    def __value_protection(
+    def _value_protection(
             self,
             attr: str,
             allowed: Union[Ontology, bool, int, float, str, List[bool], List[int], List[float], List[str]],
@@ -1906,10 +1895,6 @@ class DatasetGroup:
         In this setting, datasets are removed from memory after the function has been executed.
 
         :param annotated_only:
-        :param remove_gene_version: See .load().
-        :param match_to_reference: See .load().
-        :param load_raw: See .load().
-        :param allow_caching: See .load().
         :param processes: Processes to parallelise loading over. Uses python multiprocessing if > 1, for loop otherwise.
         :param func: Function to run on loaded datasets. map_fun should only take one argument, which is a Dataset
             instance. The return can be empty:
@@ -1918,7 +1903,6 @@ class DatasetGroup:
                     # code manipulating dataset and generating output x.
                     return x
         :param kwargs_func: Kwargs of func.
-        :return:
         """
         args = [
             remove_gene_version,
@@ -1958,6 +1942,8 @@ class DatasetGroup:
             for k in datasets_to_remove:
                 del self.datasets[k]
             del adata_group
+
+    load.__doc__ += load_doc
 
     def load_tobacked(
             self,
@@ -2010,7 +1996,6 @@ class DatasetGroup:
 
         :param fn: File name of csv to load class maps from.
         :param protected_writing: Only write if file was not already found.
-        :return:
         """
         tab = []
         for k, v in self.datasets.items():
@@ -2236,6 +2221,8 @@ class DatasetGroup:
 
 class DatasetGroupDirectoryOriented(DatasetGroup):
 
+    _cwd: os.PathLike
+
     def __init__(
             self,
             file_base: str,
@@ -2256,17 +2243,17 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
         """
         # Collect all data loaders from files in directory:
         datasets = []
-        cwd = os.path.dirname(file_base)
-        dataset_module = str(cwd.split("/")[-1])
-        loader_pydoc_path = "sfaira.data.dataloaders.loaders." if str(cwd.split("/")[-5]) == "sfaira" else \
+        self._cwd = os.path.dirname(file_base)
+        dataset_module = str(self._cwd.split("/")[-1])
+        loader_pydoc_path = "sfaira.data.dataloaders.loaders." if str(self._cwd.split("/")[-5]) == "sfaira" else \
             "sfaira_extension.data.dataloaders.loaders."
-        if "group.py" in os.listdir(cwd):
+        if "group.py" in os.listdir(self._cwd):
             DatasetGroupFound = pydoc.locate(loader_pydoc_path + dataset_module + ".group.DatasetGroup")
             dsg = DatasetGroupFound(data_path=data_path, meta_path=meta_path, cache_path=cache_path)
             datasets.extend(list(dsg.datasets.values))
         else:
-            for f in os.listdir(cwd):
-                if os.path.isfile(os.path.join(cwd, f)):  # only files
+            for f in os.listdir(self._cwd):
+                if os.path.isfile(os.path.join(self._cwd, f)):  # only files
                     # Narrow down to data set files:
                     if f.split(".")[-1] == "py" and f.split(".")[0] not in ["__init__", "base", "group"]:
                         datasets_f = []
@@ -2332,6 +2319,38 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
 
         keys = [x.id for x in datasets]
         super().__init__(datasets=dict(zip(keys, datasets)))
+
+    def clean_ontology_class_map(self):
+        """
+        Finalises processed class maps of free text cell types to ontology classes.
+
+        Checks that the assigned ontology class names appear in the ontology.
+        Adds a third column with the corresponding ontology IDs into the file.
+
+        :return:
+        """
+        for f in os.listdir(self._cwd):
+            if os.path.isfile(os.path.join(self._cwd, f)):  # only files
+                # Narrow down to data set files:
+                if f.split(".")[-1] == "py" and f.split(".")[0] not in ["__init__", "base", "group"]:
+                    file_module = ".".join(f.split(".")[:-1])
+                    fn_map = os.path.join(self._cwd, file_module + ".tsv")
+                    if os.path.exists(fn_map):
+                        # Access reading and value protection mechanisms from first data set loaded in group.
+                        tab = list(self.datasets.values())[0]._read_class_map(fn=fn_map)
+                        # Checks that the assigned ontology class names appear in the ontology.
+                        list(self.datasets.values())[0]._value_protection(
+                            attr="celltypes",
+                            allowed=self.ontology_celltypes,
+                            attempted=np.unique(tab[self._adata_ids_sfaira.classmap_target_key].values).tolist()
+                        )
+                        # Adds a third column with the corresponding ontology IDs into the file.
+                        tab[self._adata_ids_sfaira.classmap_target_id_key] = [
+                            self.ontology_celltypes.id_from_name(x) if x != self._adata_ids_sfaira.unknown_celltype_name
+                            else self._adata_ids_sfaira.unknown_celltype_name
+                            for x in tab[self._adata_ids_sfaira.classmap_target_key].values
+                        ]
+                        list(self.datasets.values())[0]._write_class_map(fn=fn_map, tab=tab)
 
 
 class DatasetSuperGroup:
@@ -2530,13 +2549,13 @@ class DatasetSuperGroup:
             self.adata.X = X
         keys = [
             self._adata_ids_sfaira.annotated,
+            self._adata_ids_sfaira.assay,
             self._adata_ids_sfaira.author,
             self._adata_ids_sfaira.dataset,
             self._adata_ids_sfaira.cell_ontology_class,
             self._adata_ids_sfaira.development_stage,
             self._adata_ids_sfaira.normalization,
             self._adata_ids_sfaira.organ,
-            self._adata_ids_sfaira.assay,
             self._adata_ids_sfaira.state_exact,
             self._adata_ids_sfaira.year,
         ]

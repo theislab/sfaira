@@ -156,5 +156,6 @@ def test_load(dir_template: str = "./template_data", doi_sfaira_repr="10.1000/j.
         load_raw=False,
         allow_caching=False
     )
+    ds.clean_ontology_class_map()
     # Test concatenation:
     _ = ds.adata

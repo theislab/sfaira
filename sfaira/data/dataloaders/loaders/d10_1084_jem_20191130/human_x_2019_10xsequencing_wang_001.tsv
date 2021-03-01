@@ -1,8 +1,8 @@
-source	target
-Enteriendocrine	 enteroendocrine cell
-Enterocyte	enterocyte
-Goblet	goblet cell
-Paneth-like	paneth cell
-Progenitor	transit amplifying cell of large intestine
-Stem Cell	intestinal crypt stem cell
-TA	transit amplifying cell of large intestine
+source	target	target_id
+Enteriendocrine	enteroendocrine cell	CL:0000164
+Enterocyte	enterocyte	CL:0000584
+Goblet	goblet cell	CL:0000160
+Paneth-like	paneth cell	CL:0000510
+Progenitor	transit amplifying cell of large intestine	CL:0009011
+Stem Cell	intestinal crypt stem cell	CL:0002250
+TA	transit amplifying cell of large intestine	CL:0009011
