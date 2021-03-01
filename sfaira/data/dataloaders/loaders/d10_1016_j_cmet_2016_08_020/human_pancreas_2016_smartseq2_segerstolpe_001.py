@@ -7,6 +7,9 @@ from sfaira.data import DatasetBase
 
 
 class Dataset(DatasetBase):
+    """
+    ToDo: revisit gamma cell missing in CO
+    """
 
     def __init__(
             self,
@@ -16,12 +19,10 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.id = "human_pancreas_2016_smartseq2_segerstolpe_001_10.1016/j.cmet.2016.08.020"
-
         self.download_url_data = "https://www.ebi.ac.uk/arrayexpress/files/E-MTAB-5061/E-MTAB-5061.processed.1.zip"
         self.download_url_meta = "https://www.ebi.ac.uk/arrayexpress/files/E-MTAB-5061/E-MTAB-5061.sdrf.txt"
 
-        self.author = "Sandberg"
+        self.author = "Segerstolpe"
         self.doi = "10.1016/j.cmet.2016.08.020"
         self.normalization = "raw"
         self.organ = "pancreas"
@@ -30,31 +31,12 @@ class Dataset(DatasetBase):
         self.year = 2016
 
         self.var_symbol_col = "index"
-
         self.obs_key_cellontology_original = "Characteristics[cell type]"
         self.obs_key_state_exact = "Characteristics[disease]"
         self.obs_key_healthy = self.obs_key_state_exact
-
         self.healthy_state_healthy = "normal"
 
-        self.class_maps = {
-            "0": {
-                "alpha cell": "Alpha cell",
-                "ductal cell": "Ductal cell",
-                "beta cell": "Beta cell",
-                "gamma cell": "Gamma cell",
-                "acinar cell": "Acinar cell",
-                "delta cell": "Delta cell",
-                "PSC cell": "PSC cell",
-                "unclassified endocrine cell": "Unclassified endocrine cell",
-                "co-expression cell": "Co-expression cell",
-                "endothelial cell": "Endothelial cell",
-                "epsilon cell": "Epsilon cell",
-                "mast cell": "Mast cell",
-                "MHC class II cell": "MHC class II cell",
-                "unclassified cell": "Unknown",
-            },
-        }
+        self.set_dataset_id(idx=1)
 
     def _load(self):
         fn = [
@@ -69,5 +51,6 @@ class Dataset(DatasetBase):
         adata.obs = pd.read_csv(fn[1], sep="\t").set_index("Source Name").loc[adata.obs.index]
         # filter observations which are not cells (empty wells, low quality cells etc.)
         adata = adata[adata.obs["Characteristics[cell type]"] != "not applicable"].copy()
+        self.set_unknown_class_id(ids=["unclassified cell", "MHC class II cell"])
 
         return adata

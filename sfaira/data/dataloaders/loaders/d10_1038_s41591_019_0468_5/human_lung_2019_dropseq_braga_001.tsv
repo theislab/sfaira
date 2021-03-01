@@ -1,0 +1,14 @@
+source	target	target_id
+B cell	B cell	CL:0000236
+Ciliated	lung ciliated cell	CL:1000271
+Endothelium	endothelial cell	CL:0000115
+Fibroblast	fibroblast of lung	CL:0002553
+Lymphatic	endothelial cell of lymphatic vessel	CL:0002138
+Macrophages	lung macrophage	CL:1001603
+Mast cell	mast cell	CL:0000097
+NK cell	natural killer cell	CL:0000623
+Secretory	secretory cell	CL:0000151
+T cell	T cell	CL:0000084
+Transformed epithelium	epithelial cell of tracheobronchial tree	CL:0002202
+Type 1	type I pneumocyte	CL:0002062
+Type 2	type II pneumocyte	CL:0002063

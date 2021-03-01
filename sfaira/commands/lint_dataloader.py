@@ -67,7 +67,9 @@ class DataloaderLinter:
         passed_load = True
 
         try:
-            line, dl_object = list(filter(lambda line_dl_object: line_dl_object[1].startswith(('def _load_any_object(self, fn=None):', 'def _load(self, fn):')),
+            line, dl_object = list(filter(lambda line_dl_object: line_dl_object[1].startswith(('def _load_any_object(self, fn=None):',
+                                                                                               'def _load(self, fn):',
+                                                                                               'def _load(self)')),
                                           enumerate(self.content)))[0]
         except IndexError:
             passed_load = False
@@ -82,7 +84,7 @@ class DataloaderLinter:
         """
         passed_required_attributes = True
 
-        attributes = ['self.id',
+        attributes = ['self.set_dataset_id',
                       'self.author',
                       'self.doi',
                       'self.download_url_data',
@@ -96,7 +98,7 @@ class DataloaderLinter:
                 line, attribute = list(filter(lambda line_attribute: line_attribute[1].startswith(attribute), enumerate(self.content)))[0]
             except IndexError:
                 passed_required_attributes = False
-                self.failed['-1'] = 'One of required attributes  id, author, doi, download_url_data, organ, organism, protocol, year   is missing.'
+                self.failed['-1'] = 'One of required attributes  set_dataset_id, author, doi, download_url_data, organ, organism, protocol, year   is missing.'
 
         if passed_required_attributes:
             self.passed[0] = 'Passed required dataloader attributes checks.'

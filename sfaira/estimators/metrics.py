@@ -1,6 +1,8 @@
-import abc
 import numpy as np
-import tensorflow as tf
+try:
+    import tensorflow as tf
+except ImportError:
+    tf = None
 
 
 def custom_mse(y_true, y_pred, sample_weight=None):

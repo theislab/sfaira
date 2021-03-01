@@ -1,0 +1,39 @@
+source	target	target_id
+Best4+ Enterocytes	enterocyte	CL:0000584
+CD4+ Activated Fos-hi	activated CD4-positive, alpha-beta T cell	CL:0000896
+CD4+ Activated Fos-lo	activated CD4-positive, alpha-beta T cell	CL:0000896
+CD4+ Memory	CD4-positive, alpha-beta memory T cell	CL:0000897
+CD4+ PD1+	CD4-positive, alpha-beta T cell	CL:0000624
+CD69+ Mast	mast cell	CL:0000097
+CD69- Mast	mast cell	CL:0000097
+CD8+ IELs	CD8-alpha-beta-positive, alpha-beta intraepithelial T cell	CL:0000796
+CD8+ IL17+	CD8-positive, alpha-beta thymocyte	CL:0000811
+CD8+ LP	CD8-positive, alpha-beta thymocyte	CL:0000811
+Cycling B	B cell	CL:0000236
+Cycling T	T cell	CL:0000084
+Cycling TA	transit amplifying cell of large intestine	CL:0009011
+DC1	dendritic cell	CL:0000451
+DC2	dendritic cell	CL:0000451
+Enterocyte Progenitors	enterocyte	CL:0000584
+Enterocytes	enterocyte	CL:0000584
+Enteroendocrine	enteroendocrine cell	CL:0000164
+Follicular	follicular B cell	CL:0000843
+GC	goblet cell	CL:0000160
+Goblet	goblet cell	CL:0000160
+ILCs	innate lymphoid cell	CL:0001065
+Immature Enterocytes 1	enterocyte	CL:0000584
+Immature Enterocytes 2	enterocyte	CL:0000584
+Immature Goblet	goblet cell	CL:0000160
+M cells	M cell of gut	CL:0000682
+MT-hi	T cell	CL:0000084
+Macrophages	macrophage	CL:0000235
+NKs	natural killer cell	CL:0000623
+Plasma	plasma cell	CL:0000786
+Secretory TA	transit amplifying cell of large intestine	CL:0009011
+Stem	intestinal crypt stem cell	CL:0002250
+TA 1	transit amplifying cell of large intestine	CL:0009011
+TA 2	transit amplifying cell of large intestine	CL:0009011
+Tregs	regulatory T cell	CL:0000815
+Tuft	intestinal tuft cell	CL:0019032
+WNT2B+ Fos-lo 1	fibroblast	CL:0000057
+WNT5B+ 2	fibroblast	CL:0000057

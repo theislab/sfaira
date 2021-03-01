@@ -53,21 +53,10 @@ setup(
         'tensorflow': [
             # 'tensorflow>=2.0.0'  # TODO Add Tensorflow here again
         ],
-        'kipoi': [
-            'kipoi',
-            'git-lfs'
-        ],
         'plotting_deps': [
             "seaborn",
             "matplotlib",
             "sklearn"
-        ],
-        'data': [
-            "scanpy",
-            "loompy",
-            "requests",
-            "xlrd==1.*",
-            "openpyxl",
         ],
         'extension': [
             "sfaira_extension",

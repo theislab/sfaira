@@ -1,5 +1,6 @@
 from typing import Dict, List, Union
 
+from sfaira.consts import OntologyContainerSfaira
 from sfaira.versions.metadata import CelltypeUniverse
 
 
@@ -45,7 +46,13 @@ def map_celltype_to_ontology(
     """
     if isinstance(queries, str):
         queries = [queries]
-    cu = CelltypeUniverse(organism=organism, **kwargs)
+    oc = OntologyContainerSfaira()
+    cu = CelltypeUniverse(
+        cl=oc.ontology_cell_types,
+        uberon=oc.ontology_organ,
+        organism=organism,
+        **kwargs
+    )
     matches_to_return = {}
     matches = cu.prepare_celltype_map_fuzzy(
         source=queries,

@@ -14,7 +14,7 @@ def write_meta(args0, args1):
         load_raw=False,
         allow_caching=False,
     )
-    args0.write_ontology_class_map(fn=args0.fn_ontology_class_map_csv)
+    args0.write_ontology_class_map(fn=args0.fn_ontology_class_map_tsv)
     return None
 
 

@@ -8,6 +8,7 @@ import pandas as pd
 from typing import List, Union
 
 from sfaira.versions.metadata import CelltypeUniverse
+from sfaira.consts import OntologyContainerSfaira
 from sfaira.versions.topology_versions import Topologies
 
 
@@ -34,6 +35,7 @@ class ModelZoo(abc.ABC):
         """
         :param model_lookuptable: model_lookuptable.
         """
+        self._ontology_container_sfaira = OntologyContainerSfaira()
         if model_lookuptable is not None:  # check if models in repository
             self.ontology = self.load_ontology_from_model_ids(model_lookuptable['model_id'].values)
         self.model_id = None
@@ -472,4 +474,8 @@ class ModelZooCelltype(ModelZoo):
             model_type=self.model_type,
             topology_id=self.model_topology
         )
-        self.celltypes = CelltypeUniverse(organism=self.organism).load_target_universe(organ=self.organ)
+        self.celltypes = CelltypeUniverse(
+            cl=self._ontology_container_sfaira.ontology_cell_types,
+            uberon=self._ontology_container_sfaira.ontology_organ,
+            organism=self.organism
+        ).load_target_universe(organ=self.organ)

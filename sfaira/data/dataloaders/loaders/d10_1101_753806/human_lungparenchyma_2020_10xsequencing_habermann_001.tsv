@@ -1,0 +1,32 @@
+source	target	target_id
+AT1	type I pneumocyte	CL:0002062
+AT2	type II pneumocyte	CL:0002063
+B Cells	B cell	CL:0000236
+Basal	respiratory basal cell	CL:0002633
+Ciliated	lung ciliated cell	CL:1000271
+Differentiating Ciliated	lung ciliated cell	CL:1000271
+Endothelial Cells	endothelial cell	CL:0000115
+Fibroblasts	fibroblast of lung	CL:0002553
+HAS1 High Fibroblasts	fibroblast of lung	CL:0002553
+KRT5-/KRT17+	epithelial cell	CL:0000066
+Lymphatic Endothelial Cells	endothelial cell of lymphatic vessel	CL:0002138
+MUC5AC+ High	secretory cell	CL:0000151
+MUC5B+	secretory cell	CL:0000151
+Macrophages	lung macrophage	CL:1001603
+Mast Cells	mast cell	CL:0000097
+Mesothelial Cells	mesothelial cell	CL:0000077
+Monocytes	monocyte	CL:0000576
+Myofibroblasts	myofibroblast cell	CL:0000186
+NK Cells	natural killer cell	CL:0000623
+PLIN2+ Fibroblasts	fibroblast of lung	CL:0002553
+Plasma Cells	plasma cell	CL:0000786
+Proliferating Epithelial Cells	respiratory epithelial cell	CL:0002368
+Proliferating Macrophages	macrophage	CL:0000235
+Proliferating T Cells	T cell	CL:0000084
+SCGB3A2+	secretory cell	CL:0000151
+SCGB3A2+ SCGB1A1+	secretory cell	CL:0000151
+Smooth Muscle Cells	bronchial smooth muscle cell	CL:0002598
+T Cells	T cell	CL:0000084
+Transitional AT2	type II pneumocyte	CL:0002063
+cDCs	conventional dendritic cell	CL:0000990
+pDCs	plasmacytoid dendritic cell	CL:0000784

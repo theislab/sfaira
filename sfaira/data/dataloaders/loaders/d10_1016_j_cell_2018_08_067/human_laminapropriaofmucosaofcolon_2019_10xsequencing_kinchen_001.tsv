@@ -1,0 +1,15 @@
+source	target	target_id
+Endothelial 1	endothelial cell	CL:0000115
+Endothelial 2	endothelial cell	CL:0000115
+Glial	glial cell	CL:0000125
+Myofibroblasts	myofibroblast cell	CL:0000186
+Pericyte 1	pericyte cell	CL:0000669
+Pericyte 2	pericyte cell	CL:0000669
+Pericytes	pericyte cell	CL:0000669
+Plasma Cells	plasma cell	CL:0000786
+Smooth Muscle	smooth muscle cell of large intestine	CL:1000279
+Stromal 1	stromal cell	CL:0000499
+Stromal 2a	stromal cell	CL:0000499
+Stromal 2b	stromal cell	CL:0000499
+Stromal 3	stromal cell	CL:0000499
+Stromal 4	stromal cell	CL:0000499

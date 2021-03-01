@@ -1,7 +1,8 @@
+cache/ontologies/cl/*
 sfaira/unit_tests/test_data_loaders/*
 sfaira/unit_tests/test_data/*
 sfaira/unit_tests/template_data/*
-sfaira/unit_tests/test_data_template.py
+sfaira/unit_tests/data_contribution/test_data_template.py
 git abuild
 cache
 sfaira.egg-info

@@ -57,8 +57,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(sample_fn=sample_fn, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        protocol = "10x" if sample_fn.split("-")[3] == "droplet" else "smartseq2"
+        super().__init__(sample_fn=sample_fn, sample_fns=SAMPLE_FNS, data_path=data_path, meta_path=meta_path,
+                         cache_path=cache_path, **kwargs)
         organ = "-".join(sample_fn.split("-")[7:]).split(".")[0].lower()
         organ = "adipose tissue" if organ in ["fat", "bat", "gat", "mat", "scat"] else \
             "aorta" if organ in ["aorta"] else \
@@ -81,19 +81,16 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             "trachea" if organ in ["trachea"] else organ
         # ToDo: heart_and_aorta could be a distinct UBERON term, e.g. cardiovascular system?
 
-        self.id = f"mouse_{''.join(organ.split(' '))}_2019_{protocol}_pisco_" \
-                  f"{str(SAMPLE_FNS.index(self.sample_fn)).zfill(3)}_10.1101/661728"
-
         self.download_url_data = f"https://czb-tabula-muris-senis.s3-us-west-2.amazonaws.com/Data-objects/{sample_fn}"
         self.download_url_meta = None
 
-        self.obs_key_cellontology_original = "free_annotation"
+        self.obs_key_cellontology_original = "cell_ontology_class"
         self.obs_key_age = "age"
         self.obs_key_dev_stage = "development_stage"  # not given in all data sets
         self.obs_key_sex = "sex"
         # ToDo: further anatomical information for subtissue in "subtissue"?
 
-        self.author = "Quake"
+        self.author = "Pisco"
         self.doi = "10.1101/661728"
         self.healthy = True
         self.normalization = "norm"
@@ -105,6 +102,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
 
         self.var_ensembl_col = None
         self.var_symbol_col = "index"
+
+        self.set_dataset_id(idx=1)
 
     def _load(self):
         fn = os.path.join(self.data_dir, self.sample_fn)

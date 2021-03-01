@@ -1,0 +1,12 @@
+source	target	target_id
+B-cell	B cell	CL:0000236
+Endothelial	endothelial cell	CL:0000115
+Fibroblast	fibroblast	CL:0000057
+Macrophage	macrophage	CL:0000235
+Mast-cell	mast cell	CL:0000097
+Melanocyte	retinal melanocyte	CL:0002485
+Pericyte	pericyte cell	CL:0000669
+RPE	retinal pigment epithelial cell	CL:0002586
+Schwann1	terminal Schwann cell	CL:0000692
+Schwann2	terminal Schwann cell	CL:0000692
+T/NK-cell	alpha-beta T cell	CL:0000789

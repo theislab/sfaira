@@ -16,12 +16,10 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.id = "human_lung_2019_dropseq_braga_003_10.1038/s41591-019-0468-5"
-
         self.download_url_data = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE130nnn/GSE130148/suppl/GSE130148%5Fraw%5Fcounts%2Ecsv%2Egz"
         self.download_url_meta = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE130nnn/GSE130148/suppl/GSE130148%5Fbarcodes%5Fcell%5Ftypes%2Etxt%2Egz"
 
-        self.author = "Teichmann"
+        self.author = "Braga"
         self.doi = "10.1038/s41591-019-0468-5"
         self.healthy = True
         self.normalization = "raw"
@@ -32,26 +30,9 @@ class Dataset(DatasetBase):
         self.year = 2019
 
         self.var_symbol_col = "index"
-
         self.obs_key_cellontology_original = "celltype"
 
-        self.class_maps = {
-            "0": {
-                "Fibroblast": "Fibroblasts",
-                "Type 2": "AT2",
-                "B cell": "B cell lineage",
-                "Macrophages": "Macrophages",
-                "NK cell": "Innate lymphoid cells",
-                "T cell": "T cell lineage",
-                "Ciliated": "Multiciliated lineage",
-                "Lymphatic": "Lymphatic EC",
-                "Type 1": "AT1",
-                "Transformed epithelium": "1_Epithelial",
-                "Secretory": "Secretory",
-                "Endothelium": "1_Endothelial",
-                "Mast cell": "Mast cells",
-            },
-        }
+        self.set_dataset_id(idx=1)
 
     def _load(self):
         fn = [
@@ -60,6 +41,6 @@ class Dataset(DatasetBase):
         ]
         adata = anndata.read_csv(fn[0]).T
         adata.obs = pd.read_csv(fn[1], sep="\t", index_col=0)
-        self.set_unkown_class_id(ids=["1_Unicorns and artifacts"])
+        self.set_unknown_class_id(ids=["1_Unicorns and artifacts"])
 
         return adata

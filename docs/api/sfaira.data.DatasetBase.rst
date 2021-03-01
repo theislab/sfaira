@@ -45,7 +45,7 @@
       ~DatasetBase.download
       ~DatasetBase.download_meta
       ~DatasetBase.ethnicity
-      ~DatasetBase.fn_ontology_class_map_csv
+      ~DatasetBase.fn_ontology_class_map_tsv
       ~DatasetBase.healthy
       ~DatasetBase.healthy_state_healthy
       ~DatasetBase.id

@@ -128,13 +128,8 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
             **kwargs
     ):
 
-        super().__init__(
-            sample_id=sample_id,
-            data_path=data_path,
-            meta_path=meta_path,
-            cache_path=cache_path,
-            **kwargs
-        )
+        super().__init__(sample_id=sample_id, sample_ids=SAMPLE_IDS, data_path=data_path, meta_path=meta_path,
+                         cache_path=cache_path, **kwargs)
 
         sample_organ_dict = {
             'AdultAdipose_1': 'adipose tissue of abdominal region',
@@ -246,17 +241,15 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
 
         self.download_url_data = "https://ndownloader.figshare.com/files/17727365"
         self.download_url_meta = [
-            "adata",
+            "https://ndownloader.figshare.com/files/21758835",
             "https://ndownloader.figshare.com/files/22447898",
         ]
 
         self.obs_key_sample = "sample"
 
         self.organ = sample_organ_dict[self.sample_id]
-        self.id = f"human_{''.join(self.organ.split(' '))}_2020_microwellseq_han_" \
-                  f"{str(SAMPLE_IDS.index(self.sample_id)).zfill(3)}_10.1038/s41586-020-2157-4"
 
-        self.author = "Guo"
+        self.author = "Han"
         self.doi = "10.1038/s41586-020-2157-4"
         self.healthy = True
         self.normalization = "raw"
@@ -265,12 +258,13 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
         self.state_exact = "healthy"
         self.year = 2020
 
-        self.obs_key_cellontology_original = "cell_ontology_class"
+        self.obs_key_cellontology_original = "celltype_specific"
         self.obs_key_dev_stage = "dev_stage"
         self.obs_key_sex = "gender"
         self.obs_key_age = "age"
-
         self.var_symbol_col = "index"
+
+        self.set_dataset_id(idx=1)
 
     def _load_full(self):
         adata = anndata.read(os.path.join(self.data_dir, "HCL_Fig1_adata.h5ad"))
@@ -290,7 +284,7 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
         # load celltype labels and harmonise them
         # This pandas code should work with pandas 1.2 but it does not and yields an empty data frame:
         fig1_anno = pd.read_excel(
-            os.path.join(self.data_dir_base, "human", self.directory_formatted_doi, "HCL_Fig1_cell_Info.xlsx"),
+            os.path.join(self.data_dir_base, self.directory_formatted_doi, "HCL_Fig1_cell_Info.xlsx"),
             index_col="cellnames",
             engine="xlrd",  # ToDo: Update when pandas xlsx reading with openpyxl is fixed: yields empty tables
         )
@@ -329,5 +323,29 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
         adata.obs.columns = [
             "sample", "sub_tissue", "n_genes", "n_counts", "cluster_global", "dev_stage", "donor", "celltype_global",
             "age", "celltype_specific", "cluster_specific", "gender", "protocol", "source"]
+
+        self.set_unknown_class_id(
+            ids=[
+                "0",
+                "Unknown1",
+                "Unknown2",
+                "Intermediated cell",
+                "MT high",
+                "MT-gene high cell",
+                "Proliferating  cell",
+                "Proliferating cell",
+                "Proliferating cell_C7 high",
+                "Proliferating cell_CCNB1 high",
+                "Proliferating cell_FABP5 high",
+                "Proliferating cell_HMGB2 high",
+                "Proliferating cell_KIAA0101 high",
+                "Proliferating cell_KIAA0101_high",
+                "Proliferating cell_PTTG1 high",
+                "Proliferating cell_TOP2A high",
+                "Proliferating cell_UBE2C  high",
+                "Proliferating cell_UBE2C high",
+                "Proliferating cell_UBE2C_high"
+            ]
+        )
 
         return adata

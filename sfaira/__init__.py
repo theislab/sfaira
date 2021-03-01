@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """A Data and Model Zoo for Single-Cell Genomics."""
 
-# import sfaira.interface as ui
-# import sfaira.train
-# import sfaira.models
-import sfaira.genomes
+import sfaira.consts
 import sfaira.data
-import sfaira.consts as consts
+import sfaira.genomes
+import sfaira.interface as ui
+import sfaira.models
+import sfaira.train
 import sfaira.versions
 from ._version import get_versions
 

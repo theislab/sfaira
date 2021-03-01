@@ -39,7 +39,7 @@ class DatasetSuperGroupSfaira(DatasetSuperGroup):
             )
         ]
         if sfairae is not None:
-            dsgs.append(sfairae.data.loaders.DatasetSuperGroupLoaders(
+            dsgs.append(sfairae.data.dataloaders.loaders.DatasetSuperGroupLoaders(
                 data_path=data_path,
                 meta_path=meta_path,
                 cache_path=cache_path,

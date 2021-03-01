@@ -1,11 +1,13 @@
 import pydoc
 import os
-from typing import Union
+from typing import List, Union
 from warnings import warn
 from sfaira.data import DatasetSuperGroup, DatasetGroupDirectoryOriented
 
 
 class DatasetSuperGroupLoaders(DatasetSuperGroup):
+
+    dataset_groups: List[DatasetGroupDirectoryOriented]
 
     def __init__(
             self,

@@ -11,21 +11,21 @@ from sfaira.data import DatasetBaseGroupLoadingManyFiles
 SAMPLE_FNS = [
     "Bladder_dge.txt.gz",
     "BoneMarrow1_dge.txt.gz",
-    # "BoneMarrow2_dge.txt.gz",  # ToDo: not annotated, potentially bad quality?
-    "BoneMarrow3_dge.txt.gz",
+    # "BoneMarrow2_dge.txt.gz",  # not annotated, potentially bad quality
+    # "BoneMarrow3_dge.txt.gz",  # not annotated, potentially bad quality
     "BoneMarrowcKit1_dge.txt.gz",
     "BoneMarrowcKit2_dge.txt.gz",
     "BoneMarrowcKit3_dge.txt.gz",
     "Brain1_dge.txt.gz",
     "Brain2_dge.txt.gz",
-    # "CJ7.EB14.Ezh2.1_dge.txt.gz",  # ToDo: sort out meta data for these
-    # "CJ7.EB14.WT.1_dge.txt.gz",  # ToDo: sort out meta data for these
-    # "CJ7.EB14.WT.2_dge.txt.gz",  # ToDo: sort out meta data for these
-    # "EB.Ezh2_dge.txt.gz",  # ToDo: sort out meta data for these
-    # "EB.WT_dge.txt.gz",  # ToDo: sort out meta data for these
-    "EmbryonicMesenchymeE14.5_dge.txt.gz",
-    "EmbryonicStemCell.CJ7_Deep_dge.txt.gz",
-    "EmbryonicStemCells_dge.txt.gz",
+    # "CJ7.EB14.Ezh2.1_dge.txt.gz",  # TODO: sort out meta data for these
+    # "CJ7.EB14.WT.1_dge.txt.gz",  # TODO: sort out meta data for these
+    # "CJ7.EB14.WT.2_dge.txt.gz",  # TODO: sort out meta data for these
+    # "EB.Ezh2_dge.txt.gz",  # TODO: sort out meta data for these
+    # "EB.WT_dge.txt.gz",  # TODO: sort out meta data for these
+    # "EmbryonicMesenchymeE14.5_dge.txt.gz",  # TODO: sort out meta data for these
+    # "EmbryonicStemCell.CJ7_Deep_dge.txt.gz",  # TODO: sort out meta data for these
+    # "EmbryonicStemCells_dge.txt.gz",  # TODO: sort out meta data for these
     "FetalBrain_dge.txt.gz",
     "FetalFemaleGonad_dge.txt.gz",
     "FetalIntestine_dge.txt.gz",
@@ -44,30 +44,30 @@ SAMPLE_FNS = [
     "Lung1_dge.txt.gz",
     "Lung2_dge.txt.gz",
     "Lung3_dge.txt.gz",
-    "MammaryGland.Involution.CD45.1_dge.txt.gz",
-    "MammaryGland.Involution.CD45.2_dge.txt.gz",
-    "MammaryGland.Involution1_dge.txt.gz",
-    "MammaryGland.Involution2_dge.txt.gz",
-    "MammaryGland.Lactation1_dge.txt.gz",
-    "MammaryGland.Lactation2_dge.txt.gz",
-    "MammaryGland.Pregnancy_dge.txt.gz",
-    "MammaryGland.Virgin.CD45.1_dge.txt.gz",
-    "MammaryGland.Virgin.CD45.2_dge.txt.gz",
+    # "MammaryGland.Involution.CD45.1_dge.txt.gz",  # TODO not annotated?
+    # "MammaryGland.Involution.CD45.2_dge.txt.gz",  # TODO not annotated?
+    # "MammaryGland.Involution1_dge.txt.gz",  # TODO not annotated?
+    # "MammaryGland.Involution2_dge.txt.gz",  # TODO not annotated?
+    # "MammaryGland.Lactation1_dge.txt.gz",  # TODO not annotated?
+    # "MammaryGland.Lactation2_dge.txt.gz",  # TODO not annotated?
+    # "MammaryGland.Pregnancy_dge.txt.gz",  # TODO not annotated?
+    # "MammaryGland.Virgin.CD45.1_dge.txt.gz",  # TODO not annotated?
+    # "MammaryGland.Virgin.CD45.2_dge.txt.gz",  # TODO not annotated?
     "MammaryGland.Virgin1_dge.txt.gz",
     "MammaryGland.Virgin2_dge.txt.gz",
     "MammaryGland.Virgin3_dge.txt.gz",
     "MammaryGland.Virgin4_dge.txt.gz",
-    # "mES.CJ7_dge.txt.gz",  # ToDo: sort out meta data for these
+    # "mES.CJ7_dge.txt.gz",  # TODO: sort out meta data for these
     "MesenchymalStemCells_dge.txt.gz",
     "MesenchymalStemCellsPrimary_dge.txt.gz",
-    # "mouse-3T3_dge.txt.gz",  # ToDo: sort out meta data for these
+    # "mouse-3T3_dge.txt.gz",  # TODO: sort out meta data for these
     "Muscle_dge.txt.gz",
     "NeonatalCalvaria1_dge.txt.gz",
     "NeonatalCalvaria2_dge.txt.gz",
     "NeonatalHeart_dge.txt.gz",
     "NeonatalMuscle1_dge.txt.gz",
     "NeonatalMuscle2_dge.txt.gz",
-    "NeonatalPancreas_dge.txt.zip",
+    # "NeonatalPancreas_dge.txt.zip",  # TODO enable zip file here
     "NeonatalRib1_dge.txt.gz",
     "NeonatalRib2_dge.txt.gz",
     "NeonatalRib3_dge.txt.gz",
@@ -113,13 +113,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(
-            sample_fn=sample_fn,
-            data_path=data_path,
-            meta_path=meta_path,
-            cache_path=cache_path,
-            **kwargs
-        )
+        super().__init__(sample_fn=sample_fn, sample_fns=SAMPLE_FNS, data_path=data_path, meta_path=meta_path,
+                         cache_path=cache_path, **kwargs)
         sample_organ_dict = {
             "Bladder_dge.txt.gz": "urinary bladder",
             "BoneMarrow1_dge.txt.gz": "bone marrow",
@@ -288,8 +283,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             "PeripheralBlood4_dge.txt.gz": "adult",
             "PeripheralBlood5_dge.txt.gz": "adult",
             "PeripheralBlood6_dge.txt.gz": "adult",
-            "PlacentaE14.1_dge.txt.gz": "adult",
-            "PlacentaE14.2_dge.txt.gz": "adult",
+            "PlacentaE14.1_dge.txt.gz": "fetal",
+            "PlacentaE14.2_dge.txt.gz": "fetal",
             "Prostate1_dge.txt.gz": "adult",
             "Prostate2_dge.txt.gz": "adult",
             "SmallIntestine.CD45_dge.txt.gz": "adult",
@@ -308,13 +303,11 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         }
 
         self.organ = sample_organ_dict[self.sample_fn]
-        self.id = f"mouse_{''.join(self.organ.split(' '))}_2018_microwellseq_han_" \
-                  f"{str(SAMPLE_FNS.index(self.sample_fn)).zfill(3)}_10.1016/j.cell.2018.02.001"
 
         self.download_url_data = "https://ndownloader.figshare.com/articles/5435866?private_link=865e694ad06d5857db4b"
         self.download_url_meta = None
 
-        self.author = "Guo"
+        self.author = "Han"
         self.dev_stage = sample_dev_stage_dict[self.sample_fn]
         self.doi = "10.1016/j.cell.2018.02.001"
         self.normalization = "raw"
@@ -326,7 +319,17 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
 
         self.var_symbol_col = "index"
 
-        self.obs_key_cellontology_original = "Annotation"
+        # Only adult and neonatal samples are annotated:
+        self.obs_key_cellontology_original = "Annotation" \
+            if sample_dev_stage_dict[self.sample_fn] in ["adult", "neonatal"] and \
+            self.sample_fn not in [
+                "NeontalBrain1_dge.txt.gz",
+                "NeontalBrain2_dge.txt.gz",
+                "SmallIntestine.CD45_dge.txt.gz",
+                "Thymus2_dge.txt.gz",
+            ] else None
+
+        self.set_dataset_id(idx=1)
 
     def _load(self):
         fn = os.path.join(self.data_dir, '5435866.zip')
@@ -342,7 +345,17 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
                                        )
 
         adata = anndata.AnnData(data.T)
-        adata = adata[np.array([x in celltypes.index for x in adata.obs_names])].copy()
-        adata.obs = celltypes.loc[adata.obs_names, :]
+        annotated_cells = np.array([x in celltypes.index for x in adata.obs_names])
+        # Subset to annotated cells if any are annotated:
+        if np.sum(annotated_cells) > 0:
+            adata = adata[annotated_cells].copy()
+            adata.obs = celltypes.loc[adata.obs_names, :]
+
+        self.set_unknown_class_id(ids=[
+            "Cell in cell cycle(Fetal_Kidney)", "Stomach cell_Gkn2 high(Stomach)", "Stomach cell_Mt2 high(Stomach)",
+            "Dividing cell(Mammary-Gland-Virgin)", "Dividing cell(Neonatal-Heart)", "Dividing cell(Neonatal-Rib)",
+            "Dividing cell(Neonatal-Skin)", "Dividing cell(Pancreas)", "Dividing cell(Stomach)", "Dividing cells(Lung)",
+            "Dividng cell(Neonatal-Calvaria)"
+        ])
 
         return adata

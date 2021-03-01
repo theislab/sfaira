@@ -1,0 +1,10 @@
+source	target	target_id
+ACs	amacrine cell	CL:0000561
+BPs	cone retinal bipolar cell	CL:0000752
+Cones	retinal cone cell	CL:0000573
+Endo	retinal blood vessel endothelial cell	CL:0002585
+HCs	retina horizontal cell	CL:0000745
+Macroglia	macroglial cell	CL:0000126
+Microglia	microglial cell	CL:0000129
+RGCs	retinal ganglion cell	CL:0000740
+Rods	retinal rod cell	CL:0000604
