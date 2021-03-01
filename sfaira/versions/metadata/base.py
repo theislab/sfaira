@@ -535,6 +535,7 @@ class OntologyCelltypes(OntologyExtendedObo):
             'develops_from',  # developmental DAG -> include because of developmental differences
             'has_part',  # ?
             'develops_into',  # inverse developmental DAG -> do not include
+            'part_of',
             'RO:0002120',  # ?
             'RO:0002103',  # ?
             'lacks_plasma_membrane_part'  # ?
