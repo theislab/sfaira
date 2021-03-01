@@ -1,61 +1,61 @@
-source	target
-Alveolar_Type1	type I pneumocyte
-Alveolar_Type2	type II pneumocyte
-B_CD27neg	B cell
-B_CD27pos	B cell
-B_Hypermutation	B cell
-B_cells	B cell
-B_follicular	follicular B cell
-B_mantle	B cell
-Blood_vessel	blood vessel endothelial cell
-Ciliated	ciliated cell
-DC_1	dendritic cell
-DC_2	dendritic cell
-DC_Monocyte_Dividing	myeloid leukocyte
-DC_activated	dendritic cell
-DC_plasmacytoid	plasmacytoid dendritic cell
-Dendritic_Cells	dendritic cell
-Epi_basal	basal cell
-Epi_dividing	epithelial cell
-Epi_stratified	epithelial cell of stratum germinativum of esophagus
-Epi_suprabasal	epithelal cell
-Epi_upper	epithelal cell
-Fibroblast	fibroblast
-Glands_duct	glandular cell of esophagus
-Glands_mucous	epithelial cell of esophagus
-ILC	innate lymphoid cell
-Lymph_vessel	endothelial cell of lymphatic vessel
-Macrophage	macrophage
-Macrophage_Dividing	macrophage
-Macrophage_MARCOneg	macrophage
-Macrophage_MARCOpos	macrophage
-Mast_cell	mast cell
-Mast_cells	mast cell
-Mono_macro	myeloid leukocyte
-Monocyte	monocyte
-Muscle_cells	muscle cell
-NK	 natural killer cell
-NK_CD160pos	CD16-positive, CD56-dim natural killer cell, human
-NK_Dividing	natural killer cell
-NK_FCGR3Apos	natural killer cell
-NK_T_CD8_Cytotoxic	mature NK T cell
-NK_dividing	natural killer cell
-Plasma_IgG	IgG short lived plasma cell
-Plasma_IgM	IgM plasma cell
-Plasma_cells	plasma cell
-Plasmablast	plasmablast
-Platelet	platelet
-T_CD4	CD4-positive, alpha-beta T cell
-T_CD4_conv	CD4-positive, alpha-beta T cell
-T_CD4_fh	T follicular helper cell
-T_CD4_naive	naive thymus-derived CD4-positive, alpha-beta T cell
-T_CD4_reg	CD4-positive, alpha-beta regulatory T cell
-T_CD8	CD8-positive, alpha-beta T cell
-T_CD8_CTL	CD8-positive, alpha-beta cytotoxic T cell
-T_CD8_CytT	CD8-positive, alpha-beta cytotoxic T cell
-T_CD8_MAIT	mucosal invariant T cell
-T_CD8_activated	activated CD8-positive, alpha-beta T cell, human
-T_CD8_gd	C-neganegative typr CD8-positive, alpha-beta T cell"
-T_cell_dividing	T cell
-T_cells_Dividing	T cell
-T_regulatory	regulatory T cell
+source	target	target_id
+Alveolar_Type1	type I pneumocyte	CL:0002062
+Alveolar_Type2	type II pneumocyte	CL:0002063
+B_CD27neg	B cell	CL:0000236
+B_CD27pos	B cell	CL:0000236
+B_Hypermutation	B cell	CL:0000236
+B_cells	B cell	CL:0000236
+B_follicular	follicular B cell	CL:0000843
+B_mantle	B cell	CL:0000236
+Blood_vessel	blood vessel endothelial cell	CL:0000071
+Ciliated	ciliated cell	CL:0000064
+DC_1	dendritic cell	CL:0000451
+DC_2	dendritic cell	CL:0000451
+DC_Monocyte_Dividing	myeloid leukocyte	CL:0000766
+DC_activated	dendritic cell	CL:0000451
+DC_plasmacytoid	plasmacytoid dendritic cell	CL:0000784
+Dendritic_Cells	dendritic cell	CL:0000451
+Epi_basal	basal cell	CL:0000646
+Epi_dividing	epithelial cell	CL:0000066
+Epi_stratified	epithelial cell of stratum germinativum of esophagus	CL:1000447
+Epi_suprabasal	epithelial cell	CL:0000066
+Epi_upper	epithelial cell	CL:0000066
+Fibroblast	fibroblast	CL:0000057
+Glands_duct	glandular cell of esophagus	CL:0002657
+Glands_mucous	epithelial cell of esophagus	CL:0002252
+ILC	innate lymphoid cell	CL:0001065
+Lymph_vessel	endothelial cell of lymphatic vessel	CL:0002138
+Macrophage	macrophage	CL:0000235
+Macrophage_Dividing	macrophage	CL:0000235
+Macrophage_MARCOneg	macrophage	CL:0000235
+Macrophage_MARCOpos	macrophage	CL:0000235
+Mast_cell	mast cell	CL:0000097
+Mast_cells	mast cell	CL:0000097
+Mono_macro	myeloid leukocyte	CL:0000766
+Monocyte	monocyte	CL:0000576
+Muscle_cells	muscle cell	CL:0000187
+NK	natural killer cell	CL:0000623
+NK_CD160pos	CD16-positive, CD56-dim natural killer cell, human	CL:0000939
+NK_Dividing	natural killer cell	CL:0000623
+NK_FCGR3Apos	natural killer cell	CL:0000623
+NK_T_CD8_Cytotoxic	mature NK T cell	CL:0000814
+NK_dividing	natural killer cell	CL:0000623
+Plasma_IgG	IgG short lived plasma cell	CL:0000977
+Plasma_IgM	IgM plasma cell	CL:0000986
+Plasma_cells	plasma cell	CL:0000786
+Plasmablast	plasmablast	CL:0000980
+Platelet	platelet	CL:0000233
+T_CD4	CD4-positive, alpha-beta T cell	CL:0000624
+T_CD4_conv	CD4-positive, alpha-beta T cell	CL:0000624
+T_CD4_fh	T follicular helper cell	CL:0002038
+T_CD4_naive	naive thymus-derived CD4-positive, alpha-beta T cell	CL:0000895
+T_CD4_reg	CD4-positive, CD25-positive, alpha-beta regulatory T cell	CL:0000792
+T_CD8	CD8-positive, alpha-beta T cell	CL:0000625
+T_CD8_CTL	CD8-positive, alpha-beta cytotoxic T cell	CL:0000794
+T_CD8_CytT	CD8-positive, alpha-beta cytotoxic T cell	CL:0000794
+T_CD8_MAIT	mucosal invariant T cell	CL:0000940
+T_CD8_activated	activated CD8-positive, alpha-beta T cell, human	CL:0001049
+T_CD8_gd	CD8-alpha alpha positive, gamma-delta intraepithelial T cell	CL:0000802
+T_cell_dividing	T cell	CL:0000084
+T_cells_Dividing	T cell	CL:0000084
+T_regulatory	regulatory T cell	CL:0000815

@@ -1,22 +1,22 @@
-source	target
-B cells	B cell
-Basal 1	respiratory basal cell
-Basal 2	respiratory basal cell
-Ciliated 1	lung ciliated cell
-Ciliated 2	lung ciliated cell
-Club	club cell
-Dendritic cells	dendritic cell
-Endothelial	endothelial cell
-Fibroblasts	fibroblast of lung
-Goblet 2	lung goblet cell
-Goblet_1	lung goblet cell
-Ionocytes	ionocyte
-Luminal_Macrophages lung macrophage
-Lymphatic	endothelial cell of lymphatic vessel
-Mast cells	mast cell
-Mesothelium	mesothelial cell
-Neutrophils	neutrophil
-Smooth muscle	bronchial smooth muscle cell
-T and NK	alpha-beta T cell
-Type 2 alveolar	type II pneumocyte
-Type_1_alveolar	type I pneumocyte
+source	target	target_id
+B cells	B cell	CL:0000236
+Basal 1	respiratory basal cell	CL:0002633
+Basal 2	respiratory basal cell	CL:0002633
+Ciliated 1	lung ciliated cell	CL:1000271
+Ciliated 2	lung ciliated cell	CL:1000271
+Club	club cell	CL:0000158
+Dendritic cells	dendritic cell	CL:0000451
+Endothelial	endothelial cell	CL:0000115
+Fibroblasts	fibroblast of lung	CL:0002553
+Goblet 2	lung goblet cell	CL:1000143
+Goblet_1	lung goblet cell	CL:1000143
+Ionocytes	ionocyte	CL:0005006
+Luminal_Macrophages	lung macrophage	CL:1001603
+Lymphatic	endothelial cell of lymphatic vessel	CL:0002138
+Mast cells	mast cell	CL:0000097
+Mesothelium	mesothelial cell	CL:0000077
+Neutrophils	neutrophil	CL:0000775
+Smooth muscle	bronchial smooth muscle cell	CL:0002598
+T and NK	alpha-beta T cell	CL:0000789
+Type 2 alveolar	type II pneumocyte	CL:0002063
+Type_1_alveolar	type I pneumocyte	CL:0002062

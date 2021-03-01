@@ -1,13 +1,13 @@
-source	target
-Muller cell	Mueller cell
-amacrine cell	amacrine cell
-microglial cell	microglial cell
-retinal bipolar neuron type A	"gastrula cell:|||:neuron:bipolar neuron:Kolmer-Agduhr neuron:Rohon-Beard neuron:|||:cartwheel heterochromatin:naive T cell:gamma-delta intraepithelial T cell:CD8-alpha alpha positive, gamma-delta intraepithelial T cell:|||:unipolar neuron:cone retinal bipolar cell:multipolar neuron:retinal melanocyte:|||:motor neuron:cerebellar Golgi cell:mature neutrophil:neutrophil"
-retinal bipolar neuron type B	"gastrula cell:|||:neuron:bipolar neuron:Kolmer-Agduhr neuron:Rohon-Beard neuron:|||:cartwheel heterochromatin:naive T cell:gamma-delta intraepithelial T cell:CD8-alpha alpha positive, gamma-delta intraepithelial T cell:|||:unipolar neuron:cone retinal bipolar cell:multipolar neuron:pseudounipolar neuron:|||:cerebellar Golgi cell:motor neuron:mature neutrophil:neutrophil"
-retinal bipolar neuron type C	"gastrula cell:|||:neuron:bipolar neuron:Kolmer-Agduhr neuron:Rohon-Beard neuron:|||:cartwheel heterochromatin:naive T cell:gamma-delta intraepithelial T cell:CD8-alpha alpha positive, gamma-delta intraepithelial T cell:|||:unipolar neuron:cone retinal bipolar cell:multipolar neuron:retinal melanocyte:|||:motor neuron:cerebellar Golgi cell:mature neutrophil:neutrophil"
-retinal bipolar neuron type D	"gastrula cell:|||:neuron:bipolar neuron:Rohon-Beard neuron:Kolmer-Agduhr neuron:|||:cartwheel heterochromatin:naive T cell:gamma-delta intraepithelial T cell:CD8-alpha alpha positive, gamma-delta intraepithelial T cell:|||:unipolar neuron:cone retinal bipolar cell:multipolar neuron:retinal melanocyte:|||:mature neutrophil:cerebellar Golgi cell:neutrophil:motor neuron"
-retinal cone cell	retinal cone cell
-retinal ganglion cell	retinal ganglion cell
-retinal rod cell type A	retinal rod cell
-retinal rod cell type B	retinal rod cell
-retinal rod cell type C	retinal rod cell
+source	target	target_id
+Muller cell	Mueller cell	CL:0000636
+amacrine cell	amacrine cell	CL:0000561
+microglial cell	microglial cell	CL:0000129
+retinal bipolar neuron type A	retinal bipolar neuron	CL:0000748
+retinal bipolar neuron type B	retinal bipolar neuron	CL:0000748
+retinal bipolar neuron type C	retinal bipolar neuron	CL:0000748
+retinal bipolar neuron type D	retinal bipolar neuron	CL:0000748
+retinal cone cell	retinal cone cell	CL:0000573
+retinal ganglion cell	retinal ganglion cell	CL:0000740
+retinal rod cell type A	retinal rod cell	CL:0000604
+retinal rod cell type B	retinal rod cell	CL:0000604
+retinal rod cell type C	retinal rod cell	CL:0000604

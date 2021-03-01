@@ -1,15 +1,15 @@
-source	target
-acinar	pancreatic acinar cell
-activated_stellate	pancreatic stellate cell
-alpha	pancreatic A cell
-beta	type B pancreatic cell
-delta	pancreatic D cell
-ductal	pancreatic ductal cell
-endothelial	endothelial cell
-epsilon	pancreatic epsilon cell
-gamma	pancreatic endocrine cell
-macrophage	macrophage
-mast	mast cell
-quiescent_stellate	pancreatic stellate cell
-schwann	Schwann cell
-t_cell	T cell
+source	target	target_id
+acinar	pancreatic acinar cell	CL:0002064
+activated_stellate	pancreatic stellate cell	CL:0002410
+alpha	pancreatic A cell	CL:0000171
+beta	type B pancreatic cell	CL:0000169
+delta	pancreatic D cell	CL:0000173
+ductal	pancreatic ductal cell	CL:0002079
+endothelial	endothelial cell	CL:0000115
+epsilon	pancreatic epsilon cell	CL:0005019
+gamma	pancreatic endocrine cell	CL:0008024
+macrophage	macrophage	CL:0000235
+mast	mast cell	CL:0000097
+quiescent_stellate	pancreatic stellate cell	CL:0002410
+schwann	Schwann cell	CL:0002573
+t_cell	T cell	CL:0000084
