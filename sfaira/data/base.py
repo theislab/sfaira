@@ -117,12 +117,18 @@ class DatasetBase(abc.ABC):
     _celltype_universe: Union[None, CelltypeUniverse]
     _ontology_class_map: Union[None, dict]
 
+    _sample_fn: Union[None, str]
+    _sample_fns: List[Union[None, str]]
+
     def __init__(
             self,
             data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
+            load_func: = None,
             yaml_path: Union[str, None] = None,
+            sample_fn: Union[str, None] = None,
+            sample_fns: Union[List[str], None] = None,
             **kwargs
     ):
         self._adata_ids_sfaira = AdataIdsSfaira()
@@ -193,9 +199,10 @@ class DatasetBase(abc.ABC):
             # ID can be set now already because YAML was used as input instead of child class constructor.
             self.set_dataset_id(idx=yaml_vals["meta"]["dataset_index"])
 
-    @abc.abstractmethod
-    def _load(self) -> anndata.AnnData:
-        pass
+        self._sample_fn = sample_fn
+        self._sample_fns = sample_fns if sample_fns is not None else [None]
+
+        self.load_func = load_func
 
     @property
     def _directory_formatted_id(self) -> str:
@@ -341,9 +348,9 @@ class DatasetBase(abc.ABC):
                 else:
                     warnings.warn(f"Cached loading enabled, but cache file {filename} not found. "
                                   f"Loading from raw files.")
-                    self.adata = self._load()
+                    self.adata = self.load_func(self.data_dir, self._sample_fn)
             else:
-                self.adata = self._load()
+                self.adata = self.load_func(self.data_dir, self._sample_fn)
 
         def _cached_writing(filename):
             if filename is not None:
@@ -353,10 +360,10 @@ class DatasetBase(abc.ABC):
                 self.adata.write_h5ad(filename)
 
         if load_raw and allow_caching:
-            self.adata = self._load()
+            self.adata = self.load_func(self.data_dir, self._sample_fn)
             _cached_writing(self.cache_fn)
         elif load_raw and not allow_caching:
-            self.adata = self._load()
+            self.adata = self.load_func(self.data_dir, self._sample_fn)
         elif not load_raw and allow_caching:
             _cached_reading(self.cache_fn)
             _cached_writing(self.cache_fn)
@@ -986,8 +993,8 @@ class DatasetBase(abc.ABC):
                 s = s.replace(' ', '').replace('-', '').replace('_', '').lower()
             return s
 
-        if hasattr(self, 'sample_idx'):
-            idx += self.sample_idx
+        if self._sample_fns != [None]:
+            idx += self._sample_fns.index(self._sample_fn)
         idx = str(idx).zfill(3)
 
         if isinstance(self.author, List):
@@ -1810,35 +1817,6 @@ class DatasetBaseGroupLoadingOneFile(DatasetBase):
         return self.adata
 
 
-class DatasetBaseGroupLoadingManyFiles(DatasetBase, abc.ABC):
-    """
-    Container class specific to datasets which come in groups and in which data sets are saved in separate but
-    streamlined files.
-    """
-    _sample_fn: str
-
-    def __init__(
-            self,
-            sample_fn: str,
-            sample_fns: List,
-            data_path: Union[str, None] = None,
-            meta_path: Union[str, None] = None,
-            cache_path: Union[str, None] = None,
-            **kwargs
-    ):
-        super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self._sample_fn = sample_fn
-        self._SAMPLE_FNS = sample_fns
-
-    @property
-    def sample_fn(self):
-        return self._sample_fn
-
-    @property
-    def sample_idx(self):
-        return self._SAMPLE_FNS.index(self.sample_fn)
-
-
 class DatasetGroup:
     """
     Container class that co-manages multiple data sets, removing need to call Dataset() methods directly through
@@ -2253,6 +2231,7 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                         # Check if global objects are available:
                         # - SAMPLE_FNS: for DatasetBaseGroupLoadingManyFiles
                         # - SAMPLE_IDS: for DatasetBaseGroupLoadingOneFile
+                        load_func = pydoc.locate(loader_pydoc_path + dataset_module + "." + file_module + ".load")
                         sample_fns = pydoc.locate(loader_pydoc_path + dataset_module + "." + file_module +
                                                   ".SAMPLE_FNS")
                         sample_ids = pydoc.locate(loader_pydoc_path + dataset_module + "." + file_module +
@@ -2267,20 +2246,20 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                                 sample_fns = yaml_vals["meta"]["sample_fns"]
                             if sample_ids is None and yaml_vals["meta"]["sample_ids"] is not None:
                                 sample_ids = yaml_vals["meta"]["sample_ids"]
-                        if sample_fns is not None and sample_ids is None:
-                            # DatasetBaseGroupLoadingManyFiles:
+                        if sample_ids is None:
                             datasets_f.extend([
                                 DatasetFound(
-                                    sample_fn=x,
                                     data_path=data_path,
                                     meta_path=meta_path,
                                     cache_path=cache_path,
+                                    load_func=load_func,
+                                    sample_fn=x,
                                     sample_fns=sample_fns,
                                     yaml_path=fn_yaml,
                                 )
                                 for x in sample_fns
                             ])
-                        elif sample_fns is None and sample_ids is not None:
+                        else:
                             # DatasetBaseGroupLoadingManyFiles:
                             datasets_f.extend([
                                 DatasetFound(
@@ -2293,16 +2272,6 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                                 )
                                 for x in sample_ids
                             ])
-                        elif sample_fns is not None and sample_ids is not None:
-                            raise ValueError(f"sample_fns and sample_ids both found for {f}")
-                        else:
-                            datasets_f.append(
-                                DatasetFound(
-                                    data_path=data_path,
-                                    meta_path=meta_path,
-                                    cache_path=cache_path,
-                                    yaml_path=fn_yaml,
-                                ))
                         # Load cell type maps:
                         for x in datasets_f:
                             x.load_ontology_class_map(fn=os.path.join(self._cwd, file_module + ".tsv"))
