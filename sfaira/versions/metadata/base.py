@@ -517,7 +517,9 @@ class OntologyCelltypes(OntologyExtendedObo):
         # Clean up nodes:
         nodes_to_delete = []
         for k, v in self.graph.nodes.items():
-            if "namespace" not in v.keys() or v["namespace"] != "cell":
+            # Some terms are not associated with the namespace cell but are cell types,
+            # we identify these based on their ID nomenclature here.
+            if ("namespace" in v.keys() and v["namespace"] != "cell") or str(v["id"])[:2] == "CL":
                 nodes_to_delete.append(k)
             elif "name" not in v.keys():
                 nodes_to_delete.append(k)

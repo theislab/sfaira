@@ -21,4 +21,5 @@ dsgl = DatasetSuperGroupLoaders(
 )
 
 for x in dsgl.dataset_groups:
+    print(x.ids)
     x.clean_ontology_class_map()
