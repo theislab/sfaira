@@ -25,8 +25,7 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
             cache_path: Union[str, None] = None,
             **kwargs
     ):
-        super().__init__(sample_id=sample_id, sample_ids=SAMPLE_IDS, data_path=data_path, meta_path=meta_path,
-                         cache_path=cache_path, **kwargs)
+        super().__init__(sample_id=sample_id, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
         sample_organ_dict = {
             "Choroid plexus": "choroid plexus",
             "Dura mater": "dura mater",

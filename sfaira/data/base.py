@@ -952,6 +952,7 @@ class DatasetBase(abc.ABC):
         # Expand table by variably cell-wise or data set-wise meta data:
         for x in [
             self._adata_ids_sfaira.age,
+            self._adata_ids_sfaira.assay,
             self._adata_ids_sfaira.bio_sample,
             self._adata_ids_sfaira.development_stage,
             self._adata_ids_sfaira.ethnicity,
@@ -959,7 +960,6 @@ class DatasetBase(abc.ABC):
             self._adata_ids_sfaira.individual,
             self._adata_ids_sfaira.organ,
             self._adata_ids_sfaira.organism,
-            self._adata_ids_sfaira.assay,
             self._adata_ids_sfaira.sex,
             self._adata_ids_sfaira.state_exact,
             self._adata_ids_sfaira.tech_sample,
@@ -995,10 +995,12 @@ class DatasetBase(abc.ABC):
         else:
             author = self.author
 
-        self.id = f"{clean(self.organism)}_" \
-                  f"{clean(self.organ)}_" \
-                  f"{self.year}_" \
-                  f"{clean(self.protocol)}_" \
+        # Note: access private attributes here, e.g. _organism, to avoid loading of content via meta data, which would
+        # invoke call to self.id before it is set.
+        self.id = f"{clean(self._organism)}_" \
+                  f"{clean(self._organ)}_" \
+                  f"{self._year}_" \
+                  f"{clean(self._assay)}_" \
                   f"{clean(author)}_" \
                   f"{idx}_" \
                   f"{self.doi}"
@@ -2266,7 +2268,7 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                                                   ".SAMPLE_FNS")
                         sample_ids = pydoc.locate(loader_pydoc_path + dataset_module + "." + file_module +
                                                   ".SAMPLE_IDS")
-                        fn_yaml = os.path.join(cwd, file_module + ".yaml")
+                        fn_yaml = os.path.join(self._cwd, file_module + ".yaml")
                         fn_yaml = fn_yaml if os.path.exists(fn_yaml) else None
                         # Check for sample_fns and sample_ids in yaml:
                         if fn_yaml is not None:
@@ -2314,7 +2316,7 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                                 ))
                         # Load cell type maps:
                         for x in datasets_f:
-                            x.load_ontology_class_map(fn=os.path.join(cwd, file_module + ".tsv"))
+                            x.load_ontology_class_map(fn=os.path.join(self._cwd, file_module + ".tsv"))
                         datasets.extend(datasets_f)
 
         keys = [x.id for x in datasets]
