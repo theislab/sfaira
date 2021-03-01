@@ -1,5 +1,4 @@
 import os
-from typing import Union
 import tarfile
 import gzip
 from io import StringIO
@@ -12,14 +11,8 @@ from sfaira.data import DatasetBase
 
 class Dataset(DatasetBase):
 
-    def __init__(
-            self,
-            data_path: Union[str, None] = None,
-            meta_path: Union[str, None] = None,
-            cache_path: Union[str, None] = None,
-            **kwargs
-    ):
-        super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.download_url_data = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE81nnn/GSE81547/suppl/GSE81547_RAW.tar"
         self.download_url_meta = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE81nnn/GSE81547/matrix/GSE81547_series_matrix.txt.gz"
 

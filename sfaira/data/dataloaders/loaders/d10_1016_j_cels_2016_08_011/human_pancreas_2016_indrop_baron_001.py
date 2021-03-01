@@ -1,6 +1,5 @@
 import anndata
 import os
-from typing import Union
 import numpy as np
 import scipy.sparse
 
@@ -12,14 +11,8 @@ class Dataset(DatasetBase):
     ToDo: revisit gamma cell missing in CO
     """
 
-    def __init__(
-            self,
-            data_path: Union[str, None] = None,
-            meta_path: Union[str, None] = None,
-            cache_path: Union[str, None] = None,
-            **kwargs
-    ):
-        super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.download_url_data = "https://covid19.cog.sanger.ac.uk/baron16.processed.h5ad"
         self.download_url_meta = None
 

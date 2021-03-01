@@ -1,6 +1,5 @@
 import anndata
 import os
-from typing import Union
 import pandas as pd
 
 from sfaira.data import DatasetBase
@@ -8,14 +7,8 @@ from sfaira.data import DatasetBase
 
 class Dataset(DatasetBase):
 
-    def __init__(
-            self,
-            data_path: Union[str, None] = None,
-            meta_path: Union[str, None] = None,
-            cache_path: Union[str, None] = None,
-            **kwargs
-    ):
-        super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.download_url_data = "private,GSE115469.csv.gz"
         self.download_url_meta = "private,GSE115469_labels.txt"
 

@@ -4,37 +4,13 @@ import os
 import pandas
 import zipfile
 import scipy.io
-from typing import Union
-from sfaira.data import DatasetBaseGroupLoadingOneFile
-
-SAMPLE_IDS = [
-    "Choroid plexus",
-    "Dura mater",
-    "Enr. SDM",
-    "Whole brain",
-]
+from sfaira.data import DatasetBase
 
 
-class Dataset(DatasetBaseGroupLoadingOneFile):
+class Dataset(DatasetBase):
 
-    def __init__(
-            self,
-            sample_id: str,
-            data_path: Union[str, None] = None,
-            meta_path: Union[str, None] = None,
-            cache_path: Union[str, None] = None,
-            **kwargs
-    ):
-        super().__init__(sample_id=sample_id, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        sample_organ_dict = {
-            "Choroid plexus": "choroid plexus",
-            "Dura mater": "dura mater",
-            "Enr. SDM": "brain meninx",
-            "Whole brain": "brain",
-        }
-        self.obs_key_sample = "sample"
-        self.organ = sample_organ_dict[self.sample_id]
-
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.download_url_data = \
             "https://www.brainimmuneatlas.org/data_files/toDownload/filtered_gene_bc_matrices_mex_WT_fullAggr.zip"
         self.download_url_meta = \
@@ -49,15 +25,23 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
         self.state_exact = "healthy"
         self.year = 2019
 
+        self.bio_sample_obs_key = "sample"
+        self.cellontology_original_obs_key = "cluster"
+        self.organ_obs_key = "sample_anatomy"
+
         self.var_ensembl_col = "ensembl"
         self.var_symbol_col = "name"
-        self.obs_key_cellontology_original = "cluster"
-        self.obs_key_organ = "sample_anatomy"
 
         self.set_dataset_id(idx=1)
 
 
 def load(data_dir, **kwargs):
+    sample_organ_dict = {
+        "Choroid plexus": "choroid plexus",
+        "Dura mater": "dura mater",
+        "Enr. SDM": "brain meninx",
+        "Whole brain": "brain",
+    }
     fn = [
         os.path.join(data_dir, "filtered_gene_bc_matrices_mex_WT_fullAggr.zip"),
         os.path.join(data_dir, "annot_fullAggr.csv")
@@ -83,6 +67,7 @@ def load(data_dir, **kwargs):
     idx_map = np.array([obs.index.tolist().index(i) for i in obs_names])
     adata = adata[idx_map, :]
     obs_names = obs_names[idx_map]
+    obs["organ"] = [sample_organ_dict[x] for x in obs["sample"].values]
 
     # Assign attributes
     adata.obs_names = obs_names

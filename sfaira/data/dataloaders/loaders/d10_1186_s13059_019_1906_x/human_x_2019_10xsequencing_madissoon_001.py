@@ -1,9 +1,8 @@
 import anndata
 import os
-from typing import Union
 import scipy.sparse
 
-from sfaira.data import DatasetBaseGroupLoadingManyFiles
+from sfaira.data import DatasetBase
 
 SAMPLE_FNS = [
     "madissoon19_lung.processed.h5ad",
@@ -12,20 +11,13 @@ SAMPLE_FNS = [
 ]
 
 
-class Dataset(DatasetBaseGroupLoadingManyFiles):
+class Dataset(DatasetBase):
     """
     ToDo: patient information in .obs["patient"] and sample information in .obs["sample"] (more samples than patients)
     """
 
-    def __init__(
-            self,
-            sample_fn: str,
-            data_path: Union[str, None] = None,
-            meta_path: Union[str, None] = None,
-            cache_path: Union[str, None] = None,
-            **kwargs
-    ):
-        super().__init__(sample_fn=sample_fn, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         if self.sample_fn == "madissoon19_lung.processed.h5ad":
             self.download_url_data = "https://covid19.cog.sanger.ac.uk/madissoon19_lung.processed.h5ad"
             self.var_ensembl_col = "gene.ids.HCATisStab7509734"

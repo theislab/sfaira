@@ -1,6 +1,5 @@
 import anndata
 import os
-from typing import Union
 import numpy as np
 
 from sfaira.data import DatasetBase
@@ -12,14 +11,8 @@ class Dataset(DatasetBase):
     TODO: annotate developmental cell types in set_unknown_class_id
     """
 
-    def __init__(
-            self,
-            data_path: Union[str, None] = None,
-            meta_path: Union[str, None] = None,
-            cache_path: Union[str, None] = None,
-            **kwargs
-    ):
-        super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.download_url_data = [
             "https://cellgeni.cog.sanger.ac.uk/BenKidney_v2.1/Mature_Full_v2.1.h5ad",
             "https://cellgeni.cog.sanger.ac.uk/BenKidney_v2.1/Fetal_full.h5ad"

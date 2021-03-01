@@ -1,10 +1,9 @@
 import anndata
 import os
-from typing import Union
 import scipy.sparse
 import numpy as np
 
-from sfaira.data import DatasetBaseGroupLoadingManyFiles
+from sfaira.data import DatasetBase
 
 SAMPLE_FNS = [
     "droplet_normal_lung_blood_scanpy.20200205.RC4.h5ad",
@@ -12,7 +11,7 @@ SAMPLE_FNS = [
 ]
 
 
-class Dataset(DatasetBaseGroupLoadingManyFiles):
+class Dataset(DatasetBase):
     """
     ToDo split by sample / patient in obs columns:
       bio replicates droplet file "orig.ident"+"sample"+"magnetic.selection",
@@ -21,15 +20,8 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
       tech replicates facs file "plate.barcode"
     """
 
-    def __init__(
-            self,
-            sample_fn: str,
-            data_path: Union[str, None] = None,
-            meta_path: Union[str, None] = None,
-            cache_path: Union[str, None] = None,
-            **kwargs
-    ):
-        super().__init__(sample_fn=sample_fn, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         synapse_id = {
             "droplet_normal_lung_blood_scanpy.20200205.RC4.h5ad": "syn21625095",
             "facs_normal_lung_blood_scanpy.20200205.RC4.h5ad": "syn21625142"

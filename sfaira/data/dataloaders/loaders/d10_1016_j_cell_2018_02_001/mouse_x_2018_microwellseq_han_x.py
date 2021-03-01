@@ -1,12 +1,11 @@
 import anndata
 import numpy as np
 import pandas
-from typing import Union
 import zipfile
 import tarfile
 import os
 
-from sfaira.data import DatasetBaseGroupLoadingManyFiles
+from sfaira.data import DatasetBase
 
 SAMPLE_FNS = [
     "Bladder_dge.txt.gz",
@@ -103,17 +102,10 @@ SAMPLE_FNS = [
 ]
 
 
-class Dataset(DatasetBaseGroupLoadingManyFiles):
+class Dataset(DatasetBase):
 
-    def __init__(
-            self,
-            sample_fn: str,
-            data_path: Union[str, None] = None,
-            meta_path: Union[str, None] = None,
-            cache_path: Union[str, None] = None,
-            **kwargs
-    ):
-        super().__init__(sample_fn=sample_fn, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         sample_organ_dict = {
             "Bladder_dge.txt.gz": "urinary bladder",
             "BoneMarrow1_dge.txt.gz": "bone marrow",

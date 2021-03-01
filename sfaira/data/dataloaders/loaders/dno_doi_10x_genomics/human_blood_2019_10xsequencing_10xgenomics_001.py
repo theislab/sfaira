@@ -1,5 +1,4 @@
 import os
-from typing import Union
 import scipy.sparse
 import anndata as ad
 import numpy as np
@@ -10,14 +9,8 @@ from sfaira.data import DatasetBase
 
 class Dataset(DatasetBase):
 
-    def __init__(
-            self,
-            data_path: Union[str, None] = None,
-            meta_path: Union[str, None] = None,
-            cache_path: Union[str, None] = None,
-            **kwargs
-    ):
-        super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.download_url_data = \
             "http://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_10k_v3/pbmc_10k_v3_filtered_feature_bc_matrix.h5"
         self.download_url_meta = None

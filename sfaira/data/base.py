@@ -117,15 +117,15 @@ class DatasetBase(abc.ABC):
     _celltype_universe: Union[None, CelltypeUniverse]
     _ontology_class_map: Union[None, dict]
 
-    _sample_fn: Union[None, str]
-    _sample_fns: List[Union[None, str]]
+    sample_fn: Union[None, str]
+    _sample_fns: Union[None, List[str]]
 
     def __init__(
             self,
             data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
-            load_func: = None,
+            load_func=None,
             yaml_path: Union[str, None] = None,
             sample_fn: Union[str, None] = None,
             sample_fns: Union[List[str], None] = None,
@@ -189,6 +189,9 @@ class DatasetBase(abc.ABC):
         self._celltype_universe = None
         self._ontology_class_map = None
 
+        self.sample_fn = sample_fn
+        self._sample_fns = sample_fns
+
         # Check if YAML files exists, read meta data from there if available:
         if yaml_path is not None:
             assert os.path.exists(yaml_path), f"did not find yaml {yaml_path}"
@@ -198,9 +201,6 @@ class DatasetBase(abc.ABC):
                     setattr(self, k, v)
             # ID can be set now already because YAML was used as input instead of child class constructor.
             self.set_dataset_id(idx=yaml_vals["meta"]["dataset_index"])
-
-        self._sample_fn = sample_fn
-        self._sample_fns = sample_fns if sample_fns is not None else [None]
 
         self.load_func = load_func
 
@@ -304,16 +304,6 @@ class DatasetBase(abc.ABC):
         dataset = syn.get(entity=synapse_entity)
         shutil.move(dataset.data_dir_base, os.path.join(self.data_dir, fn))
 
-    def set_raw_full_group_object(self, adata_group: Union[None, anndata.AnnData] = None) -> bool:
-        """
-        Only relevant for DatasetBaseGroupLoading but has to be a method of this class
-        because it is used in DatasetGroup.
-
-        :param adata_group:
-        :return: Whether group loading is used.
-        """
-        return False
-
     @property
     def cache_fn(self):
         if self.directory_formatted_doi is None or self._directory_formatted_id is None:
@@ -348,9 +338,9 @@ class DatasetBase(abc.ABC):
                 else:
                     warnings.warn(f"Cached loading enabled, but cache file {filename} not found. "
                                   f"Loading from raw files.")
-                    self.adata = self.load_func(self.data_dir, self._sample_fn)
+                    self.adata = self.load_func(self.data_dir, self.sample_fn)
             else:
-                self.adata = self.load_func(self.data_dir, self._sample_fn)
+                self.adata = self.load_func(self.data_dir, self.sample_fn)
 
         def _cached_writing(filename):
             if filename is not None:
@@ -360,10 +350,10 @@ class DatasetBase(abc.ABC):
                 self.adata.write_h5ad(filename)
 
         if load_raw and allow_caching:
-            self.adata = self.load_func(self.data_dir, self._sample_fn)
+            self.adata = self.load_func(self.data_dir, self.sample_fn)
             _cached_writing(self.cache_fn)
         elif load_raw and not allow_caching:
-            self.adata = self.load_func(self.data_dir, self._sample_fn)
+            self.adata = self.load_func(self.data_dir, self.sample_fn)
         elif not load_raw and allow_caching:
             _cached_reading(self.cache_fn)
             _cached_writing(self.cache_fn)
@@ -993,8 +983,8 @@ class DatasetBase(abc.ABC):
                 s = s.replace(' ', '').replace('-', '').replace('_', '').lower()
             return s
 
-        if self._sample_fns != [None]:
-            idx += self._sample_fns.index(self._sample_fn)
+        if self.sample_fn is not None:
+            idx += self._sample_fns.index(self.sample_fn)
         idx = str(idx).zfill(3)
 
         if isinstance(self.author, List):
@@ -1731,92 +1721,6 @@ class DatasetBase(abc.ABC):
         self.adata = self.adata[idx_keep, :].copy()
 
 
-class DatasetBaseGroupLoadingOneFile(DatasetBase):
-    """
-    Container class specific to datasets which come in groups and in which data sets are saved in a single file.
-    """
-    _unprocessed_full_group_object: bool
-    _sample_id: str
-
-    def __init__(
-            self,
-            sample_id: str,
-            sample_ids: List,
-            data_path: Union[str, None],
-            meta_path: Union[str, None] = None,
-            cache_path: Union[str, None] = None,
-            **kwargs
-    ):
-        super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self._unprocessed_full_group_object = False
-        self._sample_id = sample_id
-        self._SAMPLE_IDS = sample_ids
-
-    @property
-    def sample_id(self):
-        return self._sample_id
-
-    @property
-    def sample_idx(self):
-        return self._SAMPLE_IDS.index(self.sample_id)
-
-    @abc.abstractmethod
-    def _load_full(self) -> anndata.AnnData:
-        """
-        Loads a raw anndata object that correponds to a superset of the data belonging to this Dataset.
-
-        Overload this method in the Dataset if this is relevant.
-        :return: adata_group
-        """
-        pass
-
-    def set_raw_full_group_object(self, adata_group: Union[None, anndata.AnnData] = None):
-        if self.adata is None and adata_group is not None:
-            self.adata = adata_group
-        elif self.adata is None and adata_group is None:
-            self.adata = self._load_full()
-        elif self.adata is not None and not self._unprocessed_full_group_object:
-            self.adata = self._load_full()
-        elif self.adata is not None and self._unprocessed_full_group_object:
-            pass
-        else:
-            assert False, "switch error"
-        self._unprocessed_full_group_object = True
-        return True
-
-    def _load_from_group(self):
-        """
-        Sets .adata based on a raw anndata object that correponds to a superset of the data belonging to this Dataset,
-        including subsetting.
-
-        Override this method in the Dataset if this is relevant.
-        """
-        assert self.bio_sample_obs_key is not None, "self.obs_key_sample needs to be set"
-        self._subset_from_group(subset_items={self.bio_sample_obs_key: self.sample_id})
-
-    def _subset_from_group(
-            self,
-            subset_items: dict,
-    ):
-        """
-        Subsets a raw anndata object to the data corresponding to this Dataset.
-
-        :param subset_items: Key-value pairs for subsetting: Keys are columns in .obs, values are entries that should
-            be kept. If the dictionary has multiple entries, these are sequentially subsetted (AND-gate).
-        :return:
-        """
-        assert self.adata is not None, "this method should only be called if .adata is not None"
-        for k, v in subset_items.items():
-            self.adata = self.adata[[x in v for x in self.adata.obs[k].values], :]
-        self._unprocessed_full_group_object = False
-
-    def _load(self) -> anndata.AnnData:
-        _ = self.set_raw_full_group_object(adata_group=None)
-        if self._unprocessed_full_group_object:
-            self._load_from_group()
-        return self.adata
-
-
 class DatasetGroup:
     """
     Container class that co-manages multiple data sets, removing need to call Dataset() methods directly through
@@ -2228,14 +2132,12 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                         datasets_f = []
                         file_module = ".".join(f.split(".")[:-1])
                         DatasetFound = pydoc.locate(loader_pydoc_path + dataset_module + "." + file_module + ".Dataset")
-                        # Check if global objects are available:
-                        # - SAMPLE_FNS: for DatasetBaseGroupLoadingManyFiles
-                        # - SAMPLE_IDS: for DatasetBaseGroupLoadingOneFile
+                        # Load objects from name space:
+                        # - load(): Loading function that return anndata instance.
+                        # - SAMPLE_FNS: File name list for DatasetBaseGroupLoadingManyFiles
                         load_func = pydoc.locate(loader_pydoc_path + dataset_module + "." + file_module + ".load")
                         sample_fns = pydoc.locate(loader_pydoc_path + dataset_module + "." + file_module +
                                                   ".SAMPLE_FNS")
-                        sample_ids = pydoc.locate(loader_pydoc_path + dataset_module + "." + file_module +
-                                                  ".SAMPLE_IDS")
                         fn_yaml = os.path.join(self._cwd, file_module + ".yaml")
                         fn_yaml = fn_yaml if os.path.exists(fn_yaml) else None
                         # Check for sample_fns and sample_ids in yaml:
@@ -2244,34 +2146,36 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                             yaml_vals = read_yaml(fn=fn_yaml)
                             if sample_fns is None and yaml_vals["meta"]["sample_fns"] is not None:
                                 sample_fns = yaml_vals["meta"]["sample_fns"]
-                            if sample_ids is None and yaml_vals["meta"]["sample_ids"] is not None:
-                                sample_ids = yaml_vals["meta"]["sample_ids"]
-                        if sample_ids is None:
-                            datasets_f.extend([
-                                DatasetFound(
-                                    data_path=data_path,
-                                    meta_path=meta_path,
-                                    cache_path=cache_path,
-                                    load_func=load_func,
-                                    sample_fn=x,
-                                    sample_fns=sample_fns,
-                                    yaml_path=fn_yaml,
+                        if sample_fns is None:
+                            sample_fns = [None]
+                        # Here we distinguish between class that are already defined and those that are not.
+                        # The latter case arises if meta data are defined in YAMLs and _load is given as a function.
+                        if DatasetFound is None:
+                            for x in sample_fns:
+                                datasets_f.append(
+                                    DatasetBase(
+                                        data_path=data_path,
+                                        meta_path=meta_path,
+                                        cache_path=cache_path,
+                                        load_func=load_func,
+                                        sample_fn=x,
+                                        sample_fns=sample_fns if sample_fns != [None] else None,
+                                        yaml_path=fn_yaml,
+                                    )
                                 )
-                                for x in sample_fns
-                            ])
                         else:
-                            # DatasetBaseGroupLoadingManyFiles:
-                            datasets_f.extend([
-                                DatasetFound(
-                                    sample_id=x,
-                                    data_path=data_path,
-                                    meta_path=meta_path,
-                                    cache_path=cache_path,
-                                    sample_ids=sample_ids,
-                                    yaml_path=fn_yaml,
+                            for x in sample_fns:
+                                datasets_f.append(
+                                    DatasetFound(
+                                        data_path=data_path,
+                                        meta_path=meta_path,
+                                        cache_path=cache_path,
+                                        load_func=load_func,
+                                        sample_fn=x,
+                                        sample_fns=sample_fns if sample_fns != [None] else None,
+                                        yaml_path=fn_yaml,
+                                    )
                                 )
-                                for x in sample_ids
-                            ])
                         # Load cell type maps:
                         for x in datasets_f:
                             x.load_ontology_class_map(fn=os.path.join(self._cwd, file_module + ".tsv"))
