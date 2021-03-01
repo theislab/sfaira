@@ -1058,7 +1058,7 @@ class DatasetBase(abc.ABC):
     def assay(self, x: str):
         self.__erasing_protection(attr="protocol", val_old=self._assay, val_new=x)
         self._value_protection(attr="protocol", allowed=self._ontology_container_sfaira.ontology_protocol,
-                                attempted=x)
+                               attempted=x)
         self._assay = x
 
     @property
@@ -1120,7 +1120,7 @@ class DatasetBase(abc.ABC):
     def development_stage(self, x: str):
         self.__erasing_protection(attr="dev_stage", val_old=self._development_stage, val_new=x)
         self._value_protection(attr="dev_stage", allowed=self._ontology_container_sfaira.ontology_dev_stage,
-                                attempted=x)
+                               attempted=x)
         self._development_stage = x
 
     @property
@@ -1336,7 +1336,7 @@ class DatasetBase(abc.ABC):
     def normalization(self, x: str):
         self.__erasing_protection(attr="normalization", val_old=self._normalization, val_new=x)
         self._value_protection(attr="normalization", allowed=self._ontology_container_sfaira.ontology_normalization,
-                                attempted=x)
+                               attempted=x)
         self._normalization = x
 
     @property
@@ -1347,7 +1347,6 @@ class DatasetBase(abc.ABC):
     def age_obs_key(self, x: str):
         self.__erasing_protection(attr="age_obs_key", val_old=self._age_obs_key, val_new=x)
         self._age_obs_key = x
-
 
     @property
     def assay_obs_key(self) -> str:
@@ -1607,16 +1606,6 @@ class DatasetBase(abc.ABC):
     @property
     def ontology_organ(self):
         return self._ontology_container_sfaira.ontology_organ
-
-    @property
-    def celltypes_universe(self):
-        if self._celltype_universe:
-            self._celltype_universe = CelltypeUniverse(
-                cl=self.ontology_celltypes,
-                uberon=self._ontology_container_sfaira.ontology_organ,
-                organism=self.organism,
-            )
-        return self._celltype_universe
 
     @property
     def celltypes_universe(self):
