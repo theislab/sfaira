@@ -2215,21 +2215,22 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                 if f.split(".")[-1] == "py" and f.split(".")[0] not in ["__init__", "base", "group"]:
                     file_module = ".".join(f.split(".")[:-1])
                     fn_map = os.path.join(self._cwd, file_module + ".tsv")
-                    # Access reading and value protection mechanisms from first data set loaded in group.
-                    tab = list(self.datasets.values())[0]._read_class_map(fn=fn_map)
-                    # Checks that the assigned ontology class names appear in the ontology.
-                    list(self.datasets.values())[0]._value_protection(
-                        attr="celltypes",
-                        allowed=self.ontology_celltypes,
-                        attempted=np.unique(tab[self._adata_ids_sfaira.classmap_target_key].values).tolist()
-                    )
-                    # Adds a third column with the corresponding ontology IDs into the file.
-                    tab[self._adata_ids_sfaira.classmap_target_id_key] = [
-                        self.ontology_celltypes.id_from_name(x) if x != self._adata_ids_sfaira.unknown_celltype_name
-                        else self._adata_ids_sfaira.unknown_celltype_name
-                        for x in tab[self._adata_ids_sfaira.classmap_target_key].values
-                    ]
-                    list(self.datasets.values())[0]._write_class_map(fn=fn_map, tab=tab)
+                    if os.path.exists(fn_map):
+                        # Access reading and value protection mechanisms from first data set loaded in group.
+                        tab = list(self.datasets.values())[0]._read_class_map(fn=fn_map)
+                        # Checks that the assigned ontology class names appear in the ontology.
+                        list(self.datasets.values())[0]._value_protection(
+                            attr="celltypes",
+                            allowed=self.ontology_celltypes,
+                            attempted=np.unique(tab[self._adata_ids_sfaira.classmap_target_key].values).tolist()
+                        )
+                        # Adds a third column with the corresponding ontology IDs into the file.
+                        tab[self._adata_ids_sfaira.classmap_target_id_key] = [
+                            self.ontology_celltypes.id_from_name(x) if x != self._adata_ids_sfaira.unknown_celltype_name
+                            else self._adata_ids_sfaira.unknown_celltype_name
+                            for x in tab[self._adata_ids_sfaira.classmap_target_key].values
+                        ]
+                        list(self.datasets.values())[0]._write_class_map(fn=fn_map, tab=tab)
 
 
 class DatasetSuperGroup:
