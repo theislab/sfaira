@@ -1,11 +1,10 @@
 import anndata
 import os
-from typing import Union
 import tarfile
 import pandas as pd
 import scipy.sparse
 
-from sfaira.data import DatasetBaseGroupLoadingManyFiles
+from sfaira.data import DatasetBase
 
 SAMPLE_FNS = [
     "GSM3589406_PP001swap.filtered.matrix.txt.gz",
@@ -46,17 +45,10 @@ SAMPLE_DICT = {
 }
 
 
-class Dataset(DatasetBaseGroupLoadingManyFiles):
+class Dataset(DatasetBase):
 
-    def __init__(
-            self,
-            sample_fn: str,
-            data_path: Union[str, None] = None,
-            meta_path: Union[str, None] = None,
-            cache_path: Union[str, None] = None,
-            **kwargs
-    ):
-        super().__init__(sample_fn=sample_fn, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.download_url_data = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE126nnn/GSE126030/suppl/GSE126030_RAW.tar"
         self.download_url_meta = [
             "private,donor1.annotation.txt",
@@ -81,29 +73,30 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
 
         self.set_dataset_id(idx=1)
 
-    def _load(self):
-        fn = [
-            os.path.join(self.data_dir, "GSE126030_RAW.tar"),
-            os.path.join(self.data_dir, "donor1.annotation.txt"),
-            os.path.join(self.data_dir, "donor2.annotation.txt")
-        ]
-        with tarfile.open(fn[0]) as tar:
-            df = pd.read_csv(tar.extractfile(self.sample_fn), compression="gzip", sep="\t")
-        df.index = [i.split(".")[0] for i in df["Accession"]]
-        var = pd.concat([df.pop(x) for x in ["Gene", "Accession"]], 1)
-        if df.columns[-1].startswith("Un"):
-            df.drop(df.columns[len(df.columns) - 1], axis=1, inplace=True)
-        adata = anndata.AnnData(df.T)
-        adata.var = var
-        adata.obs["donor"] = SAMPLE_DICT[self.sample_fn][1]
-        adata.obs.index = self.sample_fn.split("_")[1].split("s")[0] + "nskept." + adata.obs.index
-        adata.obs["cell_ontology_class"] = "unknown"
-        df1 = pd.read_csv(fn[1], sep="\t", index_col=0, header=None)
-        df2 = pd.read_csv(fn[2], sep="\t", index_col=0, header=None)
-        for i in df1.index:
-            adata.obs["cell_ontology_class"].loc[i] = df1.loc[i][1]
-        for i in df2.index:
-            adata.obs["cell_ontology_class"].loc[i] = df2.loc[i][1]
-        adata.X = scipy.sparse.csc_matrix(adata.X)
 
-        return adata
+def load(data_dir, sample_fn, **kwargs):
+    fn = [
+        os.path.join(data_dir, "GSE126030_RAW.tar"),
+        os.path.join(data_dir, "donor1.annotation.txt"),
+        os.path.join(data_dir, "donor2.annotation.txt")
+    ]
+    with tarfile.open(fn[0]) as tar:
+        df = pd.read_csv(tar.extractfile(sample_fn), compression="gzip", sep="\t")
+    df.index = [i.split(".")[0] for i in df["Accession"]]
+    var = pd.concat([df.pop(x) for x in ["Gene", "Accession"]], 1)
+    if df.columns[-1].startswith("Un"):
+        df.drop(df.columns[len(df.columns) - 1], axis=1, inplace=True)
+    adata = anndata.AnnData(df.T)
+    adata.var = var
+    adata.obs["donor"] = SAMPLE_DICT[sample_fn][1]
+    adata.obs.index = sample_fn.split("_")[1].split("s")[0] + "nskept." + adata.obs.index
+    adata.obs["cell_ontology_class"] = "unknown"
+    df1 = pd.read_csv(fn[1], sep="\t", index_col=0, header=None)
+    df2 = pd.read_csv(fn[2], sep="\t", index_col=0, header=None)
+    for i in df1.index:
+        adata.obs["cell_ontology_class"].loc[i] = df1.loc[i][1]
+    for i in df2.index:
+        adata.obs["cell_ontology_class"].loc[i] = df2.loc[i][1]
+    adata.X = scipy.sparse.csc_matrix(adata.X)
+
+    return adata

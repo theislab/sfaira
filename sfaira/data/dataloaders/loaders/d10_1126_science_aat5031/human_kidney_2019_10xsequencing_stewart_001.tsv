@@ -3,9 +3,11 @@ Ascending vasa recta endothelium	vasa recta ascending limb cell	CL:1001131
 B cell	B cell	CL:0000236
 CD4 T cell	CD4-positive, alpha-beta T cell	CL:0000624
 CD8 T cell	CD8-positive, alpha-beta T cell	CL:0000625
+CNT/PC - proximal UB	UNKNOWN	UNKNOWN
 Cap mesenchyme	mesenchymal cell	CL:0008019
 Connecting tubule	kidney connecting tubule epithelial cell	CL:1000768
 Descending vasa recta endothelium	vasa recta descending limb cell	CL:1001285
+Distal S shaped body	UNKNOWN	UNKNOWN
 Distal renal vesicle	epithelial cell	CL:0000066
 Distinct proximal tubule 1	epithelial cell of proximal tubule	CL:0002306
 Distinct proximal tubule 2	epithelial cell of proximal tubule	CL:0002306
@@ -27,6 +29,7 @@ Macrophage 1	macrophage	CL:0000235
 Macrophage 2	macrophage	CL:0000235
 Mast cell	mast cell	CL:0000097
 Mast cells	mast cell	CL:0000097
+Medial S shaped body	UNKNOWN	UNKNOWN
 Megakaryocyte	megakaryocyte	CL:0000556
 Monocyte	monocyte	CL:0000576
 Myofibroblast	kidney interstitial myofibroblast	CL:1000691
@@ -53,8 +56,12 @@ Proliferating fibroblast	fibroblast	CL:0000057
 Proliferating macrophage	macrophage	CL:0000235
 Proliferating monocyte	monocyte	CL:0000576
 Proliferating myofibroblast	kidney interstitial myofibroblast	CL:1000691
+Proliferating stroma progenitor	UNKNOWN	UNKNOWN
+Proximal S shaped body	UNKNOWN	UNKNOWN
+Proximal UB	UNKNOWN	UNKNOWN
 Proximal renal vesicle	kidney blood vessel cell	CL:1000854
 Proximal tubule	epithelial cell of proximal tubule	CL:0002306
+Stroma progenitor	UNKNOWN	UNKNOWN
 Thick ascending limb of Loop of Henle	kidney loop of Henle thick ascending limb epithelial cell	CL:1001106
 Transitional urothelium	urothelial cell	CL:0000731
 Type A intercalated cell	renal intercalated cell	CL:0005010

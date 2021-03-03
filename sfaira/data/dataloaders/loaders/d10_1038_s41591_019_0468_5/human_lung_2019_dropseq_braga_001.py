@@ -1,6 +1,5 @@
 import anndata
 import os
-from typing import Union
 import pandas as pd
 
 from sfaira.data import DatasetBase
@@ -8,14 +7,8 @@ from sfaira.data import DatasetBase
 
 class Dataset(DatasetBase):
 
-    def __init__(
-            self,
-            data_path: Union[str, None] = None,
-            meta_path: Union[str, None] = None,
-            cache_path: Union[str, None] = None,
-            **kwargs
-    ):
-        super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.download_url_data = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE130nnn/GSE130148/suppl/GSE130148%5Fraw%5Fcounts%2Ecsv%2Egz"
         self.download_url_meta = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE130nnn/GSE130148/suppl/GSE130148%5Fbarcodes%5Fcell%5Ftypes%2Etxt%2Egz"
 
@@ -34,13 +27,13 @@ class Dataset(DatasetBase):
 
         self.set_dataset_id(idx=1)
 
-    def _load(self):
-        fn = [
-            os.path.join(self.data_dir, "GSE130148_raw_counts.csv.gz"),
-            os.path.join(self.data_dir, "GSE130148_barcodes_cell_types.txt.gz"),
-        ]
-        adata = anndata.read_csv(fn[0]).T
-        adata.obs = pd.read_csv(fn[1], sep="\t", index_col=0)
-        self.set_unknown_class_id(ids=["1_Unicorns and artifacts"])
 
-        return adata
+def load(data_dir, **kwargs):
+    fn = [
+        os.path.join(data_dir, "GSE130148_raw_counts.csv.gz"),
+        os.path.join(data_dir, "GSE130148_barcodes_cell_types.txt.gz"),
+    ]
+    adata = anndata.read_csv(fn[0]).T
+    adata.obs = pd.read_csv(fn[1], sep="\t", index_col=0)
+
+    return adata

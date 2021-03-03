@@ -1,9 +1,8 @@
 import os
-from typing import Union
 import pandas as pd
 import anndata
 
-from sfaira.data import DatasetBaseGroupLoadingManyFiles
+from sfaira.data import DatasetBase
 
 SAMPLE_FNS = [
     "E-MTAB-6678.processed",
@@ -11,17 +10,10 @@ SAMPLE_FNS = [
 ]
 
 
-class Dataset(DatasetBaseGroupLoadingManyFiles):
+class Dataset(DatasetBase):
 
-    def __init__(
-            self,
-            sample_fn: str,
-            data_path: Union[str, None] = None,
-            meta_path: Union[str, None] = None,
-            cache_path: Union[str, None] = None,
-            **kwargs
-    ):
-        super().__init__(sample_fn=sample_fn, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.download_url_data = f"https://www.ebi.ac.uk/arrayexpress/files/{self.sample_fn.split('.')[0]}/" \
                                  f"{self.sample_fn}.1.zip"
         self.download_url_meta = f"https://www.ebi.ac.uk/arrayexpress/files/{self.sample_fn.split('.')[0]}/" \
@@ -43,20 +35,21 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
 
         self.set_dataset_id(idx=1)
 
-    def _load(self):
-        fn = [
-            os.path.join(self.data_dir, f"{self.sample_fn}.1.zip"),
-            os.path.join(self.data_dir, f"{self.sample_fn}.2.zip"),
-        ]
-        adata = anndata.AnnData(pd.read_csv(fn[0], sep="\t", index_col="Gene").T)
-        df = pd.read_csv(fn[1], sep="\t")
-        for i in df.columns:
-            adata.obs[i] = [df.loc[j][i] for j in adata.obs.index]
 
-        adata.var["ensembl"] = [i.split("_")[1] for i in adata.var.index]
-        adata.var["names"] = [i.split("_")[0] for i in adata.var.index]
-        adata.var = adata.var.reset_index().reset_index().drop("index", axis=1)
-        adata = adata[:, ~adata.var.index.isin(
-            ["", "-1", "-10", "-11", "-2", "-3", "-4", "-5", "-6", "-7", "-8", "-9", "A.2", "A.3"])].copy()
+def load(data_dir, sample_fn, **kwargs):
+    fn = [
+        os.path.join(data_dir, f"{sample_fn}.1.zip"),
+        os.path.join(data_dir, f"{sample_fn}.2.zip"),
+    ]
+    adata = anndata.AnnData(pd.read_csv(fn[0], sep="\t", index_col="Gene").T)
+    df = pd.read_csv(fn[1], sep="\t")
+    for i in df.columns:
+        adata.obs[i] = [df.loc[j][i] for j in adata.obs.index]
 
-        return adata
+    adata.var["ensembl"] = [i.split("_")[1] for i in adata.var.index]
+    adata.var["names"] = [i.split("_")[0] for i in adata.var.index]
+    adata.var = adata.var.reset_index().reset_index().drop("index", axis=1)
+    adata = adata[:, ~adata.var.index.isin(
+        ["", "-1", "-10", "-11", "-2", "-3", "-4", "-5", "-6", "-7", "-8", "-9", "A.2", "A.3"])].copy()
+
+    return adata

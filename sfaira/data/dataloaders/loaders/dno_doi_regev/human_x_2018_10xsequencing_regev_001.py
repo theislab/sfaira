@@ -1,28 +1,13 @@
 import anndata
 import os
-from typing import Union
 
-from sfaira.data import DatasetBaseGroupLoadingOneFile
-
-SAMPLE_IDS = [
-    "umbilical cord blood",
-    "bone marrow"
-]
+from sfaira.data import DatasetBase
 
 
-class Dataset(DatasetBaseGroupLoadingOneFile):
+class Dataset(DatasetBase):
 
-    def __init__(
-            self,
-            sample_id: str,
-            data_path: Union[str, None] = None,
-            meta_path: Union[str, None] = None,
-            cache_path: Union[str, None] = None,
-            **kwargs
-    ):
-        super().__init__(sample_id=sample_id, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        self.obs_key_sample = "derived_organ_parts_label"
-
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.download_url_data = "https://data.humancellatlas.org/project-assets/project-matrices/" \
                                  "cc95ff89-2e68-4a08-a234-480eca21ce79.homo_sapiens.loom"
         self.download_url_meta = None
@@ -31,7 +16,7 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
         self.doi = "no_doi_regev"
         self.healthy = True
         self.normalization = "raw"
-        self.organ = sample_id
+        self.organ_obs_key = "derived_organ_parts_label"
         self.organism = "human"
         self.protocol = "10X sequencing"
         self.state_exact = "healthy"
@@ -42,9 +27,10 @@ class Dataset(DatasetBaseGroupLoadingOneFile):
 
         self.set_dataset_id(idx=1)
 
-    def _load_full(self):
-        fn = os.path.join(self.data_dir, "cc95ff89-2e68-4a08-a234-480eca21ce79.homo_sapiens.loom")
-        adata = anndata.read_loom(fn)
-        adata = adata[adata.obs["emptydrops_is_cell"] == "t"].copy()
 
-        return adata
+def load(data_dir, **kwargs):
+    fn = os.path.join(data_dir, "cc95ff89-2e68-4a08-a234-480eca21ce79.homo_sapiens.loom")
+    adata = anndata.read_loom(fn)
+    adata = adata[adata.obs["emptydrops_is_cell"] == "t"].copy()
+
+    return adata

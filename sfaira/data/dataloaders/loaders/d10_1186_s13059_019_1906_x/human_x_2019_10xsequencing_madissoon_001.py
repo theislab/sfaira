@@ -1,9 +1,8 @@
 import anndata
 import os
-from typing import Union
 import scipy.sparse
 
-from sfaira.data import DatasetBaseGroupLoadingManyFiles
+from sfaira.data import DatasetBase
 
 SAMPLE_FNS = [
     "madissoon19_lung.processed.h5ad",
@@ -12,20 +11,13 @@ SAMPLE_FNS = [
 ]
 
 
-class Dataset(DatasetBaseGroupLoadingManyFiles):
+class Dataset(DatasetBase):
     """
     ToDo: patient information in .obs["patient"] and sample information in .obs["sample"] (more samples than patients)
     """
 
-    def __init__(
-            self,
-            sample_fn: str,
-            data_path: Union[str, None] = None,
-            meta_path: Union[str, None] = None,
-            cache_path: Union[str, None] = None,
-            **kwargs
-    ):
-        super().__init__(sample_fn=sample_fn, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         if self.sample_fn == "madissoon19_lung.processed.h5ad":
             self.download_url_data = "https://covid19.cog.sanger.ac.uk/madissoon19_lung.processed.h5ad"
             self.var_ensembl_col = "gene.ids.HCATisStab7509734"
@@ -56,17 +48,16 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
 
         self.set_dataset_id(idx=1)
 
-    def _load(self):
-        fn = os.path.join(self.data_dir, self.sample_fn)
-        adata = anndata.read(fn)
-        if self.sample_fn != "madissoon19_lung.processed.h5ad":
-            adata.X = adata.X.multiply(scipy.sparse.csc_matrix(adata.obs["n_counts"].values[:, None]))\
-                .multiply(1 / 10000)
-        # Cell type column called differently in madissoon19_lung.processed.h5ad:
-        if self.sample_fn == "madissoon19_lung.processed.h5ad":
-            adata.obs["Celltypes"] = adata.obs["CellType"]
-            del adata.obs["CellType"]
 
-        self.set_unknown_class_id(ids=["B_T_doublet", "CD34_progenitor", "Stroma"])
+def load(data_dir, sample_fn, **kwargs):
+    fn = os.path.join(data_dir, sample_fn)
+    adata = anndata.read(fn)
+    if sample_fn != "madissoon19_lung.processed.h5ad":
+        adata.X = adata.X.multiply(scipy.sparse.csc_matrix(adata.obs["n_counts"].values[:, None]))\
+            .multiply(1 / 10000)
+    # Cell type column called differently in madissoon19_lung.processed.h5ad:
+    if sample_fn == "madissoon19_lung.processed.h5ad":
+        adata.obs["Celltypes"] = adata.obs["CellType"]
+        del adata.obs["CellType"]
 
-        return adata
+    return adata

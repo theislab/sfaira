@@ -213,8 +213,8 @@ class AdataIdsSfaira(AdataIdsExtended):
         self.classmap_target_key = "target"
         self.classmap_target_id_key = "target_id"
 
-        self.unknown_celltype_name = "unknown"
-        self.unknown_celltype_identifiers = ["nan", "none", "unknown", np.nan, None]
+        self.unknown_celltype_identifier = "UNKNOWN"
+        self.not_a_cell_celltype_identifier = "NOT_A_CELL"
 
     @property
     def load_raw(self) -> str:

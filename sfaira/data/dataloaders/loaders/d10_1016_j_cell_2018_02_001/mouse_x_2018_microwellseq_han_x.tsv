@@ -53,6 +53,7 @@ Cartilage cell_Col2a1 high(Neonatal-Rib)	chondrocyte	CL:0000138
 Cartilage cell_Cxcl14 high(Neonatal-Rib)	chondrocyte	CL:0000138
 Cartilage cell_Ppa1 high(Neonatal-Rib)	chondrocyte	CL:0000138
 Cartilage cell_Prg4 high(Neonatal-Rib)	chondrocyte	CL:0000138
+Cell in cell cycle(Fetal_Kidney)	UNKNOWN	UNKNOWN
 Chondrocyte(Neonatal-Muscle)	chondrocyte	CL:0000138
 Ciliated cell(Lung)	ciliated cell	CL:0000064
 Clara Cell(Lung)	club cell	CL:0000158
@@ -93,6 +94,14 @@ Distal collecting duct principal cell_Cldn4 high(Kidney)	kidney collecting duct 
 Distal collecting duct principal cell_Hsd11b2 high(Kidney)	kidney collecting duct principal cell	CL:1001431
 Distal convoluted tubule_Pvalb high(Kidney)	kidney distal convoluted tubule epithelial cell	CL:1000849
 Distal convoluted tubule_S100g high(Kidney)	kidney distal convoluted tubule epithelial cell	CL:1000849
+Dividing cell(Mammary-Gland-Virgin)	UNKNOWN	UNKNOWN
+Dividing cell(Neonatal-Heart)	UNKNOWN	UNKNOWN
+Dividing cell(Neonatal-Rib)	UNKNOWN	UNKNOWN
+Dividing cell(Neonatal-Skin)	UNKNOWN	UNKNOWN
+Dividing cell(Pancreas)	UNKNOWN	UNKNOWN
+Dividing cell(Stomach)	UNKNOWN	UNKNOWN
+Dividing cells(Lung)	UNKNOWN	UNKNOWN
+Dividng cell(Neonatal-Calvaria)
 Dividing T cells(Lung)	T cell	CL:0000084
 Dividing dendritic cells(Lung)	dendritic cell	CL:0000451
 Ductal cell(Pancreas)	pancreatic ductal cell	CL:0002079
@@ -375,6 +384,8 @@ Spermatocyte_Slc2a3 high(Testis)	spermatocyte	CL:0000017
 Spermatogonia_1700001P01Rik high(Testis)	primary spermatocyte	CL:0000656
 Spermatogonia_Tbc1d23 high(Testis)	primary spermatocyte	CL:0000656
 Stem and progenitor cell(Mammary-Gland-Virgin)	stem cell	CL:0000034
+Stomach cell_Gkn2 high(Stomach)	UNKNOWN	UNKNOWN
+Stomach cell_Mt2 high(Stomach)	UNKNOWN	UNKNOWN
 Stomach cell_Muc5ac high(Stomach)	mucous cell of stomach	CL:0002180
 Stroma cell (Ovary)	stromal cell of ovary	CL:0002132
 Stromal cell(Liver)	stromal cell	CL:0000499

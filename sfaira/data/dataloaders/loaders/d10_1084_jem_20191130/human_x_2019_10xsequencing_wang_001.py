@@ -1,10 +1,9 @@
 import anndata
 import os
-from typing import Union
 import numpy as np
 import scipy.sparse
 
-from sfaira.data import DatasetBaseGroupLoadingManyFiles
+from sfaira.data import DatasetBase
 
 SAMPLE_FNS = [
     "wang20_colon.processed.h5ad",
@@ -13,17 +12,10 @@ SAMPLE_FNS = [
 ]
 
 
-class Dataset(DatasetBaseGroupLoadingManyFiles):
+class Dataset(DatasetBase):
 
-    def __init__(
-            self,
-            sample_fn: str,
-            data_path: Union[str, None] = None,
-            meta_path: Union[str, None] = None,
-            cache_path: Union[str, None] = None,
-            **kwargs
-    ):
-        super().__init__(sample_fn=sample_fn, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.download_url_data = f"https://covid19.cog.sanger.ac.uk/{self.sample_fn}"
         self.download_url_meta = None
 
@@ -44,10 +36,11 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
 
         self.set_dataset_id(idx=1)
 
-    def _load(self):
-        fn = os.path.join(self.data_dir, self.sample_fn)
-        adata = anndata.read(fn)
-        adata.X = np.expm1(adata.X)
-        adata.X = adata.X.multiply(scipy.sparse.csc_matrix(adata.obs["n_counts"].values[:, None])).multiply(1 / 10000)
 
-        return adata
+def load(data_dir, sample_fn, **kwargs):
+    fn = os.path.join(data_dir, sample_fn)
+    adata = anndata.read(fn)
+    adata.X = np.expm1(adata.X)
+    adata.X = adata.X.multiply(scipy.sparse.csc_matrix(adata.obs["n_counts"].values[:, None])).multiply(1 / 10000)
+
+    return adata
