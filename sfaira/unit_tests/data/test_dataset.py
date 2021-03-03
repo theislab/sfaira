@@ -1,5 +1,6 @@
 import numpy as np
 import os
+import pytest
 import scipy.sparse
 
 from sfaira.data import DatasetSuperGroup
@@ -27,12 +28,14 @@ def test_dsgs_adata():
     _ = ds.adata
 
 
-def test_dsgs_streamline_sfaira():
+@pytest.mark.parametrize("format", ["sfaira", "cellxgene"])
+@pytest.mark.parametrize("clean", [True, False])
+def test_dsgs_streamline(format: str, clean: bool):
     ds = DatasetSuperGroupSfaira(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
     ds.subset(key="organism", values=["mouse"])
     ds.subset(key="organ", values=["bladder"])
     ds.load_all()
-    ds.streamline(format="sfaira", clean=True)
+    ds.streamline(format=format, clean=clean)
 
 
 def test_dsgs_streamline_cellxgene():
