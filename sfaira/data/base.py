@@ -1750,9 +1750,6 @@ class DatasetGroup:
     def _unknown_celltype_identifiers(self):
         return np.unqiue(np.concatenate([v._unknown_celltype_identifiers for _, v in self.datasets.items()]))
 
-    def _load_group(self, **kwargs):
-        return None
-
     def load(
             self,
             annotated_only: bool = False,
@@ -1822,6 +1819,36 @@ class DatasetGroup:
             del adata_group
 
     load.__doc__ += load_doc
+
+    def fragment(self) -> Dict[str, anndata.AnnData]:
+        """
+        Fragment data sets into largest consistent parititions based on meta data.
+
+        ToDo return this as a DatasetGroup again.
+          the streamlined Datasets are similar to anndata instances here, worth considering whether to use anndata
+          instead because it can be indexed.
+
+        :return:
+        """
+        # TODO: assert that data is streamlined.
+        datasets_new = {}
+        for k, v in self.datasets.items():
+            # Define fragments and fragment names.
+            # Because the data is streamlined, fragments are partitions of the .obs space, excluding the cell-wise
+            # annotation columns:
+            #       - cellontology_class
+            #       - cellontology_id
+            #       - cellontology_original
+            cols_exclude = ["cellontology_class", "cellontology_id", "cellontology_original"]
+            tab = v.adata.obs.loc[:, [x not in cols_exclude for x in tab.columns]]
+            tab_unique = tab.drop_duplicates()
+            idx_sets = [
+                np.where([np.all(tab_unique.iloc[i, :] == tab.iloc[j, :])[0] for j in range(tab.shape[0])])
+                for i in range(tab_unique.shape[0])
+            ]
+            for i, x in enumerate(idx_sets):
+                datasets_new[k + "_fragment" + str(i)] = v.adata[x, :]
+        return datasets_new
 
     def load_tobacked(
             self,
