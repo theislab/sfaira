@@ -196,9 +196,14 @@ class DatasetBase(abc.ABC):
         if yaml_path is not None:
             assert os.path.exists(yaml_path), f"did not find yaml {yaml_path}"
             yaml_vals = read_yaml(fn=yaml_path)
+            print(yaml_vals)
             for k, v in yaml_vals["attr"].items():
                 if v is not None and k not in ["sample_fns", "sample_ids", "dataset_index"]:
-                    setattr(self, k, v)
+                    if isinstance(v, dict):  # v is a dictionary over file-wise meta-data items
+                        assert self.sample_fn in v.keys(), f"did not find key {self.sample_fn} in yamls keys for {k}"
+                        setattr(self, k, v[self.sample_fn])
+                    else:  # v is a meta-data item
+                        setattr(self, k, v)
             # ID can be set now already because YAML was used as input instead of child class constructor.
             self.set_dataset_id(idx=yaml_vals["meta"]["dataset_index"])
 

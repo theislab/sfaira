@@ -29,7 +29,7 @@ dataset_or_observation_wise:
     ethnicity:
     ethnicity_obs_key:
     healthy:
-    healthy_obs_key: "state_exact"
+    healthy_obs_key:
     individual:
     individual_obs_key:
     organ: "lamina propria of mucosa of colon"
@@ -39,7 +39,9 @@ dataset_or_observation_wise:
     sex:
     sex_obs_key: "Sex"
     state_exact:
-    state_exact_obs_key: "state_exact"
+        HC: "healthy"
+        UC: "ulcerative colitis"
+    state_exact_obs_key:
     tech_sample:
     tech_sample_obs_key:
 observation_wise:
@@ -48,6 +50,6 @@ feature_wise:
     var_ensembl_col:
     var_symbol_col: "index"
 misc:
-    healthy_state_healthy: "healthy colon"
+    healthy_state_healthy: "healthy"
 meta:
     version: "1.0"
