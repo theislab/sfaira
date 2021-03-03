@@ -184,7 +184,7 @@ class DatasetBase(abc.ABC):
         self._var_ensembl_col = None
 
         self.class_maps = {"0": {}}
-        self._unknown_celltype_identifiers = self._adata_ids_sfaira.unknown_celltype_identifiers
+        self._unknown_celltype_identifiers = self._adata_ids_sfaira.unknown_celltype_identifier
 
         self._celltype_universe = None
         self._ontology_class_map = None
@@ -778,17 +778,6 @@ class DatasetBase(abc.ABC):
         else:
             raise ValueError(f"Did not recognize backed AnnData.X format {type(adata_backed.X)}")
 
-    def set_unknown_class_id(self, ids: List[str]):
-        """
-        Sets list of custom identifiers of unknown cell types data annotation.
-
-        :param ids: IDs in cell type name column to replace by "unknown identifier.
-        :return:
-        """
-        self._unknown_celltype_identifiers.extend(
-            [x for x in ids if x not in self._adata_ids_sfaira.unknown_celltype_identifiers]
-        )
-
     def _set_genome(self, genome: Union[str, None]):
         if genome is not None:
             if genome.lower().startswith("homo_sapiens"):
@@ -893,7 +882,6 @@ class DatasetBase(abc.ABC):
         if self.cell_ontology_map is not None:  # only if this was defined
             labels_mapped = [
                 self.cell_ontology_map[x] if x in self.cell_ontology_map.keys()
-                else self._adata_ids_sfaira.unknown_celltype_name if x.lower() in self._unknown_celltype_identifiers
                 else x for x in labels_original
             ]
         else:
@@ -914,8 +902,10 @@ class DatasetBase(abc.ABC):
         #  files with and without the ID in the third column.
         ids_mapped = [
             self._ontology_container_sfaira.ontology_cell_types.id_from_name(x)
-            if x != self._adata_ids_sfaira.unknown_celltype_name
-            else self._adata_ids_sfaira.unknown_celltype_name
+            if x not in [
+                self._adata_ids_sfaira.unknown_celltype_identifier,
+                self._adata_ids_sfaira.not_a_cell_celltype_identifier
+            ] else x
             for x in labels_mapped
         ]
         self.adata.obs[self._adata_ids_sfaira.cell_ontology_id] = ids_mapped

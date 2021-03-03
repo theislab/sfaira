@@ -28,8 +28,6 @@ class Dataset(DatasetBase):
 
         self.set_dataset_id(idx=1)
 
-        self.set_unknown_class_id(ids=["Cycling"])
-
 
 def load(data_dir, **kwargs):
     fn = os.path.join(data_dir, "martin19.processed.h5ad")

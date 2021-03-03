@@ -29,8 +29,6 @@ class Dataset(DatasetBase):
 
         self.set_dataset_id(idx=1)
 
-        self.set_unknown_class_id(ids=["Unknown"])
-
 
 def load(data_dir, **kwargs):
     fn = [

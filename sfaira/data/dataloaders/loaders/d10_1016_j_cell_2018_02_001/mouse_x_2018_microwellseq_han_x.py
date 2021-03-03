@@ -322,13 +322,6 @@ class Dataset(DatasetBase):
 
         self.set_dataset_id(idx=1)
 
-        self.set_unknown_class_id(ids=[
-            "Cell in cell cycle(Fetal_Kidney)", "Stomach cell_Gkn2 high(Stomach)", "Stomach cell_Mt2 high(Stomach)",
-            "Dividing cell(Mammary-Gland-Virgin)", "Dividing cell(Neonatal-Heart)", "Dividing cell(Neonatal-Rib)",
-            "Dividing cell(Neonatal-Skin)", "Dividing cell(Pancreas)", "Dividing cell(Stomach)", "Dividing cells(Lung)",
-            "Dividng cell(Neonatal-Calvaria)"
-        ])
-
 
 def load(data_dir, sample_fn, **kwargs):
     fn = os.path.join(data_dir, '5435866.zip')

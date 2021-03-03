@@ -38,30 +38,6 @@ class Dataset(DatasetBase):
 
         self.set_dataset_id(idx=1)
 
-        self.set_unknown_class_id(
-            ids=[
-                "0",
-                "Unknown1",
-                "Unknown2",
-                "Intermediated cell",
-                "MT high",
-                "MT-gene high cell",
-                "Proliferating  cell",
-                "Proliferating cell",
-                "Proliferating cell_C7 high",
-                "Proliferating cell_CCNB1 high",
-                "Proliferating cell_FABP5 high",
-                "Proliferating cell_HMGB2 high",
-                "Proliferating cell_KIAA0101 high",
-                "Proliferating cell_KIAA0101_high",
-                "Proliferating cell_PTTG1 high",
-                "Proliferating cell_TOP2A high",
-                "Proliferating cell_UBE2C  high",
-                "Proliferating cell_UBE2C high",
-                "Proliferating cell_UBE2C_high"
-            ]
-        )
-
 
 def load(data_dir, **kwargs):
     sample_organ_dict = {

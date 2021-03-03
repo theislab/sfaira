@@ -31,8 +31,6 @@ class Dataset(DatasetBase):
 
         self.set_dataset_id(idx=1)
 
-        self.set_unknown_class_id(ids=["unclassified cell", "MHC class II cell"])
-
 
 def load(data_dir, **kwargs):
     fn = [

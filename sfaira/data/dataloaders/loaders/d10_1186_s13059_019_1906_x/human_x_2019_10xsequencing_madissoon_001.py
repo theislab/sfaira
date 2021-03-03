@@ -48,8 +48,6 @@ class Dataset(DatasetBase):
 
         self.set_dataset_id(idx=1)
 
-        self.set_unknown_class_id(ids=["B_T_doublet", "CD34_progenitor", "Stroma"])
-
 
 def load(data_dir, sample_fn, **kwargs):
     fn = os.path.join(data_dir, sample_fn)

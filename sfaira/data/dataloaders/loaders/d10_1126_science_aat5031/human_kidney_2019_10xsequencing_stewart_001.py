@@ -7,10 +7,6 @@ from sfaira.data import DatasetBase
 
 class Dataset(DatasetBase):
 
-    """
-    TODO: annotate developmental cell types in set_unknown_class_id
-    """
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.download_url_data = [
@@ -34,11 +30,6 @@ class Dataset(DatasetBase):
         self.obs_key_cellontology_original = "celltype"
 
         self.set_dataset_id(idx=1)
-
-        self.set_unknown_class_id(ids=[
-            "CNT/PC - proximal UB", "Distal S shaped body", "Medial S shaped body", "Proliferating stroma progenitor",
-            "Proximal S shaped body", "Stroma progenitor", "Proximal UB",
-        ])
 
 
 def load(data_dir, **kwargs):

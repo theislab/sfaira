@@ -1,4 +1,5 @@
 source	target	target_id
+MHC class II cell	UNKNOWN	UNKNOWN
 PSC cell	pancreatic stellate cell	CL:0002410
 acinar cell	pancreatic acinar cell	CL:0002064
 alpha cell	pancreatic A cell	CL:0000171
@@ -10,4 +11,5 @@ endothelial cell	endothelial cell	CL:0000115
 epsilon cell	pancreatic epsilon cell	CL:0005019
 gamma cell	pancreatic endocrine cell	CL:0008024
 mast cell	mast cell	CL:0000097
+unclassified cell	UNKNOWN	UNKNOWN
 unclassified endocrine cell	pancreatic endocrine cell	CL:0008024
