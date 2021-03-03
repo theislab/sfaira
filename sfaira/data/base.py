@@ -21,7 +21,7 @@ import ssl
 
 from sfaira.versions.genome_versions import SuperGenomeContainer
 from sfaira.versions.metadata import Ontology, CelltypeUniverse
-from sfaira.consts import AdataIdsSfaira, META_DATA_FIELDS, OCS
+from sfaira.consts import AdataIdsExtended, AdataIdsSfaira, META_DATA_FIELDS, OCS
 from sfaira.data.utils import read_yaml
 
 UNS_STRING_META_IN_OBS = "__obs__"
@@ -196,7 +196,6 @@ class DatasetBase(abc.ABC):
         if yaml_path is not None:
             assert os.path.exists(yaml_path), f"did not find yaml {yaml_path}"
             yaml_vals = read_yaml(fn=yaml_path)
-            print(yaml_vals)
             for k, v in yaml_vals["attr"].items():
                 if v is not None and k not in ["sample_fns", "sample_ids", "dataset_index"]:
                     if isinstance(v, dict):  # v is a dictionary over file-wise meta-data items
@@ -401,7 +400,7 @@ class DatasetBase(abc.ABC):
         # Run data set-specific loading script:
         self._load_cached(load_raw=load_raw, allow_caching=allow_caching)
         # Set data-specific meta data in .adata:
-        self._set_metadata_in_adata()
+        self._set_metadata_in_adata(adata_ids=self._adata_ids_sfaira)
         # Set loading hyper-parameter-specific meta data:
         self.adata.uns[self._adata_ids_sfaira.load_raw] = load_raw
         self.adata.uns[self._adata_ids_sfaira.mapped_features] = match_to_reference
@@ -577,45 +576,44 @@ class DatasetBase(abc.ABC):
             uns=self.adata.uns
         )
 
-    def _set_metadata_in_adata(self):
+    def _set_metadata_in_adata(self, adata_ids: AdataIdsExtended):
         """
         Copy meta data from dataset class in .anndata.
 
         :return:
         """
         # Set data set-wide attributes (.uns):
-        self.adata.uns[self._adata_ids_sfaira.annotated] = self.annotated
-        self.adata.uns[self._adata_ids_sfaira.author] = self.author
-        self.adata.uns[self._adata_ids_sfaira.doi] = self.doi
-        self.adata.uns[self._adata_ids_sfaira.download_url_data] = self.download_url_data
-        self.adata.uns[self._adata_ids_sfaira.download_url_meta] = self.download_url_meta
-        self.adata.uns[self._adata_ids_sfaira.id] = self.id
-        self.adata.uns[self._adata_ids_sfaira.normalization] = self.normalization
-        self.adata.uns[self._adata_ids_sfaira.year] = self.year
+        self.adata.uns[adata_ids.annotated] = self.annotated
+        self.adata.uns[adata_ids.author] = self.author
+        self.adata.uns[adata_ids.doi] = self.doi
+        self.adata.uns[adata_ids.download_url_data] = self.download_url_data
+        self.adata.uns[adata_ids.download_url_meta] = self.download_url_meta
+        self.adata.uns[adata_ids.id] = self.id
+        self.adata.uns[adata_ids.normalization] = self.normalization
+        self.adata.uns[adata_ids.year] = self.year
 
         # Set cell-wise or data set-wide attributes (.uns / .obs):
         # These are saved in .uns if they are data set wide to save memory.
         for x, y, z, v in (
-            [self.age, self._adata_ids_sfaira.age, self.age_obs_key,
+            [self.age, adata_ids.age, self.age_obs_key,
              self._ontology_container_sfaira.ontology_age],
-            [self.bio_sample, self._adata_ids_sfaira.bio_sample, self.bio_sample_obs_key, None],
-            [self.development_stage, self._adata_ids_sfaira.development_stage, self.development_stage_obs_key,
-             self._ontology_container_sfaira.ontology_dev_stage],
-            [self.ethnicity, self._adata_ids_sfaira.ethnicity, self.ethnicity_obs_key,
-             self._ontology_container_sfaira.ontology_ethnicity],
-            [self.healthy, self._adata_ids_sfaira.healthy, self.healthy_obs_key,
-             self._ontology_container_sfaira.ontology_healthy],
-            [self.individual, self._adata_ids_sfaira.individual, self.individual_obs_key, None],
-            [self.organ, self._adata_ids_sfaira.organ, self.organ_obs_key,
-             self._ontology_container_sfaira.ontology_organism],
-            [self.assay, self._adata_ids_sfaira.assay, self.assay_obs_key,
+            [self.assay, adata_ids.assay, self.assay_obs_key,
              self._ontology_container_sfaira.ontology_protocol],
-            [self.sex, self._adata_ids_sfaira.sex, self.sex_obs_key,
-             self._ontology_container_sfaira.ontology_sex],
-            [self.organism, self._adata_ids_sfaira.organism, self.organism_obs_key,
+            [self.bio_sample, adata_ids.bio_sample, self.bio_sample_obs_key, None],
+            [self.development_stage, adata_ids.development_stage, self.development_stage_obs_key,
+             self._ontology_container_sfaira.ontology_dev_stage],
+            [self.ethnicity, adata_ids.ethnicity, self.ethnicity_obs_key,
+             self._ontology_container_sfaira.ontology_ethnicity],
+            [self.healthy, adata_ids.healthy, self.healthy_obs_key,
+             self._ontology_container_sfaira.ontology_healthy],
+            [self.individual, adata_ids.individual, self.individual_obs_key, None],
+            [self.organ, adata_ids.organ, self.organ_obs_key,
              self._ontology_container_sfaira.ontology_organism],
-            [self.state_exact, self._adata_ids_sfaira.state_exact, self.state_exact_obs_key, None],
-            [self.tech_sample, self._adata_ids_sfaira.tech_sample, self.tech_sample_obs_key, None],
+            [self.organism, adata_ids.organism, self.organism_obs_key,
+             self._ontology_container_sfaira.ontology_organism],
+            [self.sex, adata_ids.sex, self.sex_obs_key, self._ontology_container_sfaira.ontology_sex],
+            [self.state_exact, adata_ids.state_exact, self.state_exact_obs_key, None],
+            [self.tech_sample, adata_ids.tech_sample, self.tech_sample_obs_key, None],
         ):
             if x is None and z is None:
                 self.adata.uns[y] = None
@@ -646,6 +644,65 @@ class DatasetBase(abc.ABC):
         # Map cell type names from raw IDs to ontology maintained ones::
         if self.cellontology_original_obs_key is not None:
             self.project_celltypes_to_ontology()
+
+    def streamline(self, format: str = "sfaira", clean: bool = False):
+        """
+        Streamline the adata instance to output format.
+
+        Output format are saved in ADATA_FIELDS* classes.
+
+        :param format: Export format.
+
+            - "sfaira"
+            - "cellxgene"
+        :param clean: Whether to delete non-streamlined fields.
+        :return:
+        """
+        if format == "sfaira":
+            adata_fields = self._adata_ids_sfaira
+        elif format == "sfaira":
+            from sfaira.consts import AdataIdsCellxgene
+            adata_fields = AdataIdsCellxgene()
+        self._set_metadata_in_adata(adata_ids=adata_fields)
+        if clean:
+            if self.adata.varm is not None:
+                del self.adata.varm
+            if self.adata.obsm is not None:
+                del self.adata.obsm
+            if self.adata.varm is not None:
+                del self.adata.varp
+            if self.adata.obsp is not None:
+                del self.adata.obsp
+            # Only retain target elements in adata.uns:
+            self.adata.obs = self.adata.uns[[
+                adata_fields.annotated,
+                adata_fields.author,
+                adata_fields.doi,
+                adata_fields.download_url_data,
+                adata_fields.download_url_meta,
+                adata_fields.id,
+                adata_fields.normalization,
+                adata_fields.year,
+            ]]
+            # Only retain target elements in adata.var:
+            self.adata.obs = self.adata.var[[
+                adata_fields.gene_id_names,
+                adata_fields.gene_id_ensembl,
+            ]]
+            # Only retain target columns in adata.obs:
+            self.adata.obs = self.adata.obs[[
+                adata_fields.age,
+                adata_fields.bio_sample,
+                adata_fields.development_stage,
+                adata_fields.ethnicity,
+                adata_fields.healthy,
+                adata_fields.individual,
+                adata_fields.organ,
+                adata_fields.organism,
+                adata_fields.sex,
+                adata_fields.state_exact,
+                adata_fields.tech_sample,
+            ]]
 
     def load_tobacked(
             self,
@@ -1740,7 +1797,7 @@ class DatasetGroup:
     #dsg_humanlung[some_id]
     #dsg_humanlung.adata
     """
-    datasets: Dict
+    datasets: Dict[str, DatasetBase]
 
     def __init__(self, datasets: dict):
         self._adata_ids_sfaira = AdataIdsSfaira()
@@ -1802,13 +1859,9 @@ class DatasetGroup:
                     print(x[1])
                     del self.datasets[x[0]]
         else:  # for loop
-            adata_group = None
             datasets_to_remove = []
             for k, v in self.datasets.items():
                 print(f"loading {k}")
-                group_loading = v.set_raw_full_group_object(adata_group=adata_group)
-                if adata_group is None and group_loading:  # cache full adata object for subsequent Datasets
-                    adata_group = v.adata.copy()
                 x = map_fn(tuple([v] + args))
                 # Clear data sets that were not successfully loaded because of missing data:
                 if x is not None:
@@ -1816,9 +1869,24 @@ class DatasetGroup:
                     datasets_to_remove.append(k)
             for k in datasets_to_remove:
                 del self.datasets[k]
-            del adata_group
 
     load.__doc__ += load_doc
+
+    def streamline(self, format: str = "sfaira", clean: bool = False):
+        """
+        Streamline the adata instance in each data set to output format.
+
+        Output format are saved in ADATA_FIELDS* classes.
+
+        :param format: Export format.
+
+            - "sfaira"
+            - "cellxgene"
+        :param clean: Whether to delete non-streamlined fields.
+        :return:
+        """
+        for x in self.ids:
+            self.datasets[x].streamline(format=format, clean=clean)
 
     def fragment(self) -> Dict[str, anndata.AnnData]:
         """
@@ -1947,40 +2015,9 @@ class DatasetGroup:
     def adata(self):
         if not self.adata_ls:
             return None
+        self.streamline(format="sfaira", clean=True)
         adata_ls = self.adata_ls
-        # Save uns attributes that are fixed for entire data set to .obs to retain during concatenation:
-        for adata in adata_ls:
-            adata.obs[self._adata_ids_sfaira.author] = adata.uns[self._adata_ids_sfaira.author]
-            adata.obs[self._adata_ids_sfaira.year] = adata.uns[self._adata_ids_sfaira.year]
-            adata.obs[self._adata_ids_sfaira.assay] = adata.uns[self._adata_ids_sfaira.assay]
-            if self._adata_ids_sfaira.normalization in adata.uns.keys():
-                adata.obs[self._adata_ids_sfaira.normalization] = adata.uns[self._adata_ids_sfaira.normalization]
-            if self._adata_ids_sfaira.development_stage in adata.obs.columns:
-                adata.obs[self._adata_ids_sfaira.development_stage] = adata.uns[self._adata_ids_sfaira.development_stage]
-            adata.obs[self._adata_ids_sfaira.annotated] = adata.uns[self._adata_ids_sfaira.annotated]
-        # Workaround related to anndata bugs:  # TODO remove this in future.
-        for adata in adata_ls:
-            # Fix 1:
-            if adata.raw is not None:
-                adata.raw._varm = None
-            # Fix 2:
-            if adata.uns is not None:
-                keys_to_keep = [
-                    'neighbors',
-                    self._adata_ids_sfaira.author,
-                    self._adata_ids_sfaira.year,
-                    self._adata_ids_sfaira.assay,
-                    self._adata_ids_sfaira.normalization,
-                    self._adata_ids_sfaira.development_stage,
-                    self._adata_ids_sfaira.annotated,
-                    self._adata_ids_sfaira.mapped_features,
-                ]
-                for k in list(adata.uns.keys()):
-                    if k not in keys_to_keep:
-                        del adata.uns[k]
-            # Fix 3:
-            if not isinstance(adata.X, scipy.sparse.csr_matrix):
-                adata.X = scipy.sparse.csr_matrix(adata.X)
+
         # .var entries are renamed and copied upon concatenation.
         # To preserve gene names in .var, the target gene names are copied into var_names and are then copied
         # back into .var.
@@ -2379,15 +2416,18 @@ class DatasetSuperGroup:
                 allow_caching=allow_caching,
                 processes=processes,
             )
-        # making sure that concatenate is not used on a None adata object resulting from organ filtering
-        for i in range(len(self.dataset_groups)):
-            if self.dataset_groups[i].adata is not None:
-                break
-        self.adata = self.dataset_groups[i].adata.concatenate(
-            *[x.adata for x in self.dataset_groups[1:] if x is not None],
-            join="outer",
-            batch_key=self._adata_ids_sfaira.dataset_group
-        )
+        # Make sure that concatenate is not used on a None adata object:
+        adatas = [x.adata for x in self.dataset_groups if x.adata is not None]
+        if len(adatas) > 1:
+            self.adata = adatas[0].adata.concatenate(
+                *adatas[1:],
+                join="outer",
+                batch_key=self._adata_ids_sfaira.dataset_group
+            )
+        elif len(adatas) == 1:
+            self.adata = adatas[0]
+        else:
+            warnings.warn("no anndata instances to concatenate")
 
     def load_all_tobacked(
             self,
@@ -2505,6 +2545,23 @@ class DatasetSuperGroup:
 
     def load_cached_backed(self, fn: PathLike):
         self.adata = anndata.read(fn, backed='r')
+
+    def streamline(self, format: str = "sfaira", clean: bool = False):
+        """
+        Streamline the adata instance in each group and each data set to output format.
+
+        Output format are saved in ADATA_FIELDS* classes.
+
+        :param format: Export format.
+
+            - "sfaira"
+            - "cellxgene"
+        :param clean: Whether to delete non-streamlined fields.
+        :return:
+        """
+        for x in self.dataset_groups:
+            for xx in x.ids:
+                x.datasets[xx].streamline(format=format, clean=clean)
 
     def subset(self, key, values):
         """
