@@ -1889,6 +1889,7 @@ class DatasetGroup:
         :return:
         """
         # TODO: assert that data is streamlined.
+        print("make sure data is streamlined")
         datasets_new = {}
         for k, v in self.datasets.items():
             # Define fragments and fragment names.
@@ -1898,7 +1899,7 @@ class DatasetGroup:
             #       - cellontology_id
             #       - cellontology_original
             cols_exclude = ["cellontology_class", "cellontology_id", "cellontology_original"]
-            tab = v.adata.obs.loc[:, [x not in cols_exclude for x in tab.columns]]
+            tab = v.adata.obs.loc[:, [x not in cols_exclude for x in v.adata.obs.columns]]
             tab_unique = tab.drop_duplicates()
             idx_sets = [
                 np.where([np.all(tab_unique.iloc[i, :] == tab.iloc[j, :])[0] for j in range(tab.shape[0])])
