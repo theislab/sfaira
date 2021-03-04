@@ -12,7 +12,7 @@ import scipy.sparse
 from typing import Dict, List, Tuple, Union
 import warnings
 
-from sfaira.data.base.dataset import DatasetBase
+from sfaira.data.base.dataset import is_term, DatasetBase
 from sfaira.versions.genome_versions import SuperGenomeContainer
 from sfaira.consts import AdataIdsSfaira
 from sfaira.data.utils import read_yaml
@@ -387,7 +387,7 @@ class DatasetGroup:
         Subsetting happens on .datasets.
 
         :param key: Property to subset by.
-        :param values: Classes to overlap to.
+        :param values: Classes to overlap to. Return if elements match any of these classes.
         :return:
         """
         ids_del = []
@@ -400,9 +400,15 @@ class DatasetGroup:
         for x in self.ids:
             try:
                 values_found = getattr(self.datasets[x], key)
+                ontology = getattr(self.datasets[x]._ontology_container_sfaira, key)
                 if not isinstance(values_found, list):
                     values_found = [values_found]
-                if not np.any([xx in values for xx in values_found]):
+                if not np.any([
+                    np.any([
+                        is_term(query=y, ontology=ontology, ontology_parent=z)
+                        for z in values
+                    ]) for y in values_found
+                ]):
                     ids_del.append(x)
             except AttributeError:
                 raise ValueError(f"{key} not a valid property of data set object")

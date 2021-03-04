@@ -34,6 +34,33 @@ load_doc = \
     """
 
 
+def is_term(
+        query,
+        ontology: Union[Ontology, bool, int, float, str, List[bool], List[int], List[float], List[str]],
+        ontology_parent=None,
+) -> True:
+    """
+    Check whether value is from set of allowed values using ontology.
+
+    :param query: Value to attempt to set, only yield a single value and not a list.
+    :param ontology: Constraint for values.
+        Either ontology instance used to constrain entries, or list of allowed values.
+    :param ontology_parent: If ontology is a DAG, not only check if node is a DAG node but also whether it is a child
+        of this parent node.
+    :return: Whether attempted term is sub-term of allowed term in ontology
+    """
+    if ontology is not None:
+        if isinstance(ontology, Ontology):
+            if ontology_parent is None:
+                return ontology.is_node(query)
+            else:
+                return ontology.is_a(query=query, reference=ontology_parent)
+        else:
+            return query in ontology
+    else:
+        return True
+
+
 class DatasetBase(abc.ABC):
     adata: Union[None, anndata.AnnData]
     class_maps: dict
@@ -569,18 +596,18 @@ class DatasetBase(abc.ABC):
         # These are saved in .uns if they are data set wide to save memory.
         for x, y, z, v in (
             [self.age, adata_ids.age, self.age_obs_key, self._ontology_container_sfaira.ontology_age],
-            [self.assay, adata_ids.assay, self.assay_obs_key, self._ontology_container_sfaira.ontology_protocol],
+            [self.assay, adata_ids.assay, self.assay_obs_key, self._ontology_container_sfaira.assay],
             [self.bio_sample, adata_ids.bio_sample, self.bio_sample_obs_key, None],
             [self.development_stage, adata_ids.development_stage, self.development_stage_obs_key,
-             self._ontology_container_sfaira.ontology_dev_stage],
+             self._ontology_container_sfaira.developmental_stage],
             [self.ethnicity, adata_ids.ethnicity, self.ethnicity_obs_key,
-             self._ontology_container_sfaira.ontology_ethnicity],
-            [self.healthy, adata_ids.healthy, self.healthy_obs_key, self._ontology_container_sfaira.ontology_healthy],
+             self._ontology_container_sfaira.ethnicity],
+            [self.healthy, adata_ids.healthy, self.healthy_obs_key, self._ontology_container_sfaira.healthy],
             [self.individual, adata_ids.individual, self.individual_obs_key, None],
-            [self.organ, adata_ids.organ, self.organ_obs_key, self._ontology_container_sfaira.ontology_organism],
+            [self.organ, adata_ids.organ, self.organ_obs_key, self._ontology_container_sfaira.organism],
             [self.organism, adata_ids.organism, self.organism_obs_key,
-             self._ontology_container_sfaira.ontology_organism],
-            [self.sex, adata_ids.sex, self.sex_obs_key, self._ontology_container_sfaira.ontology_sex],
+             self._ontology_container_sfaira.organism],
+            [self.sex, adata_ids.sex, self.sex_obs_key, self._ontology_container_sfaira.sex],
             [self.state_exact, adata_ids.state_exact, self.state_exact_obs_key, None],
             [self.tech_sample, adata_ids.tech_sample, self.tech_sample_obs_key, None],
         ):
@@ -870,7 +897,7 @@ class DatasetBase(abc.ABC):
         # TODO this could be changed in the future, this allows this function to be used both on cell type name mapping
         #  files with and without the ID in the third column.
         ids_mapped = [
-            self._ontology_container_sfaira.ontology_cell_types.id_from_name(x)
+            self._ontology_container_sfaira.cellontology_class.id_from_name(x)
             if x not in [
                 self._adata_ids_sfaira.unknown_celltype_identifier,
                 self._adata_ids_sfaira.not_a_cell_celltype_identifier
@@ -1075,7 +1102,7 @@ class DatasetBase(abc.ABC):
     @assay.setter
     def assay(self, x: str):
         self.__erasing_protection(attr="protocol", val_old=self._assay, val_new=x)
-        self._value_protection(attr="protocol", allowed=self._ontology_container_sfaira.ontology_protocol,
+        self._value_protection(attr="protocol", allowed=self._ontology_container_sfaira.assay,
                                attempted=x)
         self._assay = x
 
@@ -1137,7 +1164,7 @@ class DatasetBase(abc.ABC):
     @development_stage.setter
     def development_stage(self, x: str):
         self.__erasing_protection(attr="dev_stage", val_old=self._development_stage, val_new=x)
-        self._value_protection(attr="dev_stage", allowed=self._ontology_container_sfaira.ontology_dev_stage,
+        self._value_protection(attr="dev_stage", allowed=self._ontology_container_sfaira.developmental_stage,
                                attempted=x)
         self._development_stage = x
 
@@ -1353,7 +1380,7 @@ class DatasetBase(abc.ABC):
     @normalization.setter
     def normalization(self, x: str):
         self.__erasing_protection(attr="normalization", val_old=self._normalization, val_new=x)
-        self._value_protection(attr="normalization", allowed=self._ontology_container_sfaira.ontology_normalization,
+        self._value_protection(attr="normalization", allowed=self._ontology_container_sfaira.normalization,
                                attempted=x)
         self._normalization = x
 
@@ -1499,7 +1526,7 @@ class DatasetBase(abc.ABC):
     @organ.setter
     def organ(self, x: str):
         self.__erasing_protection(attr="organ", val_old=self._organ, val_new=x)
-        self._value_protection(attr="organ", allowed=self._ontology_container_sfaira.ontology_organ, attempted=x)
+        self._value_protection(attr="organ", allowed=self._ontology_container_sfaira.organ, attempted=x)
         self._organ = x
 
     @property
@@ -1517,7 +1544,7 @@ class DatasetBase(abc.ABC):
     @organism.setter
     def organism(self, x: str):
         self.__erasing_protection(attr="organism", val_old=self._organism, val_new=x)
-        self._value_protection(attr="organism", allowed=self._ontology_container_sfaira.ontology_organism, attempted=x)
+        self._value_protection(attr="organism", allowed=self._ontology_container_sfaira.organism, attempted=x)
         self._organism = x
 
     @property
@@ -1535,7 +1562,7 @@ class DatasetBase(abc.ABC):
     @sex.setter
     def sex(self, x: str):
         self.__erasing_protection(attr="sex", val_old=self._sex, val_new=x)
-        self._value_protection(attr="sex", allowed=self._ontology_container_sfaira.ontology_sex, attempted=x)
+        self._value_protection(attr="sex", allowed=self._ontology_container_sfaira.sex, attempted=x)
         self._sex = x
 
     @property
@@ -1614,23 +1641,23 @@ class DatasetBase(abc.ABC):
     @year.setter
     def year(self, x: int):
         self.__erasing_protection(attr="year", val_old=self._year, val_new=x)
-        self._value_protection(attr="year", allowed=self._ontology_container_sfaira.ontology_year, attempted=x)
+        self._value_protection(attr="year", allowed=self._ontology_container_sfaira.year, attempted=x)
         self._year = x
 
     @property
     def ontology_celltypes(self):
-        return self._ontology_container_sfaira.ontology_cell_types
+        return self._ontology_container_sfaira.cellontology_class
 
     @property
     def ontology_organ(self):
-        return self._ontology_container_sfaira.ontology_organ
+        return self._ontology_container_sfaira.organ
 
     @property
     def celltypes_universe(self):
         if self._celltype_universe:
             self._celltype_universe = CelltypeUniverse(
                 cl=self.ontology_celltypes,
-                uberon=self._ontology_container_sfaira.ontology_organ,
+                uberon=self._ontology_container_sfaira.organ,
                 organism=self.organism,
             )
         return self._celltype_universe
@@ -1682,16 +1709,9 @@ class DatasetBase(abc.ABC):
         :param attempted: Value(s) to attempt to set in `attr`.
         :return:
         """
-        if allowed is not None:
-            if not isinstance(attempted, list) and not isinstance(attempted, tuple):
-                attempted = [attempted]
-            if isinstance(allowed, Ontology):
-                for x in attempted:
-                    allowed.validate_node(x)
-            else:
-                for x in attempted:
-                    if x not in allowed:
-                        raise ValueError(f"{x} is not a valid entry for {attr}, choose from: {str(allowed)}")
+        for x in attempted:
+            if not is_term(query=x, ontology=allowed):
+                raise ValueError(f"{x} is not a valid entry for {attr}, choose from: {str(allowed)}")
 
     def subset_cells(self, key, values):
         """

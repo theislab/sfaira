@@ -46,8 +46,11 @@ class Ontology:
         """
         pass
 
+    def is_node(self, x: str):
+        return x in self.node_names
+
     def validate_node(self, x: str):
-        if x not in self.node_names:
+        if not self.is_node(x=x):
             suggestions = self.map_node_suggestion(x=x, include_synonyms=False)
             raise ValueError(f"Node label {x} not found. Did you mean any of {suggestions}?")
 
@@ -238,7 +241,23 @@ class OntologyObo(Ontology):
         return [x for x in self.graph.nodes() if self.graph.in_degree(x) == 0]
 
     def get_ancestors(self, node: str) -> List[str]:
+        if node not in self.node_ids:
+            node = self.id_from_name(node)
         return list(networkx.ancestors(self.graph, node))
+
+    def is_a(self, query: str, reference: str) -> bool:
+        """
+        Checks if query node is reference node or an ancestor thereof.
+
+        :param query: Query node name. Node ID or name.
+        :param reference: Reference node name. Node ID or name.
+        :return: If query node is reference node or an ancestor thereof.
+        """
+        if query not in self.node_ids:
+            query = self.id_from_name(query)
+        if reference not in self.node_ids:
+            reference = self.id_from_name(reference)
+        return reference in self.get_ancestors(node=query) or query == reference
 
     def map_to_leaves(self, node: str, return_type: str = "elements", include_self: bool = True):
         """
