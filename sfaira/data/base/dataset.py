@@ -34,7 +34,7 @@ load_doc = \
     """
 
 
-def is_term(
+def is_child(
         query,
         ontology: Union[Ontology, bool, int, float, str, List[bool], List[int], List[float], List[str]],
         ontology_parent=None,
@@ -55,8 +55,10 @@ def is_term(
                 return ontology.is_node(query)
             else:
                 return ontology.is_a(query=query, reference=ontology_parent)
+        elif ontology is None:
+            return query == ontology_parent
         else:
-            return query in ontology
+            raise ValueError(f"did not recognize ontology type {type(ontology)}")
     else:
         return True
 
@@ -1734,7 +1736,7 @@ class DatasetBase(abc.ABC):
         if not isinstance(attempted, list):
             attempted = [attempted]
         for x in attempted:
-            if not is_term(query=x, ontology=allowed):
+            if not is_child(query=x, ontology=allowed):
                 raise ValueError(f"{x} is not a valid entry for {attr}, choose from: {str(allowed)}")
 
     def subset_cells(self, key, values):
@@ -1786,7 +1788,7 @@ class DatasetBase(abc.ABC):
                 # Test only unique elements  found in ontology to save time.
                 values_found_unique_matched = [
                     x for x in values_found_unique if np.any([
-                        is_term(query=x, ontology=ontology, ontology_parent=y)
+                        is_child(query=x, ontology=ontology, ontology_parent=y)
                         for y in values
                     ])
                 ]

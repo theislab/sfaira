@@ -12,7 +12,7 @@ import scipy.sparse
 from typing import Dict, List, Tuple, Union
 import warnings
 
-from sfaira.data.base.dataset import is_term, DatasetBase
+from sfaira.data.base.dataset import is_child, DatasetBase
 from sfaira.versions.genome_versions import SuperGenomeContainer
 from sfaira.consts import AdataIdsSfaira
 from sfaira.data.utils import read_yaml
@@ -414,7 +414,7 @@ class DatasetGroup:
                     values_found = [values_found]
                 if not np.any([
                     np.any([
-                        is_term(query=y, ontology=ontology, ontology_parent=z)
+                        is_child(query=y, ontology=ontology, ontology_parent=z)
                         for z in values
                     ]) for y in values_found
                 ]):
