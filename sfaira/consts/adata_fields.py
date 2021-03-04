@@ -1,4 +1,3 @@
-import numpy as np
 from typing import List
 
 """
@@ -12,6 +11,7 @@ class AdataIdsBase:
     Base class of minimal constant field names of anndata.AnnData object entries, such as .uns keys and .obs columns.
     """
     _annotated: str
+    _assay: str
     _author: str
     _cell_types_original: str
     _cell_ontology_class: str
@@ -30,7 +30,6 @@ class AdataIdsBase:
     _normalization: str
     _organ: str
     _organism: str
-    _assay: str
     _year: str
 
     @property
@@ -175,6 +174,7 @@ class AdataIdsSfaira(AdataIdsExtended):
 
     def __init__(self):
         self._annotated = "annotated"
+        self._assay = "assay"
         self._author = "author"
         self._bio_sample = "bio_sample"
         self._cell_types_original = "cell_types_original"
@@ -195,7 +195,6 @@ class AdataIdsSfaira(AdataIdsExtended):
         self._normalization = "normalization"
         self._organ = "organ"
         self._organism = "organism"
-        self._protocol = "protocol"
         self._tech_sample = "bio_sample"
         self._year = "year"
 

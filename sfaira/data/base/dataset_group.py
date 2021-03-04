@@ -400,7 +400,16 @@ class DatasetGroup:
         for x in self.ids:
             try:
                 values_found = getattr(self.datasets[x], key)
+            except AttributeError:
+                raise ValueError(f"{key} not a valid property of data set object")
+            try:
                 ontology = getattr(self.datasets[x]._ontology_container_sfaira, key)
+            except AttributeError:
+                raise ValueError(f"{key} not a valid property of ontology_container object")
+            if values_found is None:
+                # Delete entries which do not have this meta data item annotated.
+                ids_del.append(x)
+            else:
                 if not isinstance(values_found, list):
                     values_found = [values_found]
                 if not np.any([
@@ -409,9 +418,8 @@ class DatasetGroup:
                         for z in values
                     ]) for y in values_found
                 ]):
+                    # Delete entries which a non-matching meta data value associated with this item.
                     ids_del.append(x)
-            except AttributeError:
-                raise ValueError(f"{key} not a valid property of data set object")
         for x in ids_del:
             del self.datasets[x]
 
@@ -866,7 +874,7 @@ class DatasetSuperGroup:
         """
         for x in self.dataset_groups:
             x.subset(key=key, values=values)
-        self.dataset_groups = [x for x in self.dataset_groups if x.datasets]  # Delete empty DatasetGroups
+        self.dataset_groups = [x for x in self.dataset_groups if x.datasets is not None]  # Delete empty DatasetGroups
 
     def subset_cells(self, key, values: Union[str, List[str]]):
         """

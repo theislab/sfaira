@@ -342,9 +342,9 @@ class DatasetBase(abc.ABC):
                 else:
                     warnings.warn(f"Cached loading enabled, but cache file {filename} not found. "
                                   f"Loading from raw files.")
-                    self.adata = self.load_func(self.data_dir, self.sample_fn)
+                    self.adata = self.load_func(data_dir=self.data_dir, sample_fn=self.sample_fn)
             else:
-                self.adata = self.load_func(self.data_dir, self.sample_fn)
+                self.adata = self.load_func(data_dir=self.data_dir, sample_fn=self.sample_fn)
 
         def _cached_writing(filename):
             if filename is not None:
@@ -354,10 +354,10 @@ class DatasetBase(abc.ABC):
                 self.adata.write_h5ad(filename)
 
         if load_raw and allow_caching:
-            self.adata = self.load_func(self.data_dir, self.sample_fn)
+            self.adata = self.load_func(data_dir=self.data_dir, sample_fn=self.sample_fn)
             _cached_writing(self.cache_fn)
         elif load_raw and not allow_caching:
-            self.adata = self.load_func(self.data_dir, self.sample_fn)
+            self.adata = self.load_func(data_dir=self.data_dir, sample_fn=self.sample_fn)
         elif not load_raw and allow_caching:
             _cached_reading(self.cache_fn)
             _cached_writing(self.cache_fn)
@@ -504,14 +504,17 @@ class DatasetBase(abc.ABC):
                 # last element of each block as block boundaries:
                 # n_genes - 1 - idx_map_sorted_rev.index(x)
                 # Note that the blocks are named as positive integers starting at 1, without gaps.
-                counts = np.concatenate([np.sum(x, axis=1, keepdims=True)
-                                         for x in np.split(self.adata[:, idx_map_sorted_fwd].X,  # forward ordered data
-                                                           indices_or_sections=[
-                                                               n_genes - 1 - idx_map_sorted_rev.index(x)  # last occurrence of element in forward order
-                                                               for x in np.arange(0, len(new_index_collapsed) - 1)],  # -1: do not need end of last partition
-                                                           axis=1
-                                                           )
-                                         ][::-1], axis=1)
+                counts = np.concatenate([
+                    np.sum(x, axis=1, keepdims=True)
+                    for x in np.split(
+                        self.adata[:, idx_map_sorted_fwd].X,  # forward ordered data
+                        indices_or_sections=[
+                            n_genes - 1 - idx_map_sorted_rev.index(x)  # last occurrence of element in forward order
+                            for x in np.arange(0, len(new_index_collapsed) - 1)
+                        ],  # -1: do not need end of last partition
+                        axis=1
+                    )
+                ][::-1], axis=1)
                 # Remove varm and populate var with first occurrence only:
                 obs_names = self.adata.obs_names
                 self.adata = anndata.AnnData(
@@ -1709,6 +1712,12 @@ class DatasetBase(abc.ABC):
         :param attempted: Value(s) to attempt to set in `attr`.
         :return:
         """
+        if isinstance(attempted, np.ndarray):
+            attempted = attempted.tolist()
+        if isinstance(attempted, tuple):
+            attempted = list(attempted)
+        if not isinstance(attempted, list):
+            attempted = [attempted]
         for x in attempted:
             if not is_term(query=x, ontology=allowed):
                 raise ValueError(f"{x} is not a valid entry for {attr}, choose from: {str(allowed)}")

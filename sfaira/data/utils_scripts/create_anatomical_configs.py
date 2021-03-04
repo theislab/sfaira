@@ -27,7 +27,7 @@ configs_to_write = {
         "blood",
         "bone marrow",
         "brain",
-        "chorionic villus"
+        "chorionic villus",
         "diaphragm",
         "esophagus",
         "eye",

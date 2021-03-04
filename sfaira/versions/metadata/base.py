@@ -92,6 +92,18 @@ class OntologyList(Ontology):
     def synonym_node_properties(self) -> List[str]:
         return []
 
+    def is_a(self, query: str, reference: str) -> bool:
+        """
+        Checks if query node is reference node.
+
+        Note that there is no notion of ancestors for list ontologies.
+
+        :param query: Query node name. Node ID or name.
+        :param reference: Reference node name. Node ID or name.
+        :return: If query node is reference node or an ancestor thereof.
+        """
+        return query == reference
+
 
 class OntologyEbi(Ontology):
     """
