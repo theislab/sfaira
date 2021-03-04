@@ -38,12 +38,15 @@ def test_dsgs_streamline(format: str, clean: bool):
     ds.streamline(format=format, clean=clean)
 
 
-def test_dsgs_streamline_cellxgene():
+def test_dsgs_config_write_load():
+    fn = dir_data + "/config.csv"
     ds = DatasetSuperGroupSfaira(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
     ds.subset(key="organism", values=["mouse"])
-    ds.subset(key="organ", values=["bladder"])
-    ds.load_all()
-    ds.streamline(format="cellxgene", clean=True)
+    ds.subset(key="organ", values=["lung"])
+    ds.write_config(fn=fn)
+    ds2 = DatasetSuperGroupSfaira(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
+    ds2.load_config(fn=fn)
+    assert np.all(ds.ids == ds2.ids)
 
 
 def test_dsg_load():
