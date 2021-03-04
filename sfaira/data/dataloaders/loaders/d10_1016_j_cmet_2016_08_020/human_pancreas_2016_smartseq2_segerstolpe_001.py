@@ -24,11 +24,11 @@ class Dataset(DatasetBase):
         self.year = 2016
 
         self.var_symbol_col = "index"
-        
+
         self.cellontology_original_obs_key = "Characteristics[cell type]"
         self.state_exact_obs_key = "Characteristics[disease]"
         self.healthy_obs_key = "Characteristics[disease]"
-        
+
         self.healthy_state_healthy = "normal"
 
         self.set_dataset_id(idx=1)

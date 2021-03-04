@@ -1427,7 +1427,7 @@ class DatasetBase(abc.ABC):
     def cellontology_class_obs_key(self, x: str):
         self.__erasing_protection(attr="cellontology_class_obs_key", val_old=self._cellontology_class_obs_key,
                                   val_new=x)
-        self._cellontology_class_obs_key = x\
+        self._cellontology_class_obs_key = x
 
     @property
     def cellontology_id_obs_key(self) -> str:
