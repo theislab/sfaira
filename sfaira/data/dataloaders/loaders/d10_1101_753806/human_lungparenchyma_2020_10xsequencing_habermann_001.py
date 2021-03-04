@@ -25,9 +25,10 @@ class Dataset(DatasetBase):
         self.year = 2020
 
         self.var_symbol_col = "index"
-        self.obs_key_cellontology_original = "celltype"
-        self.obs_key_state_exact = "Diagnosis"
-        self.obs_key_healthy = "Status"
+        
+        self.cellontology_original_obs_key = "celltype"
+        self.state_exact_obs_key = "Diagnosis"
+        self.healthy_obs_key = "Status"
         self.healthy_state_healthy = "Control"
 
         self.set_dataset_id(idx=1)

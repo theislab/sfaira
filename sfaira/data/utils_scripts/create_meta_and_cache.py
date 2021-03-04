@@ -29,9 +29,8 @@ processes = int(str(sys.argv[4]))
 ds = sfaira.data.dataloaders.DatasetSuperGroupSfaira(
     data_path=data_path, meta_path=path_meta, cache_path=path_cache
 )
-dsg = ds.flatten()  # need to flatten in this case to parallelise across Groups and not just within.
 # Write meta data, cache and test load from cache:
-dsg.load(
+ds.load(
     annotated_only=False,
     match_to_reference=None,
     remove_gene_version=True,

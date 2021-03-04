@@ -46,8 +46,11 @@ class Ontology:
         """
         pass
 
+    def is_node(self, x: str):
+        return x in self.node_names
+
     def validate_node(self, x: str):
-        if x not in self.node_names:
+        if not self.is_node(x=x):
             suggestions = self.map_node_suggestion(x=x, include_synonyms=False)
             raise ValueError(f"Node label {x} not found. Did you mean any of {suggestions}?")
 
@@ -88,6 +91,18 @@ class OntologyList(Ontology):
 
     def synonym_node_properties(self) -> List[str]:
         return []
+
+    def is_a(self, query: str, reference: str) -> bool:
+        """
+        Checks if query node is reference node.
+
+        Note that there is no notion of ancestors for list ontologies.
+
+        :param query: Query node name. Node ID or name.
+        :param reference: Reference node name. Node ID or name.
+        :return: If query node is reference node or an ancestor thereof.
+        """
+        return query == reference
 
 
 class OntologyEbi(Ontology):
@@ -238,7 +253,23 @@ class OntologyObo(Ontology):
         return [x for x in self.graph.nodes() if self.graph.in_degree(x) == 0]
 
     def get_ancestors(self, node: str) -> List[str]:
+        if node not in self.node_ids:
+            node = self.id_from_name(node)
         return list(networkx.ancestors(self.graph, node))
+
+    def is_a(self, query: str, reference: str) -> bool:
+        """
+        Checks if query node is reference node or an ancestor thereof.
+
+        :param query: Query node name. Node ID or name.
+        :param reference: Reference node name. Node ID or name.
+        :return: If query node is reference node or an ancestor thereof.
+        """
+        if query not in self.node_ids:
+            query = self.id_from_name(query)
+        if reference not in self.node_ids:
+            reference = self.id_from_name(reference)
+        return query in self.get_ancestors(node=reference) or query == reference
 
     def map_to_leaves(self, node: str, return_type: str = "elements", include_self: bool = True):
         """
@@ -497,7 +528,9 @@ class OntologyCelltypes(OntologyExtendedObo):
             **kwargs
     ):
         # Identify cache:
-        ontology_cache_dir = os.path.join("/".join(FILE_PATH.split("/")[:-4]), "cache/ontologies/cl/")
+        folder = FILE_PATH.split(os.sep)[:-4]
+        folder.insert(1, os.sep)
+        ontology_cache_dir = os.path.join(*folder, "cache", "ontologies", "cl")
         fn = f"{branch}_cl.obo"
         fn_path = os.path.join(ontology_cache_dir, fn)
         # Download if necessary:
