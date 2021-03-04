@@ -528,7 +528,9 @@ class OntologyCelltypes(OntologyExtendedObo):
             **kwargs
     ):
         # Identify cache:
-        ontology_cache_dir = os.path.join("/".join(FILE_PATH.split("/")[:-4]), "cache/ontologies/cl/")
+        folder = FILE_PATH.split(os.sep)[:-4]
+        folder.insert(1, os.sep)
+        ontology_cache_dir = os.path.join(*folder, "cache", "ontologies", "cl")
         fn = f"{branch}_cl.obo"
         fn_path = os.path.join(ontology_cache_dir, fn)
         # Download if necessary:
