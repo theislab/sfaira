@@ -499,7 +499,7 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                                                   ".SAMPLE_FNS")
                         fn_yaml = os.path.join(self._cwd, file_module + ".yaml")
                         fn_yaml = fn_yaml if os.path.exists(fn_yaml) else None
-                        # Check for sample_fns and sample_ids in yaml:
+                        # Check for sample_fns in yaml:
                         if fn_yaml is not None:
                             assert os.path.exists(fn_yaml), f"did not find yaml {fn_yaml}"
                             yaml_vals = read_yaml(fn=fn_yaml)
