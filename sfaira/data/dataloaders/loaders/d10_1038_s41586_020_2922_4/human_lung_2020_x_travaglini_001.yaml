@@ -1,6 +1,5 @@
 dataset_structure:
     dataset_index: 1
-    sample_ids:
     sample_fns:
         - "droplet_normal_lung_blood_scanpy.20200205.RC4.h5ad"
         - "facs_normal_lung_blood_scanpy.20200205.RC4.h5ad"

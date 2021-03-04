@@ -199,7 +199,7 @@ class DatasetBase(abc.ABC):
             assert os.path.exists(yaml_path), f"did not find yaml {yaml_path}"
             yaml_vals = read_yaml(fn=yaml_path)
             for k, v in yaml_vals["attr"].items():
-                if v is not None and k not in ["sample_fns", "sample_ids", "dataset_index"]:
+                if v is not None and k not in ["sample_fns", "dataset_index"]:
                     if isinstance(v, dict):  # v is a dictionary over file-wise meta-data items
                         assert self.sample_fn in v.keys(), f"did not find key {self.sample_fn} in yamls keys for {k}"
                         setattr(self, k, v[self.sample_fn])
@@ -1427,7 +1427,7 @@ class DatasetBase(abc.ABC):
     def cellontology_class_obs_key(self, x: str):
         self.__erasing_protection(attr="cellontology_class_obs_key", val_old=self._cellontology_class_obs_key,
                                   val_new=x)
-        self._cellontology_class_obs_key = x\
+        self._cellontology_class_obs_key = x
 
     @property
     def cellontology_id_obs_key(self) -> str:
