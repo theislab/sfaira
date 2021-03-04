@@ -13,8 +13,10 @@ class OntologyContainerSfaira:
         self.cellontology_class = "v2021-02-01"
         self.cellontology_original = None
         self.developmental_stage = None
+        self.doi = None
         self.ethnicity = None
         self.healthy = [True, False]
+        self.id = None
         self.normalization = None
         self.organ = OntologyUberon()
         self.organism = OntologyList(terms=["mouse", "human"])
