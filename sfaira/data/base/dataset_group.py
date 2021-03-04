@@ -403,7 +403,7 @@ class DatasetGroup:
             except AttributeError:
                 raise ValueError(f"{key} not a valid property of data set object")
             try:
-                ontology = getattr(self.datasets[x]._ontology_container_sfaira, key)
+                ontology = getattr(self.datasets[x].ontology_container_sfaira, key)
             except AttributeError:
                 raise ValueError(f"{key} not a valid property of ontology_container object")
             if values_found is None:
@@ -447,7 +447,7 @@ class DatasetGroup:
         """
         for x in self.ids:
             self.datasets[x].subset_cells(key=key, values=values)
-            if self.datasets[x].adata is None:  # none left
+            if self.datasets[x].ncells == 0:  # No observations (cells) left.
                 del self.datasets[x]
 
 

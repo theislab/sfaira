@@ -133,7 +133,7 @@ class DatasetBase(abc.ABC):
             **kwargs
     ):
         self._adata_ids_sfaira = AdataIdsSfaira()
-        self._ontology_container_sfaira = OCS  # Using a pre-instantiated version of this yields drastic speed-ups.
+        self.ontology_container_sfaira = OCS  # Using a pre-instantiated version of this yields drastic speed-ups.
 
         self.adata = None
         self.meta = None
@@ -342,8 +342,6 @@ class DatasetBase(abc.ABC):
                 if os.path.exists(filename):
                     self.adata = anndata.read_h5ad(filename)
                 else:
-                    warnings.warn(f"Cached loading enabled, but cache file {filename} not found. "
-                                  f"Loading from raw files.")
                     self.adata = self.load_func(data_dir=self.data_dir, sample_fn=self.sample_fn)
             else:
                 self.adata = self.load_func(data_dir=self.data_dir, sample_fn=self.sample_fn)
@@ -600,19 +598,19 @@ class DatasetBase(abc.ABC):
         # Set cell-wise or data set-wide attributes (.uns / .obs):
         # These are saved in .uns if they are data set wide to save memory.
         for x, y, z, v in (
-            [self.age, adata_ids.age, self.age_obs_key, self._ontology_container_sfaira.ontology_age],
-            [self.assay, adata_ids.assay, self.assay_obs_key, self._ontology_container_sfaira.assay],
+            [self.age, adata_ids.age, self.age_obs_key, self.ontology_container_sfaira.age],
+            [self.assay, adata_ids.assay, self.assay_obs_key, self.ontology_container_sfaira.assay],
             [self.bio_sample, adata_ids.bio_sample, self.bio_sample_obs_key, None],
             [self.development_stage, adata_ids.development_stage, self.development_stage_obs_key,
-             self._ontology_container_sfaira.developmental_stage],
+             self.ontology_container_sfaira.developmental_stage],
             [self.ethnicity, adata_ids.ethnicity, self.ethnicity_obs_key,
-             self._ontology_container_sfaira.ethnicity],
-            [self.healthy, adata_ids.healthy, self.healthy_obs_key, self._ontology_container_sfaira.healthy],
+             self.ontology_container_sfaira.ethnicity],
+            [self.healthy, adata_ids.healthy, self.healthy_obs_key, self.ontology_container_sfaira.healthy],
             [self.individual, adata_ids.individual, self.individual_obs_key, None],
-            [self.organ, adata_ids.organ, self.organ_obs_key, self._ontology_container_sfaira.organism],
+            [self.organ, adata_ids.organ, self.organ_obs_key, self.ontology_container_sfaira.organism],
             [self.organism, adata_ids.organism, self.organism_obs_key,
-             self._ontology_container_sfaira.organism],
-            [self.sex, adata_ids.sex, self.sex_obs_key, self._ontology_container_sfaira.sex],
+             self.ontology_container_sfaira.organism],
+            [self.sex, adata_ids.sex, self.sex_obs_key, self.ontology_container_sfaira.sex],
             [self.state_exact, adata_ids.state_exact, self.state_exact_obs_key, None],
             [self.tech_sample, adata_ids.tech_sample, self.tech_sample_obs_key, None],
         ):
@@ -907,7 +905,7 @@ class DatasetBase(abc.ABC):
         # TODO this could be changed in the future, this allows this function to be used both on cell type name mapping
         #  files with and without the ID in the third column.
         ids_mapped = [
-            self._ontology_container_sfaira.cellontology_class.id_from_name(x)
+            self.ontology_container_sfaira.cellontology_class.id_from_name(x)
             if x not in [
                 self._adata_ids_sfaira.unknown_celltype_identifier,
                 self._adata_ids_sfaira.not_a_cell_celltype_identifier
@@ -1077,7 +1075,7 @@ class DatasetBase(abc.ABC):
     @age.setter
     def age(self, x: str):
         self.__erasing_protection(attr="age", val_old=self._age, val_new=x)
-        self._value_protection(attr="age", allowed=self._ontology_container_sfaira.ontology_age, attempted=x)
+        self._value_protection(attr="age", allowed=self.ontology_container_sfaira.age, attempted=x)
         self._age = x
 
     @property
@@ -1112,7 +1110,7 @@ class DatasetBase(abc.ABC):
     @assay.setter
     def assay(self, x: str):
         self.__erasing_protection(attr="protocol", val_old=self._assay, val_new=x)
-        self._value_protection(attr="protocol", allowed=self._ontology_container_sfaira.assay,
+        self._value_protection(attr="protocol", allowed=self.ontology_container_sfaira.assay,
                                attempted=x)
         self._assay = x
 
@@ -1174,7 +1172,7 @@ class DatasetBase(abc.ABC):
     @development_stage.setter
     def development_stage(self, x: str):
         self.__erasing_protection(attr="dev_stage", val_old=self._development_stage, val_new=x)
-        self._value_protection(attr="dev_stage", allowed=self._ontology_container_sfaira.developmental_stage,
+        self._value_protection(attr="dev_stage", allowed=self.ontology_container_sfaira.developmental_stage,
                                attempted=x)
         self._development_stage = x
 
@@ -1390,7 +1388,7 @@ class DatasetBase(abc.ABC):
     @normalization.setter
     def normalization(self, x: str):
         self.__erasing_protection(attr="normalization", val_old=self._normalization, val_new=x)
-        self._value_protection(attr="normalization", allowed=self._ontology_container_sfaira.normalization,
+        self._value_protection(attr="normalization", allowed=self.ontology_container_sfaira.normalization,
                                attempted=x)
         self._normalization = x
 
@@ -1546,7 +1544,7 @@ class DatasetBase(abc.ABC):
     @organ.setter
     def organ(self, x: str):
         self.__erasing_protection(attr="organ", val_old=self._organ, val_new=x)
-        self._value_protection(attr="organ", allowed=self._ontology_container_sfaira.organ, attempted=x)
+        self._value_protection(attr="organ", allowed=self.ontology_container_sfaira.organ, attempted=x)
         self._organ = x
 
     @property
@@ -1564,7 +1562,7 @@ class DatasetBase(abc.ABC):
     @organism.setter
     def organism(self, x: str):
         self.__erasing_protection(attr="organism", val_old=self._organism, val_new=x)
-        self._value_protection(attr="organism", allowed=self._ontology_container_sfaira.organism, attempted=x)
+        self._value_protection(attr="organism", allowed=self.ontology_container_sfaira.organism, attempted=x)
         self._organism = x
 
     @property
@@ -1582,7 +1580,7 @@ class DatasetBase(abc.ABC):
     @sex.setter
     def sex(self, x: str):
         self.__erasing_protection(attr="sex", val_old=self._sex, val_new=x)
-        self._value_protection(attr="sex", allowed=self._ontology_container_sfaira.sex, attempted=x)
+        self._value_protection(attr="sex", allowed=self.ontology_container_sfaira.sex, attempted=x)
         self._sex = x
 
     @property
@@ -1661,23 +1659,23 @@ class DatasetBase(abc.ABC):
     @year.setter
     def year(self, x: int):
         self.__erasing_protection(attr="year", val_old=self._year, val_new=x)
-        self._value_protection(attr="year", allowed=self._ontology_container_sfaira.year, attempted=x)
+        self._value_protection(attr="year", allowed=self.ontology_container_sfaira.year, attempted=x)
         self._year = x
 
     @property
     def ontology_celltypes(self):
-        return self._ontology_container_sfaira.cellontology_class
+        return self.ontology_container_sfaira.cellontology_class
 
     @property
     def ontology_organ(self):
-        return self._ontology_container_sfaira.organ
+        return self.ontology_container_sfaira.organ
 
     @property
     def celltypes_universe(self):
         if self._celltype_universe:
             self._celltype_universe = CelltypeUniverse(
                 cl=self.ontology_celltypes,
-                uberon=self._ontology_container_sfaira.organ,
+                uberon=self.ontology_container_sfaira.organ,
                 organism=self.organism,
             )
         return self._celltype_universe
@@ -1782,7 +1780,7 @@ class DatasetBase(abc.ABC):
                 values_found = self.adata.obs[obs_key].values
                 values_found_unique = np.unique(values_found)
                 try:
-                    ontology = getattr(self._ontology_container_sfaira, samplewise_key)
+                    ontology = getattr(self.ontology_container_sfaira, samplewise_key)
                 except AttributeError:
                     raise ValueError(f"{key} not a valid property of ontology_container object")
                 # Test only unique elements  found in ontology to save time.
@@ -1794,7 +1792,7 @@ class DatasetBase(abc.ABC):
                 ]
                 # TODO keep this logging for now to catch undesired behaviour resulting from loaded edges in ontologies.
                 print(f"matched cell-wise keys {str(values_found_unique_matched)} in data set {self.id}")
-                idx = np.where([x in values_found_unique_matched for x in values_found])
+                idx = np.where([x in values_found_unique_matched for x in values_found])[0]
             elif sample_attr is not None and obs_key is not None:
                 assert False, f"both cell-wise and sample-wise attribute {samplewise_key} given"
             else:
@@ -1802,4 +1800,4 @@ class DatasetBase(abc.ABC):
             return idx
 
         idx_keep = get_subset_idx(samplewise_key=key, cellwise_key=key + "_obs_key")
-        self.adata = self.adata[idx_keep, :].copy() if len(idx_keep) > 0 else None
+        self.adata = self.adata[idx_keep, :].copy()  # if len(idx_keep) > 0 else None

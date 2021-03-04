@@ -14,17 +14,18 @@ def test_dsgs_instantiate():
     _ = DatasetSuperGroupSfaira(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
 
 
-def test_dsgs_subset_dataset_wise():
+@pytest.mark.parametrize("organ", ["intestine", "ileum"])
+def test_dsgs_subset_dataset_wise(organ: str):
     """
     Tests if subsetting results only in datasets of the desired characteristics.
     """
     ds = DatasetSuperGroupSfaira(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
     ds.subset(key="organism", values=["mouse"])
-    ds.subset(key="organ", values=["lung"])
+    ds.subset(key="organ", values=[organ])
     for x in ds.dataset_groups:
         for k, v in x.datasets.items():
-            assert v.organism == "mouse", v.id
-            assert v.organ == "lung", v.id
+            assert v.organism == "mouse", v.organism
+            assert v.ontology_container_sfaira.organ.is_a(query=v.organ, reference=organ), v.organ
 
 
 def test_dsgs_config_write_load():
@@ -74,20 +75,23 @@ def test_dsgs_load():
     ds.load(remove_gene_version=False)
 
 
-def test_dsgs_subset_cell_wise():
+@pytest.mark.parametrize("organ", ["lung"])
+@pytest.mark.parametrize("celltype", ["T cell"])
+def test_dsgs_subset_cell_wise(organ: str, celltype: str):
     """
     Tests if subsetting results only in datasets of the desired characteristics.
     """
     ds = DatasetSuperGroupSfaira(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
     ds.subset(key="organism", values=["mouse"])
-    ds.subset(key="organ", values=["lung"])
+    ds.subset(key="organ", values=[organ])
     ds.load(remove_gene_version=False)
-    ds.subset_cells(key="cellontology_class", values="T cell")
+    ds.subset_cells(key="cellontology_class", values=celltype)
     for x in ds.dataset_groups:
         for k, v in x.datasets.items():
             assert v.organism == "mouse", v.id
-            assert v.organ == "lung", v.id
-            assert np.all(v.adata.obs["cellontology_class"].values == "T cell"), v.id
+            assert v.ontology_container_sfaira.organ.is_a(query=v.organ, reference=organ), v.organ
+            for y in np.unique(v.adata.obs[v._adata_ids_sfaira.cell_ontology_class].values):
+                assert v.ontology_container_sfaira.cellontology_class.is_a(query=y, reference=celltype), y
 
 
 @pytest.mark.parametrize("out_format", ["sfaira", "cellxgene"])

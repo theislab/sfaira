@@ -8,7 +8,7 @@ class OntologyContainerSfaira:
     _cellontology_class: OntologyCelltypes
 
     def __init__(self):
-        self.ontology_age = None
+        self.age = None
         self.assay = OntologySinglecellLibraryConstruction()
         self.cellontology_class = "v2021-02-01"
         self.cellontology_original = None

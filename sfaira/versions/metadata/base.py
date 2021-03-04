@@ -269,7 +269,7 @@ class OntologyObo(Ontology):
             query = self.id_from_name(query)
         if reference not in self.node_ids:
             reference = self.id_from_name(reference)
-        return reference in self.get_ancestors(node=query) or query == reference
+        return query in self.get_ancestors(node=reference) or query == reference
 
     def map_to_leaves(self, node: str, return_type: str = "elements", include_self: bool = True):
         """
