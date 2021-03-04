@@ -1,6 +1,6 @@
 from typing import Union
 
-from sfaira.data.base import DatasetGroup
+from sfaira.data import DatasetGroup
 from sfaira.data.dataloaders.super_group import DatasetSuperGroupSfaira
 
 

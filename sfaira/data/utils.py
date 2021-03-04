@@ -49,8 +49,8 @@ def map_celltype_to_ontology(
         queries = [queries]
     oc = OntologyContainerSfaira()
     cu = CelltypeUniverse(
-        cl=oc.ontology_cell_types,
-        uberon=oc.ontology_organ,
+        cl=oc.cellontology_class,
+        uberon=oc.organ,
         organism=organism,
         **kwargs
     )

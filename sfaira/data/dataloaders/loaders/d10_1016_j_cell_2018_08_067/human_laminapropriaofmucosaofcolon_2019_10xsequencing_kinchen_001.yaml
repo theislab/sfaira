@@ -1,6 +1,5 @@
 dataset_structure:
     dataset_index: 1
-    sample_ids:
     sample_fns:
         - "HC"
         - "UC"
@@ -10,11 +9,11 @@ dataset_wise:
     doi:
         - "10.1016/j.cell.2018.08.067"
     download_url_data:
-        - "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE114374&format=file&file=GSE114374%5FHuman%5FHC%5Fexpression%5Fmatrix%2Etxt%2Egz"
-        - "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE114374&format=file&file=GSE114374%5FHuman%5FUC%5Fexpression%5Fmatrix%2Etxt%2Egz"
+        HC: "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE114374&format=file&file=GSE114374%5FHuman%5FHC%5Fexpression%5Fmatrix%2Etxt%2Egz"
+        UC: "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE114374&format=file&file=GSE114374%5FHuman%5FUC%5Fexpression%5Fmatrix%2Etxt%2Egz"
     download_url_meta:
-        - "private,hc_meta_data_stromal_with_donor.txt"
-        - "private,uc_meta_data_stromal_with_donor.txt"
+        HC: "private,hc_meta_data_stromal_with_donor.txt"
+        UC: "private,uc_meta_data_stromal_with_donor.txt"
     normalization: "norm"
     year: 2019
 dataset_or_observation_wise:

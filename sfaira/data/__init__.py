@@ -1,4 +1,4 @@
-from .base import DatasetBase, \
+from sfaira.data.base import DatasetBase, \
     DatasetGroup, DatasetGroupDirectoryOriented, \
     DatasetSuperGroup
 from . import dataloaders
