@@ -496,23 +496,27 @@ class OntologyCelltypes(OntologyExtendedObo):
             branch: str,
             **kwargs
     ):
-        # Identify cache:
-        ontology_cache_dir = os.path.join("/".join(FILE_PATH.split("/")[:-4]), "cache/ontologies/cl/")
-        fn = f"{branch}_cl.obo"
-        fn_path = os.path.join(ontology_cache_dir, fn)
-        # Download if necessary:
-        if not os.path.isfile(fn_path):
+        if os.name == "nt":  # if running on windows, do not download obo file, but rather pass url directly to obonet
+            obofile = f"https://raw.github.com/obophenotype/cell-ontology/{branch}/cl.obo"
+        else:
+            # Identify cache:
+            folder = FILE_PATH.split(os.sep)[:-4]
+            folder.insert(1, os.sep)
+            ontology_cache_dir = os.path.join(*folder, "cache", "ontologies", "cl")
+            fn = f"{branch}_cl.obo"
+            obofile = os.path.join(ontology_cache_dir, fn)
+            # Download if necessary:
+            if not os.path.isfile(obofile):
+                def download_cl():
+                    url = f"https://raw.github.com/obophenotype/cell-ontology/{branch}/cl.obo"
+                    print(f"Downloading: {fn}")
+                    if not os.path.exists(ontology_cache_dir):
+                        os.makedirs(ontology_cache_dir)
+                    r = requests.get(url, allow_redirects=True)
+                    open(obofile, 'wb').write(r.content)
+                download_cl()
 
-            def download_cl():
-                url = f"https://raw.github.com/obophenotype/cell-ontology/{branch}/cl.obo"
-                print(f"Downloading: {fn}")
-                if not os.path.exists(ontology_cache_dir):
-                    os.makedirs(ontology_cache_dir)
-                r = requests.get(url, allow_redirects=True)
-                open(fn_path, 'wb').write(r.content)
-
-            download_cl()
-        super().__init__(obo=fn_path)
+        super().__init__(obo=obofile)
 
         # Clean up nodes:
         nodes_to_delete = []
