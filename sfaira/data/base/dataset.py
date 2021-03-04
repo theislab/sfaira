@@ -95,6 +95,7 @@ class DatasetBase(abc.ABC):
 
     _age_obs_key: Union[None, str]
     _assay_obs_key: Union[None, str]
+    _cellontology_class_obs_key: Union[None, str]
     _cellontology_id_obs_key: Union[None, str]
     _cellontology_original_obs_key: Union[None, str]
     _development_stage_obs_key: Union[None, str]
@@ -164,6 +165,7 @@ class DatasetBase(abc.ABC):
         self._year = None
 
         self._age_obs_key = None
+        self._cellontology_class_obs_key = None
         self._cellontology_id_obs_key = None
         self._cellontology_original_obs_key = None
         self._development_stage_obs_key = None
@@ -640,7 +642,7 @@ class DatasetBase(abc.ABC):
         # Set cell-wise attributes (.obs):
         # None so far other than celltypes.
         # Set cell types:
-        # Map cell type names from raw IDs to ontology maintained ones::
+        # Map cell type names from raw IDs to ontology maintained ones:
         if self.cellontology_original_obs_key is not None:
             self.project_celltypes_to_ontology()
 
@@ -659,9 +661,11 @@ class DatasetBase(abc.ABC):
         """
         if format == "sfaira":
             adata_fields = self._adata_ids_sfaira
-        elif format == "sfaira":
+        elif format == "cellxgene":
             from sfaira.consts import AdataIdsCellxgene
             adata_fields = AdataIdsCellxgene()
+        else:
+            raise ValueError(f"did not recognize format {format}")
         self._set_metadata_in_adata(adata_ids=adata_fields)
         if clean:
             if self.adata.varm is not None:
@@ -673,23 +677,25 @@ class DatasetBase(abc.ABC):
             if self.adata.obsp is not None:
                 del self.adata.obsp
             # Only retain target elements in adata.uns:
-            self.adata.obs = self.adata.uns[[
-                adata_fields.annotated,
-                adata_fields.author,
-                adata_fields.doi,
-                adata_fields.download_url_data,
-                adata_fields.download_url_meta,
-                adata_fields.id,
-                adata_fields.normalization,
-                adata_fields.year,
-            ]]
+            self.adata.uns = dict([
+                (k, v) for k, v in self.adata.uns.items() if k in [
+                    adata_fields.annotated,
+                    adata_fields.author,
+                    adata_fields.doi,
+                    adata_fields.download_url_data,
+                    adata_fields.download_url_meta,
+                    adata_fields.id,
+                    adata_fields.normalization,
+                    adata_fields.year,
+                ]
+            ])
             # Only retain target elements in adata.var:
             self.adata.obs = self.adata.var[[
                 adata_fields.gene_id_names,
                 adata_fields.gene_id_ensembl,
             ]]
             # Only retain target columns in adata.obs:
-            self.adata.obs = self.adata.obs[[
+            self.adata.obs = self.adata.obs.loc[:, [
                 adata_fields.age,
                 adata_fields.bio_sample,
                 adata_fields.development_stage,
@@ -877,7 +883,7 @@ class DatasetBase(abc.ABC):
 
         :return:
         """
-        labels_original = self.adata.obs[self.obs_key_cellontology_original].values
+        labels_original = self.adata.obs[self.cellontology_original_obs_key].values
         if self.cell_ontology_map is not None:  # only if this was defined
             labels_mapped = [
                 self.cell_ontology_map[x] if x in self.cell_ontology_map.keys()
@@ -894,6 +900,7 @@ class DatasetBase(abc.ABC):
             attempted=np.unique(labels_mapped).tolist()
         )
         self.adata.obs[self._adata_ids_sfaira.cell_ontology_class] = labels_mapped
+        self.cellontology_class_obs_key = self._adata_ids_sfaira.cell_ontology_class
         self.adata.obs[self._adata_ids_sfaira.cell_types_original] = labels_original
         # Add cell type IDs into object:
         # The IDs are not read from a source file but inferred based on the class name.
@@ -1415,6 +1422,16 @@ class DatasetBase(abc.ABC):
         self._bio_sample_obs_key = x
 
     @property
+    def cellontology_class_obs_key(self) -> str:
+        return self._cellontology_class_obs_key
+
+    @cellontology_class_obs_key.setter
+    def cellontology_class_obs_key(self, x: str):
+        self.__erasing_protection(attr="cellontology_class_obs_key", val_old=self._cellontology_class_obs_key,
+                                  val_new=x)
+        self._cellontology_class_obs_key = x\
+
+    @property
     def cellontology_id_obs_key(self) -> str:
         return self._cellontology_id_obs_key
 
@@ -1731,16 +1748,16 @@ class DatasetBase(abc.ABC):
 
         :param key: Property to subset by. Options:
 
-            - "age" points to self.obs_key_age
-            - "cell_ontology_class" points to self.obs_key_cellontology_original
-            - "dev_stage" points to self.obs_key_dev_stage
-            - "ethnicity" points to self.obs_key_ethnicity
-            - "healthy" points to self.obs_key_healthy
-            - "organ" points to self.obs_key_organ
-            - "organism" points to self.obs_key_organism
-            - "protocol" points to self.obs_key_protocol
-            - "sex" points to self.obs_key_sex
-            - "state_exact" points to self.obs_key_state_exact
+            - "age" points to self.age_obs_key
+            - "assay" points to self.assay_obs_key
+            - "cellontology_class" points to self.cellontology_class_obs_key
+            - "developmental_stage" points to self.developmental_stage_obs_key
+            - "ethnicity" points to self.ethnicity_obs_key
+            - "healthy" points to self.healthy_obs_key
+            - "organ" points to self.organ_obs_key
+            - "organism" points to self.organism_obs_key
+            - "sex" points to self.sex_obs_key
+            - "state_exact" points to self.state_exact_obs_key
         :param values: Classes to overlap to.
         :return:
         """
@@ -1748,8 +1765,11 @@ class DatasetBase(abc.ABC):
             values = [values]
 
         def get_subset_idx(samplewise_key, cellwise_key):
+            try:
+                sample_attr = getattr(self, samplewise_key)
+            except AttributeError:
+                sample_attr = None
             obs_key = getattr(self, cellwise_key)
-            sample_attr = getattr(self, samplewise_key)
             if sample_attr is not None and obs_key is None:
                 if not isinstance(sample_attr, list):
                     sample_attr = [sample_attr]
@@ -1760,12 +1780,26 @@ class DatasetBase(abc.ABC):
             elif sample_attr is None and obs_key is not None:
                 assert self.adata is not None, "adata was not yet loaded"
                 values_found = self.adata.obs[obs_key].values
-                idx = np.where([x in values for x in values_found])
+                values_found_unique = np.unique(values_found)
+                try:
+                    ontology = getattr(self._ontology_container_sfaira, samplewise_key)
+                except AttributeError:
+                    raise ValueError(f"{key} not a valid property of ontology_container object")
+                # Test only unique elements  found in ontology to save time.
+                values_found_unique_matched = [
+                    x for x in values_found_unique if np.any([
+                        is_term(query=x, ontology=ontology, ontology_parent=y)
+                        for y in values
+                    ])
+                ]
+                # TODO keep this logging for now to catch undesired behaviour resulting from loaded edges in ontologies.
+                print(f"matched cell-wise keys {str(values_found_unique_matched)} in data set {self.id}")
+                idx = np.where([x in values_found_unique_matched for x in values_found])
             elif sample_attr is not None and obs_key is not None:
                 assert False, f"both cell-wise and sample-wise attribute {samplewise_key} given"
             else:
                 assert False, "no subset chosen"
             return idx
 
-        idx_keep = get_subset_idx(samplewise_key="obs_key_" + key, cellwise_key=key)
-        self.adata = self.adata[idx_keep, :].copy()
+        idx_keep = get_subset_idx(samplewise_key=key, cellwise_key=key + "_obs_key")
+        self.adata = self.adata[idx_keep, :].copy() if len(idx_keep) > 0 else None

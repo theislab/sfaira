@@ -20,9 +20,9 @@ class Dataset(DatasetBase):
 
         self.var_symbol_col = "index"
 
-        self.obs_key_cellontology_original = "annotation_lineage"
-        self.obs_key_state_exact = "condition"
-        self.obs_key_healthy = self.obs_key_state_exact
+        self.cellontology_original_obs_key = "annotation_lineage"
+        self.state_exact_obs_key = "condition"
+        self.key_healthy_obs_key = "condition"
         self.healthy_state_healthy = "Uninjured"
 
         self.set_dataset_id(idx=1)

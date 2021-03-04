@@ -432,22 +432,22 @@ class DatasetGroup:
 
         :param key: Property to subset by. Options:
 
-            - "age" points to self.obs_key_age
-            - "cell_ontology_class" points to self.obs_key_cellontology_original
-            - "dev_stage" points to self.obs_key_dev_stage
-            - "ethnicity" points to self.obs_key_ethnicity
-            - "healthy" points to self.obs_key_healthy
-            - "organ" points to self.obs_key_organ
-            - "organism" points to self.obs_key_organism
-            - "protocol" points to self.obs_key_protocol
-            - "sex" points to self.obs_key_sex
-            - "state_exact" points to self.obs_key_state_exact
+            - "age" points to self.age_obs_key
+            - "assay" points to self.assay_obs_key
+            - "cellontology_class" points to self.cellontology_class_obs_key
+            - "developmental_stage" points to self.developmental_stage_obs_key
+            - "ethnicity" points to self.ethnicity_obs_key
+            - "healthy" points to self.healthy_obs_key
+            - "organ" points to self.organ_obs_key
+            - "organism" points to self.organism_obs_key
+            - "sex" points to self.sex_obs_key
+            - "state_exact" points to self.state_exact_obs_key
         :param values: Classes to overlap to.
         :return:
         """
         for x in self.ids:
             self.datasets[x].subset_cells(key=key, values=values)
-            if self.datasets[x].ncells == 0:  # none left
+            if self.datasets[x].adata is None:  # none left
                 del self.datasets[x]
 
 
@@ -584,12 +584,12 @@ class DatasetSuperGroup:
     Used to manipulate structured dataset collections. Primarly designed for this manipulation, convert to DatasetGroup
     via flatten() for more functionalities.
     """
-    adata: Union[None, anndata.AnnData]
+    _adata: Union[None, anndata.AnnData]
     fn_backed: Union[None, PathLike]
     dataset_groups: Union[list, List[DatasetGroup], List[DatasetSuperGroup]]
 
     def __init__(self, dataset_groups: Union[None, List[DatasetGroup], List[DatasetSuperGroup]]):
-        self.adata = None
+        self._adata = None
         self.fn_backed = None
         self.set_dataset_groups(dataset_groups=dataset_groups)
 
@@ -684,7 +684,7 @@ class DatasetSuperGroup:
         for x in self.dataset_groups:
             x.download(**kwargs)
 
-    def load_all(
+    def load(
             self,
             annotated_only: bool = False,
             match_to_reference: Union[str, bool, None] = None,
@@ -714,20 +714,25 @@ class DatasetSuperGroup:
                 allow_caching=allow_caching,
                 processes=processes,
             )
-        # Make sure that concatenate is not used on a None adata object:
-        adatas = [x.adata for x in self.dataset_groups if x.adata is not None]
-        if len(adatas) > 1:
-            self.adata = adatas[0].adata.concatenate(
-                *adatas[1:],
-                join="outer",
-                batch_key=self._adata_ids_sfaira.dataset_group
-            )
-        elif len(adatas) == 1:
-            self.adata = adatas[0]
-        else:
-            warnings.warn("no anndata instances to concatenate")
 
-    def load_all_tobacked(
+    @property
+    def adata(self):
+        if self._adata is None:
+            # Make sure that concatenate is not used on a None adata object:
+            adatas = [x.adata for x in self.dataset_groups if x.adata is not None]
+            if len(adatas) > 1:
+                self._adata = adatas[0].adata.concatenate(
+                    *adatas[1:],
+                    join="outer",
+                    batch_key=self._adata_ids_sfaira.dataset_group
+                )
+            elif len(adatas) == 1:
+                self._adata = adatas[0]
+            else:
+                warnings.warn("no anndata instances to concatenate")
+        return self._adata
+
+    def load_tobacked(
             self,
             fn_backed: PathLike,
             genome: str,
@@ -885,16 +890,16 @@ class DatasetSuperGroup:
 
         :param key: Property to subset by. Options:
 
-            - "age" points to self.obs_key_age
-            - "cell_ontology_class" points to self.obs_key_cellontology_original
-            - "dev_stage" points to self.obs_key_dev_stage
-            - "ethnicity" points to self.obs_key_ethnicity
-            - "healthy" points to self.obs_key_healthy
-            - "organ" points to self.obs_key_organ
-            - "organism" points to self.obs_key_organism
-            - "protocol" points to self.obs_key_protocol
-            - "sex" points to self.obs_key_sex
-            - "state_exact" points to self.obs_key_state_exact
+            - "age" points to self.age_obs_key
+            - "assay" points to self.assay_obs_key
+            - "cellontology_class" points to self.cellontology_class_obs_key
+            - "developmental_stage" points to self.developmental_stage_obs_key
+            - "ethnicity" points to self.ethnicity_obs_key
+            - "healthy" points to self.healthy_obs_key
+            - "organ" points to self.organ_obs_key
+            - "organism" points to self.organism_obs_key
+            - "sex" points to self.sex_obs_key
+            - "state_exact" points to self.state_exact_obs_key
         :param values: Classes to overlap to.
         :return:
         """
