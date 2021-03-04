@@ -342,9 +342,9 @@ class DatasetBase(abc.ABC):
                 else:
                     warnings.warn(f"Cached loading enabled, but cache file {filename} not found. "
                                   f"Loading from raw files.")
-                    self.adata = self.load_func(self.data_dir, self.sample_fn)
+                    self.adata = self.load_func(data_dir=self.data_dir, sample_fn=self.sample_fn)
             else:
-                self.adata = self.load_func(self.data_dir, self.sample_fn)
+                self.adata = self.load_func(data_dir=self.data_dir, sample_fn=self.sample_fn)
 
         def _cached_writing(filename):
             if filename is not None:
@@ -354,10 +354,10 @@ class DatasetBase(abc.ABC):
                 self.adata.write_h5ad(filename)
 
         if load_raw and allow_caching:
-            self.adata = self.load_func(self.data_dir, self.sample_fn)
+            self.adata = self.load_func(data_dir=self.data_dir, sample_fn=self.sample_fn)
             _cached_writing(self.cache_fn)
         elif load_raw and not allow_caching:
-            self.adata = self.load_func(self.data_dir, self.sample_fn)
+            self.adata = self.load_func(data_dir=self.data_dir, sample_fn=self.sample_fn)
         elif not load_raw and allow_caching:
             _cached_reading(self.cache_fn)
             _cached_writing(self.cache_fn)
