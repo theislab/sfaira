@@ -472,7 +472,7 @@ class ModelZooCelltype(ModelZoo):
             topology_id=self.model_topology
         )
         self.celltypes = CelltypeUniverse(
-            cl=self._ontology_container_sfaira.ontology_cell_types,
-            uberon=self._ontology_container_sfaira.ontology_organ,
+            cl=self._ontology_container_sfaira.cellontology_class,
+            uberon=self._ontology_container_sfaira.organ,
             organism=self.organism
         ).load_target_universe(organ=self.organ)

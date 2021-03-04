@@ -76,10 +76,10 @@ class Dataset(DatasetBase):
                                  f"{self.sample_fn}"
         self.download_url_meta = None
 
-        self.obs_key_cellontology_original = "cell_ontology_class"
-        self.obs_key_age = "age"
-        self.obs_key_dev_stage = "development_stage"  # not given in all data sets
-        self.obs_key_sex = "sex"
+        self.cellontology_original_obs_key = "cell_ontology_class"
+        self.age_obs_key = "age"
+        self.development_stage_obs_key = "development_stage"  # not given in all data sets
+        self.sex_obs_key = "sex"
         # ToDo: further anatomical information for subtissue in "subtissue"?
 
         self.author = "Pisco"

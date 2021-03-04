@@ -23,7 +23,7 @@ class Dataset(DatasetBase):
         self.year = 2020
 
         self.var_symbol_col = "index"
-        self.obs_key_cellontology_original = "Anno_level_fig1"
+        self.cellontology_original_obs_key = "Anno_level_fig1"
 
         self.set_dataset_id(idx=1)
 

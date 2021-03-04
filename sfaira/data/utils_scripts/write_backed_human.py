@@ -17,7 +17,7 @@ ds = sfaira.data.dataloaders.DatasetSuperGroupSfaira(
     data_path=path, meta_path=path_meta, cache_path=path_meta
 )
 ds.subset(key="organism", values=["human"])
-ds.load_all_tobacked(
+ds.load_tobacked(
     fn_backed=fn,
     genome=genome,
     shuffled=False,

@@ -311,7 +311,7 @@ class Dataset(DatasetBase):
         self.var_symbol_col = "index"
 
         # Only adult and neonatal samples are annotated:
-        self.obs_key_cellontology_original = "Annotation" \
+        self.cellontology_original_obs_key = "Annotation" \
             if sample_dev_stage_dict[self.sample_fn] in ["adult", "neonatal"] and \
             self.sample_fn not in [
                 "NeontalBrain1_dge.txt.gz",

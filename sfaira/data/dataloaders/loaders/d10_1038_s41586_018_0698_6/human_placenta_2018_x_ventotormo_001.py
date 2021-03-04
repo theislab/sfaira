@@ -31,7 +31,7 @@ class Dataset(DatasetBase):
 
         self.var_symbol_col = "names"
         self.var_ensembl_col = "ensembl"
-        self.obs_key_cellontology_original = "annotation"
+        self.cellontology_original_obs_key = "annotation"
 
         self.set_dataset_id(idx=1)
 

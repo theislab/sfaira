@@ -5,25 +5,26 @@ from sfaira.versions.metadata import OntologyUberon, OntologyHsapdv, OntologyMmu
 
 class OntologyContainerSfaira:
 
+    _cellontology_class: OntologyCelltypes
+
     def __init__(self):
-        self.ontology_age = None
-        self._ontology_cell_types = None
-        self.ontology_cell_types = "v2021-02-01"
-        self.ontology_dev_stage = None
-        self.ontology_ethnicity = None
-        self.ontology_healthy = [True, False]
-        self.ontology_normalization = None
-        self.ontology_organ = OntologyUberon()
-        self.ontology_organism = OntologyList(terms=["mouse", "human"])
-        self.ontology_protocol = OntologySinglecellLibraryConstruction()
-        self.ontology_sex = OntologyList(terms=["female", "male"])
-        self.ontology_subtissue = None
-        self.ontology_year = list(range(2000, 3000))
+        self.age = None
+        self.assay = OntologySinglecellLibraryConstruction()
+        self.cellontology_class = "v2021-02-01"
+        self.cellontology_original = None
+        self.developmental_stage = None
+        self.ethnicity = None
+        self.healthy = [True, False]
+        self.normalization = None
+        self.organ = OntologyUberon()
+        self.organism = OntologyList(terms=["mouse", "human"])
+        self.sex = OntologyList(terms=["female", "male"])
+        self.year = list(range(2000, 3000))
 
     @property
-    def ontology_cell_types(self):
-        return self._ontology_cell_types
+    def cellontology_class(self):
+        return self._cellontology_class
 
-    @ontology_cell_types.setter
-    def ontology_cell_types(self, x: str):
-        self._ontology_cell_types = OntologyCelltypes(branch=x)
+    @cellontology_class.setter
+    def cellontology_class(self, x: str):
+        self._cellontology_class = OntologyCelltypes(branch=x)
