@@ -21,7 +21,7 @@ class OntologyContainerSfaira:
         self.organ = OntologyUberon()
         self.organism = OntologyList(terms=["mouse", "human"])
         self.sex = OntologyList(terms=["female", "male"])
-        self.year = list(range(2000, 3000))
+        self.year = OntologyList(terms=list(range(2000, 3000)))
 
     @property
     def cellontology_class(self):
