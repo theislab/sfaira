@@ -29,6 +29,7 @@ processes = int(str(sys.argv[4]))
 ds = sfaira.data.dataloaders.DatasetSuperGroupSfaira(
     data_path=data_path, meta_path=path_meta, cache_path=path_cache
 )
+ds = ds.flatten()
 # Write meta data, cache and test load from cache:
 ds.load(
     annotated_only=False,
