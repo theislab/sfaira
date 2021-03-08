@@ -451,7 +451,7 @@ class DatasetBase(abc.ABC):
                     axis='columns'
                 )
         # If only symbol or ensembl was supplied, the other one is inferred from a genome mapping dictionary.
-        if not ensembl_col and match_to_reference:
+        if not ensembl_col and not (isinstance(match_to_reference, bool) and not match_to_reference):
             id_dict = self.genome_container.names_to_id_dict
             id_strip_dict = self.genome_container.strippednames_to_id_dict
             # Matching gene names to ensembl ids in the following way: if the gene is present in the ensembl dictionary,
@@ -467,7 +467,7 @@ class DatasetBase(abc.ABC):
                     ensids.append('n/a')
             self.adata.var[self._adata_ids_sfaira.gene_id_ensembl] = ensids
 
-        if not symbol_col and match_to_reference:
+        if not symbol_col and not (isinstance(match_to_reference, bool) and not match_to_reference):
             id_dict = self.genome_container.id_to_names_dict
             self.adata.var[self._adata_ids_sfaira.gene_id_names] = [
                 id_dict[n.split(".")[0]] if n.split(".")[0] in id_dict.keys() else 'n/a'
@@ -496,7 +496,7 @@ class DatasetBase(abc.ABC):
         # Collapse if necessary:
         self.adata = collapse_matrix(adata=self.adata)
 
-        self.adata.var[self._adata_ids_sfaira.gene_id_ensembl] = self.adata.var_names
+        self.adata.var[self._adata_ids_sfaira.gene_id_index] = self.adata.var_names
         self.adata.var.index = self.adata.var[self._adata_ids_sfaira.gene_id_ensembl].values
 
     def _match_features_to_reference(self):
