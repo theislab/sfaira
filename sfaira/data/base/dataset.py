@@ -19,7 +19,7 @@ import ssl
 
 from sfaira.versions.genome_versions import SuperGenomeContainer
 from sfaira.versions.metadata import Ontology, CelltypeUniverse
-from sfaira.consts import AdataIdsExtended, AdataIdsSfaira, META_DATA_FIELDS, OCS
+from sfaira.consts import AdataIdsSfaira, META_DATA_FIELDS, OCS
 from sfaira.data.utils import read_yaml
 
 UNS_STRING_META_IN_OBS = "__obs__"
@@ -581,7 +581,7 @@ class DatasetBase(abc.ABC):
             uns=self.adata.uns
         )
 
-    def _set_metadata_in_adata(self, adata_ids: AdataIdsExtended):
+    def _set_metadata_in_adata(self, adata_ids: AdataIds):
         """
         Copy meta data from dataset class in .anndata.
 

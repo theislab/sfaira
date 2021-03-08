@@ -6,31 +6,43 @@ in sfaira and in associated data bases.
 """
 
 
-class AdataIdsBase:
+class AdataIds:
     """
-    Base class of minimal constant field names of anndata.AnnData object entries, such as .uns keys and .obs columns.
+    Base class of constant field names of anndata.AnnData object entries, such as .uns keys and .obs columns.
     """
+    _age: str
     _annotated: str
     _assay_sc: str
     _author: str
+    _bio_sample: str
     _cell_types_original: str
     _cell_ontology_class: str
     _cell_ontology_id: str
+    _development_stage: str
     _doi: str
     _download_url_data: str
     _download_url_meta: str
     _dataset: str
     _dataset_group: str
+    _ethnicity: str
     _gene_id_ensembl: str
     _gene_id_index: str
     _gene_id_names: str
     _healthy: str
     _id: str
+    _individual: str
     _ncells: str
     _normalization: str
     _organ: str
     _organism: str
+    _sex: str
+    _state_exact: str
+    _tech_sample: str
     _year: str
+
+    @property
+    def age(self) -> str:
+        return self._age
 
     @property
     def annotated(self) -> str:
@@ -43,6 +55,10 @@ class AdataIdsBase:
     @property
     def author(self) -> str:
         return self._author
+
+    @property
+    def bio_sample(self) -> str:
+        return self._bio_sample
 
     @property
     def cell_types_original(self) -> str:
@@ -65,6 +81,10 @@ class AdataIdsBase:
         return self._dataset_group
 
     @property
+    def development_stage(self) -> str:
+        return self._development_stage
+
+    @property
     def doi(self) -> str:
         return self._doi
 
@@ -75,6 +95,10 @@ class AdataIdsBase:
     @property
     def download_url_meta(self) -> str:
         return self._download_url_meta
+
+    @property
+    def ethnicity(self) -> str:
+        return self._ethnicity
 
     @property
     def gene_id_ensembl(self) -> str:
@@ -101,6 +125,10 @@ class AdataIdsBase:
         return self._id
 
     @property
+    def individual(self) -> str:
+        return self._individual
+
+    @property
     def ncells(self) -> str:
         return self._ncells
 
@@ -113,46 +141,8 @@ class AdataIdsBase:
         return self._organ
 
     @property
-    def organism(self) -> str:  # TODO refactor into organism
+    def organism(self) -> str:
         return self._organism
-
-    @property
-    def year(self) -> str:
-        return self._year
-
-
-class AdataIdsExtended(AdataIdsBase):
-    """
-    Base class with extended set of constant field names of anndata.AnnData object entries, such as .uns keys and .obs columns.
-    """
-    _age: str
-    _bio_sample: str
-    _development_stage: str
-    _ethnicity: str
-    _individual: str
-    _sex: str
-    _state_exact: str
-    _tech_sample: str
-
-    @property
-    def age(self) -> str:
-        return self._age
-
-    @property
-    def bio_sample(self) -> str:
-        return self._bio_sample
-
-    @property
-    def development_stage(self) -> str:
-        return self._development_stage
-
-    @property
-    def ethnicity(self) -> str:
-        return self._ethnicity
-
-    @property
-    def individual(self) -> str:
-        return self._individual
 
     @property
     def sex(self) -> str:
@@ -166,10 +156,15 @@ class AdataIdsExtended(AdataIdsBase):
     def tech_sample(self) -> str:
         return self._tech_sample
 
+    @property
+    def year(self) -> str:
+        return self._year
 
-class AdataIdsSfaira(AdataIdsExtended):
+
+class AdataIdsSfaira(AdataIds):
     """
-    Class of constant field names of anndata.AnnData object entries, such as .uns keys and .obs columns.
+    Class of constant field names of anndata.AnnData object entries, such as .uns keys and .obs columns in sfaira
+    dataloader objects.
     """
 
     def __init__(self):
@@ -228,7 +223,7 @@ class AdataIdsSfaira(AdataIdsExtended):
         return self._remove_gene_version
 
 
-class AdataIdsCellxgene(AdataIdsExtended):
+class AdataIdsCellxgene(AdataIds):
     """
     Class of constant field names of anndata.AnnData object entries, such as .uns keys and .obs columns in cellxgene
     objects.
