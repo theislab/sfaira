@@ -123,17 +123,41 @@ class DatasetBase(abc.ABC):
     sample_fn: Union[None, str]
     _sample_fns: Union[None, List[str]]
 
+    _additional_annotation_key: Union[None, str]
+
     def __init__(
             self,
             data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             load_func=None,
+            dict_load_func_annotation=None,
             yaml_path: Union[str, None] = None,
             sample_fn: Union[str, None] = None,
             sample_fns: Union[List[str], None] = None,
+            additional_annotation_key: Union[str, None] = None,
             **kwargs
     ):
+        """
+
+        :param data_path:
+        :param meta_path:
+        :param cache_path:
+        :param load_func: Function to load data from disk into memory.
+
+            Signature: load(data_dir, sample_fn, **kwargs)
+        :param dict_load_func_annotation: Dictionary of functions to load additional observatino-wise annotation. The
+            functions in the values of the dictionary can be selected via  self.additional_annotation_key which needs
+            to correspond to a key of the dictionary.
+
+            Signature: Dict[str, load_annotation(data_dir, sample_fn, additional_annotation_key, **kwargs)]
+        :param yaml_path:
+        :param sample_fn:
+        :param sample_fns:
+        :param additional_annotation_key: Key used by dict_load_func_annotation to identify which additional annotation
+            is to be loaded.
+        :param kwargs:
+        """
         self._adata_ids_sfaira = AdataIdsSfaira()
         self.ontology_container_sfaira = OCS  # Using a pre-instantiated version of this yields drastic speed-ups.
 
@@ -211,6 +235,8 @@ class DatasetBase(abc.ABC):
             self.set_dataset_id(idx=yaml_vals["meta"]["dataset_index"])
 
         self.load_func = load_func
+        self.dict_load_func_annotation = dict_load_func_annotation
+        self._additional_annotation_key = additional_annotation_key
 
     @property
     def _directory_formatted_id(self) -> str:
@@ -339,6 +365,20 @@ class DatasetBase(abc.ABC):
         :return:
         """
 
+        def _assembly_wrapper():
+            self.adata = self.load_func(data_dir=self.data_dir, sample_fn=self.sample_fn)
+            # Enable loading of additional annotation, e.g. secondary cell type annotation
+            # The additional annotation `obs2 needs to be on a subset of the original annotation `self.adata.obs`.
+            if self.dict_load_func_annotation is not None:
+                obs2 = self.dict_load_func_annotation[self.additional_annotation_key](
+                    data_dir=self.data_dir, sample_fn=self.sample_fn)
+                assert np.all([x in self.adata.obs.index for x in obs2.index]), \
+                    "index mismatch between additional annotation and original"
+                self.adata = self.adata[obs2.index, :]
+                # Overwrite annotation
+                for k, v in obs2.items():
+                    self.adata.obs[k] = v
+
         def _cached_reading(filename):
             if filename is not None:
                 if os.path.exists(filename):
@@ -356,10 +396,10 @@ class DatasetBase(abc.ABC):
                 self.adata.write_h5ad(filename)
 
         if load_raw and allow_caching:
-            self.adata = self.load_func(data_dir=self.data_dir, sample_fn=self.sample_fn)
+            _assembly_wrapper()
             _cached_writing(self.cache_fn)
         elif load_raw and not allow_caching:
-            self.adata = self.load_func(data_dir=self.data_dir, sample_fn=self.sample_fn)
+            _assembly_wrapper()
         elif not load_raw and allow_caching:
             _cached_reading(self.cache_fn)
             _cached_writing(self.cache_fn)
@@ -1061,6 +1101,14 @@ class DatasetBase(abc.ABC):
                   f"{self.doi}"
 
     # Properties:
+
+    @property
+    def additional_annotation_key(self) -> Union[None, str]:
+        return self._additional_annotation_key
+
+    @additional_annotation_key.setter
+    def additional_annotation_key(self, x: str):
+        self._additional_annotation_key = x
 
     @property
     def age(self) -> Union[None, str]:

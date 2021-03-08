@@ -477,8 +477,10 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
         datasets = []
         self._cwd = os.path.dirname(file_base)
         dataset_module = str(self._cwd.split("/")[-1])
-        loader_pydoc_path = "sfaira.data.dataloaders.loaders." if str(self._cwd.split("/")[-5]) == "sfaira" else \
-            "sfaira_extension.data.dataloaders.loaders."
+        package_source = "sfaira" if str(self._cwd.split("/")[-5]) == "sfaira" else "sfairae"
+        loader_pydoc_path_sfaira = "sfaira.data.dataloaders.loaders."
+        loader_pydoc_path_sfairae = "sfaira_extension.data.dataloaders.loaders."
+        loader_pydoc_path = loader_pydoc_path_sfaira if package_source == "sfaira" else loader_pydoc_path_sfairae
         if "group.py" in os.listdir(self._cwd):
             DatasetGroupFound = pydoc.locate(loader_pydoc_path + dataset_module + ".group.DatasetGroup")
             dsg = DatasetGroupFound(data_path=data_path, meta_path=meta_path, cache_path=cache_path)
@@ -495,6 +497,17 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                         # - load(): Loading function that return anndata instance.
                         # - SAMPLE_FNS: File name list for DatasetBaseGroupLoadingManyFiles
                         load_func = pydoc.locate(loader_pydoc_path + dataset_module + "." + file_module + ".load")
+                        load_func_annotation = \
+                            pydoc.locate(loader_pydoc_path + dataset_module + "." + file_module + ".LOAD_ANNOTATION")
+                        # Also check sfaira_extension for additional load_func_annotation:
+                        if package_source != "sfairae":
+                            load_func_annotation_sfairae = pydoc.locate(loader_pydoc_path_sfairae + dataset_module +
+                                                                        "." + file_module + ".LOAD_ANNOTATION")
+                            # LOAD_ANNOTATION is a dictionary so we can use update to extend it.
+                            if load_func_annotation_sfairae is not None and load_func_annotation is not None:
+                                load_func_annotation.update(load_func_annotation_sfairae)
+                            elif load_func_annotation_sfairae is not None and load_func_annotation is None:
+                                load_func_annotation = load_func_annotation_sfairae
                         sample_fns = pydoc.locate(loader_pydoc_path + dataset_module + "." + file_module +
                                                   ".SAMPLE_FNS")
                         fn_yaml = os.path.join(self._cwd, file_module + ".yaml")
@@ -517,6 +530,7 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                                         meta_path=meta_path,
                                         cache_path=cache_path,
                                         load_func=load_func,
+                                        dict_load_func_annotation=load_func_annotation,
                                         sample_fn=x,
                                         sample_fns=sample_fns if sample_fns != [None] else None,
                                         yaml_path=fn_yaml,
@@ -530,6 +544,7 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                                         meta_path=meta_path,
                                         cache_path=cache_path,
                                         load_func=load_func,
+                                        load_func_annotation=load_func_annotation,
                                         sample_fn=x,
                                         sample_fns=sample_fns if sample_fns != [None] else None,
                                         yaml_path=fn_yaml,
