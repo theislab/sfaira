@@ -450,6 +450,29 @@ class DatasetGroup:
             if self.datasets[x].ncells == 0:  # No observations (cells) left.
                 del self.datasets[x]
 
+    @property
+    def additional_annotation_key(self) -> Dict[str, Union[None, str]]:
+        """"
+        Return dictionary of additional_annotation_key for each data set with ids as keys.
+        """
+        return dict([
+            (k, self.datasets[k].additional_annotation_key)
+            for k, v in self.datasets.items()
+        ])
+
+    @additional_annotation_key.setter
+    def additional_annotation_key(self, x: Dict[str, Union[None, str]]):
+        """
+        Allows setting of additional_annotation_key in a subset of datasets identifed by keys in x.
+
+        :param x: Dictionary with data set ids in keys and new _additional_annotation_key values to be setted in values.
+            Note that you can either add  or change secondary annotation by setting a value to a string or remove it
+            by setting a value to None.
+        :return:
+        """
+        for k, v in x.items():
+            self.datasets[k].additional_annotation_key = v
+
 
 class DatasetGroupDirectoryOriented(DatasetGroup):
 
@@ -948,3 +971,38 @@ class DatasetSuperGroup:
         tab = pd.read_csv(fn, header=0, index_col=None, sep="\t")
         ids_keep = tab["id"].values
         self.subset(key="id", values=ids_keep)
+
+    @property
+    def additional_annotation_key(self) -> List[Dict[str, Union[None, str]]]:
+        """"
+        Return list (by data set group) of dictionaries of additional_annotation_key for each data set with ids as keys.
+        """
+        return [
+            dict([
+                (k, x.datasets[k].additional_annotation_key)
+                for k, v in x.datasets.items()
+            ]) for x in self.dataset_groups
+        ]
+
+    @additional_annotation_key.setter
+    def additional_annotation_key(self, x: Dict[str, Union[None, str]]):
+        """
+        Allows setting of additional_annotation_key in a subset of datasets identifed by keys in x.
+
+        The input is not structured by DatasetGroups but only by ID, all groups are checked for matching IDs.
+
+        :param x: Dictionary with data set ids in keys and new _additional_annotation_key values to be setted in values.
+            Note that you can either add  or change secondary annotation by setting a value to a string or remove it
+            by setting a value to None.
+        :return:
+        """
+        for k, v in x.items():
+            counter = 0
+            for x in self.dataset_groups:
+                if k in x.ids:
+                    x.datasets[k].additional_annotation_key = v
+                    counter += 1
+            if counter == 0:
+                warnings.warn(f"did not data set matching ID {k}")
+            elif counter > 1:
+                warnings.warn(f"found more than one ({counter}) data set matching ID {k}")
