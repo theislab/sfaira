@@ -1146,7 +1146,7 @@ class DatasetBase(abc.ABC):
         self._development_stage = x
 
     @property
-    def doi(self) -> str:
+    def doi(self) -> Union[str, List[str]]:
         if self._doi is not None:
             return self._doi
         else:
@@ -1157,13 +1157,15 @@ class DatasetBase(abc.ABC):
             return self.meta[self._adata_ids_sfaira.doi]
 
     @doi.setter
-    def doi(self, x: str):
+    def doi(self, x: Union[str, List[str]]):
         self.__erasing_protection(attr="doi", val_old=self._doi, val_new=x)
         self._doi = x
 
     @property
     def directory_formatted_doi(self) -> str:
-        return "d" + "_".join("_".join("_".join(self.doi.split("/")).split(".")).split("-"))
+        # Chose first doi in list.
+        doi = self.doi if isinstance(self.doi, str) else self.doi[0]
+        return "d" + "_".join("_".join("_".join(doi.split("/")).split(".")).split("-"))
 
     @property
     def download_url_data(self) -> Union[Tuple[List[str]], Tuple[List[None]]]:
