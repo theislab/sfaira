@@ -90,7 +90,7 @@ class DataloaderLinter:
                       'self.download_url_data',
                       'self.organ',
                       'self.organism',
-                      'self.protocol',
+                      'self.assay_sc',
                       'self.year']
 
         for attribute in attributes:
@@ -98,7 +98,7 @@ class DataloaderLinter:
                 line, attribute = list(filter(lambda line_attribute: line_attribute[1].startswith(attribute), enumerate(self.content)))[0]
             except IndexError:
                 passed_required_attributes = False
-                self.failed['-1'] = 'One of required attributes  set_dataset_id, author, doi, download_url_data, organ, organism, protocol, year   is missing.'
+                self.failed['-1'] = 'One of required attributes  set_dataset_id, author, doi, download_url_data, organ, organism, assay_sc, year   is missing.'
 
         if passed_required_attributes:
             self.passed[0] = 'Passed required dataloader attributes checks.'

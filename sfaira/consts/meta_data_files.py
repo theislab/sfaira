@@ -15,7 +15,7 @@ META_DATA_FIELDS = {
     "ncells": int,
     "normalization": str,
     "organ": str,
-    "protocol": str,
+    "assay_sc": str,
     "organism": str,
     "state_exact": str,
     "tech_sample": str,

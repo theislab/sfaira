@@ -31,7 +31,7 @@ class Dataset(DatasetBase):
         self.normalization = "raw"
         self.organ = "pancreas"
         self.organism = "mouse"
-        self.protocol = "10X sequencing"
+        self.assay_sc = "10X sequencing"
         self.state_exact = "diabetic"
         self.year = 2019
 

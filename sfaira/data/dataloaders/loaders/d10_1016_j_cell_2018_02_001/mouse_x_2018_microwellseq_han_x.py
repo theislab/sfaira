@@ -304,7 +304,7 @@ class Dataset(DatasetBase):
         self.normalization = "raw"
         self.healthy = True
         self.organism = "mouse"
-        self.protocol = "microwell-seq"
+        self.assay_sc = "microwell-seq"
         self.state_exact = "healthy"
         self.year = 2018
 

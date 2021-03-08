@@ -19,8 +19,8 @@ dataset_wise:
 dataset_or_observation_wise:
     age:
     age_obs_key: "Age"
-    assay: "10X sequencing"
-    assay_obs_key:
+    assay_sc: "10X sequencing"
+    assay_sc_obs_key:
     bio_sample:
     bio_sample_obs_key:
     development_stage:

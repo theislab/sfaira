@@ -22,7 +22,7 @@ class Dataset(DatasetBase):
         self.normalization = "raw"
         self.organ = "pancreas"
         self.organism = "human"
-        self.protocol = "inDrop"
+        self.assay_sc = "inDrop"
         self.state_exact = "healthy"
         self.year = 2016
 

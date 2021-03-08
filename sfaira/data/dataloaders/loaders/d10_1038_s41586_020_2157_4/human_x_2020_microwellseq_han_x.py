@@ -23,7 +23,7 @@ class Dataset(DatasetBase):
         self.healthy = True
         self.normalization = "raw"
         self.organism = "human"
-        self.protocol = "microwell-seq"
+        self.assay_sc = "microwell-seq"
         self.state_exact = "healthy"
         self.year = 2020
 
@@ -203,7 +203,7 @@ def load(data_dir, **kwargs):
     # tidy up the column names of the obs annotations
     adata.obs.columns = [
         "sample", "sub_tissue", "n_genes", "n_counts", "cluster_global", "dev_stage", "donor", "celltype_global",
-        "age", "celltype_specific", "cluster_specific", "gender", "protocol", "source"]
+        "age", "celltype_specific", "cluster_specific", "gender", "assay_sc", "source"]
     adata.obs["organ"] = [sample_organ_dict[x] for x in adata.obs["sample"].values]
 
     return adata

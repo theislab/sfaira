@@ -51,7 +51,7 @@ class DatasetInteractive(DatasetBase):
         # self.normalisation  # not currently supported
         self.organ = organ
         self.organism = organism
-        # self.protocol  # not currently supported
+        # self.assay_sc  # not currently supported
         # self.sex  # not currently supported
         # self.state_exact  # not currently supported
         # self.year  # not currently supported
@@ -64,7 +64,7 @@ class DatasetInteractive(DatasetBase):
         # self.obs_key_healthy  # not currently supported
         # self.obs_key_organ  # not currently supported
         # self.obs_key_organism  # not currently supported
-        # self.obs_key_protocol  # not currently supported
+        # self.obs_key_assay_sc  # not currently supported
         # self.obs_key_sex  # not currently supported
         # self.obs_key_state_exact  # not currently supported
 

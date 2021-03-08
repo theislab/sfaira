@@ -74,7 +74,7 @@ class DatasetBase(abc.ABC):
     genome: Union[None, str]
 
     _age: Union[None, str]
-    _assay: Union[None, str]
+    _assay_sc: Union[None, str]
     _author: Union[None, str]
     _bio_sample: Union[None, str]
     _development_stage: Union[None, str]
@@ -96,7 +96,7 @@ class DatasetBase(abc.ABC):
     _year: Union[None, int]
 
     _age_obs_key: Union[None, str]
-    _assay_obs_key: Union[None, str]
+    _assay_sc_obs_key: Union[None, str]
     _cellontology_class_obs_key: Union[None, str]
     _cellontology_id_obs_key: Union[None, str]
     _cellontology_original_obs_key: Union[None, str]
@@ -159,7 +159,7 @@ class DatasetBase(abc.ABC):
         self._normalization = None
         self._organ = None
         self._organism = None
-        self._assay = None
+        self._assay_sc = None
         self._sex = None
         self._source = None
         self._state_exact = None
@@ -176,7 +176,7 @@ class DatasetBase(abc.ABC):
         self._individual_obs_key = None
         self._organ_obs_key = None
         self._organism_obs_key = None
-        self._assay_obs_key = None
+        self._assay_sc_obs_key = None
         self._bio_sample_obs_key = None
         self._sex_obs_key = None
         self._state_exact_obs_key = None
@@ -601,7 +601,7 @@ class DatasetBase(abc.ABC):
         # These are saved in .uns if they are data set wide to save memory.
         for x, y, z, v in (
             [self.age, adata_ids.age, self.age_obs_key, self.ontology_container_sfaira.age],
-            [self.assay, adata_ids.assay, self.assay_obs_key, self.ontology_container_sfaira.assay],
+            [self.assay_sc, adata_ids.assay_sc, self.assay_sc_obs_key, self.ontology_container_sfaira.assay_sc],
             [self.bio_sample, adata_ids.bio_sample, self.bio_sample_obs_key, None],
             [self.development_stage, adata_ids.development_stage, self.development_stage_obs_key,
              self.ontology_container_sfaira.developmental_stage],
@@ -1007,7 +1007,7 @@ class DatasetBase(abc.ABC):
         # Expand table by variably cell-wise or data set-wise meta data:
         for x in [
             self._adata_ids_sfaira.age,
-            self._adata_ids_sfaira.assay,
+            self._adata_ids_sfaira.assay_sc,
             self._adata_ids_sfaira.bio_sample,
             self._adata_ids_sfaira.development_stage,
             self._adata_ids_sfaira.ethnicity,
@@ -1055,7 +1055,7 @@ class DatasetBase(abc.ABC):
         self.id = f"{clean(self._organism)}_" \
                   f"{clean(self._organ)}_" \
                   f"{self._year}_" \
-                  f"{clean(self._assay)}_" \
+                  f"{clean(self._assay_sc)}_" \
                   f"{clean(author)}_" \
                   f"{idx}_" \
                   f"{self.doi}"
@@ -1098,23 +1098,23 @@ class DatasetBase(abc.ABC):
                 return None
 
     @property
-    def assay(self) -> Union[None, str]:
-        if self._assay is not None:
-            return self._assay
+    def assay_sc(self) -> Union[None, str]:
+        if self._assay_sc is not None:
+            return self._assay_sc
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids_sfaira.assay in self.meta.columns:
-                return self.meta[self._adata_ids_sfaira.assay]
+            if self.meta is not None and self._adata_ids_sfaira.assay_sc in self.meta.columns:
+                return self.meta[self._adata_ids_sfaira.assay_sc]
             else:
                 return None
 
-    @assay.setter
-    def assay(self, x: str):
-        self.__erasing_protection(attr="protocol", val_old=self._assay, val_new=x)
-        self._value_protection(attr="protocol", allowed=self.ontology_container_sfaira.assay,
+    @assay_sc.setter
+    def assay_sc(self, x: str):
+        self.__erasing_protection(attr="assay_sc", val_old=self._assay_sc, val_new=x)
+        self._value_protection(attr="assay_sc", allowed=self.ontology_container_sfaira.assay_sc,
                                attempted=x)
-        self._assay = x
+        self._assay_sc = x
 
     @property
     def author(self) -> str:
@@ -1404,13 +1404,13 @@ class DatasetBase(abc.ABC):
         self._age_obs_key = x
 
     @property
-    def assay_obs_key(self) -> str:
-        return self._assay_obs_key
+    def assay_sc_obs_key(self) -> str:
+        return self._assay_sc_obs_key
 
-    @assay_obs_key.setter
-    def assay_obs_key(self, x: str):
-        self.__erasing_protection(attr="assay_obs_key", val_old=self._assay_obs_key, val_new=x)
-        self._assay_obs_key = x
+    @assay_sc_obs_key.setter
+    def assay_sc_obs_key(self, x: str):
+        self.__erasing_protection(attr="assay_sc_obs_key", val_old=self._assay_sc_obs_key, val_new=x)
+        self._assay_sc_obs_key = x
 
     @property
     def bio_sample_obs_key(self) -> str:
@@ -1749,7 +1749,7 @@ class DatasetBase(abc.ABC):
         :param key: Property to subset by. Options:
 
             - "age" points to self.age_obs_key
-            - "assay" points to self.assay_obs_key
+            - "assay_sc" points to self.assay_sc_obs_key
             - "cellontology_class" points to self.cellontology_class_obs_key
             - "developmental_stage" points to self.developmental_stage_obs_key
             - "ethnicity" points to self.ethnicity_obs_key

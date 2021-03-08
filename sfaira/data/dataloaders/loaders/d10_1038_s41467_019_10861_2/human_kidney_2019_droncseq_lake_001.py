@@ -20,7 +20,7 @@ class Dataset(DatasetBase):
         self.normalization = "raw"
         self.organ = "kidney"
         self.organism = "human"
-        self.protocol = "DroNc-seq"
+        self.assay_sc = "DroNc-seq"
         self.state_exact = "healthy"
         self.year = 2019
 

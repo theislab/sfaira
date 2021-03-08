@@ -21,7 +21,7 @@ class Dataset(DatasetBase):
         self.healthy = True
         self.normalization = "raw"
         self.organism = "mouse"
-        self.protocol = "10X sequencing"
+        self.assay_sc = "10X sequencing"
         self.state_exact = "healthy"
         self.year = 2019
 

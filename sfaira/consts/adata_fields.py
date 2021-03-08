@@ -11,7 +11,7 @@ class AdataIdsBase:
     Base class of minimal constant field names of anndata.AnnData object entries, such as .uns keys and .obs columns.
     """
     _annotated: str
-    _assay: str
+    _assay_sc: str
     _author: str
     _cell_types_original: str
     _cell_ontology_class: str
@@ -37,8 +37,8 @@ class AdataIdsBase:
         return self._annotated
 
     @property
-    def assay(self) -> str:
-        return self._assay
+    def assay_sc(self) -> str:
+        return self._assay_sc
 
     @property
     def author(self) -> str:
@@ -174,7 +174,7 @@ class AdataIdsSfaira(AdataIdsExtended):
 
     def __init__(self):
         self._annotated = "annotated"
-        self._assay = "assay"
+        self._assay_sc = "assay_sc"
         self._author = "author"
         self._bio_sample = "bio_sample"
         self._cell_types_original = "cell_types_original"
@@ -238,7 +238,7 @@ class AdataIdsCellxgene(AdataIdsExtended):
     accepted_file_names: List[str]
 
     def __init__(self):
-        self._assay = "assay"
+        self._assay_sc = "assay"
         self._cell_types_original = "free_annotation"
         self._cell_ontology_class = "cell_type"
         self._cell_ontology_id = "cell_type_ontology_term_id"

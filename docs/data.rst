@@ -80,7 +80,7 @@ preprint and publication DOIs if both are available. We will also mention public
 The data loader python file
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Each data set (organsism, organ, protocol, optionally also batches) has its own data loader class. Each such class is
+Each data set (organsism, organ, assay_sc, optionally also batches) has its own data loader class. Each such class is
 in a separate file and inherits from a base class that contains most functionalities. Accordingly, the data loader class
 looks very similar in parts to a cell in a juypter notebook that performs data loading. The core features that must be included are:
 
@@ -102,7 +102,7 @@ before it is loaded into memory:
         # The meta data attributes labeled with (*) may als be supplied per cell, see below,
         # in this case, if you supply a .obs_key* attribute, you ccan leave out the sample-wise attribute.
 
-        self.id = x  # unique identifier of data set (Organism_Organ_Year_Protocol_NumberOfDataset_FirstAuthorLastname_doi).
+        self.id = x  # unique identifier of data set (Organism_Organ_Year_AssaySc_NumberOfDataset_FirstAuthorLastname_doi).
 
         self.author = x  # author (list) who sampled / created the data set
         self.doi = x  # doi of data set accompanying manuscript
@@ -117,7 +117,7 @@ before it is loaded into memory:
         self.normalisation = x  # (optional) normalisation applied to raw data loaded (ideally counts, "raw")
         self.organ = x  # (*, optional) organ (anatomical structure)
         self.organism = x  # (*) species / organism
-        self.protocol = x  # (*, optional) protocol used to sample data (e.g. smart-seq2)
+        self.assay_sc = x  # (*, optional) protocol used to sample data (e.g. smart-seq2)
         self.sex = x  # (*, optional) sex
         self.state_exact = x  # (*, optional) exact disease, treatment or perturbation state of sample
         self.year = x  # year in which sample was acquired
@@ -133,7 +133,7 @@ before it is loaded into memory:
         self.obs_key_healthy = x  # (optional, see above, do not provide if .healthy is provided)
         self.obs_key_organ = x  # (optional, see above, do not provide if .organ is provided)
         self.obs_key_organism = x  # (optional, see above, do not provide if .organism is provided)
-        self.obs_key_protocol = x  # (optional, see above, do not provide if .protocol is provided)
+        self.obs_key_assay_sc = x  # (optional, see above, do not provide if .assay_sc is provided)
         self.obs_key_sex = x  # (optional, see above, do not provide if .sex is provided)
         self.obs_key_state_exact = x  # (optional, see above, do not provide if .state_exact is provided)
         # Additionally, cell type annotation is ALWAYS provided per cell in .obs, this annotation is optional though.
@@ -179,7 +179,7 @@ In summary, a simply example data loader for a mouse lung data set could look li
             self.normalisation = "raw"  # because I uploaded raw counts, which is good practice!
             self.organ = "lung"
             self.organism = "mouse"
-            self.protocol = "smart-seq2"
+            self.assay_sc = "smart-seq2"
             self.year = "2020"
 
             self.obs_key_cellontology_original = "louvain_named"  # i save my cell type names in here
@@ -307,7 +307,7 @@ We constrain meta data by ontologies where possible. The current restrictions ar
         or from EMAPA (http://www.obofoundry.org/ontology/emapa.html) for mouse
     - .organism: constrained string, {"mouse", "human"}. In the future, we will use NCBITAXON
         (http://www.obofoundry.org/ontology/ncbitaxon.html).
-    - .protocol: unconstrained string, this will constrained to an anatomic ontology in the future,
+    - .assay_sc: unconstrained string, this will constrained to an experimental protocol ontology in the future,
         try choosing a term from https://www.ebi.ac.uk/ols/ontologies/efo/terms?iri=http%3A%2F%2Fwww.ebi.ac.uk%2Fefo%2FEFO_0010183&viewMode=All&siblings=false
     - .sex: constrained string, {"female", "male"}
     - .state_exact: unconstrained string, try to be concise and anticipate that this field is queried by automatised searches.
@@ -338,7 +338,7 @@ FAQ
 
 How is the dataset’s ID structured?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Organism_Organ_Year_Protocol_NumberOfDataset_FirstAuthorLastname_doi
+Organism_Organ_Year_AssaySc_NumberOfDataset_FirstAuthorLastname_doi
 
 How do I assemble the data set ID if some of its element meta data are not unique?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -384,8 +384,8 @@ Highly recommended:
         Example: self.normalization = “raw”
     - .organ (or .obs_key_organ): Organ sampled.
         Example: self.organ = “liver”
-    - .protocol (or .obs_key_protocol): Protocol with which data was collected.
-        Example: self.protocol = “10x”
+    - .assay_sc (or .obs_key_assay_sc): Protocol with which data was collected.
+        Example: self.assay_sc = “10x”
 
 Optional (if available):
 

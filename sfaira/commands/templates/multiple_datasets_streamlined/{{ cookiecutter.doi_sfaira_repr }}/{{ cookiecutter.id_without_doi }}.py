@@ -36,7 +36,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
 
         self.organ = '{{ cookiecutter.organ }}'  # organ (anatomical structure)
         self.organism = '{{ cookiecutter.organism }}'  # (*) species / organism
-        self.protocol = '{{ cookiecutter.protocol }}'  # (*, optional) protocol used to sample data (e.g. smart-seq2)
+        self.assay_sc = '{{ cookiecutter.assay_sc }}'  # (*, optional) protocol used to sample data (e.g. smart-seq2)
         self.year = {{cookiecutter.year}}  # year in which sample was acquired
         # self.age = 'x'  # (*, optional) age of sample
         # self.dev_stage = x  # (*, optional) developmental stage of organism
@@ -55,7 +55,7 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         # self.obs_key_healthy = x  # (optional, see above, do not provide if .healthy is provided)
         # self.obs_key_organ = x  # (optional, see above, do not provide if .organ is provided)
         # self.obs_key_organism = x  # (optional, see above, do not provide if .organism is provided)
-        # self.obs_key_protocol = x  # (optional, see above, do not provide if .protocol is provided)
+        # self.obs_key_assay_sc = x  # (optional, see above, do not provide if .assay_sc is provided)
         # self.obs_key_sex = x  # (optional, see above, do not provide if .sex is provided)
         # self.obs_key_state_exact = x  # (optional, see above, do not provide if .state_exact is provided)
         # SFAIRA: Additionally, cell type annotation is ALWAYS provided per cell in .obs, this annotation is optional though.

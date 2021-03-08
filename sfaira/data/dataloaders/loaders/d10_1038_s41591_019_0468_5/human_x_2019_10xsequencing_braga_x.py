@@ -22,7 +22,7 @@ class Dataset(DatasetBase):
         self.healthy = True
         self.organ = "bronchus" if self.sample_fn == "vieira19_Bronchi_anonymised.processed.h5ad" else "lung parenchyma"
         self.organism = "human"
-        self.protocol = "10X sequencing"
+        self.assay_sc = "10X sequencing"
         self.state_exact = "healthy"
         self.year = 2019
         self.normalization = "norm"

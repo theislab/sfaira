@@ -25,7 +25,7 @@ class Dataset(DatasetBase):
         self.state_exact = "healthy"
         self.organ = "prostate gland"
         self.organism = "human"
-        self.protocol = "10X sequencing"
+        self.assay_sc = "10X sequencing"
         self.year = 2018
 
         self.var_symbol_col = "index"

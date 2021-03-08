@@ -9,7 +9,7 @@ class OntologyContainerSfaira:
 
     def __init__(self):
         self.age = None
-        self.assay = OntologySinglecellLibraryConstruction()
+        self.assay_sc = OntologySinglecellLibraryConstruction()
         self.cellontology_class = "v2021-02-01"
         self.cellontology_original = None
         self.developmental_stage = None

@@ -21,7 +21,7 @@ class Dataset(DatasetBase):
         self.normalization = "raw"
         self.organ = "lung parenchyma"
         self.organism = "human"
-        self.protocol = "10X sequencing"
+        self.assay_sc = "10X sequencing"
         self.year = 2020
 
         self.var_symbol_col = "index"

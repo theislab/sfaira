@@ -433,7 +433,7 @@ class DatasetGroup:
         :param key: Property to subset by. Options:
 
             - "age" points to self.age_obs_key
-            - "assay" points to self.assay_obs_key
+            - "assay_sc" points to self.assay_sc_obs_key
             - "cellontology_class" points to self.cellontology_class_obs_key
             - "developmental_stage" points to self.developmental_stage_obs_key
             - "ethnicity" points to self.ethnicity_obs_key
@@ -788,7 +788,7 @@ class DatasetSuperGroup:
             self.adata.X = X
         keys = [
             self._adata_ids_sfaira.annotated,
-            self._adata_ids_sfaira.assay,
+            self._adata_ids_sfaira.assay_sc,
             self._adata_ids_sfaira.author,
             self._adata_ids_sfaira.dataset,
             self._adata_ids_sfaira.cell_ontology_class,
@@ -891,7 +891,7 @@ class DatasetSuperGroup:
         :param key: Property to subset by. Options:
 
             - "age" points to self.age_obs_key
-            - "assay" points to self.assay_obs_key
+            - "assay_sc" points to self.assay_sc_obs_key
             - "cellontology_class" points to self.cellontology_class_obs_key
             - "developmental_stage" points to self.developmental_stage_obs_key
             - "ethnicity" points to self.ethnicity_obs_key

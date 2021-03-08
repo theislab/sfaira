@@ -17,10 +17,10 @@ dataset_wise:
 dataset_or_observation_wise:
     age:
     age_obs_key:
-    assay:
+    assay_sc:
         droplet_normal_lung_blood_scanpy.20200205.RC4.h5ad: "10X sequencing"
         facs_normal_lung_blood_scanpy.20200205.RC4.h5ad: "Smart-seq2"
-    assay_obs_key:
+    assay_sc_obs_key:
     bio_sample:
     bio_sample_obs_key:
         droplet_normal_lung_blood_scanpy.20200205.RC4.h5ad: "orig.ident*sample*magnetic.selection"

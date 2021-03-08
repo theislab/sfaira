@@ -25,7 +25,7 @@ class Dataset(DatasetBase):
         self.organ = "placenta"
         self.organism = "human"
         self.doi = "10.1038/s41586-018-0698-6"
-        self.protocol = "10X sequencing" if self.sample_fn == "E-MTAB-6678.processed" else "Smart-seq2"
+        self.assay_sc = "10X sequencing" if self.sample_fn == "E-MTAB-6678.processed" else "Smart-seq2"
         self.state_exact = "healthy"
         self.year = 2018
 

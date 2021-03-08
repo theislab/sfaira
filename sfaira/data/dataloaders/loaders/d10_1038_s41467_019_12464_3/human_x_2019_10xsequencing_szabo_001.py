@@ -61,7 +61,7 @@ class Dataset(DatasetBase):
         self.normalization = "raw"
         self.organ = SAMPLE_DICT[self.sample_fn][0]
         self.organism = "human"
-        self.protocol = "10X sequencing"
+        self.assay_sc = "10X sequencing"
         self.state_exact = SAMPLE_DICT[self.sample_fn][2]
         self.healthy = SAMPLE_DICT[self.sample_fn][2] == "healthy"
         self.year = 2019

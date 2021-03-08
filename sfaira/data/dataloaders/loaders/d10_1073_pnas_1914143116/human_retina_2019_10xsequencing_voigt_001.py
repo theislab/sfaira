@@ -18,7 +18,7 @@ class Dataset(DatasetBase):
         self.normalization = "norm"
         self.organ = "retina"
         self.organism = "human"
-        self.protocol = "10X sequencing"
+        self.assay_sc = "10X sequencing"
         self.state_exact = "healthy"
         self.year = 2019
 

@@ -62,7 +62,7 @@
       ~DatasetBase.obs_key_healthy
       ~DatasetBase.obs_key_organ
       ~DatasetBase.obs_key_organism
-      ~DatasetBase.obs_key_protocol
+      ~DatasetBase.obs_key_assay_sc
       ~DatasetBase.obs_key_sample
       ~DatasetBase.obs_key_sex
       ~DatasetBase.obs_key_state_exact
@@ -70,7 +70,7 @@
       ~DatasetBase.ontology_class_map
       ~DatasetBase.organ
       ~DatasetBase.organism
-      ~DatasetBase.protocol
+      ~DatasetBase.assay_sc
       ~DatasetBase.sex
       ~DatasetBase.source
       ~DatasetBase.state_exact
