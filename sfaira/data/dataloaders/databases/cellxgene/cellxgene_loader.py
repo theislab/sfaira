@@ -66,5 +66,5 @@ class Dataset(DatasetBase):
         self.organ = str(self.fn).split("_")[3]  # TODO interface this properly
         # self.organ = adata.obs["tissue"].values[0]
         self.organism = adata.obs[self._adata_ids_cellxgene.organism].values[0]
-        self.assay_sc = adata.obs[self._adata_ids_cellxgene.assay].values[0]
+        self.assay_sc = adata.obs[self._adata_ids_cellxgene.assay_sc].values[0]
         self.year = adata.uns[self._adata_ids_cellxgene.year]
