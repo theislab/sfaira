@@ -27,7 +27,7 @@ class Dataset(DatasetBase):
 
         self.bio_sample_obs_key = "sample"
         self.cellontology_original_obs_key = "cluster"
-        self.organ_obs_key = "sample_anatomy"
+        self.organ_obs_key = "organ"
 
         self.var_ensembl_col = "ensembl"
         self.var_symbol_col = "name"
@@ -57,6 +57,7 @@ def load(data_dir, **kwargs):
                                     header=None
                                     )[0].values
     obs = pandas.read_csv(fn[1])
+    obs.fillna("nan", inplace=True)
 
     # Match annotation to raw data.
     obs.index = obs["cell"].values
