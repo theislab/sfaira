@@ -1025,7 +1025,7 @@ class DatasetBase(abc.ABC):
                   f"{clean(self._assay)}_" \
                   f"{clean(author)}_" \
                   f"{idx}_" \
-                  f"{self.doi}"
+                  f"{self.doi_main}"
 
     # Properties:
 
@@ -1162,10 +1162,16 @@ class DatasetBase(abc.ABC):
         self._doi = x
 
     @property
+    def doi_main(self) -> str:
+        """
+        Yields the main DOI associated with the study, defined as the DOI that comes first in alphabetical order.
+        """
+        return self.doi if isinstance(self.doi, str) else np.sort(self.doi)[0]
+
+    @property
     def directory_formatted_doi(self) -> str:
         # Chose first doi in list.
-        doi = self.doi if isinstance(self.doi, str) else self.doi[0]
-        return "d" + "_".join("_".join("_".join(doi.split("/")).split(".")).split("-"))
+        return "d" + "_".join("_".join("_".join(self.doi_main.split("/")).split(".")).split("-"))
 
     @property
     def download_url_data(self) -> Union[Tuple[List[str]], Tuple[List[None]]]:
@@ -1279,8 +1285,8 @@ class DatasetBase(abc.ABC):
         if self._id is not None:
             return self._id
         else:
-            raise AttributeError(f"Dataset ID was not set in dataloader in {self.doi}, please ensure the dataloader "
-                                 f"constructor of this dataset contains a call to self.set_dataset_id()")
+            raise AttributeError(f"Dataset ID was not set in dataloader in {self.doi_main}, please ensure the "
+                                 f"dataloader constructor of this dataset contains a call to self.set_dataset_id()")
 
     @id.setter
     def id(self, x: str):
