@@ -57,7 +57,7 @@ def load(data_dir, **kwargs):
                                     header=None
                                     )[0].values
     obs = pandas.read_csv(fn[1])
-    obs.fillna("nan", inplace=True)
+    obs.fillna("isnan", inplace=True)
 
     # Match annotation to raw data.
     obs.index = obs["cell"].values
