@@ -49,16 +49,18 @@ def is_child(
         of this parent node.
     :return: Whether attempted term is sub-term of allowed term in ontology
     """
-
-    if isinstance(ontology, Ontology):
-        if ontology_parent is None:
-            return ontology.is_node(query)
-        else:
-            return ontology.is_a(query=query, reference=ontology_parent)
-    elif ontology is None:
-        return query == ontology_parent
+    if ontology_parent is None and ontology is None:
+        return True
     else:
-        raise ValueError(f"did not recognize ontology type {type(ontology)}")
+        if isinstance(ontology, Ontology):
+            if ontology_parent is None:
+                return ontology.is_node(query)
+            else:
+                return ontology.is_a(query=query, reference=ontology_parent)
+        elif ontology is None:
+            return query == ontology_parent
+        else:
+            raise ValueError(f"did not recognize ontology type {type(ontology)}")
 
 
 class DatasetBase(abc.ABC):
