@@ -26,6 +26,7 @@ class Dataset(DatasetBase):
         self.assay_sc = "microwell-seq"
         self.state_exact = "healthy"
         self.year = 2020
+        self.sample_source = "primary_tissue"
 
         self.bio_sample_obs_key = "sample"
         self.cellontology_original_obs_key = "celltype_specific"

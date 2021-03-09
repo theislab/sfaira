@@ -22,6 +22,7 @@ class Dataset(DatasetBase):
         self.organism = "human"
         self.assay_sc = "Smart-seq2"
         self.year = 2016
+        self.sample_source = "primary_tissue"
 
         self.var_symbol_col = "index"
 

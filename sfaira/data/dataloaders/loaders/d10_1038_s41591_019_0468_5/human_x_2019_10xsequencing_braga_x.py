@@ -26,6 +26,7 @@ class Dataset(DatasetBase):
         self.state_exact = "healthy"
         self.year = 2019
         self.normalization = "norm"
+        self.sample_source = "primary_tissue"
 
         self.var_symbol_col = "index"
         self.cellontology_original_obs_key = "CellType"

@@ -34,6 +34,7 @@ class Dataset(DatasetBase):
         self.assay_sc = "10X sequencing"
         self.state_exact = "diabetic"
         self.year = 2019
+        self.sample_source = "primary_tissue"
 
         self.var_symbol_col = "index"
         self.cellontology_original_obs_key = "celltypes"

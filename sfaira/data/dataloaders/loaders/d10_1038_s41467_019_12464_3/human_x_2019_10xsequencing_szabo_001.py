@@ -65,6 +65,7 @@ class Dataset(DatasetBase):
         self.state_exact = SAMPLE_DICT[self.sample_fn][2]
         self.healthy = SAMPLE_DICT[self.sample_fn][2] == "healthy"
         self.year = 2019
+        self.sample_source = "primary_tissue"
 
         self.var_symbol_col = "Gene"
         self.var_ensembl_col = "Accession"

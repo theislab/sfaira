@@ -17,6 +17,7 @@ class Dataset(DatasetBase):
         self.organism = "human"
         self.assay_sc = "10X sequencing"
         self.year = 2019
+        self.sample_source = "primary_tissue"
 
         self.var_symbol_col = "index"
 

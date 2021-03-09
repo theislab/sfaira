@@ -23,6 +23,7 @@ class Dataset(DatasetBase):
         self.assay_sc = "DroNc-seq"
         self.state_exact = "healthy"
         self.year = 2019
+        self.sample_source = "primary_tissue"
 
         self.var_symbol_col = "index"
         self.cellontology_original_obs_key = "celltype"

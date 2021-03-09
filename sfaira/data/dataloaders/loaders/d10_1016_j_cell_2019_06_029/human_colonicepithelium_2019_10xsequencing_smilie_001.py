@@ -22,9 +22,9 @@ class Dataset(DatasetBase):
         self.assay_sc = "10X sequencing"
         self.state_exact = "healthy"
         self.year = 2019
-
         self.var_symbol_col = "index"
         self.cellontology_original_obs_key = "CellType"
+        self.sample_source = "primary_tissue"
 
         self.set_dataset_id(idx=1)
 

@@ -307,6 +307,7 @@ class Dataset(DatasetBase):
         self.assay_sc = "microwell-seq"
         self.state_exact = "healthy"
         self.year = 2018
+        self.sample_source = "primary_tissue"
 
         self.var_symbol_col = "index"
 
