@@ -7,6 +7,7 @@ import requests
 from typing import Dict, List, Tuple, Union
 import warnings
 
+from sfaira.consts.adata_fields import AdataIdsSfaira
 from sfaira.versions.metadata.extensions import ONTOLOGIY_EXTENSION_HUMAN, ONTOLOGIY_EXTENSION_MOUSE
 
 FILE_PATH = __file__

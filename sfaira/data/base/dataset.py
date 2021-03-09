@@ -864,7 +864,11 @@ class DatasetBase(abc.ABC):
         self._value_protection(
             attr="celltypes",
             allowed=self.ontology_celltypes,
-            attempted=np.unique(labels_mapped).tolist()
+            attempted=[
+                x for x in np.unique(labels_mapped).tolist()
+                if x != self._adata_ids_sfaira.unknown_celltype_identifier
+                and x != self._adata_ids_sfaira.not_a_cell_celltype_identifier
+            ]
         )
         self.adata.obs[self._adata_ids_sfaira.cell_ontology_class] = labels_mapped
         self.cellontology_class_obs_key = self._adata_ids_sfaira.cell_ontology_class
