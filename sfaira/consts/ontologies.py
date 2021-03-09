@@ -15,7 +15,7 @@ class OntologyContainerSfaira:
         self.developmental_stage = None
         self.doi = None
         self.ethnicity = None
-        self.healthy = [True, False]
+        self.healthy = OntologyList(terms=[True, False])
         self.id = None
         self.normalization = None
         self.organ = OntologyUberon()
