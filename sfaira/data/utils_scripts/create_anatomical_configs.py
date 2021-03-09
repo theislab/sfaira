@@ -15,7 +15,7 @@ config_path = str(sys.argv[1])
 
 def clean(s):
     if s is not None:
-        s = s.replace(' ', '').replace('-', '').replace('_', '').lower()
+        s = s.replace(' ', '').replace('-', '').replace('_', '').replace("'", '').lower()
     return s
 
 

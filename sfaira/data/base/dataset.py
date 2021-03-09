@@ -1032,7 +1032,7 @@ class DatasetBase(abc.ABC):
     ):
         def clean(s):
             if s is not None:
-                s = s.replace(' ', '').replace('-', '').replace('_', '').lower()
+                s = s.replace(' ', '').replace('-', '').replace('_', '').replace("'", '').lower()
             return s
 
         if self.sample_fn is not None:
