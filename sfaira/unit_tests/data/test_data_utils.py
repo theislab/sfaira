@@ -1,7 +1,11 @@
+import anndata
+import numpy as np
+import pandas as pd
 import pytest
+import scipy.sparse
 from typing import Union
 
-from sfaira.data.utils import map_celltype_to_ontology
+from sfaira.data.utils import map_celltype_to_ontology, collapse_matrix
 
 
 @pytest.mark.parametrize("trial_cell_type_labels",
@@ -39,3 +43,49 @@ def test_map_celltype_to_ontology(
             else:
                 assert isinstance(matches, list), matches
                 assert "type B pancreatic cell" in matches
+
+
+@pytest.mark.parametrize("data", ["scipy.sparse.lil_matrix", "scipy.sparse.csr_matrix", "numpy"])
+@pytest.mark.parametrize("duplications", [False, True])
+def test_collapse_matrix(
+        data: str,
+        duplications: bool,
+):
+    """
+    Tests collapse_matrix.
+
+    Tests if:
+
+        - matrix type is maintained
+        - row sums are maintained
+        - feature dimension is correct
+
+    :param data: Data format.
+    :param duplications: Whether feature names are duplicated.
+    :return:
+    """
+    x = np.asarray(np.random.randint(0, 100, size=(10, 10)), dtype="float32")
+    if data == "scipy.sparse.lil_matrix":
+        x = scipy.sparse.lil_matrix(x)
+    elif data == "scipy.sparse.csr_matrix":
+        x = scipy.sparse.csr_matrix(x)
+    elif data == "numpy":
+        pass
+    else:
+        assert False
+    if duplications:
+        index = ["g" + str(i) for i in range(x.shape[1])]
+    else:
+        # Create triplicate and duplicate gene names:
+        index = ["g" + str(i) for i in range(2)] + ["g" + str(i) for i in range(3)] + \
+                ["g" + str(i) for i in range(x.shape[1] - 3 - 2)]
+    adata = anndata.AnnData(x, var=pd.DataFrame(index=index))
+    adata.var_names = index
+    adata2 = collapse_matrix(adata=adata)
+    assert adata.X.shape[0] == adata2.X.shape[0], "observation dimension mismatch"
+    assert adata.X.dtype == adata2.X.dtype, "type mismatch"
+    assert adata2.X.shape[1] == len(np.unique(adata.var_names)), "feature dimension mismatch"
+    assert np.all(np.asarray(adata.X.sum()).flatten() == np.asarray(adata2.X.sum().flatten())), \
+        "total count mismatch"
+    assert np.all(np.asarray(adata.X.sum(axis=1)).flatten() == np.asarray(adata2.X.sum(axis=1).flatten())), \
+        "observation-wise count mismatch"

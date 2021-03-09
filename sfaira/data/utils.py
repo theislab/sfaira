@@ -1,3 +1,6 @@
+import anndata
+import numpy as np
+import scipy.sparse
 import yaml
 from typing import Dict, List, Union
 
@@ -117,3 +120,37 @@ def read_yaml(fn) -> Dict[str, Dict[str, Union[str, int, bool]]]:
         else:
             meta_dict.update(v)
     return {"attr": attr_dict, "meta": meta_dict}
+
+
+def collapse_matrix(adata: anndata.AnnData) -> anndata.AnnData:
+    """
+    Collapses (sum) features with the same var_name.
+
+    Does not retain .varm if duplicated var_names are found.
+    keeps .var column of first occurrence of duplicated variables.
+
+    :param adata: Input anndata instance with potential duplicated var_names.
+    :return: Processed anndata instance without duplicated var_names.
+    """
+    new_index = np.unique(adata.var_names).tolist()
+    if len(new_index) < adata.n_vars:
+        idx_map = np.array([np.where(x == adata.var_names)[0] for x in new_index])
+        # Build initial matrix from first match.
+        data = adata.X[:, np.array([x[0] for x in idx_map])].copy()
+        # Add additional matched (duplicates) on top:
+        for i, idx in enumerate(idx_map):
+            if len(idx) > 1:
+                data[:, i] = data[:, i] + adata.X[:, idx[1:]].sum(axis=1)
+
+        # Remove varm and populate var with first occurrence only:
+        obs_names = adata.obs_names
+        adata = anndata.AnnData(
+            X=data,
+            obs=adata.obs,
+            obsm=adata.obsm,
+            var=adata.var.iloc[[adata.var_names.tolist().index(x) for x in new_index]],
+            uns=adata.uns
+        )
+        adata.obs_names = obs_names
+        adata.var_names = new_index
+    return adata

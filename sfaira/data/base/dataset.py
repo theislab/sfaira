@@ -20,7 +20,7 @@ import ssl
 from sfaira.versions.genome_versions import SuperGenomeContainer
 from sfaira.versions.metadata import Ontology, CelltypeUniverse
 from sfaira.consts import AdataIds, AdataIdsSfaira, META_DATA_FIELDS, OCS
-from sfaira.data.utils import read_yaml
+from sfaira.data.utils import collapse_matrix, read_yaml
 
 UNS_STRING_META_IN_OBS = "__obs__"
 
@@ -425,7 +425,7 @@ class DatasetBase(abc.ABC):
         self.adata.uns[self._adata_ids_sfaira.remove_gene_version] = remove_gene_version
         # Streamline feature space:
         self._convert_and_set_var_names(match_to_reference=match_to_reference)
-        self._collapse_gene_versions(remove_gene_version=remove_gene_version)
+        self._collapse_genes(remove_gene_version=remove_gene_version)
         if match_to_reference:
             self._match_features_to_reference()
 
@@ -498,7 +498,7 @@ class DatasetBase(abc.ABC):
                 raise KeyError(e)
             self.adata.var_names_make_unique()
 
-    def _collapse_gene_versions(self, remove_gene_version):
+    def _collapse_genes(self, remove_gene_version):
         """
         Remove version tag on ensembl gene ID so that different versions are superimposed downstream.
 
@@ -506,47 +506,14 @@ class DatasetBase(abc.ABC):
         :return:
         """
         if remove_gene_version:
-            new_index = [x.split(".")[0] for x in self.adata.var_names.tolist()]
-            # Collapse if necessary:
-            new_index_collapsed = list(np.unique(new_index))
-            if len(new_index_collapsed) < self.adata.n_vars:
-                print("WARNING: duplicate features detected after removing gene versions. "
-                      "the code to collapse these features is implemented but not tested.")
-                idx_map = np.array([new_index_collapsed.index(x) for x in new_index])
-                # Need reverse sorting to find index of last element in sorted list to split array using list index().
-                idx_map_sorted_fwd = np.argsort(idx_map)
-                idx_map_sorted_rev = idx_map_sorted_fwd[::-1].tolist()
-                n_genes = len(idx_map_sorted_rev)
-                # 1. Sort array in non-reversed order: idx_map_sorted_rev[::-1]
-                # 2. Split into chunks based on blocks of identical entries in idx_map, using the occurrence of the
-                # last element of each block as block boundaries:
-                # n_genes - 1 - idx_map_sorted_rev.index(x)
-                # Note that the blocks are named as positive integers starting at 1, without gaps.
-                counts = np.concatenate([
-                    np.sum(x, axis=1, keepdims=True)
-                    for x in np.split(
-                        self.adata[:, idx_map_sorted_fwd].X,  # forward ordered data
-                        indices_or_sections=[
-                            n_genes - 1 - idx_map_sorted_rev.index(x)  # last occurrence of element in forward order
-                            for x in np.arange(0, len(new_index_collapsed) - 1)
-                        ],  # -1: do not need end of last partition
-                        axis=1
-                    )
-                ][::-1], axis=1)
-                # Remove varm and populate var with first occurrence only:
-                obs_names = self.adata.obs_names
-                self.adata = anndata.AnnData(
-                    X=counts,
-                    obs=self.adata.obs,
-                    obsm=self.adata.obsm,
-                    var=self.adata.var.iloc[[new_index.index(x) for x in new_index_collapsed]],
-                    uns=self.adata.uns
-                )
-                self.adata.obs_names = obs_names
-                self.adata.var_names = new_index_collapsed
-                new_index = new_index_collapsed
-            self.adata.var[self._adata_ids_sfaira.gene_id_ensembl] = new_index
-            self.adata.var.index = self.adata.var[self._adata_ids_sfaira.gene_id_ensembl].values
+            self.adata.var_names = [
+                x.split(".")[0] for x in self.adata.var[self._adata_ids_sfaira.gene_id_index].values
+            ]
+        # Collapse if necessary:
+        self.adata = collapse_matrix(adata=self.adata)
+
+        self.adata.var[self._adata_ids_sfaira.gene_id_ensembl] = self.adata.var_names
+        self.adata.var.index = self.adata.var[self._adata_ids_sfaira.gene_id_ensembl].values
 
     def _match_features_to_reference(self):
         """
