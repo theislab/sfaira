@@ -15,7 +15,7 @@ log = logging.getLogger(__name__)
 @dataclass
 class TemplateAttributes:
     dataloader_type: str = ''  # One of single_dataset, multiple_datasets_single_file, multiple_datasets_streamlined, multiple_datasets_not_streamlined
-    id: str = ''  # unique identifier of data set (Organism_Organ_Year_Protocol_NumberOfDataset_FirstAuthorLastname_doi).
+    id: str = ''  # unique identifier of data set (Organism_Organ_Year_AssaySc_NumberOfDataset_FirstAuthorLastname_doi).
     id_without_doi: str = ''  # complete id without the doi -> usually used to name the python scripts
 
     author: Union[str, list] = ''  # author (list) who sampled / created the data set
@@ -27,8 +27,9 @@ class TemplateAttributes:
 
     organ: str = ''  # (*, optional) organ (anatomical structure)
     organism: str = ''  # (*) species / organism
-    protocol: str = ''  # (*, optional) protocol used to sample data (e.g. smart-seq2)
+    assay_sc: str = ''  # (*, optional) protocol used to sample data (e.g. smart-seq2)
     year: str = 2021  # year in which sample was acquired
+    sample_source: str = ''  # (*) whether the sample came from primary tissue or cell culture
     number_of_datasets: str = 1  # Required to determine the file names
 
 
@@ -105,12 +106,15 @@ class DataloaderCreator:
         self.template_attributes.organ = sfaira_questionary(function='text',
                                                             question='Organ:',
                                                             default='NA')
-        self.template_attributes.protocol = sfaira_questionary(function='text',
-                                                               question='Protocol:',
+        self.template_attributes.assay_sc = sfaira_questionary(function='text',
+                                                               question='AssaySc:',
                                                                default='NA')
         self.template_attributes.year = sfaira_questionary(function='text',
                                                            question='Year:',
                                                            default='2021')
+        self.template_attributes.sample_source = sfaira_questionary(function='text',
+                                                                    question='SampleSource:',
+                                                                    default='NA')
         first_author = author[0] if isinstance(author, list) else author
         try:
             first_author_lastname = first_author.split(',')[0]
@@ -118,7 +122,7 @@ class DataloaderCreator:
             print('[bold yellow] First author was not in the expected format. Using full first author for the id.')
             first_author_lastname = first_author
         self.template_attributes.id_without_doi = f'{self.template_attributes.organism}_{self.template_attributes.organ}_' \
-                                                  f'{self.template_attributes.year}_{self.template_attributes.protocol}_' \
+                                                  f'{self.template_attributes.year}_{self.template_attributes.assay_sc}_' \
                                                   f'{first_author_lastname}_001'
         self.template_attributes.id = self.template_attributes.id_without_doi + f'_{self.template_attributes.doi_sfaira_repr}'
         self.template_attributes.download_url_data = sfaira_questionary(function='text',

@@ -36,9 +36,13 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
 
         self.organ = '{{ cookiecutter.organ }}'  # organ (anatomical structure)
         self.organism = '{{ cookiecutter.organism }}'  # (*) species / organism
-        self.protocol = '{{ cookiecutter.protocol }}'  # (*, optional) protocol used to sample data (e.g. smart-seq2)
+        self.assay_sc = '{{ cookiecutter.assay_sc }}'  # (*, optional) protocol used to sample data (e.g. smart-seq2)
         self.year = {{cookiecutter.year}}  # year in which sample was acquired
+        self.sample_source = '{{ cookiecutter.sample_source }}'  # (*) whether the sample came from primary tissue or cell culture
         # self.age = 'x'  # (*, optional) age of sample
+        # self.assay_differentiation = x  # (*, optional) protocol used to differentiate the cell line (e.g. Lancaster, 2014)
+        # self.assay_type_differentiation = x  # (*, optional) type of protocol used to differentiate the cell line (guided/unguided)
+        # self.cell_line = x # (*, optional) cell line used (for cell culture samples)
         # self.dev_stage = x  # (*, optional) developmental stage of organism
         # self.ethnicity = x  # (*, optional) ethnicity of sample
         # self.healthy = x  # (*, optional) whether sample represents a healthy organism
@@ -50,12 +54,16 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
         # SFAIRA: is present in the anndata instance (specifically in .obs) after loading. You need to make sure this is loaded in the loading script)!
         # SFAIRA: See above for a description what these meta data attributes mean. If these attributes are note available, you can simply leave this out.
         # self.obs_key_age = x  # (optional, see above, do not provide if .age is provided)
+        # self.obs_key_assay_sc = x  # (optional, see above, do not provide if .assay_sc is provided)
+        # self.obs_key_assay_differentiation = x  # (optional, see above, do not provide if .assay_differentiation is provided)
+        # self.obs_key_assay_type_differentiation = x  # (optional, see above, do not provide if .assay_type_differentiation is provided)
+        # self.obs_key_cell_line = x # (optional, see above, do not provide if .cell_line is provided)
         # self.obs_key_dev_stage = x  # (optional, see above, do not provide if .dev_stage is provided)
         # self.obs_key_ethnicity = x  # (optional, see above, do not provide if .ethnicity is provided)
         # self.obs_key_healthy = x  # (optional, see above, do not provide if .healthy is provided)
         # self.obs_key_organ = x  # (optional, see above, do not provide if .organ is provided)
         # self.obs_key_organism = x  # (optional, see above, do not provide if .organism is provided)
-        # self.obs_key_protocol = x  # (optional, see above, do not provide if .protocol is provided)
+        # self.obs_key_sample_source = x  # (optional, see above, do not provide if .sample_source is provided)
         # self.obs_key_sex = x  # (optional, see above, do not provide if .sex is provided)
         # self.obs_key_state_exact = x  # (optional, see above, do not provide if .state_exact is provided)
         # SFAIRA: Additionally, cell type annotation is ALWAYS provided per cell in .obs, this annotation is optional though.

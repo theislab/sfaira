@@ -18,9 +18,10 @@ class Dataset(DatasetBase):
         self.normalization = "raw"
         self.organ = "liver"
         self.organism = "human"
-        self.protocol = "CEL-seq2"
+        self.assay_sc = "CEL-seq2"
         self.state_exact = "healthy"
         self.year = 2019
+        self.sample_source = "primary_tissue"
 
         self.var_symbol_col = "index"
         self.cellontology_original_obs_key = "CellType"

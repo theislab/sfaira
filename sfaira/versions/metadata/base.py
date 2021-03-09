@@ -668,6 +668,48 @@ class OntologyMmusdv(OntologyExtendedObo):
         return ["synonym"]
 
 
+class OntologyCellosaurus(OntologyExtendedObo):
+
+    def __init__(
+            self,
+            **kwargs
+    ):
+        download_link = "https://ftp.expasy.org/databases/cellosaurus/cellosaurus.obo"
+
+        if os.name == "nt":  # if running on windows, do not download obo file, but rather pass url directly to obonet
+            super().__init__(obo=download_link)
+        else:
+            # Identify cache:
+            folder = FILE_PATH.split(os.sep)[:-4]
+            folder.insert(1, os.sep)
+            ontology_cache_dir = os.path.join(*folder, "cache", "ontologies", "cellosaurus")
+            fn = "cellosaurus.obo"
+            obofile = os.path.join(ontology_cache_dir, fn)
+            # Download if necessary:
+            if not os.path.isfile(obofile):
+                def download_cl():
+                    print(f"Downloading: {fn}")
+                    if not os.path.exists(ontology_cache_dir):
+                        os.makedirs(ontology_cache_dir)
+                    r = requests.get(download_link, allow_redirects=True)
+                    open(obofile, 'wb').write(r.content)
+                download_cl()
+            super().__init__(obo=obofile)
+
+        # Clean up nodes:
+        # edge_types = ["derived_from", "originate_from_same_individual_as"]
+        nodes_to_delete = []
+        for k, v in self.graph.nodes.items():
+            if "name" not in v.keys():
+                nodes_to_delete.append(k)
+        for k in nodes_to_delete:
+            self.graph.remove_node(k)
+
+    @property
+    def synonym_node_properties(self) -> List[str]:
+        return ["synonym"]
+
+
 class OntologySinglecellLibraryConstruction(OntologyEbi):
 
     def __init__(

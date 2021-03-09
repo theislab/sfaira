@@ -45,13 +45,17 @@ class DatasetInteractive(DatasetBase):
         self.download_url_meta = "."
 
         # self.age  # not currently supported
+        # self.assay_sc  # not currently supported
+        # self.assay_differentiation  # not currently supported
+        # self.assay_type_differentiation  # not currently supported
+        # self.cell_line  # not currently supported
         # self.dev_stage  # not currently supported
         # self.ethnicity  # not currently supported
         # self.healthy  # not currently supported
         # self.normalisation  # not currently supported
         self.organ = organ
         self.organism = organism
-        # self.protocol  # not currently supported
+        # self.sample_source # not currently supported
         # self.sex  # not currently supported
         # self.state_exact  # not currently supported
         # self.year  # not currently supported
@@ -59,12 +63,16 @@ class DatasetInteractive(DatasetBase):
         self.obs_key_cellontology_original = obs_key_celltypes
 
         # self.obs_key_age  # not currently supported
+        # self.obs_key_assay_sc  # not currently supported
+        # self.obs_key_assay_differentiation  # not currently supported
+        # self.obs_key_assay_type_differentiation  # not currently supported
+        # self.obs_key_cell_line  # not currently supported
         # self.obs_key_dev_stage  # not currently supported
         # self.obs_key_ethnicity  # not currently supported
         # self.obs_key_healthy  # not currently supported
         # self.obs_key_organ  # not currently supported
         # self.obs_key_organism  # not currently supported
-        # self.obs_key_protocol  # not currently supported
+        # self.obs_key_sample_source  # not currently supported
         # self.obs_key_sex  # not currently supported
         # self.obs_key_state_exact  # not currently supported
 

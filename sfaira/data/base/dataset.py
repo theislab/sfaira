@@ -19,7 +19,7 @@ import ssl
 
 from sfaira.versions.genome_versions import SuperGenomeContainer
 from sfaira.versions.metadata import Ontology, CelltypeUniverse
-from sfaira.consts import AdataIdsExtended, AdataIdsSfaira, META_DATA_FIELDS, OCS
+from sfaira.consts import AdataIds, AdataIdsSfaira, META_DATA_FIELDS, OCS
 from sfaira.data.utils import collapse_matrix, read_yaml
 
 UNS_STRING_META_IN_OBS = "__obs__"
@@ -74,9 +74,12 @@ class DatasetBase(abc.ABC):
     genome: Union[None, str]
 
     _age: Union[None, str]
-    _assay: Union[None, str]
+    _assay_sc: Union[None, str]
+    _assay_differentiation: Union[None, str]
+    _assay_type_differentiation: Union[None, str]
     _author: Union[None, str]
     _bio_sample: Union[None, str]
+    _cell_line: Union[None, str]
     _development_stage: Union[None, str]
     _doi: Union[None, str]
     _download_url_data: Union[Tuple[List[None]], Tuple[List[str]], None]
@@ -91,12 +94,16 @@ class DatasetBase(abc.ABC):
     _organism: Union[None, str]
     _sex: Union[None, str]
     _source: Union[None, str]
+    _sample_source: Union[None, str]
     _state_exact: Union[None, str]
     _bio_sample: Union[None, str]
     _year: Union[None, int]
 
     _age_obs_key: Union[None, str]
-    _assay_obs_key: Union[None, str]
+    _assay_sc_obs_key: Union[None, str]
+    _assay_differentiation_obs_key: Union[None, str]
+    _assay_type_differentiation_obs_key: Union[None, str]
+    _assay_cell_line_obs_key: Union[None, str]
     _cellontology_class_obs_key: Union[None, str]
     _cellontology_id_obs_key: Union[None, str]
     _cellontology_original_obs_key: Union[None, str]
@@ -108,6 +115,7 @@ class DatasetBase(abc.ABC):
     _organ_obs_key: Union[None, str]
     _organism_obs_key: Union[None, str]
     _bio_sample_obs_key: Union[None, str]
+    _sample_source_obs_key: Union[None, str]
     _sex_obs_key: Union[None, str]
     _state_exact_obs_key: Union[None, str]
     _tech_sample_obs_key: Union[None, str]
@@ -146,7 +154,11 @@ class DatasetBase(abc.ABC):
 
         self._age = None
         self._author = None
+        self._assay_sc = None
+        self._assay_differentiation = None
+        self._assay_type_differentiation = None
         self._bio_sample = None
+        self._cell_line = None
         self._development_stage = None
         self._doi = None
         self._download_url_data = None
@@ -159,7 +171,7 @@ class DatasetBase(abc.ABC):
         self._normalization = None
         self._organ = None
         self._organism = None
-        self._assay = None
+        self._sample_source = None
         self._sex = None
         self._source = None
         self._state_exact = None
@@ -167,6 +179,11 @@ class DatasetBase(abc.ABC):
         self._year = None
 
         self._age_obs_key = None
+        self._assay_sc_obs_key = None
+        self._assay_differentiation_obs_key = None
+        self._assay_type_differentiation_obs_key = None
+        self._bio_sample_obs_key = None
+        self._cell_line_obs_key = None
         self._cellontology_class_obs_key = None
         self._cellontology_id_obs_key = None
         self._cellontology_original_obs_key = None
@@ -176,8 +193,7 @@ class DatasetBase(abc.ABC):
         self._individual_obs_key = None
         self._organ_obs_key = None
         self._organism_obs_key = None
-        self._assay_obs_key = None
-        self._bio_sample_obs_key = None
+        self._sample_source_obs_key = None
         self._sex_obs_key = None
         self._state_exact_obs_key = None
         self._tech_sample_obs_key = None
@@ -548,7 +564,7 @@ class DatasetBase(abc.ABC):
             uns=self.adata.uns
         )
 
-    def _set_metadata_in_adata(self, adata_ids: AdataIdsExtended):
+    def _set_metadata_in_adata(self, adata_ids: AdataIds):
         """
         Copy meta data from dataset class in .anndata.
 
@@ -568,8 +584,13 @@ class DatasetBase(abc.ABC):
         # These are saved in .uns if they are data set wide to save memory.
         for x, y, z, v in (
             [self.age, adata_ids.age, self.age_obs_key, self.ontology_container_sfaira.age],
-            [self.assay, adata_ids.assay, self.assay_obs_key, self.ontology_container_sfaira.assay],
+            [self.assay_sc, adata_ids.assay_sc, self.assay_sc_obs_key, self.ontology_container_sfaira.assay_sc],
+            [self.assay_differentiation, adata_ids.assay_differentiation, self.assay_differentiation_obs_key,
+             self.ontology_container_sfaira.assay_differentiation],
+            [self.assay_type_differentiation, adata_ids.assay_type_differentiation,
+             self.assay_type_differentiation_obs_key, self.ontology_container_sfaira.assay_type_differentiation],
             [self.bio_sample, adata_ids.bio_sample, self.bio_sample_obs_key, None],
+            [self.cell_line, adata_ids.cell_line, self.cell_line_obs_key, adata_ids.cell_line],
             [self.development_stage, adata_ids.development_stage, self.development_stage_obs_key,
              self.ontology_container_sfaira.developmental_stage],
             [self.ethnicity, adata_ids.ethnicity, self.ethnicity_obs_key,
@@ -579,6 +600,8 @@ class DatasetBase(abc.ABC):
             [self.organ, adata_ids.organ, self.organ_obs_key, self.ontology_container_sfaira.organism],
             [self.organism, adata_ids.organism, self.organism_obs_key,
              self.ontology_container_sfaira.organism],
+            [self.sample_source, adata_ids.sample_source, self.sample_source_obs_key,
+             self.ontology_container_sfaira.sample_source],
             [self.sex, adata_ids.sex, self.sex_obs_key, self.ontology_container_sfaira.sex],
             [self.state_exact, adata_ids.state_exact, self.state_exact_obs_key, None],
             [self.tech_sample, adata_ids.tech_sample, self.tech_sample_obs_key, None],
@@ -974,14 +997,18 @@ class DatasetBase(abc.ABC):
         # Expand table by variably cell-wise or data set-wise meta data:
         for x in [
             self._adata_ids_sfaira.age,
-            self._adata_ids_sfaira.assay,
+            self._adata_ids_sfaira.assay_sc,
+            self._adata_ids_sfaira.assay_differentiation,
+            self._adata_ids_sfaira.assay_type_differentiation,
             self._adata_ids_sfaira.bio_sample,
+            self._adata_ids_sfaira.cell_line,
             self._adata_ids_sfaira.development_stage,
             self._adata_ids_sfaira.ethnicity,
             self._adata_ids_sfaira.healthy,
             self._adata_ids_sfaira.individual,
             self._adata_ids_sfaira.organ,
             self._adata_ids_sfaira.organism,
+            self._adata_ids_sfaira.sample_source,
             self._adata_ids_sfaira.sex,
             self._adata_ids_sfaira.state_exact,
             self._adata_ids_sfaira.tech_sample,
@@ -1022,7 +1049,7 @@ class DatasetBase(abc.ABC):
         self.id = f"{clean(self._organism)}_" \
                   f"{clean(self._organ)}_" \
                   f"{self._year}_" \
-                  f"{clean(self._assay)}_" \
+                  f"{clean(self._assay_sc)}_" \
                   f"{clean(author)}_" \
                   f"{idx}_" \
                   f"{self.doi}"
@@ -1065,23 +1092,60 @@ class DatasetBase(abc.ABC):
                 return None
 
     @property
-    def assay(self) -> Union[None, str]:
-        if self._assay is not None:
-            return self._assay
+    def assay_sc(self) -> Union[None, str]:
+        if self._assay_sc is not None:
+            return self._assay_sc
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids_sfaira.assay in self.meta.columns:
-                return self.meta[self._adata_ids_sfaira.assay]
+            if self.meta is not None and self._adata_ids_sfaira.assay_sc in self.meta.columns:
+                return self.meta[self._adata_ids_sfaira.assay_sc]
             else:
                 return None
 
-    @assay.setter
-    def assay(self, x: str):
-        self.__erasing_protection(attr="protocol", val_old=self._assay, val_new=x)
-        self._value_protection(attr="protocol", allowed=self.ontology_container_sfaira.assay,
-                               attempted=x)
-        self._assay = x
+    @assay_sc.setter
+    def assay_sc(self, x: str):
+        self.__erasing_protection(attr="assay_sc", val_old=self._assay_sc, val_new=x)
+        self._value_protection(attr="assay_sc", allowed=self.ontology_container_sfaira.assay_sc, attempted=x)
+        self._assay_sc = x
+
+    @property
+    def assay_differentiation(self) -> Union[None, str]:
+        if self._assay_differentiation is not None:
+            return self._assay_differentiation
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            if self.meta is not None and self._adata_ids_sfaira.assay_differentiation in self.meta.columns:
+                return self.meta[self._adata_ids_sfaira.assay_differentiation]
+            else:
+                return None
+
+    @assay_differentiation.setter
+    def assay_differentiation(self, x: str):
+        self.__erasing_protection(attr="assay_differentiation", val_old=self._assay_differentiation, val_new=x)
+        self._value_protection(attr="assay_differentiation",
+                               allowed=self.ontology_container_sfaira.assay_differentiation, attempted=x)
+        self._assay_differentiation = x
+
+    @property
+    def assay_type_differentiation(self) -> Union[None, str]:
+        if self._assay_type_differentiation is not None:
+            return self._assay_type_differentiation
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            if self.meta is not None and self._adata_ids_sfaira.assay_type_differentiation in self.meta.columns:
+                return self.meta[self._adata_ids_sfaira.assay_type_differentiation]
+            else:
+                return None
+
+    @assay_type_differentiation.setter
+    def assay_type_differentiation(self, x: str):
+        self.__erasing_protection(attr="assay_type_differentiation", val_old=self._assay_type_differentiation, val_new=x)
+        self._value_protection(attr="assay_type_differentiation",
+                               allowed=self.ontology_container_sfaira.assay_type_differentiation, attempted=x)
+        self._assay_type_differentiation = x
 
     @property
     def author(self) -> str:
@@ -1115,6 +1179,23 @@ class DatasetBase(abc.ABC):
     def bio_sample(self, x: str):
         self.__erasing_protection(attr="bio_sample", val_old=self._bio_sample, val_new=x)
         self._bio_sample = x
+
+    @property
+    def cell_line(self) -> Union[None, str]:
+        if self._cell_line is not None:
+            return self._cell_line
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            if self.meta is not None and self._adata_ids_sfaira.cell_line in self.meta.columns:
+                return self.meta[self._adata_ids_sfaira.cell_line]
+            else:
+                return None
+
+    @cell_line.setter
+    def cell_line(self, x: str):
+        self.__erasing_protection(attr="cell_line", val_old=self._cell_line, val_new=x)
+        self._cell_line = x
 
     @property
     def data_dir(self):
@@ -1371,13 +1452,31 @@ class DatasetBase(abc.ABC):
         self._age_obs_key = x
 
     @property
-    def assay_obs_key(self) -> str:
-        return self._assay_obs_key
+    def assay_sc_obs_key(self) -> str:
+        return self._assay_sc_obs_key
 
-    @assay_obs_key.setter
-    def assay_obs_key(self, x: str):
-        self.__erasing_protection(attr="assay_obs_key", val_old=self._assay_obs_key, val_new=x)
-        self._assay_obs_key = x
+    @assay_sc_obs_key.setter
+    def assay_sc_obs_key(self, x: str):
+        self.__erasing_protection(attr="assay_sc_obs_key", val_old=self._assay_sc_obs_key, val_new=x)
+        self._assay_sc_obs_key = x
+
+    @property
+    def assay_differentiation_obs_key(self) -> str:
+        return self._assay_differentiation_obs_key
+
+    @assay_differentiation_obs_key.setter
+    def assay_differentiation_obs_key(self, x: str):
+        self.__erasing_protection(attr="assay_differentiation_obs_key", val_old=self._assay_differentiation_obs_key, val_new=x)
+        self._assay_differentiation_obs_key = x
+
+    @property
+    def assay_type_differentiation_obs_key(self) -> str:
+        return self._assay_type_differentiation_obs_key
+
+    @assay_type_differentiation_obs_key.setter
+    def assay_type_differentiation_obs_key(self, x: str):
+        self.__erasing_protection(attr="assay_type_differentiation_otype_bs_key", val_old=self._assay_differentiation_obs_key, val_new=x)
+        self._assay_type_differentiation_obs_key = x
 
     @property
     def bio_sample_obs_key(self) -> str:
@@ -1387,6 +1486,15 @@ class DatasetBase(abc.ABC):
     def bio_sample_obs_key(self, x: str):
         self.__erasing_protection(attr="bio_sample_obs_key", val_old=self._bio_sample_obs_key, val_new=x)
         self._bio_sample_obs_key = x
+
+    @property
+    def cell_line_obs_key(self) -> str:
+        return self._cell_line_obs_key
+
+    @cell_line_obs_key.setter
+    def cell_line_obs_key(self, x: str):
+        self.__erasing_protection(attr="cell_line_obs_key", val_old=self._cell_line_obs_key, val_new=x)
+        self._cell_line_obs_key = x
 
     @property
     def cellontology_class_obs_key(self) -> str:
@@ -1472,6 +1580,15 @@ class DatasetBase(abc.ABC):
         self._organism_obs_key = x
 
     @property
+    def sample_source_obs_key(self) -> str:
+        return self._sample_source_obs_key
+
+    @sample_source_obs_key.setter
+    def sample_source_obs_key(self, x: str):
+        self.__erasing_protection(attr="sample_source_obs_key", val_old=self._sample_source_obs_key, val_new=x)
+        self._sample_source_obs_key = x
+
+    @property
     def sex_obs_key(self) -> str:
         return self._sex_obs_key
 
@@ -1533,6 +1650,24 @@ class DatasetBase(abc.ABC):
         self.__erasing_protection(attr="organism", val_old=self._organism, val_new=x)
         self._value_protection(attr="organism", allowed=self.ontology_container_sfaira.organism, attempted=x)
         self._organism = x
+
+    @property
+    def sample_source(self) -> Union[None, str]:
+        if self._sample_source is not None:
+            return self._sample_source
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            if self.meta is not None and self._adata_ids_sfaira.sample_source in self.meta.columns:
+                return self.meta[self._adata_ids_sfaira.sample_source]
+            else:
+                return None
+
+    @sample_source.setter
+    def sample_source(self, x: str):
+        self.__erasing_protection(attr="sample_source", val_old=self._sample_source, val_new=x)
+        self._value_protection(attr="sample_source", allowed=self.ontology_container_sfaira.sample_source, attempted=x)
+        self._sample_source = x
 
     @property
     def sex(self) -> Union[None, str]:
@@ -1716,13 +1851,17 @@ class DatasetBase(abc.ABC):
         :param key: Property to subset by. Options:
 
             - "age" points to self.age_obs_key
-            - "assay" points to self.assay_obs_key
+            - "assay_sc" points to self.assay_sc_obs_key
+            - "assay_differentiation" points to self.assay_differentiation_obs_key
+            - "assay_type_differentiation" points to self.assay_type_differentiation_obs_key
+            - "cell_line" points to self.cell_line
             - "cellontology_class" points to self.cellontology_class_obs_key
             - "developmental_stage" points to self.developmental_stage_obs_key
             - "ethnicity" points to self.ethnicity_obs_key
             - "healthy" points to self.healthy_obs_key
             - "organ" points to self.organ_obs_key
             - "organism" points to self.organism_obs_key
+            - "sample_source" points to self.sample_source_obs_key
             - "sex" points to self.sex_obs_key
             - "state_exact" points to self.state_exact_obs_key
         :param values: Classes to overlap to.

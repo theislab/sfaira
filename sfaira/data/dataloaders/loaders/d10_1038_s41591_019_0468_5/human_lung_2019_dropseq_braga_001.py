@@ -18,9 +18,10 @@ class Dataset(DatasetBase):
         self.normalization = "raw"
         self.organ = "lung"
         self.organism = "human"
-        self.protocol = "Drop-seq"
+        self.assay_sc = "Drop-seq"
         self.state_exact = "uninvolved areas of tumour resection material"
         self.year = 2019
+        self.sample_source = "primary_tissue"
 
         self.var_symbol_col = "index"
         self.cellontology_original_obs_key = "celltype"
