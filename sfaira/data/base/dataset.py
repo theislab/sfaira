@@ -49,18 +49,16 @@ def is_child(
         of this parent node.
     :return: Whether attempted term is sub-term of allowed term in ontology
     """
-    if ontology is not None:
-        if isinstance(ontology, Ontology):
-            if ontology_parent is None:
-                return ontology.is_node(query)
-            else:
-                return ontology.is_a(query=query, reference=ontology_parent)
-        elif ontology is None:
-            return query == ontology_parent
+
+    if isinstance(ontology, Ontology):
+        if ontology_parent is None:
+            return ontology.is_node(query)
         else:
-            raise ValueError(f"did not recognize ontology type {type(ontology)}")
+            return ontology.is_a(query=query, reference=ontology_parent)
+    elif ontology is None:
+        return query == ontology_parent
     else:
-        return True
+        raise ValueError(f"did not recognize ontology type {type(ontology)}")
 
 
 class DatasetBase(abc.ABC):
@@ -866,8 +864,8 @@ class DatasetBase(abc.ABC):
             allowed=self.ontology_celltypes,
             attempted=[
                 x for x in np.unique(labels_mapped).tolist()
-                if x != self._adata_ids_sfaira.unknown_celltype_identifier
-                    and x != self._adata_ids_sfaira.not_a_cell_celltype_identifier
+                if x != self._adata_ids_sfaira.unknown_celltype_identifier and
+                x != self._adata_ids_sfaira.not_a_cell_celltype_identifier
             ]
         )
         self.adata.obs[self._adata_ids_sfaira.cell_ontology_class] = labels_mapped
