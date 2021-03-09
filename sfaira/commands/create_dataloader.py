@@ -29,6 +29,7 @@ class TemplateAttributes:
     organism: str = ''  # (*) species / organism
     assay_sc: str = ''  # (*, optional) protocol used to sample data (e.g. smart-seq2)
     year: str = 2021  # year in which sample was acquired
+    sample_source: str = ''  # (*) whether the sample came from primary tissue or cell culture
     number_of_datasets: str = 1  # Required to determine the file names
 
 
@@ -111,6 +112,9 @@ class DataloaderCreator:
         self.template_attributes.year = sfaira_questionary(function='text',
                                                            question='Year:',
                                                            default='2021')
+        self.template_attributes.sample_source = sfaira_questionary(function='text',
+                                                                    question='SampleSource:',
+                                                                    default='NA')
         first_author = author[0] if isinstance(author, list) else author
         try:
             first_author_lastname = first_author.split(',')[0]

@@ -111,13 +111,17 @@ before it is loaded into memory:
         self.download_url_meta = x  # download website(s) of meta data files
 
         self.age = x  # (*, optional) age of sample
+        self.assay_sc = x  # (*, optional) protocol used to sample data (e.g. smart-seq2)
+        self.assay_differentiation = x  # (*, optional) protocol used to differentiate the cell line (e.g. Lancaster, 2014)
+        self.assay_type_differentiation = x  # (*, optional) type of protocol used to differentiate the cell line (guided/unguided)
+        self.cell_line = x # (*, optional) cell line used (for cell culture samples)
         self.dev_stage = x  # (*, optional) developmental stage of organism
         self.ethnicity = x  # (*, optional) ethnicity of sample
         self.healthy = x  # (*, optional) whether sample represents a healthy organism
         self.normalisation = x  # (optional) normalisation applied to raw data loaded (ideally counts, "raw")
         self.organ = x  # (*, optional) organ (anatomical structure)
         self.organism = x  # (*) species / organism
-        self.assay_sc = x  # (*, optional) protocol used to sample data (e.g. smart-seq2)
+        self.sample_source = x  # (*) whether the sample came from primary tissue or cell culture
         self.sex = x  # (*, optional) sex
         self.state_exact = x  # (*, optional) exact disease, treatment or perturbation state of sample
         self.year = x  # year in which sample was acquired
@@ -133,7 +137,7 @@ before it is loaded into memory:
         self.obs_key_healthy = x  # (optional, see above, do not provide if .healthy is provided)
         self.obs_key_organ = x  # (optional, see above, do not provide if .organ is provided)
         self.obs_key_organism = x  # (optional, see above, do not provide if .organism is provided)
-        self.obs_key_assay_sc = x  # (optional, see above, do not provide if .assay_sc is provided)
+        self.obs_key_sample_source = x  # (optional, see above, do not provide if .sample_source is provided)
         self.obs_key_sex = x  # (optional, see above, do not provide if .sex is provided)
         self.obs_key_state_exact = x  # (optional, see above, do not provide if .state_exact is provided)
         # Additionally, cell type annotation is ALWAYS provided per cell in .obs, this annotation is optional though.
@@ -181,6 +185,7 @@ In summary, a simply example data loader for a mouse lung data set could look li
             self.organism = "mouse"
             self.assay_sc = "smart-seq2"
             self.year = "2020"
+            self.sample_source = "primary_tissue"
 
             self.obs_key_cellontology_original = "louvain_named"  # i save my cell type names in here
 
@@ -292,10 +297,13 @@ Metadata management
 
 We constrain meta data by ontologies where possible. The current restrictions are:
 
-    - .age: unconstrained string, try using units of years for human and units of months for mice
+    - .age: unconstrained string, try using units of years for human, units of months for mice and units of days for
+        cell culture samples
     - .dev_stage: unconstrained string, this will constrained to an ontology in the future,
         try choosing from HSAPDV (http://www.obofoundry.org/ontology/hsapdv.html) for human
         or from MMUSDEV (http://www.obofoundry.org/ontology/mmusdv.html) for mouse
+    - .cell_line: unconstrained string, this will be constrained to an ontology later. try choosing from cellosaurus
+        cell line database (https://web.expasy.org/cellosaurus/)
     - .ethnicity: unconstrained string, this will constrained to an ontology in the future,
         try choosing from HANCESTRO (https://www.ebi.ac.uk/ols/ontologies/hancestro)
     - .healthy: bool
@@ -309,6 +317,10 @@ We constrain meta data by ontologies where possible. The current restrictions ar
         (http://www.obofoundry.org/ontology/ncbitaxon.html).
     - .assay_sc: unconstrained string, this will constrained to an experimental protocol ontology in the future,
         try choosing a term from https://www.ebi.ac.uk/ols/ontologies/efo/terms?iri=http%3A%2F%2Fwww.ebi.ac.uk%2Fefo%2FEFO_0010183&viewMode=All&siblings=false
+    - .assay_differentiation: unconstrained string, try to provide a base differentiation protocol (eg. Lancaster, 2014)
+        as well as any amendments to the original protocol
+    - .assay_type_differentiation: constrained string, {"guided", "unguided"}
+    - .sample_source: constrained string, {"primary_tissue", "2d_culture", "3d_culture", "cancer"}
     - .sex: constrained string, {"female", "male"}
     - .state_exact: unconstrained string, try to be concise and anticipate that this field is queried by automatised searches.
         If you give treatment concentrations, intervals or similar measurements use square brackets around the quantity
@@ -357,7 +369,7 @@ a Dataset attribute contains the name of the `.obs` column that contains these c
 (e.g. self.obs_key_organism).
 Note that sample-wise meta data should be yielded as such and not as a column in `.obs` to simplify loading.
 
-Which meta data objects are optional?
+Which meta data objects are mandatory?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Mandatory on sample (self.attribute) or cell level (self.obs_key_attribute):
 
@@ -377,6 +389,8 @@ Mandatory on sample (self.attribute) or cell level (self.obs_key_attribute):
         Example: self.doi = "10.1016/j.cell.2019.06.029"
     - .organism (or .obs_key_organism): Organism sampled.
         Example: self.organism = “human”
+    - .sample_source (or .obs_key_sample_source): Whether data was obtained from primary tissue or cell culture
+        Example: self.sample_source = "primary_tissue"
 
 Highly recommended:
 
@@ -405,6 +419,11 @@ Optional (if available):
         Example: self.obs_key_cellontology_original = 'CellType'
     - .year: Year of publication:
         Example: self.year = 2019
+    - .cell_line: Which cell line was used for the experiment (for cell culture samples)
+        Example: self.cell_line = "409B2 (CVCL_K092)"
+    - .assay_differentiation: Which protocol was used for the differentiation of the cells (for cell culture samples)
+    - .assay_type_differentiation: Which protocol-type was used for the differentiation of the cells: guided or unguided
+        (for cell culture samples)
 
 How do I cache data sets?
 ~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -13,8 +13,11 @@ class AdataIds:
     _age: str
     _annotated: str
     _assay_sc: str
+    _assay_differentiation: str
+    _assay_type_differentiation: str
     _author: str
     _bio_sample: str
+    _cell_line: str
     _cell_types_original: str
     _cell_ontology_class: str
     _cell_ontology_id: str
@@ -35,6 +38,7 @@ class AdataIds:
     _normalization: str
     _organ: str
     _organism: str
+    _sample_source: str
     _sex: str
     _state_exact: str
     _tech_sample: str
@@ -53,12 +57,24 @@ class AdataIds:
         return self._assay_sc
 
     @property
+    def assay_differentiation(self) -> str:
+        return self._assay_differentiation
+
+    @property
+    def assay_type_differentiation(self) -> str:
+        return self._assay_type_differentiation
+
+    @property
     def author(self) -> str:
         return self._author
 
     @property
     def bio_sample(self) -> str:
         return self._bio_sample
+
+    @property
+    def cell_line(self) -> str:
+        return self._cell_line
 
     @property
     def cell_types_original(self) -> str:
@@ -145,6 +161,10 @@ class AdataIds:
         return self._organism
 
     @property
+    def sample_source(self) -> str:
+        return self._sample_source
+
+    @property
     def sex(self) -> str:
         return self._sex
 
@@ -170,8 +190,11 @@ class AdataIdsSfaira(AdataIds):
     def __init__(self):
         self._annotated = "annotated"
         self._assay_sc = "assay_sc"
+        self._assay_differentiation = "assay_differentiation"
+        self._assay_type_differentiation = "assay_type_differentiation"
         self._author = "author"
         self._bio_sample = "bio_sample"
+        self._cell_line = "cell_line"
         self._cell_types_original = "cell_types_original"
         self._cell_ontology_class = "cell_ontology_class"
         self._cell_ontology_id = "cell_ontology_id"
@@ -190,6 +213,7 @@ class AdataIdsSfaira(AdataIds):
         self._normalization = "normalization"
         self._organ = "organ"
         self._organism = "organism"
+        self._sample_source = "sample_source"
         self._tech_sample = "bio_sample"
         self._year = "year"
 

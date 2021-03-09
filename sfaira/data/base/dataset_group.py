@@ -434,12 +434,16 @@ class DatasetGroup:
 
             - "age" points to self.age_obs_key
             - "assay_sc" points to self.assay_sc_obs_key
+            - "assay_differentiation" points to self.assay_differentiation_obs_key
+            - "assay_type_differentiation" points to self.assay_type_differentiation_obs_key
+            - "cell_line" points to self.cell_line
             - "cellontology_class" points to self.cellontology_class_obs_key
             - "developmental_stage" points to self.developmental_stage_obs_key
             - "ethnicity" points to self.ethnicity_obs_key
             - "healthy" points to self.healthy_obs_key
             - "organ" points to self.organ_obs_key
             - "organism" points to self.organism_obs_key
+            - "sample_source" points to self.sample_source_obs_key
             - "sex" points to self.sex_obs_key
             - "state_exact" points to self.state_exact_obs_key
         :param values: Classes to overlap to.
@@ -789,12 +793,16 @@ class DatasetSuperGroup:
         keys = [
             self._adata_ids_sfaira.annotated,
             self._adata_ids_sfaira.assay_sc,
+            self._adata_ids_sfaira.assay_differentiation,
+            self._adata_ids_sfaira.assay_type_differentiation,
             self._adata_ids_sfaira.author,
+            self._adata_ids_sfaira.cell_line,
             self._adata_ids_sfaira.dataset,
             self._adata_ids_sfaira.cell_ontology_class,
             self._adata_ids_sfaira.development_stage,
             self._adata_ids_sfaira.normalization,
             self._adata_ids_sfaira.organ,
+            self._adata_ids_sfaira.sample_type,
             self._adata_ids_sfaira.state_exact,
             self._adata_ids_sfaira.year,
         ]
@@ -892,12 +900,16 @@ class DatasetSuperGroup:
 
             - "age" points to self.age_obs_key
             - "assay_sc" points to self.assay_sc_obs_key
+            - "assay_differentiation" points to self.assay_differentiation_obs_key
+            - "assay_type_differentiation" points to self.assay_type_differentiation_obs_key
+            - "cell_line" points to self.cell_line
             - "cellontology_class" points to self.cellontology_class_obs_key
             - "developmental_stage" points to self.developmental_stage_obs_key
             - "ethnicity" points to self.ethnicity_obs_key
             - "healthy" points to self.healthy_obs_key
             - "organ" points to self.organ_obs_key
             - "organism" points to self.organism_obs_key
+            - "sample_source" points to self.sample_source_obs_key
             - "sex" points to self.sex_obs_key
             - "state_exact" points to self.state_exact_obs_key
         :param values: Classes to overlap to.

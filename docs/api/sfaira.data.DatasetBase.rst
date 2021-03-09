@@ -36,10 +36,14 @@
    
       ~DatasetBase.age
       ~DatasetBase.annotated
+      ~DatasetBase.assay_sc
+      ~DatasetBase.assay_differentiation
+      ~DatasetBase.assay_type_differentiation
       ~DatasetBase.author
       ~DatasetBase.citation
       ~DatasetBase.dev_stage
       ~DatasetBase.directory_formatted_doi
+      ~DatasetBase.cell_line
       ~DatasetBase.doi
       ~DatasetBase.doi_cleaned_id
       ~DatasetBase.download
@@ -55,6 +59,10 @@
       ~DatasetBase.ncells
       ~DatasetBase.normalization
       ~DatasetBase.obs_key_age
+      ~DatasetBase.obs_key_assay_sc
+      ~DatasetBase.obs_key_assay_differentiation
+      ~DatasetBase.obs_key_assay_type_differentiation
+      ~DatasetBase.obs_key_cell_line
       ~DatasetBase.obs_key_cellontology_id
       ~DatasetBase.obs_key_cellontology_original
       ~DatasetBase.obs_key_dev_stage
@@ -62,16 +70,16 @@
       ~DatasetBase.obs_key_healthy
       ~DatasetBase.obs_key_organ
       ~DatasetBase.obs_key_organism
-      ~DatasetBase.obs_key_assay_sc
       ~DatasetBase.obs_key_sample
+      ~DatasetBase.obs_key_sample_source
       ~DatasetBase.obs_key_sex
       ~DatasetBase.obs_key_state_exact
       ~DatasetBase.ontology_celltypes
       ~DatasetBase.ontology_class_map
       ~DatasetBase.organ
       ~DatasetBase.organism
-      ~DatasetBase.assay_sc
       ~DatasetBase.sex
+      ~DatasetBase.sample_source
       ~DatasetBase.source
       ~DatasetBase.state_exact
       ~DatasetBase.var_ensembl_col

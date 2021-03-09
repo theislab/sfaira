@@ -294,7 +294,8 @@ class TrainModelEmbedding(TrainModel):
         """
         embedding = self.estimator.predict_embedding()
         df_summary = self.estimator.obs_test[
-            ["dataset", "cell_ontology_class", "state_exact", "lab", "year", "subtissue", "assay_sc"]
+            ["dataset", "cell_ontology_class", "state_exact", "lab", "year", "subtissue", "assay_sc",
+             "assay_differentiation", "assay_type_differentiation", "cell_line", "sample_source"]
         ]
         df_summary["ncounts"] = np.asarray(
             self.estimator.data.X[np.sort(self.estimator.idx_test), :].sum(axis=1)[np.argsort(self.estimator.idx_test)]
@@ -366,7 +367,8 @@ class TrainModelCelltype(TrainModel):
         ytrue = self.estimator.ytrue()
         yhat = self.estimator.predict()
         df_summary = self.estimator.obs_test[
-            ["dataset", "cell_ontology_class", "state_exact", "lab", "year", "subtissue", "assay_sc"]
+            ["dataset", "cell_ontology_class", "state_exact", "lab", "year", "subtissue", "assay_sc",
+             "assay_differentiation", "assay_type_differentiation", "cell_line", "sample_source"]
         ]
         df_summary["ncounts"] = np.asarray(self.estimator.data.X[self.estimator.idx_test, :].sum(axis=1)).flatten()
         np.save(file=fn + "_ytrue", arr=ytrue)
