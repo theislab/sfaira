@@ -697,7 +697,7 @@ class OntologyCellosaurus(OntologyExtendedObo):
             super().__init__(obo=obofile)
 
         # Clean up nodes:
-        edge_types = ["derived_from", "originate_from_same_individual_as"]
+        #edge_types = ["derived_from", "originate_from_same_individual_as"]
         nodes_to_delete = []
         for k, v in self.graph.nodes.items():
             if "name" not in v.keys():
