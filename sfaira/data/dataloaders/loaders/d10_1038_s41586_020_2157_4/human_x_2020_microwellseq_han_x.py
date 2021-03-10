@@ -116,7 +116,7 @@ def load(data_dir, **kwargs):
         'FetalHeart_2': 'heart',
         'FetalIntestine_1': 'intestine',
         'FetalIntestine_2': 'intestine',
-        'FetalIntestine_3': 'intestine',
+        'FetalIntetsine_3': 'intestine',
         'FetalIntestine_4': 'intestine',
         'FetalIntestine_5': 'intestine',
         'FetalKidney_3': 'kidney',
