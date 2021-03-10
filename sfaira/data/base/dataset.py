@@ -657,12 +657,12 @@ class DatasetBase(abc.ABC):
                 ]
             ])
             # Only retain target elements in adata.var:
-            self.adata.obs = self.adata.var[[
+            self.adata.var = self.adata.var.reindex(columns=[
                 adata_fields.gene_id_names,
                 adata_fields.gene_id_ensembl,
-            ]]
+            ])
             # Only retain target columns in adata.obs:
-            self.adata.obs = self.adata.obs.loc[:, [
+            self.adata.obs = self.adata.obs.reindex(columns=[
                 adata_fields.age,
                 adata_fields.bio_sample,
                 adata_fields.development_stage,
@@ -674,7 +674,7 @@ class DatasetBase(abc.ABC):
                 adata_fields.sex,
                 adata_fields.state_exact,
                 adata_fields.tech_sample,
-            ]]
+            ])
 
     def load_tobacked(
             self,
