@@ -681,7 +681,7 @@ class DatasetBase(abc.ABC):
                 ]
             ])
             # Only retain target elements in adata.var:
-            self.adata.var = self.adata.var[[
+            self.adata.obs = self.adata.var[[
                 adata_fields.gene_id_names,
                 adata_fields.gene_id_ensembl,
             ]]
