@@ -1,7 +1,10 @@
 import logging
 
 import rich
+import yaml
 from rich.panel import Panel
+from flatten_dict import flatten
+from flatten_dict.reducer import make_reducer
 from rich.progress import Progress, BarColumn
 
 log = logging.getLogger(__name__)
@@ -11,25 +14,21 @@ class DataloaderLinter:
 
     def __init__(self, path='.'):
         self.path: str = path
-        self.content: list = []
+        self.content: dict = {}
         self.passed: dict = {}
         self.warned: dict = {}
         self.failed: dict = {}
         self.linting_functions: list = [
-            '_lint_dataloader_object',
             '_lint_required_attributes',
-            '_lint_sfaira_todos',
-            '_lint_load'
         ]
 
-    def lint(self, path) -> None:
+    def lint(self) -> None:
         """
-        Statically verifies a dataloader against a predefined set of rules.
+        Statically verifies a yaml dataloader file against a predefined set of rules.
         Every rule is a function defined in this class, which must be part of this class' linting_functions.
-        :param path: Path to an existing dataloader
         """
-        with open(path, 'r') as f:
-            self.content = list(map(lambda line: line.strip(), f.readlines()))
+        with open(self.path) as yaml_file:
+            self.content = yaml.load(yaml_file, Loader=yaml.FullLoader)
 
         progress = Progress("[bold green]{task.description}", BarColumn(bar_width=None),
                             "[bold yellow]{task.completed} of {task.total}[reset] [bold green]{task.fields[func_name]}")
@@ -43,81 +42,35 @@ class DataloaderLinter:
 
         self._print_results()
 
-    def _lint_dataloader_object(self):
-        """
-        Verifies that the Dataloader Object itself (no the attributes) is valid
-        """
-        # TODO Could be more strict by checking also whether the constructor is valid, but too much of a hazzle with Black formatting.
-        passed_lint_dataloader_object = True
-
-        try:
-            line, dl_object = list(filter(lambda line_dl_object: line_dl_object[1].startswith(('class Dataset(DatasetBaseGroupLoadingManyFiles):',
-                                                                                               'class Dataset(DatasetBase):')), enumerate(self.content)))[0]
-        except IndexError:
-            passed_lint_dataloader_object = False
-            self.failed['-1'] = 'Missing one of class Dataset(DatasetBase) or class Dataset(DatasetBaseGroupLoadingManyFiles)'
-
-        if passed_lint_dataloader_object:
-            self.passed[line] = 'Passed dataloader object checks.'
-
-    def _lint_load(self):
-        """
-        Verifies that the method _load_any_object(self, fn=None) is present.
-        """
-        passed_load = True
-
-        try:
-            line, dl_object = list(filter(lambda line_dl_object: line_dl_object[1].startswith(('def _load_any_object(self, fn=None):',
-                                                                                               'def _load(self, fn):',
-                                                                                               'def _load(self)')),
-                                          enumerate(self.content)))[0]
-        except IndexError:
-            passed_load = False
-            self.failed['-1'] = 'Missing one of methods    _load_any_object(self, fn=None)  or    def _load(self, fn)'
-
-        if passed_load:
-            self.passed[line] = 'Passed dataloader object checks.'
-
     def _lint_required_attributes(self):
         """
         Verifies that all required attributes for every dataloader are present.
         """
         passed_required_attributes = True
 
-        attributes = ['self.set_dataset_id',
-                      'self.author',
-                      'self.doi',
-                      'self.download_url_data',
-                      'self.organ',
-                      'self.organism',
-                      'self.assay_sc',
-                      'self.year',
-                      'self.sample_source']
+        attributes = ['dataset_structure:sample_fns',
+                      'dataset_wise:author',
+                      'dataset_wise:doi',
+                      'dataset_wise:download_url_data',
+                      'dataset_wise:download_url_meta',
+                      'dataset_wise:normalization',
+                      'dataset_wise:year',
+                      'dataset_or_observation_wise:assay',
+                      'dataset_or_observation_wise:organ',
+                      'dataset_or_observation_wise:organism']
 
+        flattened_dict = flatten(self.content, reducer=make_reducer(delimiter=':'))
         for attribute in attributes:
             try:
-                line, attribute = list(filter(lambda line_attribute: line_attribute[1].startswith(attribute), enumerate(self.content)))[0]
-            except IndexError:
+                if not flattened_dict[attribute]:
+                    passed_required_attributes = False
+                    self.failed['-1'] = f'Missing attribute: {attribute}'
+            except KeyError:
                 passed_required_attributes = False
-                self.failed['-1'] = 'One of required attributes  set_dataset_id, author, doi, download_url_data, ' \
-                                    'organ, organism, assay_sc, year, sample_source   is missing.'
+                self.failed['-1'] = f'Missing attribute: {attribute}'
 
         if passed_required_attributes:
             self.passed[0] = 'Passed required dataloader attributes checks.'
-
-    def _lint_sfaira_todos(self):
-        """
-        Warns if any SFAIRA TODO: statements were found
-        """
-        passed_sfaira_todos = True
-
-        for index, line in enumerate(self.content):
-            if 'SFAIRA TODO' in line:
-                passed_sfaira_todos = False
-                self.warned[f'{index}'] = f'Line {index}: {line[2:]}'
-
-        if passed_sfaira_todos:
-            self.passed['0'] = 'Passed sfaira TODOs checks.'
 
     def _print_results(self):
         console = rich.console.Console()
