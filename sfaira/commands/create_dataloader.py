@@ -16,6 +16,7 @@ class TemplateAttributes:
     dataloader_type: str = ''  # One of single_dataset, multiple_datasets_single_file, multiple_datasets_streamlined, multiple_datasets_not_streamlined
     id: str = ''  # unique identifier of data set (Organism_Organ_Year_Protocol_NumberOfDataset_FirstAuthorLastname_doi).
     id_without_doi: str = ''  # complete id without the doi -> usually used to name the python scripts
+    create_extra_description: str = ''  # Whether to create an optional extra description file or not
 
     author: Union[str, list] = ''  # author (list) who sampled / created the data set
     doi: str = ''  # doi of data set accompanying manuscript
@@ -123,6 +124,9 @@ class DataloaderCreator:
         self.template_attributes.download_url_meta = sfaira_questionary(function='text',
                                                                         question='URL to download the meta data',
                                                                         default='https://ftp.ncbi.nlm.nih.gov/geo/')
+        self.template_attributes.create_extra_description = sfaira_questionary(function='confirm',
+                                                                               question='Do you want to add additional custom metadata?',
+                                                                               default='Yes')
 
     def _template_attributes_to_dict(self) -> dict:
         """
