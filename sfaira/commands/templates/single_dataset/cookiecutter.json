@@ -1,4 +1,5 @@
 {
+    "sample_fns":  "",
     "dataloader_author_name": "",
     "dataloader_author_email": "",
     "id": "",
@@ -7,9 +8,12 @@
     "doi": "",
     "doi_sfaira_repr": "",
     "download_url_data": "",
+    "download_url_meta": "",
+    "normalization": "",
     "organ": "",
     "organism": "",
-    "assay_sc": "",
+    "assay": "",
     "year": "",
-    "sample_source": ""
+    "individual": "",
+    "state_exact": ""
   }
