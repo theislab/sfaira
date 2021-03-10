@@ -602,7 +602,7 @@ class DatasetBase(abc.ABC):
                     self.adata.uns[y] = UNS_STRING_META_IN_OBS
                     # Remove potential pd.Categorical formatting:
                     self._value_protection(
-                        attr="obs", allowed=v, attempted=np.unique(self.adata.obs[z].values).tolist())
+                        attr=y, allowed=v, attempted=np.unique(self.adata.obs[z].values).tolist())
                     self.adata.obs[y] = self.adata.obs[z].values.tolist()
             else:
                 assert False, "switch option should not occur"
@@ -1699,7 +1699,7 @@ class DatasetBase(abc.ABC):
 
         Does not check if allowed is None.
 
-        :param attr: Attribut to set.
+        :param attr: Attribute to set.
         :param allowed: Constraint for values of `attr`.
             Either ontology instance used to constrain entries, or list of allowed values.
         :param attempted: Value(s) to attempt to set in `attr`.
