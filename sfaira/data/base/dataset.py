@@ -1713,7 +1713,10 @@ class DatasetBase(abc.ABC):
             attempted = [attempted]
         for x in attempted:
             if not is_child(query=x, ontology=allowed):
-                raise ValueError(f"{x} is not a valid entry for {attr}, choose from: {str(allowed)}")
+                if isinstance(allowed, Ontology):
+                    # use node names instead of ontology object to produce a readable error message
+                    allowed = allowed.node_names
+                raise ValueError(f"{x} is not a valid entry for {attr}, choose from: {allowed}")
 
     def subset_cells(self, key, values):
         """
