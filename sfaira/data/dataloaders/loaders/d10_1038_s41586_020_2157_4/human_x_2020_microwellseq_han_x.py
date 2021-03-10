@@ -147,6 +147,12 @@ def load(data_dir, **kwargs):
         'PeripheralBlood_1': 'blood',
         'Placenta_1': 'placenta',
     }
+    sex_dict = {
+        'Male': "male",
+        'Female': "female",
+        'nan': "nan",
+        'FeM=male': "nan",
+    }
 
     adata = anndata.read(os.path.join(data_dir, "HCL_Fig1_adata.h5ad"))
     # convert to sparse matrix
@@ -204,6 +210,8 @@ def load(data_dir, **kwargs):
     adata.obs.columns = [
         "sample", "sub_tissue", "n_genes", "n_counts", "cluster_global", "dev_stage", "donor", "celltype_global",
         "age", "celltype_specific", "cluster_specific", "gender", "protocol", "source"]
+
     adata.obs["organ"] = [sample_organ_dict[x] for x in adata.obs["sample"].values]
+    adata.obs["gender"] = [sex_dict[x] for x in adata.obs["gender"].values]
 
     return adata
