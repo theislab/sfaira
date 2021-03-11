@@ -574,7 +574,6 @@ class DatasetBase(abc.ABC):
              self.ontology_container_sfaira.developmental_stage],
             [self.ethnicity, adata_ids.ethnicity, self.ethnicity_obs_key,
              self.ontology_container_sfaira.ethnicity],
-            [self.healthy, adata_ids.healthy, self.healthy_obs_key, self.ontology_container_sfaira.healthy],
             [self.individual, adata_ids.individual, self.individual_obs_key, None],
             [self.organ, adata_ids.organ, self.organ_obs_key, self.ontology_container_sfaira.organ],
             [self.organism, adata_ids.organism, self.organism_obs_key,
@@ -604,6 +603,41 @@ class DatasetBase(abc.ABC):
                     self._value_protection(
                         attr=y, allowed=v, attempted=np.unique(self.adata.obs[z].values).tolist())
                     self.adata.obs[y] = self.adata.obs[z].values.tolist()
+            else:
+                assert False, "switch option should not occur"
+        # Load boolean labels:
+        for x, y, z, v, w in (
+            [self.healthy, adata_ids.healthy, self.healthy_obs_key, self.ontology_container_sfaira.healthy,
+             self.healthy_state_healthy]
+        ):
+            if x is None and z is None:
+                self.adata.uns[y] = None
+            elif x is not None and z is None:
+                # Attribute supplied per data set: Write into .uns.
+                if w is None:
+                    self.adata.uns[y] = x
+                else:
+                    self.adata.uns[y] = x == w
+            elif z is not None:
+                # Attribute supplied per cell: Write into .obs.
+                # Search for direct match of the sought-after column name or for attribute specific obs key.
+                if z not in self.adata.obs.keys():
+                    # This should not occur in single data set loaders (see warning below) but can occur in
+                    # streamlined data loaders if not all instances of the streamlined data sets have all columns
+                    # in .obs set.
+                    self.adata.uns[y] = None
+                    print(f"WARNING: attribute {y} of data set {self.id} was not found in column {z}")  # debugging
+                else:
+                    # Include flag in .uns that this attribute is in .obs:
+                    self.adata.uns[y] = UNS_STRING_META_IN_OBS
+                    # Remove potential pd.Categorical formatting:
+                    label_y = self.adata.obs[z].values
+                    # Use reference string to establish equality if available:
+                    if w is not None:
+                        label_y = label_y == w
+                    self._value_protection(
+                        attr=y, allowed=v, attempted=np.unique(label_y).tolist())
+                    self.adata.obs[y] = label_y.tolist()
             else:
                 assert False, "switch option should not occur"
         # Set cell-wise attributes (.obs):
