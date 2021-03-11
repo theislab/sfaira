@@ -2,8 +2,7 @@ import logging
 import os
 import re
 from dataclasses import dataclass, asdict
-from shutil import copyfile
-from typing import Union
+from typing import Union, Dict
 
 from sfaira.commands.questionary import sfaira_questionary
 from rich import print
@@ -15,21 +14,24 @@ log = logging.getLogger(__name__)
 @dataclass
 class TemplateAttributes:
     dataloader_type: str = ''  # One of single_dataset, multiple_datasets_single_file, multiple_datasets_streamlined, multiple_datasets_not_streamlined
-    id: str = ''  # unique identifier of data set (Organism_Organ_Year_AssaySc_NumberOfDataset_FirstAuthorLastname_doi).
+    id: str = ''  # unique identifier of data set (Organism_Organ_Year_Protocol_NumberOfDataset_FirstAuthorLastname_doi).
     id_without_doi: str = ''  # complete id without the doi -> usually used to name the python scripts
+    create_extra_description: str = ''  # Whether to create an optional extra description file or not
 
     author: Union[str, list] = ''  # author (list) who sampled / created the data set
     doi: str = ''  # doi of data set accompanying manuscript
     doi_sfaira_repr: str = ''  # internal representation with any special characters replaced with underscores
 
+    sample_fns: Union[str, Dict[str, list]] = ''  # file name of the first *.h5ad file
     download_url_data: str = ''  # download website(s) of data files
     download_url_meta: str = ''  # download website(s) of meta data files
-
-    organ: str = ''  # (*, optional) organ (anatomical structure)
+    organ: str = ''  # (*) organ (anatomical structure)
     organism: str = ''  # (*) species / organism
-    assay_sc: str = ''  # (*, optional) protocol used to sample data (e.g. smart-seq2)
+    assay: str = ''  # (*, optional) protocol used to sample data (e.g. smart-seq2)
+    normalization: str = ''  # raw or the used normalization technique
+    ethnicity: str = ''  # ethnicity of the sample
+    state_exact: str = ''  # state of the sample
     year: str = 2021  # year in which sample was acquired
-    sample_source: str = ''  # (*) whether the sample came from primary tissue or cell culture
     number_of_datasets: str = 1  # Required to determine the file names
 
 
@@ -61,25 +63,8 @@ class DataloaderCreator:
         # One dataset
         if number_datasets == 'One':
             self.template_attributes.dataloader_type = 'single_dataset'
-            return
-        # More than one dataset
-        dataset_counts = sfaira_questionary(function='select',
-                                            question='Are your datasets in a single file or is there one file per dataset?',
-                                            choices=['Single dataset file', 'Multiple dataset files'])
-        if dataset_counts == 'Single dataset file':
-            self.template_attributes.dataloader_type = 'multiple_datasets_single_file'
-            return
-
-        # streamlined?
-        streamlined_datasets = sfaira_questionary(function='select',
-                                                  question='Are your datasets in a similar format?',
-                                                  choices=['Same format', 'Different formats'])
-        if streamlined_datasets == 'Same format':
-            self.template_attributes.dataloader_type = 'multiple_datasets_streamlined'
-            return
         else:
-            self.template_attributes.dataloader_type = 'multiple_datasets_not_streamlined'
-            return
+            self.template_attributes.dataloader_type = 'multiple_datasets'
 
     def _prompt_dataloader_configuration(self):
         """
@@ -100,21 +85,41 @@ class DataloaderCreator:
         self.template_attributes.doi = doi
         self.template_attributes.doi_sfaira_repr = f'd{doi.translate({ord(c): "_" for c in r"!@#$%^&*()[]/{};:,.<>?|`~-=_+"})}'
 
+        self.template_attributes.number_of_datasets = sfaira_questionary(function='text',
+                                                                         question='Number of datasets:',
+                                                                         default='1')
+
+        # Differentiate between a single dataset or multiple datasets to get sample file names
+        if self.template_attributes.dataloader_type == 'multiple_datasets':
+            self.template_attributes.sample_fns = {'fns': []}
+            for ds in range(int(self.template_attributes.number_of_datasets)):
+                fn = sfaira_questionary(function='text',
+                                        question='Sample file name:',
+                                        default=f'data_{ds}.h5ad')
+                self.template_attributes.sample_fns['fns'].append(fn)
+        else:
+            self.template_attributes.sample_fns = sfaira_questionary(function='text',
+                                                                     question='Sample file name of the first dataset:',
+                                                                     default='data.h5ad')
+
         self.template_attributes.organism = sfaira_questionary(function='text',
                                                                question='Organism:',
                                                                default='NA')
         self.template_attributes.organ = sfaira_questionary(function='text',
                                                             question='Organ:',
                                                             default='NA')
-        self.template_attributes.assay_sc = sfaira_questionary(function='text',
-                                                               question='AssaySc:',
-                                                               default='NA')
+        self.template_attributes.assay = sfaira_questionary(function='text',
+                                                            question='Assay:',
+                                                            default='NA')
+        self.template_attributes.normalization = sfaira_questionary(function='text',
+                                                                    question='Normalization:',
+                                                                    default='raw')
+        self.template_attributes.state_exact = sfaira_questionary(function='text',
+                                                                  question='Sample state:',
+                                                                  default='healthy')
         self.template_attributes.year = sfaira_questionary(function='text',
                                                            question='Year:',
                                                            default='2021')
-        self.template_attributes.sample_source = sfaira_questionary(function='text',
-                                                                    question='SampleSource:',
-                                                                    default='NA')
         first_author = author[0] if isinstance(author, list) else author
         try:
             first_author_lastname = first_author.split(',')[0]
@@ -122,15 +127,18 @@ class DataloaderCreator:
             print('[bold yellow] First author was not in the expected format. Using full first author for the id.')
             first_author_lastname = first_author
         self.template_attributes.id_without_doi = f'{self.template_attributes.organism}_{self.template_attributes.organ}_' \
-                                                  f'{self.template_attributes.year}_{self.template_attributes.assay_sc}_' \
+                                                  f'{self.template_attributes.year}_{self.template_attributes.assay}_' \
                                                   f'{first_author_lastname}_001'
         self.template_attributes.id = self.template_attributes.id_without_doi + f'_{self.template_attributes.doi_sfaira_repr}'
         self.template_attributes.download_url_data = sfaira_questionary(function='text',
                                                                         question='URL to download the data',
                                                                         default='https://ftp.ncbi.nlm.nih.gov/geo/')
-        self.template_attributes.number_of_datasets = sfaira_questionary(function='text',
-                                                                         question='Number of datasets:',
-                                                                         default='1').zfill(3)
+        self.template_attributes.download_url_meta = sfaira_questionary(function='text',
+                                                                        question='URL to download the meta data',
+                                                                        default='https://ftp.ncbi.nlm.nih.gov/geo/')
+        self.template_attributes.create_extra_description = sfaira_questionary(function='confirm',
+                                                                               question='Do you want to add additional custom metadata?',
+                                                                               default='Yes')
 
     def _template_attributes_to_dict(self) -> dict:
         """
@@ -145,21 +153,3 @@ class DataloaderCreator:
                      no_input=True,
                      overwrite_if_exists=True,
                      extra_context=self._template_attributes_to_dict())
-
-        # multiple datasets not streamlined are not contained in a single file but in multiple files
-        # Hence, we create one copy per dataset and adapt the ID per dataloader script
-        if self.template_attributes.dataloader_type == 'multiple_datasets_not_streamlined':
-            for i in range(2, int(self.template_attributes.number_of_datasets.lstrip('0')) + 1):
-                copyfile(f'{self.template_attributes.doi_sfaira_repr}/{self.template_attributes.id_without_doi}.py',
-                         f'{self.template_attributes.doi_sfaira_repr}/{self.template_attributes.id_without_doi[:-3]}{str(i).zfill(3)}.py')
-
-                # Replace the default ID of 1 with the file specific ID
-                with open(f'{self.template_attributes.doi_sfaira_repr}/{self.template_attributes.id_without_doi[:-3]}{str(i).zfill(3)}.py', 'r') as file:
-                    content = file.readlines()
-                idx_fixed = list(map(lambda line: f'        self.set_dataset_id(idx={i})  # autogenerated by sfaira'
-                                     if line.strip().startswith('self.set_dataset_id(idx=1)')
-                                     else line,
-                                     content))
-                with open(f'{self.template_attributes.doi_sfaira_repr}/{self.template_attributes.id_without_doi[:-3]}{str(i).zfill(3)}.py', 'w') as file:
-                    for line in idx_fixed:
-                        file.write(line)

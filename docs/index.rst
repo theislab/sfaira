@@ -39,6 +39,7 @@ Latest additions
    commandline_interface
    tutorials
    data
+   adding_datasets
    models
    ecosystem
    roadmap
