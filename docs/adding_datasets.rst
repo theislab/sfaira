@@ -201,9 +201,7 @@ sfaira features an interactive way of creating, formatting and testing dataloade
 The common workflow look as follows:
 
 1. Create a new dataloader with ``sfaira create-dataloader``
-2. Format and clean the dataloader with ``sfaira clean-dataloader <path>``
-3. Validate the dataloader with ``sfaira lint-dataloader <path>``
-4. Test the dataloader using ``sfaira test-dataloader <path>``
+2. Validate the dataloader with ``sfaira lint-dataloader <path>``
 
 When creating a dataloader with ``sfaira create-dataloader`` common information such as
 your name and email are prompted for, followed by dataloader specific attributes such as organ, organism and many more.
@@ -226,10 +224,6 @@ All unused attributes will be removed.
 
 Next validate the integrity of your dataloader content with ``sfaira lint-dataloader <path to *.yaml>``.
 All tests must pass! If any of the tests fail please revisit your dataloader and add the missing information.
-
-Finally, test your dataloader with ``sfaira test-dataloader <path>``.
-If all tests pass you can proceed to use your dataloader or to submit a pull request to sfaira.
-This function is currently still in development. Hence, we relax this requirement.
 
 Map cell type labels to ontology
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
