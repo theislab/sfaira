@@ -47,7 +47,7 @@ dataset_or_observation_wise:
     tech_sample:
     tech_sample_obs_key:
 observation_wise:
-    cellontology_original_obs_key: "PredCellType"  # TODO: get better cell labels from authors (cl_FullLineage or cl_LineComp?)
+    cellontology_original_obs_key: None  # TODO: figure out which celltype labels to add here
 feature_wise:
     var_ensembl_col: "ensembl"
     var_symbol_col: "index"
