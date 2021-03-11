@@ -20,13 +20,14 @@ class Dataset(DatasetBase):
         self.doi = "10.1016/j.cell.2017.09.004"
         self.healthy = True
         self.normalization = "raw"
-        self.protocol = "Smart-seq2"
+        self.assay_sc = "Smart-seq2"
         self.organ = "islet of Langerhans"
         self.organism = "human"
         self.state_exact = "healthy"
         self.year = 2017
         self.var_symbol_col = "index"
         self.cellontology_original_obs_key = "celltype"
+        self.sample_source = "primary_tissue"
 
         self.set_dataset_id(idx=1)
 

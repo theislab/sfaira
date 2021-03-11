@@ -9,6 +9,7 @@
     "download_url_data": "",
     "organ": "",
     "organism": "",
-    "protocol": "",
-    "year": ""
+    "assay_sc": "",
+    "year": "",
+    "sample_source": ""
   }

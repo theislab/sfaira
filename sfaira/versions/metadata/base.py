@@ -7,6 +7,7 @@ import requests
 from typing import Dict, List, Tuple, Union
 import warnings
 
+from sfaira.consts.adata_fields import AdataIdsSfaira
 from sfaira.versions.metadata.extensions import ONTOLOGIY_EXTENSION_HUMAN, ONTOLOGIY_EXTENSION_MOUSE
 
 FILE_PATH = __file__
@@ -62,7 +63,7 @@ class OntologyList(Ontology):
 
     def __init__(
             self,
-            terms: List[str],
+            terms: Union[List[Union[str, bool, int]]],
             **kwargs
     ):
         self.nodes = terms
@@ -77,6 +78,7 @@ class OntologyList(Ontology):
 
         :param x: Free text node label which is to be matched to ontology nodes.
         :param include_synonyms: Whether to search for meaches in synonyms field of node instances, too.
+        :param n_suggest: number of suggestions returned
         :return List of proposed matches in ontology.
         """
         from fuzzywuzzy import fuzz
@@ -656,6 +658,48 @@ class OntologyMmusdv(OntologyExtendedObo):
         super().__init__(obo="http://purl.obolibrary.org/obo/mmusdv.obo")
 
         # Clean up nodes:
+        nodes_to_delete = []
+        for k, v in self.graph.nodes.items():
+            if "name" not in v.keys():
+                nodes_to_delete.append(k)
+        for k in nodes_to_delete:
+            self.graph.remove_node(k)
+
+    @property
+    def synonym_node_properties(self) -> List[str]:
+        return ["synonym"]
+
+
+class OntologyCellosaurus(OntologyExtendedObo):
+
+    def __init__(
+            self,
+            **kwargs
+    ):
+        download_link = "https://ftp.expasy.org/databases/cellosaurus/cellosaurus.obo"
+
+        if os.name == "nt":  # if running on windows, do not download obo file, but rather pass url directly to obonet
+            super().__init__(obo=download_link)
+        else:
+            # Identify cache:
+            folder = FILE_PATH.split(os.sep)[:-4]
+            folder.insert(1, os.sep)
+            ontology_cache_dir = os.path.join(*folder, "cache", "ontologies", "cellosaurus")
+            fn = "cellosaurus.obo"
+            obofile = os.path.join(ontology_cache_dir, fn)
+            # Download if necessary:
+            if not os.path.isfile(obofile):
+                def download_cl():
+                    print(f"Downloading: {fn}")
+                    if not os.path.exists(ontology_cache_dir):
+                        os.makedirs(ontology_cache_dir)
+                    r = requests.get(download_link, allow_redirects=True)
+                    open(obofile, 'wb').write(r.content)
+                download_cl()
+            super().__init__(obo=obofile)
+
+        # Clean up nodes:
+        # edge_types = ["derived_from", "originate_from_same_individual_as"]
         nodes_to_delete = []
         for k, v in self.graph.nodes.items():
             if "name" not in v.keys():

@@ -6,7 +6,7 @@ print(tf.__version__)
 
 
 def write_meta(args0, args1):
-    args0.write_meta(fn_meta=None, dir_out=args1, fn_data=None)
+    args0.write_meta(fn_meta=None, dir_out=args1)
     return None
 
 
