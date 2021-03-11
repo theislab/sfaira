@@ -631,7 +631,7 @@ class DatasetBase(abc.ABC):
         # Load boolean labels:
         for x, y, z, v, w in (
             [self.healthy, adata_ids.healthy, self.healthy_obs_key, self.ontology_container_sfaira.healthy,
-             self.healthy_state_healthy]
+             self.healthy_state_healthy],
         ):
             if x is None and z is None:
                 self.adata.uns[y] = None
