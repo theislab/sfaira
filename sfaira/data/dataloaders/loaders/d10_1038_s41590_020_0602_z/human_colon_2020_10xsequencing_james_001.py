@@ -19,9 +19,10 @@ class Dataset(DatasetBase):
         self.normalization = "raw"
         self.organ = "colon"
         self.organism = "human"
-        self.protocol = "10X sequencing"
+        self.assay_sc = "10X sequencing"
         self.state_exact = "healthy"
         self.year = 2020
+        self.sample_source = "primary_tissue"
 
         self.var_symbol_col = "index"
         self.var_ensembl_col = "gene_ids"

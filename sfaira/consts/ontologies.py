@@ -1,6 +1,6 @@
 from sfaira.versions.metadata import OntologyList, OntologyCelltypes
 from sfaira.versions.metadata import OntologyUberon, OntologyHsapdv, OntologyMmusdv, \
-    OntologySinglecellLibraryConstruction
+    OntologySinglecellLibraryConstruction, OntologyCellosaurus
 
 
 class OntologyContainerSfaira:
@@ -11,7 +11,10 @@ class OntologyContainerSfaira:
         self.age = None
         self.annotated = OntologyList(terms=[True, False])
         self.author = None
-        self.assay = OntologySinglecellLibraryConstruction()
+        self.assay_differentiation = None
+        self.assay_sc = OntologySinglecellLibraryConstruction()
+        self.assay_type_differentiation = OntologyList(terms=["guided", "unguided"])
+        self.cell_line = OntologyCellosaurus()
         self.cellontology_class = "v2021-02-01"
         self.cellontology_original = None
         self.developmental_stage = None
@@ -22,6 +25,7 @@ class OntologyContainerSfaira:
         self.normalization = None
         self.organ = OntologyUberon()
         self.organism = OntologyList(terms=["mouse", "human"])
+        self.sample_source = OntologyList(terms=["primary_tissue", "2d_culture", "3d_culture", "cancer"])
         self.sex = OntologyList(terms=["female", "male"])
         self.year = OntologyList(terms=list(range(2000, 3000)))
 
