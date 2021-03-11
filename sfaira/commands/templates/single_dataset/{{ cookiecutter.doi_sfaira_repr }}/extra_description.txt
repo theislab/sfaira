@@ -1,2 +1,0 @@
-This file can be used to add further custom details for your dataset.
-Examples are: issues with cell type annotations, cell filtering choices or meta data which did not fit the yaml file, relevant links for potentially disputet annotations and more.
