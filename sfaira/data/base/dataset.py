@@ -937,7 +937,8 @@ class DatasetBase(abc.ABC):
         if os.path.exists(fn):
             self.cell_ontology_map = self._read_class_map(fn=fn)
         else:
-            warnings.warn(f"file {fn} does not exist")
+            if self.cellontology_original_obs_key is not None:
+                warnings.warn(f"file {fn} does not exist but cellontology_original_obs_key is given")
 
     def project_celltypes_to_ontology(self):
         """
