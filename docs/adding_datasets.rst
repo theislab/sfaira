@@ -203,7 +203,7 @@ In summary, a python file for a mouse lung data set could look like this:
         ):
             super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
             self.author = "me"
-            self.doi = "my preprint"
+            self.doi = ["my preprint", "my peer-reviewed publication"]
             self.download_url_data = "my GEO upload"
             self.normalisation = "raw"  # because I uploaded raw counts, which is good practice!
             self.organ = "lung"
@@ -222,6 +222,62 @@ In summary, a python file for a mouse lung data set could look like this:
 
 or as follows if you additionally also provide a yaml file:
 
+.. code-block:: yaml
+
+    dataset_structure:
+        dataset_index: 1
+        sample_fns:
+    dataset_wise:
+        author: "me"
+        doi:
+            - "my preprint"
+            - "my peer-reviewed publication"
+        download_url_data: "my GEO upload"
+        download_url_meta:
+        normalization: "raw"
+        year:
+    dataset_or_observation_wise:
+        age:
+        age_obs_key:
+        assay_sc: "smart-seq2"
+        assay_sc_obs_key:
+        assay_differentiation:
+        assay_differentiation_obs_key:
+        assay_type_differentiation:
+        assay_type_differentiation_obs_key:
+        bio_sample:
+        bio_sample_obs_key:
+        cell_line:
+        cell_line_obs_key:
+        development_stage:
+        development_stage_obs_key:
+        ethnicity:
+        ethnicity_obs_key:
+        healthy:
+        healthy_obs_key:
+        individual:
+        individual_obs_key:
+        organ: "lung"
+        organ_obs_key:
+        organism: "mouse"
+        organism_obs_key:
+        sample_source: "primary_tissue"
+        sample_source_obs_key:
+        sex:
+        sex_obs_key:
+        state_exact:
+        state_exact_obs_key:
+        tech_sample:
+        tech_sample_obs_key:
+    observation_wise:
+        cellontology_original_obs_key: "louvain_named"
+    feature_wise:
+        var_ensembl_col:
+        var_symbol_col:
+    misc:
+        healthy_state_healthy:
+    meta:
+        version: "1.0"
 
 .. code-block:: python
 
