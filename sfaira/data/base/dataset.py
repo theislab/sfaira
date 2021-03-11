@@ -630,7 +630,8 @@ class DatasetBase(abc.ABC):
             [self.assay_type_differentiation, self._adata_ids_sfaira.assay_type_differentiation,
              self.assay_type_differentiation_obs_key, self.ontology_container_sfaira.assay_type_differentiation],
             [self.bio_sample, self._adata_ids_sfaira.bio_sample, self.bio_sample_obs_key, None],
-            [self.cell_line, self._adata_ids_sfaira.cell_line, self.cell_line_obs_key, self._adata_ids_sfaira.cell_line],
+            [self.cell_line, self._adata_ids_sfaira.cell_line, self.cell_line_obs_key,
+             self.ontology_container_sfaira.cell_line],
             [self.development_stage, self._adata_ids_sfaira.development_stage, self.development_stage_obs_key,
              self.ontology_container_sfaira.developmental_stage],
             [self.ethnicity, self._adata_ids_sfaira.ethnicity, self.ethnicity_obs_key,
@@ -1096,7 +1097,7 @@ class DatasetBase(abc.ABC):
     ):
         def clean(s):
             if s is not None:
-                s = s.replace(' ', '').replace('-', '').replace('_', '').lower()
+                s = s.replace(' ', '').replace('-', '').replace('_', '').replace("'", '').lower()
             return s
 
         if self.sample_fn is not None:

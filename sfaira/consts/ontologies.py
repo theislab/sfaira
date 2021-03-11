@@ -25,7 +25,7 @@ class OntologyContainerSfaira:
         self.normalization = None
         self.organ = OntologyUberon()
         self.organism = OntologyList(terms=["mouse", "human"])
-        self.sample_source = OntologyList(terms=["primary_tissue", "2d_culture", "3d_culture", "cancer"])
+        self.sample_source = OntologyList(terms=["primary_tissue", "2d_culture", "3d_culture", "tumor"])
         self.sex = OntologyList(terms=["female", "male"])
         self.year = OntologyList(terms=list(range(2000, 3000)))
 
