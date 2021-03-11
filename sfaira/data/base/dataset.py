@@ -730,7 +730,9 @@ class DatasetBase(abc.ABC):
             adata_fields = AdataIdsCellxgene()
         else:
             raise ValueError(f"did not recognize format {format}")
-        self._set_metadata_in_adata(adata_ids=adata_fields)
+        if format != "sfaira":
+            # Meta data already set in sfaira form during load:
+            self._set_metadata_in_adata(adata_ids=adata_fields)
         if clean:
             if self.adata.varm is not None:
                 del self.adata.varm
@@ -749,6 +751,7 @@ class DatasetBase(abc.ABC):
                     adata_fields.download_url_data,
                     adata_fields.download_url_meta,
                     adata_fields.id,
+                    adata_fields.mapped_features,
                     adata_fields.normalization,
                     adata_fields.year,
                 ]
