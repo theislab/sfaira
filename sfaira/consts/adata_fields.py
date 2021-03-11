@@ -107,7 +107,11 @@ class AdataIdsSfaira(AdataIds):
 
         self.obs_keys = [
             "age",
+            "assay_sc",
+            "assay_differentiation",
+            "assay_type_differentiation",
             "bio_sample",
+            "cell_line"
             "development_stage",
             "ethnicity",
             "healthy",
@@ -116,6 +120,7 @@ class AdataIdsSfaira(AdataIds):
             "organism",
             "sex",
             "state_exact",
+            "sample_source",
             "tech_sample",
         ]
         self.var_keys = [
