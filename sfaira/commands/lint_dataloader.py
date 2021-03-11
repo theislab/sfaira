@@ -62,7 +62,11 @@ class DataloaderLinter:
         flattened_dict = flatten(self.content, reducer=make_reducer(delimiter=':'))
         for attribute in attributes:
             try:
-                if not flattened_dict[attribute]:
+                detected = False
+                for key in flattened_dict.keys():
+                    if key.startswith(attribute):
+                        detected = True
+                if not detected:
                     passed_required_attributes = False
                     self.failed['-1'] = f'Missing attribute: {attribute}'
             except KeyError:
