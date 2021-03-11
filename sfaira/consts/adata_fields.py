@@ -111,7 +111,7 @@ class AdataIdsSfaira(AdataIds):
             "assay_differentiation",
             "assay_type_differentiation",
             "bio_sample",
-            "cell_line"
+            "cell_line",
             "development_stage",
             "ethnicity",
             "healthy",
