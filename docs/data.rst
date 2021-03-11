@@ -203,6 +203,58 @@ in which local data and cell type annotation can be managed separately but still
 The data loaders and cell type annotation formats between sfaira and sfaira_extensions are identical and can be easily
 copied over.
 
+Loading third party annotation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In some cases, the data set in question is already in the sfaira zoo but there is alternative (third party), cell-wise
+annotation of the data.
+This could be different cell type annotation for example.
+The underlying data (count matrix and variable names) stay the same in these cases, and often, even some cell-wise
+meta data are kept and only some are added or replaced.
+Therefore, these cases do not require an additional `load()` function.
+Instead, you can contribute `load_annotation_*()` functions into the `.py` file of the corresponding study.
+You can chose an arbitrary suffix for the function but ideally one that identifies the source of this additional
+annotation in a human readable manner at least to someone who is familiar with this data set.
+Second you need to add this function into the dictionary `LOAD_ANNOTATION` in the `.py` file, with the suffix as a key.
+If this dictionary does not exist yet, you need to add it into the `.py` file with this function as its sole entry.
+Here an example of a `.py` file with additional annotation:
+
+.. code-block:: python
+
+    def load(data_dir, sample_fn, **kwargs):
+        pass
+
+    def load_annotation_meta_study_x(data_dir, sample_fn, **kwargs):
+        # Read a tabular file indexed with the observation names used in the adata used in load().
+        pass
+
+    def load_annotation_meta_study_y(data_dir, sample_fn, **kwargs):
+        # Read a tabular file indexed with the observation names used in the adata used in load().
+        pass
+
+    LOAD_ANNOTATION = {
+        "meta_study_x": load_annotation_meta_study_x,
+        "meta_study_y": load_annotation_meta_study_y,
+    }
+
+
+The table returned by `load_annotation_meta_study_x` needs to be indexed with the observation names used in `.adata`,
+the object generated in `load()`.
+If `load_annotation_meta_study_x` contains a subset of the observations defined in `load()`,
+and this alternative annotation is chosen,
+`.adata` is subsetted to these observations during loading.
+
+You can also add functions in the `.py` file in the same DOI-based module in sfaira_extensions if you want to keep this
+additional annotation private.
+For this to work with a public data loader, you need nothing more than the `.py` file with this `load_annotation_*()`
+function and the `LOAD_ANNOTATION` of these private functions in sfaira_extensions.
+
+To access additional annotation during loading, use the setter functions `additional_annotation_key` on an instance of
+either `Dataset`, `DatasetGroup` or `DatasetSuperGroup` to define data sets
+for which you want to load additional annotation and which additional you want to load for these.
+See also the docstrings of these functions for further details on how these can be set.
+
+
 Handling multiple data sources
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

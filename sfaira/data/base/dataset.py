@@ -131,17 +131,41 @@ class DatasetBase(abc.ABC):
     sample_fn: Union[None, str]
     _sample_fns: Union[None, List[str]]
 
+    _additional_annotation_key: Union[None, str]
+
     def __init__(
             self,
             data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             load_func=None,
+            dict_load_func_annotation=None,
             yaml_path: Union[str, None] = None,
             sample_fn: Union[str, None] = None,
             sample_fns: Union[List[str], None] = None,
+            additional_annotation_key: Union[str, None] = None,
             **kwargs
     ):
+        """
+
+        :param data_path:
+        :param meta_path:
+        :param cache_path:
+        :param load_func: Function to load data from disk into memory.
+
+            Signature: load(data_dir, sample_fn, **kwargs)
+        :param dict_load_func_annotation: Dictionary of functions to load additional observatino-wise annotation. The
+            functions in the values of the dictionary can be selected via  self.additional_annotation_key which needs
+            to correspond to a key of the dictionary.
+
+            Signature: Dict[str, load_annotation(data_dir, sample_fn, additional_annotation_key, **kwargs)]
+        :param yaml_path:
+        :param sample_fn:
+        :param sample_fns:
+        :param additional_annotation_key: Key used by dict_load_func_annotation to identify which additional annotation
+            is to be loaded.
+        :param kwargs:
+        """
         self._adata_ids_sfaira = AdataIdsSfaira()
         self.ontology_container_sfaira = OCS  # Using a pre-instantiated version of this yields drastic speed-ups.
 
@@ -227,6 +251,8 @@ class DatasetBase(abc.ABC):
             self.set_dataset_id(idx=yaml_vals["meta"]["dataset_index"])
 
         self.load_func = load_func
+        self.dict_load_func_annotation = dict_load_func_annotation
+        self._additional_annotation_key = additional_annotation_key
 
     @property
     def _directory_formatted_id(self) -> str:
@@ -355,6 +381,20 @@ class DatasetBase(abc.ABC):
         :return:
         """
 
+        def _assembly_wrapper():
+            self.adata = self.load_func(data_dir=self.data_dir, sample_fn=self.sample_fn)
+            # Enable loading of additional annotation, e.g. secondary cell type annotation
+            # The additional annotation `obs2 needs to be on a subset of the original annotation `self.adata.obs`.
+            if self.dict_load_func_annotation is not None:
+                obs2 = self.dict_load_func_annotation[self.additional_annotation_key](
+                    data_dir=self.data_dir, sample_fn=self.sample_fn)
+                assert np.all([x in self.adata.obs.index for x in obs2.index]), \
+                    "index mismatch between additional annotation and original"
+                self.adata = self.adata[obs2.index, :]
+                # Overwrite annotation
+                for k, v in obs2.items():
+                    self.adata.obs[k] = v
+
         def _cached_reading(filename):
             if filename is not None:
                 if os.path.exists(filename):
@@ -372,10 +412,10 @@ class DatasetBase(abc.ABC):
                 self.adata.write_h5ad(filename)
 
         if load_raw and allow_caching:
-            self.adata = self.load_func(data_dir=self.data_dir, sample_fn=self.sample_fn)
+            _assembly_wrapper()
             _cached_writing(self.cache_fn)
         elif load_raw and not allow_caching:
-            self.adata = self.load_func(data_dir=self.data_dir, sample_fn=self.sample_fn)
+            _assembly_wrapper()
         elif not load_raw and allow_caching:
             _cached_reading(self.cache_fn)
             _cached_writing(self.cache_fn)
@@ -418,7 +458,7 @@ class DatasetBase(abc.ABC):
         # Run data set-specific loading script:
         self._load_cached(load_raw=load_raw, allow_caching=allow_caching)
         # Set data-specific meta data in .adata:
-        self._set_metadata_in_adata(adata_ids=self._adata_ids_sfaira)
+        self._set_metadata_in_adata()
         # Set loading hyper-parameter-specific meta data:
         self.adata.uns[self._adata_ids_sfaira.load_raw] = load_raw
         self.adata.uns[self._adata_ids_sfaira.mapped_features] = match_to_reference
@@ -564,47 +604,47 @@ class DatasetBase(abc.ABC):
             uns=self.adata.uns
         )
 
-    def _set_metadata_in_adata(self, adata_ids: AdataIds):
+    def _set_metadata_in_adata(self):
         """
         Copy meta data from dataset class in .anndata.
 
         :return:
         """
         # Set data set-wide attributes (.uns):
-        self.adata.uns[adata_ids.annotated] = self.annotated
-        self.adata.uns[adata_ids.author] = self.author
-        self.adata.uns[adata_ids.doi] = self.doi
-        self.adata.uns[adata_ids.download_url_data] = self.download_url_data
-        self.adata.uns[adata_ids.download_url_meta] = self.download_url_meta
-        self.adata.uns[adata_ids.id] = self.id
-        self.adata.uns[adata_ids.normalization] = self.normalization
-        self.adata.uns[adata_ids.year] = self.year
+        self.adata.uns[self._adata_ids_sfaira.annotated] = self.annotated
+        self.adata.uns[self._adata_ids_sfaira.author] = self.author
+        self.adata.uns[self._adata_ids_sfaira.doi] = self.doi
+        self.adata.uns[self._adata_ids_sfaira.download_url_data] = self.download_url_data
+        self.adata.uns[self._adata_ids_sfaira.download_url_meta] = self.download_url_meta
+        self.adata.uns[self._adata_ids_sfaira.id] = self.id
+        self.adata.uns[self._adata_ids_sfaira.normalization] = self.normalization
+        self.adata.uns[self._adata_ids_sfaira.year] = self.year
 
         # Set cell-wise or data set-wide attributes (.uns / .obs):
         # These are saved in .uns if they are data set wide to save memory.
         for x, y, z, v in (
-            [self.age, adata_ids.age, self.age_obs_key, self.ontology_container_sfaira.age],
-            [self.assay_sc, adata_ids.assay_sc, self.assay_sc_obs_key, self.ontology_container_sfaira.assay_sc],
-            [self.assay_differentiation, adata_ids.assay_differentiation, self.assay_differentiation_obs_key,
+            [self.age, self._adata_ids_sfaira.age, self.age_obs_key, self.ontology_container_sfaira.age],
+            [self.assay_sc, self._adata_ids_sfaira.assay_sc, self.assay_sc_obs_key, self.ontology_container_sfaira.assay_sc],
+            [self.assay_differentiation, self._adata_ids_sfaira.assay_differentiation, self.assay_differentiation_obs_key,
              self.ontology_container_sfaira.assay_differentiation],
-            [self.assay_type_differentiation, adata_ids.assay_type_differentiation,
+            [self.assay_type_differentiation, self._adata_ids_sfaira.assay_type_differentiation,
              self.assay_type_differentiation_obs_key, self.ontology_container_sfaira.assay_type_differentiation],
-            [self.bio_sample, adata_ids.bio_sample, self.bio_sample_obs_key, None],
-            [self.cell_line, adata_ids.cell_line, self.cell_line_obs_key,
+            [self.bio_sample, self._adata_ids_sfaira.bio_sample, self.bio_sample_obs_key, None],
+            [self.cell_line, self._adata_ids_sfaira.cell_line, self.cell_line_obs_key,
              self.ontology_container_sfaira.cell_line],
-            [self.development_stage, adata_ids.development_stage, self.development_stage_obs_key,
+            [self.development_stage, self._adata_ids_sfaira.development_stage, self.development_stage_obs_key,
              self.ontology_container_sfaira.developmental_stage],
-            [self.ethnicity, adata_ids.ethnicity, self.ethnicity_obs_key,
+            [self.ethnicity, self._adata_ids_sfaira.ethnicity, self.ethnicity_obs_key,
              self.ontology_container_sfaira.ethnicity],
-            [self.individual, adata_ids.individual, self.individual_obs_key, None],
-            [self.organ, adata_ids.organ, self.organ_obs_key, self.ontology_container_sfaira.organ],
-            [self.organism, adata_ids.organism, self.organism_obs_key,
+            [self.individual, self._adata_ids_sfaira.individual, self.individual_obs_key, None],
+            [self.organ, self._adata_ids_sfaira.organ, self.organ_obs_key, self.ontology_container_sfaira.organ],
+            [self.organism, self._adata_ids_sfaira.organism, self.organism_obs_key,
              self.ontology_container_sfaira.organism],
-            [self.sample_source, adata_ids.sample_source, self.sample_source_obs_key,
+            [self.sample_source, self._adata_ids_sfaira.sample_source, self.sample_source_obs_key,
              self.ontology_container_sfaira.sample_source],
-            [self.sex, adata_ids.sex, self.sex_obs_key, self.ontology_container_sfaira.sex],
-            [self.state_exact, adata_ids.state_exact, self.state_exact_obs_key, None],
-            [self.tech_sample, adata_ids.tech_sample, self.tech_sample_obs_key, None],
+            [self.sex, self._adata_ids_sfaira.sex, self.sex_obs_key, self.ontology_container_sfaira.sex],
+            [self.state_exact, self._adata_ids_sfaira.state_exact, self.state_exact_obs_key, None],
+            [self.tech_sample, self._adata_ids_sfaira.tech_sample, self.tech_sample_obs_key, None],
         ):
             if x is None and z is None:
                 self.adata.uns[y] = None
@@ -631,7 +671,7 @@ class DatasetBase(abc.ABC):
                 assert False, "switch option should not occur"
         # Load boolean labels:
         for x, y, z, v, w in (
-            [self.healthy, adata_ids.healthy, self.healthy_obs_key, self.ontology_container_sfaira.healthy,
+            [self.healthy, self._adata_ids_sfaira.healthy, self.healthy_obs_key, self.ontology_container_sfaira.healthy,
              self.healthy_state_healthy],
         ):
             if x is None and z is None:
@@ -691,7 +731,6 @@ class DatasetBase(abc.ABC):
             adata_fields = AdataIdsCellxgene()
         else:
             raise ValueError(f"did not recognize format {format}")
-        self._set_metadata_in_adata(adata_ids=adata_fields)
         if clean:
             if self.adata.varm is not None:
                 del self.adata.varm
@@ -703,36 +742,22 @@ class DatasetBase(abc.ABC):
                 del self.adata.obsp
             # Only retain target elements in adata.uns:
             self.adata.uns = dict([
-                (k, v) for k, v in self.adata.uns.items() if k in [
-                    adata_fields.annotated,
-                    adata_fields.author,
-                    adata_fields.doi,
-                    adata_fields.download_url_data,
-                    adata_fields.download_url_meta,
-                    adata_fields.id,
-                    adata_fields.normalization,
-                    adata_fields.year,
-                ]
+                (getattr(adata_fields, k), self.adata.uns[getattr(self._adata_ids_sfaira, k)])
+                if getattr(self._adata_ids_sfaira, k) in self.adata.uns.keys() else None
+                for k in adata_fields.uns_keys
             ])
             # Only retain target elements in adata.var:
-            self.adata.var = self.adata.var.reindex(columns=[
-                adata_fields.gene_id_names,
-                adata_fields.gene_id_ensembl,
-            ])
+            self.adata.var = pd.DataFrame(dict([
+                (getattr(adata_fields, k), self.adata.var[getattr(self._adata_ids_sfaira, k)])
+                for k in adata_fields.var_keys
+                if getattr(self._adata_ids_sfaira, k) in self.adata.var.keys()
+            ]))
             # Only retain target columns in adata.obs:
-            self.adata.obs = self.adata.obs.reindex(columns=[
-                adata_fields.age,
-                adata_fields.bio_sample,
-                adata_fields.development_stage,
-                adata_fields.ethnicity,
-                adata_fields.healthy,
-                adata_fields.individual,
-                adata_fields.organ,
-                adata_fields.organism,
-                adata_fields.sex,
-                adata_fields.state_exact,
-                adata_fields.tech_sample,
-            ])
+            self.adata.obs = pd.DataFrame(dict([
+                (getattr(adata_fields, k), self.adata.obs[getattr(self._adata_ids_sfaira, k)])
+                for k in adata_fields.obs_keys
+                if getattr(self._adata_ids_sfaira, k) in self.adata.obs.keys()
+            ]))
 
     def load_tobacked(
             self,
@@ -898,7 +923,8 @@ class DatasetBase(abc.ABC):
         if os.path.exists(fn):
             self.cell_ontology_map = self._read_class_map(fn=fn)
         else:
-            warnings.warn(f"file {fn} does not exist")
+            if self.cellontology_original_obs_key is not None:
+                warnings.warn(f"file {fn} does not exist but cellontology_original_obs_key is given")
 
     def project_celltypes_to_ontology(self):
         """
@@ -1094,6 +1120,14 @@ class DatasetBase(abc.ABC):
                   f"{self.doi_main}"
 
     # Properties:
+
+    @property
+    def additional_annotation_key(self) -> Union[None, str]:
+        return self._additional_annotation_key
+
+    @additional_annotation_key.setter
+    def additional_annotation_key(self, x: str):
+        self._additional_annotation_key = x
 
     @property
     def age(self) -> Union[None, str]:

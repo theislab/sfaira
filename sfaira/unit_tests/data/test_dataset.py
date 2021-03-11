@@ -39,22 +39,6 @@ def test_dsgs_config_write_load():
     assert np.all(ds.ids == ds2.ids)
 
 
-def test_dsg_load():
-    ds = DatasetSuperGroupSfaira(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
-    ds.subset(key="organism", values=["mouse"])
-    ds.subset(key="organ", values=["lung"])
-    ds = DatasetSuperGroup(dataset_groups=[ds])
-    ds.load()
-
-
-def test_dsg_adata():
-    ds = DatasetSuperGroupSfaira(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
-    ds.subset(key="organism", values=["mouse"])
-    ds.subset(key="organ", values=["lung"])
-    ds = DatasetSuperGroup(dataset_groups=[ds])
-    _ = ds.adata
-
-
 """
 TODO tests from here on down require cached data for mouse lung
 """
@@ -132,3 +116,19 @@ def test_dsg_load_backed_sparse(genome="Mus_musculus_GRCm38_97"):
         annotated_only=False
     )
     assert isinstance(ds.adata.X[:], scipy.sparse.csr_matrix), "%s" % type(ds.adata.X)
+
+
+def test_dsg_load():
+    ds = DatasetSuperGroupSfaira(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
+    ds.subset(key="organism", values=["mouse"])
+    ds.subset(key="organ", values=["lung"])
+    ds = DatasetSuperGroup(dataset_groups=[ds])
+    ds.load()
+
+
+def test_dsg_adata():
+    ds = DatasetSuperGroupSfaira(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
+    ds.subset(key="organism", values=["mouse"])
+    ds.subset(key="organ", values=["lung"])
+    ds = DatasetSuperGroup(dataset_groups=[ds])
+    _ = ds.adata
