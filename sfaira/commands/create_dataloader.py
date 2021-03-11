@@ -2,7 +2,7 @@ import logging
 import os
 import re
 from dataclasses import dataclass, asdict
-from typing import Union
+from typing import Union, Dict
 
 from sfaira.commands.questionary import sfaira_questionary
 from rich import print
@@ -22,7 +22,7 @@ class TemplateAttributes:
     doi: str = ''  # doi of data set accompanying manuscript
     doi_sfaira_repr: str = ''  # internal representation with any special characters replaced with underscores
 
-    sample_fns: str = ''  # file name of the first *.h5ad file
+    sample_fns: Union[str, Dict[str, list]] = ''  # file name of the first *.h5ad file
     download_url_data: str = ''  # download website(s) of data files
     download_url_meta: str = ''  # download website(s) of meta data files
     organ: str = ''  # (*) organ (anatomical structure)
@@ -64,8 +64,6 @@ class DataloaderCreator:
         if number_datasets == 'One':
             self.template_attributes.dataloader_type = 'single_dataset'
         else:
-            print('[bold blue]In the following prompts only enter the by all datasets shared attributes.')
-            print('[bold blue]Edit the yaml file afterwards to specify attributes per dataset.')
             self.template_attributes.dataloader_type = 'multiple_datasets'
 
     def _prompt_dataloader_configuration(self):
@@ -87,9 +85,23 @@ class DataloaderCreator:
         self.template_attributes.doi = doi
         self.template_attributes.doi_sfaira_repr = f'd{doi.translate({ord(c): "_" for c in r"!@#$%^&*()[]/{};:,.<>?|`~-=_+"})}'
 
-        self.template_attributes.sample_fns = sfaira_questionary(function='text',
-                                                                 question='Sample file name of the first dataset:',
-                                                                 default='data.h5ad')
+        self.template_attributes.number_of_datasets = sfaira_questionary(function='text',
+                                                                         question='Number of datasets:',
+                                                                         default='1')
+
+        # Differentiate between a single dataset or multiple datasets to get sample file names
+        if self.template_attributes.dataloader_type == 'multiple_datasets':
+            self.template_attributes.sample_fns = {'fns': []}
+            for ds in range(int(self.template_attributes.number_of_datasets)):
+                fn = sfaira_questionary(function='text',
+                                        question='Sample file name:',
+                                        default=f'data_{ds}.h5ad')
+                self.template_attributes.sample_fns['fns'].append(fn)
+        else:
+            self.template_attributes.sample_fns = sfaira_questionary(function='text',
+                                                                     question='Sample file name of the first dataset:',
+                                                                     default='data.h5ad')
+
         self.template_attributes.organism = sfaira_questionary(function='text',
                                                                question='Organism:',
                                                                default='NA')
@@ -136,7 +148,7 @@ class DataloaderCreator:
         return {key: val for key, val in asdict(self.template_attributes).items() if val != ''}
 
     def _create_dataloader_template(self):
-        template_path = f'{self.TEMPLATES_PATH}/single_dataset'
+        template_path = f'{self.TEMPLATES_PATH}/{self.template_attributes.dataloader_type}'
         cookiecutter(f'{template_path}',
                      no_input=True,
                      overwrite_if_exists=True,
