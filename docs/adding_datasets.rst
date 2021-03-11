@@ -54,6 +54,7 @@ Each data set, ie a single file or a set of files with similar structures, has i
 files that describes its meta data.
 Alternatively to the yaml file, meta data can be also be described in a constructor of a class in the same python file
 as the loading function.
+A detailed description of all meta data is given at the bottom of this page.
 
 1. A yaml file or constructor of the following form that can be used to interact with the data set
 before it is loaded into memory:
@@ -422,35 +423,45 @@ Metadata management
 
 We constrain meta data by ontologies where possible. The current restrictions are:
 
-    - .age: unconstrained string, try using units of years for human, units of months for mice and units of days for
-        cell culture samples
-    - .assay_sc: unconstrained string, this will constrained to an experimental protocol ontology in the future,
-        try choosing a term from https://www.ebi.ac.uk/ols/ontologies/efo/terms?iri=http%3A%2F%2Fwww.ebi.ac.uk%2Fefo%2FEFO_0010183&viewMode=All&siblings=false
-    - .assay_differentiation: unconstrained string, try to provide a base differentiation protocol (eg. Lancaster, 2014)
-        as well as any amendments to the original protocol
+    - .age: unconstrained string
+        Use
+            - units of years for humans,
+            - the E{day} nomenclature for mouse embryos
+            - the P{day} nomenclature for young post-natal mice
+            - units of weeks for mice older than one week and
+            - units of days for cell culture samples.
+    - .assay_sc: EFO-constrained string
+        Choose a term from https://www.ebi.ac.uk/ols/ontologies/efo/terms?iri=http%3A%2F%2Fwww.ebi.ac.uk%2Fefo%2FEFO_0010183&viewMode=All&siblings=false
+    - .assay_differentiation: unconstrained string
+        Try to provide a base differentiation protocol (eg. Lancaster, 2014) as well as any amendments to the original protocol.
     - .assay_type_differentiation: constrained string, {"guided", "unguided"}
-    - .developmental_stage: unconstrained string, this will constrained to an ontology in the future,
+        The type of differentiation.
+    - .developmental_stage: unconstrained string
+        This will constrained to an ontology in the future,
         try choosing from HSAPDV (http://www.obofoundry.org/ontology/hsapdv.html) for human
-        or from MMUSDEV (http://www.obofoundry.org/ontology/mmusdv.html) for mouse
-    - .cell_line: unconstrained string, this will be constrained to an ontology later. try choosing from cellosaurus
-        cell line database (https://web.expasy.org/cellosaurus/)
-    - .ethnicity: unconstrained string, this will constrained to an ontology in the future,
-        try choosing from HANCESTRO (https://www.ebi.ac.uk/ols/ontologies/hancestro)
+        or from MMUSDEV (http://www.obofoundry.org/ontology/mmusdv.html) for mouse.
+    - .cell_line: unconstrained string, this will be constrained to an ontology later.
+        Try choosing from cellosaurus cell line database (https://web.expasy.org/cellosaurus/)
+    - .ethnicity: unconstrained string, this will constrained to an ontology in the future.
+        Try choosing from HANCESTRO (https://www.ebi.ac.uk/ols/ontologies/hancestro)
     - .healthy: bool
+        Whether the sample is from healthy tissue.
     - .normalisation: unconstrained string, this will constrained to an ontology in the future,
-        try using {"raw", "scaled"}
-    - .organ: unconstrained string, this will constrained to an ontology in the future, try to choose
-        term from Uberon (http://www.obofoundry.org/ontology/ehdaa2.html)
-        or from EHDAA2 (http://www.obofoundry.org/ontology/ehdaa2.html) for human
-        or from EMAPA (http://www.obofoundry.org/ontology/emapa.html) for mouse
-    - .organism: constrained string, {"mouse", "human"}. In the future, we will use NCBITAXON
-        (http://www.obofoundry.org/ontology/ncbitaxon.html).
+        Try to use {"raw", "scaled"}.
+    - .organ: UBERON-constrained string
+        The anatomic location of the sample.
+    - .organism: constrained string, {"mouse", "human"}.
+        The organism from which the sample originates.
+        In the future, we will use NCBITAXON (http://www.obofoundry.org/ontology/ncbitaxon.html).
     - .sample_source: constrained string, {"primary_tissue", "2d_culture", "3d_culture", "cancer"}
-    - .sex: constrained string, {"female", "male"}
+        Type of cellular systems.
+    - .sex: constrained string, {"female", "male", None}
+        Sex of the individual sampled.
     - .state_exact: unconstrained string, try to be concise and anticipate that this field is queried by automatised searches.
         If you give treatment concentrations, intervals or similar measurements use square brackets around the quantity
         and use units: `[1g]`
     - .year: must be an integer year, e.g. 2020
+        Year in which sample was first described (e.g. pre-print publication).
 
 Follow this issue_ for details on upcoming ontology integrations.
 
