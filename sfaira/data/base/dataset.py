@@ -872,7 +872,7 @@ class DatasetBase(abc.ABC):
         """
         Load class maps of free text cell types to ontology classes.
 
-        :param fn: File name of csv to load class maps from.
+        :param fn: File name of tsv to write class maps to.
         :param protected_writing: Only write if file was not already found.
         :return:
         """
