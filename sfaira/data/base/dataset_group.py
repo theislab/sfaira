@@ -27,13 +27,14 @@ def map_fn(inputs):
     :param inputs:
     :return: None if function ran, error report otherwise
     """
-    ds, remove_gene_version, match_to_reference, load_raw, allow_caching, func, kwargs_func = inputs
+    ds, remove_gene_version, match_to_reference, load_raw, allow_caching, set_metadata, func, kwargs_func = inputs
     try:
         ds.load(
             remove_gene_version=remove_gene_version,
             match_to_reference=match_to_reference,
             load_raw=load_raw,
             allow_caching=allow_caching,
+            set_metadata=set_metadata,
         )
         if func is not None:
             x = func(ds, **kwargs_func)
@@ -85,6 +86,7 @@ class DatasetGroup:
             match_to_reference: Union[str, bool, None] = None,
             load_raw: bool = False,
             allow_caching: bool = True,
+            set_metadata: bool = True,
             processes: int = 1,
             func=None,
             kwargs_func: Union[None, dict] = None,
@@ -112,6 +114,7 @@ class DatasetGroup:
             match_to_reference,
             load_raw,
             allow_caching,
+            set_metadata,
             func,
             kwargs_func
         ]
@@ -732,6 +735,7 @@ class DatasetSuperGroup:
             match_to_reference: Union[str, bool, None] = None,
             remove_gene_version: bool = True,
             load_raw: bool = False,
+            set_metadata: bool = True,
             allow_caching: bool = True,
             processes: int = 1,
     ):
@@ -754,6 +758,7 @@ class DatasetSuperGroup:
                 match_to_reference=match_to_reference,
                 load_raw=load_raw,
                 allow_caching=allow_caching,
+                set_metadata=set_metadata,
                 processes=processes,
             )
 

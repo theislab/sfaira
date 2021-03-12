@@ -428,6 +428,7 @@ class DatasetBase(abc.ABC):
             match_to_reference: Union[str, bool, None] = None,
             load_raw: bool = False,
             allow_caching: bool = True,
+            set_metadata: bool = True,
     ):
         if match_to_reference and not remove_gene_version:
             warnings.warn("it is not recommended to enable matching the feature space to a genomes reference"
@@ -457,8 +458,9 @@ class DatasetBase(abc.ABC):
 
         # Run data set-specific loading script:
         self._load_cached(load_raw=load_raw, allow_caching=allow_caching)
-        # Set data-specific meta data in .adata:
-        self._set_metadata_in_adata()
+        if set_metadata:
+            # Set data-specific meta data in .adata:
+            self._set_metadata_in_adata()
         # Set loading hyper-parameter-specific meta data:
         self.adata.uns[self._adata_ids_sfaira.load_raw] = load_raw
         self.adata.uns[self._adata_ids_sfaira.mapped_features] = match_to_reference
@@ -1854,7 +1856,7 @@ class DatasetBase(abc.ABC):
 
     @property
     def celltypes_universe(self):
-        if self._celltype_universe:
+        if self._celltype_universe is None:
             self._celltype_universe = CelltypeUniverse(
                 cl=self.ontology_celltypes,
                 uberon=self.ontology_container_sfaira.organ,
