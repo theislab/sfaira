@@ -239,7 +239,7 @@ class DatasetGroup:
         """
         Write cell type maps of free text cell types to ontology classes.
 
-        :param fn: File name of csv to load class maps from.
+        :param fn: File name of tsv to write class maps to.
         :param protected_writing: Only write if file was not already found.
         """
         tab = []
@@ -925,7 +925,7 @@ class DatasetSuperGroup:
         """
         for x in self.dataset_groups:
             x.subset(key=key, values=values)
-        self.dataset_groups = [x for x in self.dataset_groups if x.datasets is not None]  # Delete empty DatasetGroups
+        self.dataset_groups = [x for x in self.dataset_groups if x.datasets]  # Delete empty DatasetGroups
 
     def subset_cells(self, key, values: Union[str, List[str]]):
         """
