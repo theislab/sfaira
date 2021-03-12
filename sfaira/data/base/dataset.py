@@ -1854,7 +1854,7 @@ class DatasetBase(abc.ABC):
 
     @property
     def celltypes_universe(self):
-        if self._celltype_universe:
+        if not self._celltype_universe:
             self._celltype_universe = CelltypeUniverse(
                 cl=self.ontology_celltypes,
                 uberon=self.ontology_container_sfaira.organ,
