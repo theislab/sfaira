@@ -27,13 +27,14 @@ def map_fn(inputs):
     :param inputs:
     :return: None if function ran, error report otherwise
     """
-    ds, remove_gene_version, match_to_reference, load_raw, allow_caching, func, kwargs_func = inputs
+    ds, remove_gene_version, match_to_reference, load_raw, allow_caching, set_metadata, func, kwargs_func = inputs
     try:
         ds.load(
             remove_gene_version=remove_gene_version,
             match_to_reference=match_to_reference,
             load_raw=load_raw,
             allow_caching=allow_caching,
+            set_metadata=set_metadata,
         )
         if func is not None:
             x = func(ds, **kwargs_func)
@@ -85,6 +86,7 @@ class DatasetGroup:
             match_to_reference: Union[str, bool, None] = None,
             load_raw: bool = False,
             allow_caching: bool = True,
+            set_metadata: bool = True,
             processes: int = 1,
             func=None,
             kwargs_func: Union[None, dict] = None,
@@ -112,6 +114,7 @@ class DatasetGroup:
             match_to_reference,
             load_raw,
             allow_caching,
+            set_metadata,
             func,
             kwargs_func
         ]
@@ -239,7 +242,7 @@ class DatasetGroup:
         """
         Write cell type maps of free text cell types to ontology classes.
 
-        :param fn: File name of csv to load class maps from.
+        :param fn: File name of tsv to write class maps to.
         :param protected_writing: Only write if file was not already found.
         """
         tab = []
@@ -454,6 +457,29 @@ class DatasetGroup:
             if self.datasets[x].ncells == 0:  # No observations (cells) left.
                 del self.datasets[x]
 
+    @property
+    def additional_annotation_key(self) -> Dict[str, Union[None, str]]:
+        """"
+        Return dictionary of additional_annotation_key for each data set with ids as keys.
+        """
+        return dict([
+            (k, self.datasets[k].additional_annotation_key)
+            for k, v in self.datasets.items()
+        ])
+
+    @additional_annotation_key.setter
+    def additional_annotation_key(self, x: Dict[str, Union[None, str]]):
+        """
+        Allows setting of additional_annotation_key in a subset of datasets identifed by keys in x.
+
+        :param x: Dictionary with data set ids in keys and new _additional_annotation_key values to be setted in values.
+            Note that you can either add  or change secondary annotation by setting a value to a string or remove it
+            by setting a value to None.
+        :return:
+        """
+        for k, v in x.items():
+            self.datasets[k].additional_annotation_key = v
+
 
 class DatasetGroupDirectoryOriented(DatasetGroup):
 
@@ -481,8 +507,10 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
         datasets = []
         self._cwd = os.path.dirname(file_base)
         dataset_module = str(self._cwd.split("/")[-1])
-        loader_pydoc_path = "sfaira.data.dataloaders.loaders." if str(self._cwd.split("/")[-5]) == "sfaira" else \
-            "sfaira_extension.data.dataloaders.loaders."
+        package_source = "sfaira" if str(self._cwd.split("/")[-5]) == "sfaira" else "sfairae"
+        loader_pydoc_path_sfaira = "sfaira.data.dataloaders.loaders."
+        loader_pydoc_path_sfairae = "sfaira_extension.data.dataloaders.loaders."
+        loader_pydoc_path = loader_pydoc_path_sfaira if package_source == "sfaira" else loader_pydoc_path_sfairae
         if "group.py" in os.listdir(self._cwd):
             DatasetGroupFound = pydoc.locate(loader_pydoc_path + dataset_module + ".group.DatasetGroup")
             dsg = DatasetGroupFound(data_path=data_path, meta_path=meta_path, cache_path=cache_path)
@@ -499,6 +527,17 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                         # - load(): Loading function that return anndata instance.
                         # - SAMPLE_FNS: File name list for DatasetBaseGroupLoadingManyFiles
                         load_func = pydoc.locate(loader_pydoc_path + dataset_module + "." + file_module + ".load")
+                        load_func_annotation = \
+                            pydoc.locate(loader_pydoc_path + dataset_module + "." + file_module + ".LOAD_ANNOTATION")
+                        # Also check sfaira_extension for additional load_func_annotation:
+                        if package_source != "sfairae":
+                            load_func_annotation_sfairae = pydoc.locate(loader_pydoc_path_sfairae + dataset_module +
+                                                                        "." + file_module + ".LOAD_ANNOTATION")
+                            # LOAD_ANNOTATION is a dictionary so we can use update to extend it.
+                            if load_func_annotation_sfairae is not None and load_func_annotation is not None:
+                                load_func_annotation.update(load_func_annotation_sfairae)
+                            elif load_func_annotation_sfairae is not None and load_func_annotation is None:
+                                load_func_annotation = load_func_annotation_sfairae
                         sample_fns = pydoc.locate(loader_pydoc_path + dataset_module + "." + file_module +
                                                   ".SAMPLE_FNS")
                         fn_yaml = os.path.join(self._cwd, file_module + ".yaml")
@@ -521,6 +560,7 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                                         meta_path=meta_path,
                                         cache_path=cache_path,
                                         load_func=load_func,
+                                        dict_load_func_annotation=load_func_annotation,
                                         sample_fn=x,
                                         sample_fns=sample_fns if sample_fns != [None] else None,
                                         yaml_path=fn_yaml,
@@ -534,6 +574,7 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                                         meta_path=meta_path,
                                         cache_path=cache_path,
                                         load_func=load_func,
+                                        load_func_annotation=load_func_annotation,
                                         sample_fn=x,
                                         sample_fns=sample_fns if sample_fns != [None] else None,
                                         yaml_path=fn_yaml,
@@ -694,6 +735,7 @@ class DatasetSuperGroup:
             match_to_reference: Union[str, bool, None] = None,
             remove_gene_version: bool = True,
             load_raw: bool = False,
+            set_metadata: bool = True,
             allow_caching: bool = True,
             processes: int = 1,
     ):
@@ -716,6 +758,7 @@ class DatasetSuperGroup:
                 match_to_reference=match_to_reference,
                 load_raw=load_raw,
                 allow_caching=allow_caching,
+                set_metadata=set_metadata,
                 processes=processes,
             )
 
@@ -887,7 +930,7 @@ class DatasetSuperGroup:
         """
         for x in self.dataset_groups:
             x.subset(key=key, values=values)
-        self.dataset_groups = [x for x in self.dataset_groups if x.datasets is not None]  # Delete empty DatasetGroups
+        self.dataset_groups = [x for x in self.dataset_groups if x.datasets]  # Delete empty DatasetGroups
 
     def subset_cells(self, key, values: Union[str, List[str]]):
         """
@@ -945,3 +988,38 @@ class DatasetSuperGroup:
         tab = pd.read_csv(fn, header=0, index_col=None, sep="\t")
         ids_keep = tab["id"].values
         self.subset(key="id", values=ids_keep)
+
+    @property
+    def additional_annotation_key(self) -> List[Dict[str, Union[None, str]]]:
+        """"
+        Return list (by data set group) of dictionaries of additional_annotation_key for each data set with ids as keys.
+        """
+        return [
+            dict([
+                (k, x.datasets[k].additional_annotation_key)
+                for k, v in x.datasets.items()
+            ]) for x in self.dataset_groups
+        ]
+
+    @additional_annotation_key.setter
+    def additional_annotation_key(self, x: Dict[str, Union[None, str]]):
+        """
+        Allows setting of additional_annotation_key in a subset of datasets identifed by keys in x.
+
+        The input is not structured by DatasetGroups but only by ID, all groups are checked for matching IDs.
+
+        :param x: Dictionary with data set ids in keys and new _additional_annotation_key values to be setted in values.
+            Note that you can either add  or change secondary annotation by setting a value to a string or remove it
+            by setting a value to None.
+        :return:
+        """
+        for k, v in x.items():
+            counter = 0
+            for x in self.dataset_groups:
+                if k in x.ids:
+                    x.datasets[k].additional_annotation_key = v
+                    counter += 1
+            if counter == 0:
+                warnings.warn(f"did not data set matching ID {k}")
+            elif counter > 1:
+                warnings.warn(f"found more than one ({counter}) data set matching ID {k}")

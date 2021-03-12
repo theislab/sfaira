@@ -49,7 +49,9 @@ def is_child(
         of this parent node.
     :return: Whether attempted term is sub-term of allowed term in ontology
     """
-    if ontology is not None:
+    if ontology_parent is None and ontology is None:
+        return True
+    else:
         if isinstance(ontology, Ontology):
             if ontology_parent is None:
                 return ontology.is_node(query)
@@ -59,8 +61,6 @@ def is_child(
             return query == ontology_parent
         else:
             raise ValueError(f"did not recognize ontology type {type(ontology)}")
-    else:
-        return True
 
 
 class DatasetBase(abc.ABC):
@@ -131,17 +131,41 @@ class DatasetBase(abc.ABC):
     sample_fn: Union[None, str]
     _sample_fns: Union[None, List[str]]
 
+    _additional_annotation_key: Union[None, str]
+
     def __init__(
             self,
             data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
             load_func=None,
+            dict_load_func_annotation=None,
             yaml_path: Union[str, None] = None,
             sample_fn: Union[str, None] = None,
             sample_fns: Union[List[str], None] = None,
+            additional_annotation_key: Union[str, None] = None,
             **kwargs
     ):
+        """
+
+        :param data_path:
+        :param meta_path:
+        :param cache_path:
+        :param load_func: Function to load data from disk into memory.
+
+            Signature: load(data_dir, sample_fn, **kwargs)
+        :param dict_load_func_annotation: Dictionary of functions to load additional observatino-wise annotation. The
+            functions in the values of the dictionary can be selected via  self.additional_annotation_key which needs
+            to correspond to a key of the dictionary.
+
+            Signature: Dict[str, load_annotation(data_dir, sample_fn, additional_annotation_key, **kwargs)]
+        :param yaml_path:
+        :param sample_fn:
+        :param sample_fns:
+        :param additional_annotation_key: Key used by dict_load_func_annotation to identify which additional annotation
+            is to be loaded.
+        :param kwargs:
+        """
         self._adata_ids_sfaira = AdataIdsSfaira()
         self.ontology_container_sfaira = OCS  # Using a pre-instantiated version of this yields drastic speed-ups.
 
@@ -227,6 +251,8 @@ class DatasetBase(abc.ABC):
             self.set_dataset_id(idx=yaml_vals["meta"]["dataset_index"])
 
         self.load_func = load_func
+        self.dict_load_func_annotation = dict_load_func_annotation
+        self._additional_annotation_key = additional_annotation_key
 
     @property
     def _directory_formatted_id(self) -> str:
@@ -355,6 +381,20 @@ class DatasetBase(abc.ABC):
         :return:
         """
 
+        def _assembly_wrapper():
+            self.adata = self.load_func(data_dir=self.data_dir, sample_fn=self.sample_fn)
+            # Enable loading of additional annotation, e.g. secondary cell type annotation
+            # The additional annotation `obs2 needs to be on a subset of the original annotation `self.adata.obs`.
+            if self.dict_load_func_annotation is not None:
+                obs2 = self.dict_load_func_annotation[self.additional_annotation_key](
+                    data_dir=self.data_dir, sample_fn=self.sample_fn)
+                assert np.all([x in self.adata.obs.index for x in obs2.index]), \
+                    "index mismatch between additional annotation and original"
+                self.adata = self.adata[obs2.index, :]
+                # Overwrite annotation
+                for k, v in obs2.items():
+                    self.adata.obs[k] = v
+
         def _cached_reading(filename):
             if filename is not None:
                 if os.path.exists(filename):
@@ -372,10 +412,10 @@ class DatasetBase(abc.ABC):
                 self.adata.write_h5ad(filename)
 
         if load_raw and allow_caching:
-            self.adata = self.load_func(data_dir=self.data_dir, sample_fn=self.sample_fn)
+            _assembly_wrapper()
             _cached_writing(self.cache_fn)
         elif load_raw and not allow_caching:
-            self.adata = self.load_func(data_dir=self.data_dir, sample_fn=self.sample_fn)
+            _assembly_wrapper()
         elif not load_raw and allow_caching:
             _cached_reading(self.cache_fn)
             _cached_writing(self.cache_fn)
@@ -388,6 +428,7 @@ class DatasetBase(abc.ABC):
             match_to_reference: Union[str, bool, None] = None,
             load_raw: bool = False,
             allow_caching: bool = True,
+            set_metadata: bool = True,
     ):
         if match_to_reference and not remove_gene_version:
             warnings.warn("it is not recommended to enable matching the feature space to a genomes reference"
@@ -417,8 +458,9 @@ class DatasetBase(abc.ABC):
 
         # Run data set-specific loading script:
         self._load_cached(load_raw=load_raw, allow_caching=allow_caching)
-        # Set data-specific meta data in .adata:
-        self._set_metadata_in_adata(adata_ids=self._adata_ids_sfaira)
+        if set_metadata:
+            # Set data-specific meta data in .adata:
+            self._set_metadata_in_adata()
         # Set loading hyper-parameter-specific meta data:
         self.adata.uns[self._adata_ids_sfaira.load_raw] = load_raw
         self.adata.uns[self._adata_ids_sfaira.mapped_features] = match_to_reference
@@ -467,7 +509,7 @@ class DatasetBase(abc.ABC):
                     axis='columns'
                 )
         # If only symbol or ensembl was supplied, the other one is inferred from a genome mapping dictionary.
-        if not ensembl_col and match_to_reference:
+        if not ensembl_col and not (isinstance(match_to_reference, bool) and not match_to_reference):
             id_dict = self.genome_container.names_to_id_dict
             id_strip_dict = self.genome_container.strippednames_to_id_dict
             # Matching gene names to ensembl ids in the following way: if the gene is present in the ensembl dictionary,
@@ -483,7 +525,7 @@ class DatasetBase(abc.ABC):
                     ensids.append('n/a')
             self.adata.var[self._adata_ids_sfaira.gene_id_ensembl] = ensids
 
-        if not symbol_col and match_to_reference:
+        if not symbol_col and not (isinstance(match_to_reference, bool) and not match_to_reference):
             id_dict = self.genome_container.id_to_names_dict
             self.adata.var[self._adata_ids_sfaira.gene_id_names] = [
                 id_dict[n.split(".")[0]] if n.split(".")[0] in id_dict.keys() else 'n/a'
@@ -512,7 +554,7 @@ class DatasetBase(abc.ABC):
         # Collapse if necessary:
         self.adata = collapse_matrix(adata=self.adata)
 
-        self.adata.var[self._adata_ids_sfaira.gene_id_ensembl] = self.adata.var_names
+        self.adata.var[self._adata_ids_sfaira.gene_id_index] = self.adata.var_names
         self.adata.var.index = self.adata.var[self._adata_ids_sfaira.gene_id_ensembl].values
 
     def _match_features_to_reference(self):
@@ -564,48 +606,47 @@ class DatasetBase(abc.ABC):
             uns=self.adata.uns
         )
 
-    def _set_metadata_in_adata(self, adata_ids: AdataIds):
+    def _set_metadata_in_adata(self):
         """
         Copy meta data from dataset class in .anndata.
 
         :return:
         """
         # Set data set-wide attributes (.uns):
-        self.adata.uns[adata_ids.annotated] = self.annotated
-        self.adata.uns[adata_ids.author] = self.author
-        self.adata.uns[adata_ids.doi] = self.doi
-        self.adata.uns[adata_ids.download_url_data] = self.download_url_data
-        self.adata.uns[adata_ids.download_url_meta] = self.download_url_meta
-        self.adata.uns[adata_ids.id] = self.id
-        self.adata.uns[adata_ids.normalization] = self.normalization
-        self.adata.uns[adata_ids.year] = self.year
+        self.adata.uns[self._adata_ids_sfaira.annotated] = self.annotated
+        self.adata.uns[self._adata_ids_sfaira.author] = self.author
+        self.adata.uns[self._adata_ids_sfaira.doi] = self.doi
+        self.adata.uns[self._adata_ids_sfaira.download_url_data] = self.download_url_data
+        self.adata.uns[self._adata_ids_sfaira.download_url_meta] = self.download_url_meta
+        self.adata.uns[self._adata_ids_sfaira.id] = self.id
+        self.adata.uns[self._adata_ids_sfaira.normalization] = self.normalization
+        self.adata.uns[self._adata_ids_sfaira.year] = self.year
 
         # Set cell-wise or data set-wide attributes (.uns / .obs):
         # These are saved in .uns if they are data set wide to save memory.
         for x, y, z, v in (
-            [self.age, adata_ids.age, self.age_obs_key, self.ontology_container_sfaira.age],
-            [self.assay_sc, adata_ids.assay_sc, self.assay_sc_obs_key, self.ontology_container_sfaira.assay_sc],
-            [self.assay_differentiation, adata_ids.assay_differentiation, self.assay_differentiation_obs_key,
+            [self.age, self._adata_ids_sfaira.age, self.age_obs_key, self.ontology_container_sfaira.age],
+            [self.assay_sc, self._adata_ids_sfaira.assay_sc, self.assay_sc_obs_key, self.ontology_container_sfaira.assay_sc],
+            [self.assay_differentiation, self._adata_ids_sfaira.assay_differentiation, self.assay_differentiation_obs_key,
              self.ontology_container_sfaira.assay_differentiation],
-            [self.assay_type_differentiation, adata_ids.assay_type_differentiation,
+            [self.assay_type_differentiation, self._adata_ids_sfaira.assay_type_differentiation,
              self.assay_type_differentiation_obs_key, self.ontology_container_sfaira.assay_type_differentiation],
-            [self.bio_sample, adata_ids.bio_sample, self.bio_sample_obs_key, None],
-            [self.cell_line, adata_ids.cell_line, self.cell_line_obs_key,
+            [self.bio_sample, self._adata_ids_sfaira.bio_sample, self.bio_sample_obs_key, None],
+            [self.cell_line, self._adata_ids_sfaira.cell_line, self.cell_line_obs_key,
              self.ontology_container_sfaira.cell_line],
-            [self.development_stage, adata_ids.development_stage, self.development_stage_obs_key,
+            [self.development_stage, self._adata_ids_sfaira.development_stage, self.development_stage_obs_key,
              self.ontology_container_sfaira.developmental_stage],
-            [self.ethnicity, adata_ids.ethnicity, self.ethnicity_obs_key,
+            [self.ethnicity, self._adata_ids_sfaira.ethnicity, self.ethnicity_obs_key,
              self.ontology_container_sfaira.ethnicity],
-            [self.healthy, adata_ids.healthy, self.healthy_obs_key, self.ontology_container_sfaira.healthy],
-            [self.individual, adata_ids.individual, self.individual_obs_key, None],
-            [self.organ, adata_ids.organ, self.organ_obs_key, self.ontology_container_sfaira.organism],
-            [self.organism, adata_ids.organism, self.organism_obs_key,
+            [self.individual, self._adata_ids_sfaira.individual, self.individual_obs_key, None],
+            [self.organ, self._adata_ids_sfaira.organ, self.organ_obs_key, self.ontology_container_sfaira.organ],
+            [self.organism, self._adata_ids_sfaira.organism, self.organism_obs_key,
              self.ontology_container_sfaira.organism],
-            [self.sample_source, adata_ids.sample_source, self.sample_source_obs_key,
+            [self.sample_source, self._adata_ids_sfaira.sample_source, self.sample_source_obs_key,
              self.ontology_container_sfaira.sample_source],
-            [self.sex, adata_ids.sex, self.sex_obs_key, self.ontology_container_sfaira.sex],
-            [self.state_exact, adata_ids.state_exact, self.state_exact_obs_key, None],
-            [self.tech_sample, adata_ids.tech_sample, self.tech_sample_obs_key, None],
+            [self.sex, self._adata_ids_sfaira.sex, self.sex_obs_key, self.ontology_container_sfaira.sex],
+            [self.state_exact, self._adata_ids_sfaira.state_exact, self.state_exact_obs_key, None],
+            [self.tech_sample, self._adata_ids_sfaira.tech_sample, self.tech_sample_obs_key, None],
         ):
             if x is None and z is None:
                 self.adata.uns[y] = None
@@ -626,8 +667,43 @@ class DatasetBase(abc.ABC):
                     self.adata.uns[y] = UNS_STRING_META_IN_OBS
                     # Remove potential pd.Categorical formatting:
                     self._value_protection(
-                        attr="obs", allowed=v, attempted=np.unique(self.adata.obs[z].values).tolist())
+                        attr=y, allowed=v, attempted=np.unique(self.adata.obs[z].values).tolist())
                     self.adata.obs[y] = self.adata.obs[z].values.tolist()
+            else:
+                assert False, "switch option should not occur"
+        # Load boolean labels:
+        for x, y, z, v, w in (
+            [self.healthy, self._adata_ids_sfaira.healthy, self.healthy_obs_key, self.ontology_container_sfaira.healthy,
+             self.healthy_state_healthy],
+        ):
+            if x is None and z is None:
+                self.adata.uns[y] = None
+            elif x is not None and z is None:
+                # Attribute supplied per data set: Write into .uns.
+                if w is None:
+                    self.adata.uns[y] = x
+                else:
+                    self.adata.uns[y] = x == w
+            elif z is not None:
+                # Attribute supplied per cell: Write into .obs.
+                # Search for direct match of the sought-after column name or for attribute specific obs key.
+                if z not in self.adata.obs.keys():
+                    # This should not occur in single data set loaders (see warning below) but can occur in
+                    # streamlined data loaders if not all instances of the streamlined data sets have all columns
+                    # in .obs set.
+                    self.adata.uns[y] = None
+                    print(f"WARNING: attribute {y} of data set {self.id} was not found in column {z}")  # debugging
+                else:
+                    # Include flag in .uns that this attribute is in .obs:
+                    self.adata.uns[y] = UNS_STRING_META_IN_OBS
+                    # Remove potential pd.Categorical formatting:
+                    label_y = self.adata.obs[z].values
+                    # Use reference string to establish equality if available:
+                    if w is not None:
+                        label_y = label_y == w
+                    self._value_protection(
+                        attr=y, allowed=v, attempted=np.unique(label_y).tolist())
+                    self.adata.obs[y] = label_y.tolist()
             else:
                 assert False, "switch option should not occur"
         # Set cell-wise attributes (.obs):
@@ -657,7 +733,6 @@ class DatasetBase(abc.ABC):
             adata_fields = AdataIdsCellxgene()
         else:
             raise ValueError(f"did not recognize format {format}")
-        self._set_metadata_in_adata(adata_ids=adata_fields)
         if clean:
             if self.adata.varm is not None:
                 del self.adata.varm
@@ -669,36 +744,22 @@ class DatasetBase(abc.ABC):
                 del self.adata.obsp
             # Only retain target elements in adata.uns:
             self.adata.uns = dict([
-                (k, v) for k, v in self.adata.uns.items() if k in [
-                    adata_fields.annotated,
-                    adata_fields.author,
-                    adata_fields.doi,
-                    adata_fields.download_url_data,
-                    adata_fields.download_url_meta,
-                    adata_fields.id,
-                    adata_fields.normalization,
-                    adata_fields.year,
-                ]
+                (getattr(adata_fields, k), self.adata.uns[getattr(self._adata_ids_sfaira, k)])
+                if getattr(self._adata_ids_sfaira, k) in self.adata.uns.keys() else None
+                for k in adata_fields.uns_keys
             ])
             # Only retain target elements in adata.var:
-            self.adata.obs = self.adata.var[[
-                adata_fields.gene_id_names,
-                adata_fields.gene_id_ensembl,
-            ]]
+            self.adata.var = pd.DataFrame(dict([
+                (getattr(adata_fields, k), self.adata.var[getattr(self._adata_ids_sfaira, k)])
+                for k in adata_fields.var_keys
+                if getattr(self._adata_ids_sfaira, k) in self.adata.var.keys()
+            ]))
             # Only retain target columns in adata.obs:
-            self.adata.obs = self.adata.obs.loc[:, [
-                adata_fields.age,
-                adata_fields.bio_sample,
-                adata_fields.development_stage,
-                adata_fields.ethnicity,
-                adata_fields.healthy,
-                adata_fields.individual,
-                adata_fields.organ,
-                adata_fields.organism,
-                adata_fields.sex,
-                adata_fields.state_exact,
-                adata_fields.tech_sample,
-            ]]
+            self.adata.obs = pd.DataFrame(dict([
+                (getattr(adata_fields, k), self.adata.obs[getattr(self._adata_ids_sfaira, k)])
+                for k in adata_fields.obs_keys
+                if getattr(self._adata_ids_sfaira, k) in self.adata.obs.keys()
+            ]))
 
     def load_tobacked(
             self,
@@ -811,7 +872,7 @@ class DatasetBase(abc.ABC):
         """
         Load class maps of free text cell types to ontology classes.
 
-        :param fn: File name of csv to load class maps from.
+        :param fn: File name of tsv to write class maps to.
         :param protected_writing: Only write if file was not already found.
         :return:
         """
@@ -864,7 +925,8 @@ class DatasetBase(abc.ABC):
         if os.path.exists(fn):
             self.cell_ontology_map = self._read_class_map(fn=fn)
         else:
-            warnings.warn(f"file {fn} does not exist")
+            if self.cellontology_original_obs_key is not None:
+                warnings.warn(f"file {fn} does not exist but cellontology_original_obs_key is given")
 
     def project_celltypes_to_ontology(self):
         """
@@ -885,11 +947,17 @@ class DatasetBase(abc.ABC):
         # Validate mapped IDs based on ontology:
         # This aborts with a readable error if there was a target in the mapping file that does not match the
         # ontology.
-        self._value_protection(
-            attr="celltypes",
-            allowed=self.ontology_celltypes,
-            attempted=np.unique(labels_mapped).tolist()
-        )
+        if self.cell_ontology_map is not None:
+            # This protection blocks progression in the unit test if not deactivated.
+            self._value_protection(
+                attr="celltypes",
+                allowed=self.ontology_celltypes,
+                attempted=[
+                    x for x in np.unique(labels_mapped).tolist()
+                    if x != self._adata_ids_sfaira.unknown_celltype_identifier and
+                    x != self._adata_ids_sfaira.not_a_cell_celltype_identifier
+                ]
+            )
         self.adata.obs[self._adata_ids_sfaira.cell_ontology_class] = labels_mapped
         self.cellontology_class_obs_key = self._adata_ids_sfaira.cell_ontology_class
         self.adata.obs[self._adata_ids_sfaira.cell_types_original] = labels_original
@@ -897,15 +965,17 @@ class DatasetBase(abc.ABC):
         # The IDs are not read from a source file but inferred based on the class name.
         # TODO this could be changed in the future, this allows this function to be used both on cell type name mapping
         #  files with and without the ID in the third column.
-        ids_mapped = [
-            self.ontology_container_sfaira.cellontology_class.id_from_name(x)
-            if x not in [
-                self._adata_ids_sfaira.unknown_celltype_identifier,
-                self._adata_ids_sfaira.not_a_cell_celltype_identifier
-            ] else x
-            for x in labels_mapped
-        ]
-        self.adata.obs[self._adata_ids_sfaira.cell_ontology_id] = ids_mapped
+        if self.cell_ontology_map is not None:
+            # This mapping blocks progression in the unit test if not deactivated.
+            ids_mapped = [
+                self.ontology_container_sfaira.cellontology_class.id_from_name(x)
+                if x not in [
+                    self._adata_ids_sfaira.unknown_celltype_identifier,
+                    self._adata_ids_sfaira.not_a_cell_celltype_identifier
+                ] else x
+                for x in labels_mapped
+            ]
+            self.adata.obs[self._adata_ids_sfaira.cell_ontology_id] = ids_mapped
 
     @property
     def citation(self):
@@ -1053,9 +1123,17 @@ class DatasetBase(abc.ABC):
                   f"{clean(self._assay_sc)}_" \
                   f"{clean(author)}_" \
                   f"{idx}_" \
-                  f"{self.doi}"
+                  f"{self.doi_main}"
 
     # Properties:
+
+    @property
+    def additional_annotation_key(self) -> Union[None, str]:
+        return self._additional_annotation_key
+
+    @additional_annotation_key.setter
+    def additional_annotation_key(self, x: str):
+        self._additional_annotation_key = x
 
     @property
     def age(self) -> Union[None, str]:
@@ -1228,7 +1306,7 @@ class DatasetBase(abc.ABC):
         self._development_stage = x
 
     @property
-    def doi(self) -> str:
+    def doi(self) -> Union[str, List[str]]:
         if self._doi is not None:
             return self._doi
         else:
@@ -1239,13 +1317,21 @@ class DatasetBase(abc.ABC):
             return self.meta[self._adata_ids_sfaira.doi]
 
     @doi.setter
-    def doi(self, x: str):
+    def doi(self, x: Union[str, List[str]]):
         self.__erasing_protection(attr="doi", val_old=self._doi, val_new=x)
         self._doi = x
 
     @property
+    def doi_main(self) -> str:
+        """
+        Yields the main DOI associated with the study, defined as the DOI that comes first in alphabetical order.
+        """
+        return self.doi if isinstance(self.doi, str) else np.sort(self.doi)[0]
+
+    @property
     def directory_formatted_doi(self) -> str:
-        return "d" + "_".join("_".join("_".join(self.doi.split("/")).split(".")).split("-"))
+        # Chose first doi in list.
+        return "d" + "_".join("_".join("_".join(self.doi_main.split("/")).split(".")).split("-"))
 
     @property
     def download_url_data(self) -> Union[Tuple[List[str]], Tuple[List[None]]]:
@@ -1359,8 +1445,8 @@ class DatasetBase(abc.ABC):
         if self._id is not None:
             return self._id
         else:
-            raise AttributeError(f"Dataset ID was not set in dataloader in {self.doi}, please ensure the dataloader "
-                                 f"constructor of this dataset contains a call to self.set_dataset_id()")
+            raise AttributeError(f"Dataset ID was not set in dataloader in {self.doi_main}, please ensure the "
+                                 f"dataloader constructor of this dataset contains a call to self.set_dataset_id()")
 
     @id.setter
     def id(self, x: str):
@@ -1503,8 +1589,6 @@ class DatasetBase(abc.ABC):
 
     @cellontology_class_obs_key.setter
     def cellontology_class_obs_key(self, x: str):
-        self.__erasing_protection(attr="cellontology_class_obs_key", val_old=self._cellontology_class_obs_key,
-                                  val_new=x)
         self._cellontology_class_obs_key = x
 
     @property
@@ -1513,7 +1597,6 @@ class DatasetBase(abc.ABC):
 
     @cellontology_id_obs_key.setter
     def cellontology_id_obs_key(self, x: str):
-        self.__erasing_protection(attr="cellontology_id_obs_key", val_old=self._cellontology_id_obs_key, val_new=x)
         self._cellontology_id_obs_key = x
 
     @property
@@ -1777,7 +1860,7 @@ class DatasetBase(abc.ABC):
 
     @property
     def celltypes_universe(self):
-        if self._celltype_universe:
+        if self._celltype_universe is None:
             self._celltype_universe = CelltypeUniverse(
                 cl=self.ontology_celltypes,
                 uberon=self.ontology_container_sfaira.organ,
@@ -1826,7 +1909,7 @@ class DatasetBase(abc.ABC):
 
         Does not check if allowed is None.
 
-        :param attr: Attribut to set.
+        :param attr: Attribute to set.
         :param allowed: Constraint for values of `attr`.
             Either ontology instance used to constrain entries, or list of allowed values.
         :param attempted: Value(s) to attempt to set in `attr`.
@@ -1840,7 +1923,10 @@ class DatasetBase(abc.ABC):
             attempted = [attempted]
         for x in attempted:
             if not is_child(query=x, ontology=allowed):
-                raise ValueError(f"{x} is not a valid entry for {attr}, choose from: {str(allowed)}")
+                if isinstance(allowed, Ontology):
+                    # use node names instead of ontology object to produce a readable error message
+                    allowed = allowed.node_names
+                raise ValueError(f"{x} is not a valid entry for {attr}, choose from: {allowed}")
 
     def subset_cells(self, key, values):
         """

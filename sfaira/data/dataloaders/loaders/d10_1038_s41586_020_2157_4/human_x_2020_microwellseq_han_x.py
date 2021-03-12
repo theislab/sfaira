@@ -117,7 +117,7 @@ def load(data_dir, **kwargs):
         'FetalHeart_2': 'heart',
         'FetalIntestine_1': 'intestine',
         'FetalIntestine_2': 'intestine',
-        'FetalIntestine_3': 'intestine',
+        'FetalIntetsine_3': 'intestine',
         'FetalIntestine_4': 'intestine',
         'FetalIntestine_5': 'intestine',
         'FetalKidney_3': 'kidney',
@@ -147,6 +147,12 @@ def load(data_dir, **kwargs):
         'NeonatalAdrenalGland_1': 'adrenal gland',
         'PeripheralBlood_1': 'blood',
         'Placenta_1': 'placenta',
+    }
+    sex_dict = {
+        'Male': "male",
+        'Female': "female",
+        'nan': "nan",
+        'FeM=male': "nan",
     }
 
     adata = anndata.read(os.path.join(data_dir, "HCL_Fig1_adata.h5ad"))
@@ -206,5 +212,6 @@ def load(data_dir, **kwargs):
         "sample", "sub_tissue", "n_genes", "n_counts", "cluster_global", "dev_stage", "donor", "celltype_global",
         "age", "celltype_specific", "cluster_specific", "gender", "assay_sc", "source"]
     adata.obs["organ"] = [sample_organ_dict[x] for x in adata.obs["sample"].values]
+    adata.obs["gender"] = [sex_dict[x] for x in adata.obs["gender"].values]
 
     return adata

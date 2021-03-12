@@ -7,6 +7,7 @@ import requests
 from typing import Dict, List, Tuple, Union
 import warnings
 
+from sfaira.consts.adata_fields import AdataIdsSfaira
 from sfaira.versions.metadata.extensions import ONTOLOGIY_EXTENSION_HUMAN, ONTOLOGIY_EXTENSION_MOUSE
 
 FILE_PATH = __file__
@@ -62,7 +63,7 @@ class OntologyList(Ontology):
 
     def __init__(
             self,
-            terms: List[str],
+            terms: Union[List[Union[str, bool, int]]],
             **kwargs
     ):
         self.nodes = terms
@@ -77,6 +78,7 @@ class OntologyList(Ontology):
 
         :param x: Free text node label which is to be matched to ontology nodes.
         :param include_synonyms: Whether to search for meaches in synonyms field of node instances, too.
+        :param n_suggest: number of suggestions returned
         :return List of proposed matches in ontology.
         """
         from fuzzywuzzy import fuzz

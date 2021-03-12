@@ -7,14 +7,13 @@ print(tf.__version__)
 
 def write_meta(args0, args1):
     # Write meta data, cache.
-    args0.write_meta(fn_meta=None, dir_out=args1, fn_data=None)
+    args0.write_meta(fn_meta=None, dir_out=args1)
     # Test load from cache.
     args0.load(
         remove_gene_version=True,
         load_raw=False,
         allow_caching=False,
     )
-    args0.write_ontology_class_map(fn=args0.fn_ontology_class_map_tsv)
     return None
 
 

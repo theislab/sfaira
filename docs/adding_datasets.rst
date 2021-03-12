@@ -6,13 +6,15 @@ This process requires a couple of steps as outlined in the following sections.
 
     1. Write a dataloader as outlined below.
     2. Identify the raw files as indicated in the dataloader classes and copy them into your directory structure as required by your data loader.
+       If the raw file your dataloader uses as input is publically available, sfaira will be able to automatically download the raw file, so no manual copying is required.
+       For the purpose of testing the data loader with a unit test, you can also copy the data into `sfaira/unit_tests/template_data/` as a DOI structured folder if you do not want to maintain a data collection on the machine that you are testing on.
     3. You can contribute the data loader to public sfaira, we do not manage data upload though.
        During publication, you would upload this data set to a server like GEO and the data loader contributed to sfaira would use this download link.
 
 The following sections will first describe the underlying design principles of sfaira dataloaders and
 then explain how to interactively create, validate and test dataloaders.
 
-Use data loaders on existing data repository
+Use data loaders with an existing data repository
 --------------------------------------------
 
 You only want to use data sets with existing data loaders and have adapted your directory structure as above?
@@ -50,71 +52,69 @@ preprint and publication DOIs if both are available. We will also mention public
 The data loader python file
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Each data set (organsism, organ, assay_sc, optionally also batches) has its own data loader class. Each such class is
-in a separate file and inherits from a base class that contains most functionalities. Accordingly, the data loader class
-looks very similar in parts to a cell in a juypter notebook that performs data loading. The core features that must be included are:
+Each data set, ie a single file or a set of files with similar structures, has its own data loader function and a yaml
+files that describes its meta data.
+Alternatively to the (preffered) yaml file, meta data can be also be described in a constructor of a class in the same python file
+as the loading function. For a documentation on writing a python class-based dataloader, please see here: https://github.com/theislab/sfaira/blob/dev/docs/adding_dataset_classes.rst
+A detailed description of all meta data is given at the bottom of this page.
 
-1. A constructor of the following form that can be used to interact with the data set
+1. A yaml file or constructor of the following form that can be used to interact with the data set
 before it is loaded into memory:
 
-.. code-block:: python
+.. code-block:: yaml
 
-    def __init__(
-            self,
-            path: Union[str, None] = None,
-            meta_path: Union[str, None] = None,
-            cache_path: Union[str, None] = None,
-            **kwargs
-    ):
-        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        # Data set meta data: You do not have to include all of these and can simply skip lines corresponding
-        # to attritbutes that you do not have access to. These are meta data on a sample level.
-        # The meta data attributes labeled with (*) may als be supplied per cell, see below,
-        # in this case, if you supply a .obs_key* attribute, you ccan leave out the sample-wise attribute.
-
-        self.id = x  # unique identifier of data set (Organism_Organ_Year_AssaySc_NumberOfDataset_FirstAuthorLastname_doi).
-
-        self.author = x  # author (list) who sampled / created the data set
-        self.doi = x  # doi of data set accompanying manuscript
-
-        self.download_url_data = x  # download website(s) of data files
-        self.download_url_meta = x  # download website(s) of meta data files
-
-        self.age = x  # (*, optional) age of sample
-        self.assay_sc = x  # (*, optional) protocol used to sample data (e.g. smart-seq2)
-        self.assay_differentiation = x  # (*, optional) protocol used to differentiate the cell line (e.g. Lancaster, 2014)
-        self.assay_type_differentiation = x  # (*, optional) type of protocol used to differentiate the cell line (guided/unguided)
-        self.cell_line = x # (*, optional) cell line used (for cell culture samples)
-        self.dev_stage = x  # (*, optional) developmental stage of organism
-        self.ethnicity = x  # (*, optional) ethnicity of sample
-        self.healthy = x  # (*, optional) whether sample represents a healthy organism
-        self.normalisation = x  # (optional) normalisation applied to raw data loaded (ideally counts, "raw")
-        self.organ = x  # (*, optional) organ (anatomical structure)
-        self.organism = x  # (*) species / organism
-        self.sample_source = x  # (*) whether the sample came from primary tissue or cell culture
-        self.sex = x  # (*, optional) sex
-        self.state_exact = x  # (*, optional) exact disease, treatment or perturbation state of sample
-        self.year = x  # year in which sample was acquired
-
-        # The following meta data may instead also be supplied on a cell level if an appropriate column is present in the
-        # anndata instance (specifically in .obs) after loading.
-        # You need to make sure this is loaded in the loading script)!
-        # See above for a description what these meta data attributes mean.
-        # Again, if these attributes are note available, you can simply leave this out.
-        self.obs_key_age = x  # (optional, see above, do not provide if .age is provided)
-        self.obs_key_dev_stage = x  # (optional, see above, do not provide if .dev_stage is provided)
-        self.obs_key_ethnicity = x  # (optional, see above, do not provide if .ethnicity is provided)
-        self.obs_key_healthy = x  # (optional, see above, do not provide if .healthy is provided)
-        self.obs_key_organ = x  # (optional, see above, do not provide if .organ is provided)
-        self.obs_key_organism = x  # (optional, see above, do not provide if .organism is provided)
-        self.obs_key_sample_source = x  # (optional, see above, do not provide if .sample_source is provided)
-        self.obs_key_sex = x  # (optional, see above, do not provide if .sex is provided)
-        self.obs_key_state_exact = x  # (optional, see above, do not provide if .state_exact is provided)
-        # Additionally, cell type annotation is ALWAYS provided per cell in .obs, this annotation is optional though.
-        # name of column which contain streamlined cell ontology cell type classes:
-        self.obs_key_cellontology_original = x  # (optional)
-        # This cell type annotation is free text but is mapped to an ontology via a .csv file with the same name and
-        # directory as the python file of this data loader (see below).
+    dataset_structure:
+        dataset_index: 1
+        sample_fns:
+    dataset_wise:
+        author:
+        doi:
+        download_url_data:
+        download_url_meta:
+        normalization:
+        year:
+    dataset_or_observation_wise:
+        age:
+        age_obs_key:
+        assay_sc:
+        assay_sc_obs_key:
+        assay_differentiation:
+        assay_differentiation_obs_key:
+        assay_type_differentiation:
+        assay_type_differentiation_obs_key:
+        bio_sample:
+        bio_sample_obs_key:
+        cell_line:
+        cell_line_obs_key:
+        development_stage:
+        development_stage_obs_key:
+        ethnicity:
+        ethnicity_obs_key:
+        healthy:
+        healthy_obs_key:
+        individual:
+        individual_obs_key:
+        organ:
+        organ_obs_key:
+        organism:
+        organism_obs_key:
+        sample_source:
+        sample_source_obs_key:
+        sex:
+        sex_obs_key:
+        state_exact:
+        state_exact_obs_key:
+        tech_sample:
+        tech_sample_obs_key:
+    observation_wise:
+        cellontology_original_obs_key:
+    feature_wise:
+        var_ensembl_col:
+        var_symbol_col:
+    misc:
+        healthy_state_healthy:
+    meta:
+        version: "1.0"
 
 
 2. A function called to load the data set into memory:
@@ -126,44 +126,76 @@ directly into this sub directory.
 
 .. code-block:: python
 
-    def _load(self, fn=None):
-        # assuming that i uploaded an h5ad somewhere (in self.download)
-        if fn is None:
-            fn = os.path.join(self.path, self.directory_formatted_doi, "my.h5ad")
-        self.adata = anndata.read(fn)  # loading instruction into .adata, use other ones if the data is not h5ad
-        # Some times, you need to load multiple files (e.g. counts and annotation), all of this code would be here.
+    def load(data_dir, fn=None) -> anndata.AnnData:
+        fn = os.path.join(data_dir, "my.h5ad")
+        adata = anndata.read(fn)  # loading instruction into adata, use other ones if the data is not h5ad
+        return adata
 
+In summary, a the dataloader for a mouse lung data set could look like this:
 
-In summary, a simply example data loader for a mouse lung data set could look like this:
+.. code-block:: yaml
+
+    dataset_structure:
+        dataset_index: 1
+        sample_fns:
+    dataset_wise:
+        author: "me"
+        doi:
+            - "my preprint"
+            - "my peer-reviewed publication"
+        download_url_data: "my GEO upload"
+        download_url_meta:
+        normalization: "raw"
+        year:
+    dataset_or_observation_wise:
+        age:
+        age_obs_key:
+        assay_sc: "smart-seq2"
+        assay_sc_obs_key:
+        assay_differentiation:
+        assay_differentiation_obs_key:
+        assay_type_differentiation:
+        assay_type_differentiation_obs_key:
+        bio_sample:
+        bio_sample_obs_key:
+        cell_line:
+        cell_line_obs_key:
+        development_stage:
+        development_stage_obs_key:
+        ethnicity:
+        ethnicity_obs_key:
+        healthy:
+        healthy_obs_key:
+        individual:
+        individual_obs_key:
+        organ: "lung"
+        organ_obs_key:
+        organism: "mouse"
+        organism_obs_key:
+        sample_source: "primary_tissue"
+        sample_source_obs_key:
+        sex:
+        sex_obs_key:
+        state_exact:
+        state_exact_obs_key:
+        tech_sample:
+        tech_sample_obs_key:
+    observation_wise:
+        cellontology_original_obs_key: "louvain_named"
+    feature_wise:
+        var_ensembl_col:
+        var_symbol_col:
+    misc:
+        healthy_state_healthy:
+    meta:
+        version: "1.0"
 
 .. code-block:: python
 
-    class MyDataset(DatasetBase)
-        def __init__(
-                self,
-                path: Union[str, None] = None,
-                meta_path: Union[str, None] = None,
-                cache_path: Union[str, None] = None,
-                **kwargs
-        ):
-            super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-            self.author = "me"
-            self.doi = "my preprint"
-            self.download_url_data = "my GEO upload"
-            self.normalisation = "raw"  # because I uploaded raw counts, which is good practice!
-            self.organ = "lung"
-            self.organism = "mouse"
-            self.assay_sc = "smart-seq2"
-            self.year = "2020"
-            self.sample_source = "primary_tissue"
-
-            self.obs_key_cellontology_original = "louvain_named"  # i save my cell type names in here
-
-        def _load(self, fn=None):
-            # assuming that i uploaded an h5ad somewhere (in self.download)
-            if fn is None:
-                fn = os.path.join(self.path, self.directory_formatted_doi, "my.h5ad")
-            self.adata = anndata.read(fn)
+    def load(data_dir, fn=None) -> anndata.AnnData:
+        fn = os.path.join(data_dir, "my.h5ad")
+        adata = anndata.read(fn)
+        return adata
 
 
 Data loaders can be added into a copy of the sfaira repository and can be used locally before they are contributed to
@@ -173,26 +205,57 @@ in which local data and cell type annotation can be managed separately but still
 The data loaders and cell type annotation formats between sfaira and sfaira_extensions are identical and can be easily
 copied over.
 
-Handling multiple data sources
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Loading third party annotation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you have multiple data sets in a study which are all saved in separate files which come in similar formats:
-You can subclass `DatasetBaseGroupLoadingManyFiles` instead of `DatasetBase` and proceed as usual,
-only with adding `SAMPLE_FNS` in the data loader file name space,
-which is a list of all file names addressed with this file.
-You can then refer to an additional property of the Dataset class, `self.sample_fn` during loading
-or when dynamically defining meta data in the constructor.
-Note that you can always add additional data loaders for further, less streamlined, data sets to such a study.
+In some cases, the data set in question is already in the sfaira zoo but there is alternative (third party), cell-wise
+annotation of the data.
+This could be different cell type annotation for example.
+The underlying data (count matrix and variable names) stay the same in these cases, and often, even some cell-wise
+meta data are kept and only some are added or replaced.
+Therefore, these cases do not require an additional `load()` function.
+Instead, you can contribute `load_annotation_*()` functions into the `.py` file of the corresponding study.
+You can chose an arbitrary suffix for the function but ideally one that identifies the source of this additional
+annotation in a human readable manner at least to someone who is familiar with this data set.
+Second you need to add this function into the dictionary `LOAD_ANNOTATION` in the `.py` file, with the suffix as a key.
+If this dictionary does not exist yet, you need to add it into the `.py` file with this function as its sole entry.
+Here an example of a `.py` file with additional annotation:
 
-If you have multiple data sets in a study which are all saved in one file:
-You can subclass `DatasetBaseGroupLoadingOneFile` instead of `DatasetBase` and proceed as usual,
-only with adding `SAMPLE_IDS` in the data loader file name space,
-which is a list of all sample IDs addressed with this file.
-You can then refer to an additional property of the Dataset class, `self.sample_id` during loading
-or when dynamically defining meta data in the constructor.
-Note that `self.sample_id` refers to a `self.adata.obs` column in the loaded data set,
-this column has to be defined in `self.obs_key_sample`, which needs to be defined in the constructor.
-Note that you can always add additional data loaders for further, less streamlined, data sets to such a study.
+.. code-block:: python
+
+    def load(data_dir, sample_fn, **kwargs):
+        pass
+
+    def load_annotation_meta_study_x(data_dir, sample_fn, **kwargs):
+        # Read a tabular file indexed with the observation names used in the adata used in load().
+        pass
+
+    def load_annotation_meta_study_y(data_dir, sample_fn, **kwargs):
+        # Read a tabular file indexed with the observation names used in the adata used in load().
+        pass
+
+    LOAD_ANNOTATION = {
+        "meta_study_x": load_annotation_meta_study_x,
+        "meta_study_y": load_annotation_meta_study_y,
+    }
+
+
+The table returned by `load_annotation_meta_study_x` needs to be indexed with the observation names used in `.adata`,
+the object generated in `load()`.
+If `load_annotation_meta_study_x` contains a subset of the observations defined in `load()`,
+and this alternative annotation is chosen,
+`.adata` is subsetted to these observations during loading.
+
+You can also add functions in the `.py` file in the same DOI-based module in sfaira_extensions if you want to keep this
+additional annotation private.
+For this to work with a public data loader, you need nothing more than the `.py` file with this `load_annotation_*()`
+function and the `LOAD_ANNOTATION` of these private functions in sfaira_extensions.
+
+To access additional annotation during loading, use the setter functions `additional_annotation_key` on an instance of
+either `Dataset`, `DatasetGroup` or `DatasetSuperGroup` to define data sets
+for which you want to load additional annotation and which additional you want to load for these.
+See also the docstrings of these functions for further details on how these can be set.
+
 
 Creating dataloaders with the commandline interface
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -228,9 +291,9 @@ All tests must pass! If any of the tests fail please revisit your dataloader and
 Map cell type labels to ontology
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The entries in `self.obs_key_cellontology_original` are free text but are mapped to an ontology via a .csv file with
+The entries in `self.cellontology_original_obs_key` are free text but are mapped to an ontology via a .tsv file with
 the same name and directory as the python file in which the data loader is located.
-This .csv contains two columns with one row for each unique cell type label.
+This .tsv contains two columns with one row for each unique cell type label.
 The free text identifiers in the first column "source",
 and the corresponding ontology term in the second column "target".
 You can write this file entirely from scratch.
@@ -270,35 +333,45 @@ Metadata management
 
 We constrain meta data by ontologies where possible. The current restrictions are:
 
-    - .age: unconstrained string, try using units of years for human, units of months for mice and units of days for
-        cell culture samples
-    - .dev_stage: unconstrained string, this will constrained to an ontology in the future,
-        try choosing from HSAPDV (http://www.obofoundry.org/ontology/hsapdv.html) for human
-        or from MMUSDEV (http://www.obofoundry.org/ontology/mmusdv.html) for mouse
-    - .cell_line: unconstrained string, this will be constrained to an ontology later. try choosing from cellosaurus
-        cell line database (https://web.expasy.org/cellosaurus/)
-    - .ethnicity: unconstrained string, this will constrained to an ontology in the future,
-        try choosing from HANCESTRO (https://www.ebi.ac.uk/ols/ontologies/hancestro)
-    - .healthy: bool
-    - .normalisation: unconstrained string, this will constrained to an ontology in the future,
-        try using {"raw", "scaled"}
-    - .organ: unconstrained string, this will constrained to an ontology in the future, try to choose
-        term from Uberon (http://www.obofoundry.org/ontology/ehdaa2.html)
-        or from EHDAA2 (http://www.obofoundry.org/ontology/ehdaa2.html) for human
-        or from EMAPA (http://www.obofoundry.org/ontology/emapa.html) for mouse
-    - .organism: constrained string, {"mouse", "human"}. In the future, we will use NCBITAXON
-        (http://www.obofoundry.org/ontology/ncbitaxon.html).
-    - .assay_sc: unconstrained string, this will constrained to an experimental protocol ontology in the future,
-        try choosing a term from https://www.ebi.ac.uk/ols/ontologies/efo/terms?iri=http%3A%2F%2Fwww.ebi.ac.uk%2Fefo%2FEFO_0010183&viewMode=All&siblings=false
-    - .assay_differentiation: unconstrained string, try to provide a base differentiation protocol (eg. Lancaster, 2014)
-        as well as any amendments to the original protocol
+    - .age: unconstrained string
+        Use
+            - units of years for humans,
+            - the E{day} nomenclature for mouse embryos
+            - the P{day} nomenclature for young post-natal mice
+            - units of weeks for mice older than one week and
+            - units of days for cell culture samples.
+    - .assay_sc: EFO-constrained string
+        Choose a term from https://www.ebi.ac.uk/ols/ontologies/efo/terms?iri=http%3A%2F%2Fwww.ebi.ac.uk%2Fefo%2FEFO_0010183&viewMode=All&siblings=false
+    - .assay_differentiation: unconstrained string
+        Try to provide a base differentiation protocol (eg. "Lancaster, 2014") as well as any amendments to the original protocol.
     - .assay_type_differentiation: constrained string, {"guided", "unguided"}
-    - .sample_source: constrained string, {"primary_tissue", "2d_culture", "3d_culture", "cancer"}
-    - .sex: constrained string, {"female", "male"}
+        For cell-culture samples: Whether a guided (patterned) differentiation protocol was used in the experiment.
+    - .developmental_stage: unconstrained string
+        This will constrained to an ontology in the future,
+        try choosing from HSAPDV (https://www.ebi.ac.uk/ols/ontologies/hsapdv) for human
+        or from MMUSDEV (https://www.ebi.ac.uk/ols/ontologies/mmusdv) for mouse.
+    - .cell_line: cellosaurus-constrained string
+        Cell line name from the cellosaurus cell line database (https://web.expasy.org/cellosaurus/)
+    - .ethnicity: unconstrained string, this will constrained to an ontology in the future.
+        Try choosing from HANCESTRO (https://www.ebi.ac.uk/ols/ontologies/hancestro)
+    - .healthy: bool
+        Whether the sample is from healthy tissue ({True, False}).
+    - .normalisation: unconstrained string, this will constrained to an ontology in the future,
+        Try to use {"raw", "scaled"}.
+    - .organ: UBERON-constrained string
+        The anatomic location of the sample (https://www.ebi.ac.uk/ols/ontologies/uberon).
+    - .organism: constrained string, {"mouse", "human"}.
+        The organism from which the sample originates.
+        In the future, we will use NCBITAXON (https://www.ebi.ac.uk/ols/ontologies/ncbitaxon).
+    - .sample_source: constrained string, {"primary_tissue", "2d_culture", "3d_culture", "tumor"}
+        Which cellular system the sample was derived from.
+    - .sex: constrained string, {"female", "male", None}
+        Sex of the individual sampled.
     - .state_exact: unconstrained string, try to be concise and anticipate that this field is queried by automatised searches.
         If you give treatment concentrations, intervals or similar measurements use square brackets around the quantity
         and use units: `[1g]`
     - .year: must be an integer year, e.g. 2020
+        Year in which sample was first described (e.g. pre-print publication).
 
 Follow this issue_ for details on upcoming ontology integrations.
 

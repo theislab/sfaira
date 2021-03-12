@@ -11,5 +11,6 @@ T/NKT cells	alpha-beta T cell	CL:0000789
 cDC1	conventional dendritic cell	CL:0000990
 cDC2	conventional dendritic cell	CL:0000990
 migDC	dendritic cell	CL:0000451
+isnan	UNKNOWN	UNKNOWN
 pDC	plasmacytoid dendritic cell	CL:0000784
 yd T cells	gamma-delta T cell	CL:0000798

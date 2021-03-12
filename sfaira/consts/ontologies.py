@@ -9,8 +9,10 @@ class OntologyContainerSfaira:
 
     def __init__(self):
         self.age = None
-        self.assay_sc = OntologySinglecellLibraryConstruction()
+        self.annotated = OntologyList(terms=[True, False])
+        self.author = None
         self.assay_differentiation = None
+        self.assay_sc = OntologySinglecellLibraryConstruction()
         self.assay_type_differentiation = OntologyList(terms=["guided", "unguided"])
         self.cell_line = OntologyCellosaurus()
         self.cellontology_class = "v2021-02-01"
@@ -18,7 +20,7 @@ class OntologyContainerSfaira:
         self.developmental_stage = None
         self.doi = None
         self.ethnicity = None
-        self.healthy = [True, False]
+        self.healthy = OntologyList(terms=[True, False])
         self.id = None
         self.normalization = None
         self.organ = OntologyUberon()
