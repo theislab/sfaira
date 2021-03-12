@@ -2,12 +2,15 @@ import abc
 import networkx
 import numpy as np
 import obonet
-import pandas as pd
+import os
 import requests
 from typing import Dict, List, Tuple, Union
 import warnings
 
+from sfaira.consts.adata_fields import AdataIdsSfaira
 from sfaira.versions.metadata.extensions import ONTOLOGIY_EXTENSION_HUMAN, ONTOLOGIY_EXTENSION_MOUSE
+
+FILE_PATH = __file__
 
 """
 Ontology managament classes.
@@ -44,8 +47,11 @@ class Ontology:
         """
         pass
 
+    def is_node(self, x: str):
+        return x in self.node_names
+
     def validate_node(self, x: str):
-        if x not in self.node_names:
+        if not self.is_node(x=x):
             suggestions = self.map_node_suggestion(x=x, include_synonyms=False)
             raise ValueError(f"Node label {x} not found. Did you mean any of {suggestions}?")
 
@@ -57,7 +63,7 @@ class OntologyList(Ontology):
 
     def __init__(
             self,
-            terms: List[str],
+            terms: Union[List[Union[str, bool, int]]],
             **kwargs
     ):
         self.nodes = terms
@@ -72,6 +78,7 @@ class OntologyList(Ontology):
 
         :param x: Free text node label which is to be matched to ontology nodes.
         :param include_synonyms: Whether to search for meaches in synonyms field of node instances, too.
+        :param n_suggest: number of suggestions returned
         :return List of proposed matches in ontology.
         """
         from fuzzywuzzy import fuzz
@@ -86,6 +93,18 @@ class OntologyList(Ontology):
 
     def synonym_node_properties(self) -> List[str]:
         return []
+
+    def is_a(self, query: str, reference: str) -> bool:
+        """
+        Checks if query node is reference node.
+
+        Note that there is no notion of ancestors for list ontologies.
+
+        :param query: Query node name. Node ID or name.
+        :param reference: Reference node name. Node ID or name.
+        :return: If query node is reference node or an ancestor thereof.
+        """
+        return query == reference
 
 
 class OntologyEbi(Ontology):
@@ -236,7 +255,23 @@ class OntologyObo(Ontology):
         return [x for x in self.graph.nodes() if self.graph.in_degree(x) == 0]
 
     def get_ancestors(self, node: str) -> List[str]:
+        if node not in self.node_ids:
+            node = self.id_from_name(node)
         return list(networkx.ancestors(self.graph, node))
+
+    def is_a(self, query: str, reference: str) -> bool:
+        """
+        Checks if query node is reference node or an ancestor thereof.
+
+        :param query: Query node name. Node ID or name.
+        :param reference: Reference node name. Node ID or name.
+        :return: If query node is reference node or an ancestor thereof.
+        """
+        if query not in self.node_ids:
+            query = self.id_from_name(query)
+        if reference not in self.node_ids:
+            reference = self.id_from_name(reference)
+        return query in self.get_ancestors(node=reference) or query == reference
 
     def map_to_leaves(self, node: str, return_type: str = "elements", include_self: bool = True):
         """
@@ -491,14 +526,38 @@ class OntologyCelltypes(OntologyExtendedObo):
 
     def __init__(
             self,
+            branch: str,
             **kwargs
     ):
-        super().__init__(obo="http://purl.obolibrary.org/obo/cl.obo")
+        if os.name == "nt":  # if running on windows, do not download obo file, but rather pass url directly to obonet
+            obofile = f"https://raw.github.com/obophenotype/cell-ontology/{branch}/cl.obo"
+        else:
+            # Identify cache:
+            folder = FILE_PATH.split(os.sep)[:-4]
+            folder.insert(1, os.sep)
+            ontology_cache_dir = os.path.join(*folder, "cache", "ontologies", "cl")
+            fn = f"{branch}_cl.obo"
+            obofile = os.path.join(ontology_cache_dir, fn)
+            # Download if necessary:
+            if not os.path.isfile(obofile):
+                def download_cl():
+                    url = f"https://raw.github.com/obophenotype/cell-ontology/{branch}/cl.obo"
+                    print(f"Downloading: {fn}")
+                    if not os.path.exists(ontology_cache_dir):
+                        os.makedirs(ontology_cache_dir)
+                    r = requests.get(url, allow_redirects=True)
+                    open(obofile, 'wb').write(r.content)
+                download_cl()
+
+        super().__init__(obo=obofile)
 
         # Clean up nodes:
         nodes_to_delete = []
         for k, v in self.graph.nodes.items():
-            if "namespace" not in v.keys() or v["namespace"] != "cell":
+            # Some terms are not associated with the namespace cell but are cell types,
+            # we identify these based on their ID nomenclature here.
+            if ("namespace" in v.keys() and v["namespace"] not in ["cell", "cl"]) or \
+                    ("namespace" not in v.keys() and str(k)[:2] != "CL"):
                 nodes_to_delete.append(k)
             elif "name" not in v.keys():
                 nodes_to_delete.append(k)
@@ -511,12 +570,14 @@ class OntologyCelltypes(OntologyExtendedObo):
         # All edge types (based on previous download, assert below that this is not extended):
         edge_types = [
             'is_a',  # nomenclature DAG -> include because of annotation coarseness differences
+            'derives_from',
             'develops_from',  # developmental DAG -> include because of developmental differences
             'has_part',  # ?
             'develops_into',  # inverse developmental DAG -> do not include
+            'part_of',
             'RO:0002120',  # ?
             'RO:0002103',  # ?
-            'lacks_plasma_membrane_part'  # ?
+            'lacks_plasma_membrane_part',  # ?
         ]
         edges_to_delete = []
         for i, x in enumerate(self.graph.edges):
@@ -609,6 +670,48 @@ class OntologyMmusdv(OntologyExtendedObo):
         return ["synonym"]
 
 
+class OntologyCellosaurus(OntologyExtendedObo):
+
+    def __init__(
+            self,
+            **kwargs
+    ):
+        download_link = "https://ftp.expasy.org/databases/cellosaurus/cellosaurus.obo"
+
+        if os.name == "nt":  # if running on windows, do not download obo file, but rather pass url directly to obonet
+            super().__init__(obo=download_link)
+        else:
+            # Identify cache:
+            folder = FILE_PATH.split(os.sep)[:-4]
+            folder.insert(1, os.sep)
+            ontology_cache_dir = os.path.join(*folder, "cache", "ontologies", "cellosaurus")
+            fn = "cellosaurus.obo"
+            obofile = os.path.join(ontology_cache_dir, fn)
+            # Download if necessary:
+            if not os.path.isfile(obofile):
+                def download_cl():
+                    print(f"Downloading: {fn}")
+                    if not os.path.exists(ontology_cache_dir):
+                        os.makedirs(ontology_cache_dir)
+                    r = requests.get(download_link, allow_redirects=True)
+                    open(obofile, 'wb').write(r.content)
+                download_cl()
+            super().__init__(obo=obofile)
+
+        # Clean up nodes:
+        # edge_types = ["derived_from", "originate_from_same_individual_as"]
+        nodes_to_delete = []
+        for k, v in self.graph.nodes.items():
+            if "name" not in v.keys():
+                nodes_to_delete.append(k)
+        for k in nodes_to_delete:
+            self.graph.remove_node(k)
+
+    @property
+    def synonym_node_properties(self) -> List[str]:
+        return ["synonym"]
+
+
 class OntologySinglecellLibraryConstruction(OntologyEbi):
 
     def __init__(
@@ -623,397 +726,3 @@ class OntologySinglecellLibraryConstruction(OntologyEbi):
                 "microwell-seq": {"name": "microwell-seq"}
             }
         )
-
-
-class CelltypeUniverse:
-    """
-    Cell type universe (list) and ontology (hierarchy) container class.
-
-
-    Basic checks on the organ specific instance are performed in the constructor.
-    """
-    ontology: OntologyCelltypes
-    _target_universe: Union[List[str], None]
-
-    def __init__(self, organism: str, **kwargs):
-        """
-
-        :param organism: Organism, defines ontology extension used.
-        :param kwargs:
-        """
-        self.onto_cl = OntologyCelltypes(**kwargs)
-        self.onto_anatomy = OntologyUberon(**kwargs)
-        self._target_universe = None
-        self._set_extension(organism=organism)
-
-    def _set_extension(self, organism):
-        """
-
-        :param organism: Organism, defines ontology extension used.
-        """
-        if organism == "human":
-            self.onto_cl.add_extension(ONTOLOGIY_EXTENSION_HUMAN)
-        elif organism == "mouse":
-            self.onto_cl.add_extension(ONTOLOGIY_EXTENSION_MOUSE)
-        else:
-            raise ValueError(f"organism {organism} not found")
-
-    @property
-    def target_universe(self):
-        """
-        Ontology classes of target universe (understandable cell type names).
-
-        :return:
-        """
-        return self._target_universe
-
-    @target_universe.setter
-    def target_universe(self, x: List[str]):
-        # Check that all nodes are valid:
-        for xx in x:
-            if xx not in self.onto_cl.nodes:
-                raise ValueError(f"cell type {xx} was not in ontology")
-        # Default universe is the full set of leave nodes of ontology:
-        self.target_universe = self.onto_cl.leaves
-        self.onto_cl.set_leaves(self.target_universe)
-
-    @property
-    def target_universe_ids(self):
-        """
-        Ontology IDs of target universe (codified cell type names).
-
-        :return:
-        """
-        return [self.onto_cl.map_class_to_id(x) for x in self._target_universe]
-
-    @property
-    def ntypes(self):
-        """
-        Number of different cell types in target universe.
-        """
-        return len(self.target_universe)
-
-    def __validate_target_universe_table(self, tab: pd.DataFrame):
-        assert len(tab.columns) == 2
-        assert tab.columns[0] == "name" and tab.columns[1] == "id"
-
-    def load_target_universe(self, organ):
-        """
-
-        :param organ: Anatomic structure to load target universe for.
-        :return:
-        """
-        # ToDo: Use pydoc based query of universes stored in ./target_universes/..
-        tab = None
-        self.__validate_target_universe_table(tab=tab)
-        self.target_universe = None  # ToDo
-
-    def read_target_universe_csv(self, fn):
-        """
-
-        :param fn: File containing target universe.
-        :return:
-        """
-        tab = pd.read_csv(fn)
-        self.__validate_target_universe_table(tab=tab)
-        self.target_universe = tab["name"].values
-
-    def map_to_target_leaves(
-            self,
-            nodes: List[str],
-            return_type: str = "elements"
-    ):
-        """
-        Map a given list of nodes to leave nodes defined for this ontology.
-        :param nodes:
-        :param return_type:
-
-            "elements": names of mapped leave nodes
-            "idx": indices in leave note list of of mapped leave nodes
-        :return:
-        """
-        return [self.onto_cl.map_to_leaves(x, return_type=return_type) for x in nodes]
-
-    def prepare_celltype_map_fuzzy(
-            self,
-            source,
-            match_only: bool = False,
-            include_synonyms: bool = True,
-            anatomical_constraint: Union[str, None] = None,
-            choices_for_perfect_match: bool = True,
-            omit_list: list = [],
-            omit_target_list: list = ["cell"],
-            n_suggest: int = 4,
-            threshold_for_partial_matching: float = 90.,
-    ) -> Tuple[
-        List[Dict[str, Union[List[str], str]]],
-        List[bool]
-    ]:
-        """
-        Map free text node names to ontology node names via fuzzy string matching and return as list
-
-        If this function does not yield good matches, consider querying this web interface:
-        https://www.ebi.ac.uk/ols/index
-
-        Search strategies:
-
-            - exact_match: Only exact string matches to name or synonym in ontology. This is the only strategy that is
-                enabled if match_only is True.
-            - lenient_match: Fuzzy string matches to name or synonym in ontology based on ratio of match errors
-                ((fuzz.ratio).
-            - very_lenient_match: Fuzzy string matches to name or synonym in ontology based on ratio of matches
-                characters from query (fuzz.partial_ratio)
-
-        Search strategies with anatomical constraints:
-        An anatomic constraint is a name of an anatomical structure that can be mapped to UBERON.
-
-            - anatomic_onotolgy_match:
-                We select cell types expected in this UBERON clade based on the link between CL and UBERON.
-            - anatomic_string_match:
-                We perform an additional fuzzy string matching with the anatomical structure added to the proposed
-                label. This is often beneficial because analysts do not always prefix such extension (e.g. pancreatic)
-                to the free text cell type labels if the entire sample consists only of cells from this anatomical
-                structure. Note that if the maps from 1) were perfect, this would not be necessary. In practice, we
-                find this to still recover some hits that are otherwise missed.
-
-        Note that matches are shadowed in lower priorty strategies, ie a perfect match will not show up in the list
-        of hits of any other strategy.
-
-        :param source: Free text node labels which are to be matched to ontology nodes.
-        :param match_only: Whether to include strict matches only in output.
-        :param include_synonyms: Whether to include synonyms of nodes in string search.
-        :param anatomical_constraint: Whether to require suggestions to be within a target anatomy defined
-            within UBERON.
-        :param choices_for_perfect_match: Whether to give additional matches if a perfect match was found and an
-            anatomical_constraint is not not defined. This is overridden by match_only.
-        :param omit_list: Free text node labels to omit in map.
-        :param omit_target_list: Ontology nodes to not match to.
-        :param n_suggest: Number of cell types to suggest per search strategy.
-        :param threshold_for_partial_matching: Maximum fuzzy match score below which lenient matching (ratio) is
-            extended through partial_ratio.
-        :return: Tuple
-
-            - List with matches for each source, each entry is a dictionary,
-                of lists of search strategies named by strategy name. If a search strategy yields perfect matches, it
-                does not return a list of strings but just a single string.
-            - List with boolean indicator whether or not this output should be reported.
-        """
-        from fuzzywuzzy import fuzz
-        matches = []
-        nodes = self.onto_cl.nodes
-        nodes = [x for x in nodes if x[1]["name"] not in omit_target_list]
-        include_terms = []
-        if isinstance(source, pd.DataFrame):
-            source = list(zip(source.iloc[:, 0].values, source.iloc[:, 1].values))
-        for x in source:
-            if not isinstance(x, list) and not isinstance(x, tuple):
-                x = [x, "nan"]
-            term = x[0].lower().strip("'").strip("\"").strip("'").strip("\"").strip("]").strip("[")
-            # Test for perfect string matching:
-            scores_strict = np.array([
-                np.max([
-                    100 if term == y[1]["name"].lower() else 0
-                ] + [
-                    100 if term == yy.lower() else 0
-                    for yy in y[1]["synonym"]
-                ]) if "synonym" in y[1].keys() and include_synonyms else
-                100 if term == y[1]["name"].lower() else 0
-                for y in nodes
-            ])
-            # Test for partial string matching:
-            # fuzz ratio and partial_ratio capture different types of matches well, we use both here and decide below
-            # which scores are used in which scenario defined through the user input.
-            # Formatting of synonyms: These are richly annotated, we strip references following after either:
-            # BROAD, EXACT
-            # in the synonym string and characters: "'
-
-            def synonym_string_processing(y):
-                return y.lower().split("broad")[0].split("exact")[0].lower().strip("'").strip("\"").split("\" ")[0]
-
-            scores_lenient = np.array([
-                np.max([fuzz.ratio(term, y[1]["name"].lower())] + [
-                    fuzz.ratio(term, synonym_string_processing(yy))
-                    for yy in y[1]["synonym"]
-                ]) if "synonym" in y[1].keys() and include_synonyms else
-                fuzz.ratio(term, y[1]["name"].lower())
-                for y in nodes
-            ])
-            scores_very_lenient = np.array([
-                np.max([fuzz.partial_ratio(term, y[1]["name"].lower())] + [
-                    fuzz.partial_ratio(term, synonym_string_processing(yy))
-                    for yy in y[1]["synonym"]
-                ]) if "synonym" in y[1].keys() and include_synonyms else
-                fuzz.partial_ratio(term, y[1]["name"].lower())
-                for y in nodes
-            ])
-            include_terms.append(term not in omit_list)
-            if match_only and not anatomical_constraint:
-                # Explicitly trying to report perfect matches (match_only is True).
-                matches.append({"perfect_match": [nodes[i][1]["name"] for i in np.where(scores_strict == 100)[0]][0]})
-            else:
-                matches_i = {}
-                if np.any(scores_strict == 100) and not anatomical_constraint:
-                    # Perfect match and not additional information through anatomical_constraint, ie no reason to assume
-                    # that the user is not looking for this hit.
-                    matches_i.update({
-                        "perfect_match": [nodes[i][1]["name"] for i in np.where(scores_strict == 100)[0]][0]
-                    })
-                    if choices_for_perfect_match:
-                        matches_i.update({"lenient_match": [
-                            nodes[i][1]["name"]
-                            for i in np.argsort(scores_lenient)[::-1]
-                            if not np.any([nodes[i][1]["name"] in v for v in matches_i.values()])
-                        ][:n_suggest]})
-                        if np.max(scores_lenient) < threshold_for_partial_matching:
-                            matches_i.update({"very_lenient_match": [
-                                nodes[i][1]["name"]
-                                for i in np.argsort(scores_very_lenient)[::-1]
-                                if not np.any([nodes[i][1]["name"] in v for v in matches_i.values()])
-                            ][:n_suggest]})
-                else:
-                    if anatomical_constraint is not None:
-                        # Use anatomical constraints two fold:
-                        # 1. Select cell types that are in the correct ontology.
-                        # 2. Run a second string matching with the anatomical word included.
-
-                        # 1. Select cell types that are in the correct ontology.
-                        # Check that anatomical constraint is a term in UBERON and get UBERON ID:
-                        anatomical_constraint_id = self.onto_anatomy.id_from_name(anatomical_constraint)
-                        # Select up to 5 nodes which match the anatomical constraint:
-                        # The entries look as follows:
-                        # node.value['relationship'] = ['part_of UBERON:0001885']
-                        # Find nodes that can be matched to UBERON:
-                        anatomical_subselection = [
-                            "relationship" in y[1].keys() and
-                            np.any(["part_of UBERON" in yy for yy in y[1]["relationship"]]) and
-                            np.any([
-                                yy.split("part_of ")[-1] in self.onto_anatomy.node_ids
-                                for yy in y[1]["relationship"]
-                            ])
-                            for y in nodes
-                        ]
-                        uberon_ids = [
-                            y[1]["relationship"][
-                                np.where(["part_of UBERON" in yy for yy in y[1]["relationship"]])[0][0]
-                            ].split("part_of ")[1]
-                            if z else None
-                            for y, z in zip(nodes, anatomical_subselection)
-                        ]
-                        # Check relationship in UBERON. Select for:
-                        # a) parent -> a more general setting across anatomies from which one was sampled
-                        # b) child -> a sub anatomy of the sampled tissue.
-                        # Check this by checking if one is an ancestor of the other:
-                        anatomical_subselection = [
-                            z and (
-                                anatomical_constraint_id in self.onto_anatomy.get_ancestors(node=y) or  # noqa: E126
-                                y in self.onto_anatomy.get_ancestors(node=anatomical_constraint_id)
-                            )
-                            for y, z in zip(uberon_ids, anatomical_subselection)
-                        ]
-                        # Iterate over nodes sorted by string match score and masked by constraint:
-                        matches_i.update({
-                            "anatomic_onotolgy_match": [
-                                nodes[i][1]["name"]
-                                for i in np.argsort(scores_lenient)
-                                if anatomical_subselection[i] and not
-                                np.any([nodes[i][1]["name"] in v for v in matches_i.values()])
-                            ][-n_suggest:][::-1]
-                        })  # noqa: E122
-
-                        # 2. Run a second string matching with the anatomical word included.
-                        modified_term = anatomical_constraint + " " + x[0].lower().strip("'").strip("\"").strip("]"). \
-                            strip("[")
-                        scores_anatomy = np.array([
-                            np.max([
-                                fuzz.partial_ratio(modified_term, y[1]["name"].lower())
-                            ] + [
-                                fuzz.partial_ratio(modified_term, synonym_string_processing(yy))
-                                for yy in y[1]["synonym"]
-                            ]) if "synonym" in y[1].keys() and include_synonyms else
-                            fuzz.partial_ratio(modified_term, y[1]["name"].lower())
-                            for y in nodes
-                        ])
-                        matches_i.update({
-                            "anatomic_string_match": [
-                                nodes[i][1]["name"]
-                                for i in np.argsort(scores_anatomy)
-                                if nodes[i][1]["name"] and not
-                                np.any([nodes[i][1]["name"] in v for v in matches_i.values()])
-                            ][-n_suggest:][::-1]
-                        })
-
-                        # Select best overall matches based on lenient and strict matching:
-                        matches_i.update({"perfect_match": [
-                            nodes[i][1]["name"]
-                            for i in np.argsort(scores_strict)[::-1]
-                        ][:n_suggest]})
-                        matches_i.update({"lenient_match": [
-                            nodes[i][1]["name"]
-                            for i in np.argsort(scores_lenient)[::-1]
-                            if not np.any([nodes[i][1]["name"] in v for v in matches_i.values()])
-                        ][:n_suggest]})
-                        if np.max(scores_lenient) < threshold_for_partial_matching:
-                            matches_i.update({"very_lenient_match": [
-                                nodes[i][1]["name"]
-                                for i in np.argsort(scores_very_lenient)[::-1]
-                                if not np.any([nodes[i][1]["name"] in v for v in matches_i.values()])
-                            ][:n_suggest]})
-                    else:
-                        # Suggest top hits by string match:
-                        matches_i.update({"lenient_match": [
-                            nodes[i][1]["name"] for i in np.argsort(scores_lenient)[::-1]
-                        ][:n_suggest]})
-                        if np.max(scores_lenient) < threshold_for_partial_matching:
-                            matches_i.update({"very_lenient_match": [
-                                nodes[i][1]["name"]
-                                for i in np.argsort(scores_very_lenient)[::-1]
-                                if not np.any([nodes[i][1]["name"] in v for v in matches_i.values()])
-                            ][:n_suggest]})
-                matches.append(matches_i)
-        return matches, include_terms
-
-    def prepare_celltype_map_tab(
-            self,
-            source,
-            match_only: bool = False,
-            include_synonyms: bool = True,
-            anatomical_constraint: Union[str, None] = None,
-            omit_list: list = [],
-            n_suggest: int = 10,
-            separator_suggestions: str = ":",
-            separator_groups: str = ":|||:",
-    ) -> pd.DataFrame:
-        """
-        Map free text node names to ontology node names via fuzzy string matching and return as matching table.
-
-        :param source: Free text node labels which are to be matched to ontology nodes.
-        :param match_only: Whether to include strict matches only in output.
-        :param include_synonyms: Whether to include synonyms of nodes in string search.
-        :param anatomical_constraint: Whether to require suggestions to be within a target anatomy defined within UBERON.
-        :param omit_list: Free text node labels to omit in map.
-        :param n_suggest: Number of cell types to suggest per search strategy.
-        :param separator_suggestions: String separator for matches of a single strategy in output target column.
-        :param separator_groups: String separator for search strategy grouped matches in output target column.
-        :return: Table with source and target node names. Columns: "source", "target"
-        """
-        matches, include_terms = self.prepare_celltype_map_fuzzy(
-            source=source,
-            match_only=match_only,
-            include_synonyms=include_synonyms,
-            anatomical_constraint=anatomical_constraint,
-            choices_for_perfect_match=False,
-            omit_list=omit_list,
-            n_suggest=n_suggest,
-        )
-        tab = pd.DataFrame({
-            "source": source,
-            "target": [
-                separator_groups.join([
-                    separator_suggestions.join(v)
-                    if isinstance(v, list) else v
-                    for v in x.values()
-                ])
-                for x in matches
-            ]
-        })
-        return tab.loc[include_terms]

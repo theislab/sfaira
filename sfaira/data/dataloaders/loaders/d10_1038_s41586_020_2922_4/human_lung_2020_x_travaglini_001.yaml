@@ -1,0 +1,64 @@
+dataset_structure:
+    dataset_index: 1
+    sample_fns:
+        - "droplet_normal_lung_blood_scanpy.20200205.RC4.h5ad"
+        - "facs_normal_lung_blood_scanpy.20200205.RC4.h5ad"
+dataset_wise:
+    author:
+        - "Travaglini"
+    doi:
+        - "10.1038/s41586-020-2922-4"
+    download_url_data:
+        droplet_normal_lung_blood_scanpy.20200205.RC4.h5ad: "syn21625095,droplet_normal_lung_blood_scanpy.20200205.RC4.h5ad"
+        facs_normal_lung_blood_scanpy.20200205.RC4.h5ad: "syn21625142,facs_normal_lung_blood_scanpy.20200205.RC4.h5ad"
+    download_url_meta:
+    normalization: "raw"
+    year: 2020
+dataset_or_observation_wise:
+    age:
+    age_obs_key:
+    assay_sc:
+        droplet_normal_lung_blood_scanpy.20200205.RC4.h5ad: "10X sequencing"
+        facs_normal_lung_blood_scanpy.20200205.RC4.h5ad: "Smart-seq2"
+    assay_sc_obs_key:
+    assay_differentiation:
+    assay_differentiation_obs_key:
+    assay_type_differentiation:
+    assay_type_differentiation_obs_key:
+    bio_sample:
+    bio_sample_obs_key:
+        droplet_normal_lung_blood_scanpy.20200205.RC4.h5ad: "orig.ident*sample*magnetic.selection"
+        facs_normal_lung_blood_scanpy.20200205.RC4.h5ad: "patient*sample"
+    cell_line:
+    cell_line_obs_key:
+    development_stage:
+    development_stage_obs_key:
+    ethnicity:
+    ethnicity_obs_key:
+    healthy: True
+    healthy_obs_key:
+    individual:
+    individual_obs_key: "patient"
+    organ: "lung"
+    organ_obs_key:
+    organism: "human"
+    organism_obs_key:
+    sample_source: "primary_tissue"
+    sample_source_obs_key:
+    sex:
+    sex_obs_key:
+    state_exact: "healthy"
+    state_exact_obs_key: "state_exact"
+    tech_sample:
+    tech_sample_obs_key:
+        droplet_normal_lung_blood_scanpy.20200205.RC4.h5ad: "channel"
+        facs_normal_lung_blood_scanpy.20200205.RC4.h5ad: "plate.barcode"
+observation_wise:
+    cellontology_original_obs_key: "free_annotation"
+feature_wise:
+    var_ensembl_col:
+    var_symbol_col: "index"
+misc:
+    healthy_state_healthy:
+meta:
+    version: "1.0"

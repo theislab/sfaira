@@ -7,6 +7,7 @@ import warnings
 from typing import Union, List
 import os
 
+from sfaira.versions.metadata import CelltypeUniverse
 from sfaira.train.train_model import TargetZoos
 from sfaira.estimators import EstimatorKerasEmbedding
 
@@ -821,7 +822,6 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
             organ: str,
             organism: str,
             datapath: str,
-            celltype_version: str = "0",
             partition_select: str = "val",
             metric_select: str = "custom_cce_agg",
             metric_show: str = "f1",
@@ -836,7 +836,6 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         :param organ: Organ to plot in heatmap.
         :param organism: Organism that the gridsearch was run on
         :param datapath: Path to the local sfaira data repository
-        :param celltype_version: Version in sfaira celltype universe
         :param partition_select: Based on which partition to select the best model
             - train
             - val
@@ -876,7 +875,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         )
         sns_tab = sns_tab[sns_tab['organ'] == organ]
 
-        tz = TargetZoos(path=datapath)
+        tz = TargetZoos(data_path=datapath)
         if organism == "human":
             dataset = tz.data_human[organ]
         elif organism == "mouse":
@@ -885,23 +884,18 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
             raise(ValueError(f"Supplied organism {organism} not recognised. Should be one of ('mouse', 'loaders')"))
         dataset.load()
 
-        raise NotImplementedError("deprecated metadata code here")
-        """
         cell_counts = dataset.obs_concat(keys=['cell_ontology_class'])['cell_ontology_class'].value_counts().to_dict()
-        celltype_versions = ORGANISM_DICT.copy()
-        celltype_versions[organism][organ].set_version(celltype_version)
-        leafnodes = celltype_versions[organism][organ].ids
-        ontology = celltype_versions[organism][organ].ontology[celltype_version]["names"]
-
         celltypelist = list(cell_counts.keys()).copy()
+        cu = CelltypeUniverse(organism=organism)
+        # TODO set target universe.
         for k in celltypelist:
-            if k not in leafnodes:
-                if k not in ontology.keys():
+            if k not in cu.target_universe:
+                if k not in cu.ontology.node_names:
                     raise(ValueError(f"Celltype '{k}' not found in celltype universe"))
-                for leaf in ontology[k]:
+                for leaf in cu[k]:  # TODO get leaves
                     if leaf not in cell_counts.keys():
                         cell_counts[leaf] = 0
-                    cell_counts[leaf] += 1 / len(ontology[k])
+                    cell_counts[leaf] += 1 / len(cu[k])  # TODO get leaves
                 del cell_counts[k]
 
         # Compute class-wise metrics
@@ -978,14 +972,12 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
                 cbar=False
             )
         return fig, axs, sns_data_heatmap
-        """
 
     def plot_best_classwise_scatter(
             self,
             organ: str,
             organism: str,
             datapath: str,
-            celltype_version: str = "0",
             partition_select: str = "val",
             metric_select: str = "custom_cce_agg",
             metric_show: str = "f1",
@@ -1044,7 +1036,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         )
         sns_tab = sns_tab[sns_tab['organ'] == organ]
 
-        tz = TargetZoos(path=datapath)
+        tz = TargetZoos(data_path=datapath)
         if organism == "human":
             dataset = tz.data_human[organ]
         elif organism == "mouse":
@@ -1053,23 +1045,18 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
             raise(ValueError(f"Supplied organism {organism} not recognised. Should be one of ('mouse', 'loaders')"))
         dataset.load()
 
-        raise NotImplementedError("deprecated metadata code here")
-        """
         cell_counts = dataset.obs_concat(keys=['cell_ontology_class'])['cell_ontology_class'].value_counts().to_dict()
-        celltype_versions = ORGANISM_DICT.copy()
-        celltype_versions[organism][organ].set_version(celltype_version)
-        leafnodes = celltype_versions[organism][organ].ids
-        ontology = celltype_versions[organism][organ].ontology[celltype_version]["names"]
-
         celltypelist = list(cell_counts.keys()).copy()
+        cu = CelltypeUniverse(organism=organism)
+        # TODO set target universe.
         for k in celltypelist:
-            if k not in leafnodes:
-                if k not in ontology.keys():
+            if k not in cu.target_universe:
+                if k not in cu.ontology.node_names:
                     raise(ValueError(f"Celltype '{k}' not found in celltype universe"))
-                for leaf in ontology[k]:
+                for leaf in cu[k]:    # TODO get leaves
                     if leaf not in cell_counts.keys():
                         cell_counts[leaf] = 0
-                    cell_counts[leaf] += 1 / len(ontology[k])
+                    cell_counts[leaf] += 1 / len(cu[k])    # TODO get leaves
                 del cell_counts[k]
 
         # Compute class-wise metrics
@@ -1115,7 +1102,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
             if c in cell_counts.keys():
                 n_cells.append(np.round(cell_counts[c]))
             else:
-                warnings.warn(f"Celltype {c} from cell ontology not found in {organism} {organ} dataset")
+                warnings.warn(f"Celltype {c} from cell cu not found in {organism} {organ} dataset")
                 n_cells.append(np.nan)
         n_cells = np.array(n_cells)[:, None]
         sns_data_scatter = pandas.DataFrame(
@@ -1153,7 +1140,6 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
                              )
 
         return fig, axs, sns_data_scatter
-        """
 
 
 class SummarizeGridsearchEmbedding(GridsearchContainer):
@@ -1388,7 +1374,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         else:
             print('Compute gradients (1/3): load data')
             # load data
-            tz = TargetZoos(path=datapath)
+            tz = TargetZoos(data_path=datapath)
             if organism == "human":
                 dataset = tz.data_human[organ]
             elif organism == "mouse":

@@ -1,3 +1,5 @@
-from sfaira.consts.adata_fields import ADATA_IDS_BASE, ADATA_IDS_EXTENDED
-from sfaira.consts.adata_fields import ADATA_IDS_CELLXGENE, ADATA_IDS_SFAIRA
+from sfaira.consts.adata_fields import AdataIds, AdataIdsSfaira, AdataIdsCellxgene
 from sfaira.consts.meta_data_files import META_DATA_FIELDS
+from sfaira.consts.ontologies import OntologyContainerSfaira
+
+OCS = OntologyContainerSfaira()

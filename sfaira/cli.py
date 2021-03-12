@@ -98,8 +98,8 @@ def lint_dataloader(path) -> None:
 
     PATH to the dataloader script.
     """
-    dataloader_linter = DataloaderLinter()
-    dataloader_linter.lint(path)
+    dataloader_linter = DataloaderLinter(path)
+    dataloader_linter.lint()
 
 
 @sfaira_cli.command()

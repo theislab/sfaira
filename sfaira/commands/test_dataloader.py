@@ -20,10 +20,11 @@ class DataloaderTester:
         """
         Runs a predefined unit test on a given dataloader.
         """
-        print('[bold blue]Please ensure that your dataloader is in sfaira/dataloaders/loaders/<doi_flattened>.')
-        print('[bold blue]Please ensure that your test data is in sfaira/unit_tests/template_data/<doi_flattened>.')
-        self._prompt_doi()
-        self._run_unittest()
+        print('[bold red]This command is currently disabled.')
+        # print('[bold blue]Please ensure that your dataloader is in sfaira/dataloaders/loaders/<doi_flattened>.')
+        # print('[bold blue]Please ensure that your test data is in sfaira/unit_tests/template_data/<doi_flattened>.')
+        # self._prompt_doi()
+        # self._run_unittest()
 
     def _prompt_doi(self):
         self.doi = sfaira_questionary(function='text',

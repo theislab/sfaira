@@ -1,0 +1,13 @@
+source	target
+Bcells	B cell
+Cholangiocytes	intrahepatic cholangiocyte
+Endotheliaendothelial cell
+Hepatocytes	hepatocyte
+ILCs	innate lymphoid cell
+MPs	mononuclear phagocytes  # ToDo this are subclustered in the manuscript, is this annotated in the object?
+Mast cells	mast cell
+Mesenchyme	mesenchymal cell
+Mesothelia	mesothelial cell
+Plasma Bcells	plasma cell
+Tcells	T cell
+pDCs	plasmacytoid dendritic cell

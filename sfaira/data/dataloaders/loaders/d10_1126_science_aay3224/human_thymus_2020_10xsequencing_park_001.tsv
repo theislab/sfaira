@@ -1,0 +1,45 @@
+source	target	target_id
+B_memory	memory B cell	CL:0000787
+B_naive	naive B cell	CL:0000788
+B_plasma	plasma cell	CL:0000786
+B_pro/pre	early pro-B cell	CL:0002046
+CD4+T	CD4-positive, alpha-beta T cell	CL:0000624
+CD4+Tmem	effector memory CD4-positive, alpha-beta T cell	CL:0000905
+CD8+T	CD8-positive, alpha-beta T cell	CL:0000625
+CD8+Tmem	effector memory CD8-positive, alpha-beta T cell	CL:0000913
+CD8αα	CD8-positive, alpha-beta thymocyte	CL:0000811
+DC1	dendritic cell	CL:0000451
+DC2	dendritic cell	CL:0000451
+DN	double negative thymocyte	CL:0002489
+DP	double-positive, alpha-beta thymocyte	CL:0000809
+ETP	early lymphoid progenitor	CL:0000936
+Endo	endothelial cell	CL:0000115
+Epi_GCM2	epithelial cell	CL:0000066
+Ery	erythrocyte	CL:0000232
+Fb_1	fibroblast	CL:0000057
+Fb_2	fibroblast	CL:0000057
+Fb_cycling	fibroblast	CL:0000057
+ILC3	group 3 innate lymphoid cell	CL:0001071
+Lymph	early lymphoid progenitor	CL:0000936
+Mac	thymic medullary macrophage	CL:0000882
+Mast	mast cell	CL:0000097
+Mgk	megakaryocyte	CL:0000556
+Mono	monocyte	CL:0000576
+NK	natural killer cell	CL:0000623
+NKT	immature NK T cell	CL:0000914
+NMP	common myeloid progenitor	CL:0000049
+T(agonist)	T cell	CL:0000084
+TEC(myo)	epithelial cell of thymus	CL:0002293
+TEC(neuro)	epithelial cell of thymus	CL:0002293
+Treg	regulatory T cell	CL:0000815
+VSMC	vascular associated smooth muscle cell	CL:0000359
+aDC	dendritic cell	CL:0000451
+cTEC	cortical thymic epithelial cell	CL:0002364
+mTEC(I)	medullary thymic epithelial cell	CL:0002365
+mTEC(II)	medullary thymic epithelial cell	CL:0002365
+mTEC(III)	medullary thymic epithelial cell	CL:0002365
+mTEC(IV)	medullary thymic epithelial cell	CL:0002365
+mcTEC	epithelial cell of thymus	CL:0002293
+pDC	plasmacytoid dendritic cell	CL:0000784
+αβT(entry)	alpha-beta T cell	CL:0000789
+γδT	gamma-delta T cell	CL:0000798

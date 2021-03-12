@@ -1,8 +1,7 @@
 import anndata
 import os
-from typing import Union
 
-from sfaira.data import DatasetBaseGroupLoadingManyFiles
+from sfaira.data import DatasetBase
 
 SAMPLE_FNS = [
     "tabula-muris-senis-droplet-processed-official-annotations-Fat.h5ad",
@@ -47,19 +46,11 @@ SAMPLE_FNS = [
 ]
 
 
-class Dataset(DatasetBaseGroupLoadingManyFiles):
+class Dataset(DatasetBase):
 
-    def __init__(
-            self,
-            sample_fn: str,
-            data_path: Union[str, None] = None,
-            meta_path: Union[str, None] = None,
-            cache_path: Union[str, None] = None,
-            **kwargs
-    ):
-        super().__init__(sample_fn=sample_fn, data_path=data_path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        protocol = "10x" if sample_fn.split("-")[3] == "droplet" else "smartseq2"
-        organ = "-".join(sample_fn.split("-")[7:]).split(".")[0].lower()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        organ = "-".join(self.sample_fn.split("-")[7:]).split(".")[0].lower()
         organ = "adipose tissue" if organ in ["fat", "bat", "gat", "mat", "scat"] else \
             "aorta" if organ in ["aorta"] else \
             "urinary bladder" if organ in ["bladder"] else \
@@ -81,39 +72,41 @@ class Dataset(DatasetBaseGroupLoadingManyFiles):
             "trachea" if organ in ["trachea"] else organ
         # ToDo: heart_and_aorta could be a distinct UBERON term, e.g. cardiovascular system?
 
-        self.id = f"mouse_{''.join(organ.split(' '))}_2019_{protocol}_pisco_" \
-                  f"{str(SAMPLE_FNS.index(self.sample_fn)).zfill(3)}_10.1101/661728"
-
-        self.download_url_data = f"https://czb-tabula-muris-senis.s3-us-west-2.amazonaws.com/Data-objects/{sample_fn}"
+        self.download_url_data = f"https://czb-tabula-muris-senis.s3-us-west-2.amazonaws.com/Data-objects/" \
+                                 f"{self.sample_fn}"
         self.download_url_meta = None
 
-        self.obs_key_cellontology_original = "free_annotation"
-        self.obs_key_age = "age"
-        self.obs_key_dev_stage = "development_stage"  # not given in all data sets
-        self.obs_key_sex = "sex"
+        self.cellontology_original_obs_key = "cell_ontology_class"
+        self.age_obs_key = "age"
+        self.development_stage_obs_key = "development_stage"  # not given in all data sets
+        self.sex_obs_key = "sex"
         # ToDo: further anatomical information for subtissue in "subtissue"?
 
-        self.author = "Quake"
+        self.author = "Pisco"
         self.doi = "10.1101/661728"
         self.healthy = True
         self.normalization = "norm"
         self.organism = "mouse"
         self.organ = organ
-        self.protocol = "10X sequencing" if sample_fn.split("-")[3] == "droplet" else "Smart-seq2"
+        self.assay_sc = "10X sequencing" if self.sample_fn.split("-")[3] == "droplet" else "Smart-seq2"
         self.state_exact = "healthy"
         self.year = 2019
+        self.sample_source = "primary_tissue"
 
         self.var_ensembl_col = None
         self.var_symbol_col = "index"
 
-    def _load(self):
-        fn = os.path.join(self.data_dir, self.sample_fn)
-        adata = anndata.read_h5ad(fn)
-        adata.X = adata.raw.X
-        adata.var = adata.raw.var
-        del adata.raw
-        adata.obsm = {}
-        adata.varm = {}
-        adata.uns = {}
+        self.set_dataset_id(idx=1)
 
-        return adata
+
+def load(data_dir, sample_fn, **kwargs):
+    fn = os.path.join(data_dir, sample_fn)
+    adata = anndata.read_h5ad(fn)
+    adata.X = adata.raw.X
+    adata.var = adata.raw.var
+    del adata.raw
+    adata.obsm = {}
+    adata.varm = {}
+    adata.uns = {}
+
+    return adata

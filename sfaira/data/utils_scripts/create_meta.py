@@ -6,7 +6,7 @@ print(tf.__version__)
 
 
 def write_meta(args0, args1):
-    args0.write_meta(fn_meta=None, dir_out=args1, fn_data=None)
+    args0.write_meta(fn_meta=None, dir_out=args1)
     return None
 
 
@@ -20,8 +20,7 @@ processes = int(str(sys.argv[3]))
 ds = sfaira.data.dataloaders.DatasetSuperGroupSfaira(
     data_path=data_path, meta_path=path_meta, cache_path=path_meta
 )
-dsg = ds.flatten()  # need to flatten in this case to parallelise across Groups and not just within.
-dsg.load(
+ds.load(
     annotated_only=False,
     match_to_reference=None,
     remove_gene_version=True,

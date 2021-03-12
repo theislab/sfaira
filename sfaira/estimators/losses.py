@@ -1,6 +1,8 @@
-import abc
-import tensorflow as tf
 import numpy as np
+try:
+    import tensorflow as tf
+except ImportError:
+    tf = None
 
 
 class LossLoglikelihoodNb(tf.keras.losses.Loss):

@@ -1,0 +1,21 @@
+source	target	target_id
+1	hepatocyte	CL:0000182
+10	macrophage	CL:0000235
+11	endothelial cell of periportal hepatic sinusoid	CL:0019021
+12	endothelial cell of pericentral hepatic sinusoid	CL:0019022
+13	endothelial cell	CL:0000115
+14	hepatocyte	CL:0000182
+15	hepatocyte	CL:0000182
+16	mature B cell	CL:0000785
+17	cholangiocyte	CL:1000488
+18	gamma-delta T cell	CL:0000798
+19	erythroid lineage cell	CL:0000764
+2	alpha-beta T cell	CL:0000789
+20	hepatic stellate cell	CL:0000632
+3	hepatocyte	CL:0000182
+4	inflammatory macrophage	CL:0000863
+5	hepatocyte	CL:0000182
+6	hepatocyte	CL:0000182
+7	plasma cell	CL:0000786
+8	natural killer cell	CL:0000623
+9	gamma-delta T cell	CL:0000798

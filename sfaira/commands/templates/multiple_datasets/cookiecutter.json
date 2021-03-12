@@ -1,0 +1,20 @@
+{
+    "sample_fns": {"fns": []},
+    "dataloader_author_name": "",
+    "dataloader_author_email": "",
+    "id": "",
+    "id_without_doi": "",
+    "author": "",
+    "doi": "",
+    "doi_sfaira_repr": "",
+    "download_url_data": "",
+    "download_url_meta": "",
+    "normalization": "",
+    "organ": "",
+    "organism": "",
+    "assay": "",
+    "year": "",
+    "individual": "",
+    "state_exact": "",
+    "create_extra_description": ""
+  }

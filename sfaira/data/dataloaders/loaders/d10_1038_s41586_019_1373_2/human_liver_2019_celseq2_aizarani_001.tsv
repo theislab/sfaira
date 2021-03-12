@@ -1,0 +1,40 @@
+source	target	target_id
+1	alpha-beta T cell	CL:0000789
+10	endothelial cell	CL:0000115
+11	hepatocyte	CL:0000182
+12	alpha-beta T cell	CL:0000789
+13	endothelial cell of hepatic sinusoid	CL:1000398
+14	hepatocyte	CL:0000182
+15	endothelial cell	CL:0000115
+16	UNKNOWN	UNKNOWN
+17	hepatocyte	CL:0000182
+18	alpha-beta T cell	CL:0000789
+19	UNKNOWN	UNKNOWN
+2	Kupffer cell	CL:0000091
+20	endothelial cell of hepatic sinusoid	CL:1000398
+21	endothelial cell	CL:0000115
+22	B cell	CL:0000236
+23	Kupffer cell	CL:0000091
+24	cholangiocyte	CL:1000488
+25	Kupffer cell	CL:0000091
+26	endothelial cell	CL:0000115
+27	UNKNOWN	UNKNOWN
+28	alpha-beta T cell	CL:0000789
+29	endothelial cell of vascular tree	CL:0002139
+3	alpha-beta T cell	CL:0000789
+30	hepatocyte	CL:0000182
+31	Kupffer cell	CL:0000091
+32	endothelial cell of hepatic sinusoid	CL:1000398
+33	hepatic stellate cell	CL:0000632
+34	B cell	CL:0000236
+35	endothelial cell	CL:0000115
+36	UNKNOWN	UNKNOWN
+37	UNKNOWN	UNKNOWN
+38	B cell	CL:0000236
+39	cholangiocyte	CL:1000488
+4	cholangiocyte	CL:1000488
+5	alpha-beta T cell	CL:0000789
+6	Kupffer cell	CL:0000091
+7	cholangiocyte	CL:1000488
+8	B cell	CL:0000236
+9	endothelial cell of hepatic sinusoid	CL:1000398

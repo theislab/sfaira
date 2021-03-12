@@ -1,0 +1,16 @@
+source	target	target_id
+ASC1	astrocyte	CL:0000127
+ASC2	astrocyte	CL:0000127
+END	endothelial cell	CL:0000115
+GABA1	GABAergic interneuron	CL:0011005
+GABA2	GABAergic interneuron	CL:0011005
+MG	microglial cell	CL:0000129
+NSC	neuronal stem cell	CL:0000047
+ODC1	oligodendrocyte	CL:0000128
+OPC	oligodendrocyte precursor cell	CL:0002453
+Unclassified	UNKNOWN	UNKNOWN
+exCA1	hippocampal pyramidal neuron	CL:1001571
+exCA3	hippocampal pyramidal neuron	CL:1001571
+exDG	dentate gyrus of hippocampal formation granule cell	CL:2000089
+exPFC1	primary motor cortex pyramidal cell	CL:2000049
+exPFC2	primary motor cortex pyramidal cell	CL:2000049

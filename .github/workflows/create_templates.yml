@@ -31,23 +31,5 @@ jobs:
       - name: Create single_dataset template
         run: |
           cd ..
-          echo -e "\n\n\n\n\n\n\n\n\n\n\n" | sfaira create-dataloader
-          rm -rf d10_1000_j_journal_2021_01_001/
-
-      - name: Create multiple_datasets_single_file template
-        run: |
-          cd ..
-          echo -e "\033[B\n\n\n\n\n\n\n\n\n\n\n" | sfaira create-dataloader
-          rm -rf d10_1000_j_journal_2021_01_001/
-
-      - name: Create multiple_datasets_streamlined template
-        run: |
-          cd ..
-          echo -e "\033[B\n\033[B\n\n\n\n\n\n\n\n\n\n\n" | sfaira create-dataloader
-          rm -rf d10_1000_j_journal_2021_01_001/
-
-      - name: Create multiple_datasets_not_streamlined template
-        run: |
-          cd ..
-          echo -e "\033[B\n\033[B\n\033[B\n\n\n\n\n\n\n\n\n\n" | sfaira create-dataloader
+          echo -e "\n\n\n\n\n\n\n\n\n\n\n\n\n" | sfaira create-dataloader
           rm -rf d10_1000_j_journal_2021_01_001/

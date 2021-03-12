@@ -37,6 +37,10 @@
       ~DatasetInteractive.age
       ~DatasetInteractive.annotated
       ~DatasetInteractive.author
+      ~DatasetInteractive.assay_sc
+      ~DatasetInteractive.assay_differentiation
+      ~DatasetInteractive.assay_type_differentiation
+      ~DatasetInteractive.cell_line
       ~DatasetInteractive.citation
       ~DatasetInteractive.dev_stage
       ~DatasetInteractive.directory_formatted_doi
@@ -45,7 +49,7 @@
       ~DatasetInteractive.download
       ~DatasetInteractive.download_meta
       ~DatasetInteractive.ethnicity
-      ~DatasetInteractive.fn_ontology_class_map_csv
+      ~DatasetInteractive.fn_ontology_class_map_tsv
       ~DatasetInteractive.healthy
       ~DatasetInteractive.healthy_state_healthy
       ~DatasetInteractive.id
@@ -55,6 +59,10 @@
       ~DatasetInteractive.ncells
       ~DatasetInteractive.normalization
       ~DatasetInteractive.obs_key_age
+      ~DatasetInteractive.obs_key_assay_sc
+      ~DatasetInteractive.obs_key_assay_differentiation
+      ~DatasetInteractive.obs_key_assay_type_differentiation
+      ~DatasetInteractive.obs_key_cell_line
       ~DatasetInteractive.obs_key_cellontology_id
       ~DatasetInteractive.obs_key_cellontology_original
       ~DatasetInteractive.obs_key_dev_stage
@@ -62,16 +70,16 @@
       ~DatasetInteractive.obs_key_healthy
       ~DatasetInteractive.obs_key_organ
       ~DatasetInteractive.obs_key_organism
-      ~DatasetInteractive.obs_key_protocol
       ~DatasetInteractive.obs_key_sample
+      ~DatasetInteractive.obs_key_sample_source
       ~DatasetInteractive.obs_key_sex
       ~DatasetInteractive.obs_key_state_exact
       ~DatasetInteractive.ontology_celltypes
       ~DatasetInteractive.ontology_class_map
       ~DatasetInteractive.organ
       ~DatasetInteractive.organism
-      ~DatasetInteractive.protocol
       ~DatasetInteractive.sex
+      ~DatasetInteractive.sample_source
       ~DatasetInteractive.source
       ~DatasetInteractive.state_exact
       ~DatasetInteractive.var_ensembl_col
