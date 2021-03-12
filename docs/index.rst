@@ -38,8 +38,9 @@ Latest additions
    api/index
    commandline_interface
    tutorials
-   data
+   using_data
    adding_datasets
+   adding_dataset_classes
    models
    ecosystem
    roadmap

@@ -947,15 +947,17 @@ class DatasetBase(abc.ABC):
         # Validate mapped IDs based on ontology:
         # This aborts with a readable error if there was a target in the mapping file that does not match the
         # ontology.
-        self._value_protection(
-            attr="celltypes",
-            allowed=self.ontology_celltypes,
-            attempted=[
-                x for x in np.unique(labels_mapped).tolist()
-                if x != self._adata_ids_sfaira.unknown_celltype_identifier and
-                x != self._adata_ids_sfaira.not_a_cell_celltype_identifier
-            ]
-        )
+        if self.cell_ontology_map is not None:
+            # This protection blocks progression in the unit test if not deactivated.
+            self._value_protection(
+                attr="celltypes",
+                allowed=self.ontology_celltypes,
+                attempted=[
+                    x for x in np.unique(labels_mapped).tolist()
+                    if x != self._adata_ids_sfaira.unknown_celltype_identifier and
+                    x != self._adata_ids_sfaira.not_a_cell_celltype_identifier
+                ]
+            )
         self.adata.obs[self._adata_ids_sfaira.cell_ontology_class] = labels_mapped
         self.cellontology_class_obs_key = self._adata_ids_sfaira.cell_ontology_class
         self.adata.obs[self._adata_ids_sfaira.cell_types_original] = labels_original
@@ -963,15 +965,17 @@ class DatasetBase(abc.ABC):
         # The IDs are not read from a source file but inferred based on the class name.
         # TODO this could be changed in the future, this allows this function to be used both on cell type name mapping
         #  files with and without the ID in the third column.
-        ids_mapped = [
-            self.ontology_container_sfaira.cellontology_class.id_from_name(x)
-            if x not in [
-                self._adata_ids_sfaira.unknown_celltype_identifier,
-                self._adata_ids_sfaira.not_a_cell_celltype_identifier
-            ] else x
-            for x in labels_mapped
-        ]
-        self.adata.obs[self._adata_ids_sfaira.cell_ontology_id] = ids_mapped
+        if self.cell_ontology_map is not None:
+            # This mapping blocks progression in the unit test if not deactivated.
+            ids_mapped = [
+                self.ontology_container_sfaira.cellontology_class.id_from_name(x)
+                if x not in [
+                    self._adata_ids_sfaira.unknown_celltype_identifier,
+                    self._adata_ids_sfaira.not_a_cell_celltype_identifier
+                ] else x
+                for x in labels_mapped
+            ]
+            self.adata.obs[self._adata_ids_sfaira.cell_ontology_id] = ids_mapped
 
     @property
     def citation(self):

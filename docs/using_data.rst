@@ -1,5 +1,5 @@
-Data
-======
+Using Data
+==========
 
 .. image:: https://raw.githubusercontent.com/theislab/sfaira/master/resources/images/data_zoo.png
    :width: 600px

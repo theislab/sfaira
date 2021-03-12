@@ -71,7 +71,6 @@ def test_load(dir_template: str = "../template_data", doi_sfaira_repr="d10_1016_
         match_to_reference=False,
         load_raw=True,  # tests raw loading
         allow_caching=True,  # tests caching
-        set_metadata=False,
     )
     assert len(ds.ids) > 0, f"no data sets loaded, make sure raw data is in {dir_template}"
     # Create cell type conversion table:

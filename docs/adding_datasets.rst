@@ -7,6 +7,7 @@ This process requires a couple of steps as outlined in the following sections.
     1. Write a dataloader as outlined below.
     2. Identify the raw files as indicated in the dataloader classes and copy them into your directory structure as required by your data loader.
        If the raw file your dataloader uses as input is publically available, sfaira will be able to automatically download the raw file, so no manual copying is required.
+       For the purpose of testing the data loader with a unit test, you can also copy the data into `sfaira/unit_tests/template_data/` as a DOI structured folder if you do not want to maintain a data collection on the machine that you are testing on.
     3. You can contribute the data loader to public sfaira, we do not manage data upload though.
        During publication, you would upload this data set to a server like GEO and the data loader contributed to sfaira would use this download link.
 
