@@ -130,12 +130,13 @@ class DataloaderCreator:
                                                   f'{self.template_attributes.year}_{self.template_attributes.assay}_' \
                                                   f'{first_author_lastname}_001'
         self.template_attributes.id = self.template_attributes.id_without_doi + f'_{self.template_attributes.doi_sfaira_repr}'
-        self.template_attributes.download_url_data = sfaira_questionary(function='text',
-                                                                        question='URL to download the data',
-                                                                        default='https://ftp.ncbi.nlm.nih.gov/geo/')
-        self.template_attributes.download_url_meta = sfaira_questionary(function='text',
-                                                                        question='URL to download the meta data',
-                                                                        default='https://ftp.ncbi.nlm.nih.gov/geo/')
+        if self.template_attributes.dataloader_type == 'single_dataset':
+            self.template_attributes.download_url_data = sfaira_questionary(function='text',
+                                                                            question='URL to download the data',
+                                                                            default='https://ftp.ncbi.nlm.nih.gov/geo/')
+            self.template_attributes.download_url_meta = sfaira_questionary(function='text',
+                                                                            question='URL to download the meta data',
+                                                                            default='https://ftp.ncbi.nlm.nih.gov/geo/')
         self.template_attributes.create_extra_description = sfaira_questionary(function='confirm',
                                                                                question='Do you want to add additional custom metadata?',
                                                                                default='Yes')
