@@ -31,4 +31,11 @@ def load(data_dir, **kwargs):
     adata.obs = meta.loc[adata.obs.index, :]
     # extract sample names:
     adata.obs["sample"] = [bc.split("_")[0] for bc in adata.obs.index]
+    # add single cell assay info (based on paper):
+    patient_to_assay_dict = dict()
+    for patient in [1, 2]:
+        patient_to_assay_dict[patient] = "10X 3' v1 sequencing"
+    for patient in range(3, 9):
+        patient_to_assay_dict[patient] = "10X 3' v2 sequencing"
+    adata.obs['sc_platform'] = adata.obs.PatientNumber.map(patient_to_assay_dict)
     return adata

@@ -12,7 +12,7 @@ dataset_or_observation_wise:
     age:
     age_obs_key:
     assay:
-    assay_obs_key:
+    assay_obs_key: "sc_platform"
     bio_sample:
     bio_sample_obs_key: 
     development_stage:
