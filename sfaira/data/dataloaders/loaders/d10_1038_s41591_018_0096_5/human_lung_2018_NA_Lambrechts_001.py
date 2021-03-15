@@ -1,7 +1,6 @@
 import anndata
 import tarfile
 import scipy.io
-import anndata
 import pandas as pd
 
 
