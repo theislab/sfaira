@@ -5,7 +5,7 @@ import anndata
 import pandas as pd
 
 
-def load(data_dir):
+def load(data_dir, **kwargs):
     fn = [
         data_dir + "387ZM2s",
         data_dir + "3dGyjGr",
