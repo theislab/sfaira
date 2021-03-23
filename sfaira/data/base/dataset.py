@@ -761,6 +761,10 @@ class DatasetBase(abc.ABC):
             self.adata.uns = uns_new
         else:
             self.adata.uns.update(uns_new)
+        # Convert entries from tuple to list so that this can be saved:
+        for k, v in self.adata.uns.items():
+            if isinstance(v, tuple):
+                self.adata.uns[k] = list(v)
         # Only retain target elements in adata.var:
         var_old = self.adata.var.copy()
         self.adata.var = pd.DataFrame(dict([
