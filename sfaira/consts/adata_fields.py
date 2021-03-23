@@ -172,6 +172,7 @@ class AdataIdsCellxgene(AdataIds):
         self.ethnicity = "ethnicity"
         self.sex = "sex"
         self.state_exact = "disease"
+        self.tech_sample = "batch"
 
         # selected element entries used for parsing:
         self.disease_state_healthy = "normal"
