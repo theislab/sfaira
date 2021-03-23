@@ -32,5 +32,5 @@ for x in dois.split(","):
     assert len(ds.dataset_groups) == 1, len(ds.dataset_groups)
     dsg = ds.dataset_groups[0]
     for k, v in dsg.datasets.items():
-        fn = v.id + ".h5ad"
+        fn = v.doi_cleaned_id + ".h5ad"
         v.adata.write_h5ad(os.path.join(path_out, fn))
