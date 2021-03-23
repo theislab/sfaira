@@ -713,7 +713,13 @@ class DatasetBase(abc.ABC):
         if self.cellontology_original_obs_key is not None:
             self.project_celltypes_to_ontology()
 
-    def streamline(self, format: str = "sfaira", clean: bool = False):
+    def streamline(
+            self,
+            format: str = "sfaira",
+            clean_obs: bool = True,
+            clean_var: bool = True,
+            clean_uns: bool = True,
+    ):
         """
         Streamline the adata instance to output format.
 
@@ -723,7 +729,9 @@ class DatasetBase(abc.ABC):
 
             - "sfaira"
             - "cellxgene"
-        :param clean: Whether to delete non-streamlined fields.
+        :param clean_obs: Whether to delete non-streamlined fields in .obs, .obsm and .obsp.
+        :param clean_var: Whether to delete non-streamlined fields in .var, .varm and .varp.
+        :param clean_uns: Whether to delete non-streamlined fields in .uns.
         :return:
         """
         if format == "sfaira":
@@ -733,33 +741,50 @@ class DatasetBase(abc.ABC):
             adata_fields = AdataIdsCellxgene()
         else:
             raise ValueError(f"did not recognize format {format}")
-        if clean:
+        if clean_var:
             if self.adata.varm is not None:
                 del self.adata.varm
+            if self.adata.varp is not None:
+                del self.adata.varp
+        if clean_obs:
             if self.adata.obsm is not None:
                 del self.adata.obsm
-            if self.adata.varm is not None:
-                del self.adata.varp
             if self.adata.obsp is not None:
                 del self.adata.obsp
-            # Only retain target elements in adata.uns:
-            self.adata.uns = dict([
-                (getattr(adata_fields, k), self.adata.uns[getattr(self._adata_ids_sfaira, k)])
-                if getattr(self._adata_ids_sfaira, k) in self.adata.uns.keys() else None
-                for k in adata_fields.uns_keys
-            ])
-            # Only retain target elements in adata.var:
-            self.adata.var = pd.DataFrame(dict([
-                (getattr(adata_fields, k), self.adata.var[getattr(self._adata_ids_sfaira, k)])
-                for k in adata_fields.var_keys
-                if getattr(self._adata_ids_sfaira, k) in self.adata.var.keys()
-            ]))
-            # Only retain target columns in adata.obs:
-            self.adata.obs = pd.DataFrame(dict([
-                (getattr(adata_fields, k), self.adata.obs[getattr(self._adata_ids_sfaira, k)])
-                for k in adata_fields.obs_keys
-                if getattr(self._adata_ids_sfaira, k) in self.adata.obs.keys()
-            ]))
+        # Only retain target elements in adata.uns:
+        uns_new = dict([
+            (getattr(adata_fields, k), self.adata.uns[getattr(self._adata_ids_sfaira, k)])
+            if getattr(self._adata_ids_sfaira, k) in self.adata.uns.keys() else None
+            for k in adata_fields.uns_keys
+        ])
+        if clean_uns:
+            self.adata.uns = uns_new
+        else:
+            self.adata.uns.update(uns_new)
+        # Only retain target elements in adata.var:
+        var_old = self.adata.var.copy()
+        self.adata.var = pd.DataFrame(dict([
+            (getattr(adata_fields, k), self.adata.var[getattr(self._adata_ids_sfaira, k)])
+            for k in adata_fields.var_keys
+            if getattr(self._adata_ids_sfaira, k) in self.adata.var.keys()
+        ]))
+        # Add old columns in if they are not overwritten and object is not cleaned:
+        if not clean_var:
+            for k, v in var_old.items():
+                if k not in self.adata.var.keys():
+                    self.adata.var[k] = v
+        # Only retain target columns in adata.obs:
+        obs_old = self.adata.obs.copy()
+        self.adata.obs = pd.DataFrame(dict([
+            (getattr(adata_fields, k), self.adata.obs[getattr(self._adata_ids_sfaira, k)])
+            for k in adata_fields.obs_keys
+            if getattr(self._adata_ids_sfaira, k) in self.adata.obs.keys()
+        ]))
+        # Add old columns in if they are not overwritten and object is not cleaned:
+        if not clean_obs:
+            for k, v in obs_old.items():
+                if k not in self.adata.obs.keys():
+                    self.adata.obs[k] = v
 
     def load_tobacked(
             self,

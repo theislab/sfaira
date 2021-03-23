@@ -79,13 +79,15 @@ def test_dsgs_subset_cell_wise(organ: str, celltype: str):
 
 
 @pytest.mark.parametrize("out_format", ["sfaira", "cellxgene"])
-@pytest.mark.parametrize("clean_objects", [True, False])
-def test_dsgs_streamline(out_format: str, clean_objects: bool):
+@pytest.mark.parametrize("clean_obs", [True, False])
+@pytest.mark.parametrize("clean_var", [True, False])
+@pytest.mark.parametrize("clean_uns", [True, False])
+def test_dsgs_streamline(out_format: str, clean_obs: bool, clean_var: bool, clean_uns: bool):
     ds = DatasetSuperGroupSfaira(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
     ds.subset(key="organism", values=["mouse"])
     ds.subset(key="organ", values=["lung"])
     ds.load(remove_gene_version=True)
-    ds.streamline(format=out_format, clean=clean_objects)
+    ds.streamline(format=out_format, clean_obs=clean_obs, clean_var=clean_var, clean_uns=clean_uns)
 
 
 def test_dsg_load_backed_dense(genome="Mus_musculus_GRCm38_97"):

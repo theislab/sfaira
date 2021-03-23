@@ -146,7 +146,13 @@ class DatasetGroup:
 
     load.__doc__ += load_doc
 
-    def streamline(self, format: str = "sfaira", clean: bool = False):
+    def streamline(
+            self,
+            format: str = "sfaira",
+            clean_obs: bool = True,
+            clean_var: bool = True,
+            clean_uns: bool = True,
+    ):
         """
         Streamline the adata instance in each data set to output format.
 
@@ -156,11 +162,18 @@ class DatasetGroup:
 
             - "sfaira"
             - "cellxgene"
-        :param clean: Whether to delete non-streamlined fields.
+        :param clean_obs: Whether to delete non-streamlined fields in .obs, .obsm and .obsp.
+        :param clean_var: Whether to delete non-streamlined fields in .var, .varm and .varp.
+        :param clean_uns: Whether to delete non-streamlined fields in .uns.
         :return:
         """
         for x in self.ids:
-            self.datasets[x].streamline(format=format, clean=clean)
+            self.datasets[x].streamline(
+                format=format,
+                clean_obs=clean_obs,
+                clean_var=clean_var,
+                clean_uns=clean_uns,
+            )
 
     def fragment(self) -> Dict[str, anndata.AnnData]:
         """
@@ -900,7 +913,13 @@ class DatasetSuperGroup:
     def load_cached_backed(self, fn: PathLike):
         self.adata = anndata.read(fn, backed='r')
 
-    def streamline(self, format: str = "sfaira", clean: bool = False):
+    def streamline(
+            self,
+            format: str = "sfaira",
+            clean_obs: bool = True,
+            clean_var: bool = True,
+            clean_uns: bool = True,
+    ):
         """
         Streamline the adata instance in each group and each data set to output format.
 
@@ -910,12 +929,19 @@ class DatasetSuperGroup:
 
             - "sfaira"
             - "cellxgene"
-        :param clean: Whether to delete non-streamlined fields.
+        :param clean_obs: Whether to delete non-streamlined fields in .obs, .obsm and .obsp.
+        :param clean_var: Whether to delete non-streamlined fields in .var, .varm and .varp.
+        :param clean_uns: Whether to delete non-streamlined fields in .uns.
         :return:
         """
         for x in self.dataset_groups:
             for xx in x.ids:
-                x.datasets[xx].streamline(format=format, clean=clean)
+                x.datasets[xx].streamline(
+                    format=format,
+                    clean_obs=clean_obs,
+                    clean_var=clean_var,
+                    clean_uns=clean_uns,
+                )
 
     def subset(self, key, values):
         """
