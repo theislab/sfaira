@@ -34,7 +34,7 @@ ds.load(
     annotated_only=False,
     match_to_reference=None,
     remove_gene_version=True,
-    load_raw=True,
+    load_raw=False,
     allow_caching=True,
     processes=processes,
     func=write_meta,
