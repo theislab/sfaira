@@ -66,7 +66,7 @@ class CelltypeUniverse:
 
         :return:
         """
-        return [self.onto_cl.map_class_to_id(x) for x in self._target_universe]
+        return [self.onto_cl.id_from_name(x) for x in self._target_universe]
 
     @property
     def ntypes(self):
@@ -79,21 +79,10 @@ class CelltypeUniverse:
         assert len(tab.columns) == 2
         assert tab.columns[0] == "name" and tab.columns[1] == "id"
 
-    def load_target_universe(self, organ):
+    def load_target_universe(self, fn):
         """
 
-        :param organ: Anatomic structure to load target universe for.
-        :return:
-        """
-        # ToDo: Use pydoc based query of universes stored in ./target_universes/..
-        tab = None
-        self.__validate_target_universe_table(tab=tab)
-        self.target_universe = None  # ToDo
-
-    def read_target_universe_csv(self, fn):
-        """
-
-        :param fn: File containing target universe.
+        :param fn: .csv file containing target universe.
         :return:
         """
         tab = pd.read_csv(fn)
