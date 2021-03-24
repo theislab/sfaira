@@ -752,6 +752,7 @@ class DatasetBase(abc.ABC):
             if self.adata.obsp is not None:
                 del self.adata.obsp
         # Only retain target elements in adata.uns:
+        print(self.adata.uns)
         uns_new = dict([
             (getattr(adata_fields, k), self.adata.uns[getattr(self._adata_ids_sfaira, k)])
             if getattr(self._adata_ids_sfaira, k) in self.adata.uns.keys() else None
@@ -765,6 +766,7 @@ class DatasetBase(abc.ABC):
         for k, v in self.adata.uns.items():
             if isinstance(v, tuple):
                 self.adata.uns[k] = list(v)
+        print(self.adata.uns)
         # Only retain target elements in adata.var:
         var_old = self.adata.var.copy()
         self.adata.var = pd.DataFrame(dict([
