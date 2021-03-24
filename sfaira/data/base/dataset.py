@@ -634,14 +634,12 @@ class DatasetBase(abc.ABC):
              self.ontology_container_sfaira.assay_differentiation],
             [self.assay_type_differentiation, self._adata_ids_sfaira.assay_type_differentiation,
              self.assay_type_differentiation_obs_key, self.ontology_container_sfaira.assay_type_differentiation],
-            [self.bio_sample, self._adata_ids_sfaira.bio_sample, self.bio_sample_obs_key, None],
             [self.cell_line, self._adata_ids_sfaira.cell_line, self.cell_line_obs_key,
              self.ontology_container_sfaira.cell_line],
             [self.development_stage, self._adata_ids_sfaira.development_stage, self.development_stage_obs_key,
              self.ontology_container_sfaira.developmental_stage],
             [self.ethnicity, self._adata_ids_sfaira.ethnicity, self.ethnicity_obs_key,
              self.ontology_container_sfaira.ethnicity],
-            [self.individual, self._adata_ids_sfaira.individual, self.individual_obs_key, None],
             [self.organ, self._adata_ids_sfaira.organ, self.organ_obs_key, self.ontology_container_sfaira.organ],
             [self.organism, self._adata_ids_sfaira.organism, self.organism_obs_key,
              self.ontology_container_sfaira.organism],
@@ -649,7 +647,6 @@ class DatasetBase(abc.ABC):
              self.ontology_container_sfaira.sample_source],
             [self.sex, self._adata_ids_sfaira.sex, self.sex_obs_key, self.ontology_container_sfaira.sex],
             [self.state_exact, self._adata_ids_sfaira.state_exact, self.state_exact_obs_key, None],
-            [self.tech_sample, self._adata_ids_sfaira.tech_sample, self.tech_sample_obs_key, None],
         ):
             if z is None and allow_uns:
                 self.adata.uns[y] = None
@@ -671,6 +668,37 @@ class DatasetBase(abc.ABC):
                     self._value_protection(
                         attr=y, allowed=v, attempted=np.unique(self.adata.obs[z].values).tolist())
                     self.adata.obs[y] = self.adata.obs[z].values.tolist()
+            else:
+                assert False, "switch option should not occur"
+        # Add batch annotation which can be rule-based
+        for x, y, z in (
+                [self.bio_sample, self._adata_ids_sfaira.bio_sample, self.bio_sample_obs_key],
+                [self.individual, self._adata_ids_sfaira.individual, self.individual_obs_key],
+                [self.tech_sample, self._adata_ids_sfaira.tech_sample, self.tech_sample_obs_key],
+        ):
+            if z is None and allow_uns:
+                self.adata.uns[y] = x
+            if x is not None and z is None and not allow_uns:
+                # Include flag in .uns that this attribute is in .obs:
+                self.adata.uns[y] = UNS_STRING_META_IN_OBS
+                self.adata.obs[y] = self.adata.obs[z].values.tolist()
+            elif x is None and z is not None:
+                zs = z.split("*")  # Separator for indicate multiple columns.
+                keys_to_use = []
+                for zz in zs:
+                    if zz not in self.adata.obs.keys():
+                        # This should not occur in single data set loaders (see warning below) but can occur in
+                        # streamlined data loaders if not all instances of the streamlined data sets have all columns
+                        # in .obs set.
+                        print(f"WARNING: attribute {y} of data set {self.id} was not found in column {zz}")  # debugging
+                    else:
+                        keys_to_use.append(zz)
+                if len(keys_to_use) > 0:
+                    # Build a combination label out of all columns used to describe this group.
+                    self.adata.obs[y] = [
+                        "_".join(xx)
+                        for xx in zip([self.adata.obs[k].values.tolist() for k in keys_to_use])
+                    ]
             else:
                 assert False, "switch option should not occur"
         # Load boolean labels:
@@ -828,7 +856,7 @@ class DatasetBase(abc.ABC):
             else:
                 assert False, self.organism
             # Add ontology IDs where necessary (note that human readable terms are also kept):
-            for x in [
+            for k in [
                 "organ",
                 "assay_sc",
                 "disease",
@@ -843,8 +871,8 @@ class DatasetBase(abc.ABC):
                         map_exceptions=[],
                     )
                 else:
-                    self.adata.obs[x] = "unknown"
-                    self.adata.obs[x + "_ontology_term_id"] = "unknown"
+                    self.adata.obs[k] = "unknown"
+                    self.adata.obs[k + "_ontology_term_id"] = "unknown"
             # Adapt var columns naming.
             if self.organism == "mouse":
                 self.adata.var["hgnc_gene_symbol"] = self.adata.var["gene_id_names"]
@@ -853,6 +881,11 @@ class DatasetBase(abc.ABC):
             else:
                 assert False, self.organism
             del self.adata.var["gene_id_names"]
+        if format != "sfaira":
+            # Remove sfaira intrinsic .uns fields:
+            for k, v in self.adata.uns.items():
+                if v == UNS_STRING_META_IN_OBS:
+                    del self.adata.uns[k]
         print(self.adata.uns)
 
     def load_tobacked(

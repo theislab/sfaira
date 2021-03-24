@@ -187,7 +187,6 @@ class AdataIdsCellxgene(AdataIds):
             "development_stage",
             "disease",
             "ethnicity",
-            "healthy",
             "organ",
             "organism",
             "sex",
