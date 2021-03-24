@@ -644,7 +644,7 @@ class DatasetBase(abc.ABC):
              self.ontology_container_sfaira.developmental_stage],
             [self.disease, self._adata_ids_sfaira.disease, self.disease_obs_key,
              self.ontology_container_sfaira.disease],
-            [self.edevelopment_stagethnicity, self._adata_ids_sfaira.ethnicity, self.ethnicity_obs_key,
+            [self.ethnicity, self._adata_ids_sfaira.ethnicity, self.ethnicity_obs_key,
              self.ontology_container_sfaira.ethnicity],
             [self.organ, self._adata_ids_sfaira.organ, self.organ_obs_key, self.ontology_container_sfaira.organ],
             [self.organism, self._adata_ids_sfaira.organism, self.organism_obs_key,
