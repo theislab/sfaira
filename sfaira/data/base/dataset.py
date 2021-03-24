@@ -881,9 +881,9 @@ class DatasetBase(abc.ABC):
                     self.adata.obs[getattr(adata_fields, k) + "_ontology_term_id"] = "unknown"
             # Adapt var columns naming.
             if self.organism == "mouse":
-                self.adata.var["hgnc_gene_symbol"] = self.adata.var["gene_id_names"]
+                self.adata.var["hgnc_gene_symbol"] = self.adata.var[getattr(adata_fields, "gene_id_names")]
             elif self.organism == "human":
-                self.adata.var["mgi_gene_symbol"] = self.adata.var["gene_id_names"]
+                self.adata.var["mgi_gene_symbol"] = self.adata.var[getattr(adata_fields, "gene_id_names")]
             else:
                 assert False, self.organism
             del self.adata.var["gene_id_names"]
@@ -1124,9 +1124,13 @@ class DatasetBase(abc.ABC):
         :return:
         """
         ontology = getattr(self.ontology_container_sfaira,  ontology)
+        map_vals = dict([
+            (x, ontology.id_from_name(x))
+            for x in np.unique(self.adata.obs[key_in].values)
+            if (x not in map_exceptions and x is not None)
+        ])
         self.adata.obs[key_out] = [
-            ontology.id_from_name(x)
-            if (x not in map_exceptions and x is not None) else x
+            map_vals[x] if x in map_vals.keys() else x
             for x in self.adata.obs[key_in].values
         ]
 

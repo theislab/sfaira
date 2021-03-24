@@ -159,7 +159,7 @@ class AdataIdsCellxgene(AdataIds):
         self.cell_ontology_id = "cell_type_ontology_term_id"
         self.doi = "preprint_doi"
         self.disease = "disease"
-        self.gene_id_names = "names"
+        self.gene_id_names = "gene_symbol"
         self.id = "id"
         self.ncells = "ncells"
         self.organ = "tissue"
