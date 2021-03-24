@@ -651,11 +651,10 @@ class DatasetBase(abc.ABC):
             [self.state_exact, self._adata_ids_sfaira.state_exact, self.state_exact_obs_key, None],
             [self.tech_sample, self._adata_ids_sfaira.tech_sample, self.tech_sample_obs_key, None],
         ):
-            if x is None and z is None and allow_uns:
+            if z is None and allow_uns:
                 self.adata.uns[y] = None
-            elif x is not None and z is None and allow_uns:
-                # Attribute supplied per data set: Write into .uns.
-                self.adata.uns[y] = x
+            elif z is None and not allow_uns:
+                self.adata.obs[y] = x
             elif z is not None:
                 # Attribute supplied per cell: Write into .obs.
                 # Search for direct match of the sought-after column name or for attribute specific obs key.
@@ -687,6 +686,8 @@ class DatasetBase(abc.ABC):
                     self.adata.uns[y] = x
                 else:
                     self.adata.uns[y] = x == w
+            elif z is None and not allow_uns:
+                self.adata.obs[y] = x
             elif z is not None:
                 # Attribute supplied per cell: Write into .obs.
                 # Search for direct match of the sought-after column name or for attribute specific obs key.
