@@ -678,10 +678,10 @@ class DatasetBase(abc.ABC):
         ):
             if z is None and allow_uns:
                 self.adata.uns[y] = x
-            elif x is not None and not allow_uns:
+            elif z is None and not allow_uns:
                 self.adata.uns[y] = UNS_STRING_META_IN_OBS
                 self.adata.obs[y] = x
-            elif x is None and z is not None:
+            elif z is not None:
                 self.adata.uns[y] = UNS_STRING_META_IN_OBS
                 zs = z.split("*")  # Separator for indicate multiple columns.
                 keys_to_use = []
