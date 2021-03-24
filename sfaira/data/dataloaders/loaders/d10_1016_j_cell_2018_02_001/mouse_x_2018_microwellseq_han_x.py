@@ -339,9 +339,12 @@ def load(data_dir, sample_fn, **kwargs):
 
     adata = anndata.AnnData(data.T)
     annotated_cells = np.array([x in celltypes.index for x in adata.obs_names])
-    # Subset to annotated cells if any are annotated:
+    # Add annotation if available for this data set:
     if np.sum(annotated_cells) > 0:
+        # Subset to annotated cells if any are annotated:
         adata = adata[annotated_cells].copy()
+        # Clean nans in data frame to avoid issues with cell type annotation:
+        celltypes.replace(to_replace=np.nan, value="unknown", inplace=True)
         adata.obs = celltypes.loc[adata.obs_names, :]
 
     return adata
