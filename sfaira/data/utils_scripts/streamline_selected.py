@@ -24,6 +24,7 @@ for x in dois.split(","):
         remove_gene_version=True,
         load_raw=False,
         allow_caching=True,
+        set_metadata=False,
     )
     ds.streamline(
         format=schema.lower(),

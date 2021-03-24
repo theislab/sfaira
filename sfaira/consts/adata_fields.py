@@ -156,13 +156,12 @@ class AdataIdsCellxgene(AdataIds):
         self.cell_types_original = "free_annotation"
         self.cell_ontology_class = "cell_type"
         self.cell_ontology_id = "cell_type_ontology_term_id"
-        self.doi = "doi"
+        self.doi = "preprint_doi"
         self.disease = "disease"
         self.gene_id_names = "names"
         self.id = "id"
         self.ncells = "ncells"
-        self.normalization = ""  # is always "raw"
-        self.organ = "organ"
+        self.organ = "tissue"
         self.organism = "organism"
         self.year = "year"
 
@@ -201,6 +200,5 @@ class AdataIdsCellxgene(AdataIds):
             "author",
             "doi",
             "id",
-            "normalization",
             "year",
         ]

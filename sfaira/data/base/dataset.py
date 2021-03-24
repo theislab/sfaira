@@ -460,7 +460,7 @@ class DatasetBase(abc.ABC):
         self._load_cached(load_raw=load_raw, allow_caching=allow_caching)
         if set_metadata:
             # Set data-specific meta data in .adata:
-            self._set_metadata_in_adata()
+            self._set_metadata_in_adata(allow_uns=True)
         # Set loading hyper-parameter-specific meta data:
         self.adata.uns[self._adata_ids_sfaira.load_raw] = load_raw
         self.adata.uns[self._adata_ids_sfaira.mapped_features] = match_to_reference
@@ -606,10 +606,11 @@ class DatasetBase(abc.ABC):
             uns=self.adata.uns
         )
 
-    def _set_metadata_in_adata(self):
+    def _set_metadata_in_adata(self, allow_uns: bool):
         """
         Copy meta data from dataset class in .anndata.
 
+        :param allow_uns: Allow writing of constant meta data into uns rather than .obs.
         :return:
         """
         # Set data set-wide attributes (.uns):
@@ -623,7 +624,7 @@ class DatasetBase(abc.ABC):
         self.adata.uns[self._adata_ids_sfaira.year] = self.year
 
         # Set cell-wise or data set-wide attributes (.uns / .obs):
-        # These are saved in .uns if they are data set wide to save memory.
+        # These are saved in .uns if they are data set wide to save memory if allow_uns is True.
         for x, y, z, v in (
             [self.age, self._adata_ids_sfaira.age, self.age_obs_key, self.ontology_container_sfaira.age],
             [self.assay_sc, self._adata_ids_sfaira.assay_sc, self.assay_sc_obs_key, self.ontology_container_sfaira.assay_sc],
@@ -648,9 +649,9 @@ class DatasetBase(abc.ABC):
             [self.state_exact, self._adata_ids_sfaira.state_exact, self.state_exact_obs_key, None],
             [self.tech_sample, self._adata_ids_sfaira.tech_sample, self.tech_sample_obs_key, None],
         ):
-            if x is None and z is None:
+            if x is None and z is None and allow_uns:
                 self.adata.uns[y] = None
-            elif x is not None and z is None:
+            elif x is not None and z is None and allow_uns:
                 # Attribute supplied per data set: Write into .uns.
                 self.adata.uns[y] = x
             elif z is not None:
@@ -676,9 +677,9 @@ class DatasetBase(abc.ABC):
             [self.healthy, self._adata_ids_sfaira.healthy, self.healthy_obs_key, self.ontology_container_sfaira.healthy,
              self.healthy_state_healthy],
         ):
-            if x is None and z is None:
+            if x is None and z is None and allow_uns:
                 self.adata.uns[y] = None
-            elif x is not None and z is None:
+            elif x is not None and z is None and allow_uns:
                 # Attribute supplied per data set: Write into .uns.
                 if w is None:
                     self.adata.uns[y] = x
@@ -736,9 +737,11 @@ class DatasetBase(abc.ABC):
         """
         if format == "sfaira":
             adata_fields = self._adata_ids_sfaira
+            self._set_metadata_in_adata(allow_uns=True)
         elif format == "cellxgene":
             from sfaira.consts import AdataIdsCellxgene
             adata_fields = AdataIdsCellxgene()
+            self._set_metadata_in_adata(allow_uns=False)
         else:
             raise ValueError(f"did not recognize format {format}")
         if clean_var:
@@ -752,7 +755,6 @@ class DatasetBase(abc.ABC):
             if self.adata.obsp is not None:
                 del self.adata.obsp
         # Only retain target elements in adata.uns:
-        print(self.adata.uns)
         uns_new = dict([
             (getattr(adata_fields, k), self.adata.uns[getattr(self._adata_ids_sfaira, k)])
             if getattr(self._adata_ids_sfaira, k) in self.adata.uns.keys() else None
@@ -760,13 +762,16 @@ class DatasetBase(abc.ABC):
         ])
         if clean_uns:
             del self.adata.uns
+        # Remove old keys in sfaira scheme:
+        for k in adata_fields.uns_keys:
+            del self.adata.uns[getattr(self._adata_ids_sfaira, k)]
+        # Add new keys in new scheme:
         for k, v in uns_new.items():
             self.adata.uns[k] = v
         # Convert entries from tuple to list so that this can be saved:
         for k, v in self.adata.uns.items():
             if isinstance(v, tuple):
                 self.adata.uns[k] = list(v)
-        print(self.adata.uns)
         # Only retain target elements in adata.var:
         var_old = self.adata.var.copy()
         self.adata.var = pd.DataFrame(dict([
@@ -791,6 +796,60 @@ class DatasetBase(abc.ABC):
             for k, v in obs_old.items():
                 if k not in self.adata.obs.keys():
                     self.adata.obs[k] = v
+        # Add additional constant description changes based on output format:
+        if format == "cellxgene":
+            self.adata.uns["contributors"] = [
+                {"name": x, "institution": "", "email": ""}
+                for x in self.adata.uns["contributors"]
+            ]
+            self.adata.uns["default_embedding"] = ""
+            self.adata.uns["layer_descriptions"] = {"X": "raw"}
+            self.adata.uns["project_description"] = ""
+            # TODO project links: Infer link_name somehow?
+            self.adata.uns["project_links"] = [
+                {"link_url": x, "link_name": "nan", "link_type": "RAW_DATA"}
+                for x in self.download_url_data + self.download_url_meta
+            ]
+            self.adata.uns["project_name"] = ""
+            self.adata.uns["title"] = ""
+            self.adata.uns["version"] = {
+                "corpora_encoding_version": "0.1.0",
+                "corpora_schema_version": "1.1.0",
+            }
+            # TODO port this into organism ontology handling.
+            if self.organism == "mouse":
+                self.adata.uns["organism_ontology_term_id"] = "NCBITaxon:10090"
+            elif self.organism == "human":
+                self.adata.uns["organism_ontology_term_id"] = "NCBITaxon:9606"
+            else:
+                assert False, self.organism
+            # Add ontology IDs where necessary (note that human readable terms are also kept):
+            for x in [
+                "organ",
+                "assay_sc",
+                "disease",
+                "ethnicity",
+                "development_stage",
+            ]:
+                if x in self.adata.obs.columns:
+                    self.__project_name_to_id_obs(
+                        ontology=getattr(self._adata_ids_sfaira, k),
+                        key_in=getattr(adata_fields, k),
+                        key_out=getattr(adata_fields, k) + "_ontology_term_id",
+                        map_exceptions=[],
+                    )
+                else:
+                    self.adata.obs[x] = "unknown"
+                    self.adata.obs[x + "_ontology_term_id"] = "unknown"
+            # Adapt var columns naming.
+            if self.organism == "mouse":
+                self.adata.var["hgnc_gene_symbol"] = self.adata.var["gene_id_names"]
+            elif self.organism == "human":
+                self.adata.var["mgi_gene_symbol"] = self.adata.var["gene_id_names"]
+            else:
+                assert False, self.organism
+            del self.adata.var["gene_id_names"]
+        print(self.adata.uns)
 
     def load_tobacked(
             self,
@@ -1001,15 +1060,32 @@ class DatasetBase(abc.ABC):
         #  files with and without the ID in the third column.
         if self.cell_ontology_map is not None:
             # This mapping blocks progression in the unit test if not deactivated.
-            ids_mapped = [
-                self.ontology_container_sfaira.cellontology_class.id_from_name(x)
-                if x not in [
+            self.__project_name_to_id_obs(
+                ontology="cellontology_class",
+                key_in=self._adata_ids_sfaira.cell_ontology_class,
+                key_out=self._adata_ids_sfaira.cell_ontology_id,
+                map_exceptions=[
                     self._adata_ids_sfaira.unknown_celltype_identifier,
                     self._adata_ids_sfaira.not_a_cell_celltype_identifier
-                ] else x
-                for x in labels_mapped
-            ]
-            self.adata.obs[self._adata_ids_sfaira.cell_ontology_id] = ids_mapped
+                ],
+            )
+
+    def __project_name_to_id_obs(self, ontology: str, key_in: str, key_out: str, map_exceptions: list):
+        """
+        Project ontology names to IDs for a given ontology in .obs entries.
+
+        :param ontology:
+        :param key_in:
+        :param key_out:
+        :param map_exceptions:
+        :return:
+        """
+        ontology = getattr(self.ontology_container_sfaira,  ontology)
+        self.adata.obs[key_out] = [
+            ontology.id_from_name(x)
+            if x not in map_exceptions else x
+            for x in self.adata.obs[key_in].values
+        ]
 
     @property
     def citation(self):
