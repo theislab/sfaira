@@ -186,6 +186,7 @@ class DatasetBase(abc.ABC):
         self._bio_sample = None
         self._cell_line = None
         self._development_stage = None
+        self._disease = None
         self._doi = None
         self._download_url_data = None
         self._download_url_meta = None
@@ -214,6 +215,7 @@ class DatasetBase(abc.ABC):
         self._cellontology_id_obs_key = None
         self._cellontology_original_obs_key = None
         self._development_stage_obs_key = None
+        self._disease_obs_key = None
         self._ethnicity_obs_key = None
         self._healthy_obs_key = None
         self._individual_obs_key = None
