@@ -345,6 +345,7 @@ def load(data_dir, sample_fn, **kwargs):
         adata = adata[annotated_cells].copy()
         # Clean nans in data frame to avoid issues with cell type annotation:
         celltypes.replace(to_replace=np.nan, value="unknown", inplace=True)
+        celltypes.replace(to_replace="nan", value="unknown", inplace=True)
         adata.obs = celltypes.loc[adata.obs_names, :]
 
     return adata
