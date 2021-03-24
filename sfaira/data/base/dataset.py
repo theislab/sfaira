@@ -758,9 +758,9 @@ class DatasetBase(abc.ABC):
             for k in adata_fields.uns_keys
         ])
         if clean_uns:
-            self.adata.uns = uns_new
-        else:
-            self.adata.uns.update(uns_new)
+            del self.adata.uns
+        for k, v in uns_new.items():
+            self.adata.uns[k] = v
         # Convert entries from tuple to list so that this can be saved:
         for k, v in self.adata.uns.items():
             if isinstance(v, tuple):

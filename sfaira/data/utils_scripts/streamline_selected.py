@@ -12,6 +12,8 @@ path_out = str(sys.argv[4])
 schema = str(sys.argv[5])
 dois = str(sys.argv[6])
 
+path_cache = path_cache if path_cache != "None" else None
+
 for x in dois.split(","):
     ds = sfaira.data.dataloaders.DatasetSuperGroupSfaira(
         data_path=data_path, meta_path=path_meta, cache_path=path_cache
