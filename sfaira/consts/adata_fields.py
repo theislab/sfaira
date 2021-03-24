@@ -116,6 +116,7 @@ class AdataIdsSfaira(AdataIds):
             "cell_ontology_class",
             "cell_ontology_id",
             "development_stage",
+            "disease",
             "ethnicity",
             "healthy",
             "individual",

@@ -81,6 +81,7 @@ class DatasetBase(abc.ABC):
     _bio_sample: Union[None, str]
     _cell_line: Union[None, str]
     _development_stage: Union[None, str]
+    _disease: Union[None, str]
     _doi: Union[None, str]
     _download_url_data: Union[Tuple[List[None]], Tuple[List[str]], None]
     _download_url_meta: Union[Tuple[List[None]], Tuple[List[str]], None]
@@ -108,6 +109,7 @@ class DatasetBase(abc.ABC):
     _cellontology_id_obs_key: Union[None, str]
     _cellontology_original_obs_key: Union[None, str]
     _development_stage_obs_key: Union[None, str]
+    _disease_obs_key: Union[None, str]
     _ethnicity_obs_key: Union[None, str]
     _healthy_obs_key: Union[None, str]
     _healthy_obs_key: Union[None, str]
@@ -638,7 +640,9 @@ class DatasetBase(abc.ABC):
              self.ontology_container_sfaira.cell_line],
             [self.development_stage, self._adata_ids_sfaira.development_stage, self.development_stage_obs_key,
              self.ontology_container_sfaira.developmental_stage],
-            [self.ethnicity, self._adata_ids_sfaira.ethnicity, self.ethnicity_obs_key,
+            [self.disease, self._adata_ids_sfaira.disease, self.disease_obs_key,
+             self.ontology_container_sfaira.disease],
+            [self.edevelopment_stagethnicity, self._adata_ids_sfaira.ethnicity, self.ethnicity_obs_key,
              self.ontology_container_sfaira.ethnicity],
             [self.organ, self._adata_ids_sfaira.organ, self.organ_obs_key, self.ontology_container_sfaira.organ],
             [self.organism, self._adata_ids_sfaira.organism, self.organism_obs_key,
@@ -1447,10 +1451,29 @@ class DatasetBase(abc.ABC):
 
     @development_stage.setter
     def development_stage(self, x: str):
-        self.__erasing_protection(attr="dev_stage", val_old=self._development_stage, val_new=x)
-        self._value_protection(attr="dev_stage", allowed=self.ontology_container_sfaira.developmental_stage,
+        self.__erasing_protection(attr="development_stage", val_old=self._development_stage, val_new=x)
+        self._value_protection(attr="development_stage", allowed=self.ontology_container_sfaira.developmental_stage,
                                attempted=x)
         self._development_stage = x
+
+    @property
+    def disease(self) -> Union[None, str]:
+        if self._disease is not None:
+            return self._disease
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            if self.meta is not None and self._adata_ids_sfaira.disease in self.meta.columns:
+                return self.meta[self._adata_ids_sfaira.disease]
+            else:
+                return None
+
+    @disease.setter
+    def disease(self, x: str):
+        self.__erasing_protection(attr="disease", val_old=self._disease, val_new=x)
+        self._value_protection(attr="disease", allowed=self.ontology_container_sfaira.disease,
+                               attempted=x)
+        self._disease = x
 
     @property
     def doi(self) -> Union[str, List[str]]:
@@ -1762,8 +1785,17 @@ class DatasetBase(abc.ABC):
 
     @development_stage_obs_key.setter
     def development_stage_obs_key(self, x: str):
-        self.__erasing_protection(attr="dev_stage_obs_key", val_old=self._development_stage_obs_key, val_new=x)
+        self.__erasing_protection(attr="development_stage_obs_key", val_old=self._development_stage_obs_key, val_new=x)
         self._development_stage_obs_key = x
+
+    @property
+    def disease_obs_key(self) -> str:
+        return self._disease_obs_key
+
+    @disease_obs_key.setter
+    def disease_obs_key(self, x: str):
+        self.__erasing_protection(attr="disease_obs_key", val_old=self._disease_obs_key, val_new=x)
+        self._disease_obs_key = x
 
     @property
     def ethnicity_obs_key(self) -> str:

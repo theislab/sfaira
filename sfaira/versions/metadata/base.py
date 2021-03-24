@@ -670,6 +670,27 @@ class OntologyMmusdv(OntologyExtendedObo):
         return ["synonym"]
 
 
+class OntologyMondo(OntologyObo):
+
+    def __init__(
+            self,
+            **kwargs
+    ):
+        super().__init__(obo="http://purl.obolibrary.org/obo/mondo.obo")
+
+        # Clean up nodes:
+        nodes_to_delete = []
+        for k, v in self.graph.nodes.items():
+            if "name" not in v.keys():
+                nodes_to_delete.append(k)
+        for k in nodes_to_delete:
+            self.graph.remove_node(k)
+
+    @property
+    def synonym_node_properties(self) -> List[str]:
+        return ["synonym"]
+
+
 class OntologyCellosaurus(OntologyExtendedObo):
 
     def __init__(
