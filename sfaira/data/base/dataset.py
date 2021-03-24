@@ -678,11 +678,11 @@ class DatasetBase(abc.ABC):
         ):
             if z is None and allow_uns:
                 self.adata.uns[y] = x
-            if x is not None and z is None and not allow_uns:
-                # Include flag in .uns that this attribute is in .obs:
+            elif x is not None and not allow_uns:
                 self.adata.uns[y] = UNS_STRING_META_IN_OBS
-                self.adata.obs[y] = self.adata.obs[z].values.tolist()
+                self.adata.obs[y] = x
             elif x is None and z is not None:
+                self.adata.uns[y] = UNS_STRING_META_IN_OBS
                 zs = z.split("*")  # Separator for indicate multiple columns.
                 keys_to_use = []
                 for zz in zs:
