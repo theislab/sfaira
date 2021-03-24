@@ -869,7 +869,7 @@ class DatasetBase(abc.ABC):
                 "ethnicity",
                 "development_stage",
             ]:
-                if k in self.adata.obs.columns:
+                if getattr(adata_fields, k) in self.adata.obs.columns:
                     self.__project_name_to_id_obs(
                         ontology=getattr(self._adata_ids_sfaira, k),
                         key_in=getattr(adata_fields, k),
@@ -877,8 +877,8 @@ class DatasetBase(abc.ABC):
                         map_exceptions=[],
                     )
                 else:
-                    self.adata.obs[k] = "unknown"
-                    self.adata.obs[k + "_ontology_term_id"] = "unknown"
+                    self.adata.obs[getattr(adata_fields, k)] = "unknown"
+                    self.adata.obs[getattr(adata_fields, k) + "_ontology_term_id"] = "unknown"
             # Adapt var columns naming.
             if self.organism == "mouse":
                 self.adata.var["hgnc_gene_symbol"] = self.adata.var["gene_id_names"]
