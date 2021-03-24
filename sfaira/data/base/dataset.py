@@ -375,6 +375,7 @@ class DatasetBase(abc.ABC):
         Wraps data set specific load and allows for caching.
 
         Cache is written into director named after doi and h5ad named after data set id.
+        Cache is not over-written.
 
         :param load_raw: Loads unprocessed version of data if available in data loader.
         :param allow_caching: Whether to allow method to cache adata object for faster re-loading.
@@ -409,7 +410,8 @@ class DatasetBase(abc.ABC):
                 dir_cache = os.path.dirname(filename)
                 if not os.path.exists(dir_cache):
                     os.makedirs(dir_cache)
-                self.adata.write_h5ad(filename)
+                if not os.path.exists(filename):
+                    self.adata.write_h5ad(filename)
 
         if load_raw and allow_caching:
             _assembly_wrapper()
