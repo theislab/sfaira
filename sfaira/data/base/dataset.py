@@ -641,7 +641,7 @@ class DatasetBase(abc.ABC):
             [self.cell_line, self._adata_ids_sfaira.cell_line, self.cell_line_obs_key,
              self.ontology_container_sfaira.cell_line],
             [self.development_stage, self._adata_ids_sfaira.development_stage, self.development_stage_obs_key,
-             self.ontology_container_sfaira.developmental_stage],
+             self.ontology_container_sfaira.development_stage],
             [self.disease, self._adata_ids_sfaira.disease, self.disease_obs_key,
              self.ontology_container_sfaira.disease],
             [self.ethnicity, self._adata_ids_sfaira.ethnicity, self.ethnicity_obs_key,
@@ -1454,7 +1454,7 @@ class DatasetBase(abc.ABC):
     @development_stage.setter
     def development_stage(self, x: str):
         self.__erasing_protection(attr="development_stage", val_old=self._development_stage, val_new=x)
-        self._value_protection(attr="development_stage", allowed=self.ontology_container_sfaira.developmental_stage,
+        self._value_protection(attr="development_stage", allowed=self.ontology_container_sfaira.development_stage,
                                attempted=x)
         self._development_stage = x
 

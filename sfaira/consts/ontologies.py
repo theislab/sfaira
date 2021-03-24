@@ -17,7 +17,7 @@ class OntologyContainerSfaira:
         self.cell_line = OntologyCellosaurus()
         self.cellontology_class = "v2021-02-01"
         self.cellontology_original = None
-        self.developmental_stage = OntologyHsapdv()  # TODO allow for other organisms here too.
+        self.development_stage = OntologyHsapdv()  # TODO allow for other organisms here too.
         self.disease = OntologyMondo()
         self.doi = None
         self.ethnicity = None  # OntologyHancestro()
