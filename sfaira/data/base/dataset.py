@@ -863,7 +863,7 @@ class DatasetBase(abc.ABC):
                 "ethnicity",
                 "development_stage",
             ]:
-                if x in self.adata.obs.columns:
+                if k in self.adata.obs.columns:
                     self.__project_name_to_id_obs(
                         ontology=getattr(self._adata_ids_sfaira, k),
                         key_in=getattr(adata_fields, k),
