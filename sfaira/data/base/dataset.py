@@ -697,7 +697,7 @@ class DatasetBase(abc.ABC):
                     # Build a combination label out of all columns used to describe this group.
                     self.adata.obs[y] = [
                         "_".join([str(xxx) for xxx in xx])
-                        for xx in zip([self.adata.obs[k].values.tolist() for k in keys_to_use])
+                        for xx in zip(*[self.adata.obs[k].values.tolist() for k in keys_to_use])
                     ]
             else:
                 assert False, "switch option should not occur"
