@@ -1,5 +1,4 @@
-from sfaira.versions.metadata import OntologyUberon, OntologyCelltypes, OntologyMmusdv, OntologyHsapdv, \
-    OntologyHancestro
+from sfaira.versions.metadata import OntologyUberon, OntologyCelltypes, OntologyMondo, OntologyMmusdv, OntologyHsapdv
 
 """
 CL
@@ -15,6 +14,42 @@ def test_cl_subsetting():
     assert oc.is_a(query="T cell", reference="lymphocyte")
     assert oc.is_a(query="lymphocyte", reference="lymphocyte")
     assert not oc.is_a(query="lymphocyte", reference="T cell")
+
+
+"""
+Hancestro
+"""
+
+
+#def test_hancestro_loading():
+#    _ = OntologyHancestro()
+
+
+"""
+Hsapdv
+"""
+
+
+def test_hsapdv_loading():
+    _ = OntologyHsapdv()
+
+
+"""
+MONDO
+"""
+
+
+def test_mondo_loading():
+    _ = OntologyMondo()
+
+
+"""
+Mmusdv
+"""
+
+
+def test_mmusdv_loading():
+    _ = OntologyMmusdv()
 
 
 """
@@ -35,3 +70,4 @@ def test_uberon_subsetting():
     assert ou.is_a(query="lobar bronchus", reference="lung")
     assert ou.is_a(query="lobar bronchus", reference="lobar bronchus")
     assert not ou.is_a(query="lung", reference="lobar bronchus")
+

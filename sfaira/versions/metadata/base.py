@@ -139,6 +139,7 @@ class OntologyEbi(Ontology):
                    f"http%253A%252F%252Fwww.ebi.ac.uk%252F{ontology}%252F{iri}/children"
 
         def recursive_search(iri):
+            print(requests.get(get_url(iri=iri)).json().keys())
             terms = requests.get(get_url(iri=iri)).json()["_embedded"]["terms"]
             nodes_new = {}
             for x in terms:
@@ -593,39 +594,7 @@ class OntologyCelltypes(OntologyExtendedObo):
         return ["synonym"]
 
 
-class OntologyHancestro(OntologyExtendedObo):
-
-    def __init__(
-            self,
-            **kwargs
-    ):
-        super().__init__(obo="http://purl.obolibrary.org/obo/hancestro.obo")
-
-        # Clean up nodes:
-        nodes_to_delete = []
-        for k, v in self.graph.nodes.items():
-            if "name" not in v.keys():
-                nodes_to_delete.append(k)
-        for k in nodes_to_delete:
-            self.graph.remove_node(k)
-
-        # Clean up edges:
-        # The graph object can hold different types of edges,
-        # and multiple types are loaded from the obo, not all of which are relevant for us:
-        # All edge types (based on previous download, assert below that this is not extended):
-        edge_types = []  # ToDo
-        edges_to_delete = []
-        for i, x in enumerate(self.graph.edges):
-            assert x[2] in edge_types, x
-            if x[2] not in []:
-                edges_to_delete.append((x[0], x[1]))
-        for x in edges_to_delete:
-            self.graph.remove_edge(u=x[0], v=x[1])
-        self._check_graph()
-
-    @property
-    def synonym_node_properties(self) -> List[str]:
-        return ["synonym"]
+# use OWL for OntologyHancestro
 
 
 class OntologyHsapdv(OntologyExtendedObo):

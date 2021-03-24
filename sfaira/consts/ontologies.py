@@ -1,5 +1,5 @@
 from sfaira.versions.metadata import OntologyList, OntologyCelltypes
-from sfaira.versions.metadata import OntologyUberon, OntologyHancestro, OntologyHsapdv, OntologyMondo, OntologyMmusdv, \
+from sfaira.versions.metadata import OntologyUberon, OntologyHsapdv, OntologyMondo, OntologyMmusdv, \
     OntologySinglecellLibraryConstruction, OntologyCellosaurus
 
 
@@ -20,7 +20,7 @@ class OntologyContainerSfaira:
         self.developmental_stage = OntologyHsapdv()  # TODO allow for other organisms here too.
         self.disease = OntologyMondo()
         self.doi = None
-        self.ethnicity = OntologyHancestro()
+        self.ethnicity = None  # OntologyHancestro()
         self.healthy = OntologyList(terms=[True, False])
         self.id = None
         self.normalization = None
