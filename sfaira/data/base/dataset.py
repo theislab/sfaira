@@ -1126,7 +1126,7 @@ class DatasetBase(abc.ABC):
         ontology = getattr(self.ontology_container_sfaira,  ontology)
         self.adata.obs[key_out] = [
             ontology.id_from_name(x)
-            if x not in map_exceptions else x
+            if (x not in map_exceptions and x is not None) else x
             for x in self.adata.obs[key_in].values
         ]
 

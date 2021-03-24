@@ -49,8 +49,8 @@ dataset_or_observation_wise:
     sample_source_obs_key:
     sex:
     sex_obs_key:
-    state_exact: "healthy"
-    state_exact_obs_key: "state_exact"
+    state_exact:
+    state_exact_obs_key:
     tech_sample:
     tech_sample_obs_key:
         droplet_normal_lung_blood_scanpy.20200205.RC4.h5ad: "channel"
