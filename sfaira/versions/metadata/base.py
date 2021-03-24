@@ -139,7 +139,6 @@ class OntologyEbi(Ontology):
                    f"http%253A%252F%252Fwww.ebi.ac.uk%252F{ontology}%252F{iri}/children"
 
         def recursive_search(iri):
-            print(requests.get(get_url(iri=iri)).json().keys())
             terms = requests.get(get_url(iri=iri)).json()["_embedded"]["terms"]
             nodes_new = {}
             for x in terms:
