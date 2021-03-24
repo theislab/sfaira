@@ -766,7 +766,8 @@ class DatasetBase(abc.ABC):
             del self.adata.uns
         # Remove old keys in sfaira scheme:
         for k in adata_fields.uns_keys:
-            del self.adata.uns[getattr(self._adata_ids_sfaira, k)]
+            if getattr(self._adata_ids_sfaira, k) in self.adata.uns.keys():
+                del self.adata.uns[getattr(self._adata_ids_sfaira, k)]
         # Add new keys in new scheme:
         for k, v in uns_new.items():
             self.adata.uns[k] = v
