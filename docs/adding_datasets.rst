@@ -327,6 +327,56 @@ in which local data and cell type annotation can be managed separately but still
 The data loaders and cell type annotation formats between sfaira and sfaira_extensions are identical and can be easily
 copied over.
 
+Loading multiple files of similar structure
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Only one loader has to be written for each set of files that are similarly structured which belong to one DOI.
+`sample_fns` in `dataset_structure` in the `.yaml` indicates the presence of these files.
+The identifiers listed there do not have to be the full file names.
+They are received by `load()`  as the argument `sample_fn` and can then be used in custom code in `load()` to load
+the correct file.
+This allows sharing code across these files in `load()`.
+If these files share all meta data in the `.yaml`, you do not have to change anything else here.
+If a some meta data items are file specific, you can further subdefine them under the keys in this `.yaml` via their
+identifiers stated here.
+In the following example, we show how this formalism can be used to identify one file declared as "A" as a healthy
+lung sample and another file "B" as a healthy pancreas sample.
+
+.. code-block:: python
+
+    dataset_structure:
+        dataset_index: 1
+        sample_fns:
+            - "A"
+            - "B"
+    dataset_wise:
+        # ... part of yaml omitted ...
+    dataset_or_observation_wise:
+        # ... part of yaml omitted
+        healthy: True
+        healthy_obs_key:
+        individual:
+        individual_obs_key:
+        organ:
+            A: "lung"
+            B: "pancreas"
+        organ_obs_key:
+        # part of yaml omitted ...
+..
+
+Note that not all meta data items have to subdefined into "A" and "B" but only the ones with differing values!
+The corresponding `load` function would be:
+
+.. code-block:: python
+
+    def load(data_dir, sample_fn, fn=None) -> anndata.AnnData:
+        # The following reads either my_file_A.h5ad or my_file_B.h5ad which correspond to A and B in the yaml.
+        fn = os.path.join(data_dir, f"my_file_{sample_fn}.h5ad")
+        adata = anndata.read(fn)
+        return adata
+..
+
+
 Loading third party annotation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -406,6 +456,7 @@ Required fields
 Most meta data fields are optional in sfaira.
 Required are:
 
+- dataset_structure: dataset_index is required.
 - dataset_wise: author, doi, download_url_data, normalisation and year are required.
 - dataset_or_observation_wise: organism is required.
 - observation_wise: None are required.
@@ -417,6 +468,17 @@ Field descriptions
 
 We constrain meta data by ontologies where possible.
 Meta data can either be dataset-wise, observation-wise or feature-wise.
+
+Dataset structure meta data are in the section `dataset_structure` in the `.yaml` file.
+
+- dataset_index. [int]
+    Numeric identifier of the first loader defined by this python file.
+    Only relevant if multiple python files for one DOI generate loaders of the same name.
+    In these cases, this numeric index can be used to distinguish them.
+- sample_fns: [list of strings]
+    If there are multiple data files which can be covered by one `load()` function and `.yaml` file because they are
+    structured similarly, these can identified here.
+    See also section `Loading multiple files of similar structure`.
 
 Dataset-wise meta data are in the section `dataset_wise` in the `.yaml` file.
 
