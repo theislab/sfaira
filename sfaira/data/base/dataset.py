@@ -891,9 +891,12 @@ class DatasetBase(abc.ABC):
                 del self.adata.var[getattr(adata_fields, "gene_id_names")]
         if format != "sfaira":
             # Remove sfaira intrinsic .uns fields:
+            keys_to_delete = []
             for k, v in self.adata.uns.items():
-                if v == UNS_STRING_META_IN_OBS:
-                    del self.adata.uns[k]
+                if isinstance(v, str) and v == UNS_STRING_META_IN_OBS:
+                    keys_to_delete.append(k)
+            for k in keys_to_delete:
+                del self.adata.uns[k]
         print(self.adata.uns)
 
     def load_tobacked(
