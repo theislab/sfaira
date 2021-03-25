@@ -464,8 +464,6 @@ class DatasetBase(abc.ABC):
 
         # Run data set-specific loading script:
         self._load_cached(load_raw=load_raw, allow_caching=allow_caching)
-        # Turn into lil matrix:
-        self.adata.X = scipy.sparse.lil_matrix(self.adata.X)
         if set_metadata:
             # Set data-specific meta data in .adata:
             self._set_metadata_in_adata(allow_uns=True)
