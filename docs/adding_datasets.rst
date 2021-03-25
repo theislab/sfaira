@@ -107,8 +107,8 @@ by `_`, below referred to as `--DOI-folder--`:
     Note that you do not have to include the non-human-readable IDs here as they are added later in a fully automated
     fashion.
 
-10. Test data loader
-    Note that this will abort with error if there are bugs in your data loader.
+10. Test data loader.
+        Note that this will abort with error if there are bugs in your data loader.
 
 .. code-block::
 
@@ -116,12 +116,13 @@ by `_`, below referred to as `--DOI-folder--`:
     # sfaira test <path>`` TODO
 ..
 
-11. You can contribute the data loader to public sfaira as code through a pull request.
-    Note that you can also just keep the data loader in your local installation or keep it in sfaira_extensions if you
-    do not want to make it public.
-    Note that we do not manage data upload!
-    During publication, you would upload this data set to a server like GEO and the data loader contributed to sfaira
-    would use this download link.
+11. Make loader public.
+        You can contribute the data loader to public sfaira as code through a pull request.
+        Note that you can also just keep the data loader in your local installation or keep it in sfaira_extensions
+        if you do not want to make it public.
+        Note that we do not manage data upload!
+        During publication, you would upload this data set to a server like GEO and the data loader contributed to
+        sfaira would use this download link.
 
 .. code-block::
 
