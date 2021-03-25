@@ -807,9 +807,9 @@ class DatasetBase(abc.ABC):
         for k, v in uns_new.items():
             self.adata.uns[k] = v
         # Convert entries from tuple to list so that this can be saved:
-        for k, v in self.adata.uns.items():
-            if isinstance(v, tuple):
-                self.adata.uns[k] = list(v)
+        #for k, v in self.adata.uns.items():
+        #    if isinstance(v, tuple):
+        #        self.adata.uns[k] = list(v)
         # Only retain target elements in adata.var:
         var_old = self.adata.var.copy()
         self.adata.var = pd.DataFrame(dict([
@@ -881,12 +881,14 @@ class DatasetBase(abc.ABC):
                     self.adata.obs[getattr(adata_fields, k) + "_ontology_term_id"] = "unknown"
             # Adapt var columns naming.
             if self.organism == "mouse":
-                self.adata.var["hgnc_gene_symbol"] = self.adata.var[getattr(adata_fields, "gene_id_names")]
+                gene_id_new = "hgnc_gene_symbol"
             elif self.organism == "human":
-                self.adata.var["mgi_gene_symbol"] = self.adata.var[getattr(adata_fields, "gene_id_names")]
+                gene_id_new = "mgi_gene_symbol"
             else:
                 assert False, self.organism
-            del self.adata.var["gene_id_names"]
+            self.adata.var[gene_id_new] = self.adata.var[getattr(adata_fields, "gene_id_names")]
+            if gene_id_new != getattr(adata_fields, "gene_id_names"):
+                del self.adata.var[getattr(adata_fields, "gene_id_names")]
         if format != "sfaira":
             # Remove sfaira intrinsic .uns fields:
             for k, v in self.adata.uns.items():
