@@ -104,6 +104,7 @@ class AdataIdsSfaira(AdataIds):
 
         self.unknown_celltype_identifier = "UNKNOWN"
         self.not_a_cell_celltype_identifier = "NOT_A_CELL"
+        self.unknown_metadata_identifier = None
 
         self.obs_keys = [
             "age",
@@ -177,6 +178,8 @@ class AdataIdsCellxgene(AdataIds):
         # selected element entries used for parsing:
         self.disease_state_healthy = "normal"
         self.author_names = "names"
+
+        self.unknown_metadata_identifier = "unknown"
 
         # accepted file names
         self.accepted_file_names = [

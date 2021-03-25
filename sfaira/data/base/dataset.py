@@ -816,7 +816,10 @@ class DatasetBase(abc.ABC):
                 v = v[0]
                 replace = True
             if replace:
-                self.adata.uns[k] = v
+                if v == self._adata_ids_sfaira.unknown_metadata_identifier:
+                    self.adata.uns[k] = adata_fields.unknown_metadata_identifier
+                else:
+                    self.adata.uns[k] = v
         # Only retain target elements in adata.var:
         var_old = self.adata.var.copy()
         self.adata.var = pd.DataFrame(dict([
@@ -884,11 +887,12 @@ class DatasetBase(abc.ABC):
                         key_in=getattr(adata_fields, k),
                         key_out=getattr(adata_fields, k) + "_ontology_term_id",
                         map_exceptions=[],
-                        map_exceptions_value="unknown"
+                        map_exceptions_value=adata_fields.unknown_metadata_identifier,
                     )
                 else:
-                    self.adata.obs[getattr(adata_fields, k)] = "unknown"
-                    self.adata.obs[getattr(adata_fields, k) + "_ontology_term_id"] = "unknown"
+                    self.adata.obs[getattr(adata_fields, k)] = adata_fields.unknown_metadata_identifier
+                    self.adata.obs[getattr(adata_fields, k) + "_ontology_term_id"] = \
+                        adata_fields.unknown_metadata_identifier
             # Adapt var columns naming.
             if self.organism == "mouse":
                 gene_id_new = "hgnc_gene_symbol"
