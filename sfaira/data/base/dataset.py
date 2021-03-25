@@ -1147,7 +1147,7 @@ class DatasetBase(abc.ABC):
             key_in: str,
             key_out: str,
             map_exceptions: list,
-            map_exceptions_value = None,
+            map_exceptions_value=None,
     ):
         """
         Project ontology names to IDs for a given ontology in .obs entries.
@@ -1159,7 +1159,7 @@ class DatasetBase(abc.ABC):
         :param map_exceptions_value:
         :return:
         """
-        ontology = getattr(self.ontology_container_sfaira,  ontology)
+        ontology = getattr(self.ontology_container_sfaira, ontology)
         map_vals = dict([
             (x, ontology.id_from_name(x))
             for x in np.unique([

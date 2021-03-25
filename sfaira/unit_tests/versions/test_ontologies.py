@@ -20,10 +20,8 @@ def test_cl_subsetting():
 Hancestro
 """
 
-
-#def test_hancestro_loading():
+# def test_hancestro_loading():
 #    _ = OntologyHancestro()
-
 
 """
 Hsapdv
@@ -70,4 +68,3 @@ def test_uberon_subsetting():
     assert ou.is_a(query="lobar bronchus", reference="lung")
     assert ou.is_a(query="lobar bronchus", reference="lobar bronchus")
     assert not ou.is_a(query="lung", reference="lobar bronchus")
-
