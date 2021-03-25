@@ -863,8 +863,10 @@ class DatasetBase(abc.ABC):
             }
             # TODO port this into organism ontology handling.
             if self.organism == "mouse":
+                self.adata.uns["organism"] = "Mus musculus"
                 self.adata.uns["organism_ontology_term_id"] = "NCBITaxon:10090"
             elif self.organism == "human":
+                self.adata.uns["organism"] = "Homo sapiens"
                 self.adata.uns["organism_ontology_term_id"] = "NCBITaxon:9606"
             else:
                 assert False, self.organism
@@ -882,6 +884,7 @@ class DatasetBase(abc.ABC):
                         key_in=getattr(adata_fields, k),
                         key_out=getattr(adata_fields, k) + "_ontology_term_id",
                         map_exceptions=[],
+                        map_exceptions_value="unknown"
                     )
                 else:
                     self.adata.obs[getattr(adata_fields, k)] = "unknown"
@@ -894,6 +897,7 @@ class DatasetBase(abc.ABC):
             else:
                 assert False, self.organism
             self.adata.var[gene_id_new] = self.adata.var[getattr(adata_fields, "gene_id_names")]
+            self.adata.var.index = self.adata.var[gene_id_new].values
             if gene_id_new != getattr(adata_fields, "gene_id_names"):
                 del self.adata.var[getattr(adata_fields, "gene_id_names")]
         if format != "sfaira":
@@ -1126,7 +1130,14 @@ class DatasetBase(abc.ABC):
                 ],
             )
 
-    def __project_name_to_id_obs(self, ontology: str, key_in: str, key_out: str, map_exceptions: list):
+    def __project_name_to_id_obs(
+            self,
+            ontology: str,
+            key_in: str,
+            key_out: str,
+            map_exceptions: list,
+            map_exceptions_value = None,
+    ):
         """
         Project ontology names to IDs for a given ontology in .obs entries.
 
@@ -1134,6 +1145,7 @@ class DatasetBase(abc.ABC):
         :param key_in:
         :param key_out:
         :param map_exceptions:
+        :param map_exceptions_value:
         :return:
         """
         ontology = getattr(self.ontology_container_sfaira,  ontology)
@@ -1145,7 +1157,7 @@ class DatasetBase(abc.ABC):
             ])
         ])
         self.adata.obs[key_out] = [
-            map_vals[x] if x in map_vals.keys() else x
+            map_vals[x] if x in map_vals.keys() else map_exceptions_value
             for x in self.adata.obs[key_in].values
         ]
 

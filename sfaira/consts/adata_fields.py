@@ -185,6 +185,9 @@ class AdataIdsCellxgene(AdataIds):
 
         self.obs_keys = [
             "age",
+            "cell_types_original",
+            "cell_ontology_class",
+            "cell_ontology_id",
             "development_stage",
             "disease",
             "ethnicity",
