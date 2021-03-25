@@ -464,6 +464,8 @@ class DatasetBase(abc.ABC):
 
         # Run data set-specific loading script:
         self._load_cached(load_raw=load_raw, allow_caching=allow_caching)
+        # Turn into lil matrix:
+        self.adata.X = scipy.sparse.lil_matrix(self.adata.X)
         if set_metadata:
             # Set data-specific meta data in .adata:
             self._set_metadata_in_adata(allow_uns=True)
@@ -806,11 +808,11 @@ class DatasetBase(abc.ABC):
         # Add new keys in new scheme:
         for k, v in uns_new.items():
             # Catch issues with data structures in uns that cannot be written to h5ad:
-            if isinstance(v, tuple) and len(v) == 1 and isinstance(v[0], tuple):
-                # Nested tuples:
-                self.adata.uns[k] = v[0]
-            else:
-                self.adata.uns[k] = v
+            if isinstance(v, tuple) and len(v) == 1 and (isinstance(v[0], tuple) or isinstance(v[0], list)):
+                v = v[0]
+            if isinstance(v, tuple) and len(v) == 1 and (isinstance(v[0], tuple) or isinstance(v[0], list)):
+                v = v[0]
+            self.adata.uns[k] = v
         # Only retain target elements in adata.var:
         var_old = self.adata.var.copy()
         self.adata.var = pd.DataFrame(dict([
