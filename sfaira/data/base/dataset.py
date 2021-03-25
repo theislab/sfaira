@@ -892,6 +892,14 @@ class DatasetBase(abc.ABC):
                 else:
                     self.adata.obs[getattr(adata_fields, k)] = adata_fields.unknown_metadata_identifier
                     self.adata.obs[getattr(adata_fields, k) + "_ontology_term_id"] = ""
+            # Clean up fields that are not accompanied by ontology ID.
+            for k in [
+                "sex",
+            ]:
+                self.adata.obs[getattr(adata_fields, k)] = [
+                    x if x is not None else adata_fields.unknown_metadata_identifier
+                    for x in self.adata.obs[getattr(adata_fields, k)].values
+                ]
             # Adapt var columns naming.
             if self.organism == "mouse":
                 gene_id_new = "hgnc_gene_symbol"
