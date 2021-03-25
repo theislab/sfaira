@@ -805,11 +805,11 @@ class DatasetBase(abc.ABC):
                 del self.adata.uns[getattr(self._adata_ids_sfaira, k)]
         # Add new keys in new scheme:
         for k, v in uns_new.items():
-            self.adata.uns[k] = v
-        # Convert entries from tuple to list so that this can be saved:
-        #for k, v in self.adata.uns.items():
-        #    if isinstance(v, tuple):
-        #        self.adata.uns[k] = list(v)
+            # Catch issues with data structures in uns that cannot be written to h5ad:
+            if isinstance(v, tuple):
+                self.adata.uns[k] = list(v)
+            else:
+                self.adata.uns[k] = v
         # Only retain target elements in adata.var:
         var_old = self.adata.var.copy()
         self.adata.var = pd.DataFrame(dict([
