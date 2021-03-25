@@ -806,8 +806,9 @@ class DatasetBase(abc.ABC):
         # Add new keys in new scheme:
         for k, v in uns_new.items():
             # Catch issues with data structures in uns that cannot be written to h5ad:
-            if isinstance(v, tuple):
-                self.adata.uns[k] = list(v)
+            if isinstance(v, tuple) and len(v) == 1 and isinstance(v[0], tuple):
+                # Nested tuples:
+                self.adata.uns[k] = v[0]
             else:
                 self.adata.uns[k] = v
         # Only retain target elements in adata.var:
@@ -891,12 +892,13 @@ class DatasetBase(abc.ABC):
                 del self.adata.var[getattr(adata_fields, "gene_id_names")]
         if format != "sfaira":
             # Remove sfaira intrinsic .uns fields:
-            keys_to_delete = []
+            keys_to_delete = ["load_raw", "mapped_features", "remove_gene_version", "annotated"]
             for k, v in self.adata.uns.items():
                 if isinstance(v, str) and v == UNS_STRING_META_IN_OBS:
                     keys_to_delete.append(k)
-            for k in keys_to_delete:
-                del self.adata.uns[k]
+            for k in np.unique(keys_to_delete):
+                if k in self.adata.uns.keys():
+                    del self.adata.uns[k]
         print(self.adata.uns)
 
     def load_tobacked(
