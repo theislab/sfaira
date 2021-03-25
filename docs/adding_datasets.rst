@@ -471,31 +471,34 @@ Meta data can either be dataset-wise, observation-wise or feature-wise.
 
 Dataset structure meta data are in the section `dataset_structure` in the `.yaml` file.
 
-- dataset_index. [int]
+- dataset_index [int]
     Numeric identifier of the first loader defined by this python file.
     Only relevant if multiple python files for one DOI generate loaders of the same name.
     In these cases, this numeric index can be used to distinguish them.
-- sample_fns: [list of strings]
+- sample_fns [list of strings]
     If there are multiple data files which can be covered by one `load()` function and `.yaml` file because they are
     structured similarly, these can identified here.
     See also section `Loading multiple files of similar structure`.
 
 Dataset-wise meta data are in the section `dataset_wise` in the `.yaml` file.
 
-- author: Author names. [list of strings]
+- author [list of strings]
     List of author names of dataset (not of loader).
-- doi: DOIs associated with dataset. [list of strings]
+- doi [list of strings]
+    DOIs associated with dataset.
     These can be preprints and journal publication DOIs.
-- download_url_data: Download links for data. [list of strings]
+- download_url_data [list of strings]
+    Download links for data.
     Full URLs of all data files such as count matrices. Note that distinct observation-wise annotation files can be
     supplied in download_url_meta.
-- download_url_meta: Download links for observation-wise data. [list of strings]
+- download_url_meta [list of strings]
+    Download links for observation-wise data.
     Full URLs of all observation-wise meta data files such as count matrices.
     This attribute is optional and not necessary ff observation-wise meta data is already in the files defined in
     `download_url_data`, e.g. often the case for .h5ad`.
-- normalization: Data normalisation. {"raw", "scaled"}
+- normalization: Data normalisation {"raw", "scaled"}
     Type of normalisation of data stored in `adata.X` emitted by the `load()` function.
-- year: Year in which sample was first described. [integer]
+- year: Year in which sample was first described [integer]
     Pre-print publication year.
 
 Meta-data which can either be dataset- or observation-wise are in the section `dataset_or_observation_wise` in the
@@ -507,21 +510,21 @@ The latter, `NAME_obs_key`, indicates that there is a column in `adata.obs` emit
 Note that in both cases the value, or the column values, have to fulfill contraints imposed on the meta data item as
 outlined below.
 
-- age and age_obs_key. [string]
+- age and age_obs_key [string]
     Use
         - units of years for humans,
         - the E{day} nomenclature for mouse embryos
         - the P{day} nomenclature for young post-natal mice
         - units of weeks for mice older than one week and
         - units of days for cell culture samples.
-- assay_sc and assay_sc_obs_key. [ontology term]
+- assay_sc and assay_sc_obs_key [ontology term]
     Choose a term from https://www.ebi.ac.uk/ols/ontologies/efo/terms?iri=http%3A%2F%2Fwww.ebi.ac.uk%2Fefo%2FEFO_0010183&viewMode=All&siblings=false
-- assay_differentiation and assay_differentiation_obs_key. [string]
+- assay_differentiation and assay_differentiation_obs_key [string]
     Try to provide a base differentiation protocol (eg. "Lancaster, 2014") as well as any amendments to the original
     protocol.
-- assay_type_differentiation and assay_type_differentiation_obs_key. {"guided", "unguided"}
+- assay_type_differentiation and assay_type_differentiation_obs_key {"guided", "unguided"}
     For cell-culture samples: Whether a guided (patterned) differentiation protocol was used in the experiment.
-- bio_sample and bio_sample_obs_key. [string]
+- bio_sample and bio_sample_obs_key [string]
     Column name in `adata.obs` emitted by the `load()` function which reflects biologically distinct samples, either
     different in condition or biological replicates, as a categorical variable.
     The values of this column are not constrained and can be arbitrary identifiers of observation groups.
@@ -530,20 +533,20 @@ outlined below.
     Note that the notion of biologically distinct sample is slightly subjective, we allow this element to allow
     researchers to distinguish technical and biological replicates within one study for example.
     See also the meta data items `individual` and `tech_sample`.
-- cell_line and cell_line_obs_key: cellosaurus-constrained string
+- cell_line and cell_line_obs_key [ontology term]
     Cell line name from the cellosaurus cell line database (https://web.expasy.org/cellosaurus/)
-- developmental_stage and developmental_stage_obs_key. [ontology term]
+- developmental_stage and developmental_stage_obs_key [ontology term]
     Choose from HSAPDV (https://www.ebi.ac.uk/ols/ontologies/hsapdv) for human
     or from MMUSDEV (https://www.ebi.ac.uk/ols/ontologies/mmusdv) for mouse.
-- disease and disease_obs_key. [ontology term]
+- disease and disease_obs_key [ontology term]
     Choose from MONDO (https://www.ebi.ac.uk/ols/ontologies/mondo) for human
-- ethnicity and ethnicity_obs_key. [ontology term]
+- ethnicity and ethnicity_obs_key [ontology term]
     Choose from HANCESTRO (https://www.ebi.ac.uk/ols/ontologies/hancestro)
-- healthy and healthy_obs_key. [bool, string]
+- healthy and healthy_obs_key [bool, string]
     Whether the sample is from healthy tissue.
     Can also be string, in this case `healthy_state_healthy` is used as an equality check against the values of this
     column to establish if the observation is from a healthy condition.
-- individual and individual_obs_key. [string]
+- individual and individual_obs_key [string]
     Column name in `adata.obs` emitted by the `load()` function which reflects the indvidual sampled as a categorical
     variable.
     The values of this column are not constrained and can be arbitrary identifiers of observation groups.
@@ -552,7 +555,7 @@ outlined below.
     Note that the notion of individuals is slightly mal-defined in some cases, we allow this element to allow
     researchers to distinguish sample groups that originate from biological material with distinct genotypes.
     See also the meta data items `individual` and `tech_sample`.
-- organ and organ_obs_key. [ontology term]
+- organ and organ_obs_key [ontology term]
     The UBERON anatomic location of the sample (https://www.ebi.ac.uk/ols/ontologies/uberon).
 - organism and organism_obs_key. {"mouse", "human"}.
     The organism from which the sample originates.
@@ -561,11 +564,11 @@ outlined below.
     Which cellular system the sample was derived from.
 - sex and sex_obs_key. Sex of individual sampled. {"female", "male", None}
     Sex of the individual sampled.
-- state_exact and state_exact_obs_key. [string]
+- state_exact and state_exact_obs_key [string]
     Free text description of condition.
     If you give treatment concentrations, intervals or similar measurements use square brackets around the quantity
     and use units: `[1g]`
-- tech_sample and tech_sample_obs_key. [string]
+- tech_sample and tech_sample_obs_key [string]
     Column name in `adata.obs` emitted by the `load()` function which reflects technically distinct samples, either
     different in condition or technical replicates, as a categorical variable.
     Any data batch is a `tech_sample`.
@@ -577,12 +580,12 @@ outlined below.
 
 Meta-data which are strictly observation-wise are in the section `observation_wise` in the `.yaml` file:
 
-- cellontology_original_obs_key. [string]
+- cellontology_original_obs_key [string]
     Column name in `adata.obs` emitted by the `load()` function which contains free text cell type labels.
 
 Meta-data which are feature-wise are in the section `feature_wise` in the `.yaml` file:
 
-- var_ensembl_col. [string]
+- var_ensembl_col [string]
     Name of the column in `adata.var` emitted by the `load()` which contains ENSEMBL gene IDs.
     This can also be "index" if the ENSEMBL gene names are in the index of the `adata.var` data frame.
 - var_symbol_col:.[string]
@@ -592,7 +595,7 @@ Meta-data which are feature-wise are in the section `feature_wise` in the `.yaml
 
 Meta-data which are misceanous are in the section `misc` in the `.yaml` file:
 
-- healthy_state_healthy. [string]
+- healthy_state_healthy [string]
     See `healthy`, only necessary if `healthy_obs_key` contains non-boolean values.
 
 The meta data on the meta data file do not have to modified by you are automatically controlled are in the section
