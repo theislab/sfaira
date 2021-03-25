@@ -6,7 +6,20 @@ This process requires a couple of steps as outlined in the following sections.
 sfaira features an interactive way of creating, formatting and testing dataloaders through a command line interface (CLI).
 The common workflow using the CLI looks as follows:
 
-1. Install sfaira.
+1. Check that the data loader was not already implemented.
+    We will open issues for all planned data loaders, so you can search both the code_ base and our GitHub issues_ for
+    matching data loaders before you start writing one.
+    The core data loader identified is the directory compatible doi,
+    which is the doi with all special characters replaced by "_" and a "d" prefix is used:
+    "10.1016/j.cell.2019.06.029" becomes "d10_1016_j_cell_2019_06_029".
+    Searching for this string should yield a match if it is already implemented, take care to look for both
+    preprint and publication DOIs if both are available.
+    We will also mention publication names in issues, you will however not find these in the code.
+
+.. _code: https://github.com/theislab/sfaira/tree/dev
+.. _issues: https://github.com/theislab/sfaira/issues
+
+2. Install sfaira.
     Clone sfaira into a local repository from `dev` branch and install via pip.
 
 .. code-block::
@@ -19,7 +32,7 @@ The common workflow using the CLI looks as follows:
     pip install -e .  # install
 ..
 
-2. Create a new dataloader.
+3. Create a new dataloader.
     When creating a dataloader with ``sfaira create-dataloader`` dataloader specific attributes such as organ, organism
     and many more are prompted for.
     We provide a description of all meta data items at the bottom of this file.
@@ -45,12 +58,12 @@ by `_`, below referred to as `--DOI-folder--`:
         ├── NA_NA_2021_NA_Einstein_001.yaml <- Specifies all data loader data
 ..
 
-3. Correct yaml file.
+4. Correct yaml file.
     Correct errors in `sfaira/data/dataloaders/loaders/--DOI-folder--/NA_NA_2021_NA_Einstein_001.yaml` file and add
     further attributes you may have forgotten in step 2.
     This step is optional.
 
-4. Make downloaded data available to sfaira data loader testing.
+5. Make downloaded data available to sfaira data loader testing.
     Identify the raw files as indicated in the dataloader classes and copy them into your directory structure as
     required by your data loader.
     Note that this should be the exact files that are uploaded to cloud servers such as GEO:
@@ -60,10 +73,10 @@ by `_`, below referred to as `--DOI-folder--`:
     This folder is masked from git and only serves for temporarily using this data for loader testing.
     After finishing loader contribution, you can delete this data again without any consequences for your loader.
 
-5. Write load function.
+6. Write load function.
     Fill load function in `sfaira/data/dataloaders/loaders/--DOI-folder--NA_NA_2021_NA_Einstein_001.py`.
 
-6. Clean the dataloader with a supervicial check (lint).
+7. Clean the dataloader with a supervicial check (lint).
     This step is optional.
 
 .. code-block::
@@ -72,7 +85,7 @@ by `_`, below referred to as `--DOI-folder--`:
     sfaira clean-dataloader <path to *.yaml>
 ..
 
-7. Validate the dataloader with the CLI.
+8. Validate the dataloader with the CLI.
     Next validate the integrity of your dataloader content with ``sfaira lint-dataloader <path to *.yaml>``.
     All tests must pass! If any of the tests fail please revisit your dataloader and add the missing information.
 
@@ -82,7 +95,7 @@ by `_`, below referred to as `--DOI-folder--`:
     sfaira lint-dataloader <path>``
 ..
 
-8. Create cell type annotation if your data set is annotated.
+9. Create cell type annotation if your data set is annotated.
     Note that this will abort with error if there are bugs in your data loader.
 
 .. code-block::
@@ -91,23 +104,24 @@ by `_`, below referred to as `--DOI-folder--`:
     # sfaira annotate <path>`` TODO
 ..
 
-9. Mitigate automated cell type maps.
-    Sfaira creates a cell type mapping `.tsv` file in the directory in which your data loaders is located if you
-    indicated that annotation is present by filling `cellontology_original_obs_key`.
-    This file is: `NA_NA_2021_NA_Einstein_001.tsv`.
-    This file contains two columns with one row for each unique cell type label.
-    The free text identifiers in the first column "source",
-    and the corresponding ontology term in the second column "target".
-    You can write this file entirely from scratch.
-    Sfaira also allows you to generate a first guess of this file using fuzzy string matching
-    which is automatically executed when you run the template data loader unit test for the first time with you new loader.
-    Conflicts are not resolved in this first guess and you have to manually decide which free text field corresponds to which
-    ontology term in the case of conflicts.
-    Still, this first guess usually drastically speeds up this annotation harmonization.
-    Note that you do not have to include the non-human-readable IDs here as they are added later in a fully automated
-    fashion.
+10. Mitigate automated cell type maps.
+        Sfaira creates a cell type mapping `.tsv` file in the directory in which your data loaders is located if you
+        indicated that annotation is present by filling `cellontology_original_obs_key`.
+        This file is: `NA_NA_2021_NA_Einstein_001.tsv`.
+        This file contains two columns with one row for each unique cell type label.
+        The free text identifiers in the first column "source",
+        and the corresponding ontology term in the second column "target".
+        You can write this file entirely from scratch.
+        Sfaira also allows you to generate a first guess of this file using fuzzy string matching
+        which is automatically executed when you run the template data loader unit test for the first time with you new
+        loader.
+        Conflicts are not resolved in this first guess and you have to manually decide which free text field corresponds
+        to which ontology term in the case of conflicts.
+        Still, this first guess usually drastically speeds up this annotation harmonization.
+        Note that you do not have to include the non-human-readable IDs here as they are added later in a fully
+        automated fashion.
 
-10. Test data loader.
+11. Test data loader.
         Note that this will abort with error if there are bugs in your data loader.
 
 .. code-block::
@@ -116,7 +130,7 @@ by `_`, below referred to as `--DOI-folder--`:
     # sfaira test <path>`` TODO
 ..
 
-11. Make loader public.
+12. Make loader public.
         You can contribute the data loader to public sfaira as code through a pull request.
         Note that you can also just keep the data loader in your local installation or keep it in sfaira_extensions
         if you do not want to make it public.
@@ -151,19 +165,6 @@ In the sfaira code, data loaders are organised into directories, which correspon
 All data loaders corresponding to data sets of one study are grouped into this directory.
 Next, each data set is represented by one data loader python file in this directory.
 See below for more complex set ups with repetitive data loader code.
-
-Check that the data loader was not already implemented
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-We will open issues for all planned data loaders, so you can search both the code_ base and our GitHub issues_ for
-matching data loaders before you start writing one.
-The core data loader identified is the directory compatible doi,
-which is the doi with all special characters replaced by "_" and a "d" prefix is used:
-"10.1016/j.cell.2019.06.029" becomes "d10_1016_j_cell_2019_06_029".
-Searching for this string should yield a match if it is already implemented, take care to look for both
-preprint and publication DOIs if both are available. We will also mention publication names in issues, you will however not find these in the code.
-
-.. _code: https://github.com/theislab/sfaira/tree/dev
-.. _issues: https://github.com/theislab/sfaira/issues
 
 
 The data loader python file
