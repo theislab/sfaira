@@ -3,26 +3,142 @@ Adding data sets
 
 Adding datasets to sfaira is a great way to increase the visibility of your dataset and to make it available to a large audience.
 This process requires a couple of steps as outlined in the following sections.
+sfaira features an interactive way of creating, formatting and testing dataloaders through a command line interface (CLI).
+The common workflow using the CLI looks as follows:
 
-    1. Write a dataloader as outlined below.
-    2. Identify the raw files as indicated in the dataloader classes and copy them into your directory structure as required by your data loader.
-       If the raw file your dataloader uses as input is publically available, sfaira will be able to automatically download the raw file, so no manual copying is required.
-       For the purpose of testing the data loader with a unit test, you can also copy the data into `sfaira/unit_tests/template_data/` as a DOI structured folder if you do not want to maintain a data collection on the machine that you are testing on.
-    3. You can contribute the data loader to public sfaira, we do not manage data upload though.
-       During publication, you would upload this data set to a server like GEO and the data loader contributed to sfaira would use this download link.
+1. Install sfaira.
+    Clone sfaira into a local repository from `dev` branch and install via pip.
+
+.. code-block::
+
+    cd target_directory
+    git clone https://github.com/theislab/sfaira.git
+    git checkout dev
+    # git pull  # use this to update your installation
+    cd sfaira  # go into sfaira directory
+    pip install -e .  # install
+..
+
+2. Create a new dataloader.
+    When creating a dataloader with ``sfaira create-dataloader`` dataloader specific attributes such as organ, organism
+    and many more are prompted for.
+    We provide a description of all meta data items at the bottom of this file.
+    If the requested information is not available simply hit enter and continue until done.
+
+.. code-block::
+
+    # make sure you are in the top-level sfaira directory from step 1
+    git checkout -b YOUR_BRANCH_NAME  # create a new branch for your data loader.
+    sfaira create-dataloader
+
+
+The created files are created in the sfaira installation under `sfaira/data/dataloaders/loaders/--DOI-folder--`,
+where the DOI-specific folder starts with `d` and is followed by the DOI in which all special characters are replaced
+by `_`, below referred to as `--DOI-folder--`:
+
+.. code-block::
+
+    ├──sfaira/data/dataloaders/loaders/--DOI-folder--
+        ├── extra_description.txt <- Optional extra description file
+        ├── __init__.py
+        ├── NA_NA_2021_NA_Einstein_001.py <- Contains the load function to load the data
+        ├── NA_NA_2021_NA_Einstein_001.yaml <- Specifies all data loader data
+..
+
+3. Correct yaml file.
+    Correct errors in `sfaira/data/dataloaders/loaders/--DOI-folder--/NA_NA_2021_NA_Einstein_001.yaml` file and add
+    further attributes you may have forgotten in step 2.
+    This step is optional.
+
+4. Make downloaded data available to sfaira data loader testing.
+    Identify the raw files as indicated in the dataloader classes and copy them into your directory structure as
+    required by your data loader.
+    Note that this should be the exact files that are uploaded to cloud servers such as GEO:
+    Do not decompress these files ff these files are archives such as zip, tar or gz.
+    Instead, navigate the archives directly in the load function (step 5).
+    Copy the data into `sfaira/unit_tests/template_data/--DOI-folder--/`.
+    This folder is masked from git and only serves for temporarily using this data for loader testing.
+    After finishing loader contribution, you can delete this data again without any consequences for your loader.
+
+5. Write load function.
+    Fill load function in `sfaira/data/dataloaders/loaders/--DOI-folder--NA_NA_2021_NA_Einstein_001.py`.
+
+6. Clean the dataloader with a supervicial check (lint).
+    This step is optional.
+
+.. code-block::
+
+    # make sure you are in the top-level sfaira directory from step 1
+    sfaira clean-dataloader <path to *.yaml>
+..
+
+7. Validate the dataloader with the CLI.
+    Next validate the integrity of your dataloader content with ``sfaira lint-dataloader <path to *.yaml>``.
+    All tests must pass! If any of the tests fail please revisit your dataloader and add the missing information.
+
+.. code-block::
+
+    # make sure you are in the top-level sfaira directory from step 1
+    sfaira lint-dataloader <path>``
+..
+
+8. Create cell type annotation if your data set is annotated.
+    Note that this will abort with error if there are bugs in your data loader.
+
+.. code-block::
+
+    # make sure you are in the top-level sfaira directory from step 1
+    # sfaira annotate <path>`` TODO
+..
+
+9. Mitigate automated cell type maps.
+    Sfaira creates a cell type mapping `.tsv` file in the directory in which your data loaders is located if you
+    indicated that annotation is present by filling `cellontology_original_obs_key`.
+    This file is: `NA_NA_2021_NA_Einstein_001.tsv`.
+    This file contains two columns with one row for each unique cell type label.
+    The free text identifiers in the first column "source",
+    and the corresponding ontology term in the second column "target".
+    You can write this file entirely from scratch.
+    Sfaira also allows you to generate a first guess of this file using fuzzy string matching
+    which is automatically executed when you run the template data loader unit test for the first time with you new loader.
+    Conflicts are not resolved in this first guess and you have to manually decide which free text field corresponds to which
+    ontology term in the case of conflicts.
+    Still, this first guess usually drastically speeds up this annotation harmonization.
+    Note that you do not have to include the non-human-readable IDs here as they are added later in a fully automated
+    fashion.
+
+10. Test data loader
+    Note that this will abort with error if there are bugs in your data loader.
+
+.. code-block::
+
+    # make sure you are in the top-level sfaira directory from step 1
+    # sfaira test <path>`` TODO
+..
+
+11. You can contribute the data loader to public sfaira as code through a pull request.
+    Note that you can also just keep the data loader in your local installation or keep it in sfaira_extensions if you
+    do not want to make it public.
+    Note that we do not manage data upload!
+    During publication, you would upload this data set to a server like GEO and the data loader contributed to sfaira
+    would use this download link.
+
+.. code-block::
+
+    # make sure you are in the top-level sfaira directory from step 1
+    git add *
+    git commit  # enter your commit description
+    # Next make sure you are up to date with dev
+    git checkout dev
+    git pull
+    git checkout YOUR_BRANCH_NAME
+    git merge dev
+    git push  # this starts the pull request.
+..
 
 The following sections will first describe the underlying design principles of sfaira dataloaders and
 then explain how to interactively create, validate and test dataloaders.
 
-Use data loaders with an existing data repository
---------------------------------------------
-
-You only want to use data sets with existing data loaders and have adapted your directory structure as above?
-In that case, you can immediately start using the data loader functions, you just need to supply the root directory
-of the directory structure as `path to the constructor of the class that you are using.
-Depending on the functionalities you want to use, you would often want to create a directory with cached meta data
-first. This can be easily done via the script sfaira.data.utils.create_meta.py. This meta information is necessary to
-anticipate file sizes for backing merged adata objects, for example, and is used for lazy loading.
 
 Writing dataloaders
 ---------------------
@@ -88,6 +204,8 @@ before it is loaded into memory:
         cell_line_obs_key:
         development_stage:
         development_stage_obs_key:
+        disease_stage:
+        disease_obs_key:
         ethnicity:
         ethnicity_obs_key:
         healthy:
@@ -162,6 +280,8 @@ In summary, a the dataloader for a mouse lung data set could look like this:
         cell_line_obs_key:
         development_stage:
         development_stage_obs_key:
+        disease_stage:
+        disease_obs_key:
         ethnicity:
         ethnicity_obs_key:
         healthy:
@@ -256,52 +376,6 @@ either `Dataset`, `DatasetGroup` or `DatasetSuperGroup` to define data sets
 for which you want to load additional annotation and which additional you want to load for these.
 See also the docstrings of these functions for further details on how these can be set.
 
-
-Creating dataloaders with the commandline interface
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-sfaira features an interactive way of creating, formatting and testing dataloaders.
-The common workflow look as follows:
-
-1. Create a new dataloader with ``sfaira create-dataloader``
-2. Validate the dataloader with ``sfaira lint-dataloader <path>``
-
-When creating a dataloader with ``sfaira create-dataloader`` common information such as
-your name and email are prompted for, followed by dataloader specific attributes such as organ, organism and many more.
-If the requested information is not available simply hit enter and continue until done. If you have mixed organ or organism
-data you will have to resolve this manually later. Your dataloader template will be created in your current working directory
-in a folder resembling your doi.
-
-The created files are:
-
-.. code-block::
-
-    ├── extra_description.txt <- Optional extra description file
-    ├── __init__.py
-    ├── NA_NA_2021_NA_Einstein_001.py <- Contains the load function to load the data
-    ├── NA_NA_2021_NA_Einstein_001.yaml <- Specifies all data loader data
-
-Now simply fill in all missing properties in your dataloader scripts and yaml file.
-When done optionally run ``sfaira clean-dataloader <path to *.yaml>`` on the just filled out dataloader yaml file.
-All unused attributes will be removed.
-
-Next validate the integrity of your dataloader content with ``sfaira lint-dataloader <path to *.yaml>``.
-All tests must pass! If any of the tests fail please revisit your dataloader and add the missing information.
-
-Map cell type labels to ontology
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The entries in `self.cellontology_original_obs_key` are free text but are mapped to an ontology via a .tsv file with
-the same name and directory as the python file in which the data loader is located.
-This .tsv contains two columns with one row for each unique cell type label.
-The free text identifiers in the first column "source",
-and the corresponding ontology term in the second column "target".
-You can write this file entirely from scratch.
-Sfaira also allows you to generate a first guess of this file using fuzzy string matching
-which is automatically executed when you run the template data loader unit test for the first time with you new loader.
-Conflicts are not resolved in this first guess and you have to manually decide which free text field corresponds to which
-ontology term in the case of conflicts.
-Still, this first guess usually drastically speeds up this annotation harmonization.
 
 Cell type ontology management
 -----------------------------
