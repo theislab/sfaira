@@ -1126,8 +1126,10 @@ class DatasetBase(abc.ABC):
         ontology = getattr(self.ontology_container_sfaira,  ontology)
         map_vals = dict([
             (x, ontology.id_from_name(x))
-            for x in np.unique(self.adata.obs[key_in].values)
-            if (x not in map_exceptions and x is not None)
+            for x in np.unique([
+                xx for xx in self.adata.obs[key_in].values
+                if (xx not in map_exceptions and xx is not None)
+            ])
         ])
         self.adata.obs[key_out] = [
             map_vals[x] if x in map_vals.keys() else x
