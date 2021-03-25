@@ -395,59 +395,145 @@ Contribute cell types to ontology
 
 Please open an issue on the sfaira repo with a description what type of cell type you want to add.
 
-Using ontologies to train cell type classifiers
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Cell type classifiers can be trained on data sets with different coarsity of cell type annotation using aggregate
-cross-entropy as a loss and aggregate accuracy as a metric.
-The one-hot encoded cell type label matrix is accordingly modified in the estimator class in data loading if terms
-that correspond to intermediate nodes (rather than leave nodes) are encountered in the label set.
+Metadata
+--------
 
-Metadata management
--------------------
+Required fields
+~~~~~~~~~~~~~~~
 
-We constrain meta data by ontologies where possible. The current restrictions are:
+Most meta data fields are optional in sfaira.
+Required are:
 
-    - .age: unconstrained string
-        Use
-            - units of years for humans,
-            - the E{day} nomenclature for mouse embryos
-            - the P{day} nomenclature for young post-natal mice
-            - units of weeks for mice older than one week and
-            - units of days for cell culture samples.
-    - .assay_sc: EFO-constrained string
-        Choose a term from https://www.ebi.ac.uk/ols/ontologies/efo/terms?iri=http%3A%2F%2Fwww.ebi.ac.uk%2Fefo%2FEFO_0010183&viewMode=All&siblings=false
-    - .assay_differentiation: unconstrained string
-        Try to provide a base differentiation protocol (eg. "Lancaster, 2014") as well as any amendments to the original protocol.
-    - .assay_type_differentiation: constrained string, {"guided", "unguided"}
-        For cell-culture samples: Whether a guided (patterned) differentiation protocol was used in the experiment.
-    - .developmental_stage: unconstrained string
-        This will constrained to an ontology in the future,
-        try choosing from HSAPDV (https://www.ebi.ac.uk/ols/ontologies/hsapdv) for human
-        or from MMUSDEV (https://www.ebi.ac.uk/ols/ontologies/mmusdv) for mouse.
-    - .cell_line: cellosaurus-constrained string
-        Cell line name from the cellosaurus cell line database (https://web.expasy.org/cellosaurus/)
-    - .ethnicity: unconstrained string, this will constrained to an ontology in the future.
-        Try choosing from HANCESTRO (https://www.ebi.ac.uk/ols/ontologies/hancestro)
-    - .healthy: bool
-        Whether the sample is from healthy tissue ({True, False}).
-    - .normalisation: unconstrained string, this will constrained to an ontology in the future,
-        Try to use {"raw", "scaled"}.
-    - .organ: UBERON-constrained string
-        The anatomic location of the sample (https://www.ebi.ac.uk/ols/ontologies/uberon).
-    - .organism: constrained string, {"mouse", "human"}.
-        The organism from which the sample originates.
-        In the future, we will use NCBITAXON (https://www.ebi.ac.uk/ols/ontologies/ncbitaxon).
-    - .sample_source: constrained string, {"primary_tissue", "2d_culture", "3d_culture", "tumor"}
-        Which cellular system the sample was derived from.
-    - .sex: constrained string, {"female", "male", None}
-        Sex of the individual sampled.
-    - .state_exact: unconstrained string, try to be concise and anticipate that this field is queried by automatised searches.
-        If you give treatment concentrations, intervals or similar measurements use square brackets around the quantity
-        and use units: `[1g]`
-    - .year: must be an integer year, e.g. 2020
-        Year in which sample was first described (e.g. pre-print publication).
+- dataset_wise: author, doi, download_url_data, normalisation and year are required.
+- dataset_or_observation_wise: organism is required.
+- observation_wise: None are required.
+- feature_wise: var_ensembl_col or var_symbol_col is required.
+- misc: None are required.
 
-Follow this issue_ for details on upcoming ontology integrations.
+Field descriptions
+~~~~~~~~~~~~~~~~~~
 
-.. _issue: https://github.com/theislab/sfaira/issues/16
+We constrain meta data by ontologies where possible.
+Meta data can either be dataset-wise, observation-wise or feature-wise.
+
+Dataset-wise meta data are in the section `dataset_wise` in the `.yaml` file.
+
+- author: Author names. [list of strings]
+    List of author names of dataset (not of loader).
+- doi: DOIs associated with dataset. [list of strings]
+    These can be preprints and journal publication DOIs.
+- download_url_data: Download links for data. [list of strings]
+    Full URLs of all data files such as count matrices. Note that distinct observation-wise annotation files can be
+    supplied in download_url_meta.
+- download_url_meta: Download links for observation-wise data. [list of strings]
+    Full URLs of all observation-wise meta data files such as count matrices.
+    This attribute is optional and not necessary ff observation-wise meta data is already in the files defined in
+    `download_url_data`, e.g. often the case for .h5ad`.
+- normalization: Data normalisation. {"raw", "scaled"}
+    Type of normalisation of data stored in `adata.X` emitted by the `load()` function.
+- year: Year in which sample was first described. [integer]
+    Pre-print publication year.
+
+Meta-data which can either be dataset- or observation-wise are in the section `dataset_or_observation_wise` in the
+`.yaml` file.
+They can all be supplied as `NAME` or as `NAME_obs_key`:
+The former indicates that the entire data set has the value stated in the yaml.
+The latter, `NAME_obs_key`, indicates that there is a column in `adata.obs` emitted by the `load()` function of the name
+`NAME_obs_key` which contains the annotation per observation for this meta data item.
+Note that in both cases the value, or the column values, have to fulfill contraints imposed on the meta data item as
+outlined below.
+
+- age and age_obs_key. [string]
+    Use
+        - units of years for humans,
+        - the E{day} nomenclature for mouse embryos
+        - the P{day} nomenclature for young post-natal mice
+        - units of weeks for mice older than one week and
+        - units of days for cell culture samples.
+- assay_sc and assay_sc_obs_key. [ontology term]
+    Choose a term from https://www.ebi.ac.uk/ols/ontologies/efo/terms?iri=http%3A%2F%2Fwww.ebi.ac.uk%2Fefo%2FEFO_0010183&viewMode=All&siblings=false
+- assay_differentiation and assay_differentiation_obs_key. [string]
+    Try to provide a base differentiation protocol (eg. "Lancaster, 2014") as well as any amendments to the original
+    protocol.
+- assay_type_differentiation and assay_type_differentiation_obs_key. {"guided", "unguided"}
+    For cell-culture samples: Whether a guided (patterned) differentiation protocol was used in the experiment.
+- bio_sample and bio_sample_obs_key. [string]
+    Column name in `adata.obs` emitted by the `load()` function which reflects biologically distinct samples, either
+    different in condition or biological replicates, as a categorical variable.
+    The values of this column are not constrained and can be arbitrary identifiers of observation groups.
+    You can concatenate multiple columns to build more fine grained observation groupings by concatenating the column
+    keys with `*` in this string, e.g. `patient*treatment` to get one `bio_sample` for each patient and treatment.
+    Note that the notion of biologically distinct sample is slightly subjective, we allow this element to allow
+    researchers to distinguish technical and biological replicates within one study for example.
+    See also the meta data items `individual` and `tech_sample`.
+- cell_line and cell_line_obs_key: cellosaurus-constrained string
+    Cell line name from the cellosaurus cell line database (https://web.expasy.org/cellosaurus/)
+- developmental_stage and developmental_stage_obs_key. [ontology term]
+    Choose from HSAPDV (https://www.ebi.ac.uk/ols/ontologies/hsapdv) for human
+    or from MMUSDEV (https://www.ebi.ac.uk/ols/ontologies/mmusdv) for mouse.
+- disease and disease_obs_key. [ontology term]
+    Choose from MONDO (https://www.ebi.ac.uk/ols/ontologies/mondo) for human
+- ethnicity and ethnicity_obs_key. [ontology term]
+    Choose from HANCESTRO (https://www.ebi.ac.uk/ols/ontologies/hancestro)
+- healthy and healthy_obs_key. [bool, string]
+    Whether the sample is from healthy tissue.
+    Can also be string, in this case `healthy_state_healthy` is used as an equality check against the values of this
+    column to establish if the observation is from a healthy condition.
+- individual and individual_obs_key. [string]
+    Column name in `adata.obs` emitted by the `load()` function which reflects the indvidual sampled as a categorical
+    variable.
+    The values of this column are not constrained and can be arbitrary identifiers of observation groups.
+    You can concatenate multiple columns to build more fine grained observation groupings by concatenating the column
+    keys with `*` in this string, e.g. `group1*group2` to get one `individual` for each group1 and group2 entry.
+    Note that the notion of individuals is slightly mal-defined in some cases, we allow this element to allow
+    researchers to distinguish sample groups that originate from biological material with distinct genotypes.
+    See also the meta data items `individual` and `tech_sample`.
+- organ and organ_obs_key. [ontology term]
+    The UBERON anatomic location of the sample (https://www.ebi.ac.uk/ols/ontologies/uberon).
+- organism and organism_obs_key. {"mouse", "human"}.
+    The organism from which the sample originates.
+    In the future, we will use NCBITAXON (https://www.ebi.ac.uk/ols/ontologies/ncbitaxon).
+- sample_source and sample_source_obs_key. {"primary_tissue", "2d_culture", "3d_culture", "tumor"}
+    Which cellular system the sample was derived from.
+- sex and sex_obs_key. Sex of individual sampled. {"female", "male", None}
+    Sex of the individual sampled.
+- state_exact and state_exact_obs_key. [string]
+    Free text description of condition.
+    If you give treatment concentrations, intervals or similar measurements use square brackets around the quantity
+    and use units: `[1g]`
+- tech_sample and tech_sample_obs_key. [string]
+    Column name in `adata.obs` emitted by the `load()` function which reflects technically distinct samples, either
+    different in condition or technical replicates, as a categorical variable.
+    Any data batch is a `tech_sample`.
+    The values of this column are not constrained and can be arbitrary identifiers of observation groups.
+    You can concatenate multiple columns to build more fine grained observation groupings by concatenating the column
+    keys with `*` in this string, e.g. `patient*treatment*protocol` to get one `tech_sample` for each patient, treatment
+    and measurement protocol.
+    See also the meta data items `individual` and `tech_sample`.
+
+Meta-data which are strictly observation-wise are in the section `observation_wise` in the `.yaml` file:
+
+- cellontology_original_obs_key. [string]
+    Column name in `adata.obs` emitted by the `load()` function which contains free text cell type labels.
+
+Meta-data which are feature-wise are in the section `feature_wise` in the `.yaml` file:
+
+- var_ensembl_col. [string]
+    Name of the column in `adata.var` emitted by the `load()` which contains ENSEMBL gene IDs.
+    This can also be "index" if the ENSEMBL gene names are in the index of the `adata.var` data frame.
+- var_symbol_col:.[string]
+    Name of the column in `adata.var` emitted by the `load()` which contains gene symbol:
+    HGNC for human and MGI for mouse.
+    This can also be "index" if the gene symbol are in the index of the `adata.var` data frame.
+
+Meta-data which are misceanous are in the section `misc` in the `.yaml` file:
+
+- healthy_state_healthy. [string]
+    See `healthy`, only necessary if `healthy_obs_key` contains non-boolean values.
+
+The meta data on the meta data file do not have to modified by you are automatically controlled are in the section
+`meta` in the `.yaml` file:
+
+- version: [string]
+    Version identifier of meta data scheme.
