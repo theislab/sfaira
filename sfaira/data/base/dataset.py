@@ -891,8 +891,7 @@ class DatasetBase(abc.ABC):
                     )
                 else:
                     self.adata.obs[getattr(adata_fields, k)] = adata_fields.unknown_metadata_identifier
-                    self.adata.obs[getattr(adata_fields, k) + "_ontology_term_id"] = \
-                        adata_fields.unknown_metadata_identifier
+                    self.adata.obs[getattr(adata_fields, k) + "_ontology_term_id"] = ""
             # Adapt var columns naming.
             if self.organism == "mouse":
                 gene_id_new = "hgnc_gene_symbol"
