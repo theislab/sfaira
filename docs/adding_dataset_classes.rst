@@ -28,7 +28,6 @@ In this scenario, meta data is described in a constructor of a class in the same
         self.download_url_data = x  # download website(s) of data files
         self.download_url_meta = x  # download website(s) of meta data files
 
-        self.age = x  # (*, optional) age of sample
         self.assay_sc = x  # (*, optional) protocol used to sample data (e.g. smart-seq2)
         self.assay_differentiation = x  # (*, optional) protocol used to differentiate the cell line (e.g. Lancaster, 2014)
         self.assay_type_differentiation = x  # (*, optional) type of protocol used to differentiate the cell line (guided/unguided)
@@ -49,7 +48,6 @@ In this scenario, meta data is described in a constructor of a class in the same
         # You need to make sure this is loaded in the loading script)!
         # See above for a description what these meta data attributes mean.
         # Again, if these attributes are note available, you can simply leave this out.
-        self.obs_key_age = x  # (optional, see above, do not provide if .age is provided)
         self.obs_key_assay_sc = x  # (optional, see above, do not provide if .assay_sc is provided)
         self.obs_key_assay_differentiation = x  # (optional, see above, do not provide if .age is assay_differentiation)
         self.obs_key_assay_type_differentiation = x  # (optional, see above, do not provide if .assay_type_differentiation is provided)

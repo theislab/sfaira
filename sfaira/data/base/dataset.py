@@ -73,7 +73,6 @@ class DatasetBase(abc.ABC):
     id: Union[None, str]
     genome: Union[None, str]
 
-    _age: Union[None, str]
     _assay_sc: Union[None, str]
     _assay_differentiation: Union[None, str]
     _assay_type_differentiation: Union[None, str]
@@ -100,7 +99,6 @@ class DatasetBase(abc.ABC):
     _bio_sample: Union[None, str]
     _year: Union[None, int]
 
-    _age_obs_key: Union[None, str]
     _assay_sc_obs_key: Union[None, str]
     _assay_differentiation_obs_key: Union[None, str]
     _assay_type_differentiation_obs_key: Union[None, str]
@@ -178,7 +176,6 @@ class DatasetBase(abc.ABC):
         self.meta_path = meta_path
         self.cache_path = cache_path
 
-        self._age = None
         self._author = None
         self._assay_sc = None
         self._assay_differentiation = None
@@ -205,7 +202,6 @@ class DatasetBase(abc.ABC):
         self._tech_sample = None
         self._year = None
 
-        self._age_obs_key = None
         self._assay_sc_obs_key = None
         self._assay_differentiation_obs_key = None
         self._assay_type_differentiation_obs_key = None
@@ -632,7 +628,6 @@ class DatasetBase(abc.ABC):
         # Set cell-wise or data set-wide attributes (.uns / .obs):
         # These are saved in .uns if they are data set wide to save memory if allow_uns is True.
         for x, y, z, v in (
-            [self.age, self._adata_ids_sfaira.age, self.age_obs_key, self.ontology_container_sfaira.age],
             [self.assay_sc, self._adata_ids_sfaira.assay_sc, self.assay_sc_obs_key, self.ontology_container_sfaira.assay_sc],
             [self.assay_differentiation, self._adata_ids_sfaira.assay_differentiation, self.assay_differentiation_obs_key,
              self.ontology_container_sfaira.assay_differentiation],
@@ -1262,7 +1257,6 @@ class DatasetBase(abc.ABC):
         }, index=range(1))
         # Expand table by variably cell-wise or data set-wise meta data:
         for x in [
-            self._adata_ids_sfaira.age,
             self._adata_ids_sfaira.assay_sc,
             self._adata_ids_sfaira.assay_differentiation,
             self._adata_ids_sfaira.assay_type_differentiation,
@@ -1329,24 +1323,6 @@ class DatasetBase(abc.ABC):
     @additional_annotation_key.setter
     def additional_annotation_key(self, x: str):
         self._additional_annotation_key = x
-
-    @property
-    def age(self) -> Union[None, str]:
-        if self._age is not None:
-            return self._age
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids_sfaira.age in self.meta.columns:
-                return self.meta[self._adata_ids_sfaira.age]
-            else:
-                return None
-
-    @age.setter
-    def age(self, x: str):
-        self.__erasing_protection(attr="age", val_old=self._age, val_new=x)
-        self._value_protection(attr="age", allowed=self.ontology_container_sfaira.age, attempted=x)
-        self._age = x
 
     @property
     def annotated(self) -> Union[bool, None]:
@@ -1742,15 +1718,6 @@ class DatasetBase(abc.ABC):
         self._value_protection(attr="normalization", allowed=self.ontology_container_sfaira.normalization,
                                attempted=x)
         self._normalization = x
-
-    @property
-    def age_obs_key(self) -> str:
-        return self._age_obs_key
-
-    @age_obs_key.setter
-    def age_obs_key(self, x: str):
-        self.__erasing_protection(attr="age_obs_key", val_old=self._age_obs_key, val_new=x)
-        self._age_obs_key = x
 
     @property
     def assay_sc_obs_key(self) -> str:
@@ -2160,7 +2127,6 @@ class DatasetBase(abc.ABC):
 
         :param key: Property to subset by. Options:
 
-            - "age" points to self.age_obs_key
             - "assay_sc" points to self.assay_sc_obs_key
             - "assay_differentiation" points to self.assay_differentiation_obs_key
             - "assay_type_differentiation" points to self.assay_type_differentiation_obs_key

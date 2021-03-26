@@ -11,8 +11,6 @@ dataset_wise:
     normalization: "raw"
     year: 2020
 dataset_or_observation_wise:
-    age:
-    age_obs_key: "Age"
     assay_sc: "sci-RNA-seq"
     assay_sc_obs_key:
     assay_differentiation:

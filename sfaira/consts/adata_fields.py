@@ -10,7 +10,6 @@ class AdataIds:
     """
     Base class of constant field names of anndata.AnnData object entries, such as .uns keys and .obs columns.
     """
-    age: str
     annotated: str
     assay_sc: str
     author: str
@@ -88,7 +87,6 @@ class AdataIdsSfaira(AdataIds):
         self.tech_sample = "tech_sample"
         self.year = "year"
 
-        self.age = "age"
         self.development_stage = "development_stage"
         self.ethnicity = "ethnicity"
         self.sex = "sex"
@@ -107,7 +105,6 @@ class AdataIdsSfaira(AdataIds):
         self.unknown_metadata_identifier = None
 
         self.obs_keys = [
-            "age",
             "assay_sc",
             "assay_differentiation",
             "assay_type_differentiation",
@@ -167,7 +164,6 @@ class AdataIdsCellxgene(AdataIds):
         self.organism = "organism"
         self.year = "year"
 
-        self.age = "age"
         self.author = "contributors"
         self.development_stage = "development_stage"
         self.ethnicity = "ethnicity"
@@ -187,7 +183,6 @@ class AdataIdsCellxgene(AdataIds):
         ]
 
         self.obs_keys = [
-            "age",
             "cell_types_original",
             "cell_ontology_class",
             "cell_ontology_id",

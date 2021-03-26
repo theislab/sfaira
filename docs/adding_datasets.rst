@@ -192,8 +192,6 @@ before it is loaded into memory:
         normalization:
         year:
     dataset_or_observation_wise:
-        age:
-        age_obs_key:
         assay_sc:
         assay_sc_obs_key:
         assay_differentiation:
@@ -268,8 +266,6 @@ In summary, a the dataloader for a mouse lung data set could look like this:
         normalization: "raw"
         year:
     dataset_or_observation_wise:
-        age:
-        age_obs_key:
         assay_sc: "smart-seq2"
         assay_sc_obs_key:
         assay_differentiation:
@@ -510,13 +506,6 @@ The latter, `NAME_obs_key`, indicates that there is a column in `adata.obs` emit
 Note that in both cases the value, or the column values, have to fulfill contraints imposed on the meta data item as
 outlined below.
 
-- age and age_obs_key [string]
-    Use
-        - units of years for humans,
-        - the E{day} nomenclature for mouse embryos
-        - the P{day} nomenclature for young post-natal mice
-        - units of weeks for mice older than one week and
-        - units of days for cell culture samples.
 - assay_sc and assay_sc_obs_key [ontology term]
     Choose a term from https://www.ebi.ac.uk/ols/ontologies/efo/terms?iri=http%3A%2F%2Fwww.ebi.ac.uk%2Fefo%2FEFO_0010183&viewMode=All&siblings=false
 - assay_differentiation and assay_differentiation_obs_key [string]
@@ -536,6 +525,7 @@ outlined below.
 - cell_line and cell_line_obs_key [ontology term]
     Cell line name from the cellosaurus cell line database (https://web.expasy.org/cellosaurus/)
 - developmental_stage and developmental_stage_obs_key [ontology term]
+    Developmental stage (age) of individual sampled.
     Choose from HSAPDV (https://www.ebi.ac.uk/ols/ontologies/hsapdv) for human
     or from MMUSDEV (https://www.ebi.ac.uk/ols/ontologies/mmusdv) for mouse.
 - disease and disease_obs_key [ontology term]

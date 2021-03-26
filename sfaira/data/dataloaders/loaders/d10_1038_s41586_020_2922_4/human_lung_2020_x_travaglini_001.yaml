@@ -15,8 +15,6 @@ dataset_wise:
     normalization: "raw"
     year: 2020
 dataset_or_observation_wise:
-    age:
-    age_obs_key:
     assay_sc:
         droplet_normal_lung_blood_scanpy.20200205.RC4.h5ad: "10X sequencing"
         facs_normal_lung_blood_scanpy.20200205.RC4.h5ad: "Smart-seq2"

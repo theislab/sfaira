@@ -448,7 +448,6 @@ class DatasetGroup:
 
         :param key: Property to subset by. Options:
 
-            - "age" points to self.age_obs_key
             - "assay_sc" points to self.assay_sc_obs_key
             - "assay_differentiation" points to self.assay_differentiation_obs_key
             - "assay_type_differentiation" points to self.assay_type_differentiation_obs_key
@@ -967,7 +966,6 @@ class DatasetSuperGroup:
 
         :param key: Property to subset by. Options:
 
-            - "age" points to self.age_obs_key
             - "assay_sc" points to self.assay_sc_obs_key
             - "assay_differentiation" points to self.assay_differentiation_obs_key
             - "assay_type_differentiation" points to self.assay_type_differentiation_obs_key

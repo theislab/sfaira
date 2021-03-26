@@ -8,7 +8,6 @@ class OntologyContainerSfaira:
     _cellontology_class: OntologyCelltypes
 
     def __init__(self):
-        self.age = None
         self.annotated = OntologyList(terms=[True, False])
         self.author = None
         self.assay_differentiation = None
@@ -17,7 +16,7 @@ class OntologyContainerSfaira:
         self.cell_line = OntologyCellosaurus()
         self.cellontology_class = "v2021-02-01"
         self.cellontology_original = None
-        self.development_stage = OntologyHsapdv()  # TODO allow for other organisms here too.
+        self.development_stage = None  # OntologyHsapdv()  # TODO allow for other organisms here too.
         self.disease = OntologyMondo()
         self.doi = None
         self.ethnicity = None  # OntologyHancestro()
