@@ -19,16 +19,15 @@ class Dataset(DatasetBase):
         self.download_url_meta = f"https://www.ebi.ac.uk/arrayexpress/files/{self.sample_fn.split('.')[0]}/" \
                                  f"{self.sample_fn}.2.zip"
 
+        self.assay_sc = "10X sequencing" if self.sample_fn == "E-MTAB-6678.processed" else "Smart-seq2"
         self.author = "Ventotormo"
-        self.healthy = True
+        self.disease = "healthy"
+        self.doi = "10.1038/s41586-018-0698-6"
         self.normalization = "raw"
         self.organ = "placenta"
         self.organism = "human"
-        self.doi = "10.1038/s41586-018-0698-6"
-        self.assay_sc = "10X sequencing" if self.sample_fn == "E-MTAB-6678.processed" else "Smart-seq2"
-        self.state_exact = "healthy"
-        self.year = 2018
         self.sample_source = "primary_tissue"
+        self.year = 2018
 
         self.var_symbol_col = "names"
         self.var_ensembl_col = "ensembl"

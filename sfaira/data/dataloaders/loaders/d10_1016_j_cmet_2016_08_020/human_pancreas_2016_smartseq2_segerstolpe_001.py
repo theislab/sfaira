@@ -8,6 +8,7 @@ from sfaira.data import DatasetBase
 class Dataset(DatasetBase):
     """
     ToDo: revisit gamma cell missing in CO
+    TODO: move state exact to diesase
     """
 
     def __init__(self, **kwargs):
@@ -28,9 +29,6 @@ class Dataset(DatasetBase):
 
         self.cellontology_original_obs_key = "Characteristics[cell type]"
         self.state_exact_obs_key = "Characteristics[disease]"
-        self.healthy_obs_key = "Characteristics[disease]"
-
-        self.healthy_state_healthy = "normal"
 
         self.set_dataset_id(idx=1)
 

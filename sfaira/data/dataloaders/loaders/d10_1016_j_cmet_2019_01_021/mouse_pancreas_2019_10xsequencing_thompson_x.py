@@ -19,6 +19,9 @@ SAMPLE_FNS = [
 
 
 class Dataset(DatasetBase):
+    """
+    TODO add disease
+    """
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -27,7 +30,6 @@ class Dataset(DatasetBase):
 
         self.author = "Thompson"
         self.doi = "10.1016/j.cmet.2019.01.021"
-        self.healthy = False
         self.normalization = "raw"
         self.organ = "pancreas"
         self.organism = "mouse"

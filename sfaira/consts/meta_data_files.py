@@ -17,7 +17,6 @@ META_DATA_FIELDS = {
     "doi": str,
     "download_url_data": str,
     "download_url_meta": str,
-    "healthy": str,
     "id": str,
     "ncells": int,
     "normalization": str,

@@ -27,7 +27,6 @@ class AdataIds:
     gene_id_ensembl: str
     gene_id_index: str
     gene_id_names: str
-    healthy: str
     id: str
     individual: str
     ncells: str
@@ -76,7 +75,6 @@ class AdataIdsSfaira(AdataIds):
         self.gene_id_ensembl = "ensembl"
         self.gene_id_index = "ensembl"
         self.gene_id_names = "names"
-        self.healthy = "healthy"
         self.id = "id"
         self.individual = "individual"
         self.ncells = "ncells"
@@ -116,7 +114,6 @@ class AdataIdsSfaira(AdataIds):
             "development_stage",
             "disease",
             "ethnicity",
-            "healthy",
             "individual",
             "organ",
             "organism",
@@ -147,7 +144,6 @@ class AdataIdsCellxgene(AdataIds):
     Class of constant field names of anndata.AnnData object entries", such as .uns keys and .obs columns in cellxgene
     objects.
     """
-    disease_state_healthy: str
     accepted_file_names: List[str]
 
     def __init__(self):
@@ -172,7 +168,6 @@ class AdataIdsCellxgene(AdataIds):
         self.tech_sample = "batch"
 
         # selected element entries used for parsing:
-        self.disease_state_healthy = "normal"
         self.author_names = "names"
 
         self.unknown_metadata_identifier = "unknown"

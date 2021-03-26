@@ -85,7 +85,6 @@ class DatasetBase(abc.ABC):
     _download_url_data: Union[Tuple[List[None]], Tuple[List[str]], None]
     _download_url_meta: Union[Tuple[List[None]], Tuple[List[str]], None]
     _ethnicity: Union[None, str]
-    _healthy: Union[None, bool]
     _id: Union[None, str]
     _individual: Union[None, str]
     _ncells: Union[None, int]
@@ -109,8 +108,6 @@ class DatasetBase(abc.ABC):
     _development_stage_obs_key: Union[None, str]
     _disease_obs_key: Union[None, str]
     _ethnicity_obs_key: Union[None, str]
-    _healthy_obs_key: Union[None, str]
-    _healthy_obs_key: Union[None, str]
     _individual: Union[None, str]
     _organ_obs_key: Union[None, str]
     _organism_obs_key: Union[None, str]
@@ -119,8 +116,6 @@ class DatasetBase(abc.ABC):
     _sex_obs_key: Union[None, str]
     _state_exact_obs_key: Union[None, str]
     _tech_sample_obs_key: Union[None, str]
-
-    _healthy_state_healthy: Union[None, str]
 
     _var_symbol_col: Union[None, str]
     _var_ensembl_col: Union[None, str]
@@ -188,7 +183,6 @@ class DatasetBase(abc.ABC):
         self._download_url_data = None
         self._download_url_meta = None
         self._ethnicity = None
-        self._healthy = None
         self._id = None
         self._individual = None
         self._ncells = None
@@ -213,7 +207,7 @@ class DatasetBase(abc.ABC):
         self._development_stage_obs_key = None
         self._disease_obs_key = None
         self._ethnicity_obs_key = None
-        self._healthy_obs_key = None
+
         self._individual_obs_key = None
         self._organ_obs_key = None
         self._organism_obs_key = None
@@ -221,8 +215,6 @@ class DatasetBase(abc.ABC):
         self._sex_obs_key = None
         self._state_exact_obs_key = None
         self._tech_sample_obs_key = None
-
-        self._healthy_state_healthy = None
 
         self._var_symbol_col = None
         self._var_ensembl_col = None
@@ -700,43 +692,6 @@ class DatasetBase(abc.ABC):
                         "_".join([str(xxx) for xxx in xx])
                         for xx in zip(*[self.adata.obs[k].values.tolist() for k in keys_to_use])
                     ]
-            else:
-                assert False, "switch option should not occur"
-        # Load boolean labels:
-        for x, y, z, v, w in (
-            [self.healthy, self._adata_ids_sfaira.healthy, self.healthy_obs_key, self.ontology_container_sfaira.healthy,
-             self.healthy_state_healthy],
-        ):
-            if x is None and z is None and allow_uns:
-                self.adata.uns[y] = None
-            elif x is not None and z is None and allow_uns:
-                # Attribute supplied per data set: Write into .uns.
-                if w is None:
-                    self.adata.uns[y] = x
-                else:
-                    self.adata.uns[y] = x == w
-            elif z is None and not allow_uns:
-                self.adata.obs[y] = x
-            elif z is not None:
-                # Attribute supplied per cell: Write into .obs.
-                # Search for direct match of the sought-after column name or for attribute specific obs key.
-                if z not in self.adata.obs.keys():
-                    # This should not occur in single data set loaders (see warning below) but can occur in
-                    # streamlined data loaders if not all instances of the streamlined data sets have all columns
-                    # in .obs set.
-                    self.adata.uns[y] = None
-                    print(f"WARNING: attribute {y} of data set {self.id} was not found in column {z}")  # debugging
-                else:
-                    # Include flag in .uns that this attribute is in .obs:
-                    self.adata.uns[y] = UNS_STRING_META_IN_OBS
-                    # Remove potential pd.Categorical formatting:
-                    label_y = self.adata.obs[z].values
-                    # Use reference string to establish equality if available:
-                    if w is not None:
-                        label_y = label_y == w
-                    self._value_protection(
-                        attr=y, allowed=v, attempted=np.unique(label_y).tolist())
-                    self.adata.obs[y] = label_y.tolist()
             else:
                 assert False, "switch option should not occur"
         # Set cell-wise attributes (.obs):
@@ -1264,7 +1219,6 @@ class DatasetBase(abc.ABC):
             self._adata_ids_sfaira.cell_line,
             self._adata_ids_sfaira.development_stage,
             self._adata_ids_sfaira.ethnicity,
-            self._adata_ids_sfaira.healthy,
             self._adata_ids_sfaira.individual,
             self._adata_ids_sfaira.organ,
             self._adata_ids_sfaira.organism,
@@ -1605,32 +1559,6 @@ class DatasetBase(abc.ABC):
         self._ethnicity = x
 
     @property
-    def healthy(self) -> Union[None, bool]:
-        if self._healthy is not None:
-            return self._healthy
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids_sfaira.healthy in self.meta.columns:
-                return self.meta[self._adata_ids_sfaira.healthy]
-            else:
-                return None
-
-    @healthy.setter
-    def healthy(self, x: bool):
-        self.__erasing_protection(attr="healthy", val_old=self._healthy, val_new=x)
-        self._healthy = x
-
-    @property
-    def healthy_state_healthy(self) -> str:
-        return self._healthy_state_healthy
-
-    @healthy_state_healthy.setter
-    def healthy_state_healthy(self, x: str):
-        self.__erasing_protection(attr="healthy_state_healthy", val_old=self._healthy_state_healthy, val_new=x)
-        self._healthy_state_healthy = x
-
-    @property
     def id(self) -> str:
         if self._id is not None:
             return self._id
@@ -1816,15 +1744,6 @@ class DatasetBase(abc.ABC):
     def ethnicity_obs_key(self, x: str):
         self.__erasing_protection(attr="ethnicity_obs_key", val_old=self._ethnicity_obs_key, val_new=x)
         self._ethnicity_obs_key = x
-
-    @property
-    def healthy_obs_key(self) -> str:
-        return self._healthy_obs_key
-
-    @healthy_obs_key.setter
-    def healthy_obs_key(self, x: str):
-        self.__erasing_protection(attr="healthy_obs_key", val_old=self._healthy_obs_key, val_new=x)
-        self._healthy_obs_key = x
 
     @property
     def individual_obs_key(self) -> str:
@@ -2134,7 +2053,6 @@ class DatasetBase(abc.ABC):
             - "cellontology_class" points to self.cellontology_class_obs_key
             - "developmental_stage" points to self.developmental_stage_obs_key
             - "ethnicity" points to self.ethnicity_obs_key
-            - "healthy" points to self.healthy_obs_key
             - "organ" points to self.organ_obs_key
             - "organism" points to self.organism_obs_key
             - "sample_source" points to self.sample_source_obs_key

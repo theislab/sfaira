@@ -16,16 +16,16 @@ class Dataset(DatasetBase):
         self.download_url_data = "https://covid19.cog.sanger.ac.uk/baron16.processed.h5ad"
         self.download_url_meta = None
 
+        self.assay_sc = "inDrop"
         self.author = "Baron"
+        self.disease = "healthy"
         self.doi = "10.1016/j.cels.2016.08.011"
-        self.healthy = True
         self.normalization = "raw"
         self.organ = "pancreas"
         self.organism = "human"
-        self.assay_sc = "inDrop"
+        self.sample_source = "primary_tissue"
         self.state_exact = "healthy"
         self.year = 2016
-        self.sample_source = "primary_tissue"
 
         self.var_symbol_col = "index"
         self.cellontology_original_obs_key = "CellType"

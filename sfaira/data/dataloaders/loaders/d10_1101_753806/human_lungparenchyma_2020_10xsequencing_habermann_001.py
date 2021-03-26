@@ -6,6 +6,9 @@ from sfaira.data import DatasetBase
 
 
 class Dataset(DatasetBase):
+    """
+    TODO:  add disease from status and diagnosis fields, healthy is "control"
+    """
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -29,8 +32,6 @@ class Dataset(DatasetBase):
 
         self.cellontology_original_obs_key = "celltype"
         self.state_exact_obs_key = "Diagnosis"
-        self.healthy_obs_key = "Status"
-        self.healthy_state_healthy = "Control"
 
         self.set_dataset_id(idx=1)
 

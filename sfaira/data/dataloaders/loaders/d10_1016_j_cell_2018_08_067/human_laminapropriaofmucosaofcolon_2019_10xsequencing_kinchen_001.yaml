@@ -33,8 +33,6 @@ dataset_or_observation_wise:
     disease_obs_key:
     ethnicity:
     ethnicity_obs_key:
-    healthy:
-    healthy_obs_key:
     individual:
     individual_obs_key:
     organ: "lamina propria of mucosa of colon"
@@ -56,7 +54,5 @@ observation_wise:
 feature_wise:
     var_ensembl_col:
     var_symbol_col: "index"
-misc:
-    healthy_state_healthy: "healthy"
 meta:
     version: "1.0"
