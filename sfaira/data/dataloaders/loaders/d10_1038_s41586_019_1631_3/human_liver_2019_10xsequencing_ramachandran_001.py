@@ -1,4 +1,5 @@
 import os
+import numpy as np
 
 from sfaira.data import DatasetBase
 
@@ -43,5 +44,6 @@ def load(data_dir, **kwargs):
         f"new_obj@meta.data = tissue@meta.data\n"
         f"as.SingleCellExperiment(new_obj)\n"
     )
+    adata.obs["nGene"] = adata.obs["nGene"].astype(np.int32)
 
     return adata
