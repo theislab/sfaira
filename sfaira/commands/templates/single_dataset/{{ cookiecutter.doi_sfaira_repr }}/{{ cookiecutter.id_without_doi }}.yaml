@@ -10,8 +10,6 @@ dataset_wise:
     normalization: "{{ cookiecutter.normalization }}"
     year: "{{ cookiecutter.year }}"
 dataset_or_observation_wise:
-    age:
-    age_obs_key:
     assay: "{{ cookiecutter.assay }}"
     assay_obs_key:
     bio_sample:
@@ -20,8 +18,6 @@ dataset_or_observation_wise:
     development_stage_obs_key:
     ethnicity:
     ethnicity_obs_key:
-    healthy:
-    healthy_obs_key:
     individual:
     individual_obs_key:
     organ: "{{ cookiecutter.organ }}"
