@@ -21,6 +21,9 @@ dataset_or_observation_wise:
     development_stage:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
 {% endfor %}    development_stage_obs_key:
+    disease:
+{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}: "{{ cookiecutter.disease }}"
+{% endfor %}    disease_obs_key:
     ethnicity:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
 {% endfor %}    ethnicity_obs_key:
