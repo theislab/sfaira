@@ -9,7 +9,7 @@ except ImportError:
     sfairae = None
 
 
-def test_load(dir_template: str = "../template_data", doi_sfaira_repr="d10_1016_j_cmet_2019_01_021"):
+def test_load(dir_template: str = "../template_data", doi_sfaira_repr="_d10_1126_science_aba7721"):
     """
     Unit test to assist with data set contribution.
 
