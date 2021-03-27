@@ -12,9 +12,6 @@ dataset_structure:
 {% endfor %}    normalization: "{{ cookiecutter.normalization }}"
     year: "{{ cookiecutter.year }}"
 dataset_or_observation_wise:
-    age:
-{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
-{% endfor %}    age_obs_key:
     assay:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}: "{{ cookiecutter.assay }}"
 {% endfor %}    assay_obs_key:
@@ -24,12 +21,12 @@ dataset_or_observation_wise:
     development_stage:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
 {% endfor %}    development_stage_obs_key:
+    disease:
+{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}: "{{ cookiecutter.disease }}"
+{% endfor %}    disease_obs_key:
     ethnicity:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
 {% endfor %}    ethnicity_obs_key:
-    healthy:
-{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
-{% endfor %}    healthy_obs_key:
     individual:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
 {% endfor %}    individual_obs_key:
