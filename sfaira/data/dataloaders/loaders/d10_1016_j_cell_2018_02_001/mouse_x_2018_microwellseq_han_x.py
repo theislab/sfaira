@@ -343,8 +343,10 @@ def load(data_dir, sample_fn, **kwargs):
         # Subset to annotated cells if any are annotated:
         adata = adata[annotated_cells].copy()
         # Clean nans in data frame to avoid issues with cell type annotation:
-        celltypes.replace(to_replace=np.nan, value="unknown", inplace=True)
-        celltypes.replace(to_replace="nan", value="unknown", inplace=True)
+        celltypes["Annotation"] = [
+            x if x not in [np.nan, "nan"] else "unknown"
+            for x in celltypes["Annotation"].values
+        ]
         adata.obs = celltypes.loc[adata.obs_names, :]
 
     return adata
