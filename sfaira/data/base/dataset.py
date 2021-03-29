@@ -1061,6 +1061,9 @@ class DatasetBase(abc.ABC):
         # ontology.
         if self.cell_ontology_map is not None:
             # This protection blocks progression in the unit test if not deactivated.
+            print(np.unique(labels_original))
+            print(np.unique(labels_mapped))
+            print(self.cell_ontology_map)
             self._value_protection(
                 attr="celltypes",
                 allowed=self.ontology_celltypes,

@@ -347,7 +347,6 @@ def load(data_dir, sample_fn, **kwargs):
             x if x not in [np.nan, "nan"] else "unknown"
             for x in celltypes["Annotation"].values
         ]
-        print(np.unique(celltypes["Annotation"].values))
         adata.obs = celltypes.loc[adata.obs_names, :]
 
     return adata
