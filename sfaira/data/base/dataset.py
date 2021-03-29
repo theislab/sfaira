@@ -1987,7 +1987,12 @@ class DatasetBase(abc.ABC):
         assert x.shape[1] in [2, 3], f"{x.shape} in {self.id}"
         assert x.columns[0] == self._adata_ids_sfaira.classmap_source_key
         assert x.columns[1] == self._adata_ids_sfaira.classmap_target_key
-        nan_vals = np.where(np.isnan(x[self._adata_ids_sfaira.classmap_target_key].values))[0]
+        # Check for weird entries:
+        # nan arises if columns was empty in that row.
+        nan_vals = np.where([
+            False if isinstance(x, str) else (np.isnan(x) or x is None)
+            for x in x[self._adata_ids_sfaira.classmap_target_key].values.tolist()
+        ])[0]
         assert len(nan_vals) == 0, \
             f"Found nan target values for {x[self._adata_ids_sfaira.classmap_target_key].values[nan_vals]}"
         # Transform data frame into a mapping dictionary:
