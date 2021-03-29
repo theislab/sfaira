@@ -1061,9 +1061,6 @@ class DatasetBase(abc.ABC):
         # ontology.
         if self.cell_ontology_map is not None:
             # This protection blocks progression in the unit test if not deactivated.
-            print(np.unique(labels_original))
-            print(np.unique(labels_mapped))
-            print(self.cell_ontology_map)
             self._value_protection(
                 attr="celltypes",
                 allowed=self.ontology_celltypes,
@@ -1990,6 +1987,9 @@ class DatasetBase(abc.ABC):
         assert x.shape[1] in [2, 3], f"{x.shape} in {self.id}"
         assert x.columns[0] == self._adata_ids_sfaira.classmap_source_key
         assert x.columns[1] == self._adata_ids_sfaira.classmap_target_key
+        nan_vals = np.where(np.isnan(x[self._adata_ids_sfaira.classmap_target_key].values))[0]
+        assert len(nan_vals) == 0, \
+            f"Found nan target values for {x[self._adata_ids_sfaira.classmap_target_key].values[nan_vals]}"
         # Transform data frame into a mapping dictionary:
         self._ontology_class_map = dict(list(zip(
             x[self._adata_ids_sfaira.classmap_source_key].values.tolist(),
