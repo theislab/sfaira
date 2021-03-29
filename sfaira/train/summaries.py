@@ -8,8 +8,8 @@ from typing import Union, List
 import os
 
 from sfaira.versions.metadata import CelltypeUniverse
-from sfaira.train.train_model import TargetZoos
 from sfaira.estimators import EstimatorKerasEmbedding
+from sfaira.data import DatasetSuperGroupSfaira
 
 
 def _tp(yhat, ytrue):
@@ -875,14 +875,13 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         )
         sns_tab = sns_tab[sns_tab['organ'] == organ]
 
-        tz = TargetZoos(data_path=datapath)
-        if organism == "human":
-            dataset = tz.data_human[organ]
-        elif organism == "mouse":
-            dataset = tz.data_mouse[organ]
-        else:
-            raise(ValueError(f"Supplied organism {organism} not recognised. Should be one of ('mouse', 'loaders')"))
+        dataset = DatasetSuperGroupSfaira(data_path=datapath)
+        dataset.subset(key="organism", values=[organism])
+        dataset.subset(key="organ", values=[organ])
+        if not dataset.flatten().datasets:
+            raise ValueError(f"No datasets matching organism: {organism} and organ: {organ} found")
         dataset.load()
+        dataset = dataset.flatten()
 
         cell_counts = dataset.obs_concat(keys=['cell_ontology_class'])['cell_ontology_class'].value_counts().to_dict()
         celltypelist = list(cell_counts.keys()).copy()
@@ -1036,14 +1035,13 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         )
         sns_tab = sns_tab[sns_tab['organ'] == organ]
 
-        tz = TargetZoos(data_path=datapath)
-        if organism == "human":
-            dataset = tz.data_human[organ]
-        elif organism == "mouse":
-            dataset = tz.data_mouse[organ]
-        else:
-            raise(ValueError(f"Supplied organism {organism} not recognised. Should be one of ('mouse', 'loaders')"))
+        dataset = DatasetSuperGroupSfaira(data_path=datapath)
+        dataset.subset(key="organism", values=[organism])
+        dataset.subset(key="organ", values=[organ])
+        if not dataset.flatten().datasets:
+            raise ValueError(f"No datasets matching organism: {organism} and organ: {organ} found")
         dataset.load()
+        dataset = dataset.flatten()
 
         cell_counts = dataset.obs_concat(keys=['cell_ontology_class'])['cell_ontology_class'].value_counts().to_dict()
         celltypelist = list(cell_counts.keys()).copy()
@@ -1374,14 +1372,14 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         else:
             print('Compute gradients (1/3): load data')
             # load data
-            tz = TargetZoos(data_path=datapath)
-            if organism == "human":
-                dataset = tz.data_human[organ]
-            elif organism == "mouse":
-                dataset = tz.data_mouse[organ]
-            else:
-                raise (ValueError(f"Supplied organism {organism} not recognised. Should be one of ('mouse', 'loaders')"))
-            dataset.load(annotated_only=True)
+            dataset = DatasetSuperGroupSfaira(data_path=datapath)
+            dataset.subset(key="organism", values=[organism])
+            dataset.subset(key="organ", values=[organ])
+            dataset.subset(key="annotated", values=[True])
+            if not dataset.flatten().datasets:
+                raise ValueError(f"No datasets matching organism: {organism} and organ: {organ} found")
+            dataset.load()
+            dataset = dataset.flatten()
 
             print('Compute gradients (2/3): load embedding')
             # load embedding
