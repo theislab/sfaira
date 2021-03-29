@@ -12,11 +12,12 @@ from sfaira.interface import ModelZooEmbedding, ModelZooCelltype
 
 class TrainModel:
 
-    def __init__(self,
-                 config_path: str,
-                 data_path: str,
-                 meta_path: str,
-                 cache_path: str,
+    def __init__(
+            self,
+            config_path: str,
+            data_path: str,
+            meta_path: str,
+            cache_path: str,
     ):
         # Check if handling backed anndata or base path to directory of raw files:
         if data_path.split(".")[-1] == "h5ad":
