@@ -92,7 +92,7 @@ class TrainModelEmbedding(TrainModel):
             cache_path: str,
             model_path: str,
     ):
-        super(TrainModelCelltype, self).__init__(config_path=config_path, data_path=data_path, meta_path=meta_path, cache_path=cache_path)
+        super(TrainModelEmbedding, self).__init__(config_path=config_path, data_path=data_path, meta_path=meta_path, cache_path=cache_path)
         self.zoo = ModelZooEmbedding(model_lookuptable=None)
         self.estimator = None
         self.model_dir = model_path
