@@ -66,6 +66,7 @@ class AdataIdsSfaira(AdataIds):
         self.cell_types_original = "cell_types_original"
         self.cell_ontology_class = "cell_ontology_class"
         self.cell_ontology_id = "cell_ontology_id"
+        self.default_embedding = "default_embedding"
         self.disease = "disease"
         self.doi = "doi"
         self.dataset = "dataset"
@@ -83,6 +84,7 @@ class AdataIdsSfaira(AdataIds):
         self.organism = "organism"
         self.sample_source = "sample_source"
         self.tech_sample = "tech_sample"
+        self.title = "title"
         self.year = "year"
 
         self.development_stage = "development_stage"
@@ -151,6 +153,7 @@ class AdataIdsCellxgene(AdataIds):
         self.cell_types_original = "free_annotation"
         self.cell_ontology_class = "cell_type"
         self.cell_ontology_id = "cell_type_ontology_term_id"
+        self.default_embedding = "title"
         self.doi = "preprint_doi"
         self.disease = "disease"
         self.gene_id_names = "gene_symbol"
@@ -158,6 +161,7 @@ class AdataIdsCellxgene(AdataIds):
         self.ncells = "ncells"
         self.organ = "tissue"
         self.organism = "organism"
+        self.title = "title"
         self.year = "year"
 
         self.author = "contributors"
@@ -194,7 +198,9 @@ class AdataIdsCellxgene(AdataIds):
         ]
         self.uns_keys = [
             "author",
+            "default_embedding",
             "doi",
             "id",
+            "title",
             "year",
         ]

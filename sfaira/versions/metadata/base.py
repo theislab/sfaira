@@ -654,10 +654,11 @@ class OntologyMondo(OntologyExtendedObo):
             self.graph.remove_node(k)
 
         # add healthy property
-        # Add node "healthy" under root node "MONDO:0000001": "quality"
+        # Add node "healthy" under root node "MONDO:0000001": "quality".
+        # We use a PATO node for this label: PATO:0000461.
         self.add_extension(dict_ontology={
             "MONDO:0000001": {
-                "MONDO:custom_0000001": {"name": "healthy"}
+                "PATO:0000461": {"name": "healthy"}
             },
         })
 

@@ -79,6 +79,7 @@ class DatasetBase(abc.ABC):
     _author: Union[None, str]
     _bio_sample: Union[None, str]
     _cell_line: Union[None, str]
+    _default_embedding: Union[None, str]
     _development_stage: Union[None, str]
     _disease: Union[None, str]
     _doi: Union[None, str]
@@ -95,6 +96,7 @@ class DatasetBase(abc.ABC):
     _source: Union[None, str]
     _sample_source: Union[None, str]
     _state_exact: Union[None, str]
+    _title: Union[None, str]
     _bio_sample: Union[None, str]
     _year: Union[None, int]
 
@@ -796,20 +798,7 @@ class DatasetBase(abc.ABC):
                     self.adata.obs[k] = v
         # Add additional constant description changes based on output format:
         if format == "cellxgene":
-            self.adata.uns["contributors"] = [
-                {"name": x, "institution": "", "email": ""}
-                for x in self.adata.uns["contributors"]
-            ]
-            self.adata.uns["default_embedding"] = ""
             self.adata.uns["layer_descriptions"] = {"X": "raw"}
-            self.adata.uns["project_description"] = ""
-            # TODO project links: Infer link_name somehow?
-            self.adata.uns["project_links"] = [
-                {"link_url": x, "link_name": "nan", "link_type": "RAW_DATA"}
-                for x in self.download_url_data + self.download_url_meta
-            ]
-            self.adata.uns["project_name"] = ""
-            self.adata.uns["title"] = ""
             self.adata.uns["version"] = {
                 "corpora_encoding_version": "0.1.0",
                 "corpora_schema_version": "1.1.0",
@@ -842,8 +831,13 @@ class DatasetBase(abc.ABC):
                 else:
                     self.adata.obs[getattr(adata_fields, k)] = adata_fields.unknown_metadata_identifier
                     self.adata.obs[getattr(adata_fields, k) + "_ontology_term_id"] = ""
-            # Clean up fields that are not accompanied by ontology ID.
+            # Clean up readablefields.
             for k in [
+                "organ",
+                "assay_sc",
+                "disease",
+                "ethnicity",
+                "development_stage",
                 "sex",
             ]:
                 self.adata.obs[getattr(adata_fields, k)] = [
@@ -1352,22 +1346,6 @@ class DatasetBase(abc.ABC):
         self._assay_type_differentiation = x
 
     @property
-    def author(self) -> str:
-        if self._author is not None:
-            return self._author
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is None or self._adata_ids_sfaira.author not in self.meta.columns:
-                raise ValueError("author must be set but was neither set in constructor nor in meta data")
-            return self.meta[self._adata_ids_sfaira.author]
-
-    @author.setter
-    def author(self, x: str):
-        self.__erasing_protection(attr="author", val_old=self._author, val_new=x)
-        self._author = x
-
-    @property
     def bio_sample(self) -> Union[None, str]:
         if self._bio_sample is not None:
             return self._bio_sample
@@ -1410,6 +1388,25 @@ class DatasetBase(abc.ABC):
             return sfaira_path
         else:
             return self.data_dir_base
+
+    @property
+    def default_embedding(self) -> Union[None, str]:
+        if self._default_embedding is not None:
+            return self._default_embedding
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            if self.meta is not None and self._adata_ids_sfaira.default_embedding in self.meta.columns:
+                return self.meta[self._adata_ids_sfaira.default_embedding]
+            else:
+                return None
+
+    @default_embedding.setter
+    def default_embedding(self, x: str):
+        self.__erasing_protection(attr="default_embedding", val_old=self._development_stage, val_new=x)
+        self._value_protection(attr="default_embedding", allowed=self.ontology_container_sfaira.default_embedding,
+                               attempted=x)
+        self._default_embedding = x
 
     @property
     def development_stage(self) -> Union[None, str]:
@@ -2000,6 +1997,51 @@ class DatasetBase(abc.ABC):
             x[self._adata_ids_sfaira.classmap_source_key].values.tolist(),
             x[self._adata_ids_sfaira.classmap_target_key].values.tolist()
         )))
+
+    def __crossref_query(self, k):
+        """
+        Queries cross REST API via package crossref_commons.
+
+        :param k: Key to extract from crossref query container.
+        :return:
+        """
+        from crossref_commons.retrieval import get_entity
+        from crossref_commons.types import EntityType, OutputType
+        try:
+            x = get_entity(self.doi_main, EntityType.PUBLICATION, OutputType.JSON)[k]
+            if x == "author":
+                pass
+            return x
+        except ValueError:
+            return None
+
+    @property
+    def author(self) -> str:
+        if self._author is not None:
+            return self._author
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            if self.meta is None or self._adata_ids_sfaira.author not in self.meta.columns:
+                raise ValueError("author must be set but was neither set in constructor nor in meta data")
+            return self.meta[self._adata_ids_sfaira.author]
+
+    @author.setter
+    def author(self, x: str):
+        self.__erasing_protection(attr="author", val_old=self._author, val_new=x)
+        self._author = x
+
+    @property
+    def title(self):
+        if self._title is not None:
+            return self._title
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            if self.meta is not None and self._adata_ids_sfaira.title in self.meta.columns:
+                return self.meta[self._adata_ids_sfaira.title]
+            else:
+                return self.__crossref_query(k="title")
 
     # Private methods:
 

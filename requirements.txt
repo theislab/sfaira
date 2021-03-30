@@ -1,4 +1,5 @@
 anndata>=0.7
+crossref_commons
 docutils
 fuzzywuzzy
 loompy
