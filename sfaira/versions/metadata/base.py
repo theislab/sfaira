@@ -159,6 +159,10 @@ class OntologyEbi(Ontology):
     def node_names(self) -> List[str]:
         return [v["name"] for k, v in self.nodes.items()]
 
+    def id_from_name(self, x: str) -> str:
+        self.validate_node(x=x)
+        return [k for k, v in self.nodes.items() if v["name"] == x][0]
+
     def map_node_suggestion(self, x: str, include_synonyms: bool = True, n_suggest: int = 10):
         """
         Map free text node name to ontology node names via fuzzy string matching.
