@@ -26,7 +26,7 @@ class OntologyContainerSfaira:
         self.organ = OntologyUberon()
         self.organism = OntologyList(terms=["mouse", "human"])  # TODO introduce NCBItaxon here
         self.sample_source = OntologyList(terms=["primary_tissue", "2d_culture", "3d_culture", "tumor"])
-        self.sex = OntologyList(terms=["female", "male"])
+        self.sex = OntologyList(terms=["female", "male", "mixed", "unknown", "other"])
         self.year = OntologyList(terms=list(range(2000, 3000)))
 
     @property
