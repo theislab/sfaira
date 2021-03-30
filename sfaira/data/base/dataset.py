@@ -613,7 +613,8 @@ class DatasetBase(abc.ABC):
         """
         # Set data set-wide attributes (.uns):
         for k in self._adata_ids_sfaira.uns_keys:
-            self.adata.uns[getattr(self._adata_ids_sfaira, k)] = getattr(self, k)
+            if k not in self.adata.uns.keys():
+                self.adata.uns[getattr(self._adata_ids_sfaira, k)] = getattr(self, k)
 
         # Set cell-wise or data set-wide attributes (.uns / .obs):
         # These are saved in .uns if they are data set wide to save memory if allow_uns is True.
