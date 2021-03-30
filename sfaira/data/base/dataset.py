@@ -864,7 +864,6 @@ class DatasetBase(abc.ABC):
             for k in np.unique(keys_to_delete):
                 if k in self.adata.uns.keys():
                     del self.adata.uns[k]
-        print(self.adata.uns)
 
     def load_tobacked(
             self,
