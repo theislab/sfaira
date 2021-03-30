@@ -153,7 +153,7 @@ class AdataIdsCellxgene(AdataIds):
         self.cell_types_original = "free_annotation"
         self.cell_ontology_class = "cell_type"
         self.cell_ontology_id = "cell_type_ontology_term_id"
-        self.default_embedding = "title"
+        self.default_embedding = "default_embedding"
         self.doi = "preprint_doi"
         self.disease = "disease"
         self.gene_id_names = "gene_symbol"
