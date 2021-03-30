@@ -744,6 +744,8 @@ class DatasetBase(abc.ABC):
             if self.adata.obsp is not None:
                 del self.adata.obsp
         # Only retain target elements in adata.uns:
+        print(adata_fields.uns_keys)
+        print(self.adata.uns.keys())
         uns_new = dict([
             (getattr(adata_fields, k), self.adata.uns[getattr(self._adata_ids_sfaira, k)])
             if getattr(self._adata_ids_sfaira, k) in self.adata.uns.keys() else None
