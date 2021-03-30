@@ -779,7 +779,7 @@ class DatasetSuperGroup:
             # Make sure that concatenate is not used on a None adata object:
             adatas = [x.adata for x in self.dataset_groups if x.adata_ls]
             if len(adatas) > 1:
-                self._adata = adatas[0].adata.concatenate(
+                self._adata = adatas[0].concatenate(
                     *adatas[1:],
                     join="outer",
                     batch_key=self._adata_ids_sfaira.dataset_group
