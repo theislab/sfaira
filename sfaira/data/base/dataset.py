@@ -799,7 +799,8 @@ class DatasetBase(abc.ABC):
         if not clean_obs:
             for k, v in obs_old.items():
                 if k not in self.adata.obs.keys() and \
-                        k not in [getattr(self._adata_ids_sfaira, k) for k in adata_fields.obs_keys]:
+                        k not in [getattr(self._adata_ids_sfaira, k) for k in adata_fields.obs_keys] and \
+                        k not in self._adata_ids_sfaira.obs_keys:
                     self.adata.obs[k] = v
         # Add additional constant description changes based on output format:
         if format == "cellxgene":
