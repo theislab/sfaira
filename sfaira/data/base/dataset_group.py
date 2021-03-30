@@ -303,7 +303,7 @@ class DatasetGroup:
     def adata(self):
         if not self.adata_ls:
             return None
-        self.streamline(format="sfaira", clean=True)
+        self.streamline(format="sfaira", clean_obs=True, clean_var=True, clean_uns=True)
         adata_ls = self.adata_ls
 
         # .var entries are renamed and copied upon concatenation.
