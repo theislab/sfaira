@@ -137,6 +137,7 @@ class AdataIdsSfaira(AdataIds):
             "id",
             "mapped_features",
             "normalization",
+            "title",
             "year",
         ]
 

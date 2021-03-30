@@ -142,7 +142,9 @@ class OntologyEbi(Ontology):
             terms = requests.get(get_url(iri=iri)).json()["_embedded"]["terms"]
             nodes_new = {}
             for x in terms:
-                nodes_new[x["iri"].split("/")[-1]] = {
+                k = x["iri"].split("/")[-1]
+                k = ":".join(k.split("_"))
+                nodes_new[k] = {
                     "name": x["label"],
                     "description": x["description"],
                     "synonyms": x["synonyms"],
