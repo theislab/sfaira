@@ -788,11 +788,14 @@ class DatasetBase(abc.ABC):
                     self.adata.var[k] = v
         # Only retain target columns in adata.obs:
         obs_old = self.adata.obs.copy()
-        self.adata.obs = pd.DataFrame(dict([
-            (getattr(adata_fields, k), self.adata.obs[getattr(self._adata_ids_sfaira, k)])
-            for k in adata_fields.obs_keys
-            if getattr(self._adata_ids_sfaira, k) in self.adata.obs.keys()
-        ]))
+        self.adata.obs = pd.DataFrame(
+            data=dict([
+                (getattr(adata_fields, k), self.adata.obs[getattr(self._adata_ids_sfaira, k)])
+                for k in adata_fields.obs_keys
+                if getattr(self._adata_ids_sfaira, k) in self.adata.obs.keys()
+            ]),
+            index=self.adata.obs.index
+        )
         # Add old columns in if they are not overwritten and object is not cleaned:
         if not clean_obs:
             for k, v in obs_old.items():
