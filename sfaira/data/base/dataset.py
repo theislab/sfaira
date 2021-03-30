@@ -833,7 +833,7 @@ class DatasetBase(abc.ABC):
                 else:
                     self.adata.obs[getattr(adata_fields, k)] = adata_fields.unknown_metadata_identifier
                     self.adata.obs[getattr(adata_fields, k) + "_ontology_term_id"] = ""
-            # Clean up readablefields.
+            # Clean up readable fields.
             for k in [
                 "organ",
                 "assay_sc",
@@ -866,7 +866,6 @@ class DatasetBase(abc.ABC):
             for k in np.unique(keys_to_delete):
                 if k in self.adata.uns.keys():
                     del self.adata.uns[k]
-        print(self.adata.uns)
 
     def load_tobacked(
             self,
