@@ -212,6 +212,6 @@ def load(data_dir, **kwargs):
         "sample", "sub_tissue", "n_genes", "n_counts", "cluster_global", "dev_stage", "donor", "celltype_global",
         "age", "celltype_specific", "cluster_specific", "sex", "assay_sc", "source"]
     adata.obs["organ"] = [sample_organ_dict[x] for x in adata.obs["sample"].values]
-    adata.obs["sex"] = [sex_dict[x] for x in adata.obs["sex"].values]
+    adata.obs["sex"] = [sex_dict[str(x)] for x in adata.obs["sex"].values]
 
     return adata
