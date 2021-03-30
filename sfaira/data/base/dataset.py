@@ -179,6 +179,7 @@ class DatasetBase(abc.ABC):
         self._assay_type_differentiation = None
         self._bio_sample = None
         self._cell_line = None
+        self._default_embedding = None
         self._development_stage = None
         self._disease = None
         self._doi = None
@@ -196,6 +197,7 @@ class DatasetBase(abc.ABC):
         self._source = None
         self._state_exact = None
         self._tech_sample = None
+        self._title = None
         self._year = None
 
         self._assay_sc_obs_key = None
@@ -610,14 +612,8 @@ class DatasetBase(abc.ABC):
         :return:
         """
         # Set data set-wide attributes (.uns):
-        self.adata.uns[self._adata_ids_sfaira.annotated] = self.annotated
-        self.adata.uns[self._adata_ids_sfaira.author] = self.author
-        self.adata.uns[self._adata_ids_sfaira.doi] = self.doi
-        self.adata.uns[self._adata_ids_sfaira.download_url_data] = self.download_url_data
-        self.adata.uns[self._adata_ids_sfaira.download_url_meta] = self.download_url_meta
-        self.adata.uns[self._adata_ids_sfaira.id] = self.id
-        self.adata.uns[self._adata_ids_sfaira.normalization] = self.normalization
-        self.adata.uns[self._adata_ids_sfaira.year] = self.year
+        for k in self._adata_ids_sfaira.uns_keys:
+            self.adata.uns[getattr(self._adata_ids_sfaira, k)] = getattr(self, k)
 
         # Set cell-wise or data set-wide attributes (.uns / .obs):
         # These are saved in .uns if they are data set wide to save memory if allow_uns is True.

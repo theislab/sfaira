@@ -131,6 +131,7 @@ class AdataIdsSfaira(AdataIds):
         self.uns_keys = [
             "annotated",
             "author",
+            "default_embedding",
             "doi",
             "download_url_data",
             "download_url_meta",
