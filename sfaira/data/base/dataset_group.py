@@ -301,10 +301,10 @@ class DatasetGroup:
 
     @property
     def adata(self):
-        if not self.adata_ls:
+        adata_ls = self.adata_ls
+        if not adata_ls:
             return None
         self.streamline(format="sfaira", clean_obs=True, clean_var=True, clean_uns=True)
-        adata_ls = self.adata_ls
 
         # .var entries are renamed and copied upon concatenation.
         # To preserve gene names in .var, the target gene names are copied into var_names and are then copied
@@ -777,7 +777,7 @@ class DatasetSuperGroup:
     def adata(self):
         if self._adata is None:
             # Make sure that concatenate is not used on a None adata object:
-            adatas = [x.adata for x in self.dataset_groups if x.adata is not None]
+            adatas = [x.adata for x in self.dataset_groups if x.adata_ls]
             if len(adatas) > 1:
                 self._adata = adatas[0].adata.concatenate(
                     *adatas[1:],
