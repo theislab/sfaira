@@ -798,7 +798,8 @@ class DatasetBase(abc.ABC):
         # Add old columns in if they are not overwritten and object is not cleaned:
         if not clean_obs:
             for k, v in obs_old.items():
-                if k not in self.adata.obs.keys():
+                if k not in self.adata.obs.keys() and \
+                        k not in [getattr(self._adata_ids_sfaira, k) for k in adata_fields.obs_keys]:
                     self.adata.obs[k] = v
         # Add additional constant description changes based on output format:
         if format == "cellxgene":

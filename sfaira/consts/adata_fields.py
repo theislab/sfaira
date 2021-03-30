@@ -182,6 +182,7 @@ class AdataIdsCellxgene(AdataIds):
         ]
 
         self.obs_keys = [
+            "assay_sc",
             "cell_types_original",
             "cell_ontology_class",
             "cell_ontology_id",
@@ -197,9 +198,7 @@ class AdataIdsCellxgene(AdataIds):
             "gene_id_names",
         ]
         self.uns_keys = [
-            "author",
             "default_embedding",
-            "doi",
             "id",
             "title",
             "year",
