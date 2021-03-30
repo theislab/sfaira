@@ -6,6 +6,7 @@ dataset_structure:
 dataset_wise:
     author:
         - "Kinchen"
+    default_embedding:
     doi:
         - "10.1016/j.cell.2018.08.067"
     download_url_data:

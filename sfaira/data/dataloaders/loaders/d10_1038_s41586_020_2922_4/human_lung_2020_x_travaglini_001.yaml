@@ -6,6 +6,7 @@ dataset_structure:
 dataset_wise:
     author:
         - "Travaglini"
+    default_embedding: "X_tSNE"
     doi:
         - "10.1038/s41586-020-2922-4"
     download_url_data:
