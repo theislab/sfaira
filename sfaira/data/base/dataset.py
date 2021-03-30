@@ -808,6 +808,9 @@ class DatasetBase(abc.ABC):
                 "corpora_encoding_version": "0.1.0",
                 "corpora_schema_version": "1.1.0",
             }
+            for k in ["author", "doi", "download_url_data", "download_url_meta", "id", "year"]:
+                if k in self.adata.uns.keys():
+                    del self.adata.uns[k]
             # TODO port this into organism ontology handling.
             if self.organism == "mouse":
                 self.adata.uns["organism"] = "Mus musculus"

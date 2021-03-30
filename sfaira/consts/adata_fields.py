@@ -201,5 +201,4 @@ class AdataIdsCellxgene(AdataIds):
             "default_embedding",
             "id",
             "title",
-            "year",
         ]
