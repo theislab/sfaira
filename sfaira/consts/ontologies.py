@@ -16,6 +16,7 @@ class OntologyContainerSfaira:
         self.cell_line = OntologyCellosaurus()
         self.cellontology_class = "v2021-02-01"
         self.cellontology_original = None
+        self.default_embedding = None
         self.development_stage = None  # OntologyHsapdv()  # TODO allow for other organisms here too.
         self.disease = OntologyMondo()
         self.doi = None
@@ -27,6 +28,7 @@ class OntologyContainerSfaira:
         self.organism = OntologyList(terms=["mouse", "human"])  # TODO introduce NCBItaxon here
         self.sample_source = OntologyList(terms=["primary_tissue", "2d_culture", "3d_culture", "tumor"])
         self.sex = OntologyList(terms=["female", "male", "mixed", "unknown", "other"])
+        self.title = None
         self.year = OntologyList(terms=list(range(2000, 3000)))
 
     @property
