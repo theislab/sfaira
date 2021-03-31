@@ -21,11 +21,11 @@ processes = int(str(sys.argv[4]))
 # ToDo: not supported yet.
 # TMS d10_1101_661728
 # MCA d10_1016_j_cell_2018_02_001
-# HCL d10_1038_s41586_020_2157_4
+# HCL _d10_1038_s41586_020_2157_4
 studys_separate_csvs = []
 #    "d10_1101_661728",
 #    "d10_1016_j_cell_2018_02_001",
-#    "d10_1038_s41586_020_2157_4"
+#    "_d10_1038_s41586_020_2157_4"
 # ]
 
 dir_sfaira_dataloaders = "/" + str(os.path.join(*str(os.path.dirname(FILE_PATH)).split("/")[:-1]))
