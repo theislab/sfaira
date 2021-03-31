@@ -31,5 +31,5 @@ jobs:
       - name: Create single_dataset template
         run: |
           cd ..
-          echo -e "\n\n\n\n\n\n\n\n\n\n\n\n\n\n" | sfaira create-dataloader
+          echo -e "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" | sfaira create-dataloader
           rm -rf d10_1000_j_journal_2021_01_001/
