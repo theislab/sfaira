@@ -289,6 +289,10 @@ All unused attributes will be removed.
 Next validate the integrity of your dataloader content with ``sfaira lint-dataloader <path to *.yaml>``.
 All tests must pass! If any of the tests fail please revisit your dataloader and add the missing information.
 
+Finally, copy your dataloader into the ``sfaira/dataloaders/loaders/`` folder and your test data into ``sfaira/unit_tests/template_data/``.
+Now you can test your dataloader with ``sfaira test-dataloader <path_to_sfaira> --doi <doi>``. 
+All tests must pass! If any of the tests fail please revisit your dataloader and fix the error.
+
 Map cell type labels to ontology
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
