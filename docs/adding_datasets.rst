@@ -190,6 +190,7 @@ before it is loaded into memory:
         download_url_data:
         download_url_meta:
         normalization:
+        primary_data:
         year:
     dataset_or_observation_wise:
         assay_sc:
@@ -208,8 +209,6 @@ before it is loaded into memory:
         disease_obs_key:
         ethnicity:
         ethnicity_obs_key:
-        healthy:
-        healthy_obs_key:
         individual:
         individual_obs_key:
         organ:
@@ -229,8 +228,6 @@ before it is loaded into memory:
     feature_wise:
         var_ensembl_col:
         var_symbol_col:
-    misc:
-        healthy_state_healthy:
     meta:
         version: "1.0"
 
@@ -264,6 +261,7 @@ In summary, a the dataloader for a mouse lung data set could look like this:
         download_url_data: "my GEO upload"
         download_url_meta:
         normalization: "raw"
+        primary_data:
         year:
     dataset_or_observation_wise:
         assay_sc: "smart-seq2"
@@ -282,8 +280,6 @@ In summary, a the dataloader for a mouse lung data set could look like this:
         disease_obs_key:
         ethnicity:
         ethnicity_obs_key:
-        healthy:
-        healthy_obs_key:
         individual:
         individual_obs_key:
         organ: "lung"
@@ -303,8 +299,6 @@ In summary, a the dataloader for a mouse lung data set could look like this:
     feature_wise:
         var_ensembl_col:
         var_symbol_col:
-    misc:
-        healthy_state_healthy:
     meta:
         version: "1.0"
 
@@ -532,10 +526,6 @@ outlined below.
     Choose from MONDO (https://www.ebi.ac.uk/ols/ontologies/mondo) for human
 - ethnicity and ethnicity_obs_key [ontology term]
     Choose from HANCESTRO (https://www.ebi.ac.uk/ols/ontologies/hancestro)
-- healthy and healthy_obs_key [bool, string]
-    Whether the sample is from healthy tissue.
-    Can also be string, in this case `healthy_state_healthy` is used as an equality check against the values of this
-    column to establish if the observation is from a healthy condition.
 - individual and individual_obs_key [string]
     Column name in `adata.obs` emitted by the `load()` function which reflects the indvidual sampled as a categorical
     variable.
@@ -550,6 +540,8 @@ outlined below.
 - organism and organism_obs_key. {"mouse", "human"}.
     The organism from which the sample originates.
     In the future, we will use NCBITAXON (https://www.ebi.ac.uk/ols/ontologies/ncbitaxon).
+- primary_data [bool]
+    Whether contains cells that were measured in this study (ie this is not a meta study on published data).
 - sample_source and sample_source_obs_key. {"primary_tissue", "2d_culture", "3d_culture", "tumor"}
     Which cellular system the sample was derived from.
 - sex and sex_obs_key. Sex of individual sampled. {"female", "male", None}
@@ -582,11 +574,6 @@ Meta-data which are feature-wise are in the section `feature_wise` in the `.yaml
     Name of the column in `adata.var` emitted by the `load()` which contains gene symbol:
     HGNC for human and MGI for mouse.
     This can also be "index" if the gene symbol are in the index of the `adata.var` data frame.
-
-Meta-data which are misceanous are in the section `misc` in the `.yaml` file:
-
-- healthy_state_healthy [string]
-    See `healthy`, only necessary if `healthy_obs_key` contains non-boolean values.
 
 The meta data on the meta data file do not have to modified by you are automatically controlled are in the section
 `meta` in the `.yaml` file:
