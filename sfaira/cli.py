@@ -104,11 +104,13 @@ def lint_dataloader(path) -> None:
 
 @sfaira_cli.command()
 @click.argument('path', type=click.Path(exists=True))
-def test_dataloader(path) -> None:
+@click.option('--doi', type=str, default=None)
+def test_dataloader(path, doi) -> None:
+    """Runs a dataloader integration test.
+
+    PATH is the absolute path of the root of your sfaira clone.
     """
-    Runs a dataloader unit test.
-    """
-    dataloader_tester = DataloaderTester(path)
+    dataloader_tester = DataloaderTester(path, doi)
     dataloader_tester.test_dataloader()
 
 

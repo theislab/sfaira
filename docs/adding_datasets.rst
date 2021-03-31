@@ -54,7 +54,7 @@ The data loader python file
 
 Each data set, ie a single file or a set of files with similar structures, has its own data loader function and a yaml
 files that describes its meta data.
-Alternatively to the (preffered) yaml file, meta data can be also be described in a constructor of a class in the same python file
+Alternatively to the (preferred) yaml file, meta data can be also be described in a constructor of a class in the same python file
 as the loading function. For a documentation on writing a python class-based dataloader, please see here: https://github.com/theislab/sfaira/blob/dev/docs/adding_dataset_classes.rst
 A detailed description of all meta data is given at the bottom of this page.
 
@@ -265,6 +265,7 @@ The common workflow look as follows:
 
 1. Create a new dataloader with ``sfaira create-dataloader``
 2. Validate the dataloader with ``sfaira lint-dataloader <path>``
+3. Test the dataloader with ``sfaira test-dataloader . --doi <doi>``
 
 When creating a dataloader with ``sfaira create-dataloader`` common information such as
 your name and email are prompted for, followed by dataloader specific attributes such as organ, organism and many more.

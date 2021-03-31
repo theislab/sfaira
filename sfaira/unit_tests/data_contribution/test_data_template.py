@@ -9,7 +9,7 @@ except ImportError:
     sfairae = None
 
 
-def test_load(dir_template: str = "../template_data", doi_sfaira_repr="d10_1016_j_cmet_2019_01_021"):
+def test_load(doi_sfaira_repr, dir_template: str = "../template_data"):
     """
     Unit test to assist with data set contribution.
 
@@ -30,8 +30,6 @@ def test_load(dir_template: str = "../template_data", doi_sfaira_repr="d10_1016_
     (Note that columns are separated by ",")
     You can also manually check maps here: https://www.ebi.ac.uk/ols/ontologies/cl
     5. Run this unit test for a last time to check the cell type maps.
-
-    :return:
     """
     remove_gene_version = True
     match_to_reference = None
