@@ -456,13 +456,13 @@ class DatasetBase(abc.ABC):
 
         # Run data set-specific loading script:
         self._load_cached(load_raw=load_raw, allow_caching=allow_caching)
-        if set_metadata:
-            # Set data-specific meta data in .adata:
-            self._set_metadata_in_adata(allow_uns=True)
         # Set loading hyper-parameter-specific meta data:
         self.adata.uns[self._adata_ids_sfaira.load_raw] = load_raw
         self.adata.uns[self._adata_ids_sfaira.mapped_features] = match_to_reference
         self.adata.uns[self._adata_ids_sfaira.remove_gene_version] = remove_gene_version
+        if set_metadata:
+            # Set data-specific meta data in .adata:
+            self._set_metadata_in_adata(allow_uns=True)
         # Streamline feature space:
         self._convert_and_set_var_names(match_to_reference=match_to_reference)
         self._collapse_genes(remove_gene_version=remove_gene_version)
