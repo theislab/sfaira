@@ -92,6 +92,7 @@ class DatasetBase(abc.ABC):
     _normalization: Union[None, str]
     _organ: Union[None, str]
     _organism: Union[None, str]
+    _primary_data: Union[None, bool]
     _sex: Union[None, str]
     _source: Union[None, str]
     _sample_source: Union[None, str]
@@ -192,6 +193,7 @@ class DatasetBase(abc.ABC):
         self._normalization = None
         self._organ = None
         self._organism = None
+        self._primary_data = None
         self._sample_source = None
         self._sex = None
         self._source = None
@@ -1648,6 +1650,25 @@ class DatasetBase(abc.ABC):
         self._value_protection(attr="normalization", allowed=self.ontology_container_sfaira.normalization,
                                attempted=x)
         self._normalization = x
+
+    @property
+    def primary_data(self) -> Union[None, bool]:
+        if self._primary_data is not None:
+            return self._primary_data
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            if self.meta is not None and self._adata_ids_sfaira.primary_data in self.meta.columns:
+                return self.meta[self._adata_ids_sfaira.primary_data]
+            else:
+                return None
+
+    @primary_data.setter
+    def primary_data(self, x: bool):
+        self.__erasing_protection(attr="primary_data", val_old=self._primary_data, val_new=x)
+        self._value_protection(attr="primary_data", allowed=self.ontology_container_sfaira.primary_data,
+                               attempted=x)
+        self._primary_data = x
 
     @property
     def assay_sc_obs_key(self) -> str:

@@ -82,6 +82,7 @@ class AdataIdsSfaira(AdataIds):
         self.normalization = "normalization"
         self.organ = "organ"
         self.organism = "organism"
+        self.primary_data = "primary_data"
         self.sample_source = "sample_source"
         self.tech_sample = "tech_sample"
         self.title = "title"
@@ -138,6 +139,7 @@ class AdataIdsSfaira(AdataIds):
             "id",
             "mapped_features",
             "normalization",
+            "primary_data",
             "title",
             "year",
         ]

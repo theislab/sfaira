@@ -21,11 +21,11 @@ class OntologyContainerSfaira:
         self.disease = OntologyMondo()
         self.doi = None
         self.ethnicity = None  # OntologyHancestro()
-        self.healthy = OntologyList(terms=[True, False])
         self.id = None
         self.normalization = None
         self.organ = OntologyUberon()
         self.organism = OntologyList(terms=["mouse", "human"])  # TODO introduce NCBItaxon here
+        self.primary_data = OntologyList(terms=[True, False])
         self.sample_source = OntologyList(terms=["primary_tissue", "2d_culture", "3d_culture", "tumor"])
         self.sex = OntologyList(terms=["female", "male", "mixed", "unknown", "other"])
         self.title = None
