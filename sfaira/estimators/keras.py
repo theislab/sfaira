@@ -13,6 +13,7 @@ import os
 import warnings
 from tqdm import tqdm
 
+from sfaira.consts import AdataIdsSfaira
 from sfaira.models import BasicModel
 from sfaira.versions.metadata import CelltypeUniverse
 from sfaira.versions.topology_versions import Topologies
@@ -79,6 +80,7 @@ class EstimatorKeras:
         self.idx_test = None
         self.md5 = weights_md5
         self.cache_path = cache_path
+        self._adata_ids_sfaira = AdataIdsSfaira()
 
     def load_pretrained_weights(self):
         """
@@ -180,7 +182,7 @@ class EstimatorKeras:
 
     def _get_class_dict(
             self,
-            obs_key: str = 'cell_ontology_class'
+            obs_key: str
     ):
         y = self.data.obs[obs_key]
         for i, val in enumerate(y):
@@ -215,12 +217,12 @@ class EstimatorKeras:
 
             # If the feature space is already mapped to the right reference, return the data matrix immediately
             if 'mapped_features' in self.data.uns_keys():
-                if self.data.uns['mapped_features'] == self.topology_container.genome_container.genome:
+                if self.data.uns[self._adata_ids_sfaira.mapped_features] == self.topology_container.genome_container.genome:
                     print(f"found {x.shape[0]} observations")
                     return x
 
             # Compute indices of genes to keep
-            data_ids = self.data.var["ensembl"].values
+            data_ids = self.data.var[self._adata_ids_sfaira.gene_id_ensembl].values
             idx_feature_kept = np.where([x in self.topology_container.genome_container.ensembl for x in data_ids])[0]
             idx_feature_map = np.array([self.topology_container.genome_container.ensembl.index(x)
                                         for x in data_ids[idx_feature_kept]])
@@ -607,7 +609,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             # Prepare data reading according to whether anndata is backed or not:
             if self.data.isbacked:
                 n_features = self.data.X.shape[1]
-                cell_to_class = self._get_class_dict()
+                cell_to_class = self._get_class_dict(obs_key=self._adata_ids_sfaira.cell_ontology_class)
                 output_types, output_shapes = self._get_output_dim(n_features, 'vae')
 
                 def generator():
@@ -615,13 +617,13 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                     for i in idx:
                         x = self.data.X[i, :].toarray().flatten() if sparse else self.data.X[i, :].flatten()
                         sf = self._prepare_sf(x=x)[0]
-                        y = self.data.obs['cell_ontology_class'][i]
+                        y = self.data.obs[self._adata_ids_sfaira.cell_ontology_class][i]
                         yield (x, sf), (x, cell_to_class[y])
             else:
                 x = self._prepare_data_matrix(idx=idx)
                 sf = self._prepare_sf(x=x)
-                cell_to_class = self._get_class_dict()
-                y = self.data.obs['cell_ontology_class'][idx]  # for gradients per celltype in compute_gradients_input()
+                cell_to_class = self._get_class_dict(obs_key=self._adata_ids_sfaira.cell_ontology_class)
+                y = self.data.obs[self._adata_ids_sfaira.cell_ontology_class][idx]  # for gradients per celltype in compute_gradients_input()
                 n_features = x.shape[1]
                 output_types, output_shapes = self._get_output_dim(n_features, 'vae')
 
@@ -813,7 +815,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         )
 
         if per_celltype:
-            cell_to_id = self._get_class_dict(obs_key="cell_ontology_class")
+            cell_to_id = self._get_class_dict(obs_key=self._adata_ids_sfaira.cell_ontology_class)
             cell_names = cell_to_id.keys()
             cell_id = cell_to_id.values()
             id_to_cell = dict([(key, value) for (key, value) in zip(cell_id, cell_names)])
@@ -963,7 +965,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             type_classes = self.ntypes + 1
         y = np.zeros((len(idx), type_classes), dtype="float32")
         celltype_idx = self.model.celltypes_version.map_to_target_leaves(
-            nodes=self.data.obs["cell_ontology_class"].values[idx].tolist(),
+            nodes=self.data.obs[self._adata_ids_sfaira.cell_ontology_class].values[idx].tolist(),
             ontology="custom",
             ontology_id=lookup_ontology,
             return_type="idx"
