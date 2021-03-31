@@ -43,8 +43,6 @@ class DataloaderTester:
 
         os.chdir(f'{self.path}/sfaira/unit_tests/data_contribution')
 
-        # the DOI to enter should be 10.1016.j.cmet.2019.01.021
-
         pytest = Popen(['pytest', 'test_data_template.py', '--doi_sfaira_repr', self.doi_sfaira_repr],
                        universal_newlines=True, shell=False, close_fds=True)
         (pytest_stdout, pytest_stderr) = pytest.communicate()
@@ -53,5 +51,4 @@ class DataloaderTester:
         if pytest_stderr:
             print(pytest_stderr)
 
-        # Switch back to the current working directory
         os.chdir(self.cwd)
