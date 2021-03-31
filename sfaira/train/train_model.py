@@ -98,7 +98,7 @@ class TrainModelEmbedding(TrainModel):
         self.model_dir = model_path
 
     def set_data(self, dataset):
-        dataset.load()
+        dataset.load(match_to_reference=True)
         self.data = dataset.adata
 
     def init_estim(
@@ -173,7 +173,7 @@ class TrainModelCelltype(TrainModel):
 
     def set_data(self, dataset):
         dataset.subset("annotated", True)
-        dataset.load()
+        dataset.load(match_to_reference=True)
         self.data = dataset.adata
 
     def init_estim(

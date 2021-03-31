@@ -757,6 +757,7 @@ class DatasetSuperGroup:
         :param match_to_reference: See .load().
         :param remove_gene_version: See .load().
         :param load_raw: See .load().
+        :param set_metadata: See .load().
         :param allow_caching: See .load().
         :param processes: Processes to parallelise loading over. Uses python multiprocessing if > 1, for loop otherwise.
             Note: parallelises loading of each dataset group, but not across groups.
