@@ -2034,11 +2034,25 @@ class DatasetBase(abc.ABC):
         from crossref_commons.retrieval import get_entity
         from crossref_commons.types import EntityType, OutputType
         try:
-            x = get_entity(self.doi_main, EntityType.PUBLICATION, OutputType.JSON)[k]
-            if x == "author":
+            retry = True
+            attempt_counter = 0
+            while retry:
+                try:
+                    attempt_counter += 1
+                    x = get_entity(self.doi_main, EntityType.PUBLICATION, OutputType.JSON)[k]
+                except ConnectionError as e:
+                    # Terminate trial after 5 attempts with ConnectionError:
+                    if attempt_counter > 5:
+                        raise ConnectionError(e)
+                finally:
+                    retry = False
+            if k == "author":
                 pass
             return x
-        except ValueError:
+        except ValueError as e:
+            return None
+        except ConnectionError as e:
+            print(f"ConnectionError: {e}")
             return None
 
     @property
@@ -2108,10 +2122,7 @@ class DatasetBase(abc.ABC):
             attempted = [attempted]
         for x in attempted:
             if not is_child(query=x, ontology=allowed):
-                if isinstance(allowed, Ontology):
-                    # use node names instead of ontology object to produce a readable error message
-                    allowed = allowed.node_names
-                raise ValueError(f"{x} is not a valid entry for {attr}, choose from: {allowed}")
+                raise ValueError(f"{x} is not a valid entry for {attr}.")
 
     def subset_cells(self, key, values):
         """
