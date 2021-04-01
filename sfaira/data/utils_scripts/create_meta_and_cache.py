@@ -26,15 +26,14 @@ for x in ds.dataset_groups:
                     load_raw=False,
                     allow_caching=True,
                 )
+                # Write meta data, cache.
+                v.write_meta(fn_meta=None, dir_out=path_meta)
+                # Test load from cache.
+                v.load(
+                    remove_gene_version=False,  # speed this up
+                    load_raw=False,
+                    allow_caching=False,
+                )
         except ValueError as e:
             # Do not abort upon ValueErorrs, such as from cell type map bugs.
             raise Warning(f"TO-FIX: ValueError in {k}: {e}")
-        finally:
-            # Write meta data, cache.
-            v.write_meta(fn_meta=None, dir_out=path_meta)
-            # Test load from cache.
-            v.load(
-                remove_gene_version=False,  # speed this up
-                load_raw=False,
-                allow_caching=False,
-            )
