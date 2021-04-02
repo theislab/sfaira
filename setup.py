@@ -23,7 +23,7 @@ def package_files(directory):
 
 
 WD = os.path.dirname(__file__)
-templates = package_files(f'{WD}/sfaira/commands/templates')
+templates = package_files(os.path.join(WD, "sfaira", "commands", "templates"))
 
 setup(
     name='sfaira',

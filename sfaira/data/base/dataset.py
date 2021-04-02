@@ -909,7 +909,8 @@ class DatasetBase(abc.ABC):
         :return:
         """
         try:
-            tab = pd.read_csv(fn, header=0, index_col=None, sep="\t")
+            # Need dtype="str" to force numeric cell type identifiers, e.g. cluster numbers to be in string format.
+            tab = pd.read_csv(fn, header=0, index_col=None, sep="\t", dtype="str")
         except pandas.errors.ParserError as e:
             print(f"{self.id}")
             raise pandas.errors.ParserError(e)
