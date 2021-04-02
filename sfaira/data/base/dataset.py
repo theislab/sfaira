@@ -2034,9 +2034,9 @@ class DatasetBase(abc.ABC):
         from crossref_commons.retrieval import get_entity
         from crossref_commons.types import EntityType, OutputType
         try:
-            retry = True
             attempt_counter = 0
-            while retry:
+            while True:
+                x = None
                 try:
                     attempt_counter += 1
                     x = get_entity(self.doi_main, EntityType.PUBLICATION, OutputType.JSON)[k]
@@ -2045,10 +2045,9 @@ class DatasetBase(abc.ABC):
                     if attempt_counter > 5:
                         raise ConnectionError(e)
                 finally:
-                    retry = False
-            if k == "author":
-                pass
-            return x
+                    if k == "author":
+                        pass
+                    return x
         except ValueError as e:
             return None
         except ConnectionError as e:
