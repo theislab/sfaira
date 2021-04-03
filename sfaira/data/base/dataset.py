@@ -2121,7 +2121,7 @@ class DatasetBase(abc.ABC):
             attempted = [attempted]
         for x in attempted:
             if not is_child(query=x, ontology=allowed):
-                raise ValueError(f"{x} is not a valid entry for {attr}.")
+                raise ValueError(f"'{x}' is not a valid entry for {attr}.")
 
     def subset_cells(self, key, values):
         """

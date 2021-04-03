@@ -211,6 +211,11 @@ def load(data_dir, **kwargs):
     adata.obs.columns = [
         "sample", "sub_tissue", "n_genes", "n_counts", "cluster_global", "dev_stage", "donor", "celltype_global",
         "age", "celltype_specific", "cluster_specific", "sex", "assay_sc", "source"]
+    # Remove new line characters from cell type:
+    adata.obs["celltype_specific"] = [
+        x.replace("\n", "")
+        for x in adata.obs["celltype_specific"].values
+    ]
     adata.obs["organ"] = [sample_organ_dict[x] for x in adata.obs["sample"].values]
     adata.obs["sex"] = [sex_dict[str(x)] for x in adata.obs["sex"].values]
 
