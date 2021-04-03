@@ -34,6 +34,7 @@ for x in ds.dataset_groups:
                 load_raw=False,
                 allow_caching=False,
             )
+            v.clear()
         except ValueError as e:
-            # Do not abort upon ValueErorrs, such as from cell type map bugs.
+            # Do not abort upon ValueErrors, such as from cell type map bugs.
             raise Warning(f"TO-FIX: ValueError in {k}: {e}")
