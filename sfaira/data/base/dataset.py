@@ -2050,7 +2050,7 @@ class DatasetBase(abc.ABC):
                     if k == "author":
                         pass
                     return x
-        except ValueError as e:
+        except ValueError:
             return None
         except ConnectionError as e:
             print(f"ConnectionError: {e}")
