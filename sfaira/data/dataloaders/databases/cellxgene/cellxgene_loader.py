@@ -23,27 +23,21 @@ class Dataset(DatasetBase):
             **kwargs
     ):
         super().__init__(data_path=data_path, meta_path=meta_path, **kwargs)
-        self._self._adata_ids_cellxgene = AdataIdsCellxgene()
+        self._adata_ids_cellxgene = AdataIdsCellxgene()
         self.fn = fn
 
-        self.obs_key_cellontology_class = self._adata_ids_cellxgene.cell_ontology_class
-        self.obs_key_cellontology_id = self._adata_ids_cellxgene.cell_ontology_id
-        self.obs_key_cellontology_original = self._adata_ids_cellxgene.cell_types_original
-        self.obs_key_dev_stage = self._adata_ids_cellxgene.development_stage
-        self.obs_key_ethnicity = self._adata_ids_cellxgene.ethnicity
-        self.obs_key_healthy = self._adata_ids_cellxgene.healthy
-        self.obs_key_sex = self._adata_ids_cellxgene.sex
-        self.obs_key_organism = self._adata_ids_cellxgene.organism
-        self.obs_key_state_exact = self._adata_ids_cellxgene.state_exact
-
-        self.healthy_state_healthy = self._adata_ids_cellxgene.disease_state_healthy
+        self.cellontology_class_obs_key = self._adata_ids_cellxgene.cell_ontology_class
+        self.cellontology_id_obs_key = self._adata_ids_cellxgene.cell_ontology_id
+        self.cellontology_original_obs_key = self._adata_ids_cellxgene.cell_types_original
+        self.development_stage_obs_key = self._adata_ids_cellxgene.development_stage
+        self.disease_obs_key = self._adata_ids_cellxgene.disease
+        self.ethnicity_obs_key = self._adata_ids_cellxgene.ethnicity
+        self.sex_obs_key = self._adata_ids_cellxgene.sex
+        self.organ_obs_key = self._adata_ids_cellxgene.organism
+        self.state_exact_obs_key = self._adata_ids_cellxgene.state_exact
 
         self.var_ensembl_col = self._adata_ids_cellxgene.gene_id_ensembl
         self.var_symbol_col = self._adata_ids_cellxgene.gene_id_names
-
-        self.class_maps = {
-            "0": {},
-        }
 
     def _load(self):
         """
