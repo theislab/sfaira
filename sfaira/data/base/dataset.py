@@ -705,9 +705,10 @@ class DatasetBase(abc.ABC):
     def streamline(
             self,
             format: str = "sfaira",
+            allow_uns_sfaira: bool = True,
             clean_obs: bool = True,
             clean_var: bool = True,
-            clean_uns: bool = True,
+            clean_uns: bool = True
     ):
         """
         Streamline the adata instance to output format.
@@ -718,6 +719,7 @@ class DatasetBase(abc.ABC):
 
             - "sfaira"
             - "cellxgene"
+        :param allow_uns_sfaira: When using sfaira format: Whether to keep metadata in uns or move it to obs instead.
         :param clean_obs: Whether to delete non-streamlined fields in .obs, .obsm and .obsp.
         :param clean_var: Whether to delete non-streamlined fields in .var, .varm and .varp.
         :param clean_uns: Whether to delete non-streamlined fields in .uns.
@@ -725,7 +727,7 @@ class DatasetBase(abc.ABC):
         """
         if format == "sfaira":
             adata_fields = self._adata_ids_sfaira
-            self._set_metadata_in_adata(allow_uns=True)
+            self._set_metadata_in_adata(allow_uns=allow_uns_sfaira)
         elif format == "cellxgene":
             from sfaira.consts import AdataIdsCellxgene
             adata_fields = AdataIdsCellxgene()

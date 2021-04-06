@@ -26,12 +26,7 @@ for x in dois.split(","):
         allow_caching=True,
         set_metadata=False,
     )
-    ds.streamline(
-        format=schema.lower(),
-        clean_obs=False,
-        clean_var=True,
-        clean_uns=False,
-    )
+    ds.streamline(format=schema.lower(), allow_uns_sfaira=True, clean_obs=False, clean_var=True, clean_uns=False)
     assert len(ds.dataset_groups) == 1, len(ds.dataset_groups)
     dsg = ds.dataset_groups[0]
     for k, v in dsg.datasets.items():
