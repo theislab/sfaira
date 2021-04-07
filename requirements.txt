@@ -21,6 +21,7 @@ requests
 versioneer
 h5py
 xlrd==1.*
+zarr
 rich>=9.10.0
 click>=7.1.2
 questionary>=1.8.1

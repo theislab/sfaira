@@ -27,7 +27,8 @@ def map_fn(inputs):
     :param inputs:
     :return: None if function ran, error report otherwise
     """
-    ds, remove_gene_version, match_to_reference, load_raw, allow_caching, set_metadata, func, kwargs_func = inputs
+    ds, remove_gene_version, match_to_reference, load_raw, allow_caching, set_metadata, kwargs, func, kwargs_func = \
+        inputs
     try:
         ds.load(
             remove_gene_version=remove_gene_version,
@@ -35,6 +36,7 @@ def map_fn(inputs):
             load_raw=load_raw,
             allow_caching=allow_caching,
             set_metadata=set_metadata,
+            **kwargs
         )
         if func is not None:
             x = func(ds, **kwargs_func)
@@ -90,6 +92,7 @@ class DatasetGroup:
             processes: int = 1,
             func=None,
             kwargs_func: Union[None, dict] = None,
+            **kwargs
     ):
         """
         Load all datasets in group (option for temporary loading).
@@ -115,6 +118,7 @@ class DatasetGroup:
             load_raw,
             allow_caching,
             set_metadata,
+            kwargs,
             func,
             kwargs_func
         ]
@@ -149,10 +153,9 @@ class DatasetGroup:
     def streamline(
             self,
             format: str = "sfaira",
-            allow_uns_sfaira: bool = False,
             clean_obs: bool = True,
             clean_var: bool = True,
-            clean_uns: bool = True
+            clean_uns: bool = True,
     ):
         """
         Streamline the adata instance in each data set to output format.
@@ -163,15 +166,18 @@ class DatasetGroup:
 
             - "sfaira"
             - "cellxgene"
-        :param allow_uns_sfaira: When using sfaira format: Whether to keep metadata in uns or move it to obs instead.
         :param clean_obs: Whether to delete non-streamlined fields in .obs, .obsm and .obsp.
         :param clean_var: Whether to delete non-streamlined fields in .var, .varm and .varp.
         :param clean_uns: Whether to delete non-streamlined fields in .uns.
         :return:
         """
         for x in self.ids:
-            self.datasets[x].streamline(format=format, allow_uns_sfaira=allow_uns_sfaira, clean_obs=clean_obs,
-                                        clean_var=clean_var, clean_uns=clean_uns)
+            self.datasets[x].streamline(
+                format=format,
+                clean_obs=clean_obs,
+                clean_var=clean_var,
+                clean_uns=clean_uns,
+            )
 
     def fragment(self) -> Dict[str, anndata.AnnData]:
         """
@@ -204,7 +210,32 @@ class DatasetGroup:
                 datasets_new[k + "_fragment" + str(i)] = v.adata[x, :]
         return datasets_new
 
-    def load_tobacked(
+    def write_distributed_store(
+            self,
+            dir_cache: Union[str, os.PathLike],
+            store: str = "backed",
+            chunks: Union[int, None] = None,
+    ):
+        """
+        Write data set into a format that allows distributed access to data set on disk.
+
+        Writes every data set contained to a zarr-backed h5ad.
+        Load data set and streamline before calling this method.
+
+        :param dir_cache: Directory to write cache in.
+        :param store: Disk format for objects in cache:
+
+            - "h5ad": Allows access via backed .h5ad.
+                On disk data will not be compressed as .h5ad supports sparse data with is a good compression that gives
+                fast row-wise access if the files are csr.
+            - "zarr": Allows access as zarr array.
+        :param chunks: Chunk size of zarr array, see anndata.AnnData.write_zarr documentation.
+            Only relevant for store=="zarr".
+        """
+        for _, v in self.datasets.items():
+            v.write_distributed_store(dir_cache=dir_cache, store=store, chunks=chunks)
+
+    def write_backed(
             self,
             adata_backed: anndata.AnnData,
             genome: str,
@@ -233,7 +264,7 @@ class DatasetGroup:
             # if this is for celltype prediction, only load the data with have celltype annotation
             try:
                 if self.datasets[x].annotated or not annotated_only:
-                    self.datasets[x].load_tobacked(
+                    self.datasets[x].write_backed(
                         adata_backed=adata_backed,
                         genome=genome,
                         idx=idx[i],
@@ -302,7 +333,7 @@ class DatasetGroup:
         adata_ls = self.adata_ls
         if not adata_ls:
             return None
-        self.streamline(format="sfaira", allow_uns_sfaira=False, clean_obs=True, clean_var=True, clean_uns=True)
+        self.streamline(format="sfaira", clean_obs=True, clean_var=True, clean_uns=True)
 
         # .var entries are renamed and copied upon concatenation.
         # To preserve gene names in .var, the target gene names are copied into var_names and are then copied
@@ -488,6 +519,27 @@ class DatasetGroup:
         """
         for k, v in x.items():
             self.datasets[k].additional_annotation_key = v
+
+    @property
+    def doi(self) -> List[str]:
+        """
+        Propagates DOI annotation from contained datasets.
+        """
+        dois = []
+        for _, v in self.datasets.items():
+            vdoi = v.doi
+            if isinstance(vdoi, str):
+                vdoi = [vdoi]
+            dois.extend(vdoi)
+        return np.sort(np.unique(vdoi)).tolist()
+
+    @property
+    def supplier(self) -> List[str]:
+        """
+        Propagates supplier annotation from contained datasets.
+        """
+        supplier = [v.supplier for _, v in self.datasets.items()]
+        return np.sort(np.unique(supplier)).tolist()
 
 
 class DatasetGroupDirectoryOriented(DatasetGroup):
@@ -747,6 +799,7 @@ class DatasetSuperGroup:
             set_metadata: bool = True,
             allow_caching: bool = True,
             processes: int = 1,
+            **kwargs
     ):
         """
         Loads data set human into anndata object.
@@ -770,6 +823,7 @@ class DatasetSuperGroup:
                 allow_caching=allow_caching,
                 set_metadata=set_metadata,
                 processes=processes,
+                **kwargs
             )
 
     @property
@@ -789,7 +843,33 @@ class DatasetSuperGroup:
                 warnings.warn("no anndata instances to concatenate")
         return self._adata
 
-    def load_tobacked(
+    def write_distributed_store(
+            self,
+            dir_cache: Union[str, os.PathLike],
+            store: str = "backed",
+            chunks: Union[int, None] = None,
+    ):
+        """
+        Write data set into a format that allows distributed access to data set on disk.
+
+        Writes every data set contained to a zarr-backed h5ad.
+        The group structure of the super group is lost during this process.
+        Load data set and streamline before calling this method.
+
+        :param dir_cache: Directory to write cache in.
+        :param store: Disk format for objects in cache:
+
+            - "h5ad": Allows access via backed .h5ad.
+                On disk data will not be compressed as .h5ad supports sparse data with is a good compression that gives
+                fast row-wise access if the files are csr.
+            - "zarr": Allows access as zarr array.
+        :param chunks: Chunk size of zarr array, see anndata.AnnData.write_zarr documentation.
+            Only relevant for store=="zarr".
+        """
+        for x in self.dataset_groups:
+            x.write_distributed_store(dir_cache=dir_cache, store=store, chunks=chunks)
+
+    def write_backed(
             self,
             fn_backed: PathLike,
             genome: str,
@@ -801,6 +881,8 @@ class DatasetSuperGroup:
     ):
         """
         Loads data set human into backed anndata object.
+
+        TODO replace streamlining in here by required call to .streamline() before.
 
         Example usage:
 
@@ -885,7 +967,7 @@ class DatasetSuperGroup:
         print(self.ncells_bydataset(annotated_only=annotated_only))
         print([[len(x) for x in xx] for xx in idx_ls])
         for i, x in enumerate(self.dataset_groups):
-            x.load_tobacked(
+            x.write_backed(
                 adata_backed=self.adata,
                 genome=genome,
                 idx=idx_ls[i],
@@ -913,10 +995,9 @@ class DatasetSuperGroup:
     def streamline(
             self,
             format: str = "sfaira",
-            allow_uns_sfaira: bool = False,
             clean_obs: bool = True,
             clean_var: bool = True,
-            clean_uns: bool = True
+            clean_uns: bool = True,
     ):
         """
         Streamline the adata instance in each group and each data set to output format.
@@ -927,7 +1008,6 @@ class DatasetSuperGroup:
 
             - "sfaira"
             - "cellxgene"
-        :param allow_uns_sfaira: When using sfaira format: Whether to keep metadata in uns or move it to obs instead.
         :param clean_obs: Whether to delete non-streamlined fields in .obs, .obsm and .obsp.
         :param clean_var: Whether to delete non-streamlined fields in .var, .varm and .varp.
         :param clean_uns: Whether to delete non-streamlined fields in .uns.
@@ -935,7 +1015,12 @@ class DatasetSuperGroup:
         """
         for x in self.dataset_groups:
             for xx in x.ids:
-                x.datasets[xx].streamline(format=format, allow_uns_sfaira=allow_uns_sfaira, clean_obs=clean_obs, clean_var=clean_var, clean_uns=clean_uns)
+                x.datasets[xx].streamline(
+                    format=format,
+                    clean_obs=clean_obs,
+                    clean_var=clean_var,
+                    clean_uns=clean_uns,
+                )
 
     def subset(self, key, values):
         """
@@ -951,6 +1036,65 @@ class DatasetSuperGroup:
         for x in self.dataset_groups:
             x.subset(key=key, values=values)
         self.dataset_groups = [x for x in self.dataset_groups if x.datasets]  # Delete empty DatasetGroups
+
+    def remove_duplicates(
+            self,
+            supplier_hierarchy: str = "cellxgene,sfaira"
+    ):
+        """
+        Remove duplicate data loaders from super group, e.g. loaders that map to the same DOI.
+
+        Any DOI match is removed (pre-print or journal publication).
+        Data sets without DOI are removed, too.
+        Loaders are kept in the hierarchy indicated in supplier_hierarchy.
+        Requires a super group with homogenous suppliers across DatasetGroups, throws an error otherwise.
+        This is given for sfaira maintained libraries but may not be the case if custom assembled DatasetGroups are
+        used.
+
+        :param supplier_hierarchy: Hierarchy to resolve duplications by.
+            Comma separated string that indicates which data provider takes priority.
+            Choose "cellxgene,sfaira" to prioritise use of data sets downloaded from cellxgene.
+            Choose "sfaira,cellxgene" to prioritise use of raw data processing pipelines locally.
+
+                - cellxgene: cellxgene downloads
+                - sfaira: local raw file processing
+        :return:
+        """
+        # Build a pairing of provider and DOI:
+        report_list = []
+        idx_tokeep = []
+        supplier_hierarchy = supplier_hierarchy.split(",")
+        for i, (x, y) in enumerate([(xx.supplier, xx.doi) for xx in self.dataset_groups]):
+            if len(x) > 1:
+                raise ValueError(f"found more than one supplier for DOI {str(y)}")
+            else:
+                x = x[0]
+                if x not in supplier_hierarchy:
+                    raise ValueError(f"could not associate supplier {x} with hierarchy {supplier_hierarchy} in "
+                                     f"data set {y}")
+                if len(report_list) > 0:
+                    matched_idx = np.where([
+                        np.any([
+                            zz in y
+                            for zz in z[1]
+                        ])
+                        for z in report_list
+                    ])[0]
+                    assert len(matched_idx) < 1, f"more matches than expected for {(x, y)}"
+                else:
+                    matched_idx = []
+                if len(matched_idx) > 0:
+                    # Establish which entry takes priority
+                    supplier_old = report_list[matched_idx[0]][0]
+                    priority = supplier_hierarchy.index(supplier_old) > supplier_hierarchy.index(x)
+                    print(f"removing duplicate data set {y} from supplier: {supplier_old if priority else x}")
+                    if priority:
+                        idx_tokeep.append(i)
+                        del idx_tokeep[matched_idx[0]]
+                else:
+                    report_list.append([x, y])
+                    idx_tokeep.append(i)
+        self.dataset_groups = [self.dataset_groups[i] for i in idx_tokeep]
 
     def subset_cells(self, key, values: Union[str, List[str]]):
         """
