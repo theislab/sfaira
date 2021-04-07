@@ -13,6 +13,7 @@ class OntologyContainerSfaira:
         self.assay_differentiation = None
         self.assay_sc = OntologySinglecellLibraryConstruction()
         self.assay_type_differentiation = OntologyList(terms=["guided", "unguided"])
+        self.bio_sample = None
         self.cell_line = OntologyCellosaurus()
         self.cellontology_class = "v2021-02-01"
         self.cellontology_original = None
@@ -22,12 +23,14 @@ class OntologyContainerSfaira:
         self.doi = None
         self.ethnicity = None  # OntologyHancestro()
         self.id = None
+        self.individual = None
         self.normalization = None
         self.organ = OntologyUberon()
         self.organism = OntologyList(terms=["mouse", "human"])  # TODO introduce NCBItaxon here
         self.primary_data = OntologyList(terms=[True, False])
         self.sample_source = OntologyList(terms=["primary_tissue", "2d_culture", "3d_culture", "tumor"])
         self.sex = OntologyList(terms=["female", "male", "mixed", "unknown", "other"])
+        self.tech_sample = None
         self.title = None
         self.year = OntologyList(terms=list(range(2000, 3000)))
 
