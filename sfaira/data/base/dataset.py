@@ -620,11 +620,13 @@ class DatasetBase(abc.ABC):
                     self.adata.uns[getattr(self._adata_ids_sfaira, k)] = getattr(self, k)
         else:
             for k in self._adata_ids_sfaira.uns_keys:
-                if k not in self.adata.obs.keys():
+                if k in self.adata.uns.keys():
+                    val = self.adata.uns[k]
+                else:
                     val = getattr(self, k)
-                    while hasattr(val, '__len__') and not isinstance(val, str) and len(val) == 1:  # unpack nested lists
-                        val = val[0]
-                    self.adata.obs[getattr(self._adata_ids_sfaira, k)] = [val for i in range(len(self.adata.obs))]
+                while hasattr(val, '__len__') and not isinstance(val, str) and len(val) == 1:  # unpack nested lists
+                    val = val[0]
+                self.adata.obs[getattr(self._adata_ids_sfaira, k)] = [val for i in range(len(self.adata.obs))]
 
         # Set cell-wise or data set-wide attributes (.uns / .obs):
         # These are saved in .uns if they are data set wide to save memory if allow_uns is True.
