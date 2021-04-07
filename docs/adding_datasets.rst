@@ -172,7 +172,7 @@ The data loader python file
 
 Each data set, ie a single file or a set of files with similar structures, has its own data loader function and a yaml
 files that describes its meta data.
-Alternatively to the (preffered) yaml file, meta data can be also be described in a constructor of a class in the same python file
+Alternatively to the (preferred) yaml file, meta data can be also be described in a constructor of a class in the same python file
 as the loading function. For a documentation on writing a python class-based dataloader, please see here: https://github.com/theislab/sfaira/blob/dev/docs/adding_dataset_classes.rst
 A detailed description of all meta data is given at the bottom of this page.
 
@@ -418,6 +418,74 @@ either `Dataset`, `DatasetGroup` or `DatasetSuperGroup` to define data sets
 for which you want to load additional annotation and which additional you want to load for these.
 See also the docstrings of these functions for further details on how these can be set.
 
+
+Creating dataloaders with the commandline interface
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+sfaira features an interactive way of creating, formatting and testing dataloaders.
+The common workflow look as follows:
+
+1. Create a new dataloader with ``sfaira create-dataloader``
+2. Validate the dataloader with ``sfaira lint-dataloader <path>``
+3. Test the dataloader with ``sfaira test-dataloader . --doi <doi> --test-data <folder_above_test_data>``
+
+When creating a dataloader with ``sfaira create-dataloader`` common information such as
+your name and email are prompted for, followed by dataloader specific attributes such as organ, organism and many more.
+If the requested information is not available simply hit enter and continue until done. If you have mixed organ or organism
+data you will have to resolve this manually later. Your dataloader template will be created in your current working directory
+in a folder resembling your doi.
+
+The created files are:
+
+.. code-block::
+
+    ├── extra_description.txt <- Optional extra description file
+    ├── __init__.py
+    ├── NA_NA_2021_NA_Einstein_001.py <- Contains the load function to load the data
+    ├── NA_NA_2021_NA_Einstein_001.yaml <- Specifies all data loader data
+
+Now simply fill in all missing properties in your dataloader scripts and yaml file.
+When done optionally run ``sfaira clean-dataloader <path to *.yaml>`` on the just filled out dataloader yaml file.
+All unused attributes will be removed.
+
+Next validate the integrity of your dataloader content with ``sfaira lint-dataloader <path to *.yaml>``.
+All tests must pass! If any of the tests fail please revisit your dataloader and add the missing information.
+
+Finally, copy your dataloader into the ``sfaira/dataloaders/loaders/`` folder.
+Now you can test your dataloader with ``sfaira test-dataloader <path_to_sfaira> --doi <doi> --test-data <template_data_folder>``.
+Note that sfaira expects a folder structure for the test data such as:
+
+.. code-block::
+
+    ├── template_data
+    │   └── d10_1016_j_cmet_2019_01_021
+    │       ├── GSE117770_RAW.tar
+    │       ├── GSM3308545_NOD_08w_A_annotation.csv
+    │       ├── GSM3308547_NOD_08w_C_annotation.csv
+    │       ├── GSM3308548_NOD_14w_A_annotation.csv
+    │       ├── GSM3308549_NOD_14w_B_annotation.csv
+    │       ├── GSM3308550_NOD_14w_C_annotation.csv
+    │       ├── GSM3308551_NOD_16w_A_annotation.csv
+    │       ├── GSM3308552_NOD_16w_B_annotation.csv
+    │       └── GSM3308553_NOD_16w_C_annotation.csv
+
+Pass the path to the template_data folder, not the doi. Sfaira will use this path to cache further data for speedups.
+All tests must pass! If any of the tests fail please revisit your dataloader and fix the error.
+
+Map cell type labels to ontology
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The entries in `self.cellontology_original_obs_key` are free text but are mapped to an ontology via a .tsv file with
+the same name and directory as the python file in which the data loader is located.
+This .tsv contains two columns with one row for each unique cell type label.
+The free text identifiers in the first column "source",
+and the corresponding ontology term in the second column "target".
+You can write this file entirely from scratch.
+Sfaira also allows you to generate a first guess of this file using fuzzy string matching
+which is automatically executed when you run the template data loader unit test for the first time with you new loader.
+Conflicts are not resolved in this first guess and you have to manually decide which free text field corresponds to which
+ontology term in the case of conflicts.
+Still, this first guess usually drastically speeds up this annotation harmonization.
 
 Cell type ontology management
 -----------------------------

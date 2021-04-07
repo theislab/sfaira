@@ -87,7 +87,7 @@ def test_dsgs_streamline(out_format: str, clean_obs: bool, clean_var: bool, clea
     ds.subset(key="organism", values=["mouse"])
     ds.subset(key="organ", values=["lung"])
     ds.load(remove_gene_version=True)
-    ds.streamline(format=out_format, clean_obs=clean_obs, clean_var=clean_var, clean_uns=clean_uns)
+    ds.streamline(format=out_format, allow_uns_sfaira=False, clean_obs=clean_obs, clean_var=clean_var, clean_uns=clean_uns)
 
 
 def test_dsg_load_backed_dense(genome="Mus_musculus_GRCm38_97"):

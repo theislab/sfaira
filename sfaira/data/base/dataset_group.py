@@ -149,9 +149,10 @@ class DatasetGroup:
     def streamline(
             self,
             format: str = "sfaira",
+            allow_uns_sfaira: bool = False,
             clean_obs: bool = True,
             clean_var: bool = True,
-            clean_uns: bool = True,
+            clean_uns: bool = True
     ):
         """
         Streamline the adata instance in each data set to output format.
@@ -162,18 +163,15 @@ class DatasetGroup:
 
             - "sfaira"
             - "cellxgene"
+        :param allow_uns_sfaira: When using sfaira format: Whether to keep metadata in uns or move it to obs instead.
         :param clean_obs: Whether to delete non-streamlined fields in .obs, .obsm and .obsp.
         :param clean_var: Whether to delete non-streamlined fields in .var, .varm and .varp.
         :param clean_uns: Whether to delete non-streamlined fields in .uns.
         :return:
         """
         for x in self.ids:
-            self.datasets[x].streamline(
-                format=format,
-                clean_obs=clean_obs,
-                clean_var=clean_var,
-                clean_uns=clean_uns,
-            )
+            self.datasets[x].streamline(format=format, allow_uns_sfaira=allow_uns_sfaira, clean_obs=clean_obs,
+                                        clean_var=clean_var, clean_uns=clean_uns)
 
     def fragment(self) -> Dict[str, anndata.AnnData]:
         """
@@ -304,7 +302,7 @@ class DatasetGroup:
         adata_ls = self.adata_ls
         if not adata_ls:
             return None
-        self.streamline(format="sfaira", clean_obs=True, clean_var=True, clean_uns=True)
+        self.streamline(format="sfaira", allow_uns_sfaira=False, clean_obs=True, clean_var=True, clean_uns=True)
 
         # .var entries are renamed and copied upon concatenation.
         # To preserve gene names in .var, the target gene names are copied into var_names and are then copied
@@ -915,9 +913,10 @@ class DatasetSuperGroup:
     def streamline(
             self,
             format: str = "sfaira",
+            allow_uns_sfaira: bool = False,
             clean_obs: bool = True,
             clean_var: bool = True,
-            clean_uns: bool = True,
+            clean_uns: bool = True
     ):
         """
         Streamline the adata instance in each group and each data set to output format.
@@ -928,6 +927,7 @@ class DatasetSuperGroup:
 
             - "sfaira"
             - "cellxgene"
+        :param allow_uns_sfaira: When using sfaira format: Whether to keep metadata in uns or move it to obs instead.
         :param clean_obs: Whether to delete non-streamlined fields in .obs, .obsm and .obsp.
         :param clean_var: Whether to delete non-streamlined fields in .var, .varm and .varp.
         :param clean_uns: Whether to delete non-streamlined fields in .uns.
@@ -935,12 +935,7 @@ class DatasetSuperGroup:
         """
         for x in self.dataset_groups:
             for xx in x.ids:
-                x.datasets[xx].streamline(
-                    format=format,
-                    clean_obs=clean_obs,
-                    clean_var=clean_var,
-                    clean_uns=clean_uns,
-                )
+                x.datasets[xx].streamline(format=format, allow_uns_sfaira=allow_uns_sfaira, clean_obs=clean_obs, clean_var=clean_var, clean_uns=clean_uns)
 
     def subset(self, key, values):
         """
