@@ -1,7 +1,6 @@
 source	target	target_id
 0	UNKNOWN	UNKNOWN
 AT1 cell	type I pneumocyte	CL:0002062
-AT1 cell 	type I pneumocyte	CL:0002062
 AT2 cell	type II pneumocyte	CL:0002063
 Absorptive cell	absorptive cell	CL:0000212
 Acinar cell_CLPS high	acinar cell	CL:0000622
@@ -101,7 +100,6 @@ Cytotrophoblast_PAGE4 high	mononuclear cytotrophoblast cell	CL:0000523
 Cytotrophoblast_PEG10 high	mononuclear cytotrophoblast cell	CL:0000523
 D cell/ X/A cell	type D cell of stomach	CL:0002267
 Dendritic cell	dendritic cell	CL:0000451
-Dendritic cell 	dendritic cell	CL:0000451
 Dendritic cell_CPVL high	dendritic cell	CL:0000451
 Dendritic cell_FCER1A high	dendritic cell	CL:0000451
 Dendritic cell_HLA-DRA high	dendritic cell	CL:0000451
@@ -158,7 +156,6 @@ Endothelial progenitor cell	endothelial cell	CL:0000115
 Enteric glial cell	glial cell	CL:0000125
 Enteric nerval cell	neuron	CL:0000540
 Enterocyte	enterocyte	CL:0000584
-Enterocyte 	enterocyte	CL:0000584
 Enterocyte progenitor	enterocyte	CL:0000584
 Enterocyte progenitor_APOA4 high	enterocyte	CL:0000584
 Enterocyte progenitor_APOC3 high	enterocyte	CL:0000584
@@ -244,14 +241,12 @@ Fenestrated endothelial cell_EMCN high	fenestrated cell	CL:0000666
 Fenestrated endothelial cell_SELE high	fenestrated cell	CL:0000666
 Fetal leydig cell	Leydig cell	CL:0000178
 Fibroblast	fibroblast	CL:0000057
-Fibroblast 	fibroblast	CL:0000057
 Fibroblast cell_MFAP5 high	fibroblast	CL:0000057
 Fibroblast_ CXCL12 high	fibroblast	CL:0000057
 Fibroblast_A2M high	fibroblast	CL:0000057
 Fibroblast_APOD high	fibroblast	CL:0000057
 Fibroblast_COL1A1 high	fibroblast of choroid plexus	CL:0002549
 Fibroblast_COL3A1 high	fibroblast	CL:0000057
-Fibroblast_COL3A1 high 	fibroblast	CL:0000057
 Fibroblast_COL5A2 high	fibroblast of dermis	CL:0002551
 Fibroblast_DCN high	fibroblast	CL:0000057
 Fibroblast_EFEMP1 high	fibroblast of dermis	CL:0002551
@@ -330,7 +325,7 @@ Loop of henle_SLPI high	kidney loop of Henle epithelial cell	CL:1000909
 Loop of henle_SOD3 high	kidney loop of Henle epithelial cell	CL:1000909
 Loop of henle_SPP1 high	kidney loop of Henle epithelial cell	CL:1000909
 Luminal cell	luminal epithelial cell of prostatic duct	CL:0002237
-Luminal epithelium 	placental epithelial cell	CL:0002577
+Luminal epithelium	placental epithelial cell	CL:0002577
 Lung mesenchyme cell (cardiopulmonary progenitor)	mesenchymal cell	CL:0008019
 Lymphatic endothelial cell	endothelial cell	CL:0000115
 Lymphatic endothelial cell_CCL21 high	endothelial cell	CL:0000115
@@ -368,7 +363,6 @@ Mast	mast cell	CL:0000097
 Mast cell	mast cell	CL:0000097
 Mast progenitor cell	mast cell	CL:0000097
 Megakaryocyte	megakaryocyte	CL:0000556
-Megakaryocyte 	megakaryocyte	CL:0000556
 Megakaryocyte/Erythroid Progenitor	megakaryocyte-erythroid progenitor cell	CL:0000050
 Megakaryocyte/Erythtoid progenitor cell	megakaryocyte-erythroid progenitor cell	CL:0000050
 Melanocyte	melanocyte	CL:0000148
@@ -436,9 +430,8 @@ Neuron_RELN high	neuron	CL:0000540
 Neuron_S100B high	neuron	CL:0000540
 Neuron_TMEM233 high	neuron	CL:0000540
 Neuron_XPR1 high	neuron	CL:0000540
-Neutriophil 	neutrophil	CL:0000775
+Neutriophil	neutrophil	CL:0000775
 Neutrophil	neutrophil	CL:0000775
-Neutrophil  	neutrophil	CL:0000775
 Neutrophil _S100A8 high	neutrophil	CL:0000775
 Neutrophil_CAMP high	neutrophil	CL:0000775
 Neutrophil_CAMP_high	neutrophil	CL:0000775
@@ -491,7 +484,6 @@ Plasmacytoid dendritic cell	plasmacytoid dendritic cell, human	CL:0001058
 Podocyte	glomerular visceral epithelial cell	CL:0000653
 Pre B cell	precursor B cell	CL:0000817
 Primordial germ cell	primordial germ cell	CL:0000670
-Primordial germ cell 	primordial germ cell	CL:0000670
 Primordial germ cell_GTSF1 high	primordial germ cell	CL:0000670
 Primordial germ cell_TCL1A high	primordial germ cell	CL:0000670
 Principle cell	renal principal cell	CL:0005009
@@ -563,7 +555,6 @@ Spermatocyte	spermatocyte	CL:0000017
 Stomach fundus cell	mucous cell of stomach	CL:0002180
 Striated muscle cell	striated muscle cell	CL:0000737
 Stromal cell	stromal cell	CL:0000499
-Stromal cell 	stromal cell	CL:0000499
 Stromal cell_APOD high	stromal cell	CL:0000499
 Stromal cell_ASPN high	stromal cell	CL:0000499
 Stromal cell_CLEC3B high	stromal cell	CL:0000499
@@ -590,7 +581,7 @@ Stromal cell_SULT1E1 high	stromal cell	CL:0000499
 Stromal cell_TSLP high	stromal cell	CL:0000499
 Superficial cell	ureteral cell	CL:1000601
 Sympathetic neuron	sympathetic neuron	CL:0011103
-Syncytiotrophoblast 	syncytiotrophoblast cell	CL:0000525
+Syncytiotrophoblast	syncytiotrophoblast cell	CL:0000525
 Syncytiotrophoblast cell	syncytiotrophoblast cell	CL:0000525
 T cell	T cell	CL:0000084
 T cell_CCL4 high	T cell	CL:0000084
@@ -614,7 +605,6 @@ Ureteric bud cell	epithelial cell	CL:0000066
 Ureteric epithelial cell	epithelial cell	CL:0000066
 Ureteric smooth muscle cell	ureter smooth muscle cell	CL:1000979
 Urothelial cell	bladder urothelial cell	CL:1001428
-Urothelial cell 	bladder urothelial cell	CL:1001428
 Vascular endothelial cell	endothelial cell of vascular tree	CL:0002139
 Vascular endothelial cell_A2M high	endothelial cell of vascular tree	CL:0002139
 Vascular endothelial cell_AQP1 high	endothelial cell of vascular tree	CL:0002139

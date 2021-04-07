@@ -213,7 +213,7 @@ def load(data_dir, **kwargs):
         "age", "celltype_specific", "cluster_specific", "sex", "assay_sc", "source"]
     # Remove new line characters from cell type:
     adata.obs["celltype_specific"] = [
-        x.replace("\n", "")
+        x.replace("\n", "").rstrip()
         for x in adata.obs["celltype_specific"].values
     ]
     adata.obs["organ"] = [sample_organ_dict[x] for x in adata.obs["sample"].values]
