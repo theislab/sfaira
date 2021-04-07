@@ -265,7 +265,7 @@ The common workflow look as follows:
 
 1. Create a new dataloader with ``sfaira create-dataloader``
 2. Validate the dataloader with ``sfaira lint-dataloader <path>``
-3. Test the dataloader with ``sfaira test-dataloader . --doi <doi>``
+3. Test the dataloader with ``sfaira test-dataloader . --doi <doi> --test-data <folder_above_test_data>``
 
 When creating a dataloader with ``sfaira create-dataloader`` common information such as
 your name and email are prompted for, followed by dataloader specific attributes such as organ, organism and many more.
@@ -289,8 +289,25 @@ All unused attributes will be removed.
 Next validate the integrity of your dataloader content with ``sfaira lint-dataloader <path to *.yaml>``.
 All tests must pass! If any of the tests fail please revisit your dataloader and add the missing information.
 
-Finally, copy your dataloader into the ``sfaira/dataloaders/loaders/`` folder and your test data into ``sfaira/unit_tests/template_data/``.
-Now you can test your dataloader with ``sfaira test-dataloader <path_to_sfaira> --doi <doi>``. 
+Finally, copy your dataloader into the ``sfaira/dataloaders/loaders/`` folder.
+Now you can test your dataloader with ``sfaira test-dataloader <path_to_sfaira> --doi <doi> --test-data <template_data_folder>``.
+Note that sfaira expects a folder structure for the test data such as:
+
+.. code-block::
+
+    ├── template_data
+    │   └── d10_1016_j_cmet_2019_01_021
+    │       ├── GSE117770_RAW.tar
+    │       ├── GSM3308545_NOD_08w_A_annotation.csv
+    │       ├── GSM3308547_NOD_08w_C_annotation.csv
+    │       ├── GSM3308548_NOD_14w_A_annotation.csv
+    │       ├── GSM3308549_NOD_14w_B_annotation.csv
+    │       ├── GSM3308550_NOD_14w_C_annotation.csv
+    │       ├── GSM3308551_NOD_16w_A_annotation.csv
+    │       ├── GSM3308552_NOD_16w_B_annotation.csv
+    │       └── GSM3308553_NOD_16w_C_annotation.csv
+
+Pass the path to the template_data folder, not the doi. Sfaira will use this path to cache further data for speedups.
 All tests must pass! If any of the tests fail please revisit your dataloader and fix the error.
 
 Map cell type labels to ontology

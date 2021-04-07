@@ -23,7 +23,6 @@ class DataloaderTester:
         Runs a predefined unit test on a given dataloader.
         """
         print('[bold blue]Please ensure that your dataloader is in sfaira/dataloaders/loaders/<doi_flattened>.')
-        print('[bold blue]Please ensure that your test data is in sfaira/unit_tests/template_data/<doi_flattened>.')
         if not self.doi:
             self._prompt_doi()
         self.doi_sfaira_repr = f'd{self.doi.translate({ord(c): "_" for c in r"!@#$%^&*()[]/{};:,.<>?|`~-=_+"})}'
@@ -44,7 +43,7 @@ class DataloaderTester:
 
         os.chdir(f'{self.path}/sfaira/unit_tests/data_contribution')
 
-        pytest = Popen(['pytest', 'test_data_template.py', '--doi_sfaira_repr', self.doi_sfaira_repr],
+        pytest = Popen(['pytest', 'test_data_template.py', '--doi_sfaira_repr', self.doi_sfaira_repr, '--test_data', self.test_data],
                        universal_newlines=True, shell=False, close_fds=True)
         (pytest_stdout, pytest_stderr) = pytest.communicate()
         if pytest_stdout:
