@@ -336,6 +336,7 @@ M1 Macrophage	inflammatory macrophage	CL:0000863
 M1 Macrophage_CCL2_high	inflammatory macrophage	CL:0000863
 M1 Macrophage_CXCL8_high	inflammatory macrophage	CL:0000863
 M2 Macrophage	alternatively activated macrophage	CL:0000890
+M2 macrophage	alternatively activated macrophage	CL:0000890
 M2 macrophage_CXCL8 high	alternatively activated macrophage	CL:0000890
 M2 macrophage_MALAT1 high	alternatively activated macrophage	CL:0000890
 Macrophage	macrophage	CL:0000235
