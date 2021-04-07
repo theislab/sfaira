@@ -92,7 +92,7 @@ def test_load(doi_sfaira_repr: str, test_data: str):
                 load_func = pydoc.locate(dir_loader + "." + file_module + ".load")
                 load_func_annotation = pydoc.locate(dir_loader + "." + file_module + ".LOAD_ANNOTATION")
                 # Also check sfaira_extension for additional load_func_annotation:
-                if package_source != "sfairae":
+                if package_source != "sfairae" and sfairae is not None:
                     load_func_annotation_sfairae = pydoc.locate(dir_loader_sfairae + "." + dataset_module +
                                                                 "." + file_module + ".LOAD_ANNOTATION")
                     # LOAD_ANNOTATION is a dictionary so we can use update to extend it.
