@@ -613,10 +613,15 @@ class DatasetBase(abc.ABC):
         :param allow_uns: Allow writing of constant meta data into uns rather than .obs.
         :return:
         """
-        # Set data set-wide attributes (.uns):
-        for k in self._adata_ids_sfaira.uns_keys:
-            if k not in self.adata.uns.keys():
-                self.adata.uns[getattr(self._adata_ids_sfaira, k)] = getattr(self, k)
+        # Set data set-wide attributes (.uns) (write to .obs if .uns is not allowed):
+        if allow_uns:
+            for k in self._adata_ids_sfaira.uns_keys:
+                if k not in self.adata.uns.keys():
+                    self.adata.uns[getattr(self._adata_ids_sfaira, k)] = getattr(self, k)
+        else:
+            for k in self._adata_ids_sfaira.uns_keys:
+                if k not in self.adata.obs.keys():
+                    self.adata.obs[getattr(self._adata_ids_sfaira, k)] = getattr(self, k)
 
         # Set cell-wise or data set-wide attributes (.uns / .obs):
         # These are saved in .uns if they are data set wide to save memory if allow_uns is True.
