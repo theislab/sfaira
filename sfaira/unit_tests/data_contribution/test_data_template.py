@@ -9,7 +9,7 @@ except ImportError:
     sfairae = None
 
 
-def test_load(dir_template: str = "../template_data", doi_sfaira_repr="d10_1016_j_cmet_2019_01_021"):
+def test_load(doi_sfaira_repr: str, test_data: str):
     """
     Unit test to assist with data set contribution.
 
@@ -30,8 +30,6 @@ def test_load(dir_template: str = "../template_data", doi_sfaira_repr="d10_1016_
     (Note that columns are separated by ",")
     You can also manually check maps here: https://www.ebi.ac.uk/ols/ontologies/cl
     5. Run this unit test for a last time to check the cell type maps.
-
-    :return:
     """
     remove_gene_version = True
     match_to_reference = None
@@ -59,9 +57,9 @@ def test_load(dir_template: str = "../template_data", doi_sfaira_repr="d10_1016_
 
     ds = DatasetGroupDirectoryOriented(
         file_base=file_path,
-        data_path=dir_template,
-        meta_path=dir_template,
-        cache_path=dir_template
+        data_path=test_data,
+        meta_path=test_data,
+        cache_path=test_data
     )
     # Test raw loading and caching:
     # You can set load_raw to True while debugging when caching works already to speed the test up,
@@ -72,7 +70,7 @@ def test_load(dir_template: str = "../template_data", doi_sfaira_repr="d10_1016_
         load_raw=True,  # tests raw loading
         allow_caching=True,  # tests caching
     )
-    assert len(ds.ids) > 0, f"no data sets loaded, make sure raw data is in {dir_template}"
+    assert len(ds.ids) > 0, f"no data sets loaded, make sure raw data is in {test_data}"
     # Create cell type conversion table:
     cwd = os.path.dirname(file_path)
     dataset_module = str(cwd.split("/")[-1])
@@ -118,9 +116,9 @@ def test_load(dir_template: str = "../template_data", doi_sfaira_repr="d10_1016_
                 if DatasetFound is None:
                     datasets_f = [
                         DatasetBase(
-                            data_path=dir_template,
-                            meta_path=dir_template,
-                            cache_path=dir_template,
+                            data_path=test_data,
+                            meta_path=test_data,
+                            cache_path=test_data,
                             load_func=load_func,
                             dict_load_func_annotation=load_func_annotation,
                             sample_fn=x,
@@ -131,9 +129,9 @@ def test_load(dir_template: str = "../template_data", doi_sfaira_repr="d10_1016_
                 else:
                     datasets_f = [
                         DatasetFound(
-                            data_path=dir_template,
-                            meta_path=dir_template,
-                            cache_path=dir_template,
+                            data_path=test_data,
+                            meta_path=test_data,
+                            cache_path=test_data,
                             load_func=load_func,
                             load_func_annotation=load_func_annotation,
                             sample_fn=x,
@@ -154,9 +152,9 @@ def test_load(dir_template: str = "../template_data", doi_sfaira_repr="d10_1016_
     # Test loading from cache:
     ds = DatasetGroupDirectoryOriented(
         file_base=file_path,
-        data_path=dir_template,
-        meta_path=dir_template,
-        cache_path=dir_template
+        data_path=test_data,
+        meta_path=test_data,
+        cache_path=test_data
     )
     ds.load(
         remove_gene_version=remove_gene_version,
