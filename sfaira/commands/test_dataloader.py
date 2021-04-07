@@ -10,9 +10,10 @@ log = logging.getLogger(__name__)
 
 class DataloaderTester:
 
-    def __init__(self, path, doi):
+    def __init__(self, path, test_data, doi):
         self.WD = os.path.dirname(__file__)
         self.path = path
+        self.test_data = test_data
         self.cwd = os.getcwd()
         self.doi = doi
         self.doi_sfaira_repr = ''
