@@ -622,7 +622,7 @@ class DatasetBase(abc.ABC):
             for k in self._adata_ids_sfaira.uns_keys:
                 if k not in self.adata.obs.keys():
                     val = getattr(self, k)
-                    while not isinstance(val, (str, bool)) and len(val) == 1:  # unpack nested lists
+                    while not isinstance(val, (str, bool)) and val is not None and len(val) == 1:  # unpack nested lists
                         val = val[0]
                     self.adata.obs[getattr(self._adata_ids_sfaira, k)] = [val for i in range(len(self.adata.obs))]
 
