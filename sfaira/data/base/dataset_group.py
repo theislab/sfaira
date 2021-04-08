@@ -619,7 +619,13 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                         list(self.datasets.values())[0]._value_protection(
                             attr="celltypes",
                             allowed=self.ontology_celltypes,
-                            attempted=np.unique(tab[self._adata_ids_sfaira.classmap_target_key].values).tolist()
+                            attempted=[
+                                x for x in np.unique(tab[self._adata_ids_sfaira.classmap_target_key].values).tolist()
+                                if x not in [
+                                    self._adata_ids_sfaira.unknown_celltype_identifier,
+                                    self._adata_ids_sfaira.not_a_cell_celltype_identifier
+                                ]
+                            ]
                         )
                         # Adds a third column with the corresponding ontology IDs into the file.
                         tab[self._adata_ids_sfaira.classmap_target_id_key] = [
