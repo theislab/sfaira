@@ -20,8 +20,8 @@ for x in dois.split(","):
     )
     ds.subset(key="doi", values=[x])
     ds.load(
-        match_to_reference=False,
-        remove_gene_version=False,
+        match_to_reference=None,
+        remove_gene_version=True,
         load_raw=False,
         allow_caching=True,
         set_metadata=False,
