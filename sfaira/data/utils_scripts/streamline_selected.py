@@ -20,12 +20,14 @@ for x in dois.split(","):
     )
     ds.subset(key="doi", values=[x])
     ds.load(
-        match_to_reference=None,
-        remove_gene_version=True,
+        match_to_reference=False,
+        remove_gene_version=False,
         load_raw=False,
         allow_caching=True,
         set_metadata=False,
     )
+    if schema == "cellxgene":
+        ds.subset_genes(subset_type=None)
     ds.streamline(format=schema.lower(), allow_uns_sfaira=True, clean_obs=False, clean_var=True, clean_uns=False)
     assert len(ds.dataset_groups) == 1, len(ds.dataset_groups)
     dsg = ds.dataset_groups[0]

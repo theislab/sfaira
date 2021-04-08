@@ -16,7 +16,7 @@ from tqdm import tqdm
 from sfaira.consts import AdataIdsSfaira
 from sfaira.models import BasicModel
 from sfaira.versions.metadata import CelltypeUniverse
-from sfaira.versions.topology_versions import Topologies
+from sfaira.versions.topologies import Topologies
 from .losses import LossLoglikelihoodNb, LossLoglikelihoodGaussian, LossCrossentropyAgg, KLLoss
 from .metrics import custom_mse, custom_negll_nb, custom_negll_gaussian, custom_kl, \
     CustomAccAgg, CustomF1Classwise, CustomFprClasswise, CustomTprClasswise, custom_cce_agg
@@ -217,7 +217,7 @@ class EstimatorKeras:
 
             # If the feature space is already mapped to the right reference, return the data matrix immediately
             if 'mapped_features' in self.data.uns_keys():
-                if self.data.uns[self._adata_ids_sfaira.mapped_features] == self.topology_container.genome_container.genome:
+                if self.data.uns[self._adata_ids_sfaira.mapped_features] == self.topology_container.genome_container.assembly:
                     print(f"found {x.shape[0]} observations")
                     return x
 

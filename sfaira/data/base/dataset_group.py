@@ -9,11 +9,11 @@ from os import PathLike
 import pandas
 import pydoc
 import scipy.sparse
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Union
 import warnings
 
 from sfaira.data.base.dataset import is_child, DatasetBase
-from sfaira.versions.genome_versions import SuperGenomeContainer
+from sfaira.versions.genomes import GenomeContainer
 from sfaira.consts import AdataIdsSfaira
 from sfaira.data.utils import read_yaml
 
@@ -173,36 +173,17 @@ class DatasetGroup:
             self.datasets[x].streamline(format=format, allow_uns_sfaira=allow_uns_sfaira, clean_obs=clean_obs,
                                         clean_var=clean_var, clean_uns=clean_uns)
 
-    def fragment(self) -> Dict[str, anndata.AnnData]:
+    def subset_genes(self, subset_type: Union[None, str, List[str]] = None):
         """
-        Fragment data sets into largest consistent parititions based on meta data.
+        Subset and sort genes to genes defined in an assembly or genes of a particular type, such as protein coding.
 
-        ToDo return this as a DatasetGroup again.
-          the streamlined Datasets are similar to anndata instances here, worth considering whether to use anndata
-          instead because it can be indexed.
+        :param subset_type: Type(s) to subset to. Can be a single type or a list of types or None. Types can be:
 
-        :return:
+            - None: All genes in assembly.
+            - "protein_coding": All protein coding genes in assembly.
         """
-        # TODO: assert that data is streamlined.
-        print("make sure data is streamlined")
-        datasets_new = {}
-        for k, v in self.datasets.items():
-            # Define fragments and fragment names.
-            # Because the data is streamlined, fragments are partitions of the .obs space, excluding the cell-wise
-            # annotation columns:
-            #       - cellontology_class
-            #       - cellontology_id
-            #       - cellontology_original
-            cols_exclude = ["cellontology_class", "cellontology_id", "cellontology_original"]
-            tab = v.adata.obs.loc[:, [x not in cols_exclude for x in v.adata.obs.columns]]
-            tab_unique = tab.drop_duplicates()
-            idx_sets = [
-                np.where([np.all(tab_unique.iloc[i, :] == tab.iloc[j, :])[0] for j in range(tab.shape[0])])
-                for i in range(tab_unique.shape[0])
-            ]
-            for i, x in enumerate(idx_sets):
-                datasets_new[k + "_fragment" + str(i)] = v.adata[x, :]
-        return datasets_new
+        for x in self.ids:
+            self.datasets[x].subset_genes(subset_type=subset_type)
 
     def load_tobacked(
             self,
@@ -691,14 +672,14 @@ class DatasetSuperGroup:
             genome: str = None
     ):
         if genome.lower().startswith("homo_sapiens"):
-            g = SuperGenomeContainer(
+            g = GenomeContainer(
                 organism="human",
-                genome=genome
+                assembly=genome
             )
         elif genome.lower().startswith("mus_musculus"):
-            g = SuperGenomeContainer(
+            g = GenomeContainer(
                 organism="mouse",
-                genome=genome
+                assembly=genome
             )
         else:
             raise ValueError(f"Genome {genome} not recognised. Needs to start with 'Mus_Musculus' or 'Homo_Sapiens'.")
@@ -771,6 +752,18 @@ class DatasetSuperGroup:
                 set_metadata=set_metadata,
                 processes=processes,
             )
+
+    def subset_genes(self, subset_type: Union[None, str, List[str]] = None):
+        """
+        Subset and sort genes to genes defined in an assembly or genes of a particular type, such as protein coding.
+
+        :param subset_type: Type(s) to subset to. Can be a single type or a list of types or None. Types can be:
+
+            - None: All genes in assembly.
+            - "protein_coding": All protein coding genes in assembly.
+        """
+        for x in self.dataset_groups:
+            x.subset_genes(subset_type=subset_type)
 
     @property
     def adata(self):

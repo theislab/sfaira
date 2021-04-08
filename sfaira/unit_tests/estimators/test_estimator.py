@@ -6,7 +6,7 @@ from typing import Union
 import unittest
 
 from sfaira.estimators import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
-from sfaira.versions.topology_versions import Topologies
+from sfaira.versions.topologies import Topologies
 
 
 class _TestEstimator:
