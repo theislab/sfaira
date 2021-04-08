@@ -29,7 +29,10 @@ class GtfInterface:
         """
         The cache dir is in a cache directory in the sfaira installation that is excempt from git versioning.
         """
-        return os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "cache", "genomes")
+        cache_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "cache", "genomes")
+        if not os.path.exists(cache_dir):
+            os.mkdir(cache_dir)
+        return cache_dir
 
     @property
     def cache_fn(self):
@@ -74,7 +77,6 @@ class GtfInterface:
     @property
     def cache(self) -> pandas.DataFrame:
         if not os.path.exists(self.cache_fn):
-            os.mkdir(self.cache_dir)
             self.download_gtf_ensembl()
         return pandas.read_csv(self.cache_fn)
 
