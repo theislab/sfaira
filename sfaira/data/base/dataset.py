@@ -433,7 +433,7 @@ class DatasetBase(abc.ABC):
         if match_to_reference and not remove_gene_version:
             warnings.warn("it is not recommended to enable matching the feature space to a genomes reference"
                           "while not removing gene versions. this can lead to very poor matching results")
-        if not (isinstance(match_to_reference, bool) and match_to_reference):
+        if not (isinstance(match_to_reference, bool) and not match_to_reference):
             self._set_genome(organism=self.organism, assembly=match_to_reference)
 
         # Set path to dataset directory
