@@ -336,6 +336,7 @@ M1 Macrophage	inflammatory macrophage	CL:0000863
 M1 Macrophage_CCL2_high	inflammatory macrophage	CL:0000863
 M1 Macrophage_CXCL8_high	inflammatory macrophage	CL:0000863
 M2 Macrophage	alternatively activated macrophage	CL:0000890
+M2 macrophage	alternatively activated macrophage	CL:0000890
 M2 macrophage_CXCL8 high	alternatively activated macrophage	CL:0000890
 M2 macrophage_MALAT1 high	alternatively activated macrophage	CL:0000890
 Macrophage	macrophage	CL:0000235
@@ -548,6 +549,7 @@ Smooth muscle cell_CCL19 high	smooth muscle cell	CL:0000192
 Smooth muscle cell_CCL4L2 high	smooth muscle cell	CL:0000192
 Smooth muscle cell_CYCS high	smooth muscle cell of the pulmonary artery	CL:0002591
 Smooth muscle cell_MYL9 high	smooth muscle cell	CL:0000192
+Smooth muscle cell_MYLK high	smooth muscle cell	CL:0000192
 Smooth muscle cell_PDK4 high	smooth muscle cell	CL:0000192
 Smooth muscle cell_TAGLN high	smooth muscle cell	CL:0000192
 Soomth muscle cell	smooth muscle cell	CL:0000192
@@ -596,6 +598,7 @@ Tendon cell_GCG high	tendon cell	CL:0000388
 Theca cell	theca cell	CL:0000503
 Thyroid follicular cell	thyroid follicular cell	CL:0002258
 Treg cell	regulatory T cell	CL:0000815
+Unknown	UNKNOWN	UNKNOWN
 Unknown Epithelial cell_EFNA1 high	epithelial cell	CL:0000066
 Unknown Epithelial cell_FOS high	epithelial cell	CL:0000066
 Unknown1	UNKNOWN	UNKNOWN

@@ -17,7 +17,7 @@ import urllib.error
 import cgi
 import ssl
 
-from sfaira.versions.genome_versions import SuperGenomeContainer
+from sfaira.versions.genomes import GenomeContainer
 from sfaira.versions.metadata import Ontology, OntologyHierarchical, CelltypeUniverse
 from sfaira.consts import AdataIds, AdataIdsSfaira, META_DATA_FIELDS, OCS
 from sfaira.data.utils import collapse_matrix, read_yaml
@@ -438,24 +438,8 @@ class DatasetBase(abc.ABC):
         if match_to_reference and not remove_gene_version:
             warnings.warn("it is not recommended to enable matching the feature space to a genomes reference"
                           "while not removing gene versions. this can lead to very poor matching results")
-
-        # Set default genomes per organism if none provided:
-        if isinstance(match_to_reference, str):
-            genome = match_to_reference
-        elif match_to_reference is None or (isinstance(match_to_reference, bool) and match_to_reference):
-            if self.organism == "human":
-                genome = "Homo_sapiens_GRCh38_97"
-                warnings.warn(f"using default genome {genome}")
-            elif self.organism == "mouse":
-                genome = "Mus_musculus_GRCm38_97"
-                warnings.warn(f"using default genome {genome}")
-            else:
-                raise ValueError(f"genome was not supplied and no default genome found for organism {self.organism}")
-        elif not match_to_reference:
-            genome = None
-        else:
-            raise ValueError(f"invalid choice for match_to_reference={match_to_reference}")
-        self._set_genome(genome=genome)
+        if not (isinstance(match_to_reference, bool) and not match_to_reference):
+            self._set_genome(organism=self.organism, assembly=match_to_reference)
 
         # Set path to dataset directory
         if self.data_dir is None:
@@ -473,8 +457,6 @@ class DatasetBase(abc.ABC):
         # Streamline feature space:
         self._convert_and_set_var_names(match_to_reference=match_to_reference)
         self._collapse_genes(remove_gene_version=remove_gene_version)
-        if match_to_reference:
-            self._match_features_to_reference()
 
     load.__doc__ = load_doc
 
@@ -562,9 +544,14 @@ class DatasetBase(abc.ABC):
         self.adata.var[self._adata_ids_sfaira.gene_id_index] = self.adata.var_names
         self.adata.var.index = self.adata.var[self._adata_ids_sfaira.gene_id_ensembl].values
 
-    def _match_features_to_reference(self):
+    def subset_genes(self, subset_type: Union[None, str, List[str]] = None):
         """
-        Match feature space to a genomes provided with sfaira
+        Subset and sort genes to genes defined in an assembly or genes of a particular type, such as protein coding.
+
+        :param subset_type: Type(s) to subset to. Can be a single type or a list of types or None. Types can be:
+
+            - None: All genes in assembly.
+            - "protein_coding": All protein coding genes in assembly.
         """
         # Convert data matrix to csc matrix
         if isinstance(self.adata.X, np.ndarray):
@@ -579,9 +566,21 @@ class DatasetBase(abc.ABC):
 
         # Compute indices of genes to keep
         data_ids = self.adata.var[self._adata_ids_sfaira.gene_id_ensembl].values
-        idx_feature_kept = np.where([x in self.genome_container.ensembl for x in data_ids])[0]
-        idx_feature_map = np.array([self.genome_container.ensembl.index(x)
-                                    for x in data_ids[idx_feature_kept]])
+        if subset_type is None:
+            subset_ids = self.genome_container.ensembl
+        else:
+            if isinstance(subset_type, str):
+                subset_type = [subset_type]
+            keys = np.unique(self.genome_container.type)
+            if subset_type not in keys:
+                raise ValueError(f"subset type {subset_type} not available in list {keys}")
+            subset_ids = [
+                x for x, y in zip(self.genome_container.ensembl, self.genome_container.type)
+                if y in subset_type
+            ]
+
+        idx_feature_kept = np.where([x in subset_ids for x in data_ids])[0]
+        idx_feature_map = np.array([subset_ids.index(x) for x in data_ids[idx_feature_kept]])
         # Remove unmapped genes
         x = x[:, idx_feature_kept]
 
@@ -618,10 +617,20 @@ class DatasetBase(abc.ABC):
         :param allow_uns: Allow writing of constant meta data into uns rather than .obs.
         :return:
         """
-        # Set data set-wide attributes (.uns):
-        for k in self._adata_ids_sfaira.uns_keys:
-            if k not in self.adata.uns.keys():
-                self.adata.uns[getattr(self._adata_ids_sfaira, k)] = getattr(self, k)
+        # Set data set-wide attributes (.uns) (write to .obs if .uns is not allowed):
+        if allow_uns:
+            for k in self._adata_ids_sfaira.uns_keys:
+                if k not in self.adata.uns.keys():
+                    self.adata.uns[getattr(self._adata_ids_sfaira, k)] = getattr(self, k)
+        else:
+            for k in self._adata_ids_sfaira.uns_keys:
+                if k in self.adata.uns.keys():
+                    val = self.adata.uns[k]
+                else:
+                    val = getattr(self, k)
+                while hasattr(val, '__len__') and not isinstance(val, str) and len(val) == 1:  # unpack nested lists
+                    val = val[0]
+                self.adata.obs[getattr(self._adata_ids_sfaira, k)] = [val for i in range(len(self.adata.obs))]
 
         # Set cell-wise or data set-wide attributes (.uns / .obs):
         # These are saved in .uns if they are data set wide to save memory if allow_uns is True.
@@ -710,9 +719,10 @@ class DatasetBase(abc.ABC):
     def streamline(
             self,
             format: str = "sfaira",
+            allow_uns_sfaira: bool = True,
             clean_obs: bool = True,
             clean_var: bool = True,
-            clean_uns: bool = True,
+            clean_uns: bool = True
     ):
         """
         Streamline the adata instance to output format.
@@ -723,6 +733,7 @@ class DatasetBase(abc.ABC):
 
             - "sfaira"
             - "cellxgene"
+        :param allow_uns_sfaira: When using sfaira format: Whether to keep metadata in uns or move it to obs instead.
         :param clean_obs: Whether to delete non-streamlined fields in .obs, .obsm and .obsp.
         :param clean_var: Whether to delete non-streamlined fields in .var, .varm and .varp.
         :param clean_uns: Whether to delete non-streamlined fields in .uns.
@@ -730,7 +741,7 @@ class DatasetBase(abc.ABC):
         """
         if format == "sfaira":
             adata_fields = self._adata_ids_sfaira
-            self._set_metadata_in_adata(allow_uns=True)
+            self._set_metadata_in_adata(allow_uns=allow_uns_sfaira)
         elif format == "cellxgene":
             from sfaira.consts import AdataIdsCellxgene
             adata_fields = AdataIdsCellxgene()
@@ -878,13 +889,6 @@ class DatasetBase(abc.ABC):
                 if k in self.adata.uns.keys():
                     del self.adata.uns[k]
 
-    def __assert_loaded(self):
-        """
-        Asserts that data set is loaded into memory.
-        """
-        if self.adata is None:
-            raise ValueError(f"data set {self.id} was not loaded")
-
     def write_distributed_store(
             self,
             dir_cache: Union[str, os.PathLike],
@@ -919,7 +923,7 @@ class DatasetBase(abc.ABC):
             self.adata.write_zarr(store=fn, chunks=chunks)
         else:
             raise ValueError()
-        
+
     def write_backed(
             self,
             adata_backed: anndata.AnnData,
@@ -994,24 +998,11 @@ class DatasetBase(abc.ABC):
         else:
             raise ValueError(f"Did not recognize backed AnnData.X format {type(adata_backed.X)}")
 
-    def _set_genome(self, genome: Union[str, None]):
-        if genome is not None:
-            if genome.lower().startswith("homo_sapiens"):
-                g = SuperGenomeContainer(
-                    organism="human",
-                    genome=genome
-                )
-            elif genome.lower().startswith("mus_musculus"):
-                g = SuperGenomeContainer(
-                    organism="mouse",
-                    genome=genome
-                )
-            else:
-                raise ValueError(f"Genome {genome} not recognised. Needs to start with 'Mus_Musculus' or "
-                                 f"'Homo_Sapiens'.")
-        else:
-            g = None
-        self.genome_container = g
+    def _set_genome(self, organism: str, assembly: Union[str, None]):
+        self.genome_container = GenomeContainer(
+            organism=organism,
+            assembly=assembly,
+        )
 
     @property
     def doi_cleaned_id(self):
@@ -2096,7 +2087,7 @@ class DatasetBase(abc.ABC):
                     if k == "author":
                         pass
                     return x
-        except ValueError as e:
+        except ValueError:
             return None
         except ConnectionError as e:
             print(f"ConnectionError: {e}")

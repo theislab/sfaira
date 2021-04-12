@@ -7,7 +7,7 @@ from typing import Union, Tuple
 
 from sfaira.models.embedding.output_layers import NegBinOutput, NegBinSharedDispOutput, NegBinConstDispOutput, \
     GaussianOutput, GaussianSharedStdOutput, GaussianConstStdOutput
-from sfaira.versions.topology_versions import Topologies
+from sfaira.versions.topologies import Topologies
 from sfaira.models.base import BasicModel
 from sfaira.models.pp_layer import PreprocInput
 from sfaira.models.made import MaskingDense

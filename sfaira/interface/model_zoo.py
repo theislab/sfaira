@@ -9,7 +9,7 @@ from typing import List, Union
 
 from sfaira.versions.metadata import CelltypeUniverse
 from sfaira.consts import OntologyContainerSfaira
-from sfaira.versions.topology_versions import Topologies
+from sfaira.versions.topologies import Topologies
 
 
 class ModelZoo(abc.ABC):

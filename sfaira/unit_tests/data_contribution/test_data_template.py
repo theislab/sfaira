@@ -1,5 +1,6 @@
 import os
 import pydoc
+import shutil
 
 from sfaira.data import DatasetGroupDirectoryOriented, DatasetGroup, DatasetBase
 from sfaira.data.utils import read_yaml
@@ -54,12 +55,15 @@ def test_load(doi_sfaira_repr: str, test_data: str):
     else:
         raise ValueError("data loader not found in sfaira and also not in sfaira_extension")
     file_path = pydoc.locate(dir_loader + ".FILE_PATH")
+    cache_path = os.path.join(test_data, "cache")
+    # Clear dataset cache
+    shutil.rmtree(cache_path, ignore_errors=True)
 
     ds = DatasetGroupDirectoryOriented(
         file_base=file_path,
         data_path=test_data,
         meta_path=test_data,
-        cache_path=test_data
+        cache_path=cache_path
     )
     # Test raw loading and caching:
     # You can set load_raw to True while debugging when caching works already to speed the test up,
@@ -70,6 +74,7 @@ def test_load(doi_sfaira_repr: str, test_data: str):
         load_raw=True,  # tests raw loading
         allow_caching=True,  # tests caching
     )
+
     assert len(ds.ids) > 0, f"no data sets loaded, make sure raw data is in {test_data}"
     # Create cell type conversion table:
     cwd = os.path.dirname(file_path)
@@ -92,7 +97,7 @@ def test_load(doi_sfaira_repr: str, test_data: str):
                 load_func = pydoc.locate(dir_loader + "." + file_module + ".load")
                 load_func_annotation = pydoc.locate(dir_loader + "." + file_module + ".LOAD_ANNOTATION")
                 # Also check sfaira_extension for additional load_func_annotation:
-                if package_source != "sfairae":
+                if package_source != "sfairae" and sfairae is not None:
                     load_func_annotation_sfairae = pydoc.locate(dir_loader_sfairae + "." + dataset_module +
                                                                 "." + file_module + ".LOAD_ANNOTATION")
                     # LOAD_ANNOTATION is a dictionary so we can use update to extend it.
@@ -118,7 +123,7 @@ def test_load(doi_sfaira_repr: str, test_data: str):
                         DatasetBase(
                             data_path=test_data,
                             meta_path=test_data,
-                            cache_path=test_data,
+                            cache_path=cache_path,
                             load_func=load_func,
                             dict_load_func_annotation=load_func_annotation,
                             sample_fn=x,
@@ -131,7 +136,7 @@ def test_load(doi_sfaira_repr: str, test_data: str):
                         DatasetFound(
                             data_path=test_data,
                             meta_path=test_data,
-                            cache_path=test_data,
+                            cache_path=cache_path,
                             load_func=load_func,
                             load_func_annotation=load_func_annotation,
                             sample_fn=x,
@@ -154,7 +159,7 @@ def test_load(doi_sfaira_repr: str, test_data: str):
         file_base=file_path,
         data_path=test_data,
         meta_path=test_data,
-        cache_path=test_data
+        cache_path=cache_path
     )
     ds.load(
         remove_gene_version=remove_gene_version,
@@ -165,3 +170,5 @@ def test_load(doi_sfaira_repr: str, test_data: str):
     ds.clean_ontology_class_map()
     # Test concatenation:
     _ = ds.adata
+    # Clear dataset cache
+    shutil.rmtree(cache_path, ignore_errors=True)
