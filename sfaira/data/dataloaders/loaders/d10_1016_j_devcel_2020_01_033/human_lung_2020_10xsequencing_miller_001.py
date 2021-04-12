@@ -13,16 +13,16 @@ class Dataset(DatasetBase):
         self.download_url_data = "https://covid19.cog.sanger.ac.uk/miller20.processed.h5ad"
         self.download_url_meta = None
 
+        self.assay_sc = "10X sequencing"
         self.author = "Miller"
+        self.disease = "healthy"
         self.doi = "10.1016/j.devcel.2020.01.033"
-        self.healthy = True
         self.normalization = "raw"
         self.organ = "lung"
         self.organism = "human"
-        self.assay_sc = "10X sequencing"
+        self.sample_source = "primary_tissue"
         self.state_exact = "healthy"
         self.year = 2020
-        self.sample_source = "primary_tissue"
 
         self.var_symbol_col = "index"
         self.cellontology_original_obs_key = "Cell_type"

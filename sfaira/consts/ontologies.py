@@ -1,5 +1,5 @@
 from sfaira.versions.metadata import OntologyList, OntologyCelltypes
-from sfaira.versions.metadata import OntologyUberon, OntologyHsapdv, OntologyMmusdv, \
+from sfaira.versions.metadata import OntologyUberon, OntologyHsapdv, OntologyMondo, OntologyMmusdv, \
     OntologySinglecellLibraryConstruction, OntologyCellosaurus
 
 
@@ -8,25 +8,30 @@ class OntologyContainerSfaira:
     _cellontology_class: OntologyCelltypes
 
     def __init__(self):
-        self.age = None
         self.annotated = OntologyList(terms=[True, False])
         self.author = None
         self.assay_differentiation = None
         self.assay_sc = OntologySinglecellLibraryConstruction()
         self.assay_type_differentiation = OntologyList(terms=["guided", "unguided"])
+        self.bio_sample = None
         self.cell_line = OntologyCellosaurus()
         self.cellontology_class = "v2021-02-01"
         self.cellontology_original = None
-        self.developmental_stage = None
+        self.default_embedding = None
+        self.development_stage = None  # OntologyHsapdv()  # TODO allow for other organisms here too.
+        self.disease = OntologyMondo()
         self.doi = None
-        self.ethnicity = None
-        self.healthy = OntologyList(terms=[True, False])
+        self.ethnicity = None  # OntologyHancestro()
         self.id = None
+        self.individual = None
         self.normalization = None
         self.organ = OntologyUberon()
-        self.organism = OntologyList(terms=["mouse", "human"])
+        self.organism = OntologyList(terms=["mouse", "human"])  # TODO introduce NCBItaxon here
+        self.primary_data = OntologyList(terms=[True, False])
         self.sample_source = OntologyList(terms=["primary_tissue", "2d_culture", "3d_culture", "tumor"])
-        self.sex = OntologyList(terms=["female", "male"])
+        self.sex = OntologyList(terms=["female", "male", "mixed", "unknown", "other"])
+        self.tech_sample = None
+        self.title = None
         self.year = OntologyList(terms=list(range(2000, 3000)))
 
     @property

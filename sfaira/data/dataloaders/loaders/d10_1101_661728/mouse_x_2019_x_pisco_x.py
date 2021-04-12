@@ -77,19 +77,17 @@ class Dataset(DatasetBase):
         self.download_url_meta = None
 
         self.cellontology_original_obs_key = "cell_ontology_class"
-        self.age_obs_key = "age"
-        self.development_stage_obs_key = "development_stage"  # not given in all data sets
+        self.development_stage_obs_key = "development_stage"  # not given in all data sets, TODO maybe infer as age?
         self.sex_obs_key = "sex"
         # ToDo: further anatomical information for subtissue in "subtissue"?
 
         self.author = "Pisco"
+        self.disease = "healthy"
         self.doi = "10.1101/661728"
-        self.healthy = True
         self.normalization = "norm"
         self.organism = "mouse"
         self.organ = organ
         self.assay_sc = "10X sequencing" if self.sample_fn.split("-")[3] == "droplet" else "Smart-seq2"
-        self.state_exact = "healthy"
         self.year = 2019
         self.sample_source = "primary_tissue"
 

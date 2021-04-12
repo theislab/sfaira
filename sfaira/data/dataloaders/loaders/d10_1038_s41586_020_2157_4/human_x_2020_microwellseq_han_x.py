@@ -32,7 +32,7 @@ class Dataset(DatasetBase):
         self.cellontology_original_obs_key = "celltype_specific"
         self.development_stage_obs_key = "dev_stage"
         self.organ_obs_key = "organ"
-        self.sex_obs_key = "gender"
+        self.sex_obs_key = "sex"
         self.age_obs_key = "age"
 
         self.var_symbol_col = "index"
@@ -151,8 +151,8 @@ def load(data_dir, **kwargs):
     sex_dict = {
         'Male': "male",
         'Female': "female",
-        'nan': "nan",
-        'FeM=male': "nan",
+        'nan': "unknown",
+        'FeM=male': "unknown",
     }
 
     adata = anndata.read(os.path.join(data_dir, "HCL_Fig1_adata.h5ad"))
@@ -210,8 +210,13 @@ def load(data_dir, **kwargs):
     # tidy up the column names of the obs annotations
     adata.obs.columns = [
         "sample", "sub_tissue", "n_genes", "n_counts", "cluster_global", "dev_stage", "donor", "celltype_global",
-        "age", "celltype_specific", "cluster_specific", "gender", "assay_sc", "source"]
+        "age", "celltype_specific", "cluster_specific", "sex", "assay_sc", "source"]
+    # Remove new line characters from cell type:
+    adata.obs["celltype_specific"] = [
+        x.replace("\n", "").rstrip()
+        for x in adata.obs["celltype_specific"].values
+    ]
     adata.obs["organ"] = [sample_organ_dict[x] for x in adata.obs["sample"].values]
-    adata.obs["gender"] = [sex_dict[x] for x in adata.obs["gender"].values]
+    adata.obs["sex"] = [sex_dict[str(x)] for x in adata.obs["sex"].values]
 
     return adata

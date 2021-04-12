@@ -5,6 +5,7 @@
     "id": "",
     "id_without_doi": "",
     "author": "",
+    "disease": "",
     "doi": "",
     "doi_sfaira_repr": "",
     "download_url_data": "",
@@ -16,5 +17,7 @@
     "year": "",
     "individual": "",
     "state_exact": "",
+    "primary_data": "",
+    "default_embedding": "",
     "create_extra_description": ""
   }

@@ -300,12 +300,11 @@ class Dataset(DatasetBase):
 
         self.author = "Han"
         self.dev_stage = sample_dev_stage_dict[self.sample_fn]
+        self.disease = "healthy"
         self.doi = "10.1016/j.cell.2018.02.001"
         self.normalization = "raw"
-        self.healthy = True
         self.organism = "mouse"
         self.assay_sc = "microwell-seq"
-        self.state_exact = "healthy"
         self.year = 2018
         self.sample_source = "primary_tissue"
 
@@ -339,9 +338,15 @@ def load(data_dir, sample_fn, **kwargs):
 
     adata = anndata.AnnData(data.T)
     annotated_cells = np.array([x in celltypes.index for x in adata.obs_names])
-    # Subset to annotated cells if any are annotated:
+    # Add annotation if available for this data set:
     if np.sum(annotated_cells) > 0:
+        # Subset to annotated cells if any are annotated:
         adata = adata[annotated_cells].copy()
+        # Clean nans in data frame to avoid issues with cell type annotation:
+        celltypes["Annotation"] = [
+            x if x not in [np.nan, "nan"] else "unknown"
+            for x in celltypes["Annotation"].values
+        ]
         adata.obs = celltypes.loc[adata.obs_names, :]
 
     return adata

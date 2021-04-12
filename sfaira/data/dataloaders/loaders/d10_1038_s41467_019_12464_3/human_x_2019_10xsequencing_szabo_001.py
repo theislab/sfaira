@@ -46,6 +46,9 @@ SAMPLE_DICT = {
 
 
 class Dataset(DatasetBase):
+    """
+    TODO: move state exact to disease
+    """
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -55,23 +58,21 @@ class Dataset(DatasetBase):
             "private,donor2.annotation.txt"
         ]
 
+        self.assay_sc = "10X sequencing"
         self.author = "Szabo"
         self.doi = "10.1038/s41467-019-12464-3"
         self.individual = SAMPLE_DICT[self.sample_fn][1]
         self.normalization = "raw"
         self.organ = SAMPLE_DICT[self.sample_fn][0]
         self.organism = "human"
-        self.assay_sc = "10X sequencing"
-        self.state_exact = SAMPLE_DICT[self.sample_fn][2]
-        self.healthy = SAMPLE_DICT[self.sample_fn][2] == "healthy"
-        self.year = 2019
         self.sample_source = "primary_tissue"
+        self.state_exact = SAMPLE_DICT[self.sample_fn][2]
+        self.year = 2019
 
         self.var_symbol_col = "Gene"
         self.var_ensembl_col = "Accession"
 
         self.cellontology_original_obs_key = "cell_ontology_class"
-        self.organ_obs_key = "organ"
 
         self.set_dataset_id(idx=1)
 

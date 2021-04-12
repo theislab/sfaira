@@ -13,16 +13,16 @@ class Dataset(DatasetBase):
         self.download_url_data = "https://covid19.cog.sanger.ac.uk/james20.processed.h5ad"
         self.download_url_meta = None
 
+        self.assay_sc = "10X sequencing"
         self.author = "James"
+        self.disease = "healthy"
         self.doi = "10.1038/s41590-020-0602-z"
-        self.healthy = True
         self.normalization = "raw"
         self.organ = "colon"
         self.organism = "human"
-        self.assay_sc = "10X sequencing"
+        self.sample_source = "primary_tissue"
         self.state_exact = "healthy"
         self.year = 2020
-        self.sample_source = "primary_tissue"
 
         self.var_symbol_col = "index"
         self.var_ensembl_col = "gene_ids"

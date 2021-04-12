@@ -142,7 +142,9 @@ class OntologyEbi(Ontology):
             terms = requests.get(get_url(iri=iri)).json()["_embedded"]["terms"]
             nodes_new = {}
             for x in terms:
-                nodes_new[x["iri"].split("/")[-1]] = {
+                k = x["iri"].split("/")[-1]
+                k = ":".join(k.split("_"))
+                nodes_new[k] = {
                     "name": x["label"],
                     "description": x["description"],
                     "synonyms": x["synonyms"],
@@ -158,6 +160,10 @@ class OntologyEbi(Ontology):
     @property
     def node_names(self) -> List[str]:
         return [v["name"] for k, v in self.nodes.items()]
+
+    def id_from_name(self, x: str) -> str:
+        self.validate_node(x=x)
+        return [k for k, v in self.nodes.items() if v["name"] == x][0]
 
     def map_node_suggestion(self, x: str, include_synonyms: bool = True, n_suggest: int = 10):
         """
@@ -332,10 +338,8 @@ class OntologyExtendedObo(OntologyObo):
 
     def __init__(self, obo, **kwargs):
         super().__init__(obo=obo, **kwargs)
-        # ToDo distinguish here:
-        self.add_extension(dict_ontology=ONTOLOGIY_EXTENSION_HUMAN)
 
-    def add_extension(self, dict_ontology: Dict[str, List[str]]):
+    def add_extension(self, dict_ontology: Dict[str, List[Dict[str, dict]]]):
         """
         Extend ontology by additional edges and nodes defined in a dictionary.
 
@@ -344,21 +348,22 @@ class OntologyExtendedObo(OntologyObo):
         :param dict_ontology: Dictionary of nodes and edges to add to ontology. Parsing:
 
             - keys: parent nodes (which must be in ontology)
-            - values: children nodes (which can be in ontology), must be given as list of stringd.
+            - values: children nodes (which can be in ontology), must be given as a dictionary in which keys are
+                ontology IDs and values are node values..
                 If these are in the ontology, an edge is added, otherwise, an edge and the node are added.
         :return:
         """
         for k, v in dict_ontology.items():
-            assert isinstance(v, list), "dictionary values should be list of strings"
+            assert isinstance(v, dict), "dictionary values should be dictionaries"
             # Check that parent node is present:
-            if k not in self.nodes:
+            if k not in self.node_ids:
                 raise ValueError(f"key {k} was not in reference ontology")
             # Check if edge is added only, or edge and node.
-            for child_node in v:
-                if child_node not in self.nodes:  # Add node.
-                    self.graph.add_node(child_node)
+            for child_node_k, child_node_v in v.items():
+                if child_node_k not in self.node_ids:  # Add node
+                    self.graph.add_node(node_for_adding=child_node_k, **child_node_v)
                 # Add edge.
-                self.graph.add_edge(k, child_node)
+                self.graph.add_edge(k, child_node_k)
         # Check that DAG was not broken:
         self._check_graph()
 
@@ -593,39 +598,7 @@ class OntologyCelltypes(OntologyExtendedObo):
         return ["synonym"]
 
 
-class OntologyHancestro(OntologyExtendedObo):
-
-    def __init__(
-            self,
-            **kwargs
-    ):
-        super().__init__(obo="http://purl.obolibrary.org/obo/hancestro.obo")
-
-        # Clean up nodes:
-        nodes_to_delete = []
-        for k, v in self.graph.nodes.items():
-            if "name" not in v.keys():
-                nodes_to_delete.append(k)
-        for k in nodes_to_delete:
-            self.graph.remove_node(k)
-
-        # Clean up edges:
-        # The graph object can hold different types of edges,
-        # and multiple types are loaded from the obo, not all of which are relevant for us:
-        # All edge types (based on previous download, assert below that this is not extended):
-        edge_types = []  # ToDo
-        edges_to_delete = []
-        for i, x in enumerate(self.graph.edges):
-            assert x[2] in edge_types, x
-            if x[2] not in []:
-                edges_to_delete.append((x[0], x[1]))
-        for x in edges_to_delete:
-            self.graph.remove_edge(u=x[0], v=x[1])
-        self._check_graph()
-
-    @property
-    def synonym_node_properties(self) -> List[str]:
-        return ["synonym"]
+# use OWL for OntologyHancestro
 
 
 class OntologyHsapdv(OntologyExtendedObo):
@@ -664,6 +637,36 @@ class OntologyMmusdv(OntologyExtendedObo):
                 nodes_to_delete.append(k)
         for k in nodes_to_delete:
             self.graph.remove_node(k)
+
+    @property
+    def synonym_node_properties(self) -> List[str]:
+        return ["synonym"]
+
+
+class OntologyMondo(OntologyExtendedObo):
+
+    def __init__(
+            self,
+            **kwargs
+    ):
+        super().__init__(obo="http://purl.obolibrary.org/obo/mondo.obo")
+
+        # Clean up nodes:
+        nodes_to_delete = []
+        for k, v in self.graph.nodes.items():
+            if "name" not in v.keys():
+                nodes_to_delete.append(k)
+        for k in nodes_to_delete:
+            self.graph.remove_node(k)
+
+        # add healthy property
+        # Add node "healthy" under root node "MONDO:0000001": "quality".
+        # We use a PATO node for this label: PATO:0000461.
+        self.add_extension(dict_ontology={
+            "MONDO:0000001": {
+                "PATO:0000461": {"name": "healthy"}
+            },
+        })
 
     @property
     def synonym_node_properties(self) -> List[str]:

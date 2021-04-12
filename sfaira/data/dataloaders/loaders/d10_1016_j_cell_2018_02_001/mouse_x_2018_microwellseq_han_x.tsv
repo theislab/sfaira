@@ -101,7 +101,7 @@ Dividing cell(Neonatal-Skin)	UNKNOWN	UNKNOWN
 Dividing cell(Pancreas)	UNKNOWN	UNKNOWN
 Dividing cell(Stomach)	UNKNOWN	UNKNOWN
 Dividing cells(Lung)	UNKNOWN	UNKNOWN
-Dividng cell(Neonatal-Calvaria)
+Dividng cell(Neonatal-Calvaria)	UNKNOWN	UNKNOWN
 Dividing T cells(Lung)	T cell	CL:0000084
 Dividing dendritic cells(Lung)	dendritic cell	CL:0000451
 Ductal cell(Pancreas)	pancreatic ductal cell	CL:0002079
@@ -459,4 +459,5 @@ Ventricle cardiomyocyte_Kcnj8 high(Neonatal-Heart)	ventricular cardiac muscle ce
 abT cell(Thymus)	immature alpha-beta T cell	CL:0000790
 gdT cell (Thymus)	gamma-delta thymocyte	CL:0002405
 luteal cells(Ovary)	luteal cell	CL:0000175
+unknown	UNKNOWN	UNKNOWN
 β-cell(Pancreas)	type B pancreatic cell	CL:0000169

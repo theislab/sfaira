@@ -4,15 +4,15 @@ dataset_structure:
 dataset_wise:
     author:
         - "Cao"
+    default_embedding:
     doi:
         - "10.1126/science.aba7721"
     download_url_data: "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE156793&format=file&file=GSE156793%5FS3%5Fgene%5Fcount%2Eloom%2Egz"
     download_url_meta:
     normalization: "raw"
+    primary_data:
     year: 2020
 dataset_or_observation_wise:
-    age:
-    age_obs_key: "Age"
     assay_sc: "sci-RNA-seq"
     assay_sc_obs_key:
     assay_differentiation:
@@ -24,11 +24,11 @@ dataset_or_observation_wise:
     cell_line:
     cell_line_obs_key:
     development_stage:
-    development_stage_obs_key: "Development_day"
+    development_stage_obs_key: "Developmental_stage"
+    disease: "healthy"
+    disease_obs_key:
     ethnicity:
     ethnicity_obs_key:
-    healthy: True
-    healthy_obs_key:
     individual:
     individual_obs_key: "Fetus_id"
     organ:
@@ -48,7 +48,5 @@ observation_wise:
 feature_wise:
     var_ensembl_col: "gene_id"
     var_symbol_col: "gene_short_name"
-misc:
-    healthy_state_healthy: "healthy"
 meta:
     version: "1.0"

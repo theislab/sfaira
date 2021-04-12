@@ -7,7 +7,7 @@ from sfaira.consts import AdataIdsCellxgene
 from .cellxgene_loader import Dataset
 
 
-class DatasetGroup(DatasetGroup):
+class DatasetGroupCellxgene(DatasetGroup):
 
     def __init__(
         self,

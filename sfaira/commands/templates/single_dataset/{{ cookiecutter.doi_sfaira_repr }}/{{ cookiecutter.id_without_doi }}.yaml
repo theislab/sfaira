@@ -4,24 +4,24 @@ dataset_structure:
         - "{{ cookiecutter.sample_fns }}"
 dataset_wise:
     author: "{{ cookiecutter.author }}"
+    default_embedding: "{{ cookiecutter.default_embedding }}"
     doi: "{{ cookiecutter.doi }}"
     download_url_data: "{{ cookiecutter.download_url_data }}"
     download_url_meta: "{{ cookiecutter.download_url_meta }}"
+    primary_data: {{ cookiecutter.primary_data }}
     normalization: "{{ cookiecutter.normalization }}"
     year: "{{ cookiecutter.year }}"
 dataset_or_observation_wise:
-    age:
-    age_obs_key:
     assay: "{{ cookiecutter.assay }}"
     assay_obs_key:
     bio_sample:
     bio_sample_obs_key:
     development_stage:
     development_stage_obs_key:
+    disease: "{{ cookiecutter.disease }}"
+    disease_obs_key:
     ethnicity:
     ethnicity_obs_key:
-    healthy:
-    healthy_obs_key:
     individual:
     individual_obs_key:
     organ: "{{ cookiecutter.organ }}"

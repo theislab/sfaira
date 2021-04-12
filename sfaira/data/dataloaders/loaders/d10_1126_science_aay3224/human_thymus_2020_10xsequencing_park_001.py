@@ -12,16 +12,15 @@ class Dataset(DatasetBase):
         self.download_url_data = "https://covid19.cog.sanger.ac.uk/park20.processed.h5ad"
         self.download_url_meta = None
 
+        self.assay_sc = "10X sequencing"
         self.author = "Park"
+        self.disease = "healthy"
         self.doi = "10.1126/science.aay3224"
-        self.healthy = True
         self.normalization = "norm"
         self.organ = "thymus"
         self.organism = "human"
-        self.assay_sc = "10X sequencing"
-        self.state_exact = "healthy"
-        self.year = 2020
         self.sample_source = "primary_tissue"
+        self.year = 2020
 
         self.var_symbol_col = "index"
         self.cellontology_original_obs_key = "Anno_level_fig1"

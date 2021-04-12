@@ -15,16 +15,16 @@ class Dataset(DatasetBase):
         ]
         self.download_url_meta = None
 
+        self.assay_sc = "10X sequencing"
         self.author = "Stewart"
+        self.disease = "healthy"
         self.doi = "10.1126/science.aat5031"
-        self.healthy = True
         self.normalization = "norm"
         self.organ = "kidney"
         self.organism = "human"
-        self.assay_sc = "10X sequencing"
+        self.sample_source = "primary_tissue"
         self.state_exact = "healthy"
         self.year = 2019
-        self.sample_source = "primary_tissue"
 
         self.var_symbol_col = "index"
         self.var_ensembl_col = "ID"

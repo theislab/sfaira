@@ -17,7 +17,7 @@ import urllib.error
 import cgi
 import ssl
 
-from sfaira.versions.genome_versions import SuperGenomeContainer
+from sfaira.versions.genomes import GenomeContainer
 from sfaira.versions.metadata import Ontology, CelltypeUniverse
 from sfaira.consts import AdataIds, AdataIdsSfaira, META_DATA_FIELDS, OCS
 from sfaira.data.utils import collapse_matrix, read_yaml
@@ -73,33 +73,34 @@ class DatasetBase(abc.ABC):
     id: Union[None, str]
     genome: Union[None, str]
 
-    _age: Union[None, str]
     _assay_sc: Union[None, str]
     _assay_differentiation: Union[None, str]
     _assay_type_differentiation: Union[None, str]
     _author: Union[None, str]
     _bio_sample: Union[None, str]
     _cell_line: Union[None, str]
+    _default_embedding: Union[None, str]
     _development_stage: Union[None, str]
+    _disease: Union[None, str]
     _doi: Union[None, str]
     _download_url_data: Union[Tuple[List[None]], Tuple[List[str]], None]
     _download_url_meta: Union[Tuple[List[None]], Tuple[List[str]], None]
     _ethnicity: Union[None, str]
-    _healthy: Union[None, bool]
     _id: Union[None, str]
     _individual: Union[None, str]
     _ncells: Union[None, int]
     _normalization: Union[None, str]
     _organ: Union[None, str]
     _organism: Union[None, str]
+    _primary_data: Union[None, bool]
     _sex: Union[None, str]
     _source: Union[None, str]
     _sample_source: Union[None, str]
     _state_exact: Union[None, str]
+    _title: Union[None, str]
     _bio_sample: Union[None, str]
     _year: Union[None, int]
 
-    _age_obs_key: Union[None, str]
     _assay_sc_obs_key: Union[None, str]
     _assay_differentiation_obs_key: Union[None, str]
     _assay_type_differentiation_obs_key: Union[None, str]
@@ -108,9 +109,8 @@ class DatasetBase(abc.ABC):
     _cellontology_id_obs_key: Union[None, str]
     _cellontology_original_obs_key: Union[None, str]
     _development_stage_obs_key: Union[None, str]
+    _disease_obs_key: Union[None, str]
     _ethnicity_obs_key: Union[None, str]
-    _healthy_obs_key: Union[None, str]
-    _healthy_obs_key: Union[None, str]
     _individual: Union[None, str]
     _organ_obs_key: Union[None, str]
     _organism_obs_key: Union[None, str]
@@ -119,8 +119,6 @@ class DatasetBase(abc.ABC):
     _sex_obs_key: Union[None, str]
     _state_exact_obs_key: Union[None, str]
     _tech_sample_obs_key: Union[None, str]
-
-    _healthy_state_healthy: Union[None, str]
 
     _var_symbol_col: Union[None, str]
     _var_ensembl_col: Union[None, str]
@@ -176,33 +174,34 @@ class DatasetBase(abc.ABC):
         self.meta_path = meta_path
         self.cache_path = cache_path
 
-        self._age = None
         self._author = None
         self._assay_sc = None
         self._assay_differentiation = None
         self._assay_type_differentiation = None
         self._bio_sample = None
         self._cell_line = None
+        self._default_embedding = None
         self._development_stage = None
+        self._disease = None
         self._doi = None
         self._download_url_data = None
         self._download_url_meta = None
         self._ethnicity = None
-        self._healthy = None
         self._id = None
         self._individual = None
         self._ncells = None
         self._normalization = None
         self._organ = None
         self._organism = None
+        self._primary_data = None
         self._sample_source = None
         self._sex = None
         self._source = None
         self._state_exact = None
         self._tech_sample = None
+        self._title = None
         self._year = None
 
-        self._age_obs_key = None
         self._assay_sc_obs_key = None
         self._assay_differentiation_obs_key = None
         self._assay_type_differentiation_obs_key = None
@@ -212,8 +211,9 @@ class DatasetBase(abc.ABC):
         self._cellontology_id_obs_key = None
         self._cellontology_original_obs_key = None
         self._development_stage_obs_key = None
+        self._disease_obs_key = None
         self._ethnicity_obs_key = None
-        self._healthy_obs_key = None
+
         self._individual_obs_key = None
         self._organ_obs_key = None
         self._organism_obs_key = None
@@ -221,8 +221,6 @@ class DatasetBase(abc.ABC):
         self._sex_obs_key = None
         self._state_exact_obs_key = None
         self._tech_sample_obs_key = None
-
-        self._healthy_state_healthy = None
 
         self._var_symbol_col = None
         self._var_ensembl_col = None
@@ -375,6 +373,7 @@ class DatasetBase(abc.ABC):
         Wraps data set specific load and allows for caching.
 
         Cache is written into director named after doi and h5ad named after data set id.
+        Cache is not over-written.
 
         :param load_raw: Loads unprocessed version of data if available in data loader.
         :param allow_caching: Whether to allow method to cache adata object for faster re-loading.
@@ -409,7 +408,8 @@ class DatasetBase(abc.ABC):
                 dir_cache = os.path.dirname(filename)
                 if not os.path.exists(dir_cache):
                     os.makedirs(dir_cache)
-                self.adata.write_h5ad(filename)
+                if not os.path.exists(filename):
+                    self.adata.write_h5ad(filename)
 
         if load_raw and allow_caching:
             _assembly_wrapper()
@@ -433,24 +433,8 @@ class DatasetBase(abc.ABC):
         if match_to_reference and not remove_gene_version:
             warnings.warn("it is not recommended to enable matching the feature space to a genomes reference"
                           "while not removing gene versions. this can lead to very poor matching results")
-
-        # Set default genomes per organism if none provided:
-        if isinstance(match_to_reference, str):
-            genome = match_to_reference
-        elif match_to_reference is None or (isinstance(match_to_reference, bool) and match_to_reference):
-            if self.organism == "human":
-                genome = "Homo_sapiens_GRCh38_97"
-                warnings.warn(f"using default genome {genome}")
-            elif self.organism == "mouse":
-                genome = "Mus_musculus_GRCm38_97"
-                warnings.warn(f"using default genome {genome}")
-            else:
-                raise ValueError(f"genome was not supplied and no default genome found for organism {self.organism}")
-        elif not match_to_reference:
-            genome = None
-        else:
-            raise ValueError(f"invalid choice for match_to_reference={match_to_reference}")
-        self._set_genome(genome=genome)
+        if not (isinstance(match_to_reference, bool) and not match_to_reference):
+            self._set_genome(organism=self.organism, assembly=match_to_reference)
 
         # Set path to dataset directory
         if self.data_dir is None:
@@ -458,18 +442,16 @@ class DatasetBase(abc.ABC):
 
         # Run data set-specific loading script:
         self._load_cached(load_raw=load_raw, allow_caching=allow_caching)
-        if set_metadata:
-            # Set data-specific meta data in .adata:
-            self._set_metadata_in_adata()
         # Set loading hyper-parameter-specific meta data:
         self.adata.uns[self._adata_ids_sfaira.load_raw] = load_raw
         self.adata.uns[self._adata_ids_sfaira.mapped_features] = match_to_reference
         self.adata.uns[self._adata_ids_sfaira.remove_gene_version] = remove_gene_version
+        if set_metadata:
+            # Set data-specific meta data in .adata:
+            self._set_metadata_in_adata(allow_uns=True)
         # Streamline feature space:
         self._convert_and_set_var_names(match_to_reference=match_to_reference)
         self._collapse_genes(remove_gene_version=remove_gene_version)
-        if match_to_reference:
-            self._match_features_to_reference()
 
     load.__doc__ = load_doc
 
@@ -557,9 +539,14 @@ class DatasetBase(abc.ABC):
         self.adata.var[self._adata_ids_sfaira.gene_id_index] = self.adata.var_names
         self.adata.var.index = self.adata.var[self._adata_ids_sfaira.gene_id_ensembl].values
 
-    def _match_features_to_reference(self):
+    def subset_genes(self, subset_type: Union[None, str, List[str]] = None):
         """
-        Match feature space to a genomes provided with sfaira
+        Subset and sort genes to genes defined in an assembly or genes of a particular type, such as protein coding.
+
+        :param subset_type: Type(s) to subset to. Can be a single type or a list of types or None. Types can be:
+
+            - None: All genes in assembly.
+            - "protein_coding": All protein coding genes in assembly.
         """
         # Convert data matrix to csc matrix
         if isinstance(self.adata.X, np.ndarray):
@@ -574,9 +561,21 @@ class DatasetBase(abc.ABC):
 
         # Compute indices of genes to keep
         data_ids = self.adata.var[self._adata_ids_sfaira.gene_id_ensembl].values
-        idx_feature_kept = np.where([x in self.genome_container.ensembl for x in data_ids])[0]
-        idx_feature_map = np.array([self.genome_container.ensembl.index(x)
-                                    for x in data_ids[idx_feature_kept]])
+        if subset_type is None:
+            subset_ids = self.genome_container.ensembl
+        else:
+            if isinstance(subset_type, str):
+                subset_type = [subset_type]
+            keys = np.unique(self.genome_container.type)
+            if subset_type not in keys:
+                raise ValueError(f"subset type {subset_type} not available in list {keys}")
+            subset_ids = [
+                x for x, y in zip(self.genome_container.ensembl, self.genome_container.type)
+                if y in subset_type
+            ]
+
+        idx_feature_kept = np.where([x in subset_ids for x in data_ids])[0]
+        idx_feature_map = np.array([subset_ids.index(x) for x in data_ids[idx_feature_kept]])
         # Remove unmapped genes
         x = x[:, idx_feature_kept]
 
@@ -606,39 +605,44 @@ class DatasetBase(abc.ABC):
             uns=self.adata.uns
         )
 
-    def _set_metadata_in_adata(self):
+    def _set_metadata_in_adata(self, allow_uns: bool):
         """
         Copy meta data from dataset class in .anndata.
 
+        :param allow_uns: Allow writing of constant meta data into uns rather than .obs.
         :return:
         """
-        # Set data set-wide attributes (.uns):
-        self.adata.uns[self._adata_ids_sfaira.annotated] = self.annotated
-        self.adata.uns[self._adata_ids_sfaira.author] = self.author
-        self.adata.uns[self._adata_ids_sfaira.doi] = self.doi
-        self.adata.uns[self._adata_ids_sfaira.download_url_data] = self.download_url_data
-        self.adata.uns[self._adata_ids_sfaira.download_url_meta] = self.download_url_meta
-        self.adata.uns[self._adata_ids_sfaira.id] = self.id
-        self.adata.uns[self._adata_ids_sfaira.normalization] = self.normalization
-        self.adata.uns[self._adata_ids_sfaira.year] = self.year
+        # Set data set-wide attributes (.uns) (write to .obs if .uns is not allowed):
+        if allow_uns:
+            for k in self._adata_ids_sfaira.uns_keys:
+                if k not in self.adata.uns.keys():
+                    self.adata.uns[getattr(self._adata_ids_sfaira, k)] = getattr(self, k)
+        else:
+            for k in self._adata_ids_sfaira.uns_keys:
+                if k in self.adata.uns.keys():
+                    val = self.adata.uns[k]
+                else:
+                    val = getattr(self, k)
+                while hasattr(val, '__len__') and not isinstance(val, str) and len(val) == 1:  # unpack nested lists
+                    val = val[0]
+                self.adata.obs[getattr(self._adata_ids_sfaira, k)] = [val for i in range(len(self.adata.obs))]
 
         # Set cell-wise or data set-wide attributes (.uns / .obs):
-        # These are saved in .uns if they are data set wide to save memory.
+        # These are saved in .uns if they are data set wide to save memory if allow_uns is True.
         for x, y, z, v in (
-            [self.age, self._adata_ids_sfaira.age, self.age_obs_key, self.ontology_container_sfaira.age],
             [self.assay_sc, self._adata_ids_sfaira.assay_sc, self.assay_sc_obs_key, self.ontology_container_sfaira.assay_sc],
             [self.assay_differentiation, self._adata_ids_sfaira.assay_differentiation, self.assay_differentiation_obs_key,
              self.ontology_container_sfaira.assay_differentiation],
             [self.assay_type_differentiation, self._adata_ids_sfaira.assay_type_differentiation,
              self.assay_type_differentiation_obs_key, self.ontology_container_sfaira.assay_type_differentiation],
-            [self.bio_sample, self._adata_ids_sfaira.bio_sample, self.bio_sample_obs_key, None],
             [self.cell_line, self._adata_ids_sfaira.cell_line, self.cell_line_obs_key,
              self.ontology_container_sfaira.cell_line],
             [self.development_stage, self._adata_ids_sfaira.development_stage, self.development_stage_obs_key,
-             self.ontology_container_sfaira.developmental_stage],
+             self.ontology_container_sfaira.development_stage],
+            [self.disease, self._adata_ids_sfaira.disease, self.disease_obs_key,
+             self.ontology_container_sfaira.disease],
             [self.ethnicity, self._adata_ids_sfaira.ethnicity, self.ethnicity_obs_key,
              self.ontology_container_sfaira.ethnicity],
-            [self.individual, self._adata_ids_sfaira.individual, self.individual_obs_key, None],
             [self.organ, self._adata_ids_sfaira.organ, self.organ_obs_key, self.ontology_container_sfaira.organ],
             [self.organism, self._adata_ids_sfaira.organism, self.organism_obs_key,
              self.ontology_container_sfaira.organism],
@@ -646,13 +650,11 @@ class DatasetBase(abc.ABC):
              self.ontology_container_sfaira.sample_source],
             [self.sex, self._adata_ids_sfaira.sex, self.sex_obs_key, self.ontology_container_sfaira.sex],
             [self.state_exact, self._adata_ids_sfaira.state_exact, self.state_exact_obs_key, None],
-            [self.tech_sample, self._adata_ids_sfaira.tech_sample, self.tech_sample_obs_key, None],
         ):
-            if x is None and z is None:
+            if z is None and allow_uns:
                 self.adata.uns[y] = None
-            elif x is not None and z is None:
-                # Attribute supplied per data set: Write into .uns.
-                self.adata.uns[y] = x
+            elif z is None and not allow_uns:
+                self.adata.obs[y] = x
             elif z is not None:
                 # Attribute supplied per cell: Write into .obs.
                 # Search for direct match of the sought-after column name or for attribute specific obs key.
@@ -671,39 +673,35 @@ class DatasetBase(abc.ABC):
                     self.adata.obs[y] = self.adata.obs[z].values.tolist()
             else:
                 assert False, "switch option should not occur"
-        # Load boolean labels:
-        for x, y, z, v, w in (
-            [self.healthy, self._adata_ids_sfaira.healthy, self.healthy_obs_key, self.ontology_container_sfaira.healthy,
-             self.healthy_state_healthy],
+        # Add batch annotation which can be rule-based
+        for x, y, z in (
+                [self.bio_sample, self._adata_ids_sfaira.bio_sample, self.bio_sample_obs_key],
+                [self.individual, self._adata_ids_sfaira.individual, self.individual_obs_key],
+                [self.tech_sample, self._adata_ids_sfaira.tech_sample, self.tech_sample_obs_key],
         ):
-            if x is None and z is None:
-                self.adata.uns[y] = None
-            elif x is not None and z is None:
-                # Attribute supplied per data set: Write into .uns.
-                if w is None:
-                    self.adata.uns[y] = x
-                else:
-                    self.adata.uns[y] = x == w
+            if z is None and allow_uns:
+                self.adata.uns[y] = x
+            elif z is None and not allow_uns:
+                self.adata.uns[y] = UNS_STRING_META_IN_OBS
+                self.adata.obs[y] = x
             elif z is not None:
-                # Attribute supplied per cell: Write into .obs.
-                # Search for direct match of the sought-after column name or for attribute specific obs key.
-                if z not in self.adata.obs.keys():
-                    # This should not occur in single data set loaders (see warning below) but can occur in
-                    # streamlined data loaders if not all instances of the streamlined data sets have all columns
-                    # in .obs set.
-                    self.adata.uns[y] = None
-                    print(f"WARNING: attribute {y} of data set {self.id} was not found in column {z}")  # debugging
-                else:
-                    # Include flag in .uns that this attribute is in .obs:
-                    self.adata.uns[y] = UNS_STRING_META_IN_OBS
-                    # Remove potential pd.Categorical formatting:
-                    label_y = self.adata.obs[z].values
-                    # Use reference string to establish equality if available:
-                    if w is not None:
-                        label_y = label_y == w
-                    self._value_protection(
-                        attr=y, allowed=v, attempted=np.unique(label_y).tolist())
-                    self.adata.obs[y] = label_y.tolist()
+                self.adata.uns[y] = UNS_STRING_META_IN_OBS
+                zs = z.split("*")  # Separator for indicate multiple columns.
+                keys_to_use = []
+                for zz in zs:
+                    if zz not in self.adata.obs.keys():
+                        # This should not occur in single data set loaders (see warning below) but can occur in
+                        # streamlined data loaders if not all instances of the streamlined data sets have all columns
+                        # in .obs set.
+                        print(f"WARNING: attribute {y} of data set {self.id} was not found in column {zz}")  # debugging
+                    else:
+                        keys_to_use.append(zz)
+                if len(keys_to_use) > 0:
+                    # Build a combination label out of all columns used to describe this group.
+                    self.adata.obs[y] = [
+                        "_".join([str(xxx) for xxx in xx])
+                        for xx in zip(*[self.adata.obs[k].values.tolist() for k in keys_to_use])
+                    ]
             else:
                 assert False, "switch option should not occur"
         # Set cell-wise attributes (.obs):
@@ -713,7 +711,14 @@ class DatasetBase(abc.ABC):
         if self.cellontology_original_obs_key is not None:
             self.project_celltypes_to_ontology()
 
-    def streamline(self, format: str = "sfaira", clean: bool = False):
+    def streamline(
+            self,
+            format: str = "sfaira",
+            allow_uns_sfaira: bool = True,
+            clean_obs: bool = True,
+            clean_var: bool = True,
+            clean_uns: bool = True
+    ):
         """
         Streamline the adata instance to output format.
 
@@ -723,43 +728,161 @@ class DatasetBase(abc.ABC):
 
             - "sfaira"
             - "cellxgene"
-        :param clean: Whether to delete non-streamlined fields.
+        :param allow_uns_sfaira: When using sfaira format: Whether to keep metadata in uns or move it to obs instead.
+        :param clean_obs: Whether to delete non-streamlined fields in .obs, .obsm and .obsp.
+        :param clean_var: Whether to delete non-streamlined fields in .var, .varm and .varp.
+        :param clean_uns: Whether to delete non-streamlined fields in .uns.
         :return:
         """
         if format == "sfaira":
             adata_fields = self._adata_ids_sfaira
+            self._set_metadata_in_adata(allow_uns=allow_uns_sfaira)
         elif format == "cellxgene":
             from sfaira.consts import AdataIdsCellxgene
             adata_fields = AdataIdsCellxgene()
+            self._set_metadata_in_adata(allow_uns=False)
         else:
             raise ValueError(f"did not recognize format {format}")
-        if clean:
+        if clean_var:
             if self.adata.varm is not None:
                 del self.adata.varm
+            if self.adata.varp is not None:
+                del self.adata.varp
+        if clean_obs:
             if self.adata.obsm is not None:
                 del self.adata.obsm
-            if self.adata.varm is not None:
-                del self.adata.varp
             if self.adata.obsp is not None:
                 del self.adata.obsp
-            # Only retain target elements in adata.uns:
-            self.adata.uns = dict([
-                (getattr(adata_fields, k), self.adata.uns[getattr(self._adata_ids_sfaira, k)])
-                if getattr(self._adata_ids_sfaira, k) in self.adata.uns.keys() else None
-                for k in adata_fields.uns_keys
-            ])
-            # Only retain target elements in adata.var:
-            self.adata.var = pd.DataFrame(dict([
-                (getattr(adata_fields, k), self.adata.var[getattr(self._adata_ids_sfaira, k)])
-                for k in adata_fields.var_keys
-                if getattr(self._adata_ids_sfaira, k) in self.adata.var.keys()
-            ]))
-            # Only retain target columns in adata.obs:
-            self.adata.obs = pd.DataFrame(dict([
+        # Only retain target elements in adata.uns:
+        uns_new = dict([
+            (getattr(adata_fields, k), self.adata.uns[getattr(self._adata_ids_sfaira, k)])
+            if getattr(self._adata_ids_sfaira, k) in self.adata.uns.keys()
+            else (getattr(adata_fields, k), None)
+            for k in adata_fields.uns_keys
+        ])
+        if clean_uns:
+            del self.adata.uns
+        # Remove old keys in sfaira scheme:
+        for k in adata_fields.uns_keys:
+            if getattr(self._adata_ids_sfaira, k) in self.adata.uns.keys():
+                del self.adata.uns[getattr(self._adata_ids_sfaira, k)]
+        # Add new keys in new scheme:
+        for k, v in uns_new.items():
+            self.adata.uns[k] = v
+        # Catch issues with data structures in uns that cannot be written to h5ad:
+        for k, v in self.adata.uns.items():
+            replace = False
+            if isinstance(v, tuple) and len(v) == 1 and (isinstance(v[0], tuple) or isinstance(v[0], list)):
+                v = v[0]
+                replace = True
+            if isinstance(v, tuple) and len(v) == 1 and (isinstance(v[0], tuple) or isinstance(v[0], list)):
+                v = v[0]
+                replace = True
+            if replace:
+                if v == self._adata_ids_sfaira.unknown_metadata_identifier:
+                    self.adata.uns[k] = adata_fields.unknown_metadata_identifier
+                else:
+                    self.adata.uns[k] = v
+        # Only retain target elements in adata.var:
+        var_old = self.adata.var.copy()
+        self.adata.var = pd.DataFrame(dict([
+            (getattr(adata_fields, k), self.adata.var[getattr(self._adata_ids_sfaira, k)])
+            for k in adata_fields.var_keys
+            if getattr(self._adata_ids_sfaira, k) in self.adata.var.keys()
+        ]))
+        # Add old columns in if they are not overwritten and object is not cleaned:
+        if not clean_var:
+            for k, v in var_old.items():
+                if k not in self.adata.var.keys():
+                    self.adata.var[k] = v
+        # Only retain target columns in adata.obs:
+        obs_old = self.adata.obs.copy()
+        self.adata.obs = pd.DataFrame(
+            data=dict([
                 (getattr(adata_fields, k), self.adata.obs[getattr(self._adata_ids_sfaira, k)])
                 for k in adata_fields.obs_keys
                 if getattr(self._adata_ids_sfaira, k) in self.adata.obs.keys()
-            ]))
+            ]),
+            index=self.adata.obs.index
+        )
+        # Add old columns in if they are not overwritten and object is not cleaned:
+        if not clean_obs:
+            for k, v in obs_old.items():
+                if k not in self.adata.obs.keys() and \
+                        k not in [getattr(self._adata_ids_sfaira, k) for k in adata_fields.obs_keys] and \
+                        k not in self._adata_ids_sfaira.obs_keys:
+                    self.adata.obs[k] = v
+        # Add additional constant description changes based on output format:
+        if format == "cellxgene":
+            self.adata.uns["layer_descriptions"] = {"X": "raw"}
+            self.adata.uns["version"] = {
+                "corpora_encoding_version": "0.1.0",
+                "corpora_schema_version": "1.1.0",
+            }
+            for k in ["author", "doi", "download_url_data", "download_url_meta", "id", "year"]:
+                if k in self.adata.uns.keys():
+                    del self.adata.uns[k]
+            # TODO port this into organism ontology handling.
+            if self.organism == "mouse":
+                self.adata.uns["organism"] = "Mus musculus"
+                self.adata.uns["organism_ontology_term_id"] = "NCBITaxon:10090"
+            elif self.organism == "human":
+                self.adata.uns["organism"] = "Homo sapiens"
+                self.adata.uns["organism_ontology_term_id"] = "NCBITaxon:9606"
+            else:
+                assert False, self.organism
+            # Add ontology IDs where necessary (note that human readable terms are also kept):
+            for k in [
+                "organ",
+                "assay_sc",
+                "disease",
+                "ethnicity",
+                "development_stage",
+            ]:
+                if getattr(adata_fields, k) in self.adata.obs.columns:
+                    self.__project_name_to_id_obs(
+                        ontology=getattr(self._adata_ids_sfaira, k),
+                        key_in=getattr(adata_fields, k),
+                        key_out=getattr(adata_fields, k) + "_ontology_term_id",
+                        map_exceptions=[],
+                        map_exceptions_value="",
+                    )
+                else:
+                    self.adata.obs[getattr(adata_fields, k)] = adata_fields.unknown_metadata_identifier
+                    self.adata.obs[getattr(adata_fields, k) + "_ontology_term_id"] = ""
+            # Clean up readable fields.
+            for k in [
+                "organ",
+                "assay_sc",
+                "disease",
+                "ethnicity",
+                "development_stage",
+                "sex",
+            ]:
+                self.adata.obs[getattr(adata_fields, k)] = [
+                    x if x is not None else adata_fields.unknown_metadata_identifier
+                    for x in self.adata.obs[getattr(adata_fields, k)].values
+                ]
+            # Adapt var columns naming.
+            if self.organism == "mouse":
+                gene_id_new = "hgnc_gene_symbol"
+            elif self.organism == "human":
+                gene_id_new = "mgi_gene_symbol"
+            else:
+                assert False, self.organism
+            self.adata.var[gene_id_new] = self.adata.var[getattr(adata_fields, "gene_id_names")]
+            self.adata.var.index = self.adata.var[gene_id_new].values
+            if gene_id_new != getattr(adata_fields, "gene_id_names"):
+                del self.adata.var[getattr(adata_fields, "gene_id_names")]
+        if format != "sfaira":
+            # Remove sfaira intrinsic .uns fields:
+            keys_to_delete = ["load_raw", "mapped_features", "remove_gene_version", "annotated"]
+            for k, v in self.adata.uns.items():
+                if isinstance(v, str) and v == UNS_STRING_META_IN_OBS:
+                    keys_to_delete.append(k)
+            for k in np.unique(keys_to_delete):
+                if k in self.adata.uns.keys():
+                    del self.adata.uns[k]
 
     def load_tobacked(
             self,
@@ -835,24 +958,11 @@ class DatasetBase(abc.ABC):
         else:
             raise ValueError(f"Did not recognize backed AnnData.X format {type(adata_backed.X)}")
 
-    def _set_genome(self, genome: Union[str, None]):
-        if genome is not None:
-            if genome.lower().startswith("homo_sapiens"):
-                g = SuperGenomeContainer(
-                    organism="human",
-                    genome=genome
-                )
-            elif genome.lower().startswith("mus_musculus"):
-                g = SuperGenomeContainer(
-                    organism="mouse",
-                    genome=genome
-                )
-            else:
-                raise ValueError(f"Genome {genome} not recognised. Needs to start with 'Mus_Musculus' or "
-                                 f"'Homo_Sapiens'.")
-        else:
-            g = None
-        self.genome_container = g
+    def _set_genome(self, organism: str, assembly: Union[str, None]):
+        self.genome_container = GenomeContainer(
+            organism=organism,
+            assembly=assembly,
+        )
 
     @property
     def doi_cleaned_id(self):
@@ -955,8 +1065,10 @@ class DatasetBase(abc.ABC):
                 allowed=self.ontology_celltypes,
                 attempted=[
                     x for x in np.unique(labels_mapped).tolist()
-                    if x != self._adata_ids_sfaira.unknown_celltype_identifier and
-                    x != self._adata_ids_sfaira.not_a_cell_celltype_identifier
+                    if x not in [
+                        self._adata_ids_sfaira.unknown_celltype_identifier,
+                        self._adata_ids_sfaira.not_a_cell_celltype_identifier
+                    ]
                 ]
             )
         self.adata.obs[self._adata_ids_sfaira.cell_ontology_class] = labels_mapped
@@ -968,15 +1080,46 @@ class DatasetBase(abc.ABC):
         #  files with and without the ID in the third column.
         if self.cell_ontology_map is not None:
             # This mapping blocks progression in the unit test if not deactivated.
-            ids_mapped = [
-                self.ontology_container_sfaira.cellontology_class.id_from_name(x)
-                if x not in [
+            self.__project_name_to_id_obs(
+                ontology="cellontology_class",
+                key_in=self._adata_ids_sfaira.cell_ontology_class,
+                key_out=self._adata_ids_sfaira.cell_ontology_id,
+                map_exceptions=[
                     self._adata_ids_sfaira.unknown_celltype_identifier,
                     self._adata_ids_sfaira.not_a_cell_celltype_identifier
-                ] else x
-                for x in labels_mapped
-            ]
-            self.adata.obs[self._adata_ids_sfaira.cell_ontology_id] = ids_mapped
+                ],
+            )
+
+    def __project_name_to_id_obs(
+            self,
+            ontology: str,
+            key_in: str,
+            key_out: str,
+            map_exceptions: list,
+            map_exceptions_value=None,
+    ):
+        """
+        Project ontology names to IDs for a given ontology in .obs entries.
+
+        :param ontology:
+        :param key_in:
+        :param key_out:
+        :param map_exceptions:
+        :param map_exceptions_value:
+        :return:
+        """
+        ontology = getattr(self.ontology_container_sfaira, ontology)
+        map_vals = dict([
+            (x, ontology.id_from_name(x))
+            for x in np.unique([
+                xx for xx in self.adata.obs[key_in].values
+                if (xx not in map_exceptions and xx is not None)
+            ])
+        ])
+        self.adata.obs[key_out] = [
+            map_vals[x] if x in map_vals.keys() else map_exceptions_value
+            for x in self.adata.obs[key_in].values
+        ]
 
     @property
     def citation(self):
@@ -1068,7 +1211,6 @@ class DatasetBase(abc.ABC):
         }, index=range(1))
         # Expand table by variably cell-wise or data set-wise meta data:
         for x in [
-            self._adata_ids_sfaira.age,
             self._adata_ids_sfaira.assay_sc,
             self._adata_ids_sfaira.assay_differentiation,
             self._adata_ids_sfaira.assay_type_differentiation,
@@ -1076,7 +1218,6 @@ class DatasetBase(abc.ABC):
             self._adata_ids_sfaira.cell_line,
             self._adata_ids_sfaira.development_stage,
             self._adata_ids_sfaira.ethnicity,
-            self._adata_ids_sfaira.healthy,
             self._adata_ids_sfaira.individual,
             self._adata_ids_sfaira.organ,
             self._adata_ids_sfaira.organism,
@@ -1135,24 +1276,6 @@ class DatasetBase(abc.ABC):
     @additional_annotation_key.setter
     def additional_annotation_key(self, x: str):
         self._additional_annotation_key = x
-
-    @property
-    def age(self) -> Union[None, str]:
-        if self._age is not None:
-            return self._age
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids_sfaira.age in self.meta.columns:
-                return self.meta[self._adata_ids_sfaira.age]
-            else:
-                return None
-
-    @age.setter
-    def age(self, x: str):
-        self.__erasing_protection(attr="age", val_old=self._age, val_new=x)
-        self._value_protection(attr="age", allowed=self.ontology_container_sfaira.age, attempted=x)
-        self._age = x
 
     @property
     def annotated(self) -> Union[bool, None]:
@@ -1228,22 +1351,6 @@ class DatasetBase(abc.ABC):
         self._assay_type_differentiation = x
 
     @property
-    def author(self) -> str:
-        if self._author is not None:
-            return self._author
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is None or self._adata_ids_sfaira.author not in self.meta.columns:
-                raise ValueError("author must be set but was neither set in constructor nor in meta data")
-            return self.meta[self._adata_ids_sfaira.author]
-
-    @author.setter
-    def author(self, x: str):
-        self.__erasing_protection(attr="author", val_old=self._author, val_new=x)
-        self._author = x
-
-    @property
     def bio_sample(self) -> Union[None, str]:
         if self._bio_sample is not None:
             return self._bio_sample
@@ -1288,6 +1395,25 @@ class DatasetBase(abc.ABC):
             return self.data_dir_base
 
     @property
+    def default_embedding(self) -> Union[None, str]:
+        if self._default_embedding is not None:
+            return self._default_embedding
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            if self.meta is not None and self._adata_ids_sfaira.default_embedding in self.meta.columns:
+                return self.meta[self._adata_ids_sfaira.default_embedding]
+            else:
+                return None
+
+    @default_embedding.setter
+    def default_embedding(self, x: str):
+        self.__erasing_protection(attr="default_embedding", val_old=self._development_stage, val_new=x)
+        self._value_protection(attr="default_embedding", allowed=self.ontology_container_sfaira.default_embedding,
+                               attempted=x)
+        self._default_embedding = x
+
+    @property
     def development_stage(self) -> Union[None, str]:
         if self._development_stage is not None:
             return self._development_stage
@@ -1301,10 +1427,29 @@ class DatasetBase(abc.ABC):
 
     @development_stage.setter
     def development_stage(self, x: str):
-        self.__erasing_protection(attr="dev_stage", val_old=self._development_stage, val_new=x)
-        self._value_protection(attr="dev_stage", allowed=self.ontology_container_sfaira.developmental_stage,
+        self.__erasing_protection(attr="development_stage", val_old=self._development_stage, val_new=x)
+        self._value_protection(attr="development_stage", allowed=self.ontology_container_sfaira.development_stage,
                                attempted=x)
         self._development_stage = x
+
+    @property
+    def disease(self) -> Union[None, str]:
+        if self._disease is not None:
+            return self._disease
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            if self.meta is not None and self._adata_ids_sfaira.disease in self.meta.columns:
+                return self.meta[self._adata_ids_sfaira.disease]
+            else:
+                return None
+
+    @disease.setter
+    def disease(self, x: str):
+        self.__erasing_protection(attr="disease", val_old=self._disease, val_new=x)
+        self._value_protection(attr="disease", allowed=self.ontology_container_sfaira.disease,
+                               attempted=x)
+        self._disease = x
 
     @property
     def doi(self) -> Union[str, List[str]]:
@@ -1416,32 +1561,6 @@ class DatasetBase(abc.ABC):
         self._ethnicity = x
 
     @property
-    def healthy(self) -> Union[None, bool]:
-        if self._healthy is not None:
-            return self._healthy
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids_sfaira.healthy in self.meta.columns:
-                return self.meta[self._adata_ids_sfaira.healthy]
-            else:
-                return None
-
-    @healthy.setter
-    def healthy(self, x: bool):
-        self.__erasing_protection(attr="healthy", val_old=self._healthy, val_new=x)
-        self._healthy = x
-
-    @property
-    def healthy_state_healthy(self) -> str:
-        return self._healthy_state_healthy
-
-    @healthy_state_healthy.setter
-    def healthy_state_healthy(self, x: str):
-        self.__erasing_protection(attr="healthy_state_healthy", val_old=self._healthy_state_healthy, val_new=x)
-        self._healthy_state_healthy = x
-
-    @property
     def id(self) -> str:
         if self._id is not None:
             return self._id
@@ -1531,13 +1650,23 @@ class DatasetBase(abc.ABC):
         self._normalization = x
 
     @property
-    def age_obs_key(self) -> str:
-        return self._age_obs_key
+    def primary_data(self) -> Union[None, bool]:
+        if self._primary_data is not None:
+            return self._primary_data
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            if self.meta is not None and self._adata_ids_sfaira.primary_data in self.meta.columns:
+                return self.meta[self._adata_ids_sfaira.primary_data]
+            else:
+                return None
 
-    @age_obs_key.setter
-    def age_obs_key(self, x: str):
-        self.__erasing_protection(attr="age_obs_key", val_old=self._age_obs_key, val_new=x)
-        self._age_obs_key = x
+    @primary_data.setter
+    def primary_data(self, x: bool):
+        self.__erasing_protection(attr="primary_data", val_old=self._primary_data, val_new=x)
+        self._value_protection(attr="primary_data", allowed=self.ontology_container_sfaira.primary_data,
+                               attempted=x)
+        self._primary_data = x
 
     @property
     def assay_sc_obs_key(self) -> str:
@@ -1616,8 +1745,17 @@ class DatasetBase(abc.ABC):
 
     @development_stage_obs_key.setter
     def development_stage_obs_key(self, x: str):
-        self.__erasing_protection(attr="dev_stage_obs_key", val_old=self._development_stage_obs_key, val_new=x)
+        self.__erasing_protection(attr="development_stage_obs_key", val_old=self._development_stage_obs_key, val_new=x)
         self._development_stage_obs_key = x
+
+    @property
+    def disease_obs_key(self) -> str:
+        return self._disease_obs_key
+
+    @disease_obs_key.setter
+    def disease_obs_key(self, x: str):
+        self.__erasing_protection(attr="disease_obs_key", val_old=self._disease_obs_key, val_new=x)
+        self._disease_obs_key = x
 
     @property
     def ethnicity_obs_key(self) -> str:
@@ -1627,15 +1765,6 @@ class DatasetBase(abc.ABC):
     def ethnicity_obs_key(self, x: str):
         self.__erasing_protection(attr="ethnicity_obs_key", val_old=self._ethnicity_obs_key, val_new=x)
         self._ethnicity_obs_key = x
-
-    @property
-    def healthy_obs_key(self) -> str:
-        return self._healthy_obs_key
-
-    @healthy_obs_key.setter
-    def healthy_obs_key(self, x: str):
-        self.__erasing_protection(attr="healthy_obs_key", val_old=self._healthy_obs_key, val_new=x)
-        self._healthy_obs_key = x
 
     @property
     def individual_obs_key(self) -> str:
@@ -1879,11 +2008,77 @@ class DatasetBase(abc.ABC):
         assert x.shape[1] in [2, 3], f"{x.shape} in {self.id}"
         assert x.columns[0] == self._adata_ids_sfaira.classmap_source_key
         assert x.columns[1] == self._adata_ids_sfaira.classmap_target_key
+        # Check for weird entries:
+        # nan arises if columns was empty in that row.
+        nan_vals = np.where([
+            False if isinstance(x, str) else (np.isnan(x) or x is None)
+            for x in x[self._adata_ids_sfaira.classmap_target_key].values.tolist()
+        ])[0]
+        assert len(nan_vals) == 0, \
+            f"Found nan target values in {self.id} for {x[self._adata_ids_sfaira.classmap_target_key].values[nan_vals]}"
         # Transform data frame into a mapping dictionary:
         self._ontology_class_map = dict(list(zip(
             x[self._adata_ids_sfaira.classmap_source_key].values.tolist(),
             x[self._adata_ids_sfaira.classmap_target_key].values.tolist()
         )))
+
+    def __crossref_query(self, k):
+        """
+        Queries cross REST API via package crossref_commons.
+
+        :param k: Key to extract from crossref query container.
+        :return:
+        """
+        from crossref_commons.retrieval import get_entity
+        from crossref_commons.types import EntityType, OutputType
+        try:
+            attempt_counter = 0
+            while True:
+                x = None
+                try:
+                    attempt_counter += 1
+                    x = get_entity(self.doi_main, EntityType.PUBLICATION, OutputType.JSON)[k]
+                except ConnectionError as e:
+                    # Terminate trial after 5 attempts with ConnectionError:
+                    if attempt_counter > 5:
+                        raise ConnectionError(e)
+                finally:
+                    if k == "author":
+                        pass
+                    return x
+        except ValueError:
+            return None
+        except ConnectionError as e:
+            print(f"ConnectionError: {e}")
+            return None
+
+    @property
+    def author(self) -> str:
+        if self._author is not None:
+            return self._author
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            if self.meta is None or self._adata_ids_sfaira.author not in self.meta.columns:
+                raise ValueError("author must be set but was neither set in constructor nor in meta data")
+            return self.meta[self._adata_ids_sfaira.author]
+
+    @author.setter
+    def author(self, x: str):
+        self.__erasing_protection(attr="author", val_old=self._author, val_new=x)
+        self._author = x
+
+    @property
+    def title(self):
+        if self._title is not None:
+            return self._title
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            if self.meta is not None and self._adata_ids_sfaira.title in self.meta.columns:
+                return self.meta[self._adata_ids_sfaira.title]
+            else:
+                return self.__crossref_query(k="title")
 
     # Private methods:
 
@@ -1924,10 +2119,7 @@ class DatasetBase(abc.ABC):
             attempted = [attempted]
         for x in attempted:
             if not is_child(query=x, ontology=allowed):
-                if isinstance(allowed, Ontology):
-                    # use node names instead of ontology object to produce a readable error message
-                    allowed = allowed.node_names
-                raise ValueError(f"{x} is not a valid entry for {attr}, choose from: {allowed}")
+                raise ValueError(f"'{x}' is not a valid entry for {attr}.")
 
     def subset_cells(self, key, values):
         """
@@ -1938,7 +2130,6 @@ class DatasetBase(abc.ABC):
 
         :param key: Property to subset by. Options:
 
-            - "age" points to self.age_obs_key
             - "assay_sc" points to self.assay_sc_obs_key
             - "assay_differentiation" points to self.assay_differentiation_obs_key
             - "assay_type_differentiation" points to self.assay_type_differentiation_obs_key
@@ -1946,7 +2137,6 @@ class DatasetBase(abc.ABC):
             - "cellontology_class" points to self.cellontology_class_obs_key
             - "developmental_stage" points to self.developmental_stage_obs_key
             - "ethnicity" points to self.ethnicity_obs_key
-            - "healthy" points to self.healthy_obs_key
             - "organ" points to self.organ_obs_key
             - "organism" points to self.organism_obs_key
             - "sample_source" points to self.sample_source_obs_key

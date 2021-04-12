@@ -1,7 +1,7 @@
 from typing import Union
 
 from sfaira.data import DatasetSuperGroup
-from sfaira.data.dataloaders.databases.cellxgene import DatasetGroup as DatasetGroupCellxgene
+from sfaira.data.dataloaders.databases.cellxgene import DatasetGroupCellxgene
 
 
 class DatasetSuperGroupDatabases(DatasetSuperGroup):

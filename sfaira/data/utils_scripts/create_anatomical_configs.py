@@ -43,7 +43,7 @@ configs_to_write = {
         "placenta",
         "pleura",
         "prostate gland",
-        "rib"
+        "rib",
         "skeleton",
         "skin of body",
         "spinal cord",
@@ -91,6 +91,7 @@ configs_to_write = {
 
 for organism, organs in configs_to_write.items():
     for organ in organs:
+        print(f"Writing {organism} {organ}")
         dsgs = DatasetSuperGroupSfaira(
             data_path=".",
             meta_path=".",
