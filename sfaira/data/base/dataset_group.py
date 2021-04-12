@@ -35,7 +35,6 @@ def map_fn(inputs):
             match_to_reference=match_to_reference,
             load_raw=load_raw,
             allow_caching=allow_caching,
-            set_metadata=set_metadata,
             **kwargs
         )
         if func is not None:

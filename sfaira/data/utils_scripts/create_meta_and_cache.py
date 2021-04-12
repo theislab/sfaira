@@ -20,20 +20,11 @@ for x in ds.dataset_groups:
             # Initial load and cache writing:
             # Only run this if data set was not already cached to speed up resumed jobs.
             if not os.path.exists(v.cache_fn):
-                v.load(
-                    match_to_reference=None,
-                    remove_gene_version=True,
-                    load_raw=False,
-                    allow_caching=True,
-                )
+                v.load(remove_gene_version=True, match_to_reference=None, load_raw=False, allow_caching=True)
             # Write meta data, cache.
             v.write_meta(fn_meta=None, dir_out=path_meta)
             # Test load from cache.
-            v.load(
-                remove_gene_version=False,  # speed this up
-                load_raw=False,
-                allow_caching=False,
-            )
+            v.load(remove_gene_version=False, match_to_reference=None, load_raw=False, allow_caching=False)
             v.clear()
         except ValueError as e:
             # Do not abort upon ValueErrors, such as from cell type map bugs.

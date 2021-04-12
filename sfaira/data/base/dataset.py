@@ -433,31 +433,40 @@ class DatasetBase(abc.ABC):
             match_to_reference: Union[str, bool, None] = None,
             load_raw: bool = False,
             allow_caching: bool = True,
-            set_metadata: bool = True,
             **kwargs
     ):
-        if match_to_reference and not remove_gene_version:
-            warnings.warn("it is not recommended to enable matching the feature space to a genomes reference"
-                          "while not removing gene versions. this can lead to very poor matching results")
-        if not (isinstance(match_to_reference, bool) and not match_to_reference):
-            self._set_genome(organism=self.organism, assembly=match_to_reference)
+        """
+        Load the selected datasets into memory.
 
-        # Set path to dataset directory
+        :param remove_gene_version: Whether to remove the version number after the colon sometimes foud in ensembl gene ids.
+        :param match_to_reference: Whether to map gene names to a given annotation. Can be:
+                                   - str: Provide the name of the annotation in the format Organism.Assembly.Release
+                                   - None: use the default annotation for this organism in sfaira.
+                                   - False: no mapping of gene labels will be done.
+        :param load_raw: Force reading the raw object even when a cached one is present.
+        :param allow_caching: Write the object to cache after loading if no cache exists yet.
+        """
+        # Sanity checks
+        if self.adata is not None:
+            raise ValueError(f"adata of {self.id} already loaded.")
+        if match_to_reference and not remove_gene_version:
+            warnings.warn("it is not recommended to enable matching the feature space to a genome reference"
+                          "when not removing gene versions. this can lead to very poor matching results")
         if self.data_dir is None:
             raise ValueError("No sfaira data repo path provided in constructor.")
 
+        # Set genome container if mapping of gene labels is requested
+        if match_to_reference is not False:
+            self._set_genome(organism=self.organism, assembly=match_to_reference)
         # Run data set-specific loading script:
         self._load_cached(load_raw=load_raw, allow_caching=allow_caching, **kwargs)
-        # Set loading hyper-parameter-specific meta data:
+        # Set loading-specific metadata:
         self.adata.uns[self._adata_ids_sfaira.load_raw] = load_raw
         self.adata.uns[self._adata_ids_sfaira.mapped_features] = match_to_reference
         self.adata.uns[self._adata_ids_sfaira.remove_gene_version] = remove_gene_version
-        if set_metadata:
-            # Set data-specific meta data in .adata:
-            self._set_metadata_in_adata(allow_uns=True)
         # Streamline feature space:
         self._convert_and_set_var_names(match_to_reference=match_to_reference)
-        self._collapse_genes(remove_gene_version=remove_gene_version)
+        self._collapse_gene_versions(remove_gene_version=remove_gene_version)
 
     load.__doc__ = load_doc
 
@@ -528,7 +537,7 @@ class DatasetBase(abc.ABC):
                 raise KeyError(e)
             self.adata.var_names_make_unique()
 
-    def _collapse_genes(self, remove_gene_version):
+    def _collapse_gene_versions(self, remove_gene_version):
         """
         Remove version tag on ensembl gene ID so that different versions are superimposed downstream.
 
@@ -912,12 +921,7 @@ class DatasetBase(abc.ABC):
         :param allow_caching: See .load().
         :return: New row index for next element to be written into backed anndata.
         """
-        self.load(
-            remove_gene_version=True,
-            match_to_reference=genome,
-            load_raw=load_raw,
-            allow_caching=allow_caching
-        )
+        self.load(remove_gene_version=True, match_to_reference=genome, load_raw=load_raw, allow_caching=allow_caching)
         # Check if writing to sparse or dense matrix:
         if isinstance(adata_backed.X, np.ndarray) or \
                 isinstance(adata_backed.X, h5py._hl.dataset.Dataset):  # backed dense
@@ -1198,12 +1202,7 @@ class DatasetBase(abc.ABC):
             assert False, "bug in switch"
 
         if self.adata is None:
-            self.load(
-                remove_gene_version=False,
-                match_to_reference=None,
-                load_raw=True,
-                allow_caching=False,
-            )
+            self.load(remove_gene_version=False, match_to_reference=None, load_raw=True, allow_caching=False)
         # Add data-set wise meta data into table:
         meta = pandas.DataFrame({
             self._adata_ids_sfaira.annotated: self.adata.uns[self._adata_ids_sfaira.annotated],
