@@ -520,6 +520,11 @@ class DatasetGroup:
         supplier = [v.supplier for _, v in self.datasets.items()]
         return np.sort(np.unique(supplier)).tolist()
 
+    def show_summary(self):
+        for k, v in self.datasets.items():
+            print(k)
+            print(f"\t {(v.supplier, v.organism, v.organ, v.assay_sc, v.disease)}")
+
 
 class DatasetGroupDirectoryOriented(DatasetGroup):
 
@@ -758,6 +763,20 @@ class DatasetSuperGroup:
     def ncells(self, annotated_only: bool = False):
         return np.sum(self.ncells_bydataset_flat(annotated_only=annotated_only))
 
+    @property
+    def datasets(self) -> Dict[str, DatasetBase]:
+        """
+        Returns DatasetGroup (rather than self = DatasetSuperGroup) containing all listed data sets.
+
+        :return:
+        """
+        ds = {}
+        for x in self.dataset_groups:
+            for k, v in x.datasets.items():
+                assert k not in ds.keys(), f"{k} was duplicated in super group, remove duplicates before flattening"
+                ds[k] = v
+        return ds
+
     def flatten(self) -> DatasetGroup:
         """
         Returns DatasetGroup (rather than self = DatasetSuperGroup) containing all listed data sets.
@@ -839,6 +858,13 @@ class DatasetSuperGroup:
             else:
                 warnings.warn("no anndata instances to concatenate")
         return self._adata
+
+    @property
+    def adata_ls(self):
+        adata_ls = []
+        for k, v in self.datasets.items():
+            adata_ls.append(v.adata)
+        return adata_ls
 
     def write_distributed_store(
             self,
@@ -1180,3 +1206,8 @@ class DatasetSuperGroup:
                 warnings.warn(f"did not data set matching ID {k}")
             elif counter > 1:
                 warnings.warn(f"found more than one ({counter}) data set matching ID {k}")
+
+    def show_summary(self):
+        for k, v in self.datasets.items():
+            print(k)
+            print(f"\t {(v.supplier, v.organism, v.organ, v.assay_sc, v.disease)}")

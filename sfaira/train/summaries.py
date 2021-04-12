@@ -9,7 +9,7 @@ import os
 
 from sfaira.versions.metadata import CelltypeUniverse
 from sfaira.estimators import EstimatorKerasEmbedding
-from sfaira.data import DatasetSuperGroupSfaira
+from sfaira.data import Universe
 
 
 def _tp(yhat, ytrue):
@@ -875,7 +875,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         )
         sns_tab = sns_tab[sns_tab['organ'] == organ]
 
-        dataset = DatasetSuperGroupSfaira(data_path=datapath)
+        dataset = Universe(data_path=datapath)
         dataset.subset(key="organism", values=[organism])
         dataset.subset(key="organ", values=[organ])
         if not dataset.flatten().datasets:
@@ -1035,7 +1035,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         )
         sns_tab = sns_tab[sns_tab['organ'] == organ]
 
-        dataset = DatasetSuperGroupSfaira(data_path=datapath)
+        dataset = Universe(data_path=datapath)
         dataset.subset(key="organism", values=[organism])
         dataset.subset(key="organ", values=[organ])
         if not dataset.flatten().datasets:
@@ -1372,7 +1372,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         else:
             print('Compute gradients (1/3): load data')
             # load data
-            dataset = DatasetSuperGroupSfaira(data_path=datapath)
+            dataset = Universe(data_path=datapath)
             dataset.subset(key="organism", values=[organism])
             dataset.subset(key="organ", values=[organ])
             dataset.subset(key="annotated", values=[True])

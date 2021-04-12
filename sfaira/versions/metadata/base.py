@@ -60,6 +60,7 @@ class OntologyList(Ontology):
     """
     Basic unordered ontology container
     """
+    nodes: list
 
     def __init__(
             self,
@@ -107,7 +108,30 @@ class OntologyList(Ontology):
         return query == reference
 
 
-class OntologyEbi(Ontology):
+class OntologyHierarchical(Ontology):
+    """
+    Basic ordered ontology container
+    """
+    nodes: dict
+
+    @abc.abstractmethod
+    def id_from_name(self, x: str) -> str:
+        pass
+
+    @abc.abstractmethod
+    def name_from_id(self, x: str) -> str:
+        pass
+
+    @property
+    def node_names(self) -> List[str]:
+        pass
+
+    @property
+    def node_ids(self) -> List[str]:
+        pass
+
+
+class OntologyEbi(OntologyHierarchical):
     """
     Recursively assembles ontology by querying EBI web interface.
 
@@ -161,9 +185,17 @@ class OntologyEbi(Ontology):
     def node_names(self) -> List[str]:
         return [v["name"] for k, v in self.nodes.items()]
 
+    @property
+    def node_ids(self) -> List[str]:
+        return list(self.nodes.keys())
+
     def id_from_name(self, x: str) -> str:
         self.validate_node(x=x)
         return [k for k, v in self.nodes.items() if v["name"] == x][0]
+
+    def name_from_id(self, x: str) -> str:
+        assert x in self.nodes.keys(), f"node {x} not found"
+        return self.nodes[x]["name"]
 
     def map_node_suggestion(self, x: str, include_synonyms: bool = True, n_suggest: int = 10):
         """
@@ -194,7 +226,7 @@ class OntologyEbi(Ontology):
     def synonym_node_properties(self) -> List[str]:
         return ["synonyms"]
 
-# class OntologyOwl(Ontology):
+# class OntologyOwl(OntologyHierarchical):
 #
 #    onto: owlready2.Ontology
 #
@@ -212,7 +244,7 @@ class OntologyEbi(Ontology):
 #        pass
 
 
-class OntologyObo(Ontology):
+class OntologyObo(OntologyHierarchical):
 
     graph: networkx.MultiDiGraph
     leaves: List[str]
@@ -247,6 +279,10 @@ class OntologyObo(Ontology):
     def id_from_name(self, x: str) -> str:
         self.validate_node(x=x)
         return [k for k, v in self.graph.nodes.items() if v["name"] == x][0]
+
+    def name_from_id(self, x: str) -> str:
+        assert x in self.graph.nodes.keys(), f"node {x} not found"
+        return self.graph.nodes[x]["name"]
 
     def set_leaves(self, nodes: list = None):
         # ToDo check that these are not include parents of each other!
@@ -726,6 +762,7 @@ class OntologySinglecellLibraryConstruction(OntologyEbi):
             ontology=ontology,
             root_term=root_term,
             additional_terms={
-                "microwell-seq": {"name": "microwell-seq"}
+                "microwell-seq": {"name": "microwell-seq"},
+                "sci-plex": {"name": "sci-plex"}
             }
         )

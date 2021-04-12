@@ -13,7 +13,7 @@ fn = str(sys.argv[2])
 genome = str(sys.argv[3])
 
 path_meta = os.path.join(path, "meta")
-ds = sfaira.data.dataloaders.DatasetSuperGroupSfaira(
+ds = sfaira.data.dataloaders.Universe(
     data_path=path, meta_path=path_meta, cache_path=path_meta
 )
 ds.subset(key="organism", values=["human"])

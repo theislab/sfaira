@@ -4,14 +4,14 @@ import pytest
 import scipy.sparse
 
 from sfaira.data import DatasetSuperGroup
-from sfaira.data import DatasetSuperGroupSfaira
+from sfaira.data import Universe
 
 dir_data = "../test_data"
 dir_meta = "../test_data/meta"
 
 
 def test_dsgs_instantiate():
-    _ = DatasetSuperGroupSfaira(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
+    _ = Universe(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
 
 
 @pytest.mark.parametrize("organ", ["intestine", "ileum"])
@@ -19,7 +19,7 @@ def test_dsgs_subset_dataset_wise(organ: str):
     """
     Tests if subsetting results only in datasets of the desired characteristics.
     """
-    ds = DatasetSuperGroupSfaira(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
+    ds = Universe(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
     ds.subset(key="organism", values=["mouse"])
     ds.subset(key="organ", values=[organ])
     for x in ds.dataset_groups:
@@ -30,11 +30,11 @@ def test_dsgs_subset_dataset_wise(organ: str):
 
 def test_dsgs_config_write_load():
     fn = dir_data + "/config.csv"
-    ds = DatasetSuperGroupSfaira(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
+    ds = Universe(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
     ds.subset(key="organism", values=["mouse"])
     ds.subset(key="organ", values=["lung"])
     ds.write_config(fn=fn)
-    ds2 = DatasetSuperGroupSfaira(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
+    ds2 = Universe(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
     ds2.load_config(fn=fn)
     assert np.all(ds.ids == ds2.ids)
 
@@ -45,7 +45,7 @@ TODO tests from here on down require cached data for mouse lung
 
 
 def test_dsgs_adata():
-    ds = DatasetSuperGroupSfaira(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
+    ds = Universe(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
     ds.subset(key="organism", values=["mouse"])
     ds.subset(key="organ", values=["lung"])
     ds.load(remove_gene_version=True)
@@ -53,7 +53,7 @@ def test_dsgs_adata():
 
 
 def test_dsgs_load():
-    ds = DatasetSuperGroupSfaira(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
+    ds = Universe(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
     ds.subset(key="organism", values=["mouse"])
     ds.subset(key="organ", values=["lung"])
     ds.load(remove_gene_version=False)
@@ -65,7 +65,7 @@ def test_dsgs_subset_cell_wise(organ: str, celltype: str):
     """
     Tests if subsetting results only in datasets of the desired characteristics.
     """
-    ds = DatasetSuperGroupSfaira(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
+    ds = Universe(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
     ds.subset(key="organism", values=["mouse"])
     ds.subset(key="organ", values=[organ])
     ds.load(remove_gene_version=False)
@@ -83,7 +83,7 @@ def test_dsgs_subset_cell_wise(organ: str, celltype: str):
 @pytest.mark.parametrize("clean_var", [True, False])
 @pytest.mark.parametrize("clean_uns", [True, False])
 def test_dsgs_streamline(out_format: str, clean_obs: bool, clean_var: bool, clean_uns: bool):
-    ds = DatasetSuperGroupSfaira(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
+    ds = Universe(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
     ds.subset(key="organism", values=["mouse"])
     ds.subset(key="organ", values=["lung"])
     ds.load(remove_gene_version=True)
@@ -91,7 +91,7 @@ def test_dsgs_streamline(out_format: str, clean_obs: bool, clean_var: bool, clea
 
 
 def test_dsg_load_backed_dense(genome="Mus_musculus_GRCm38_97"):
-    ds = DatasetSuperGroupSfaira(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
+    ds = Universe(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
     ds.subset(key="organism", values=["mouse"])
     ds.subset(key="organ", values=["lung"])
     ds = DatasetSuperGroup(dataset_groups=[ds])
@@ -106,7 +106,7 @@ def test_dsg_load_backed_dense(genome="Mus_musculus_GRCm38_97"):
 
 
 def test_dsg_load_backed_sparse(genome="Mus_musculus_GRCm38_97"):
-    ds = DatasetSuperGroupSfaira(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
+    ds = Universe(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
     ds.subset(key="organism", values=["mouse"])
     ds.subset(key="organ", values=["lung"])
     ds = DatasetSuperGroup(dataset_groups=[ds])
@@ -121,7 +121,7 @@ def test_dsg_load_backed_sparse(genome="Mus_musculus_GRCm38_97"):
 
 
 def test_dsg_load():
-    ds = DatasetSuperGroupSfaira(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
+    ds = Universe(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
     ds.subset(key="organism", values=["mouse"])
     ds.subset(key="organ", values=["lung"])
     ds = DatasetSuperGroup(dataset_groups=[ds])
@@ -129,7 +129,7 @@ def test_dsg_load():
 
 
 def test_dsg_adata():
-    ds = DatasetSuperGroupSfaira(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
+    ds = Universe(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
     ds.subset(key="organism", values=["mouse"])
     ds.subset(key="organ", values=["lung"])
     ds = DatasetSuperGroup(dataset_groups=[ds])

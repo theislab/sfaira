@@ -322,9 +322,8 @@ class DatasetBase(abc.ABC):
                     fn = cgi.parse_header(urllib.request.urlopen(url).info()['Content-Disposition'])[1]["filename"]
                 else:
                     fn = url.split("/")[-1]
-                if os.path.isfile(os.path.join(self.data_dir, fn)):
-                    print(f"File {fn} already found on disk, skipping download.")
-                else:
+                # Only download if file not already downloaded:
+                if not os.path.isfile(os.path.join(self.data_dir, fn)):
                     print(f"Downloading: {fn}")
                     urllib.request.urlretrieve(url, os.path.join(self.data_dir, fn))
 
@@ -385,6 +384,8 @@ class DatasetBase(abc.ABC):
         """
 
         def _assembly_wrapper():
+            if self.load_func is None:
+                raise ValueError(f"Tried to access load_func for {self.id} but did not find any.")
             self.adata = self.load_func(data_dir=self.data_dir, sample_fn=self.sample_fn, **kwargs)
             # Enable loading of additional annotation, e.g. secondary cell type annotation
             # The additional annotation `obs2 needs to be on a subset of the original annotation `self.adata.obs`.
@@ -1179,19 +1180,20 @@ class DatasetBase(abc.ABC):
             meta = self.data_dir
         else:
             meta = os.path.join(self.meta_path, self.directory_formatted_doi)
-
-        return os.path.join(meta, "meta", self.doi_cleaned_id + "_meta.csv")
+        if meta is None:
+            return None
+        else:
+            return os.path.join(meta, "meta", self.doi_cleaned_id + "_meta.csv")
 
     def load_meta(self, fn: Union[PathLike, str, None]):
         if fn is None:
-            if self.meta_fn is None:
-                raise ValueError("provide either fn in load or path in constructor")
-            fn = self.meta_fn
+            if self.meta_fn is not None:
+                fn = self.meta_fn
         else:
             if isinstance(fn, str):
                 fn = os.path.normpath(fn)
         # Only load meta data if file exists:
-        if os.path.isfile(fn):
+        if fn is not None and os.path.isfile(fn):
             meta = pandas.read_csv(
                 fn,
                 usecols=list(META_DATA_FIELDS.keys()),
@@ -1428,11 +1430,14 @@ class DatasetBase(abc.ABC):
     def data_dir(self):
         # Data is either directly in user supplied directory or in a sub directory if the overall directory is managed
         # by sfaira: In this case, the sub directory is named after the doi of the data set.
-        sfaira_path = os.path.join(self.data_dir_base, self.directory_formatted_doi)
-        if os.path.exists(sfaira_path):
-            return sfaira_path
+        if self.data_dir_base is None:
+            return None
         else:
-            return self.data_dir_base
+            sfaira_path = os.path.join(self.data_dir_base, self.directory_formatted_doi)
+            if os.path.exists(sfaira_path):
+                return sfaira_path
+            else:
+                return self.data_dir_base
 
     @property
     def default_embedding(self) -> Union[None, str]:
@@ -2138,7 +2143,7 @@ class DatasetBase(abc.ABC):
     def _value_protection(
             self,
             attr: str,
-            allowed: Union[Ontology, bool, int, float, str, List[bool], List[int], List[float], List[str]],
+            allowed: Union[Ontology, None],
             attempted
     ):
         """
@@ -2153,24 +2158,33 @@ class DatasetBase(abc.ABC):
         :param attempted: Value(s) to attempt to set in `attr`.
         :return:
         """
-        if isinstance(attempted, np.ndarray):
-            attempted_ls = attempted.tolist()
-        if isinstance(attempted, tuple):
-            attempted_ls = list(attempted)
         if not isinstance(attempted, list):
-            attempted_ls = [attempted]
+            if isinstance(attempted, np.ndarray):
+                attempted_ls = attempted.tolist()
+            elif isinstance(attempted, tuple):
+                attempted_ls = list(attempted)
+            else:
+                attempted_ls = [attempted]
+        else:
+            attempted_ls = attempted
         attempted_clean = []
         for x in attempted_ls:
-            # TODO add setting via ontology ID rather than term label only
-            if not is_child(query=x, ontology=allowed):
-                # Check that this was not an ontology ID:
-                if not (isinstance(allowed, OntologyHierarchical) and x in allowed.node_ids):
-                    if not is_child(query=x, ontology=allowed):
-                        raise ValueError(f"'{x}' is not a valid entry for {attr} in _, v in self.datasets.items(){self.id}.")
-                    else:
-                        attempted_clean.append(x)
+            if allowed is None:
+                attempted_clean.append(x)
+            elif isinstance(allowed, Ontology):
+                if attr == "disease" and (x.lower() == "normal" or x.lower() == "healthy"):
+                    # TODO required because of missing streamlining between sfaira and 10x, remove in future.
+                    attempted_clean.append("healthy")
+                elif x in allowed.node_names:
+                    attempted_clean.append(x)
                 else:
-                    attempted_clean.append(allowed.name_from_id(x))
+                    if isinstance(allowed, OntologyHierarchical) and x in allowed.node_ids:
+                        attempted_clean.append(allowed.name_from_id(x))
+                    else:
+                        raise ValueError(f"'{x}' is not a valid entry for {attr} in {self.id}.")
+            else:
+                raise ValueError(f"allowed of type {type(allowed)} is not a valid entry for {attr}.")
+        # Flatten attempts if only one was made:
         if len(attempted_clean) == 1:
             attempted_clean = attempted_clean[0]
         return attempted_clean
@@ -2205,17 +2219,18 @@ class DatasetBase(abc.ABC):
         def get_subset_idx(samplewise_key, cellwise_key):
             try:
                 sample_attr = getattr(self, samplewise_key)
+                if not isinstance(sample_attr, list):
+                    sample_attr = [sample_attr]
             except AttributeError:
                 sample_attr = None
             obs_key = getattr(self, cellwise_key)
-            if sample_attr is not None and obs_key is None:
-                if not isinstance(sample_attr, list):
-                    sample_attr = [sample_attr]
+            if sample_attr is not None and len(sample_attr) == 1:
+                # Only use sample-wise subsetting if the sample-wise attribute is unique (not mixed).
                 if np.any([x in values for x in sample_attr]):
                     idx = np.arange(1, self.ncells)
                 else:
                     idx = np.array([])
-            elif sample_attr is None and obs_key is not None:
+            elif obs_key is not None:
                 assert self.adata is not None, "adata was not yet loaded"
                 values_found = self.adata.obs[obs_key].values
                 values_found_unique = np.unique(values_found)
@@ -2233,11 +2248,12 @@ class DatasetBase(abc.ABC):
                 # TODO keep this logging for now to catch undesired behaviour resulting from loaded edges in ontologies.
                 print(f"matched cell-wise keys {str(values_found_unique_matched)} in data set {self.id}")
                 idx = np.where([x in values_found_unique_matched for x in values_found])[0]
-            elif sample_attr is not None and obs_key is not None:
-                assert False, f"both cell-wise and sample-wise attribute {samplewise_key} given"
             else:
                 assert False, "no subset chosen"
             return idx
 
         idx_keep = get_subset_idx(samplewise_key=key, cellwise_key=key + "_obs_key")
         self.adata = self.adata[idx_keep, :].copy()  # if len(idx_keep) > 0 else None
+
+    def show_summary(self):
+        print(f"{(self.supplier, self.organism, self.organ, self.assay_sc, self.disease)}")
