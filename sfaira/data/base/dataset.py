@@ -2257,3 +2257,7 @@ class DatasetBase(abc.ABC):
 
     def show_summary(self):
         print(f"{(self.supplier, self.organism, self.organ, self.assay_sc, self.disease)}")
+
+    def __assert_loaded(self):
+        if self.adata is None:
+            raise ValueError("adata was not loaded, this is necessary for this operation")
