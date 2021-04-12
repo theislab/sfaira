@@ -73,7 +73,7 @@ class DatasetGroup:
     datasets: Dict[str, DatasetBase]
 
     def __init__(self, datasets: dict):
-        self._adata_ids_sfaira = AdataIdsSfaira()
+        self._adata_ids = AdataIdsSfaira()
         self.datasets = datasets
 
     @property
@@ -244,7 +244,7 @@ class DatasetGroup:
         for k, v in self.datasets.items():
             if v.annotated:
                 labels_original = np.sort(np.unique(np.concatenate([
-                    v.adata.obs[self._adata_ids_sfaira.cell_types_original].values
+                    v.adata.obs[self._adata_ids.cell_types_original].values
                 ])))
                 tab.append(v.celltypes_universe.prepare_celltype_map_tab(
                     source=labels_original,
@@ -260,7 +260,7 @@ class DatasetGroup:
             tab = pandas.concat(tab, axis=0)
             # Take out columns with the same source:
             tab = tab.loc[[x not in tab.iloc[:i, 0].values for i, x in enumerate(tab.iloc[:, 0].values)], :].copy()
-            tab = tab.sort_values(self._adata_ids_sfaira.classmap_source_key)
+            tab = tab.sort_values(self._adata_ids.classmap_source_key)
             if not os.path.exists(fn) or not protected_writing:
                 tab.to_csv(fn, index=False, sep="\t")
 
@@ -292,7 +292,7 @@ class DatasetGroup:
         # To preserve gene names in .var, the target gene names are copied into var_names and are then copied
         # back into .var.
         for adata in adata_ls:
-            adata.var.index = adata.var[self._adata_ids_sfaira.gene_id_ensembl].tolist()
+            adata.var.index = adata.var[self._adata_ids.gene_id_ensembl].tolist()
         if len(adata_ls) > 1:
             # TODO: need to keep this? -> yes, still catching errors here (March 2020)
             # Fix for loading bug: sometime concatenating sparse matrices fails the first time but works on second try.
@@ -300,27 +300,27 @@ class DatasetGroup:
                 adata_concat = adata_ls[0].concatenate(
                     *adata_ls[1:],
                     join="outer",
-                    batch_key=self._adata_ids_sfaira.dataset,
+                    batch_key=self._adata_ids.dataset,
                     batch_categories=[i for i in self.ids if self.datasets[i].adata is not None]
                 )
             except ValueError:
                 adata_concat = adata_ls[0].concatenate(
                     *adata_ls[1:],
                     join="outer",
-                    batch_key=self._adata_ids_sfaira.dataset,
+                    batch_key=self._adata_ids.dataset,
                     batch_categories=[i for i in self.ids if self.datasets[i].adata is not None]
                 )
 
-            adata_concat.var[self._adata_ids_sfaira.gene_id_ensembl] = adata_concat.var.index
+            adata_concat.var[self._adata_ids.gene_id_ensembl] = adata_concat.var.index
 
-            if len(set([a.uns[self._adata_ids_sfaira.mapped_features] for a in adata_ls])) == 1:
-                adata_concat.uns[self._adata_ids_sfaira.mapped_features] = \
-                    adata_ls[0].uns[self._adata_ids_sfaira.mapped_features]
+            if len(set([a.uns[self._adata_ids.mapped_features] for a in adata_ls])) == 1:
+                adata_concat.uns[self._adata_ids.mapped_features] = \
+                    adata_ls[0].uns[self._adata_ids.mapped_features]
             else:
-                adata_concat.uns[self._adata_ids_sfaira.mapped_features] = False
+                adata_concat.uns[self._adata_ids.mapped_features] = False
         else:
             adata_concat = adata_ls[0]
-            adata_concat.obs[self._adata_ids_sfaira.dataset] = self.ids[0]
+            adata_concat.obs[self._adata_ids.dataset] = self.ids[0]
 
         adata_concat.var_names_make_unique()
         return adata_concat
@@ -341,7 +341,7 @@ class DatasetGroup:
                 (k, self.datasets[x].adata.obs[k]) if k in self.datasets[x].adata.obs.columns
                 else (k, ["nan" for _ in range(self.datasets[x].adata.obs.shape[0])])
                 for k in keys
-            ] + [(self._adata_ids_sfaira.dataset, [x for _ in range(self.datasets[x].adata.obs.shape[0])])]
+            ] + [(self._adata_ids.dataset, [x for _ in range(self.datasets[x].adata.obs.shape[0])])]
         )) for x in self.ids if self.datasets[x].adata is not None])
         return obs_concat
 
@@ -630,19 +630,19 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                             attr="celltypes",
                             allowed=self.ontology_celltypes,
                             attempted=[
-                                x for x in np.unique(tab[self._adata_ids_sfaira.classmap_target_key].values).tolist()
+                                x for x in np.unique(tab[self._adata_ids.classmap_target_key].values).tolist()
                                 if x not in [
-                                    self._adata_ids_sfaira.unknown_celltype_identifier,
-                                    self._adata_ids_sfaira.not_a_cell_celltype_identifier
+                                    self._adata_ids.unknown_celltype_identifier,
+                                    self._adata_ids.not_a_cell_celltype_identifier
                                 ]
                             ]
                         )
                         # Adds a third column with the corresponding ontology IDs into the file.
-                        tab[self._adata_ids_sfaira.classmap_target_id_key] = [
+                        tab[self._adata_ids.classmap_target_id_key] = [
                             self.ontology_celltypes.id_from_name(x)
-                            if x != self._adata_ids_sfaira.unknown_celltype_identifier
-                            else self._adata_ids_sfaira.unknown_celltype_identifier
-                            for x in tab[self._adata_ids_sfaira.classmap_target_key].values
+                            if x != self._adata_ids.unknown_celltype_identifier
+                            else self._adata_ids.unknown_celltype_identifier
+                            for x in tab[self._adata_ids.classmap_target_key].values
                         ]
                         list(self.datasets.values())[0]._write_class_map(fn=fn_map, tab=tab)
 
@@ -663,7 +663,7 @@ class DatasetSuperGroup:
         self.fn_backed = None
         self.set_dataset_groups(dataset_groups=dataset_groups)
 
-        self._adata_ids_sfaira = AdataIdsSfaira()
+        self._adata_ids = AdataIdsSfaira()
 
     def set_dataset_groups(self, dataset_groups: Union[DatasetGroup, DatasetSuperGroup, List[DatasetGroup],
                                                        List[DatasetSuperGroup]]):
@@ -825,7 +825,7 @@ class DatasetSuperGroup:
                 self._adata = adatas[0].concatenate(
                     *adatas[1:],
                     join="outer",
-                    batch_key=self._adata_ids_sfaira.dataset_group
+                    batch_key=self._adata_ids.dataset_group
                 )
             elif len(adatas) == 1:
                 self._adata = adatas[0]
@@ -895,20 +895,20 @@ class DatasetSuperGroup:
             X.indptr = X.indptr.astype(np.int64)
             self.adata.X = X
         keys = [
-            self._adata_ids_sfaira.annotated,
-            self._adata_ids_sfaira.assay_sc,
-            self._adata_ids_sfaira.assay_differentiation,
-            self._adata_ids_sfaira.assay_type_differentiation,
-            self._adata_ids_sfaira.author,
-            self._adata_ids_sfaira.cell_line,
-            self._adata_ids_sfaira.dataset,
-            self._adata_ids_sfaira.cell_ontology_class,
-            self._adata_ids_sfaira.development_stage,
-            self._adata_ids_sfaira.normalization,
-            self._adata_ids_sfaira.organ,
-            self._adata_ids_sfaira.sample_type,
-            self._adata_ids_sfaira.state_exact,
-            self._adata_ids_sfaira.year,
+            self._adata_ids.annotated,
+            self._adata_ids.assay_sc,
+            self._adata_ids.assay_differentiation,
+            self._adata_ids.assay_type_differentiation,
+            self._adata_ids.author,
+            self._adata_ids.cell_line,
+            self._adata_ids.dataset,
+            self._adata_ids.cell_ontology_class,
+            self._adata_ids.development_stage,
+            self._adata_ids.normalization,
+            self._adata_ids.organ,
+            self._adata_ids.sample_type,
+            self._adata_ids.state_exact,
+            self._adata_ids.year,
         ]
         if scatter_update:
             self.adata.obs = pandas.DataFrame({
