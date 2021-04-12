@@ -1,7 +1,7 @@
 from typing import Union
 
 from sfaira.data import DatasetGroup
-from sfaira.data.dataloaders.super_group import DatasetSuperGroupSfaira
+from sfaira.data.dataloaders.super_group import Universe
 
 
 class DatasetGroupThymus(DatasetGroup):
@@ -12,7 +12,7 @@ class DatasetGroupThymus(DatasetGroup):
         meta_path: Union[str, None] = None,
         cache_path: Union[str, None] = None
     ):
-        dsg = DatasetSuperGroupSfaira(data_path=data_path, meta_path=meta_path, cache_path=cache_path)
+        dsg = Universe(data_path=data_path, meta_path=meta_path, cache_path=cache_path)
         dsg.subset(key="id", values=[
             "human_thymus_2020_10x_park_001",
             "human_thymus_2020_microwell_han_001_10.1038/s41586-020-2157-4",

@@ -10,7 +10,7 @@ from sfaira.data.dataloaders.databases import DatasetSuperGroupDatabases
 from sfaira.data import DatasetSuperGroup
 
 
-class DatasetSuperGroupSfaira(DatasetSuperGroup):
+class Universe(DatasetSuperGroup):
 
     def __init__(
             self,

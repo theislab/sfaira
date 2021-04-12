@@ -17,11 +17,12 @@ class OntologyContainerSfaira:
         self.cell_line = OntologyCellosaurus()
         self.cellontology_class = "v2021-02-01"
         self.cellontology_original = None
+        self.collection_id = None
         self.default_embedding = None
         self.development_stage = None  # OntologyHsapdv()  # TODO allow for other organisms here too.
         self.disease = OntologyMondo()
         self.doi = None
-        self.ethnicity = None  # OntologyHancestro()
+        self.ethnicity = None  # OntologyHancestro()  # TODO
         self.id = None
         self.individual = None
         self.normalization = None
@@ -30,6 +31,7 @@ class OntologyContainerSfaira:
         self.primary_data = OntologyList(terms=[True, False])
         self.sample_source = OntologyList(terms=["primary_tissue", "2d_culture", "3d_culture", "tumor"])
         self.sex = OntologyList(terms=["female", "male", "mixed", "unknown", "other"])
+        self.supplier = OntologyList(terms=["cellxgene", "sfaira"])
         self.tech_sample = None
         self.title = None
         self.year = OntologyList(terms=list(range(2000, 3000)))
