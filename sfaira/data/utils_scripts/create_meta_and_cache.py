@@ -10,7 +10,7 @@ path_meta = str(sys.argv[2])
 path_cache = str(sys.argv[3])
 processes = int(str(sys.argv[4]))
 
-ds = sfaira.data.dataloaders.DatasetSuperGroupSfaira(
+ds = sfaira.data.dataloaders.Universe(
     data_path=data_path, meta_path=path_meta, cache_path=path_cache
 )
 # Write meta data, cache and test load from cache:

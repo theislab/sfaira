@@ -1,7 +1,7 @@
 from typing import Union
 
 from sfaira.data import DatasetGroup
-from sfaira.data.dataloaders.super_group import DatasetSuperGroupSfaira
+from sfaira.data.dataloaders.super_group import Universe
 
 
 class DatasetGroupBladder(DatasetGroup):
@@ -12,7 +12,7 @@ class DatasetGroupBladder(DatasetGroup):
         meta_path: Union[str, None] = None,
         cache_path: Union[str, None] = None
     ):
-        dsg = DatasetSuperGroupSfaira(data_path=data_path, meta_path=meta_path, cache_path=cache_path)
+        dsg = Universe(data_path=data_path, meta_path=meta_path, cache_path=cache_path)
         dsg.subset(key="id", values=[
             "mouse_bladder_2019_10x_pisco_001_10.1101/661728",
             "mouse_bladder_2019_smartseq2_pisco_001_10.1101/661728",

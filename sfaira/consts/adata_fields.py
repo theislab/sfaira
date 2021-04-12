@@ -1,9 +1,8 @@
-from typing import List
-
 """
 The classes in this file are containers of field names and element entries that are used in streamlined adata objects
 in sfaira and in associated data bases.
 """
+from typing import List
 
 
 class AdataIds:
@@ -154,7 +153,7 @@ class AdataIdsCellxgene(AdataIds):
 
     def __init__(self):
         self.assay_sc = "assay"
-        self.cell_types_original = "free_annotation"
+        self.cell_types_original = "cell_type"  # TODO "free_annotation" not always given.
         self.cell_ontology_class = "cell_type"
         self.cell_ontology_id = "cell_type_ontology_term_id"
         self.default_embedding = "default_embedding"
@@ -178,7 +177,10 @@ class AdataIdsCellxgene(AdataIds):
         # selected element entries used for parsing:
         self.author_names = "names"
 
+        self.unknown_celltype_identifier = None
         self.unknown_metadata_identifier = "unknown"
+        self.invalid_metadata_identifier = "na"
+        self.unknown_metadata_ontology_id_identifier = ""
 
         # accepted file names
         self.accepted_file_names = [
@@ -205,4 +207,15 @@ class AdataIdsCellxgene(AdataIds):
             "default_embedding",
             "id",
             "title",
+        ]
+        # These attributes related to obs and uns keys above are also in the data set attributes that can be
+        # inquired before download via the REST API:
+        self.dataset_keys = [
+            "assay_sc",
+            "development_stage",
+            "disease",
+            "ethnicity",
+            "organ",
+            "organism",
+            "sex",
         ]

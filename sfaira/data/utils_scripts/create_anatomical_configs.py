@@ -3,7 +3,7 @@ import sys
 import tensorflow as tf
 
 # Any data loader here to extract path:
-from sfaira.data import DatasetSuperGroupSfaira
+from sfaira.data import Universe
 
 print(tf.__version__)
 
@@ -92,7 +92,7 @@ configs_to_write = {
 for organism, organs in configs_to_write.items():
     for organ in organs:
         print(f"Writing {organism} {organ}")
-        dsgs = DatasetSuperGroupSfaira(
+        dsgs = Universe(
             data_path=".",
             meta_path=".",
             cache_path="."
