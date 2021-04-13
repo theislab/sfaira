@@ -816,6 +816,8 @@ class DatasetBase(abc.ABC):
                 (getattr(adata_fields, k), self.adata.obs[getattr(self._adata_ids_sfaira, k)])
                 if getattr(self._adata_ids_sfaira, k) in self.adata.obs.keys()
                 else (getattr(adata_fields, k), list(self.adata.uns[getattr(self._adata_ids_sfaira, k)]))
+                if getattr(self._adata_ids_sfaira, k) in self.adata.uns.keys()
+                else (getattr(adata_fields, k), adata_fields.unknown_metadata_identifier)
                 for k in adata_fields.obs_keys
             ]),
             index=self.adata.obs.index
