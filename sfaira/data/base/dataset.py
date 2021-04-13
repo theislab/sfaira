@@ -9,7 +9,7 @@ import os
 from os import PathLike
 import pandas
 import scipy.sparse
-from typing import Dict, List, Tuple, Union
+from typing import List, Tuple, Union
 import warnings
 import urllib.request
 import urllib.parse
@@ -19,7 +19,7 @@ import ssl
 
 from sfaira.versions.genomes import GenomeContainer
 from sfaira.versions.metadata import Ontology, OntologyHierarchical, CelltypeUniverse
-from sfaira.consts import AdataIds, AdataIdsSfaira, META_DATA_FIELDS, OCS
+from sfaira.consts import AdataIdsCellxgene, AdataIdsSfaira, META_DATA_FIELDS, OCS
 from sfaira.data.utils import collapse_matrix, read_yaml
 
 UNS_STRING_META_IN_OBS = "__obs__"
@@ -456,7 +456,7 @@ class DatasetBase(abc.ABC):
             raise ValueError("No sfaira data repo path provided in constructor.")
 
         # Set genome container if mapping of gene labels is requested
-        if match_to_reference is not False:
+        if match_to_reference is not False:  # Testing this explicitly to make sure False is treated separately from None
             self._set_genome(organism=self.organism, assembly=match_to_reference)
         # Run data set-specific loading script:
         self._load_cached(load_raw=load_raw, allow_caching=allow_caching, **kwargs)
@@ -620,19 +620,30 @@ class DatasetBase(abc.ABC):
             uns=self.adata.uns
         )
 
-    def _set_metadata_in_adata(self, allow_uns: bool):
+    def streamline(
+            self,
+            schema: str = "sfaira",
+            uns_to_obs: bool = False,
+            clean_obs: bool = True,
+            clean_var: bool = True,
+            clean_uns: bool = True
+    ):
         """
-        Copy meta data from dataset class in .anndata.
+        Streamline the adata instance to a defined output schema.
 
-        :param allow_uns: Allow writing of constant meta data into uns rather than .obs.
+        Output format are saved in ADATA_FIELDS* classes.
+
+        :param schema: Export format.
+            - "sfaira"
+            - "cellxgene"
+        :param uns_to_obs: Whether to move metadata in .uns to .obs to make sure it's not lost when concatenating multiple objects.
+        :param clean_obs: Whether to delete non-streamlined fields in .obs, .obsm and .obsp.
+        :param clean_var: Whether to delete non-streamlined fields in .var, .varm and .varp.
+        :param clean_uns: Whether to delete non-streamlined fields in .uns.
         :return:
         """
-        # Set data set-wide attributes (.uns) (write to .obs if .uns is not allowed):
-        if allow_uns:
-            for k in self._adata_ids.uns_keys:
-                if k not in self.adata.uns.keys():
-                    self.adata.uns[getattr(self._adata_ids, k)] = getattr(self, k)
-        else:
+        # Set data set-wide attributes (.uns) (write to .obs instead if requested):
+        if uns_to_obs:
             for k in self._adata_ids.uns_keys:
                 if k in self.adata.uns.keys():
                     val = self.adata.uns[k]
@@ -641,10 +652,14 @@ class DatasetBase(abc.ABC):
                 while hasattr(val, '__len__') and not isinstance(val, str) and len(val) == 1:  # unpack nested lists
                     val = val[0]
                 self.adata.obs[getattr(self._adata_ids, k)] = [val for i in range(len(self.adata.obs))]
+        else:
+            for k in self._adata_ids.uns_keys:
+                if k not in self.adata.uns.keys():
+                    self.adata.uns[getattr(self._adata_ids, k)] = getattr(self, k)
 
         # Set cell-wise or data set-wide attributes (.uns / .obs):
-        # These are saved in .uns if they are data set wide to save memory if allow_uns is True.
-        for x, y, z, v in (
+        # These are saved in .uns if they are data set wide to save memory if uns_to_obs is False.
+        for attr, attr_name, attr_obs_key, ont in (
             [self.assay_sc, self._adata_ids.assay_sc, self.assay_sc_obs_key, self.ontology_container_sfaira.assay_sc],
             [self.assay_differentiation, self._adata_ids.assay_differentiation, self.assay_differentiation_obs_key,
              self.ontology_container_sfaira.assay_differentiation],
@@ -666,59 +681,59 @@ class DatasetBase(abc.ABC):
             [self.sex, self._adata_ids.sex, self.sex_obs_key, self.ontology_container_sfaira.sex],
             [self.state_exact, self._adata_ids.state_exact, self.state_exact_obs_key, None],
         ):
-            if z is None and allow_uns:
-                self.adata.uns[y] = None
-            elif z is None and not allow_uns:
-                self.adata.obs[y] = x
-            elif z is not None:
+            if attr_obs_key is None and not uns_to_obs:
+                self.adata.uns[attr_name] = attr
+            elif attr_obs_key is None and uns_to_obs:
+                self.adata.obs[attr_name] = attr
+            elif attr_obs_key is not None:
                 # Attribute supplied per cell: Write into .obs.
                 # Search for direct match of the sought-after column name or for attribute specific obs key.
-                if z not in self.adata.obs.keys():
+                if attr_obs_key not in self.adata.obs.keys():
                     # This should not occur in single data set loaders (see warning below) but can occur in
                     # streamlined data loaders if not all instances of the streamlined data sets have all columns
                     # in .obs set.
-                    self.adata.uns[y] = None
-                    print(f"WARNING: attribute {y} of data set {self.id} was not found in column {z}")  # debugging
+                    self.adata.uns[attr_name] = None
+                    print(f"WARNING: attribute {attr_name} of data set {self.id} was not found in column {attr_obs_key}")
                 else:
                     # Include flag in .uns that this attribute is in .obs:
-                    self.adata.uns[y] = UNS_STRING_META_IN_OBS
+                    self.adata.uns[attr_name] = UNS_STRING_META_IN_OBS
                     # Remove potential pd.Categorical formatting:
                     self._value_protection(
-                        attr=y, allowed=v, attempted=np.unique(self.adata.obs[z].values).tolist())
-                    self.adata.obs[y] = self.adata.obs[z].values.tolist()
+                        attr=attr_name, allowed=ont, attempted=np.unique(self.adata.obs[attr_obs_key].values).tolist())
+                    self.adata.obs[attr_name] = self.adata.obs[attr_obs_key].values.tolist()
             else:
-                assert False, "switch option should not occur"
+                raise ValueError("switch option should not occur")
         # Add batch annotation which can be rule-based
-        for x, y, z in (
-                [self.bio_sample, self._adata_ids.bio_sample, self.bio_sample_obs_key],
-                [self.individual, self._adata_ids.individual, self.individual_obs_key],
-                [self.tech_sample, self._adata_ids.tech_sample, self.tech_sample_obs_key],
+        for attr, attr_name, attr_obs_key, ont in (
+                [self.bio_sample, self._adata_ids.bio_sample, self.bio_sample_obs_key, None],
+                [self.individual, self._adata_ids.individual, self.individual_obs_key, None],
+                [self.tech_sample, self._adata_ids.tech_sample, self.tech_sample_obs_key, None],
         ):
-            if z is None and allow_uns:
-                self.adata.uns[y] = x
-            elif z is None and not allow_uns:
-                self.adata.uns[y] = UNS_STRING_META_IN_OBS
-                self.adata.obs[y] = x
-            elif z is not None:
-                self.adata.uns[y] = UNS_STRING_META_IN_OBS
-                zs = z.split("*")  # Separator for indicate multiple columns.
+            if attr_obs_key is None and not uns_to_obs:
+                self.adata.uns[attr_name] = attr
+            elif attr_obs_key is None and uns_to_obs:
+                self.adata.uns[attr_name] = UNS_STRING_META_IN_OBS
+                self.adata.obs[attr_name] = attr
+            elif attr_obs_key is not None:
+                self.adata.uns[attr_name] = UNS_STRING_META_IN_OBS
+                attr_obs_keys = attr_obs_key.split("*")  # Separator for indicate multiple columns.
                 keys_to_use = []
-                for zz in zs:
-                    if zz not in self.adata.obs.keys():
+                for k in attr_obs_keys:
+                    if k not in self.adata.obs.keys():
                         # This should not occur in single data set loaders (see warning below) but can occur in
                         # streamlined data loaders if not all instances of the streamlined data sets have all columns
                         # in .obs set.
-                        print(f"WARNING: attribute {y} of data set {self.id} was not found in column {zz}")  # debugging
+                        print(f"WARNING: attribute {attr_name} of data set {self.id} was not found in column {k}")  # debugging
                     else:
-                        keys_to_use.append(zz)
+                        keys_to_use.append(k)
                 if len(keys_to_use) > 0:
                     # Build a combination label out of all columns used to describe this group.
-                    self.adata.obs[y] = [
+                    self.adata.obs[attr_name] = [
                         "_".join([str(xxx) for xxx in xx])
                         for xx in zip(*[self.adata.obs[k].values.tolist() for k in keys_to_use])
                     ]
             else:
-                assert False, "switch option should not occur"
+                raise ValueError("switch option should not occur")
         # Set cell-wise attributes (.obs):
         # None so far other than celltypes.
         # Set cell types:
@@ -726,38 +741,27 @@ class DatasetBase(abc.ABC):
         if self.cellontology_original_obs_key is not None:
             self.project_celltypes_to_ontology()
 
-    def streamline(
-            self,
-            format: str = "sfaira",
-            allow_uns_sfaira: bool = True,
-            clean_obs: bool = True,
-            clean_var: bool = True,
-            clean_uns: bool = True
-    ):
-        """
-        Streamline the adata instance to output format.
 
-        Output format are saved in ADATA_FIELDS* classes.
 
-        :param format: Export format.
 
-            - "sfaira"
-            - "cellxgene"
-        :param allow_uns_sfaira: When using sfaira format: Whether to keep metadata in uns or move it to obs instead.
-        :param clean_obs: Whether to delete non-streamlined fields in .obs, .obsm and .obsp.
-        :param clean_var: Whether to delete non-streamlined fields in .var, .varm and .varp.
-        :param clean_uns: Whether to delete non-streamlined fields in .uns.
-        :return:
-        """
-        if format == "sfaira":
-            adata_fields = self._adata_ids
-            self._set_metadata_in_adata(allow_uns=allow_uns_sfaira)
-        elif format == "cellxgene":
-            from sfaira.consts import AdataIdsCellxgene
+
+
+
+
+
+
+
+
+
+        if schema == "sfaira":
+            adata_fields = AdataIdsSfaira()
+        elif schema == "cellxgene":
             adata_fields = AdataIdsCellxgene()
-            self._set_metadata_in_adata(allow_uns=False)
         else:
-            raise ValueError(f"did not recognize format {format}")
+            raise ValueError(f"did not recognize schema {schema}")
+
+
+
         if clean_var:
             if self.adata.varm is not None:
                 del self.adata.varm
@@ -768,6 +772,9 @@ class DatasetBase(abc.ABC):
                 del self.adata.obsm
             if self.adata.obsp is not None:
                 del self.adata.obsp
+
+
+
         # Only retain target elements in adata.uns:
         uns_new = dict([
             (getattr(adata_fields, k), self.adata.uns[getattr(self._adata_ids, k)])
@@ -798,6 +805,8 @@ class DatasetBase(abc.ABC):
                     self.adata.uns[k] = adata_fields.unknown_metadata_identifier
                 else:
                     self.adata.uns[k] = v
+
+
         # Only retain target elements in adata.var:
         var_old = self.adata.var.copy()
         self.adata.var = pd.DataFrame(dict([
@@ -810,6 +819,9 @@ class DatasetBase(abc.ABC):
             for k, v in var_old.items():
                 if k not in self.adata.var.keys():
                     self.adata.var[k] = v
+
+
+
         # Only retain target columns in adata.obs:
         obs_old = self.adata.obs.copy()
         self.adata.obs = pd.DataFrame(
@@ -827,8 +839,12 @@ class DatasetBase(abc.ABC):
                         k not in [getattr(self._adata_ids, k) for k in adata_fields.obs_keys] and \
                         k not in self._adata_ids.obs_keys:
                     self.adata.obs[k] = v
-        # Add additional constant description changes based on output format:
-        if format == "cellxgene":
+
+
+
+
+        # Add additional hard-coded description changes for cellxgene schema:
+        if schema == "cellxgene":
             self.adata.uns["layer_descriptions"] = {"X": "raw"}
             self.adata.uns["version"] = {
                 "corpora_encoding_version": "0.1.0",
@@ -845,15 +861,9 @@ class DatasetBase(abc.ABC):
                 self.adata.uns["organism"] = "Homo sapiens"
                 self.adata.uns["organism_ontology_term_id"] = "NCBITaxon:9606"
             else:
-                assert False, self.organism
+                raise ValueError(f"organism {self.organism} currently not supported")
             # Add ontology IDs where necessary (note that human readable terms are also kept):
-            for k in [
-                "organ",
-                "assay_sc",
-                "disease",
-                "ethnicity",
-                "development_stage",
-            ]:
+            for k in ["organ", "assay_sc", "disease", "ethnicity", "development_stage"]:
                 if getattr(adata_fields, k) in self.adata.obs.columns:
                     self.__project_name_to_id_obs(
                         ontology=getattr(self._adata_ids, k),
@@ -884,17 +894,20 @@ class DatasetBase(abc.ABC):
             elif self.organism == "human":
                 gene_id_new = "mgi_gene_symbol"
             else:
-                assert False, self.organism
+                raise ValueError(f"organism {self.organism} currently not supported")
             self.adata.var[gene_id_new] = self.adata.var[getattr(adata_fields, "gene_id_names")]
             self.adata.var.index = self.adata.var[gene_id_new].values
             if gene_id_new != getattr(adata_fields, "gene_id_names"):
                 del self.adata.var[getattr(adata_fields, "gene_id_names")]
-        if format != "sfaira":
-            # Remove sfaira intrinsic .uns fields:
+
+        # Remove sfaira-specific .uns fields:
+        if schema != "sfaira":
             keys_to_delete = ["load_raw", "mapped_features", "remove_gene_version", "annotated"]
+            # Also remove UNS_STRING_META_IN_OBS labels in uns
             for k, v in self.adata.uns.items():
-                if isinstance(v, str) and v == UNS_STRING_META_IN_OBS:
+                if v == UNS_STRING_META_IN_OBS:
                     keys_to_delete.append(k)
+            # Actually do the deletion
             for k in np.unique(keys_to_delete):
                 if k in self.adata.uns.keys():
                     del self.adata.uns[k]

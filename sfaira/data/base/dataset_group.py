@@ -151,30 +151,27 @@ class DatasetGroup:
 
     def streamline(
             self,
-            format: str = "sfaira",
-            allow_uns_sfaira: bool = False,
+            schema: str = "sfaira",
+            uns_to_obs: bool = False,
             clean_obs: bool = True,
             clean_var: bool = True,
             clean_uns: bool = True
     ):
         """
         Streamline the adata instance in each data set to output format.
-
         Output format are saved in ADATA_FIELDS* classes.
 
-        :param format: Export format.
-
+        :param schema: Export format.
             - "sfaira"
             - "cellxgene"
-        :param allow_uns_sfaira: When using sfaira format: Whether to keep metadata in uns or move it to obs instead.
+        :param uns_to_obs: Whether to move metadata in .uns to .obs to make sure it's not lost when concatenating multiple objects.
         :param clean_obs: Whether to delete non-streamlined fields in .obs, .obsm and .obsp.
         :param clean_var: Whether to delete non-streamlined fields in .var, .varm and .varp.
         :param clean_uns: Whether to delete non-streamlined fields in .uns.
         :return:
         """
         for x in self.ids:
-            self.datasets[x].streamline(format=format, allow_uns_sfaira=allow_uns_sfaira, clean_obs=clean_obs,
-                                        clean_var=clean_var, clean_uns=clean_uns)
+            self.datasets[x].streamline(schema=schema, uns_to_obs=uns_to_obs, clean_obs=clean_obs, clean_var=clean_var, clean_uns=clean_uns)
 
     def subset_genes(self, subset_type: Union[None, str, List[str]] = None):
         """
@@ -963,22 +960,20 @@ class DatasetSuperGroup:
 
     def streamline(
             self,
-            format: str = "sfaira",
-            allow_uns_sfaira: bool = False,
+            schema: str = "sfaira",
+            uns_to_obs: bool = False,
             clean_obs: bool = True,
             clean_var: bool = True,
             clean_uns: bool = True
     ):
         """
         Streamline the adata instance in each group and each data set to output format.
-
         Output format are saved in ADATA_FIELDS* classes.
 
-        :param format: Export format.
-
+        :param schema: Export format.
             - "sfaira"
             - "cellxgene"
-        :param allow_uns_sfaira: When using sfaira format: Whether to keep metadata in uns or move it to obs instead.
+        :param uns_to_obs: Whether to move metadata in .uns to .obs to make sure it's not lost when concatenating multiple objects.
         :param clean_obs: Whether to delete non-streamlined fields in .obs, .obsm and .obsp.
         :param clean_var: Whether to delete non-streamlined fields in .var, .varm and .varp.
         :param clean_uns: Whether to delete non-streamlined fields in .uns.
@@ -986,7 +981,7 @@ class DatasetSuperGroup:
         """
         for x in self.dataset_groups:
             for xx in x.ids:
-                x.datasets[xx].streamline(format=format, allow_uns_sfaira=allow_uns_sfaira, clean_obs=clean_obs, clean_var=clean_var, clean_uns=clean_uns)
+                x.datasets[xx].streamline(schema=schema, uns_to_obs=uns_to_obs, clean_obs=clean_obs, clean_var=clean_var, clean_uns=clean_uns)
 
     def subset(self, key, values):
         """
