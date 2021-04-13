@@ -568,25 +568,31 @@ class DatasetBase(abc.ABC):
         # Compute indices of genes to keep
         data_ids = self.adata.var[self._adata_ids_sfaira.gene_id_ensembl].values
         if subset_type is None:
-            subset_ids = self.genome_container.ensembl
+            subset_ids_ensg = self.genome_container.ensembl
+            subset_ids_symbol = self.genome_container.names
         else:
             if isinstance(subset_type, str):
                 subset_type = [subset_type]
             keys = np.unique(self.genome_container.type)
             if subset_type not in keys:
                 raise ValueError(f"subset type {subset_type} not available in list {keys}")
-            subset_ids = [
+            subset_ids_ensg = [
                 x for x, y in zip(self.genome_container.ensembl, self.genome_container.type)
                 if y in subset_type
             ]
+            subset_ids_symbol = [
+                x for x, y in zip(self.genome_container.names, self.genome_container.type)
+                if y in subset_type
+            ]
 
-        idx_feature_kept = np.where([x in subset_ids for x in data_ids])[0]
-        idx_feature_map = np.array([subset_ids.index(x) for x in data_ids[idx_feature_kept]])
         # Remove unmapped genes
+        idx_feature_kept = np.where([x in subset_ids_symbol for x in data_ids])[0]
+        data_ids_kept = data_ids[idx_feature_kept]
         x = x[:, idx_feature_kept]
-
+        # Build map of subset_ids to features in x:
+        idx_feature_map = np.array([subset_ids_symbol.index(x) for x in data_ids_kept])
         # Create reordered feature matrix based on reference and convert to csr
-        x_new = scipy.sparse.csc_matrix((x.shape[0], self.genome_container.ngenes), dtype=x.dtype)
+        x_new = scipy.sparse.csc_matrix((x.shape[0], len(subset_ids_symbol)), dtype=x.dtype)
         # copying this over to the new matrix in chunks of size `steps` prevents a strange scipy error:
         # ... scipy/sparse/compressed.py", line 922, in _zero_many i, j, offsets)
         # ValueError: could not convert integer scalar
@@ -605,9 +611,9 @@ class DatasetBase(abc.ABC):
             X=x_new,
             obs=self.adata.obs,
             obsm=self.adata.obsm,
-            var=pd.DataFrame(data={'names': self.genome_container.names,
-                                   self._adata_ids_sfaira.gene_id_ensembl: self.genome_container.ensembl},
-                             index=self.genome_container.ensembl),
+            var=pd.DataFrame(data={self._adata_ids_sfaira.gene_id_names: subset_ids_symbol,
+                                   self._adata_ids_sfaira.gene_id_ensembl: subset_ids_ensg},
+                             index=subset_ids_ensg),
             uns=self.adata.uns
         )
 
