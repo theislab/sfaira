@@ -266,7 +266,7 @@ class OntologyObo(OntologyHierarchical):
 
     @property
     def nodes_dict(self) -> dict:
-        return self.graph.nodes.items()
+        return dict(list(self.graph.nodes.items()))
 
     @property
     def node_names(self) -> List[str]:
@@ -288,13 +288,14 @@ class OntologyObo(OntologyHierarchical):
         # ToDo check that these are not include parents of each other!
         if nodes is not None:
             for x in nodes:
-                assert x in self.graph.nodes, f"{x} not found"
+                assert x in self.node_names, f"{x} not found"
             self.leaves = nodes
         else:
             self.leaves = self.get_all_roots()
 
     def get_all_roots(self) -> List[str]:
-        return [x for x in self.graph.nodes() if self.graph.in_degree(x) == 0]
+        return [v["name"] for v, x in zip(self.graph.nodes.values(), self.graph.nodes())
+                if self.graph.in_degree(x) == 0]
 
     def get_ancestors(self, node: str) -> List[str]:
         if node not in self.node_ids:
@@ -334,7 +335,7 @@ class OntologyObo(OntologyHierarchical):
         if return_type == "elements":
             return [x for x in self.leaves if x in ancestors]
         if return_type == "idx":
-            return np.array([i for i, (x, y) in enumerate(self.leaves) if x in ancestors])
+            return np.array([i for i, x in enumerate(self.leaves) if x in ancestors])
 
     @abc.abstractmethod
     def synonym_node_properties(self) -> List[str]:

@@ -11,7 +11,7 @@ print(tf.__version__)
 print("sys.argv", sys.argv)
 
 store_path = str(sys.argv[1])
-config_path = str(sys.argv[1])
+config_path = str(sys.argv[2])
 
 
 def clean(s):

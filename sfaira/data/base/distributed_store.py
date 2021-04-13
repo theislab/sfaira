@@ -8,6 +8,7 @@ from typing import Dict, List, Union
 
 from sfaira.consts import AdataIdsSfaira, OCS
 from sfaira.data.base.dataset import is_child
+from sfaira.versions.metadata import CelltypeUniverse
 
 
 class DistributedStore:
@@ -53,6 +54,7 @@ class DistributedStore:
         self.indices = indices
         self.ontology_container = OCS
         self._adata_ids_sfaira = AdataIdsSfaira()
+        self._celltype_universe = None
 
     def generator(
             self,
@@ -73,6 +75,7 @@ class DistributedStore:
 
                 - if store format is h5ad: (scipy.sparse.csr_matrix, pandas.DataFrame)
         """
+
         def generator() -> tuple:
             n_datasets = len(list(self.adatas.keys()))
             x_last = None
@@ -112,7 +115,18 @@ class DistributedStore:
                     else:
                         # Yield current batch.
                         yield x, obs
+
         return generator
+
+    @property
+    def celltypes_universe(self) -> CelltypeUniverse:
+        if self._celltype_universe is None:
+            self._celltype_universe = CelltypeUniverse(
+                cl=self.ontology_container.cellontology_class,
+                uberon=self.ontology_container.organ,
+                organism=None,  # TODO Does not load extensions!
+            )
+        return self._celltype_universe
 
     def subset(self, attr_key, values):
         """
@@ -149,11 +163,9 @@ class DistributedStore:
                 # Delete entries which did not have this key annotated.
                 del self.adatas[k]
 
-    def subset_cells(self, attr_key, values: Union[str, List[str]]):
+    def subset_cells_idx(self, attr_key, values: Union[str, List[str]]):
         """
-        Subset list of adata objects based on cell-wise properties.
-
-        Subsetting is done based on index vectors, the objects remain untouched.
+        Get indices of subset list of adata objects based on cell-wise properties.
 
         :param attr_key: Property to subset by. Options:
 
@@ -170,6 +182,7 @@ class DistributedStore:
             - "sex" points to self.sex_obs_key
             - "state_exact" points to self.state_exact_obs_key
         :param values: Classes to overlap to.
+        :return dictionary of files and observation indices by file.
         """
         if not isinstance(values, list):
             values = [values]
@@ -193,15 +206,75 @@ class DistributedStore:
             idx = np.where([x in values_found_unique_matched for x in values_found])[0]
             return idx
 
+        indices = {}
         for k, v in self.adatas.items():
             idx_old = self.indices[k].tolist()
             idx_new = get_subset_idx(adata=v, k=attr_key)
             # Keep intersection of old and new hits.
-            self.indices[k] = np.array(list(set(idx_old).intersection(set(idx_new))))
-        # Purge empty data sets from object.
+            indices[k] = np.array(list(set(idx_old).intersection(set(idx_new))))
+        return indices
+
+    def subset_cells(self, attr_key, values: Union[str, List[str]]):
+        """
+        Subset list of adata objects based on cell-wise properties.
+
+        Subsetting is done based on index vectors, the objects remain untouched.
+
+        :param attr_key: Property to subset by. Options:
+
+            - "assay_differentiation" points to self.assay_differentiation_obs_key
+            - "assay_sc" points to self.assay_sc_obs_key
+            - "assay_type_differentiation" points to self.assay_type_differentiation_obs_key
+            - "cell_line" points to self.cell_line
+            - "cellontology_class" points to self.cellontology_class_obs_key
+            - "developmental_stage" points to self.developmental_stage_obs_key
+            - "ethnicity" points to self.ethnicity_obs_key
+            - "organ" points to self.organ_obs_key
+            - "organism" points to self.organism_obs_key
+            - "sample_source" points to self.sample_source_obs_key
+            - "sex" points to self.sex_obs_key
+            - "state_exact" points to self.state_exact_obs_key
+        :param values: Classes to overlap to.
+        """
+        self.indices = self.subset_cells_idx(attr_key=attr_key, values=values)
+
         for k, v in self.indices.items():
             if v.shape[0] == 0:  # No observations (cells) left.
                 del self.adatas[k]
+
+    def subset_cells_idx_global(self, attr_key, values: Union[str, List[str]]):
+        """
+        Get indices of subset list of adata objects based on cell-wise properties treating instance as single array.
+
+        The indices are continuous across all data sets as if they were one array.
+
+        :param attr_key: Property to subset by. Options:
+
+            - "assay_differentiation" points to self.assay_differentiation_obs_key
+            - "assay_sc" points to self.assay_sc_obs_key
+            - "assay_type_differentiation" points to self.assay_type_differentiation_obs_key
+            - "cell_line" points to self.cell_line
+            - "cellontology_class" points to self.cellontology_class_obs_key
+            - "developmental_stage" points to self.developmental_stage_obs_key
+            - "ethnicity" points to self.ethnicity_obs_key
+            - "organ" points to self.organ_obs_key
+            - "organism" points to self.organism_obs_key
+            - "sample_source" points to self.sample_source_obs_key
+            - "sex" points to self.sex_obs_key
+            - "state_exact" points to self.state_exact_obs_key
+        :param values: Classes to overlap to.
+        :return Index vector
+        """
+        # Get indices of of cells in target set by file.
+        idx_by_dataset = self.subset_cells_idx(attr_key=attr_key, values=values)
+        # Translate file-wise indices into global index list across all data sets.
+        idx = []
+        counter = 0
+        for k, v in self.adatas.items():
+            idx_k = np.arange(counter, counter + v.n_obs)
+            idx.extend(idx_k[idx_by_dataset[k]])
+            counter += v.n_obs
+        return idx
 
     def write_config(self, fn: Union[str, os.PathLike]):
         """
@@ -230,3 +303,12 @@ class DistributedStore:
                 raise ValueError(f"did not find object with name {x} in currently loaded universe")
         # Only retain data sets with which are mentioned in config file.
         self.subset(attr_key="id", values=list(self.indices.keys()))
+
+    @property
+    def n_vars(self):
+        # assumes that all adata
+        return list(self.adatas.values())[0].n_vars
+
+    @property
+    def n_obs(self):
+        return np.sum([len(v) for _, v in self.indices])

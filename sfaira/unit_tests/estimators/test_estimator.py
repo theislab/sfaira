@@ -44,7 +44,7 @@ class _TestEstimator:
             np.random.randint(low=0, high=100, size=(nobs, ngenes)).astype(np.float32)
         )
         self.data.obs["cell_ontology_class"] = [
-            ["vein endothelial cell", "glial cell"][np.random.randint(0, 2)]
+            ["T cell", "stromal cell"][np.random.randint(0, 2)]
             for i in range(nobs)
         ]
         self.data.var["ensembl"] = self.topology_container.genome_container.ensembl
@@ -132,6 +132,8 @@ class TestEstimatorKerasEmbedding(unittest.TestCase, _TestEstimator):
 
 class TestEstimatorKerasCelltype(unittest.TestCase, _TestEstimator):
 
+    estimator: EstimatorKerasCelltype
+
     def set_topology(self, model_type):
         self.topology_container = Topologies(
             organism="mouse",
@@ -150,6 +152,7 @@ class TestEstimatorKerasCelltype(unittest.TestCase, _TestEstimator):
             model_type=self.topology_container.model_type,
             model_topology=self.topology_container.topology_id
         )
+        self.estimator.celltype_universe.target_universe = ["T cell", "stromal cell"]
 
     def basic_estimator_test(self):
         self.estimator.init_model()

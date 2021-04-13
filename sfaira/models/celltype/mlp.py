@@ -89,14 +89,13 @@ class CellTypeMlpVersioned(CellTypeMlp):
             dictionary that is queried based on the topology_id. Can contain a subset of all hyperparameters.
         """
         # Get cell type version instance based on topology ID, organism and organ.
-        unkown_already_included = np.any([x.lower() == "unknown" for x in celltypes_version.target_universe])
         hyperpar = topology_container.topology["hyper_parameters"]
         if override_hyperpar is not None:
             for k in list(override_hyperpar.keys()):
                 hyperpar[k] = override_hyperpar[k]
         super().__init__(
             in_dim=topology_container.ngenes,
-            out_dim=celltypes_version.ntypes if unkown_already_included else celltypes_version.ntypes + 1,
+            out_dim=celltypes_version.ntypes,
             **hyperpar
         )
         print('passed hyperpar: \n', hyperpar)
