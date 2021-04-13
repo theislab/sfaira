@@ -47,6 +47,6 @@ observation_wise:
     cell_types_original_obs_key: "Main_cluster_name"
 feature_wise:
     gene_id_ensembl_var_key: "gene_id"
-    var_symbol_col: "gene_short_name"
+    gene_id_symbols_var_key: "gene_short_name"
 meta:
     version: "1.0"

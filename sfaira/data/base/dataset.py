@@ -121,7 +121,7 @@ class DatasetBase(abc.ABC):
     _state_exact_obs_key: Union[None, str]
     _tech_sample_obs_key: Union[None, str]
 
-    _var_symbol_col: Union[None, str]
+    _gene_id_symbols_var_key: Union[None, str]
     _gene_id_ensembl_var_key: Union[None, str]
 
     _celltype_universe: Union[None, CelltypeUniverse]
@@ -223,7 +223,7 @@ class DatasetBase(abc.ABC):
         self._state_exact_obs_key = None
         self._tech_sample_obs_key = None
 
-        self._var_symbol_col = None
+        self._gene_id_symbols_var_key = None
         self._gene_id_ensembl_var_key = None
 
         self.class_maps = {"0": {}}
@@ -478,7 +478,7 @@ class DatasetBase(abc.ABC):
     ):
         # Use defaults defined in data loader if none given to this function.
         if symbol_col is None:
-            symbol_col = self.var_symbol_col
+            symbol_col = self.gene_id_symbols_var_key
         if ensembl_col is None:
             ensembl_col = self.gene_id_ensembl_var_key
         if not ensembl_col and not symbol_col:
@@ -489,11 +489,11 @@ class DatasetBase(abc.ABC):
         # If the IDs were contained in the index, a new column is added to .var.
         if symbol_col:
             if symbol_col == 'index':
-                self.adata.var[self._adata_ids.gene_id_names] = self.adata.var.index.values.tolist()
+                self.adata.var[self._adata_ids.gene_id_symbols] = self.adata.var.index.values.tolist()
             else:
                 assert symbol_col in self.adata.var.columns, f"symbol_col {symbol_col} not found in .var"
                 self.adata.var = self.adata.var.rename(
-                    {symbol_col: self._adata_ids.gene_id_names},
+                    {symbol_col: self._adata_ids.gene_id_symbols},
                     axis='columns'
                 )
         if ensembl_col:
@@ -513,7 +513,7 @@ class DatasetBase(abc.ABC):
             # match it straight away, if it is not in there we try to match everything in front of the first period in
             # the gene name with a dictionary that was modified in the same way, if there is still no match we append na
             ensids = []
-            for n in self.adata.var[self._adata_ids.gene_id_names]:
+            for n in self.adata.var[self._adata_ids.gene_id_symbols]:
                 if n in id_dict.keys():
                     ensids.append(id_dict[n])
                 elif n.split(".")[0] in id_strip_dict.keys():
@@ -524,7 +524,7 @@ class DatasetBase(abc.ABC):
 
         if not symbol_col and not (isinstance(match_to_reference, bool) and not match_to_reference):
             id_dict = self.genome_container.id_to_names_dict
-            self.adata.var[self._adata_ids.gene_id_names] = [
+            self.adata.var[self._adata_ids.gene_id_symbols] = [
                 id_dict[n.split(".")[0]] if n.split(".")[0] in id_dict.keys() else 'n/a'
                 for n in self.adata.var[self._adata_ids.gene_id_ensembl]
             ]
@@ -895,10 +895,10 @@ class DatasetBase(abc.ABC):
                 gene_id_new = "mgi_gene_symbol"
             else:
                 raise ValueError(f"organism {self.organism} currently not supported")
-            self.adata.var[gene_id_new] = self.adata.var[getattr(adata_fields, "gene_id_names")]
+            self.adata.var[gene_id_new] = self.adata.var[getattr(adata_fields, "gene_id_symbols")]
             self.adata.var.index = self.adata.var[gene_id_new].values
-            if gene_id_new != getattr(adata_fields, "gene_id_names"):
-                del self.adata.var[getattr(adata_fields, "gene_id_names")]
+            if gene_id_new != getattr(adata_fields, "gene_id_symbols"):
+                del self.adata.var[getattr(adata_fields, "gene_id_symbols")]
 
         # Remove sfaira-specific .uns fields:
         if schema != "sfaira":
@@ -1977,13 +1977,13 @@ class DatasetBase(abc.ABC):
         self._gene_id_ensembl_var_key = x
 
     @property
-    def var_symbol_col(self) -> str:
-        return self._var_symbol_col
+    def gene_id_symbols_var_key(self) -> str:
+        return self._gene_id_symbols_var_key
 
-    @var_symbol_col.setter
-    def var_symbol_col(self, x: str):
-        self.__erasing_protection(attr="var_symbol_col", val_old=self._var_symbol_col, val_new=x)
-        self._var_symbol_col = x
+    @gene_id_symbols_var_key.setter
+    def gene_id_symbols_var_key(self, x: str):
+        self.__erasing_protection(attr="gene_id_symbols_var_key", val_old=self._gene_id_symbols_var_key, val_new=x)
+        self._gene_id_symbols_var_key = x
 
     @property
     def year(self) -> Union[None, int]:

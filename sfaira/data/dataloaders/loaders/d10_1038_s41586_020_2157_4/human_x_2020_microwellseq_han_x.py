@@ -35,7 +35,7 @@ class Dataset(DatasetBase):
         self.sex_obs_key = "sex"
         self.age_obs_key = "age"
 
-        self.var_symbol_col = "index"
+        self.gene_id_symbols_var_key = "index"
 
         self.set_dataset_id(idx=1)
 

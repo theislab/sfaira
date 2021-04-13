@@ -52,7 +52,7 @@ observation_wise:
     cell_types_original_obs_key:
 feature_wise:
     gene_id_ensembl_var_key:
-    var_symbol_col:
+    gene_id_symbols_var_key:
 misc:
 meta:
     version: "1.0"

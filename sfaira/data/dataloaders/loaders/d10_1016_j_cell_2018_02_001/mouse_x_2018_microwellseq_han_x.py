@@ -308,7 +308,7 @@ class Dataset(DatasetBase):
         self.year = 2018
         self.sample_source = "primary_tissue"
 
-        self.var_symbol_col = "index"
+        self.gene_id_symbols_var_key = "index"
 
         # Only adult and neonatal samples are annotated:
         self.cell_types_original_obs_key = "Annotation" \

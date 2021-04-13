@@ -24,7 +24,7 @@ class Dataset(DatasetBase):
         self.state_exact = "healthy"
         self.year = 2020
 
-        self.var_symbol_col = "index"
+        self.gene_id_symbols_var_key = "index"
         self.gene_id_ensembl_var_key = "gene_ids"
         self.cell_types_original_obs_key = "cell_type"
 

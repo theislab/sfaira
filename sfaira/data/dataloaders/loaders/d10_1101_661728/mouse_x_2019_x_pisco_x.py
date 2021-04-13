@@ -92,7 +92,7 @@ class Dataset(DatasetBase):
         self.sample_source = "primary_tissue"
 
         self.gene_id_ensembl_var_key = None
-        self.var_symbol_col = "index"
+        self.gene_id_symbols_var_key = "index"
 
         self.set_dataset_id(idx=1)
 

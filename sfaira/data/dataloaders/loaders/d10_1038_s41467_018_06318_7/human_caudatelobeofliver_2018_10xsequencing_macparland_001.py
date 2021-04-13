@@ -22,7 +22,7 @@ class Dataset(DatasetBase):
         self.sample_source = "primary_tissue"
         self.year = 2018
 
-        self.var_symbol_col = "index"
+        self.gene_id_symbols_var_key = "index"
         self.cell_types_original_obs_key = "celltype"
 
         self.set_dataset_id(idx=1)

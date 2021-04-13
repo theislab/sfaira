@@ -76,7 +76,7 @@ class DatasetInteractive(DatasetBase):
         # self.obs_key_sex  # not currently supported
         # self.obs_key_state_exact  # not currently supported
 
-        self.var_symbol_col = gene_symbol_col
+        self.gene_id_symbols_var_key = gene_symbol_col
         self.gene_id_ensembl_var_key = gene_ens_col
 
         self.class_maps = class_maps

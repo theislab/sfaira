@@ -25,7 +25,7 @@ class AdataIds:
     ethnicity: str
     gene_id_ensembl: str
     gene_id_index: str
-    gene_id_names: str
+    gene_id_symbols: str
     id: str
     individual: str
     ncells: str
@@ -74,7 +74,7 @@ class AdataIdsSfaira(AdataIds):
         self.download_url_meta = "download_url_meta"
         self.gene_id_ensembl = "ensembl"
         self.gene_id_index = "ensembl"
-        self.gene_id_names = "names"
+        self.gene_id_symbols = "names"
         self.id = "id"
         self.individual = "individual"
         self.ncells = "ncells"
@@ -126,7 +126,7 @@ class AdataIdsSfaira(AdataIds):
         ]
         self.var_keys = [
             "gene_id_ensembl",
-            "gene_id_names",
+            "gene_id_symbols",
         ]
         self.uns_keys = [
             "annotated",
@@ -159,7 +159,7 @@ class AdataIdsCellxgene(AdataIds):
         self.default_embedding = "default_embedding"
         self.doi = "preprint_doi"
         self.disease = "disease"
-        self.gene_id_names = "gene_symbol"
+        self.gene_id_symbols = "gene_symbol"
         self.id = "id"
         self.ncells = "ncells"
         self.organ = "tissue"
@@ -201,7 +201,7 @@ class AdataIdsCellxgene(AdataIds):
             "tech_sample",
         ]
         self.var_keys = [
-            "gene_id_names",
+            "gene_id_symbols",
         ]
         self.uns_keys = [
             "default_embedding",

@@ -31,7 +31,7 @@ class Dataset(DatasetBase):
         self.organ_obs_key = "organ"
 
         self.gene_id_ensembl_var_key = "ensembl"
-        self.var_symbol_col = "name"
+        self.gene_id_symbols_var_key = "name"
 
         self.set_dataset_id(idx=1)
 

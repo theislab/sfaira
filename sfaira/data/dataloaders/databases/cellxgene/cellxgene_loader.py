@@ -37,7 +37,7 @@ class Dataset(DatasetBase):
         self.state_exact_obs_key = self._adata_ids_cellxgene.state_exact
 
         self.gene_id_ensembl_var_key = self._adata_ids_cellxgene.gene_id_ensembl
-        self.var_symbol_col = self._adata_ids_cellxgene.gene_id_names
+        self.gene_id_symbols_var_key = self._adata_ids_cellxgene.gene_id_symbols
 
     def _load(self):
         """
