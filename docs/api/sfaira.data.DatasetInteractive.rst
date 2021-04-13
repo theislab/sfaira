@@ -64,7 +64,7 @@
       ~DatasetInteractive.obs_key_assay_type_differentiation
       ~DatasetInteractive.obs_key_cell_line
       ~DatasetInteractive.obs_key_cellontology_id
-      ~DatasetInteractive.obs_key_cellontology_original
+      ~DatasetInteractive.obs_key_cell_types_original
       ~DatasetInteractive.obs_key_dev_stage
       ~DatasetInteractive.obs_key_ethnicity
       ~DatasetInteractive.obs_key_healthy

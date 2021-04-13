@@ -108,7 +108,7 @@ class DatasetBase(abc.ABC):
     _assay_cell_line_obs_key: Union[None, str]
     _cellontology_class_obs_key: Union[None, str]
     _cellontology_id_obs_key: Union[None, str]
-    _cellontology_original_obs_key: Union[None, str]
+    _cell_types_original_obs_key: Union[None, str]
     _development_stage_obs_key: Union[None, str]
     _disease_obs_key: Union[None, str]
     _ethnicity_obs_key: Union[None, str]
@@ -210,7 +210,7 @@ class DatasetBase(abc.ABC):
         self._cell_line_obs_key = None
         self._cellontology_class_obs_key = None
         self._cellontology_id_obs_key = None
-        self._cellontology_original_obs_key = None
+        self._cell_types_original_obs_key = None
         self._development_stage_obs_key = None
         self._disease_obs_key = None
         self._ethnicity_obs_key = None
@@ -738,7 +738,7 @@ class DatasetBase(abc.ABC):
         # None so far other than celltypes.
         # Set cell types:
         # Map cell type names from raw IDs to ontology maintained ones:
-        if self.cellontology_original_obs_key is not None:
+        if self.cell_types_original_obs_key is not None:
             self.project_celltypes_to_ontology()
 
 
@@ -1059,8 +1059,8 @@ class DatasetBase(abc.ABC):
         if os.path.exists(fn):
             self.cell_ontology_map = self._read_class_map(fn=fn)
         else:
-            if self.cellontology_original_obs_key is not None:
-                warnings.warn(f"file {fn} does not exist but cellontology_original_obs_key is given")
+            if self.cell_types_original_obs_key is not None:
+                warnings.warn(f"file {fn} does not exist but cell_types_original_obs_key is given")
 
     def project_celltypes_to_ontology(self):
         """
@@ -1070,7 +1070,7 @@ class DatasetBase(abc.ABC):
 
         :return:
         """
-        labels_original = self.adata.obs[self.cellontology_original_obs_key].values
+        labels_original = self.adata.obs[self.cell_types_original_obs_key].values
         if self.cell_ontology_map is not None:  # only if this was defined
             labels_mapped = [
                 self.cell_ontology_map[x] if x in self.cell_ontology_map.keys()
@@ -1298,7 +1298,7 @@ class DatasetBase(abc.ABC):
 
     @property
     def annotated(self) -> Union[bool, None]:
-        if self.cellontology_id_obs_key is not None or self.cellontology_original_obs_key is not None:
+        if self.cellontology_id_obs_key is not None or self.cell_types_original_obs_key is not None:
             return True
         else:
             if self.meta is None:
@@ -1752,14 +1752,14 @@ class DatasetBase(abc.ABC):
         self._cellontology_id_obs_key = x
 
     @property
-    def cellontology_original_obs_key(self) -> str:
-        return self._cellontology_original_obs_key
+    def cell_types_original_obs_key(self) -> str:
+        return self._cell_types_original_obs_key
 
-    @cellontology_original_obs_key.setter
-    def cellontology_original_obs_key(self, x: str):
-        self.__erasing_protection(attr="cellontology_original_obs_key", val_old=self._cellontology_original_obs_key,
+    @cell_types_original_obs_key.setter
+    def cell_types_original_obs_key(self, x: str):
+        self.__erasing_protection(attr="cell_types_original_obs_key", val_old=self._cell_types_original_obs_key,
                                   val_new=x)
-        self._cellontology_original_obs_key = x
+        self._cell_types_original_obs_key = x
 
     @property
     def development_stage_obs_key(self) -> str:

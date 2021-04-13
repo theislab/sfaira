@@ -60,7 +60,7 @@ class DatasetInteractive(DatasetBase):
         # self.state_exact  # not currently supported
         # self.year  # not currently supported
 
-        self.obs_key_cellontology_original = obs_key_celltypes
+        self.obs_key_cell_types_original = obs_key_celltypes
 
         # self.obs_key_age  # not currently supported
         # self.obs_key_assay_sc  # not currently supported

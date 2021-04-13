@@ -62,7 +62,7 @@ In this scenario, meta data is described in a constructor of a class in the same
         self.obs_key_state_exact = x  # (optional, see above, do not provide if .state_exact is provided)
         # Additionally, cell type annotation is ALWAYS provided per cell in .obs, this annotation is optional though.
         # name of column which contain streamlined cell ontology cell type classes:
-        self.obs_key_cellontology_original = x  # (optional)
+        self.obs_key_cell_types_original = x  # (optional)
         # This cell type annotation is free text but is mapped to an ontology via a .tsv file with the same name and
         # directory as the python file of this data loader (see below).
 
@@ -104,7 +104,7 @@ In summary, a python file for a mouse lung data set could look like this:
             self.year = "2020"
             self.sample_source = "primary_tissue"
 
-            self.obs_key_cellontology_original = "louvain_named"  # i save my cell type names in here
+            self.obs_key_cell_types_original = "louvain_named"  # i save my cell type names in here
 
     def load(data_dir, fn=None) -> anndata.AnnData:
         fn = os.path.join(data_dir, "my.h5ad")

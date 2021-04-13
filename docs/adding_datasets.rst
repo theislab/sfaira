@@ -106,7 +106,7 @@ by `_`, below referred to as `--DOI-folder--`:
 
 10. Mitigate automated cell type maps.
         Sfaira creates a cell type mapping `.tsv` file in the directory in which your data loaders is located if you
-        indicated that annotation is present by filling `cellontology_original_obs_key`.
+        indicated that annotation is present by filling `cell_types_original_obs_key`.
         This file is: `NA_NA_2021_NA_Einstein_001.tsv`.
         This file contains two columns with one row for each unique cell type label.
         The free text identifiers in the first column "source",
@@ -224,7 +224,7 @@ before it is loaded into memory:
         tech_sample:
         tech_sample_obs_key:
     observation_wise:
-        cellontology_original_obs_key:
+        cell_types_original_obs_key:
     feature_wise:
         var_ensembl_col:
         var_symbol_col:
@@ -295,7 +295,7 @@ In summary, a the dataloader for a mouse lung data set could look like this:
         tech_sample:
         tech_sample_obs_key:
     observation_wise:
-        cellontology_original_obs_key: "louvain_named"
+        cell_types_original_obs_key: "louvain_named"
     feature_wise:
         var_ensembl_col:
         var_symbol_col:
@@ -475,7 +475,7 @@ All tests must pass! If any of the tests fail please revisit your dataloader and
 Map cell type labels to ontology
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The entries in `self.cellontology_original_obs_key` are free text but are mapped to an ontology via a .tsv file with
+The entries in `self.cell_types_original_obs_key` are free text but are mapped to an ontology via a .tsv file with
 the same name and directory as the python file in which the data loader is located.
 This .tsv contains two columns with one row for each unique cell type label.
 The free text identifiers in the first column "source",
@@ -630,7 +630,7 @@ outlined below.
 
 Meta-data which are strictly observation-wise are in the section `observation_wise` in the `.yaml` file:
 
-- cellontology_original_obs_key [string]
+- cell_types_original_obs_key [string]
     Column name in `adata.obs` emitted by the `load()` function which contains free text cell type labels.
 
 Meta-data which are feature-wise are in the section `feature_wise` in the `.yaml` file:

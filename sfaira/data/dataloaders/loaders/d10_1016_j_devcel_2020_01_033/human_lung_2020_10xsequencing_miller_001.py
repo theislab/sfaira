@@ -25,7 +25,7 @@ class Dataset(DatasetBase):
         self.year = 2020
 
         self.var_symbol_col = "index"
-        self.cellontology_original_obs_key = "Cell_type"
+        self.cell_types_original_obs_key = "Cell_type"
 
         self.set_dataset_id(idx=1)
 

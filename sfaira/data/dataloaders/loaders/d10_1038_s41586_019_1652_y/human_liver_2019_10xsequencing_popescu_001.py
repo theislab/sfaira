@@ -23,7 +23,7 @@ class Dataset(DatasetBase):
         self.year = 2019
 
         self.var_symbol_col = "index"
-        self.cellontology_original_obs_key = "cell.labels"
+        self.cell_types_original_obs_key = "cell.labels"
 
         self.set_dataset_id(idx=1)
 

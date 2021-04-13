@@ -109,8 +109,8 @@ Optional (if available):
         Example: self.sex = “male”
     - .state_exact (or .obs_key_state_exact): Exact disease state
         self.state_exact = free text
-    - .obs_key_cellontology_original: Column in .obs in which free text cell type names are stored.
-        Example: self.obs_key_cellontology_original = 'CellType'
+    - .obs_key_cell_types_original: Column in .obs in which free text cell type names are stored.
+        Example: self.obs_key_cell_types_original = 'CellType'
     - .year: Year of publication:
         Example: self.year = 2019
     - .cell_line: Which cell line was used for the experiment (for cell culture samples)

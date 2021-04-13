@@ -25,7 +25,7 @@ class Dataset(DatasetBase):
 
         self.var_symbol_col = "index"
 
-        self.cellontology_original_obs_key = "annotation_lineage"
+        self.cell_types_original_obs_key = "annotation_lineage"
         self.state_exact_obs_key = "condition"
 
         self.set_dataset_id(idx=1)

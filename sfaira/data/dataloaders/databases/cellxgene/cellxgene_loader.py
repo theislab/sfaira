@@ -28,7 +28,7 @@ class Dataset(DatasetBase):
 
         self.cellontology_class_obs_key = self._adata_ids_cellxgene.cell_ontology_class
         self.cellontology_id_obs_key = self._adata_ids_cellxgene.cell_ontology_id
-        self.cellontology_original_obs_key = self._adata_ids_cellxgene.cell_types_original
+        self.cell_types_original_obs_key = self._adata_ids_cellxgene.cell_types_original
         self.development_stage_obs_key = self._adata_ids_cellxgene.development_stage
         self.disease_obs_key = self._adata_ids_cellxgene.disease
         self.ethnicity_obs_key = self._adata_ids_cellxgene.ethnicity
