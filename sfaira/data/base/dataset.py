@@ -680,8 +680,7 @@ class DatasetBase(abc.ABC):
                     # Include flag in .uns that this attribute is in .obs:
                     self.adata.uns[y] = UNS_STRING_META_IN_OBS
                     # Remove potential pd.Categorical formatting:
-                    self._value_protection(
-                        attr=y, allowed=v, attempted=np.unique(self.adata.obs[z].values).tolist())
+                    self._value_protection(attr=y, allowed=v, attempted=np.unique(self.adata.obs[z].values).tolist())
                     self.adata.obs[y] = self.adata.obs[z].values.tolist()
             else:
                 assert False, "switch option should not occur"
@@ -769,6 +768,9 @@ class DatasetBase(abc.ABC):
         uns_new = dict([
             (getattr(adata_fields, k), self.adata.uns[getattr(self._adata_ids_sfaira, k)])
             if getattr(self._adata_ids_sfaira, k) in self.adata.uns.keys()
+            else (getattr(adata_fields, k),
+                  np.unique(self.adata.obs[getattr(self._adata_ids_sfaira, k)].values).tolist())
+            if getattr(self._adata_ids_sfaira, k) in self.adata.obs.keys()
             else (getattr(adata_fields, k), None)
             for k in adata_fields.uns_keys
         ])
@@ -812,8 +814,9 @@ class DatasetBase(abc.ABC):
         self.adata.obs = pd.DataFrame(
             data=dict([
                 (getattr(adata_fields, k), self.adata.obs[getattr(self._adata_ids_sfaira, k)])
-                for k in adata_fields.obs_keys
                 if getattr(self._adata_ids_sfaira, k) in self.adata.obs.keys()
+                else (getattr(adata_fields, k), list(self.adata.uns[getattr(self._adata_ids_sfaira, k)]))
+                for k in adata_fields.obs_keys
             ]),
             index=self.adata.obs.index
         )
