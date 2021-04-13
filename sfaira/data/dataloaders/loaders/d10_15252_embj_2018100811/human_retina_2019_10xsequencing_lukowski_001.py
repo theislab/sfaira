@@ -25,7 +25,7 @@ class Dataset(DatasetBase):
         self.year = 2019
 
         self.var_symbol_col = "index"
-        self.var_ensembl_col = "gene_ids"
+        self.gene_id_ensembl_var_key = "gene_ids"
         self.cell_types_original_obs_key = "CellType"
 
         self.set_dataset_id(idx=1)

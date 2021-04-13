@@ -122,7 +122,7 @@ class DatasetBase(abc.ABC):
     _tech_sample_obs_key: Union[None, str]
 
     _var_symbol_col: Union[None, str]
-    _var_ensembl_col: Union[None, str]
+    _gene_id_ensembl_var_key: Union[None, str]
 
     _celltype_universe: Union[None, CelltypeUniverse]
     _ontology_class_map: Union[None, dict]
@@ -224,7 +224,7 @@ class DatasetBase(abc.ABC):
         self._tech_sample_obs_key = None
 
         self._var_symbol_col = None
-        self._var_ensembl_col = None
+        self._gene_id_ensembl_var_key = None
 
         self.class_maps = {"0": {}}
         self._unknown_celltype_identifiers = self._adata_ids.unknown_celltype_identifier
@@ -480,7 +480,7 @@ class DatasetBase(abc.ABC):
         if symbol_col is None:
             symbol_col = self.var_symbol_col
         if ensembl_col is None:
-            ensembl_col = self.var_ensembl_col
+            ensembl_col = self.gene_id_ensembl_var_key
         if not ensembl_col and not symbol_col:
             raise ValueError('Please provide the name of at least the name of the var column containing ensembl ids or'
                              'the name of the var column containing gene symbols')
@@ -1968,13 +1968,13 @@ class DatasetBase(abc.ABC):
         self._tech_sample = x
 
     @property
-    def var_ensembl_col(self) -> str:
-        return self._var_ensembl_col
+    def gene_id_ensembl_var_key(self) -> str:
+        return self._gene_id_ensembl_var_key
 
-    @var_ensembl_col.setter
-    def var_ensembl_col(self, x: str):
-        self.__erasing_protection(attr="var_ensembl_col", val_old=self._var_ensembl_col, val_new=x)
-        self._var_ensembl_col = x
+    @gene_id_ensembl_var_key.setter
+    def gene_id_ensembl_var_key(self, x: str):
+        self.__erasing_protection(attr="gene_id_ensembl_var_key", val_old=self._gene_id_ensembl_var_key, val_new=x)
+        self._gene_id_ensembl_var_key = x
 
     @property
     def var_symbol_col(self) -> str:

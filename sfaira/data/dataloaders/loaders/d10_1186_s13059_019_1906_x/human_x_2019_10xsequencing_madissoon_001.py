@@ -20,16 +20,16 @@ class Dataset(DatasetBase):
         super().__init__(**kwargs)
         if self.sample_fn == "madissoon19_lung.processed.h5ad":
             self.download_url_data = "https://covid19.cog.sanger.ac.uk/madissoon19_lung.processed.h5ad"
-            self.var_ensembl_col = "gene.ids.HCATisStab7509734"
+            self.gene_id_ensembl_var_key = "gene.ids.HCATisStab7509734"
         elif self.sample_fn == "oesophagus.cellxgene.h5ad":
             self.download_url_data = \
                 "https://cellgeni.cog.sanger.ac.uk/tissue-stability/tissue-stability/oesophagus.cellxgene.h5ad"
             # Associated DCP: https://data.humancellatlas.org/explore/projects/c4077b3c-5c98-4d26-a614-246d12c2e5d7
-            self.var_ensembl_col = "gene_ids-HCATisStab7413619"
+            self.gene_id_ensembl_var_key = "gene_ids-HCATisStab7413619"
         else:
             self.download_url_data = \
                 "https://cellgeni.cog.sanger.ac.uk/tissue-stability/tissue-stability/spleen.cellxgene.h5ad"
-            self.var_ensembl_col = "gene_ids-HCATisStab7463846"
+            self.gene_id_ensembl_var_key = "gene_ids-HCATisStab7463846"
 
         self.download_url_meta = None
 

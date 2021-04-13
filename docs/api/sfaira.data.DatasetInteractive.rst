@@ -82,7 +82,7 @@
       ~DatasetInteractive.sample_source
       ~DatasetInteractive.source
       ~DatasetInteractive.state_exact
-      ~DatasetInteractive.var_ensembl_col
+      ~DatasetInteractive.gene_id_ensembl_var_key
       ~DatasetInteractive.var_symbol_col
       ~DatasetInteractive.year
    

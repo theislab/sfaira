@@ -70,7 +70,7 @@ class Dataset(DatasetBase):
         self.year = 2019
 
         self.var_symbol_col = "Gene"
-        self.var_ensembl_col = "Accession"
+        self.gene_id_ensembl_var_key = "Accession"
 
         self.cell_types_original_obs_key = "cell_ontology_class"
 

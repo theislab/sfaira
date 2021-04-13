@@ -82,7 +82,7 @@
       ~DatasetBase.sample_source
       ~DatasetBase.source
       ~DatasetBase.state_exact
-      ~DatasetBase.var_ensembl_col
+      ~DatasetBase.gene_id_ensembl_var_key
       ~DatasetBase.var_symbol_col
       ~DatasetBase.year
    

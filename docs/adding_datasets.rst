@@ -226,7 +226,7 @@ before it is loaded into memory:
     observation_wise:
         cell_types_original_obs_key:
     feature_wise:
-        var_ensembl_col:
+        gene_id_ensembl_var_key:
         var_symbol_col:
     meta:
         version: "1.0"
@@ -297,7 +297,7 @@ In summary, a the dataloader for a mouse lung data set could look like this:
     observation_wise:
         cell_types_original_obs_key: "louvain_named"
     feature_wise:
-        var_ensembl_col:
+        gene_id_ensembl_var_key:
         var_symbol_col:
     meta:
         version: "1.0"
@@ -518,7 +518,7 @@ Required are:
 - dataset_wise: author, doi, download_url_data, normalisation and year are required.
 - dataset_or_observation_wise: organism is required.
 - observation_wise: None are required.
-- feature_wise: var_ensembl_col or var_symbol_col is required.
+- feature_wise: gene_id_ensembl_var_key or var_symbol_col is required.
 - misc: None are required.
 
 Field descriptions
@@ -635,7 +635,7 @@ Meta-data which are strictly observation-wise are in the section `observation_wi
 
 Meta-data which are feature-wise are in the section `feature_wise` in the `.yaml` file:
 
-- var_ensembl_col [string]
+- gene_id_ensembl_var_key [string]
     Name of the column in `adata.var` emitted by the `load()` which contains ENSEMBL gene IDs.
     This can also be "index" if the ENSEMBL gene names are in the index of the `adata.var` data frame.
 - var_symbol_col:.[string]

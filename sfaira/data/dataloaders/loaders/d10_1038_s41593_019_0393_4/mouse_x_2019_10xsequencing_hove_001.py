@@ -30,7 +30,7 @@ class Dataset(DatasetBase):
         self.cell_types_original_obs_key = "cluster"
         self.organ_obs_key = "organ"
 
-        self.var_ensembl_col = "ensembl"
+        self.gene_id_ensembl_var_key = "ensembl"
         self.var_symbol_col = "name"
 
         self.set_dataset_id(idx=1)
