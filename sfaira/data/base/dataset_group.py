@@ -932,7 +932,7 @@ class DatasetSuperGroup:
         self.fn_backed = fn_backed
         n_cells = self.ncells(annotated_only=annotated_only)
         gc = self.get_gc(genome=genome)
-        n_genes = gc.ngenes
+        n_genes = gc.n_var
         if scatter_update:
             self.adata = anndata.AnnData(
                 scipy.sparse.csr_matrix((n_cells, n_genes), dtype=np.float32)

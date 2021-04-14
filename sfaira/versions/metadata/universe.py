@@ -33,9 +33,9 @@ class CelltypeUniverse:
         :param organism: Organism, defines ontology extension used.
         """
         if organism is not None:
-            if organism == "human":
+            if organism == "human" or organism.lower() == "homo_sapiens":
                 self.onto_cl.add_extension(ONTOLOGIY_EXTENSION_HUMAN)
-            elif organism == "mouse":
+            elif organism == "mouse" or organism.lower() == "mus_musculus":
                 self.onto_cl.add_extension(ONTOLOGIY_EXTENSION_MOUSE)
             else:
                 raise ValueError(f"organism {organism} not found")

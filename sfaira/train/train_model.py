@@ -6,13 +6,14 @@ import pickle
 from typing import Union
 
 from sfaira.data import DistributedStore, Universe
-from sfaira.estimators import EstimatorKerasCelltype, EstimatorKerasEmbedding
+from sfaira.estimators import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
 from sfaira.interface import ModelZooEmbedding, ModelZooCelltype
 
 
 class TrainModel:
 
     data: Union[anndata.AnnData, DistributedStore]
+    estimator: EstimatorKeras
 
     def __init__(
             self,
@@ -69,6 +70,8 @@ class TrainModel:
 
 class TrainModelEmbedding(TrainModel):
 
+    estimator: EstimatorKerasEmbedding
+
     def __init__(
             self,
             model_path: str,
@@ -88,9 +91,6 @@ class TrainModelEmbedding(TrainModel):
             data=self.data,
             model_dir=self.model_dir,
             model_id=self.zoo.model_id,
-            organism=self.zoo.organism,
-            organ=self.zoo.organ,
-            model_type=self.zoo.model_type,
             model_topology=self.zoo.model_topology
         )
         self.estimator.init_model(override_hyperpar=override_hyperpar)
@@ -136,6 +136,8 @@ class TrainModelEmbedding(TrainModel):
 
 class TrainModelCelltype(TrainModel):
 
+    estimator: EstimatorKerasCelltype
+
     def __init__(
             self,
             model_path: str,
@@ -157,9 +159,6 @@ class TrainModelCelltype(TrainModel):
             data=self.data,
             model_dir=self.model_dir,
             model_id=self.zoo.model_id,
-            organism=self.zoo.organism,
-            organ=self.zoo.organ,
-            model_type=self.zoo.model_type,
             model_topology=self.zoo.model_topology
         )
         self.estimator.init_model(override_hyperpar=override_hyperpar)

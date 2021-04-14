@@ -2,7 +2,6 @@ import abc
 import anndata
 import hashlib
 import numpy as np
-import pandas
 import scipy.sparse
 try:
     import tensorflow as tf
@@ -16,8 +15,8 @@ from tqdm import tqdm
 from sfaira.consts import AdataIdsSfaira, OCS
 from sfaira.data import DistributedStore
 from sfaira.models import BasicModel
-from sfaira.versions.metadata import CelltypeUniverse
-from sfaira.versions.topologies import Topologies
+from sfaira.versions.metadata import CelltypeUniverse, OntologyCelltypes
+from sfaira.versions.topologies import TopologyContainer
 from .losses import LossLoglikelihoodNb, LossLoglikelihoodGaussian, LossCrossentropyAgg, KLLoss
 from .metrics import custom_mse, custom_negll_nb, custom_negll_gaussian, custom_kl, \
     CustomAccAgg, CustomF1Classwise, CustomFprClasswise, CustomTprClasswise, custom_cce_agg
@@ -54,12 +53,9 @@ class EstimatorKeras:
             self,
             data: Union[anndata.AnnData, np.ndarray, DistributedStore],
             model_dir: Union[str, None],
+            model_class: str,
             model_id: Union[str, None],
-            model_class: Union[str, None],
-            organism: Union[str, None],
-            organ: Union[str, None],
-            model_type: Union[str, None],
-            model_topology: Union[str, None],
+            model_topology: TopologyContainer,
             weights_md5: Union[str, None] = None,
             cache_path: str = os.path.join('cache', '')
     ):
@@ -67,17 +63,8 @@ class EstimatorKeras:
         self.model = None
         self.model_dir = model_dir
         self.model_id = model_id
-        self.model_class = model_class.lower()
-        self.organism = organism.lower()
-        self.organ = organ.lower()
-        self.model_type = model_type.lower()
-        self.model_topology = model_topology
-        self.topology_container = Topologies(
-            organism=organism,
-            model_class=model_class,
-            model_type=model_type,
-            topology_id=model_topology
-        )
+        self.model_class = model_class
+        self.topology_container = model_topology
 
         self.history = None
         self.train_hyperparam = None
@@ -87,6 +74,14 @@ class EstimatorKeras:
         self.md5 = weights_md5
         self.cache_path = cache_path
         self._adata_ids_sfaira = AdataIdsSfaira()
+
+    @property
+    def model_type(self):
+        return self.topology_container.model_type
+
+    @property
+    def organism(self):
+        return self.topology_container.organism
 
     def load_pretrained_weights(self):
         """
@@ -224,14 +219,14 @@ class EstimatorKeras:
             # If the feature space is already mapped to the right reference, return the data matrix immediately
             if 'mapped_features' in self.data.uns_keys():
                 if self.data.uns[self._adata_ids_sfaira.mapped_features] == \
-                        self.topology_container.genome_container.assembly:
+                        self.topology_container.gc.assembly:
                     print(f"found {x.shape[0]} observations")
                     return x
 
             # Compute indices of genes to keep
             data_ids = self.data.var[self._adata_ids_sfaira.gene_id_ensembl].values
-            idx_feature_kept = np.where([x in self.topology_container.genome_container.ensembl for x in data_ids])[0]
-            idx_feature_map = np.array([self.topology_container.genome_container.ensembl.index(x)
+            idx_feature_kept = np.where([x in self.topology_container.gc.ensembl for x in data_ids])[0]
+            idx_feature_map = np.array([self.topology_container.gc.ensembl.index(x)
                                         for x in data_ids[idx_feature_kept]])
 
             # Convert to csc and remove unmapped genes
@@ -239,7 +234,7 @@ class EstimatorKeras:
             x = x[:, idx_feature_kept]
 
             # Create reordered feature matrix based on reference and convert to csr
-            x_new = scipy.sparse.csc_matrix((x.shape[0], self.topology_container.ngenes), dtype=x.dtype)
+            x_new = scipy.sparse.csc_matrix((x.shape[0], self.topology_container.n_var), dtype=x.dtype)
             # copying this over to the new matrix in chunks of size `steps` prevents a strange scipy error:
             # ... scipy/sparse/compressed.py", line 922, in _zero_many i, j, offsets)
             # ValueError: could not convert integer scalar
@@ -254,7 +249,7 @@ class EstimatorKeras:
             x_new = x_new.tocsr()
 
             print(f"found {len(idx_feature_kept)} intersecting features between {x.shape[1]} "
-                  f"features in input data set and {self.topology_container.ngenes} features in reference genome")
+                  f"features in input data set and {self.topology_container.n_var} features in reference genome")
             print(f"found {x_new.shape[0]} observations")
 
             return x_new
@@ -485,21 +480,15 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             data: Union[anndata.AnnData, np.ndarray],
             model_dir: Union[str, None],
             model_id: Union[str, None],
-            organism: Union[str, None],
-            organ: Union[str, None],
-            model_type: Union[str, None],
-            model_topology: Union[str, None],
+            model_topology: TopologyContainer,
             weights_md5: Union[str, None] = None,
             cache_path: str = os.path.join('cache', '')
     ):
         super(EstimatorKerasEmbedding, self).__init__(
             data=data,
             model_dir=model_dir,
-            model_id=model_id,
             model_class="embedding",
-            organism=organism,
-            organ=organ,
-            model_type=model_type,
+            model_id=model_id,
             model_topology=model_topology,
             weights_md5=weights_md5,
             cache_path=cache_path
@@ -526,7 +515,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         elif self.model_type == 'vaevamp':
             from sfaira.models.embedding import ModelVaeVampVersioned as Model
         else:
-            raise ValueError('unknown model type %s for EstimatorKerasEmbedding' % self.model_type)
+            raise ValueError(f'unknown model type {self.model_type} for EstimatorKerasEmbedding')
         self.model = Model(
             topology_container=self.topology_container,
             override_hyperpar=override_hyperpar
@@ -535,8 +524,8 @@ class EstimatorKerasEmbedding(EstimatorKeras):
     @staticmethod
     def _get_output_dim(n_features, model_type, mode='train'):
         if mode == 'predict':  # Output shape is same for predict mode regardless of model type
-            output_types = (tf.float32, tf.float32)
-            output_shapes = (n_features, ())
+            output_types = (tf.float32, tf.float32),
+            output_shapes = (n_features, ()),
         elif model_type == "vae":
             output_types = ((tf.float32, tf.float32), (tf.float32, tf.float32))
             output_shapes = ((n_features, ()), (n_features, ()))
@@ -572,13 +561,13 @@ class EstimatorKerasEmbedding(EstimatorKeras):
 
         if mode in ['train', 'train_val', 'eval', 'predict']:
             def generator_helper(x_sample):
-                sf = prepare_sf(x=x_sample)[0]
-                if mode == 'predict':  # If predicting, only return X regardless of model type
-                    return x_sample, sf
+                sf_sample = prepare_sf(x=x_sample)[0]
+                if mode == 'predict':
+                    return (x_sample, sf_sample),
                 elif model_type == "vae":
-                    return (x_sample, sf), (x_sample, sf)
+                    return (x_sample, sf_sample), (x_sample, sf_sample)
                 else:
-                    return (x_sample, sf), x_sample
+                    return (x_sample, sf_sample), x_sample
 
             # Prepare data reading according to whether anndata is backed or not:
             if self.using_store:
@@ -645,10 +634,10 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                     for z in generator_raw:
                         counter += 1
                         if counter in idx:
-                            x = z[0].toarray().flatten()
-                            sf = prepare_sf(x=x)[0]
-                            y = z[1]["cell_ontology_class"].values[0]
-                            yield (x, sf), (x, cell_to_class[y])
+                            x_sample = z[0].toarray().flatten()
+                            sf_sample = prepare_sf(x=x_sample)[0]
+                            y_sample = z[1]["cell_ontology_class"].values[0]
+                            yield (x_sample, sf_sample), (x_sample, cell_to_class[y_sample])
 
             elif isinstance(self.data, anndata.AnnData) and self.data.isbacked:
                 n_features = self.data.X.shape[1]
@@ -656,14 +645,15 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 def generator():
                     sparse = isinstance(self.data.X[0, :], scipy.sparse.spmatrix)
                     for i in idx:
-                        x = self.data.X[i, :].toarray().flatten() if sparse else self.data.X[i, :].flatten()
-                        sf = prepare_sf(x=x)[0]
-                        y = self.data.obs[self._adata_ids_sfaira.cell_ontology_class][i]
-                        yield (x, sf), (x, cell_to_class[y])
+                        x_sample = self.data.X[i, :].toarray().flatten() if sparse else self.data.X[i, :].flatten()
+                        sf_sample = prepare_sf(x=x_sample)[0]
+                        y_sample = self.data.obs[self._adata_ids_sfaira.cell_ontology_class][i]
+                        yield (x_sample, sf_sample), (x, cell_to_class[y_sample])
             else:
                 x = self._prepare_data_matrix(idx=idx)
                 sf = prepare_sf(x=x)
-                y = self.data.obs[self._adata_ids_sfaira.cell_ontology_class][idx]  # for gradients per celltype in compute_gradients_input()
+                y = self.data.obs[self._adata_ids_sfaira.cell_ontology_class][idx]
+                # for gradients per celltype in compute_gradients_input()
                 n_features = x.shape[1]
 
                 def generator():
@@ -785,9 +775,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 batch_size=64,
                 mode='predict'
             )
-            return self.model.predict_reconstructed(
-                x=x
-            )
+            return self.model.predict_reconstructed(x=x)
         else:
             return np.array([])
 
@@ -927,10 +915,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             data: Union[anndata.AnnData, np.ndarray],
             model_dir: Union[str, None],
             model_id: Union[str, None],
-            organism: Union[str, None],
-            organ: Union[str, None],
-            model_type: Union[str, None],
-            model_topology: Union[str, None],
+            model_topology: TopologyContainer,
             weights_md5: Union[str, None] = None,
             cache_path: str = os.path.join('cache', ''),
             max_class_weight: float = 1e3
@@ -938,21 +923,21 @@ class EstimatorKerasCelltype(EstimatorKeras):
         super(EstimatorKerasCelltype, self).__init__(
             data=data,
             model_dir=model_dir,
-            model_id=model_id,
             model_class="celltype",
-            organism=organism,
-            organ=organ,
-            model_type=model_type,
+            model_id=model_id,
             model_topology=model_topology,
             weights_md5=weights_md5,
             cache_path=cache_path
         )
+        assert "cl" in self.topology_container.output.keys(), self.topology_container.output.keys()
+        assert "targets" in self.topology_container.output.keys(), self.topology_container.output.keys()
         self.max_class_weight = max_class_weight
         self.celltype_universe = CelltypeUniverse(
-            cl=OCS.cellontology_class,
+            cl=OntologyCelltypes(branch=self.topology_container.output["cl"]),
             uberon=OCS.organ,
-            organism=organism,
+            organism=self.organism,
         )
+        self.celltype_universe.target_universe = self.topology_container.output["targets"]
 
     def init_model(
             self,

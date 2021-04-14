@@ -1,7 +1,11 @@
 VAEVAMP_TOPOLOGIES = {
     "0.2": {
-        "genome": "Mus_musculus.GRCm38.102",
-        "genes": ["protein_coding"],
+        "model_type": "vaevamp",
+        "input": {
+            "genome": "Homo_sapiens.GRCh38.102",
+            "genes": ["biotype", "protein_coding"],
+        },
+        "output": {},
         "hyper_parameters": {
             "latent_dim": (256, 128, (32, 32), 128, 256),
             "l1_coef": 0.,
@@ -14,8 +18,12 @@ VAEVAMP_TOPOLOGIES = {
         }
     },
     "0.3": {
-        "genome": "Mus_musculus.GRCm38.102",
-        "genes": ["protein_coding"],
+        "model_type": "vaevamp",
+        "input": {
+            "genome": "Homo_sapiens.GRCh38.102",
+            "genes": ["biotype", "protein_coding"],
+        },
+        "output": {},
         "hyper_parameters": {
             "latent_dim": (512, 256, (64, 64), 256, 512),
             "l1_coef": 0.,

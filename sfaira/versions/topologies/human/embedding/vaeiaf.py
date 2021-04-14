@@ -1,7 +1,11 @@
 VAEIAF_TOPOLOGIES = {
     "0.1": {
-        "genome": "Homo_sapiens.GRCh38.102",
-        "genes": ["protein_coding"],
+        "model_type": "vaeiaf",
+        "input": {
+            "genome": "Homo_sapiens.GRCh38.102",
+            "genes": ["biotype", "protein_coding"],
+        },
+        "output": {},
         "hyper_parameters": {
             "latent_dim": (256, 128, 64, 128, 256),
             "n_iaf": 2,
@@ -15,8 +19,12 @@ VAEIAF_TOPOLOGIES = {
         }
     },
     "0.2": {
-        "genome": "Homo_sapiens.GRCh38.102",
-        "genes": ["protein_coding"],
+        "model_type": "vaeiaf",
+        "input": {
+            "genome": "Homo_sapiens.GRCh38.102",
+            "genes": ["biotype", "protein_coding"],
+        },
+        "output": {},
         "hyper_parameters": {
             "latent_dim": (512, 256, 128, 256, 512),
             "n_iaf": 2,
