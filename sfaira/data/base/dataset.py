@@ -127,6 +127,10 @@ class DatasetBase(abc.ABC):
     _celltype_universe: Union[None, CelltypeUniverse]
     _ontology_class_map: Union[None, dict]
 
+    load_raw: Union[None, bool]
+    mapped_features: Union[None, str, bool]
+    remove_gene_version: Union[None, bool]
+
     sample_fn: Union[None, str]
     _sample_fns: Union[None, List[str]]
 
@@ -231,6 +235,10 @@ class DatasetBase(abc.ABC):
 
         self._celltype_universe = None
         self._ontology_class_map = None
+
+        self.load_raw = None
+        self.mapped_features = None
+        self.remove_gene_version = None
 
         self.sample_fn = sample_fn
         self._sample_fns = sample_fns
@@ -461,9 +469,9 @@ class DatasetBase(abc.ABC):
         # Run data set-specific loading script:
         self._load_cached(load_raw=load_raw, allow_caching=allow_caching, **kwargs)
         # Set loading-specific metadata:
-        self.adata.uns[self._adata_ids.load_raw] = load_raw
-        self.adata.uns[self._adata_ids.mapped_features] = match_to_reference
-        self.adata.uns[self._adata_ids.remove_gene_version] = remove_gene_version
+        self.load_raw = load_raw
+        self.mapped_features = match_to_reference
+        self.remove_gene_version = remove_gene_version
         # Streamline feature space:
         self._convert_and_set_var_names(match_to_reference=match_to_reference)
         self._collapse_gene_versions(remove_gene_version=remove_gene_version)
@@ -642,126 +650,83 @@ class DatasetBase(abc.ABC):
         :param clean_uns: Whether to delete non-streamlined fields in .uns.
         :return:
         """
-        # Set data set-wide attributes (.uns) (write to .obs instead if requested):
-        if uns_to_obs:
-            for k in self._adata_ids.uns_keys:
-                if k in self.adata.uns.keys():
-                    val = self.adata.uns[k]
-                else:
-                    val = getattr(self, k)
-                while hasattr(val, '__len__') and not isinstance(val, str) and len(val) == 1:  # unpack nested lists
-                    val = val[0]
-                self.adata.obs[getattr(self._adata_ids, k)] = [val for i in range(len(self.adata.obs))]
-        else:
-            for k in self._adata_ids.uns_keys:
-                if k not in self.adata.uns.keys():
-                    self.adata.uns[getattr(self._adata_ids, k)] = getattr(self, k)
 
-        # Set cell-wise or data set-wide attributes (.uns / .obs):
-        # These are saved in .uns if they are data set wide to save memory if uns_to_obs is False.
-        for attr, attr_name, attr_obs_key, ont in (
-            [self.assay_sc, self._adata_ids.assay_sc, self.assay_sc_obs_key, self.ontology_container_sfaira.assay_sc],
-            [self.assay_differentiation, self._adata_ids.assay_differentiation, self.assay_differentiation_obs_key,
-             self.ontology_container_sfaira.assay_differentiation],
-            [self.assay_type_differentiation, self._adata_ids.assay_type_differentiation,
-             self.assay_type_differentiation_obs_key, self.ontology_container_sfaira.assay_type_differentiation],
-            [self.cell_line, self._adata_ids.cell_line, self.cell_line_obs_key,
-             self.ontology_container_sfaira.cell_line],
-            [self.development_stage, self._adata_ids.development_stage, self.development_stage_obs_key,
-             self.ontology_container_sfaira.development_stage],
-            [self.disease, self._adata_ids.disease, self.disease_obs_key,
-             self.ontology_container_sfaira.disease],
-            [self.ethnicity, self._adata_ids.ethnicity, self.ethnicity_obs_key,
-             self.ontology_container_sfaira.ethnicity],
-            [self.organ, self._adata_ids.organ, self.organ_obs_key, self.ontology_container_sfaira.organ],
-            [self.organism, self._adata_ids.organism, self.organism_obs_key,
-             self.ontology_container_sfaira.organism],
-            [self.sample_source, self._adata_ids.sample_source, self.sample_source_obs_key,
-             self.ontology_container_sfaira.sample_source],
-            [self.sex, self._adata_ids.sex, self.sex_obs_key, self.ontology_container_sfaira.sex],
-            [self.state_exact, self._adata_ids.state_exact, self.state_exact_obs_key, None],
-        ):
-            if attr_obs_key is None and not uns_to_obs:
-                self.adata.uns[attr_name] = attr
-            elif attr_obs_key is None and uns_to_obs:
-                self.adata.obs[attr_name] = attr
-            elif attr_obs_key is not None:
-                # Attribute supplied per cell: Write into .obs.
-                # Search for direct match of the sought-after column name or for attribute specific obs key.
-                if attr_obs_key not in self.adata.obs.keys():
-                    # This should not occur in single data set loaders (see warning below) but can occur in
-                    # streamlined data loaders if not all instances of the streamlined data sets have all columns
-                    # in .obs set.
-                    self.adata.uns[attr_name] = None
-                    print(f"WARNING: attribute {attr_name} of data set {self.id} was not found in column {attr_obs_key}")
-                else:
-                    # Include flag in .uns that this attribute is in .obs:
-                    self.adata.uns[attr_name] = UNS_STRING_META_IN_OBS
-                    # Remove potential pd.Categorical formatting:
-                    self._value_protection(
-                        attr=attr_name, allowed=ont, attempted=np.unique(self.adata.obs[attr_obs_key].values).tolist())
-                    self.adata.obs[attr_name] = self.adata.obs[attr_obs_key].values.tolist()
-            else:
-                raise ValueError("switch option should not occur")
-        # Add batch annotation which can be rule-based
-        for attr, attr_name, attr_obs_key, ont in (
-                [self.bio_sample, self._adata_ids.bio_sample, self.bio_sample_obs_key, None],
-                [self.individual, self._adata_ids.individual, self.individual_obs_key, None],
-                [self.tech_sample, self._adata_ids.tech_sample, self.tech_sample_obs_key, None],
-        ):
-            if attr_obs_key is None and not uns_to_obs:
-                self.adata.uns[attr_name] = attr
-            elif attr_obs_key is None and uns_to_obs:
-                self.adata.uns[attr_name] = UNS_STRING_META_IN_OBS
-                self.adata.obs[attr_name] = attr
-            elif attr_obs_key is not None:
-                self.adata.uns[attr_name] = UNS_STRING_META_IN_OBS
-                attr_obs_keys = attr_obs_key.split("*")  # Separator for indicate multiple columns.
-                keys_to_use = []
-                for k in attr_obs_keys:
-                    if k not in self.adata.obs.keys():
-                        # This should not occur in single data set loaders (see warning below) but can occur in
-                        # streamlined data loaders if not all instances of the streamlined data sets have all columns
-                        # in .obs set.
-                        print(f"WARNING: attribute {attr_name} of data set {self.id} was not found in column {k}")  # debugging
-                    else:
-                        keys_to_use.append(k)
-                if len(keys_to_use) > 0:
-                    # Build a combination label out of all columns used to describe this group.
-                    self.adata.obs[attr_name] = [
-                        "_".join([str(xxx) for xxx in xx])
-                        for xx in zip(*[self.adata.obs[k].values.tolist() for k in keys_to_use])
-                    ]
-            else:
-                raise ValueError("switch option should not occur")
-        # Set cell-wise attributes (.obs):
-        # None so far other than celltypes.
-        # Set cell types:
-        # Map cell type names from raw IDs to ontology maintained ones:
-        if self.cell_types_original_obs_key is not None:
-            self.project_celltypes_to_ontology()
-
-
-
-
-
-
-
-
-
-
-
-
-
+        # Set schema as provided by the user
         if schema == "sfaira":
-            adata_fields = AdataIdsSfaira()
+            adata_target_ids = AdataIdsSfaira()
         elif schema == "cellxgene":
-            adata_fields = AdataIdsCellxgene()
+            adata_target_ids = AdataIdsCellxgene()
         else:
             raise ValueError(f"did not recognize schema {schema}")
 
+        # Prepare .obs column name dict (process keys below with other .uns keys if they're set dataset-wide)
+        obs_cols = {}
+        for k in adata_target_ids.obs_keys:
+            if hasattr(self, f"{k}_obs_key") and getattr(self, f"{k}_obs_key") is not None:
+                obs_cols[k] = (getattr(self, f"{k}_obs_key"), getattr(adata_target_ids, k))
+            else:
+                adata_target_ids.uns_keys.append(k)
 
+        # Prepare new .uns dict:
+        uns_new = {}
+        for k in adata_target_ids.uns_keys:
+            val = getattr(self, k)
+            while hasattr(val, '__len__') and not isinstance(val, str) and len(val) == 1:  # unpack nested lists/tuples
+                val = val[0]
+            uns_new[getattr(adata_target_ids, k)] = val
 
+        # Prepare new .obs dataframe
+        # First define some special obs column types
+        per_cell_labels = ["cell_types_original", "cell_ontology_class", "cell_ontology_id"]
+        experiment_batch_labels = ["bio_sample", "individual", "tech_sample"]
+        obs_new = pd.DataFrame(index=self.adata.obs.index)
+        for k, (old_col, new_col) in obs_cols.items():
+            # Skip any per-cell labels for now and process them in the next code block
+            if k in per_cell_labels:
+                continue
+            # Handle batch-annotation columns which can be provided as a combination of columns separated by an asterisk
+            elif k in experiment_batch_labels and "*" in old_col:
+                batch_cols = []
+                for batch_col in old_col.split("*"):
+                    if batch_col in self.adata.obs_keys():
+                        batch_cols.append(batch_col)
+                    else:
+                        # This should not occur in single data set loaders (see warning below) but can occur in
+                        # streamlined data loaders if not all instances of the streamlined data sets have all columns
+                        # in .obs set.
+                        print(f"WARNING: attribute {new_col} of data set {self.id} was not found in column {batch_col}")
+                # Build a combination label out of all columns used to describe this group.
+                obs_new[new_col] = [
+                    "_".join([str(xxx) for xxx in xx])
+                    for xx in zip(*[self.adata.obs[batch_col].values.tolist() for batch_col in batch_cols])
+                ]
+                setattr(self, f"{k}_obs_key", new_col)  # update _obs_column attribute of this class to match the new column
+            # All other (ie. non-batch-related) .obs fields are interpreted as provided
+            else:
+                # Search for direct match of the sought-after column name or for attribute specific obs key.
+                if old_col in self.adata.obs_keys():
+                    # Include flag in .uns that this attribute is in .obs:
+                    uns_new[new_col] = UNS_STRING_META_IN_OBS
+                    # Remove potential pd.Categorical formatting:
+                    ontology = getattr(self.ontology_container_sfaira, k) if hasattr(self.ontology_container_sfaira, k) else None
+                    self._value_protection(attr=new_col, allowed=ontology, attempted=np.unique(self.adata.obs[old_col].values).tolist())
+                    obs_new[new_col] = self.adata.obs[old_col].values.tolist()
+                    del self.adata.obs[old_col]
+                    setattr(self, f"{k}_obs_key", new_col)  # update _obs_column attribute of this class to match the new column
+                else:
+                    # This should not occur in single data set loaders (see warning below) but can occur in
+                    # streamlined data loaders if not all instances of the streamlined data sets have all columns
+                    # in .obs set.
+                    uns_new[new_col] = None
+                    print(f"WARNING: attribute {new_col} of data set {self.id} was not found in column {old_col}")
+
+        # Set cell-wise attributes (.obs): (None so far other than celltypes.)
+        # Set cell types:
+        # Map cell type names from raw IDs to ontology maintained ones:
+        if self.cell_types_original_obs_key is not None:
+            self.project_celltypes_to_ontology(copy=True)
+
+        # Clean up
         if clean_var:
             if self.adata.varm is not None:
                 del self.adata.varm
@@ -772,39 +737,9 @@ class DatasetBase(abc.ABC):
                 del self.adata.obsm
             if self.adata.obsp is not None:
                 del self.adata.obsp
-
-
-
-        # Only retain target elements in adata.uns:
-        uns_new = dict([
-            (getattr(adata_fields, k), self.adata.uns[getattr(self._adata_ids, k)])
-            if getattr(self._adata_ids, k) in self.adata.uns.keys()
-            else (getattr(adata_fields, k), None)
-            for k in adata_fields.uns_keys
-        ])
         if clean_uns:
-            del self.adata.uns
-        # Remove old keys in sfaira scheme:
-        for k in adata_fields.uns_keys:
-            if getattr(self._adata_ids, k) in self.adata.uns.keys():
-                del self.adata.uns[getattr(self._adata_ids, k)]
-        # Add new keys in new scheme:
-        for k, v in uns_new.items():
-            self.adata.uns[k] = v
-        # Catch issues with data structures in uns that cannot be written to h5ad:
-        for k, v in self.adata.uns.items():
-            replace = False
-            if isinstance(v, tuple) and len(v) == 1 and (isinstance(v[0], tuple) or isinstance(v[0], list)):
-                v = v[0]
-                replace = True
-            if isinstance(v, tuple) and len(v) == 1 and (isinstance(v[0], tuple) or isinstance(v[0], list)):
-                v = v[0]
-                replace = True
-            if replace:
-                if v == self._adata_ids.unknown_metadata_identifier:
-                    self.adata.uns[k] = adata_fields.unknown_metadata_identifier
-                else:
-                    self.adata.uns[k] = v
+            pass
+
 
 
         # Only retain target elements in adata.var:
@@ -822,25 +757,6 @@ class DatasetBase(abc.ABC):
 
 
 
-        # Only retain target columns in adata.obs:
-        obs_old = self.adata.obs.copy()
-        self.adata.obs = pd.DataFrame(
-            data=dict([
-                (getattr(adata_fields, k), self.adata.obs[getattr(self._adata_ids, k)])
-                for k in adata_fields.obs_keys
-                if getattr(self._adata_ids, k) in self.adata.obs.keys()
-            ]),
-            index=self.adata.obs.index
-        )
-        # Add old columns in if they are not overwritten and object is not cleaned:
-        if not clean_obs:
-            for k, v in obs_old.items():
-                if k not in self.adata.obs.keys() and \
-                        k not in [getattr(self._adata_ids, k) for k in adata_fields.obs_keys] and \
-                        k not in self._adata_ids.obs_keys:
-                    self.adata.obs[k] = v
-
-
 
 
         # Add additional hard-coded description changes for cellxgene schema:
@@ -850,9 +766,6 @@ class DatasetBase(abc.ABC):
                 "corpora_encoding_version": "0.1.0",
                 "corpora_schema_version": "1.1.0",
             }
-            for k in ["author", "doi", "download_url_data", "download_url_meta", "id", "year"]:
-                if k in self.adata.uns.keys():
-                    del self.adata.uns[k]
             # TODO port this into organism ontology handling.
             if self.organism == "mouse":
                 self.adata.uns["organism"] = "Mus musculus"
@@ -861,33 +774,20 @@ class DatasetBase(abc.ABC):
                 self.adata.uns["organism"] = "Homo sapiens"
                 self.adata.uns["organism_ontology_term_id"] = "NCBITaxon:9606"
             else:
-                raise ValueError(f"organism {self.organism} currently not supported")
+                raise ValueError(f"organism {self.organism} currently not supported by cellxgene schema")
             # Add ontology IDs where necessary (note that human readable terms are also kept):
             for k in ["organ", "assay_sc", "disease", "ethnicity", "development_stage"]:
-                if getattr(adata_fields, k) in self.adata.obs.columns:
+                if getattr(adata_target_ids, k) in self.adata.obs.columns:
                     self.__project_name_to_id_obs(
                         ontology=getattr(self._adata_ids, k),
-                        key_in=getattr(adata_fields, k),
-                        key_out=getattr(adata_fields, k) + "_ontology_term_id",
+                        key_in=getattr(adata_target_ids, k),
+                        key_out=getattr(adata_target_ids, k) + "_ontology_term_id",
                         map_exceptions=[],
-                        map_exceptions_value="",
+                        map_exceptions_value=adata_target_ids.unknown_metadata_ontology_id_identifier,
                     )
                 else:
-                    self.adata.obs[getattr(adata_fields, k)] = adata_fields.unknown_metadata_identifier
-                    self.adata.obs[getattr(adata_fields, k) + "_ontology_term_id"] = ""
-            # Clean up readable fields.
-            for k in [
-                "organ",
-                "assay_sc",
-                "disease",
-                "ethnicity",
-                "development_stage",
-                "sex",
-            ]:
-                self.adata.obs[getattr(adata_fields, k)] = [
-                    x if x is not None else adata_fields.unknown_metadata_identifier
-                    for x in self.adata.obs[getattr(adata_fields, k)].values
-                ]
+                    self.adata.obs[getattr(adata_target_ids, k)] = adata_target_ids.unknown_metadata_identifier
+                    self.adata.obs[getattr(adata_target_ids, k) + "_ontology_term_id"] = adata_target_ids.unknown_metadata_ontology_id_identifier
             # Adapt var columns naming.
             if self.organism == "mouse":
                 gene_id_new = "hgnc_gene_symbol"
@@ -895,22 +795,20 @@ class DatasetBase(abc.ABC):
                 gene_id_new = "mgi_gene_symbol"
             else:
                 raise ValueError(f"organism {self.organism} currently not supported")
-            self.adata.var[gene_id_new] = self.adata.var[getattr(adata_fields, "gene_id_symbols")]
+            self.adata.var[gene_id_new] = self.adata.var[getattr(adata_target_ids, "gene_id_symbols")]
             self.adata.var.index = self.adata.var[gene_id_new].values
-            if gene_id_new != getattr(adata_fields, "gene_id_symbols"):
-                del self.adata.var[getattr(adata_fields, "gene_id_symbols")]
+            if gene_id_new != getattr(adata_target_ids, "gene_id_symbols"):
+                del self.adata.var[getattr(adata_target_ids, "gene_id_symbols")]
 
-        # Remove sfaira-specific .uns fields:
-        if schema != "sfaira":
-            keys_to_delete = ["load_raw", "mapped_features", "remove_gene_version", "annotated"]
-            # Also remove UNS_STRING_META_IN_OBS labels in uns
-            for k, v in self.adata.uns.items():
-                if v == UNS_STRING_META_IN_OBS:
-                    keys_to_delete.append(k)
-            # Actually do the deletion
-            for k in np.unique(keys_to_delete):
-                if k in self.adata.uns.keys():
-                    del self.adata.uns[k]
+        # Make sure that correct unknown_metadata_identifier is used in .uns, .obs and .var metadata
+        self.adata.obs = self.adata.obs.replace({None: adata_target_ids.unknown_metadata_identifier})
+        self.adata.var = self.adata.var.replace({None: adata_target_ids.unknown_metadata_identifier})
+        for k in self.adata.uns_keys():
+            if self.adata.uns[k] is None:
+                self.adata.uns[k] = adata_target_ids.unknown_metadata_identifier
+
+        # Set new adata fields to class after conversion
+        self._adata_ids = adata_target_ids
 
     def load_tobacked(
             self,
@@ -1062,7 +960,7 @@ class DatasetBase(abc.ABC):
             if self.cell_types_original_obs_key is not None:
                 warnings.warn(f"file {fn} does not exist but cell_types_original_obs_key is given")
 
-    def project_celltypes_to_ontology(self):
+    def project_celltypes_to_ontology(self, copy=False):
         """
         Project free text cell type names to ontology based on mapping table.
 
@@ -1079,8 +977,7 @@ class DatasetBase(abc.ABC):
         else:
             labels_mapped = labels_original
         # Validate mapped IDs based on ontology:
-        # This aborts with a readable error if there was a target in the mapping file that does not match the
-        # ontology.
+        # This aborts with a readable error if there was a target in the mapping file that does not match the ontology.
         if self.cell_ontology_map is not None:
             # This protection blocks progression in the unit test if not deactivated.
             self._value_protection(

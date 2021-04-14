@@ -141,6 +141,9 @@ class AdataIdsSfaira(AdataIds):
             "primary_data",
             "title",
             "year",
+            "load_raw",
+            "mapped_features",
+            "remove_gene_version",
         ]
 
 
