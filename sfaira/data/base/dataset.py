@@ -566,7 +566,7 @@ class DatasetBase(abc.ABC):
             raise ValueError(f"Data type {type(self.adata.X)} not recognized.")
 
         # Compute indices of genes to keep
-        data_ids = self.adata.var[self._adata_ids_sfaira.gene_id_ensembl].values
+        data_ids_ensg = self.adata.var[self._adata_ids_sfaira.gene_id_ensembl].values
         if subset_type is None:
             subset_ids_ensg = self.genome_container.ensembl
             subset_ids_symbol = self.genome_container.names
@@ -577,17 +577,17 @@ class DatasetBase(abc.ABC):
             if subset_type not in keys:
                 raise ValueError(f"subset type {subset_type} not available in list {keys}")
             subset_ids_ensg = [
-                x for x, y in zip(self.genome_container.ensembl, self.genome_container.type)
+                x.upper() for x, y in zip(self.genome_container.ensembl, self.genome_container.type)
                 if y in subset_type
             ]
             subset_ids_symbol = [
-                x for x, y in zip(self.genome_container.names, self.genome_container.type)
+                x.upper() for x, y in zip(self.genome_container.names, self.genome_container.type)
                 if y in subset_type
             ]
 
         # Remove unmapped genes
-        idx_feature_kept = np.where([x in subset_ids_symbol for x in data_ids])[0]
-        data_ids_kept = data_ids[idx_feature_kept]
+        idx_feature_kept = np.where([x.upper() in subset_ids_ensg for x in data_ids_ensg])[0]
+        data_ids_kept = data_ids_ensg[idx_feature_kept]
         x = x[:, idx_feature_kept]
         # Build map of subset_ids to features in x:
         idx_feature_map = np.array([subset_ids_symbol.index(x) for x in data_ids_kept])
