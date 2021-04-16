@@ -15,7 +15,7 @@ dois = str(sys.argv[6])
 path_cache = path_cache if path_cache != "None" else None
 
 for x in dois.split(","):
-    ds = sfaira.data.dataloaders.DatasetSuperGroupSfaira(
+    ds = sfaira.data.dataloaders.Universe(
         data_path=data_path, meta_path=path_meta, cache_path=path_cache
     )
     ds.subset(key="doi", values=[x])
