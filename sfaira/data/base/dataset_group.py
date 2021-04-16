@@ -149,7 +149,7 @@ class DatasetGroup:
 
     load.__doc__ += load_doc
 
-    def streamline(
+    def streamline_metadata(
             self,
             schema: str = "sfaira",
             uns_to_obs: bool = False,
@@ -171,7 +171,7 @@ class DatasetGroup:
         :return:
         """
         for x in self.ids:
-            self.datasets[x].streamline(schema=schema, uns_to_obs=uns_to_obs, clean_obs=clean_obs, clean_var=clean_var, clean_uns=clean_uns)
+            self.datasets[x].streamline_metadata(schema=schema, uns_to_obs=uns_to_obs, clean_obs=clean_obs, clean_var=clean_var, clean_uns=clean_uns)
 
     def subset_genes(self, subset_type: Union[None, str, List[str]] = None):
         """
@@ -283,7 +283,7 @@ class DatasetGroup:
         adata_ls = self.adata_ls
         if not adata_ls:
             return None
-        self.streamline(format="sfaira", allow_uns_sfaira=False, clean_obs=True, clean_var=True, clean_uns=True)
+        self.streamline_metadata(format="sfaira", allow_uns_sfaira=False, clean_obs=True, clean_var=True, clean_uns=True)
 
         # .var entries are renamed and copied upon concatenation.
         # To preserve gene names in .var, the target gene names are copied into var_names and are then copied
@@ -958,7 +958,7 @@ class DatasetSuperGroup:
     def load_cached_backed(self, fn: PathLike):
         self.adata = anndata.read(fn, backed='r')
 
-    def streamline(
+    def streamline_metadata(
             self,
             schema: str = "sfaira",
             uns_to_obs: bool = False,
@@ -981,7 +981,7 @@ class DatasetSuperGroup:
         """
         for x in self.dataset_groups:
             for xx in x.ids:
-                x.datasets[xx].streamline(schema=schema, uns_to_obs=uns_to_obs, clean_obs=clean_obs, clean_var=clean_var, clean_uns=clean_uns)
+                x.datasets[xx].streamline_metadata(schema=schema, uns_to_obs=uns_to_obs, clean_obs=clean_obs, clean_var=clean_var, clean_uns=clean_uns)
 
     def subset(self, key, values):
         """

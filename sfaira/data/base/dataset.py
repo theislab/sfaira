@@ -628,7 +628,7 @@ class DatasetBase(abc.ABC):
             uns=self.adata.uns
         )
 
-    def streamline(
+    def streamline_metadata(
             self,
             schema: str = "sfaira",
             uns_to_obs: bool = False,
