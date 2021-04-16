@@ -4,6 +4,7 @@ try:
 except ImportError:
     tf = None
 
+
 class BasicModel(abc.ABC):
     """
     This base class defines model attributes shared across all models.
