@@ -1,13 +1,13 @@
 dataset_structure:
     dataset_index: 1
     sample_fns:
-        - "27379793"
-        - "25803224"
-        - "25803422"
+        - "27379793-WTA"
+        - "25803224-BM_All"
+        - "25803422-Integration_200AB"
 dataset_wise:
     author:
         - "Triana"
-    default_embedding:
+    default_embedding: "MOFAUMAP"
     doi:
         - "10.1101/2021.03.18.435922"
     download_url_data:
@@ -29,15 +29,18 @@ dataset_or_observation_wise:
     bio_sample_obs_key:
     cell_line:
     cell_line_obs_key:
-    development_stage:
+    development_stage: "human adult stage"
     development_stage_obs_key:
     disease:
+        - "27379793-WTA": "healthy"
+        - "25803422-Integration_200AB": "healthy"
     disease_obs_key:
+        - "25803224-BM_All": "class"
     ethnicity:
     ethnicity_obs_key:
     individual:
     individual_obs_key:
-    organ:
+    organ: "bone marrow"
     organ_obs_key:
     organism: "human"
     organism_obs_key:
@@ -48,11 +51,11 @@ dataset_or_observation_wise:
     state_exact:
     state_exact_obs_key:
     tech_sample:
-    tech_sample_obs_key:
+    tech_sample_obs_key: "Batch"
 observation_wise:
-    cellontology_original_obs_key:
+    cellontology_original_obs_key: "Prediction_Ind"
 feature_wise:
     var_ensembl_col:
-    var_symbol_col:
+    var_symbol_col: "index"
 meta:
     version: "1.0"
