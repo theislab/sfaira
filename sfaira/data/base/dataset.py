@@ -566,27 +566,33 @@ class DatasetBase(abc.ABC):
             raise ValueError(f"Data type {type(self.adata.X)} not recognized.")
 
         # Compute indices of genes to keep
-        data_ids = self.adata.var[self._adata_ids_sfaira.gene_id_ensembl].values
+        data_ids_ensg = self.adata.var[self._adata_ids_sfaira.gene_id_ensembl].values
         if subset_type is None:
-            subset_ids = self.genome_container.ensembl
+            subset_ids_ensg = self.genome_container.ensembl
+            subset_ids_symbol = self.genome_container.names
         else:
             if isinstance(subset_type, str):
                 subset_type = [subset_type]
             keys = np.unique(self.genome_container.type)
             if subset_type not in keys:
                 raise ValueError(f"subset type {subset_type} not available in list {keys}")
-            subset_ids = [
-                x for x, y in zip(self.genome_container.ensembl, self.genome_container.type)
+            subset_ids_ensg = [
+                x.upper() for x, y in zip(self.genome_container.ensembl, self.genome_container.type)
+                if y in subset_type
+            ]
+            subset_ids_symbol = [
+                x.upper() for x, y in zip(self.genome_container.names, self.genome_container.type)
                 if y in subset_type
             ]
 
-        idx_feature_kept = np.where([x in subset_ids for x in data_ids])[0]
-        idx_feature_map = np.array([subset_ids.index(x) for x in data_ids[idx_feature_kept]])
         # Remove unmapped genes
+        idx_feature_kept = np.where([x.upper() in subset_ids_ensg for x in data_ids_ensg])[0]
+        data_ids_kept = data_ids_ensg[idx_feature_kept]
         x = x[:, idx_feature_kept]
-
+        # Build map of subset_ids to features in x:
+        idx_feature_map = np.array([subset_ids_symbol.index(x) for x in data_ids_kept])
         # Create reordered feature matrix based on reference and convert to csr
-        x_new = scipy.sparse.csc_matrix((x.shape[0], self.genome_container.ngenes), dtype=x.dtype)
+        x_new = scipy.sparse.csc_matrix((x.shape[0], len(subset_ids_symbol)), dtype=x.dtype)
         # copying this over to the new matrix in chunks of size `steps` prevents a strange scipy error:
         # ... scipy/sparse/compressed.py", line 922, in _zero_many i, j, offsets)
         # ValueError: could not convert integer scalar
@@ -605,9 +611,9 @@ class DatasetBase(abc.ABC):
             X=x_new,
             obs=self.adata.obs,
             obsm=self.adata.obsm,
-            var=pd.DataFrame(data={'names': self.genome_container.names,
-                                   self._adata_ids_sfaira.gene_id_ensembl: self.genome_container.ensembl},
-                             index=self.genome_container.ensembl),
+            var=pd.DataFrame(data={self._adata_ids_sfaira.gene_id_names: subset_ids_symbol,
+                                   self._adata_ids_sfaira.gene_id_ensembl: subset_ids_ensg},
+                             index=subset_ids_ensg),
             uns=self.adata.uns
         )
 
@@ -674,8 +680,7 @@ class DatasetBase(abc.ABC):
                     # Include flag in .uns that this attribute is in .obs:
                     self.adata.uns[y] = UNS_STRING_META_IN_OBS
                     # Remove potential pd.Categorical formatting:
-                    self._value_protection(
-                        attr=y, allowed=v, attempted=np.unique(self.adata.obs[z].values).tolist())
+                    self._value_protection(attr=y, allowed=v, attempted=np.unique(self.adata.obs[z].values).tolist())
                     self.adata.obs[y] = self.adata.obs[z].values.tolist()
             else:
                 assert False, "switch option should not occur"
@@ -763,6 +768,9 @@ class DatasetBase(abc.ABC):
         uns_new = dict([
             (getattr(adata_fields, k), self.adata.uns[getattr(self._adata_ids_sfaira, k)])
             if getattr(self._adata_ids_sfaira, k) in self.adata.uns.keys()
+            else (getattr(adata_fields, k),
+                  np.unique(self.adata.obs[getattr(self._adata_ids_sfaira, k)].values).tolist())
+            if getattr(self._adata_ids_sfaira, k) in self.adata.obs.keys()
             else (getattr(adata_fields, k), None)
             for k in adata_fields.uns_keys
         ])
@@ -806,8 +814,11 @@ class DatasetBase(abc.ABC):
         self.adata.obs = pd.DataFrame(
             data=dict([
                 (getattr(adata_fields, k), self.adata.obs[getattr(self._adata_ids_sfaira, k)])
-                for k in adata_fields.obs_keys
                 if getattr(self._adata_ids_sfaira, k) in self.adata.obs.keys()
+                else (getattr(adata_fields, k), list(self.adata.uns[getattr(self._adata_ids_sfaira, k)]))
+                if getattr(self._adata_ids_sfaira, k) in self.adata.uns.keys()
+                else (getattr(adata_fields, k), adata_fields.unknown_metadata_identifier)
+                for k in adata_fields.obs_keys
             ]),
             index=self.adata.obs.index
         )
@@ -890,7 +901,42 @@ class DatasetBase(abc.ABC):
                 if k in self.adata.uns.keys():
                     del self.adata.uns[k]
 
-    def load_tobacked(
+    def write_distributed_store(
+            self,
+            dir_cache: Union[str, os.PathLike],
+            store: str = "backed",
+            chunks: Union[int, None] = None,
+    ):
+        """
+        Write data set into a format that allows distributed access to data set on disk.
+
+        Writes to a zarr-backed h5ad.
+        Load data set and streamline before calling this method.
+
+        :param dir_cache: Directory to write cache in.
+        :param store: Disk format for objects in cache:
+
+            - "h5ad": Allows access via backed .h5ad.
+                On disk data will not be compressed as .h5ad supports sparse data with is a good compression that gives
+                fast row-wise access if the files are csr.
+            - "zarr": Allows access as zarr array.
+        :param chunks: Chunk size of zarr array, see anndata.AnnData.write_zarr documentation.
+            Only relevant for store=="zarr".
+        """
+        self.__assert_loaded()
+        if store == "h5ad":
+            if not isinstance(self.adata.X, scipy.sparse.csr_matrix):
+                print(f"WARNING: high-perfomances caches based on .h5ad work better with .csr formatted expression "
+                      f"data, found {type(self.adata.X)}")
+            fn = os.path.join(dir_cache, self.doi_cleaned_id + ".h5ad")
+            self.adata.write_h5ad(filename=fn, compression=None, force_dense=False)
+        elif store == "zarr":
+            fn = os.path.join(dir_cache, self.doi_cleaned_id)
+            self.adata.write_zarr(store=fn, chunks=chunks)
+        else:
+            raise ValueError()
+
+    def write_backed(
             self,
             adata_backed: anndata.AnnData,
             genome: str,
@@ -2222,3 +2268,7 @@ class DatasetBase(abc.ABC):
 
     def show_summary(self):
         print(f"{(self.supplier, self.organism, self.organ, self.assay_sc, self.disease)}")
+
+    def __assert_loaded(self):
+        if self.adata is None:
+            raise ValueError("adata was not loaded, this is necessary for this operation")

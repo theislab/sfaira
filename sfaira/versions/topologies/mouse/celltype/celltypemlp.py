@@ -1,7 +1,14 @@
 CELLTYPEMLP_TOPOLOGIES = {
     "0.0.1": {
-        "genome": "Mus_musculus.GRCm38.102",
-        "genes": ["protein_coding"],
+        "model_type": "mlp",
+        "input": {
+            "genome": "Homo_sapiens.GRCh38.102",
+            "genes": ["biotype", "protein_coding"],
+        },
+        "output": {
+            "cl": "v2021-02-01",
+            "targets": None,
+        },
         "hyper_parameters": {
             "units": [],
             "activation": None,
@@ -17,8 +24,15 @@ CELLTYPEMLP_TOPOLOGIES = {
         }
     },
     "0.1.1": {
-        "genome": "Mus_musculus.GRCm38.102",
-        "genes": ["protein_coding"],
+        "model_type": "mlp",
+        "input": {
+            "genome": "Homo_sapiens.GRCh38.102",
+            "genes": ["biotype", "protein_coding"],
+        },
+        "output": {
+            "cl": "v2021-02-01",
+            "targets": None,
+        },
         "hyper_parameters": {
             "units": [128],
             "activation": "selu",
@@ -34,8 +48,9 @@ CELLTYPEMLP_TOPOLOGIES = {
         }
     },
     "0.1.2": {
+        "model_type": "mlp",
         "genome": "Mus_musculus.GRCm38.102",
-        "genes": ["protein_coding"],
+        "genes": ["biotype", "protein_coding"],
         "hyper_parameters": {
             "units": [256, 128],
             "activation": "selu",
@@ -51,8 +66,15 @@ CELLTYPEMLP_TOPOLOGIES = {
         }
     },
     "0.1.3": {
-        "genome": "Mus_musculus.GRCm38.102",
-        "genes": ["protein_coding"],
+        "model_type": "mlp",
+        "input": {
+            "genome": "Homo_sapiens.GRCh38.102",
+            "genes": ["biotype", "protein_coding"],
+        },
+        "output": {
+            "cl": "v2021-02-01",
+            "targets": None,
+        },
         "hyper_parameters": {
             "units": [512, 256, 128],
             "activation": "selu",

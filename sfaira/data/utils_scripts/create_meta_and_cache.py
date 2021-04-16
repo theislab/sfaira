@@ -16,6 +16,7 @@ ds = sfaira.data.dataloaders.Universe(
 # Write meta data, cache and test load from cache:
 for x in ds.dataset_groups:
     for k, v in x.datasets.items():
+        print(f"SCRIPT: loading {x} {k}")
         try:
             # Initial load and cache writing:
             # Only run this if data set was not already cached to speed up resumed jobs.
@@ -37,4 +38,4 @@ for x in ds.dataset_groups:
             v.clear()
         except ValueError as e:
             # Do not abort upon ValueErrors, such as from cell type map bugs.
-            print(f"WARNING: TO-FIX: ValueError in {k}: {e}")
+            print(f"SCRIPT WARNING: TO-FIX: ValueError in {k}: {e}")

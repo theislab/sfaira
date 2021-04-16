@@ -83,31 +83,55 @@ class GtfInterface:
 
 
 class GenomeContainer:
+
     genome_tab: pandas.DataFrame
     assembly: str
-    organism: str
 
     def __init__(
             self,
-            organism: str,
-            assembly: Union[None, str],
+            organism: Union[None, str] = None,
+            assembly: Union[None, str] = None,
     ):
-        self.organism = organism
-        # Set defaults:
-        if self.organism == "human":
-            self.assembly = assembly if assembly is not None else "Homo_sapiens.GRCh38.102"
-        elif self.organism == "mouse":
-            self.assembly = assembly if assembly is not None else "Mus_musculus.GRCm38.102"
+        if assembly is None:
+            # Set defaults based on organism if assembly is not given.
+            if self.organism == "human":
+                self.assembly = "Homo_sapiens.GRCh38.102"
+            elif self.organism == "mouse":
+                self.assembly = "Mus_musculus.GRCm38.102"
+            else:
+                raise ValueError(f"organism {organism} not found")
         else:
-            raise ValueError(f"organism {organism} not found")
+            self.assembly = assembly
         self.gc = GtfInterface(assembly=self.assembly)
         self.load_genome()
+
+    @property
+    def organism(self):
+        return self.gc.organism
 
     def load_genome(self):
         self.genome_tab = self.gc.cache
 
-    def subset(self, gene_biotype: str):
-        self.genome_tab = self.genome_tab.loc[self.genome_tab[KEY_TYPE].values == gene_biotype, :].copy()
+    def subset(
+            self,
+            biotype: Union[None, str] = None,
+            symbols: Union[None, str] = None,
+            ensg: Union[None, str] = None,
+    ):
+        """
+        Subset by gene biotype or to gene list defined by identifiers (symbol or ensemble ID).
+
+        :param biotype:
+        :param symbols:
+        :param ensg:
+        :return:
+        """
+        if biotype is None:
+            self.genome_tab = self.genome_tab.loc[self.genome_tab[KEY_TYPE].values == biotype, :].copy()
+        if symbols is None:
+            self.genome_tab = self.genome_tab.loc[self.genome_tab[KEY_SYMBOL].values == symbols, :].copy()
+        if ensg is None:
+            self.genome_tab = self.genome_tab.loc[self.genome_tab[KEY_ID].values == ensg, :].copy()
 
     @property
     def names(self):
@@ -122,7 +146,7 @@ class GenomeContainer:
         return self.genome_tab[KEY_TYPE].values.tolist()
 
     @property
-    def ngenes(self) -> int:
+    def n_var(self) -> int:
         return self.genome_tab.shape[0]
 
     @property

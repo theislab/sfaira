@@ -17,7 +17,7 @@ ds = sfaira.data.dataloaders.Universe(
     data_path=path, meta_path=path_meta, cache_path=path_meta
 )
 ds.subset(key="organism", values=["mouse"])
-ds.load_tobacked(
+ds.write_backed(
     fn_backed=fn,
     genome=genome,
     shuffled=False,

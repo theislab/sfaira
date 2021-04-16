@@ -1,7 +1,14 @@
 CELLTYPEMARKER_TOPOLOGIES = {
     "0.0.1": {
-        "genome": "Mus_musculus.GRCm38.102",
-        "genes": ["protein_coding"],
+        "model_type": "marker",
+        "input": {
+            "genome": "Homo_sapiens.GRCh38.102",
+            "genes": ["biotype", "protein_coding"],
+        },
+        "output": {
+            "cl": "v2021-02-01",
+            "targets": None,
+        },
         "hyper_parameters": {
             "l1_coef": 0.,
             "l2_coef": 0.,

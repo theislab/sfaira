@@ -17,7 +17,7 @@ class CelltypeUniverse:
     onto_uberon: OntologyUberon
     _target_universe: Union[List[str], None]
 
-    def __init__(self, cl: OntologyCelltypes, uberon: OntologyUberon, organism: str, **kwargs):
+    def __init__(self, cl: OntologyCelltypes, uberon: OntologyUberon, organism: Union[str, None] = None, **kwargs):
         """
 
         :param organism: Organism, defines ontology extension used.
@@ -28,20 +28,20 @@ class CelltypeUniverse:
         self._target_universe = None
         self._set_extension(organism=organism)
 
-    def _set_extension(self, organism):
+    def _set_extension(self, organism: Union[str, None]):
         """
-
         :param organism: Organism, defines ontology extension used.
         """
-        if organism == "human":
-            self.onto_cl.add_extension(ONTOLOGIY_EXTENSION_HUMAN)
-        elif organism == "mouse":
-            self.onto_cl.add_extension(ONTOLOGIY_EXTENSION_MOUSE)
-        else:
-            raise ValueError(f"organism {organism} not found")
+        if organism is not None:
+            if organism == "human" or organism.lower() == "homo_sapiens":
+                self.onto_cl.add_extension(ONTOLOGIY_EXTENSION_HUMAN)
+            elif organism == "mouse" or organism.lower() == "mus_musculus":
+                self.onto_cl.add_extension(ONTOLOGIY_EXTENSION_MOUSE)
+            else:
+                raise ValueError(f"organism {organism} not found")
 
     @property
-    def target_universe(self):
+    def target_universe(self) -> List[str]:
         """
         Ontology classes of target universe (understandable cell type names).
 
@@ -53,11 +53,11 @@ class CelltypeUniverse:
     def target_universe(self, x: List[str]):
         # Check that all nodes are valid:
         for xx in x:
-            if xx not in self.onto_cl.nodes:
+            if xx not in self.onto_cl.node_names:
                 raise ValueError(f"cell type {xx} was not in ontology")
         # Default universe is the full set of leave nodes of ontology:
-        self.target_universe = self.onto_cl.leaves
-        self.onto_cl.set_leaves(self.target_universe)
+        self._target_universe = x
+        self.onto_cl.set_leaves(self._target_universe)
 
     @property
     def target_universe_ids(self):
@@ -93,7 +93,7 @@ class CelltypeUniverse:
             self,
             nodes: List[str],
             return_type: str = "elements"
-    ):
+    ) -> list:
         """
         Map a given list of nodes to leave nodes defined for this ontology.
         :param nodes:
