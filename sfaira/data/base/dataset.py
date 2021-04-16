@@ -659,13 +659,20 @@ class DatasetBase(abc.ABC):
         else:
             raise ValueError(f"did not recognize schema {schema}")
 
+        per_cell_labels = ["cell_types_original", "cell_ontology_class", "cell_ontology_id"]
+        experiment_batch_labels = ["bio_sample", "individual", "tech_sample"]
+
         # Prepare .obs column name dict (process keys below with other .uns keys if they're set dataset-wide)
         obs_cols = {}
         for k in adata_target_ids.obs_keys:
-            if hasattr(self, f"{k}_obs_key") and getattr(self, f"{k}_obs_key") is not None:
-                obs_cols[k] = (getattr(self, f"{k}_obs_key"), getattr(adata_target_ids, k))
+            # Skip any per-cell labels for now and process them in the next code block
+            if k in per_cell_labels:
+                continue
             else:
-                adata_target_ids.uns_keys.append(k)
+                if hasattr(self, f"{k}_obs_key") and getattr(self, f"{k}_obs_key") is not None:
+                    obs_cols[k] = (getattr(self, f"{k}_obs_key"), getattr(adata_target_ids, k))
+                else:
+                    adata_target_ids.uns_keys.append(k)
 
         # Prepare new .uns dict:
         uns_new = {}
@@ -677,15 +684,10 @@ class DatasetBase(abc.ABC):
 
         # Prepare new .obs dataframe
         # First define some special obs column types
-        per_cell_labels = ["cell_types_original", "cell_ontology_class", "cell_ontology_id"]
-        experiment_batch_labels = ["bio_sample", "individual", "tech_sample"]
         obs_new = pd.DataFrame(index=self.adata.obs.index)
         for k, (old_col, new_col) in obs_cols.items():
-            # Skip any per-cell labels for now and process them in the next code block
-            if k in per_cell_labels:
-                continue
             # Handle batch-annotation columns which can be provided as a combination of columns separated by an asterisk
-            elif k in experiment_batch_labels and "*" in old_col:
+            if k in experiment_batch_labels and "*" in old_col:
                 batch_cols = []
                 for batch_col in old_col.split("*"):
                     if batch_col in self.adata.obs_keys():
@@ -701,7 +703,7 @@ class DatasetBase(abc.ABC):
                     for xx in zip(*[self.adata.obs[batch_col].values.tolist() for batch_col in batch_cols])
                 ]
                 setattr(self, f"{k}_obs_key", new_col)  # update _obs_column attribute of this class to match the new column
-            # All other (ie. non-batch-related) .obs fields are interpreted as provided
+            # All other .obs fields are interpreted below as provided
             else:
                 # Search for direct match of the sought-after column name or for attribute specific obs key.
                 if old_col in self.adata.obs_keys():
@@ -724,7 +726,8 @@ class DatasetBase(abc.ABC):
         # Set cell types:
         # Map cell type names from raw IDs to ontology maintained ones:
         if self.cell_types_original_obs_key is not None:
-            self.project_celltypes_to_ontology(copy=True)
+            obs_cl = self.project_celltypes_to_ontology(copy=True)
+            obs_new = pd.concat([obs_new, obs_cl], axis=1)
 
         # Clean up
         if clean_var:
@@ -968,17 +971,15 @@ class DatasetBase(abc.ABC):
 
         :return:
         """
+        results = {}
         labels_original = self.adata.obs[self.cell_types_original_obs_key].values
         if self.cell_ontology_map is not None:  # only if this was defined
             labels_mapped = [
                 self.cell_ontology_map[x] if x in self.cell_ontology_map.keys()
                 else x for x in labels_original
             ]
-        else:
-            labels_mapped = labels_original
-        # Validate mapped IDs based on ontology:
-        # This aborts with a readable error if there was a target in the mapping file that does not match the ontology.
-        if self.cell_ontology_map is not None:
+            # Validate mapped IDs based on ontology:
+            # This aborts with a readable error if there was a target in the mapping file that doesnt match the ontology
             # This protection blocks progression in the unit test if not deactivated.
             self._value_protection(
                 attr="celltypes",
@@ -991,55 +992,69 @@ class DatasetBase(abc.ABC):
                     ]
                 ]
             )
-        self.adata.obs[self._adata_ids.cell_ontology_class] = labels_mapped
-        self.cellontology_class_obs_key = self._adata_ids.cell_ontology_class
-        self.adata.obs[self._adata_ids.cell_types_original] = labels_original
-        # Add cell type IDs into object:
-        # The IDs are not read from a source file but inferred based on the class name.
-        # TODO this could be changed in the future, this allows this function to be used both on cell type name mapping
-        #  files with and without the ID in the third column.
-        if self.cell_ontology_map is not None:
+            # Add cell type IDs into object:
+            # The IDs are not read from a source file but inferred based on the class name.
+            # TODO this could be changed in the future, this allows this function to be used both on cell type name
+            #  mapping files with and without the ID in the third column.
             # This mapping blocks progression in the unit test if not deactivated.
-            self.__project_name_to_id_obs(
+            ids_mapped = self.__project_name_to_id_obs(
                 ontology="cellontology_class",
-                key_in=self._adata_ids.cell_ontology_class,
-                key_out=self._adata_ids.cell_ontology_id,
+                key_in=labels_mapped,
+                key_out=None,
                 map_exceptions=[
                     self._adata_ids.unknown_celltype_identifier,
                     self._adata_ids.not_a_cell_celltype_identifier
                 ],
             )
+            results[self._adata_ids.cell_ontology_class] = labels_mapped
+            results[self._adata_ids.cell_ontology_id] = ids_mapped
+        else:
+            results[self._adata_ids.cell_ontology_class] = labels_original
+        results[self._adata_ids.cell_types_original] = labels_original
+        self.cellontology_class_obs_key = self._adata_ids.cell_ontology_class
+        if copy:
+            return pd.DataFrame(results, index=self.adata.obs.index)
+        else:
+            for k, v in results.items():
+                self.adata.obs[k] = v
 
     def __project_name_to_id_obs(
             self,
             ontology: str,
-            key_in: str,
-            key_out: str,
+            key_in: Union[str, list],
+            key_out: Union[str, None],
             map_exceptions: list,
             map_exceptions_value=None,
     ):
         """
         Project ontology names to IDs for a given ontology in .obs entries.
 
-        :param ontology:
-        :param key_in:
-        :param key_out:
-        :param map_exceptions:
-        :param map_exceptions_value:
+        :param ontology: name of the ontology to use when converting to IDs
+        :param key_in: name of obs_column containing names to convert or python list containing these values
+        :param key_out: name of obs_column to write the IDs or None. If None, a python list with the new values will be returned
+        :param map_exceptions: list of values that should not be mapped
+        :param map_exceptions_value: placeholder target value for values excluded from mapping
         :return:
         """
         ontology = getattr(self.ontology_container_sfaira, ontology)
+        assert isinstance(key_in, (str, list)), f"argument key_in needs to be of type str or list. Supplied" \
+                                                f"type: {type(key_in)=}"
+        input_values = self.adata.obs[key_in].values if isinstance(key_in, str) else key_in
         map_vals = dict([
             (x, ontology.id_from_name(x))
             for x in np.unique([
-                xx for xx in self.adata.obs[key_in].values
+                xx for xx in input_values
                 if (xx not in map_exceptions and xx is not None)
             ])
         ])
-        self.adata.obs[key_out] = [
+        output_values = [
             map_vals[x] if x in map_vals.keys() else map_exceptions_value
-            for x in self.adata.obs[key_in].values
+            for x in input_values
         ]
+        if isinstance(key_out, str):
+            self.adata.obs[key_out] = output_values
+        else:
+            return output_values
 
     @property
     def citation(self):
