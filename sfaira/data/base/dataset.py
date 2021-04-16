@@ -562,7 +562,7 @@ class DatasetBase(abc.ABC):
         self.adata.var[self._adata_ids.gene_id_index] = self.adata.var_names
         self.adata.var.index = self.adata.var[self._adata_ids.gene_id_ensembl].values
 
-    def subset_genes(self, subset_type: Union[None, str, List[str]] = None):
+    def streamline_features(self, subset_type: Union[None, str, List[str]] = None):
         """
         Subset and sort genes to genes defined in an assembly or genes of a particular type, such as protein coding.
 

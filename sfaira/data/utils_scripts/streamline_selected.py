@@ -27,7 +27,7 @@ for x in dois.split(","):
         set_metadata=False,
     )
     if schema == "cellxgene":
-        ds.subset_genes(subset_type=None)
+        ds.streamline_features(subset_type=None)
     ds.streamline_metadata(format=schema.lower(), allow_uns_sfaira=True, clean_obs=False, clean_var=True, clean_uns=False)
     assert len(ds.dataset_groups) == 1, len(ds.dataset_groups)
     dsg = ds.dataset_groups[0]

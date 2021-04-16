@@ -173,7 +173,7 @@ class DatasetGroup:
         for x in self.ids:
             self.datasets[x].streamline_metadata(schema=schema, uns_to_obs=uns_to_obs, clean_obs=clean_obs, clean_var=clean_var, clean_uns=clean_uns)
 
-    def subset_genes(self, subset_type: Union[None, str, List[str]] = None):
+    def streamline_features(self, subset_type: Union[None, str, List[str]] = None):
         """
         Subset and sort genes to genes defined in an assembly or genes of a particular type, such as protein coding.
 
@@ -183,7 +183,7 @@ class DatasetGroup:
             - "protein_coding": All protein coding genes in assembly.
         """
         for x in self.ids:
-            self.datasets[x].subset_genes(subset_type=subset_type)
+            self.datasets[x].streamline_features(subset_type=subset_type)
 
     def load_tobacked(
             self,
@@ -801,7 +801,7 @@ class DatasetSuperGroup:
                 **kwargs
             )
 
-    def subset_genes(self, subset_type: Union[None, str, List[str]] = None):
+    def streamline_features(self, subset_type: Union[None, str, List[str]] = None):
         """
         Subset and sort genes to genes defined in an assembly or genes of a particular type, such as protein coding.
 
@@ -811,7 +811,7 @@ class DatasetSuperGroup:
             - "protein_coding": All protein coding genes in assembly.
         """
         for x in self.dataset_groups:
-            x.subset_genes(subset_type=subset_type)
+            x.streamline_features(subset_type=subset_type)
 
     @property
     def adata(self):
