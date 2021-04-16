@@ -55,15 +55,16 @@ def test_load(doi_sfaira_repr: str, test_data: str):
     else:
         raise ValueError("data loader not found in sfaira and also not in sfaira_extension")
     file_path = pydoc.locate(dir_loader + ".FILE_PATH")
-    cache_path = os.path.join(test_data, "cache")
+    meta_path = None
+    cache_path = None
     # Clear dataset cache
     shutil.rmtree(cache_path, ignore_errors=True)
 
     ds = DatasetGroupDirectoryOriented(
         file_base=file_path,
         data_path=test_data,
-        meta_path=test_data,
-        cache_path=cache_path
+        meta_path=None,
+        cache_path=None
     )
     # Test raw loading and caching:
     # You can set load_raw to True while debugging when caching works already to speed the test up,
@@ -122,7 +123,7 @@ def test_load(doi_sfaira_repr: str, test_data: str):
                     datasets_f = [
                         DatasetBase(
                             data_path=test_data,
-                            meta_path=test_data,
+                            meta_path=meta_path,
                             cache_path=cache_path,
                             load_func=load_func,
                             dict_load_func_annotation=load_func_annotation,
@@ -135,7 +136,7 @@ def test_load(doi_sfaira_repr: str, test_data: str):
                     datasets_f = [
                         DatasetFound(
                             data_path=test_data,
-                            meta_path=test_data,
+                            meta_path=meta_path,
                             cache_path=cache_path,
                             load_func=load_func,
                             load_func_annotation=load_func_annotation,
@@ -158,7 +159,7 @@ def test_load(doi_sfaira_repr: str, test_data: str):
     ds = DatasetGroupDirectoryOriented(
         file_base=file_path,
         data_path=test_data,
-        meta_path=test_data,
+        meta_path=meta_path,
         cache_path=cache_path
     )
     ds.load(
