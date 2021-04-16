@@ -3,10 +3,12 @@ Functionalities to interact with gene sets defined in an assembly and gene-annot
 """
 
 import gzip
+import numpy as np
 import os
 from typing import Union
 import pandas
 import pathlib
+import urllib.error
 import urllib.request
 
 KEY_SYMBOL = "gene_name"
@@ -44,7 +46,7 @@ class GtfInterface:
         return self.assembly.split(".")[-1]
 
     @property
-    def organism(self):
+    def organism(self) -> str:
         return self.assembly.split(".")[0].lower()
 
     @property
@@ -57,7 +59,10 @@ class GtfInterface:
         """
         temp_file = os.path.join(self.cache_dir, self.assembly + ".gtf.gz")
         print(f"downloading {self.url_ensembl_ftp} into a temporary file {temp_file}")
-        _ = urllib.request.urlretrieve(url=self.url_ensembl_ftp, filename=temp_file)
+        try:
+            _ = urllib.request.urlretrieve(url=self.url_ensembl_ftp, filename=temp_file)
+        except urllib.error.URLError as e:
+            raise ValueError(f"Could not download gtf from {self.url_ensembl_ftp} with urllib.error.URLError: {e}")
         with gzip.open(temp_file) as f:
             tab = pandas.read_csv(f, sep="\t", comment="#", header=None)
         os.remove(temp_file)  # Delete temporary file .gtf.gz.
@@ -94,23 +99,25 @@ class GenomeContainer:
     ):
         if assembly is None:
             # Set defaults based on organism if assembly is not given.
-            if self.organism == "human":
+            if organism is None:
+                raise ValueError("Supply either organism or assembly to GenomeContainer().")
+            if organism == "human":
                 self.assembly = "Homo_sapiens.GRCh38.102"
-            elif self.organism == "mouse":
+            elif organism == "mouse":
                 self.assembly = "Mus_musculus.GRCm38.102"
             else:
                 raise ValueError(f"organism {organism} not found")
         else:
             self.assembly = assembly
-        self.gc = GtfInterface(assembly=self.assembly)
+        self.gtfi = GtfInterface(assembly=self.assembly)
         self.load_genome()
 
     @property
     def organism(self):
-        return self.gc.organism
+        return self.gtfi.organism
 
     def load_genome(self):
-        self.genome_tab = self.gc.cache
+        self.genome_tab = self.gtfi.cache
 
     def subset(
             self,
@@ -121,17 +128,39 @@ class GenomeContainer:
         """
         Subset by gene biotype or to gene list defined by identifiers (symbol or ensemble ID).
 
-        :param biotype:
-        :param symbols:
-        :param ensg:
-        :return:
+        Can subset by multiple factors at the same time.
+
+        :param biotype: Gene biotype(s) of gene(s) to subset genome to. Separate in string via "," if choosing multiple.
+        :param symbols: Gene symbol(s) of gene(s) to subset genome to. Separate in string via "," if choosing multiple.
+        :param ensg: Ensemble gene ID(s) of gene(s) to subset genome to. Separate in string via "," if choosing
+            multiple.
         """
-        if biotype is None:
-            self.genome_tab = self.genome_tab.loc[self.genome_tab[KEY_TYPE].values == biotype, :].copy()
-        if symbols is None:
-            self.genome_tab = self.genome_tab.loc[self.genome_tab[KEY_SYMBOL].values == symbols, :].copy()
-        if ensg is None:
-            self.genome_tab = self.genome_tab.loc[self.genome_tab[KEY_ID].values == ensg, :].copy()
+        subset = np.ones((self.n_var,), "int") == 1
+        if biotype is not None:
+            if not isinstance(biotype, str):
+                raise ValueError("Supply biotype as string, see also function annotation.")
+            biotype = biotype.split(",")
+            subset = np.logical_and(
+                subset,
+                [x in biotype for x in self.genome_tab[KEY_TYPE].values]
+            )
+        if symbols is not None:
+            if not isinstance(symbols, str):
+                raise ValueError("Supply symbols as string, see also function annotation.")
+            symbols = symbols.split(",")
+            subset = np.logical_and(
+                subset,
+                [x in symbols for x in self.genome_tab[KEY_SYMBOL].values]
+            )
+        if ensg is not None:
+            if not isinstance(ensg, str):
+                raise ValueError("Supply ensg as string, see also function annotation.")
+            ensg = ensg.split(",")
+            subset = np.logical_and(
+                subset,
+                [x in ensg for x in self.genome_tab[KEY_ID].values]
+            )
+        self.genome_tab = self.genome_tab.loc[subset, :].copy()
 
     @property
     def names(self):
