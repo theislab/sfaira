@@ -1162,7 +1162,7 @@ class DatasetBase(abc.ABC):
         """
         ontology = getattr(self.ontology_container_sfaira, ontology)
         map_vals = dict([
-            (x, ontology.id_from_name(x))
+            (x, ontology.convert_to_id(x))
             for x in np.unique([
                 xx for xx in self.adata.obs[key_in].values
                 if (xx not in map_exceptions and xx is not None)
@@ -2051,7 +2051,6 @@ class DatasetBase(abc.ABC):
             self._celltype_universe = CelltypeUniverse(
                 cl=self.ontology_celltypes,
                 uberon=self.ontology_container_sfaira.organ,
-                organism=self.organism,
             )
         return self._celltype_universe
 
@@ -2190,7 +2189,7 @@ class DatasetBase(abc.ABC):
                     attempted_clean.append(x)
                 else:
                     if isinstance(allowed, OntologyHierarchical) and x in allowed.node_ids:
-                        attempted_clean.append(allowed.name_from_id(x))
+                        attempted_clean.append(allowed.convert_to_name(x))
                     else:
                         raise ValueError(f"'{x}' is not a valid entry for {attr} in {self.id}.")
             else:

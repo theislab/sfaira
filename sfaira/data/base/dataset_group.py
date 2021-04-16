@@ -665,7 +665,7 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                         )
                         # Adds a third column with the corresponding ontology IDs into the file.
                         tab[self._adata_ids_sfaira.classmap_target_id_key] = [
-                            self.ontology_celltypes.id_from_name(x)
+                            self.ontology_celltypes.convert_to_id(x)
                             if x != self._adata_ids_sfaira.unknown_celltype_identifier and
                             x != self._adata_ids_sfaira.not_a_cell_celltype_identifier
                             else self._adata_ids_sfaira.unknown_celltype_identifier
