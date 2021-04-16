@@ -5,7 +5,7 @@ Functionalities to interact with gene sets defined in an assembly and gene-annot
 import gzip
 import numpy as np
 import os
-from typing import Union
+from typing import List, Union
 import pandas
 import pathlib
 import urllib.error
@@ -121,41 +121,55 @@ class GenomeContainer:
 
     def subset(
             self,
-            biotype: Union[None, str] = None,
-            symbols: Union[None, str] = None,
-            ensg: Union[None, str] = None,
+            biotype: Union[None, str, List[str]] = None,
+            symbols: Union[None, str, List[str]] = None,
+            ensg: Union[None, str, List[str]] = None,
     ):
         """
         Subset by gene biotype or to gene list defined by identifiers (symbol or ensemble ID).
 
-        Can subset by multiple factors at the same time.
+        Will subset by multiple factors if more than one parameter is not None.
 
-        :param biotype: Gene biotype(s) of gene(s) to subset genome to. Separate in string via "," if choosing multiple.
-        :param symbols: Gene symbol(s) of gene(s) to subset genome to. Separate in string via "," if choosing multiple.
-        :param ensg: Ensemble gene ID(s) of gene(s) to subset genome to. Separate in string via "," if choosing
-            multiple.
+        :param biotype: Gene biotype(s) of gene(s) to subset genome to. Elements have to appear in genome.
+            Separate in string via "," if choosing multiple or supply as list of string.
+        :param symbols: Gene symbol(s) of gene(s) to subset genome to. Elements have to appear in genome.
+            Separate in string via "," if choosing multiple or supply as list of string.
+        :param ensg: Ensemble gene ID(s) of gene(s) to subset genome to. Elements have to appear in genome.
+            Separate in string via "," if choosing multiple or supply as list of string.
         """
         subset = np.ones((self.n_var,), "int") == 1
         if biotype is not None:
-            if not isinstance(biotype, str):
-                raise ValueError("Supply biotype as string, see also function annotation.")
-            biotype = biotype.split(",")
+            if isinstance(biotype, list):
+                pass
+            elif isinstance(biotype, str):
+                biotype = biotype.split(",")
+            else:
+                raise ValueError(f"Supply biotype as string, see also function annotation. Supplied {biotype}.")
+            self.__validate_types(x=biotype)
             subset = np.logical_and(
                 subset,
                 [x in biotype for x in self.genome_tab[KEY_TYPE].values]
             )
         if symbols is not None:
-            if not isinstance(symbols, str):
-                raise ValueError("Supply symbols as string, see also function annotation.")
-            symbols = symbols.split(",")
+            if isinstance(symbols, list):
+                pass
+            elif isinstance(symbols, str):
+                symbols = symbols.split(",")
+            else:
+                raise ValueError(f"Supply symbols as string, see also function annotation. Supplied {symbols}.")
+            self.__validate_symbols(x=symbols)
             subset = np.logical_and(
                 subset,
                 [x in symbols for x in self.genome_tab[KEY_SYMBOL].values]
             )
         if ensg is not None:
-            if not isinstance(ensg, str):
-                raise ValueError("Supply ensg as string, see also function annotation.")
-            ensg = ensg.split(",")
+            if isinstance(ensg, list):
+                pass
+            elif isinstance(ensg, str):
+                ensg = ensg.split(",")
+            else:
+                raise ValueError(f"Supply ensg as string, see also function annotation. Supplied {ensg}.")
+            self.__validate_ensembl(x=ensg)
             subset = np.logical_and(
                 subset,
                 [x in ensg for x in self.genome_tab[KEY_ID].values]
@@ -163,7 +177,7 @@ class GenomeContainer:
         self.genome_tab = self.genome_tab.loc[subset, :].copy()
 
     @property
-    def names(self):
+    def symbols(self):
         return self.genome_tab[KEY_SYMBOL].values.tolist()
 
     @property
@@ -171,8 +185,23 @@ class GenomeContainer:
         return self.genome_tab[KEY_ID].values.tolist()
 
     @property
-    def type(self):
+    def biotype(self):
         return self.genome_tab[KEY_TYPE].values.tolist()
+
+    def __validate_ensembl(self, x: List[str]):
+        not_found = [y for y in x if y not in self.ensembl]
+        if len(not_found) > 0:
+            raise ValueError(f"Could not find ensembl: {not_found}")
+
+    def __validate_symbols(self, x: List[str]):
+        not_found = [y for y in x if y not in self.symbols]
+        if len(not_found) > 0:
+            raise ValueError(f"Could not find names: {not_found}")
+
+    def __validate_types(self, x: List[str]):
+        not_found = [y for y in x if y not in self.biotype]
+        if len(not_found) > 0:
+            raise ValueError(f"Could not find type: {not_found}")
 
     @property
     def n_var(self) -> int:

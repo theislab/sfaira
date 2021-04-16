@@ -22,7 +22,7 @@ def test_gc_init(organism: Union[str, None], assembly: Union[str, None]):
 @pytest.mark.parametrize("subset", [
     ({"biotype": "protein_coding"}, 21936),
     ({"biotype": "lincRNA"}, 5629),
-    ({"biotype": "protein_coding,lincRNA"}, 21936+5629),
+    ({"biotype": "protein_coding,lincRNA"}, 21936 + 5629),
     ({"symbols": "Gnai3,Pbsn,Cdc45"}, 3),
     ({"ensg": "ENSMUSG00000000003,ENSMUSG00000000028"}, 2)
 ])
@@ -34,7 +34,7 @@ def test_gc_subsetting(subset: Tuple[dict, int]):
     gc.subset(**subset[0])
     assert gc.n_var == subset[1]
     assert len(gc.ensembl) == subset[1]
-    assert len(gc.names) == subset[1]
-    assert len(gc.type) == subset[1]
+    assert len(gc.symbols) == subset[1]
+    assert len(gc.biotype) == subset[1]
     if list(subset[0].keys())[0] == "protein_coding":
-        assert np.all(gc.type == "protein_coding")
+        assert np.all(gc.biotype == "protein_coding")
