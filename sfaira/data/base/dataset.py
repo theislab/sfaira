@@ -437,8 +437,6 @@ class DatasetBase(abc.ABC):
 
     def load(
             self,
-            remove_gene_version: bool = True,
-            match_to_reference: Union[str, bool, None] = None,
             load_raw: bool = False,
             allow_caching: bool = True,
             **kwargs
@@ -446,35 +444,18 @@ class DatasetBase(abc.ABC):
         """
         Load the selected datasets into memory.
 
-        :param remove_gene_version: Whether to remove the version number after the colon sometimes foud in ensembl gene ids.
-        :param match_to_reference: Whether to map gene names to a given annotation. Can be:
-                                   - str: Provide the name of the annotation in the format Organism.Assembly.Release
-                                   - None: use the default annotation for this organism in sfaira.
-                                   - False: no mapping of gene labels will be done.
         :param load_raw: Force reading the raw object even when a cached one is present.
         :param allow_caching: Write the object to cache after loading if no cache exists yet.
         """
         # Sanity checks
         if self.adata is not None:
             raise ValueError(f"adata of {self.id} already loaded.")
-        if match_to_reference and not remove_gene_version:
-            warnings.warn("it is not recommended to enable matching the feature space to a genome reference"
-                          "when not removing gene versions. this can lead to very poor matching results")
         if self.data_dir is None:
             raise ValueError("No sfaira data repo path provided in constructor.")
-
-        # Set genome container if mapping of gene labels is requested
-        if match_to_reference is not False:  # Testing this explicitly to make sure False is treated separately from None
-            self._set_genome(organism=self.organism, assembly=match_to_reference)
         # Run data set-specific loading script:
         self._load_cached(load_raw=load_raw, allow_caching=allow_caching, **kwargs)
         # Set loading-specific metadata:
         self.load_raw = load_raw
-        self.mapped_features = match_to_reference
-        self.remove_gene_version = remove_gene_version
-        # Streamline feature space:
-        self._convert_and_set_var_names(match_to_reference=match_to_reference)
-        self._collapse_gene_versions(remove_gene_version=remove_gene_version)
 
     load.__doc__ = load_doc
 
@@ -562,15 +543,37 @@ class DatasetBase(abc.ABC):
         self.adata.var[self._adata_ids.gene_id_index] = self.adata.var_names
         self.adata.var.index = self.adata.var[self._adata_ids.gene_id_ensembl].values
 
-    def streamline_features(self, subset_type: Union[None, str, List[str]] = None):
+    def streamline_features(
+            self,
+            remove_gene_version: bool = True,
+            match_to_reference: Union[str, bool, None] = None,
+            subset_type: Union[None, str, List[str]] = None
+    ):
         """
         Subset and sort genes to genes defined in an assembly or genes of a particular type, such as protein coding.
-
+        :param remove_gene_version: Whether to remove the version number after the colon sometimes found in ensembl gene ids.
+        :param match_to_reference: Whether to map gene names to a given annotation. Can be:
+                                   - str: Provide the name of the annotation in the format Organism.Assembly.Release
+                                   - None: use the default annotation for this organism in sfaira.
+                                   - False: no mapping of gene labels will be done.
         :param subset_type: Type(s) to subset to. Can be a single type or a list of types or None. Types can be:
-
             - None: All genes in assembly.
             - "protein_coding": All protein coding genes in assembly.
+
         """
+        if match_to_reference and not remove_gene_version:
+            warnings.warn("it is not recommended to enable matching the feature space to a genome reference"
+                          "when not removing gene versions. this can lead to very poor matching results")
+        # Set genome container if mapping of gene labels is requested
+        if match_to_reference is not False:  # Testing this explicitly makes sure False is treated separately from None
+            self._set_genome(organism=self.organism, assembly=match_to_reference)
+        self.mapped_features = match_to_reference
+        self.remove_gene_version = remove_gene_version
+        # Streamline feature space:
+        self._convert_and_set_var_names(match_to_reference=match_to_reference)
+        self._collapse_gene_versions(remove_gene_version=remove_gene_version)
+
+
         # Convert data matrix to csc matrix
         if isinstance(self.adata.X, np.ndarray):
             # Change NaN to zero. This occurs for example in concatenation of anndata instances.
@@ -835,7 +838,7 @@ class DatasetBase(abc.ABC):
         :param allow_caching: See .load().
         :return: New row index for next element to be written into backed anndata.
         """
-        self.load(remove_gene_version=True, match_to_reference=genome, load_raw=load_raw, allow_caching=allow_caching)
+        self.load(load_raw=load_raw, allow_caching=allow_caching)
         # Check if writing to sparse or dense matrix:
         if isinstance(adata_backed.X, np.ndarray) or \
                 isinstance(adata_backed.X, h5py._hl.dataset.Dataset):  # backed dense
@@ -1127,7 +1130,7 @@ class DatasetBase(abc.ABC):
             assert False, "bug in switch"
 
         if self.adata is None:
-            self.load(remove_gene_version=False, match_to_reference=None, load_raw=True, allow_caching=False)
+            self.load(load_raw=True, allow_caching=False)
         # Add data-set wise meta data into table:
         meta = pandas.DataFrame({
             self._adata_ids.annotated: self.adata.uns[self._adata_ids.annotated],

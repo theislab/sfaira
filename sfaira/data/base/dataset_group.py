@@ -30,13 +30,7 @@ def map_fn(inputs):
     ds, remove_gene_version, match_to_reference, load_raw, allow_caching, set_metadata, kwargs, func, kwargs_func = \
         inputs
     try:
-        ds.load(
-            remove_gene_version=remove_gene_version,
-            match_to_reference=match_to_reference,
-            load_raw=load_raw,
-            allow_caching=allow_caching,
-            **kwargs
-        )
+        ds.load(load_raw=load_raw, allow_caching=allow_caching, **kwargs)
         if func is not None:
             x = func(ds, **kwargs_func)
             ds.clear()
