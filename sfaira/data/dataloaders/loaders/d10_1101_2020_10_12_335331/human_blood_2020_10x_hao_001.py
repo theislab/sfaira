@@ -8,7 +8,7 @@ import tarfile
 
 def load(data_dir, **kwargs):
     fn = os.path.join(data_dir, "GSE164378_RAW.tar")
-    adatas = []        
+    adatas = []
     with tarfile.open(fn) as tar:
         samples = ['GSM5008737_RNA_3P', 'GSM5008738_ADT_3P']
         for sample in samples:
@@ -31,5 +31,5 @@ def load(data_dir, **kwargs):
     meta = pd.read_csv(os.path.join(data_dir, 'GSE164378_sc.meta.data_3P.csv.gz'), index_col=0)
     adata.obs = adata.obs.join(meta)
     adata.obsm['protein_expression'] = pd.DataFrame(protein.X.A, columns=protein.var_names, index=protein.obs_names)
-    
+
     return adata
