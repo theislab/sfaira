@@ -152,7 +152,7 @@ class TestEstimatorKerasCelltype(TestEstimatorBase):
             model_id="testid",
             model_topology=TopologyContainer(topology=topology, topology_id="0.1"),
         )
-        self.estimator.celltype_universe.target_universe = TARGETS
+        self.estimator.celltype_universe.leaves = TARGETS
 
     def basic_estimator_test(self):
         self.estimator.init_model()

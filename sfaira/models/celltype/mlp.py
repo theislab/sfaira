@@ -95,7 +95,7 @@ class CellTypeMlpVersioned(CellTypeMlp):
                 hyperpar[k] = override_hyperpar[k]
         super().__init__(
             in_dim=topology_container.n_var,
-            out_dim=celltypes_version.ntypes,
+            out_dim=celltypes_version.onto_cl.n_leaves,
             **hyperpar
         )
         print('passed hyperpar: \n', hyperpar)
@@ -110,6 +110,6 @@ class CellTypeMlpVersioned(CellTypeMlp):
                 ("genome_size", self.genome_size),
                 ("model_class", self.model_class),
                 ("model_type", self.model_type),
-                ("ntypes", celltypes_version.ntypes),
+                ("ntypes", celltypes_version.onto_cl.n_leaves),
             ]
         )

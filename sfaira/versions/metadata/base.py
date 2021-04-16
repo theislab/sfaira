@@ -8,7 +8,7 @@ from typing import Dict, List, Tuple, Union
 import warnings
 
 from sfaira.consts.adata_fields import AdataIdsSfaira
-from sfaira.versions.metadata.extensions import ONTOLOGIY_EXTENSION_HUMAN, ONTOLOGIY_EXTENSION_MOUSE
+from sfaira.versions.metadata.extensions import ONTOLOGIY_EXTENSION
 
 FILE_PATH = __file__
 
@@ -115,11 +115,11 @@ class OntologyHierarchical(Ontology):
     nodes: dict
 
     @abc.abstractmethod
-    def id_from_name(self, x: str) -> str:
+    def convert_to_id(self, x: str) -> str:
         pass
 
     @abc.abstractmethod
-    def name_from_id(self, x: str) -> str:
+    def convert_to_name(self, x: str) -> str:
         pass
 
     @property
@@ -189,11 +189,11 @@ class OntologyEbi(OntologyHierarchical):
     def node_ids(self) -> List[str]:
         return list(self.nodes.keys())
 
-    def id_from_name(self, x: str) -> str:
+    def convert_to_id(self, x: str) -> str:
         self.validate_node(x=x)
         return [k for k, v in self.nodes.items() if v["name"] == x][0]
 
-    def name_from_id(self, x: str) -> str:
+    def convert_to_name(self, x: str) -> str:
         assert x in self.nodes.keys(), f"node {x} not found"
         return self.nodes[x]["name"]
 
@@ -247,7 +247,6 @@ class OntologyEbi(OntologyHierarchical):
 class OntologyObo(OntologyHierarchical):
 
     graph: networkx.MultiDiGraph
-    leaves: List[str]
 
     def __init__(
             self,
@@ -259,6 +258,22 @@ class OntologyObo(OntologyHierarchical):
     def _check_graph(self):
         if not networkx.is_directed_acyclic_graph(self.graph):
             warnings.warn("DAG was broken")
+
+    def __validate_node_ids(self, x: Union[str, List[str]]):
+        if isinstance(x, str):
+            x = [x]
+        node_ids = self.node_ids
+        for y in x:
+            if y not in node_ids:
+                raise ValueError(f"queried node id {y} is not in graph")
+
+    def __validate_node_names(self, x: Union[str, List[str]]):
+        if isinstance(x, str):
+            x = [x]
+        node_names = self.node_names
+        for y in x:
+            if y not in node_names:
+                raise ValueError(f"queried node name {y} is not in graph")
 
     @property
     def nodes(self) -> List[Tuple[str, dict]]:
@@ -276,31 +291,100 @@ class OntologyObo(OntologyHierarchical):
     def node_ids(self) -> List[str]:
         return list(self.graph.nodes())
 
-    def id_from_name(self, x: str) -> str:
-        self.validate_node(x=x)
-        return [k for k, v in self.graph.nodes.items() if v["name"] == x][0]
+    def is_a_node_id(self, x: str) -> bool:
+        return x in self.node_ids
 
-    def name_from_id(self, x: str) -> str:
-        assert x in self.graph.nodes.keys(), f"node {x} not found"
-        return self.graph.nodes[x]["name"]
+    def is_a_node_name(self, x: str) -> bool:
+        return x in self.node_names
 
-    def set_leaves(self, nodes: list = None):
-        # ToDo check that these are not include parents of each other!
-        if nodes is not None:
-            for x in nodes:
-                assert x in self.node_names, f"{x} not found"
-            self.leaves = nodes
+    def convert_to_name(self, x: Union[str, List[str]]) -> Union[str, List[str]]:
+        was_str = isinstance(x, str)
+        if was_str:
+            x = [x]
+        if self.is_a_node_id(x[0]):
+            self.__validate_node_ids(x=x)
+            x = [
+                [v["name"] for k, v in self.graph.nodes.items() if k == z][0]
+                for z in x
+            ]
+        elif self.is_a_node_name(x[0]):
+            self.__validate_node_names(x=x)
         else:
-            self.leaves = self.get_all_roots()
+            raise ValueError(f"node {x[0]} not recognized")
+        self.__validate_node_names(x=x)
+        if was_str:
+            return x[0]
+        else:
+            return x
 
-    def get_all_roots(self) -> List[str]:
-        return [v["name"] for v, x in zip(self.graph.nodes.values(), self.graph.nodes())
-                if self.graph.in_degree(x) == 0]
+    def convert_to_id(self, x: Union[str, List[str]]) -> Union[str, List[str]]:
+        was_str = isinstance(x, str)
+        if was_str:
+            x = [x]
+        if self.is_a_node_id(x[0]):
+            self.__validate_node_ids(x=x)
+        elif self.is_a_node_name(x[0]):
+            self.__validate_node_names(x=x)
+            x = [
+                [k for k, v in self.graph.nodes.items() if v["name"] == z][0]
+                for z in x
+            ]
+        else:
+            raise ValueError(f"node {x[0]} not recognized")
+        self.__validate_node_ids(x=x)
+        if was_str:
+            return x[0]
+        else:
+            return x
+
+    @property
+    def leaves(self) -> List[str]:
+        return [x for x in self.graph.nodes() if self.graph.in_degree(x) == 0]
+
+    @leaves.setter
+    def leaves(self, x: List[str]):
+        """
+        Sets new leaf-space for graph.
+
+        This clips nodes that are not upstream of defined leaves.
+        :param x: New set of leaves nodes, identified as IDs.
+        """
+        x = self.convert_to_id(x=x)
+        nodes_to_remove = []
+        for y in self.graph.nodes():
+            if not np.any([self.is_a(query=z, reference=y) for z in x]):
+                nodes_to_remove.append(y)
+        self.graph.remove_nodes_from(nodes_to_remove)
+
+    @property
+    def n_leaves(self) -> int:
+        return len(self.leaves)
+
+    def get_effective_leaves(self, x: List[str]) -> List[str]:
+        """
+        Get effective leaves in ontology given set of observed nodes.
+
+        The effective leaves are the minimal set of nodes such that all nodes in x are ancestors of this set, ie the
+        observed nodes which represent leaves of a sub-DAG of the ontology DAG, which captures all observed nodes.
+
+        :param x: Observed node IDs.
+        :return: Effective leaves.
+        """
+        x = np.unique(x).tolist()
+        x = self.convert_to_id(x=x)
+        leaves = []
+        for y in x:
+            if not np.any([self.is_a(query=z, reference=y) for z in list(set(x) - {y})]):
+                leaves.append(y)
+        return leaves
 
     def get_ancestors(self, node: str) -> List[str]:
-        if node not in self.node_ids:
-            node = self.id_from_name(node)
+        node = self.convert_to_id(node)
         return list(networkx.ancestors(self.graph, node))
+
+    def get_descendants(self, node: str) -> List[str]:
+        node = self.convert_to_id(node)
+        return list(networkx.descendants(self.graph, node))
 
     def is_a(self, query: str, reference: str) -> bool:
         """
@@ -310,32 +394,38 @@ class OntologyObo(OntologyHierarchical):
         :param reference: Reference node name. Node ID or name.
         :return: If query node is reference node or an ancestor thereof.
         """
-        if query not in self.node_ids:
-            query = self.id_from_name(query)
-        if reference not in self.node_ids:
-            reference = self.id_from_name(reference)
+        query = self.convert_to_id(query)
+        reference = self.convert_to_id(reference)
         return query in self.get_ancestors(node=reference) or query == reference
 
-    def map_to_leaves(self, node: str, return_type: str = "elements", include_self: bool = True):
+    def map_to_leaves(
+            self,
+            node: str,
+            return_type: str = "ids",
+            include_self: bool = True
+    ) -> Union[List[str], np.ndarray]:
         """
-        Map a given list of nodes to leave nodes.
+        Map a given node to leave nodes.
 
         :param node:
         :param return_type:
 
-            "elements": names of mapped leave nodes
-            "idx": indicies in leave note list of of mapped leave nodes
+            "ids": IDs of mapped leave nodes
+            "idx": indicies in leave note list of mapped leave nodes
         :param include_self: whether to include node itself
         :return:
         """
-        assert self.leaves is not None
+        node = self.convert_to_id(node)
         ancestors = self.get_ancestors(node)
         if include_self:
             ancestors = ancestors + [node]
-        if return_type == "elements":
-            return [x for x in self.leaves if x in ancestors]
+        if len(ancestors) > 0:
+            ancestors = self.convert_to_id(ancestors)
+        leaves = self.convert_to_id(self.leaves)
+        if return_type == "ids":
+            return [x for x in leaves if x in ancestors]
         if return_type == "idx":
-            return np.array([i for i, x in enumerate(self.leaves) if x in ancestors])
+            return np.sort([i for i, x in enumerate(leaves) if x in ancestors])
 
     @abc.abstractmethod
     def synonym_node_properties(self) -> List[str]:
@@ -564,13 +654,22 @@ class OntologyUberon(OntologyExtendedObo):
         return ["synonym", "latin term", "has relational adjective"]
 
 
-class OntologyCelltypes(OntologyExtendedObo):
+class OntologyCl(OntologyExtendedObo):
 
     def __init__(
             self,
             branch: str,
+            use_developmental_relationships: bool = False,
             **kwargs
     ):
+        """
+
+        Developmental edges are not desired in all interactions with this ontology, double-negative thymocytes are for
+        example not an intuitive parent node for a fine grained T cell label in a non-thymic tissue.
+        :param branch:
+        :param use_developmental_relationships: Whether to keep developmental relationships.
+        :param kwargs:
+        """
         if os.name == "nt":  # if running on windows, do not download obo file, but rather pass url directly to obonet
             obofile = f"https://raw.github.com/obophenotype/cell-ontology/{branch}/cl.obo"
         else:
@@ -622,9 +721,13 @@ class OntologyCelltypes(OntologyExtendedObo):
             'lacks_plasma_membrane_part',  # ?
         ]
         edges_to_delete = []
+        if use_developmental_relationships:
+            edges_allowed = ["is_a", "develops_from"]
+        else:
+            edges_allowed = ["is_a"]
         for i, x in enumerate(self.graph.edges):
             assert x[2] in edge_types, x
-            if x[2] not in ["is_a", "develops_from"]:
+            if x[2] not in edges_allowed:
                 edges_to_delete.append((x[0], x[1]))
         for x in edges_to_delete:
             self.graph.remove_edge(u=x[0], v=x[1])

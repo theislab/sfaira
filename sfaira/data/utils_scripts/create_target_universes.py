@@ -1,5 +1,5 @@
+import numpy as np
 import os
-import sfaira
 import sys
 import tensorflow as tf
 
@@ -16,7 +16,6 @@ store_path = str(sys.argv[1])
 config_path = str(sys.argv[2])
 out_path = str(sys.argv[3])
 
-
 for f in os.listdir(config_path):
     fn = os.path.join(config_path, f)
     if os.path.isfile(fn):  # only files
@@ -27,4 +26,15 @@ for f in os.listdir(config_path):
             organ = f.split("_")[2]
             store = DistributedStore(cache_path=store_path)
             store.load_config(fn=fn)
-            store.write_config(os.path.join(config_path, f"targets_{organism}_{organ}.csv"))
+            celltypes_found = {}
+            for adata in store.adatas:
+                celltypes_found = celltypes_found.union(set(adata.obs["cell_ontology_class"].values))
+            celltypes_found = np.sort(list(celltypes_found - {
+                store._adata_ids_sfaira.unknown_celltype_identifier,
+                store._adata_ids_sfaira.not_a_cell_celltype_identifier
+            })).tolist()
+            celltypes_found = store.celltypes_universe.onto_cl.get_effective_leaves(x=celltypes_found)
+            store.celltypes_universe.write_target_universe(
+                fn=os.path.join(config_path, f"targets_{organism}_{organ}.csv"),
+                x=celltypes_found,
+            )

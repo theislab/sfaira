@@ -888,7 +888,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         cu = CelltypeUniverse(organism=organism)
         # TODO set target universe.
         for k in celltypelist:
-            if k not in cu.target_universe:
+            if k not in cu.leaves:
                 if k not in cu.ontology.node_names:
                     raise(ValueError(f"Celltype '{k}' not found in celltype universe"))
                 for leaf in cu[k]:  # TODO get leaves
@@ -1048,7 +1048,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         cu = CelltypeUniverse(organism=organism)
         # TODO set target universe.
         for k in celltypelist:
-            if k not in cu.target_universe:
+            if k not in cu.leaves:
                 if k not in cu.ontology.node_names:
                     raise(ValueError(f"Celltype '{k}' not found in celltype universe"))
                 for leaf in cu[k]:    # TODO get leaves

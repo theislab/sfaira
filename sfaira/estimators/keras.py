@@ -15,7 +15,7 @@ from tqdm import tqdm
 from sfaira.consts import AdataIdsSfaira, OCS
 from sfaira.data import DistributedStore
 from sfaira.models import BasicModel
-from sfaira.versions.metadata import CelltypeUniverse, OntologyCelltypes
+from sfaira.versions.metadata import CelltypeUniverse, OntologyCl
 from sfaira.versions.topologies import TopologyContainer
 from .losses import LossLoglikelihoodNb, LossLoglikelihoodGaussian, LossCrossentropyAgg, KLLoss
 from .metrics import custom_mse, custom_negll_nb, custom_negll_gaussian, custom_kl, \
@@ -874,15 +874,14 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 tape.watch(x)
                 model_out = model((x, sf))
             if abs_gradients:
-                def f(x):
-                    return abs(x)
+                def f(xx):
+                    return abs(xx)
             else:
-                def f(x):
-                    return x
+                def f(xx):
+                    return xx
             # marginalize on batch level and then accumulate batches
             # batch_jacobian gives output of size: (batch_size, latent_dim, input_dim)
-            batch_gradients = f(tape.batch_jacobian(model_out, x))
-            return batch_gradients
+            return f(tape.batch_jacobian(model_out, x))
 
         for step, (x_batch, y_batch) in tqdm(enumerate(ds), total=np.ceil(n_obs / batch_size)):
             batch_gradients = get_gradients(x_batch).numpy()
@@ -933,11 +932,11 @@ class EstimatorKerasCelltype(EstimatorKeras):
         assert "targets" in self.topology_container.output.keys(), self.topology_container.output.keys()
         self.max_class_weight = max_class_weight
         self.celltype_universe = CelltypeUniverse(
-            cl=OntologyCelltypes(branch=self.topology_container.output["cl"]),
+            cl=OntologyCl(branch=self.topology_container.output["cl"]),
             uberon=OCS.organ,
             organism=self.organism,
         )
-        self.celltype_universe.target_universe = self.topology_container.output["targets"]
+        self.celltype_universe.leaves = self.topology_container.output["targets"]
 
     def init_model(
             self,
@@ -964,23 +963,24 @@ class EstimatorKerasCelltype(EstimatorKeras):
 
     @property
     def ids(self):
-        return self.celltype_universe.target_universe
+        return self.celltype_universe.leaves
 
     @property
     def ntypes(self):
-        return self.celltype_universe.ntypes
+        return self.celltype_universe.onto_cl.n_leaves
 
     @property
     def ontology_ids(self):
-        return self.celltype_universe.target_universe
+        return self.celltype_universe.leaves
 
     def _one_hot_encoder(self):
 
         def encoder(x):
-            idx = self.celltype_universe.map_to_target_leaves(
-                nodes=[x],
-                return_type="idx"
-            )[0]
+            idx = self.celltype_universe.onto_cl.map_to_leaves(
+                node=x,
+                return_type="idx",
+                include_self=True,
+            )
             y = np.zeros((self.ntypes,), dtype="float32")
             y[idx] = 1. / len(idx)
             return y
@@ -1038,7 +1038,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
                 raise ValueError("using weights with store is not supported yet")
             n_obs = self.data.n_obs
             n_features = self.data.n_vars
-            n_labels = len(self.data.celltypes_universe.target_universe)
+            n_labels = self.data.celltypes_universe.onto_cl.n_leaves
             generator_raw = self.data.generator(
                 batch_size=1,
                 obs_keys=["cell_ontology_class"],
