@@ -7,11 +7,11 @@ from typing import List, Union
 
 from sfaira.versions.metadata import CelltypeUniverse
 from sfaira.versions.topologies import TopologyContainer
-from sfaira.models.base import BasicModel
+from sfaira.models.base import BasicModelKeras
 from sfaira.models.pp_layer import PreprocInput
 
 
-class CellTypeMlp(BasicModel):
+class CellTypeMlp(BasicModelKeras):
     """
     Multi-layer perceptron to predict cell type.
 

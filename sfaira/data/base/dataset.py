@@ -569,19 +569,19 @@ class DatasetBase(abc.ABC):
         data_ids_ensg = self.adata.var[self._adata_ids_sfaira.gene_id_ensembl].values
         if subset_type is None:
             subset_ids_ensg = self.genome_container.ensembl
-            subset_ids_symbol = self.genome_container.names
+            subset_ids_symbol = self.genome_container.symbols
         else:
             if isinstance(subset_type, str):
                 subset_type = [subset_type]
-            keys = np.unique(self.genome_container.type)
+            keys = np.unique(self.genome_container.biotype)
             if subset_type not in keys:
                 raise ValueError(f"subset type {subset_type} not available in list {keys}")
             subset_ids_ensg = [
-                x.upper() for x, y in zip(self.genome_container.ensembl, self.genome_container.type)
+                x.upper() for x, y in zip(self.genome_container.ensembl, self.genome_container.biotype)
                 if y in subset_type
             ]
             subset_ids_symbol = [
-                x.upper() for x, y in zip(self.genome_container.names, self.genome_container.type)
+                x.upper() for x, y in zip(self.genome_container.symbols, self.genome_container.biotype)
                 if y in subset_type
             ]
 
