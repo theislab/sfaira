@@ -447,40 +447,30 @@ class DatasetBase(abc.ABC):
     def _convert_and_set_var_names(
             self,
             match_to_reference: Union[str, bool, None],
-            symbol_col: str = None,
-            ensembl_col: str = None,
     ):
-        # Use defaults defined in data loader if none given to this function.
-        if symbol_col is None:
-            symbol_col = self.gene_id_symbols_var_key
-        if ensembl_col is None:
-            ensembl_col = self.gene_id_ensembl_var_key
-        if not ensembl_col and not symbol_col:
-            raise ValueError('Please provide the name of at least the name of the var column containing ensembl ids or'
-                             'the name of the var column containing gene symbols')
         # Process given gene names: Full gene names ("symbol") or ENSEMBL IDs ("ensembl").
         # Below the .var column that contain the target IDs are renamed to follow streamlined naming.
         # If the IDs were contained in the index, a new column is added to .var.
-        if symbol_col:
-            if symbol_col == 'index':
+        if self.gene_id_symbols_var_key:
+            if self.gene_id_symbols_var_key == 'index':
                 self.adata.var[self._adata_ids.gene_id_symbols] = self.adata.var.index.values.tolist()
             else:
-                assert symbol_col in self.adata.var.columns, f"symbol_col {symbol_col} not found in .var"
+                assert self.gene_id_symbols_var_key in self.adata.var.columns, f"self.gene_id_symbols_var_key {self.gene_id_symbols_var_key} not found in .var"
                 self.adata.var = self.adata.var.rename(
-                    {symbol_col: self._adata_ids.gene_id_symbols},
+                    {self.gene_id_symbols_var_key: self._adata_ids.gene_id_symbols},
                     axis='columns'
                 )
-        if ensembl_col:
-            if ensembl_col == 'index':
+        if self.gene_id_symbols_var_key:
+            if self.gene_id_symbols_var_key == 'index':
                 self.adata.var[self._adata_ids.gene_id_ensembl] = self.adata.var.index.values.tolist()
             else:
-                assert ensembl_col in self.adata.var.columns, f"ensembl_col {ensembl_col} not found in .var"
+                assert self.gene_id_symbols_var_key in self.adata.var.columns, f"self.gene_id_symbols_var_key {self.gene_id_symbols_var_key} not found in .var"
                 self.adata.var = self.adata.var.rename(
-                    {ensembl_col: self._adata_ids.gene_id_ensembl},
+                    {self.gene_id_symbols_var_key: self._adata_ids.gene_id_ensembl},
                     axis='columns'
                 )
         # If only symbol or ensembl was supplied, the other one is inferred from a genome mapping dictionary.
-        if not ensembl_col and not (isinstance(match_to_reference, bool) and not match_to_reference):
+        if not self.gene_id_symbols_var_key and not (isinstance(match_to_reference, bool) and not match_to_reference):
             id_dict = self.genome_container.names_to_id_dict
             id_strip_dict = self.genome_container.strippednames_to_id_dict
             # Matching gene names to ensembl ids in the following way: if the gene is present in the ensembl dictionary,
@@ -496,7 +486,7 @@ class DatasetBase(abc.ABC):
                     ensids.append('n/a')
             self.adata.var[self._adata_ids.gene_id_ensembl] = ensids
 
-        if not symbol_col and not (isinstance(match_to_reference, bool) and not match_to_reference):
+        if not self.gene_id_symbols_var_key and not (isinstance(match_to_reference, bool) and not match_to_reference):
             id_dict = self.genome_container.id_to_names_dict
             self.adata.var[self._adata_ids.gene_id_symbols] = [
                 id_dict[n.split(".")[0]] if n.split(".")[0] in id_dict.keys() else 'n/a'
@@ -504,7 +494,7 @@ class DatasetBase(abc.ABC):
             ]
 
         if match_to_reference:
-            # Lastly, the index of .var is set to ensembl IDs.
+            # Lastly, the index of .var is set according to adata_fields.
             try:  # debugging
                 self.adata.var.index = self.adata.var[self._adata_ids.gene_id_index].values.tolist()
             except KeyError as e:
@@ -532,7 +522,7 @@ class DatasetBase(abc.ABC):
             self,
             remove_gene_version: bool = True,
             match_to_reference: Union[str, bool, None] = None,
-            subset_type: Union[None, str, List[str]] = None
+            subset_genes_to_type: Union[None, str, List[str]] = None,
     ):
         """
         Subset and sort genes to genes defined in an assembly or genes of a particular type, such as protein coding.
@@ -541,10 +531,9 @@ class DatasetBase(abc.ABC):
                                    - str: Provide the name of the annotation in the format Organism.Assembly.Release
                                    - None: use the default annotation for this organism in sfaira.
                                    - False: no mapping of gene labels will be done.
-        :param subset_type: Type(s) to subset to. Can be a single type or a list of types or None. Types can be:
+        :param subset_genes_to_type: Type(s) to subset to. Can be a single type or a list of types or None. Types can be:
             - None: All genes in assembly.
             - "protein_coding": All protein coding genes in assembly.
-
         """
         if match_to_reference and not remove_gene_version:
             warnings.warn("it is not recommended to enable matching the feature space to a genome reference"
@@ -557,7 +546,6 @@ class DatasetBase(abc.ABC):
         # Streamline feature space:
         self._convert_and_set_var_names(match_to_reference=match_to_reference)
         self._collapse_gene_versions(remove_gene_version=remove_gene_version)
-
 
         # Convert data matrix to csc matrix
         if isinstance(self.adata.X, np.ndarray):
@@ -572,17 +560,17 @@ class DatasetBase(abc.ABC):
 
         # Compute indices of genes to keep
         data_ids = self.adata.var[self._adata_ids.gene_id_ensembl].values
-        if subset_type is None:
+        if subset_genes_to_type is None:
             subset_ids = self.genome_container.ensembl
         else:
-            if isinstance(subset_type, str):
-                subset_type = [subset_type]
+            if isinstance(subset_genes_to_type, str):
+                subset_genes_to_type = [subset_genes_to_type]
             keys = np.unique(self.genome_container.type)
-            if subset_type not in keys:
-                raise ValueError(f"subset type {subset_type} not available in list {keys}")
+            if subset_genes_to_type not in keys:
+                raise ValueError(f"subset type {subset_genes_to_type} not available in list {keys}")
             subset_ids = [
                 x for x, y in zip(self.genome_container.ensembl, self.genome_container.type)
-                if y in subset_type
+                if y in subset_genes_to_type
             ]
 
         idx_feature_kept = np.where([x in subset_ids for x in data_ids])[0]

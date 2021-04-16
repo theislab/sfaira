@@ -167,17 +167,29 @@ class DatasetGroup:
         for x in self.ids:
             self.datasets[x].streamline_metadata(schema=schema, uns_to_obs=uns_to_obs, clean_obs=clean_obs, clean_var=clean_var, clean_uns=clean_uns)
 
-    def streamline_features(self, subset_type: Union[None, str, List[str]] = None):
+    def streamline_features(
+            self,
+            remove_gene_version: bool = True,
+            match_to_reference: Union[str, bool, None] = None,
+            subset_genes_to_type: Union[None, str, List[str]] = None,
+    ):
         """
         Subset and sort genes to genes defined in an assembly or genes of a particular type, such as protein coding.
-
-        :param subset_type: Type(s) to subset to. Can be a single type or a list of types or None. Types can be:
-
+        :param remove_gene_version: Whether to remove the version number after the colon sometimes found in ensembl gene ids.
+        :param match_to_reference: Whether to map gene names to a given annotation. Can be:
+                                   - str: Provide the name of the annotation in the format Organism.Assembly.Release
+                                   - None: use the default annotation for this organism in sfaira.
+                                   - False: no mapping of gene labels will be done.
+        :param subset_genes_to_type: Type(s) to subset to. Can be a single type or a list of types or None. Types can be:
             - None: All genes in assembly.
             - "protein_coding": All protein coding genes in assembly.
         """
         for x in self.ids:
-            self.datasets[x].streamline_features(subset_type=subset_type)
+            self.datasets[x].streamline_features(
+                remove_gene_version=remove_gene_version,
+                match_to_reference=match_to_reference,
+                subset_genes_to_type=subset_genes_to_type,
+            )
 
     def load_tobacked(
             self,
@@ -795,17 +807,29 @@ class DatasetSuperGroup:
                 **kwargs
             )
 
-    def streamline_features(self, subset_type: Union[None, str, List[str]] = None):
+    def streamline_features(
+            self,
+            remove_gene_version: bool = True,
+            match_to_reference: Union[str, bool, None] = None,
+            subset_genes_to_type: Union[None, str, List[str]] = None,
+    ):
         """
         Subset and sort genes to genes defined in an assembly or genes of a particular type, such as protein coding.
-
-        :param subset_type: Type(s) to subset to. Can be a single type or a list of types or None. Types can be:
-
+        :param remove_gene_version: Whether to remove the version number after the colon sometimes found in ensembl gene ids.
+        :param match_to_reference: Whether to map gene names to a given annotation. Can be:
+                                   - str: Provide the name of the annotation in the format Organism.Assembly.Release
+                                   - None: use the default annotation for this organism in sfaira.
+                                   - False: no mapping of gene labels will be done.
+        :param subset_genes_to_type: Type(s) to subset to. Can be a single type or a list of types or None. Types can be:
             - None: All genes in assembly.
             - "protein_coding": All protein coding genes in assembly.
         """
         for x in self.dataset_groups:
-            x.streamline_features(subset_type=subset_type)
+            x.streamline_features(
+                remove_gene_version=remove_gene_version,
+                match_to_reference=match_to_reference,
+                subset_genes_to_type=subset_genes_to_type
+            )
 
     @property
     def adata(self):
