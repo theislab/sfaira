@@ -374,23 +374,27 @@ class DatasetBase(abc.ABC):
                 cache = os.path.join(self.cache_path, self.directory_formatted_doi)
             return os.path.join(cache, "cache", self._directory_formatted_id + ".h5ad")
 
-    def _load_cached(
+    def load(
             self,
-            load_raw: bool,
-            allow_caching: bool,
+            load_raw: bool = False,
+            allow_caching: bool = True,
             **kwargs
     ):
         """
-        Wraps data set specific load and allows for caching.
-
+        Load the selected datasets into memory.
         Cache is written into director named after doi and h5ad named after data set id.
         Cache is not over-written.
 
-        :param load_raw: Loads unprocessed version of data if available in data loader.
-        :param allow_caching: Whether to allow method to cache adata object for faster re-loading.
-        :return:
+        :param load_raw: Force reading the raw object even when a cached one is present.
+        :param allow_caching: Write the object to cache after loading if no cache exists yet.
         """
+        # Sanity checks
+        if self.adata is not None:
+            raise ValueError(f"adata of {self.id} already loaded.")
+        if self.data_dir is None:
+            raise ValueError("No sfaira data repo path provided in constructor.")
 
+        # Run data set-specific loading script:
         def _assembly_wrapper():
             if self.load_func is None:
                 raise ValueError(f"Tried to access load_func for {self.id} but did not find any.")
@@ -435,25 +439,6 @@ class DatasetBase(abc.ABC):
         else:  # not load_raw and not allow_caching
             _cached_reading(self.cache_fn)
 
-    def load(
-            self,
-            load_raw: bool = False,
-            allow_caching: bool = True,
-            **kwargs
-    ):
-        """
-        Load the selected datasets into memory.
-
-        :param load_raw: Force reading the raw object even when a cached one is present.
-        :param allow_caching: Write the object to cache after loading if no cache exists yet.
-        """
-        # Sanity checks
-        if self.adata is not None:
-            raise ValueError(f"adata of {self.id} already loaded.")
-        if self.data_dir is None:
-            raise ValueError("No sfaira data repo path provided in constructor.")
-        # Run data set-specific loading script:
-        self._load_cached(load_raw=load_raw, allow_caching=allow_caching, **kwargs)
         # Set loading-specific metadata:
         self.load_raw = load_raw
 
