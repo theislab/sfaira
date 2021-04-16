@@ -7,7 +7,7 @@ from typing import List, Union
 
 from sfaira.versions.metadata import CelltypeUniverse
 from sfaira.versions.topologies import TopologyContainer
-from sfaira.models.base import BasicModel
+from sfaira.models.base import BasicModelKeras
 from sfaira.models.pp_layer import PreprocInput
 
 
@@ -41,7 +41,7 @@ class LearnedThresholdLayer(tf.keras.layers.Layer):
         return tf.nn.sigmoid(x)
 
 
-class CellTypeMarker(BasicModel):
+class CellTypeMarker(BasicModelKeras):
     """
     Marker gene-based cell type classifier: Learns whether or not each gene exceeds requires threshold
     and learns cell type assignment as linear combination of these marker gene presence probabilities.
@@ -120,7 +120,7 @@ class CellTypeMarkerVersioned(CellTypeMarker):
                 hyperpar[k] = override_hyperpar[k]
         super().__init__(
             in_dim=topology_container.n_var,
-            out_dim=celltypes_version.ntypes,
+            out_dim=celltypes_version.onto_cl.n_leaves,
             **hyperpar
         )
         print('passed hyperpar: \n', hyperpar)

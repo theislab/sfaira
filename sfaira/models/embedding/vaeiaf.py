@@ -8,7 +8,7 @@ from typing import Union, Tuple
 from sfaira.models.embedding.output_layers import NegBinOutput, NegBinSharedDispOutput, NegBinConstDispOutput, \
     GaussianOutput, GaussianSharedStdOutput, GaussianConstStdOutput
 from sfaira.versions.topologies import TopologyContainer
-from sfaira.models.base import BasicModel
+from sfaira.models.base import BasicModelKeras
 from sfaira.models.pp_layer import PreprocInput
 from sfaira.models.made import MaskingDense
 
@@ -221,7 +221,7 @@ class Decoder(tf.keras.layers.Layer):
         return x
 
 
-class ModelVaeIAF(BasicModel):
+class ModelKerasVaeIAF(BasicModelKeras):
 
     def __init__(
             self,
@@ -237,7 +237,7 @@ class ModelVaeIAF(BasicModel):
             init='glorot_uniform',
             output_layer="nb"
     ):
-        super(ModelVaeIAF, self).__init__()
+        super(ModelKerasVaeIAF, self).__init__()
         # Check length of latent dim to divide encoder-decoder stack:
         if len(latent_dim) % 2 == 1:
             n_layers_enc = len(latent_dim) // 2 + 1
@@ -347,7 +347,7 @@ class ModelVaeIAF(BasicModel):
             return z_t_mean
 
 
-class ModelVaeIAFVersioned(ModelVaeIAF):
+class ModelVaeIAFVersioned(ModelKerasVaeIAF):
     def __init__(
             self,
             topology_container: TopologyContainer,

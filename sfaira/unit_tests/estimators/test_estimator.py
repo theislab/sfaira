@@ -42,7 +42,7 @@ TOPOLOGY_CELLTYPE_MODEL = {
 }
 
 
-class TestEstimatorBase:
+class HelperEstimatorBase:
     estimator: Union[EstimatorKeras]
     data: Union[anndata.AnnData]
 
@@ -82,7 +82,7 @@ class TestEstimatorBase:
     def basic_estimator_test(self):
         pass
 
-    def test_for_fatal(self, model_type):
+    def fatal_estimator_test(self, model_type):
         np.random.seed(1)
         self.simulate()
         self.init_estimator(model_type=model_type)
@@ -90,7 +90,7 @@ class TestEstimatorBase:
         return True
 
 
-class TestEstimatorKerasEmbedding(TestEstimatorBase):
+class HelperEstimatorKerasEmbedding(HelperEstimatorBase):
 
     estimator: EstimatorKerasEmbedding
 
@@ -137,7 +137,7 @@ class TestEstimatorKerasEmbedding(TestEstimatorBase):
             assert np.allclose(prediction_embed, new_prediction_embed, rtol=1e-6, atol=1e-6)
 
 
-class TestEstimatorKerasCelltype(TestEstimatorBase):
+class HelperEstimatorKerasCelltype(HelperEstimatorBase):
 
     estimator: EstimatorKerasCelltype
 
@@ -183,28 +183,28 @@ class TestEstimatorKerasCelltype(TestEstimatorBase):
 
 
 def test_for_fatal_linear():
-    test_estim = TestEstimatorKerasEmbedding()
-    test_estim.test_for_fatal(model_type="linear")
+    test_estim = HelperEstimatorKerasEmbedding()
+    test_estim.fatal_estimator_test(model_type="linear")
 
 
 def test_for_fatal_ae():
-    test_estim = TestEstimatorKerasEmbedding()
-    test_estim.test_for_fatal(model_type="ae")
+    test_estim = HelperEstimatorKerasEmbedding()
+    test_estim.fatal_estimator_test(model_type="ae")
 
 
 def test_for_fatal_vae():
-    test_estim = TestEstimatorKerasEmbedding()
-    test_estim.test_for_fatal(model_type="vae")
+    test_estim = HelperEstimatorKerasEmbedding()
+    test_estim.fatal_estimator_test(model_type="vae")
 
 
 # Test cell type predictor models:
 
 
 def test_for_fatal_mlp():
-    test_estim = TestEstimatorKerasCelltype()
-    test_estim.test_for_fatal(model_type="mlp")
+    test_estim = HelperEstimatorKerasCelltype()
+    test_estim.fatal_estimator_test(model_type="mlp")
 
 
 def test_for_fatal_marker():
-    test_estim = TestEstimatorKerasCelltype()
-    test_estim.test_for_fatal(model_type="marker")
+    test_estim = HelperEstimatorKerasCelltype()
+    test_estim.fatal_estimator_test(model_type="marker")

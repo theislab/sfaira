@@ -14,7 +14,7 @@ from tqdm import tqdm
 
 from sfaira.consts import AdataIdsSfaira, OCS
 from sfaira.data import DistributedStore
-from sfaira.models import BasicModel
+from sfaira.models import BasicModelKeras
 from sfaira.versions.metadata import CelltypeUniverse, OntologyCl
 from sfaira.versions.topologies import TopologyContainer
 from .losses import LossLoglikelihoodNb, LossLoglikelihoodGaussian, LossCrossentropyAgg, KLLoss
@@ -38,7 +38,7 @@ class EstimatorKeras:
     Estimator base class for keras models.
     """
     data: Union[anndata.AnnData, DistributedStore]
-    model: Union[BasicModel, None]
+    model: Union[BasicModelKeras, None]
     model_topology: Union[str, None]
     model_id: Union[str, None]
     weights: Union[np.ndarray, None]

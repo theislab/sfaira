@@ -8,7 +8,7 @@ from typing import List, Union
 from sfaira.models.embedding.output_layers import NegBinOutput, NegBinSharedDispOutput, NegBinConstDispOutput, \
     GaussianOutput, GaussianSharedStdOutput, GaussianConstStdOutput
 from sfaira.versions.topologies import TopologyContainer
-from sfaira.models.base import BasicModel
+from sfaira.models.base import BasicModelKeras
 from sfaira.models.pp_layer import PreprocInput
 
 
@@ -39,7 +39,7 @@ class EncoderLinear(tf.keras.layers.Layer):
         return x
 
 
-class ModelLinear(BasicModel):
+class ModelKerasLinear(BasicModelKeras):
 
     def __init__(
             self,
@@ -51,7 +51,7 @@ class ModelLinear(BasicModel):
             dropout_rate=None,
             output_layer="nb"
     ):
-        super(ModelLinear, self).__init__()
+        super(ModelKerasLinear, self).__init__()
 
         self.in_dim = in_dim
         self.latent_dim = latent_dim
@@ -102,7 +102,7 @@ class ModelLinear(BasicModel):
         return self.encoder_model.predict(x)
 
 
-class ModelLinearVersioned(ModelLinear):
+class ModelLinearVersioned(ModelKerasLinear):
     def __init__(
             self,
             topology_container: TopologyContainer,
