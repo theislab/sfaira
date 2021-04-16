@@ -5,7 +5,7 @@ import pandas as pd
 import pickle
 from typing import Union
 
-from sfaira.data import DatasetSuperGroupSfaira
+from sfaira.data import Universe
 from sfaira.estimators import EstimatorKerasCelltype, EstimatorKerasEmbedding
 from sfaira.interface import ModelZooEmbedding, ModelZooCelltype
 
@@ -26,7 +26,7 @@ class TrainModel:
                 fn_backed_obs = ".".join(data_path.split(".")[:-1]) + "_obs.csv"
                 self.data.obs = pd.read_csv(fn_backed_obs)
         else:
-            dataset = DatasetSuperGroupSfaira(data_path=data_path, meta_path=meta_path, cache_path=cache_path)
+            dataset = Universe(data_path=data_path, meta_path=meta_path, cache_path=cache_path)
             dataset.load_config(config_path)
             self.set_data(dataset)
 

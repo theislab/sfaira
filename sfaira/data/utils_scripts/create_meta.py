@@ -17,7 +17,7 @@ data_path = str(sys.argv[1])
 path_meta = str(sys.argv[2])
 processes = int(str(sys.argv[3]))
 
-ds = sfaira.data.dataloaders.DatasetSuperGroupSfaira(
+ds = sfaira.data.dataloaders.Universe(
     data_path=data_path, meta_path=path_meta, cache_path=path_meta
 )
 ds.load(

@@ -18,7 +18,7 @@ import cgi
 import ssl
 
 from sfaira.versions.genomes import GenomeContainer
-from sfaira.versions.metadata import Ontology, CelltypeUniverse
+from sfaira.versions.metadata import Ontology, OntologyHierarchical, CelltypeUniverse
 from sfaira.consts import AdataIds, AdataIdsSfaira, META_DATA_FIELDS, OCS
 from sfaira.data.utils import collapse_matrix, read_yaml
 
@@ -72,6 +72,7 @@ class DatasetBase(abc.ABC):
     cache_path: Union[None, str]
     id: Union[None, str]
     genome: Union[None, str]
+    supplier: str
 
     _assay_sc: Union[None, str]
     _assay_differentiation: Union[None, str]
@@ -252,6 +253,8 @@ class DatasetBase(abc.ABC):
         self.dict_load_func_annotation = dict_load_func_annotation
         self._additional_annotation_key = additional_annotation_key
 
+        self.supplier = "sfaira"
+
     @property
     def _directory_formatted_id(self) -> str:
         return "_".join("_".join(self.id.split("/")).split("."))
@@ -319,9 +322,8 @@ class DatasetBase(abc.ABC):
                     fn = cgi.parse_header(urllib.request.urlopen(url).info()['Content-Disposition'])[1]["filename"]
                 else:
                     fn = url.split("/")[-1]
-                if os.path.isfile(os.path.join(self.data_dir, fn)):
-                    print(f"File {fn} already found on disk, skipping download.")
-                else:
+                # Only download if file not already downloaded:
+                if not os.path.isfile(os.path.join(self.data_dir, fn)):
                     print(f"Downloading: {fn}")
                     urllib.request.urlretrieve(url, os.path.join(self.data_dir, fn))
 
@@ -368,6 +370,7 @@ class DatasetBase(abc.ABC):
             self,
             load_raw: bool,
             allow_caching: bool,
+            **kwargs
     ):
         """
         Wraps data set specific load and allows for caching.
@@ -381,7 +384,9 @@ class DatasetBase(abc.ABC):
         """
 
         def _assembly_wrapper():
-            self.adata = self.load_func(data_dir=self.data_dir, sample_fn=self.sample_fn)
+            if self.load_func is None:
+                raise ValueError(f"Tried to access load_func for {self.id} but did not find any.")
+            self.adata = self.load_func(data_dir=self.data_dir, sample_fn=self.sample_fn, **kwargs)
             # Enable loading of additional annotation, e.g. secondary cell type annotation
             # The additional annotation `obs2 needs to be on a subset of the original annotation `self.adata.obs`.
             if self.dict_load_func_annotation is not None:
@@ -429,11 +434,12 @@ class DatasetBase(abc.ABC):
             load_raw: bool = False,
             allow_caching: bool = True,
             set_metadata: bool = True,
+            **kwargs
     ):
         if match_to_reference and not remove_gene_version:
             warnings.warn("it is not recommended to enable matching the feature space to a genomes reference"
                           "while not removing gene versions. this can lead to very poor matching results")
-        if not (isinstance(match_to_reference, bool) and match_to_reference):
+        if not (isinstance(match_to_reference, bool) and not match_to_reference):
             self._set_genome(organism=self.organism, assembly=match_to_reference)
 
         # Set path to dataset directory
@@ -441,7 +447,7 @@ class DatasetBase(abc.ABC):
             raise ValueError("No sfaira data repo path provided in constructor.")
 
         # Run data set-specific loading script:
-        self._load_cached(load_raw=load_raw, allow_caching=allow_caching)
+        self._load_cached(load_raw=load_raw, allow_caching=allow_caching, **kwargs)
         # Set loading hyper-parameter-specific meta data:
         self.adata.uns[self._adata_ids_sfaira.load_raw] = load_raw
         self.adata.uns[self._adata_ids_sfaira.mapped_features] = match_to_reference
@@ -1139,19 +1145,20 @@ class DatasetBase(abc.ABC):
             meta = self.data_dir
         else:
             meta = os.path.join(self.meta_path, self.directory_formatted_doi)
-
-        return os.path.join(meta, "meta", self.doi_cleaned_id + "_meta.csv")
+        if meta is None:
+            return None
+        else:
+            return os.path.join(meta, "meta", self.doi_cleaned_id + "_meta.csv")
 
     def load_meta(self, fn: Union[PathLike, str, None]):
         if fn is None:
-            if self.meta_fn is None:
-                raise ValueError("provide either fn in load or path in constructor")
-            fn = self.meta_fn
+            if self.meta_fn is not None:
+                fn = self.meta_fn
         else:
             if isinstance(fn, str):
                 fn = os.path.normpath(fn)
         # Only load meta data if file exists:
-        if os.path.isfile(fn):
+        if fn is not None and os.path.isfile(fn):
             meta = pandas.read_csv(
                 fn,
                 usecols=list(META_DATA_FIELDS.keys()),
@@ -1309,7 +1316,7 @@ class DatasetBase(abc.ABC):
     @assay_sc.setter
     def assay_sc(self, x: str):
         self.__erasing_protection(attr="assay_sc", val_old=self._assay_sc, val_new=x)
-        self._value_protection(attr="assay_sc", allowed=self.ontology_container_sfaira.assay_sc, attempted=x)
+        x = self._value_protection(attr="assay_sc", allowed=self.ontology_container_sfaira.assay_sc, attempted=x)
         self._assay_sc = x
 
     @property
@@ -1327,8 +1334,8 @@ class DatasetBase(abc.ABC):
     @assay_differentiation.setter
     def assay_differentiation(self, x: str):
         self.__erasing_protection(attr="assay_differentiation", val_old=self._assay_differentiation, val_new=x)
-        self._value_protection(attr="assay_differentiation",
-                               allowed=self.ontology_container_sfaira.assay_differentiation, attempted=x)
+        x = self._value_protection(attr="assay_differentiation",
+                                   allowed=self.ontology_container_sfaira.assay_differentiation, attempted=x)
         self._assay_differentiation = x
 
     @property
@@ -1346,8 +1353,8 @@ class DatasetBase(abc.ABC):
     @assay_type_differentiation.setter
     def assay_type_differentiation(self, x: str):
         self.__erasing_protection(attr="assay_type_differentiation", val_old=self._assay_type_differentiation, val_new=x)
-        self._value_protection(attr="assay_type_differentiation",
-                               allowed=self.ontology_container_sfaira.assay_type_differentiation, attempted=x)
+        x = self._value_protection(attr="assay_type_differentiation",
+                                   allowed=self.ontology_container_sfaira.assay_type_differentiation, attempted=x)
         self._assay_type_differentiation = x
 
     @property
@@ -1388,11 +1395,14 @@ class DatasetBase(abc.ABC):
     def data_dir(self):
         # Data is either directly in user supplied directory or in a sub directory if the overall directory is managed
         # by sfaira: In this case, the sub directory is named after the doi of the data set.
-        sfaira_path = os.path.join(self.data_dir_base, self.directory_formatted_doi)
-        if os.path.exists(sfaira_path):
-            return sfaira_path
+        if self.data_dir_base is None:
+            return None
         else:
-            return self.data_dir_base
+            sfaira_path = os.path.join(self.data_dir_base, self.directory_formatted_doi)
+            if os.path.exists(sfaira_path):
+                return sfaira_path
+            else:
+                return self.data_dir_base
 
     @property
     def default_embedding(self) -> Union[None, str]:
@@ -1409,8 +1419,8 @@ class DatasetBase(abc.ABC):
     @default_embedding.setter
     def default_embedding(self, x: str):
         self.__erasing_protection(attr="default_embedding", val_old=self._development_stage, val_new=x)
-        self._value_protection(attr="default_embedding", allowed=self.ontology_container_sfaira.default_embedding,
-                               attempted=x)
+        x = self._value_protection(attr="default_embedding", allowed=self.ontology_container_sfaira.default_embedding,
+                                   attempted=x)
         self._default_embedding = x
 
     @property
@@ -1428,8 +1438,8 @@ class DatasetBase(abc.ABC):
     @development_stage.setter
     def development_stage(self, x: str):
         self.__erasing_protection(attr="development_stage", val_old=self._development_stage, val_new=x)
-        self._value_protection(attr="development_stage", allowed=self.ontology_container_sfaira.development_stage,
-                               attempted=x)
+        x = self._value_protection(attr="development_stage", allowed=self.ontology_container_sfaira.development_stage,
+                                   attempted=x)
         self._development_stage = x
 
     @property
@@ -1447,8 +1457,8 @@ class DatasetBase(abc.ABC):
     @disease.setter
     def disease(self, x: str):
         self.__erasing_protection(attr="disease", val_old=self._disease, val_new=x)
-        self._value_protection(attr="disease", allowed=self.ontology_container_sfaira.disease,
-                               attempted=x)
+        x = self._value_protection(attr="disease", allowed=self.ontology_container_sfaira.disease,
+                                   attempted=x)
         self._disease = x
 
     @property
@@ -1557,7 +1567,7 @@ class DatasetBase(abc.ABC):
     @ethnicity.setter
     def ethnicity(self, x: str):
         self.__erasing_protection(attr="ethnicity", val_old=self._ethnicity, val_new=x)
-        self._value_protection(attr="ethnicity", allowed=self._adata_ids_sfaira.ontology_ethnicity, attempted=x)
+        x = self._value_protection(attr="ethnicity", allowed=self.ontology_container_sfaira.ethnicity, attempted=x)
         self._ethnicity = x
 
     @property
@@ -1645,8 +1655,8 @@ class DatasetBase(abc.ABC):
     @normalization.setter
     def normalization(self, x: str):
         self.__erasing_protection(attr="normalization", val_old=self._normalization, val_new=x)
-        self._value_protection(attr="normalization", allowed=self.ontology_container_sfaira.normalization,
-                               attempted=x)
+        x = self._value_protection(attr="normalization", allowed=self.ontology_container_sfaira.normalization,
+                                   attempted=x)
         self._normalization = x
 
     @property
@@ -1664,8 +1674,8 @@ class DatasetBase(abc.ABC):
     @primary_data.setter
     def primary_data(self, x: bool):
         self.__erasing_protection(attr="primary_data", val_old=self._primary_data, val_new=x)
-        self._value_protection(attr="primary_data", allowed=self.ontology_container_sfaira.primary_data,
-                               attempted=x)
+        x = self._value_protection(attr="primary_data", allowed=self.ontology_container_sfaira.primary_data,
+                                   attempted=x)
         self._primary_data = x
 
     @property
@@ -1844,7 +1854,7 @@ class DatasetBase(abc.ABC):
     @organ.setter
     def organ(self, x: str):
         self.__erasing_protection(attr="organ", val_old=self._organ, val_new=x)
-        self._value_protection(attr="organ", allowed=self.ontology_container_sfaira.organ, attempted=x)
+        x = self._value_protection(attr="organ", allowed=self.ontology_container_sfaira.organ, attempted=x)
         self._organ = x
 
     @property
@@ -1862,7 +1872,7 @@ class DatasetBase(abc.ABC):
     @organism.setter
     def organism(self, x: str):
         self.__erasing_protection(attr="organism", val_old=self._organism, val_new=x)
-        self._value_protection(attr="organism", allowed=self.ontology_container_sfaira.organism, attempted=x)
+        x = self._value_protection(attr="organism", allowed=self.ontology_container_sfaira.organism, attempted=x)
         self._organism = x
 
     @property
@@ -1880,7 +1890,8 @@ class DatasetBase(abc.ABC):
     @sample_source.setter
     def sample_source(self, x: str):
         self.__erasing_protection(attr="sample_source", val_old=self._sample_source, val_new=x)
-        self._value_protection(attr="sample_source", allowed=self.ontology_container_sfaira.sample_source, attempted=x)
+        x = self._value_protection(attr="sample_source", allowed=self.ontology_container_sfaira.sample_source,
+                                   attempted=x)
         self._sample_source = x
 
     @property
@@ -1898,7 +1909,7 @@ class DatasetBase(abc.ABC):
     @sex.setter
     def sex(self, x: str):
         self.__erasing_protection(attr="sex", val_old=self._sex, val_new=x)
-        self._value_protection(attr="sex", allowed=self.ontology_container_sfaira.sex, attempted=x)
+        x = self._value_protection(attr="sex", allowed=self.ontology_container_sfaira.sex, attempted=x)
         self._sex = x
 
     @property
@@ -1977,7 +1988,7 @@ class DatasetBase(abc.ABC):
     @year.setter
     def year(self, x: int):
         self.__erasing_protection(attr="year", val_old=self._year, val_new=x)
-        self._value_protection(attr="year", allowed=self.ontology_container_sfaira.year, attempted=x)
+        x = self._value_protection(attr="year", allowed=self.ontology_container_sfaira.year, attempted=x)
         self._year = x
 
     @property
@@ -2097,13 +2108,14 @@ class DatasetBase(abc.ABC):
     def _value_protection(
             self,
             attr: str,
-            allowed: Union[Ontology, bool, int, float, str, List[bool], List[int], List[float], List[str]],
+            allowed: Union[Ontology, None],
             attempted
     ):
         """
         Check whether value is from set of allowed values.
 
         Does not check if allowed is None.
+        Cleans entry to term name if ontology ID is provided.
 
         :param attr: Attribute to set.
         :param allowed: Constraint for values of `attr`.
@@ -2111,15 +2123,36 @@ class DatasetBase(abc.ABC):
         :param attempted: Value(s) to attempt to set in `attr`.
         :return:
         """
-        if isinstance(attempted, np.ndarray):
-            attempted = attempted.tolist()
-        if isinstance(attempted, tuple):
-            attempted = list(attempted)
         if not isinstance(attempted, list):
-            attempted = [attempted]
-        for x in attempted:
-            if not is_child(query=x, ontology=allowed):
-                raise ValueError(f"'{x}' is not a valid entry for {attr}.")
+            if isinstance(attempted, np.ndarray):
+                attempted_ls = attempted.tolist()
+            elif isinstance(attempted, tuple):
+                attempted_ls = list(attempted)
+            else:
+                attempted_ls = [attempted]
+        else:
+            attempted_ls = attempted
+        attempted_clean = []
+        for x in attempted_ls:
+            if allowed is None:
+                attempted_clean.append(x)
+            elif isinstance(allowed, Ontology):
+                if attr == "disease" and (x.lower() == "normal" or x.lower() == "healthy"):
+                    # TODO required because of missing streamlining between sfaira and 10x, remove in future.
+                    attempted_clean.append("healthy")
+                elif x in allowed.node_names:
+                    attempted_clean.append(x)
+                else:
+                    if isinstance(allowed, OntologyHierarchical) and x in allowed.node_ids:
+                        attempted_clean.append(allowed.name_from_id(x))
+                    else:
+                        raise ValueError(f"'{x}' is not a valid entry for {attr} in {self.id}.")
+            else:
+                raise ValueError(f"allowed of type {type(allowed)} is not a valid entry for {attr}.")
+        # Flatten attempts if only one was made:
+        if len(attempted_clean) == 1:
+            attempted_clean = attempted_clean[0]
+        return attempted_clean
 
     def subset_cells(self, key, values):
         """
@@ -2151,17 +2184,18 @@ class DatasetBase(abc.ABC):
         def get_subset_idx(samplewise_key, cellwise_key):
             try:
                 sample_attr = getattr(self, samplewise_key)
+                if not isinstance(sample_attr, list):
+                    sample_attr = [sample_attr]
             except AttributeError:
                 sample_attr = None
             obs_key = getattr(self, cellwise_key)
-            if sample_attr is not None and obs_key is None:
-                if not isinstance(sample_attr, list):
-                    sample_attr = [sample_attr]
+            if sample_attr is not None and len(sample_attr) == 1:
+                # Only use sample-wise subsetting if the sample-wise attribute is unique (not mixed).
                 if np.any([x in values for x in sample_attr]):
                     idx = np.arange(1, self.ncells)
                 else:
                     idx = np.array([])
-            elif sample_attr is None and obs_key is not None:
+            elif obs_key is not None:
                 assert self.adata is not None, "adata was not yet loaded"
                 values_found = self.adata.obs[obs_key].values
                 values_found_unique = np.unique(values_found)
@@ -2179,11 +2213,12 @@ class DatasetBase(abc.ABC):
                 # TODO keep this logging for now to catch undesired behaviour resulting from loaded edges in ontologies.
                 print(f"matched cell-wise keys {str(values_found_unique_matched)} in data set {self.id}")
                 idx = np.where([x in values_found_unique_matched for x in values_found])[0]
-            elif sample_attr is not None and obs_key is not None:
-                assert False, f"both cell-wise and sample-wise attribute {samplewise_key} given"
             else:
                 assert False, "no subset chosen"
             return idx
 
         idx_keep = get_subset_idx(samplewise_key=key, cellwise_key=key + "_obs_key")
         self.adata = self.adata[idx_keep, :].copy()  # if len(idx_keep) > 0 else None
+
+    def show_summary(self):
+        print(f"{(self.supplier, self.organism, self.organ, self.assay_sc, self.disease)}")

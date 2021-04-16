@@ -6,6 +6,7 @@ import gzip
 import os
 from typing import Union
 import pandas
+import pathlib
 import urllib.request
 
 KEY_SYMBOL = "gene_name"
@@ -29,7 +30,10 @@ class GtfInterface:
         """
         The cache dir is in a cache directory in the sfaira installation that is excempt from git versioning.
         """
-        return os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "cache", "genomes")
+        cache_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "cache", "genomes")
+        cache_dir_path = pathlib.Path(cache_dir)
+        cache_dir_path.mkdir(parents=True, exist_ok=True)
+        return cache_dir
 
     @property
     def cache_fn(self):
@@ -74,7 +78,6 @@ class GtfInterface:
     @property
     def cache(self) -> pandas.DataFrame:
         if not os.path.exists(self.cache_fn):
-            os.mkdir(self.cache_dir)
             self.download_gtf_ensembl()
         return pandas.read_csv(self.cache_fn)
 

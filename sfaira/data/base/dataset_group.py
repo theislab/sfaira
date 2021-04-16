@@ -27,7 +27,8 @@ def map_fn(inputs):
     :param inputs:
     :return: None if function ran, error report otherwise
     """
-    ds, remove_gene_version, match_to_reference, load_raw, allow_caching, set_metadata, func, kwargs_func = inputs
+    ds, remove_gene_version, match_to_reference, load_raw, allow_caching, set_metadata, kwargs, func, kwargs_func = \
+        inputs
     try:
         ds.load(
             remove_gene_version=remove_gene_version,
@@ -35,6 +36,7 @@ def map_fn(inputs):
             load_raw=load_raw,
             allow_caching=allow_caching,
             set_metadata=set_metadata,
+            **kwargs
         )
         if func is not None:
             x = func(ds, **kwargs_func)
@@ -90,6 +92,7 @@ class DatasetGroup:
             processes: int = 1,
             func=None,
             kwargs_func: Union[None, dict] = None,
+            **kwargs
     ):
         """
         Load all datasets in group (option for temporary loading).
@@ -115,6 +118,7 @@ class DatasetGroup:
             load_raw,
             allow_caching,
             set_metadata,
+            kwargs,
             func,
             kwargs_func
         ]
@@ -470,6 +474,32 @@ class DatasetGroup:
         for k, v in x.items():
             self.datasets[k].additional_annotation_key = v
 
+    @property
+    def doi(self) -> List[str]:
+        """
+        Propagates DOI annotation from contained datasets.
+        """
+        dois = []
+        for _, v in self.datasets.items():
+            vdoi = v.doi
+            if isinstance(vdoi, str):
+                vdoi = [vdoi]
+            dois.extend(vdoi)
+        return np.sort(np.unique(vdoi)).tolist()
+
+    @property
+    def supplier(self) -> List[str]:
+        """
+        Propagates supplier annotation from contained datasets.
+        """
+        supplier = [v.supplier for _, v in self.datasets.items()]
+        return np.sort(np.unique(supplier)).tolist()
+
+    def show_summary(self):
+        for k, v in self.datasets.items():
+            print(k)
+            print(f"\t {(v.supplier, v.organism, v.organ, v.assay_sc, v.disease)}")
+
 
 class DatasetGroupDirectoryOriented(DatasetGroup):
 
@@ -708,6 +738,20 @@ class DatasetSuperGroup:
     def ncells(self, annotated_only: bool = False):
         return np.sum(self.ncells_bydataset_flat(annotated_only=annotated_only))
 
+    @property
+    def datasets(self) -> Dict[str, DatasetBase]:
+        """
+        Returns DatasetGroup (rather than self = DatasetSuperGroup) containing all listed data sets.
+
+        :return:
+        """
+        ds = {}
+        for x in self.dataset_groups:
+            for k, v in x.datasets.items():
+                assert k not in ds.keys(), f"{k} was duplicated in super group, remove duplicates before flattening"
+                ds[k] = v
+        return ds
+
     def flatten(self) -> DatasetGroup:
         """
         Returns DatasetGroup (rather than self = DatasetSuperGroup) containing all listed data sets.
@@ -734,6 +778,7 @@ class DatasetSuperGroup:
             set_metadata: bool = True,
             allow_caching: bool = True,
             processes: int = 1,
+            **kwargs
     ):
         """
         Loads data set human into anndata object.
@@ -757,6 +802,7 @@ class DatasetSuperGroup:
                 allow_caching=allow_caching,
                 set_metadata=set_metadata,
                 processes=processes,
+                **kwargs
             )
 
     def subset_genes(self, subset_type: Union[None, str, List[str]] = None):
@@ -787,6 +833,13 @@ class DatasetSuperGroup:
             else:
                 warnings.warn("no anndata instances to concatenate")
         return self._adata
+
+    @property
+    def adata_ls(self):
+        adata_ls = []
+        for k, v in self.datasets.items():
+            adata_ls.append(v.adata)
+        return adata_ls
 
     def load_tobacked(
             self,
@@ -951,6 +1004,65 @@ class DatasetSuperGroup:
             x.subset(key=key, values=values)
         self.dataset_groups = [x for x in self.dataset_groups if x.datasets]  # Delete empty DatasetGroups
 
+    def remove_duplicates(
+            self,
+            supplier_hierarchy: str = "cellxgene,sfaira"
+    ):
+        """
+        Remove duplicate data loaders from super group, e.g. loaders that map to the same DOI.
+
+        Any DOI match is removed (pre-print or journal publication).
+        Data sets without DOI are removed, too.
+        Loaders are kept in the hierarchy indicated in supplier_hierarchy.
+        Requires a super group with homogenous suppliers across DatasetGroups, throws an error otherwise.
+        This is given for sfaira maintained libraries but may not be the case if custom assembled DatasetGroups are
+        used.
+
+        :param supplier_hierarchy: Hierarchy to resolve duplications by.
+            Comma separated string that indicates which data provider takes priority.
+            Choose "cellxgene,sfaira" to prioritise use of data sets downloaded from cellxgene.
+            Choose "sfaira,cellxgene" to prioritise use of raw data processing pipelines locally.
+
+                - cellxgene: cellxgene downloads
+                - sfaira: local raw file processing
+        :return:
+        """
+        # Build a pairing of provider and DOI:
+        report_list = []
+        idx_tokeep = []
+        supplier_hierarchy = supplier_hierarchy.split(",")
+        for i, (x, y) in enumerate([(xx.supplier, xx.doi) for xx in self.dataset_groups]):
+            if len(x) > 1:
+                raise ValueError(f"found more than one supplier for DOI {str(y)}")
+            else:
+                x = x[0]
+                if x not in supplier_hierarchy:
+                    raise ValueError(f"could not associate supplier {x} with hierarchy {supplier_hierarchy} in "
+                                     f"data set {y}")
+                if len(report_list) > 0:
+                    matched_idx = np.where([
+                        np.any([
+                            zz in y
+                            for zz in z[1]
+                        ])
+                        for z in report_list
+                    ])[0]
+                    assert len(matched_idx) < 1, f"more matches than expected for {(x, y)}"
+                else:
+                    matched_idx = []
+                if len(matched_idx) > 0:
+                    # Establish which entry takes priority
+                    supplier_old = report_list[matched_idx[0]][0]
+                    priority = supplier_hierarchy.index(supplier_old) > supplier_hierarchy.index(x)
+                    print(f"removing duplicate data set {y} from supplier: {supplier_old if priority else x}")
+                    if priority:
+                        idx_tokeep.append(i)
+                        del idx_tokeep[matched_idx[0]]
+                else:
+                    report_list.append([x, y])
+                    idx_tokeep.append(i)
+        self.dataset_groups = [self.dataset_groups[i] for i in idx_tokeep]
+
     def subset_cells(self, key, values: Union[str, List[str]]):
         """
         Subset list of adata objects based on cell-wise properties.
@@ -1040,3 +1152,8 @@ class DatasetSuperGroup:
                 warnings.warn(f"did not data set matching ID {k}")
             elif counter > 1:
                 warnings.warn(f"found more than one ({counter}) data set matching ID {k}")
+
+    def show_summary(self):
+        for k, v in self.datasets.items():
+            print(k)
+            print(f"\t {(v.supplier, v.organism, v.organ, v.assay_sc, v.disease)}")
