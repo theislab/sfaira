@@ -39,7 +39,7 @@ class EstimatorKeras:
     """
     data: Union[anndata.AnnData, DistributedStore]
     model: Union[BasicModelKeras, None]
-    model_topology: Union[str, None]
+    topology_container: Union[TopologyContainer, None]
     model_id: Union[str, None]
     weights: Union[np.ndarray, None]
     model_dir: Union[str, None]
@@ -535,6 +535,58 @@ class EstimatorKerasEmbedding(EstimatorKeras):
 
         return output_types, output_shapes
 
+    def _get_base_generator(
+            self,
+            generator_helper,
+            idx: Union[np.ndarray, None],
+    ):
+        """
+        Yield a basic generator based on which a tf dataset can be built.
+
+        The signature of this generator can be modified through generator_helper.
+
+        :param generator_helper: Python function that should take (x_sample,) as an input:
+
+            - x_sample is a gene expression vector of a cell
+        :param idx: Indicies of data set to include in generator.
+        :return:
+        """
+        if idx is None:
+            idx = np.arange(0, self.data.n_obs)
+
+        # Prepare data reading according to whether anndata is backed or not:
+        if self.using_store:
+            generator_raw = self.data.generator(
+                batch_size=1,
+                obs_keys=[],
+                continuous_batches=True,
+            )
+
+            def generator():
+                counter = -1
+                for z in generator_raw:
+                    counter += 1
+                    if counter in idx:
+                        x_sample = z[0].toarray().flatten()
+                        yield generator_helper(x_sample=x_sample)
+
+            n_features = self.data.n_vars
+            n_samples = self.data.n_obs
+        else:
+            x = self.data.X if self.data.isbacked else self._prepare_data_matrix(idx=idx)
+
+            def generator():
+                is_sparse = isinstance(x[0, :], scipy.sparse.spmatrix)
+                indices = idx if self.data.isbacked else range(x.shape[0])
+                for i in indices:
+                    x_sample = x[i, :].toarray().flatten() if is_sparse else x[i, :].flatten()
+                    yield generator_helper(x_sample=x_sample)
+
+            n_features = x.shape[1]
+            n_samples = x.shape[0]
+
+        return generator, n_samples, n_features
+
     def _get_dataset(
             self,
             idx: Union[np.ndarray, None],
@@ -556,9 +608,6 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         # Determine model type [ae, vae(iaf, vamp)]
         model_type = "vae" if self.model_type[:3] == "vae" else "ae"
 
-        if idx is None:
-            idx = np.arange(0, self.data.n_obs)
-
         if mode in ['train', 'train_val', 'eval', 'predict']:
             def generator_helper(x_sample):
                 sf_sample = prepare_sf(x=x_sample)[0]
@@ -569,39 +618,11 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 else:
                     return (x_sample, sf_sample), x_sample
 
-            # Prepare data reading according to whether anndata is backed or not:
-            if self.using_store:
-                generator_raw = self.data.generator(
-                    batch_size=1,
-                    obs_keys=[],
-                    continuous_batches=True,
-                )
-
-                def generator():
-                    counter = -1
-                    for z in generator_raw:
-                        counter += 1
-                        if counter in idx:
-                            x_sample = z[0].toarray().flatten()
-                            yield generator_helper(x_sample=x_sample)
-
-                n_features = self.data.n_vars
-                n_samples = self.data.n_obs
-            else:
-                x = self.data.X if self.data.isbacked else self._prepare_data_matrix(idx=idx)
-
-                def generator():
-                    is_sparse = isinstance(x[0, :], scipy.sparse.spmatrix)
-                    indices = idx if self.data.isbacked else range(x.shape[0])
-                    for i in indices:
-                        x_sample = x[i, :].toarray().flatten() if is_sparse else x[i, :].flatten()
-                        yield generator_helper(x_sample=x_sample)
-
-                n_features = x.shape[1]
-                n_samples = x.shape[0]
-
-            output_types, output_shapes = self._get_output_dim(n_features, model_type, mode=mode)
-
+            generator, n_samples, n_features = self._get_base_generator(
+                generator_helper=generator_helper,
+                idx=idx,
+            )
+            output_types, output_shapes = self._get_output_dim(n_features=n_features, model_type=model_type, mode=mode)
             dataset = tf.data.Dataset.from_generator(
                 generator=generator,
                 output_types=output_types,
@@ -715,9 +736,11 @@ class EstimatorKerasEmbedding(EstimatorKeras):
 
         return {"neg_ll": [custom_mse, custom_negll]}
 
-    def evaluate_any(self, idx, batch_size=64, max_steps=20):
+    def evaluate_any(self, idx, batch_size: int = 1, max_steps: int = np.inf):
         """
         Evaluate the custom model on any local data.
+
+        Defaults to run on full data if idx is None.
 
         :param idx: Indices of observations to evaluate on. Evaluates on all observations if None.
         :param batch_size: Batch size for evaluation.
@@ -732,35 +755,22 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 mode='eval'
             )
             steps = min(max(len(idx) // batch_size, 1), max_steps)
-            results = self.model.training_model.evaluate(
-                x=dataset, steps=steps
-            )
+            results = self.model.training_model.evaluate(x=dataset, steps=steps)
             return dict(zip(self.model.training_model.metrics_names, results))
         else:
             return {}
 
-    def evaluate(self, batch_size=64, max_steps=20):
+    def evaluate(self, batch_size: int = 1, max_steps: int = np.inf):
         """
-        Evaluate the custom model on local data.
+        Evaluate the custom model on test data.
 
         Defaults to run on full data if idx_test was not set before, ie. train() has not been called before.
 
+        :param batch_size: Batch size for evaluation.
+        :param max_steps: Maximum steps before evaluation round is considered complete.
         :return: Dictionary of metric names and values.
         """
-        if self.idx_test is None or self.idx_test.any():  # true if the array is not empty or if the passed value is None
-            idx = np.arange(0, self.data.n_obs) if self.idx_test is None else self.idx_test
-            dataset = self._get_dataset(
-                idx=idx,
-                batch_size=batch_size,
-                mode='eval'
-            )
-            steps = min(max(len(idx) // batch_size, 1), max_steps)
-            results = self.model.training_model.evaluate(
-                x=dataset, steps=steps
-            )
-            return dict(zip(self.model.training_model.metrics_names, results))
-        else:
-            return {}
+        return self.evaluate_any(idx=self.idx_test, batch_size=batch_size, max_steps=max_steps)
 
     def predict(self):
         """
@@ -770,12 +780,12 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         prediction
         """
         if self.idx_test is None or self.idx_test.any():  # true if the array is not empty or if the passed value is None
-            x = self._get_dataset(
+            dataset = self._get_dataset(
                 idx=self.idx_test,
                 batch_size=64,
                 mode='predict'
             )
-            return self.model.predict_reconstructed(x=x)
+            return self.model.predict_reconstructed(x=dataset)
         else:
             return np.array([])
 
@@ -787,15 +797,12 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         latent space
         """
         if self.idx_test is None or self.idx_test.any():  # true if the array is not empty or if the passed value is None
-            x = self._get_dataset(
+            dataset = self._get_dataset(
                 idx=self.idx_test,
                 batch_size=64,
                 mode='predict'
             )
-            return self.model.predict_embedding(
-                x=x,
-                variational=False
-            )
+            return self.model.predict_embedding(x=dataset, variational=False)
         else:
             return np.array([])
 
@@ -807,15 +814,12 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         sample of latent space, mean of latent space, variance of latent space
         """
         if self.idx_test is None or self.idx_test:  # true if the array is not empty or if the passed value is None
-            x = self._get_dataset(
+            dataset = self._get_dataset(
                 idx=self.idx_test,
                 batch_size=64,
                 mode='predict'
             )
-            return self.model.predict_embedding(
-                x=x,
-                variational=True
-            )
+            return self.model.predict_embedding(x=dataset, variational=True)
         else:
             return np.array([])
 
@@ -1015,6 +1019,87 @@ class EstimatorKerasCelltype(EstimatorKeras):
         ).flatten()
         return weights, y
 
+    @staticmethod
+    def _get_output_dim(n_features, n_labels, mode):
+        if mode == 'predict':
+            output_types = (tf.float32,)
+            output_shapes = (tf.TensorShape([n_features]),)
+        else:
+            output_types = (tf.float32, tf.float32, tf.float32)
+            output_shapes = (
+                (tf.TensorShape([n_features])),
+                tf.TensorShape([n_labels]),
+                tf.TensorShape([])
+            )
+
+        return output_types, output_shapes
+
+    def _get_base_generator(
+            self,
+            generator_helper,
+            idx: Union[np.ndarray, None],
+            weighted: bool = False,
+    ):
+        """
+        Yield a basic generator based on which a tf dataset can be built.
+
+        The signature of this generator can be modified through generator_helper.
+
+        :param generator_helper: Python function that should take (x_sample, y_sample, w_sample) as an input:
+
+            - x_sample is a gene expression vector of a cell
+            - y_sample is a one-hot encoded label vector of a cell
+            - w_sample is a weight scalar of a cell
+        :param idx: Indicies of data set to include in generator.
+        :return:
+        """
+        if idx is None:
+            idx = np.arange(0, self.data.n_obs)
+
+        # Prepare data reading according to whether anndata is backed or not:
+        if self.using_store:
+            if weighted:
+                raise ValueError("using weights with store is not supported yet")
+            generator_raw = self.data.generator(
+                batch_size=1,
+                obs_keys=["cell_ontology_class"],
+                continuous_batches=True,
+            )
+            onehot_encoder = self._one_hot_encoder()
+
+            def generator():
+                counter = -1
+                for z in generator_raw:
+                    counter += 1
+                    if counter in idx:
+                        x_sample = z[0].toarray().flatten()
+                        y_sample = onehot_encoder(z[0]["cell_ontology_class"].values[0])
+                        yield generator_helper(x_sample, y_sample, 1.)
+
+            n_features = self.data.n_vars
+            n_samples = self.data.n_obs
+            n_labels = self.data.celltypes_universe.onto_cl.n_leaves
+        else:
+            weights, y = self._get_celltype_out(idx=idx)
+            if not weighted:
+                weights = np.ones_like(weights)
+            x = self.data.X if self.data.isbacked else self._prepare_data_matrix(idx=idx)
+
+            def generator():
+                is_sparse = isinstance(x[0, :], scipy.sparse.spmatrix)
+                indices = idx if self.data.isbacked else range(x.shape[0])
+                for i in indices:
+                    x_sample = np.asarray(x[i, :].todense()).flatten() if is_sparse else x[i, :].flatten()
+                    y_sample = y[i, :]
+                    w_sample = weights[i]
+                    yield generator_helper(x_sample, y_sample, w_sample)
+
+            n_features = x.shape[1]
+            n_samples = x.shape[0]
+            n_labels = y.shape[1]
+
+        return generator, n_samples, n_features, n_labels
+
     def _get_dataset(
             self,
             idx: Union[np.ndarray, None],
@@ -1033,118 +1118,34 @@ class EstimatorKerasCelltype(EstimatorKeras):
         :param weighted: Whether to use weights.
         :return:
         """
-        if self.using_store:
-            if weighted:
-                raise ValueError("using weights with store is not supported yet")
-            n_obs = self.data.n_obs
-            n_features = self.data.n_vars
-            n_labels = self.data.celltypes_universe.onto_cl.n_leaves
-            generator_raw = self.data.generator(
-                batch_size=1,
-                obs_keys=["cell_ontology_class"],
-                continuous_batches=True,
-            )
-            onehot_encoder = self._one_hot_encoder()
-
-            def generator():
-                counter = -1
-                for z in generator_raw:
-                    counter += 1
-                    if counter in idx:
-                        x_sample = z[0].toarray().flatten()
-                        y = onehot_encoder(z[0]["cell_ontology_class"].values[0])
-                        yield x_sample, y, 1.
-
-            dataset = tf.data.Dataset.from_generator(
-                generator=generator,
-                output_types=(tf.float32, tf.float32, tf.float32),
-                output_shapes=(
-                    (tf.TensorShape([n_features])),
-                    tf.TensorShape([n_labels]),
-                    tf.TensorShape([])
-                )
-            )
-            if mode == 'train' or mode == 'train_val':
-                dataset = dataset.repeat()
-                dataset = dataset.shuffle(
-                    buffer_size=min(n_obs, shuffle_buffer_size),
-                    seed=None,
-                    reshuffle_each_iteration=True
-                )
-            dataset = dataset.batch(batch_size).prefetch(prefetch)
-
-            return dataset
-        else:
-            if mode != 'predict':
-                weights, y = self._get_celltype_out(idx=idx)
-                if not weighted:
-                    weights = np.ones_like(weights)
-            if mode == 'train' or mode == 'train_val':
-                if isinstance(self.data, anndata.AnnData) and self.data.isbacked:
-                    n_features = self.data.X.shape[1]
-                    n_labels = y.shape[1]
-
-                    def generator():
-                        sparse = isinstance(self.data.X[0, :], scipy.sparse.spmatrix)
-                        for i, ii in enumerate(idx):
-                            x = self.data.X[ii, :].toarray().flatten() if sparse else self.data.X[ii, :].flatten()
-                            yield x, y[i, :], weights[i]
-                else:
-                    x = self._prepare_data_matrix(idx=idx)
-                    n_features = x.shape[1]
-                    n_labels = y.shape[1]
-
-                    def generator():
-                        for i, ii in enumerate(idx):
-                            yield x[i, :].toarray().flatten(), y[i, :], weights[i]
-
-                dataset = tf.data.Dataset.from_generator(
-                    generator=generator,
-                    output_types=(tf.float32, tf.float32, tf.float32),
-                    output_shapes=(
-                        (tf.TensorShape([n_features])),
-                        tf.TensorShape([n_labels]),
-                        tf.TensorShape([])
-                    )
-                )
-                if mode == 'train':
-                    dataset = dataset.repeat()
-                dataset = dataset.shuffle(
-                    buffer_size=min(x.shape[0], shuffle_buffer_size),
-                    seed=None,
-                    reshuffle_each_iteration=True
-                ).batch(batch_size).prefetch(prefetch)
-
-                return dataset
-
-            elif mode == 'eval':
-                # Prepare data reading according to whether anndata is backed or not:
-                if isinstance(self.data, anndata.AnnData) and self.data.isbacked:
-                    # Need to supply sorted indices to backed anndata:
-                    x = self.data.X[np.sort(idx), :]
-                    # Sort back in original order of indices.
-                    x = x[[np.where(np.sort(idx) == i)[0][0] for i in idx], :]
-                else:
-                    x = self._prepare_data_matrix(idx=idx)
-                    x = x.toarray()
-
-                return x, y, weights
-
-            elif mode == 'predict':
-                # Prepare data reading according to whether anndata is backed or not:
-                if self.data.isbacked:
-                    # Need to supply sorted indices to backed anndata:
-                    x = self.data.X[np.sort(idx), :]
-                    # Sort back in original order of indices.
-                    x = x[[np.where(np.sort(idx) == i)[0][0] for i in idx], :]
-                else:
-                    x = self._prepare_data_matrix(idx=idx)
-                    x = x.toarray()
-
-                return x, None, None
-
+        # This is a basic cell type prediction model estimator class, the standard generator is fine.
+        def generator_helper(x_sample, y_sample, w_sample):
+            if mode in ['train', 'train_val', 'eval']:
+                return x_sample, y_sample, w_sample
             else:
-                raise ValueError(f'Mode {mode} not recognised. Should be "train", "eval" or" predict"')
+                return x_sample,
+
+        generator, n_samples, n_features, n_labels = self._get_base_generator(
+            generator_helper=generator_helper,
+            idx=idx,
+            weighted=weighted,
+        )
+        output_types, output_shapes = self._get_output_dim(n_features=n_features, n_labels=n_labels, mode=mode)
+        dataset = tf.data.Dataset.from_generator(
+            generator=generator,
+            output_types=output_types,
+            output_shapes=output_shapes
+        )
+        if mode == 'train' or mode == 'train_val':
+            dataset = dataset.repeat()
+            dataset = dataset.shuffle(
+                buffer_size=min(n_samples, shuffle_buffer_size),
+                seed=None,
+                reshuffle_each_iteration=True
+            )
+        dataset = dataset.batch(batch_size).prefetch(prefetch)
+
+        return dataset
 
     def _get_loss(self):
         return LossCrossentropyAgg()
@@ -1159,22 +1160,27 @@ class EstimatorKerasCelltype(EstimatorKeras):
             CustomTprClasswise(k=self.ntypes)
         ]
 
-    def predict(self):
+    def predict(
+            self,
+            batch_size: int = 1,
+            max_steps: int = np.inf,
+    ):
         """
         Return the prediction of the model
 
-        :return:
-        prediction
+        :param batch_size: Batch size for evaluation.
+        :param max_steps: Maximum steps before evaluation round is considered complete.
+        :return: Prediction tensor.
         """
-        if self.idx_test is None or self.idx_test.any():   # true if the array is not empty or if the passed value is None
-            x, _, _ = self._get_dataset(
-                idx=self.idx_test,
-                batch_size=None,
+        idx = self.idx_test
+        if idx is None or idx.any():   # true if the array is not empty or if the passed value is None
+            dataset = self._get_dataset(
+                idx=idx,
+                batch_size=batch_size,
                 mode='predict'
             )
-            return self.model.training_model.predict(
-                x=x
-            )
+            steps = min(max(len(idx) // batch_size, 1), max_steps)
+            return self.model.training_model.predict(x=dataset, steps=steps)
         else:
             return np.array([])
 
@@ -1197,50 +1203,47 @@ class EstimatorKerasCelltype(EstimatorKeras):
     def evaluate_any(
             self,
             idx,
+            batch_size: int = 1,
+            max_steps: int = np.inf,
             weighted: bool = True
     ):
         """
         Evaluate the custom model on any local data.
 
+        Defaults to run on full data if idx is None.
+
         :param idx: Indices of observations to evaluate on. Evaluates on all observations if None.
+        :param batch_size: Batch size for evaluation.
+        :param max_steps: Maximum steps before evaluation round is considered complete.
         :param weighted: Whether to use class weights in evaluation.
         :return: Dictionary of metric names and values.
         """
         if idx is None or idx.any():   # true if the array is not empty or if the passed value is None
-            x, y, w = self._get_dataset(
+            idx = np.arange(0, self.data.n_obs) if idx is None else idx
+            dataset = self._get_dataset(
                 idx=idx,
-                batch_size=None,
+                batch_size=batch_size,
                 mode='eval',
                 weighted=weighted
             )
-            results = self.model.training_model.evaluate(
-                x=x, y=y, sample_weight=w
-            )
+            steps = min(max(len(idx) // batch_size, 1), max_steps)
+            results = self.model.training_model.evaluate(x=dataset, steps=steps)
             return dict(zip(self.model.training_model.metrics_names, results))
         else:
             return {}
 
-    def evaluate(self, weighted: bool = True):
+    def evaluate(self, batch_size: int = 1, max_steps: int = np.inf, weighted: bool = True):
         """
         Evaluate the custom model on local data.
 
         Defaults to run on full data if idx_test was not set before, ie. train() has not been called before.
 
+        :param batch_size: Batch size for evaluation.
+        :param max_steps: Maximum steps before evaluation round is considered complete.
         :param weighted: Whether to use class weights in evaluation.
-        :return: model.evaluate
+        :return: Dictionary of metric names and values.
         """
-        if self.idx_test is None or self.idx_test.any():   # true if the array is not empty or if the passed value is None
-            x, y, w = self._get_dataset(
-                idx=self.idx_test,
-                batch_size=None,
-                mode='eval',
-                weighted=weighted
-            )
-            return self.model.training_model.evaluate(
-                x=x, y=y, sample_weight=w
-            )
-        else:
-            return np.array([])
+        return self.evaluate_any(idx=self.idx_test, batch_size=batch_size, max_steps=max_steps, weighted=weighted)
 
     def compute_gradients_input(
             self,
