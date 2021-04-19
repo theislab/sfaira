@@ -170,8 +170,8 @@ class AdataIdsCellxgene(AdataIds):
         self.default_embedding = "default_embedding"
         self.doi = "preprint_doi"
         self.disease = "disease"
-        self.gene_id_index = self.gene_id_symbols
         self.gene_id_symbols = "gene_symbol"
+        self.gene_id_index = self.gene_id_symbols
         self.id = "id"
         self.ncells = "ncells"
         self.organ = "tissue"
