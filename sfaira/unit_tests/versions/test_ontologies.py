@@ -128,6 +128,7 @@ def test_sclc_nodes():
     assert "10x 5' v3 sequencing" in sclc.node_names
     assert "Smart-like" in sclc.node_names
     assert "Smart-seq2" in sclc.node_names
+    assert "sci-plex" in sclc.node_names
     assert "single cell library construction" in sclc.node_names
 
 
@@ -141,6 +142,8 @@ def test_sclc_is_a():
     assert sclc.is_a(query="10x 5' v3 sequencing", reference="10x v3 sequencing")
     assert not sclc.is_a(query="10x sequencing", reference="10x v1 sequencing")
     assert sclc.is_a(query="10x 5' v3 sequencing", reference="single cell library construction")
+    assert sclc.is_a(query="sci-plex", reference="single cell library construction")
+    assert not sclc.is_a(query="sci-plex", reference="10x sequencing")
 
 
 """
