@@ -302,6 +302,8 @@ class OntologyEbi(OntologyHierarchical):
             self,
             ontology: str,
             root_term: str,
+            additional_terms: dict,
+            additional_edges: List[Tuple[str, str]],
             **kwargs
     ):
         def get_url_self(iri):
@@ -370,6 +372,8 @@ class OntologyEbi(OntologyHierarchical):
 
         self.graph = networkx.MultiDiGraph()
         nodes, edges = recursive_search(iri=root_term)
+        nodes.update(additional_terms)
+        edges.extend(additional_edges)
         for k, v in nodes.items():
             self.graph.add_node(node_for_adding=k, **v)
         for x in edges:
@@ -867,5 +871,9 @@ class OntologySinglecellLibraryConstruction(OntologyEbi):
             additional_terms={
                 "microwell-seq": {"name": "microwell-seq"},
                 "sci-plex": {"name": "sci-plex"}
-            }
+            },
+            additional_edges=[
+                ("EFO:0010183", "microwell-seq"),
+                ("EFO:0010183", "sci-plex"),
+            ]
         )
