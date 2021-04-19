@@ -82,12 +82,13 @@ def test_dsgs_subset_cell_wise(organ: str, celltype: str):
 @pytest.mark.parametrize("clean_obs", [True, False])
 @pytest.mark.parametrize("clean_var", [True, False])
 @pytest.mark.parametrize("clean_uns", [True, False])
-def test_dsgs_streamline_metadata(out_format: str, clean_obs: bool, clean_var: bool, clean_uns: bool):
+@pytest.mark.parametrize("clean_obs_names", [True, False])
+def test_dsgs_streamline_metadata(out_format: str, clean_obs: bool, clean_var: bool, clean_uns: bool, clean_obs_names: bool):
     ds = Universe(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
     ds.subset(key="organism", values=["mouse"])
     ds.subset(key="organ", values=["lung"])
     ds.load(remove_gene_version=True)
-    ds.streamline_metadata(format=out_format, allow_uns_sfaira=False, clean_obs=clean_obs, clean_var=clean_var, clean_uns=clean_uns)
+    ds.streamline_metadata(schema=out_format, uns_to_obs=True, clean_obs=clean_obs, clean_var=clean_var, clean_uns=clean_uns, clean_obs_names=clean_obs_names)
 
 
 def test_dsg_load_backed_dense(genome="Mus_musculus_GRCm38_97"):

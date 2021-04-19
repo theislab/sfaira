@@ -79,12 +79,11 @@ def test_collapse_matrix(
         # Create triplicate and duplicate gene names:
         index = ["g" + str(i) for i in range(2)] + ["g" + str(i) for i in range(3)] + \
                 ["g" + str(i) for i in range(x.shape[1] - 3 - 2)]
-    adata = anndata.AnnData(x, var=pd.DataFrame(index=index))
-    adata.var_names = index
-    adata2 = collapse_matrix(adata=adata)
+    adata = anndata.AnnData(x, var=pd.DataFrame({"var_column": index}))
+    adata2 = collapse_matrix(adata=adata, var_column="var_column")
     assert adata.X.shape[0] == adata2.X.shape[0], "observation dimension mismatch"
     assert adata.X.dtype == adata2.X.dtype, "type mismatch"
-    assert adata2.X.shape[1] == len(np.unique(adata.var_names)), "feature dimension mismatch"
+    assert adata2.X.shape[1] == len(np.unique(adata.var["var_column"])), "feature dimension mismatch"
     assert np.all(np.asarray(adata.X.sum()).flatten() == np.asarray(adata2.X.sum().flatten())), \
         "total count mismatch"
     assert np.all(np.asarray(adata.X.sum(axis=1)).flatten() == np.asarray(adata2.X.sum(axis=1).flatten())), \

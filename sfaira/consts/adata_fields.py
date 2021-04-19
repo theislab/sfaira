@@ -2,7 +2,7 @@
 The classes in this file are containers of field names and element entries that are used in streamlined adata objects
 in sfaira and in associated data bases.
 """
-from typing import List
+from typing import List, Union
 
 
 class AdataIds:
@@ -42,6 +42,14 @@ class AdataIds:
     var_keys: List[str]
     uns_keys: List[str]
 
+    classmap_source_key: str
+    classmap_target_key: str
+    classmap_target_id_key: str
+
+    unknown_celltype_identifier: Union[str, None]
+    not_a_cell_celltype_identifier: Union[str, None]
+    unknown_metadata_identifier: Union[str, None]
+
 
 class AdataIdsSfaira(AdataIds):
     """
@@ -73,7 +81,7 @@ class AdataIdsSfaira(AdataIds):
         self.download_url_data = "download_url_data"
         self.download_url_meta = "download_url_meta"
         self.gene_id_ensembl = "ensembl"
-        self.gene_id_index = "ensembl"
+        self.gene_id_index = self.gene_id_ensembl
         self.gene_id_symbols = "names"
         self.id = "id"
         self.individual = "individual"
@@ -162,6 +170,7 @@ class AdataIdsCellxgene(AdataIds):
         self.default_embedding = "default_embedding"
         self.doi = "preprint_doi"
         self.disease = "disease"
+        self.gene_id_index = self.gene_id_symbols
         self.gene_id_symbols = "gene_symbol"
         self.id = "id"
         self.ncells = "ncells"

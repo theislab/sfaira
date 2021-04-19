@@ -19,7 +19,7 @@ import ssl
 
 from sfaira.versions.genomes import GenomeContainer
 from sfaira.versions.metadata import Ontology, OntologyHierarchical, CelltypeUniverse
-from sfaira.consts import AdataIdsCellxgene, AdataIdsSfaira, META_DATA_FIELDS, OCS
+from sfaira.consts import AdataIds, AdataIdsCellxgene, AdataIdsSfaira, META_DATA_FIELDS, OCS
 from sfaira.data.utils import collapse_matrix, read_yaml
 
 UNS_STRING_META_IN_OBS = "__obs__"
@@ -444,64 +444,43 @@ class DatasetBase(abc.ABC):
 
     load.__doc__ = load_doc
 
-    def _convert_and_set_var_names(
+    def _add_missing_featurenames(
             self,
             match_to_reference: Union[str, bool, None],
     ):
-        # Process given gene names: Full gene names ("symbol") or ENSEMBL IDs ("ensembl").
-        # Below the .var column that contain the target IDs are renamed to follow streamlined naming.
-        # If the IDs were contained in the index, a new column is added to .var.
-        if self.gene_id_symbols_var_key:
-            if self.gene_id_symbols_var_key == 'index':
-                self.adata.var[self._adata_ids.gene_id_symbols] = self.adata.var.index.values.tolist()
-            else:
-                assert self.gene_id_symbols_var_key in self.adata.var.columns, f"self.gene_id_symbols_var_key {self.gene_id_symbols_var_key} not found in .var"
-                self.adata.var = self.adata.var.rename(
-                    {self.gene_id_symbols_var_key: self._adata_ids.gene_id_symbols},
-                    axis='columns'
-                )
-        if self.gene_id_symbols_var_key:
-            if self.gene_id_symbols_var_key == 'index':
-                self.adata.var[self._adata_ids.gene_id_ensembl] = self.adata.var.index.values.tolist()
-            else:
-                assert self.gene_id_symbols_var_key in self.adata.var.columns, f"self.gene_id_symbols_var_key {self.gene_id_symbols_var_key} not found in .var"
-                self.adata.var = self.adata.var.rename(
-                    {self.gene_id_symbols_var_key: self._adata_ids.gene_id_ensembl},
-                    axis='columns'
-                )
-        # If only symbol or ensembl was supplied, the other one is inferred from a genome mapping dictionary.
-        if not self.gene_id_symbols_var_key and not (isinstance(match_to_reference, bool) and not match_to_reference):
-            id_dict = self.genome_container.names_to_id_dict
-            id_strip_dict = self.genome_container.strippednames_to_id_dict
-            # Matching gene names to ensembl ids in the following way: if the gene is present in the ensembl dictionary,
-            # match it straight away, if it is not in there we try to match everything in front of the first period in
-            # the gene name with a dictionary that was modified in the same way, if there is still no match we append na
-            ensids = []
-            for n in self.adata.var[self._adata_ids.gene_id_symbols]:
-                if n in id_dict.keys():
-                    ensids.append(id_dict[n])
-                elif n.split(".")[0] in id_strip_dict.keys():
-                    ensids.append(id_strip_dict[n.split(".")[0]])
-                else:
-                    ensids.append('n/a')
-            self.adata.var[self._adata_ids.gene_id_ensembl] = ensids
+        if match_to_reference is not False:
+            if not self.gene_id_symbols_var_key and not self.gene_id_ensembl_var_key:
+                raise ValueError("Either gene_id_symbols_var_key or gene_id_ensembl_var_key needs to be provided in the"
+                                 " dataloader")
+            elif not self.gene_id_symbols_var_key and self.gene_id_ensembl_var_key:
+                # Convert ensembl ids to gene symbols
+                id_dict = self.genome_container.id_to_names_dict
+                ensids = self.adata.var.index if self.gene_id_ensembl_var_key == "index" else self.adata.var[self.gene_id_ensembl_var_key]
+                self.adata.var[self._adata_ids.gene_id_symbols] = [
+                    id_dict[n.split(".")[0]] if n.split(".")[0] in id_dict.keys() else 'n/a'
+                    for n in ensids
+                ]
+                self.gene_id_symbols_var_key = self._adata_ids.gene_id_symbols
+            elif self.gene_id_symbols_var_key and not self.gene_id_ensembl_var_key:
+                # Convert gene symbols to ensembl ids
+                id_dict = self.genome_container.names_to_id_dict
+                id_strip_dict = self.genome_container.strippednames_to_id_dict
+                # Matching gene names to ensembl ids in the following way: if the gene is present in the ensembl dictionary,
+                # match it straight away, if it is not in there we try to match everything in front of the first period in
+                # the gene name with a dictionary that was modified in the same way, if there is still no match we append na
+                ensids = []
+                symbs = self.adata.var.index if self.gene_id_symbols_var_key == "index" else self.adata.var[self.gene_id_symbols_var_key]
+                for n in symbs:
+                    if n in id_dict.keys():
+                        ensids.append(id_dict[n])
+                    elif n.split(".")[0] in id_strip_dict.keys():
+                        ensids.append(id_strip_dict[n.split(".")[0]])
+                    else:
+                        ensids.append('n/a')
+                self.adata.var[self._adata_ids.gene_id_ensembl] = ensids
+                self.gene_id_ensembl_var_key = self._adata_ids.gene_id_ensembl
 
-        if not self.gene_id_symbols_var_key and not (isinstance(match_to_reference, bool) and not match_to_reference):
-            id_dict = self.genome_container.id_to_names_dict
-            self.adata.var[self._adata_ids.gene_id_symbols] = [
-                id_dict[n.split(".")[0]] if n.split(".")[0] in id_dict.keys() else 'n/a'
-                for n in self.adata.var[self._adata_ids.gene_id_ensembl]
-            ]
-
-        if match_to_reference:
-            # Lastly, the index of .var is set according to adata_fields.
-            try:  # debugging
-                self.adata.var.index = self.adata.var[self._adata_ids.gene_id_index].values.tolist()
-            except KeyError as e:
-                raise KeyError(e)
-            self.adata.var_names_make_unique()
-
-    def _collapse_gene_versions(self, remove_gene_version):
+    def _collapse_ensembl_gene_id_versions(self, remove_gene_version):
         """
         Remove version tag on ensembl gene ID so that different versions are superimposed downstream.
 
@@ -509,14 +488,21 @@ class DatasetBase(abc.ABC):
         :return:
         """
         if remove_gene_version:
-            self.adata.var_names = [
-                x.split(".")[0] for x in self.adata.var[self._adata_ids.gene_id_index].values
-            ]
+            if not self.gene_id_ensembl_var_key:
+                raise ValueError(
+                    "Cannot remove gene version when gene_id_ensembl_var_key is not set in dataloader and "
+                    "match_to_reference is False"
+                )
+            elif self.gene_id_ensembl_var_key == "index":
+                self.adata.index = [
+                    x.split(".")[0] for x in self.adata.var.index
+                ]
+            else:
+                self.adata.var[self.gene_id_ensembl_var_key] = [
+                    x.split(".")[0] for x in self.adata.var[self.gene_id_ensembl_var_key].values
+                ]
         # Collapse if necessary:
-        self.adata = collapse_matrix(adata=self.adata)
-
-        self.adata.var[self._adata_ids.gene_id_index] = self.adata.var_names
-        self.adata.var.index = self.adata.var[self._adata_ids.gene_id_ensembl].values
+        self.adata = collapse_matrix(adata=self.adata, var_column=self.gene_id_ensembl_var_key)
 
     def streamline_features(
             self,
@@ -526,6 +512,9 @@ class DatasetBase(abc.ABC):
     ):
         """
         Subset and sort genes to genes defined in an assembly or genes of a particular type, such as protein coding.
+        This also adds missing ensid or gene symbol columns if match_to_reference is not set to False and removes all
+        adata.var columns that are not defined as gene_id_ensembl_var_key or gene_id_symbol_var_key in the dataloader.
+
         :param remove_gene_version: Whether to remove the version number after the colon sometimes found in ensembl gene ids.
         :param match_to_reference: Whether to map gene names to a given annotation. Can be:
                                    - str: Provide the name of the annotation in the format Organism.Assembly.Release
@@ -535,17 +524,14 @@ class DatasetBase(abc.ABC):
             - None: All genes in assembly.
             - "protein_coding": All protein coding genes in assembly.
         """
-        if match_to_reference and not remove_gene_version:
-            warnings.warn("it is not recommended to enable matching the feature space to a genome reference"
-                          "when not removing gene versions. this can lead to very poor matching results")
         # Set genome container if mapping of gene labels is requested
         if match_to_reference is not False:  # Testing this explicitly makes sure False is treated separately from None
             self._set_genome(organism=self.organism, assembly=match_to_reference)
         self.mapped_features = match_to_reference
         self.remove_gene_version = remove_gene_version
         # Streamline feature space:
-        self._convert_and_set_var_names(match_to_reference=match_to_reference)
-        self._collapse_gene_versions(remove_gene_version=remove_gene_version)
+        self._add_missing_featurenames(match_to_reference=match_to_reference)
+        self._collapse_ensembl_gene_id_versions(remove_gene_version=remove_gene_version)
 
         # Convert data matrix to csc matrix
         if isinstance(self.adata.X, np.ndarray):
@@ -559,7 +545,7 @@ class DatasetBase(abc.ABC):
             raise ValueError(f"Data type {type(self.adata.X)} not recognized.")
 
         # Compute indices of genes to keep
-        data_ids = self.adata.var[self._adata_ids.gene_id_ensembl].values
+        data_ids = self.adata.var.index.tolist() if self.gene_id_ensembl_var_key == "index" else adata.var[self.gene_id_ensembl_var_key].tolist()
         if subset_genes_to_type is None:
             subset_ids = self.genome_container.ensembl
         else:
@@ -591,16 +577,26 @@ class DatasetBase(abc.ABC):
             x_new[:, idx_feature_map[i + step:]] = x[:, i + step:]
         else:
             x_new[:, idx_feature_map] = x
-
         x_new = x_new.tocsr()
+
+        # Create new var dataframe
+        if self.gene_id_symbols_var_key == "index":
+            var_index = self.genome_container.names
+            var_data = {self.gene_id_ensembl_var_key: self.genome_container.ensembl}
+        elif self.gene_id_ensembl_var_key == "index":
+            var_index = self.genome_container.ensembl
+            var_data = {self.gene_id_symbols_var_key: self.genome_container.names}
+        else:
+            var_index = None
+            var_data = {self.gene_id_symbols_var_key: self.genome_container.names,
+                        self.gene_id_ensembl_var_key: self.genome_container.ensembl}
+        var_new = pd.DataFrame(data=var_data, index=var_index)
 
         self.adata = anndata.AnnData(
             X=x_new,
             obs=self.adata.obs,
             obsm=self.adata.obsm,
-            var=pd.DataFrame(data={'names': self.genome_container.names,
-                                   self._adata_ids.gene_id_ensembl: self.genome_container.ensembl},
-                             index=self.genome_container.ensembl),
+            var=var_new,
             uns=self.adata.uns
         )
 
@@ -610,7 +606,8 @@ class DatasetBase(abc.ABC):
             uns_to_obs: bool = False,
             clean_obs: bool = True,
             clean_var: bool = True,
-            clean_uns: bool = True
+            clean_uns: bool = True,
+            clean_obs_names: bool = True,
     ):
         """
         Streamline the adata instance to a defined output schema.
@@ -624,6 +621,7 @@ class DatasetBase(abc.ABC):
         :param clean_obs: Whether to delete non-streamlined fields in .obs, .obsm and .obsp.
         :param clean_var: Whether to delete non-streamlined fields in .var, .varm and .varp.
         :param clean_uns: Whether to delete non-streamlined fields in .uns.
+        :param clean_obs_names: Whether to replace obs_names with a string comprised of dataset id and an increasing integer.
         :return:
         """
 
@@ -702,41 +700,65 @@ class DatasetBase(abc.ABC):
         # Set cell types:
         # Map cell type names from raw IDs to ontology maintained ones:
         if self.cell_types_original_obs_key is not None:
-            obs_cl = self.project_celltypes_to_ontology(copy=True)
+            obs_cl = self.project_celltypes_to_ontology(copy=True, adata_fields=adata_target_ids)
             obs_new = pd.concat([obs_new, obs_cl], axis=1)
 
-        # Clean up
+        # Creating new var annotation
+        var_new = pd.DataFrame()
+        for k in adata_target_ids.var_keys:
+            if k == "gene_id_ensembl":
+                if not self.gene_id_ensembl_var_key:
+                    raise ValueError("gene_id_ensembl_var_key not set in dataloader despite being required by the "
+                                     "selected meta data schema. please run streamline_features() first to create the "
+                                     "missing annotation")
+                elif self.gene_id_ensembl_var_key == "index":
+                    var_new[getattr(adata_target_ids, k)] = self.adata.var.index.tolist()
+                else:
+                    var_new[getattr(adata_target_ids, k)] = self.adata.var[self.gene_id_ensembl_var_key].tolist()
+                    del self.adata.var[self.gene_id_ensembl_var_key]
+            elif k == "gene_id_symbols":
+                if not self.gene_id_symbols_var_key:
+                    raise ValueError("gene_id_symbols_var_key not set in dataloader despite being required by the "
+                                     "selected meta data schema. please run streamline_features() first to create the "
+                                     "missing annotation")
+                elif self.gene_id_symbols_var_key == "index":
+                    var_new[getattr(adata_target_ids, k)] = self.adata.var.index.tolist()
+                    del self.adata.var[self.gene_id_symbols_var_key]
+                else:
+                    var_new[getattr(adata_target_ids, k)] = self.adata.var[self.gene_id_symbols_var_key].tolist()
+            else:
+                val = getattr(self, k)
+                while hasattr(val, '__len__') and not isinstance(val, str) and len(val) == 1:  # unpack nested lists/tuples
+                    val = val[0]
+                var_new[getattr(adata_target_ids, k)] = val
+        # set var index
+        var_new.index = var_new[adata_target_ids.gene_id_index].tolist()
+
+        # Add new annotation to adata and delete old fields if requested
         if clean_var:
             if self.adata.varm is not None:
                 del self.adata.varm
             if self.adata.varp is not None:
                 del self.adata.varp
+            self.adata.var = var_new
+        else:
+            self.adata.var = pd.concat([var_new, self.adata.var], axis=1, ignore_index=True)
+            self.adata.var.index = var_new.index
         if clean_obs:
             if self.adata.obsm is not None:
                 del self.adata.obsm
             if self.adata.obsp is not None:
                 del self.adata.obsp
+            self.adata.obs = obs_new
+        else:
+            self.adata.obs = pd.concat([obs_new, self.adata.obs], axis=1, ignore_index=True)
+            self.adata.obs.index = var_new.index
+        if clean_obs_names:
+            self.adata.obs.index = [f"{self.id}_{i}" for i in range(1, self.adata.n_obs+1)]
         if clean_uns:
-            pass
-
-
-
-        # Only retain target elements in adata.var:
-        var_old = self.adata.var.copy()
-        self.adata.var = pd.DataFrame(dict([
-            (getattr(adata_fields, k), self.adata.var[getattr(self._adata_ids, k)])
-            for k in adata_fields.var_keys
-            if getattr(self._adata_ids, k) in self.adata.var.keys()
-        ]))
-        # Add old columns in if they are not overwritten and object is not cleaned:
-        if not clean_var:
-            for k, v in var_old.items():
-                if k not in self.adata.var.keys():
-                    self.adata.var[k] = v
-
-
-
-
+            self.adata.uns = uns_new
+        else:
+            self.adata.uns = {**self.adata.uns, **uns_new}
 
         # Add additional hard-coded description changes for cellxgene schema:
         if schema == "cellxgene":
@@ -758,7 +780,7 @@ class DatasetBase(abc.ABC):
             for k in ["organ", "assay_sc", "disease", "ethnicity", "development_stage"]:
                 if getattr(adata_target_ids, k) in self.adata.obs.columns:
                     self.__project_name_to_id_obs(
-                        ontology=getattr(self._adata_ids, k),
+                        ontology=getattr(adata_target_ids, k),
                         key_in=getattr(adata_target_ids, k),
                         key_out=getattr(adata_target_ids, k) + "_ontology_term_id",
                         map_exceptions=[],
@@ -775,7 +797,7 @@ class DatasetBase(abc.ABC):
             else:
                 raise ValueError(f"organism {self.organism} currently not supported")
             self.adata.var[gene_id_new] = self.adata.var[getattr(adata_target_ids, "gene_id_symbols")]
-            self.adata.var.index = self.adata.var[gene_id_new].values
+            self.adata.var.index = self.adata.var[gene_id_new].tolist()
             if gene_id_new != getattr(adata_target_ids, "gene_id_symbols"):
                 del self.adata.var[getattr(adata_target_ids, "gene_id_symbols")]
 
@@ -785,6 +807,13 @@ class DatasetBase(abc.ABC):
         for k in self.adata.uns_keys():
             if self.adata.uns[k] is None:
                 self.adata.uns[k] = adata_target_ids.unknown_metadata_identifier
+
+        # Move all uns annotation to obs columns if requested
+        if uns_to_obs:
+            for k in self.adata.uns.items():
+                if k not in self.adata.obs_keys():
+                    self.adata.obs = [self.adata.uns[k] for i in range(self.adata.n_obs)]
+            self.adata.uns = {}
 
         # Set new adata fields to class after conversion
         self._adata_ids = adata_target_ids
@@ -939,7 +968,7 @@ class DatasetBase(abc.ABC):
             if self.cell_types_original_obs_key is not None:
                 warnings.warn(f"file {fn} does not exist but cell_types_original_obs_key is given")
 
-    def project_celltypes_to_ontology(self, copy=False):
+    def project_celltypes_to_ontology(self, adata_fields: Union[AdataIds, None] = None, copy=False):
         """
         Project free text cell type names to ontology based on mapping table.
 
@@ -947,6 +976,7 @@ class DatasetBase(abc.ABC):
 
         :return:
         """
+        adata_fields = adata_fields if adata_fields is not None else self._adata_ids
         results = {}
         labels_original = self.adata.obs[self.cell_types_original_obs_key].values
         if self.cell_ontology_map is not None:  # only if this was defined
@@ -961,10 +991,10 @@ class DatasetBase(abc.ABC):
                 attr="celltypes",
                 allowed=self.ontology_celltypes,
                 attempted=[
-                    x for x in np.unique(labels_mapped).tolist()
+                    x for x in list(np.unique(labels_mapped))
                     if x not in [
-                        self._adata_ids.unknown_celltype_identifier,
-                        self._adata_ids.not_a_cell_celltype_identifier
+                        adata_fields.unknown_celltype_identifier,
+                        adata_fields.not_a_cell_celltype_identifier
                     ]
                 ]
             )
@@ -978,16 +1008,16 @@ class DatasetBase(abc.ABC):
                 key_in=labels_mapped,
                 key_out=None,
                 map_exceptions=[
-                    self._adata_ids.unknown_celltype_identifier,
-                    self._adata_ids.not_a_cell_celltype_identifier
+                    adata_fields.unknown_celltype_identifier,
+                    adata_fields.not_a_cell_celltype_identifier
                 ],
             )
-            results[self._adata_ids.cell_ontology_class] = labels_mapped
-            results[self._adata_ids.cell_ontology_id] = ids_mapped
+            results[adata_fields.cell_ontology_class] = labels_mapped
+            results[adata_fields.cell_ontology_id] = ids_mapped
         else:
-            results[self._adata_ids.cell_ontology_class] = labels_original
-        results[self._adata_ids.cell_types_original] = labels_original
-        self.cellontology_class_obs_key = self._adata_ids.cell_ontology_class
+            results[adata_fields.cell_ontology_class] = labels_original
+        results[adata_fields.cell_types_original] = labels_original
+        self.cellontology_class_obs_key = adata_fields.cell_ontology_class
         if copy:
             return pd.DataFrame(results, index=self.adata.obs.index)
         else:
