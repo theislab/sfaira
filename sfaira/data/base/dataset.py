@@ -545,7 +545,7 @@ class DatasetBase(abc.ABC):
             raise ValueError(f"Data type {type(self.adata.X)} not recognized.")
 
         # Compute indices of genes to keep
-        data_ids = self.adata.var.index.tolist() if self.gene_id_ensembl_var_key == "index" else adata.var[self.gene_id_ensembl_var_key].tolist()
+        data_ids = self.adata.var.index.tolist() if self.gene_id_ensembl_var_key == "index" else self.adata.var[self.gene_id_ensembl_var_key].tolist()
         if subset_genes_to_type is None:
             subset_ids = self.genome_container.ensembl
         else:
@@ -657,7 +657,6 @@ class DatasetBase(abc.ABC):
             uns_new[getattr(adata_target_ids, k)] = val
 
         # Prepare new .obs dataframe
-        # First define some special obs column types
         obs_new = pd.DataFrame(index=self.adata.obs.index)
         for k, (old_col, new_col) in obs_cols.items():
             # Handle batch-annotation columns which can be provided as a combination of columns separated by an asterisk
@@ -754,7 +753,7 @@ class DatasetBase(abc.ABC):
             self.adata.obs = pd.concat([obs_new, self.adata.obs], axis=1, ignore_index=True)
             self.adata.obs.index = var_new.index
         if clean_obs_names:
-            self.adata.obs.index = [f"{self.id}_{i}" for i in range(1, self.adata.n_obs+1)]
+            self.adata.obs.index = [f"{self.id}_{i}" for i in range(1, self.adata.n_obs + 1)]
         if clean_uns:
             self.adata.uns = uns_new
         else:
