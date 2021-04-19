@@ -108,152 +108,11 @@ class OntologyList(Ontology):
         return query == reference
 
 
-class OntologyHierarchical(Ontology):
+class OntologyHierarchical(Ontology, abc.ABC):
     """
     Basic ordered ontology container
     """
-    nodes: dict
-
-    @abc.abstractmethod
-    def convert_to_id(self, x: str) -> str:
-        pass
-
-    @abc.abstractmethod
-    def convert_to_name(self, x: str) -> str:
-        pass
-
-    @property
-    def node_names(self) -> List[str]:
-        pass
-
-    @property
-    def node_ids(self) -> List[str]:
-        pass
-
-
-class OntologyEbi(OntologyHierarchical):
-    """
-    Recursively assembles ontology by querying EBI web interface.
-
-    Not recommended for large ontologies.
-    Yields unstructured list of terms.
-    """
-
-    def __init__(
-            self,
-            ontology: str,
-            root_term: str,
-            additional_terms: Union[Dict[str, Dict[str, str]], None] = None,
-            **kwargs
-    ):
-        """
-
-        :param ontology:
-        :param root_term:
-        :param additional_terms: Dictionary with additional terms, values should be
-
-            - "name" necessary
-            - "description" optional
-            - "synonyms" optional
-            - "has_children" optional
-        :param kwargs:
-        """
-        def get_url(iri):
-            return f"https://www.ebi.ac.uk/ols/api/ontologies/{ontology}/terms/" \
-                   f"http%253A%252F%252Fwww.ebi.ac.uk%252F{ontology}%252F{iri}/children"
-
-        def recursive_search(iri):
-            terms = requests.get(get_url(iri=iri)).json()["_embedded"]["terms"]
-            nodes_new = {}
-            for x in terms:
-                k = x["iri"].split("/")[-1]
-                k = ":".join(k.split("_"))
-                nodes_new[k] = {
-                    "name": x["label"],
-                    "description": x["description"],
-                    "synonyms": x["synonyms"],
-                    "has_children": x["has_children"],
-                }
-                if x["has_children"]:
-                    nodes_new.update(recursive_search(iri=x["iri"].split("/")[-1]))
-            return nodes_new
-
-        self.nodes = recursive_search(iri=root_term)
-        self.nodes.update(additional_terms)
-
-    @property
-    def node_names(self) -> List[str]:
-        return [v["name"] for k, v in self.nodes.items()]
-
-    @property
-    def node_ids(self) -> List[str]:
-        return list(self.nodes.keys())
-
-    def convert_to_id(self, x: str) -> str:
-        self.validate_node(x=x)
-        return [k for k, v in self.nodes.items() if v["name"] == x][0]
-
-    def convert_to_name(self, x: str) -> str:
-        assert x in self.nodes.keys(), f"node {x} not found"
-        return self.nodes[x]["name"]
-
-    def map_node_suggestion(self, x: str, include_synonyms: bool = True, n_suggest: int = 10):
-        """
-        Map free text node name to ontology node names via fuzzy string matching.
-
-        :param x: Free text node label which is to be matched to ontology nodes.
-        :param include_synonyms: Whether to search for meaches in synonyms field of node instances, too.
-        :return List of proposed matches in ontology.
-        """
-        from fuzzywuzzy import fuzz
-        scores = np.array([
-            np.max(
-                [
-                    fuzz.partial_ratio(x.lower(), v["name"].lower())
-                ] + [
-                    fuzz.partial_ratio(x.lower(), yyy.lower())
-                    for yy in self.synonym_node_properties if yy in v.keys() for yyy in v[yy]
-                ]
-            ) if include_synonyms else
-            np.max([
-                fuzz.partial_ratio(x.lower(), v["name"].lower())
-            ])
-            for k, v in self.nodes.items()
-        ])
-        # Suggest top n_suggest hits by string match:
-        return [self.node_names[i] for i in np.argsort(scores)[-n_suggest:]][::-1]
-
-    def synonym_node_properties(self) -> List[str]:
-        return ["synonyms"]
-
-# class OntologyOwl(OntologyHierarchical):
-#
-#    onto: owlready2.Ontology
-#
-#    def __init__(
-#            self,
-#            owl: str,
-#            **kwargs
-#    ):
-#        self.onto = owlready2.get_ontology(owl)
-#        self.onto.load()
-#        # ToDo build support here
-#
-#    @property
-#    def node_names(self):
-#        pass
-
-
-class OntologyObo(OntologyHierarchical):
-
     graph: networkx.MultiDiGraph
-
-    def __init__(
-            self,
-            obo: str,
-            **kwargs
-    ):
-        self.graph = obonet.read_obo(obo)
 
     def _check_graph(self):
         if not networkx.is_directed_acyclic_graph(self.graph):
@@ -430,6 +289,150 @@ class OntologyObo(OntologyHierarchical):
     @abc.abstractmethod
     def synonym_node_properties(self) -> List[str]:
         pass
+
+
+class OntologyEbi(OntologyHierarchical):
+    """
+    Recursively assembles ontology by querying EBI web interface.
+
+    Not recommended for large ontologies because of the iterative query of the web API.
+    """
+
+    def __init__(
+            self,
+            ontology: str,
+            root_term: str,
+            **kwargs
+    ):
+        def get_url_self(iri):
+            return f"https://www.ebi.ac.uk/ols/api/ontologies/{ontology}/terms/" \
+                   f"http%253A%252F%252Fwww.ebi.ac.uk%252F{ontology}%252F{iri}"
+
+        def get_url_children(iri):
+            return f"https://www.ebi.ac.uk/ols/api/ontologies/{ontology}/terms/" \
+                   f"http%253A%252F%252Fwww.ebi.ac.uk%252F{ontology}%252F{iri}/children"
+
+        def get_iri_from_node(x):
+            return x["iri"].split("/")[-1]
+
+        def get_id_from_iri(x):
+            x = ":".join(x.split("_"))
+            return x
+
+        def get_id_from_node(x):
+            x = get_iri_from_node(x)
+            x = get_id_from_iri(x)
+            return x
+
+        def recursive_search(iri):
+            """
+            This function queries all nodes that are children of a given node at one time. This is faster than querying
+            the characteristics of each node separately but leads to slightly awkward code, the root node has to be
+            queried separately for example below.
+
+            :param iri: Root node IRI.
+            :return: Tuple of
+
+                - nodes (dictionaries of node ID and node values) and
+                - edges (node ID of parent and child).
+            """
+            terms_children = requests.get(get_url_children(iri=iri)).json()["_embedded"]["terms"]
+            nodes_new = {}
+            edges_new = []
+            direct_children = []
+            k_self = get_id_from_iri(iri)
+            # Define root node if this is the first iteration, this node is otherwise not defined through values.
+            if k_self == "EFO:0010183":
+                terms_self = requests.get(get_url_self(iri=iri)).json()
+                nodes_new[k_self] = {
+                    "name": terms_self["label"],
+                    "description": terms_self["description"],
+                    "synonyms": terms_self["synonyms"],
+                    "has_children": terms_self["has_children"],
+                }
+            for c in terms_children:
+                k_c = get_id_from_node(c)
+                nodes_new[k_c] = {
+                    "name": c["label"],
+                    "description": c["description"],
+                    "synonyms": c["synonyms"],
+                    "has_children": c["has_children"],
+                }
+                direct_children.append(k_c)
+                if c["has_children"]:
+                    nodes_x, edges_x = recursive_search(iri=get_iri_from_node(c))
+                    nodes_new.update(nodes_x)
+                    # Update nested edges of between children:
+                    edges_new.extend(edges_x)
+            # Update edges to children:
+            edges_new.extend([(k_self, k_c) for k_c in direct_children])
+            return nodes_new, edges_new
+
+        self.graph = networkx.MultiDiGraph()
+        nodes, edges = recursive_search(iri=root_term)
+        for k, v in nodes.items():
+            self.graph.add_node(node_for_adding=k, **v)
+        for x in edges:
+            parent, child = x
+            self.graph.add_edge(child, parent)
+
+    def map_node_suggestion(self, x: str, include_synonyms: bool = True, n_suggest: int = 10):
+        """
+        Map free text node name to ontology node names via fuzzy string matching.
+
+        :param x: Free text node label which is to be matched to ontology nodes.
+        :param include_synonyms: Whether to search for meaches in synonyms field of node instances, too.
+        :return List of proposed matches in ontology.
+        """
+        from fuzzywuzzy import fuzz
+        scores = np.array([
+            np.max(
+                [
+                    fuzz.partial_ratio(x.lower(), v["name"].lower())
+                ] + [
+                    fuzz.partial_ratio(x.lower(), yyy.lower())
+                    for yy in self.synonym_node_properties if yy in v.keys() for yyy in v[yy]
+                ]
+            ) if include_synonyms else
+            np.max([
+                fuzz.partial_ratio(x.lower(), v["name"].lower())
+            ])
+            for k, v in self.graph.nodes.items()
+        ])
+        # Suggest top n_suggest hits by string match:
+        return [self.node_names[i] for i in np.argsort(scores)[-n_suggest:]][::-1]
+
+    @property
+    def synonym_node_properties(self) -> List[str]:
+        return ["synonyms"]
+
+
+# class OntologyOwl(OntologyHierarchical):
+#
+#    onto: owlready2.Ontology
+#
+#    def __init__(
+#            self,
+#            owl: str,
+#            **kwargs
+#    ):
+#        self.onto = owlready2.get_ontology(owl)
+#        self.onto.load()
+#        # ToDo build support here
+#
+#    @property
+#    def node_names(self):
+#        pass
+
+
+class OntologyObo(OntologyHierarchical, abc.ABC):
+
+    def __init__(
+            self,
+            obo: str,
+            **kwargs
+    ):
+        self.graph = obonet.read_obo(obo)
 
     def map_node_suggestion(self, x: str, include_synonyms: bool = True, n_suggest: int = 10):
         """
@@ -857,14 +860,10 @@ class OntologyCellosaurus(OntologyExtendedObo):
 
 class OntologySinglecellLibraryConstruction(OntologyEbi):
 
-    def __init__(
-            self,
-            ontology: str = "efo",
-            root_term: str = "EFO_0010183",
-    ):
+    def __init__(self):
         super().__init__(
-            ontology=ontology,
-            root_term=root_term,
+            ontology="efo",
+            root_term="EFO_0010183",
             additional_terms={
                 "microwell-seq": {"name": "microwell-seq"},
                 "sci-plex": {"name": "sci-plex"}

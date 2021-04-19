@@ -1,5 +1,6 @@
 import numpy as np
-from sfaira.versions.metadata import OntologyUberon, OntologyCl, OntologyMondo, OntologyMmusdv, OntologyHsapdv
+from sfaira.versions.metadata import OntologyUberon, OntologyCl, OntologyMondo, OntologyMmusdv, OntologyHsapdv, \
+    OntologySinglecellLibraryConstruction
 
 """
 OntologyCelltypes
@@ -104,6 +105,42 @@ Mmusdv
 
 def test_mmusdv_loading():
     _ = OntologyMmusdv()
+
+
+"""
+OntologySinglecellLibraryConstruction
+"""
+
+
+def test_sclc_loading():
+    """
+    Tests if ontology can be initialised.
+    """
+    _ = OntologySinglecellLibraryConstruction()
+
+
+def test_sclc_nodes():
+    """
+    Tests for presence and absence of a few commonly mistaken nodes.
+    """
+    sclc = OntologySinglecellLibraryConstruction()
+    assert "10x sequencing" in sclc.node_names
+    assert "10x 5' v3 sequencing" in sclc.node_names
+    assert "Smart-like" in sclc.node_names
+    assert "Smart-seq2" in sclc.node_names
+    assert "single cell library construction" in sclc.node_names
+
+
+def test_sclc_is_a():
+    """
+    Tests if is-a relationships work correctly.
+    """
+    sclc = OntologySinglecellLibraryConstruction()
+    assert sclc.is_a(query="10x v1 sequencing", reference="10x sequencing")
+    assert sclc.is_a(query="10x 5' v3 sequencing", reference="10x sequencing")
+    assert sclc.is_a(query="10x 5' v3 sequencing", reference="10x v3 sequencing")
+    assert not sclc.is_a(query="10x sequencing", reference="10x v1 sequencing")
+    assert sclc.is_a(query="10x 5' v3 sequencing", reference="single cell library construction")
 
 
 """

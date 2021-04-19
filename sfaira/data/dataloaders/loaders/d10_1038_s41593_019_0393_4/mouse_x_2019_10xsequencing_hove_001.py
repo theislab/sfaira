@@ -16,7 +16,7 @@ class Dataset(DatasetBase):
         self.download_url_meta = \
             "https://www.brainimmuneatlas.org/data_files/toDownload/annot_fullAggr.csv"
 
-        self.assay_sc = "10X sequencing"
+        self.assay_sc = "10x sequencing"
         self.author = "Hove"
         self.disease = "healthy"
         self.doi = "10.1038/s41593-019-0393-4"
