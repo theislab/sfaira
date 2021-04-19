@@ -167,7 +167,14 @@ class DatasetGroup:
         :return:
         """
         for x in self.ids:
-            self.datasets[x].streamline_metadata(schema=schema, uns_to_obs=uns_to_obs, clean_obs=clean_obs, clean_var=clean_var, clean_uns=clean_uns, clean_obs_names=clean_obs_names)
+            self.datasets[x].streamline_metadata(
+                schema=schema,
+                uns_to_obs=uns_to_obs,
+                clean_obs=clean_obs,
+                clean_var=clean_var,
+                clean_uns=clean_uns,
+                clean_obs_names=clean_obs_names
+            )
 
     def streamline_features(
             self,
@@ -309,9 +316,17 @@ class DatasetGroup:
                 match_ref_list.append(self.datasets[d_id].mapped_features)
                 rm_gene_ver_list.append(self.datasets[d_id].remove_gene_version)
                 gene_type_list.append(self.datasets[d_id].subset_gene_type)
-        assert len(set(match_ref_list)) == 1, f"Not all datasets in this group had their features matched to the same reference (argument 'match_to_reference' of method .streamline_features()). This is however a prerequisite for creating a combined adata object."
-        assert len(set(rm_gene_ver_list)) == 1, f"Not all datasets in this group have had their gene version removed (argument 'remove_gene_version' of method .streamline_features()). This is however a prerequisite for creating a combined adata object."
-        assert len(set(gene_type_list)) == 1, f"Not all datasets in this group had their featurespace subsetted to the same gene type (argument 'subset_gene_type' of method .streamline_features()). This is however a prerequisite for creating a combined adata object."
+        assert len(set(match_ref_list)) == 1, \
+            "Not all datasets in this group had their features matched to the same reference (argument " \
+            "'match_to_reference' of method .streamline_features())." \
+            "This is however a prerequisite for creating a combined adata object."
+        assert len(set(rm_gene_ver_list)) == 1, \
+            "Not all datasets in this group have had their gene version removed (argument 'remove_gene_version' of " \
+            "method .streamline_features()). This is however a prerequisite for creating a combined adata object."
+        assert len(set(gene_type_list)) == 1, \
+            "Not all datasets in this group had their featurespace subsetted to the same gene type (argument " \
+            "'subset_gene_type' of method .streamline_features()). This is however a prerequisite for creating a " \
+            "combined adata object."
 
         if len(adata_ls) > 1:
             var_original = adata_ls[0].var.copy()
@@ -845,7 +860,6 @@ class DatasetSuperGroup:
                 subset_genes_to_type=subset_genes_to_type
             )
 
-
     @property
     def adata_ls(self):
         adata_ls = []
@@ -878,9 +892,17 @@ class DatasetSuperGroup:
                 match_ref_list.append(self.flatten().datasets[d_id].mapped_features)
                 rm_gene_ver_list.append(self.flatten().datasets[d_id].remove_gene_version)
                 gene_type_list.append(self.flatten().datasets[d_id].subset_gene_type)
-        assert len(set(match_ref_list)) == 1, f"Not all datasets in this group had their features matched to the same reference (argument 'match_to_reference' of method .streamline_features()). This is however a prerequisite for creating a combined adata object."
-        assert len(set(rm_gene_ver_list)) == 1, f"Not all datasets in this group have had their gene version removed (argument 'remove_gene_version' of method .streamline_features()). This is however a prerequisite for creating a combined adata object."
-        assert len(set(gene_type_list)) == 1, f"Not all datasets in this group had their featurespace subsetted to the same gene type (argument 'subset_gene_type' of method .streamline_features()). This is however a prerequisite for creating a combined adata object."
+        assert len(set(match_ref_list)) == 1, \
+            "Not all datasets in this group had their features matched to the same reference (argument " \
+            "'match_to_reference' of method .streamline_features()). This is however a prerequisite for creating a " \
+            "combined adata object."
+        assert len(set(rm_gene_ver_list)) == 1, \
+            "Not all datasets in this group have had their gene version removed (argument 'remove_gene_version' of " \
+            "method .streamline_features()). This is however a prerequisite for creating a combined adata object."
+        assert len(set(gene_type_list)) == 1, \
+            "Not all datasets in this group had their featurespace subsetted to the same gene type (argument " \
+            "'subset_gene_type' of method .streamline_features()). This is however a prerequisite for creating a " \
+            "combined adata object."
 
         if len(adata_ls) > 1:
             var_original = adata_ls[0].var.copy()
@@ -1057,7 +1079,14 @@ class DatasetSuperGroup:
         """
         for x in self.dataset_groups:
             for xx in x.ids:
-                x.datasets[xx].streamline_metadata(schema=schema, uns_to_obs=uns_to_obs, clean_obs=clean_obs, clean_var=clean_var, clean_uns=clean_uns, clean_obs_names=clean_obs_names)
+                x.datasets[xx].streamline_metadata(
+                    schema=schema,
+                    uns_to_obs=uns_to_obs,
+                    clean_obs=clean_obs,
+                    clean_var=clean_var,
+                    clean_uns=clean_uns,
+                    clean_obs_names=clean_obs_names
+                )
 
     def subset(self, key, values):
         """
