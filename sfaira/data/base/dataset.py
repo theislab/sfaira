@@ -552,27 +552,33 @@ class DatasetBase(abc.ABC):
             raise ValueError(f"Data type {type(self.adata.X)} not recognized.")
 
         # Compute indices of genes to keep
-        data_ids = self.adata.var.index.tolist() if self.gene_id_ensembl_var_key == "index" else self.adata.var[self.gene_id_ensembl_var_key].tolist()
+        data_ids_ensg = self.adata.var.index.tolist() if self.gene_id_ensembl_var_key == "index" else self.adata.var[self.gene_id_ensembl_var_key].tolist()
         if subset_genes_to_type is None:
-            subset_ids = self.genome_container.ensembl
+            subset_ids_ensg = self.genome_container.ensembl
+            subset_ids_symbol = self.genome_container.symbols
         else:
             if isinstance(subset_genes_to_type, str):
                 subset_genes_to_type = [subset_genes_to_type]
-            keys = np.unique(self.genome_container.type)
+            keys = np.unique(self.genome_container.biotype)
             if subset_genes_to_type not in keys:
                 raise ValueError(f"subset type {subset_genes_to_type} not available in list {keys}")
-            subset_ids = [
-                x for x, y in zip(self.genome_container.ensembl, self.genome_container.type)
+            subset_ids_ensg = [
+                x.upper() for x, y in zip(self.genome_container.ensembl, self.genome_container.biotype)
+                if y in subset_genes_to_type
+            ]
+            subset_ids_symbol = [
+                x.upper() for x, y in zip(self.genome_container.symbols, self.genome_container.biotype)
                 if y in subset_genes_to_type
             ]
 
-        idx_feature_kept = np.where([x in subset_ids for x in data_ids])[0]
-        idx_feature_map = np.array([subset_ids.index(x) for x in data_ids[idx_feature_kept]])
         # Remove unmapped genes
+        idx_feature_kept = np.where([x.upper() in subset_ids_ensg for x in data_ids_ensg])[0]
+        data_ids_kept = data_ids_ensg[idx_feature_kept]
         x = x[:, idx_feature_kept]
-
+        # Build map of subset_ids to features in x:
+        idx_feature_map = np.array([subset_ids_symbol.index(x) for x in data_ids_kept])
         # Create reordered feature matrix based on reference and convert to csr
-        x_new = scipy.sparse.csc_matrix((x.shape[0], self.genome_container.ngenes), dtype=x.dtype)
+        x_new = scipy.sparse.csc_matrix((x.shape[0], len(subset_ids_symbol)), dtype=x.dtype)
         # copying this over to the new matrix in chunks of size `steps` prevents a strange scipy error:
         # ... scipy/sparse/compressed.py", line 922, in _zero_many i, j, offsets)
         # ValueError: could not convert integer scalar
@@ -589,14 +595,14 @@ class DatasetBase(abc.ABC):
         # Create new var dataframe
         if self.gene_id_symbols_var_key == "index":
             var_index = self.genome_container.names
-            var_data = {self.gene_id_ensembl_var_key: self.genome_container.ensembl}
+            var_data = {self.gene_id_ensembl_var_key: subset_ids_ensg}
         elif self.gene_id_ensembl_var_key == "index":
             var_index = self.genome_container.ensembl
-            var_data = {self.gene_id_symbols_var_key: self.genome_container.names}
+            var_data = {self.gene_id_symbols_var_key: subset_ids_symbol}
         else:
             var_index = None
-            var_data = {self.gene_id_symbols_var_key: self.genome_container.names,
-                        self.gene_id_ensembl_var_key: self.genome_container.ensembl}
+            var_data = {self.gene_id_symbols_var_key: subset_ids_symbol,
+                        self.gene_id_ensembl_var_key: subset_ids_ensg}
         var_new = pd.DataFrame(data=var_data, index=var_index)
 
         self.adata = anndata.AnnData(
@@ -825,7 +831,42 @@ class DatasetBase(abc.ABC):
         self._adata_ids = adata_target_ids  # set new adata fields to class after conversion
         self.streamlined_meta = True
 
-    def load_tobacked(
+    def write_distributed_store(
+            self,
+            dir_cache: Union[str, os.PathLike],
+            store: str = "backed",
+            chunks: Union[int, None] = None,
+    ):
+        """
+        Write data set into a format that allows distributed access to data set on disk.
+
+        Writes to a zarr-backed h5ad.
+        Load data set and streamline before calling this method.
+
+        :param dir_cache: Directory to write cache in.
+        :param store: Disk format for objects in cache:
+
+            - "h5ad": Allows access via backed .h5ad.
+                On disk data will not be compressed as .h5ad supports sparse data with is a good compression that gives
+                fast row-wise access if the files are csr.
+            - "zarr": Allows access as zarr array.
+        :param chunks: Chunk size of zarr array, see anndata.AnnData.write_zarr documentation.
+            Only relevant for store=="zarr".
+        """
+        self.__assert_loaded()
+        if store == "h5ad":
+            if not isinstance(self.adata.X, scipy.sparse.csr_matrix):
+                print(f"WARNING: high-perfomances caches based on .h5ad work better with .csr formatted expression "
+                      f"data, found {type(self.adata.X)}")
+            fn = os.path.join(dir_cache, self.doi_cleaned_id + ".h5ad")
+            self.adata.write_h5ad(filename=fn, compression=None, force_dense=False)
+        elif store == "zarr":
+            fn = os.path.join(dir_cache, self.doi_cleaned_id)
+            self.adata.write_zarr(store=fn, chunks=chunks)
+        else:
+            raise ValueError()
+
+    def write_backed(
             self,
             adata_backed: anndata.AnnData,
             genome: str,
@@ -1054,7 +1095,7 @@ class DatasetBase(abc.ABC):
                                                 f"type: {type(key_in)=}"
         input_values = self.adata.obs[key_in].values if isinstance(key_in, str) else key_in
         map_vals = dict([
-            (x, ontology.id_from_name(x))
+            (x, ontology.convert_to_id(x))
             for x in np.unique([
                 xx for xx in input_values
                 if (xx not in map_exceptions and xx is not None)
@@ -1942,7 +1983,6 @@ class DatasetBase(abc.ABC):
             self._celltype_universe = CelltypeUniverse(
                 cl=self.ontology_celltypes,
                 uberon=self.ontology_container_sfaira.organ,
-                organism=self.organism,
             )
         return self._celltype_universe
 
@@ -2081,9 +2121,9 @@ class DatasetBase(abc.ABC):
                     attempted_clean.append(x)
                 else:
                     if isinstance(allowed, OntologyHierarchical) and x in allowed.node_ids:
-                        attempted_clean.append(allowed.name_from_id(x))
+                        attempted_clean.append(allowed.convert_to_name(x))
                     else:
-                        raise ValueError(f"'{x}' is not a valid entry for {attr} in {self.id}.")
+                        raise ValueError(f"'{x}' is not a valid entry for {attr}.")
             else:
                 raise ValueError(f"allowed of type {type(allowed)} is not a valid entry for {attr}.")
         # Flatten attempts if only one was made:
@@ -2159,3 +2199,7 @@ class DatasetBase(abc.ABC):
 
     def show_summary(self):
         print(f"{(self.supplier, self.organism, self.organ, self.assay_sc, self.disease)}")
+
+    def __assert_loaded(self):
+        if self.adata is None:
+            raise ValueError("adata was not loaded, this is necessary for this operation")

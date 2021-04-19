@@ -11,7 +11,7 @@ class Dataset(DatasetBase):
         self.download_url_data = "https://covid19.cog.sanger.ac.uk/menon19.processed.h5ad"
         self.download_url_meta = None
 
-        self.assay_sc = "10X sequencing"
+        self.assay_sc = "10x sequencing"
         self.author = "Menon"
         self.disease = "healthy"
         self.doi = "10.1038/s41467-019-12780-8"

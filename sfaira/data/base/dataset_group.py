@@ -200,7 +200,32 @@ class DatasetGroup:
                 subset_genes_to_type=subset_genes_to_type,
             )
 
-    def load_tobacked(
+    def write_distributed_store(
+            self,
+            dir_cache: Union[str, os.PathLike],
+            store: str = "backed",
+            chunks: Union[int, None] = None,
+    ):
+        """
+        Write data set into a format that allows distributed access to data set on disk.
+
+        Writes every data set contained to a zarr-backed h5ad.
+        Load data set and streamline before calling this method.
+
+        :param dir_cache: Directory to write cache in.
+        :param store: Disk format for objects in cache:
+
+            - "h5ad": Allows access via backed .h5ad.
+                On disk data will not be compressed as .h5ad supports sparse data with is a good compression that gives
+                fast row-wise access if the files are csr.
+            - "zarr": Allows access as zarr array.
+        :param chunks: Chunk size of zarr array, see anndata.AnnData.write_zarr documentation.
+            Only relevant for store=="zarr".
+        """
+        for _, v in self.datasets.items():
+            v.write_distributed_store(dir_cache=dir_cache, store=store, chunks=chunks)
+
+    def write_backed(
             self,
             adata_backed: anndata.AnnData,
             genome: str,
@@ -229,7 +254,7 @@ class DatasetGroup:
             # if this is for celltype prediction, only load the data with have celltype annotation
             try:
                 if self.datasets[x].annotated or not annotated_only:
-                    self.datasets[x].load_tobacked(
+                    self.datasets[x].write_backed(
                         adata_backed=adata_backed,
                         genome=genome,
                         idx=idx[i],
@@ -671,8 +696,9 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                         )
                         # Adds a third column with the corresponding ontology IDs into the file.
                         tab[self._adata_ids.classmap_target_id_key] = [
-                            self.ontology_celltypes.id_from_name(x)
-                            if x != self._adata_ids.unknown_celltype_identifier
+                            self.ontology_celltypes.convert_to_id(x)
+                            if x != self._adata_ids.unknown_celltype_identifier and
+                            x != self._adata_ids.not_a_cell_celltype_identifier
                             else self._adata_ids.unknown_celltype_identifier
                             for x in tab[self._adata_ids.classmap_target_key].values
                         ]
@@ -933,7 +959,33 @@ class DatasetSuperGroup:
             adata_concat.obs[self._adata_ids.dataset] = adata_ls[0].uns['id']
         return adata_concat
 
-    def load_tobacked(
+    def write_distributed_store(
+            self,
+            dir_cache: Union[str, os.PathLike],
+            store: str = "backed",
+            chunks: Union[int, None] = None,
+    ):
+        """
+        Write data set into a format that allows distributed access to data set on disk.
+
+        Writes every data set contained to a zarr-backed h5ad.
+        The group structure of the super group is lost during this process.
+        Load data set and streamline before calling this method.
+
+        :param dir_cache: Directory to write cache in.
+        :param store: Disk format for objects in cache:
+
+            - "h5ad": Allows access via backed .h5ad.
+                On disk data will not be compressed as .h5ad supports sparse data with is a good compression that gives
+                fast row-wise access if the files are csr.
+            - "zarr": Allows access as zarr array.
+        :param chunks: Chunk size of zarr array, see anndata.AnnData.write_zarr documentation.
+            Only relevant for store=="zarr".
+        """
+        for x in self.dataset_groups:
+            x.write_distributed_store(dir_cache=dir_cache, store=store, chunks=chunks)
+
+    def write_backed(
             self,
             fn_backed: PathLike,
             genome: str,
@@ -945,6 +997,8 @@ class DatasetSuperGroup:
     ):
         """
         Loads data set human into backed anndata object.
+
+        TODO replace streamlining in here by required call to .streamline() before.
 
         Example usage:
 
@@ -971,7 +1025,7 @@ class DatasetSuperGroup:
         self.fn_backed = fn_backed
         n_cells = self.ncells(annotated_only=annotated_only)
         gc = self.get_gc(genome=genome)
-        n_genes = gc.ngenes
+        n_genes = gc.n_var
         if scatter_update:
             self.adata = anndata.AnnData(
                 scipy.sparse.csr_matrix((n_cells, n_genes), dtype=np.float32)
@@ -1029,7 +1083,7 @@ class DatasetSuperGroup:
         print(self.ncells_bydataset(annotated_only=annotated_only))
         print([[len(x) for x in xx] for xx in idx_ls])
         for i, x in enumerate(self.dataset_groups):
-            x.load_tobacked(
+            x.write_backed(
                 adata_backed=self.adata,
                 genome=genome,
                 idx=idx_ls[i],

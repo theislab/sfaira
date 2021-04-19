@@ -7,8 +7,8 @@ from typing import List, Union, Tuple
 
 from sfaira.models.embedding.output_layers import NegBinOutput, NegBinSharedDispOutput, NegBinConstDispOutput, \
     GaussianOutput, GaussianSharedStdOutput, GaussianConstStdOutput
-from sfaira.versions.topologies import Topologies
-from sfaira.models.base import BasicModel
+from sfaira.versions.topologies import TopologyContainer
+from sfaira.models.base import BasicModelKeras
 from sfaira.models.pp_layer import PreprocInput
 
 
@@ -200,7 +200,7 @@ class Decoder(Encoder):
         return (p_z1_mean, p_z1_log_var), (p_z2_mean, p_z2_log_var), out
 
 
-class ModelVaeVamp(BasicModel):
+class ModelKerasVaeVamp(BasicModelKeras):
 
     def predict_reconstructed(self, x: np.ndarray):
         return np.split(self.training_model.predict(x)[0], indices_or_sections=2, axis=1)[0]
@@ -218,7 +218,7 @@ class ModelVaeVamp(BasicModel):
             init='glorot_uniform',
             output_layer="nb"
     ):
-        super(ModelVaeVamp, self).__init__()
+        super(ModelKerasVaeVamp, self).__init__()
         config = (
             latent_dim,
             l1_coef,
@@ -274,7 +274,7 @@ class ModelVaeVamp(BasicModel):
         z_log_var = tf.keras.layers.Concatenate(axis=1, name="z_log_var")([q_z1_log_var, q_z2_log_var])
 
         self.encoder_model = tf.keras.Model(
-            inputs=inputs_encoder,
+            inputs=[inputs_encoder, inputs_sf],
             outputs=[z, z_mean, z_log_var],
             name="encoder_model"
         )
@@ -284,17 +284,17 @@ class ModelVaeVamp(BasicModel):
             name="autoencoder"
         )
 
-    def predict_embedding(self, x: np.ndarray, variational=False):
+    def predict_embedding(self, x, variational=False):
         if variational:
             return self.encoder_model.predict(x)
         else:
             return self.encoder_model.predict(x)[1]
 
 
-class ModelVaeVampVersioned(ModelVaeVamp):
+class ModelVaeVampVersioned(ModelKerasVaeVamp):
     def __init__(
             self,
-            topology_container: Topologies,
+            topology_container: TopologyContainer,
             override_hyperpar: Union[dict, None] = None
     ):
         hyperpar = topology_container.topology["hyper_parameters"]
@@ -302,14 +302,14 @@ class ModelVaeVampVersioned(ModelVaeVamp):
             for k in list(override_hyperpar.keys()):
                 hyperpar[k] = override_hyperpar[k]
         super().__init__(
-            in_dim=topology_container.ngenes,
+            in_dim=topology_container.n_var,
             **hyperpar
         )
 
         print('passed hyperpar: \n', hyperpar)
         self._topology_id = topology_container.topology_id
-        self.genome_size = topology_container.ngenes
-        self.model_class = topology_container.model_class
+        self.genome_size = topology_container.n_var
+        self.model_class = "embedding"
         self.model_type = topology_container.model_type
         self.hyperparam = dict(
             list(hyperpar.items()) +  # noqa: W504

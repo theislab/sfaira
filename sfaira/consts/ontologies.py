@@ -1,11 +1,11 @@
-from sfaira.versions.metadata import OntologyList, OntologyCelltypes
+from sfaira.versions.metadata import OntologyList, OntologyCl
 from sfaira.versions.metadata import OntologyUberon, OntologyHsapdv, OntologyMondo, OntologyMmusdv, \
     OntologySinglecellLibraryConstruction, OntologyCellosaurus
 
 
 class OntologyContainerSfaira:
 
-    _cellontology_class: OntologyCelltypes
+    _cellontology_class: OntologyCl
 
     def __init__(self):
         self.annotated = OntologyList(terms=[True, False])
@@ -42,4 +42,4 @@ class OntologyContainerSfaira:
 
     @cellontology_class.setter
     def cellontology_class(self, x: str):
-        self._cellontology_class = OntologyCelltypes(branch=x)
+        self._cellontology_class = OntologyCl(branch=x)

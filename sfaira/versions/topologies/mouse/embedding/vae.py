@@ -1,7 +1,11 @@
 VAE_TOPOLOGIES = {
     "0.1": {
-        "genome": "Mus_musculus.GRCm38.102",
-        "genes": ["protein_coding"],
+        "model_type": "vae",
+        "input": {
+            "genome": "Homo_sapiens.GRCh38.102",
+            "genes": ["biotype", "protein_coding"],
+        },
+        "output": {},
         "hyper_parameters": {
             "latent_dim": (512, 64, 512),
             "l1_coef": 0.,
@@ -15,8 +19,12 @@ VAE_TOPOLOGIES = {
     },
 
     "0.2": {
-        "genome": "Mus_musculus.GRCm38.102",
-        "genes": ["protein_coding"],
+        "model_type": "vae",
+        "input": {
+            "genome": "Homo_sapiens.GRCh38.102",
+            "genes": ["biotype", "protein_coding"],
+        },
+        "output": {},
         "hyper_parameters": {
             "latent_dim": (256, 128, 64, 128, 256),
             "l1_coef": 0.,
@@ -30,8 +38,12 @@ VAE_TOPOLOGIES = {
     },
 
     "0.3": {
-        "genome": "Mus_musculus.GRCm38.102",
-        "genes": ["protein_coding"],
+        "model_type": "vae",
+        "input": {
+            "genome": "Homo_sapiens.GRCh38.102",
+            "genes": ["biotype", "protein_coding"],
+        },
+        "output": {},
         "hyper_parameters": {
             "latent_dim": (512, 256, 128, 256, 512),
             "l1_coef": 0.,
@@ -45,8 +57,12 @@ VAE_TOPOLOGIES = {
     },
 
     "0.4": {
-        "genome": "Mus_musculus.GRCm38.102",
-        "genes": ["protein_coding"],
+        "model_type": "vae",
+        "input": {
+            "genome": "Homo_sapiens.GRCh38.102",
+            "genes": ["biotype", "protein_coding"],
+        },
+        "output": {},
         "hyper_parameters": {
             "latent_dim": (512, 256, 128, 64, 128, 256, 512),
             "l2_coef": 0.,

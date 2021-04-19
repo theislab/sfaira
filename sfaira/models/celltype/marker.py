@@ -6,8 +6,8 @@ except ImportError:
 from typing import List, Union
 
 from sfaira.versions.metadata import CelltypeUniverse
-from sfaira.versions.topologies import Topologies
-from sfaira.models.base import BasicModel
+from sfaira.versions.topologies import TopologyContainer
+from sfaira.models.base import BasicModelKeras
 from sfaira.models.pp_layer import PreprocInput
 
 
@@ -41,7 +41,7 @@ class LearnedThresholdLayer(tf.keras.layers.Layer):
         return tf.nn.sigmoid(x)
 
 
-class CellTypeMarker(BasicModel):
+class CellTypeMarker(BasicModelKeras):
     """
     Marker gene-based cell type classifier: Learns whether or not each gene exceeds requires threshold
     and learns cell type assignment as linear combination of these marker gene presence probabilities.
@@ -102,7 +102,7 @@ class CellTypeMarkerVersioned(CellTypeMarker):
     def __init__(
             self,
             celltypes_version: CelltypeUniverse,
-            topology_container: Topologies,
+            topology_container: TopologyContainer,
             override_hyperpar: Union[dict, None] = None
     ):
         """
@@ -114,20 +114,19 @@ class CellTypeMarkerVersioned(CellTypeMarker):
             dictionary that is queried based on the topology_id. Can contain a subset of all hyperparameters.
         """
         # Get cell type version instance based on topology ID, organism and organ.
-        unkown_already_included = np.any([x.lower() == "unknown" for x in celltypes_version.target_universe])
         hyperpar = topology_container.topology["hyper_parameters"]
         if override_hyperpar is not None:
             for k in list(override_hyperpar.keys()):
                 hyperpar[k] = override_hyperpar[k]
         super().__init__(
-            in_dim=topology_container.ngenes,
-            out_dim=celltypes_version.ntypes if unkown_already_included else celltypes_version.ntypes + 1,
+            in_dim=topology_container.n_var,
+            out_dim=celltypes_version.onto_cl.n_leaves,
             **hyperpar
         )
         print('passed hyperpar: \n', hyperpar)
         self._topology_id = topology_container.topology_id
-        self.genome_size = topology_container.ngenes
-        self.model_class = topology_container.model_class
+        self.genome_size = topology_container.n_var
+        self.model_class = "celltype"
         self.model_type = topology_container.model_type
         self.hyperparam = dict(
             list(hyperpar.items()) +  # noqa: W504
@@ -136,6 +135,6 @@ class CellTypeMarkerVersioned(CellTypeMarker):
                 ("genome_size", self.genome_size),
                 ("model_class", self.model_class),
                 ("model_type", self.model_type),
-                ("ntypes", celltypes_version.ntypes),
+                ("ntypes", celltypes_version.onto_cl.n_leaves),
             ]
         )

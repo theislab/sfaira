@@ -15,7 +15,7 @@ class Dataset(DatasetBase):
         self.download_url_data = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE131nnn/GSE131685/suppl/GSE131685_RAW.tar"
         self.download_url_meta = None
 
-        self.assay_sc = "10X sequencing"
+        self.assay_sc = "10x sequencing"
         self.author = "Liao"
         self.disease = "healthy"
         self.normalization = "raw"

@@ -12,7 +12,7 @@ class Dataset(DatasetBase):
         self.download_url_data = "private,GSE115469.csv.gz"
         self.download_url_meta = "private,GSE115469_labels.txt"
 
-        self.assay_sc = "10X sequencing"
+        self.assay_sc = "10x sequencing"
         self.author = "MacParland"
         self.disease = "healthy"
         self.doi = "10.1038/s41467-018-06318-7"

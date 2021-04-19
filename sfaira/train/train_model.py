@@ -5,52 +5,38 @@ import pandas as pd
 import pickle
 from typing import Union
 
-from sfaira.data import Universe
-from sfaira.estimators import EstimatorKerasCelltype, EstimatorKerasEmbedding
+from sfaira.data import DistributedStore, Universe
+from sfaira.estimators import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
 from sfaira.interface import ModelZooEmbedding, ModelZooCelltype
 
 
 class TrainModel:
 
+    data: Union[anndata.AnnData, DistributedStore]
+    estimator: EstimatorKeras
+
     def __init__(
             self,
-            config_path: str,
-            data_path: str,
-            meta_path: str,
-            cache_path: str,
+            data: Union[str, anndata.AnnData, Universe, DistributedStore],
     ):
         # Check if handling backed anndata or base path to directory of raw files:
-        if data_path.split(".")[-1] == "h5ad":
-            self.data = anndata.read(data_path, backed='r')
+        if isinstance(data, str) and data.split(".")[-1] == "h5ad":
+            self.data = anndata.read(data, backed='r')
             if len(self.data.obs.columns) == 0:
-                fn_backed_obs = ".".join(data_path.split(".")[:-1]) + "_obs.csv"
+                fn_backed_obs = ".".join(data.split(".")[:-1]) + "_obs.csv"
                 self.data.obs = pd.read_csv(fn_backed_obs)
+        elif isinstance(data, anndata.AnnData):
+            self.data = data
+        elif isinstance(data, Universe):
+            self.data = data.adata
+        elif isinstance(data, DistributedStore):
+            self.data = data
         else:
-            dataset = Universe(data_path=data_path, meta_path=meta_path, cache_path=cache_path)
-            dataset.load_config(config_path)
-            self.set_data(dataset)
-
-    @abc.abstractmethod
-    def set_data(self, dataset):
-        pass
+            raise ValueError(f"did not recongize data of type {type(data)}")
 
     @abc.abstractmethod
     def init_estim(self):
         pass
-
-    @property
-    def adata(self):
-        """
-        Get adata object depending on whether backed or a property of a container class.
-
-        :return:
-        """
-        if self.data is None:
-            raise ValueError("self.data not set yet")
-        elif isinstance(self.data, anndata.AnnData):
-            return self.data
-        else:
-            raise ValueError(f"self.data type not recognized: {type(self.data)}")
 
     @abc.abstractmethod
     def _save_specific(
@@ -84,22 +70,17 @@ class TrainModel:
 
 class TrainModelEmbedding(TrainModel):
 
+    estimator: EstimatorKerasEmbedding
+
     def __init__(
             self,
-            config_path: str,
-            data_path: str,
-            meta_path: str,
-            cache_path: str,
             model_path: str,
+            data: Union[str, anndata.AnnData, Universe, DistributedStore],
     ):
-        super(TrainModelEmbedding, self).__init__(config_path=config_path, data_path=data_path, meta_path=meta_path, cache_path=cache_path)
+        super(TrainModelEmbedding, self).__init__(data=data)
         self.zoo = ModelZooEmbedding(model_lookuptable=None)
         self.estimator = None
         self.model_dir = model_path
-
-    def set_data(self, dataset):
-        dataset.load()
-        self.data = dataset.adata
 
     def init_estim(
             self,
@@ -107,12 +88,9 @@ class TrainModelEmbedding(TrainModel):
     ):
         assert self.zoo.model_id is not None, "choose model in zoo first"
         self.estimator = EstimatorKerasEmbedding(
-            data=self.adata,
+            data=self.data,
             model_dir=self.model_dir,
             model_id=self.zoo.model_id,
-            organism=self.zoo.organism,
-            organ=self.zoo.organ,
-            model_type=self.zoo.model_type,
             model_topology=self.zoo.model_topology
         )
         self.estimator.init_model(override_hyperpar=override_hyperpar)
@@ -158,23 +136,19 @@ class TrainModelEmbedding(TrainModel):
 
 class TrainModelCelltype(TrainModel):
 
+    estimator: EstimatorKerasCelltype
+
     def __init__(
             self,
-            config_path: str,
-            data_path: str,
-            meta_path: str,
-            cache_path: str,
             model_path: str,
+            data: Union[str, anndata.AnnData, Universe, DistributedStore],
+            fn_target_universe: str,
     ):
-        super(TrainModelCelltype, self).__init__(config_path=config_path, data_path=data_path, meta_path=meta_path, cache_path=cache_path)
+        super(TrainModelCelltype, self).__init__(data=data)
         self.zoo = ModelZooCelltype(model_lookuptable=None)
         self.estimator = None
         self.model_dir = model_path
-
-    def set_data(self, dataset):
-        dataset.subset("annotated", True)
-        dataset.load()
-        self.data = dataset.adata
+        self.data.celltypes_universe.load_target_universe(fn=fn_target_universe)
 
     def init_estim(
             self,
@@ -182,12 +156,9 @@ class TrainModelCelltype(TrainModel):
     ):
         assert self.zoo.model_id is not None, "choose model in zoo first"
         self.estimator = EstimatorKerasCelltype(
-            data=self.adata,
+            data=self.data,
             model_dir=self.model_dir,
             model_id=self.zoo.model_id,
-            organism=self.zoo.organism,
-            organ=self.zoo.organ,
-            model_type=self.zoo.model_type,
             model_topology=self.zoo.model_topology
         )
         self.estimator.init_model(override_hyperpar=override_hyperpar)
@@ -240,12 +211,12 @@ class TrainModelCelltype(TrainModel):
         cell_counts_leaf = cell_counts.copy()
         for k in cell_counts.keys():
             if k not in self.estimator.ids:
-                if k not in self.estimator.celltypes_version.ontology.node_ids:
+                if k not in self.estimator.celltype_universe.ontology.node_ids:
                     raise(ValueError(f"Celltype '{k}' not found in celltype universe"))
-                for leaf in self.estimator.celltypes_version.ontology.node_ids:
+                for leaf in self.estimator.celltype_universe.ontology.node_ids:
                     if leaf not in cell_counts_leaf.keys():
                         cell_counts_leaf[leaf] = 0
-                    cell_counts_leaf[leaf] += 1 / len(self.estimator.celltypes_version.ontology.node_ids)
+                    cell_counts_leaf[leaf] += 1 / len(self.estimator.celltype_universe.ontology.node_ids)
                 del cell_counts_leaf[k]
         with open(fn + '_celltypes_valuecounts_wholedata.pickle', 'wb') as f:
             pickle.dump(obj=[cell_counts, cell_counts_leaf], file=f)

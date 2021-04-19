@@ -2,8 +2,11 @@ import numpy as np
 import pandas as pd
 from typing import Dict, List, Tuple, Union
 
-from sfaira.versions.metadata import OntologyCelltypes, OntologyUberon
-from sfaira.versions.metadata.extensions import ONTOLOGIY_EXTENSION_HUMAN, ONTOLOGIY_EXTENSION_MOUSE
+from sfaira.versions.metadata import OntologyCl, OntologyUberon
+from sfaira.versions.metadata.extensions import ONTOLOGIY_EXTENSION
+
+TARGET_UNIVERSE_KEY_NAME = "name"
+TARGET_UNIVERSE_KEY_ID = "id"
 
 
 class CelltypeUniverse:
@@ -13,67 +16,18 @@ class CelltypeUniverse:
 
     Basic checks on the organ specific instance are performed in the constructor.
     """
-    onto_cl: OntologyCelltypes
+    onto_cl: OntologyCl
     onto_uberon: OntologyUberon
     _target_universe: Union[List[str], None]
 
-    def __init__(self, cl: OntologyCelltypes, uberon: OntologyUberon, organism: str, **kwargs):
-        """
-
-        :param organism: Organism, defines ontology extension used.
-        :param kwargs:
-        """
+    def __init__(self, cl: OntologyCl, uberon: OntologyUberon, **kwargs):
         self.onto_cl = cl
         self.onto_uberon = uberon
         self._target_universe = None
-        self._set_extension(organism=organism)
+        self._set_extension()
 
-    def _set_extension(self, organism):
-        """
-
-        :param organism: Organism, defines ontology extension used.
-        """
-        if organism == "human":
-            self.onto_cl.add_extension(ONTOLOGIY_EXTENSION_HUMAN)
-        elif organism == "mouse":
-            self.onto_cl.add_extension(ONTOLOGIY_EXTENSION_MOUSE)
-        else:
-            raise ValueError(f"organism {organism} not found")
-
-    @property
-    def target_universe(self):
-        """
-        Ontology classes of target universe (understandable cell type names).
-
-        :return:
-        """
-        return self._target_universe
-
-    @target_universe.setter
-    def target_universe(self, x: List[str]):
-        # Check that all nodes are valid:
-        for xx in x:
-            if xx not in self.onto_cl.nodes:
-                raise ValueError(f"cell type {xx} was not in ontology")
-        # Default universe is the full set of leave nodes of ontology:
-        self.target_universe = self.onto_cl.leaves
-        self.onto_cl.set_leaves(self.target_universe)
-
-    @property
-    def target_universe_ids(self):
-        """
-        Ontology IDs of target universe (codified cell type names).
-
-        :return:
-        """
-        return [self.onto_cl.id_from_name(x) for x in self._target_universe]
-
-    @property
-    def ntypes(self):
-        """
-        Number of different cell types in target universe.
-        """
-        return len(self.target_universe)
+    def _set_extension(self):
+        self.onto_cl.add_extension(ONTOLOGIY_EXTENSION)
 
     def __validate_target_universe_table(self, tab: pd.DataFrame):
         assert len(tab.columns) == 2
@@ -85,25 +39,27 @@ class CelltypeUniverse:
         :param fn: .csv file containing target universe.
         :return:
         """
-        tab = pd.read_csv(fn)
+        tab = pd.read_csv(fn, sep="\t", index_col=None)
         self.__validate_target_universe_table(tab=tab)
-        self.target_universe = tab["name"].values
+        self.leaves = tab["name"].values
 
-    def map_to_target_leaves(
+    def write_target_universe(
             self,
-            nodes: List[str],
-            return_type: str = "elements"
+            fn,
+            x: List[str],
     ):
         """
-        Map a given list of nodes to leave nodes defined for this ontology.
-        :param nodes:
-        :param return_type:
 
-            "elements": names of mapped leave nodes
-            "idx": indices in leave note list of of mapped leave nodes
+        :param fn: .csv file containing target universe.
+        :param x: Nodes that make up target universe.
         :return:
         """
-        return [self.onto_cl.map_to_leaves(x, return_type=return_type) for x in nodes]
+        tab = pd.DataFrame({
+            TARGET_UNIVERSE_KEY_NAME: self.onto_cl.convert_to_name(x),
+            TARGET_UNIVERSE_KEY_ID: self.onto_cl.convert_to_id(x),
+        })
+        self.__validate_target_universe_table(tab=tab)
+        tab.to_csv(path_or_buf=fn, sep="\t", index=False)
 
     def prepare_celltype_map_fuzzy(
             self,
@@ -253,7 +209,7 @@ class CelltypeUniverse:
 
                         # 1. Select cell types that are in the correct ontology.
                         # Check that anatomical constraint is a term in UBERON and get UBERON ID:
-                        anatomical_constraint_id = self.onto_uberon.id_from_name(anatomical_constraint)
+                        anatomical_constraint_id = self.onto_uberon.convert_to_id(anatomical_constraint)
                         # Select up to 5 nodes which match the anatomical constraint:
                         # The entries look as follows:
                         # node.value['relationship'] = ['part_of UBERON:0001885']

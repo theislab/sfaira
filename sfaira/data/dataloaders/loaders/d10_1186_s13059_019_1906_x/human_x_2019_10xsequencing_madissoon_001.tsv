@@ -4,7 +4,7 @@ Alveolar_Type2	type II pneumocyte	CL:0002063
 B_CD27neg	B cell	CL:0000236
 B_CD27pos	B cell	CL:0000236
 B_Hypermutation	B cell	CL:0000236
-B_T_doublet	NOT_A_CELL	NOT_A_CELL
+B_T_doublet	NOT_A_CELL	UNKNOWN
 B_cells	B cell	CL:0000236
 B_follicular	follicular B cell	CL:0000843
 B_mantle	B cell	CL:0000236

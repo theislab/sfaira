@@ -1,0 +1,51 @@
+dataset_structure:
+    dataset_index: 1
+    sample_fns:
+dataset_wise:
+    author:
+        - "Hao, Yuhan"
+    default_embedding:
+    doi: "10.1101/2020.10.12.335331"
+    download_url_data: "https://atlas.fredhutch.org/nygc/multimodal-pbmc/"
+    download_url_meta: "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE164378&format=file&file=GSE164378%5Fsc%2Emeta%2Edata%5F3P%2Ecsv%2Egz"
+    normalization: "raw"
+    primary_data:
+    year: 2020
+dataset_or_observation_wise:
+    assay_sc: "10x sequencing"
+    assay_sc_obs_key:
+    assay_differentiation:
+    assay_differentiation_obs_key:
+    assay_type_differentiation:
+    assay_type_differentiation_obs_key:
+    bio_sample:
+    bio_sample_obs_key:
+    cell_line:
+    cell_line_obs_key:
+    development_stage: "human adult stage"
+    development_stage_obs_key:
+    disease: "healthy"
+    disease_obs_key:
+    ethnicity:
+    ethnicity_obs_key:
+    individual:
+    individual_obs_key: "donor"
+    organ: "blood"
+    organ_obs_key:
+    organism: "human"
+    organism_obs_key:
+    sample_source: "primary_tissue"
+    sample_source_obs_key:
+    sex:
+    sex_obs_key:
+    state_exact:
+    state_exact_obs_key: 'time'
+    tech_sample:
+    tech_sample_obs_key: 'Batch'
+observation_wise:
+    cellontology_original_obs_key: "celltype.l3"
+feature_wise:
+    var_ensembl_col:
+    var_symbol_col: "names"
+meta:
+    version: "1.0"
