@@ -14,7 +14,7 @@ import warnings
 
 from sfaira.data.base.dataset import is_child, DatasetBase
 from sfaira.versions.genomes import GenomeContainer
-from sfaira.consts import AdataIdsSfaira
+from sfaira.consts import AdataIds, AdataIdsSfaira
 from sfaira.data.utils import read_yaml
 
 UNS_STRING_META_IN_OBS = "__obs__"
@@ -149,7 +149,8 @@ class DatasetGroup:
             uns_to_obs: bool = False,
             clean_obs: bool = True,
             clean_var: bool = True,
-            clean_uns: bool = True
+            clean_uns: bool = True,
+            clean_obs_names: bool = True
     ):
         """
         Streamline the adata instance in each data set to output format.
@@ -162,10 +163,11 @@ class DatasetGroup:
         :param clean_obs: Whether to delete non-streamlined fields in .obs, .obsm and .obsp.
         :param clean_var: Whether to delete non-streamlined fields in .var, .varm and .varp.
         :param clean_uns: Whether to delete non-streamlined fields in .uns.
+        :param clean_obs_names: Whether to replace obs_names with a string comprised of dataset id and an increasing integer.
         :return:
         """
         for x in self.ids:
-            self.datasets[x].streamline_metadata(schema=schema, uns_to_obs=uns_to_obs, clean_obs=clean_obs, clean_var=clean_var, clean_uns=clean_uns)
+            self.datasets[x].streamline_metadata(schema=schema, uns_to_obs=uns_to_obs, clean_obs=clean_obs, clean_var=clean_var, clean_uns=clean_uns, clean_obs_names=clean_obs_names)
 
     def streamline_features(
             self,
@@ -289,14 +291,30 @@ class DatasetGroup:
         adata_ls = self.adata_ls
         if not adata_ls:
             return None
-        self.streamline_metadata(format="sfaira", allow_uns_sfaira=False, clean_obs=True, clean_var=True, clean_uns=True)
+        # Check that all individual adata objects in linked Dataset instances have identicall streamlined features and metadata
+        match_ref_list = []
+        rm_gene_ver_list = []
+        gene_type_list = []
+        for d_id in self.ids:
+            if self.datasets[d_id].adata is not None:
+                assert self.datasets[d_id].streamlined_features, f"Dataset {d_id} does not seem to have a streamlined " \
+                                                                 f"featurespace. To obtain an adata object from this " \
+                                                                 f"DatasetGroup, all contained Datasets need to have a " \
+                                                                 f"streamlined featurespace. Run .streamline_features()" \
+                                                                 f" first."
+                assert self.datasets[d_id].streamlined_meta, f"Dataset {d_id} does not seem to have streamlined " \
+                                                             f"metadata. To obtain an adata object from this " \
+                                                             f"DatasetGroup, all contained Datasets need to have " \
+                                                             f"streamlined metadata. Run .streamline_meta() first."
+                match_ref_list.append(self.datasets[d_id].mapped_features)
+                rm_gene_ver_list.append(self.datasets[d_id].remove_gene_version)
+                gene_type_list.append(self.datasets[d_id].subset_gene_type)
+        assert len(set(match_ref_list)) == 1, f"Not all datasets in this group had their features matched to the same reference (argument 'match_to_reference' of method .streamline_features()). This is however a prerequisite for creating a combined adata object."
+        assert len(set(rm_gene_ver_list)) == 1, f"Not all datasets in this group have had their gene version removed (argument 'remove_gene_version' of method .streamline_features()). This is however a prerequisite for creating a combined adata object."
+        assert len(set(gene_type_list)) == 1, f"Not all datasets in this group had their featurespace subsetted to the same gene type (argument 'subset_gene_type' of method .streamline_features()). This is however a prerequisite for creating a combined adata object."
 
-        # .var entries are renamed and copied upon concatenation.
-        # To preserve gene names in .var, the target gene names are copied into var_names and are then copied
-        # back into .var.
-        for adata in adata_ls:
-            adata.var.index = adata.var[self._adata_ids.gene_id_ensembl].tolist()
         if len(adata_ls) > 1:
+            var_original = adata_ls[0].var.copy()
             # TODO: need to keep this? -> yes, still catching errors here (March 2020)
             # Fix for loading bug: sometime concatenating sparse matrices fails the first time but works on second try.
             try:
@@ -313,9 +331,7 @@ class DatasetGroup:
                     batch_key=self._adata_ids.dataset,
                     batch_categories=[i for i in self.ids if self.datasets[i].adata is not None]
                 )
-
-            adata_concat.var[self._adata_ids.gene_id_ensembl] = adata_concat.var.index
-
+            adata_concat.var = var_original
             if len(set([a.uns[self._adata_ids.mapped_features] for a in adata_ls])) == 1:
                 adata_concat.uns[self._adata_ids.mapped_features] = \
                     adata_ls[0].uns[self._adata_ids.mapped_features]
@@ -323,9 +339,7 @@ class DatasetGroup:
                 adata_concat.uns[self._adata_ids.mapped_features] = False
         else:
             adata_concat = adata_ls[0]
-            adata_concat.obs[self._adata_ids.dataset] = self.ids[0]
-
-        adata_concat.var_names_make_unique()
+            adata_concat.obs[self._adata_ids.dataset] = adata_ls[0].uns['id']
         return adata_concat
 
     def obs_concat(self, keys: Union[list, None] = None):
@@ -372,13 +386,13 @@ class DatasetGroup:
                           "type ontology. Using only the ontology of the first data set in the group.")
         return self.datasets[self.ids[0]].ontology_celltypes
 
-    def project_celltypes_to_ontology(self):
+    def project_celltypes_to_ontology(self, adata_fields: Union[AdataIds, None] = None, copy=False):
         """
         Project free text cell type names to ontology based on mapping table.
         :return:
         """
         for _, v in self.datasets.items():
-            v.project_celltypes_to_ontology()
+            v.project_celltypes_to_ontology(adata_fields=adata_fields, copy=copy)
 
     def subset(self, key, values: Union[list, tuple, np.ndarray]):
         """
@@ -831,29 +845,71 @@ class DatasetSuperGroup:
                 subset_genes_to_type=subset_genes_to_type
             )
 
-    @property
-    def adata(self):
-        if self._adata is None:
-            # Make sure that concatenate is not used on a None adata object:
-            adatas = [x.adata for x in self.dataset_groups if x.adata_ls]
-            if len(adatas) > 1:
-                self._adata = adatas[0].concatenate(
-                    *adatas[1:],
-                    join="outer",
-                    batch_key=self._adata_ids.dataset_group
-                )
-            elif len(adatas) == 1:
-                self._adata = adatas[0]
-            else:
-                warnings.warn("no anndata instances to concatenate")
-        return self._adata
 
     @property
     def adata_ls(self):
         adata_ls = []
-        for k, v in self.datasets.items():
-            adata_ls.append(v.adata)
+        for k, v in self.flatten().datasets.items():
+            if v.adata is not None:
+                adata_ls.append(v.adata)
         return adata_ls
+
+    @property
+    def adata(self):
+        adata_ls = self.adata_ls
+        if not adata_ls:
+            return None
+
+        # Check that all individual adata objects in linked Dataset instances have identicall streamlined features and metadata
+        match_ref_list = []
+        rm_gene_ver_list = []
+        gene_type_list = []
+        for d_id in self.flatten().ids:
+            if self.flatten().datasets[d_id].adata is not None:
+                assert self.flatten().datasets[d_id].streamlined_features, f"Dataset {d_id} does not seem to have a streamlined " \
+                                                                           f"featurespace. To obtain an adata object from this " \
+                                                                           f"DatasetGroup, all contained Datasets need to have a " \
+                                                                           f"streamlined featurespace. Run .streamline_features()" \
+                                                                           f" first."
+                assert self.flatten().datasets[d_id].streamlined_meta, f"Dataset {d_id} does not seem to have streamlined " \
+                                                                       f"metadata. To obtain an adata object from this " \
+                                                                       f"DatasetGroup, all contained Datasets need to have " \
+                                                                       f"streamlined metadata. Run .streamline_meta() first."
+                match_ref_list.append(self.flatten().datasets[d_id].mapped_features)
+                rm_gene_ver_list.append(self.flatten().datasets[d_id].remove_gene_version)
+                gene_type_list.append(self.flatten().datasets[d_id].subset_gene_type)
+        assert len(set(match_ref_list)) == 1, f"Not all datasets in this group had their features matched to the same reference (argument 'match_to_reference' of method .streamline_features()). This is however a prerequisite for creating a combined adata object."
+        assert len(set(rm_gene_ver_list)) == 1, f"Not all datasets in this group have had their gene version removed (argument 'remove_gene_version' of method .streamline_features()). This is however a prerequisite for creating a combined adata object."
+        assert len(set(gene_type_list)) == 1, f"Not all datasets in this group had their featurespace subsetted to the same gene type (argument 'subset_gene_type' of method .streamline_features()). This is however a prerequisite for creating a combined adata object."
+
+        if len(adata_ls) > 1:
+            var_original = adata_ls[0].var.copy()
+            # TODO: need to keep this? -> yes, still catching errors here (March 2020)
+            # Fix for loading bug: sometime concatenating sparse matrices fails the first time but works on second try.
+            try:
+                adata_concat = adata_ls[0].concatenate(
+                    *adata_ls[1:],
+                    join="outer",
+                    batch_key=self._adata_ids.dataset,
+                    batch_categories=[i for i in self.ids if self.flatten().datasets[i].adata is not None]
+                )
+            except ValueError:
+                adata_concat = adata_ls[0].concatenate(
+                    *adata_ls[1:],
+                    join="outer",
+                    batch_key=self._adata_ids.dataset,
+                    batch_categories=[i for i in self.ids if self.flatten().datasets[i].adata is not None]
+                )
+            adata_concat.var = var_original
+            if len(set([a.uns[self._adata_ids.mapped_features] for a in adata_ls])) == 1:
+                adata_concat.uns[self._adata_ids.mapped_features] = \
+                    adata_ls[0].uns[self._adata_ids.mapped_features]
+            else:
+                adata_concat.uns[self._adata_ids.mapped_features] = False
+        else:
+            adata_concat = adata_ls[0]
+            adata_concat.obs[self._adata_ids.dataset] = adata_ls[0].uns['id']
+        return adata_concat
 
     def load_tobacked(
             self,
@@ -982,7 +1038,8 @@ class DatasetSuperGroup:
             uns_to_obs: bool = False,
             clean_obs: bool = True,
             clean_var: bool = True,
-            clean_uns: bool = True
+            clean_uns: bool = True,
+            clean_obs_names: bool = True,
     ):
         """
         Streamline the adata instance in each group and each data set to output format.
@@ -995,11 +1052,12 @@ class DatasetSuperGroup:
         :param clean_obs: Whether to delete non-streamlined fields in .obs, .obsm and .obsp.
         :param clean_var: Whether to delete non-streamlined fields in .var, .varm and .varp.
         :param clean_uns: Whether to delete non-streamlined fields in .uns.
+        :param clean_obs_names: Whether to replace obs_names with a string comprised of dataset id and an increasing integer.
         :return:
         """
         for x in self.dataset_groups:
             for xx in x.ids:
-                x.datasets[xx].streamline_metadata(schema=schema, uns_to_obs=uns_to_obs, clean_obs=clean_obs, clean_var=clean_var, clean_uns=clean_uns)
+                x.datasets[xx].streamline_metadata(schema=schema, uns_to_obs=uns_to_obs, clean_obs=clean_obs, clean_var=clean_var, clean_uns=clean_uns, clean_obs_names=clean_obs_names)
 
     def subset(self, key, values):
         """
@@ -1102,13 +1160,13 @@ class DatasetSuperGroup:
         for i in range(len(self.dataset_groups)):
             self.dataset_groups[i].subset_cells(key=key, values=values)
 
-    def project_celltypes_to_ontology(self):
+    def project_celltypes_to_ontology(self, adata_fields: Union[AdataIds, None] = None, copy=False):
         """
         Project free text cell type names to ontology based on mapping table.
         :return:
         """
         for _, v in self.dataset_groups:
-            v.project_celltypes_to_ontology()
+            v.project_celltypes_to_ontology(adata_fields=adata_fields, copy=copy)
 
     def write_config(self, fn: Union[str, os.PathLike]):
         """

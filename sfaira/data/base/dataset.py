@@ -130,6 +130,9 @@ class DatasetBase(abc.ABC):
     load_raw: Union[None, bool]
     mapped_features: Union[None, str, bool]
     remove_gene_version: Union[None, bool]
+    subset_gene_type: Union[None, str]
+    streamlined_features: bool
+    streamlined_meta: bool
 
     sample_fn: Union[None, str]
     _sample_fns: Union[None, List[str]]
@@ -239,6 +242,9 @@ class DatasetBase(abc.ABC):
         self.load_raw = None
         self.mapped_features = None
         self.remove_gene_version = None
+        self.subset_gene_type = None
+        self.streamlined_features = False
+        self.streamlined_meta = False
 
         self.sample_fn = sample_fn
         self._sample_fns = sample_fns
@@ -529,6 +535,7 @@ class DatasetBase(abc.ABC):
             self._set_genome(organism=self.organism, assembly=match_to_reference)
         self.mapped_features = match_to_reference
         self.remove_gene_version = remove_gene_version
+        self.subset_gene_type = subset_genes_to_type
         # Streamline feature space:
         self._add_missing_featurenames(match_to_reference=match_to_reference)
         self._collapse_ensembl_gene_id_versions(remove_gene_version=remove_gene_version)
@@ -599,6 +606,7 @@ class DatasetBase(abc.ABC):
             var=var_new,
             uns=self.adata.uns
         )
+        self.streamlined_features = True
 
     def streamline_metadata(
             self,
@@ -814,8 +822,8 @@ class DatasetBase(abc.ABC):
                     self.adata.obs = [self.adata.uns[k] for i in range(self.adata.n_obs)]
             self.adata.uns = {}
 
-        # Set new adata fields to class after conversion
-        self._adata_ids = adata_target_ids
+        self._adata_ids = adata_target_ids  # set new adata fields to class after conversion
+        self.streamlined_meta = True
 
     def load_tobacked(
             self,
