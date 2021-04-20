@@ -747,9 +747,9 @@ class DatasetBase(abc.ABC):
                                      "missing annotation")
                 elif self.gene_id_symbols_var_key == "index":
                     var_new[getattr(adata_target_ids, k)] = self.adata.var.index.tolist()
-                    del self.adata.var[self.gene_id_symbols_var_key]
                 else:
                     var_new[getattr(adata_target_ids, k)] = self.adata.var[self.gene_id_symbols_var_key].tolist()
+                    del self.adata.var[self.gene_id_symbols_var_key]
             else:
                 val = getattr(self, k)
                 while hasattr(val, '__len__') and not isinstance(val, str) and len(val) == 1:  # unpack nested lists/tuples
