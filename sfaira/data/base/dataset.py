@@ -562,7 +562,8 @@ class DatasetBase(abc.ABC):
             raise ValueError(f"Data type {type(self.adata.X)} not recognized.")
 
         # Compute indices of genes to keep
-        data_ids_ensg = self.adata.var.index.values if self.gene_id_ensembl_var_key == "index" else self.adata.var[self.gene_id_ensembl_var_key].values
+        data_ids_ensg = self.adata.var.index.values if self.gene_id_ensembl_var_key == "index" \
+            else self.adata.var[self.gene_id_ensembl_var_key].values
         if subset_genes_to_type is None:
             subset_ids_ensg = self.genome_container.ensembl
             subset_ids_symbol = self.genome_container.symbols
@@ -586,9 +587,9 @@ class DatasetBase(abc.ABC):
         data_ids_kept = data_ids_ensg[idx_feature_kept]
         x = x[:, idx_feature_kept]
         # Build map of subset_ids to features in x:
-        idx_feature_map = np.array([subset_ids_symbol.index(x) for x in data_ids_kept])
+        idx_feature_map = np.array([subset_ids_ensg.index(x) for x in data_ids_kept])
         # Create reordered feature matrix based on reference and convert to csr
-        x_new = scipy.sparse.csc_matrix((x.shape[0], len(subset_ids_symbol)), dtype=x.dtype)
+        x_new = scipy.sparse.csc_matrix((x.shape[0], len(subset_ids_ensg)), dtype=x.dtype)
         # copying this over to the new matrix in chunks of size `steps` prevents a strange scipy error:
         # ... scipy/sparse/compressed.py", line 922, in _zero_many i, j, offsets)
         # ValueError: could not convert integer scalar
@@ -604,7 +605,7 @@ class DatasetBase(abc.ABC):
 
         # Create new var dataframe
         if self.gene_id_symbols_var_key == "index":
-            var_index = self.genome_container.names
+            var_index = self.genome_container.symbols
             var_data = {self.gene_id_ensembl_var_key: subset_ids_ensg}
         elif self.gene_id_ensembl_var_key == "index":
             var_index = self.genome_container.ensembl
