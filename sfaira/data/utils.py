@@ -135,8 +135,8 @@ def collapse_matrix(adata: anndata.AnnData, var_column: str) -> anndata.AnnData:
     """
     old_index = adata.var.index.tolist() if var_column == "index" else adata.var[var_column].tolist()
     new_index = list(np.unique(old_index))
-    if len(new_index) < adata.n_vars:
-        idx_map = np.array([np.where(x == old_index)[0] for x in new_index])
+    if len(new_index) < len(old_index):
+        idx_map = np.array([np.where(x == np.array(old_index))[0] for x in new_index])
         # Build initial matrix from first match.
         data = adata.X[:, np.array([x[0] for x in idx_map])].copy()
         # Add additional matched (duplicates) on top:

@@ -74,11 +74,11 @@ def test_collapse_matrix(
     else:
         assert False
     if duplications:
-        index = ["g" + str(i) for i in range(x.shape[1])]
-    else:
         # Create triplicate and duplicate gene names:
         index = ["g" + str(i) for i in range(2)] + ["g" + str(i) for i in range(3)] + \
                 ["g" + str(i) for i in range(x.shape[1] - 3 - 2)]
+    else:
+        index = ["g" + str(i) for i in range(x.shape[1])]
     adata = anndata.AnnData(x, var=pd.DataFrame({"var_column": index}))
     adata2 = collapse_matrix(adata=adata, var_column="var_column")
     assert adata.X.shape[0] == adata2.X.shape[0], "observation dimension mismatch"

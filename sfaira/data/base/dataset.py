@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import abc
 import anndata
+dfrom anndata.utils import make_index_unique
 import h5py
 import numpy as np
 import pandas as pd
@@ -538,6 +539,10 @@ class DatasetBase(abc.ABC):
         self.subset_gene_type = subset_genes_to_type
         # Streamline feature space:
         self._add_missing_featurenames(match_to_reference=match_to_reference)
+        self.adata.var[self._adata_ids.gene_id_ensembl] = make_index_unique(
+            self.adata.var[self._adata_ids.gene_id_ensembl]).tolist()
+        self.adata.var[self._adata_ids.gene_id_symbols] = make_index_unique(
+            self.adata.var[self._adata_ids.gene_id_symbols]).tolist()
         self._collapse_ensembl_gene_id_versions(remove_gene_version=remove_gene_version)
 
         # Convert data matrix to csc matrix

@@ -337,7 +337,7 @@ class DatasetGroup:
                 assert self.datasets[d_id].streamlined_meta, f"Dataset {d_id} does not seem to have streamlined " \
                                                              f"metadata. To obtain an adata object from this " \
                                                              f"DatasetGroup, all contained Datasets need to have " \
-                                                             f"streamlined metadata. Run .streamline_meta() first."
+                                                             f"streamlined metadata. Run .streamline_metadata() first."
                 match_ref_list.append(self.datasets[d_id].mapped_features)
                 rm_gene_ver_list.append(self.datasets[d_id].remove_gene_version)
                 gene_type_list.append(self.datasets[d_id].subset_gene_type)
@@ -914,7 +914,7 @@ class DatasetSuperGroup:
                 assert self.flatten().datasets[d_id].streamlined_meta, f"Dataset {d_id} does not seem to have streamlined " \
                                                                        f"metadata. To obtain an adata object from this " \
                                                                        f"DatasetGroup, all contained Datasets need to have " \
-                                                                       f"streamlined metadata. Run .streamline_meta() first."
+                                                                       f"streamlined metadata. Run .streamline_metadata() first."
                 match_ref_list.append(self.flatten().datasets[d_id].mapped_features)
                 rm_gene_ver_list.append(self.flatten().datasets[d_id].remove_gene_version)
                 gene_type_list.append(self.flatten().datasets[d_id].subset_gene_type)
