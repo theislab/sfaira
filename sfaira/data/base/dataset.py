@@ -1713,7 +1713,6 @@ class DatasetBase(abc.ABC):
 
     @cell_types_original_obs_key.setter
     def cell_types_original_obs_key(self, x: str):
-                                  val_new=x)
         self._cell_types_original_obs_key = x
 
     @property
