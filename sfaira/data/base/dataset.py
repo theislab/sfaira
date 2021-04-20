@@ -539,10 +539,11 @@ class DatasetBase(abc.ABC):
         self.subset_gene_type = subset_genes_to_type
         # Streamline feature space:
         self._add_missing_featurenames(match_to_reference=match_to_reference)
-        self.adata.var[self._adata_ids.gene_id_ensembl] = make_index_unique(
-            self.adata.var[self._adata_ids.gene_id_ensembl]).tolist()
-        self.adata.var[self._adata_ids.gene_id_symbols] = make_index_unique(
-            self.adata.var[self._adata_ids.gene_id_symbols]).tolist()
+        if match_to_reference is not False:
+            self.adata.var[self.gene_id_ensembl_var_key] = make_index_unique(
+                self.adata.var[self.gene_id_ensembl_var_key]).tolist()
+            self.adata.var[self.gene_id_symbols_var_key] = make_index_unique(
+                self.adata.var[self.gene_id_symbols_var_key]).tolist()
         self._collapse_ensembl_gene_id_versions(remove_gene_version=remove_gene_version)
 
         # Convert data matrix to csc matrix
