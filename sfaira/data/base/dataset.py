@@ -1102,7 +1102,7 @@ class DatasetBase(abc.ABC):
         """
         ontology = getattr(self.ontology_container_sfaira, ontology)
         assert isinstance(key_in, (str, list)), f"argument key_in needs to be of type str or list. Supplied" \
-                                                f"type: {type(key_in)=}"
+                                                f"type: {type(key_in)}"
         input_values = self.adata.obs[key_in].values if isinstance(key_in, str) else key_in
         map_vals = dict([
             (x, ontology.convert_to_id(x))
