@@ -562,7 +562,7 @@ class DatasetBase(abc.ABC):
             raise ValueError(f"Data type {type(self.adata.X)} not recognized.")
 
         # Compute indices of genes to keep
-        data_ids_ensg = self.adata.var.index.tolist() if self.gene_id_ensembl_var_key == "index" else self.adata.var[self.gene_id_ensembl_var_key].tolist()
+        data_ids_ensg = self.adata.var.index.values if self.gene_id_ensembl_var_key == "index" else self.adata.var[self.gene_id_ensembl_var_key].values
         if subset_genes_to_type is None:
             subset_ids_ensg = self.genome_container.ensembl
             subset_ids_symbol = self.genome_container.symbols
