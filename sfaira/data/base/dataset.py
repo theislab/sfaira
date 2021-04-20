@@ -1304,7 +1304,6 @@ class DatasetBase(abc.ABC):
 
     @assay_sc.setter
     def assay_sc(self, x: str):
-        self.__erasing_protection(attr="assay_sc", val_old=self._assay_sc, val_new=x)
         x = self._value_protection(attr="assay_sc", allowed=self.ontology_container_sfaira.assay_sc, attempted=x)
         self._assay_sc = x
 
@@ -1322,7 +1321,6 @@ class DatasetBase(abc.ABC):
 
     @assay_differentiation.setter
     def assay_differentiation(self, x: str):
-        self.__erasing_protection(attr="assay_differentiation", val_old=self._assay_differentiation, val_new=x)
         x = self._value_protection(attr="assay_differentiation",
                                    allowed=self.ontology_container_sfaira.assay_differentiation, attempted=x)
         self._assay_differentiation = x
@@ -1341,7 +1339,6 @@ class DatasetBase(abc.ABC):
 
     @assay_type_differentiation.setter
     def assay_type_differentiation(self, x: str):
-        self.__erasing_protection(attr="assay_type_differentiation", val_old=self._assay_type_differentiation, val_new=x)
         x = self._value_protection(attr="assay_type_differentiation",
                                    allowed=self.ontology_container_sfaira.assay_type_differentiation, attempted=x)
         self._assay_type_differentiation = x
@@ -1360,7 +1357,6 @@ class DatasetBase(abc.ABC):
 
     @bio_sample.setter
     def bio_sample(self, x: str):
-        self.__erasing_protection(attr="bio_sample", val_old=self._bio_sample, val_new=x)
         self._bio_sample = x
 
     @property
@@ -1377,7 +1373,6 @@ class DatasetBase(abc.ABC):
 
     @cell_line.setter
     def cell_line(self, x: str):
-        self.__erasing_protection(attr="cell_line", val_old=self._cell_line, val_new=x)
         self._cell_line = x
 
     @property
@@ -1407,7 +1402,6 @@ class DatasetBase(abc.ABC):
 
     @default_embedding.setter
     def default_embedding(self, x: str):
-        self.__erasing_protection(attr="default_embedding", val_old=self._development_stage, val_new=x)
         x = self._value_protection(attr="default_embedding", allowed=self.ontology_container_sfaira.default_embedding,
                                    attempted=x)
         self._default_embedding = x
@@ -1426,7 +1420,6 @@ class DatasetBase(abc.ABC):
 
     @development_stage.setter
     def development_stage(self, x: str):
-        self.__erasing_protection(attr="development_stage", val_old=self._development_stage, val_new=x)
         x = self._value_protection(attr="development_stage", allowed=self.ontology_container_sfaira.development_stage,
                                    attempted=x)
         self._development_stage = x
@@ -1445,7 +1438,6 @@ class DatasetBase(abc.ABC):
 
     @disease.setter
     def disease(self, x: str):
-        self.__erasing_protection(attr="disease", val_old=self._disease, val_new=x)
         x = self._value_protection(attr="disease", allowed=self.ontology_container_sfaira.disease,
                                    attempted=x)
         self._disease = x
@@ -1463,7 +1455,6 @@ class DatasetBase(abc.ABC):
 
     @doi.setter
     def doi(self, x: Union[str, List[str]]):
-        self.__erasing_protection(attr="doi", val_old=self._doi, val_new=x)
         self._doi = x
 
     @property
@@ -1500,7 +1491,6 @@ class DatasetBase(abc.ABC):
 
     @download_url_data.setter
     def download_url_data(self, x: Union[str, None, List[str], Tuple[str], List[None], Tuple[None]]):
-        self.__erasing_protection(attr="download_url_data", val_old=self._download_url_data, val_new=x)
         # Formats to tuple with single element, which is a list of all download websites relevant to dataset,
         # which can be used as a single element column in a pandas data frame.
         if isinstance(x, str) or x is None:
@@ -1532,7 +1522,6 @@ class DatasetBase(abc.ABC):
 
     @download_url_meta.setter
     def download_url_meta(self, x: Union[str, None, List[str], Tuple[str], List[None], Tuple[None]]):
-        self.__erasing_protection(attr="download_url_meta", val_old=self._download_url_meta, val_new=x)
         # Formats to tuple with single element, which is a list of all download websites relevant to dataset,
         # which can be used as a single element column in a pandas data frame.
         if isinstance(x, str) or x is None:
@@ -1555,7 +1544,6 @@ class DatasetBase(abc.ABC):
 
     @ethnicity.setter
     def ethnicity(self, x: str):
-        self.__erasing_protection(attr="ethnicity", val_old=self._ethnicity, val_new=x)
         x = self._value_protection(attr="ethnicity", allowed=self.ontology_container_sfaira.ethnicity, attempted=x)
         self._ethnicity = x
 
@@ -1569,7 +1557,6 @@ class DatasetBase(abc.ABC):
 
     @id.setter
     def id(self, x: str):
-        self.__erasing_protection(attr="id", val_old=self._id, val_new=x)
         self._id = x
 
     @property
@@ -1586,7 +1573,6 @@ class DatasetBase(abc.ABC):
 
     @individual.setter
     def individual(self, x: str):
-        self.__erasing_protection(attr="bio_sample", val_old=self._individual, val_new=x)
         self._individual = x
 
     @property
@@ -1643,7 +1629,6 @@ class DatasetBase(abc.ABC):
 
     @normalization.setter
     def normalization(self, x: str):
-        self.__erasing_protection(attr="normalization", val_old=self._normalization, val_new=x)
         x = self._value_protection(attr="normalization", allowed=self.ontology_container_sfaira.normalization,
                                    attempted=x)
         self._normalization = x
@@ -1662,7 +1647,6 @@ class DatasetBase(abc.ABC):
 
     @primary_data.setter
     def primary_data(self, x: bool):
-        self.__erasing_protection(attr="primary_data", val_old=self._primary_data, val_new=x)
         x = self._value_protection(attr="primary_data", allowed=self.ontology_container_sfaira.primary_data,
                                    attempted=x)
         self._primary_data = x
@@ -1673,7 +1657,6 @@ class DatasetBase(abc.ABC):
 
     @assay_sc_obs_key.setter
     def assay_sc_obs_key(self, x: str):
-        self.__erasing_protection(attr="assay_sc_obs_key", val_old=self._assay_sc_obs_key, val_new=x)
         self._assay_sc_obs_key = x
 
     @property
@@ -1682,7 +1665,6 @@ class DatasetBase(abc.ABC):
 
     @assay_differentiation_obs_key.setter
     def assay_differentiation_obs_key(self, x: str):
-        self.__erasing_protection(attr="assay_differentiation_obs_key", val_old=self._assay_differentiation_obs_key, val_new=x)
         self._assay_differentiation_obs_key = x
 
     @property
@@ -1691,7 +1673,6 @@ class DatasetBase(abc.ABC):
 
     @assay_type_differentiation_obs_key.setter
     def assay_type_differentiation_obs_key(self, x: str):
-        self.__erasing_protection(attr="assay_type_differentiation_otype_bs_key", val_old=self._assay_differentiation_obs_key, val_new=x)
         self._assay_type_differentiation_obs_key = x
 
     @property
@@ -1700,7 +1681,6 @@ class DatasetBase(abc.ABC):
 
     @bio_sample_obs_key.setter
     def bio_sample_obs_key(self, x: str):
-        self.__erasing_protection(attr="bio_sample_obs_key", val_old=self._bio_sample_obs_key, val_new=x)
         self._bio_sample_obs_key = x
 
     @property
@@ -1709,7 +1689,6 @@ class DatasetBase(abc.ABC):
 
     @cell_line_obs_key.setter
     def cell_line_obs_key(self, x: str):
-        self.__erasing_protection(attr="cell_line_obs_key", val_old=self._cell_line_obs_key, val_new=x)
         self._cell_line_obs_key = x
 
     @property
@@ -1734,7 +1713,6 @@ class DatasetBase(abc.ABC):
 
     @cell_types_original_obs_key.setter
     def cell_types_original_obs_key(self, x: str):
-        self.__erasing_protection(attr="cell_types_original_obs_key", val_old=self._cell_types_original_obs_key,
                                   val_new=x)
         self._cell_types_original_obs_key = x
 
@@ -1744,7 +1722,6 @@ class DatasetBase(abc.ABC):
 
     @development_stage_obs_key.setter
     def development_stage_obs_key(self, x: str):
-        self.__erasing_protection(attr="development_stage_obs_key", val_old=self._development_stage_obs_key, val_new=x)
         self._development_stage_obs_key = x
 
     @property
@@ -1753,7 +1730,6 @@ class DatasetBase(abc.ABC):
 
     @disease_obs_key.setter
     def disease_obs_key(self, x: str):
-        self.__erasing_protection(attr="disease_obs_key", val_old=self._disease_obs_key, val_new=x)
         self._disease_obs_key = x
 
     @property
@@ -1762,7 +1738,6 @@ class DatasetBase(abc.ABC):
 
     @ethnicity_obs_key.setter
     def ethnicity_obs_key(self, x: str):
-        self.__erasing_protection(attr="ethnicity_obs_key", val_old=self._ethnicity_obs_key, val_new=x)
         self._ethnicity_obs_key = x
 
     @property
@@ -1771,7 +1746,6 @@ class DatasetBase(abc.ABC):
 
     @individual_obs_key.setter
     def individual_obs_key(self, x: str):
-        self.__erasing_protection(attr="individual_obs_key", val_old=self._individual_obs_key, val_new=x)
         self._individual_obs_key = x
 
     @property
@@ -1780,7 +1754,6 @@ class DatasetBase(abc.ABC):
 
     @organ_obs_key.setter
     def organ_obs_key(self, x: str):
-        self.__erasing_protection(attr="organ_obs_key", val_old=self._organ_obs_key, val_new=x)
         self._organ_obs_key = x
 
     @property
@@ -1789,7 +1762,6 @@ class DatasetBase(abc.ABC):
 
     @organism_obs_key.setter
     def organism_obs_key(self, x: str):
-        self.__erasing_protection(attr="organism_obs_key", val_old=self._organism_obs_key, val_new=x)
         self._organism_obs_key = x
 
     @property
@@ -1798,7 +1770,6 @@ class DatasetBase(abc.ABC):
 
     @sample_source_obs_key.setter
     def sample_source_obs_key(self, x: str):
-        self.__erasing_protection(attr="sample_source_obs_key", val_old=self._sample_source_obs_key, val_new=x)
         self._sample_source_obs_key = x
 
     @property
@@ -1807,7 +1778,6 @@ class DatasetBase(abc.ABC):
 
     @sex_obs_key.setter
     def sex_obs_key(self, x: str):
-        self.__erasing_protection(attr="sex_obs_key", val_old=self._sex_obs_key, val_new=x)
         self._sex_obs_key = x
 
     @property
@@ -1816,7 +1786,6 @@ class DatasetBase(abc.ABC):
 
     @state_exact_obs_key.setter
     def state_exact_obs_key(self, x: str):
-        self.__erasing_protection(attr="state_exact_obs_key", val_old=self._state_exact_obs_key, val_new=x)
         self._state_exact_obs_key = x
 
     @property
@@ -1825,7 +1794,6 @@ class DatasetBase(abc.ABC):
 
     @tech_sample_obs_key.setter
     def tech_sample_obs_key(self, x: str):
-        self.__erasing_protection(attr="tech_sample_obs_key", val_old=self._tech_sample_obs_key, val_new=x)
         self._tech_sample_obs_key = x
 
     @property
@@ -1842,7 +1810,6 @@ class DatasetBase(abc.ABC):
 
     @organ.setter
     def organ(self, x: str):
-        self.__erasing_protection(attr="organ", val_old=self._organ, val_new=x)
         x = self._value_protection(attr="organ", allowed=self.ontology_container_sfaira.organ, attempted=x)
         self._organ = x
 
@@ -1860,7 +1827,6 @@ class DatasetBase(abc.ABC):
 
     @organism.setter
     def organism(self, x: str):
-        self.__erasing_protection(attr="organism", val_old=self._organism, val_new=x)
         x = self._value_protection(attr="organism", allowed=self.ontology_container_sfaira.organism, attempted=x)
         self._organism = x
 
@@ -1878,7 +1844,6 @@ class DatasetBase(abc.ABC):
 
     @sample_source.setter
     def sample_source(self, x: str):
-        self.__erasing_protection(attr="sample_source", val_old=self._sample_source, val_new=x)
         x = self._value_protection(attr="sample_source", allowed=self.ontology_container_sfaira.sample_source,
                                    attempted=x)
         self._sample_source = x
@@ -1897,7 +1862,6 @@ class DatasetBase(abc.ABC):
 
     @sex.setter
     def sex(self, x: str):
-        self.__erasing_protection(attr="sex", val_old=self._sex, val_new=x)
         x = self._value_protection(attr="sex", allowed=self.ontology_container_sfaira.sex, attempted=x)
         self._sex = x
 
@@ -1907,7 +1871,6 @@ class DatasetBase(abc.ABC):
 
     @source.setter
     def source(self, x: Union[str, None]):
-        self.__erasing_protection(attr="source", val_old=self._source, val_new=x)
         self._source = x
 
     @property
@@ -1924,7 +1887,6 @@ class DatasetBase(abc.ABC):
 
     @state_exact.setter
     def state_exact(self, x: str):
-        self.__erasing_protection(attr="state_exact", val_old=self._state_exact, val_new=x)
         self._state_exact = x
 
     @property
@@ -1941,7 +1903,6 @@ class DatasetBase(abc.ABC):
 
     @tech_sample.setter
     def tech_sample(self, x: str):
-        self.__erasing_protection(attr="tech_sample", val_old=self._tech_sample, val_new=x)
         self._tech_sample = x
 
     @property
@@ -1950,7 +1911,6 @@ class DatasetBase(abc.ABC):
 
     @gene_id_ensembl_var_key.setter
     def gene_id_ensembl_var_key(self, x: str):
-        self.__erasing_protection(attr="gene_id_ensembl_var_key", val_old=self._gene_id_ensembl_var_key, val_new=x)
         self._gene_id_ensembl_var_key = x
 
     @property
@@ -1959,7 +1919,6 @@ class DatasetBase(abc.ABC):
 
     @gene_id_symbols_var_key.setter
     def gene_id_symbols_var_key(self, x: str):
-        self.__erasing_protection(attr="gene_id_symbols_var_key", val_old=self._gene_id_symbols_var_key, val_new=x)
         self._gene_id_symbols_var_key = x
 
     @property
@@ -1976,7 +1935,6 @@ class DatasetBase(abc.ABC):
 
     @year.setter
     def year(self, x: int):
-        self.__erasing_protection(attr="year", val_old=self._year, val_new=x)
         x = self._value_protection(attr="year", allowed=self.ontology_container_sfaira.year, attempted=x)
         self._year = x
 
@@ -2003,7 +1961,6 @@ class DatasetBase(abc.ABC):
 
     @cell_ontology_map.setter
     def cell_ontology_map(self, x: pd.DataFrame):
-        self.__erasing_protection(attr="ontology_class_map", val_old=self._ontology_class_map, val_new=x)
         assert x.shape[1] in [2, 3], f"{x.shape} in {self.id}"
         assert x.columns[0] == self._adata_ids.classmap_source_key
         assert x.columns[1] == self._adata_ids.classmap_target_key
@@ -2064,7 +2021,6 @@ class DatasetBase(abc.ABC):
 
     @author.setter
     def author(self, x: str):
-        self.__erasing_protection(attr="author", val_old=self._author, val_new=x)
         self._author = x
 
     @property
@@ -2080,18 +2036,6 @@ class DatasetBase(abc.ABC):
                 return self.__crossref_query(k="title")
 
     # Private methods:
-
-    def __erasing_protection(self, attr, val_old, val_new):
-        """
-        This is called when a erasing protected attribute is set to check whether it was set before.
-
-        :param attr: Attribute to be set.
-        :param val_old: Old value for attribute to be set.
-        :param val_new: New value for attribute to be set.
-        """
-        if val_old is not None:
-            raise ValueError(f"attempted to set erasing protected attribute {attr}: "
-                             f"previously was {str(val_old)}, attempted to set {str(val_new)}")
 
     def _value_protection(
             self,
