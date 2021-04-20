@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import abc
 import anndata
-dfrom anndata.utils import make_index_unique
+from anndata.utils import make_index_unique
 import h5py
 import numpy as np
 import pandas as pd
