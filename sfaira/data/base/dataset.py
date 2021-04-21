@@ -776,7 +776,7 @@ class DatasetBase(abc.ABC):
             self.adata.obs = obs_new
         else:
             self.adata.obs = pd.concat([obs_new, self.adata.obs], axis=1, ignore_index=True)
-            self.adata.obs.index = var_new.index
+            self.adata.obs.index = obs_new.index
         if clean_obs_names:
             self.adata.obs.index = [f"{self.id}_{i}" for i in range(1, self.adata.n_obs + 1)]
         if clean_uns:
@@ -1077,6 +1077,7 @@ class DatasetBase(abc.ABC):
             results[adata_fields.cell_ontology_class] = labels_original
         results[adata_fields.cell_types_original] = labels_original
         self.cellontology_class_obs_key = adata_fields.cell_ontology_class
+        self.cell_types_original_obs_key = adata_fields.cell_types_original
         if copy:
             return pd.DataFrame(results, index=self.adata.obs.index)
         else:
