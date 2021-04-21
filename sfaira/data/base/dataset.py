@@ -740,6 +740,7 @@ class DatasetBase(abc.ABC):
                 else:
                     var_new[getattr(adata_target_ids, k)] = self.adata.var[self.gene_id_ensembl_var_key].tolist()
                     del self.adata.var[self.gene_id_ensembl_var_key]
+                    self.gene_id_ensembl_var_key = getattr(adata_target_ids, k)
             elif k == "gene_id_symbols":
                 if not self.gene_id_symbols_var_key:
                     raise ValueError("gene_id_symbols_var_key not set in dataloader despite being required by the "
@@ -750,6 +751,7 @@ class DatasetBase(abc.ABC):
                 else:
                     var_new[getattr(adata_target_ids, k)] = self.adata.var[self.gene_id_symbols_var_key].tolist()
                     del self.adata.var[self.gene_id_symbols_var_key]
+                    self.gene_id_symbols_var_key = getattr(adata_target_ids, k)
             else:
                 val = getattr(self, k)
                 while hasattr(val, '__len__') and not isinstance(val, str) and len(val) == 1:  # unpack nested lists/tuples
