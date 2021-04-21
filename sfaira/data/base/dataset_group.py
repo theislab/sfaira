@@ -362,14 +362,16 @@ class DatasetGroup:
                     *adata_ls[1:],
                     join="outer",
                     batch_key=self._adata_ids.dataset,
-                    batch_categories=[i for i in self.ids if self.datasets[i].adata is not None]
+                    batch_categories=[i for i in self.ids if self.datasets[i].adata is not None],
+                    index_unique=None
                 )
             except ValueError:
                 adata_concat = adata_ls[0].concatenate(
                     *adata_ls[1:],
                     join="outer",
                     batch_key=self._adata_ids.dataset,
-                    batch_categories=[i for i in self.ids if self.datasets[i].adata is not None]
+                    batch_categories=[i for i in self.ids if self.datasets[i].adata is not None],
+                    index_unique=None
                 )
             adata_concat.var = var_original
             if len(set([a.uns[self._adata_ids.mapped_features] for a in adata_ls])) == 1:
@@ -939,14 +941,16 @@ class DatasetSuperGroup:
                     *adata_ls[1:],
                     join="outer",
                     batch_key=self._adata_ids.dataset,
-                    batch_categories=[i for i in self.ids if self.flatten().datasets[i].adata is not None]
+                    batch_categories=[i for i in self.ids if self.flatten().datasets[i].adata is not None],
+                    index_unique=None
                 )
             except ValueError:
                 adata_concat = adata_ls[0].concatenate(
                     *adata_ls[1:],
                     join="outer",
                     batch_key=self._adata_ids.dataset,
-                    batch_categories=[i for i in self.ids if self.flatten().datasets[i].adata is not None]
+                    batch_categories=[i for i in self.ids if self.flatten().datasets[i].adata is not None],
+                    index_unique=None
                 )
             adata_concat.var = var_original
             if len(set([a.uns[self._adata_ids.mapped_features] for a in adata_ls])) == 1:
