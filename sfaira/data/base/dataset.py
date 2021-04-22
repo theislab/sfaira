@@ -539,6 +539,9 @@ class DatasetBase(abc.ABC):
             - None: All genes in assembly.
             - "protein_coding": All protein coding genes in assembly.
         """
+        # TODO: think about workflow when featurespace should nt be sreamlined. can we still apply a metadata schema?
+        assert match_to_reference is not False, "feature_streamlining is not possible when match_to_reference is False"
+
         # Set genome container if mapping of gene labels is requested
         if match_to_reference is not False:  # Testing this explicitly makes sure False is treated separately from None
             self._set_genome(organism=self.organism, assembly=match_to_reference)
