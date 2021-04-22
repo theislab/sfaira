@@ -836,9 +836,9 @@ class DatasetBase(abc.ABC):
 
         # Move all uns annotation to obs columns if requested
         if uns_to_obs:
-            for k in self.adata.uns.items():
+            for k, v in self.adata.uns.items():
                 if k not in self.adata.obs_keys():
-                    self.adata.obs = [self.adata.uns[k] for i in range(self.adata.n_obs)]
+                    self.adata.obs[k] = [v for i in range(self.adata.n_obs)]
             self.adata.uns = {}
 
         self._adata_ids = adata_target_ids  # set new adata fields to class after conversion
