@@ -453,10 +453,18 @@ class DatasetBase(abc.ABC):
             self,
             match_to_reference: Union[str, bool, None],
     ):
-        gene_id_symbols = self._adata_ids.gene_id_symbols \
-            if hasattr(self._adata_ids, "gene_id_symbols") else "gene_symbol"  # add some default name if not in schema
-        gene_id_ensembl = self._adata_ids.gene_id_ensembl \
-            if hasattr(self._adata_ids, "gene_id_ensembl") else "ensembl"  # add some default name if not in schema
+        # If schema does not include symbols or ensebl ids, add them to the schema so we can do the conversion
+        if hasattr(self._adata_ids, "gene_id_symbols"):
+            gene_id_symbols = self._adata_ids.gene_id_symbols
+        else:
+            gene_id_symbols = "gene_symbol"  # add some default name if not in schema
+            self._adata_ids.gene_id_symbols = gene_id_symbols
+        if hasattr(self._adata_ids, "gene_id_ensembl"):
+            gene_id_ensembl = self._adata_ids.gene_id_ensembl
+        else:
+            gene_id_ensembl = "ensembl"  # add some default name if not in schema
+            self._adata_ids.gene_id_ensembl = gene_id_ensembl
+
         if match_to_reference is not False:
             if not self.gene_id_symbols_var_key and not self.gene_id_ensembl_var_key:
                 raise ValueError("Either gene_id_symbols_var_key or gene_id_ensembl_var_key needs to be provided in the"
@@ -828,9 +836,9 @@ class DatasetBase(abc.ABC):
                     self.adata.obs[getattr(adata_target_ids, k) + "_ontology_term_id"] = \
                         adata_target_ids.unknown_metadata_ontology_id_identifier
             # Adapt var columns naming.
-            if self.organism == "mouse":
+            if self.organism == "human":
                 gene_id_new = "hgnc_gene_symbol"
-            elif self.organism == "human":
+            elif self.organism == "mouse":
                 gene_id_new = "mgi_gene_symbol"
             else:
                 raise ValueError(f"organism {self.organism} currently not supported")
