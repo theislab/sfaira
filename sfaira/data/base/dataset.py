@@ -658,7 +658,6 @@ class DatasetBase(abc.ABC):
             raise ValueError(f"did not recognize schema {schema}")
 
         if hasattr("gene_id_ensembl", adata_target_ids) and not hasattr("gene_id_ensembl", self._adata_ids):
-            # TODO: Handle this better (eg. through automatic conversion of gene symbols as done in streamline_metadata)
             raise ValueError(f"Cannot convert this object to schema {schema}, as the currently applied schema does not "
                              f"have an ensembl gene ID annotation. Please run .streamline_features() first.")
 
