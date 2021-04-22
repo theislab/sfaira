@@ -27,7 +27,7 @@ def map_fn(inputs):
     :param inputs:
     :return: None if function ran, error report otherwise
     """
-    ds, remove_gene_version, match_to_reference, load_raw, allow_caching, set_metadata, kwargs, func, kwargs_func = \
+    ds, load_raw, allow_caching, kwargs, func, kwargs_func = \
         inputs
     try:
         ds.load(load_raw=load_raw, allow_caching=allow_caching, **kwargs)
@@ -77,11 +77,8 @@ class DatasetGroup:
     def load(
             self,
             annotated_only: bool = False,
-            remove_gene_version: bool = True,
-            match_to_reference: Union[str, bool, None] = None,
             load_raw: bool = False,
             allow_caching: bool = True,
-            set_metadata: bool = True,
             processes: int = 1,
             func=None,
             kwargs_func: Union[None, dict] = None,
@@ -96,6 +93,8 @@ class DatasetGroup:
         In this setting, datasets are removed from memory after the function has been executed.
 
         :param annotated_only:
+        :param load_raw:
+        :param allow_caching:
         :param processes: Processes to parallelise loading over. Uses python multiprocessing if > 1, for loop otherwise.
         :param func: Function to run on loaded datasets. map_fun should only take one argument, which is a Dataset
             instance. The return can be empty:
@@ -106,11 +105,8 @@ class DatasetGroup:
         :param kwargs_func: Kwargs of func.
         """
         args = [
-            remove_gene_version,
-            match_to_reference,
             load_raw,
             allow_caching,
-            set_metadata,
             kwargs,
             func,
             kwargs_func
@@ -831,10 +827,7 @@ class DatasetSuperGroup:
     def load(
             self,
             annotated_only: bool = False,
-            match_to_reference: Union[str, bool, None] = None,
-            remove_gene_version: bool = True,
             load_raw: bool = False,
-            set_metadata: bool = True,
             allow_caching: bool = True,
             processes: int = 1,
             **kwargs
@@ -843,10 +836,7 @@ class DatasetSuperGroup:
         Loads data set human into anndata object.
 
         :param annotated_only:
-        :param match_to_reference: See .load().
-        :param remove_gene_version: See .load().
         :param load_raw: See .load().
-        :param set_metadata: See .load().
         :param allow_caching: See .load().
         :param processes: Processes to parallelise loading over. Uses python multiprocessing if > 1, for loop otherwise.
             Note: parallelises loading of each dataset group, but not across groups.
@@ -855,11 +845,8 @@ class DatasetSuperGroup:
         for x in self.dataset_groups:
             x.load(
                 annotated_only=annotated_only,
-                remove_gene_version=remove_gene_version,
-                match_to_reference=match_to_reference,
                 load_raw=load_raw,
                 allow_caching=allow_caching,
-                set_metadata=set_metadata,
                 processes=processes,
                 **kwargs
             )
