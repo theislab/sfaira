@@ -605,10 +605,10 @@ class DatasetBase(abc.ABC):
 
         # Create new var dataframe
         if self.gene_id_symbols_var_key == "index":
-            var_index = self.genome_container.symbols
+            var_index = subset_ids_symbol
             var_data = {self.gene_id_ensembl_var_key: subset_ids_ensg}
         elif self.gene_id_ensembl_var_key == "index":
-            var_index = self.genome_container.ensembl
+            var_index = subset_ids_ensg
             var_data = {self.gene_id_symbols_var_key: subset_ids_symbol}
         else:
             var_index = None
