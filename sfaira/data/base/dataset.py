@@ -453,6 +453,10 @@ class DatasetBase(abc.ABC):
             self,
             match_to_reference: Union[str, bool, None],
     ):
+        gene_id_symbols = self._adata_ids.gene_id_symbols \
+            if hasattr(self._adata_ids, "gene_id_symbols") else "gene_symbol"  # add some default name if not in schema
+        gene_id_ensembl = self._adata_ids.gene_id_ensembl \
+            if hasattr(self._adata_ids, "gene_id_ensembl") else "ensembl"  # add some default name if not in schema
         if match_to_reference is not False:
             if not self.gene_id_symbols_var_key and not self.gene_id_ensembl_var_key:
                 raise ValueError("Either gene_id_symbols_var_key or gene_id_ensembl_var_key needs to be provided in the"
@@ -461,11 +465,11 @@ class DatasetBase(abc.ABC):
                 # Convert ensembl ids to gene symbols
                 id_dict = self.genome_container.id_to_names_dict
                 ensids = self.adata.var.index if self.gene_id_ensembl_var_key == "index" else self.adata.var[self.gene_id_ensembl_var_key]
-                self.adata.var[self._adata_ids.gene_id_symbols] = [
+                self.adata.var[gene_id_symbols] = [
                     id_dict[n.split(".")[0]] if n.split(".")[0] in id_dict.keys() else 'n/a'
                     for n in ensids
                 ]
-                self.gene_id_symbols_var_key = self._adata_ids.gene_id_symbols
+                self.gene_id_symbols_var_key = gene_id_symbols
             elif self.gene_id_symbols_var_key and not self.gene_id_ensembl_var_key:
                 # Convert gene symbols to ensembl ids
                 id_dict = self.genome_container.names_to_id_dict
@@ -482,8 +486,8 @@ class DatasetBase(abc.ABC):
                         ensids.append(id_strip_dict[n.split(".")[0]])
                     else:
                         ensids.append('n/a')
-                self.adata.var[self._adata_ids.gene_id_ensembl] = ensids
-                self.gene_id_ensembl_var_key = self._adata_ids.gene_id_ensembl
+                self.adata.var[gene_id_ensembl] = ensids
+                self.gene_id_ensembl_var_key = gene_id_ensembl
 
     def _collapse_ensembl_gene_id_versions(self, remove_gene_version):
         """

@@ -351,6 +351,8 @@ class DatasetGroup:
 
         if len(adata_ls) > 1:
             var_original = adata_ls[0].var.copy()
+            for a in adata_ls:
+                a.var_names_make_unique()
             # TODO: need to keep this? -> yes, still catching errors here (March 2020)
             # Fix for loading bug: sometime concatenating sparse matrices fails the first time but works on second try.
             try:
@@ -917,6 +919,8 @@ class DatasetSuperGroup:
 
         if len(adata_ls) > 1:
             var_original = adata_ls[0].var.copy()
+            for a in adata_ls:
+                a.var_names_make_unique()
             # TODO: need to keep this? -> yes, still catching errors here (March 2020)
             # Fix for loading bug: sometime concatenating sparse matrices fails the first time but works on second try.
             try:
