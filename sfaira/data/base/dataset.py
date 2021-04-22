@@ -497,27 +497,25 @@ class DatasetBase(abc.ABC):
                 self.adata.var[gene_id_ensembl] = ensids
                 self.gene_id_ensembl_var_key = gene_id_ensembl
 
-    def _collapse_ensembl_gene_id_versions(self, remove_gene_version):
+    def _collapse_ensembl_gene_id_versions(self):
         """
         Remove version tag on ensembl gene ID so that different versions are superimposed downstream.
 
-        :param remove_gene_version:
         :return:
         """
-        if remove_gene_version:
-            if not self.gene_id_ensembl_var_key:
-                raise ValueError(
-                    "Cannot remove gene version when gene_id_ensembl_var_key is not set in dataloader and "
-                    "match_to_reference is False"
-                )
-            elif self.gene_id_ensembl_var_key == "index":
-                self.adata.index = [
-                    x.split(".")[0] for x in self.adata.var.index
-                ]
-            else:
-                self.adata.var[self.gene_id_ensembl_var_key] = [
-                    x.split(".")[0] for x in self.adata.var[self.gene_id_ensembl_var_key].values
-                ]
+        if not self.gene_id_ensembl_var_key:
+            raise ValueError(
+                "Cannot remove gene version when gene_id_ensembl_var_key is not set in dataloader and "
+                "match_to_reference is False"
+            )
+        elif self.gene_id_ensembl_var_key == "index":
+            self.adata.index = [
+                x.split(".")[0] for x in self.adata.var.index
+            ]
+        else:
+            self.adata.var[self.gene_id_ensembl_var_key] = [
+                x.split(".")[0] for x in self.adata.var[self.gene_id_ensembl_var_key].values
+            ]
         # Collapse if necessary:
         self.adata = collapse_matrix(adata=self.adata, var_column=self.gene_id_ensembl_var_key)
 
@@ -560,7 +558,8 @@ class DatasetBase(abc.ABC):
                 self.adata.var.index = make_index_unique(self.adata.var.index).tolist()
             else:
                 self.adata.var[key] = make_index_unique(self.adata.var[key]).tolist()
-        self._collapse_ensembl_gene_id_versions(remove_gene_version=remove_gene_version)
+        if remove_gene_version:
+            self._collapse_ensembl_gene_id_versions()
 
         # Convert data matrix to csc matrix
         if isinstance(self.adata.X, np.ndarray):
