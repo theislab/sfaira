@@ -1044,6 +1044,15 @@ class DatasetBase(abc.ABC):
                 self.cell_ontology_map[x] if x in self.cell_ontology_map.keys()
                 else x for x in labels_original
             ]
+            # Convert unknown celltype placeholders
+            placeholder_conversion = {
+                self._adata_ids.unknown_celltype_identifier: adata_fields.unknown_celltype_identifier,
+                self._adata_ids.not_a_cell_celltype_identifier: adata_fields.not_a_cell_celltype_identifier,
+            }
+            labels_mapped = [
+                placeholder_conversion[x] if x in placeholder_conversion.keys()
+                else x for x in labels_mapped
+            ]
             # Validate mapped IDs based on ontology:
             # This aborts with a readable error if there was a target in the mapping file that doesnt match the ontology
             # This protection blocks progression in the unit test if not deactivated.
