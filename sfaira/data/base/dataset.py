@@ -132,7 +132,6 @@ class DatasetBase(abc.ABC):
     mapped_features: Union[None, str, bool]
     remove_gene_version: Union[None, bool]
     subset_gene_type: Union[None, str]
-    streamlined_features: bool
     streamlined_meta: bool
 
     sample_fn: Union[None, str]
@@ -244,7 +243,6 @@ class DatasetBase(abc.ABC):
         self.mapped_features = None
         self.remove_gene_version = None
         self.subset_gene_type = None
-        self.streamlined_features = False
         self.streamlined_meta = False
 
         self.sample_fn = sample_fn
@@ -534,7 +532,9 @@ class DatasetBase(abc.ABC):
         # Set genome container if mapping of gene labels is requested
         if match_to_reference is not False:  # Testing this explicitly makes sure False is treated separately from None
             self._set_genome(organism=self.organism, assembly=match_to_reference)
-        self.mapped_features = match_to_reference
+            self.mapped_features = self.genome_container.assembly
+        else:
+            self.mapped_features = False
         self.remove_gene_version = remove_gene_version
         self.subset_gene_type = subset_genes_to_type
         # Streamline feature space:
@@ -623,7 +623,6 @@ class DatasetBase(abc.ABC):
             var=var_new,
             uns=self.adata.uns
         )
-        self.streamlined_features = True
 
     def streamline_metadata(
             self,
@@ -657,6 +656,39 @@ class DatasetBase(abc.ABC):
             adata_target_ids = AdataIdsCellxgene()
         else:
             raise ValueError(f"did not recognize schema {schema}")
+
+        # Creating new var annotation
+        var_new = pd.DataFrame()
+        for k in adata_target_ids.var_keys:
+            if k == "gene_id_ensembl":
+                if not self.gene_id_ensembl_var_key:
+                    raise ValueError("gene_id_ensembl_var_key not set in dataloader despite being required by the "
+                                     "selected meta data schema. please run streamline_features() first to create the "
+                                     "missing annotation")
+                elif self.gene_id_ensembl_var_key == "index":
+                    var_new[getattr(adata_target_ids, k)] = self.adata.var.index.tolist()
+                else:
+                    var_new[getattr(adata_target_ids, k)] = self.adata.var[self.gene_id_ensembl_var_key].tolist()
+                    del self.adata.var[self.gene_id_ensembl_var_key]
+                self.gene_id_ensembl_var_key = getattr(adata_target_ids, k)
+            elif k == "gene_id_symbols":
+                if not self.gene_id_symbols_var_key:
+                    raise ValueError("gene_id_symbols_var_key not set in dataloader despite being required by the "
+                                     "selected meta data schema. please run streamline_features() first to create the "
+                                     "missing annotation")
+                elif self.gene_id_symbols_var_key == "index":
+                    var_new[getattr(adata_target_ids, k)] = self.adata.var.index.tolist()
+                else:
+                    var_new[getattr(adata_target_ids, k)] = self.adata.var[self.gene_id_symbols_var_key].tolist()
+                    del self.adata.var[self.gene_id_symbols_var_key]
+                self.gene_id_symbols_var_key = getattr(adata_target_ids, k)
+            else:
+                val = getattr(self, k)
+                while hasattr(val, '__len__') and not isinstance(val, str) and len(val) == 1:  # unpack nested lists/tuples
+                    val = val[0]
+                var_new[getattr(adata_target_ids, k)] = val
+        # set var index
+        var_new.index = var_new[adata_target_ids.gene_id_index].tolist()
 
         per_cell_labels = ["cell_types_original", "cell_ontology_class", "cell_ontology_id"]
         experiment_batch_labels = ["bio_sample", "individual", "tech_sample"]
@@ -726,39 +758,6 @@ class DatasetBase(abc.ABC):
         if self.cell_types_original_obs_key is not None:
             obs_cl = self.project_celltypes_to_ontology(copy=True, adata_fields=adata_target_ids)
             obs_new = pd.concat([obs_new, obs_cl], axis=1)
-
-        # Creating new var annotation
-        var_new = pd.DataFrame()
-        for k in adata_target_ids.var_keys:
-            if k == "gene_id_ensembl":
-                if not self.gene_id_ensembl_var_key:
-                    raise ValueError("gene_id_ensembl_var_key not set in dataloader despite being required by the "
-                                     "selected meta data schema. please run streamline_features() first to create the "
-                                     "missing annotation")
-                elif self.gene_id_ensembl_var_key == "index":
-                    var_new[getattr(adata_target_ids, k)] = self.adata.var.index.tolist()
-                else:
-                    var_new[getattr(adata_target_ids, k)] = self.adata.var[self.gene_id_ensembl_var_key].tolist()
-                    del self.adata.var[self.gene_id_ensembl_var_key]
-                self.gene_id_ensembl_var_key = getattr(adata_target_ids, k)
-            elif k == "gene_id_symbols":
-                if not self.gene_id_symbols_var_key:
-                    raise ValueError("gene_id_symbols_var_key not set in dataloader despite being required by the "
-                                     "selected meta data schema. please run streamline_features() first to create the "
-                                     "missing annotation")
-                elif self.gene_id_symbols_var_key == "index":
-                    var_new[getattr(adata_target_ids, k)] = self.adata.var.index.tolist()
-                else:
-                    var_new[getattr(adata_target_ids, k)] = self.adata.var[self.gene_id_symbols_var_key].tolist()
-                    del self.adata.var[self.gene_id_symbols_var_key]
-                self.gene_id_symbols_var_key = getattr(adata_target_ids, k)
-            else:
-                val = getattr(self, k)
-                while hasattr(val, '__len__') and not isinstance(val, str) and len(val) == 1:  # unpack nested lists/tuples
-                    val = val[0]
-                var_new[getattr(adata_target_ids, k)] = val
-        # set var index
-        var_new.index = var_new[adata_target_ids.gene_id_index].tolist()
 
         # Add new annotation to adata and delete old fields if requested
         if clean_var:

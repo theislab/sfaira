@@ -325,11 +325,11 @@ class DatasetGroup:
         gene_type_list = []
         for d_id in self.ids:
             if self.datasets[d_id].adata is not None:
-                assert self.datasets[d_id].streamlined_features, f"Dataset {d_id} does not seem to have a streamlined " \
-                                                                 f"featurespace. To obtain an adata object from this " \
-                                                                 f"DatasetGroup, all contained Datasets need to have a " \
-                                                                 f"streamlined featurespace. Run .streamline_features()" \
-                                                                 f" first."
+                assert self.datasets[d_id].mapped_features, f"Dataset {d_id} does not seem to have a streamlined " \
+                                                            f"featurespace. To obtain an adata object from this " \
+                                                            f"DatasetGroup, all contained Datasets need to have a " \
+                                                            f"streamlined featurespace. Run .streamline_features()" \
+                                                            f" first."
                 assert self.datasets[d_id].streamlined_meta, f"Dataset {d_id} does not seem to have streamlined " \
                                                              f"metadata. To obtain an adata object from this " \
                                                              f"DatasetGroup, all contained Datasets need to have " \
@@ -370,11 +370,7 @@ class DatasetGroup:
                     index_unique=None
                 )
             adata_concat.var = var_original
-            if len(set([a.uns[self._adata_ids.mapped_features] for a in adata_ls])) == 1:
-                adata_concat.uns[self._adata_ids.mapped_features] = \
-                    adata_ls[0].uns[self._adata_ids.mapped_features]
-            else:
-                adata_concat.uns[self._adata_ids.mapped_features] = False
+            adata_concat.uns[self._adata_ids.mapped_features] = match_ref_list[0]
         else:
             adata_concat = adata_ls[0]
             adata_concat.obs[self._adata_ids.dataset] = adata_ls[0].uns['id']
@@ -895,11 +891,11 @@ class DatasetSuperGroup:
         gene_type_list = []
         for d_id in self.flatten().ids:
             if self.flatten().datasets[d_id].adata is not None:
-                assert self.flatten().datasets[d_id].streamlined_features, f"Dataset {d_id} does not seem to have a streamlined " \
-                                                                           f"featurespace. To obtain an adata object from this " \
-                                                                           f"DatasetGroup, all contained Datasets need to have a " \
-                                                                           f"streamlined featurespace. Run .streamline_features()" \
-                                                                           f" first."
+                assert self.flatten().datasets[d_id].mapped_features, f"Dataset {d_id} does not seem to have a streamlined " \
+                                                                      f"featurespace. To obtain an adata object from this " \
+                                                                      f"DatasetGroup, all contained Datasets need to have a " \
+                                                                      f"streamlined featurespace. Run .streamline_features()" \
+                                                                      f" first."
                 assert self.flatten().datasets[d_id].streamlined_meta, f"Dataset {d_id} does not seem to have streamlined " \
                                                                        f"metadata. To obtain an adata object from this " \
                                                                        f"DatasetGroup, all contained Datasets need to have " \
@@ -940,11 +936,7 @@ class DatasetSuperGroup:
                     index_unique=None
                 )
             adata_concat.var = var_original
-            if len(set([a.uns[self._adata_ids.mapped_features] for a in adata_ls])) == 1:
-                adata_concat.uns[self._adata_ids.mapped_features] = \
-                    adata_ls[0].uns[self._adata_ids.mapped_features]
-            else:
-                adata_concat.uns[self._adata_ids.mapped_features] = False
+            adata_concat.uns[self._adata_ids.mapped_features] = match_ref_list[0]
         else:
             adata_concat = adata_ls[0]
             adata_concat.obs[self._adata_ids.dataset] = adata_ls[0].uns['id']
