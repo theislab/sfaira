@@ -25,9 +25,9 @@ class Dataset(DatasetBase):
         self.year = 2016
         self.sample_source = "primary_tissue"
 
-        self.var_symbol_col = "index"
+        self.gene_id_symbols_var_key = "index"
 
-        self.cellontology_original_obs_key = "Characteristics[cell type]"
+        self.cell_types_original_obs_key = "Characteristics[cell type]"
         self.state_exact_obs_key = "Characteristics[disease]"
 
         self.set_dataset_id(idx=1)

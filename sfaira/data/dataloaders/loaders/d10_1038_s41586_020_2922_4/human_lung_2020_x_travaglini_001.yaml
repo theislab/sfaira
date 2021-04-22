@@ -54,9 +54,9 @@ dataset_or_observation_wise:
         droplet_normal_lung_blood_scanpy.20200205.RC4.h5ad: "channel"
         facs_normal_lung_blood_scanpy.20200205.RC4.h5ad: "plate.barcode"
 observation_wise:
-    cellontology_original_obs_key: "free_annotation"
+    cell_types_original_obs_key: "free_annotation"
 feature_wise:
-    var_ensembl_col:
-    var_symbol_col: "index"
+    gene_id_ensembl_var_key:
+    gene_id_symbols_var_key: "index"
 meta:
     version: "1.0"

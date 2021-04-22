@@ -27,11 +27,11 @@ class Dataset(DatasetBase):
         self.year = 2019
 
         self.bio_sample_obs_key = "sample"
-        self.cellontology_original_obs_key = "cluster"
+        self.cell_types_original_obs_key = "cluster"
         self.organ_obs_key = "organ"
 
-        self.var_ensembl_col = "ensembl"
-        self.var_symbol_col = "name"
+        self.gene_id_ensembl_var_key = "ensembl"
+        self.gene_id_symbols_var_key = "name"
 
         self.set_dataset_id(idx=1)
 

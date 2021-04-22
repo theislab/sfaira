@@ -16,7 +16,7 @@ class OntologyContainerSfaira:
         self.bio_sample = None
         self.cell_line = OntologyCellosaurus()
         self.cellontology_class = "v2021-02-01"
-        self.cellontology_original = None
+        self.cell_types_original = None
         self.collection_id = None
         self.default_embedding = None
         self.development_stage = None  # OntologyHsapdv()  # TODO allow for other organisms here too.

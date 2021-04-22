@@ -76,7 +76,7 @@ class Dataset(DatasetBase):
                                  f"{self.sample_fn}"
         self.download_url_meta = None
 
-        self.cellontology_original_obs_key = "cell_ontology_class"
+        self.cell_types_original_obs_key = "cell_ontology_class"
         self.development_stage_obs_key = "development_stage"  # not given in all data sets, TODO maybe infer as age?
         self.sex_obs_key = "sex"
         # ToDo: further anatomical information for subtissue in "subtissue"?
@@ -91,8 +91,8 @@ class Dataset(DatasetBase):
         self.year = 2019
         self.sample_source = "primary_tissue"
 
-        self.var_ensembl_col = None
-        self.var_symbol_col = "index"
+        self.gene_id_ensembl_var_key = None
+        self.gene_id_symbols_var_key = "index"
 
         self.set_dataset_id(idx=1)
 

@@ -29,9 +29,9 @@ class Dataset(DatasetBase):
         self.sample_source = "primary_tissue"
         self.year = 2018
 
-        self.var_symbol_col = "names"
-        self.var_ensembl_col = "ensembl"
-        self.cellontology_original_obs_key = "annotation"
+        self.gene_id_symbols_var_key = "names"
+        self.gene_id_ensembl_var_key = "ensembl"
+        self.cell_types_original_obs_key = "annotation"
 
         self.set_dataset_id(idx=1)
 

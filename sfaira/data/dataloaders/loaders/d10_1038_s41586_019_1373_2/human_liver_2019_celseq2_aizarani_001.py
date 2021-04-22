@@ -22,8 +22,8 @@ class Dataset(DatasetBase):
         self.organism = "human"
         self.year = 2019
 
-        self.var_symbol_col = "index"
-        self.cellontology_original_obs_key = "CellType"
+        self.gene_id_symbols_var_key = "index"
+        self.cell_types_original_obs_key = "CellType"
 
         self.set_dataset_id(idx=1)
 

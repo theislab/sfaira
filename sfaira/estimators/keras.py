@@ -73,7 +73,7 @@ class EstimatorKeras:
         self.idx_test = None
         self.md5 = weights_md5
         self.cache_path = cache_path
-        self._adata_ids_sfaira = AdataIdsSfaira()
+        self._adata_ids = AdataIdsSfaira()
 
     @property
     def model_type(self):
@@ -218,13 +218,13 @@ class EstimatorKeras:
 
             # If the feature space is already mapped to the right reference, return the data matrix immediately
             if 'mapped_features' in self.data.uns_keys():
-                if self.data.uns[self._adata_ids_sfaira.mapped_features] == \
+                if self.data.uns[self._adata_ids.mapped_features] == \
                         self.topology_container.gc.assembly:
                     print(f"found {x.shape[0]} observations")
                     return x
 
             # Compute indices of genes to keep
-            data_ids = self.data.var[self._adata_ids_sfaira.gene_id_ensembl].values
+            data_ids = self.data.var[self._adata_ids.gene_id_ensembl].values
             idx_feature_kept = np.where([x in self.topology_container.gc.ensembl for x in data_ids])[0]
             idx_feature_map = np.array([self.topology_container.gc.ensembl.index(x)
                                         for x in data_ids[idx_feature_kept]])
@@ -641,7 +641,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
 
         elif mode == 'gradient_method':
             # Prepare data reading according to whether anndata is backed or not:
-            cell_to_class = self._get_class_dict(obs_key=self._adata_ids_sfaira.cell_ontology_class)
+            cell_to_class = self._get_class_dict(obs_key=self._adata_ids.cell_ontology_class)
             if self.using_store:
                 n_features = self.data.n_vars
                 generator_raw = self.data.generator(
@@ -668,12 +668,12 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                     for i in idx:
                         x_sample = self.data.X[i, :].toarray().flatten() if sparse else self.data.X[i, :].flatten()
                         sf_sample = prepare_sf(x=x_sample)[0]
-                        y_sample = self.data.obs[self._adata_ids_sfaira.cell_ontology_class][i]
+                        y_sample = self.data.obs[self._adata_ids.cell_ontology_class][i]
                         yield (x_sample, sf_sample), (x, cell_to_class[y_sample])
             else:
                 x = self._prepare_data_matrix(idx=idx)
                 sf = prepare_sf(x=x)
-                y = self.data.obs[self._adata_ids_sfaira.cell_ontology_class][idx]
+                y = self.data.obs[self._adata_ids.cell_ontology_class][idx]
                 # for gradients per celltype in compute_gradients_input()
                 n_features = x.shape[1]
 
@@ -847,7 +847,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         )
 
         if per_celltype:
-            cell_to_id = self._get_class_dict(obs_key=self._adata_ids_sfaira.cell_ontology_class)
+            cell_to_id = self._get_class_dict(obs_key=self._adata_ids.cell_ontology_class)
             cell_names = cell_to_id.keys()
             cell_id = cell_to_id.values()
             id_to_cell = dict([(key, value) for (key, value) in zip(cell_id, cell_names)])
@@ -1007,7 +1007,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
         onehot_encoder = self._one_hot_encoder()
         y = np.concatenate([
             np.expand_dims(onehot_encoder(z), axis=0)
-            for z in self.data.obs[self._adata_ids_sfaira.cell_ontology_class].values[idx].tolist()
+            for z in self.data.obs[self._adata_ids.cell_ontology_class].values[idx].tolist()
         ], axis=0)
         # Distribute aggregated class weight for computation of weights:
         freq = np.mean(y / np.sum(y, axis=1, keepdims=True), axis=0, keepdims=True)

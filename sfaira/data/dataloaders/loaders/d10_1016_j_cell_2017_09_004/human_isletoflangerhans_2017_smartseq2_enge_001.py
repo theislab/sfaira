@@ -24,8 +24,8 @@ class Dataset(DatasetBase):
         self.organ = "islet of Langerhans"
         self.organism = "human"
         self.year = 2017
-        self.var_symbol_col = "index"
-        self.cellontology_original_obs_key = "celltype"
+        self.gene_id_symbols_var_key = "index"
+        self.cell_types_original_obs_key = "celltype"
         self.sample_source = "primary_tissue"
 
         self.set_dataset_id(idx=1)

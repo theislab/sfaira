@@ -29,13 +29,13 @@ class Dataset(DatasetBase):
         self.sample_source = "primary_tissue"
 
         self.bio_sample_obs_key = "sample"
-        self.cellontology_original_obs_key = "celltype_specific"
+        self.cell_types_original_obs_key = "celltype_specific"
         self.development_stage_obs_key = "dev_stage"
         self.organ_obs_key = "organ"
         self.sex_obs_key = "sex"
         self.age_obs_key = "age"
 
-        self.var_symbol_col = "index"
+        self.gene_id_symbols_var_key = "index"
 
         self.set_dataset_id(idx=1)
 

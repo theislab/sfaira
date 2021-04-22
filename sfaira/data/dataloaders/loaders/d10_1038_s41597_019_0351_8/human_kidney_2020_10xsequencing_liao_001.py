@@ -25,8 +25,8 @@ class Dataset(DatasetBase):
         self.year = 2020
         self.doi = "10.1038/s41597-019-0351-8"
 
-        self.var_symbol_col = "names"
-        self.var_ensembl_col = "ensembl"
+        self.gene_id_symbols_var_key = "names"
+        self.gene_id_ensembl_var_key = "ensembl"
 
         self.set_dataset_id(idx=1)
 

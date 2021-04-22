@@ -74,9 +74,9 @@ Mandatory on sample (self.attribute) or cell level (self.obs_key_attribute):
     - .download_url_meta: Download link to metadata. Assumes that meta data is defined in .download_url_data if not
         specified.
         Example: self.download_meta = "some URL"
-    - .var_symbol_col, .var_ensembl_col: Location of gene name as gene symbol and/or ENSEMBL ID in adata.var
+    - .gene_id_symbols_var_key, .gene_id_ensembl_var_key: Location of gene name as gene symbol and/or ENSEMBL ID in adata.var
         (if index of adata.var, set to “index”, otherwise to column name). One of the two must be provided.
-        Example: self.var_symbol_col = 'index', self.var_ensembl_col = “GeneID”
+        Example: self.gene_id_symbols_var_key = 'index', self.gene_id_ensembl_var_key = “GeneID”
     - .author: First author of publication (or list of all authors).
         self.author = "Last name, first name" # or ["Last name, first name", "Last name, first name"]
     - .doi: Doi of publication
@@ -109,8 +109,8 @@ Optional (if available):
         Example: self.sex = “male”
     - .state_exact (or .obs_key_state_exact): Exact disease state
         self.state_exact = free text
-    - .obs_key_cellontology_original: Column in .obs in which free text cell type names are stored.
-        Example: self.obs_key_cellontology_original = 'CellType'
+    - .obs_key_cell_types_original: Column in .obs in which free text cell type names are stored.
+        Example: self.obs_key_cell_types_original = 'CellType'
     - .year: Year of publication:
         Example: self.year = 2019
     - .cell_line: Which cell line was used for the experiment (for cell culture samples)
@@ -138,7 +138,7 @@ Setting of class metadata such as `.doi`, `.id` etc. should be done in the const
 
 How do I tell sfaira where the gene names are?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-By setting the attributes `.var_symbol_col` or `.var_ensembl_col` in the constructor.
+By setting the attributes `.gene_id_symbols_var_key` or `.gene_id_ensembl_var_key` in the constructor.
 If the gene names are in the index of this data frame, you can set “index” as the value of these attributes.
 
 I only have gene symbols (human readable names, often abbreviations), such as HGNC or MGI, but not ENSEMBL identifiers, is that a problem?

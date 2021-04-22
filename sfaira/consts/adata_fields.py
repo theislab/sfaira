@@ -2,7 +2,7 @@
 The classes in this file are containers of field names and element entries that are used in streamlined adata objects
 in sfaira and in associated data bases.
 """
-from typing import List
+from typing import List, Union
 
 
 class AdataIds:
@@ -25,7 +25,7 @@ class AdataIds:
     ethnicity: str
     gene_id_ensembl: str
     gene_id_index: str
-    gene_id_names: str
+    gene_id_symbols: str
     id: str
     individual: str
     ncells: str
@@ -41,6 +41,14 @@ class AdataIds:
     obs_keys: List[str]
     var_keys: List[str]
     uns_keys: List[str]
+
+    classmap_source_key: str
+    classmap_target_key: str
+    classmap_target_id_key: str
+
+    unknown_celltype_identifier: Union[str, None]
+    not_a_cell_celltype_identifier: Union[str, None]
+    unknown_metadata_identifier: Union[str, None]
 
 
 class AdataIdsSfaira(AdataIds):
@@ -73,8 +81,8 @@ class AdataIdsSfaira(AdataIds):
         self.download_url_data = "download_url_data"
         self.download_url_meta = "download_url_meta"
         self.gene_id_ensembl = "ensembl"
-        self.gene_id_index = "ensembl"
-        self.gene_id_names = "names"
+        self.gene_id_index = self.gene_id_ensembl
+        self.gene_id_symbols = "names"
         self.id = "id"
         self.individual = "individual"
         self.ncells = "ncells"
@@ -126,7 +134,7 @@ class AdataIdsSfaira(AdataIds):
         ]
         self.var_keys = [
             "gene_id_ensembl",
-            "gene_id_names",
+            "gene_id_symbols",
         ]
         self.uns_keys = [
             "annotated",
@@ -141,6 +149,9 @@ class AdataIdsSfaira(AdataIds):
             "primary_data",
             "title",
             "year",
+            "load_raw",
+            "mapped_features",
+            "remove_gene_version",
         ]
 
 
@@ -153,13 +164,15 @@ class AdataIdsCellxgene(AdataIds):
 
     def __init__(self):
         self.assay_sc = "assay"
-        self.cell_types_original = "cell_type"  # TODO "free_annotation" not always given.
+        self.cell_types_original = "free_annotation"  # TODO "free_annotation" not always given
+        # TODO: -> This will break streamlining though if self.cell_types_original is the same value as self.cell_ontology_class!!
         self.cell_ontology_class = "cell_type"
         self.cell_ontology_id = "cell_type_ontology_term_id"
         self.default_embedding = "default_embedding"
         self.doi = "preprint_doi"
         self.disease = "disease"
-        self.gene_id_names = "gene_symbol"
+        self.gene_id_symbols = "gene_symbol"
+        self.gene_id_index = self.gene_id_symbols
         self.id = "id"
         self.ncells = "ncells"
         self.organ = "tissue"
@@ -178,6 +191,7 @@ class AdataIdsCellxgene(AdataIds):
         self.author_names = "names"
 
         self.unknown_celltype_identifier = None
+        self.not_a_cell_celltype_identifier = self.unknown_celltype_identifier
         self.unknown_metadata_identifier = "unknown"
         self.invalid_metadata_identifier = "na"
         self.unknown_metadata_ontology_id_identifier = ""
@@ -201,7 +215,7 @@ class AdataIdsCellxgene(AdataIds):
             "tech_sample",
         ]
         self.var_keys = [
-            "gene_id_names",
+            "gene_id_symbols",
         ]
         self.uns_keys = [
             "default_embedding",

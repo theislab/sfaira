@@ -64,7 +64,7 @@
       ~DatasetBase.obs_key_assay_type_differentiation
       ~DatasetBase.obs_key_cell_line
       ~DatasetBase.obs_key_cellontology_id
-      ~DatasetBase.obs_key_cellontology_original
+      ~DatasetBase.obs_key_cell_types_original
       ~DatasetBase.obs_key_dev_stage
       ~DatasetBase.obs_key_ethnicity
       ~DatasetBase.obs_key_healthy
@@ -82,8 +82,8 @@
       ~DatasetBase.sample_source
       ~DatasetBase.source
       ~DatasetBase.state_exact
-      ~DatasetBase.var_ensembl_col
-      ~DatasetBase.var_symbol_col
+      ~DatasetBase.gene_id_ensembl_var_key
+      ~DatasetBase.gene_id_symbols_var_key
       ~DatasetBase.year
    
    

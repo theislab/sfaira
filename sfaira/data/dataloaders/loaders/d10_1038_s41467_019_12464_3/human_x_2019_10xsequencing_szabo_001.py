@@ -69,10 +69,10 @@ class Dataset(DatasetBase):
         self.state_exact = SAMPLE_DICT[self.sample_fn][2]
         self.year = 2019
 
-        self.var_symbol_col = "Gene"
-        self.var_ensembl_col = "Accession"
+        self.gene_id_symbols_var_key = "Gene"
+        self.gene_id_ensembl_var_key = "Accession"
 
-        self.cellontology_original_obs_key = "cell_ontology_class"
+        self.cell_types_original_obs_key = "cell_ontology_class"
 
         self.set_dataset_id(idx=1)
 

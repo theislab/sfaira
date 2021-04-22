@@ -52,9 +52,9 @@ dataset_or_observation_wise:
     tech_sample:
     tech_sample_obs_key:
 observation_wise:
-    cellontology_original_obs_key: "Cluster"
+    cell_types_original_obs_key: "Cluster"
 feature_wise:
-    var_ensembl_col:
-    var_symbol_col: "index"
+    gene_id_ensembl_var_key:
+    gene_id_symbols_var_key: "index"
 meta:
     version: "1.0"
