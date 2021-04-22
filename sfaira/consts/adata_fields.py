@@ -190,6 +190,7 @@ class AdataIdsCellxgene(AdataIds):
         self.author_names = "names"
 
         self.unknown_celltype_identifier = None
+        self.not_a_cell_celltype_identifier = self.unknown_celltype_identifier
         self.unknown_metadata_identifier = "unknown"
         self.invalid_metadata_identifier = "na"
         self.unknown_metadata_ontology_id_identifier = ""
