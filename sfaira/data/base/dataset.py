@@ -657,6 +657,11 @@ class DatasetBase(abc.ABC):
         else:
             raise ValueError(f"did not recognize schema {schema}")
 
+        if hasattr("gene_id_ensembl", adata_target_ids) and not hasattr("gene_id_ensembl", self._adata_ids):
+            # TODO: Handle this better (eg. through automatic conversion of gene symbols as done in streamline_metadata)
+            raise ValueError(f"Cannot convert this object to schema {schema}, as the currently applied schema does not "
+                             f"have an ensembl gene ID annotation. Please run .streamline_features() first.")
+
         # Creating new var annotation
         var_new = pd.DataFrame()
         for k in adata_target_ids.var_keys:
@@ -766,6 +771,10 @@ class DatasetBase(abc.ABC):
             if self.adata.varp is not None:
                 del self.adata.varp
             self.adata.var = var_new
+            if "gene_id_ensembl" not in adata_target_ids.var_keys:
+                self.gene_id_ensembl_var_key = None
+            if "gene_id_symbols" not in adata_target_ids.var_keys:
+                self.gene_id_symbols_var_key = None
         else:
             self.adata.var = pd.concat([var_new, self.adata.var], axis=1, ignore_index=True)
             self.adata.var.index = var_new.index
