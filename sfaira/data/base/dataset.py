@@ -813,7 +813,8 @@ class DatasetBase(abc.ABC):
                     )
                 else:
                     self.adata.obs[getattr(adata_target_ids, k)] = adata_target_ids.unknown_metadata_identifier
-                    self.adata.obs[getattr(adata_target_ids, k) + "_ontology_term_id"] = adata_target_ids.unknown_metadata_ontology_id_identifier
+                    self.adata.obs[getattr(adata_target_ids, k) + "_ontology_term_id"] = \
+                        adata_target_ids.unknown_metadata_ontology_id_identifier
             # Adapt var columns naming.
             if self.organism == "mouse":
                 gene_id_new = "hgnc_gene_symbol"
@@ -823,8 +824,9 @@ class DatasetBase(abc.ABC):
                 raise ValueError(f"organism {self.organism} currently not supported")
             self.adata.var[gene_id_new] = self.adata.var[getattr(adata_target_ids, "gene_id_symbols")]
             self.adata.var.index = self.adata.var[gene_id_new].tolist()
-            if gene_id_new != getattr(adata_target_ids, "gene_id_symbols"):
-                del self.adata.var[getattr(adata_target_ids, "gene_id_symbols")]
+            if gene_id_new != self.gene_id_symbols_var_key:
+                del self.adata.var[self.gene_id_symbols_var_key]
+                self.gene_id_symbols_var_key = gene_id_new
 
         # Make sure that correct unknown_metadata_identifier is used in .uns, .obs and .var metadata
         self.adata.obs = self.adata.obs.replace({None: adata_target_ids.unknown_metadata_identifier})
