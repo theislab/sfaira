@@ -1060,7 +1060,7 @@ class DatasetBase(abc.ABC):
                 attr="celltypes",
                 allowed=self.ontology_celltypes,
                 attempted=[
-                    x for x in list(np.unique(labels_mapped))
+                    x for x in list(set(labels_mapped))
                     if x not in [
                         adata_fields.unknown_celltype_identifier,
                         adata_fields.not_a_cell_celltype_identifier
