@@ -327,8 +327,12 @@ class DatasetGroup:
         if not adata_ls:
             return None
         if len(adata_ls) == 1:
+            for i in self.ids:
+                if self.datasets[i] is not None:
+                    if self.datasets[i].adata is not None:
+                        ds_id = i
             adata_concat = adata_ls[0]
-            adata_concat.obs[self._adata_ids.dataset] = adata_ls[0].uns['id']
+            adata_concat.obs[self._adata_ids.dataset] = ds_id
         else:
             # Check that all individual adata objects in linked Dataset instances have identicall streamlined features and metadata
             match_ref_list = []
@@ -895,8 +899,12 @@ class DatasetSuperGroup:
         if not adata_ls:
             return None
         if len(adata_ls) == 1:
+            for i in self.ids:
+                if self.datasets[i] is not None:
+                    if self.datasets[i].adata is not None:
+                        ds_id = i
             adata_concat = adata_ls[0]
-            adata_concat.obs[self._adata_ids.dataset] = adata_ls[0].uns['id']
+            adata_concat.obs[self._adata_ids.dataset] = ds_id
         else:
             # Check that all individual adata objects in linked Dataset instances have identicall streamlined features and metadata
             match_ref_list = []
