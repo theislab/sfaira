@@ -94,21 +94,11 @@ class GenomeContainer:
 
     def __init__(
             self,
-            organism: Union[None, str] = None,
-            assembly: Union[None, str] = None,
+            assembly: str = None,
     ):
-        if assembly is None:
-            # Set defaults based on organism if assembly is not given.
-            if organism is None:
-                raise ValueError("Supply either organism or assembly to GenomeContainer().")
-            if organism == "human":
-                self.assembly = "Homo_sapiens.GRCh38.102"
-            elif organism == "mouse":
-                self.assembly = "Mus_musculus.GRCm38.102"
-            else:
-                raise ValueError(f"organism {organism} not found")
-        else:
-            self.assembly = assembly
+        if not isinstance(assembly, str):
+            raise ValueError(f"supplied assembly {assembly} was not a string")
+        self.assembly = assembly
         self.gtfi = GtfInterface(assembly=self.assembly)
         self.load_genome()
 

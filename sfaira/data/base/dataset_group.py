@@ -192,8 +192,8 @@ class DatasetGroup:
         """
         for x in self.ids:
             self.datasets[x].streamline_features(
-                remove_gene_version=remove_gene_version,
                 match_to_reference=match_to_reference,
+                remove_gene_version=remove_gene_version,
                 subset_genes_to_type=subset_genes_to_type,
             )
 
@@ -877,9 +877,9 @@ class DatasetSuperGroup:
         """
         for x in self.dataset_groups:
             x.streamline_features(
-                remove_gene_version=remove_gene_version,
                 match_to_reference=match_to_reference,
-                subset_genes_to_type=subset_genes_to_type
+                remove_gene_version=remove_gene_version,
+                subset_genes_to_type=subset_genes_to_type,
             )
 
     @property

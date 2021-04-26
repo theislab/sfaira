@@ -20,15 +20,17 @@ for x in dois.split(","):
     )
     ds.subset(key="doi", values=[x])
     ds.load(
-        match_to_reference=None,
-        remove_gene_version=True,
         load_raw=False,
         allow_caching=True,
-        set_metadata=False,
     )
     if schema == "cellxgene":
-        ds.streamline_features(remove_gene_version=True, match_to_reference=True, subset_genes_to_type=None)
-    ds.streamline_metadata(schema=schema.lower(), uns_to_obs=False, clean_obs=False, clean_var=True, clean_uns=False, clean_obs_names=True)
+        ds.streamline_features(
+            match_to_reference={"human": "Homo_sapiens.GRCh38.102", "mouse": "Mus_musculus.GRCm38.102"},
+            remove_gene_version=True,
+            subset_genes_to_type=None
+        )
+    ds.streamline_metadata(schema=schema.lower(), uns_to_obs=False, clean_obs=False, clean_var=True, clean_uns=False,
+                           clean_obs_names=True)
     assert len(ds.dataset_groups) == 1, len(ds.dataset_groups)
     dsg = ds.dataset_groups[0]
     for k, v in dsg.datasets.items():

@@ -546,10 +546,10 @@ class DatasetBase(abc.ABC):
         self.__assert_loaded()
 
         # Set genome container if mapping of gene labels is requested
-        if match_to_reference is not False:  # Testing this explicitly makes sure False is treated separately from None
+        if match_to_reference is not None:  # Testing this explicitly makes sure False is treated separately from None
             if isinstance(match_to_reference, dict):
                 match_to_reference = match_to_reference[self.organism]
-            self._set_genome(organism=self.organism, assembly=match_to_reference)
+            self._set_genome(assembly=match_to_reference)
             self.mapped_features = self.genome_container.assembly
         else:
             self.mapped_features = False
@@ -983,9 +983,8 @@ class DatasetBase(abc.ABC):
         else:
             raise ValueError(f"Did not recognize backed AnnData.X format {type(adata_backed.X)}")
 
-    def _set_genome(self, organism: str, assembly: Union[str, None]):
+    def _set_genome(self, assembly: Union[str, None]):
         self.genome_container = GenomeContainer(
-            organism=organism,
             assembly=assembly,
         )
 
