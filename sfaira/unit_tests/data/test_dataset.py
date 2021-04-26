@@ -107,14 +107,15 @@ def test_dsgs_streamline_features(match_to_reference: str, remove_gene_version: 
 
 @pytest.mark.parametrize("store", ["h5ad"])
 @pytest.mark.parametrize("dense", [False])
-def test_dsg_write_store(store: str, dense: bool):
+@pytest.mark.parametrize("clean_obs", [False, True])
+def test_dsg_write_store(store: str, dense: bool, clean_obs: bool):
     ds = Universe(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
     ds.subset(key="organism", values=["mouse"])
     ds.subset(key="organ", values=["lung"])
     ds.load()
     ds.streamline_features(remove_gene_version=True, match_to_reference={"mouse": MOUSE_GENOME_ANNOTATION},
                            subset_genes_to_type="protein_coding")
-    ds.streamline_metadata(schema="sfaira", uns_to_obs=False, clean_obs=True, clean_var=True, clean_uns=True,
+    ds.streamline_metadata(schema="sfaira", uns_to_obs=False, clean_obs=clean_obs, clean_var=True, clean_uns=True,
                            clean_obs_names=True)
     ds.write_distributed_store(dir_cache=os.path.join(dir_data, "store"), store=store, dense=dense)
 

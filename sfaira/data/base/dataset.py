@@ -795,8 +795,13 @@ class DatasetBase(abc.ABC):
             if "gene_id_symbols" not in adata_target_ids.var_keys:
                 self.gene_id_symbols_var_key = None
         else:
-            self.adata.var = pd.concat([var_new, self.adata.var], axis=1, ignore_index=True)
-            self.adata.var.index = var_new.index
+            index_old = self.adata.var.index.copy()
+            # Add old columns in if they are not duplicated:
+            self.adata.var = pd.concat([
+                var_new,
+                pd.DataFrame(dict([(k, v) for k, v in self.adata.var.items() if k not in var_new.columns]))
+            ], axis=1)
+            self.adata.var.index = index_old
         if clean_obs:
             if self.adata.obsm is not None:
                 del self.adata.obsm
@@ -804,8 +809,13 @@ class DatasetBase(abc.ABC):
                 del self.adata.obsp
             self.adata.obs = obs_new
         else:
-            self.adata.obs = pd.concat([obs_new, self.adata.obs], axis=1, ignore_index=True)
-            self.adata.obs.index = obs_new.index
+            index_old = self.adata.obs.index.copy()
+            # Add old columns in if they are not duplicated:
+            self.adata.obs = pd.concat([
+                obs_new,
+                pd.DataFrame(dict([(k, v) for k, v in self.adata.obs.items() if k not in obs_new.columns]))
+            ], axis=1)
+            self.adata.obs.index = index_old
         if clean_obs_names:
             self.adata.obs.index = [f"{self.id}_{i}" for i in range(1, self.adata.n_obs + 1)]
         if clean_uns:
