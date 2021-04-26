@@ -884,8 +884,8 @@ class DatasetBase(abc.ABC):
         """
         Write data set into a format that allows distributed access to data set on disk.
 
-        Writes to a zarr-backed h5ad.
-        Load data set and streamline before calling this method.
+        Stores are useful for distributed access to data sets, in many settings this requires some streamlining of the
+        data sets that are accessed. Use .streamline_* before calling this method to streamline the data sets.
 
         :param dir_cache: Directory to write cache in.
         :param store: Disk format for objects in cache:
