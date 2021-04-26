@@ -252,8 +252,12 @@ class DatasetBase(abc.ABC):
         if yaml_path is not None:
             assert os.path.exists(yaml_path), f"did not find yaml {yaml_path}"
             yaml_vals = read_yaml(fn=yaml_path)
+            # Set organism first as this is required to disambiguate valid entries for other meta data.
+            k = "organism"
+            v = yaml_vals["attr"]["organism"]
+            setattr(self, k, v)
             for k, v in yaml_vals["attr"].items():
-                if v is not None and k not in ["sample_fns", "dataset_index"]:
+                if v is not None and k not in ["organism", "sample_fns", "dataset_index"]:
                     if isinstance(v, dict):  # v is a dictionary over file-wise meta-data items
                         assert self.sample_fn in v.keys(), f"did not find key {self.sample_fn} in yamls keys for {k}"
                         setattr(self, k, v[self.sample_fn])
@@ -838,8 +842,12 @@ class DatasetBase(abc.ABC):
             # Add ontology IDs where necessary (note that human readable terms are also kept):
             for k in ["organ", "assay_sc", "disease", "ethnicity", "development_stage"]:
                 if getattr(adata_target_ids, k) in self.adata.obs.columns:
+                    ontology = getattr(self.ontology_container_sfaira, k)
+                    # Disambiguate organism-dependent ontologies:
+                    if isinstance(ontology, dict):
+                        ontology = ontology[self.organism]
                     self.__project_name_to_id_obs(
-                        ontology=k,
+                        ontology=ontology,
                         key_in=getattr(adata_target_ids, k),
                         key_out=getattr(adata_target_ids, k) + "_ontology_term_id",
                         map_exceptions=[],
@@ -1114,8 +1122,9 @@ class DatasetBase(abc.ABC):
             # TODO this could be changed in the future, this allows this function to be used both on cell type name
             #  mapping files with and without the ID in the third column.
             # This mapping blocks progression in the unit test if not deactivated.
+            ontology = getattr(self.ontology_container_sfaira, "cellontology_class")
             ids_mapped = self.__project_name_to_id_obs(
-                ontology="cellontology_class",
+                ontology=ontology,
                 key_in=labels_mapped,
                 key_out=None,
                 map_exceptions=[
@@ -1138,7 +1147,7 @@ class DatasetBase(abc.ABC):
 
     def __project_name_to_id_obs(
             self,
-            ontology: str,
+            ontology: Ontology,
             key_in: Union[str, list],
             key_out: Union[str, None],
             map_exceptions: list,
@@ -1147,14 +1156,14 @@ class DatasetBase(abc.ABC):
         """
         Project ontology names to IDs for a given ontology in .obs entries.
 
-        :param ontology: name of the ontology to use when converting to IDs
+        :param ontology: ontology to use when converting to IDs
         :param key_in: name of obs_column containing names to convert or python list containing these values
         :param key_out: name of obs_column to write the IDs or None. If None, a python list with the new values will be returned
         :param map_exceptions: list of values that should not be mapped
         :param map_exceptions_value: placeholder target value for values excluded from mapping
         :return:
         """
-        ontology = getattr(self.ontology_container_sfaira, ontology)
+        assert ontology is not None, f"cannot project value for {key_in} because ontology is None"
         assert isinstance(key_in, (str, list)), f"argument key_in needs to be of type str or list. Supplied" \
                                                 f"type: {type(key_in)}"
         input_values = self.adata.obs[key_in].values if isinstance(key_in, str) else key_in
@@ -1473,7 +1482,8 @@ class DatasetBase(abc.ABC):
 
     @development_stage.setter
     def development_stage(self, x: str):
-        x = self._value_protection(attr="development_stage", allowed=self.ontology_container_sfaira.development_stage,
+        x = self._value_protection(attr="development_stage",
+                                   allowed=self.ontology_container_sfaira.development_stage[self.organism],
                                    attempted=x)
         self._development_stage = x
 
@@ -1597,7 +1607,8 @@ class DatasetBase(abc.ABC):
 
     @ethnicity.setter
     def ethnicity(self, x: str):
-        x = self._value_protection(attr="ethnicity", allowed=self.ontology_container_sfaira.ethnicity, attempted=x)
+        x = self._value_protection(attr="ethnicity", allowed=self.ontology_container_sfaira.ethnicity[self.organism],
+                                   attempted=x)
         self._ethnicity = x
 
     @property
