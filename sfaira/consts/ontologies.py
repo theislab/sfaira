@@ -1,6 +1,6 @@
 from sfaira.versions.metadata import OntologyList, OntologyCl
-from sfaira.versions.metadata import OntologyUberon, OntologyHsapdv, OntologyMondo, OntologyMmusdv, \
-    OntologySinglecellLibraryConstruction, OntologyCellosaurus
+from sfaira.versions.metadata import OntologyCellosaurus, OntologyHsapdv, OntologyMondo, \
+    OntologyMmusdv, OntologySinglecellLibraryConstruction, OntologyUberon
 
 
 class OntologyContainerSfaira:
@@ -19,10 +19,16 @@ class OntologyContainerSfaira:
         self.cell_types_original = None
         self.collection_id = None
         self.default_embedding = None
-        self.development_stage = None  # OntologyHsapdv()  # TODO allow for other organisms here too.
+        self.development_stage = {
+            "human": OntologyHsapdv(),
+            "mouse": OntologyMmusdv(),
+        }
         self.disease = OntologyMondo()
         self.doi = None
-        self.ethnicity = None  # OntologyHancestro()  # TODO
+        self.ethnicity = {
+            "human": None,  # TODO OntologyHancestro
+            "mouse": None,
+        }
         self.id = None
         self.individual = None
         self.normalization = None
