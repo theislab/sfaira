@@ -769,7 +769,9 @@ class DatasetBase(abc.ABC):
                     uns_new[new_col] = UNS_STRING_META_IN_OBS
                     # Remove potential pd.Categorical formatting:
                     ontology = getattr(self.ontology_container_sfaira, k) if hasattr(self.ontology_container_sfaira, k) else None
-                    if k in ["development_stage", "ethnicity"]:
+                    if k == "development_stage":
+                        ontology = ontology[self.organism]
+                    if k == "ethnicity":
                         ontology = ontology[self.organism]
                     self._value_protection(attr=new_col, allowed=ontology, attempted=np.unique(self.adata.obs[old_col].values).tolist())
                     obs_new[new_col] = self.adata.obs[old_col].values.tolist()
@@ -877,6 +879,13 @@ class DatasetBase(abc.ABC):
             if gene_id_new != self.gene_id_symbols_var_key:
                 del self.adata.var[self.gene_id_symbols_var_key]
                 self.gene_id_symbols_var_key = gene_id_new
+            # Check if .X is counts: The conversion are based on the assumption that .X is csr.
+            assert isinstance(self.adata.X, scipy.sparse.csr_matrix), type(self.adata.X)
+            count_values = np.unique(np.asarray(self.adata.X.todense()))
+            is_counts = np.all(count_values % 1. == 0.)
+            if not is_counts:
+                print(f"WARNING: not all count entries were counts {is_counts}. rounding.")
+                self.adata.X.data = np.rint(self.adata.X.data)
 
         # Make sure that correct unknown_metadata_identifier is used in .uns, .obs and .var metadata
         self.adata.obs = self.adata.obs.replace({None: adata_target_ids.unknown_metadata_identifier})

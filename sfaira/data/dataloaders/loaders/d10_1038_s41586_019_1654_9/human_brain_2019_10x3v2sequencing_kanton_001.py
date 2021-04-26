@@ -29,9 +29,6 @@ def load(data_dir, **kwargs):
     with zipfile.ZipFile(fn[2]) as archive:
         obs = pandas.read_csv(archive.open('metadata_human_cells.tsv'), sep="\t", index_col=0)
     adata = anndata.AnnData(X=x, var=var, obs=obs)
-
     adata.obs["Line"] = [cell_line_dict[x] for x in adata.obs["Line"]]
-
-    # TODO: remove non-protein coding genes?
 
     return adata
