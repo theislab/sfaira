@@ -56,6 +56,12 @@ class DistributedStore:
         self._adata_ids_sfaira = AdataIdsSfaira()
         self._celltype_universe = None
 
+    @property
+    def adata(self):
+        return list(self.adatas.values)[0].concatenate(
+            list(self.adatas.values)[1:]
+        )
+
     def generator(
             self,
             batch_size: int = 1,

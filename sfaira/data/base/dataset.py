@@ -769,6 +769,8 @@ class DatasetBase(abc.ABC):
                     uns_new[new_col] = UNS_STRING_META_IN_OBS
                     # Remove potential pd.Categorical formatting:
                     ontology = getattr(self.ontology_container_sfaira, k) if hasattr(self.ontology_container_sfaira, k) else None
+                    if k in ["development_stage", "ethnicity"]:
+                        ontology = ontology[self.organism]
                     self._value_protection(attr=new_col, allowed=ontology, attempted=np.unique(self.adata.obs[old_col].values).tolist())
                     obs_new[new_col] = self.adata.obs[old_col].values.tolist()
                     del self.adata.obs[old_col]
