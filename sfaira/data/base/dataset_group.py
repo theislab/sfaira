@@ -196,6 +196,13 @@ class DatasetGroup:
                 subset_genes_to_type=subset_genes_to_type,
             )
 
+    def collapse_counts(self):
+        """
+        Collapse count matrix along duplicated index.
+        """
+        for x in self.ids:
+            self.datasets[x].collapse_counts()
+
     def write_distributed_store(
             self,
             dir_cache: Union[str, os.PathLike],
@@ -884,6 +891,13 @@ class DatasetSuperGroup:
                 remove_gene_version=remove_gene_version,
                 subset_genes_to_type=subset_genes_to_type,
             )
+
+    def collapse_counts(self):
+        """
+        Collapse count matrix along duplicated index.
+        """
+        for x in self.dataset_groups:
+            x.collapse_counts()
 
     @property
     def adata_ls(self):
