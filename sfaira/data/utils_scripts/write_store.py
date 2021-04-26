@@ -20,13 +20,8 @@ for k, ds in universe.datasets.items():
         allow_caching=True,
         set_metadata=False,
     )
-    ds.streamline(
-        format="sfaira",
-        allow_uns_sfaira=True,
-        clean_obs=True,
-        clean_var=True,
-        clean_uns=True,
-    )
-    ds.subset_genes(subset_type="protein_coding")
+    ds.streamline_features(remove_gene_version=True, match_to_reference=True, subset_genes_to_type="protein_coding")
+    ds.streamline_metadata(schema="sfaira", uns_to_obs=False, clean_obs=False, clean_var=True, clean_uns=False,
+                           clean_obs_names=True)
     ds.write_distributed_store(dir_cache=path_store, store="h5ad")
     ds.clear()
