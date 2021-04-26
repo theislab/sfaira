@@ -565,7 +565,7 @@ class DatasetBase(abc.ABC):
             elif key == "index":
                 self.adata.var.index = make_index_unique(self.adata.var.index).tolist()
             else:
-                self.adata.var[key] = make_index_unique(self.adata.var[key]).tolist()
+                self.adata.var[key] = make_index_unique(pd.Index(self.adata.var[key].values.tolist())).tolist()
         if remove_gene_version:
             self._collapse_ensembl_gene_id_versions()
 
