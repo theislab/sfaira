@@ -529,6 +529,13 @@ class DatasetBase(abc.ABC):
         # Collapse if necessary:
         self.adata = collapse_matrix(adata=self.adata, var_column=self.gene_id_ensembl_var_key)
 
+    def collapse_counts(self):
+        """
+        Collapse count matrix along duplicated index.
+        """
+        if len(np.unique(self.adata.var.index)) < self.adata.var.shape[0]:
+            self.adata = collapse_matrix(adata=self.adata, var_column="index")
+
     def streamline_features(
             self,
             match_to_reference: Union[str, Dict[str, str], None],

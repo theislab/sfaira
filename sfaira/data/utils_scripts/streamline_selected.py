@@ -29,8 +29,15 @@ for x in dois.split(","):
             remove_gene_version=True,
             subset_genes_to_type=None
         )
-    ds.streamline_metadata(schema=schema.lower(), uns_to_obs=False, clean_obs=False, clean_var=True, clean_uns=False,
-                           clean_obs_names=False)
+        ds.streamline_metadata(
+            schema=schema.lower(),
+            uns_to_obs=False,
+            clean_obs=False,
+            clean_var=True,
+            clean_uns=True,
+            clean_obs_names=False
+        )
+        ds.collapse_counts()
     assert len(ds.dataset_groups) == 1, len(ds.dataset_groups)
     dsg = ds.dataset_groups[0]
     for k, v in dsg.datasets.items():
