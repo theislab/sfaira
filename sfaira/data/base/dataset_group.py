@@ -174,17 +174,16 @@ class DatasetGroup:
 
     def streamline_features(
             self,
-            match_to_reference: Union[str, Dict[str, str], None] = None,
+            match_to_reference: Union[str, Dict[str, str], None],
             remove_gene_version: bool = True,
             subset_genes_to_type: Union[None, str, List[str]] = None,
     ):
         """
         Subset and sort genes to genes defined in an assembly or genes of a particular type, such as protein coding.
-        :param match_to_reference: Whether to map gene names to a given annotation. Can be:
+        :param match_to_reference: Which annotation to map the feature space to. Can be:
             - str: Provide the name of the annotation in the format Organism.Assembly.Release
             - dict: Mapping of organism to name of the annotation (see str format). Chooses annotation for each data set
                 based on organism annotation.
-            - False: no mapping of gene labels will be done.
         :param remove_gene_version: Whether to remove the version number after the colon sometimes found in ensembl gene ids.
         :param subset_genes_to_type: Type(s) to subset to. Can be a single type or a list of types or None. Types can be:
             - None: All genes in assembly.
@@ -860,18 +859,17 @@ class DatasetSuperGroup:
 
     def streamline_features(
             self,
-            match_to_reference: Union[str, Dict[str, str], None] = None,
+            match_to_reference: Union[str, Dict[str, str], None],
             remove_gene_version: bool = True,
             subset_genes_to_type: Union[None, str, List[str]] = None,
     ):
         """
         Subset and sort genes to genes defined in an assembly or genes of a particular type, such as protein coding.
-        :param remove_gene_version: Whether to remove the version number after the colon sometimes found in ensembl gene ids.
-        :param match_to_reference: Whether to map gene names to a given annotation. Can be:
+        :param match_to_reference: Which annotation to map the feature space to. Can be:
             - str: Provide the name of the annotation in the format Organism.Assembly.Release
             - dict: Mapping of organism to name of the annotation (see str format). Chooses annotation for each data set
                 based on organism annotation.
-            - False: no mapping of gene labels will be done.
+        :param remove_gene_version: Whether to remove the version number after the colon sometimes found in ensembl gene ids.
         :param subset_genes_to_type: Type(s) to subset to. Can be a single type or a list of types or None. Types can be:
             - None: All genes in assembly.
             - "protein_coding": All protein coding genes in assembly.
