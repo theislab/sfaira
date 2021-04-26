@@ -843,7 +843,7 @@ class DatasetBase(abc.ABC):
             for k in ["organ", "assay_sc", "disease", "ethnicity", "development_stage"]:
                 if getattr(adata_target_ids, k) in self.adata.obs.columns:
                     self.__project_name_to_id_obs(
-                        ontology=getattr(adata_target_ids, k),
+                        ontology=k,
                         key_in=getattr(adata_target_ids, k),
                         key_out=getattr(adata_target_ids, k) + "_ontology_term_id",
                         map_exceptions=[],
