@@ -10,7 +10,7 @@ import os
 from os import PathLike
 import pandas
 import scipy.sparse
-from typing import List, Tuple, Union
+from typing import Dict, List, Tuple, Union
 import warnings
 import urllib.request
 import urllib.parse
@@ -486,7 +486,8 @@ class DatasetBase(abc.ABC):
                 # match it straight away, if it is not in there we try to match everything in front of the first period in
                 # the gene name with a dictionary that was modified in the same way, if there is still no match we append na
                 ensids = []
-                symbs = self.adata.var.index if self.gene_id_symbols_var_key == "index" else self.adata.var[self.gene_id_symbols_var_key]
+                symbs = self.adata.var.index if self.gene_id_symbols_var_key == "index" else \
+                    self.adata.var[self.gene_id_symbols_var_key]
                 for n in symbs:
                     if n in id_dict.keys():
                         ensids.append(id_dict[n])
@@ -521,8 +522,8 @@ class DatasetBase(abc.ABC):
 
     def streamline_features(
             self,
+            match_to_reference: Union[str, Dict[str, str], None] = None,
             remove_gene_version: bool = True,
-            match_to_reference: Union[str, bool, None] = None,
             subset_genes_to_type: Union[None, str, List[str]] = None,
     ):
         """
@@ -530,20 +531,24 @@ class DatasetBase(abc.ABC):
         This also adds missing ensid or gene symbol columns if match_to_reference is not set to False and removes all
         adata.var columns that are not defined as gene_id_ensembl_var_key or gene_id_symbol_var_key in the dataloader.
 
-        :param remove_gene_version: Whether to remove the version number after the colon sometimes found in ensembl gene ids.
         :param match_to_reference: Whether to map gene names to a given annotation. Can be:
-                                   - str: Provide the name of the annotation in the format Organism.Assembly.Release
-                                   - None: use the default annotation for this organism in sfaira.
-                                   - False: no mapping of gene labels will be done.
+            - str: Provide the name of the annotation in the format Organism.Assembly.Release
+            - dict: Mapping of organism to name of the annotation (see str format). Chooses annotation for each data set
+                based on organism annotation.
+            - False: no mapping of gene labels will be done.
+        :param remove_gene_version: Whether to remove the version number after the colon sometimes found in ensembl gene ids.
         :param subset_genes_to_type: Type(s) to subset to. Can be a single type or a list of types or None. Types can be:
             - None: All genes in assembly.
             - "protein_coding": All protein coding genes in assembly.
         """
-        # TODO: think about workflow when featurespace should nt be sreamlined. can we still apply a metadata schema?
+        # TODO: think about workflow when featurespace should nt be streamlined. can we still apply a metadata schema?
         assert match_to_reference is not False, "feature_streamlining is not possible when match_to_reference is False"
+        self.__assert_loaded()
 
         # Set genome container if mapping of gene labels is requested
         if match_to_reference is not False:  # Testing this explicitly makes sure False is treated separately from None
+            if isinstance(match_to_reference, dict):
+                match_to_reference = match_to_reference[self.organism]
             self._set_genome(organism=self.organism, assembly=match_to_reference)
             self.mapped_features = self.genome_container.assembly
         else:
@@ -662,6 +667,7 @@ class DatasetBase(abc.ABC):
         :param clean_obs_names: Whether to replace obs_names with a string comprised of dataset id and an increasing integer.
         :return:
         """
+        self.__assert_loaded()
 
         # Set schema as provided by the user
         if schema == "sfaira":

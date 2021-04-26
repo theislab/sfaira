@@ -48,7 +48,7 @@ def test_dsgs_adata():
     ds = Universe(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
     ds.subset(key="organism", values=["mouse"])
     ds.subset(key="organ", values=["lung"])
-    ds.load(remove_gene_version=True)
+    ds.load()
     _ = ds.adata
 
 
@@ -56,7 +56,7 @@ def test_dsgs_load():
     ds = Universe(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
     ds.subset(key="organism", values=["mouse"])
     ds.subset(key="organ", values=["lung"])
-    ds.load(remove_gene_version=False)
+    ds.load()
 
 
 @pytest.mark.parametrize("organ", ["lung"])
@@ -68,7 +68,7 @@ def test_dsgs_subset_cell_wise(organ: str, celltype: str):
     ds = Universe(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
     ds.subset(key="organism", values=["mouse"])
     ds.subset(key="organ", values=[organ])
-    ds.load(remove_gene_version=False)
+    ds.load()
     ds.subset_cells(key="cellontology_class", values=celltype)
     for x in ds.dataset_groups:
         for k, v in x.datasets.items():
@@ -87,8 +87,20 @@ def test_dsgs_streamline_metadata(out_format: str, clean_obs: bool, clean_var: b
     ds = Universe(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
     ds.subset(key="organism", values=["mouse"])
     ds.subset(key="organ", values=["lung"])
-    ds.load(remove_gene_version=True)
+    ds.load()
     ds.streamline_metadata(schema=out_format, uns_to_obs=True, clean_obs=clean_obs, clean_var=clean_var, clean_uns=clean_uns, clean_obs_names=clean_obs_names)
+
+
+@pytest.mark.parametrize("match_to_reference", ["Mus_musculus.GRCm38.102", {"mouse": "Mus_musculus.GRCm38.102"}])
+@pytest.mark.parametrize("remove_gene_version", [False, True])
+@pytest.mark.parametrize("subset_genes_to_type", [None, "protein_coding"])
+def test_dsgs_streamline_features(match_to_reference: str, remove_gene_version: str, subset_genes_to_type: str):
+    ds = Universe(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
+    ds.subset(key="organism", values=["mouse"])
+    ds.subset(key="organ", values=["lung"])
+    ds.load()
+    ds.streamline_features(remove_gene_version=remove_gene_version, match_to_reference=match_to_reference,
+                           subset_genes_to_type=subset_genes_to_type)
 
 
 def test_dsg_load_backed_dense(genome="Mus_musculus_GRCm38_97"):
