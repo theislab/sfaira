@@ -64,6 +64,12 @@ def is_child(
             raise ValueError(f"did not recognize ontology type {type(ontology)}")
 
 
+def clean_string(s):
+    if s is not None:
+        s = s.replace(',', '').replace(' ', '').replace('-', '').replace('_', '').replace("'", '').lower()
+    return s
+
+
 class DatasetBase(abc.ABC):
     adata: Union[None, anndata.AnnData]
     class_maps: dict
@@ -1301,11 +1307,6 @@ class DatasetBase(abc.ABC):
             self,
             idx: int = 1
     ):
-        def clean(s):
-            if s is not None:
-                s = s.replace(' ', '').replace('-', '').replace('_', '').replace("'", '').lower()
-            return s
-
         if self.sample_fn is not None:
             idx += self._sample_fns.index(self.sample_fn)
         idx = str(idx).zfill(3)
@@ -1317,11 +1318,11 @@ class DatasetBase(abc.ABC):
 
         # Note: access private attributes here, e.g. _organism, to avoid loading of content via meta data, which would
         # invoke call to self.id before it is set.
-        self.id = f"{clean(self._organism)}_" \
-                  f"{clean(self._organ)}_" \
+        self.id = f"{clean_string(self._organism)}_" \
+                  f"{clean_string(self._organ)}_" \
                   f"{self._year}_" \
-                  f"{clean(self._assay_sc)}_" \
-                  f"{clean(author)}_" \
+                  f"{clean_string(self._assay_sc)}_" \
+                  f"{clean_string(author)}_" \
                   f"{idx}_" \
                   f"{self.doi_main}"
 
