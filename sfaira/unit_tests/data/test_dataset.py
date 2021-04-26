@@ -6,6 +6,8 @@ import scipy.sparse
 from sfaira.data import DatasetSuperGroup
 from sfaira.data import Universe
 
+MOUSE_GENOME_ANNOTATION = "Mus_musculus.GRCm38.102"
+
 dir_data = "../test_data"
 dir_meta = "../test_data/meta"
 
@@ -91,7 +93,7 @@ def test_dsgs_streamline_metadata(out_format: str, clean_obs: bool, clean_var: b
     ds.streamline_metadata(schema=out_format, uns_to_obs=True, clean_obs=clean_obs, clean_var=clean_var, clean_uns=clean_uns, clean_obs_names=clean_obs_names)
 
 
-@pytest.mark.parametrize("match_to_reference", ["Mus_musculus.GRCm38.102", {"mouse": "Mus_musculus.GRCm38.102"}])
+@pytest.mark.parametrize("match_to_reference", ["Mus_musculus.GRCm38.102", {"mouse": MOUSE_GENOME_ANNOTATION}])
 @pytest.mark.parametrize("remove_gene_version", [False, True])
 @pytest.mark.parametrize("subset_genes_to_type", [None, "protein_coding"])
 def test_dsgs_streamline_features(match_to_reference: str, remove_gene_version: bool, subset_genes_to_type: str):
@@ -110,6 +112,10 @@ def test_dsg_write_store(store: str, dense: bool):
     ds.subset(key="organism", values=["mouse"])
     ds.subset(key="organ", values=["lung"])
     ds.load()
+    ds.streamline_features(remove_gene_version=True, match_to_reference={"mouse": MOUSE_GENOME_ANNOTATION},
+                           subset_genes_to_type="protein_coding")
+    ds.streamline_metadata(schema="sfaira", uns_to_obs=False, clean_obs=True, clean_var=True, clean_uns=True,
+                           clean_obs_names=True)
     ds.write_distributed_store(dir_cache=os.path.join(dir_data, "store"), store=store, dense=dense)
 
 
