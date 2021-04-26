@@ -465,38 +465,37 @@ class DatasetBase(abc.ABC):
             gene_id_ensembl = "ensembl"  # add some default name if not in schema
             self._adata_ids.gene_id_ensembl = gene_id_ensembl
 
-        if match_to_reference is not False:
-            if not self.gene_id_symbols_var_key and not self.gene_id_ensembl_var_key:
-                raise ValueError("Either gene_id_symbols_var_key or gene_id_ensembl_var_key needs to be provided in the"
-                                 " dataloader")
-            elif not self.gene_id_symbols_var_key and self.gene_id_ensembl_var_key:
-                # Convert ensembl ids to gene symbols
-                id_dict = self.genome_container.id_to_names_dict
-                ensids = self.adata.var.index if self.gene_id_ensembl_var_key == "index" else self.adata.var[self.gene_id_ensembl_var_key]
-                self.adata.var[gene_id_symbols] = [
-                    id_dict[n.split(".")[0]] if n.split(".")[0] in id_dict.keys() else 'n/a'
-                    for n in ensids
-                ]
-                self.gene_id_symbols_var_key = gene_id_symbols
-            elif self.gene_id_symbols_var_key and not self.gene_id_ensembl_var_key:
-                # Convert gene symbols to ensembl ids
-                id_dict = self.genome_container.names_to_id_dict
-                id_strip_dict = self.genome_container.strippednames_to_id_dict
-                # Matching gene names to ensembl ids in the following way: if the gene is present in the ensembl dictionary,
-                # match it straight away, if it is not in there we try to match everything in front of the first period in
-                # the gene name with a dictionary that was modified in the same way, if there is still no match we append na
-                ensids = []
-                symbs = self.adata.var.index if self.gene_id_symbols_var_key == "index" else \
-                    self.adata.var[self.gene_id_symbols_var_key]
-                for n in symbs:
-                    if n in id_dict.keys():
-                        ensids.append(id_dict[n])
-                    elif n.split(".")[0] in id_strip_dict.keys():
-                        ensids.append(id_strip_dict[n.split(".")[0]])
-                    else:
-                        ensids.append('n/a')
-                self.adata.var[gene_id_ensembl] = ensids
-                self.gene_id_ensembl_var_key = gene_id_ensembl
+        if not self.gene_id_symbols_var_key and not self.gene_id_ensembl_var_key:
+            raise ValueError("Either gene_id_symbols_var_key or gene_id_ensembl_var_key needs to be provided in the"
+                             " dataloader")
+        elif not self.gene_id_symbols_var_key and self.gene_id_ensembl_var_key:
+            # Convert ensembl ids to gene symbols
+            id_dict = self.genome_container.id_to_names_dict
+            ensids = self.adata.var.index if self.gene_id_ensembl_var_key == "index" else self.adata.var[self.gene_id_ensembl_var_key]
+            self.adata.var[gene_id_symbols] = [
+                id_dict[n.split(".")[0]] if n.split(".")[0] in id_dict.keys() else 'n/a'
+                for n in ensids
+            ]
+            self.gene_id_symbols_var_key = gene_id_symbols
+        elif self.gene_id_symbols_var_key and not self.gene_id_ensembl_var_key:
+            # Convert gene symbols to ensembl ids
+            id_dict = self.genome_container.names_to_id_dict
+            id_strip_dict = self.genome_container.strippednames_to_id_dict
+            # Matching gene names to ensembl ids in the following way: if the gene is present in the ensembl dictionary,
+            # match it straight away, if it is not in there we try to match everything in front of the first period in
+            # the gene name with a dictionary that was modified in the same way, if there is still no match we append na
+            ensids = []
+            symbs = self.adata.var.index if self.gene_id_symbols_var_key == "index" else \
+                self.adata.var[self.gene_id_symbols_var_key]
+            for n in symbs:
+                if n in id_dict.keys():
+                    ensids.append(id_dict[n])
+                elif n.split(".")[0] in id_strip_dict.keys():
+                    ensids.append(id_strip_dict[n.split(".")[0]])
+                else:
+                    ensids.append('n/a')
+            self.adata.var[gene_id_ensembl] = ensids
+            self.gene_id_ensembl_var_key = gene_id_ensembl
 
     def _collapse_ensembl_gene_id_versions(self):
         """
@@ -541,18 +540,14 @@ class DatasetBase(abc.ABC):
             - None: All genes in assembly.
             - "protein_coding": All protein coding genes in assembly.
         """
-        # TODO: think about workflow when featurespace should not be streamlined. can we still apply a metadata schema?
-        assert match_to_reference is not False, "feature_streamlining is not possible when match_to_reference is False"
         self.__assert_loaded()
 
         # Set genome container if mapping of gene labels is requested
-        if match_to_reference is not None:  # Testing this explicitly makes sure False is treated separately from None
-            if isinstance(match_to_reference, dict):
-                match_to_reference = match_to_reference[self.organism]
-            self._set_genome(assembly=match_to_reference)
-            self.mapped_features = self.genome_container.assembly
-        else:
-            self.mapped_features = False
+        if isinstance(match_to_reference, dict):
+            match_to_reference = match_to_reference[self.organism]
+        self._set_genome(assembly=match_to_reference)
+        self.mapped_features = self.genome_container.assembly
+
         self.remove_gene_version = remove_gene_version
         self.subset_gene_type = subset_genes_to_type
         # Streamline feature space:
