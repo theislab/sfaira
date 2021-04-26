@@ -879,6 +879,13 @@ class DatasetBase(abc.ABC):
             if gene_id_new != self.gene_id_symbols_var_key:
                 del self.adata.var[self.gene_id_symbols_var_key]
                 self.gene_id_symbols_var_key = gene_id_new
+            # Check if .X is counts: The conversion are based on the assumption that .X is csr.
+            assert isinstance(self.adata.X, scipy.sparse.csr_matrix), type(self.adata.X)
+            count_values = np.unique(np.asarray(self.adata.X.todense()))
+            is_counts = np.all(count_values % 1. == 0.)
+            if not is_counts:
+                print(f"WARNING: not all count entries were counts {is_counts}. rounding.")
+                self.adata.X.data = np.rint(self.adata.X.data)
 
         # Make sure that correct unknown_metadata_identifier is used in .uns, .obs and .var metadata
         self.adata.obs = self.adata.obs.replace({None: adata_target_ids.unknown_metadata_identifier})
