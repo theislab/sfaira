@@ -541,7 +541,7 @@ class DatasetBase(abc.ABC):
             - None: All genes in assembly.
             - "protein_coding": All protein coding genes in assembly.
         """
-        # TODO: think about workflow when featurespace should nt be streamlined. can we still apply a metadata schema?
+        # TODO: think about workflow when featurespace should not be streamlined. can we still apply a metadata schema?
         assert match_to_reference is not False, "feature_streamlining is not possible when match_to_reference is False"
         self.__assert_loaded()
 
@@ -795,8 +795,8 @@ class DatasetBase(abc.ABC):
             if "gene_id_symbols" not in adata_target_ids.var_keys:
                 self.gene_id_symbols_var_key = None
         else:
-            self.adata.var = pd.concat([var_new, self.adata.var], axis=1, ignore_index=True)
             self.adata.var.index = var_new.index
+            self.adata.var = pd.concat([var_new, self.adata.var], axis=1)
         if clean_obs:
             if self.adata.obsm is not None:
                 del self.adata.obsm
@@ -804,8 +804,8 @@ class DatasetBase(abc.ABC):
                 del self.adata.obsp
             self.adata.obs = obs_new
         else:
-            self.adata.obs = pd.concat([obs_new, self.adata.obs], axis=1, ignore_index=True)
             self.adata.obs.index = obs_new.index
+            self.adata.obs = pd.concat([obs_new, self.adata.obs], axis=1)
         if clean_obs_names:
             self.adata.obs.index = [f"{self.id}_{i}" for i in range(1, self.adata.n_obs + 1)]
         if clean_uns:
