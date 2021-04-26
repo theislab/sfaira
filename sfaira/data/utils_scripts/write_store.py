@@ -24,5 +24,5 @@ for k, ds in universe.datasets.items():
     )
     ds.streamline_metadata(schema="sfaira", uns_to_obs=False, clean_obs=False, clean_var=True, clean_uns=False,
                            clean_obs_names=True)
-    ds.write_distributed_store(dir_cache=path_store, store="h5ad")
+    ds.write_distributed_store(dir_cache=path_store, store="h5ad", dense=False)
     ds.clear()

@@ -200,7 +200,9 @@ class DatasetGroup:
     def write_distributed_store(
             self,
             dir_cache: Union[str, os.PathLike],
-            store: str = "backed",
+            store: str = "h5ad",
+            dense: bool = False,
+            compression_kwargs: dict = {},
             chunks: Union[int, None] = None,
     ):
         """
@@ -213,14 +215,18 @@ class DatasetGroup:
         :param store: Disk format for objects in cache:
 
             - "h5ad": Allows access via backed .h5ad.
-                On disk data will not be compressed as .h5ad supports sparse data with is a good compression that gives
-                fast row-wise access if the files are csr.
+                Note on compression: .h5ad supports sparse data with is a good compression that gives fast row-wise
+                    access if the files are csr, so further compression potentially not necessary.
             - "zarr": Allows access as zarr array.
+        :param dense: Whether to write sparse or dense store, this will be homogenously enforced.
+        :param compression_kwargs: Compression key word arguments to give to h5py, see also anndata.AnnData.write_h5ad:
+            compression, compression_opts.
         :param chunks: Chunk size of zarr array, see anndata.AnnData.write_zarr documentation.
             Only relevant for store=="zarr".
         """
         for _, v in self.datasets.items():
-            v.write_distributed_store(dir_cache=dir_cache, store=store, chunks=chunks)
+            v.write_distributed_store(dir_cache=dir_cache, store=store, dense=dense,
+                                      compression_kwargs=compression_kwargs, chunks=chunks)
 
     def write_backed(
             self,
@@ -951,7 +957,9 @@ class DatasetSuperGroup:
     def write_distributed_store(
             self,
             dir_cache: Union[str, os.PathLike],
-            store: str = "backed",
+            store: str = "h5ad",
+            dense: bool = False,
+            compression_kwargs: dict = {},
             chunks: Union[int, None] = None,
     ):
         """
@@ -965,14 +973,18 @@ class DatasetSuperGroup:
         :param store: Disk format for objects in cache:
 
             - "h5ad": Allows access via backed .h5ad.
-                On disk data will not be compressed as .h5ad supports sparse data with is a good compression that gives
-                fast row-wise access if the files are csr.
+                Note on compression: .h5ad supports sparse data with is a good compression that gives fast row-wise
+                    access if the files are csr, so further compression potentially not necessary.
             - "zarr": Allows access as zarr array.
+        :param dense: Whether to write sparse or dense store, this will be homogenously enforced.
+        :param compression_kwargs: Compression key word arguments to give to h5py, see also anndata.AnnData.write_h5ad:
+            compression, compression_opts.
         :param chunks: Chunk size of zarr array, see anndata.AnnData.write_zarr documentation.
             Only relevant for store=="zarr".
         """
         for x in self.dataset_groups:
-            x.write_distributed_store(dir_cache=dir_cache, store=store, chunks=chunks)
+            x.write_distributed_store(dir_cache=dir_cache, store=store, dense=dense,
+                                      compression_kwargs=compression_kwargs, chunks=chunks)
 
     def write_backed(
             self,

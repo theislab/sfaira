@@ -94,7 +94,7 @@ def test_dsgs_streamline_metadata(out_format: str, clean_obs: bool, clean_var: b
 @pytest.mark.parametrize("match_to_reference", ["Mus_musculus.GRCm38.102", {"mouse": "Mus_musculus.GRCm38.102"}])
 @pytest.mark.parametrize("remove_gene_version", [False, True])
 @pytest.mark.parametrize("subset_genes_to_type", [None, "protein_coding"])
-def test_dsgs_streamline_features(match_to_reference: str, remove_gene_version: str, subset_genes_to_type: str):
+def test_dsgs_streamline_features(match_to_reference: str, remove_gene_version: bool, subset_genes_to_type: str):
     ds = Universe(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
     ds.subset(key="organism", values=["mouse"])
     ds.subset(key="organ", values=["lung"])
@@ -103,34 +103,14 @@ def test_dsgs_streamline_features(match_to_reference: str, remove_gene_version: 
                            subset_genes_to_type=subset_genes_to_type)
 
 
-def test_dsg_load_backed_dense(genome="Mus_musculus_GRCm38_97"):
+@pytest.mark.parametrize("store", ["h5ad"])
+@pytest.mark.parametrize("dense", [False])
+def test_dsg_write_store(store: str, dense: bool):
     ds = Universe(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
     ds.subset(key="organism", values=["mouse"])
     ds.subset(key="organ", values=["lung"])
-    ds = DatasetSuperGroup(dataset_groups=[ds])
-    ds.write_backed(
-        fn_backed=os.path.join(dir_data, 'test_backed_data.h5ad'),
-        genome=genome,
-        shuffled=True,
-        as_dense=True,
-        annotated_only=False
-    )
-    assert isinstance(ds.adata.X[:], np.ndarray), "%s" % type(ds.adata.X)
-
-
-def test_dsg_load_backed_sparse(genome="Mus_musculus_GRCm38_97"):
-    ds = Universe(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
-    ds.subset(key="organism", values=["mouse"])
-    ds.subset(key="organ", values=["lung"])
-    ds = DatasetSuperGroup(dataset_groups=[ds])
-    ds.write_backed(
-        fn_backed=os.path.join(dir_data, 'test_backed_data.h5ad'),
-        genome=genome,
-        shuffled=False,
-        as_dense=False,
-        annotated_only=False
-    )
-    assert isinstance(ds.adata.X[:], scipy.sparse.csr_matrix), "%s" % type(ds.adata.X)
+    ds.load()
+    ds.write_distributed_store(dir_cache=os.path.join(dir_data, "store"), store=store, dense=dense)
 
 
 def test_dsg_load():

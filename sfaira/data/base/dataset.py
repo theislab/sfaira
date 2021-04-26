@@ -876,7 +876,9 @@ class DatasetBase(abc.ABC):
     def write_distributed_store(
             self,
             dir_cache: Union[str, os.PathLike],
-            store: str = "backed",
+            store: str = "h5ad",
+            dense: bool = False,
+            compression_kwargs: dict = {},
             chunks: Union[int, None] = None,
     ):
         """
@@ -889,9 +891,12 @@ class DatasetBase(abc.ABC):
         :param store: Disk format for objects in cache:
 
             - "h5ad": Allows access via backed .h5ad.
-                On disk data will not be compressed as .h5ad supports sparse data with is a good compression that gives
-                fast row-wise access if the files are csr.
+                Note on compression: .h5ad supports sparse data with is a good compression that gives fast row-wise
+                    access if the files are csr, so further compression potentially not necessary.
             - "zarr": Allows access as zarr array.
+        :param dense: Whether to write sparse or dense store, this will be homogenously enforced.
+        :param compression_kwargs: Compression key word arguments to give to h5py, see also anndata.AnnData.write_h5ad:
+            compression, compression_opts.
         :param chunks: Chunk size of zarr array, see anndata.AnnData.write_zarr documentation.
             Only relevant for store=="zarr".
         """
@@ -901,7 +906,8 @@ class DatasetBase(abc.ABC):
                 print(f"WARNING: high-perfomances caches based on .h5ad work better with .csr formatted expression "
                       f"data, found {type(self.adata.X)}")
             fn = os.path.join(dir_cache, self.doi_cleaned_id + ".h5ad")
-            self.adata.write_h5ad(filename=fn, compression=None, force_dense=False)
+            as_dense = ("X",) if dense else ()
+            self.adata.write_h5ad(filename=fn, as_dense=as_dense, **compression_kwargs)
         elif store == "zarr":
             fn = os.path.join(dir_cache, self.doi_cleaned_id)
             self.adata.write_zarr(store=fn, chunks=chunks)
