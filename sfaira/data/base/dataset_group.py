@@ -327,37 +327,40 @@ class DatasetGroup:
         adata_ls = self.adata_ls
         if not adata_ls:
             return None
-        # Check that all individual adata objects in linked Dataset instances have identicall streamlined features and metadata
-        match_ref_list = []
-        rm_gene_ver_list = []
-        gene_type_list = []
-        for d_id in self.ids:
-            if self.datasets[d_id].adata is not None:
-                assert self.datasets[d_id].mapped_features, f"Dataset {d_id} does not seem to have a streamlined " \
-                                                            f"featurespace. To obtain an adata object from this " \
-                                                            f"DatasetGroup, all contained Datasets need to have a " \
-                                                            f"streamlined featurespace. Run .streamline_features()" \
-                                                            f" first."
-                assert self.datasets[d_id].streamlined_meta, f"Dataset {d_id} does not seem to have streamlined " \
-                                                             f"metadata. To obtain an adata object from this " \
-                                                             f"DatasetGroup, all contained Datasets need to have " \
-                                                             f"streamlined metadata. Run .streamline_metadata() first."
-                match_ref_list.append(self.datasets[d_id].mapped_features)
-                rm_gene_ver_list.append(self.datasets[d_id].remove_gene_version)
-                gene_type_list.append(self.datasets[d_id].subset_gene_type)
-        assert len(set(match_ref_list)) == 1, \
-            "Not all datasets in this group had their features matched to the same reference (argument " \
-            "'match_to_reference' of method .streamline_features())." \
-            "This is however a prerequisite for creating a combined adata object."
-        assert len(set(rm_gene_ver_list)) == 1, \
-            "Not all datasets in this group have had their gene version removed (argument 'remove_gene_version' of " \
-            "method .streamline_features()). This is however a prerequisite for creating a combined adata object."
-        assert len(set(gene_type_list)) == 1, \
-            "Not all datasets in this group had their featurespace subsetted to the same gene type (argument " \
-            "'subset_gene_type' of method .streamline_features()). This is however a prerequisite for creating a " \
-            "combined adata object."
+        if len(adata_ls) == 1:
+            adata_concat = adata_ls[0]
+            adata_concat.obs[self._adata_ids.dataset] = adata_ls[0].uns['id']
+        else:
+            # Check that all individual adata objects in linked Dataset instances have identicall streamlined features and metadata
+            match_ref_list = []
+            rm_gene_ver_list = []
+            gene_type_list = []
+            for d_id in self.ids:
+                if self.datasets[d_id].adata is not None:
+                    assert self.datasets[d_id].mapped_features, f"Dataset {d_id} does not seem to have a streamlined " \
+                                                                f"featurespace. To obtain an adata object from this " \
+                                                                f"DatasetGroup, all contained Datasets need to have a " \
+                                                                f"streamlined featurespace. Run .streamline_features()" \
+                                                                f" first."
+                    assert self.datasets[d_id].streamlined_meta, f"Dataset {d_id} does not seem to have streamlined " \
+                                                                 f"metadata. To obtain an adata object from this " \
+                                                                 f"DatasetGroup, all contained Datasets need to have " \
+                                                                 f"streamlined metadata. Run .streamline_metadata() first."
+                    match_ref_list.append(self.datasets[d_id].mapped_features)
+                    rm_gene_ver_list.append(self.datasets[d_id].remove_gene_version)
+                    gene_type_list.append(self.datasets[d_id].subset_gene_type)
+            assert len(set(match_ref_list)) == 1, \
+                "Not all datasets in this group had their features matched to the same reference (argument " \
+                "'match_to_reference' of method .streamline_features())." \
+                "This is however a prerequisite for creating a combined adata object."
+            assert len(set(rm_gene_ver_list)) == 1, \
+                "Not all datasets in this group have had their gene version removed (argument 'remove_gene_version' of " \
+                "method .streamline_features()). This is however a prerequisite for creating a combined adata object."
+            assert len(set(gene_type_list)) == 1, \
+                "Not all datasets in this group had their featurespace subsetted to the same gene type (argument " \
+                "'subset_gene_type' of method .streamline_features()). This is however a prerequisite for creating a " \
+                "combined adata object."
 
-        if len(adata_ls) > 1:
             var_original = adata_ls[0].var.copy()
             for a in adata_ls:
                 a.var_names_make_unique()
@@ -381,9 +384,7 @@ class DatasetGroup:
                 )
             adata_concat.var = var_original
             adata_concat.uns[self._adata_ids.mapped_features] = match_ref_list[0]
-        else:
-            adata_concat = adata_ls[0]
-            adata_concat.obs[self._adata_ids.dataset] = adata_ls[0].uns['id']
+
         return adata_concat
 
     def obs_concat(self, keys: Union[list, None] = None):
@@ -895,38 +896,40 @@ class DatasetSuperGroup:
         adata_ls = self.adata_ls
         if not adata_ls:
             return None
+        if len(adata_ls) == 1:
+            adata_concat = adata_ls[0]
+            adata_concat.obs[self._adata_ids.dataset] = adata_ls[0].uns['id']
+        else:
+            # Check that all individual adata objects in linked Dataset instances have identicall streamlined features and metadata
+            match_ref_list = []
+            rm_gene_ver_list = []
+            gene_type_list = []
+            for d_id in self.flatten().ids:
+                if self.flatten().datasets[d_id].adata is not None:
+                    assert self.flatten().datasets[d_id].mapped_features, f"Dataset {d_id} does not seem to have a streamlined " \
+                                                                          f"featurespace. To obtain an adata object from this " \
+                                                                          f"DatasetGroup, all contained Datasets need to have a " \
+                                                                          f"streamlined featurespace. Run .streamline_features()" \
+                                                                          f" first."
+                    assert self.flatten().datasets[d_id].streamlined_meta, f"Dataset {d_id} does not seem to have streamlined " \
+                                                                           f"metadata. To obtain an adata object from this " \
+                                                                           f"DatasetGroup, all contained Datasets need to have " \
+                                                                           f"streamlined metadata. Run .streamline_metadata() first."
+                    match_ref_list.append(self.flatten().datasets[d_id].mapped_features)
+                    rm_gene_ver_list.append(self.flatten().datasets[d_id].remove_gene_version)
+                    gene_type_list.append(self.flatten().datasets[d_id].subset_gene_type)
+            assert len(set(match_ref_list)) == 1, \
+                "Not all datasets in this group had their features matched to the same reference (argument " \
+                "'match_to_reference' of method .streamline_features()). This is however a prerequisite for creating a " \
+                "combined adata object."
+            assert len(set(rm_gene_ver_list)) == 1, \
+                "Not all datasets in this group have had their gene version removed (argument 'remove_gene_version' of " \
+                "method .streamline_features()). This is however a prerequisite for creating a combined adata object."
+            assert len(set(gene_type_list)) == 1, \
+                "Not all datasets in this group had their featurespace subsetted to the same gene type (argument " \
+                "'subset_gene_type' of method .streamline_features()). This is however a prerequisite for creating a " \
+                "combined adata object."
 
-        # Check that all individual adata objects in linked Dataset instances have identicall streamlined features and metadata
-        match_ref_list = []
-        rm_gene_ver_list = []
-        gene_type_list = []
-        for d_id in self.flatten().ids:
-            if self.flatten().datasets[d_id].adata is not None:
-                assert self.flatten().datasets[d_id].mapped_features, f"Dataset {d_id} does not seem to have a streamlined " \
-                                                                      f"featurespace. To obtain an adata object from this " \
-                                                                      f"DatasetGroup, all contained Datasets need to have a " \
-                                                                      f"streamlined featurespace. Run .streamline_features()" \
-                                                                      f" first."
-                assert self.flatten().datasets[d_id].streamlined_meta, f"Dataset {d_id} does not seem to have streamlined " \
-                                                                       f"metadata. To obtain an adata object from this " \
-                                                                       f"DatasetGroup, all contained Datasets need to have " \
-                                                                       f"streamlined metadata. Run .streamline_metadata() first."
-                match_ref_list.append(self.flatten().datasets[d_id].mapped_features)
-                rm_gene_ver_list.append(self.flatten().datasets[d_id].remove_gene_version)
-                gene_type_list.append(self.flatten().datasets[d_id].subset_gene_type)
-        assert len(set(match_ref_list)) == 1, \
-            "Not all datasets in this group had their features matched to the same reference (argument " \
-            "'match_to_reference' of method .streamline_features()). This is however a prerequisite for creating a " \
-            "combined adata object."
-        assert len(set(rm_gene_ver_list)) == 1, \
-            "Not all datasets in this group have had their gene version removed (argument 'remove_gene_version' of " \
-            "method .streamline_features()). This is however a prerequisite for creating a combined adata object."
-        assert len(set(gene_type_list)) == 1, \
-            "Not all datasets in this group had their featurespace subsetted to the same gene type (argument " \
-            "'subset_gene_type' of method .streamline_features()). This is however a prerequisite for creating a " \
-            "combined adata object."
-
-        if len(adata_ls) > 1:
             var_original = adata_ls[0].var.copy()
             for a in adata_ls:
                 a.var_names_make_unique()
@@ -950,9 +953,7 @@ class DatasetSuperGroup:
                 )
             adata_concat.var = var_original
             adata_concat.uns[self._adata_ids.mapped_features] = match_ref_list[0]
-        else:
-            adata_concat = adata_ls[0]
-            adata_concat.obs[self._adata_ids.dataset] = adata_ls[0].uns['id']
+
         return adata_concat
 
     def write_distributed_store(
