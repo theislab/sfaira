@@ -90,6 +90,8 @@ def test_dsgs_streamline_metadata(out_format: str, clean_obs: bool, clean_var: b
     ds.subset(key="organism", values=["mouse"])
     ds.subset(key="organ", values=["lung"])
     ds.load()
+    ds.streamline_features(remove_gene_version=False, match_to_reference=MOUSE_GENOME_ANNOTATION,
+                           subset_genes_to_type=None)
     ds.streamline_metadata(schema=out_format, uns_to_obs=True, clean_obs=clean_obs, clean_var=clean_var, clean_uns=clean_uns, clean_obs_names=clean_obs_names)
 
 
