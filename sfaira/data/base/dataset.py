@@ -64,6 +64,12 @@ def is_child(
             raise ValueError(f"did not recognize ontology type {type(ontology)}")
 
 
+def clean_string(s):
+    if s is not None:
+        s = s.replace(',', '').replace(' ', '').replace('-', '').replace('_', '').replace("'", '').lower()
+    return s
+
+
 class DatasetBase(abc.ABC):
     adata: Union[None, anndata.AnnData]
     class_maps: dict
@@ -252,8 +258,12 @@ class DatasetBase(abc.ABC):
         if yaml_path is not None:
             assert os.path.exists(yaml_path), f"did not find yaml {yaml_path}"
             yaml_vals = read_yaml(fn=yaml_path)
+            # Set organism first as this is required to disambiguate valid entries for other meta data.
+            k = "organism"
+            v = yaml_vals["attr"]["organism"]
+            setattr(self, k, v)
             for k, v in yaml_vals["attr"].items():
-                if v is not None and k not in ["sample_fns", "dataset_index"]:
+                if v is not None and k not in ["organism", "sample_fns", "dataset_index"]:
                     if isinstance(v, dict):  # v is a dictionary over file-wise meta-data items
                         assert self.sample_fn in v.keys(), f"did not find key {self.sample_fn} in yamls keys for {k}"
                         setattr(self, k, v[self.sample_fn])
@@ -804,10 +814,12 @@ class DatasetBase(abc.ABC):
             self.adata.obs = obs_new
         else:
             index_old = self.adata.obs.index.copy()
-            # Add old columns in if they are not duplicated:
+            # Add old columns in if they are not duplicated in target obs column space, even if this column is not
+            # defined. This would result in the instance accessing this column assuming it was streamlined.
             self.adata.obs = pd.concat([
                 obs_new,
-                pd.DataFrame(dict([(k, v) for k, v in self.adata.obs.items() if k not in obs_new.columns]))
+                pd.DataFrame(dict([(k, v) for k, v in self.adata.obs.items()
+                                   if k not in adata_target_ids.controlled_meta_keys]))
             ], axis=1)
             self.adata.obs.index = index_old
         if clean_obs_names:
@@ -836,8 +848,12 @@ class DatasetBase(abc.ABC):
             # Add ontology IDs where necessary (note that human readable terms are also kept):
             for k in ["organ", "assay_sc", "disease", "ethnicity", "development_stage"]:
                 if getattr(adata_target_ids, k) in self.adata.obs.columns:
+                    ontology = getattr(self.ontology_container_sfaira, k)
+                    # Disambiguate organism-dependent ontologies:
+                    if isinstance(ontology, dict):
+                        ontology = ontology[self.organism]
                     self.__project_name_to_id_obs(
-                        ontology=k,
+                        ontology=ontology,
                         key_in=getattr(adata_target_ids, k),
                         key_out=getattr(adata_target_ids, k) + "_ontology_term_id",
                         map_exceptions=[],
@@ -1112,8 +1128,9 @@ class DatasetBase(abc.ABC):
             # TODO this could be changed in the future, this allows this function to be used both on cell type name
             #  mapping files with and without the ID in the third column.
             # This mapping blocks progression in the unit test if not deactivated.
+            ontology = getattr(self.ontology_container_sfaira, "cellontology_class")
             ids_mapped = self.__project_name_to_id_obs(
-                ontology="cellontology_class",
+                ontology=ontology,
                 key_in=labels_mapped,
                 key_out=None,
                 map_exceptions=[
@@ -1136,7 +1153,7 @@ class DatasetBase(abc.ABC):
 
     def __project_name_to_id_obs(
             self,
-            ontology: str,
+            ontology: Ontology,
             key_in: Union[str, list],
             key_out: Union[str, None],
             map_exceptions: list,
@@ -1145,14 +1162,14 @@ class DatasetBase(abc.ABC):
         """
         Project ontology names to IDs for a given ontology in .obs entries.
 
-        :param ontology: name of the ontology to use when converting to IDs
+        :param ontology: ontology to use when converting to IDs
         :param key_in: name of obs_column containing names to convert or python list containing these values
         :param key_out: name of obs_column to write the IDs or None. If None, a python list with the new values will be returned
         :param map_exceptions: list of values that should not be mapped
         :param map_exceptions_value: placeholder target value for values excluded from mapping
         :return:
         """
-        ontology = getattr(self.ontology_container_sfaira, ontology)
+        assert ontology is not None, f"cannot project value for {key_in} because ontology is None"
         assert isinstance(key_in, (str, list)), f"argument key_in needs to be of type str or list. Supplied" \
                                                 f"type: {type(key_in)}"
         input_values = self.adata.obs[key_in].values if isinstance(key_in, str) else key_in
@@ -1290,11 +1307,6 @@ class DatasetBase(abc.ABC):
             self,
             idx: int = 1
     ):
-        def clean(s):
-            if s is not None:
-                s = s.replace(' ', '').replace('-', '').replace('_', '').replace("'", '').lower()
-            return s
-
         if self.sample_fn is not None:
             idx += self._sample_fns.index(self.sample_fn)
         idx = str(idx).zfill(3)
@@ -1306,11 +1318,11 @@ class DatasetBase(abc.ABC):
 
         # Note: access private attributes here, e.g. _organism, to avoid loading of content via meta data, which would
         # invoke call to self.id before it is set.
-        self.id = f"{clean(self._organism)}_" \
-                  f"{clean(self._organ)}_" \
+        self.id = f"{clean_string(self._organism)}_" \
+                  f"{clean_string(self._organ)}_" \
                   f"{self._year}_" \
-                  f"{clean(self._assay_sc)}_" \
-                  f"{clean(author)}_" \
+                  f"{clean_string(self._assay_sc)}_" \
+                  f"{clean_string(author)}_" \
                   f"{idx}_" \
                   f"{self.doi_main}"
 
@@ -1471,7 +1483,8 @@ class DatasetBase(abc.ABC):
 
     @development_stage.setter
     def development_stage(self, x: str):
-        x = self._value_protection(attr="development_stage", allowed=self.ontology_container_sfaira.development_stage,
+        x = self._value_protection(attr="development_stage",
+                                   allowed=self.ontology_container_sfaira.development_stage[self.organism],
                                    attempted=x)
         self._development_stage = x
 
@@ -1595,7 +1608,8 @@ class DatasetBase(abc.ABC):
 
     @ethnicity.setter
     def ethnicity(self, x: str):
-        x = self._value_protection(attr="ethnicity", allowed=self.ontology_container_sfaira.ethnicity, attempted=x)
+        x = self._value_protection(attr="ethnicity", allowed=self.ontology_container_sfaira.ethnicity[self.organism],
+                                   attempted=x)
         self._ethnicity = x
 
     @property

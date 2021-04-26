@@ -50,6 +50,10 @@ class AdataIds:
     not_a_cell_celltype_identifier: Union[str, None]
     unknown_metadata_identifier: Union[str, None]
 
+    @property
+    def controlled_meta_keys(self):
+        return [getattr(self, k) for k in self.obs_keys + self.uns_keys]
+
 
 class AdataIdsSfaira(AdataIds):
     """

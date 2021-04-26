@@ -43,9 +43,9 @@ dataset_or_observation_wise:
     tech_sample:
     tech_sample_obs_key: 'Batch'
 observation_wise:
-    cellontology_original_obs_key: "celltype.l3"
+    cell_types_original_obs_key: "celltype.l3"
 feature_wise:
-    var_ensembl_col:
-    var_symbol_col: "names"
+    gene_id_ensembl_var_key:
+    gene_id_symbols_var_key: "names"
 meta:
     version: "1.0"
