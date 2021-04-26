@@ -804,10 +804,12 @@ class DatasetBase(abc.ABC):
             self.adata.obs = obs_new
         else:
             index_old = self.adata.obs.index.copy()
-            # Add old columns in if they are not duplicated:
+            # Add old columns in if they are not duplicated in target obs column space, even if this column is not
+            # defined. This would result in the instance accessing this column assuming it was streamlined.
             self.adata.obs = pd.concat([
                 obs_new,
-                pd.DataFrame(dict([(k, v) for k, v in self.adata.obs.items() if k not in obs_new.columns]))
+                pd.DataFrame(dict([(k, v) for k, v in self.adata.obs.items()
+                                   if k not in adata_target_ids.controlled_meta_keys]))
             ], axis=1)
             self.adata.obs.index = index_old
         if clean_obs_names:
