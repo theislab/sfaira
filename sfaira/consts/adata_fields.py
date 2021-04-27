@@ -54,6 +54,10 @@ class AdataIds:
     def controlled_meta_keys(self):
         return [getattr(self, k) for k in self.obs_keys + self.uns_keys]
 
+    @property
+    def controlled_meta_fields(self):
+        return [k for k in self.obs_keys + self.uns_keys]
+
 
 class AdataIdsSfaira(AdataIds):
     """
@@ -149,6 +153,7 @@ class AdataIdsSfaira(AdataIds):
             "download_url_meta",
             "id",
             "mapped_features",
+            "ncells",
             "normalization",
             "primary_data",
             "title",
