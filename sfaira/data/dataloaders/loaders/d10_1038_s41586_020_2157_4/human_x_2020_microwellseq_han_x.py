@@ -325,6 +325,7 @@ def load(data_dir, **kwargs):
     ]
     adata.obs["organ"] = [sample_organ_dict[x] for x in adata.obs["sample"].values]
     adata.obs["sex"] = [sex_dict[str(x)] for x in adata.obs["sex"].values]
-    adata.obs["dev_stage"] = [sample_dev_stage_dict[str(x)] for x in adata.obs["dev_stage"].values]
+    # TODO are the more exact developmental stages in dev_stage?
+    adata.obs["dev_stage"] = [sample_dev_stage_dict[str(x)] for x in adata.obs["sample"].values]
 
     return adata
