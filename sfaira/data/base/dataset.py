@@ -1299,6 +1299,8 @@ class DatasetBase(abc.ABC):
         meta = pandas.DataFrame(index=range(1))
         # Expand table by variably cell-wise or data set-wise meta data:
         for x in self._adata_ids.controlled_meta_fields:
+            if x in ["cell_types_original", "cell_ontology_class", "cell_ontology_id"]:
+                continue
             if hasattr(self, f"{x}_obs_key") and getattr(self, f"{x}_obs_key") is not None:
                 meta[getattr(self._adata_ids, x)] = (self.adata.obs[getattr(self, f"{x}_obs_key")].unique(),)
             else:
@@ -1307,8 +1309,12 @@ class DatasetBase(abc.ABC):
         if self.cell_types_original_obs_key is not None:
             mappings = self.project_celltypes_to_ontology(copy=True, update_fields=False)
             meta[self._adata_ids.cell_ontology_class] = (mappings[self._adata_ids.cell_ontology_class].unique(),)
+            meta[self._adata_ids.cell_ontology_id] = (mappings[self._adata_ids.cell_ontology_id].unique(),)
+            meta[self._adata_ids.cell_types_original] = (mappings[self._adata_ids.cell_types_original].unique(),)
         else:
             meta[self._adata_ids.cell_ontology_class] = " "
+            meta[self._adata_ids.cell_ontology_id] = " "
+            meta[self._adata_ids.cell_types_original] = " "
         meta.to_csv(fn_meta)
 
     def set_dataset_id(
