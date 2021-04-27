@@ -1301,7 +1301,7 @@ class DatasetBase(abc.ABC):
         for x in self._adata_ids.controlled_meta_fields:
             if x in ["cell_types_original", "cell_ontology_class", "cell_ontology_id"]:
                 continue
-            if x in ["bio_sample", "individual", "tech_sample"] and \
+            elif x in ["bio_sample", "individual", "tech_sample"] and \
                     hasattr(self, f"{x}_obs_key") and \
                     "*" in getattr(self, f"{x}_obs_key"):
                 batch_cols = []
@@ -1318,7 +1318,8 @@ class DatasetBase(abc.ABC):
                     "_".join([str(xxx) for xxx in xx])
                     for xx in zip(*[self.adata.obs[batch_col].values.tolist() for batch_col in batch_cols])
                 ])),)
-            if hasattr(self, f"{x}_obs_key") and getattr(self, f"{x}_obs_key") is not None:
+
+            elif hasattr(self, f"{x}_obs_key") and getattr(self, f"{x}_obs_key") is not None:
                 meta[getattr(self._adata_ids, x)] = (self.adata.obs[getattr(self, f"{x}_obs_key")].unique(),)
             else:
                 meta[getattr(self._adata_ids, x)] = getattr(self, x)
