@@ -3,7 +3,7 @@ import os
 import pytest
 import scipy.sparse
 
-from sfaira.data import DatasetSuperGroup
+from sfaira.data import DatasetSuperGroup, DistributedStore
 from sfaira.data import Universe
 
 MOUSE_GENOME_ANNOTATION = "Mus_musculus.GRCm38.102"

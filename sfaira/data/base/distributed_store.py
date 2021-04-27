@@ -153,8 +153,8 @@ class DistributedStore:
         # Get ontology container to be able to do relational reasoning:
         ontology = getattr(self.ontology_container, attr_key)
         for k in list(self.adatas.keys()):
-            if getattr(self._adata_ids_sfaira, attr_key) in self.adatas.uns.keys():
-                values_found = self.adatas.uns[getattr(self._adata_ids_sfaira, attr_key)]
+            if getattr(self._adata_ids_sfaira, attr_key) in self.adatas[k].uns.keys():
+                values_found = self.adatas[k].uns[getattr(self._adata_ids_sfaira, attr_key)]
                 if not isinstance(values_found, list):
                     values_found = [values_found]
                 if not np.any([
