@@ -3,7 +3,7 @@ import sys
 import tensorflow as tf
 
 # Any data loader here to extract path:
-from sfaira.data import DistributedStore
+from sfaira.data import DistributedStore, clean_string
 
 print(tf.__version__)
 
@@ -12,12 +12,6 @@ print("sys.argv", sys.argv)
 
 store_path = str(sys.argv[1])
 config_path = str(sys.argv[2])
-
-
-def clean(s):
-    if s is not None:
-        s = s.replace(' ', '').replace('-', '').replace('_', '').replace("'", '').lower()
-    return s
 
 
 configs_to_write = {
@@ -87,7 +81,7 @@ configs_to_write = {
         "trachea",
         "urinary bladder",
         "uterus",
-    ]
+    ],
 }
 
 for organism, organs in configs_to_write.items():
@@ -96,4 +90,4 @@ for organism, organs in configs_to_write.items():
         store = DistributedStore(cache_path=store_path)
         store.subset(attr_key="organism", values=[organism])
         store.subset(attr_key="organ", values=[organ])
-        store.write_config(os.path.join(config_path, f"config_{clean(organism)}_{clean(organ)}.csv"))
+        store.write_config(os.path.join(config_path, f"config_{clean_string(organism)}_{clean_string(organ)}.csv"))
