@@ -1104,14 +1104,24 @@ class DatasetBase(abc.ABC):
             if self.cell_types_original_obs_key is not None:
                 warnings.warn(f"file {fn} does not exist but cell_types_original_obs_key is given")
 
-    def project_celltypes_to_ontology(self, adata_fields: Union[AdataIds, None] = None, copy=False):
+    def project_celltypes_to_ontology(self, adata_fields: Union[AdataIds, None] = None, copy=False, update_fields=True):
         """
         Project free text cell type names to ontology based on mapping table.
 
         ToDo: add ontology ID setting here.
 
+        :param adata_fields: AdataIds instance that holds the column names to use for the annotation
+        :param copy: If True, a dataframe with the celltype annotation is returned, otherwise self.adata.obs is updated
+            inplace.
+        :param update_fields: If True, the celltype-related attributes of this Dataset instance are updated. Basically,
+            this should always be true, unless self.adata.obs is not updated by (or with the output of) this function.
+            This includes the following fields: self.cellontology_class_obs_key, self.cell_types_original_obs_key,
+            self.cellontology_id_obs_key
+
         :return:
         """
+        assert copy or update_fields, "when copy is set to False, update_fields cannot be False"
+
         adata_fields = adata_fields if adata_fields is not None else self._adata_ids
         results = {}
         labels_original = self.adata.obs[self.cell_types_original_obs_key].values
@@ -1161,11 +1171,14 @@ class DatasetBase(abc.ABC):
             )
             results[adata_fields.cell_ontology_class] = labels_mapped
             results[adata_fields.cell_ontology_id] = ids_mapped
+            if update_fields:
+                self.cellontology_id_obs_key = adata_fields.cell_ontology_id
         else:
             results[adata_fields.cell_ontology_class] = labels_original
         results[adata_fields.cell_types_original] = labels_original
-        self.cellontology_class_obs_key = adata_fields.cell_ontology_class
-        self.cell_types_original_obs_key = adata_fields.cell_types_original
+        if update_fields:
+            self.cellontology_class_obs_key = adata_fields.cell_ontology_class
+            self.cell_types_original_obs_key = adata_fields.cell_types_original
         if copy:
             return pd.DataFrame(results, index=self.adata.obs.index)
         else:
@@ -1174,7 +1187,7 @@ class DatasetBase(abc.ABC):
 
     def __project_name_to_id_obs(
             self,
-            ontology: Ontology,
+            ontology: OntologyHierarchical,
             key_in: Union[str, list],
             key_out: Union[str, None],
             map_exceptions: list,
@@ -1283,43 +1296,17 @@ class DatasetBase(abc.ABC):
         if self.adata is None:
             self.load(load_raw=True, allow_caching=False)
         # Add data-set wise meta data into table:
-        meta = pandas.DataFrame({
-            self._adata_ids.annotated: self.adata.uns[self._adata_ids.annotated],
-            self._adata_ids.author: self.adata.uns[self._adata_ids.author],
-            self._adata_ids.doi: self.adata.uns[self._adata_ids.doi],
-            self._adata_ids.download_url_data: self.adata.uns[self._adata_ids.download_url_data],
-            self._adata_ids.download_url_meta: self.adata.uns[self._adata_ids.download_url_meta],
-            self._adata_ids.id: self.adata.uns[self._adata_ids.id],
-            self._adata_ids.ncells: self.adata.n_obs,
-            self._adata_ids.normalization: self.adata.uns[self._adata_ids.normalization],
-            self._adata_ids.year: self.adata.uns[self._adata_ids.year],
-        }, index=range(1))
+        meta = pandas.DataFrame(index=range(1))
         # Expand table by variably cell-wise or data set-wise meta data:
-        for x in [
-            self._adata_ids.assay_sc,
-            self._adata_ids.assay_differentiation,
-            self._adata_ids.assay_type_differentiation,
-            self._adata_ids.bio_sample,
-            self._adata_ids.cell_line,
-            self._adata_ids.development_stage,
-            self._adata_ids.ethnicity,
-            self._adata_ids.individual,
-            self._adata_ids.organ,
-            self._adata_ids.organism,
-            self._adata_ids.sample_source,
-            self._adata_ids.sex,
-            self._adata_ids.state_exact,
-            self._adata_ids.tech_sample,
-        ]:
-            if self.adata.uns[x] == UNS_STRING_META_IN_OBS:
-                meta[x] = (np.sort(np.unique(self.adata.obs[x].values)),)
+        for x in self._adata_ids.controlled_meta_fields:
+            if hasattr(self, f"{x}_obs_key") and getattr(self, f"{x}_obs_key") is not None:
+                meta[getattr(self._adata_ids, x)] = (self.adata.obs[getattr(self, f"{x}_obs_key")].unique(),)
             else:
-                meta[x] = self.adata.uns[x]
+                meta[getattr(self._adata_ids, x)] = getattr(self, x)
         # Add cell types into table if available:
-        if self._adata_ids.cell_ontology_class in self.adata.obs.keys():
-            meta[self._adata_ids.cell_ontology_class] = str((
-                np.sort(np.unique(self.adata.obs[self._adata_ids.cell_ontology_class].values)),
-            ))
+        if self.cell_types_original_obs_key is not None:
+            mappings = self.project_celltypes_to_ontology(copy=True, update_fields=False)
+            meta[self._adata_ids.cell_ontology_class] = (mappings[self._adata_ids.cell_ontology_class].unique(),)
         else:
             meta[self._adata_ids.cell_ontology_class] = " "
         meta.to_csv(fn_meta)
