@@ -16,7 +16,10 @@ TODO tests from here on down require cached data for mouse lung
 """
 
 
-def test_dsg_store_config():
+def test_store_config():
+    """
+    Test that data set config files can be set, written and recovered.
+    """
     ds = Universe(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
     ds.subset(key="organism", values=["mouse"])
     ds.subset(key="organ", values=["lung"])
@@ -29,15 +32,18 @@ def test_dsg_store_config():
     config_path = os.path.join(store_path, "lung")
     ds.write_distributed_store(dir_cache=store_path, store="h5ad", dense=True)
     store = DistributedStore(cache_path=store_path)
-    store.subset(attr_key="organism", values=["mouse"])
-    store.subset(attr_key="organ", values=["lung"])
+    store.subset(attr_key="assay_sc", values=["10x sequencing"])
     store.write_config(fn=config_path)
     store2 = DistributedStore(cache_path=store_path)
     store2.load_config(fn=config_path)
-    assert np.all(store.indices == store2.indices)
+    assert np.all(store.indices.keys() == store2.indices.keys())
+    assert np.all([np.all(store.indices[k] == store2.indices[k]) for k in store.indices.keys()])
 
 
-def test_dsg_store_type_targets():
+def test_store_type_targets():
+    """
+    Test that target leave nodes can be set, written and recovered.
+    """
     ds = Universe(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
     ds.subset(key="organism", values=["mouse"])
     ds.subset(key="organ", values=["lung"])
@@ -50,4 +56,18 @@ def test_dsg_store_type_targets():
     target_path = os.path.join(store_path, "lung")
     ds.write_distributed_store(dir_cache=store_path, store="h5ad", dense=True)
     store = DistributedStore(cache_path=store_path)
-    store.celltypes_universe.write_target_universe(fn=target_path)
+    observed_nodes = np.unique(np.concatenate([
+        x.obs[store._adata_ids_sfaira.cell_ontology_class]
+        for x in store.adatas.values()
+    ])).tolist()
+    leaves_all = store.celltypes_universe.onto_cl.leaves
+    effective_leaves = store.celltypes_universe.onto_cl.get_effective_leaves(x=observed_nodes)
+    store.celltypes_universe.onto_cl.leaves = effective_leaves
+    leaves1 = store.celltypes_universe.onto_cl.leaves
+    store.celltypes_universe.write_target_universe(fn=target_path, x=effective_leaves)
+    store2 = DistributedStore(cache_path=store_path)
+    store2.celltypes_universe.load_target_universe(fn=target_path)
+    leaves2 = store2.celltypes_universe.onto_cl.leaves
+    assert len(leaves_all) > len(leaves1)
+    assert len(set(leaves1).union(set(leaves2))) == len(leaves1)
+    assert np.all([x in leaves1 for x in leaves2])

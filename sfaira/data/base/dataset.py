@@ -410,11 +410,7 @@ class DatasetBase(abc.ABC):
             raise ValueError("No sfaira data repo path provided in constructor.")
 
         def _error_buffered_reading(**load_kwargs):
-            try:
-                self.adata = self.load_func(data_dir=self.data_dir, sample_fn=self.sample_fn, **load_kwargs)
-            except OSError as e:
-                print(f"WARNING: encountered OS error {e} for {self.id}, likely, the raw files were not downloaded.")
-                return False
+            self.adata = self.load_func(data_dir=self.data_dir, sample_fn=self.sample_fn, **load_kwargs)
 
         # Run data set-specific loading script:
         def _assembly_wrapper():
@@ -447,7 +443,7 @@ class DatasetBase(abc.ABC):
                 dir_cache = os.path.dirname(filename)
                 if not os.path.exists(dir_cache):
                     os.makedirs(dir_cache)
-                if not os.path.exists(filename):
+                if not os.path.exists(filename) and self.adata is not None:
                     self.adata.write_h5ad(filename)
 
         if load_raw and allow_caching:
