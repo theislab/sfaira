@@ -77,7 +77,7 @@ class Dataset(DatasetBase):
         self.download_url_meta = None
 
         self.cell_types_original_obs_key = "cell_ontology_class"
-        self.development_stage_obs_key = "development_stage"  # not given in all data sets, TODO maybe infer as age?
+        self.development_stage_obs_key = "development_stage"
         self.sex_obs_key = "sex"
         # ToDo: further anatomical information for subtissue in "subtissue"?
 
@@ -98,6 +98,14 @@ class Dataset(DatasetBase):
 
 
 def load(data_dir, sample_fn, **kwargs):
+    dev_stage_dict = {
+        "18m": "18 month-old stage",
+        "1m": "4 weeks",
+        "21m": "20 month-old stage and over",
+        "24m": "20 month-old stage and over",
+        "30m": "20 month-old stage and over",
+        "3m": "3 month-old stage",
+    }
     fn = os.path.join(data_dir, sample_fn)
     adata = anndata.read_h5ad(fn)
     adata.X = adata.raw.X
@@ -106,5 +114,6 @@ def load(data_dir, sample_fn, **kwargs):
     adata.obsm = {}
     adata.varm = {}
     adata.uns = {}
+    adata.obs['development_stage'] = [dev_stage_dict[i] for i in adata.obs['age']]
 
     return adata
