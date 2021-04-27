@@ -165,7 +165,7 @@ def load(data_dir, **kwargs):
         'AdultEsophagus_2': 'human adult stage',
         'AdultFallopiantube_1': 'human adult stage',
         'AdultGallbladder_1': 'human adult stage',
-        'AdultGallbladder_2': 'gall bladder',
+        'AdultGallbladder_2': 'human adult stage',
         'AdultHeart_1': 'human adult stage',
         'AdultHeart_2': 'human adult stage',
         'AdultIleum_2': 'human adult stage',
