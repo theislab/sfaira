@@ -409,11 +409,18 @@ class DatasetBase(abc.ABC):
         if self.data_dir is None:
             raise ValueError("No sfaira data repo path provided in constructor.")
 
+        def _error_buffered_reading(**load_kwargs):
+            try:
+                self.adata = self.load_func(data_dir=self.data_dir, sample_fn=self.sample_fn, **load_kwargs)
+            except OSError as e:
+                print(f"WARNING: encountered OS error {e} for {self.id}, likely, the raw files were not downloaded.")
+                return False
+
         # Run data set-specific loading script:
         def _assembly_wrapper():
             if self.load_func is None:
                 raise ValueError(f"Tried to access load_func for {self.id} but did not find any.")
-            self.adata = self.load_func(data_dir=self.data_dir, sample_fn=self.sample_fn, **kwargs)
+            _error_buffered_reading(**kwargs)
             # Enable loading of additional annotation, e.g. secondary cell type annotation
             # The additional annotation `obs2 needs to be on a subset of the original annotation `self.adata.obs`.
             if self.dict_load_func_annotation is not None:
@@ -431,9 +438,9 @@ class DatasetBase(abc.ABC):
                 if os.path.exists(filename):
                     self.adata = anndata.read_h5ad(filename)
                 else:
-                    self.adata = self.load_func(data_dir=self.data_dir, sample_fn=self.sample_fn)
+                    _error_buffered_reading()
             else:
-                self.adata = self.load_func(data_dir=self.data_dir, sample_fn=self.sample_fn)
+                _error_buffered_reading()
 
         def _cached_writing(filename):
             if filename is not None:

@@ -291,7 +291,7 @@ class DistributedStore:
 
         :param fn: Output file without file type extension.
         """
-        with open(fn + '.pickle', 'w') as f:
+        with open(fn + '.pickle', 'wb') as f:
             pickle.dump(self.indices, f)
 
     def load_config(self, fn: Union[str, os.PathLike]):
