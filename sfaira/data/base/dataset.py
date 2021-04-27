@@ -1301,6 +1301,23 @@ class DatasetBase(abc.ABC):
         for x in self._adata_ids.controlled_meta_fields:
             if x in ["cell_types_original", "cell_ontology_class", "cell_ontology_id"]:
                 continue
+            if x in ["bio_sample", "individual", "tech_sample"] and \
+                    hasattr(self, f"{x}_obs_key") and \
+                    "*" in getattr(self, f"{x}_obs_key"):
+                batch_cols = []
+                for batch_col in getattr(self, f"{x}_obs_key").split("*"):
+                    if batch_col in self.adata.obs_keys():
+                        batch_cols.append(batch_col)
+                    else:
+                        # This should not occur in single data set loaders (see warning below) but can occur in
+                        # streamlined data loaders if not all instances of the streamlined data sets have all columns
+                        # in .obs set.
+                        print(f"WARNING: attribute {x} of data set {self.id} was not found in column {batch_col}")
+                # Build a combination label out of all columns used to describe this group.
+                meta[getattr(self._adata_ids, x)] = (list(set([
+                    "_".join([str(xxx) for xxx in xx])
+                    for xx in zip(*[self.adata.obs[batch_col].values.tolist() for batch_col in batch_cols])
+                ])),)
             if hasattr(self, f"{x}_obs_key") and getattr(self, f"{x}_obs_key") is not None:
                 meta[getattr(self._adata_ids, x)] = (self.adata.obs[getattr(self, f"{x}_obs_key")].unique(),)
             else:
