@@ -7,7 +7,7 @@ import scipy.sparse
 from typing import Dict, List, Union
 
 from sfaira.consts import AdataIdsSfaira, OCS
-from sfaira.data.base.dataset import is_child
+from sfaira.data.base.dataset import is_child, UNS_STRING_META_IN_OBS
 from sfaira.versions.metadata import CelltypeUniverse
 
 
@@ -154,7 +154,10 @@ class DistributedStore:
         ontology = getattr(self.ontology_container, attr_key)
         for k in list(self.adatas.keys()):
             if getattr(self._adata_ids_sfaira, attr_key) in self.adatas[k].uns.keys():
-                values_found = self.adatas[k].uns[getattr(self._adata_ids_sfaira, attr_key)]
+                if getattr(self._adata_ids_sfaira, attr_key) != UNS_STRING_META_IN_OBS:
+                    values_found = self.adatas[k].uns[getattr(self._adata_ids_sfaira, attr_key)]
+                else:
+                    values_found = self.adatas[k].obs[getattr(self._adata_ids_sfaira, attr_key)].values.tolist()
                 if not isinstance(values_found, list):
                     values_found = [values_found]
                 if not np.any([
@@ -193,8 +196,26 @@ class DistributedStore:
         if not isinstance(values, list):
             values = [values]
 
-        def get_subset_idx(adata, k):
-            values_found = adata.obs[getattr(self._adata_ids_sfaira, k)].values
+        def get_subset_idx(adata, k, dataset):
+            # Try to look first in cell wise annotation to use cell-wise map if data set-wide maps are ambiguous:
+            # This can happen if the different cell-wise annotations are summarised as a union in .uns.
+            if getattr(self._adata_ids_sfaira, k) in adata.obs.keys():
+                values_found = adata.obs[getattr(self._adata_ids_sfaira, k)].values
+            elif getattr(self._adata_ids_sfaira, k) in adata.uns.keys():
+                values_found = adata.uns[getattr(self._adata_ids_sfaira, k)]
+                if isinstance(values_found, np.ndarray):
+                    values_found = values_found.tolist()
+                elif not isinstance(values_found, list):
+                    values_found = [values_found]
+                if len(values_found) > 1:
+                    print(f"WARNING: subsetting not exact for attribute {k}: {values_found},"
+                          f" discarding data set {dataset}.")
+                    values_found = []
+                else:
+                    # Replicate unique property along cell dimension.
+                    values_found = [values_found[0] for i in range(adata.n_obs)]
+            else:
+                raise ValueError(f"did not find attribute {k} in data set {dataset}")
             values_found_unique = np.unique(values_found)
             try:
                 ontology = getattr(self.ontology_container, k)
@@ -208,14 +229,14 @@ class DistributedStore:
                 ])
             ]
             # TODO keep this logging for now to catch undesired behaviour resulting from loaded edges in ontologies.
-            print(f"matched cell-wise keys {str(values_found_unique_matched)} in data set {self.id}")
+            print(f"matched cell-wise keys {str(values_found_unique_matched)} in data set {dataset}")
             idx = np.where([x in values_found_unique_matched for x in values_found])[0]
             return idx
 
         indices = {}
         for k, v in self.adatas.items():
             idx_old = self.indices[k].tolist()
-            idx_new = get_subset_idx(adata=v, k=attr_key)
+            idx_new = get_subset_idx(adata=v, k=attr_key, dataset=k)
             # Keep intersection of old and new hits.
             indices[k] = np.array(list(set(idx_old).intersection(set(idx_new))))
         return indices
