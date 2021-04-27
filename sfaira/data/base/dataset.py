@@ -1303,6 +1303,7 @@ class DatasetBase(abc.ABC):
                 continue
             elif x in ["bio_sample", "individual", "tech_sample"] and \
                     hasattr(self, f"{x}_obs_key") and \
+                    getattr(self, f"{x}_obs_key") is not None and \
                     "*" in getattr(self, f"{x}_obs_key"):
                 batch_cols = []
                 for batch_col in getattr(self, f"{x}_obs_key").split("*"):
@@ -1318,7 +1319,6 @@ class DatasetBase(abc.ABC):
                     "_".join([str(xxx) for xxx in xx])
                     for xx in zip(*[self.adata.obs[batch_col].values.tolist() for batch_col in batch_cols])
                 ])),)
-
             elif hasattr(self, f"{x}_obs_key") and getattr(self, f"{x}_obs_key") is not None:
                 meta[getattr(self._adata_ids, x)] = (self.adata.obs[getattr(self, f"{x}_obs_key")].unique(),)
             else:
