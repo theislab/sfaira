@@ -33,6 +33,7 @@ def test_store_config():
     ds.write_distributed_store(dir_cache=store_path, store="h5ad", dense=True)
     store = DistributedStore(cache_path=store_path)
     store.subset(attr_key="assay_sc", values=["10x sequencing"])
+    store.subset_cells(attr_key="assay_sc", values=["10x sequencing"])
     store.write_config(fn=config_path)
     store2 = DistributedStore(cache_path=store_path)
     store2.load_config(fn=config_path)
