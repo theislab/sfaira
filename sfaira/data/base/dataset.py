@@ -1575,7 +1575,7 @@ class DatasetBase(abc.ABC):
             x = [x]
         if isinstance(x, list):
             x = (x,)
-        self._download_url_data = (x,)
+        self._download_url_data = x
 
     @property
     def download_url_meta(self) -> Union[Tuple[List[str]], Tuple[List[None]]]:
@@ -1606,7 +1606,7 @@ class DatasetBase(abc.ABC):
             x = [x]
         if isinstance(x, list):
             x = (x,)
-        self._download_url_meta = (x,)
+        self._download_url_meta = x
 
     @property
     def ethnicity(self) -> Union[None, str]:
