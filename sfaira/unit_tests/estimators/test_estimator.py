@@ -22,7 +22,7 @@ TARGETS = ["T cell", "stromal cell"]
 ASSAYS = ["10x sequencing", "Smart-seq2"]
 # Read 500 genes (not full protein coding) to compromise between being able to distinguish observations and reducing
 # run time of unit tests.
-GENES_500 = pd.read_csv(os.path.join(cache_dir, ASSEMBLY + ".csv"))["gene_id"].values.tolist()
+GENES_500 = pd.read_csv(os.path.join(cache_dir, ASSEMBLY + ".csv"))["gene_id"].values[:500].tolist()
 
 TOPOLOGY_EMBEDDING_MODEL = {
     "model_type": None,
