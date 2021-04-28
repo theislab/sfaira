@@ -41,7 +41,7 @@ def cached_store_writing(dir_data, dir_meta, assembly) -> os.PathLike:
     # Only load files that are not already in cache.
     anticipated_files = [
         v.doi for k, v in ds.datasets.items()
-        if not os.path.join(store_path, v.doi_cleaned_id + ".h5ad")
+        if not os.path.exists(os.path.join(store_path, v.doi_cleaned_id + ".h5ad"))
     ]
     ds.subset(key="doi", values=anticipated_files)
     ds.load()
