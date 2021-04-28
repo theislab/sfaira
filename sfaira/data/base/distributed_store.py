@@ -40,7 +40,7 @@ class DistributedStore:
                 if f.split(".")[-1] == "h5ad":
                     adata = anndata.read_h5ad(
                         filename=os.path.join(cache_path, f),
-                        backed=True,
+                        backed="r",
                     )
                 elif f.split(".")[-1] == "zarr":
                     # TODO this reads into memory! Might need to directly interface the zarr arrays to work with dask.
