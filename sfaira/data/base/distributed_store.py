@@ -61,8 +61,10 @@ class DistributedStore:
 
     @property
     def adata(self):
-        return list(self.adatas.values)[0].concatenate(
-            list(self.adatas.values)[1:]
+        return self.adatas[list(self.adatas.keys())[0]].concatenate(
+            *[self.adatas[k] for k in list(self.adatas.keys())[1:]],
+            batch_key="dataset_id",
+            batch_categories=list(self.adatas.keys()),
         )
 
     @property
@@ -181,45 +183,7 @@ class DistributedStore:
             )
         return self._celltype_universe
 
-    def subset(self, attr_key, values):
-        """
-        Subset list of adata objects based on match to values in key property.
-
-        Keys need to be available in adata.uns
-
-        :param attr_key: Property to subset by.
-        :param values: Classes to overlap to.
-        :return:
-        """
-        if isinstance(values, np.ndarray):
-            values = values.tolist()
-        if isinstance(values, tuple):
-            values = list(values)
-        if not isinstance(values, list):
-            values = [values]
-        # Get ontology container to be able to do relational reasoning:
-        ontology = getattr(self.ontology_container, attr_key)
-        for k in list(self.adatas.keys()):
-            if getattr(self._adata_ids_sfaira, attr_key) in self.adatas[k].uns.keys():
-                if getattr(self._adata_ids_sfaira, attr_key) != UNS_STRING_META_IN_OBS:
-                    values_found = self.adatas[k].uns[getattr(self._adata_ids_sfaira, attr_key)]
-                else:
-                    values_found = self.adatas[k].obs[getattr(self._adata_ids_sfaira, attr_key)].values.tolist()
-                if not isinstance(values_found, list):
-                    values_found = [values_found]
-                if not np.any([
-                    np.any([
-                        is_child(query=x, ontology=ontology, ontology_parent=y)
-                        for y in values
-                    ]) for x in values_found
-                ]):
-                    # Delete entries which a non-matching meta data value associated with this item.
-                    del self.adatas[k]
-            else:
-                # Delete entries which did not have this key annotated.
-                del self.adatas[k]
-
-    def subset_cells_idx(self, attr_key, values: Union[str, List[str]]):
+    def _get_subset_idx(self, attr_key, values: Union[str, List[str]]):
         """
         Get indices of subset list of adata objects based on cell-wise properties.
 
@@ -244,25 +208,26 @@ class DistributedStore:
             values = [values]
 
         def get_subset_idx(adata, k, dataset):
-            # Try to look first in cell wise annotation to use cell-wise map if data set-wide maps are ambiguous:
+            # Use cell-wise annotation if data set-wide maps are ambiguous:
             # This can happen if the different cell-wise annotations are summarised as a union in .uns.
-            if getattr(self._adata_ids_sfaira, k) in adata.obs.keys():
-                values_found = adata.obs[getattr(self._adata_ids_sfaira, k)].values
-            elif getattr(self._adata_ids_sfaira, k) in adata.uns.keys():
+            if getattr(self._adata_ids_sfaira, k) in adata.uns.keys():
                 values_found = adata.uns[getattr(self._adata_ids_sfaira, k)]
                 if isinstance(values_found, np.ndarray):
                     values_found = values_found.tolist()
                 elif not isinstance(values_found, list):
                     values_found = [values_found]
                 if len(values_found) > 1:
-                    print(f"WARNING: subsetting not exact for attribute {k}: {values_found},"
-                          f" discarding data set {dataset}.")
-                    values_found = []
+                    values_found = None  # Go to cell-wise annotation.
                 else:
                     # Replicate unique property along cell dimension.
                     values_found = [values_found[0] for i in range(adata.n_obs)]
             else:
-                raise ValueError(f"did not find attribute {k} in data set {dataset}")
+                values_found = None
+            if values_found is None:
+                if getattr(self._adata_ids_sfaira, k) in adata.obs.keys():
+                    values_found = adata.obs[getattr(self._adata_ids_sfaira, k)].values
+                else:
+                    raise ValueError(f"did not find unique attribute {k} in data set {dataset}")
             values_found_unique = np.unique(values_found)
             try:
                 ontology = getattr(self.ontology_container, k)
@@ -288,7 +253,7 @@ class DistributedStore:
             indices[k] = np.array(list(set(idx_old).intersection(set(idx_new))))
         return indices
 
-    def subset_cells(self, attr_key, values: Union[str, List[str]]):
+    def subset(self, attr_key, values: Union[str, List[str]]):
         """
         Subset list of adata objects based on cell-wise properties.
 
@@ -310,7 +275,7 @@ class DistributedStore:
             - "state_exact" points to self.state_exact_obs_key
         :param values: Classes to overlap to.
         """
-        self.indices = self.subset_cells_idx(attr_key=attr_key, values=values)
+        self.indices = self._get_subset_idx(attr_key=attr_key, values=values)
 
         for k, v in self.indices.items():
             if v.shape[0] == 0:  # No observations (cells) left.
@@ -340,7 +305,7 @@ class DistributedStore:
         :return Index vector
         """
         # Get indices of of cells in target set by file.
-        idx_by_dataset = self.subset_cells_idx(attr_key=attr_key, values=values)
+        idx_by_dataset = self._get_subset_idx(attr_key=attr_key, values=values)
         # Translate file-wise indices into global index list across all data sets.
         idx = []
         counter = 0

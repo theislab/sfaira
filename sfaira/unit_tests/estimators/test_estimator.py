@@ -149,7 +149,7 @@ class HelperEstimatorKerasEmbedding(HelperEstimatorBase):
         if model_type == "linear":
             topology["hyper_parameters"]["latent_dim"] = 2
         else:
-            topology["hyper_parameters"]["latent_dim"] = (2, 2)
+            topology["hyper_parameters"]["latent_dim"] = (2, 2, 2)
         self.model_type = model_type
         self.tc = TopologyContainer(topology=topology, topology_id="0.1")
 

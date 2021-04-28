@@ -36,6 +36,14 @@ class TrainModel:
             raise ValueError(f"did not recongize data of type {type(data)}")
         self.zoo = ModelZoo()
 
+    def load_into_memory(self):
+        """
+        Loads backed objects from DistributedStore into single adata object in memory in .data slot.
+        :return:
+        """
+        if isinstance(self.data, DistributedStore):
+            self.data = self.data.adata
+
     @abc.abstractmethod
     def init_estim(self):
         pass

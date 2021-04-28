@@ -477,7 +477,6 @@ class EstimatorKeras:
         return self.data.obs.iloc[self.idx_test, :]
 
 
-
 class EstimatorKerasEmbedding(EstimatorKeras):
     """
     Estimator class for the embedding model.
@@ -1090,7 +1089,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
                         if isinstance(x_sample, scipy.sparse.csr_matrix):
                             x_sample = x_sample.toarray()
                         x_sample = x_sample.flatten()
-                        y_sample = onehot_encoder(z[0]["cell_ontology_class"].values[0])
+                        y_sample = onehot_encoder(z[1]["cell_ontology_class"].values[0])
                         yield generator_helper(x_sample, y_sample, 1.)
 
             n_features = self.data.n_vars
