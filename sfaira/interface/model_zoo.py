@@ -9,7 +9,7 @@ from typing import List, Union
 
 from sfaira.versions.metadata import CelltypeUniverse
 from sfaira.consts import OntologyContainerSfaira
-from sfaira.versions.topologies import TopologyContainer
+from sfaira.versions.topologies import TopologyContainer, TOPOLOGIES
 
 
 class ModelZoo(abc.ABC):
@@ -42,7 +42,6 @@ class ModelZoo(abc.ABC):
         self.organisation = None
         self.model_topology = None
         self.model_version = None
-        self.topology_container = None
         self.celltypes = None
 
     @abc.abstractmethod
@@ -164,16 +163,18 @@ class ModelZoo(abc.ABC):
         assert self.topology_container is not None
         return self.topology_container.topology["hyper_parameters"]
 
+    @property
+    def topology_container(self) -> TopologyContainer:
+        assert self.model_id is not None, "set model_id first"
+        # TODO: this ID decomposition to organism is custom to the topologies handled in this package.
+        organism = self.model_id.split("-")[0]
+        return TopologyContainer(
+            topology=TOPOLOGIES[organism][self.model_class][self.model_type][self.model_version],
+            topology_id=self.model_version
+        )
+
 
 class ModelZooEmbedding(ModelZoo):
-
-    """
-    The supported model ontology is:
-
-        organism -> organ -> model -> organisation -> topology -> version -> ID
-
-    Maybe: include experimental protocol? Ie droplet, full-length, single-nuclei.
-    """
 
     def load_ontology_from_model_ids(
             self,
@@ -249,12 +250,6 @@ class ModelZooEmbedding(ModelZoo):
 
 class ModelZooCelltype(ModelZoo):
     """
-    The supported model ontology is:
-
-        organism -> organ -> model -> organisation -> topology -> version -> ID
-
-    Maybe: include experimental protocol? Ie droplet, full-length, single-nuclei.
-
     Note on topology id: The topology ID is x.y.z, x is the major cell type version and y.z is the cell type model
     topology. Cell type model ontologies do not include the output size as this is set by the cell type version.
     """

@@ -5,7 +5,7 @@ import os
 from sfaira.data import Universe
 
 
-def simulate_anndata(assays, genes, n_obs, targets) -> anndata.AnnData:
+def simulate_anndata(genes, n_obs, targets=None, assays=None) -> anndata.AnnData:
     """
     Simulate basic data example.
 
@@ -14,14 +14,16 @@ def simulate_anndata(assays, genes, n_obs, targets) -> anndata.AnnData:
     data = anndata.AnnData(
         np.random.randint(low=0, high=100, size=(n_obs, len(genes))).astype(np.float32)
     )
-    data.obs["assay_sc"] = [
-        assays[np.random.randint(0, len(targets))]
-        for i in range(n_obs)
-    ]
-    data.obs["cell_ontology_class"] = [
-        targets[np.random.randint(0, len(targets))]
-        for i in range(n_obs)
-    ]
+    if assays is not None:
+        data.obs["assay_sc"] = [
+            assays[np.random.randint(0, len(targets))]
+            for i in range(n_obs)
+        ]
+    if targets is not None:
+        data.obs["cell_ontology_class"] = [
+            targets[np.random.randint(0, len(targets))]
+            for i in range(n_obs)
+        ]
     data.var["ensembl"] = genes
     return data
 

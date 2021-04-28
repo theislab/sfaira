@@ -2,6 +2,7 @@ import abc
 import anndata
 import hashlib
 import numpy as np
+import pandas as pd
 import scipy.sparse
 try:
     import tensorflow as tf
@@ -462,6 +463,19 @@ class EstimatorKeras:
     @property
     def using_store(self) -> bool:
         return isinstance(self.data, DistributedStore)
+
+    @property
+    def obs_train(self):
+        return self.data.obs.iloc[self.idx_train, :]
+
+    @property
+    def obs_eval(self):
+        return self.data.obs.iloc[self.idx_eval, :]
+
+    @property
+    def obs_test(self):
+        return self.data.obs.iloc[self.idx_test, :]
+
 
 
 class EstimatorKerasEmbedding(EstimatorKeras):

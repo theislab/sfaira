@@ -91,7 +91,7 @@ class TrainModelEmbedding(TrainModel):
             data=self.data,
             model_dir=self.model_dir,
             model_id=self.zoo.model_id,
-            model_topology=self.zoo.model_topology
+            model_topology=self.zoo.topology_container
         )
         self.estimator.init_model(override_hyperpar=override_hyperpar)
 
@@ -159,7 +159,7 @@ class TrainModelCelltype(TrainModel):
             data=self.data,
             model_dir=self.model_dir,
             model_id=self.zoo.model_id,
-            model_topology=self.zoo.model_topology
+            model_topology=self.zoo.topology_container
         )
         self.estimator.init_model(override_hyperpar=override_hyperpar)
 

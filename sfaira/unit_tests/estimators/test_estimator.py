@@ -356,15 +356,15 @@ def test_split_index_sets(data_type: str, test_split):
     assert x_eval.shape[0] == len(idx_eval)
     assert x_test.shape[0] == len(idx_test)
     # Assert that observations are unique within partition:
-    assert not np.all([
+    assert np.all([
         np.sum([np.all(x_train[i] == x_train[j]) for j in range(x_train.shape[0])]) == 1
         for i in range(x_train.shape[0])
     ])
-    assert not np.all([
+    assert np.all([
         np.sum([np.all(x_eval[i] == x_eval[j]) for j in range(x_eval.shape[0])]) == 1
         for i in range(x_eval.shape[0])
     ])
-    assert not np.all([
+    assert np.all([
         np.sum([np.all(x_test[i] == x_test[j]) for j in range(x_test.shape[0])]) == 1
         for i in range(x_test.shape[0])
     ])

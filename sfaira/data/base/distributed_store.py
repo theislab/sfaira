@@ -403,3 +403,12 @@ class DistributedStore:
     @property
     def shape(self):
         return [self.n_obs, self.n_vars]
+
+    @property
+    def obs(self) -> pd.DataFrame:
+        """
+        Assemble .obs table of subset of full data.
+
+        :return: .obs data frame.
+        """
+        return pd.concat([v.obs for v in self.adatas.values()], axis=0)
