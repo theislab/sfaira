@@ -300,7 +300,7 @@ def test_split_index_sets(data_type: str, test_split):
         # See also EstimatorKeras.train and DistributedStore.subset_cells_idx_global
         for i, x in enumerate(idx_raw):
             if i > 0:
-                idx_raw[i] = idx_raw[i] + int(np.max(idx_raw[i-1]))
+                idx_raw[i] = idx_raw[i] + int(np.max(idx_raw[i - 1]))
         if isinstance(test_split, float):
             # Make sure that indices from each split are in each data set:
             for z in [idx_train, idx_eval, idx_test]:
@@ -338,23 +338,23 @@ def test_split_index_sets(data_type: str, test_split):
         if x_train is None:
             x_train = x
         else:
-            x_train = np.hstack([x_train, x])
+            x_train = np.concatenate([x_train, x], axis=0)
     for x, y in ds_eval.as_numpy_iterator():
         x = x[0]
         if x_eval is None:
             x_eval = x
         else:
-            x_eval = np.hstack([x_eval, x])
+            x_eval = np.concatenate([x_eval, x], axis=0)
     for x, y in ds_test.as_numpy_iterator():
         x = x[0]
         if x_test is None:
             x_test = x
         else:
-            x_test = np.hstack([x_test, x])
+            x_test = np.concatenate([x_test, x], axis=0)
     # Validate size of recovered numpy data sets:
-    assert x_train.shape[0] == len(idx_train), (x_train.shape[0], len(idx_train))
-    assert x_eval.shape[0] == len(idx_eval), (x_eval.shape[0], len(idx_eval))
-    assert x_test.shape[0] == len(idx_test), (x_test.shape[0], len(idx_test))
+    assert x_train.shape[0] == len(idx_train)
+    assert x_eval.shape[0] == len(idx_eval)
+    assert x_test.shape[0] == len(idx_test)
     # Assert that observations are unique within partition:
     assert not np.all([
         np.sum([np.all(x_train[i] == x_train[j]) for j in range(x_train.shape[0])]) == 1
