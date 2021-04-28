@@ -180,7 +180,7 @@ class EstimatorKeras:
             batch_size: Union[int, None],
             mode: str,
             shuffle_buffer_size: int,
-            prefetch: int,
+            cache_full: bool,
             weighted: bool
     ):
         pass
@@ -278,6 +278,7 @@ class EstimatorKeras:
             test_split: Union[float, dict] = 0.,
             validation_batch_size: int = 256,
             max_validation_steps: Union[int, None] = 10,
+            cache_full: bool = False,
             patience: int = 20,
             lr_schedule_min_lr: float = 1e-5,
             lr_schedule_factor: float = 0.2,
@@ -429,14 +430,16 @@ class EstimatorKeras:
             batch_size=batch_size,
             mode='train',
             shuffle_buffer_size=min(shuffle_buffer_size, len(self.idx_train)),
-            weighted=weighted
+            weighted=weighted,
+            cache_full=cache_full,
         )
         eval_dataset = self._get_dataset(
             idx=self.idx_eval,
             batch_size=validation_batch_size,
             mode='train_val',
             shuffle_buffer_size=min(shuffle_buffer_size, len(self.idx_eval)),
-            weighted=weighted
+            weighted=weighted,
+            cache_full=cache_full,
         )
 
         steps_per_epoch = min(max(len(self.idx_train) // batch_size, 1), max_steps_per_epoch)
@@ -576,7 +579,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                     if counter in idx:
                         x_sample = z[0]
                         if isinstance(x_sample, scipy.sparse.csr_matrix):
-                            x_sample = x_sample.toarray()
+                            x_sample = np.asarray(x_sample.todense())
                         x_sample = x_sample.flatten()
                         yield generator_helper(x_sample=x_sample)
 
@@ -589,7 +592,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 is_sparse = isinstance(x[0, :], scipy.sparse.spmatrix)
                 indices = idx if self.data.isbacked else range(x.shape[0])
                 for i in indices:
-                    x_sample = x[i, :].toarray().flatten() if is_sparse else x[i, :].flatten()
+                    x_sample = np.asarray(x[i, :].todense()).flatten() if is_sparse else x[i, :].flatten()
                     yield generator_helper(x_sample=x_sample)
 
             n_features = x.shape[1]
@@ -603,7 +606,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             batch_size: Union[int, None],
             mode: str,
             shuffle_buffer_size: int = int(1e7),
-            prefetch: int = 10,
+            cache_full: bool = False,
             weighted: bool = False,
     ):
         """
@@ -638,6 +641,8 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 output_types=output_types,
                 output_shapes=output_shapes
             )
+            if cache_full:
+                dataset = dataset.cache()
             # Only shuffle in train modes
             if mode in ['train', 'train_val']:
                 dataset = dataset.repeat()
@@ -645,7 +650,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                     buffer_size=min(n_samples, shuffle_buffer_size),
                     seed=None,
                     reshuffle_each_iteration=True)
-            dataset = dataset.batch(batch_size).prefetch(prefetch)
+            dataset = dataset.batch(batch_size).prefetch(tf.data.AUTOTUNE)
 
             return dataset
 
@@ -667,7 +672,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                         if counter in idx:
                             x_sample = z[0]
                             if isinstance(x_sample, scipy.sparse.csr_matrix):
-                                x_sample = x_sample.toarray()
+                                x_sample = np.asarray(x_sample.todense())
                             x_sample = x_sample.flatten()
                             sf_sample = prepare_sf(x=x_sample)[0]
                             y_sample = z[1]["cell_ontology_class"].values[0]
@@ -704,7 +709,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 buffer_size=shuffle_buffer_size,
                 seed=None,
                 reshuffle_each_iteration=True
-            ).batch(batch_size).prefetch(prefetch)
+            ).batch(batch_size).prefetch(tf.data.AUTOTUNE)
 
             return dataset
 
@@ -1087,7 +1092,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
                     if counter in idx:
                         x_sample = z[0]
                         if isinstance(x_sample, scipy.sparse.csr_matrix):
-                            x_sample = x_sample.toarray()
+                            x_sample = np.asarray(x_sample.todense())
                         x_sample = x_sample.flatten()
                         y_sample = onehot_encoder(z[1]["cell_ontology_class"].values[0])
                         yield generator_helper(x_sample, y_sample, 1.)
@@ -1122,7 +1127,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             batch_size: Union[int, None],
             mode: str,
             shuffle_buffer_size: int = int(1e7),
-            prefetch: int = 10,
+            cache_full: bool = False,
             weighted: bool = False,
     ):
         """
@@ -1152,6 +1157,8 @@ class EstimatorKerasCelltype(EstimatorKeras):
             output_types=output_types,
             output_shapes=output_shapes
         )
+        if cache_full:
+            dataset = dataset.cache()
         if mode == 'train' or mode == 'train_val':
             dataset = dataset.repeat()
             dataset = dataset.shuffle(
@@ -1159,7 +1166,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
                 seed=None,
                 reshuffle_each_iteration=True
             )
-        dataset = dataset.batch(batch_size).prefetch(prefetch)
+        dataset = dataset.batch(batch_size).prefetch(tf.data.AUTOTUNE)
 
         return dataset
 
@@ -1221,7 +1228,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             idx,
             batch_size: int = 1,
             max_steps: int = np.inf,
-            weighted: bool = True
+            weighted: bool = False
     ):
         """
         Evaluate the custom model on any local data.
@@ -1248,7 +1255,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
         else:
             return {}
 
-    def evaluate(self, batch_size: int = 1, max_steps: int = np.inf, weighted: bool = True):
+    def evaluate(self, batch_size: int = 1, max_steps: int = np.inf, weighted: bool = False):
         """
         Evaluate the custom model on local data.
 

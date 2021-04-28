@@ -150,7 +150,6 @@ class DistributedStore:
                     if var_idx is not None:
                         x = x[:, var_idx]
                     obs = v.obs[obs_keys].iloc[z:batch_end, :]
-                    assert isinstance(x, np.ndarray), f"{type(x)}"
                     assert isinstance(obs, pd.DataFrame), f"{type(obs)}"
                     if continuous_batches and remainder > 0 and i < (n_datasets - 1) and j == (n_batches - 1):
                         # Cache incomplete last batch to append to next first batch of next data set.
@@ -159,7 +158,6 @@ class DistributedStore:
                     elif continuous_batches and x_last is not None:
                         # Append last incomplete batch current batch.
                         if isinstance(x, scipy.sparse.csr_matrix):
-                            # TODO: does this happen?
                             x = scipy.sparse.hstack(blocks=[x_last, x], format="csr")
                         elif isinstance(x, np.ndarray):
                             x = np.hstack(blocks=[x_last, x])
@@ -210,7 +208,8 @@ class DistributedStore:
         def get_subset_idx(adata, k, dataset):
             # Use cell-wise annotation if data set-wide maps are ambiguous:
             # This can happen if the different cell-wise annotations are summarised as a union in .uns.
-            if getattr(self._adata_ids_sfaira, k) in adata.uns.keys():
+            if getattr(self._adata_ids_sfaira, k) in adata.uns.keys() and \
+                    adata.uns[getattr(self._adata_ids_sfaira, k)] != UNS_STRING_META_IN_OBS:
                 values_found = adata.uns[getattr(self._adata_ids_sfaira, k)]
                 if isinstance(values_found, np.ndarray):
                     values_found = values_found.tolist()
@@ -250,7 +249,7 @@ class DistributedStore:
             idx_old = self.indices[k].tolist()
             idx_new = get_subset_idx(adata=v, k=attr_key, dataset=k)
             # Keep intersection of old and new hits.
-            indices[k] = np.array(list(set(idx_old).intersection(set(idx_new))))
+            indices[k] = np.asarray(list(set(idx_old).intersection(set(idx_new))), dtype="int32")
         return indices
 
     def subset(self, attr_key, values: Union[str, List[str]]):
@@ -281,7 +280,7 @@ class DistributedStore:
             if v.shape[0] == 0:  # No observations (cells) left.
                 del self.adatas[k]
 
-    def subset_cells_idx_global(self, attr_key, values: Union[str, List[str]]):
+    def subset_cells_idx_global(self, attr_key, values: Union[str, List[str]]) -> np.ndarray:
         """
         Get indices of subset list of adata objects based on cell-wise properties treating instance as single array.
 
@@ -311,9 +310,9 @@ class DistributedStore:
         counter = 0
         for k, v in self.adatas.items():
             idx_k = np.arange(counter, counter + v.n_obs)
-            idx.extend(idx_k[idx_by_dataset[k]])
+            idx.extend(idx_k[idx_by_dataset[k]].tolist())
             counter += v.n_obs
-        return idx
+        return np.asarray(idx)
 
     def write_config(self, fn: Union[str, os.PathLike]):
         """

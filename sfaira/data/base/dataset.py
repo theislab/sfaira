@@ -948,6 +948,7 @@ class DatasetBase(abc.ABC):
                       f"data, found {type(self.adata.X)}")
             fn = os.path.join(dir_cache, self.doi_cleaned_id + ".h5ad")
             as_dense = ("X",) if dense else ()
+            print(f"writing {self.adata.shape} into {fn}")
             self.adata.write_h5ad(filename=fn, as_dense=as_dense, **compression_kwargs)
         elif store == "zarr":
             fn = os.path.join(dir_cache, self.doi_cleaned_id)
