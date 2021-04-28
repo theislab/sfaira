@@ -65,6 +65,9 @@ class EstimatorKeras:
         self.model_id = model_id
         self.model_class = model_class
         self.topology_container = model_topology
+        # Prepare store with genome container sub-setting:
+        if isinstance(self.data, DistributedStore):
+            self.data.genome_container = self.topology_container.gc
 
         self.history = None
         self.train_hyperparam = None
@@ -195,7 +198,14 @@ class EstimatorKeras:
             label_dict.update({label: float(i)})
         return label_dict
 
-    def _prepare_data_matrix(self, idx: Union[np.ndarray, None]):
+    def _prepare_data_matrix(self, idx: Union[np.ndarray, None]) -> scipy.sparse.csr_matrix:
+        """
+        Subsets observations x features matrix in .data to observation indices (idx, the split) and features defined
+        by topology.
+
+        :param idx: Observation index split.
+        :return: Data matrix
+        """
         # Check that AnnData is not backed. If backed, assume that these processing steps were done before.
         if self.data.isbacked:
             raise ValueError("tried running backed AnnData object through standard pipeline")
@@ -224,35 +234,19 @@ class EstimatorKeras:
                     return x
 
             # Compute indices of genes to keep
-            data_ids = self.data.var[self._adata_ids.gene_id_ensembl].values
-            idx_feature_kept = np.where([x in self.topology_container.gc.ensembl for x in data_ids])[0]
-            idx_feature_map = np.array([self.topology_container.gc.ensembl.index(x)
-                                        for x in data_ids[idx_feature_kept]])
-
-            # Convert to csc and remove unmapped genes
-            x = x.tocsc()
-            x = x[:, idx_feature_kept]
-
-            # Create reordered feature matrix based on reference and convert to csr
-            x_new = scipy.sparse.csc_matrix((x.shape[0], self.topology_container.n_var), dtype=x.dtype)
-            # copying this over to the new matrix in chunks of size `steps` prevents a strange scipy error:
-            # ... scipy/sparse/compressed.py", line 922, in _zero_many i, j, offsets)
-            # ValueError: could not convert integer scalar
-            step = 500
-            if step < len(idx_feature_map):
-                for i in range(0, len(idx_feature_map), step):
-                    x_new[:, idx_feature_map[i:i + step]] = x[:, i:i + step]
-                x_new[:, idx_feature_map[i + step:]] = x[:, i + step:]
-            else:
-                x_new[:, idx_feature_map] = x
-
-            x_new = x_new.tocsr()
-
-            print(f"found {len(idx_feature_kept)} intersecting features between {x.shape[1]} "
-                  f"features in input data set and {self.topology_container.n_var} features in reference genome")
-            print(f"found {x_new.shape[0]} observations")
-
-            return x_new
+            data_ids = self.data.var[self._adata_ids.gene_id_ensembl].values.tolist()
+            target_ids = self.topology_container.gc.ensembl
+            idx_map = np.array([data_ids.index(z) for z in target_ids])
+            # Assert that each ID from target IDs appears exactly once in data IDs:
+            assert np.all([z in data_ids for z in target_ids]), "not all target feature IDs found in data"
+            assert np.all([np.sum(z == np.array(data_ids)) <= 1. for z in target_ids]), \
+                "duplicated target feature IDs exist in data"
+            # Map feature space.
+            x = x[:, idx_map]
+            print(f"found {len(idx_map)} intersecting features between {x.shape[1]} features in input data set and"
+                  f" {self.topology_container.n_var} features in reference genome")
+            print(f"found {x.shape[0]} observations")
+            return x
 
     @abc.abstractmethod
     def _get_loss(self):
@@ -290,7 +284,7 @@ class EstimatorKeras:
             shuffle_buffer_size: int = int(1e4),
             log_dir: Union[str, None] = None,
             callbacks: Union[list, None] = None,
-            weighted: bool = True,
+            weighted: bool = False,
             verbose: int = 2
     ):
         """
@@ -391,7 +385,7 @@ class EstimatorKeras:
         if isinstance(test_split, float) or isinstance(test_split, int):
             self.idx_test = np.random.choice(
                 a=all_idx,
-                size=round(self.data.shape[0] * test_split),
+                size=round(self.data.n_obs * test_split),
                 replace=False,
             )
         elif isinstance(test_split, dict):
@@ -564,10 +558,13 @@ class EstimatorKerasEmbedding(EstimatorKeras):
 
             def generator():
                 counter = -1
-                for z in generator_raw:
+                for z in generator_raw():
                     counter += 1
                     if counter in idx:
-                        x_sample = z[0].toarray().flatten()
+                        x_sample = z[0]
+                        if isinstance(x_sample, scipy.sparse.csr_matrix):
+                            x_sample = x_sample.toarray()
+                        x_sample = x_sample.flatten()
                         yield generator_helper(x_sample=x_sample)
 
             n_features = self.data.n_vars
@@ -652,10 +649,13 @@ class EstimatorKerasEmbedding(EstimatorKeras):
 
                 def generator():
                     counter = -1
-                    for z in generator_raw:
+                    for z in generator_raw():
                         counter += 1
                         if counter in idx:
-                            x_sample = z[0].toarray().flatten()
+                            x_sample = z[0]
+                            if isinstance(x_sample, scipy.sparse.csr_matrix):
+                                x_sample = x_sample.toarray()
+                            x_sample = x_sample.flatten()
                             sf_sample = prepare_sf(x=x_sample)[0]
                             y_sample = z[1]["cell_ontology_class"].values[0]
                             yield (x_sample, sf_sample), (x_sample, cell_to_class[y_sample])
@@ -1069,10 +1069,13 @@ class EstimatorKerasCelltype(EstimatorKeras):
 
             def generator():
                 counter = -1
-                for z in generator_raw:
+                for z in generator_raw():
                     counter += 1
                     if counter in idx:
-                        x_sample = z[0].toarray().flatten()
+                        x_sample = z[0]
+                        if isinstance(x_sample, scipy.sparse.csr_matrix):
+                            x_sample = x_sample.toarray()
+                        x_sample = x_sample.flatten()
                         y_sample = onehot_encoder(z[0]["cell_ontology_class"].values[0])
                         yield generator_helper(x_sample, y_sample, 1.)
 
@@ -1107,7 +1110,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             mode: str,
             shuffle_buffer_size: int = int(1e7),
             prefetch: int = 10,
-            weighted: bool = True,
+            weighted: bool = False,
     ):
         """
 

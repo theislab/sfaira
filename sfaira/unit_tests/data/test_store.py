@@ -1,9 +1,12 @@
 import numpy as np
 import os
 import pytest
+from typing import List
 
 from sfaira.data import DistributedStore
-from sfaira.data import Universe
+from sfaira.versions.genomes import GenomeContainer
+from sfaira.unit_tests.utils import cached_store_writing
+
 
 MOUSE_GENOME_ANNOTATION = "Mus_musculus.GRCm38.102"
 
@@ -16,21 +19,12 @@ TODO tests from here on down require cached data for mouse lung
 """
 
 
-def test_store_config():
+def test_config():
     """
     Test that data set config files can be set, written and recovered.
     """
-    ds = Universe(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
-    ds.subset(key="organism", values=["mouse"])
-    ds.subset(key="organ", values=["lung"])
-    ds.load()
-    ds.streamline_features(remove_gene_version=True, match_to_reference={"mouse": MOUSE_GENOME_ANNOTATION},
-                           subset_genes_to_type="protein_coding")
-    ds.streamline_metadata(schema="sfaira", uns_to_obs=False, clean_obs=True, clean_var=True, clean_uns=True,
-                           clean_obs_names=True)
-    store_path = os.path.join(dir_data, "store")
+    store_path = cached_store_writing(dir_data=dir_data, dir_meta=dir_meta, assembly=MOUSE_GENOME_ANNOTATION)
     config_path = os.path.join(store_path, "lung")
-    ds.write_distributed_store(dir_cache=store_path, store="h5ad", dense=True)
     store = DistributedStore(cache_path=store_path)
     store.subset(attr_key="assay_sc", values=["10x sequencing"])
     store.subset_cells(attr_key="assay_sc", values=["10x sequencing"])
@@ -41,21 +35,12 @@ def test_store_config():
     assert np.all([np.all(store.indices[k] == store2.indices[k]) for k in store.indices.keys()])
 
 
-def test_store_type_targets():
+def test_type_targets():
     """
     Test that target leave nodes can be set, written and recovered.
     """
-    ds = Universe(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
-    ds.subset(key="organism", values=["mouse"])
-    ds.subset(key="organ", values=["lung"])
-    ds.load()
-    ds.streamline_features(remove_gene_version=True, match_to_reference={"mouse": MOUSE_GENOME_ANNOTATION},
-                           subset_genes_to_type="protein_coding")
-    ds.streamline_metadata(schema="sfaira", uns_to_obs=False, clean_obs=True, clean_var=True, clean_uns=True,
-                           clean_obs_names=True)
-    store_path = os.path.join(dir_data, "store")
+    store_path = cached_store_writing(dir_data=dir_data, dir_meta=dir_meta, assembly=MOUSE_GENOME_ANNOTATION)
     target_path = os.path.join(store_path, "lung")
-    ds.write_distributed_store(dir_cache=store_path, store="h5ad", dense=True)
     store = DistributedStore(cache_path=store_path)
     observed_nodes = np.unique(np.concatenate([
         x.obs[store._adata_ids_sfaira.cell_ontology_class]
@@ -72,3 +57,34 @@ def test_store_type_targets():
     assert len(leaves_all) > len(leaves1)
     assert len(set(leaves1).union(set(leaves2))) == len(leaves1)
     assert np.all([x in leaves1 for x in leaves2])
+
+
+@pytest.mark.parametrize("batch_size", [1, 10])
+@pytest.mark.parametrize("obs_keys", [[], ["cell_ontology_class"]])
+@pytest.mark.parametrize("continuous_batches", [True])
+@pytest.mark.parametrize("assembly", [None, MOUSE_GENOME_ANNOTATION])
+@pytest.mark.parametrize("subset", [{}, {"biotype": "protein_coding"}])
+def test_generator_shapes(batch_size: int, obs_keys: List[str], continuous_batches: bool, assembly: str, subset: dict):
+    """
+    Test generators queries do not throw errors and that output shapes are correct.
+    """
+    if assembly is not None:
+        gc = GenomeContainer(assembly=assembly)
+        gc.subset(**subset)
+    else:
+        gc = None
+    store_path = cached_store_writing(dir_data=dir_data, dir_meta=dir_meta, assembly=MOUSE_GENOME_ANNOTATION)
+    store = DistributedStore(cache_path=store_path)
+    store.genome_container = gc
+    g = store.generator(
+        batch_size=batch_size,
+        obs_keys=obs_keys,
+        continuous_batches=continuous_batches,
+    )
+    x, obs = next(g)
+    assert x.shape[0] == batch_size, (x.shape, batch_size)
+    assert obs.shape[0] == batch_size, (obs.shape, batch_size)
+    assert x.shape[1] == store.n_vars, (x.shape, store.n_vars)
+    assert obs.shape[1] == len(obs_keys), (x.shape, obs_keys)
+    if assembly is not None:
+        assert x.shape[1] == gc.n_var, (x.shape, gc.n_var)

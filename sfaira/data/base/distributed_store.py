@@ -8,6 +8,7 @@ from typing import Dict, List, Union
 
 from sfaira.consts import AdataIdsSfaira, OCS
 from sfaira.data.base.dataset import is_child, UNS_STRING_META_IN_OBS
+from sfaira.versions.genomes import GenomeContainer
 from sfaira.versions.metadata import CelltypeUniverse
 
 
@@ -20,7 +21,7 @@ class DistributedStore:
 
     indices: Dict[str, np.ndarray]
 
-    def __init__(self, cache_path: Union[str, None] = None):
+    def __init__(self, cache_path: Union[str, os.PathLike, None] = None):
         """
         This class is instantiated on a cache directory which contains pre-processed files in rapid access format.
 
@@ -30,6 +31,7 @@ class DistributedStore:
             - zarr
 
         :param cache_path: Directory in which pre-processed .h5ad files lie.
+        :param genome_container: GenomeContainer with target features space defined.
         """
         # Collect all data loaders from files in directory:
         adatas = {}
@@ -53,6 +55,7 @@ class DistributedStore:
         self.adatas = adatas
         self.indices = indices
         self.ontology_container = OCS
+        self._genome_container = None
         self._adata_ids_sfaira = AdataIdsSfaira()
         self._celltype_universe = None
 
@@ -61,6 +64,29 @@ class DistributedStore:
         return list(self.adatas.values)[0].concatenate(
             list(self.adatas.values)[1:]
         )
+
+    @property
+    def genome_container(self) -> Union[GenomeContainer, None]:
+        return self._genome_container
+
+    @genome_container.setter
+    def genome_container(self, x: GenomeContainer):
+        var_names = self.__validate_feature_space_homogeneity()
+        # Validate genome container choice:
+        # Make sure that all var names defined in genome container are also contained in loaded data sets.
+        assert np.all([y in var_names for y in x.ensembl]), \
+            "did not find variable names from genome container in store"
+        self._genome_container = x
+
+    def __validate_feature_space_homogeneity(self) -> List[str]:
+        """
+        Assert that the data sets which were kept have the same feature names.
+        """
+        var_names = self.adatas[list(self.adatas.keys())[0]].var_names.tolist()
+        for k, v in self.adatas.items():
+            assert len(var_names) == len(v.var_names), f"number of features in store differed in object {k}"
+            assert np.all(var_names == v.var_names), f"var_names in store were not matched in object {k}"
+        return var_names
 
     def generator(
             self,
@@ -81,6 +107,19 @@ class DistributedStore:
 
                 - if store format is h5ad: (scipy.sparse.csr_matrix, pandas.DataFrame)
         """
+        # Make sure that features are ordered in the same way in each object so that generator yields consistent cell
+        # vectors.
+        _ = self.__validate_feature_space_homogeneity()
+        var_names_store = self.adatas[list(self.adatas.keys())[0]].var_names.tolist()
+        # Use feature space sub-selection based on assembly if provided, will use full feature space otherwise.
+        if self.genome_container is not None:
+            var_names_target = self.genome_container.ensembl
+            var_idx = np.array([var_names_store.index(x) for x in var_names_target])
+            # Check if index vector is just full ordered list of indices, in this case, subsetting is unnecessary.
+            if len(var_idx) == len(var_names_store) and np.all(var_idx == np.arange(0, len(var_names_store))):
+                var_idx = None
+        else:
+            var_idx = None
 
         def generator() -> tuple:
             n_datasets = len(list(self.adatas.keys()))
@@ -103,11 +142,13 @@ class DistributedStore:
                 ]
                 n_batches = len(batch_starts)
                 # Iterate over batches:
-                for j, x in enumerate(batch_starts):
-                    batch_end = int(x + batch_size)
-                    x = v.X[x:batch_end, :]
-                    obs = v.obs[obs_keys].iloc[x:batch_end, :]
-                    assert isinstance(x, scipy.sparse.csr_matrix), f"{type(x)}"
+                for j, z in enumerate(batch_starts):
+                    batch_end = int(z + batch_size)
+                    x = v.X[z:batch_end, :]
+                    if var_idx is not None:
+                        x = x[:, var_idx]
+                    obs = v.obs[obs_keys].iloc[z:batch_end, :]
+                    assert isinstance(x, np.ndarray), f"{type(x)}"
                     assert isinstance(obs, pd.DataFrame), f"{type(obs)}"
                     if continuous_batches and remainder > 0 and i < (n_datasets - 1) and j == (n_batches - 1):
                         # Cache incomplete last batch to append to next first batch of next data set.
@@ -115,7 +156,13 @@ class DistributedStore:
                         obs_last = obs
                     elif continuous_batches and x_last is not None:
                         # Append last incomplete batch current batch.
-                        x = scipy.sparse.hstack(blocks=[x_last, x], format="csr")
+                        if isinstance(x, scipy.sparse.csr_matrix):
+                            # TODO: does this happen?
+                            x = scipy.sparse.hstack(blocks=[x_last, x], format="csr")
+                        elif isinstance(x, np.ndarray):
+                            x = np.hstack(blocks=[x_last, x])
+                        else:
+                            assert False, type(x)
                         obs = pd.concat(objs=[obs_last, obs], axis=0)
                         yield x, obs
                     else:
@@ -332,10 +379,27 @@ class DistributedStore:
         self.subset(attr_key="id", values=list(self.indices.keys()))
 
     @property
+    def var_names(self):
+        var_names = self.__validate_feature_space_homogeneity()
+        # Use feature space sub-selection based on assembly if provided, will use full feature space otherwise.
+        if self.genome_container is None:
+            return var_names
+        else:
+            return self.genome_container.ensembl
+
+    @property
     def n_vars(self):
-        # assumes that all adata
-        return list(self.adatas.values())[0].n_vars
+        var_names = self.__validate_feature_space_homogeneity()
+        # Use feature space sub-selection based on assembly if provided, will use full feature space otherwise.
+        if self.genome_container is None:
+            return len(var_names)
+        else:
+            return self.genome_container.n_var
 
     @property
     def n_obs(self):
-        return np.sum([len(v) for _, v in self.indices])
+        return np.sum([len(v) for v in self.indices.values()])
+
+    @property
+    def shape(self):
+        return [self.n_obs, self.n_vars]
