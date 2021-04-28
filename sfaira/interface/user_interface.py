@@ -11,7 +11,7 @@ import warnings
 
 from sfaira.data import DatasetInteractive
 from sfaira.estimators import EstimatorKerasEmbedding, EstimatorKerasCelltype
-from sfaira.interface.model_zoo import ModelZooEmbedding, ModelZooCelltype
+from sfaira.interface.model_zoo import ModelZoo
 
 
 class UserInterface:
@@ -43,8 +43,8 @@ class UserInterface:
     estimator_celltype: Union[EstimatorKerasCelltype, None]
     model_kipoi_embedding: Union[None]
     model_kipoi_celltype: Union[BaseModel, None]
-    zoo_embedding: Union[ModelZooEmbedding, None]
-    zoo_celltype: Union[ModelZooCelltype, None]
+    zoo_embedding: Union[ModelZoo, None]
+    zoo_celltype: Union[ModelZoo, None]
     data: Union[anndata.AnnData]
     model_lookuptable: Union[pd.DataFrame, None]
 
@@ -87,8 +87,8 @@ class UserInterface:
         # TODO: workaround to deal with model ids bearing file endings in model lookuptable (as is the case in first sfaira model repo upload)
         self.model_lookuptable['model_id'] = [i.replace('.h5', '').replace('.data-00000-of-00001', '') for i in self.model_lookuptable['model_id']]
 
-        self.zoo_embedding = ModelZooEmbedding(self.model_lookuptable)
-        self.zoo_celltype = ModelZooCelltype(self.model_lookuptable)
+        self.zoo_embedding = ModelZoo(model_lookuptable=self.model_lookuptable, model_class="embedding")
+        self.zoo_celltype = ModelZoo(model_lookuptable=self.model_lookuptable, model_class="celltype")
 
     def _load_lookuptable(
             self,

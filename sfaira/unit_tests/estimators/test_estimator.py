@@ -1,6 +1,8 @@
 import abc
 import anndata
 import numpy as np
+import os
+import pandas as pd
 import pytest
 from typing import Union
 
@@ -9,13 +11,18 @@ from sfaira.estimators import EstimatorKeras, EstimatorKerasCelltype, EstimatorK
 from sfaira.versions.topologies import TopologyContainer
 from sfaira.unit_tests.utils import cached_store_writing, simulate_anndata
 
-dir_data = "../test_data"
-dir_meta = "../test_data/meta"
+dir_data = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_data")
+dir_meta = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_data/meta")
+cache_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))),
+                         "cache", "genomes")
 
+ASSEMBLY = "Mus_musculus.GRCm38.102"
 GENES = ["ENSMUSG00000000003", "ENSMUSG00000000028"]
 TARGETS = ["T cell", "stromal cell"]
 ASSAYS = ["10x sequencing", "Smart-seq2"]
-ASSEMBLY = "Mus_musculus.GRCm38.102"
+# Read 500 genes (not full protein coding) to compromise between being able to distinguish observations and reducing
+# run time of unit tests.
+GENES_500 = pd.read_csv(os.path.join(cache_dir, ASSEMBLY + ".csv"))["gene_id"].values.tolist()
 
 TOPOLOGY_EMBEDDING_MODEL = {
     "model_type": None,
@@ -36,7 +43,7 @@ TOPOLOGY_EMBEDDING_MODEL_FULL = {
     "model_type": None,
     "input": {
         "genome": ASSEMBLY,
-        "genes": ["biotype", "protein_coding"],
+        "genes": ["ensg", GENES_500],
     },
     "output": {},
     "hyper_parameters": {

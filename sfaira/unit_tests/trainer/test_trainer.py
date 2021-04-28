@@ -1,16 +1,16 @@
-import abc
 import anndata
 import numpy as np
+import os
 import pytest
 from typing import Union
 
 from sfaira.data import DistributedStore
+from sfaira.interface import ModelZoo, ModelZooCelltype, ModelZooEmbedding
 from sfaira.train import TrainModelCelltype, TrainModelEmbedding
-from sfaira.versions.topologies import TopologyContainer
 from sfaira.unit_tests.utils import cached_store_writing, simulate_anndata
 
-dir_data = "../test_data"
-dir_meta = "../test_data/meta"
+dir_data = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_data")
+dir_meta = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_data/meta")
 
 ASSEMBLY = "Mus_musculus.GRCm38.102"
 TARGETS = ["T cell", "stromal cell"]
@@ -20,6 +20,11 @@ class HelperTrainerBase:
 
     data: Union[anndata.AnnData, DistributedStore]
     trainer: Union[TrainModelCelltype, TrainModelEmbedding]
+    zoo: ModelZoo
+
+    def __init__(self, zoo: ModelZoo):
+        self.model_id = zoo.model_id
+        self.tc = zoo.topology_container
 
     def _simulate(self) -> anndata.AnnData:
         """
@@ -47,21 +52,27 @@ class HelperTrainerBase:
         else:
             self.load_store()
 
-    def test_for_fatal(self, cls, model_id):
+    def test_for_fatal(self, cls):
         self.load_data(data_type="adata")
         trainer = cls(
             data=self.data,
             model_path=dir_meta,
         )
-        trainer.zoo.set_model_id(model_id=model_id)
+        trainer.zoo.set_model_id(model_id=self.model_id)
         trainer.init_estim(override_hyperpar={})
 
 
 def test_for_fatal_embedding():
-    test_trainer = HelperTrainerBase()
-    test_trainer.test_for_fatal(cls=TrainModelEmbedding, model_id="embedding_human-lung_linear_mylab_0.1_0.1")
+    model_id = "embedding_human-lung_linear_mylab_0.1_0.1"
+    zoo = ModelZooEmbedding()
+    zoo.set_model_id(model_id=model_id)
+    test_trainer = HelperTrainerBase(zoo=zoo)
+    test_trainer.test_for_fatal(cls=TrainModelEmbedding)
 
 
-def test_for_fatal_celltype():
-    test_trainer = HelperTrainerBase()
-    test_trainer.test_for_fatal(cls=TrainModelCelltype, model_id="celltype_human-lung_mlp_mylab_0.0.1_0.1")
+def test_for_fatal():
+    model_id = "celltype_human-lung_mlp_mylab_0.0.1_0.1"
+    zoo = ModelZooCelltype()
+    zoo.set_model_id(model_id=model_id)
+    test_trainer = HelperTrainerBase(zoo=zoo)
+    test_trainer.test_for_fatal(cls=TrainModelCelltype)

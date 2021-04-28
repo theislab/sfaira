@@ -5,9 +5,10 @@ import pandas as pd
 import pickle
 from typing import Union
 
+from sfaira.consts import AdataIdsSfaira
 from sfaira.data import DistributedStore, Universe
 from sfaira.estimators import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
-from sfaira.interface import ModelZooEmbedding, ModelZooCelltype
+from sfaira.interface import ModelZoo
 
 
 class TrainModel:
@@ -33,16 +34,18 @@ class TrainModel:
             self.data = data
         else:
             raise ValueError(f"did not recongize data of type {type(data)}")
+        self.zoo = ModelZoo()
 
     @abc.abstractmethod
     def init_estim(self):
         pass
 
     @abc.abstractmethod
-    def _save_specific(
-            self,
-            fn: str
-    ):
+    def save_eval(self, fn: str):
+        pass
+
+    @abc.abstractmethod
+    def _save_specific(self, fn: str):
         pass
 
     def save(
@@ -78,7 +81,6 @@ class TrainModelEmbedding(TrainModel):
             data: Union[str, anndata.AnnData, Universe, DistributedStore],
     ):
         super(TrainModelEmbedding, self).__init__(data=data)
-        self.zoo = ModelZooEmbedding(model_lookuptable=None)
         self.estimator = None
         self.model_dir = model_path
 
@@ -95,10 +97,7 @@ class TrainModelEmbedding(TrainModel):
         )
         self.estimator.init_model(override_hyperpar=override_hyperpar)
 
-    def save_eval(
-            self,
-            fn: str
-    ):
+    def save_eval(self, fn: str):
         evaluation_train = self.estimator.evaluate_any(idx=self.estimator.idx_train)
         evaluation_val = self.estimator.evaluate_any(idx=self.estimator.idx_eval)
         evaluation_test = self.estimator.evaluate_any(idx=self.estimator.idx_test)
@@ -112,10 +111,7 @@ class TrainModelEmbedding(TrainModel):
         with open(fn + '_evaluation.pickle', 'wb') as f:
             pickle.dump(obj=evaluation, file=f)
 
-    def _save_specific(
-            self,
-            fn: str
-    ):
+    def _save_specific(self, fn: str):
         """
         Save embedding prediction:
 
@@ -123,10 +119,7 @@ class TrainModelEmbedding(TrainModel):
         :return:
         """
         embedding = self.estimator.predict_embedding()
-        df_summary = self.estimator.obs_test[
-            ["dataset", "cell_ontology_class", "state_exact", "author", "year", "assay_sc",
-             "assay_differentiation", "assay_type_differentiation", "cell_line", "sample_source"]
-        ]
+        df_summary = self.estimator.obs_test[AdataIdsSfaira.obs_keys]
         df_summary["ncounts"] = np.asarray(
             self.estimator.data.X[np.sort(self.estimator.idx_test), :].sum(axis=1)[np.argsort(self.estimator.idx_test)]
         ).flatten()
@@ -145,7 +138,6 @@ class TrainModelCelltype(TrainModel):
             fn_target_universe: str,
     ):
         super(TrainModelCelltype, self).__init__(data=data)
-        self.zoo = ModelZooCelltype(model_lookuptable=None)
         self.estimator = None
         self.model_dir = model_path
         self.data.celltypes_universe.load_target_universe(fn=fn_target_universe)
@@ -163,10 +155,7 @@ class TrainModelCelltype(TrainModel):
         )
         self.estimator.init_model(override_hyperpar=override_hyperpar)
 
-    def save_eval(
-            self,
-            fn: str
-    ):
+    def save_eval(self, fn: str):
         evaluation = {
             'train': self.estimator.evaluate_any(idx=self.estimator.idx_train, weighted=False),
             'val': self.estimator.evaluate_any(idx=self.estimator.idx_eval, weighted=False),
@@ -184,10 +173,7 @@ class TrainModelCelltype(TrainModel):
         with open(fn + '_evaluation_weighted.pickle', 'wb') as f:
             pickle.dump(obj=evaluation_weighted, file=f)
 
-    def _save_specific(
-            self,
-            fn: str
-    ):
+    def _save_specific(self, fn: str):
         """
         Save true and predicted labels on test set:
 
@@ -196,10 +182,7 @@ class TrainModelCelltype(TrainModel):
         """
         ytrue = self.estimator.ytrue()
         yhat = self.estimator.predict()
-        df_summary = self.estimator.obs_test[
-            ["dataset", "cell_ontology_class", "state_exact", "author", "year", "assay_sc",
-             "assay_differentiation", "assay_type_differentiation", "cell_line", "sample_source"]
-        ]
+        df_summary = self.estimator.obs_test[AdataIdsSfaira.obs_keys]
         df_summary["ncounts"] = np.asarray(self.estimator.data.X[self.estimator.idx_test, :].sum(axis=1)).flatten()
         np.save(file=fn + "_ytrue", arr=ytrue)
         np.save(file=fn + "_yhat", arr=yhat)
@@ -207,16 +190,16 @@ class TrainModelCelltype(TrainModel):
         with open(fn + '_ontology_names.pickle', 'wb') as f:
             pickle.dump(obj=self.estimator.ids, file=f)
 
-        cell_counts = self.data.obs_concat(keys=['cell_ontology_class'])['cell_ontology_class'].value_counts().to_dict()
+        cell_counts = self.data.obs['cell_ontology_class'].value_counts().to_dict()
         cell_counts_leaf = cell_counts.copy()
         for k in cell_counts.keys():
             if k not in self.estimator.ids:
-                if k not in self.estimator.celltype_universe.ontology.node_ids:
+                if k not in self.estimator.celltype_universe.onto_cl.node_ids:
                     raise(ValueError(f"Celltype '{k}' not found in celltype universe"))
-                for leaf in self.estimator.celltype_universe.ontology.node_ids:
+                for leaf in self.estimator.celltype_universe.onto_cl.node_ids:
                     if leaf not in cell_counts_leaf.keys():
                         cell_counts_leaf[leaf] = 0
-                    cell_counts_leaf[leaf] += 1 / len(self.estimator.celltype_universe.ontology.node_ids)
+                    cell_counts_leaf[leaf] += 1 / len(self.estimator.celltype_universe.onto_cl.node_ids)
                 del cell_counts_leaf[k]
         with open(fn + '_celltypes_valuecounts_wholedata.pickle', 'wb') as f:
             pickle.dump(obj=[cell_counts, cell_counts_leaf], file=f)
