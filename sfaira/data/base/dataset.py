@@ -626,7 +626,7 @@ class DatasetBase(abc.ABC):
         # copying this over to the new matrix in chunks of size `steps` prevents a strange scipy error:
         # ... scipy/sparse/compressed.py", line 922, in _zero_many i, j, offsets)
         # ValueError: could not convert integer scalar
-        step = 2000
+        step = 500
         if step < len(idx_feature_map):
             i = 0
             for i in range(0, len(idx_feature_map), step):
