@@ -95,6 +95,7 @@ class DistributedStore:
             batch_size: int = 1,
             obs_keys: List[str] = [],
             continuous_batches: bool = True,
+            return_dense: bool = True,
     ) -> iter:
         """
         Yields an unbiased generator over observations in the contained data sets.
@@ -104,6 +105,8 @@ class DistributedStore:
             in self.adatas.
         :param continuous_batches: Whether to build batches of batch_size across data set boundaries if end of one
             data set is reached.
+        :param return_dense: Whether to return count data .X as dense batches. This allows more efficient feature
+            indexing if the store is sparse (column indexing on csr matrices is slow).
         :return: Generator function which yields batch_size at every invocation.
             The generator returns a tuple of (.X, .obs) with types:
 
@@ -116,7 +119,7 @@ class DistributedStore:
         # Use feature space sub-selection based on assembly if provided, will use full feature space otherwise.
         if self.genome_container is not None:
             var_names_target = self.genome_container.ensembl
-            var_idx = np.array([var_names_store.index(x) for x in var_names_target])
+            var_idx = np.sort([var_names_store.index(x) for x in var_names_target])
             # Check if index vector is just full ordered list of indices, in this case, subsetting is unnecessary.
             if len(var_idx) == len(var_names_store) and np.all(var_idx == np.arange(0, len(var_names_store))):
                 var_idx = None
@@ -132,24 +135,28 @@ class DistributedStore:
                 if continuous_batches and x_last is not None:
                     # Prepend data set with residual data from last data set.
                     remainder_start = x_last.shape[0]
-                    n_obs = v.n_obs + remainder_start
                 else:
                     # Partition into equally sized batches up to last batch.
                     remainder_start = 0
-                    n_obs = v.n_obs
-                remainder = n_obs % batch_size
-                batch_starts = [
-                    np.min([0, int(x * batch_size - remainder_start)])
-                    for x in np.arange(1, n_obs // batch_size + int(remainder > 0))
+                remainder = (v.n_obs + remainder_start) % batch_size
+                batch_starts_ends = [
+                    (
+                        np.max([0, int(x * batch_size - remainder_start)]),
+                        np.max([0, int(x * batch_size - remainder_start)]) + batch_size
+                    )
+                    for x in np.arange(0, (v.n_obs + remainder_start) // batch_size + int(remainder > 0))
                 ]
-                n_batches = len(batch_starts)
+                n_batches = len(batch_starts_ends)
                 # Iterate over batches:
-                for j, z in enumerate(batch_starts):
-                    batch_end = int(z + batch_size)
-                    x = v.X[z:batch_end, :]
+                for j, (s, e) in enumerate(batch_starts_ends):
+                    x = v.X[s:e, :]
+                    # Do dense conversion now so that col-wise indexing is not slow, often, dense conversion
+                    # would be done later anyway.
+                    if return_dense:
+                        x = x.todense()
                     if var_idx is not None:
                         x = x[:, var_idx]
-                    obs = v.obs[obs_keys].iloc[z:batch_end, :]
+                    obs = v.obs[obs_keys].iloc[s:e, :]
                     assert isinstance(obs, pd.DataFrame), f"{type(obs)}"
                     if continuous_batches and remainder > 0 and i < (n_datasets - 1) and j == (n_batches - 1):
                         # Cache incomplete last batch to append to next first batch of next data set.
@@ -164,6 +171,9 @@ class DistributedStore:
                         else:
                             assert False, type(x)
                         obs = pd.concat(objs=[obs_last, obs], axis=0)
+                        # Reset over-hang cache:
+                        x_last = None
+                        obs_last = None
                         yield x, obs
                     else:
                         # Yield current batch.

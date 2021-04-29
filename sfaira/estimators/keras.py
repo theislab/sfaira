@@ -24,13 +24,16 @@ from .metrics import custom_mse, custom_negll_nb, custom_negll_gaussian, custom_
 
 
 def prepare_sf(x):
+    """
+    Uses a minimal size factor of 1e-3 for total counts / 1e4
+    """
     if len(x.shape) == 2:
         sf = np.asarray(x.sum(axis=1)).flatten()
     elif len(x.shape) == 1:
         sf = np.asarray(x.sum()).flatten()
     else:
         raise ValueError("x.shape > 2")
-    sf = np.log(sf / 1e4 + 1e-10)
+    sf = np.log(np.maximum(sf / 1e4, 1e-3))
     return sf
 
 
@@ -549,6 +552,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             self,
             generator_helper,
             idx: Union[np.ndarray, None],
+            store_generator_batch_size: int = 1,
     ):
         """
         Yield a basic generator based on which a tf dataset can be built.
@@ -567,7 +571,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         # Prepare data reading according to whether anndata is backed or not:
         if self.using_store:
             generator_raw = self.data.generator(
-                batch_size=1,
+                batch_size=store_generator_batch_size,
                 obs_keys=[],
                 continuous_batches=True,
             )
@@ -579,8 +583,8 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                     if counter in idx:
                         x_sample = z[0]
                         if isinstance(x_sample, scipy.sparse.csr_matrix):
-                            x_sample = np.asarray(x_sample.todense())
-                        x_sample = x_sample.flatten()
+                            x_sample = x_sample.todense()
+                        x_sample = np.asarray(x_sample).flatten()
                         yield generator_helper(x_sample=x_sample)
 
             n_features = self.data.n_vars
@@ -672,8 +676,8 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                         if counter in idx:
                             x_sample = z[0]
                             if isinstance(x_sample, scipy.sparse.csr_matrix):
-                                x_sample = np.asarray(x_sample.todense())
-                            x_sample = x_sample.flatten()
+                                x_sample = x_sample.todense()
+                            x_sample = np.asarray(x_sample).flatten()
                             sf_sample = prepare_sf(x=x_sample)[0]
                             y_sample = z[1]["cell_ontology_class"].values[0]
                             yield (x_sample, sf_sample), (x_sample, cell_to_class[y_sample])
@@ -778,7 +782,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         else:
             return {}
 
-    def evaluate(self, batch_size: int = 1, max_steps: int = np.inf):
+    def evaluate(self, batch_size: int = 64, max_steps: int = np.inf):
         """
         Evaluate the custom model on test data.
 
@@ -790,7 +794,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         """
         return self.evaluate_any(idx=self.idx_test, batch_size=batch_size, max_steps=max_steps)
 
-    def predict(self):
+    def predict(self, batch_size: int = 64, max_steps: int = np.inf):
         """
         return the prediction of the model
 
@@ -800,14 +804,14 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         if self.idx_test is None or self.idx_test.any():  # true if the array is not empty or if the passed value is None
             dataset = self._get_dataset(
                 idx=self.idx_test,
-                batch_size=64,
+                batch_size=batch_size,
                 mode='predict'
             )
             return self.model.predict_reconstructed(x=dataset)
         else:
             return np.array([])
 
-    def predict_embedding(self):
+    def predict_embedding(self, batch_size: int = 64, max_steps: int = np.inf):
         """
         return the prediction in the latent space (z_mean for variational models)
 
@@ -817,14 +821,14 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         if self.idx_test is None or self.idx_test.any():  # true if the array is not empty or if the passed value is None
             dataset = self._get_dataset(
                 idx=self.idx_test,
-                batch_size=64,
+                batch_size=batch_size,
                 mode='predict'
             )
             return self.model.predict_embedding(x=dataset, variational=False)
         else:
             return np.array([])
 
-    def predict_embedding_variational(self):
+    def predict_embedding_variational(self, batch_size: int = 64, max_steps: int = np.inf):
         """
         return the prediction of z, z_mean, z_log_var in the variational latent space
 
@@ -834,7 +838,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         if self.idx_test is None or self.idx_test:  # true if the array is not empty or if the passed value is None
             dataset = self._get_dataset(
                 idx=self.idx_test,
-                batch_size=64,
+                batch_size=batch_size,
                 mode='predict'
             )
             return self.model.predict_embedding(x=dataset, variational=True)
@@ -1057,6 +1061,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             generator_helper,
             idx: Union[np.ndarray, None],
             weighted: bool = False,
+            store_generator_batch_size: int = 1,
     ):
         """
         Yield a basic generator based on which a tf dataset can be built.
@@ -1079,7 +1084,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             if weighted:
                 raise ValueError("using weights with store is not supported yet")
             generator_raw = self.data.generator(
-                batch_size=1,
+                batch_size=store_generator_batch_size,
                 obs_keys=["cell_ontology_class"],
                 continuous_batches=True,
             )
@@ -1092,8 +1097,8 @@ class EstimatorKerasCelltype(EstimatorKeras):
                     if counter in idx:
                         x_sample = z[0]
                         if isinstance(x_sample, scipy.sparse.csr_matrix):
-                            x_sample = np.asarray(x_sample.todense())
-                        x_sample = x_sample.flatten()
+                            x_sample = x_sample.todense()
+                        x_sample = np.asarray(x_sample).flatten()
                         y_sample = onehot_encoder(z[1]["cell_ontology_class"].values[0])
                         yield generator_helper(x_sample, y_sample, 1.)
 
@@ -1183,11 +1188,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             CustomTprClasswise(k=self.ntypes)
         ]
 
-    def predict(
-            self,
-            batch_size: int = 1,
-            max_steps: int = np.inf,
-    ):
+    def predict(self, batch_size: int = 64, max_steps: int = np.inf):
         """
         Return the prediction of the model
 
@@ -1207,7 +1208,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
         else:
             return np.array([])
 
-    def ytrue(self):
+    def ytrue(self, batch_size: int = 64, max_steps: int = np.inf):
         """
         Return the true labels of the test set.
 
@@ -1216,7 +1217,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
         if self.idx_test is None or self.idx_test.any():   # true if the array is not empty or if the passed value is None
             x, y, w = self._get_dataset(
                 idx=self.idx_test,
-                batch_size=None,
+                batch_size=batch_size,
                 mode='eval'
             )
             return y
@@ -1255,7 +1256,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
         else:
             return {}
 
-    def evaluate(self, batch_size: int = 1, max_steps: int = np.inf, weighted: bool = False):
+    def evaluate(self, batch_size: int = 64, max_steps: int = np.inf, weighted: bool = False):
         """
         Evaluate the custom model on local data.
 

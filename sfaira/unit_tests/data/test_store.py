@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import pytest
+import time
 from typing import List
 
 from sfaira.data import DistributedStore
@@ -61,30 +62,47 @@ def test_type_targets():
 
 @pytest.mark.parametrize("batch_size", [1, 10])
 @pytest.mark.parametrize("obs_keys", [[], ["cell_ontology_class"]])
-@pytest.mark.parametrize("continuous_batches", [True])
-@pytest.mark.parametrize("assembly", [None, MOUSE_GENOME_ANNOTATION])
-@pytest.mark.parametrize("subset", [{}, {"biotype": "protein_coding"}])
-def test_generator_shapes(batch_size: int, obs_keys: List[str], continuous_batches: bool, assembly: str, subset: dict):
+@pytest.mark.parametrize("continuous_batches", [True, False])
+@pytest.mark.parametrize("gc", [(None, {}), (MOUSE_GENOME_ANNOTATION, {"biotype": "protein_coding"})])
+def test_generator_shapes(batch_size: int, obs_keys: List[str], continuous_batches: bool, gc: tuple):
     """
     Test generators queries do not throw errors and that output shapes are correct.
     """
+    assembly, subset = gc
+    store_path = cached_store_writing(dir_data=dir_data, dir_meta=dir_meta, assembly=MOUSE_GENOME_ANNOTATION)
+    store = DistributedStore(cache_path=store_path)
     if assembly is not None:
         gc = GenomeContainer(assembly=assembly)
         gc.subset(**subset)
-    else:
-        gc = None
-    store_path = cached_store_writing(dir_data=dir_data, dir_meta=dir_meta, assembly=MOUSE_GENOME_ANNOTATION)
-    store = DistributedStore(cache_path=store_path)
-    store.genome_container = gc
+        store.genome_container = gc
     g = store.generator(
         batch_size=batch_size,
         obs_keys=obs_keys,
         continuous_batches=continuous_batches,
     )
-    x, obs = next(g)
+    batch_sizes = []
+    t0 = time.time()
+    for i, z in enumerate(g()):
+        x_i, obs_i = z
+        assert x_i.shape[0] == obs_i.shape[0]
+        if i == 0:  # First batch hast correct shape, last batch not necessarily!
+            x = x_i
+            obs = obs_i
+        batch_sizes.append(x_i.shape[0])
+    tdelta = time.time() - t0
+    print(f"time for iterating over generator:"
+          f" {tdelta} for {np.sum(batch_sizes)} cells in {len(batch_sizes)} batches,"
+          f" {tdelta / len(batch_sizes)} per batch.")
+    if continuous_batches:
+        # Only the last batch can be of different size:
+        assert np.sum(batch_sizes != batch_size) <= 1
+    else:
+        # Only the last batch in each data set can be of different size:
+        assert np.sum(batch_sizes != batch_size) <= len(store.adatas.keys())
     assert x.shape[0] == batch_size, (x.shape, batch_size)
     assert obs.shape[0] == batch_size, (obs.shape, batch_size)
     assert x.shape[1] == store.n_vars, (x.shape, store.n_vars)
     assert obs.shape[1] == len(obs_keys), (x.shape, obs_keys)
+    assert np.sum(batch_sizes) == store.n_obs, (x.shape, obs_keys)
     if assembly is not None:
         assert x.shape[1] == gc.n_var, (x.shape, gc.n_var)

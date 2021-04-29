@@ -44,7 +44,7 @@ def cached_store_writing(dir_data, dir_meta, assembly) -> os.PathLike:
         if not os.path.exists(os.path.join(store_path, v.doi_cleaned_id + ".h5ad"))
     ]).tolist()
     ds.subset(key="doi", values=anticipated_files)
-    ds.load()
+    ds.load(allow_caching=True)
     ds.streamline_features(remove_gene_version=True, match_to_reference={"mouse": assembly},
                            subset_genes_to_type="protein_coding")
     ds.streamline_metadata(schema="sfaira", uns_to_obs=False, clean_obs=True, clean_var=True, clean_uns=True,

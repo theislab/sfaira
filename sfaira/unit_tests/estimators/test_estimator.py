@@ -320,7 +320,7 @@ def test_split_index_sets(data_type: str, test_split):
                 for x in idx_raw
             ])[0]
             assert datasets_train == datasets_eval, (datasets_train, datasets_eval)
-            assert set(datasets_train).intersection(set(datasets_test)) == 0, (datasets_train, datasets_test)
+            assert len(set(datasets_train).intersection(set(datasets_test))) == 0, (datasets_train, datasets_test)
     # 4) Assert that observations mapped to indices are actually unique based on expression vectors:
     # Build numpy arrays of expression input data sets from tensorflow data sets directly from estimator.
     # These data sets are the most processed transformation of the data and stand directly in concat with the model.
