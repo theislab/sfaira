@@ -165,7 +165,7 @@ class HelperEstimatorKerasEmbedding(HelperEstimatorBase):
             model_topology=self.tc
         )
 
-    def basic_estimator_test(self, test_split):
+    def basic_estimator_test(self, test_split=0.1):
         _ = self.estimator.evaluate()
         prediction_output = self.estimator.predict()
         prediction_embed = self.estimator.predict_embedding()
@@ -206,7 +206,7 @@ class HelperEstimatorKerasCelltype(HelperEstimatorBase):
         )
         self.estimator.celltype_universe.leaves = TARGETS
 
-    def basic_estimator_test(self, test_split):
+    def basic_estimator_test(self, test_split=0.1):
         _ = self.estimator.evaluate()
         prediction_output = self.estimator.predict()
         weights = self.estimator.model.training_model.get_weights()

@@ -28,7 +28,6 @@ def test_config():
     config_path = os.path.join(store_path, "lung")
     store = DistributedStore(cache_path=store_path)
     store.subset(attr_key="assay_sc", values=["10x sequencing"])
-    store.subset_cells(attr_key="assay_sc", values=["10x sequencing"])
     store.write_config(fn=config_path)
     store2 = DistributedStore(cache_path=store_path)
     store2.load_config(fn=config_path)
