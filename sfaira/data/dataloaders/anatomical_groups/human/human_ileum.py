@@ -1,7 +1,7 @@
 from typing import Union
 
 from sfaira.data import DatasetGroup
-from sfaira.data.dataloaders.super_group import DatasetSuperGroupSfaira
+from sfaira.data.dataloaders.super_group import Universe
 
 
 class DatasetGroupIleum(DatasetGroup):
@@ -12,7 +12,7 @@ class DatasetGroupIleum(DatasetGroup):
         meta_path: Union[str, None] = None,
         cache_path: Union[str, None] = None
     ):
-        dsg = DatasetSuperGroupSfaira(data_path=data_path, meta_path=meta_path, cache_path=cache_path)
+        dsg = Universe(data_path=data_path, meta_path=meta_path, cache_path=cache_path)
         dsg.subset(key="id", values=[
             "human_ileum_2019_10x_martin_001",
             "human_ileum_2019_10x_wang_001",

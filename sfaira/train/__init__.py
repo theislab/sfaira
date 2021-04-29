@@ -1,2 +1,2 @@
 from sfaira.train.summaries import GridsearchContainer, SummarizeGridsearchEmbedding, SummarizeGridsearchCelltype
-from sfaira.train.train_model import TrainModelEmbedding, TrainModelCelltype, TargetZoos
+from sfaira.train.train_model import TrainModelEmbedding, TrainModelCelltype

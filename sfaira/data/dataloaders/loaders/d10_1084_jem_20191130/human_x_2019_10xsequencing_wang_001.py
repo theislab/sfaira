@@ -21,19 +21,18 @@ class Dataset(DatasetBase):
 
         organ = self.sample_fn.split("_")[1].split(".")[0]
 
+        self.assay_sc = "10x sequencing"
         self.author = "Wang"
+        self.disease = "healthy"
         self.doi = "10.1084/jem.20191130"
-        self.healthy = True
         self.normalization = "raw"
         self.organ = organ
         self.organism = "human"
-        self.assay_sc = "10X sequencing"
-        self.state_exact = "healthy"
-        self.year = 2019
         self.sample_source = "primary_tissue"
+        self.year = 2019
 
-        self.var_symbol_col = "index"
-        self.cellontology_original_obs_key = "CellType"
+        self.gene_id_symbols_var_key = "index"
+        self.cell_types_original_obs_key = "CellType"
 
         self.set_dataset_id(idx=1)
 

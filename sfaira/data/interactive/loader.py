@@ -60,7 +60,7 @@ class DatasetInteractive(DatasetBase):
         # self.state_exact  # not currently supported
         # self.year  # not currently supported
 
-        self.obs_key_cellontology_original = obs_key_celltypes
+        self.obs_key_cell_types_original = obs_key_celltypes
 
         # self.obs_key_age  # not currently supported
         # self.obs_key_assay_sc  # not currently supported
@@ -76,8 +76,8 @@ class DatasetInteractive(DatasetBase):
         # self.obs_key_sex  # not currently supported
         # self.obs_key_state_exact  # not currently supported
 
-        self.var_symbol_col = gene_symbol_col
-        self.var_ensembl_col = gene_ens_col
+        self.gene_id_symbols_var_key = gene_symbol_col
+        self.gene_id_ensembl_var_key = gene_ens_col
 
         self.class_maps = class_maps
 

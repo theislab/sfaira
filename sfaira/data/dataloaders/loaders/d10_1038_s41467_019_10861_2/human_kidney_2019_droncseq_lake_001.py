@@ -14,19 +14,18 @@ class Dataset(DatasetBase):
         self.download_url_meta = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE121nnn/GSE121862/suppl/" \
             "GSE121862%5FUCSD%2DWU%5FSingle%5FNuclei%5FCluster%5FAnnotations%2Ecsv%2Egz"
 
+        self.assay_sc = "DroNc-seq"
         self.author = "Lake"
+        self.disease = "healthy"
         self.doi = "10.1038/s41467-019-10861-2"
-        self.healthy = True
         self.normalization = "raw"
         self.organ = "kidney"
         self.organism = "human"
-        self.assay_sc = "DroNc-seq"
-        self.state_exact = "healthy"
-        self.year = 2019
         self.sample_source = "primary_tissue"
+        self.year = 2019
 
-        self.var_symbol_col = "index"
-        self.cellontology_original_obs_key = "celltype"
+        self.gene_id_symbols_var_key = "index"
+        self.cell_types_original_obs_key = "celltype"
 
         self.set_dataset_id(idx=1)
 

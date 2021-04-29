@@ -9,12 +9,12 @@ from os import PathLike
 import pandas
 import pydoc
 import scipy.sparse
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Union
 import warnings
 
 from sfaira.data.base.dataset import is_child, DatasetBase
-from sfaira.versions.genome_versions import SuperGenomeContainer
-from sfaira.consts import AdataIdsSfaira
+from sfaira.versions.genomes import GenomeContainer
+from sfaira.consts import AdataIds, AdataIdsSfaira
 from sfaira.data.utils import read_yaml
 
 UNS_STRING_META_IN_OBS = "__obs__"
@@ -27,15 +27,10 @@ def map_fn(inputs):
     :param inputs:
     :return: None if function ran, error report otherwise
     """
-    ds, remove_gene_version, match_to_reference, load_raw, allow_caching, set_metadata, func, kwargs_func = inputs
+    ds, load_raw, allow_caching, kwargs, func, kwargs_func = \
+        inputs
     try:
-        ds.load(
-            remove_gene_version=remove_gene_version,
-            match_to_reference=match_to_reference,
-            load_raw=load_raw,
-            allow_caching=allow_caching,
-            set_metadata=set_metadata,
-        )
+        ds.load(load_raw=load_raw, allow_caching=allow_caching, **kwargs)
         if func is not None:
             x = func(ds, **kwargs_func)
             ds.clear()
@@ -72,7 +67,7 @@ class DatasetGroup:
     datasets: Dict[str, DatasetBase]
 
     def __init__(self, datasets: dict):
-        self._adata_ids_sfaira = AdataIdsSfaira()
+        self._adata_ids = AdataIdsSfaira()
         self.datasets = datasets
 
     @property
@@ -82,14 +77,12 @@ class DatasetGroup:
     def load(
             self,
             annotated_only: bool = False,
-            remove_gene_version: bool = True,
-            match_to_reference: Union[str, bool, None] = None,
             load_raw: bool = False,
             allow_caching: bool = True,
-            set_metadata: bool = True,
             processes: int = 1,
             func=None,
             kwargs_func: Union[None, dict] = None,
+            **kwargs
     ):
         """
         Load all datasets in group (option for temporary loading).
@@ -100,6 +93,8 @@ class DatasetGroup:
         In this setting, datasets are removed from memory after the function has been executed.
 
         :param annotated_only:
+        :param load_raw:
+        :param allow_caching:
         :param processes: Processes to parallelise loading over. Uses python multiprocessing if > 1, for loop otherwise.
         :param func: Function to run on loaded datasets. map_fun should only take one argument, which is a Dataset
             instance. The return can be empty:
@@ -110,11 +105,9 @@ class DatasetGroup:
         :param kwargs_func: Kwargs of func.
         """
         args = [
-            remove_gene_version,
-            match_to_reference,
             load_raw,
             allow_caching,
-            set_metadata,
+            kwargs,
             func,
             kwargs_func
         ]
@@ -146,54 +139,103 @@ class DatasetGroup:
 
     load.__doc__ += load_doc
 
-    def streamline(self, format: str = "sfaira", clean: bool = False):
+    def streamline_metadata(
+            self,
+            schema: str = "sfaira",
+            uns_to_obs: bool = False,
+            clean_obs: bool = True,
+            clean_var: bool = True,
+            clean_uns: bool = True,
+            clean_obs_names: bool = True
+    ):
         """
         Streamline the adata instance in each data set to output format.
-
         Output format are saved in ADATA_FIELDS* classes.
 
-        :param format: Export format.
-
+        :param schema: Export format.
             - "sfaira"
             - "cellxgene"
-        :param clean: Whether to delete non-streamlined fields.
+        :param uns_to_obs: Whether to move metadata in .uns to .obs to make sure it's not lost when concatenating multiple objects.
+        :param clean_obs: Whether to delete non-streamlined fields in .obs, .obsm and .obsp.
+        :param clean_var: Whether to delete non-streamlined fields in .var, .varm and .varp.
+        :param clean_uns: Whether to delete non-streamlined fields in .uns.
+        :param clean_obs_names: Whether to replace obs_names with a string comprised of dataset id and an increasing integer.
         :return:
         """
         for x in self.ids:
-            self.datasets[x].streamline(format=format, clean=clean)
+            self.datasets[x].streamline_metadata(
+                schema=schema,
+                uns_to_obs=uns_to_obs,
+                clean_obs=clean_obs,
+                clean_var=clean_var,
+                clean_uns=clean_uns,
+                clean_obs_names=clean_obs_names
+            )
 
-    def fragment(self) -> Dict[str, anndata.AnnData]:
+    def streamline_features(
+            self,
+            match_to_reference: Union[str, Dict[str, str], None],
+            remove_gene_version: bool = True,
+            subset_genes_to_type: Union[None, str, List[str]] = None,
+    ):
         """
-        Fragment data sets into largest consistent parititions based on meta data.
-
-        ToDo return this as a DatasetGroup again.
-          the streamlined Datasets are similar to anndata instances here, worth considering whether to use anndata
-          instead because it can be indexed.
-
-        :return:
+        Subset and sort genes to genes defined in an assembly or genes of a particular type, such as protein coding.
+        :param match_to_reference: Which annotation to map the feature space to. Can be:
+            - str: Provide the name of the annotation in the format Organism.Assembly.Release
+            - dict: Mapping of organism to name of the annotation (see str format). Chooses annotation for each data set
+                based on organism annotation.
+        :param remove_gene_version: Whether to remove the version number after the colon sometimes found in ensembl gene ids.
+        :param subset_genes_to_type: Type(s) to subset to. Can be a single type or a list of types or None. Types can be:
+            - None: All genes in assembly.
+            - "protein_coding": All protein coding genes in assembly.
         """
-        # TODO: assert that data is streamlined.
-        print("make sure data is streamlined")
-        datasets_new = {}
-        for k, v in self.datasets.items():
-            # Define fragments and fragment names.
-            # Because the data is streamlined, fragments are partitions of the .obs space, excluding the cell-wise
-            # annotation columns:
-            #       - cellontology_class
-            #       - cellontology_id
-            #       - cellontology_original
-            cols_exclude = ["cellontology_class", "cellontology_id", "cellontology_original"]
-            tab = v.adata.obs.loc[:, [x not in cols_exclude for x in v.adata.obs.columns]]
-            tab_unique = tab.drop_duplicates()
-            idx_sets = [
-                np.where([np.all(tab_unique.iloc[i, :] == tab.iloc[j, :])[0] for j in range(tab.shape[0])])
-                for i in range(tab_unique.shape[0])
-            ]
-            for i, x in enumerate(idx_sets):
-                datasets_new[k + "_fragment" + str(i)] = v.adata[x, :]
-        return datasets_new
+        for x in self.ids:
+            self.datasets[x].streamline_features(
+                match_to_reference=match_to_reference,
+                remove_gene_version=remove_gene_version,
+                subset_genes_to_type=subset_genes_to_type,
+            )
 
-    def load_tobacked(
+    def collapse_counts(self):
+        """
+        Collapse count matrix along duplicated index.
+        """
+        for x in self.ids:
+            self.datasets[x].collapse_counts()
+
+    def write_distributed_store(
+            self,
+            dir_cache: Union[str, os.PathLike],
+            store: str = "h5ad",
+            dense: bool = False,
+            compression_kwargs: dict = {},
+            chunks: Union[int, None] = None,
+    ):
+        """
+        Write data set into a format that allows distributed access to data set on disk.
+
+        Stores are useful for distributed access to data sets, in many settings this requires some streamlining of the
+        data sets that are accessed. Use .streamline_* before calling this method to streamline the data sets.
+        This method writes a separate file for each data set in this object.
+
+        :param dir_cache: Directory to write cache in.
+        :param store: Disk format for objects in cache:
+
+            - "h5ad": Allows access via backed .h5ad.
+                Note on compression: .h5ad supports sparse data with is a good compression that gives fast row-wise
+                    access if the files are csr, so further compression potentially not necessary.
+            - "zarr": Allows access as zarr array.
+        :param dense: Whether to write sparse or dense store, this will be homogenously enforced.
+        :param compression_kwargs: Compression key word arguments to give to h5py, see also anndata.AnnData.write_h5ad:
+            compression, compression_opts.
+        :param chunks: Chunk size of zarr array, see anndata.AnnData.write_zarr documentation.
+            Only relevant for store=="zarr".
+        """
+        for _, v in self.datasets.items():
+            v.write_distributed_store(dir_cache=dir_cache, store=store, dense=dense,
+                                      compression_kwargs=compression_kwargs, chunks=chunks)
+
+    def write_backed(
             self,
             adata_backed: anndata.AnnData,
             genome: str,
@@ -222,7 +264,7 @@ class DatasetGroup:
             # if this is for celltype prediction, only load the data with have celltype annotation
             try:
                 if self.datasets[x].annotated or not annotated_only:
-                    self.datasets[x].load_tobacked(
+                    self.datasets[x].write_backed(
                         adata_backed=adata_backed,
                         genome=genome,
                         idx=idx[i],
@@ -249,7 +291,7 @@ class DatasetGroup:
         for k, v in self.datasets.items():
             if v.annotated:
                 labels_original = np.sort(np.unique(np.concatenate([
-                    v.adata.obs[self._adata_ids_sfaira.cell_types_original].values
+                    v.adata.obs[self._adata_ids.cell_types_original].values
                 ])))
                 tab.append(v.celltypes_universe.prepare_celltype_map_tab(
                     source=labels_original,
@@ -265,7 +307,7 @@ class DatasetGroup:
             tab = pandas.concat(tab, axis=0)
             # Take out columns with the same source:
             tab = tab.loc[[x not in tab.iloc[:i, 0].values for i, x in enumerate(tab.iloc[:, 0].values)], :].copy()
-            tab = tab.sort_values(self._adata_ids_sfaira.classmap_source_key)
+            tab = tab.sort_values(self._adata_ids.classmap_source_key)
             if not os.path.exists(fn) or not protected_writing:
                 tab.to_csv(fn, index=False, sep="\t")
 
@@ -288,46 +330,71 @@ class DatasetGroup:
 
     @property
     def adata(self):
-        if not self.adata_ls:
-            return None
-        self.streamline(format="sfaira", clean=True)
         adata_ls = self.adata_ls
+        if not adata_ls:
+            return None
+        if len(adata_ls) == 1:
+            for i in self.ids:
+                if self.datasets[i] is not None:
+                    if self.datasets[i].adata is not None:
+                        ds_id = i
+            adata_concat = adata_ls[0]
+            adata_concat.obs[self._adata_ids.dataset] = ds_id
+        else:
+            # Check that all individual adata objects in linked Dataset instances have identicall streamlined features and metadata
+            match_ref_list = []
+            rm_gene_ver_list = []
+            gene_type_list = []
+            for d_id in self.ids:
+                if self.datasets[d_id].adata is not None:
+                    assert self.datasets[d_id].mapped_features, f"Dataset {d_id} does not seem to have a streamlined " \
+                                                                f"featurespace. To obtain an adata object from this " \
+                                                                f"DatasetGroup, all contained Datasets need to have a " \
+                                                                f"streamlined featurespace. Run .streamline_features()" \
+                                                                f" first."
+                    assert self.datasets[d_id].streamlined_meta, f"Dataset {d_id} does not seem to have streamlined " \
+                                                                 f"metadata. To obtain an adata object from this " \
+                                                                 f"DatasetGroup, all contained Datasets need to have " \
+                                                                 f"streamlined metadata. Run .streamline_metadata() first."
+                    match_ref_list.append(self.datasets[d_id].mapped_features)
+                    rm_gene_ver_list.append(self.datasets[d_id].remove_gene_version)
+                    gene_type_list.append(self.datasets[d_id].subset_gene_type)
+            assert len(set(match_ref_list)) == 1, \
+                "Not all datasets in this group had their features matched to the same reference (argument " \
+                "'match_to_reference' of method .streamline_features())." \
+                "This is however a prerequisite for creating a combined adata object."
+            assert len(set(rm_gene_ver_list)) == 1, \
+                "Not all datasets in this group have had their gene version removed (argument 'remove_gene_version' of " \
+                "method .streamline_features()). This is however a prerequisite for creating a combined adata object."
+            assert len(set(gene_type_list)) == 1, \
+                "Not all datasets in this group had their featurespace subsetted to the same gene type (argument " \
+                "'subset_gene_type' of method .streamline_features()). This is however a prerequisite for creating a " \
+                "combined adata object."
 
-        # .var entries are renamed and copied upon concatenation.
-        # To preserve gene names in .var, the target gene names are copied into var_names and are then copied
-        # back into .var.
-        for adata in adata_ls:
-            adata.var.index = adata.var[self._adata_ids_sfaira.gene_id_ensembl].tolist()
-        if len(adata_ls) > 1:
+            var_original = adata_ls[0].var.copy()
+            for a in adata_ls:
+                a.var_names_make_unique()
             # TODO: need to keep this? -> yes, still catching errors here (March 2020)
             # Fix for loading bug: sometime concatenating sparse matrices fails the first time but works on second try.
             try:
                 adata_concat = adata_ls[0].concatenate(
                     *adata_ls[1:],
                     join="outer",
-                    batch_key=self._adata_ids_sfaira.dataset,
-                    batch_categories=[i for i in self.ids if self.datasets[i].adata is not None]
+                    batch_key=self._adata_ids.dataset,
+                    batch_categories=[i for i in self.ids if self.datasets[i].adata is not None],
+                    index_unique=None
                 )
             except ValueError:
                 adata_concat = adata_ls[0].concatenate(
                     *adata_ls[1:],
                     join="outer",
-                    batch_key=self._adata_ids_sfaira.dataset,
-                    batch_categories=[i for i in self.ids if self.datasets[i].adata is not None]
+                    batch_key=self._adata_ids.dataset,
+                    batch_categories=[i for i in self.ids if self.datasets[i].adata is not None],
+                    index_unique=None
                 )
+            adata_concat.var = var_original
+            adata_concat.uns[self._adata_ids.mapped_features] = match_ref_list[0]
 
-            adata_concat.var[self._adata_ids_sfaira.gene_id_ensembl] = adata_concat.var.index
-
-            if len(set([a.uns[self._adata_ids_sfaira.mapped_features] for a in adata_ls])) == 1:
-                adata_concat.uns[self._adata_ids_sfaira.mapped_features] = \
-                    adata_ls[0].uns[self._adata_ids_sfaira.mapped_features]
-            else:
-                adata_concat.uns[self._adata_ids_sfaira.mapped_features] = False
-        else:
-            adata_concat = adata_ls[0]
-            adata_concat.obs[self._adata_ids_sfaira.dataset] = self.ids[0]
-
-        adata_concat.var_names_make_unique()
         return adata_concat
 
     def obs_concat(self, keys: Union[list, None] = None):
@@ -346,7 +413,7 @@ class DatasetGroup:
                 (k, self.datasets[x].adata.obs[k]) if k in self.datasets[x].adata.obs.columns
                 else (k, ["nan" for _ in range(self.datasets[x].adata.obs.shape[0])])
                 for k in keys
-            ] + [(self._adata_ids_sfaira.dataset, [x for _ in range(self.datasets[x].adata.obs.shape[0])])]
+            ] + [(self._adata_ids.dataset, [x for _ in range(self.datasets[x].adata.obs.shape[0])])]
         )) for x in self.ids if self.datasets[x].adata is not None])
         return obs_concat
 
@@ -374,13 +441,13 @@ class DatasetGroup:
                           "type ontology. Using only the ontology of the first data set in the group.")
         return self.datasets[self.ids[0]].ontology_celltypes
 
-    def project_celltypes_to_ontology(self):
+    def project_celltypes_to_ontology(self, adata_fields: Union[AdataIds, None] = None, copy=False):
         """
         Project free text cell type names to ontology based on mapping table.
         :return:
         """
         for _, v in self.datasets.items():
-            v.project_celltypes_to_ontology()
+            v.project_celltypes_to_ontology(adata_fields=adata_fields, copy=copy)
 
     def subset(self, key, values: Union[list, tuple, np.ndarray]):
         """
@@ -435,15 +502,13 @@ class DatasetGroup:
 
         :param key: Property to subset by. Options:
 
-            - "age" points to self.age_obs_key
-            - "assay_sc" points to self.assay_sc_obs_key
             - "assay_differentiation" points to self.assay_differentiation_obs_key
+            - "assay_sc" points to self.assay_sc_obs_key
             - "assay_type_differentiation" points to self.assay_type_differentiation_obs_key
             - "cell_line" points to self.cell_line
             - "cellontology_class" points to self.cellontology_class_obs_key
             - "developmental_stage" points to self.developmental_stage_obs_key
             - "ethnicity" points to self.ethnicity_obs_key
-            - "healthy" points to self.healthy_obs_key
             - "organ" points to self.organ_obs_key
             - "organism" points to self.organism_obs_key
             - "sample_source" points to self.sample_source_obs_key
@@ -479,6 +544,32 @@ class DatasetGroup:
         """
         for k, v in x.items():
             self.datasets[k].additional_annotation_key = v
+
+    @property
+    def doi(self) -> List[str]:
+        """
+        Propagates DOI annotation from contained datasets.
+        """
+        dois = []
+        for _, v in self.datasets.items():
+            vdoi = v.doi
+            if isinstance(vdoi, str):
+                vdoi = [vdoi]
+            dois.extend(vdoi)
+        return np.sort(np.unique(vdoi)).tolist()
+
+    @property
+    def supplier(self) -> List[str]:
+        """
+        Propagates supplier annotation from contained datasets.
+        """
+        supplier = [v.supplier for _, v in self.datasets.items()]
+        return np.sort(np.unique(supplier)).tolist()
+
+    def show_summary(self):
+        for k, v in self.datasets.items():
+            print(k)
+            print(f"\t {(v.supplier, v.organism, v.organ, v.assay_sc, v.disease)}")
 
 
 class DatasetGroupDirectoryOriented(DatasetGroup):
@@ -610,14 +701,21 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                         list(self.datasets.values())[0]._value_protection(
                             attr="celltypes",
                             allowed=self.ontology_celltypes,
-                            attempted=np.unique(tab[self._adata_ids_sfaira.classmap_target_key].values).tolist()
+                            attempted=[
+                                x for x in np.unique(tab[self._adata_ids.classmap_target_key].values).tolist()
+                                if x not in [
+                                    self._adata_ids.unknown_celltype_identifier,
+                                    self._adata_ids.not_a_cell_celltype_identifier
+                                ]
+                            ]
                         )
                         # Adds a third column with the corresponding ontology IDs into the file.
-                        tab[self._adata_ids_sfaira.classmap_target_id_key] = [
-                            self.ontology_celltypes.id_from_name(x)
-                            if x != self._adata_ids_sfaira.unknown_celltype_identifier
-                            else self._adata_ids_sfaira.unknown_celltype_identifier
-                            for x in tab[self._adata_ids_sfaira.classmap_target_key].values
+                        tab[self._adata_ids.classmap_target_id_key] = [
+                            self.ontology_celltypes.convert_to_id(x)
+                            if x != self._adata_ids.unknown_celltype_identifier and
+                            x != self._adata_ids.not_a_cell_celltype_identifier
+                            else self._adata_ids.unknown_celltype_identifier
+                            for x in tab[self._adata_ids.classmap_target_key].values
                         ]
                         list(self.datasets.values())[0]._write_class_map(fn=fn_map, tab=tab)
 
@@ -638,7 +736,7 @@ class DatasetSuperGroup:
         self.fn_backed = None
         self.set_dataset_groups(dataset_groups=dataset_groups)
 
-        self._adata_ids_sfaira = AdataIdsSfaira()
+        self._adata_ids = AdataIdsSfaira()
 
     def set_dataset_groups(self, dataset_groups: Union[DatasetGroup, DatasetSuperGroup, List[DatasetGroup],
                                                        List[DatasetSuperGroup]]):
@@ -682,14 +780,14 @@ class DatasetSuperGroup:
             genome: str = None
     ):
         if genome.lower().startswith("homo_sapiens"):
-            g = SuperGenomeContainer(
+            g = GenomeContainer(
                 organism="human",
-                genome=genome
+                assembly=genome
             )
         elif genome.lower().startswith("mus_musculus"):
-            g = SuperGenomeContainer(
+            g = GenomeContainer(
                 organism="mouse",
-                genome=genome
+                assembly=genome
             )
         else:
             raise ValueError(f"Genome {genome} not recognised. Needs to start with 'Mus_Musculus' or 'Homo_Sapiens'.")
@@ -712,6 +810,20 @@ class DatasetSuperGroup:
     def ncells(self, annotated_only: bool = False):
         return np.sum(self.ncells_bydataset_flat(annotated_only=annotated_only))
 
+    @property
+    def datasets(self) -> Dict[str, DatasetBase]:
+        """
+        Returns DatasetGroup (rather than self = DatasetSuperGroup) containing all listed data sets.
+
+        :return:
+        """
+        ds = {}
+        for x in self.dataset_groups:
+            for k, v in x.datasets.items():
+                assert k not in ds.keys(), f"{k} was duplicated in super group, remove duplicates before flattening"
+                ds[k] = v
+        return ds
+
     def flatten(self) -> DatasetGroup:
         """
         Returns DatasetGroup (rather than self = DatasetSuperGroup) containing all listed data sets.
@@ -732,19 +844,15 @@ class DatasetSuperGroup:
     def load(
             self,
             annotated_only: bool = False,
-            match_to_reference: Union[str, bool, None] = None,
-            remove_gene_version: bool = True,
             load_raw: bool = False,
-            set_metadata: bool = True,
             allow_caching: bool = True,
             processes: int = 1,
+            **kwargs
     ):
         """
         Loads data set human into anndata object.
 
         :param annotated_only:
-        :param match_to_reference: See .load().
-        :param remove_gene_version: See .load().
         :param load_raw: See .load().
         :param allow_caching: See .load().
         :param processes: Processes to parallelise loading over. Uses python multiprocessing if > 1, for loop otherwise.
@@ -754,32 +862,153 @@ class DatasetSuperGroup:
         for x in self.dataset_groups:
             x.load(
                 annotated_only=annotated_only,
-                remove_gene_version=remove_gene_version,
-                match_to_reference=match_to_reference,
                 load_raw=load_raw,
                 allow_caching=allow_caching,
-                set_metadata=set_metadata,
                 processes=processes,
+                **kwargs
             )
+
+    def streamline_features(
+            self,
+            match_to_reference: Union[str, Dict[str, str], None],
+            remove_gene_version: bool = True,
+            subset_genes_to_type: Union[None, str, List[str]] = None,
+    ):
+        """
+        Subset and sort genes to genes defined in an assembly or genes of a particular type, such as protein coding.
+        :param match_to_reference: Which annotation to map the feature space to. Can be:
+            - str: Provide the name of the annotation in the format Organism.Assembly.Release
+            - dict: Mapping of organism to name of the annotation (see str format). Chooses annotation for each data set
+                based on organism annotation.
+        :param remove_gene_version: Whether to remove the version number after the colon sometimes found in ensembl gene ids.
+        :param subset_genes_to_type: Type(s) to subset to. Can be a single type or a list of types or None. Types can be:
+            - None: All genes in assembly.
+            - "protein_coding": All protein coding genes in assembly.
+        """
+        for x in self.dataset_groups:
+            x.streamline_features(
+                match_to_reference=match_to_reference,
+                remove_gene_version=remove_gene_version,
+                subset_genes_to_type=subset_genes_to_type,
+            )
+
+    def collapse_counts(self):
+        """
+        Collapse count matrix along duplicated index.
+        """
+        for x in self.dataset_groups:
+            x.collapse_counts()
+
+    @property
+    def adata_ls(self):
+        adata_ls = []
+        for k, v in self.flatten().datasets.items():
+            if v.adata is not None:
+                adata_ls.append(v.adata)
+        return adata_ls
 
     @property
     def adata(self):
-        if self._adata is None:
-            # Make sure that concatenate is not used on a None adata object:
-            adatas = [x.adata for x in self.dataset_groups if x.adata is not None]
-            if len(adatas) > 1:
-                self._adata = adatas[0].adata.concatenate(
-                    *adatas[1:],
-                    join="outer",
-                    batch_key=self._adata_ids_sfaira.dataset_group
-                )
-            elif len(adatas) == 1:
-                self._adata = adatas[0]
-            else:
-                warnings.warn("no anndata instances to concatenate")
-        return self._adata
+        adata_ls = self.adata_ls
+        if not adata_ls:
+            return None
+        if len(adata_ls) == 1:
+            for i in self.ids:
+                if self.datasets[i] is not None:
+                    if self.datasets[i].adata is not None:
+                        ds_id = i
+            adata_concat = adata_ls[0]
+            adata_concat.obs[self._adata_ids.dataset] = ds_id
+        else:
+            # Check that all individual adata objects in linked Dataset instances have identicall streamlined features and metadata
+            match_ref_list = []
+            rm_gene_ver_list = []
+            gene_type_list = []
+            for d_id in self.flatten().ids:
+                if self.flatten().datasets[d_id].adata is not None:
+                    assert self.flatten().datasets[d_id].mapped_features, f"Dataset {d_id} does not seem to have a streamlined " \
+                                                                          f"featurespace. To obtain an adata object from this " \
+                                                                          f"DatasetGroup, all contained Datasets need to have a " \
+                                                                          f"streamlined featurespace. Run .streamline_features()" \
+                                                                          f" first."
+                    assert self.flatten().datasets[d_id].streamlined_meta, f"Dataset {d_id} does not seem to have streamlined " \
+                                                                           f"metadata. To obtain an adata object from this " \
+                                                                           f"DatasetGroup, all contained Datasets need to have " \
+                                                                           f"streamlined metadata. Run .streamline_metadata() first."
+                    match_ref_list.append(self.flatten().datasets[d_id].mapped_features)
+                    rm_gene_ver_list.append(self.flatten().datasets[d_id].remove_gene_version)
+                    gene_type_list.append(self.flatten().datasets[d_id].subset_gene_type)
+            assert len(set(match_ref_list)) == 1, \
+                "Not all datasets in this group had their features matched to the same reference (argument " \
+                "'match_to_reference' of method .streamline_features()). This is however a prerequisite for creating a " \
+                "combined adata object."
+            assert len(set(rm_gene_ver_list)) == 1, \
+                "Not all datasets in this group have had their gene version removed (argument 'remove_gene_version' of " \
+                "method .streamline_features()). This is however a prerequisite for creating a combined adata object."
+            assert len(set(gene_type_list)) == 1, \
+                "Not all datasets in this group had their featurespace subsetted to the same gene type (argument " \
+                "'subset_gene_type' of method .streamline_features()). This is however a prerequisite for creating a " \
+                "combined adata object."
 
-    def load_tobacked(
+            var_original = adata_ls[0].var.copy()
+            for a in adata_ls:
+                a.var_names_make_unique()
+            # TODO: need to keep this? -> yes, still catching errors here (March 2020)
+            # Fix for loading bug: sometime concatenating sparse matrices fails the first time but works on second try.
+            try:
+                adata_concat = adata_ls[0].concatenate(
+                    *adata_ls[1:],
+                    join="outer",
+                    batch_key=self._adata_ids.dataset,
+                    batch_categories=[i for i in self.ids if self.flatten().datasets[i].adata is not None],
+                    index_unique=None
+                )
+            except ValueError:
+                adata_concat = adata_ls[0].concatenate(
+                    *adata_ls[1:],
+                    join="outer",
+                    batch_key=self._adata_ids.dataset,
+                    batch_categories=[i for i in self.ids if self.flatten().datasets[i].adata is not None],
+                    index_unique=None
+                )
+            adata_concat.var = var_original
+            adata_concat.uns[self._adata_ids.mapped_features] = match_ref_list[0]
+
+        return adata_concat
+
+    def write_distributed_store(
+            self,
+            dir_cache: Union[str, os.PathLike],
+            store: str = "h5ad",
+            dense: bool = False,
+            compression_kwargs: dict = {},
+            chunks: Union[int, None] = None,
+    ):
+        """
+        Write data set into a format that allows distributed access to data set on disk.
+
+        Stores are useful for distributed access to data sets, in many settings this requires some streamlining of the
+        data sets that are accessed. Use .streamline_* before calling this method to streamline the data sets.
+        This method writes a separate file for each data set in this object.
+
+        :param dir_cache: Directory to write cache in.
+        :param store: Disk format for objects in cache:
+
+            - "h5ad": Allows access via backed .h5ad.
+                Note on compression: .h5ad supports sparse data with is a good compression that gives fast row-wise
+                    access if the files are csr, so further compression potentially not necessary.
+            - "zarr": Allows access as zarr array.
+        :param dense: Whether to write sparse or dense store, this will be homogenously enforced.
+        :param compression_kwargs: Compression key word arguments to give to h5py, see also anndata.AnnData.write_h5ad:
+            compression, compression_opts.
+        :param chunks: Chunk size of zarr array, see anndata.AnnData.write_zarr documentation.
+            Only relevant for store=="zarr".
+        """
+        for x in self.dataset_groups:
+            x.write_distributed_store(dir_cache=dir_cache, store=store, dense=dense,
+                                      compression_kwargs=compression_kwargs, chunks=chunks)
+
+    def write_backed(
             self,
             fn_backed: PathLike,
             genome: str,
@@ -791,6 +1020,8 @@ class DatasetSuperGroup:
     ):
         """
         Loads data set human into backed anndata object.
+
+        TODO replace streamlining in here by required call to .streamline() before.
 
         Example usage:
 
@@ -817,7 +1048,7 @@ class DatasetSuperGroup:
         self.fn_backed = fn_backed
         n_cells = self.ncells(annotated_only=annotated_only)
         gc = self.get_gc(genome=genome)
-        n_genes = gc.ngenes
+        n_genes = gc.n_var
         if scatter_update:
             self.adata = anndata.AnnData(
                 scipy.sparse.csr_matrix((n_cells, n_genes), dtype=np.float32)
@@ -834,20 +1065,20 @@ class DatasetSuperGroup:
             X.indptr = X.indptr.astype(np.int64)
             self.adata.X = X
         keys = [
-            self._adata_ids_sfaira.annotated,
-            self._adata_ids_sfaira.assay_sc,
-            self._adata_ids_sfaira.assay_differentiation,
-            self._adata_ids_sfaira.assay_type_differentiation,
-            self._adata_ids_sfaira.author,
-            self._adata_ids_sfaira.cell_line,
-            self._adata_ids_sfaira.dataset,
-            self._adata_ids_sfaira.cell_ontology_class,
-            self._adata_ids_sfaira.development_stage,
-            self._adata_ids_sfaira.normalization,
-            self._adata_ids_sfaira.organ,
-            self._adata_ids_sfaira.sample_type,
-            self._adata_ids_sfaira.state_exact,
-            self._adata_ids_sfaira.year,
+            self._adata_ids.annotated,
+            self._adata_ids.assay_sc,
+            self._adata_ids.assay_differentiation,
+            self._adata_ids.assay_type_differentiation,
+            self._adata_ids.author,
+            self._adata_ids.cell_line,
+            self._adata_ids.dataset,
+            self._adata_ids.cell_ontology_class,
+            self._adata_ids.development_stage,
+            self._adata_ids.normalization,
+            self._adata_ids.organ,
+            self._adata_ids.sample_type,
+            self._adata_ids.state_exact,
+            self._adata_ids.year,
         ]
         if scatter_update:
             self.adata.obs = pandas.DataFrame({
@@ -875,7 +1106,7 @@ class DatasetSuperGroup:
         print(self.ncells_bydataset(annotated_only=annotated_only))
         print([[len(x) for x in xx] for xx in idx_ls])
         for i, x in enumerate(self.dataset_groups):
-            x.load_tobacked(
+            x.write_backed(
                 adata_backed=self.adata,
                 genome=genome,
                 idx=idx_ls[i],
@@ -900,22 +1131,39 @@ class DatasetSuperGroup:
     def load_cached_backed(self, fn: PathLike):
         self.adata = anndata.read(fn, backed='r')
 
-    def streamline(self, format: str = "sfaira", clean: bool = False):
+    def streamline_metadata(
+            self,
+            schema: str = "sfaira",
+            uns_to_obs: bool = False,
+            clean_obs: bool = True,
+            clean_var: bool = True,
+            clean_uns: bool = True,
+            clean_obs_names: bool = True,
+    ):
         """
         Streamline the adata instance in each group and each data set to output format.
-
         Output format are saved in ADATA_FIELDS* classes.
 
-        :param format: Export format.
-
+        :param schema: Export format.
             - "sfaira"
             - "cellxgene"
-        :param clean: Whether to delete non-streamlined fields.
+        :param uns_to_obs: Whether to move metadata in .uns to .obs to make sure it's not lost when concatenating multiple objects.
+        :param clean_obs: Whether to delete non-streamlined fields in .obs, .obsm and .obsp.
+        :param clean_var: Whether to delete non-streamlined fields in .var, .varm and .varp.
+        :param clean_uns: Whether to delete non-streamlined fields in .uns.
+        :param clean_obs_names: Whether to replace obs_names with a string comprised of dataset id and an increasing integer.
         :return:
         """
         for x in self.dataset_groups:
             for xx in x.ids:
-                x.datasets[xx].streamline(format=format, clean=clean)
+                x.datasets[xx].streamline_metadata(
+                    schema=schema,
+                    uns_to_obs=uns_to_obs,
+                    clean_obs=clean_obs,
+                    clean_var=clean_var,
+                    clean_uns=clean_uns,
+                    clean_obs_names=clean_obs_names
+                )
 
     def subset(self, key, values):
         """
@@ -932,6 +1180,65 @@ class DatasetSuperGroup:
             x.subset(key=key, values=values)
         self.dataset_groups = [x for x in self.dataset_groups if x.datasets]  # Delete empty DatasetGroups
 
+    def remove_duplicates(
+            self,
+            supplier_hierarchy: str = "cellxgene,sfaira"
+    ):
+        """
+        Remove duplicate data loaders from super group, e.g. loaders that map to the same DOI.
+
+        Any DOI match is removed (pre-print or journal publication).
+        Data sets without DOI are removed, too.
+        Loaders are kept in the hierarchy indicated in supplier_hierarchy.
+        Requires a super group with homogenous suppliers across DatasetGroups, throws an error otherwise.
+        This is given for sfaira maintained libraries but may not be the case if custom assembled DatasetGroups are
+        used.
+
+        :param supplier_hierarchy: Hierarchy to resolve duplications by.
+            Comma separated string that indicates which data provider takes priority.
+            Choose "cellxgene,sfaira" to prioritise use of data sets downloaded from cellxgene.
+            Choose "sfaira,cellxgene" to prioritise use of raw data processing pipelines locally.
+
+                - cellxgene: cellxgene downloads
+                - sfaira: local raw file processing
+        :return:
+        """
+        # Build a pairing of provider and DOI:
+        report_list = []
+        idx_tokeep = []
+        supplier_hierarchy = supplier_hierarchy.split(",")
+        for i, (x, y) in enumerate([(xx.supplier, xx.doi) for xx in self.dataset_groups]):
+            if len(x) > 1:
+                raise ValueError(f"found more than one supplier for DOI {str(y)}")
+            else:
+                x = x[0]
+                if x not in supplier_hierarchy:
+                    raise ValueError(f"could not associate supplier {x} with hierarchy {supplier_hierarchy} in "
+                                     f"data set {y}")
+                if len(report_list) > 0:
+                    matched_idx = np.where([
+                        np.any([
+                            zz in y
+                            for zz in z[1]
+                        ])
+                        for z in report_list
+                    ])[0]
+                    assert len(matched_idx) < 1, f"more matches than expected for {(x, y)}"
+                else:
+                    matched_idx = []
+                if len(matched_idx) > 0:
+                    # Establish which entry takes priority
+                    supplier_old = report_list[matched_idx[0]][0]
+                    priority = supplier_hierarchy.index(supplier_old) > supplier_hierarchy.index(x)
+                    print(f"removing duplicate data set {y} from supplier: {supplier_old if priority else x}")
+                    if priority:
+                        idx_tokeep.append(i)
+                        del idx_tokeep[matched_idx[0]]
+                else:
+                    report_list.append([x, y])
+                    idx_tokeep.append(i)
+        self.dataset_groups = [self.dataset_groups[i] for i in idx_tokeep]
+
     def subset_cells(self, key, values: Union[str, List[str]]):
         """
         Subset list of adata objects based on cell-wise properties.
@@ -941,7 +1248,6 @@ class DatasetSuperGroup:
 
         :param key: Property to subset by. Options:
 
-            - "age" points to self.age_obs_key
             - "assay_sc" points to self.assay_sc_obs_key
             - "assay_differentiation" points to self.assay_differentiation_obs_key
             - "assay_type_differentiation" points to self.assay_type_differentiation_obs_key
@@ -949,7 +1255,6 @@ class DatasetSuperGroup:
             - "cellontology_class" points to self.cellontology_class_obs_key
             - "developmental_stage" points to self.developmental_stage_obs_key
             - "ethnicity" points to self.ethnicity_obs_key
-            - "healthy" points to self.healthy_obs_key
             - "organ" points to self.organ_obs_key
             - "organism" points to self.organism_obs_key
             - "sample_source" points to self.sample_source_obs_key
@@ -961,13 +1266,13 @@ class DatasetSuperGroup:
         for i in range(len(self.dataset_groups)):
             self.dataset_groups[i].subset_cells(key=key, values=values)
 
-    def project_celltypes_to_ontology(self):
+    def project_celltypes_to_ontology(self, adata_fields: Union[AdataIds, None] = None, copy=False):
         """
         Project free text cell type names to ontology based on mapping table.
         :return:
         """
         for _, v in self.dataset_groups:
-            v.project_celltypes_to_ontology()
+            v.project_celltypes_to_ontology(adata_fields=adata_fields, copy=copy)
 
     def write_config(self, fn: Union[str, os.PathLike]):
         """
@@ -1023,3 +1328,8 @@ class DatasetSuperGroup:
                 warnings.warn(f"did not data set matching ID {k}")
             elif counter > 1:
                 warnings.warn(f"found more than one ({counter}) data set matching ID {k}")
+
+    def show_summary(self):
+        for k, v in self.datasets.items():
+            print(k)
+            print(f"\t {(v.supplier, v.organism, v.organ, v.assay_sc, v.disease)}")

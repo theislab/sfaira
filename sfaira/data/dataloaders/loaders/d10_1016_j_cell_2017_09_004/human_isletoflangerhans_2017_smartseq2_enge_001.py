@@ -17,16 +17,15 @@ class Dataset(DatasetBase):
         self.download_url_meta = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE81nnn/GSE81547/matrix/GSE81547_series_matrix.txt.gz"
 
         self.author = "Enge"
+        self.disease = "healthy"
         self.doi = "10.1016/j.cell.2017.09.004"
-        self.healthy = True
         self.normalization = "raw"
         self.assay_sc = "Smart-seq2"
         self.organ = "islet of Langerhans"
         self.organism = "human"
-        self.state_exact = "healthy"
         self.year = 2017
-        self.var_symbol_col = "index"
-        self.cellontology_original_obs_key = "celltype"
+        self.gene_id_symbols_var_key = "index"
+        self.cell_types_original_obs_key = "celltype"
         self.sample_source = "primary_tissue"
 
         self.set_dataset_id(idx=1)

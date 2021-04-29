@@ -14,9 +14,7 @@ dataset_wise:
     normalization: "raw"
     year: 2019
 dataset_or_observation_wise:
-    age:
-    age_obs_key:
-    assay_sc: "10X 3' v2 sequencing"
+    assay_sc: "10x 3' v2 sequencing"
     assay_sc_obs_key:
     assay_differentiation: "Lancaster, 2014 (doi: 10.1038/nprot.2014.158)"
     assay_differentiation_obs_key:
@@ -27,11 +25,11 @@ dataset_or_observation_wise:
     cell_line:
     cell_line_obs_key: "Line"
     development_stage:
-    development_stage_obs_key: "Stage"
+    development_stage_obs_key:
+    disease: "healthy"
+    disease_obs_key:
     ethnicity:
     ethnicity_obs_key:
-    healthy: True
-    healthy_obs_key:
     individual:
     individual_obs_key:
     organ: "brain"
@@ -42,16 +40,14 @@ dataset_or_observation_wise:
     sample_source_obs_key:
     sex:
     sex_obs_key:
-    state_exact: "healthy"
-    state_exact_obs_key:
+    state_exact:
+    state_exact_obs_key: "Stage"
     tech_sample:
     tech_sample_obs_key:
 observation_wise:
-    cellontology_original_obs_key:
+    cell_types_original_obs_key:
 feature_wise:
-    var_ensembl_col: "ensembl"
-    var_symbol_col: "index"
-misc:
-    healthy_state_healthy:
+    gene_id_ensembl_var_key: "ensembl"
+    gene_id_symbols_var_key: "index"
 meta:
     version: "1.0"

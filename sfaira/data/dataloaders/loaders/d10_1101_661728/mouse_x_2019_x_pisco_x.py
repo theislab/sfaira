@@ -76,30 +76,36 @@ class Dataset(DatasetBase):
                                  f"{self.sample_fn}"
         self.download_url_meta = None
 
-        self.cellontology_original_obs_key = "cell_ontology_class"
-        self.age_obs_key = "age"
-        self.development_stage_obs_key = "development_stage"  # not given in all data sets
+        self.cell_types_original_obs_key = "cell_ontology_class"
+        self.development_stage_obs_key = "development_stage"
         self.sex_obs_key = "sex"
         # ToDo: further anatomical information for subtissue in "subtissue"?
 
         self.author = "Pisco"
+        self.disease = "healthy"
         self.doi = "10.1101/661728"
-        self.healthy = True
         self.normalization = "norm"
         self.organism = "mouse"
         self.organ = organ
-        self.assay_sc = "10X sequencing" if self.sample_fn.split("-")[3] == "droplet" else "Smart-seq2"
-        self.state_exact = "healthy"
+        self.assay_sc = "10x sequencing" if self.sample_fn.split("-")[3] == "droplet" else "Smart-seq2"
         self.year = 2019
         self.sample_source = "primary_tissue"
 
-        self.var_ensembl_col = None
-        self.var_symbol_col = "index"
+        self.gene_id_ensembl_var_key = None
+        self.gene_id_symbols_var_key = "index"
 
         self.set_dataset_id(idx=1)
 
 
 def load(data_dir, sample_fn, **kwargs):
+    dev_stage_dict = {
+        "18m": "18 month-old stage",
+        "1m": "4 weeks",
+        "21m": "20 month-old stage and over",
+        "24m": "20 month-old stage and over",
+        "30m": "20 month-old stage and over",
+        "3m": "3 month-old stage",
+    }
     fn = os.path.join(data_dir, sample_fn)
     adata = anndata.read_h5ad(fn)
     adata.X = adata.raw.X
@@ -108,5 +114,6 @@ def load(data_dir, sample_fn, **kwargs):
     adata.obsm = {}
     adata.varm = {}
     adata.uns = {}
+    adata.obs['development_stage'] = [dev_stage_dict[i] for i in adata.obs['age']]
 
     return adata

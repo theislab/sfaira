@@ -6,6 +6,7 @@ dataset_structure:
 dataset_wise:
     author:
         - "Kinchen"
+    default_embedding:
     doi:
         - "10.1016/j.cell.2018.08.067"
     download_url_data:
@@ -15,11 +16,10 @@ dataset_wise:
         HC: "private,hc_meta_data_stromal_with_donor.txt"
         UC: "private,uc_meta_data_stromal_with_donor.txt"
     normalization: "norm"
+    primary_data:
     year: 2019
 dataset_or_observation_wise:
-    age:
-    age_obs_key: "Age"
-    assay_sc: "10X sequencing"
+    assay_sc: "10x sequencing"
     assay_sc_obs_key:
     assay_differentiation:
     assay_differentiation_obs_key:
@@ -30,11 +30,11 @@ dataset_or_observation_wise:
     cell_line:
     cell_line_obs_key:
     development_stage:
-    development_stage_obs_key:
+    development_stage_obs_key: "Age"
+    disease:
+    disease_obs_key:
     ethnicity:
     ethnicity_obs_key:
-    healthy:
-    healthy_obs_key:
     individual:
     individual_obs_key:
     organ: "lamina propria of mucosa of colon"
@@ -52,11 +52,9 @@ dataset_or_observation_wise:
     tech_sample:
     tech_sample_obs_key:
 observation_wise:
-    cellontology_original_obs_key: "Cluster"
+    cell_types_original_obs_key: "Cluster"
 feature_wise:
-    var_ensembl_col:
-    var_symbol_col: "index"
-misc:
-    healthy_state_healthy: "healthy"
+    gene_id_ensembl_var_key:
+    gene_id_symbols_var_key: "index"
 meta:
     version: "1.0"

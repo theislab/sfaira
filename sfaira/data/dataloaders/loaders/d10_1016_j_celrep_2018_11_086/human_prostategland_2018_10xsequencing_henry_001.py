@@ -18,19 +18,20 @@ class Dataset(DatasetBase):
         self.download_url_data = "https://covid19.cog.sanger.ac.uk/henry18_0.processed.h5ad"
         self.download_url_meta = None
 
+        self.assay_sc = "10x sequencing"
         self.author = "Henry"
+        self.disease = "healthy"
         self.doi = "10.1016/j.celrep.2018.11.086"
-        self.healthy = True
         self.normalization = "raw"
+        self.sample_source = "primary_tissue"
         self.state_exact = "healthy"
         self.organ = "prostate gland"
         self.organism = "human"
-        self.assay_sc = "10X sequencing"
         self.year = 2018
-        self.sample_source = "primary_tissue"
 
-        self.var_symbol_col = "index"
-        self.cellontology_original_obs_key = "CellType"
+        self.gene_id_symbols_var_key = "index"
+
+        self.cell_types_original_obs_key = "CellType"
 
         self.set_dataset_id(idx=1)
 

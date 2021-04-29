@@ -15,19 +15,18 @@ class Dataset(DatasetBase):
         self.download_url_data = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE131nnn/GSE131685/suppl/GSE131685_RAW.tar"
         self.download_url_meta = None
 
+        self.assay_sc = "10x sequencing"
         self.author = "Liao"
-        self.healthy = True
+        self.disease = "healthy"
         self.normalization = "raw"
         self.organ = "kidney"
         self.organism = "human"
-        self.assay_sc = "10X sequencing"
-        self.state_exact = "healthy"
+        self.sample_source = "primary_tissue"
         self.year = 2020
         self.doi = "10.1038/s41597-019-0351-8"
-        self.sample_source = "primary_tissue"
 
-        self.var_symbol_col = "names"
-        self.var_ensembl_col = "ensembl"
+        self.gene_id_symbols_var_key = "names"
+        self.gene_id_ensembl_var_key = "ensembl"
 
         self.set_dataset_id(idx=1)
 

@@ -6,6 +6,9 @@ from sfaira.data import DatasetBase
 
 
 class Dataset(DatasetBase):
+    """
+    TODO:  add disease from status and diagnosis fields, healthy is "control"
+    """
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -21,16 +24,14 @@ class Dataset(DatasetBase):
         self.normalization = "raw"
         self.organ = "lung parenchyma"
         self.organism = "human"
-        self.assay_sc = "10X sequencing"
+        self.assay_sc = "10x sequencing"
         self.year = 2020
         self.sample_source = "primary_tissue"
 
-        self.var_symbol_col = "index"
+        self.gene_id_symbols_var_key = "index"
 
-        self.cellontology_original_obs_key = "celltype"
+        self.cell_types_original_obs_key = "celltype"
         self.state_exact_obs_key = "Diagnosis"
-        self.healthy_obs_key = "Status"
-        self.healthy_state_healthy = "Control"
 
         self.set_dataset_id(idx=1)
 

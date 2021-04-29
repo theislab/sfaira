@@ -12,19 +12,18 @@ class Dataset(DatasetBase):
         self.download_url_data = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE124nnn/GSE124395/suppl/GSE124395%5FNormalhumanlivercellatlasdata%2Etxt%2Egz"
         self.download_url_meta = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE124nnn/GSE124395/suppl/GSE124395%5Fclusterpartition%2Etxt%2Egz"
 
+        self.assay_sc = "CEL-seq2"
         self.author = "Aizarani"
+        self.disease = "healthy"
         self.doi = "10.1038/s41586-019-1373-2"
-        self.healthy = True
         self.normalization = "raw"
+        self.sample_source = "primary_tissue"
         self.organ = "liver"
         self.organism = "human"
-        self.assay_sc = "CEL-seq2"
-        self.state_exact = "healthy"
         self.year = 2019
-        self.sample_source = "primary_tissue"
 
-        self.var_symbol_col = "index"
-        self.cellontology_original_obs_key = "CellType"
+        self.gene_id_symbols_var_key = "index"
+        self.cell_types_original_obs_key = "CellType"
 
         self.set_dataset_id(idx=1)
 

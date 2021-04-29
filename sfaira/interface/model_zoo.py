@@ -9,19 +9,17 @@ from typing import List, Union
 
 from sfaira.versions.metadata import CelltypeUniverse
 from sfaira.consts import OntologyContainerSfaira
-from sfaira.versions.topology_versions import Topologies
+from sfaira.versions.topologies import TopologyContainer
 
 
 class ModelZoo(abc.ABC):
     """
     Model ontology base class.
     """
-    topology_container: Topologies
+    topology_container: TopologyContainer
     ontology: dict
     model_id: Union[str, None]
     model_class: Union[str, None]
-    organism: Union[str, None]
-    organ: Union[str, None]
     model_class: Union[str, None]
     model_type: Union[str, None]
     model_topology: Union[str, None]
@@ -40,8 +38,6 @@ class ModelZoo(abc.ABC):
             self.ontology = self.load_ontology_from_model_ids(model_lookuptable['model_id'].values)
         self.model_id = None
         self.model_class = None
-        self.organism = None
-        self.organ = None
         self.model_type = None
         self.organisation = None
         self.model_topology = None
@@ -79,24 +75,16 @@ class ModelZoo(abc.ABC):
 
         :param model_id: Model ID to set. Format: pipeline_genome_organ_model_organisation_topology_version
         """
-        if len(model_id.split('_')) < 7:
-            raise RuntimeError(f'Model ID {model_id} is invalid! Must follow the format: pipeline_genome_organ_model_organisation_topology_version')
+        if len(model_id.split('_')) < 6:
+            raise RuntimeError(f'Model ID {model_id} is invalid!')
         self.model_id = model_id
         ixs = self.model_id.split('_')
         self.model_class = ixs[0]
-        self.organism = ixs[1]
-        self.organ = ixs[2]
-        self.model_type = ixs[3]
-        self.organisation = ixs[4]
-        self.model_topology = ixs[5]
-        self.model_version = ixs[6]
-
-        self.topology_container = Topologies(
-            organism=self.organism,
-            model_class=self.model_class,
-            model_type=self.model_type,
-            topology_id=self.model_topology
-        )
+        self.model_id = ixs[1]
+        self.model_type = ixs[2]
+        self.organisation = ixs[3]
+        self.model_topology = ixs[4]
+        self.model_version = ixs[5]
 
     def save_weights_to_remote(self, path=None):
         """
@@ -123,99 +111,35 @@ class ModelZoo(abc.ABC):
 
         :return: Predictions
         """
-        return kipoi.get_model(
-            self.model_id,
-            source='kipoi_experimental',
-            with_dataloader=True
-        )  # TODO make sure that this is in line with kipoi_experimental model names
-        # alternatively:
-        # return kipoi_experimental.get_model("https://github.com/kipoi/models/tree/7d3ea7800184de414aac16811deba6c8eefef2b6/pwm_HOCOMOCO/human/CTCF",
-        #                                     source='github-permalink')
+        raise NotImplementedError()
 
-    def organism(self) -> List[str]:
+    def models(self) -> List[str]:
         """
-        Return list of available organism.
+        Return list of available models.
 
-        :return: List of organism available.
+        :return: List of models available.
         """
         return self.ontology.keys()
 
-    def organs(
-            self,
-            organism: str
-    ) -> List[str]:
-        """
-        Return list of available organs for a given organism.
-
-        :param organism: Identifier of organism to show organs for.
-        :return: List of organs available.
-        """
-        assert organism in self.ontology.keys(), "organism requested was not found in ontology"
-        return self.ontology[organism].keys()
-
-    def models(
-            self,
-            organism: str,
-            organ: str
-    ) -> List[str]:
-        """
-        Return list of available models for a given organism, organ.
-
-        :param organism: Identifier of organism to show organs for.
-        :param organ: Identifier of organ to show versions for.
-        :return: List of models available.
-        """
-        assert organism in self.ontology.keys(), "organism requested was not found in ontology"
-        assert organ in self.ontology[organism].keys(), "organ requested was not found in ontology"
-        return self.ontology[organism][organ].keys()
-
-    def organisation(
-            self,
-            organism: str,
-            organ: str,
-            model_type: str
-    ) -> List[str]:
-        """
-        Return list of available organisation that trained a given model for a given organism and organ
-
-        :param organism: Identifier of organism to show versions for.
-        :param organ: Identifier of organ to show versions for.
-        :param model_type: Identifier of model to show versions for.
-        :return: List of versions available.
-        """
-        assert organism in self.ontology.keys(), "organism requested was not found in ontology"
-        assert organ in self.ontology[organism].keys(), "organ requested was not found in ontology"
-        assert model_type in self.ontology[organism][organ].keys(), "model_type requested was not found in ontology"
-        return self.ontology[organism][organ][model_type]
-
     def topology(
             self,
-            organism: str,
-            organ: str,
             model_type: str,
             organisation: str
     ) -> List[str]:
         """
-        Return list of available model topologies that trained by a given organisation,
-        a given model for a given organism and organ
+        Return list of available model topologies that trained by a given organisation, and a given model
 
-        :param organism: Identifier of organism to show versions for.
-        :param organ: Identifier of organ to show versions for.
         :param model_type: Identifier of model_type to show versions for.
         :param organisation: Identifier of organisation to show versions for.
         :return: List of versions available.
         """
-        assert organism in self.ontology.keys(), "organism requested was not found in ontology"
-        assert organ in self.ontology[organism].keys(), "organ requested was not found in ontology"
-        assert model_type in self.ontology[organism][organ].keys(), "model_type requested was not found in ontology"
-        assert organisation in self.ontology[organism][organ][model_type].keys(), \
+        assert model_type in self.ontology.keys(), "model_type requested was not found in ontology"
+        assert organisation in self.ontology[model_type].keys(), \
             "organisation requested was not found in ontology"
-        return self.ontology[organism][organ][model_type][organisation]
+        return self.ontology[model_type][organisation]
 
     def versions(
             self,
-            organism: str,
-            organ: str,
             model_type: str,
             organisation: str,
             model_topology: str
@@ -223,33 +147,17 @@ class ModelZoo(abc.ABC):
         """
         Return list of available model versions of a given organisation for a given organism and organ and model.
 
-        :param organism: Identifier of organism to show versions for.
-        :param organ: Identifier of organ to show versions for.
         :param model_type: Identifier of model_type to show versions for.
         :param organisation: Identifier of organisation to show versions for.
         :param model_topology: Identifier of model_topology to show versions for.
         :return: List of versions available.
         """
-        assert organism in self.ontology.keys(), "organism requested was not found in ontology"
-        assert organ in self.ontology[organism].keys(), "organ requested was not found in ontology"
-        assert model_type in self.ontology[organism][organ].keys(), "model_type requested was not found in ontology"
-        assert organisation in self.ontology[organism][organ][model_type].keys(), \
+        assert model_type in self.ontology.keys(), "model_type requested was not found in ontology"
+        assert organisation in self.ontology[model_type].keys(), \
             "organisation requested was not found in ontology"
-        assert model_topology in self.ontology[organism][organ][model_type][organisation].keys(), \
+        assert model_topology in self.ontology[model_type][organisation].keys(), \
             "model_topology requested was not found in ontology"
-        return self.ontology[organism][organ][model_type][organisation][model_topology]
-
-    @property
-    def genome(self):
-        return self.model_hyperparameters["genome"]
-
-    @property
-    def gene_names(self):
-        return self.topology_container.genome_container.names
-
-    @property
-    def ensemble_names(self):
-        return self.topology_container.genome_container.ensembl
+        return self.ontology[model_type][organisation][model_topology]
 
     @property
     def model_hyperparameters(self) -> dict:
@@ -258,6 +166,7 @@ class ModelZoo(abc.ABC):
 
 
 class ModelZooEmbedding(ModelZoo):
+
     """
     The supported model ontology is:
 
@@ -279,37 +188,27 @@ class ModelZooEmbedding(ModelZoo):
 
         ids = [i for i in model_ids if i.split('_')[0] == 'embedding']
         id_df = pd.DataFrame(
-            [i.split('_')[1:7] for i in ids],
-            columns=['organism', 'organ', 'model_type', 'organisation', 'model_topology', 'model_version']
+            [i.split('_')[1:6] for i in ids],
+            columns=['id', 'model_type', 'organisation', 'model_topology', 'model_version']
         )
-        organism = np.unique(id_df['organism'])
-        ontology = dict.fromkeys(organism)
-        for g in organism:
-            id_df_g = id_df[id_df.organism == g]
-            organ = np.unique(id_df_g['organ'])
-            ontology[g] = dict.fromkeys(organ)
-            for o in organ:
-                id_df_o = id_df_g[id_df_g.organ == o]
-                model = np.unique(id_df_o['model_type'])
-                ontology[g][o] = dict.fromkeys(model)
-                for m in model:
-                    id_df_m = id_df_o[id_df_o.model_type == m]
-                    orga = np.unique(id_df_m['organisation'])
-                    ontology[g][o][m] = dict.fromkeys(orga)
-                    for org in orga:
-                        id_df_org = id_df_m[id_df_m.organisation == org]
-                        topo = np.unique(id_df_org['model_topology'])
-                        ontology[g][o][m][org] = dict.fromkeys(topo)
-                        for t in topo:
-                            id_df_t = id_df_org[id_df_org.model_topology == t]
-                            ontology[g][o][m][org][t] = id_df_t.model_version.tolist()
+        model = np.unique(id_df['model_type'])
+        ontology = dict.fromkeys(model)
+        for m in model:
+            id_df_m = id_df[id_df.model_type == m]
+            orga = np.unique(id_df_m['organisation'])
+            ontology[m] = dict.fromkeys(orga)
+            for org in orga:
+                id_df_org = id_df_m[id_df_m.organisation == org]
+                topo = np.unique(id_df_org['model_topology'])
+                ontology[m][org] = dict.fromkeys(topo)
+                for t in topo:
+                    id_df_t = id_df_org[id_df_org.model_topology == t]
+                    ontology[m][org][t] = id_df_t.model_version.tolist()
 
         return ontology
 
     def set_latest(
             self,
-            organism: str,
-            organ: str,
             model_type: str,
             organisation: str,
             model_topology: str
@@ -317,30 +216,22 @@ class ModelZooEmbedding(ModelZoo):
         """
         Set model ID to latest model in given ontology group.
 
-        :param organism: Identifier of organism to select.
-        :param organ: Identifier of organ to select.
         :param model_type: Identifier of model_type to select.
         :param organisation: Identifier of organisation to select.
         :param model_topology: Identifier of model_topology to select
         :return:
         """
-        assert organism in self.ontology.keys(), "organism requested was not found in ontology"
-        assert organ in self.ontology[organism].keys(), "organ requested was not found in ontology"
-        assert model_type in self.ontology[organism][organ].keys(), "model_type requested was not found in ontology"
-        assert organisation in self.ontology[organism][organ][model_type].keys(), \
+        assert model_type in self.ontology.keys(), "model_type requested was not found in ontology"
+        assert organisation in self.ontology[model_type].keys(), \
             "organisation requested was not found in ontology"
-        assert model_topology in self.ontology[organism][organ][model_type][organisation].keys(), \
+        assert model_topology in self.ontology[model_type][organisation].keys(), \
             "model_topology requested was not found in ontology"
 
         versions = self.versions(
-            organism=organism,
-            organ=organ,
             model_type=model_type,
             organisation=organisation,
             model_topology=model_topology
         )
-        self.organism = organism
-        self.organ = organ
         self.model_type = model_type
         self.organisation = organisation
         self.model_topology = model_topology  # set to model for now, could be organism/organ specific later
@@ -348,19 +239,12 @@ class ModelZooEmbedding(ModelZoo):
         self.model_version = self._order_versions(versions=versions)[0]
         self.model_id = '_'.join([
             'embedding',
-            self.organism,
-            self.organ,
+            self.id,
             self.model_type,
             self.organisation,
             self.model_topology,
             self.model_version
         ])
-        self.topology_container = Topologies(
-            organism=self.organism,
-            model_class="embedding",
-            model_type=self.model_type,
-            topology_id=self.model_topology
-        )
 
 
 class ModelZooCelltype(ModelZoo):
@@ -388,37 +272,27 @@ class ModelZooCelltype(ModelZoo):
 
         ids = [i for i in model_ids if i.split('_')[0] == 'celltype']
         id_df = pd.DataFrame(
-            [i.split('_')[1:7] for i in ids],
-            columns=['organism', 'organ', 'model_type', 'organisation', 'model_topology', 'model_version']
+            [i.split('_')[1:6] for i in ids],
+            columns=['id', 'model_type', 'organisation', 'model_topology', 'model_version']
         )
-        organism = np.unique(id_df['organism'])
-        ontology = dict.fromkeys(organism)
-        for g in organism:
-            id_df_g = id_df[id_df.organism == g]
-            organ = np.unique(id_df_g['organ'])
-            ontology[g] = dict.fromkeys(organ)
-            for o in organ:
-                id_df_o = id_df_g[id_df_g.organ == o]
-                model = np.unique(id_df_o['model_type'])
-                ontology[g][o] = dict.fromkeys(model)
-                for m in model:
-                    id_df_m = id_df_o[id_df_o.model_type == m]
-                    orga = np.unique(id_df_m['organisation'])
-                    ontology[g][o][m] = dict.fromkeys(orga)
-                    for org in orga:
-                        id_df_org = id_df_m[id_df_m.organisation == org]
-                        topo = np.unique(id_df_org['model_topology'])
-                        ontology[g][o][m][org] = dict.fromkeys(topo)
-                        for t in topo:
-                            id_df_t = id_df_org[id_df_org.model_topology == t]
-                            ontology[g][o][m][org][t] = id_df_t.model_version.tolist()
+        model = np.unique(id_df['model_type'])
+        ontology = dict.fromkeys(model)
+        for m in model:
+            id_df_m = id_df[id_df.model_type == m]
+            orga = np.unique(id_df_m['organisation'])
+            ontology[m] = dict.fromkeys(orga)
+            for org in orga:
+                id_df_org = id_df_m[id_df_m.organisation == org]
+                topo = np.unique(id_df_org['model_topology'])
+                ontology[m][org] = dict.fromkeys(topo)
+                for t in topo:
+                    id_df_t = id_df_org[id_df_org.model_topology == t]
+                    ontology[m][org][t] = id_df_t.model_version.tolist()
 
         return ontology
 
     def set_latest(
             self,
-            organism: str,
-            organ: str,
             model_type: str,
             organisation: str,
             model_topology: str
@@ -433,24 +307,18 @@ class ModelZooCelltype(ModelZoo):
         :param model_topology: Identifier of model_topology to select
         :return:
         """
-        assert organism in self.ontology.keys(), "organism requested was not found in ontology"
-        assert organ in self.ontology[organism].keys(), "organ requested was not found in ontology"
-        assert model_type in self.ontology[organism][organ].keys(), "model_type requested was not found in ontology"
-        assert organisation in self.ontology[organism][organ][model_type].keys(), \
+        assert model_type in self.ontology.keys(), "model_type requested was not found in ontology"
+        assert organisation in self.ontology[model_type].keys(), \
             "organisation requested was not found in ontology"
-        assert model_topology in self.ontology[organism][organ][model_type][organisation].keys(), \
+        assert model_topology in self.ontology[model_type][organisation].keys(), \
             "model_topology requested was not found in ontology"
 
         versions = self.versions(
-            organism=organism,
-            organ=organ,
             model_type=model_type,
             organisation=organisation,
             model_topology=model_topology
         )
 
-        self.organism = organism
-        self.organ = organ
         self.model_type = model_type
         self.organisation = organisation
         self.model_topology = model_topology  # set to model for now, could be organism/organ specific later
@@ -458,21 +326,9 @@ class ModelZooCelltype(ModelZoo):
         self.model_version = self._order_versions(versions=versions)[0]
         self.model_id = '_'.join([
             'celltype',
-            self.organism,
-            self.organ,
+            self.id,
             self.model_type,
             self.organisation,
             self.model_topology,
             self.model_version
         ])
-        self.topology_container = Topologies(
-            organism=self.organism,
-            model_class="celltype",
-            model_type=self.model_type,
-            topology_id=self.model_topology
-        )
-        self.celltypes = CelltypeUniverse(
-            cl=self._ontology_container_sfaira.cellontology_class,
-            uberon=self._ontology_container_sfaira.organ,
-            organism=self.organism
-        ).load_target_universe(organ=self.organ)

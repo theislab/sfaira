@@ -7,8 +7,8 @@ from typing import Union, Tuple
 
 from sfaira.models.embedding.output_layers import NegBinOutput, NegBinSharedDispOutput, NegBinConstDispOutput, \
     GaussianOutput, GaussianSharedStdOutput, GaussianConstStdOutput
-from sfaira.versions.topology_versions import Topologies
-from sfaira.models.base import BasicModel
+from sfaira.versions.topologies import TopologyContainer
+from sfaira.models.base import BasicModelKeras
 from sfaira.models.pp_layer import PreprocInput
 from sfaira.models.made import MaskingDense
 
@@ -221,7 +221,7 @@ class Decoder(tf.keras.layers.Layer):
         return x
 
 
-class ModelVaeIAF(BasicModel):
+class ModelKerasVaeIAF(BasicModelKeras):
 
     def __init__(
             self,
@@ -237,7 +237,7 @@ class ModelVaeIAF(BasicModel):
             init='glorot_uniform',
             output_layer="nb"
     ):
-        super(ModelVaeIAF, self).__init__()
+        super(ModelKerasVaeIAF, self).__init__()
         # Check length of latent dim to divide encoder-decoder stack:
         if len(latent_dim) % 2 == 1:
             n_layers_enc = len(latent_dim) // 2 + 1
@@ -319,7 +319,7 @@ class ModelVaeIAF(BasicModel):
         output_decoder_expfamily_concat = tf.keras.layers.Concatenate(axis=1, name="neg_ll")(output_decoder_expfamily)
 
         self.encoder_model = tf.keras.Model(
-            inputs=inputs_encoder,
+            inputs=[inputs_encoder, inputs_sf],
             outputs=[z_t, z_t_mean, z_0],
             name="encoder_model"
         )
@@ -329,10 +329,10 @@ class ModelVaeIAF(BasicModel):
             name="autoencoder"
         )
 
-    def predict_reconstructed(self, x: np.ndarray):
+    def predict_reconstructed(self, x):
         return np.split(self.training_model.predict(x)[0], indices_or_sections=2, axis=1)[0]
 
-    def predict_embedding(self, x: np.ndarray, variational=False, return_z0=False):
+    def predict_embedding(self, x, variational=False, return_z0=False):
         if return_z0 and variational:
             z_t, z_t_mean, z_0 = self.encoder_model.predict(x)
             return z_t, z_t_mean, z_0
@@ -347,10 +347,10 @@ class ModelVaeIAF(BasicModel):
             return z_t_mean
 
 
-class ModelVaeIAFVersioned(ModelVaeIAF):
+class ModelVaeIAFVersioned(ModelKerasVaeIAF):
     def __init__(
             self,
-            topology_container: Topologies,
+            topology_container: TopologyContainer,
             override_hyperpar: Union[dict, None] = None
     ):
         hyperpar = topology_container.topology["hyper_parameters"]
@@ -358,13 +358,13 @@ class ModelVaeIAFVersioned(ModelVaeIAF):
             for k in list(override_hyperpar.keys()):
                 hyperpar[k] = override_hyperpar[k]
         super().__init__(
-            in_dim=topology_container.ngenes,
+            in_dim=topology_container.n_var,
             **hyperpar
         )
         print('passed hyperpar: \n', hyperpar)
         self._topology_id = topology_container.topology_id
-        self.genome_size = topology_container.ngenes
-        self.model_class = topology_container.model_class
+        self.genome_size = topology_container.n_var
+        self.model_class = "embedding"
         self.model_type = topology_container.model_type
         self.hyperparam = dict(
             list(hyperpar.items()) +  # noqa: W504

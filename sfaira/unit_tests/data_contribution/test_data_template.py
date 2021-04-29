@@ -1,5 +1,6 @@
 import os
 import pydoc
+import shutil
 
 from sfaira.data import DatasetGroupDirectoryOriented, DatasetGroup, DatasetBase
 from sfaira.data.utils import read_yaml
@@ -30,8 +31,6 @@ def test_load(doi_sfaira_repr: str, test_data: str):
     (Note that columns are separated by ",")
     You can also manually check maps here: https://www.ebi.ac.uk/ols/ontologies/cl
     5. Run this unit test for a last time to check the cell type maps.
-
-    :return:
     """
     remove_gene_version = True
     match_to_reference = None
@@ -56,12 +55,16 @@ def test_load(doi_sfaira_repr: str, test_data: str):
     else:
         raise ValueError("data loader not found in sfaira and also not in sfaira_extension")
     file_path = pydoc.locate(dir_loader + ".FILE_PATH")
+    meta_path = None
+    cache_path = None
+    # Clear dataset cache
+    shutil.rmtree(cache_path, ignore_errors=True)
 
     ds = DatasetGroupDirectoryOriented(
         file_base=file_path,
-        data_path=dir_template,
-        meta_path=dir_template,
-        cache_path=dir_template
+        data_path=test_data,
+        meta_path=None,
+        cache_path=None
     )
     # Test raw loading and caching:
     # You can set load_raw to True while debugging when caching works already to speed the test up,
@@ -72,7 +75,8 @@ def test_load(doi_sfaira_repr: str, test_data: str):
         load_raw=True,  # tests raw loading
         allow_caching=True,  # tests caching
     )
-    assert len(ds.ids) > 0, f"no data sets loaded, make sure raw data is in {dir_template}"
+
+    assert len(ds.ids) > 0, f"no data sets loaded, make sure raw data is in {test_data}"
     # Create cell type conversion table:
     cwd = os.path.dirname(file_path)
     dataset_module = str(cwd.split("/")[-1])
@@ -94,7 +98,7 @@ def test_load(doi_sfaira_repr: str, test_data: str):
                 load_func = pydoc.locate(dir_loader + "." + file_module + ".load")
                 load_func_annotation = pydoc.locate(dir_loader + "." + file_module + ".LOAD_ANNOTATION")
                 # Also check sfaira_extension for additional load_func_annotation:
-                if package_source != "sfairae":
+                if package_source != "sfairae" and sfairae is not None:
                     load_func_annotation_sfairae = pydoc.locate(dir_loader_sfairae + "." + dataset_module +
                                                                 "." + file_module + ".LOAD_ANNOTATION")
                     # LOAD_ANNOTATION is a dictionary so we can use update to extend it.
@@ -118,9 +122,9 @@ def test_load(doi_sfaira_repr: str, test_data: str):
                 if DatasetFound is None:
                     datasets_f = [
                         DatasetBase(
-                            data_path=dir_template,
-                            meta_path=dir_template,
-                            cache_path=dir_template,
+                            data_path=test_data,
+                            meta_path=meta_path,
+                            cache_path=cache_path,
                             load_func=load_func,
                             dict_load_func_annotation=load_func_annotation,
                             sample_fn=x,
@@ -131,9 +135,9 @@ def test_load(doi_sfaira_repr: str, test_data: str):
                 else:
                     datasets_f = [
                         DatasetFound(
-                            data_path=dir_template,
-                            meta_path=dir_template,
-                            cache_path=dir_template,
+                            data_path=test_data,
+                            meta_path=meta_path,
+                            cache_path=cache_path,
                             load_func=load_func,
                             load_func_annotation=load_func_annotation,
                             sample_fn=x,
@@ -154,9 +158,9 @@ def test_load(doi_sfaira_repr: str, test_data: str):
     # Test loading from cache:
     ds = DatasetGroupDirectoryOriented(
         file_base=file_path,
-        data_path=dir_template,
-        meta_path=dir_template,
-        cache_path=dir_template
+        data_path=test_data,
+        meta_path=meta_path,
+        cache_path=cache_path
     )
     ds.load(
         remove_gene_version=remove_gene_version,
@@ -167,3 +171,5 @@ def test_load(doi_sfaira_repr: str, test_data: str):
     ds.clean_ontology_class_map()
     # Test concatenation:
     _ = ds.adata
+    # Clear dataset cache
+    shutil.rmtree(cache_path, ignore_errors=True)

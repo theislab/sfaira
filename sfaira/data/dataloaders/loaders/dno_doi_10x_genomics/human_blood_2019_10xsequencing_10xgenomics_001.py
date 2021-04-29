@@ -15,19 +15,18 @@ class Dataset(DatasetBase):
             "http://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_10k_v3/pbmc_10k_v3_filtered_feature_bc_matrix.h5"
         self.download_url_meta = None
 
+        self.assay_sc = "10x sequencing"
         self.author = "10x Genomics"
+        self.disease = "healthy"
         self.doi = "no_doi_10x_genomics"
-        self.healthy = True
         self.normalization = "raw"
         self.organ = "blood"
         self.organism = "human"
-        self.assay_sc = "10X sequencing"
-        self.state_exact = "healthy"
-        self.year = 2019
         self.sample_source = "primary_tissue"
+        self.year = 2019
 
-        self.var_symbol_col = "index"
-        self.var_ensembl_col = "gene_ids"
+        self.gene_id_symbols_var_key = "index"
+        self.gene_id_ensembl_var_key = "gene_ids"
 
         self.set_dataset_id(idx=1)
 

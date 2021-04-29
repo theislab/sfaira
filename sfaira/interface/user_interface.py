@@ -314,14 +314,7 @@ class UserInterface:
             gene_symbol_col=gene_symbol_col,
             gene_ens_col=gene_ens_col
         )
-        dataset.load(
-            celltype_version=None,
-            data_dir=None,
-            remove_gene_version=remove_gene_version,
-            match_to_reference=match_to_reference,
-            load_raw=False,
-            allow_caching=False,
-        )
+        dataset.load(load_raw=False, allow_caching=False, celltype_version=None, data_dir=None)
         self.data = dataset.adata
 
     def filter_cells(self):

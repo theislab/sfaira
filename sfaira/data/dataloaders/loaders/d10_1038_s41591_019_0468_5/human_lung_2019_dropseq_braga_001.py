@@ -12,19 +12,19 @@ class Dataset(DatasetBase):
         self.download_url_data = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE130nnn/GSE130148/suppl/GSE130148%5Fraw%5Fcounts%2Ecsv%2Egz"
         self.download_url_meta = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE130nnn/GSE130148/suppl/GSE130148%5Fbarcodes%5Fcell%5Ftypes%2Etxt%2Egz"
 
+        self.assay_sc = "Drop-seq"
         self.author = "Braga"
+        self.disease = "healthy"
         self.doi = "10.1038/s41591-019-0468-5"
-        self.healthy = True
         self.normalization = "raw"
         self.organ = "lung"
         self.organism = "human"
-        self.assay_sc = "Drop-seq"
+        self.sample_source = "primary_tissue"
         self.state_exact = "uninvolved areas of tumour resection material"
         self.year = 2019
-        self.sample_source = "primary_tissue"
 
-        self.var_symbol_col = "index"
-        self.cellontology_original_obs_key = "celltype"
+        self.gene_id_symbols_var_key = "index"
+        self.cell_types_original_obs_key = "celltype"
 
         self.set_dataset_id(idx=1)
 

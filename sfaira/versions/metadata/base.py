@@ -8,7 +8,7 @@ from typing import Dict, List, Tuple, Union
 import warnings
 
 from sfaira.consts.adata_fields import AdataIdsSfaira
-from sfaira.versions.metadata.extensions import ONTOLOGIY_EXTENSION_HUMAN, ONTOLOGIY_EXTENSION_MOUSE
+from sfaira.versions.metadata.extensions import ONTOLOGIY_EXTENSION
 
 FILE_PATH = __file__
 
@@ -60,6 +60,7 @@ class OntologyList(Ontology):
     """
     Basic unordered ontology container
     """
+    nodes: list
 
     def __init__(
             self,
@@ -107,57 +108,277 @@ class OntologyList(Ontology):
         return query == reference
 
 
-class OntologyEbi(Ontology):
+class OntologyHierarchical(Ontology, abc.ABC):
+    """
+    Basic ordered ontology container
+    """
+    graph: networkx.MultiDiGraph
+
+    def _check_graph(self):
+        if not networkx.is_directed_acyclic_graph(self.graph):
+            warnings.warn("DAG was broken")
+
+    def __validate_node_ids(self, x: Union[str, List[str]]):
+        if isinstance(x, str):
+            x = [x]
+        node_ids = self.node_ids
+        for y in x:
+            if y not in node_ids:
+                raise ValueError(f"queried node id {y} is not in graph")
+
+    def __validate_node_names(self, x: Union[str, List[str]]):
+        if isinstance(x, str):
+            x = [x]
+        node_names = self.node_names
+        for y in x:
+            if y not in node_names:
+                raise ValueError(f"queried node name {y} is not in graph")
+
+    @property
+    def nodes(self) -> List[Tuple[str, dict]]:
+        return list(self.graph.nodes.items())
+
+    @property
+    def nodes_dict(self) -> dict:
+        return dict(list(self.graph.nodes.items()))
+
+    @property
+    def node_names(self) -> List[str]:
+        return [x["name"] for x in self.graph.nodes.values()]
+
+    @property
+    def node_ids(self) -> List[str]:
+        return list(self.graph.nodes())
+
+    def is_a_node_id(self, x: str) -> bool:
+        return x in self.node_ids
+
+    def is_a_node_name(self, x: str) -> bool:
+        return x in self.node_names
+
+    def convert_to_name(self, x: Union[str, List[str]]) -> Union[str, List[str]]:
+        was_str = isinstance(x, str)
+        if was_str:
+            x = [x]
+        if self.is_a_node_id(x[0]):
+            self.__validate_node_ids(x=x)
+            x = [
+                [v["name"] for k, v in self.graph.nodes.items() if k == z][0]
+                for z in x
+            ]
+        elif self.is_a_node_name(x[0]):
+            self.__validate_node_names(x=x)
+        else:
+            raise ValueError(f"node {x[0]} not recognized")
+        self.__validate_node_names(x=x)
+        if was_str:
+            return x[0]
+        else:
+            return x
+
+    def convert_to_id(self, x: Union[str, List[str]]) -> Union[str, List[str]]:
+        was_str = isinstance(x, str)
+        if was_str:
+            x = [x]
+        if self.is_a_node_id(x[0]):
+            self.__validate_node_ids(x=x)
+        elif self.is_a_node_name(x[0]):
+            self.__validate_node_names(x=x)
+            x = [
+                [k for k, v in self.graph.nodes.items() if v["name"] == z][0]
+                for z in x
+            ]
+        else:
+            raise ValueError(f"node {x[0]} not recognized")
+        self.__validate_node_ids(x=x)
+        if was_str:
+            return x[0]
+        else:
+            return x
+
+    @property
+    def leaves(self) -> List[str]:
+        return [x for x in self.graph.nodes() if self.graph.in_degree(x) == 0]
+
+    @leaves.setter
+    def leaves(self, x: List[str]):
+        """
+        Sets new leaf-space for graph.
+
+        This clips nodes that are not upstream of defined leaves.
+        :param x: New set of leaves nodes, identified as IDs.
+        """
+        x = self.convert_to_id(x=x)
+        nodes_to_remove = []
+        for y in self.graph.nodes():
+            if not np.any([self.is_a(query=z, reference=y) for z in x]):
+                nodes_to_remove.append(y)
+        self.graph.remove_nodes_from(nodes_to_remove)
+
+    @property
+    def n_leaves(self) -> int:
+        return len(self.leaves)
+
+    def get_effective_leaves(self, x: List[str]) -> List[str]:
+        """
+        Get effective leaves in ontology given set of observed nodes.
+
+        The effective leaves are the minimal set of nodes such that all nodes in x are ancestors of this set, ie the
+        observed nodes which represent leaves of a sub-DAG of the ontology DAG, which captures all observed nodes.
+
+        :param x: Observed node IDs.
+        :return: Effective leaves.
+        """
+        x = np.unique(x).tolist()
+        x = self.convert_to_id(x=x)
+        leaves = []
+        for y in x:
+            if not np.any([self.is_a(query=z, reference=y) for z in list(set(x) - {y})]):
+                leaves.append(y)
+        return leaves
+
+    def get_ancestors(self, node: str) -> List[str]:
+        node = self.convert_to_id(node)
+        return list(networkx.ancestors(self.graph, node))
+
+    def get_descendants(self, node: str) -> List[str]:
+        node = self.convert_to_id(node)
+        return list(networkx.descendants(self.graph, node))
+
+    def is_a(self, query: str, reference: str) -> bool:
+        """
+        Checks if query node is reference node or an ancestor thereof.
+
+        :param query: Query node name. Node ID or name.
+        :param reference: Reference node name. Node ID or name.
+        :return: If query node is reference node or an ancestor thereof.
+        """
+        query = self.convert_to_id(query)
+        reference = self.convert_to_id(reference)
+        return query in self.get_ancestors(node=reference) or query == reference
+
+    def map_to_leaves(
+            self,
+            node: str,
+            return_type: str = "ids",
+            include_self: bool = True
+    ) -> Union[List[str], np.ndarray]:
+        """
+        Map a given node to leave nodes.
+
+        :param node:
+        :param return_type:
+
+            "ids": IDs of mapped leave nodes
+            "idx": indicies in leave note list of mapped leave nodes
+        :param include_self: whether to include node itself
+        :return:
+        """
+        node = self.convert_to_id(node)
+        ancestors = self.get_ancestors(node)
+        if include_self:
+            ancestors = ancestors + [node]
+        if len(ancestors) > 0:
+            ancestors = self.convert_to_id(ancestors)
+        leaves = self.convert_to_id(self.leaves)
+        if return_type == "ids":
+            return [x for x in leaves if x in ancestors]
+        if return_type == "idx":
+            return np.sort([i for i, x in enumerate(leaves) if x in ancestors])
+
+    @abc.abstractmethod
+    def synonym_node_properties(self) -> List[str]:
+        pass
+
+
+class OntologyEbi(OntologyHierarchical):
     """
     Recursively assembles ontology by querying EBI web interface.
 
-    Not recommended for large ontologies.
-    Yields unstructured list of terms.
+    Not recommended for large ontologies because of the iterative query of the web API.
     """
 
     def __init__(
             self,
             ontology: str,
             root_term: str,
-            additional_terms: Union[Dict[str, Dict[str, str]], None] = None,
+            additional_terms: dict,
+            additional_edges: List[Tuple[str, str]],
             **kwargs
     ):
-        """
+        def get_url_self(iri):
+            return f"https://www.ebi.ac.uk/ols/api/ontologies/{ontology}/terms/" \
+                   f"http%253A%252F%252Fwww.ebi.ac.uk%252F{ontology}%252F{iri}"
 
-        :param ontology:
-        :param root_term:
-        :param additional_terms: Dictionary with additional terms, values should be
-
-            - "name" necessary
-            - "description" optional
-            - "synonyms" optional
-            - "has_children" optional
-        :param kwargs:
-        """
-        def get_url(iri):
+        def get_url_children(iri):
             return f"https://www.ebi.ac.uk/ols/api/ontologies/{ontology}/terms/" \
                    f"http%253A%252F%252Fwww.ebi.ac.uk%252F{ontology}%252F{iri}/children"
 
+        def get_iri_from_node(x):
+            return x["iri"].split("/")[-1]
+
+        def get_id_from_iri(x):
+            x = ":".join(x.split("_"))
+            return x
+
+        def get_id_from_node(x):
+            x = get_iri_from_node(x)
+            x = get_id_from_iri(x)
+            return x
+
         def recursive_search(iri):
-            terms = requests.get(get_url(iri=iri)).json()["_embedded"]["terms"]
+            """
+            This function queries all nodes that are children of a given node at one time. This is faster than querying
+            the characteristics of each node separately but leads to slightly awkward code, the root node has to be
+            queried separately for example below.
+
+            :param iri: Root node IRI.
+            :return: Tuple of
+
+                - nodes (dictionaries of node ID and node values) and
+                - edges (node ID of parent and child).
+            """
+            terms_children = requests.get(get_url_children(iri=iri)).json()["_embedded"]["terms"]
             nodes_new = {}
-            for x in terms:
-                nodes_new[x["iri"].split("/")[-1]] = {
-                    "name": x["label"],
-                    "description": x["description"],
-                    "synonyms": x["synonyms"],
-                    "has_children": x["has_children"],
+            edges_new = []
+            direct_children = []
+            k_self = get_id_from_iri(iri)
+            # Define root node if this is the first iteration, this node is otherwise not defined through values.
+            if k_self == "EFO:0010183":
+                terms_self = requests.get(get_url_self(iri=iri)).json()
+                nodes_new[k_self] = {
+                    "name": terms_self["label"],
+                    "description": terms_self["description"],
+                    "synonyms": terms_self["synonyms"],
+                    "has_children": terms_self["has_children"],
                 }
-                if x["has_children"]:
-                    nodes_new.update(recursive_search(iri=x["iri"].split("/")[-1]))
-            return nodes_new
+            for c in terms_children:
+                k_c = get_id_from_node(c)
+                nodes_new[k_c] = {
+                    "name": c["label"],
+                    "description": c["description"],
+                    "synonyms": c["synonyms"],
+                    "has_children": c["has_children"],
+                }
+                direct_children.append(k_c)
+                if c["has_children"]:
+                    nodes_x, edges_x = recursive_search(iri=get_iri_from_node(c))
+                    nodes_new.update(nodes_x)
+                    # Update nested edges of between children:
+                    edges_new.extend(edges_x)
+            # Update edges to children:
+            edges_new.extend([(k_self, k_c) for k_c in direct_children])
+            return nodes_new, edges_new
 
-        self.nodes = recursive_search(iri=root_term)
-        self.nodes.update(additional_terms)
-
-    @property
-    def node_names(self) -> List[str]:
-        return [v["name"] for k, v in self.nodes.items()]
+        self.graph = networkx.MultiDiGraph()
+        nodes, edges = recursive_search(iri=root_term)
+        nodes.update(additional_terms)
+        edges.extend(additional_edges)
+        for k, v in nodes.items():
+            self.graph.add_node(node_for_adding=k, **v)
+        for x in edges:
+            parent, child = x
+            self.graph.add_edge(child, parent)
 
     def map_node_suggestion(self, x: str, include_synonyms: bool = True, n_suggest: int = 10):
         """
@@ -180,15 +401,17 @@ class OntologyEbi(Ontology):
             np.max([
                 fuzz.partial_ratio(x.lower(), v["name"].lower())
             ])
-            for k, v in self.nodes.items()
+            for k, v in self.graph.nodes.items()
         ])
         # Suggest top n_suggest hits by string match:
         return [self.node_names[i] for i in np.argsort(scores)[-n_suggest:]][::-1]
 
+    @property
     def synonym_node_properties(self) -> List[str]:
         return ["synonyms"]
 
-# class OntologyOwl(Ontology):
+
+# class OntologyOwl(OntologyHierarchical):
 #
 #    onto: owlready2.Ontology
 #
@@ -206,10 +429,7 @@ class OntologyEbi(Ontology):
 #        pass
 
 
-class OntologyObo(Ontology):
-
-    graph: networkx.MultiDiGraph
-    leaves: List[str]
+class OntologyObo(OntologyHierarchical, abc.ABC):
 
     def __init__(
             self,
@@ -217,86 +437,6 @@ class OntologyObo(Ontology):
             **kwargs
     ):
         self.graph = obonet.read_obo(obo)
-
-    def _check_graph(self):
-        if not networkx.is_directed_acyclic_graph(self.graph):
-            warnings.warn("DAG was broken")
-
-    @property
-    def nodes(self) -> List[Tuple[str, dict]]:
-        return list(self.graph.nodes.items())
-
-    @property
-    def nodes_dict(self) -> dict:
-        return self.graph.nodes.items()
-
-    @property
-    def node_names(self) -> List[str]:
-        return [x["name"] for x in self.graph.nodes.values()]
-
-    @property
-    def node_ids(self) -> List[str]:
-        return list(self.graph.nodes())
-
-    def id_from_name(self, x: str) -> str:
-        self.validate_node(x=x)
-        return [k for k, v in self.graph.nodes.items() if v["name"] == x][0]
-
-    def set_leaves(self, nodes: list = None):
-        # ToDo check that these are not include parents of each other!
-        if nodes is not None:
-            for x in nodes:
-                assert x in self.graph.nodes, f"{x} not found"
-            self.leaves = nodes
-        else:
-            self.leaves = self.get_all_roots()
-
-    def get_all_roots(self) -> List[str]:
-        return [x for x in self.graph.nodes() if self.graph.in_degree(x) == 0]
-
-    def get_ancestors(self, node: str) -> List[str]:
-        if node not in self.node_ids:
-            node = self.id_from_name(node)
-        return list(networkx.ancestors(self.graph, node))
-
-    def is_a(self, query: str, reference: str) -> bool:
-        """
-        Checks if query node is reference node or an ancestor thereof.
-
-        :param query: Query node name. Node ID or name.
-        :param reference: Reference node name. Node ID or name.
-        :return: If query node is reference node or an ancestor thereof.
-        """
-        if query not in self.node_ids:
-            query = self.id_from_name(query)
-        if reference not in self.node_ids:
-            reference = self.id_from_name(reference)
-        return query in self.get_ancestors(node=reference) or query == reference
-
-    def map_to_leaves(self, node: str, return_type: str = "elements", include_self: bool = True):
-        """
-        Map a given list of nodes to leave nodes.
-
-        :param node:
-        :param return_type:
-
-            "elements": names of mapped leave nodes
-            "idx": indicies in leave note list of of mapped leave nodes
-        :param include_self: whether to include node itself
-        :return:
-        """
-        assert self.leaves is not None
-        ancestors = self.get_ancestors(node)
-        if include_self:
-            ancestors = ancestors + [node]
-        if return_type == "elements":
-            return [x for x in self.leaves if x in ancestors]
-        if return_type == "idx":
-            return np.array([i for i, (x, y) in enumerate(self.leaves) if x in ancestors])
-
-    @abc.abstractmethod
-    def synonym_node_properties(self) -> List[str]:
-        pass
 
     def map_node_suggestion(self, x: str, include_synonyms: bool = True, n_suggest: int = 10):
         """
@@ -332,10 +472,8 @@ class OntologyExtendedObo(OntologyObo):
 
     def __init__(self, obo, **kwargs):
         super().__init__(obo=obo, **kwargs)
-        # ToDo distinguish here:
-        self.add_extension(dict_ontology=ONTOLOGIY_EXTENSION_HUMAN)
 
-    def add_extension(self, dict_ontology: Dict[str, List[str]]):
+    def add_extension(self, dict_ontology: Dict[str, List[Dict[str, dict]]]):
         """
         Extend ontology by additional edges and nodes defined in a dictionary.
 
@@ -344,21 +482,22 @@ class OntologyExtendedObo(OntologyObo):
         :param dict_ontology: Dictionary of nodes and edges to add to ontology. Parsing:
 
             - keys: parent nodes (which must be in ontology)
-            - values: children nodes (which can be in ontology), must be given as list of stringd.
+            - values: children nodes (which can be in ontology), must be given as a dictionary in which keys are
+                ontology IDs and values are node values..
                 If these are in the ontology, an edge is added, otherwise, an edge and the node are added.
         :return:
         """
         for k, v in dict_ontology.items():
-            assert isinstance(v, list), "dictionary values should be list of strings"
+            assert isinstance(v, dict), "dictionary values should be dictionaries"
             # Check that parent node is present:
-            if k not in self.nodes:
+            if k not in self.node_ids:
                 raise ValueError(f"key {k} was not in reference ontology")
             # Check if edge is added only, or edge and node.
-            for child_node in v:
-                if child_node not in self.nodes:  # Add node.
-                    self.graph.add_node(child_node)
+            for child_node_k, child_node_v in v.items():
+                if child_node_k not in self.node_ids:  # Add node
+                    self.graph.add_node(node_for_adding=child_node_k, **child_node_v)
                 # Add edge.
-                self.graph.add_edge(k, child_node)
+                self.graph.add_edge(k, child_node_k)
         # Check that DAG was not broken:
         self._check_graph()
 
@@ -522,13 +661,22 @@ class OntologyUberon(OntologyExtendedObo):
         return ["synonym", "latin term", "has relational adjective"]
 
 
-class OntologyCelltypes(OntologyExtendedObo):
+class OntologyCl(OntologyExtendedObo):
 
     def __init__(
             self,
             branch: str,
+            use_developmental_relationships: bool = False,
             **kwargs
     ):
+        """
+
+        Developmental edges are not desired in all interactions with this ontology, double-negative thymocytes are for
+        example not an intuitive parent node for a fine grained T cell label in a non-thymic tissue.
+        :param branch:
+        :param use_developmental_relationships: Whether to keep developmental relationships.
+        :param kwargs:
+        """
         if os.name == "nt":  # if running on windows, do not download obo file, but rather pass url directly to obonet
             obofile = f"https://raw.github.com/obophenotype/cell-ontology/{branch}/cl.obo"
         else:
@@ -580,9 +728,13 @@ class OntologyCelltypes(OntologyExtendedObo):
             'lacks_plasma_membrane_part',  # ?
         ]
         edges_to_delete = []
+        if use_developmental_relationships:
+            edges_allowed = ["is_a", "develops_from"]
+        else:
+            edges_allowed = ["is_a"]
         for i, x in enumerate(self.graph.edges):
             assert x[2] in edge_types, x
-            if x[2] not in ["is_a", "develops_from"]:
+            if x[2] not in edges_allowed:
                 edges_to_delete.append((x[0], x[1]))
         for x in edges_to_delete:
             self.graph.remove_edge(u=x[0], v=x[1])
@@ -593,39 +745,7 @@ class OntologyCelltypes(OntologyExtendedObo):
         return ["synonym"]
 
 
-class OntologyHancestro(OntologyExtendedObo):
-
-    def __init__(
-            self,
-            **kwargs
-    ):
-        super().__init__(obo="http://purl.obolibrary.org/obo/hancestro.obo")
-
-        # Clean up nodes:
-        nodes_to_delete = []
-        for k, v in self.graph.nodes.items():
-            if "name" not in v.keys():
-                nodes_to_delete.append(k)
-        for k in nodes_to_delete:
-            self.graph.remove_node(k)
-
-        # Clean up edges:
-        # The graph object can hold different types of edges,
-        # and multiple types are loaded from the obo, not all of which are relevant for us:
-        # All edge types (based on previous download, assert below that this is not extended):
-        edge_types = []  # ToDo
-        edges_to_delete = []
-        for i, x in enumerate(self.graph.edges):
-            assert x[2] in edge_types, x
-            if x[2] not in []:
-                edges_to_delete.append((x[0], x[1]))
-        for x in edges_to_delete:
-            self.graph.remove_edge(u=x[0], v=x[1])
-        self._check_graph()
-
-    @property
-    def synonym_node_properties(self) -> List[str]:
-        return ["synonym"]
+# use OWL for OntologyHancestro
 
 
 class OntologyHsapdv(OntologyExtendedObo):
@@ -664,6 +784,36 @@ class OntologyMmusdv(OntologyExtendedObo):
                 nodes_to_delete.append(k)
         for k in nodes_to_delete:
             self.graph.remove_node(k)
+
+    @property
+    def synonym_node_properties(self) -> List[str]:
+        return ["synonym"]
+
+
+class OntologyMondo(OntologyExtendedObo):
+
+    def __init__(
+            self,
+            **kwargs
+    ):
+        super().__init__(obo="http://purl.obolibrary.org/obo/mondo.obo")
+
+        # Clean up nodes:
+        nodes_to_delete = []
+        for k, v in self.graph.nodes.items():
+            if "name" not in v.keys():
+                nodes_to_delete.append(k)
+        for k in nodes_to_delete:
+            self.graph.remove_node(k)
+
+        # add healthy property
+        # Add node "healthy" under root node "MONDO:0000001": "quality".
+        # We use a PATO node for this label: PATO:0000461.
+        self.add_extension(dict_ontology={
+            "MONDO:0000001": {
+                "PATO:0000461": {"name": "healthy"}
+            },
+        })
 
     @property
     def synonym_node_properties(self) -> List[str]:
@@ -714,15 +864,16 @@ class OntologyCellosaurus(OntologyExtendedObo):
 
 class OntologySinglecellLibraryConstruction(OntologyEbi):
 
-    def __init__(
-            self,
-            ontology: str = "efo",
-            root_term: str = "EFO_0010183",
-    ):
+    def __init__(self):
         super().__init__(
-            ontology=ontology,
-            root_term=root_term,
+            ontology="efo",
+            root_term="EFO_0010183",
             additional_terms={
-                "microwell-seq": {"name": "microwell-seq"}
-            }
+                "microwell-seq": {"name": "microwell-seq"},
+                "sci-plex": {"name": "sci-plex"}
+            },
+            additional_edges=[
+                ("EFO:0010183", "microwell-seq"),
+                ("EFO:0010183", "sci-plex"),
+            ]
         )

@@ -29,6 +29,9 @@ class TemplateAttributes:
     organism: str = ''  # (*) species / organism
     assay: str = ''  # (*, optional) protocol used to sample data (e.g. smart-seq2)
     normalization: str = ''  # raw or the used normalization technique
+    default_embedding: str = ''  # Default embedding of the data
+    primary_data: str = ''  # Is this a primary dataset?
+    disease: str = ''  # name of the disease of the condition
     ethnicity: str = ''  # ethnicity of the sample
     state_exact: str = ''  # state of the sample
     year: str = 2021  # year in which sample was acquired
@@ -102,6 +105,12 @@ class DataloaderCreator:
                                                                      question='Sample file name of the first dataset:',
                                                                      default='data.h5ad')
 
+        self.template_attributes.primary_data = str(sfaira_questionary(function='confirm',
+                                                                       question='Primary data:',
+                                                                       default='Yes'))
+        self.template_attributes.default_embedding = sfaira_questionary(function='text',
+                                                                        question='Default embedding:',
+                                                                        default='NA')
         self.template_attributes.organism = sfaira_questionary(function='text',
                                                                question='Organism:',
                                                                default='NA')
@@ -114,6 +123,9 @@ class DataloaderCreator:
         self.template_attributes.normalization = sfaira_questionary(function='text',
                                                                     question='Normalization:',
                                                                     default='raw')
+        self.template_attributes.disease = sfaira_questionary(function='text',
+                                                              question='Disease:',
+                                                              default='NA')
         self.template_attributes.state_exact = sfaira_questionary(function='text',
                                                                   question='Sample state:',
                                                                   default='healthy')
@@ -130,12 +142,13 @@ class DataloaderCreator:
                                                   f'{self.template_attributes.year}_{self.template_attributes.assay}_' \
                                                   f'{first_author_lastname}_001'
         self.template_attributes.id = self.template_attributes.id_without_doi + f'_{self.template_attributes.doi_sfaira_repr}'
-        self.template_attributes.download_url_data = sfaira_questionary(function='text',
-                                                                        question='URL to download the data',
-                                                                        default='https://ftp.ncbi.nlm.nih.gov/geo/')
-        self.template_attributes.download_url_meta = sfaira_questionary(function='text',
-                                                                        question='URL to download the meta data',
-                                                                        default='https://ftp.ncbi.nlm.nih.gov/geo/')
+        if self.template_attributes.dataloader_type == 'single_dataset':
+            self.template_attributes.download_url_data = sfaira_questionary(function='text',
+                                                                            question='URL to download the data',
+                                                                            default='https://ftp.ncbi.nlm.nih.gov/geo/')
+            self.template_attributes.download_url_meta = sfaira_questionary(function='text',
+                                                                            question='URL to download the meta data',
+                                                                            default='https://ftp.ncbi.nlm.nih.gov/geo/')
         self.template_attributes.create_extra_description = sfaira_questionary(function='confirm',
                                                                                question='Do you want to add additional custom metadata?',
                                                                                default='Yes')

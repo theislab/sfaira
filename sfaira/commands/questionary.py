@@ -64,4 +64,6 @@ def sfaira_questionary(function: str,
     log.debug(f'User was asked the question: ||{question}|| as: {function}')
     log.debug(f'User selected {answer}')
 
+    if isinstance(answer, str):
+        answer = answer.strip('\"')
     return answer  # type: ignore
