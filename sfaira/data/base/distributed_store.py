@@ -149,10 +149,9 @@ class DistributedStore:
                     # Cells left over after batching to batch size, accounting for overhang:
                     remainder = n_obs % batch_size
                     batch_starts_ends = [
-                        (int(x * batch_size),  int(x * batch_size) + batch_size)
+                        (int(x * batch_size), int(x * batch_size) + batch_size)
                         for x in np.arange(0, n_obs // batch_size + int(remainder > 0))
                     ]
-                    n_batches = len(batch_starts_ends)
                     # Iterate over batches:
                     for j, (s, e) in enumerate(batch_starts_ends):
                         if continuous_slices:
