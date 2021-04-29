@@ -63,9 +63,8 @@ def test_type_targets():
 @pytest.mark.parametrize("idx", [None, np.concatenate([np.arange(150, 200), np.array([1, 100, 2003, 33])])])
 @pytest.mark.parametrize("batch_size", [1, 10])
 @pytest.mark.parametrize("obs_keys", [[], ["cell_ontology_class"]])
-@pytest.mark.parametrize("continuous_batches", [True, False])
 @pytest.mark.parametrize("gc", [(None, {}), (MOUSE_GENOME_ANNOTATION, {"biotype": "protein_coding"})])
-def test_generator_shapes(idx, batch_size: int, obs_keys: List[str], continuous_batches: bool, gc: tuple):
+def test_generator_shapes(idx, batch_size: int, obs_keys: List[str], gc: tuple):
     """
     Test generators queries do not throw errors and that output shapes are correct.
     """
@@ -80,7 +79,6 @@ def test_generator_shapes(idx, batch_size: int, obs_keys: List[str], continuous_
         idx=idx,
         batch_size=batch_size,
         obs_keys=obs_keys,
-        continuous_batches=continuous_batches,
     )
     nobs = len(idx) if idx is not None else store.n_obs
     batch_sizes = []
@@ -96,12 +94,8 @@ def test_generator_shapes(idx, batch_size: int, obs_keys: List[str], continuous_
     print(f"time for iterating over generator:"
           f" {tdelta}s for {np.sum(batch_sizes)} cells in {len(batch_sizes)} batches,"
           f" {tdelta / len(batch_sizes)}s per batch.")
-    if continuous_batches:
-        # Only the last batch can be of different size:
-        assert np.sum(batch_sizes != batch_size) <= 1
-    else:
-        # Only the last batch in each data set can be of different size:
-        assert np.sum(batch_sizes != batch_size) <= len(store.adatas.keys())
+    # Only the last batch in each data set can be of different size:
+    assert np.sum(batch_sizes != batch_size) <= len(store.adatas.keys())
     assert x.shape[0] == batch_size, (x.shape, batch_size)
     assert obs.shape[0] == batch_size, (obs.shape, batch_size)
     assert x.shape[1] == store.n_vars, (x.shape, store.n_vars)

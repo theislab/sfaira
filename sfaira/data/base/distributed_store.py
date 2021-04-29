@@ -95,7 +95,6 @@ class DistributedStore:
             idx: Union[np.ndarray, None] = None,
             batch_size: int = 1,
             obs_keys: List[str] = [],
-            continuous_batches: bool = True,
             return_dense: bool = True,
     ) -> iter:
         """
@@ -109,8 +108,6 @@ class DistributedStore:
             these batches are the smallest data unit that upstream generators can access.
         :param obs_keys: .obs columns to return in the generator. These have to be a subset of the columns available
             in self.adatas.
-        :param continuous_batches: Whether to build batches of batch_size across data set boundaries if end of one
-            data set is reached.
         :param return_dense: Whether to return count data .X as dense batches. This allows more efficient feature
             indexing if the store is sparse (column indexing on csr matrices is slow).
         :return: Generator function which yields batch_size at every invocation.
@@ -133,30 +130,15 @@ class DistributedStore:
             var_idx = None
 
         def generator() -> tuple:
-            x_last = None
-            obs_last = None
-            global_index_set = []
-            for i, (k, v) in enumerate(self.adatas.items()):
-                if i > 0:
-                    start = np.max(global_index_set[-1][1])
-                else:
-                    start = 0
-                global_index_set.append((k, np.arange(start, start + v.n_obs).tolist()))
-            global_index_set = dict(global_index_set)
+            global_index_set = dict(list(zip(list(self.adatas.keys()), self.indices_global)))
             for i, (k, v) in enumerate(self.adatas.items()):
                 # Define batch partitions:
-                if continuous_batches and x_last is not None:
-                    # Prepend data set with residual data from last data set.
-                    remainder_start = x_last.shape[0]
-                else:
-                    # Partition into equally sized batches up to last batch.
-                    remainder_start = 0
                 # Get subset of target indices that fall into this data set.
                 # Use indices relative to this data (via .index here).
                 # continuous_slices is evaluated to establish whether slicing can be performed as the potentially
                 # faster [start:end] or needs to tbe index wise [indices]
                 if idx is not None:
-                    idx_i = [global_index_set[k].index(x) for x in [y for y in idx if y in global_index_set[k]]]
+                    idx_i = [global_index_set[k].tolist().index(x) for x in idx if x in global_index_set[k]]
                     idx_i = np.sort(idx_i)
                     continuous_slices = np.all(idx_i == np.arange(0, v.n_obs))
                 else:
@@ -165,13 +147,10 @@ class DistributedStore:
                 if len(idx_i) > 0:  # Skip data objects without matched cells.
                     n_obs = len(idx_i)
                     # Cells left over after batching to batch size, accounting for overhang:
-                    remainder = (n_obs + remainder_start) % batch_size
+                    remainder = n_obs % batch_size
                     batch_starts_ends = [
-                        (
-                            np.max([0, int(x * batch_size - remainder_start)]),
-                            np.max([0, int(x * batch_size - remainder_start)]) + batch_size
-                        )
-                        for x in np.arange(0, (n_obs + remainder_start) // batch_size + int(remainder > 0))
+                        (int(x * batch_size),  int(x * batch_size) + batch_size)
+                        for x in np.arange(0, n_obs // batch_size + int(remainder > 0))
                     ]
                     n_batches = len(batch_starts_ends)
                     # Iterate over batches:
@@ -193,46 +172,8 @@ class DistributedStore:
                         else:
                             obs = v.obs[obs_keys].iloc[idx_i[s:e], :]
                         assert isinstance(obs, pd.DataFrame), f"{type(obs)}"
-                        if x_last is not None:
-                            # Append last incomplete batch current batch.
-                            if isinstance(x, scipy.sparse.csr_matrix):
-                                x = scipy.sparse.hstack(blocks=[x_last, x], format="csr")
-                            elif isinstance(x, np.ndarray):
-                                x = np.concatenate([x_last, x], axis=0)
-                            else:
-                                assert False, type(x)
-                            obs = pd.concat(objs=[obs_last, obs], axis=0)
-                            if x.shape[0] < batch_size:
-                                # Extend overhang cache and do not yield batch.
-                                # This happens if there is already an overhand and the new data sets only consists of an
-                                # incomplete batch which does not make up a full batch together with the previous
-                                # overhang.
-                                x_last = x
-                                obs_last = obs
-                            elif x.shape[0] == batch_size:
-                                # Reset over-hang cache:
-                                x_last = None
-                                obs_last = None
-                                yield x, obs
-                            else:
-                                # Split into yielded full batch and remaining overhang.
-                                x_last = x[batch_size:, :]
-                                obs_last = obs.iloc[batch_size:, :]
-                                x = x[:batch_size, :]
-                                obs = obs.iloc[:batch_size, :]
-                                yield x, obs
-                        else:
-                            if continuous_batches and remainder > 0 and j == (n_batches - 1):
-                                # Cache incomplete last batch to append to next first batch of next data set.
-                                # Check if there is already a remainer from before, allow stacking of such remainders
-                                x_last = x
-                                obs_last = obs
-                            else:
-                                # Yield current batch.
-                                yield x, obs
-            # Yield remainder if any is left:
-            if x_last is not None:
-                yield x_last, obs_last
+                        # Yield current batch.
+                        yield x, obs
 
         return generator
 
@@ -373,11 +314,23 @@ class DistributedStore:
         # Translate file-wise indices into global index list across all data sets.
         idx = []
         counter = 0
-        for k, v in self.adatas.items():
-            idx_k = np.arange(counter, counter + v.n_obs)
-            idx.extend(idx_k[idx_by_dataset[k]].tolist())
-            counter += v.n_obs
+        for k, v in idx_by_dataset.items():
+            idx.extend((v + counter).tolist())
+            counter += self.adatas[k].n_obs
         return np.asarray(idx)
+
+    @property
+    def indices_global(self):
+        """
+        Increasing indices across data sets which can be concatenated into a single index vector with unique entries
+        for cells.
+        """
+        counter = 0
+        indices = []
+        for k, v in self.adatas.items():
+            indices.append(np.arange(counter, counter + v.n_obs))
+            counter += v.n_obs
+        return indices
 
     def write_config(self, fn: Union[str, os.PathLike]):
         """

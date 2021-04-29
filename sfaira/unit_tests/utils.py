@@ -47,7 +47,7 @@ def cached_store_writing(dir_data, dir_meta, assembly) -> os.PathLike:
     ds.load(allow_caching=True)
     ds.streamline_features(remove_gene_version=True, match_to_reference={"mouse": assembly},
                            subset_genes_to_type="protein_coding")
-    ds.streamline_metadata(schema="sfaira", uns_to_obs=False, clean_obs=True, clean_var=True, clean_uns=True,
+    ds.streamline_metadata(schema="sfaira", uns_to_obs=True, clean_obs=True, clean_var=True, clean_uns=True,
                            clean_obs_names=True)
     ds.write_distributed_store(dir_cache=store_path, store="h5ad", dense=False)
     return store_path

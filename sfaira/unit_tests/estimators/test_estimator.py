@@ -4,6 +4,7 @@ import numpy as np
 import os
 import pandas as pd
 import pytest
+import time
 from typing import Union
 
 from sfaira.data import DistributedStore
@@ -99,11 +100,26 @@ class HelperEstimatorBase:
         """
         pass
 
+    def estimator_train(self, test_split):
+        self.estimator.init_model()
+        self.estimator.train(
+            optimizer="adam",
+            lr=0.005,
+            epochs=2,
+            batch_size=4,
+            validation_split=0.5,
+            test_split=test_split,
+            validation_batch_size=4,
+            max_validation_steps=1,
+            shuffle_buffer_size=10,
+            cache_full=False,
+        )
+
     @abc.abstractmethod
     def basic_estimator_test(self, test_split):
         pass
 
-    def load_estimator(self, model_type, data_type, feature_space):
+    def load_estimator(self, model_type, data_type, feature_space, test_split):
         self.init_topology(model_type=model_type, feature_space=feature_space)
         np.random.seed(1)
         if data_type == "adata":
@@ -111,10 +127,12 @@ class HelperEstimatorBase:
         else:
             self.load_store()
         self.init_estimator()
+        self.estimator_train(test_split=test_split)
 
     def fatal_estimator_test(self, model_type, data_type, test_split=0.1, feature_space="small"):
-        self.load_estimator(model_type=model_type, data_type=data_type, feature_space=feature_space)
-        self.basic_estimator_test(test_split=test_split)
+        self.load_estimator(model_type=model_type, data_type=data_type, feature_space=feature_space,
+                            test_split=test_split)
+        self.basic_estimator_test()
 
 
 class HelperEstimatorKerasEmbedding(HelperEstimatorBase):
@@ -148,18 +166,6 @@ class HelperEstimatorKerasEmbedding(HelperEstimatorBase):
         )
 
     def basic_estimator_test(self, test_split):
-        self.estimator.init_model()
-        self.estimator.train(
-            optimizer="adam",
-            lr=0.005,
-            epochs=2,
-            batch_size=4,
-            validation_split=0.1,
-            test_split=test_split,
-            validation_batch_size=4,
-            max_validation_steps=1,
-            shuffle_buffer_size=10,
-        )
         _ = self.estimator.evaluate()
         prediction_output = self.estimator.predict()
         prediction_embed = self.estimator.predict_embedding()
@@ -201,18 +207,6 @@ class HelperEstimatorKerasCelltype(HelperEstimatorBase):
         self.estimator.celltype_universe.leaves = TARGETS
 
     def basic_estimator_test(self, test_split):
-        self.estimator.init_model()
-        self.estimator.train(
-            optimizer="adam",
-            lr=0.005,
-            epochs=2,
-            batch_size=4,
-            validation_split=0.1,
-            test_split=test_split,
-            validation_batch_size=4,
-            max_validation_steps=1,
-            shuffle_buffer_size=10,
-        )
         _ = self.estimator.evaluate()
         prediction_output = self.estimator.predict()
         weights = self.estimator.model.training_model.get_weights()
@@ -278,8 +272,9 @@ def test_split_index_sets(data_type: str, test_split):
     test_estim = HelperEstimatorKerasEmbedding()
     # Need full feature space here because observations are not necessarily different in small model testing feature
     # space with only two genes:
-    test_estim.fatal_estimator_test(model_type="linear", data_type=data_type, test_split=test_split,
-                                    feature_space="full")
+    t0 = time.time()
+    test_estim.load_estimator(model_type="linear", data_type=data_type, test_split=test_split, feature_space="full")
+    print(f"time for running estimator test: {time.time() - t0}s")
     idx_train = test_estim.estimator.idx_train
     idx_eval = test_estim.estimator.idx_eval
     idx_test = test_estim.estimator.idx_test
@@ -292,12 +287,9 @@ def test_split_index_sets(data_type: str, test_split):
     assert len(set(idx_test).intersection(set(idx_eval))) == 0
     # 3) Check partition of index vectors over store data sets matches test split scenario:
     if isinstance(test_estim.estimator.data, DistributedStore):
-        idx_raw = list(test_estim.estimator.data.indices.values())
         # Prepare data set-wise index vectors that are numbered in the same way as global split index vectors.
         # See also EstimatorKeras.train and DistributedStore.subset_cells_idx_global
-        for i, x in enumerate(idx_raw):
-            if i > 0:
-                idx_raw[i] = idx_raw[i] + int(np.max(idx_raw[i - 1]))
+        idx_raw = test_estim.estimator.data.indices_global
         if isinstance(test_split, float):
             # Make sure that indices from each split are in each data set:
             for z in [idx_train, idx_eval, idx_test]:
@@ -324,31 +316,39 @@ def test_split_index_sets(data_type: str, test_split):
     # 4) Assert that observations mapped to indices are actually unique based on expression vectors:
     # Build numpy arrays of expression input data sets from tensorflow data sets directly from estimator.
     # These data sets are the most processed transformation of the data and stand directly in concat with the model.
-    ds_train = test_estim.estimator._get_dataset(idx=idx_train, batch_size=1, mode='eval', shuffle_buffer_size=1)
-    ds_eval = test_estim.estimator._get_dataset(idx=idx_eval, batch_size=1, mode='eval', shuffle_buffer_size=1)
-    ds_test = test_estim.estimator._get_dataset(idx=idx_test, batch_size=1, mode='eval', shuffle_buffer_size=1)
-    x_train = None
-    x_eval = None
-    x_test = None
+    t0 = time.time()
+    ds_train = test_estim.estimator._get_dataset(idx=idx_train, batch_size=128, mode='eval', shuffle_buffer_size=1,
+                                                 retrieval_batch_size=128)
+    print(f"time for building training data set: {time.time() - t0}s")
+    t0 = time.time()
+    ds_eval = test_estim.estimator._get_dataset(idx=idx_eval, batch_size=128, mode='eval', shuffle_buffer_size=1,
+                                                retrieval_batch_size=128)
+    print(f"time for building validation data set: {time.time() - t0}s")
+    t0 = time.time()
+    ds_test = test_estim.estimator._get_dataset(idx=idx_test, batch_size=128, mode='eval', shuffle_buffer_size=1,
+                                                retrieval_batch_size=128)
+    print(f"time for building test data set: {time.time() - t0}s")
+    x_train = []
+    x_eval = []
+    x_test = []
+    t0 = time.time()
     for x, y in ds_train.as_numpy_iterator():
-        x = x[0]
-        if x_train is None:
-            x_train = x
-        else:
-            x_train = np.concatenate([x_train, x], axis=0)
+        x_train.append(x[0])
+    x_train = np.concatenate(x_train, axis=0)
+    print(f"time for iterating over training data set: {time.time() - t0}s")
+    t0 = time.time()
     for x, y in ds_eval.as_numpy_iterator():
-        x = x[0]
-        if x_eval is None:
-            x_eval = x
-        else:
-            x_eval = np.concatenate([x_eval, x], axis=0)
+        x_eval.append(x[0])
+    x_eval = np.concatenate(x_eval, axis=0)
+    print(f"time for iterating over validation data set: {time.time() - t0}s")
+    t0 = time.time()
     for x, y in ds_test.as_numpy_iterator():
-        x = x[0]
-        if x_test is None:
-            x_test = x
-        else:
-            x_test = np.concatenate([x_test, x], axis=0)
+        x_test.append(x[0])
+    x_test = np.concatenate(x_test, axis=0)
+    print(f"time for iterating over test data set: {time.time() - t0}s")
     # Validate size of recovered numpy data sets:
+    print(f"shapes received {(x_train.shape[0], x_eval.shape[0], x_test.shape[0])}")
+    print(f"shapes expected {(len(idx_train), len(idx_eval), len(idx_test))}")
     assert x_train.shape[0] == len(idx_train)
     assert x_eval.shape[0] == len(idx_eval)
     assert x_test.shape[0] == len(idx_test)

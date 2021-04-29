@@ -395,20 +395,15 @@ class EstimatorKeras:
                 replace=False,
             )
         elif isinstance(test_split, dict):
-            if isinstance(self.data, anndata.AnnData):
-                in_test = np.ones((self.data.obs.shape[0],), dtype=int) == 1
-                for k, v in test_split.items():
-                    if isinstance(v, list):
-                        in_test = np.logical_and(in_test, np.array([x in v for x in self.data.obs[k].values]))
-                    else:
-                        in_test = np.logical_and(in_test, self.data.obs[k].values == v)
-                self.idx_test = np.where(in_test)[0]
-                print(f"Found {len(self.idx_test)} out of {self.data.n_obs} cells that correspond to held out data set")
-                print(self.idx_test)
-            else:
-                assert len(test_split.values()) == 1
-                self.idx_test = self.data.subset_cells_idx_global(attr_key=list(test_split.keys())[0],
-                                                                  values=list(test_split.values())[0])
+            in_test = np.ones((self.data.n_obs,), dtype=int) == 1
+            for k, v in test_split.items():
+                if isinstance(v, list):
+                    in_test = np.logical_and(in_test, np.array([x in v for x in self.data.obs[k].values]))
+                else:
+                    in_test = np.logical_and(in_test, self.data.obs[k].values == v)
+            self.idx_test = np.where(in_test)[0]
+            print(f"Found {len(self.idx_test)} out of {self.data.n_obs} cells that correspond to held out data set")
+            print(self.idx_test)
         else:
             raise ValueError("type of test_split %s not recognized" % type(test_split))
         idx_train_eval = np.array([x for x in all_idx if x not in self.idx_test])
@@ -575,7 +570,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 idx=idx,
                 batch_size=batch_size,
                 obs_keys=[],
-                continuous_batches=True,
+                return_dense=True,
             )
 
             def generator():
@@ -677,7 +672,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                     idx=idx,
                     batch_size=1,
                     obs_keys=["cell_ontology_class"],
-                    continuous_batches=True,
+                    return_dense=True,
                 )
 
                 def generator():
@@ -1105,7 +1100,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
                 idx=idx,
                 batch_size=batch_size,
                 obs_keys=["cell_ontology_class"],
-                continuous_batches=True,
+                return_dense=True,
             )
             onehot_encoder = self._one_hot_encoder()
 
