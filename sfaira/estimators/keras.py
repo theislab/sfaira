@@ -2,6 +2,7 @@ import abc
 import anndata
 import hashlib
 import numpy as np
+import pandas as pd
 import scipy.sparse
 try:
     import tensorflow as tf
@@ -23,13 +24,16 @@ from .metrics import custom_mse, custom_negll_nb, custom_negll_gaussian, custom_
 
 
 def prepare_sf(x):
+    """
+    Uses a minimal size factor of 1e-3 for total counts / 1e4
+    """
     if len(x.shape) == 2:
         sf = np.asarray(x.sum(axis=1)).flatten()
     elif len(x.shape) == 1:
         sf = np.asarray(x.sum()).flatten()
     else:
         raise ValueError("x.shape > 2")
-    sf = np.log(sf / 1e4 + 1e-10)
+    sf = np.log(np.maximum(sf / 1e4, 1e-3))
     return sf
 
 
@@ -65,6 +69,9 @@ class EstimatorKeras:
         self.model_id = model_id
         self.model_class = model_class
         self.topology_container = model_topology
+        # Prepare store with genome container sub-setting:
+        if isinstance(self.data, DistributedStore):
+            self.data.genome_container = self.topology_container.gc
 
         self.history = None
         self.train_hyperparam = None
@@ -176,8 +183,9 @@ class EstimatorKeras:
             batch_size: Union[int, None],
             mode: str,
             shuffle_buffer_size: int,
-            prefetch: int,
-            weighted: bool
+            cache_full: bool,
+            weighted: bool,
+            retrieval_batch_size: int,
     ):
         pass
 
@@ -195,7 +203,14 @@ class EstimatorKeras:
             label_dict.update({label: float(i)})
         return label_dict
 
-    def _prepare_data_matrix(self, idx: Union[np.ndarray, None]):
+    def _prepare_data_matrix(self, idx: Union[np.ndarray, None]) -> scipy.sparse.csr_matrix:
+        """
+        Subsets observations x features matrix in .data to observation indices (idx, the split) and features defined
+        by topology.
+
+        :param idx: Observation index split.
+        :return: Data matrix
+        """
         # Check that AnnData is not backed. If backed, assume that these processing steps were done before.
         if self.data.isbacked:
             raise ValueError("tried running backed AnnData object through standard pipeline")
@@ -224,35 +239,19 @@ class EstimatorKeras:
                     return x
 
             # Compute indices of genes to keep
-            data_ids = self.data.var[self._adata_ids.gene_id_ensembl].values
-            idx_feature_kept = np.where([x in self.topology_container.gc.ensembl for x in data_ids])[0]
-            idx_feature_map = np.array([self.topology_container.gc.ensembl.index(x)
-                                        for x in data_ids[idx_feature_kept]])
-
-            # Convert to csc and remove unmapped genes
-            x = x.tocsc()
-            x = x[:, idx_feature_kept]
-
-            # Create reordered feature matrix based on reference and convert to csr
-            x_new = scipy.sparse.csc_matrix((x.shape[0], self.topology_container.n_var), dtype=x.dtype)
-            # copying this over to the new matrix in chunks of size `steps` prevents a strange scipy error:
-            # ... scipy/sparse/compressed.py", line 922, in _zero_many i, j, offsets)
-            # ValueError: could not convert integer scalar
-            step = 500
-            if step < len(idx_feature_map):
-                for i in range(0, len(idx_feature_map), step):
-                    x_new[:, idx_feature_map[i:i + step]] = x[:, i:i + step]
-                x_new[:, idx_feature_map[i + step:]] = x[:, i + step:]
-            else:
-                x_new[:, idx_feature_map] = x
-
-            x_new = x_new.tocsr()
-
-            print(f"found {len(idx_feature_kept)} intersecting features between {x.shape[1]} "
-                  f"features in input data set and {self.topology_container.n_var} features in reference genome")
-            print(f"found {x_new.shape[0]} observations")
-
-            return x_new
+            data_ids = self.data.var[self._adata_ids.gene_id_ensembl].values.tolist()
+            target_ids = self.topology_container.gc.ensembl
+            idx_map = np.array([data_ids.index(z) for z in target_ids])
+            # Assert that each ID from target IDs appears exactly once in data IDs:
+            assert np.all([z in data_ids for z in target_ids]), "not all target feature IDs found in data"
+            assert np.all([np.sum(z == np.array(data_ids)) <= 1. for z in target_ids]), \
+                "duplicated target feature IDs exist in data"
+            # Map feature space.
+            x = x[:, idx_map]
+            print(f"found {len(idx_map)} intersecting features between {x.shape[1]} features in input data set and"
+                  f" {self.topology_container.n_var} features in reference genome")
+            print(f"found {x.shape[0]} observations")
+            return x
 
     @abc.abstractmethod
     def _get_loss(self):
@@ -283,6 +282,7 @@ class EstimatorKeras:
             test_split: Union[float, dict] = 0.,
             validation_batch_size: int = 256,
             max_validation_steps: Union[int, None] = 10,
+            cache_full: bool = False,
             patience: int = 20,
             lr_schedule_min_lr: float = 1e-5,
             lr_schedule_factor: float = 0.2,
@@ -290,7 +290,7 @@ class EstimatorKeras:
             shuffle_buffer_size: int = int(1e4),
             log_dir: Union[str, None] = None,
             callbacks: Union[list, None] = None,
-            weighted: bool = True,
+            weighted: bool = False,
             verbose: int = 2
     ):
         """
@@ -350,7 +350,7 @@ class EstimatorKeras:
         }
 
         # Set callbacks.
-        cbs = []
+        cbs = [tf.keras.callbacks.TerminateOnNaN()]
         if patience is not None and patience > 0:
             cbs.append(tf.keras.callbacks.EarlyStopping(
                 monitor='val_loss',
@@ -391,24 +391,19 @@ class EstimatorKeras:
         if isinstance(test_split, float) or isinstance(test_split, int):
             self.idx_test = np.random.choice(
                 a=all_idx,
-                size=round(self.data.shape[0] * test_split),
+                size=round(self.data.n_obs * test_split),
                 replace=False,
             )
         elif isinstance(test_split, dict):
-            if isinstance(self.data, anndata.AnnData):
-                in_test = np.ones((self.data.obs.shape[0],), dtype=int) == 1
-                for k, v in test_split.items():
-                    if isinstance(v, list):
-                        in_test = np.logical_and(in_test, np.array([x in v for x in self.data.obs[k].values]))
-                    else:
-                        in_test = np.logical_and(in_test, self.data.obs[k].values == v)
-                self.idx_test = np.where(in_test)[0]
-                print(f"Found {len(self.idx_test)} out of {self.data.n_obs} cells that correspond to held out data set")
-                print(self.idx_test)
-            else:
-                assert len(test_split.values()) == 1
-                self.idx_test = self.data.subset_cells_idx_global(attr_key=list(test_split.keys())[0],
-                                                                  values=list(test_split.values())[0])
+            in_test = np.ones((self.data.n_obs,), dtype=int) == 1
+            for k, v in test_split.items():
+                if isinstance(v, list):
+                    in_test = np.logical_and(in_test, np.array([x in v for x in self.data.obs[k].values]))
+                else:
+                    in_test = np.logical_and(in_test, self.data.obs[k].values == v)
+            self.idx_test = np.where(in_test)[0]
+            print(f"Found {len(self.idx_test)} out of {self.data.n_obs} cells that correspond to held out data set")
+            print(self.idx_test)
         else:
             raise ValueError("type of test_split %s not recognized" % type(test_split))
         idx_train_eval = np.array([x for x in all_idx if x not in self.idx_test])
@@ -434,14 +429,16 @@ class EstimatorKeras:
             batch_size=batch_size,
             mode='train',
             shuffle_buffer_size=min(shuffle_buffer_size, len(self.idx_train)),
-            weighted=weighted
+            weighted=weighted,
+            cache_full=cache_full,
         )
         eval_dataset = self._get_dataset(
             idx=self.idx_eval,
             batch_size=validation_batch_size,
             mode='train_val',
             shuffle_buffer_size=min(shuffle_buffer_size, len(self.idx_eval)),
-            weighted=weighted
+            weighted=weighted,
+            cache_full=cache_full,
         )
 
         steps_per_epoch = min(max(len(self.idx_train) // batch_size, 1), max_steps_per_epoch)
@@ -468,6 +465,18 @@ class EstimatorKeras:
     @property
     def using_store(self) -> bool:
         return isinstance(self.data, DistributedStore)
+
+    @property
+    def obs_train(self):
+        return self.data.obs.iloc[self.idx_train, :]
+
+    @property
+    def obs_eval(self):
+        return self.data.obs.iloc[self.idx_eval, :]
+
+    @property
+    def obs_test(self):
+        return self.data.obs.iloc[self.idx_test, :]
 
 
 class EstimatorKerasEmbedding(EstimatorKeras):
@@ -539,6 +548,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             self,
             generator_helper,
             idx: Union[np.ndarray, None],
+            batch_size: int = 1,
     ):
         """
         Yield a basic generator based on which a tf dataset can be built.
@@ -557,30 +567,40 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         # Prepare data reading according to whether anndata is backed or not:
         if self.using_store:
             generator_raw = self.data.generator(
-                batch_size=1,
+                idx=idx,
+                batch_size=batch_size,
                 obs_keys=[],
-                continuous_batches=True,
+                return_dense=True,
             )
 
             def generator():
-                counter = -1
-                for z in generator_raw:
-                    counter += 1
-                    if counter in idx:
-                        x_sample = z[0].toarray().flatten()
-                        yield generator_helper(x_sample=x_sample)
+                for z in generator_raw():
+                    x_sample = z[0]
+                    if isinstance(x_sample, scipy.sparse.csr_matrix):
+                        x_sample = x_sample.todense()
+                    x_sample = np.asarray(x_sample)
+                    for i in range(x_sample.shape[0]):
+                        yield generator_helper(x_sample=x_sample[i])
 
             n_features = self.data.n_vars
             n_samples = self.data.n_obs
         else:
             x = self.data.X if self.data.isbacked else self._prepare_data_matrix(idx=idx)
+            indices = idx if self.data.isbacked else range(x.shape[0])
+            n_obs = len(indices)
+            remainder = n_obs % batch_size
+            batch_starts_ends = [
+                (int(x * batch_size), int(x * batch_size) + batch_size)
+                for x in np.arange(0, n_obs // batch_size + int(remainder > 0))
+            ]
 
             def generator():
                 is_sparse = isinstance(x[0, :], scipy.sparse.spmatrix)
-                indices = idx if self.data.isbacked else range(x.shape[0])
-                for i in indices:
-                    x_sample = x[i, :].toarray().flatten() if is_sparse else x[i, :].flatten()
-                    yield generator_helper(x_sample=x_sample)
+                for s, e in batch_starts_ends:
+                    x_sample = np.asarray(x[indices[s:e], :].todense()) if is_sparse \
+                        else x[indices[s:e], :]
+                    for i in range(x_sample.shape[0]):
+                        yield generator_helper(x_sample=x_sample[i])
 
             n_features = x.shape[1]
             n_samples = x.shape[0]
@@ -593,8 +613,9 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             batch_size: Union[int, None],
             mode: str,
             shuffle_buffer_size: int = int(1e7),
-            prefetch: int = 10,
+            cache_full: bool = False,
             weighted: bool = False,
+            retrieval_batch_size: int = 128,
     ):
         """
 
@@ -621,6 +642,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             generator, n_samples, n_features = self._get_base_generator(
                 generator_helper=generator_helper,
                 idx=idx,
+                batch_size=retrieval_batch_size,
             )
             output_types, output_shapes = self._get_output_dim(n_features=n_features, model_type=model_type, mode=mode)
             dataset = tf.data.Dataset.from_generator(
@@ -628,6 +650,8 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 output_types=output_types,
                 output_shapes=output_shapes
             )
+            if cache_full:
+                dataset = dataset.cache()
             # Only shuffle in train modes
             if mode in ['train', 'train_val']:
                 dataset = dataset.repeat()
@@ -635,30 +659,31 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                     buffer_size=min(n_samples, shuffle_buffer_size),
                     seed=None,
                     reshuffle_each_iteration=True)
-            dataset = dataset.batch(batch_size).prefetch(prefetch)
+            dataset = dataset.batch(batch_size).prefetch(tf.data.AUTOTUNE)
 
             return dataset
 
-        elif mode == 'gradient_method':
+        elif mode == 'gradient_method':  # TODO depreceate this code
             # Prepare data reading according to whether anndata is backed or not:
             cell_to_class = self._get_class_dict(obs_key=self._adata_ids.cell_ontology_class)
             if self.using_store:
                 n_features = self.data.n_vars
                 generator_raw = self.data.generator(
+                    idx=idx,
                     batch_size=1,
                     obs_keys=["cell_ontology_class"],
-                    continuous_batches=True,
+                    return_dense=True,
                 )
 
                 def generator():
-                    counter = -1
-                    for z in generator_raw:
-                        counter += 1
-                        if counter in idx:
-                            x_sample = z[0].toarray().flatten()
-                            sf_sample = prepare_sf(x=x_sample)[0]
-                            y_sample = z[1]["cell_ontology_class"].values[0]
-                            yield (x_sample, sf_sample), (x_sample, cell_to_class[y_sample])
+                    for z in generator_raw():
+                        x_sample = z[0]
+                        if isinstance(x_sample, scipy.sparse.csr_matrix):
+                            x_sample = x_sample.todense()
+                        x_sample = np.asarray(x_sample).flatten()
+                        sf_sample = prepare_sf(x=x_sample)[0]
+                        y_sample = z[1]["cell_ontology_class"].values[0]
+                        yield (x_sample, sf_sample), (x_sample, cell_to_class[y_sample])
 
             elif isinstance(self.data, anndata.AnnData) and self.data.isbacked:
                 n_features = self.data.X.shape[1]
@@ -691,7 +716,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 buffer_size=shuffle_buffer_size,
                 seed=None,
                 reshuffle_each_iteration=True
-            ).batch(batch_size).prefetch(prefetch)
+            ).batch(batch_size).prefetch(tf.data.AUTOTUNE)
 
             return dataset
 
@@ -752,7 +777,8 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             dataset = self._get_dataset(
                 idx=idx,
                 batch_size=batch_size,
-                mode='eval'
+                mode='eval',
+                retrieval_batch_size=128,
             )
             steps = min(max(len(idx) // batch_size, 1), max_steps)
             results = self.model.training_model.evaluate(x=dataset, steps=steps)
@@ -760,7 +786,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         else:
             return {}
 
-    def evaluate(self, batch_size: int = 1, max_steps: int = np.inf):
+    def evaluate(self, batch_size: int = 64, max_steps: int = np.inf):
         """
         Evaluate the custom model on test data.
 
@@ -772,7 +798,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         """
         return self.evaluate_any(idx=self.idx_test, batch_size=batch_size, max_steps=max_steps)
 
-    def predict(self):
+    def predict(self, batch_size: int = 64, max_steps: int = np.inf):
         """
         return the prediction of the model
 
@@ -782,14 +808,15 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         if self.idx_test is None or self.idx_test.any():  # true if the array is not empty or if the passed value is None
             dataset = self._get_dataset(
                 idx=self.idx_test,
-                batch_size=64,
-                mode='predict'
+                batch_size=batch_size,
+                mode='predict',
+                retrieval_batch_size=128,
             )
             return self.model.predict_reconstructed(x=dataset)
         else:
             return np.array([])
 
-    def predict_embedding(self):
+    def predict_embedding(self, batch_size: int = 64, max_steps: int = np.inf):
         """
         return the prediction in the latent space (z_mean for variational models)
 
@@ -799,14 +826,15 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         if self.idx_test is None or self.idx_test.any():  # true if the array is not empty or if the passed value is None
             dataset = self._get_dataset(
                 idx=self.idx_test,
-                batch_size=64,
-                mode='predict'
+                batch_size=batch_size,
+                mode='predict',
+                retrieval_batch_size=128,
             )
             return self.model.predict_embedding(x=dataset, variational=False)
         else:
             return np.array([])
 
-    def predict_embedding_variational(self):
+    def predict_embedding_variational(self, batch_size: int = 64, max_steps: int = np.inf):
         """
         return the prediction of z, z_mean, z_log_var in the variational latent space
 
@@ -816,8 +844,9 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         if self.idx_test is None or self.idx_test:  # true if the array is not empty or if the passed value is None
             dataset = self._get_dataset(
                 idx=self.idx_test,
-                batch_size=64,
-                mode='predict'
+                batch_size=batch_size,
+                mode='predict',
+                retrieval_batch_size=128,
             )
             return self.model.predict_embedding(x=dataset, variational=True)
         else:
@@ -979,15 +1008,21 @@ class EstimatorKerasCelltype(EstimatorKeras):
 
     def _one_hot_encoder(self):
 
-        def encoder(x):
-            idx = self.celltype_universe.onto_cl.map_to_leaves(
-                node=x,
-                return_type="idx",
-                include_self=True,
-            )
-            y = np.zeros((self.ntypes,), dtype="float32")
-            y[idx] = 1. / len(idx)
-            return y
+        def encoder(x) -> np.ndarray:
+            if isinstance(x, str):
+                x = [x]
+            idx = [
+                self.celltype_universe.onto_cl.map_to_leaves(
+                    node=y,
+                    return_type="idx",
+                    include_self=True,
+                )
+                for y in x
+            ]
+            oh = np.zeros((len(x), self.ntypes,), dtype="float32")
+            for i, y in enumerate(idx):
+                oh[i, y] = 1. / len(y)
+            return oh
 
         return encoder
 
@@ -1006,7 +1041,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
         # One whether "unknown" is already included, otherwise add one extra column.
         onehot_encoder = self._one_hot_encoder()
         y = np.concatenate([
-            np.expand_dims(onehot_encoder(z), axis=0)
+            onehot_encoder(z)
             for z in self.data.obs[self._adata_ids.cell_ontology_class].values[idx].tolist()
         ], axis=0)
         # Distribute aggregated class weight for computation of weights:
@@ -1039,6 +1074,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             generator_helper,
             idx: Union[np.ndarray, None],
             weighted: bool = False,
+            batch_size: int = 1,
     ):
         """
         Yield a basic generator based on which a tf dataset can be built.
@@ -1061,20 +1097,22 @@ class EstimatorKerasCelltype(EstimatorKeras):
             if weighted:
                 raise ValueError("using weights with store is not supported yet")
             generator_raw = self.data.generator(
-                batch_size=1,
+                idx=idx,
+                batch_size=batch_size,
                 obs_keys=["cell_ontology_class"],
-                continuous_batches=True,
+                return_dense=True,
             )
             onehot_encoder = self._one_hot_encoder()
 
             def generator():
-                counter = -1
-                for z in generator_raw:
-                    counter += 1
-                    if counter in idx:
-                        x_sample = z[0].toarray().flatten()
-                        y_sample = onehot_encoder(z[0]["cell_ontology_class"].values[0])
-                        yield generator_helper(x_sample, y_sample, 1.)
+                for z in generator_raw():
+                    x_sample = z[0]
+                    if isinstance(x_sample, scipy.sparse.csr_matrix):
+                        x_sample = x_sample.todense()
+                    x_sample = np.asarray(x_sample)
+                    y_sample = onehot_encoder(z[1]["cell_ontology_class"].values)
+                    for i in range(x_sample.shape[0]):
+                        yield generator_helper(x_sample[i], y_sample[i], 1.)
 
             n_features = self.data.n_vars
             n_samples = self.data.n_obs
@@ -1084,15 +1122,23 @@ class EstimatorKerasCelltype(EstimatorKeras):
             if not weighted:
                 weights = np.ones_like(weights)
             x = self.data.X if self.data.isbacked else self._prepare_data_matrix(idx=idx)
+            is_sparse = isinstance(x, scipy.sparse.spmatrix)
+            indices = idx if self.data.isbacked else range(x.shape[0])
+            n_obs = len(indices)
+            remainder = n_obs % batch_size
+            batch_starts_ends = [
+                (int(x * batch_size), int(x * batch_size) + batch_size)
+                for x in np.arange(0, n_obs // batch_size + int(remainder > 0))
+            ]
 
             def generator():
-                is_sparse = isinstance(x[0, :], scipy.sparse.spmatrix)
-                indices = idx if self.data.isbacked else range(x.shape[0])
-                for i in indices:
-                    x_sample = np.asarray(x[i, :].todense()).flatten() if is_sparse else x[i, :].flatten()
-                    y_sample = y[i, :]
-                    w_sample = weights[i]
-                    yield generator_helper(x_sample, y_sample, w_sample)
+                for s, e in batch_starts_ends:
+                    x_sample = np.asarray(x[indices[s:e], :].todense()) if is_sparse \
+                        else x[indices[s:e], :]
+                    y_sample = y[indices[s:e], :]
+                    w_sample = weights[indices[s:e]]
+                    for i in range(x_sample.shape[0]):
+                        yield generator_helper(x_sample[i], y_sample[i], w_sample[i])
 
             n_features = x.shape[1]
             n_samples = x.shape[0]
@@ -1106,8 +1152,9 @@ class EstimatorKerasCelltype(EstimatorKeras):
             batch_size: Union[int, None],
             mode: str,
             shuffle_buffer_size: int = int(1e7),
-            prefetch: int = 10,
-            weighted: bool = True,
+            cache_full: bool = False,
+            weighted: bool = False,
+            retrieval_batch_size: int = 128,
     ):
         """
 
@@ -1129,6 +1176,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             generator_helper=generator_helper,
             idx=idx,
             weighted=weighted,
+            batch_size=retrieval_batch_size,
         )
         output_types, output_shapes = self._get_output_dim(n_features=n_features, n_labels=n_labels, mode=mode)
         dataset = tf.data.Dataset.from_generator(
@@ -1136,6 +1184,8 @@ class EstimatorKerasCelltype(EstimatorKeras):
             output_types=output_types,
             output_shapes=output_shapes
         )
+        if cache_full:
+            dataset = dataset.cache()
         if mode == 'train' or mode == 'train_val':
             dataset = dataset.repeat()
             dataset = dataset.shuffle(
@@ -1143,7 +1193,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
                 seed=None,
                 reshuffle_each_iteration=True
             )
-        dataset = dataset.batch(batch_size).prefetch(prefetch)
+        dataset = dataset.batch(batch_size).prefetch(tf.data.AUTOTUNE)
 
         return dataset
 
@@ -1160,11 +1210,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             CustomTprClasswise(k=self.ntypes)
         ]
 
-    def predict(
-            self,
-            batch_size: int = 1,
-            max_steps: int = np.inf,
-    ):
+    def predict(self, batch_size: int = 64, max_steps: int = np.inf):
         """
         Return the prediction of the model
 
@@ -1177,14 +1223,15 @@ class EstimatorKerasCelltype(EstimatorKeras):
             dataset = self._get_dataset(
                 idx=idx,
                 batch_size=batch_size,
-                mode='predict'
+                mode='predict',
+                retrieval_batch_size=128,
             )
             steps = min(max(len(idx) // batch_size, 1), max_steps)
             return self.model.training_model.predict(x=dataset, steps=steps)
         else:
             return np.array([])
 
-    def ytrue(self):
+    def ytrue(self, batch_size: int = 64, max_steps: int = np.inf):
         """
         Return the true labels of the test set.
 
@@ -1193,7 +1240,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
         if self.idx_test is None or self.idx_test.any():   # true if the array is not empty or if the passed value is None
             x, y, w = self._get_dataset(
                 idx=self.idx_test,
-                batch_size=None,
+                batch_size=batch_size,
                 mode='eval'
             )
             return y
@@ -1205,7 +1252,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             idx,
             batch_size: int = 1,
             max_steps: int = np.inf,
-            weighted: bool = True
+            weighted: bool = False
     ):
         """
         Evaluate the custom model on any local data.
@@ -1224,7 +1271,8 @@ class EstimatorKerasCelltype(EstimatorKeras):
                 idx=idx,
                 batch_size=batch_size,
                 mode='eval',
-                weighted=weighted
+                weighted=weighted,
+                retrieval_batch_size=128,
             )
             steps = min(max(len(idx) // batch_size, 1), max_steps)
             results = self.model.training_model.evaluate(x=dataset, steps=steps)
@@ -1232,7 +1280,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
         else:
             return {}
 
-    def evaluate(self, batch_size: int = 1, max_steps: int = np.inf, weighted: bool = True):
+    def evaluate(self, batch_size: int = 64, max_steps: int = np.inf, weighted: bool = False):
         """
         Evaluate the custom model on local data.
 
