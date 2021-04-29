@@ -1,4 +1,3 @@
-import abc
 import numpy as np
 import pandas as pd
 from typing import List, Union
@@ -8,7 +7,7 @@ from sfaira.consts import OntologyContainerSfaira
 from sfaira.versions.topologies import TopologyContainer, TOPOLOGIES
 
 
-class ModelZoo(abc.ABC):
+class ModelZoo:
     """
     Model ontology base class.
     """

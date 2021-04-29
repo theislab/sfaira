@@ -1,11 +1,10 @@
 import anndata
 import numpy as np
 import os
-import pytest
 from typing import Union
 
 from sfaira.data import DistributedStore
-from sfaira.interface import ModelZoo, ModelZooCelltype, ModelZooEmbedding
+from sfaira.interface import ModelZoo
 from sfaira.train import TrainModelCelltype, TrainModelEmbedding
 from sfaira.unit_tests.utils import cached_store_writing, simulate_anndata
 
@@ -58,21 +57,21 @@ class HelperTrainerBase:
             data=self.data,
             model_path=dir_meta,
         )
-        trainer.zoo.set_model_id(model_id=self.model_id)
+        trainer.zoo.model_id = self.model_id
         trainer.init_estim(override_hyperpar={})
 
 
 def test_for_fatal_embedding():
-    model_id = "embedding_human-lung_linear_mylab_0.1_0.1"
-    zoo = ModelZooEmbedding()
-    zoo.set_model_id(model_id=model_id)
+    model_id = "embedding_human-lung-linear-0.1-0.1_mylab"
+    zoo = ModelZoo()
+    zoo.model_id = model_id
     test_trainer = HelperTrainerBase(zoo=zoo)
     test_trainer.test_for_fatal(cls=TrainModelEmbedding)
 
 
-def test_for_fatal():
-    model_id = "celltype_human-lung_mlp_mylab_0.0.1_0.1"
-    zoo = ModelZooCelltype()
-    zoo.set_model_id(model_id=model_id)
+def test_for_fatal_celltype():
+    model_id = "celltype_human-lung-mlp-0.0.1-0.1_mylab"
+    zoo = ModelZoo()
+    zoo.model_id = model_id
     test_trainer = HelperTrainerBase(zoo=zoo)
     test_trainer.test_for_fatal(cls=TrainModelCelltype)
