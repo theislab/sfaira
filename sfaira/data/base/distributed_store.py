@@ -133,7 +133,6 @@ class DistributedStore:
             var_idx = None
 
         def generator() -> tuple:
-            n_datasets = len(list(self.adatas.keys()))
             x_last = None
             obs_last = None
             global_index_set = []
@@ -199,7 +198,7 @@ class DistributedStore:
                             if isinstance(x, scipy.sparse.csr_matrix):
                                 x = scipy.sparse.hstack(blocks=[x_last, x], format="csr")
                             elif isinstance(x, np.ndarray):
-                                x = np.concatenate(blocks=[x_last, x], axis=0)
+                                x = np.concatenate([x_last, x], axis=0)
                             else:
                                 assert False, type(x)
                             obs = pd.concat(objs=[obs_last, obs], axis=0)
@@ -216,7 +215,12 @@ class DistributedStore:
                                 obs_last = None
                                 yield x, obs
                             else:
-                                assert False, (x.shape[0], batch_size)
+                                # Split into yielded full batch and remaining overhang.
+                                x_last = x[batch_size:, :]
+                                obs_last = obs.iloc[batch_size:, :]
+                                x = x[:batch_size, :]
+                                obs = obs.iloc[:batch_size, :]
+                                yield x, obs
                         else:
                             if continuous_batches and remainder > 0 and j == (n_batches - 1):
                                 # Cache incomplete last batch to append to next first batch of next data set.
@@ -229,7 +233,6 @@ class DistributedStore:
             # Yield remainder if any is left:
             if x_last is not None:
                 yield x_last, obs_last
-
 
         return generator
 

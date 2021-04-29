@@ -350,7 +350,7 @@ class EstimatorKeras:
         }
 
         # Set callbacks.
-        cbs = []
+        cbs = [tf.keras.callbacks.TerminateOnNaN()]
         if patience is not None and patience > 0:
             cbs.append(tf.keras.callbacks.EarlyStopping(
                 monitor='val_loss',
@@ -583,8 +583,9 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                     x_sample = z[0]
                     if isinstance(x_sample, scipy.sparse.csr_matrix):
                         x_sample = x_sample.todense()
-                    x_sample = np.asarray(x_sample).flatten()
-                    yield generator_helper(x_sample=x_sample)
+                    x_sample = np.asarray(x_sample)
+                    for i in range(x_sample.shape[0]):
+                        yield generator_helper(x_sample=x_sample[i])
 
             n_features = self.data.n_vars
             n_samples = self.data.n_obs
@@ -601,9 +602,10 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             def generator():
                 is_sparse = isinstance(x[0, :], scipy.sparse.spmatrix)
                 for s, e in batch_starts_ends:
-                    x_sample = np.asarray(x[indices[s:e], :].todense()).flatten() if is_sparse \
-                        else x[indices[s:e], :].flatten()
-                    yield generator_helper(x_sample=x_sample)
+                    x_sample = np.asarray(x[indices[s:e], :].todense()) if is_sparse \
+                        else x[indices[s:e], :]
+                    for i in range(x_sample.shape[0]):
+                        yield generator_helper(x_sample=x_sample[i])
 
             n_features = x.shape[1]
             n_samples = x.shape[0]
@@ -618,7 +620,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             shuffle_buffer_size: int = int(1e7),
             cache_full: bool = False,
             weighted: bool = False,
-            retrieval_batch_size: int = 1,
+            retrieval_batch_size: int = 128,
     ):
         """
 
@@ -777,13 +779,11 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         """
         if idx is None or idx.any():  # true if the array is not empty or if the passed value is None
             idx = np.arange(0, self.data.n_obs) if idx is None else idx
-            # These data sets are not repeated or shuffled, accordingly we can pool samples during retrieval already,
-            # and use retrieval_batch_size instead of batch size here.
             dataset = self._get_dataset(
                 idx=idx,
-                batch_size=1,
+                batch_size=batch_size,
                 mode='eval',
-                retrieval_batch_size=batch_size,
+                retrieval_batch_size=128,
             )
             steps = min(max(len(idx) // batch_size, 1), max_steps)
             results = self.model.training_model.evaluate(x=dataset, steps=steps)
@@ -811,13 +811,11 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         prediction
         """
         if self.idx_test is None or self.idx_test.any():  # true if the array is not empty or if the passed value is None
-            # These data sets are not repeated or shuffled, accordingly we can pool samples during retrieval already,
-            # and use retrieval_batch_size instead of batch size here.
             dataset = self._get_dataset(
                 idx=self.idx_test,
-                batch_size=1,
+                batch_size=batch_size,
                 mode='predict',
-                retrieval_batch_size=batch_size,
+                retrieval_batch_size=128,
             )
             return self.model.predict_reconstructed(x=dataset)
         else:
@@ -831,13 +829,11 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         latent space
         """
         if self.idx_test is None or self.idx_test.any():  # true if the array is not empty or if the passed value is None
-            # These data sets are not repeated or shuffled, accordingly we can pool samples during retrieval already,
-            # and use retrieval_batch_size instead of batch size here.
             dataset = self._get_dataset(
                 idx=self.idx_test,
-                batch_size=1,
+                batch_size=batch_size,
                 mode='predict',
-                retrieval_batch_size=batch_size,
+                retrieval_batch_size=128,
             )
             return self.model.predict_embedding(x=dataset, variational=False)
         else:
@@ -851,13 +847,11 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         sample of latent space, mean of latent space, variance of latent space
         """
         if self.idx_test is None or self.idx_test:  # true if the array is not empty or if the passed value is None
-            # These data sets are not repeated or shuffled, accordingly we can pool samples during retrieval already,
-            # and use retrieval_batch_size instead of batch size here.
             dataset = self._get_dataset(
                 idx=self.idx_test,
-                batch_size=1,
+                batch_size=batch_size,
                 mode='predict',
-                retrieval_batch_size=batch_size,
+                retrieval_batch_size=128,
             )
             return self.model.predict_embedding(x=dataset, variational=True)
         else:
@@ -1019,15 +1013,21 @@ class EstimatorKerasCelltype(EstimatorKeras):
 
     def _one_hot_encoder(self):
 
-        def encoder(x):
-            idx = self.celltype_universe.onto_cl.map_to_leaves(
-                node=x,
-                return_type="idx",
-                include_self=True,
-            )
-            y = np.zeros((self.ntypes,), dtype="float32")
-            y[idx] = 1. / len(idx)
-            return y
+        def encoder(x) -> np.ndarray:
+            if isinstance(x, str):
+                x = [x]
+            idx = [
+                self.celltype_universe.onto_cl.map_to_leaves(
+                    node=y,
+                    return_type="idx",
+                    include_self=True,
+                )
+                for y in x
+            ]
+            oh = np.zeros((len(x), self.ntypes,), dtype="float32")
+            for i, y in enumerate(idx):
+                oh[i, y] = 1. / len(y)
+            return oh
 
         return encoder
 
@@ -1046,7 +1046,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
         # One whether "unknown" is already included, otherwise add one extra column.
         onehot_encoder = self._one_hot_encoder()
         y = np.concatenate([
-            np.expand_dims(onehot_encoder(z), axis=0)
+            onehot_encoder(z)
             for z in self.data.obs[self._adata_ids.cell_ontology_class].values[idx].tolist()
         ], axis=0)
         # Distribute aggregated class weight for computation of weights:
@@ -1114,9 +1114,10 @@ class EstimatorKerasCelltype(EstimatorKeras):
                     x_sample = z[0]
                     if isinstance(x_sample, scipy.sparse.csr_matrix):
                         x_sample = x_sample.todense()
-                    x_sample = np.asarray(x_sample).flatten()
-                    y_sample = onehot_encoder(z[1]["cell_ontology_class"].values[0])
-                    yield generator_helper(x_sample, y_sample, 1.)
+                    x_sample = np.asarray(x_sample)
+                    y_sample = onehot_encoder(z[1]["cell_ontology_class"].values)
+                    for i in range(x_sample.shape[0]):
+                        yield generator_helper(x_sample[i], y_sample[i], 1.)
 
             n_features = self.data.n_vars
             n_samples = self.data.n_obs
@@ -1137,11 +1138,12 @@ class EstimatorKerasCelltype(EstimatorKeras):
 
             def generator():
                 for s, e in batch_starts_ends:
-                    x_sample = np.asarray(x[indices[s:e], :].todense()).flatten() if is_sparse \
-                        else x[indices[s:e], :].flatten()
+                    x_sample = np.asarray(x[indices[s:e], :].todense()) if is_sparse \
+                        else x[indices[s:e], :]
                     y_sample = y[indices[s:e], :]
                     w_sample = weights[indices[s:e]]
-                    yield generator_helper(x_sample, y_sample, w_sample)
+                    for i in range(x_sample.shape[0]):
+                        yield generator_helper(x_sample[i], y_sample[i], w_sample[i])
 
             n_features = x.shape[1]
             n_samples = x.shape[0]
@@ -1157,7 +1159,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             shuffle_buffer_size: int = int(1e7),
             cache_full: bool = False,
             weighted: bool = False,
-            retrieval_batch_size: int = 1,
+            retrieval_batch_size: int = 128,
     ):
         """
 
@@ -1223,13 +1225,11 @@ class EstimatorKerasCelltype(EstimatorKeras):
         """
         idx = self.idx_test
         if idx is None or idx.any():   # true if the array is not empty or if the passed value is None
-            # These data sets are not repeated or shuffled, accordingly we can pool samples during retrieval already,
-            # and use retrieval_batch_size instead of batch size here.
             dataset = self._get_dataset(
                 idx=idx,
-                batch_size=1,
+                batch_size=batch_size,
                 mode='predict',
-                retrieval_batch_size=batch_size,
+                retrieval_batch_size=128,
             )
             steps = min(max(len(idx) // batch_size, 1), max_steps)
             return self.model.training_model.predict(x=dataset, steps=steps)
@@ -1272,14 +1272,12 @@ class EstimatorKerasCelltype(EstimatorKeras):
         """
         if idx is None or idx.any():   # true if the array is not empty or if the passed value is None
             idx = np.arange(0, self.data.n_obs) if idx is None else idx
-            # These data sets are not repeated or shuffled, accordingly we can pool samples during retrieval already,
-            # and use retrieval_batch_size instead of batch size here.
             dataset = self._get_dataset(
                 idx=idx,
-                batch_size=1,
+                batch_size=batch_size,
                 mode='eval',
                 weighted=weighted,
-                retrieval_batch_size=batch_size,
+                retrieval_batch_size=128,
             )
             steps = min(max(len(idx) // batch_size, 1), max_steps)
             results = self.model.training_model.evaluate(x=dataset, steps=steps)

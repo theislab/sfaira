@@ -349,12 +349,6 @@ def test_split_index_sets(data_type: str, test_split):
         else:
             x_test = np.concatenate([x_test, x], axis=0)
     # Validate size of recovered numpy data sets:
-    print(x_train.shape[0])
-    print(x_eval.shape[0])
-    print(x_test.shape[0])
-    print(len(idx_train))
-    print(len(idx_eval))
-    print(len(idx_test))
     assert x_train.shape[0] == len(idx_train)
     assert x_eval.shape[0] == len(idx_eval)
     assert x_test.shape[0] == len(idx_test)
