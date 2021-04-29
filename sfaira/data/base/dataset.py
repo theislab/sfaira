@@ -674,7 +674,8 @@ class DatasetBase(abc.ABC):
         :param schema: Export format.
             - "sfaira"
             - "cellxgene"
-        :param uns_to_obs: Whether to move metadata in .uns to .obs to make sure it's not lost when concatenating multiple objects.
+        :param uns_to_obs: Whether to move metadata in .uns to .obs to make sure it's not lost when concatenating
+            multiple objects. Retains .id in .uns.
         :param clean_obs: Whether to delete non-streamlined fields in .obs, .obsm and .obsp.
         :param clean_var: Whether to delete non-streamlined fields in .var, .varm and .varp.
         :param clean_uns: Whether to delete non-streamlined fields in .uns.
@@ -909,7 +910,9 @@ class DatasetBase(abc.ABC):
             for k, v in self.adata.uns.items():
                 if k not in self.adata.obs_keys():
                     self.adata.obs[k] = [v for i in range(self.adata.n_obs)]
-            self.adata.uns = {}
+            # Retain only target uns keys in .uns.
+            self.adata.uns = dict([(k, v) for k, v in self.adata.uns.items()
+                                   if k in [getattr(adata_target_ids, kk) for kk in ["id"]]])
 
         self._adata_ids = adata_target_ids  # set new adata fields to class after conversion
         self.streamlined_meta = True
