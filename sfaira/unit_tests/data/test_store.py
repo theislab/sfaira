@@ -60,11 +60,12 @@ def test_type_targets():
     assert np.all([x in leaves1 for x in leaves2])
 
 
+@pytest.mark.parametrize("idx", [None, np.concatenate([np.arange(150, 200), np.array([1, 100, 2003, 33])])])
 @pytest.mark.parametrize("batch_size", [1, 10])
 @pytest.mark.parametrize("obs_keys", [[], ["cell_ontology_class"]])
 @pytest.mark.parametrize("continuous_batches", [True, False])
 @pytest.mark.parametrize("gc", [(None, {}), (MOUSE_GENOME_ANNOTATION, {"biotype": "protein_coding"})])
-def test_generator_shapes(batch_size: int, obs_keys: List[str], continuous_batches: bool, gc: tuple):
+def test_generator_shapes(idx, batch_size: int, obs_keys: List[str], continuous_batches: bool, gc: tuple):
     """
     Test generators queries do not throw errors and that output shapes are correct.
     """
@@ -76,10 +77,12 @@ def test_generator_shapes(batch_size: int, obs_keys: List[str], continuous_batch
         gc.subset(**subset)
         store.genome_container = gc
     g = store.generator(
+        idx=idx,
         batch_size=batch_size,
         obs_keys=obs_keys,
         continuous_batches=continuous_batches,
     )
+    nobs = len(idx) if idx is not None else store.n_obs
     batch_sizes = []
     t0 = time.time()
     for i, z in enumerate(g()):
@@ -91,8 +94,8 @@ def test_generator_shapes(batch_size: int, obs_keys: List[str], continuous_batch
         batch_sizes.append(x_i.shape[0])
     tdelta = time.time() - t0
     print(f"time for iterating over generator:"
-          f" {tdelta} for {np.sum(batch_sizes)} cells in {len(batch_sizes)} batches,"
-          f" {tdelta / len(batch_sizes)} per batch.")
+          f" {tdelta}s for {np.sum(batch_sizes)} cells in {len(batch_sizes)} batches,"
+          f" {tdelta / len(batch_sizes)}s per batch.")
     if continuous_batches:
         # Only the last batch can be of different size:
         assert np.sum(batch_sizes != batch_size) <= 1
@@ -103,6 +106,6 @@ def test_generator_shapes(batch_size: int, obs_keys: List[str], continuous_batch
     assert obs.shape[0] == batch_size, (obs.shape, batch_size)
     assert x.shape[1] == store.n_vars, (x.shape, store.n_vars)
     assert obs.shape[1] == len(obs_keys), (x.shape, obs_keys)
-    assert np.sum(batch_sizes) == store.n_obs, (x.shape, obs_keys)
+    assert np.sum(batch_sizes) == nobs, (x.shape, obs_keys)
     if assembly is not None:
         assert x.shape[1] == gc.n_var, (x.shape, gc.n_var)

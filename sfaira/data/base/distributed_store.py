@@ -92,6 +92,7 @@ class DistributedStore:
 
     def generator(
             self,
+            idx: Union[np.ndarray, None] = None,
             batch_size: int = 1,
             obs_keys: List[str] = [],
             continuous_batches: bool = True,
@@ -100,7 +101,12 @@ class DistributedStore:
         """
         Yields an unbiased generator over observations in the contained data sets.
 
-        :param batch_size: Number of observations in each batch (generator invocation).
+        :param idx: Global idx to query from store. These is an array with indicies corresponding to a contiuous index
+            along all observations in self.adatas, ordered along a hypothetical concatenation along the keys of
+            self.adatas.
+        :param batch_size: Number of observations in each batch (generator invocation). Increasing this may result in
+            large speed-ups in query time but removes the ability of upstream generators to fully shuffle cells, as
+            these batches are the smallest data unit that upstream generators can access.
         :param obs_keys: .obs columns to return in the generator. These have to be a subset of the columns available
             in self.adatas.
         :param continuous_batches: Whether to build batches of batch_size across data set boundaries if end of one
@@ -110,7 +116,7 @@ class DistributedStore:
         :return: Generator function which yields batch_size at every invocation.
             The generator returns a tuple of (.X, .obs) with types:
 
-                - if store format is h5ad: (scipy.sparse.csr_matrix, pandas.DataFrame)
+                - if store format is h5ad: (Union[scipy.sparse.csr_matrix, np.ndarray], pandas.DataFrame)
         """
         # Make sure that features are ordered in the same way in each object so that generator yields consistent cell
         # vectors.
@@ -120,7 +126,7 @@ class DistributedStore:
         if self.genome_container is not None:
             var_names_target = self.genome_container.ensembl
             var_idx = np.sort([var_names_store.index(x) for x in var_names_target])
-            # Check if index vector is just full ordered list of indices, in this case, subsetting is unnecessary.
+            # Check if index vector is just full ordered list of indices, in this case, sub-setting is unnecessary.
             if len(var_idx) == len(var_names_store) and np.all(var_idx == np.arange(0, len(var_names_store))):
                 var_idx = None
         else:
@@ -130,6 +136,14 @@ class DistributedStore:
             n_datasets = len(list(self.adatas.keys()))
             x_last = None
             obs_last = None
+            global_index_set = []
+            for i, (k, v) in enumerate(self.adatas.items()):
+                if i > 0:
+                    start = np.max(global_index_set[-1][1])
+                else:
+                    start = 0
+                global_index_set.append((k, np.arange(start, start + v.n_obs).tolist()))
+            global_index_set = dict(global_index_set)
             for i, (k, v) in enumerate(self.adatas.items()):
                 # Define batch partitions:
                 if continuous_batches and x_last is not None:
@@ -138,46 +152,84 @@ class DistributedStore:
                 else:
                     # Partition into equally sized batches up to last batch.
                     remainder_start = 0
-                remainder = (v.n_obs + remainder_start) % batch_size
-                batch_starts_ends = [
-                    (
-                        np.max([0, int(x * batch_size - remainder_start)]),
-                        np.max([0, int(x * batch_size - remainder_start)]) + batch_size
-                    )
-                    for x in np.arange(0, (v.n_obs + remainder_start) // batch_size + int(remainder > 0))
-                ]
-                n_batches = len(batch_starts_ends)
-                # Iterate over batches:
-                for j, (s, e) in enumerate(batch_starts_ends):
-                    x = v.X[s:e, :]
-                    # Do dense conversion now so that col-wise indexing is not slow, often, dense conversion
-                    # would be done later anyway.
-                    if return_dense:
-                        x = x.todense()
-                    if var_idx is not None:
-                        x = x[:, var_idx]
-                    obs = v.obs[obs_keys].iloc[s:e, :]
-                    assert isinstance(obs, pd.DataFrame), f"{type(obs)}"
-                    if continuous_batches and remainder > 0 and i < (n_datasets - 1) and j == (n_batches - 1):
-                        # Cache incomplete last batch to append to next first batch of next data set.
-                        x_last = x
-                        obs_last = obs
-                    elif continuous_batches and x_last is not None:
-                        # Append last incomplete batch current batch.
-                        if isinstance(x, scipy.sparse.csr_matrix):
-                            x = scipy.sparse.hstack(blocks=[x_last, x], format="csr")
-                        elif isinstance(x, np.ndarray):
-                            x = np.hstack(blocks=[x_last, x])
+                # Get subset of target indices that fall into this data set.
+                # Use indices relative to this data (via .index here).
+                # continuous_slices is evaluated to establish whether slicing can be performed as the potentially
+                # faster [start:end] or needs to tbe index wise [indices]
+                if idx is not None:
+                    idx_i = [global_index_set[k].index(x) for x in [y for y in idx if y in global_index_set[k]]]
+                    idx_i = np.sort(idx_i)
+                    continuous_slices = np.all(idx_i == np.arange(0, v.n_obs))
+                else:
+                    idx_i = np.arange(0, v.n_obs)
+                    continuous_slices = True
+                if len(idx_i) > 0:  # Skip data objects without matched cells.
+                    n_obs = len(idx_i)
+                    # Cells left over after batching to batch size, accounting for overhang:
+                    remainder = (n_obs + remainder_start) % batch_size
+                    batch_starts_ends = [
+                        (
+                            np.max([0, int(x * batch_size - remainder_start)]),
+                            np.max([0, int(x * batch_size - remainder_start)]) + batch_size
+                        )
+                        for x in np.arange(0, (n_obs + remainder_start) // batch_size + int(remainder > 0))
+                    ]
+                    n_batches = len(batch_starts_ends)
+                    # Iterate over batches:
+                    for j, (s, e) in enumerate(batch_starts_ends):
+                        if continuous_slices:
+                            e = idx_i[e] if e < n_obs else n_obs
+                            x = v.X[idx_i[s]:e, :]
                         else:
-                            assert False, type(x)
-                        obs = pd.concat(objs=[obs_last, obs], axis=0)
-                        # Reset over-hang cache:
-                        x_last = None
-                        obs_last = None
-                        yield x, obs
-                    else:
-                        # Yield current batch.
-                        yield x, obs
+                            x = v.X[idx_i[s:e], :]
+                        # Do dense conversion now so that col-wise indexing is not slow, often, dense conversion
+                        # would be done later anyway.
+                        if return_dense:
+                            x = x.todense()
+                        if var_idx is not None:
+                            x = x[:, var_idx]
+                        if continuous_slices:
+                            e = idx_i[e] if e < n_obs else n_obs
+                            obs = v.obs[obs_keys].iloc[idx_i[s]:e, :]
+                        else:
+                            obs = v.obs[obs_keys].iloc[idx_i[s:e], :]
+                        assert isinstance(obs, pd.DataFrame), f"{type(obs)}"
+                        if x_last is not None:
+                            # Append last incomplete batch current batch.
+                            if isinstance(x, scipy.sparse.csr_matrix):
+                                x = scipy.sparse.hstack(blocks=[x_last, x], format="csr")
+                            elif isinstance(x, np.ndarray):
+                                x = np.concatenate(blocks=[x_last, x], axis=0)
+                            else:
+                                assert False, type(x)
+                            obs = pd.concat(objs=[obs_last, obs], axis=0)
+                            if x.shape[0] < batch_size:
+                                # Extend overhang cache and do not yield batch.
+                                # This happens if there is already an overhand and the new data sets only consists of an
+                                # incomplete batch which does not make up a full batch together with the previous
+                                # overhang.
+                                x_last = x
+                                obs_last = obs
+                            elif x.shape[0] == batch_size:
+                                # Reset over-hang cache:
+                                x_last = None
+                                obs_last = None
+                                yield x, obs
+                            else:
+                                assert False, (x.shape[0], batch_size)
+                        else:
+                            if continuous_batches and remainder > 0 and j == (n_batches - 1):
+                                # Cache incomplete last batch to append to next first batch of next data set.
+                                # Check if there is already a remainer from before, allow stacking of such remainders
+                                x_last = x
+                                obs_last = obs
+                            else:
+                                # Yield current batch.
+                                yield x, obs
+            # Yield remainder if any is left:
+            if x_last is not None:
+                yield x_last, obs_last
+
 
         return generator
 
