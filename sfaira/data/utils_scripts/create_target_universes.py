@@ -26,13 +26,13 @@ for f in os.listdir(config_path):
             organ = f.split("_")[2]
             store = DistributedStore(cache_path=store_path)
             store.load_config(fn=fn)
-            celltypes_found = {}
+            celltypes_found = set([])
             for adata in store.adatas:
-                celltypes_found = celltypes_found.union(set(adata.obs["cell_ontology_class"].values))
-            celltypes_found = np.sort(list(celltypes_found - {
+                celltypes_found = celltypes_found.union(set(adata.obs["cell_ontology_class"].values.tolist()))
+            celltypes_found = np.sort(list(celltypes_found - set([
                 store._adata_ids_sfaira.unknown_celltype_identifier,
                 store._adata_ids_sfaira.not_a_cell_celltype_identifier
-            })).tolist()
+            ]))).tolist()
             celltypes_found = store.celltypes_universe.onto_cl.get_effective_leaves(x=celltypes_found)
             store.celltypes_universe.write_target_universe(
                 fn=os.path.join(config_path, f"targets_{organism}_{organ}.csv"),
