@@ -2,7 +2,7 @@ CELLTYPEMLP_TOPOLOGIES = {
     "0.0.1": {
         "model_type": "mlp",
         "input": {
-            "genome": "Homo_sapiens.GRCh38.102",
+            "genome": "Mus_musculus.GRCm38.102",
             "genes": ["biotype", "protein_coding"],
         },
         "output": {
