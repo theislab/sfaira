@@ -25,12 +25,12 @@ def test_config():
     Test that data set config files can be set, written and recovered.
     """
     store_path = cached_store_writing(dir_data=dir_data, dir_meta=dir_meta, assembly=MOUSE_GENOME_ANNOTATION)
-    config_path = os.path.join(store_path, "lung")
+    config_path = os.path.join(store_path, "config_lung")
     store = DistributedStore(cache_path=store_path)
     store.subset(attr_key="assay_sc", values=["10x sequencing"])
     store.write_config(fn=config_path)
     store2 = DistributedStore(cache_path=store_path)
-    store2.load_config(fn=config_path)
+    store2.load_config(fn=config_path + ".pickle")
     assert np.all(store.indices.keys() == store2.indices.keys())
     assert np.all([np.all(store.indices[k] == store2.indices[k]) for k in store.indices.keys()])
 
