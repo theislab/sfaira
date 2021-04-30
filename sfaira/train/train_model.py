@@ -45,6 +45,7 @@ class TrainModel:
             adata = None
             for k, v in self.data.indices.items():
                 x = self.data.adatas[k][v, :].to_memory()
+                x.obs["dataset_id"] = k
                 if adata is None:
                     adata = x
                 else:
