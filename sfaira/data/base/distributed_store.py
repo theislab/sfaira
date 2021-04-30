@@ -350,7 +350,7 @@ class DistributedStore:
 
         :param fn: Output file without file type extension.
         """
-        with open(fn + '.pickle', 'rb') as f:
+        with open(fn, 'rb') as f:
             self.indices = pickle.load(f)
         # Subset to described data sets:
         for x in self.indices.keys():
