@@ -17,8 +17,24 @@ class DistributedStore:
     Data set group class tailored to data access requirements common in high-performance computing (HPC).
 
     This class does not inherit from DatasetGroup because it entirely relies on the cached objects.
+    This class is centred around .adatas and .indices.
+
+    .adatas is a dictionary (by id) of backed anndata instances that point to individual h5ads.
+    This dictionary is intialised with all h5ads in the store.
+    As the store is subsetted, key-value pairs are deleted from this dictionary.
+
+    .indices have keys that correspond to keys in .adatas and contain index vectors of observations in the anndata
+    instances in .adatas which are still kept.
+    These index vectors are a form of lazy slicing that does not require data set loading or re-writing.
+    As the store is subsetted, key-value pairs are deleted from this dictionary if no observations from a given key
+    match the subsetting.
+    If a subset of observations from a key matches the subsetting operation, the index set in the corresponding value is
+    reduced.
+    All data retrievel operations work on .indices: Generators run over these indices when retrieving observations for
+    example.
     """
 
+    adatas: Dict[str, anndata.AnnData]
     indices: Dict[str, np.ndarray]
 
     def __init__(self, cache_path: Union[str, os.PathLike, None] = None):
@@ -130,7 +146,7 @@ class DistributedStore:
             var_idx = None
 
         def generator() -> tuple:
-            global_index_set = dict(list(zip(list(self.adatas.keys()), self.indices_global)))
+            global_index_set = self.indices_global
             for i, (k, v) in enumerate(self.adatas.items()):
                 # Define batch partitions:
                 # Get subset of target indices that fall into this data set.
@@ -186,7 +202,7 @@ class DistributedStore:
             )
         return self._celltype_universe
 
-    def _get_subset_idx(self, attr_key, values: Union[str, List[str]]):
+    def _get_subset_idx(self, attr_key, values: Union[str, List[str]]) -> dict:
         """
         Get indices of subset list of adata objects based on cell-wise properties.
 
@@ -250,11 +266,15 @@ class DistributedStore:
             return idx
 
         indices = {}
-        for k, v in self.adatas.items():
-            idx_old = self.indices[k].tolist()
-            idx_new = get_subset_idx(adata=v, k=attr_key, dataset=k)
+        for k, v in self.indices.items():
+            idx_old = v.tolist()
+            if k not in self.adatas.keys():
+                raise ValueError(f"data set {k} queried by indices does not exist in store (.adatas)")
+            idx_new = get_subset_idx(adata=self.adatas[k], k=attr_key, dataset=k)
             # Keep intersection of old and new hits.
-            indices[k] = np.asarray(list(set(idx_old).intersection(set(idx_new))), dtype="int32")
+            idx_new = list(set(idx_old).intersection(set(idx_new)))
+            if len(idx_new) > 0:
+                indices[k] = np.asarray(idx_new, dtype="int32")
         return indices
 
     def subset(self, attr_key, values: Union[str, List[str]]):
@@ -281,8 +301,8 @@ class DistributedStore:
         """
         self.indices = self._get_subset_idx(attr_key=attr_key, values=values)
 
-        for k, v in self.indices.items():
-            if v.shape[0] == 0:  # No observations (cells) left.
+        for k in list(self.adatas.keys()):
+            if k not in self.indices or self.indices[k].shape[0] == 0:  # No observations (cells) left.
                 del self.adatas[k]
 
     def subset_cells_idx_global(self, attr_key, values: Union[str, List[str]]) -> np.ndarray:
@@ -319,16 +339,16 @@ class DistributedStore:
         return np.asarray(idx)
 
     @property
-    def indices_global(self):
+    def indices_global(self) -> dict:
         """
         Increasing indices across data sets which can be concatenated into a single index vector with unique entries
         for cells.
         """
         counter = 0
-        indices = []
-        for k, v in self.adatas.items():
-            indices.append(np.arange(counter, counter + v.n_obs))
-            counter += v.n_obs
+        indices = {}
+        for k, v in self.indices.items():
+            indices[k] = np.arange(counter, counter + len(v))
+            counter += len(v)
         return indices
 
     def write_config(self, fn: Union[str, os.PathLike]):

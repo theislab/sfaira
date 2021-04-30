@@ -116,7 +116,7 @@ class OntologyHierarchical(Ontology, abc.ABC):
 
     def _check_graph(self):
         if not networkx.is_directed_acyclic_graph(self.graph):
-            warnings.warn("DAG was broken")
+            warnings.warn(f"DAG was broken in {type(self)}")
 
     def __validate_node_ids(self, x: Union[str, List[str]]):
         if isinstance(x, str):
@@ -229,6 +229,13 @@ class OntologyHierarchical(Ontology, abc.ABC):
         :param x: Observed node IDs.
         :return: Effective leaves.
         """
+        if isinstance(x, str):
+            x = [x]
+        if isinstance(x, np.ndarray):
+            x = x.tolist()
+        assert isinstance(x, list), "supply either list or str to get_effective_leaves"
+        if len(x) == 0:
+            raise ValueError("x was empty list, get_effective_leaves cannot be called on empty list")
         x = np.unique(x).tolist()
         x = self.convert_to_id(x=x)
         leaves = []
@@ -607,7 +614,7 @@ class OntologyUberon(OntologyExtendedObo):
             'innervated_by',
             'innervates',
             'intersects_midsagittal_plane_of',
-            'is_a',
+            'is_a',  # term DAG -> include because it connect conceptual tissue groups
             'layer_part_of',
             'located_in',  # anatomic DAG -> include because it reflects the anatomic coarseness / hierarchy
             'location_of',
@@ -648,6 +655,9 @@ class OntologyUberon(OntologyExtendedObo):
             assert x[2] in edge_types, x
             if x[2] not in [
                 "develops_from",
+                'develops_from_part_of',
+                'directly_develops_from',
+                "is_a",
                 "located_in",
                 "part_of",
             ]:
