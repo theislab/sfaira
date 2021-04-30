@@ -412,4 +412,4 @@ class DistributedStore:
 
         :return: .obs data frame.
         """
-        return pd.concat([v.obs for v in self.adatas.values()], axis=0)
+        return pd.concat([self.adatas[k].obs.iloc[v, :] for k, v in self.indices.values()], axis=0)

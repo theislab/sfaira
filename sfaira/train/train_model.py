@@ -42,7 +42,14 @@ class TrainModel:
         :return:
         """
         if isinstance(self.data, DistributedStore):
-            self.data = self.data.adata
+            adata = None
+            for k, v in self.data.indices:
+                x = self.data.adatas[k][v, :]
+                if adata is None:
+                    adata = x
+                else:
+                    adata.concatenate(x)
+            self.data = adata
 
     @abc.abstractmethod
     def init_estim(self):
