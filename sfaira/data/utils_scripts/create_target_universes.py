@@ -6,8 +6,6 @@ import tensorflow as tf
 # Any data loader here to extract path:
 from sfaira.data import DistributedStore
 
-print(tf.__version__)
-
 
 # Set global variables.
 print("sys.argv", sys.argv)
@@ -15,6 +13,8 @@ print("sys.argv", sys.argv)
 store_path = str(sys.argv[1])
 config_path = str(sys.argv[2])
 out_path = str(sys.argv[3])
+
+col_name_annot = "cell_ontology_class"
 
 for f in os.listdir(config_path):
     fn = os.path.join(config_path, f)
@@ -27,10 +27,13 @@ for f in os.listdir(config_path):
             store = DistributedStore(cache_path=store_path)
             store.load_config(fn=fn)
             celltypes_found = set([])
-            for adata in store.adatas.values():
-                celltypes_found = celltypes_found.union(
-                    set(adata.obs["cell_ontology_class"].values.tolist())
-                )
+            for k, adata in store.adatas.items():
+                if col_name_annot not in adata.obs.columns:
+                    print(f"WARNING: annotation column {col_name_annot} not found in  {k}, skipping.")
+                else:
+                    celltypes_found = celltypes_found.union(
+                        set(adata.obs[col_name_annot].values.tolist())
+                    )
             celltypes_found = np.sort(list(celltypes_found - set([
                 store._adata_ids_sfaira.unknown_celltype_identifier,
                 store._adata_ids_sfaira.not_a_cell_celltype_identifier
