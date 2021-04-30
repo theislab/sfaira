@@ -34,15 +34,13 @@ for f in os.listdir(config_path):
                     celltypes_found = celltypes_found.union(
                         set(adata.obs[col_name_annot].values.tolist())
                     )
-            celltypes_found = np.sort(list(celltypes_found - set([
-                store._adata_ids_sfaira.unknown_celltype_identifier,
-                store._adata_ids_sfaira.not_a_cell_celltype_identifier
-            ]))).tolist()
+            celltypes_found = sorted(list(celltypes_found - {store._adata_ids_sfaira.unknown_celltype_identifier,
+                                                              store._adata_ids_sfaira.not_a_cell_celltype_identifier}))
             if len(celltypes_found) == 0:
                 print(f"WARNING: No cells found for {organism} {organ}, skipping.")
             else:
                 celltypes_found = store.celltypes_universe.onto_cl.get_effective_leaves(x=celltypes_found)
                 store.celltypes_universe.write_target_universe(
-                    fn=os.path.join(config_path, f"targets_{organism}_{organ}.csv"),
+                    fn=os.path.join(out_path, f"targets_{organism}_{organ}.csv"),
                     x=celltypes_found,
                 )
