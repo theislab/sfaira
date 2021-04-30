@@ -27,13 +27,14 @@ for f in os.listdir(config_path):
             store = DistributedStore(cache_path=store_path)
             store.load_config(fn=fn)
             celltypes_found = set([])
-            for k, adata in store.adatas.items():
-                if col_name_annot not in adata.obs.columns:
+            for k, idx in store.indices.items():
+                if col_name_annot not in store.adatas[k].obs.columns:
                     print(f"WARNING: annotation column {col_name_annot} not found in  {k}, skipping.")
                 else:
-                    celltypes_found = celltypes_found.union(
-                        set(adata.obs[col_name_annot].values.tolist())
-                    )
+                    if len(idx) > 0:
+                        celltypes_found = celltypes_found.union(
+                            set(store.adatas[k].obs[col_name_annot].values[idx].tolist())
+                        )
             celltypes_found = sorted(list(celltypes_found - {store._adata_ids_sfaira.unknown_celltype_identifier,
                                                              store._adata_ids_sfaira.not_a_cell_celltype_identifier}))
             if len(celltypes_found) == 0:
