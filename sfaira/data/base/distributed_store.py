@@ -186,7 +186,7 @@ class DistributedStore:
             )
         return self._celltype_universe
 
-    def _get_subset_idx(self, attr_key, values: Union[str, List[str]]):
+    def _get_subset_idx(self, attr_key, values: Union[str, List[str]]) -> dict:
         """
         Get indices of subset list of adata objects based on cell-wise properties.
 
@@ -252,6 +252,8 @@ class DistributedStore:
         indices = {}
         for k, v in self.indices.items():
             idx_old = v.tolist()
+            if k not in self.adatas.keys():
+                raise ValueError(f"data set {k} queried by indices does not exist in store (.adatas)")
             idx_new = get_subset_idx(adata=self.adatas[k], k=attr_key, dataset=k)
             # Keep intersection of old and new hits.
             idx_new = list(set(idx_old).intersection(set(idx_new)))
@@ -321,13 +323,13 @@ class DistributedStore:
         return np.asarray(idx)
 
     @property
-    def indices_global(self):
+    def indices_global(self) -> dict:
         """
         Increasing indices across data sets which can be concatenated into a single index vector with unique entries
         for cells.
         """
         counter = 0
-        indices = []
+        indices = {}
         for k, v in self.indices.items():
             indices[k] = np.arange(counter, counter + len(v))
             counter += len(v)
