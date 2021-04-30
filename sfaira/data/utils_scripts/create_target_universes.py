@@ -20,7 +20,7 @@ for f in os.listdir(config_path):
     fn = os.path.join(config_path, f)
     if os.path.isfile(fn):  # only files
         # Narrow down to supported file types:
-        if f.split(".")[-1] == "csv" and f.startswith("config_"):
+        if f.split(".")[-1] == "pickle" and f.startswith("config_"):
             print(f"Writing {f}")
             organism = f.split("_")[1]
             organ = f.split("_")[2]
