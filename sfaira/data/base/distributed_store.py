@@ -130,7 +130,7 @@ class DistributedStore:
             var_idx = None
 
         def generator() -> tuple:
-            global_index_set = dict(list(zip(list(self.adatas.keys()), self.indices_global)))
+            global_index_set = self.indices_global
             for i, (k, v) in enumerate(self.adatas.items()):
                 # Define batch partitions:
                 # Get subset of target indices that fall into this data set.
@@ -250,11 +250,13 @@ class DistributedStore:
             return idx
 
         indices = {}
-        for k, v in self.adatas.items():
-            idx_old = self.indices[k].tolist()
-            idx_new = get_subset_idx(adata=v, k=attr_key, dataset=k)
+        for k, v in self.indices.items():
+            idx_old = v.tolist()
+            idx_new = get_subset_idx(adata=self.adatas[k], k=attr_key, dataset=k)
             # Keep intersection of old and new hits.
-            indices[k] = np.asarray(list(set(idx_old).intersection(set(idx_new))), dtype="int32")
+            idx_new = list(set(idx_old).intersection(set(idx_new)))
+            if len(idx_new) > 0:
+                indices[k] = np.asarray(idx_new, dtype="int32")
         return indices
 
     def subset(self, attr_key, values: Union[str, List[str]]):
@@ -281,8 +283,8 @@ class DistributedStore:
         """
         self.indices = self._get_subset_idx(attr_key=attr_key, values=values)
 
-        for k, v in self.indices.items():
-            if v.shape[0] == 0:  # No observations (cells) left.
+        for k in list(self.adatas.keys()):
+            if k not in self.indices or self.indices[k].shape[0] == 0:  # No observations (cells) left.
                 del self.adatas[k]
 
     def subset_cells_idx_global(self, attr_key, values: Union[str, List[str]]) -> np.ndarray:
@@ -326,9 +328,9 @@ class DistributedStore:
         """
         counter = 0
         indices = []
-        for k, v in self.adatas.items():
-            indices.append(np.arange(counter, counter + v.n_obs))
-            counter += v.n_obs
+        for k, v in self.indices.items():
+            indices[k] = np.arange(counter, counter + len(v))
+            counter += len(v)
         return indices
 
     def write_config(self, fn: Union[str, os.PathLike]):
