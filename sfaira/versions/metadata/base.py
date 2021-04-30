@@ -229,6 +229,13 @@ class OntologyHierarchical(Ontology, abc.ABC):
         :param x: Observed node IDs.
         :return: Effective leaves.
         """
+        if isinstance(x, str):
+            x = [x]
+        if isinstance(x, np.ndarray):
+            x = x.tolist()
+        assert isinstance(x, list), "supply either list or str to get_effective_leaves"
+        if len(x) == 0:
+            raise ValueError("x was empty list, get_effective_leaves cannot be called on empty list")
         x = np.unique(x).tolist()
         x = self.convert_to_id(x=x)
         leaves = []
