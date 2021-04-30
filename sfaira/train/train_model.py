@@ -43,7 +43,7 @@ class TrainModel:
         """
         if isinstance(self.data, DistributedStore):
             adata = None
-            for k, v in self.data.indices:
+            for k, v in self.data.indices.items():
                 x = self.data.adatas[k][v, :]
                 if adata is None:
                     adata = x
