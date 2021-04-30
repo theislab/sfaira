@@ -116,7 +116,7 @@ class OntologyHierarchical(Ontology, abc.ABC):
 
     def _check_graph(self):
         if not networkx.is_directed_acyclic_graph(self.graph):
-            warnings.warn(f"DAG was broken in {self}")
+            warnings.warn(f"DAG was broken in {type(self)}")
 
     def __validate_node_ids(self, x: Union[str, List[str]]):
         if isinstance(x, str):
