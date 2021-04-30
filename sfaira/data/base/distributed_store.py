@@ -17,8 +17,24 @@ class DistributedStore:
     Data set group class tailored to data access requirements common in high-performance computing (HPC).
 
     This class does not inherit from DatasetGroup because it entirely relies on the cached objects.
+    This class is centred around .adatas and .indices.
+
+    .adatas is a dictionary (by id) of backed anndata instances that point to individual h5ads.
+    This dictionary is intialised with all h5ads in the store.
+    As the store is subsetted, key-value pairs are deleted from this dictionary.
+
+    .indices have keys that correspond to keys in .adatas and contain index vectors of observations in the anndata
+    instances in .adatas which are still kept.
+    These index vectors are a form of lazy slicing that does not require data set loading or re-writing.
+    As the store is subsetted, key-value pairs are deleted from this dictionary if no observations from a given key
+    match the subsetting.
+    If a subset of observations from a key matches the subsetting operation, the index set in the corresponding value is
+    reduced.
+    All data retrievel operations work on .indices: Generators run over these indices when retrieving observations for
+    example.
     """
 
+    adatas: Dict[str, anndata.AnnData]
     indices: Dict[str, np.ndarray]
 
     def __init__(self, cache_path: Union[str, os.PathLike, None] = None):
