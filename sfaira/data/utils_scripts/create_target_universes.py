@@ -27,8 +27,10 @@ for f in os.listdir(config_path):
             store = DistributedStore(cache_path=store_path)
             store.load_config(fn=fn)
             celltypes_found = set([])
-            for adata in store.adatas:
-                celltypes_found = celltypes_found.union(set(adata.obs["cell_ontology_class"].values.tolist()))
+            for adata in store.adatas.values():
+                celltypes_found = celltypes_found.union(
+                    set(adata.obs["cell_ontology_class"].values.tolist())
+                )
             celltypes_found = np.sort(list(celltypes_found - set([
                 store._adata_ids_sfaira.unknown_celltype_identifier,
                 store._adata_ids_sfaira.not_a_cell_celltype_identifier
