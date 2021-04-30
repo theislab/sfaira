@@ -21,7 +21,7 @@ for f in os.listdir(config_path):
     if os.path.isfile(fn):  # only files
         # Narrow down to supported file types:
         if f.split(".")[-1] == "pickle" and f.startswith("config_"):
-            print(f"Writing {f}")
+            print(f"Writing target universe for {f}")
             organism = f.split("_")[1]
             organ = f.split("_")[2]
             store = DistributedStore(cache_path=store_path)
