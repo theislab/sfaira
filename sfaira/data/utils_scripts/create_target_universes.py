@@ -23,7 +23,7 @@ for f in os.listdir(config_path):
         if f.split(".")[-1] == "pickle" and f.startswith("config_"):
             print(f"Writing target universe for {f}")
             organism = f.split("_")[1]
-            organ = f.split("_")[2]
+            organ = f.split("_")[2].split(".")[0]
             store = DistributedStore(cache_path=store_path)
             store.load_config(fn=fn)
             celltypes_found = set([])
