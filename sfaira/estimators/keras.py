@@ -788,6 +788,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 batch_size=batch_size,
                 mode='eval',
                 retrieval_batch_size=128,
+                shuffle_buffer_size=0,
             )
             steps = min(max(len(idx) // batch_size, 1), max_steps)
             results = self.model.training_model.evaluate(x=dataset, steps=steps)
@@ -820,6 +821,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 batch_size=batch_size,
                 mode='predict',
                 retrieval_batch_size=128,
+                shuffle_buffer_size=0,
             )
             return self.model.predict_reconstructed(x=dataset)
         else:
@@ -838,6 +840,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 batch_size=batch_size,
                 mode='predict',
                 retrieval_batch_size=128,
+                shuffle_buffer_size=0,
             )
             return self.model.predict_embedding(x=dataset, variational=False)
         else:
@@ -856,6 +859,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 batch_size=batch_size,
                 mode='predict',
                 retrieval_batch_size=128,
+                shuffle_buffer_size=0,
             )
             return self.model.predict_embedding(x=dataset, variational=True)
         else:
@@ -1229,12 +1233,13 @@ class EstimatorKerasCelltype(EstimatorKeras):
         :return: Prediction tensor.
         """
         idx = self.idx_test
-        if idx is None or idx.any():   # true if the array is not empty or if the passed value is None
+        if idx is None or idx.any():
             dataset = self._get_dataset(
                 idx=idx,
                 batch_size=batch_size,
                 mode='predict',
                 retrieval_batch_size=128,
+                shuffle_buffer_size=0,
             )
             steps = min(max(len(idx) // batch_size, 1), max_steps)
             return self.model.training_model.predict(x=dataset, steps=steps)
@@ -1247,13 +1252,18 @@ class EstimatorKerasCelltype(EstimatorKeras):
 
         :return: true labels
         """
-        if self.idx_test is None or self.idx_test.any():   # true if the array is not empty or if the passed value is None
-            x, y, w = self._get_dataset(
+        if self.idx_test is None or self.idx_test.any():
+            dataset = self._get_dataset(
                 idx=self.idx_test,
                 batch_size=batch_size,
-                mode='eval'
+                mode='eval',
+                shuffle_buffer_size=0,
             )
-            return y
+            y_true = []
+            for _, y in dataset.as_numpy_iterator():
+                y_true.append(y)
+            y_true = np.concatenate(y_true, axis=0)
+            return y_true
         else:
             return np.array([])
 
@@ -1277,6 +1287,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
                 mode='eval',
                 weighted=weighted,
                 retrieval_batch_size=128,
+                shuffle_buffer_size=0,
             )
             steps = min(max(len(idx) // batch_size, 1), max_steps)
             results = self.model.training_model.evaluate(x=dataset, steps=steps)

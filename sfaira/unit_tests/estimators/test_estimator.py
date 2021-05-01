@@ -199,12 +199,21 @@ class HelperEstimatorKerasCelltype(HelperEstimatorBase):
         self.tc = TopologyContainer(topology=topology, topology_id="0.1")
 
     def init_estimator(self):
+        tc = self.tc
+        if isinstance(self.data, DistributedStore):
+            # Reset leaves below:
+            tc.topology["output"]["targets"] = None
         self.estimator = EstimatorKerasCelltype(
             data=self.data,
             model_dir=None,
             model_id="testid",
-            model_topology=self.tc
+            model_topology=tc
         )
+        if isinstance(self.data, DistributedStore):
+            leaves = self.estimator.celltype_universe.onto_cl.get_effective_leaves(
+                x=self.data.obs["cell_ontology_class"].values
+            )
+            self.estimator.celltype_universe.onto_cl.leaves = leaves
 
     def basic_estimator_test(self, test_split=0.1):
         _ = self.estimator.evaluate()
