@@ -16,7 +16,7 @@ def simulate_anndata(genes, n_obs, targets=None, assays=None) -> anndata.AnnData
     )
     if assays is not None:
         data.obs["assay_sc"] = [
-            assays[np.random.randint(0, len(targets))]
+            assays[np.random.randint(0, len(assays))]
             for i in range(n_obs)
         ]
     if targets is not None:

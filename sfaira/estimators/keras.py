@@ -770,7 +770,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
 
         return {"neg_ll": [custom_mse, custom_negll]}
 
-    def evaluate_any(self, idx, batch_size: int = 1, max_steps: int = np.inf):
+    def evaluate_any(self, idx, batch_size: int = 128, max_steps: int = np.inf):
         """
         Evaluate the custom model on any local data.
 
@@ -795,7 +795,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         else:
             return {}
 
-    def evaluate(self, batch_size: int = 64, max_steps: int = np.inf):
+    def evaluate(self, batch_size: int = 128, max_steps: int = np.inf):
         """
         Evaluate the custom model on test data.
 
@@ -807,7 +807,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         """
         return self.evaluate_any(idx=self.idx_test, batch_size=batch_size, max_steps=max_steps)
 
-    def predict(self, batch_size: int = 64, max_steps: int = np.inf):
+    def predict(self, batch_size: int = 128, max_steps: int = np.inf):
         """
         return the prediction of the model
 
@@ -825,7 +825,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         else:
             return np.array([])
 
-    def predict_embedding(self, batch_size: int = 64, max_steps: int = np.inf):
+    def predict_embedding(self, batch_size: int = 128, max_steps: int = np.inf):
         """
         return the prediction in the latent space (z_mean for variational models)
 
@@ -843,7 +843,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         else:
             return np.array([])
 
-    def predict_embedding_variational(self, batch_size: int = 64, max_steps: int = np.inf):
+    def predict_embedding_variational(self, batch_size: int = 128, max_steps: int = np.inf):
         """
         return the prediction of z, z_mean, z_log_var in the variational latent space
 
@@ -978,7 +978,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             uberon=OCS.organ,
             organism=self.organism,
         )
-        self.celltype_universe.leaves = self.topology_container.output["targets"]
+        self.celltype_universe.onto_cl.leaves = self.topology_container.output["targets"]
 
     def init_model(
             self,
@@ -1004,16 +1004,16 @@ class EstimatorKerasCelltype(EstimatorKeras):
         )
 
     @property
-    def ids(self):
-        return self.celltype_universe.leaves
-
-    @property
     def ntypes(self):
         return self.celltype_universe.onto_cl.n_leaves
 
     @property
     def ontology_ids(self):
-        return self.celltype_universe.leaves
+        return self.celltype_universe.onto_cl.leaves
+
+    @property
+    def ontology_names(self):
+        return self.celltype_universe.onto_cl.convert_to_name(self.celltype_universe.onto_cl.leaves)
 
     def _one_hot_encoder(self):
 
@@ -1219,7 +1219,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             CustomTprClasswise(k=self.ntypes)
         ]
 
-    def predict(self, batch_size: int = 64, max_steps: int = np.inf):
+    def predict(self, batch_size: int = 128, max_steps: int = np.inf):
         """
         Return the prediction of the model
 
@@ -1256,13 +1256,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
         else:
             return np.array([])
 
-    def evaluate_any(
-            self,
-            idx,
-            batch_size: int = 1,
-            max_steps: int = np.inf,
-            weighted: bool = False
-    ):
+    def evaluate_any(self, idx, batch_size: int = 128, max_steps: int = np.inf, weighted: bool = False):
         """
         Evaluate the custom model on any local data.
 
@@ -1289,7 +1283,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
         else:
             return {}
 
-    def evaluate(self, batch_size: int = 64, max_steps: int = np.inf, weighted: bool = False):
+    def evaluate(self, batch_size: int = 128, max_steps: int = np.inf, weighted: bool = False):
         """
         Evaluate the custom model on local data.
 

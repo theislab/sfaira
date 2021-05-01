@@ -57,11 +57,11 @@ class TrainModel:
         pass
 
     @abc.abstractmethod
-    def save_eval(self, fn: str):
+    def save_eval(self, fn: str, **kwargs):
         pass
 
     @abc.abstractmethod
-    def _save_specific(self, fn: str):
+    def _save_specific(self, fn: str, **kwargs):
         pass
 
     def save(
@@ -85,6 +85,16 @@ class TrainModel:
             pickle.dump(obj=self.estimator.model.hyperparam, file=f)
         if specific:
             self._save_specific(fn=fn)
+
+    def n_counts(self, idx):
+        if isinstance(self.estimator.data, anndata.AnnData):
+            return np.asarray(
+                self.estimator.data.X[np.sort(idx), :].sum(axis=1)[np.argsort(idx)]
+            ).flatten()
+        elif isinstance(self.estimator.data, DistributedStore):
+            return self.estimator.data.n_counts(idx=idx)
+        else:
+            assert False
 
 
 class TrainModelEmbedding(TrainModel):
@@ -136,9 +146,7 @@ class TrainModelEmbedding(TrainModel):
         """
         embedding = self.estimator.predict_embedding()
         df_summary = self.estimator.obs_test[AdataIdsSfaira.obs_keys]
-        df_summary["ncounts"] = np.asarray(
-            self.estimator.data.X[np.sort(self.estimator.idx_test), :].sum(axis=1)[np.argsort(self.estimator.idx_test)]
-        ).flatten()
+        df_summary["ncounts"] = self.n_counts(idx=self.estimator.idx_test)
         np.save(file=fn + "_embedding", arr=embedding)
         df_summary.to_csv(fn + "_covar.csv")
 
@@ -171,7 +179,7 @@ class TrainModelCelltype(TrainModel):
         )
         self.estimator.init_model(override_hyperpar=override_hyperpar)
 
-    def save_eval(self, fn: str):
+    def save_eval(self, fn: str, eval_weighted: bool = False):
         evaluation = {
             'train': self.estimator.evaluate_any(idx=self.estimator.idx_train, weighted=False),
             'val': self.estimator.evaluate_any(idx=self.estimator.idx_eval, weighted=False),
@@ -180,14 +188,15 @@ class TrainModelCelltype(TrainModel):
         }
         with open(fn + '_evaluation.pickle', 'wb') as f:
             pickle.dump(obj=evaluation, file=f)
-        evaluation_weighted = {
-            'train': self.estimator.evaluate_any(idx=self.estimator.idx_train, weighted=True),
-            'val': self.estimator.evaluate_any(idx=self.estimator.idx_eval, weighted=True),
-            'test': self.estimator.evaluate_any(idx=self.estimator.idx_test, weighted=True),
-            'all': self.estimator.evaluate_any(idx=None, weighted=True)
-        }
-        with open(fn + '_evaluation_weighted.pickle', 'wb') as f:
-            pickle.dump(obj=evaluation_weighted, file=f)
+        if eval_weighted:
+            evaluation_weighted = {
+                'train': self.estimator.evaluate_any(idx=self.estimator.idx_train, weighted=True),
+                'val': self.estimator.evaluate_any(idx=self.estimator.idx_eval, weighted=True),
+                'test': self.estimator.evaluate_any(idx=self.estimator.idx_test, weighted=True),
+                'all': self.estimator.evaluate_any(idx=None, weighted=True)
+            }
+            with open(fn + '_evaluation_weighted.pickle', 'wb') as f:
+                pickle.dump(obj=evaluation_weighted, file=f)
 
     def _save_specific(self, fn: str):
         """
@@ -196,20 +205,23 @@ class TrainModelCelltype(TrainModel):
         :param fn:
         :return:
         """
+        obs = self.estimator.data.obs
         ytrue = self.estimator.ytrue()
         yhat = self.estimator.predict()
         df_summary = self.estimator.obs_test[AdataIdsSfaira.obs_keys]
-        df_summary["ncounts"] = np.asarray(self.estimator.data.X[self.estimator.idx_test, :].sum(axis=1)).flatten()
+        df_summary["ncounts"] = self.n_counts(idx=self.estimator.idx_test)
         np.save(file=fn + "_ytrue", arr=ytrue)
         np.save(file=fn + "_yhat", arr=yhat)
         df_summary.to_csv(fn + "_covar.csv")
         with open(fn + '_ontology_names.pickle', 'wb') as f:
-            pickle.dump(obj=self.estimator.ids, file=f)
+            pickle.dump(obj=self.estimator.ontology_names, file=f)
+        with open(fn + '_ontology_ids.pickle', 'wb') as f:
+            pickle.dump(obj=self.estimator.ontology_ids, file=f)
 
-        cell_counts = self.data.obs['cell_ontology_class'].value_counts().to_dict()
+        cell_counts = obs['cell_ontology_class'].value_counts().to_dict()
         cell_counts_leaf = cell_counts.copy()
         for k in cell_counts.keys():
-            if k not in self.estimator.ids:
+            if k not in self.estimator.ontology_ids:
                 if k not in self.estimator.celltype_universe.onto_cl.node_ids:
                     raise(ValueError(f"Celltype '{k}' not found in celltype universe"))
                 for leaf in self.estimator.celltype_universe.onto_cl.node_ids:

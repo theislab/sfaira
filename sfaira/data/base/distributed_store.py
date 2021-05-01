@@ -351,6 +351,15 @@ class DistributedStore:
             counter += len(v)
         return indices
 
+    def global_indices_to_dict(self, idx: np.ndarray) -> dict:
+        assert np.max(idx) < self.n_obs
+        indices = {}
+        for k, v in self.indices_global.items():
+            matched = [x in v for x in idx]
+            if np.any(matched):
+                indices[k] = np.array([v.tolist().index(x) for x in idx[matched]])[0]
+        return indices
+
     def write_config(self, fn: Union[str, os.PathLike]):
         """
         Writes a config file that describes the current data sub-setting.
@@ -413,3 +422,20 @@ class DistributedStore:
         :return: .obs data frame.
         """
         return pd.concat([self.adatas[k].obs.iloc[v, :] for k, v in self.indices.items()], axis=0)
+
+    def n_counts(self, idx: Union[np.ndarray, None] = None) -> np.ndarray:
+        """
+        Compute sum over features for each observation in index.
+
+        :param idx: Subset of index to run operation over. Can be either global index (list) or dictionary of data set
+            wise indices.
+        :return: Array with sum per observations: (number of observations in index,)
+        """
+        idx = self.indices if idx is None else idx
+        if isinstance(idx, list) or isinstance(idx, np.ndarray):
+            # Convert global index to dictionary of indices:
+            idx = self.global_indices_to_dict(idx=idx)
+        return np.concatenate([
+            np.asarray(self.adatas[k].X[v, :].sum(axis=1)).flatten()
+            for k, v in idx.items()
+        ], axis=0)

@@ -19,7 +19,8 @@ cache_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path
 
 ASSEMBLY = "Mus_musculus.GRCm38.102"
 GENES = ["ENSMUSG00000000003", "ENSMUSG00000000028"]
-TARGETS = ["T cell", "stromal cell"]
+TARGETS = ["T cell", "CD4-positive helper T cell", "stromal cell"]
+TARGET_UNIVERSE = ["CD4-positive helper T cell", "stromal cell"]
 ASSAYS = ["10x sequencing", "Smart-seq2"]
 
 
@@ -46,7 +47,7 @@ TOPOLOGY_CELLTYPE_MODEL = {
     },
     "output": {
         "cl": "v2021-02-01",
-        "targets": TARGETS
+        "targets": TARGET_UNIVERSE
     },
     "hyper_parameters": {
         "latent_dim": None,
@@ -204,11 +205,11 @@ class HelperEstimatorKerasCelltype(HelperEstimatorBase):
             model_id="testid",
             model_topology=self.tc
         )
-        self.estimator.celltype_universe.leaves = TARGETS
 
     def basic_estimator_test(self, test_split=0.1):
         _ = self.estimator.evaluate()
         prediction_output = self.estimator.predict()
+        assert prediction_output.shape[1] == len(TARGET_UNIVERSE), prediction_output.shape
         weights = self.estimator.model.training_model.get_weights()
         self.estimator.save_weights_to_cache()
         self.estimator.load_weights_from_cache()
@@ -278,6 +279,9 @@ def test_split_index_sets(data_type: str, test_split):
     idx_train = test_estim.estimator.idx_train
     idx_eval = test_estim.estimator.idx_eval
     idx_test = test_estim.estimator.idx_test
+    print(idx_train)
+    print(idx_eval)
+    print(idx_test)
     # 1) Assert that index assignments sum up to full data set:
     assert len(idx_train) + len(idx_eval) + len(idx_test) == test_estim.data.n_obs, \
         (len(idx_train), len(idx_eval), len(idx_test), test_estim.data.n_obs)
