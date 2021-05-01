@@ -331,6 +331,11 @@ class DistributedStore:
         """
         Increasing indices across data sets which can be concatenated into a single index vector with unique entries
         for cells.
+
+        E.g.: For two data sets of 10 cells each, the return value would be {A:[0..9], B:[10..19]}.
+        Note that this operates over pre-selected indices, if this store was subsetted before resulting in only the
+        second half B to be kept, the return value would be {A:[0..9], B:[10..14]}, where .indices would be
+        {A:[0..9], B:[15..19]}.
         """
         counter = 0
         indices = {}
