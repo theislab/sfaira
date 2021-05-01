@@ -192,16 +192,6 @@ class DistributedStore:
 
         return generator
 
-    @property
-    def celltypes_universe(self) -> CelltypeUniverse:
-        if self._celltype_universe is None:
-            self._celltype_universe = CelltypeUniverse(
-                cl=self.ontology_container.cellontology_class,
-                uberon=self.ontology_container.organ,
-                organism=None,  # TODO Does not load extensions!
-            )
-        return self._celltype_universe
-
     def get_subset_idx(self, attr_key, values: Union[str, List[str]]) -> dict:
         """
         Get indices of subset list of adata objects based on cell-wise properties.

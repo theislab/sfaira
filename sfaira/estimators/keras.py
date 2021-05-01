@@ -978,7 +978,9 @@ class EstimatorKerasCelltype(EstimatorKeras):
             uberon=OCS.organ,
             organism=self.organism,
         )
-        self.celltype_universe.onto_cl.leaves = self.topology_container.output["targets"]
+        # Set leaves if they are defined in topology:
+        if self.topology_container.output["targets"] is not None:
+            self.celltype_universe.onto_cl.leaves = self.topology_container.output["targets"]
 
     def init_model(
             self,

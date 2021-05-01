@@ -122,8 +122,9 @@ class TrainModelEmbedding(TrainModel):
             model_topology=self.zoo.topology_container
         )
         self.estimator.init_model(override_hyperpar=override_hyperpar)
+        print(f"TRAINER: initialised model with {self.estimator.topology_container.n_var} features.")
 
-    def save_eval(self, fn: str):
+    def save_eval(self, fn: str, **kwargs):
         evaluation_train = self.estimator.evaluate_any(idx=self.estimator.idx_train)
         evaluation_val = self.estimator.evaluate_any(idx=self.estimator.idx_eval)
         evaluation_test = self.estimator.evaluate_any(idx=self.estimator.idx_test)
@@ -137,7 +138,7 @@ class TrainModelEmbedding(TrainModel):
         with open(fn + '_evaluation.pickle', 'wb') as f:
             pickle.dump(obj=evaluation, file=f)
 
-    def _save_specific(self, fn: str):
+    def _save_specific(self, fn: str, **kwargs):
         """
         Save embedding prediction:
 
@@ -164,7 +165,7 @@ class TrainModelCelltype(TrainModel):
         super(TrainModelCelltype, self).__init__(data=data)
         self.estimator = None
         self.model_dir = model_path
-        self.data.celltypes_universe.load_target_universe(fn=fn_target_universe)
+        self.fn_target_universe = fn_target_universe
 
     def init_estim(
             self,
@@ -177,9 +178,12 @@ class TrainModelCelltype(TrainModel):
             model_id=self.zoo.model_id,
             model_topology=self.zoo.topology_container
         )
+        self.estimator.celltype_universe.load_target_universe(self.fn_target_universe)
         self.estimator.init_model(override_hyperpar=override_hyperpar)
+        print(f"TRAINER: initialised model with {self.estimator.topology_container.n_var} features and "
+              f"{self.estimator.ntypes} labels: \n{self.estimator.ontology_names}.")
 
-    def save_eval(self, fn: str, eval_weighted: bool = False):
+    def save_eval(self, fn: str, eval_weighted: bool = False, **kwargs):
         evaluation = {
             'train': self.estimator.evaluate_any(idx=self.estimator.idx_train, weighted=False),
             'val': self.estimator.evaluate_any(idx=self.estimator.idx_eval, weighted=False),
@@ -198,7 +202,7 @@ class TrainModelCelltype(TrainModel):
             with open(fn + '_evaluation_weighted.pickle', 'wb') as f:
                 pickle.dump(obj=evaluation_weighted, file=f)
 
-    def _save_specific(self, fn: str):
+    def _save_specific(self, fn: str, **kwargs):
         """
         Save true and predicted labels on test set:
 
