@@ -359,9 +359,6 @@ class DistributedStore:
         for k, v in self.indices_global.items():
             v = v.tolist()
             idx_k = [x for x in idx if x in v]
-            print(v)
-            print(idx)
-            print(idx_k)
             if len(idx_k) > 0:
                 indices[k] = np.sort(np.array([v.index(x) for x in idx_k]))
         return indices
