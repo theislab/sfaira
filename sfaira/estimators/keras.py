@@ -397,10 +397,19 @@ class EstimatorKeras:
         elif isinstance(test_split, dict):
             in_test = np.ones((self.data.n_obs,), dtype=int) == 1
             for k, v in test_split.items():
-                if isinstance(v, list):
+                if isinstance(v, bool) or isinstance(v, int) or isinstance(v, list):
+                    v = [v]
+                if isinstance(self.data, anndata.AnnData):
+                    if k not in self.data.obs.columns:
+                        raise ValueError(f"Did not find column {k} used to define test set in self.data.")
                     in_test = np.logical_and(in_test, np.array([x in v for x in self.data.obs[k].values]))
+                elif isinstance(self.data, DistributedStore):
+                    idx = self.data.get_subset_idx_global(attr_key=k, values=v)
+                    in_test_k = np.ones((self.data.n_obs,), dtype=int) == 0
+                    in_test_k[idx] = True
+                    in_test = np.logical_and(in_test, in_test_k)
                 else:
-                    in_test = np.logical_and(in_test, self.data.obs[k].values == v)
+                    assert False
             self.idx_test = np.where(in_test)[0]
             print(f"Found {len(self.idx_test)} out of {self.data.n_obs} cells that correspond to held out data set")
             print(self.idx_test)

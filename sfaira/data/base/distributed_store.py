@@ -202,7 +202,7 @@ class DistributedStore:
             )
         return self._celltype_universe
 
-    def _get_subset_idx(self, attr_key, values: Union[str, List[str]]) -> dict:
+    def get_subset_idx(self, attr_key, values: Union[str, List[str]]) -> dict:
         """
         Get indices of subset list of adata objects based on cell-wise properties.
 
@@ -226,7 +226,7 @@ class DistributedStore:
         if not isinstance(values, list):
             values = [values]
 
-        def get_subset_idx(adata, k, dataset):
+        def get_idx(adata, k, dataset):
             # Use cell-wise annotation if data set-wide maps are ambiguous:
             # This can happen if the different cell-wise annotations are summarised as a union in .uns.
             if getattr(self._adata_ids_sfaira, k) in adata.uns.keys() and \
@@ -270,7 +270,7 @@ class DistributedStore:
             idx_old = v.tolist()
             if k not in self.adatas.keys():
                 raise ValueError(f"data set {k} queried by indices does not exist in store (.adatas)")
-            idx_new = get_subset_idx(adata=self.adatas[k], k=attr_key, dataset=k)
+            idx_new = get_idx(adata=self.adatas[k], k=attr_key, dataset=k)
             # Keep intersection of old and new hits.
             idx_new = list(set(idx_old).intersection(set(idx_new)))
             if len(idx_new) > 0:
@@ -299,13 +299,13 @@ class DistributedStore:
             - "state_exact" points to self.state_exact_obs_key
         :param values: Classes to overlap to.
         """
-        self.indices = self._get_subset_idx(attr_key=attr_key, values=values)
+        self.indices = self.get_subset_idx(attr_key=attr_key, values=values)
 
         for k in list(self.adatas.keys()):
             if k not in self.indices or self.indices[k].shape[0] == 0:  # No observations (cells) left.
                 del self.adatas[k]
 
-    def subset_cells_idx_global(self, attr_key, values: Union[str, List[str]]) -> np.ndarray:
+    def get_subset_idx_global(self, attr_key, values: Union[str, List[str]]) -> np.ndarray:
         """
         Get indices of subset list of adata objects based on cell-wise properties treating instance as single array.
 
@@ -329,7 +329,7 @@ class DistributedStore:
         :return Index vector
         """
         # Get indices of of cells in target set by file.
-        idx_by_dataset = self._get_subset_idx(attr_key=attr_key, values=values)
+        idx_by_dataset = self.get_subset_idx(attr_key=attr_key, values=values)
         # Translate file-wise indices into global index list across all data sets.
         idx = []
         counter = 0
@@ -412,4 +412,4 @@ class DistributedStore:
 
         :return: .obs data frame.
         """
-        return pd.concat([self.adatas[k].obs.iloc[v, :] for k, v in self.indices.values()], axis=0)
+        return pd.concat([self.adatas[k].obs.iloc[v, :] for k, v in self.indices.items()], axis=0)
