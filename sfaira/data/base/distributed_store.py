@@ -3,13 +3,11 @@ import numpy as np
 import os
 import pandas as pd
 import pickle
-import scipy.sparse
 from typing import Dict, List, Union
 
 from sfaira.consts import AdataIdsSfaira, OCS
 from sfaira.data.base.dataset import is_child, UNS_STRING_META_IN_OBS
 from sfaira.versions.genomes import GenomeContainer
-from sfaira.versions.metadata import CelltypeUniverse
 
 
 class DistributedStore:
@@ -341,13 +339,31 @@ class DistributedStore:
             counter += len(v)
         return indices
 
-    def global_indices_to_dict(self, idx: np.ndarray) -> dict:
-        assert np.max(idx) < self.n_obs
+    def global_indices_to_dict(self, idx: Union[np.ndarray, list]) -> dict:
+        """
+        Create a data set-resolved index vector based on a global one.
+
+        E.g.: idx=[2,5,6,7], means the 2nd, 5th..7th cell from the current selection should be yielded.
+        Assuming that .indices carries two cells in data set A and 200 in data set B, such as:
+        indices={A:[10,11], B:[1..200]}, the return value would be: {A:[11], B:[3,4,5]}.
+
+        :param idx: Index vector over .indices (treats data sets in .adata like a continuous data set).
+        :return: Index vectors by data set in a dictionary of cells matching the selection of idx in .indices.
+        """
+        assert np.max(idx) < self.n_obs, "supplied index vector exceeds number of modelled observations"
+        if isinstance(idx, np.ndarray):
+            assert len(idx.shape) == 1, idx.shape
+            assert idx.dtype == np.int
+            idx = idx.tolist()
         indices = {}
         for k, v in self.indices_global.items():
-            matched = [x in v for x in idx]
-            if np.any(matched):
-                indices[k] = np.array([v.tolist().index(x) for x in idx[matched]])[0]
+            v = v.tolist()
+            idx_k = [x for x in idx if x in v]
+            print(v)
+            print(idx)
+            print(idx_k)
+            if len(idx_k) > 0:
+                indices[k] = np.sort(np.array([v.index(x) for x in idx_k]))
         return indices
 
     def write_config(self, fn: Union[str, os.PathLike]):
@@ -413,7 +429,7 @@ class DistributedStore:
         """
         return pd.concat([self.adatas[k].obs.iloc[v, :] for k, v in self.indices.items()], axis=0)
 
-    def n_counts(self, idx: Union[np.ndarray, None] = None) -> np.ndarray:
+    def n_counts(self, idx: Union[np.ndarray, list, None] = None) -> np.ndarray:
         """
         Compute sum over features for each observation in index.
 

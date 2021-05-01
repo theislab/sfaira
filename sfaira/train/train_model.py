@@ -146,7 +146,8 @@ class TrainModelEmbedding(TrainModel):
         :return:
         """
         embedding = self.estimator.predict_embedding()
-        df_summary = self.estimator.obs_test[AdataIdsSfaira.obs_keys]
+        df_summary = self.estimator.obs_test
+        df_summary = df_summary[[k for k in df_summary.columns if k in AdataIdsSfaira.obs_keys]]
         df_summary["ncounts"] = self.n_counts(idx=self.estimator.idx_test)
         np.save(file=fn + "_embedding", arr=embedding)
         df_summary.to_csv(fn + "_covar.csv")
@@ -212,7 +213,8 @@ class TrainModelCelltype(TrainModel):
         obs = self.estimator.data.obs
         ytrue = self.estimator.ytrue()
         yhat = self.estimator.predict()
-        df_summary = self.estimator.obs_test[AdataIdsSfaira.obs_keys]
+        df_summary = self.estimator.obs_test
+        df_summary = df_summary[[k for k in df_summary.columns if k in AdataIdsSfaira.obs_keys]]
         df_summary["ncounts"] = self.n_counts(idx=self.estimator.idx_test)
         np.save(file=fn + "_ytrue", arr=ytrue)
         np.save(file=fn + "_yhat", arr=yhat)

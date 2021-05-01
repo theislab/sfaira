@@ -20,6 +20,25 @@ TODO tests from here on down require cached data for mouse lung
 """
 
 
+def test_fatal():
+    """
+    Test if basic methods abort.
+    """
+    store_path = cached_store_writing(dir_data=dir_data, dir_meta=dir_meta, assembly=MOUSE_GENOME_ANNOTATION)
+    store = DistributedStore(cache_path=store_path)
+    store.subset(attr_key="assay_sc", values=["10x sequencing"])
+    _ = store.n_obs
+    _ = store.n_vars
+    _ = store.var_names
+    _ = store.shape
+    _ = store.obs
+    _ = store.indices
+    _ = store.indices_global
+    _ = store.genome_container
+    _ = store.global_indices_to_dict(idx=[1, 3])
+    _ = store.n_counts(idx=[1, 3])
+
+
 def test_config():
     """
     Test that data set config files can be set, written and recovered.
