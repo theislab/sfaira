@@ -50,7 +50,6 @@ TOPOLOGY_CELLTYPE_MODEL = {
         "targets": TARGET_UNIVERSE
     },
     "hyper_parameters": {
-        "latent_dim": None,
         "l1_coef": 0.,
         "l2_coef": 0.,
     }
@@ -194,9 +193,10 @@ class HelperEstimatorKerasCelltype(HelperEstimatorBase):
     def init_topology(self, model_type: str, feature_space: str):
         topology = TOPOLOGY_CELLTYPE_MODEL.copy()
         topology["model_type"] = model_type
-        topology["hyper_parameters"]["latent_dim"] = (2,)
+        if model_type == "mlp":
+            topology["hyper_parameters"]["units"] = (2,)
         self.model_type = model_type
-        self.tc = TopologyContainer(topology=topology, topology_id="0.1")
+        self.tc = TopologyContainer(topology=topology, topology_id="0.0.1")
 
     def init_estimator(self):
         tc = self.tc
@@ -213,12 +213,18 @@ class HelperEstimatorKerasCelltype(HelperEstimatorBase):
             leaves = self.estimator.celltype_universe.onto_cl.get_effective_leaves(
                 x=self.data.obs["cell_ontology_class"].values
             )
+            self.nleaves = len(leaves)
             self.estimator.celltype_universe.onto_cl.leaves = leaves
+        else:
+            self.nleaves = None
 
     def basic_estimator_test(self, test_split=0.1):
         _ = self.estimator.evaluate()
         prediction_output = self.estimator.predict()
-        assert prediction_output.shape[1] == len(TARGET_UNIVERSE), prediction_output.shape
+        if isinstance(self.estimator.data, anndata.AnnData):
+            assert prediction_output.shape[1] == len(TARGET_UNIVERSE), prediction_output.shape
+        else:
+            assert prediction_output.shape[1] == self.nleaves, prediction_output.shape
         weights = self.estimator.model.training_model.get_weights()
         self.estimator.save_weights_to_cache()
         self.estimator.load_weights_from_cache()
@@ -302,14 +308,15 @@ def test_split_index_sets(data_type: str, test_split):
     if isinstance(test_estim.estimator.data, DistributedStore):
         # Prepare data set-wise index vectors that are numbered in the same way as global split index vectors.
         # See also EstimatorKeras.train and DistributedStore.subset_cells_idx_global
-        idx_raw = test_estim.estimator.data.indices_global
+        idx_raw = test_estim.estimator.data.indices_global.values()
         if isinstance(test_split, float):
             # Make sure that indices from each split are in each data set:
-            for z in [idx_train, idx_eval, idx_test]:
-                assert np.all([  # in each data set
+            for i, z in enumerate([idx_train, idx_eval, idx_test]):
+                matches = [  # in each data set
                     np.any([y in z for y in x])  # at least one match of data set to split index set
                     for x in idx_raw
-                ])
+                ]
+                assert np.all(matches), (i, matches)
         else:
             # Make sure that indices from (train, val) and test split are exclusive:
             datasets_train = np.where([  # in each data set
@@ -324,21 +331,22 @@ def test_split_index_sets(data_type: str, test_split):
                 np.any([y in idx_test for y in x])  # at least one match of data set to split index set
                 for x in idx_raw
             ])[0]
-            assert datasets_train == datasets_eval, (datasets_train, datasets_eval)
-            assert len(set(datasets_train).intersection(set(datasets_test))) == 0, (datasets_train, datasets_test)
+            assert datasets_train == datasets_eval, (datasets_train, datasets_eval, datasets_test)
+            assert len(set(datasets_train).intersection(set(datasets_test))) == 0, \
+                (datasets_train, datasets_eval, datasets_test)
     # 4) Assert that observations mapped to indices are actually unique based on expression vectors:
     # Build numpy arrays of expression input data sets from tensorflow data sets directly from estimator.
     # These data sets are the most processed transformation of the data and stand directly in concat with the model.
     t0 = time.time()
-    ds_train = test_estim.estimator._get_dataset(idx=idx_train, batch_size=128, mode='eval', shuffle_buffer_size=1,
+    ds_train = test_estim.estimator._get_dataset(idx=idx_train, batch_size=128, mode='eval', shuffle_buffer_size=0,
                                                  retrieval_batch_size=128)
     print(f"time for building training data set: {time.time() - t0}s")
     t0 = time.time()
-    ds_eval = test_estim.estimator._get_dataset(idx=idx_eval, batch_size=128, mode='eval', shuffle_buffer_size=1,
+    ds_eval = test_estim.estimator._get_dataset(idx=idx_eval, batch_size=128, mode='eval', shuffle_buffer_size=0,
                                                 retrieval_batch_size=128)
     print(f"time for building validation data set: {time.time() - t0}s")
     t0 = time.time()
-    ds_test = test_estim.estimator._get_dataset(idx=idx_test, batch_size=128, mode='eval', shuffle_buffer_size=1,
+    ds_test = test_estim.estimator._get_dataset(idx=idx_test, batch_size=128, mode='eval', shuffle_buffer_size=0,
                                                 retrieval_batch_size=128)
     print(f"time for building test data set: {time.time() - t0}s")
     x_train = []
@@ -367,27 +375,27 @@ def test_split_index_sets(data_type: str, test_split):
     assert x_test.shape[0] == len(idx_test)
     # Assert that observations are unique within partition:
     assert np.all([
-        np.sum([np.all(x_train[i] == x_train[j]) for j in range(x_train.shape[0])]) == 1
+        np.sum([np.abs(x_train[i] - x_train[j]).sum() == 0 for j in range(x_train.shape[0])]) == 1
         for i in range(x_train.shape[0])
     ])
     assert np.all([
-        np.sum([np.all(x_eval[i] == x_eval[j]) for j in range(x_eval.shape[0])]) == 1
+        np.sum([np.abs(x_eval[i] - x_eval[j]).sum() == 0 for j in range(x_eval.shape[0])]) == 1
         for i in range(x_eval.shape[0])
     ])
     assert np.all([
-        np.sum([np.all(x_test[i] == x_test[j]) for j in range(x_test.shape[0])]) == 1
+        np.sum([np.abs(x_test[i] - x_test[j]).sum() == 0 for j in range(x_test.shape[0])]) == 1
         for i in range(x_test.shape[0])
     ])
     # Assert that observations are not replicated across partitions:
     assert not np.any([
-        np.any([np.all(x_train[i] == x_eval[j]) for j in range(x_eval.shape[0])])
+        np.any([np.abs(x_train[i] - x_eval[j]).sum() == 0 for j in range(x_eval.shape[0])])
         for i in range(x_train.shape[0])
     ])
     assert not np.any([
-        np.any([np.all(x_train[i] == x_test[j]) for j in range(x_test.shape[0])])
+        np.any([np.abs(x_train[i] - x_test[j]).sum() == 0 for j in range(x_test.shape[0])])
         for i in range(x_train.shape[0])
     ])
     assert not np.any([
-        np.any([np.all(x_test[i] == x_eval[j]) for j in range(x_eval.shape[0])])
+        np.any([np.abs(x_test[i] - x_eval[j]).sum() == 0 for j in range(x_eval.shape[0])])
         for i in range(x_test.shape[0])
     ])

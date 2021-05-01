@@ -815,7 +815,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         :return:
         prediction
         """
-        if self.idx_test is None or self.idx_test.any():  # true if the array is not empty or if the passed value is None
+        if self.idx_test is None or self.idx_test.any():
             dataset = self._get_dataset(
                 idx=self.idx_test,
                 batch_size=batch_size,
@@ -834,7 +834,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         :return:
         latent space
         """
-        if self.idx_test is None or self.idx_test.any():  # true if the array is not empty or if the passed value is None
+        if self.idx_test is None or self.idx_test.any():
             dataset = self._get_dataset(
                 idx=self.idx_test,
                 batch_size=batch_size,
@@ -853,7 +853,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         :return:
         sample of latent space, mean of latent space, variance of latent space
         """
-        if self.idx_test is None or self.idx_test:  # true if the array is not empty or if the passed value is None
+        if self.idx_test is None or self.idx_test:
             dataset = self._get_dataset(
                 idx=self.idx_test,
                 batch_size=batch_size,
@@ -980,7 +980,6 @@ class EstimatorKerasCelltype(EstimatorKeras):
         self.celltype_universe = CelltypeUniverse(
             cl=OntologyCl(branch=self.topology_container.output["cl"]),
             uberon=OCS.organ,
-            organism=self.organism,
         )
         # Set leaves if they are defined in topology:
         if self.topology_container.output["targets"] is not None:
@@ -1241,8 +1240,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
                 retrieval_batch_size=128,
                 shuffle_buffer_size=0,
             )
-            steps = min(max(len(idx) // batch_size, 1), max_steps)
-            return self.model.training_model.predict(x=dataset, steps=steps)
+            return self.model.training_model.predict(x=dataset)
         else:
             return np.array([])
 
@@ -1289,8 +1287,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
                 retrieval_batch_size=128,
                 shuffle_buffer_size=0,
             )
-            steps = min(max(len(idx) // batch_size, 1), max_steps)
-            results = self.model.training_model.evaluate(x=dataset, steps=steps)
+            results = self.model.training_model.evaluate(x=dataset)
             return dict(zip(self.model.training_model.metrics_names, results))
         else:
             return {}
