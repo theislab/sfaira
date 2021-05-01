@@ -1127,7 +1127,6 @@ class EstimatorKerasCelltype(EstimatorKeras):
 
             n_features = self.data.n_vars
             n_samples = self.data.n_obs
-            n_labels = self.data.celltypes_universe.onto_cl.n_leaves
         else:
             weights, y = self._get_celltype_out(idx=idx)
             if not weighted:
@@ -1153,8 +1152,8 @@ class EstimatorKerasCelltype(EstimatorKeras):
 
             n_features = x.shape[1]
             n_samples = x.shape[0]
-            n_labels = y.shape[1]
 
+        n_labels = self.celltype_universe.onto_cl.n_leaves
         return generator, n_samples, n_features, n_labels
 
     def _get_dataset(
