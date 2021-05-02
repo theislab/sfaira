@@ -53,7 +53,7 @@ AE_TOPOLOGIES = {
     "0.4": {
         "model_type": "ae",
         "input": {
-            "genome": "Homo_sapiens.GRCh38.102",
+            "genome": "Mus_musculus.GRCm38.102",
             "genes": ["biotype", "protein_coding"],
         },
         "output": {},
