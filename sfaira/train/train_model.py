@@ -49,7 +49,7 @@ class TrainModel:
                 if adata is None:
                     adata = x
                 else:
-                    adata.concatenate(x)
+                    adata = adata.concatenate(x)
             self.data = adata
 
     @abc.abstractmethod
