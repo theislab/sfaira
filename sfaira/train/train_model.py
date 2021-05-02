@@ -226,15 +226,5 @@ class TrainModelCelltype(TrainModel):
             pickle.dump(obj=self.estimator.ontology_ids, file=f)
 
         cell_counts = obs['cell_ontology_class'].value_counts().to_dict()
-        cell_counts_leaf = cell_counts.copy()
-        for k in cell_counts.keys():
-            if k not in self.estimator.ontology_ids:
-                if k not in self.estimator.celltype_universe.onto_cl.node_ids:
-                    raise(ValueError(f"Celltype '{k}' not found in celltype universe"))
-                for leaf in self.estimator.celltype_universe.onto_cl.node_ids:
-                    if leaf not in cell_counts_leaf.keys():
-                        cell_counts_leaf[leaf] = 0
-                    cell_counts_leaf[leaf] += 1 / len(self.estimator.celltype_universe.onto_cl.node_ids)
-                del cell_counts_leaf[k]
         with open(fn + '_celltypes_valuecounts_wholedata.pickle', 'wb') as f:
-            pickle.dump(obj=[cell_counts, cell_counts_leaf], file=f)
+            pickle.dump(obj=[cell_counts], file=f)

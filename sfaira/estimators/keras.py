@@ -1013,7 +1013,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
 
     @property
     def ontology_ids(self):
-        return self.celltype_universe.onto_cl.leaves
+        return self.celltype_universe.onto_cl.convert_to_id(self.celltype_universe.onto_cl.leaves)
 
     @property
     def ontology_names(self):
