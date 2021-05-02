@@ -15,7 +15,7 @@ config_path = str(sys.argv[2])
 out_path = str(sys.argv[3])
 
 col_name_annot = "cell_ontology_class"
-cl_branch = "v2021-02-01_cl"
+cl_branch = "v2021-02-01"
 
 for f in os.listdir(config_path):
     fn = os.path.join(config_path, f)
