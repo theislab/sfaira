@@ -321,9 +321,11 @@ class DistributedStore:
         # Translate file-wise indices into global index list across all data sets.
         idx = []
         counter = 0
-        for k, v in idx_by_dataset.items():
-            idx.extend((v + counter).tolist())
-            counter += self.adatas[k].n_obs
+        for k, v in self.indices.items():
+            for x in v:
+                if k in idx_by_dataset.keys() and x in idx_by_dataset[k]:
+                    idx.append(counter)
+                counter += 1
         return np.asarray(idx)
 
     @property
