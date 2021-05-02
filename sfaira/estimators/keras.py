@@ -2,7 +2,6 @@ import abc
 import anndata
 import hashlib
 import numpy as np
-import pandas as pd
 import scipy.sparse
 try:
     import tensorflow as tf
@@ -1244,7 +1243,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
         else:
             return np.array([])
 
-    def ytrue(self, batch_size: int = 64, max_steps: int = np.inf):
+    def ytrue(self, batch_size: int = 128, max_steps: int = np.inf):
         """
         Return the true labels of the test set.
 
@@ -1258,7 +1257,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
                 shuffle_buffer_size=0,
             )
             y_true = []
-            for _, y in dataset.as_numpy_iterator():
+            for _, y, _ in dataset.as_numpy_iterator():
                 y_true.append(y)
             y_true = np.concatenate(y_true, axis=0)
             return y_true

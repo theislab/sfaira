@@ -2,7 +2,7 @@ import anndata
 import numpy as np
 import os
 
-from sfaira.data import Universe
+from sfaira.data import DistributedStore, Universe
 
 
 def simulate_anndata(genes, n_obs, targets=None, assays=None) -> anndata.AnnData:
