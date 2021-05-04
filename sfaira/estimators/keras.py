@@ -1024,17 +1024,20 @@ class EstimatorKerasCelltype(EstimatorKeras):
         def encoder(x) -> np.ndarray:
             if isinstance(x, str):
                 x = [x]
+            # Encodes unknowns to empty rows.
             idx = [
                 self.celltype_universe.onto_cl.map_to_leaves(
                     node=y,
                     return_type="idx",
                     include_self=True,
-                )
+                ) if y != self._adata_ids.unknown_celltype_identifier else np.array([])
                 for y in x
             ]
             oh = np.zeros((len(x), self.ntypes,), dtype="float32")
             for i, y in enumerate(idx):
-                oh[i, y] = 1. / len(y)
+                scale = len(y)
+                if scale > 0:
+                    oh[i, y] = 1. / scale
             return oh
 
         return encoder
@@ -1125,7 +1128,8 @@ class EstimatorKerasCelltype(EstimatorKeras):
                     x_sample = np.asarray(x_sample)
                     y_sample = onehot_encoder(z[1]["cell_ontology_class"].values)
                     for i in range(x_sample.shape[0]):
-                        yield generator_helper(x_sample[i], y_sample[i], 1.)
+                        if y_sample[i].sum() > 0:
+                            yield generator_helper(x_sample[i], y_sample[i], 1.)
 
             n_features = self.data.n_vars
             n_samples = self.data.n_obs
@@ -1150,7 +1154,8 @@ class EstimatorKerasCelltype(EstimatorKeras):
                     y_sample = y[indices[s:e], :]
                     w_sample = weights[indices[s:e]]
                     for i in range(x_sample.shape[0]):
-                        yield generator_helper(x_sample[i], y_sample[i], w_sample[i])
+                        if y_sample[i].sum() > 0:
+                            yield generator_helper(x_sample[i], y_sample[i], w_sample[i])
 
             n_features = x.shape[1]
             n_samples = x.shape[0]
@@ -1179,6 +1184,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
         """
         # This is a basic cell type prediction model estimator class, the standard generator is fine.
         def generator_helper(x_sample, y_sample, w_sample):
+            # Only yields samples with annotation, ie not unknown labels.
             if mode in ['train', 'train_val', 'eval']:
                 return x_sample, y_sample, w_sample
             else:

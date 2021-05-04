@@ -19,7 +19,7 @@ cache_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path
 
 ASSEMBLY = "Mus_musculus.GRCm38.102"
 GENES = ["ENSMUSG00000000003", "ENSMUSG00000000028"]
-TARGETS = ["T cell", "CD4-positive helper T cell", "stromal cell"]
+TARGETS = ["T cell", "CD4-positive helper T cell", "stromal cell", "UNKNOWN"]
 TARGET_UNIVERSE = ["CD4-positive helper T cell", "stromal cell"]
 ASSAYS = ["10x sequencing", "Smart-seq2"]
 
