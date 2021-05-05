@@ -1064,7 +1064,7 @@ class DatasetBase(abc.ABC):
         if not self.annotated:
             warnings.warn(f"attempted to write ontology classmaps for data set {self.id} without annotation")
         else:
-            labels_original = np.sort(np.unique(self.adata.obs[self._adata_ids.cell_types_original].values))
+            labels_original = np.sort(np.unique(self.adata.obs[self.cell_types_original_obs_key].values))
             tab = self.celltypes_universe.prepare_celltype_map_tab(
                 source=labels_original,
                 match_only=False,
