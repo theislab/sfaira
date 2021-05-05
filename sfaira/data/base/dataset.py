@@ -306,6 +306,7 @@ class DatasetBase(abc.ABC):
         for url in urls:
             if url is None:
                 continue
+            # Special case for data that is not publically available
             if url.split(",")[0] == 'private':
                 if "," in url:
                     fn = ','.join(url.split(',')[1:])
@@ -318,14 +319,19 @@ class DatasetBase(abc.ABC):
                 else:
                     warnings.warn(f"A file for dataset {self.id} is not available for automatic download, please"
                                   f"manually copy the associated file to the following location: {self.data_dir}")
-
+            # Special case for data from the synapse portal
             elif url.split(",")[0].startswith('syn'):
                 fn = ",".join(url.split(",")[1:])
                 if os.path.isfile(os.path.join(self.data_dir, fn)):
                     print(f"File {fn} already found on disk, skipping download.")
                 else:
                     self._download_synapse(url.split(",")[0], fn, **kwargs)
-
+            # Special case for public data that is labelled as not automatically downloadable
+            elif url.split(",")[0] == 'manual':
+                u = ",".join(url.split(",")[1:])
+                print(f"Data file for dataset {self.id} cannot be retreived automatically. "
+                      f"If it not yet present here: {self.data_dir} please download it from {u}")
+            # All other cases
             else:
                 url = urllib.parse.unquote(url)
                 try:

@@ -7,7 +7,7 @@ dataset_wise:
     doi:
         - "10.1016/j.neuron.2019.06.011"
     download_url_data:
-        - "http://solo.bmap.ucla.edu/shiny/webapp/session/5f3c9604a510b63f500413007f52fd8e/download/downloadData?w="
+        - "manual, http://solo.bmap.ucla.edu/shiny/webapp"
     download_url_meta:
     normalization: "raw"
     year: 2019
