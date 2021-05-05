@@ -301,7 +301,7 @@ class DatasetBase(abc.ABC):
         if not os.path.exists(os.path.join(self.data_dir_base, self.directory_formatted_doi)):
             os.makedirs(os.path.join(self.data_dir_base, self.directory_formatted_doi))
 
-        urls = self.download_url_data[0][0] + self.download_url_meta[0][0]
+        urls = self.download_url_data[0] + self.download_url_meta[0]
 
         for url in urls:
             if url is None:
