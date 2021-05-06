@@ -306,6 +306,7 @@ class DatasetBase(abc.ABC):
         for url in urls:
             if url is None:
                 continue
+            # Special case for data that is not publically available
             if url.split(",")[0] == 'private':
                 if "," in url:
                     fn = ','.join(url.split(',')[1:])
@@ -318,14 +319,23 @@ class DatasetBase(abc.ABC):
                 else:
                     warnings.warn(f"A file for dataset {self.id} is not available for automatic download, please"
                                   f"manually copy the associated file to the following location: {self.data_dir}")
-
+            # Special case for data from the synapse portal
             elif url.split(",")[0].startswith('syn'):
                 fn = ",".join(url.split(",")[1:])
                 if os.path.isfile(os.path.join(self.data_dir, fn)):
                     print(f"File {fn} already found on disk, skipping download.")
                 else:
                     self._download_synapse(url.split(",")[0], fn, **kwargs)
-
+            # Special case for public data that is labelled as not automatically downloadable
+            elif url.split(",")[0] == 'manual':
+                u = ",".join(url.split(",")[2:])
+                fn = url.split(",")[1]
+                if os.path.isfile(os.path.join(self.data_dir, fn)):
+                    print(f"File {fn} already found on disk, skipping download.")
+                else:
+                    print(f"Data file {fn} for dataset {self.id} cannot be retrieved automatically. "
+                          f"Please download it from {u} and copy to {os.path.join(self.data_dir, fn)}")
+            # All other cases
             else:
                 url = urllib.parse.unquote(url)
                 try:
@@ -1058,7 +1068,7 @@ class DatasetBase(abc.ABC):
         if not self.annotated:
             warnings.warn(f"attempted to write ontology classmaps for data set {self.id} without annotation")
         else:
-            labels_original = np.sort(np.unique(self.adata.obs[self._adata_ids.cell_types_original].values))
+            labels_original = np.sort(np.unique(self.adata.obs[self.cell_types_original_obs_key].values))
             tab = self.celltypes_universe.prepare_celltype_map_tab(
                 source=labels_original,
                 match_only=False,
