@@ -1,0 +1,17 @@
+source	target	target_id
+Endothelial	endothelial cell	CL:0000115
+Excitatory deep layer 1	excitatory neuron	CL:0008030
+Excitatory deep layer 2	excitatory neuron	CL:0008030
+Maturing excitatory	excitatory neuron	CL:0008030
+Maturing excitatory upper enriched	excitatory neuron	CL:0008030
+Migrating excitatory	excitatory neuron	CL:0008030
+IP	neural progenitor cell	CL:0011020
+Interneuron CGE	interneuron	CL:0000099
+Interneuron MGE	interneuron	CL:0000099
+Microglia	microglial cell	CL:0000129
+OPC	oligodendrocyte precursor cell	CL:0002453
+Pericyte	pericyte cell	CL:0000669
+Cycling Progenitors (G2/M phase)	neural progenitor cell	CL:0011020
+Cycling Progenitors (S phase)	neural progenitor cell	CL:0011020
+Outer Radial Glia	radial glial cell	CL:0000681
+Ventricular Radial Glia	radial glial cell	CL:0000681
