@@ -329,7 +329,7 @@ class DatasetBase(abc.ABC):
             # Special case for public data that is labelled as not automatically downloadable
             elif url.split(",")[0] == 'manual':
                 u = ",".join(url.split(",")[2:])
-                fn = url.split(",")[2]
+                fn = url.split(",")[1]
                 if os.path.isfile(os.path.join(self.data_dir, fn)):
                     print(f"File {fn} already found on disk, skipping download.")
                 else:
