@@ -9,6 +9,24 @@ def load(data_dir, **kwargs):
         17: "17th week post-fertilization human stage",
         18: "18th week post-fertilization human stage",
     }
+    ct_dict = {
+        "End": "Endothelial",
+        "ExDp1": "Excitatory deep layer 1",
+        "ExDp2": "Excitatory deep layer 2",
+        "ExM": "Maturing excitatory",
+        "ExM-U": "Maturing excitatory upper enriched",
+        "ExN": "Migrating excitatory",
+        "IP": "IP",
+        "InCGE": "Interneuron CGE",
+        "InMGE": "Interneuron MGE",
+        "Mic": "Microglia",
+        "OPC": "OPC",
+        "Per": "Pericyte",
+        "PgG2M": "Cycling Progenitors (G2/M phase)",
+        "PgS": "Cycling Progenitors (S phase)",
+        "oRG": "Outer Radial Glia",
+        "vRG": "Ventricular Radial Glia",
+    }
 
     import anndata2ri
     from rpy2.robjects import r
@@ -29,5 +47,6 @@ def load(data_dir, **kwargs):
     adata = adata[obs.index.tolist()].copy()
     adata.obs = obs
     shutil.rmtree(fn_tmp)
-    adata.obs['DevStage'] = [age_dict[i] for i in adata.obs['Gestation_week']]
+    adata.obs['devstage'] = [age_dict[i] for i in adata.obs['Gestation_week']]
+    adata.obs['celltype'] = [ct_dict[i] for i in adata.obs['Cluster']]
     return adata
