@@ -328,9 +328,13 @@ class DatasetBase(abc.ABC):
                     self._download_synapse(url.split(",")[0], fn, **kwargs)
             # Special case for public data that is labelled as not automatically downloadable
             elif url.split(",")[0] == 'manual':
-                u = ",".join(url.split(",")[1:])
-                print(f"Data file for dataset {self.id} cannot be retreived automatically. "
-                      f"If it not yet present here: {self.data_dir} please download it from {u}")
+                u = ",".join(url.split(",")[2:])
+                fn = url.split(",")[2]
+                if os.path.isfile(os.path.join(self.data_dir, fn)):
+                    print(f"File {fn} already found on disk, skipping download.")
+                else:
+                    print(f"Data file {fn} for dataset {self.id} cannot be retrieved automatically. "
+                          f"Please download it from {u} and copy to {os.path.join(self.data_dir, fn)}")
             # All other cases
             else:
                 url = urllib.parse.unquote(url)
