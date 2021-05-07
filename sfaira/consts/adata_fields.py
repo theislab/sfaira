@@ -13,8 +13,8 @@ class AdataIds:
     assay_sc: str
     author: str
     cell_types_original: str
-    cell_ontology_class: str
-    cell_ontology_id: str
+    cellontology_class: str
+    cellontology_id: str
     development_stage: str
     disease: str
     doi: str
@@ -79,8 +79,8 @@ class AdataIdsSfaira(AdataIds):
         self.bio_sample = "bio_sample"
         self.cell_line = "cell_line"
         self.cell_types_original = "cell_types_original"
-        self.cell_ontology_class = "cell_ontology_class"
-        self.cell_ontology_id = "cell_ontology_id"
+        self.cellontology_class = "cell_ontology_class"
+        self.cellontology_id = "cell_ontology_id"
         self.default_embedding = "default_embedding"
         self.disease = "disease"
         self.doi = "doi"
@@ -175,8 +175,8 @@ class AdataIdsCellxgene(AdataIds):
         self.assay_sc = "assay"
         self.cell_types_original = "free_annotation"  # TODO "free_annotation" not always given
         # TODO: -> This will break streamlining though if self.cell_types_original is the same value as self.cell_ontology_class!!
-        self.cell_ontology_class = "cell_type"
-        self.cell_ontology_id = "cell_type_ontology_term_id"
+        self.cellontology_class = "cell_type"
+        self.cellontology_id = "cell_type_ontology_term_id"
         self.default_embedding = "default_embedding"
         self.doi = "preprint_doi"
         self.disease = "disease"

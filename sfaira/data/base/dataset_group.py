@@ -1072,7 +1072,7 @@ class DatasetSuperGroup:
             self._adata_ids.author,
             self._adata_ids.cell_line,
             self._adata_ids.dataset,
-            self._adata_ids.cell_ontology_class,
+            self._adata_ids.cellontology_class,
             self._adata_ids.development_stage,
             self._adata_ids.normalization,
             self._adata_ids.organ,

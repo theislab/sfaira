@@ -709,7 +709,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
 
         elif mode == 'gradient_method':  # TODO depreceate this code
             # Prepare data reading according to whether anndata is backed or not:
-            cell_to_class = self._get_class_dict(obs_key=self._adata_ids.cell_ontology_class)
+            cell_to_class = self._get_class_dict(obs_key=self._adata_ids.cellontology_class)
             if self.using_store:
                 n_features = self.data.n_vars
                 generator_raw = self.data.generator(
@@ -737,12 +737,12 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                     for i in idx:
                         x_sample = self.data.X[i, :].toarray().flatten() if sparse else self.data.X[i, :].flatten()
                         sf_sample = prepare_sf(x=x_sample)[0]
-                        y_sample = self.data.obs[self._adata_ids.cell_ontology_class][i]
+                        y_sample = self.data.obs[self._adata_ids.cellontology_class][i]
                         yield (x_sample, sf_sample), (x, cell_to_class[y_sample])
             else:
                 x = self._prepare_data_matrix(idx=idx)
                 sf = prepare_sf(x=x)
-                y = self.data.obs[self._adata_ids.cell_ontology_class][idx]
+                y = self.data.obs[self._adata_ids.cellontology_class][idx]
                 # for gradients per celltype in compute_gradients_input()
                 n_features = x.shape[1]
 
@@ -924,7 +924,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         )
 
         if per_celltype:
-            cell_to_id = self._get_class_dict(obs_key=self._adata_ids.cell_ontology_class)
+            cell_to_id = self._get_class_dict(obs_key=self._adata_ids.cellontology_class)
             cell_names = cell_to_id.keys()
             cell_id = cell_to_id.values()
             id_to_cell = dict([(key, value) for (key, value) in zip(cell_id, cell_names)])
@@ -1020,7 +1020,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
                 x not in [
                     self._adata_ids.unknown_celltype_identifier,
                     self._adata_ids.not_a_cell_celltype_identifier,
-                ] for x in self.data.obs[self._adata_ids.cell_ontology_class].values
+                ] for x in self.data.obs[self._adata_ids.cellontology_class].values
             ])[0], :]
         else:
             assert False
@@ -1112,7 +1112,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
         onehot_encoder = self._one_hot_encoder()
         y = np.concatenate([
             onehot_encoder(z)
-            for z in self.data.obs[self._adata_ids.cell_ontology_class].values[idx].tolist()
+            for z in self.data.obs[self._adata_ids.cellontology_class].values[idx].tolist()
         ], axis=0)
         # Distribute aggregated class weight for computation of weights:
         freq = np.mean(y / np.sum(y, axis=1, keepdims=True), axis=0, keepdims=True)
