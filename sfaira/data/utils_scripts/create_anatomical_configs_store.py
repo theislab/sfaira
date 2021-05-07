@@ -49,7 +49,6 @@ configs_to_write = {
         "trachea",
         "ureter",
         "urinary bladder",
-        "uterine cervix",
         "uterus",
         "vault of skull",
     ],

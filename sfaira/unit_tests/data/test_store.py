@@ -1,5 +1,6 @@
 import numpy as np
 import os
+import pandas as pd
 import pytest
 import time
 from typing import List
@@ -10,9 +11,10 @@ from sfaira.unit_tests.utils import cached_store_writing
 
 
 MOUSE_GENOME_ANNOTATION = "Mus_musculus.GRCm38.102"
+HUMAN_GENOME_ANNOTATION = "Homo_sapiens.GRCh38.102"
 
 dir_data = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_data")
-dir_meta = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_data/meta")
+dir_meta = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_data", "meta")
 
 
 """
@@ -26,6 +28,7 @@ def test_fatal():
     """
     store_path = cached_store_writing(dir_data=dir_data, dir_meta=dir_meta, assembly=MOUSE_GENOME_ANNOTATION)
     store = DistributedStore(cache_path=store_path)
+    store.subset(attr_key="organism", values=["mouse"])
     store.subset(attr_key="assay_sc", values=["10x sequencing"])
     _ = store.n_obs
     _ = store.n_vars
@@ -35,8 +38,30 @@ def test_fatal():
     _ = store.indices
     _ = store.indices_global
     _ = store.genome_container
-    _ = store.global_indices_to_dict(idx=[1, 3])
     _ = store.n_counts(idx=[1, 3])
+
+
+def test_adata_sliced():
+    """
+    Test if basic methods abort.
+    """
+    store_path = cached_store_writing(dir_data=dir_data, dir_meta=dir_meta, assembly=HUMAN_GENOME_ANNOTATION,
+                                      organism="human", organ="lung")
+    store = DistributedStore(cache_path=store_path)
+    n_obs_raw = store.n_obs
+    slice0 = store.adatas_sliced
+    store.subset(attr_key="organism", values="human")
+    store.subset(attr_key="organ", values="lung")
+    slice1 = store.adatas_sliced
+    slice2 = store.adatas_sliced_subset(idx=[0, 7, store.n_obs - 1])
+    slice3 = store.adatas_sliced_subset(idx=[0, 8, 14, 30, store.n_obs - 2])
+    assert np.sum([v.shape[0] for v in slice0.values()]) == n_obs_raw, slice0.values()
+    assert np.sum([v.shape[0] for v in slice1.values()]) == store.n_obs, slice1.values()
+    assert np.sum([v.shape[0] for v in slice2.values()]) == 3, slice2.values()
+    assert np.sum([v.shape[0] for v in slice3.values()]) == 5, slice3.values()
+    assert np.all(pd.concat([v.obs for v in slice1.values()])["organism"].values == "human")
+    assert np.all(pd.concat([v.obs for v in slice2.values()])["organism"].values == "human")
+    assert np.all(pd.concat([v.obs for v in slice3.values()])["organism"].values == "human")
 
 
 def test_config():
@@ -46,6 +71,7 @@ def test_config():
     store_path = cached_store_writing(dir_data=dir_data, dir_meta=dir_meta, assembly=MOUSE_GENOME_ANNOTATION)
     config_path = os.path.join(store_path, "config_lung")
     store = DistributedStore(cache_path=store_path)
+    store.subset(attr_key="organism", values=["mouse"])
     store.subset(attr_key="assay_sc", values=["10x sequencing"])
     store.write_config(fn=config_path)
     store2 = DistributedStore(cache_path=store_path)
@@ -54,41 +80,20 @@ def test_config():
     assert np.all([np.all(store.indices[k] == store2.indices[k]) for k in store.indices.keys()])
 
 
-def test_type_targets():
-    """
-    Test that target leave nodes can be set, written and recovered.
-    """
-    store_path = cached_store_writing(dir_data=dir_data, dir_meta=dir_meta, assembly=MOUSE_GENOME_ANNOTATION)
-    target_path = os.path.join(store_path, "lung")
-    store = DistributedStore(cache_path=store_path)
-    observed_nodes = np.unique(np.concatenate([
-        x.obs[store._adata_ids_sfaira.cell_ontology_class]
-        for x in store.adatas.values()
-    ])).tolist()
-    leaves_all = store.celltypes_universe.onto_cl.leaves
-    effective_leaves = store.celltypes_universe.onto_cl.get_effective_leaves(x=observed_nodes)
-    store.celltypes_universe.onto_cl.leaves = effective_leaves
-    leaves1 = store.celltypes_universe.onto_cl.leaves
-    store.celltypes_universe.write_target_universe(fn=target_path, x=effective_leaves)
-    store2 = DistributedStore(cache_path=store_path)
-    store2.celltypes_universe.load_target_universe(fn=target_path)
-    leaves2 = store2.celltypes_universe.onto_cl.leaves
-    assert len(leaves_all) > len(leaves1)
-    assert len(set(leaves1).union(set(leaves2))) == len(leaves1)
-    assert np.all([x in leaves1 for x in leaves2])
-
-
-@pytest.mark.parametrize("idx", [None, np.concatenate([np.arange(150, 200), np.array([1, 100, 2003, 33])])])
-@pytest.mark.parametrize("batch_size", [1, 10])
+@pytest.mark.parametrize("idx", [np.array([2, 1020, 3, 50000, 50100]),
+                                 np.concatenate([np.arange(150, 200), np.array([1, 100, 2003, 33])])])
+@pytest.mark.parametrize("batch_size", [1, 7])
 @pytest.mark.parametrize("obs_keys", [[], ["cell_ontology_class"]])
-@pytest.mark.parametrize("gc", [(None, {}), (MOUSE_GENOME_ANNOTATION, {"biotype": "protein_coding"})])
-def test_generator_shapes(idx, batch_size: int, obs_keys: List[str], gc: tuple):
+@pytest.mark.parametrize("gc", [(None, {}), (HUMAN_GENOME_ANNOTATION, {"biotype": "protein_coding"})])
+@pytest.mark.parametrize("randomized_batch_access", [True, False])
+def test_generator_shapes(idx, batch_size: int, obs_keys: List[str], gc: tuple, randomized_batch_access: bool):
     """
     Test generators queries do not throw errors and that output shapes are correct.
     """
     assembly, subset = gc
     store_path = cached_store_writing(dir_data=dir_data, dir_meta=dir_meta, assembly=MOUSE_GENOME_ANNOTATION)
     store = DistributedStore(cache_path=store_path)
+    store.subset(attr_key="organism", values=["human"])
     if assembly is not None:
         gc = GenomeContainer(assembly=assembly)
         gc.subset(**subset)
@@ -97,6 +102,7 @@ def test_generator_shapes(idx, batch_size: int, obs_keys: List[str], gc: tuple):
         idx=idx,
         batch_size=batch_size,
         obs_keys=obs_keys,
+        randomized_batch_access=randomized_batch_access,
     )
     nobs = len(idx) if idx is not None else store.n_obs
     batch_sizes = []
@@ -104,7 +110,7 @@ def test_generator_shapes(idx, batch_size: int, obs_keys: List[str], gc: tuple):
     for i, z in enumerate(g()):
         x_i, obs_i = z
         assert x_i.shape[0] == obs_i.shape[0]
-        if i == 0:  # First batch hast correct shape, last batch not necessarily!
+        if i == 0:
             x = x_i
             obs = obs_i
         batch_sizes.append(x_i.shape[0])
@@ -112,10 +118,6 @@ def test_generator_shapes(idx, batch_size: int, obs_keys: List[str], gc: tuple):
     print(f"time for iterating over generator:"
           f" {tdelta}s for {np.sum(batch_sizes)} cells in {len(batch_sizes)} batches,"
           f" {tdelta / len(batch_sizes)}s per batch.")
-    # Only the last batch in each data set can be of different size:
-    assert np.sum(batch_sizes != batch_size) <= len(store.adatas.keys())
-    assert x.shape[0] == batch_size, (x.shape, batch_size)
-    assert obs.shape[0] == batch_size, (obs.shape, batch_size)
     assert x.shape[1] == store.n_vars, (x.shape, store.n_vars)
     assert obs.shape[1] == len(obs_keys), (x.shape, obs_keys)
     assert np.sum(batch_sizes) == nobs, (x.shape, obs_keys)

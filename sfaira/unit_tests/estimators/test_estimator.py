@@ -13,12 +13,18 @@ from sfaira.versions.topologies import TopologyContainer
 from sfaira.unit_tests.utils import cached_store_writing, simulate_anndata
 
 dir_data = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_data")
-dir_meta = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_data/meta")
+dir_meta = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_data", "meta")
 cache_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))),
                          "cache", "genomes")
 
-ASSEMBLY = "Mus_musculus.GRCm38.102"
-GENES = ["ENSMUSG00000000003", "ENSMUSG00000000028"]
+ASSEMBLY = {
+    "mouse": "Mus_musculus.GRCm38.102",
+    "human": "Homo_sapiens.GRCh38.102",
+}
+GENES = {
+    "mouse": ["ENSMUSG00000000003", "ENSMUSG00000000028"],
+    "human": ["ENSG00000000003", "ENSG00000000005"],
+}
 TARGETS = ["T cell", "CD4-positive helper T cell", "stromal cell", "UNKNOWN"]
 TARGET_UNIVERSE = ["CD4-positive helper T cell", "stromal cell"]
 ASSAYS = ["10x sequencing", "Smart-seq2"]
@@ -27,8 +33,8 @@ ASSAYS = ["10x sequencing", "Smart-seq2"]
 TOPOLOGY_EMBEDDING_MODEL = {
     "model_type": None,
     "input": {
-        "genome": ASSEMBLY,
-        "genes": ["ensg", GENES],
+        "genome": None,
+        "genes": None,
     },
     "output": {},
     "hyper_parameters": {
@@ -42,8 +48,8 @@ TOPOLOGY_EMBEDDING_MODEL = {
 TOPOLOGY_CELLTYPE_MODEL = {
     "model_type": None,
     "input": {
-        "genome": ASSEMBLY,
-        "genes": ["ensg", GENES],
+        "genome": None,
+        "genes": None,
     },
     "output": {
         "cl": "v2021-02-01",
@@ -84,13 +90,16 @@ class HelperEstimatorBase:
         """
         self.data = self._simulate()
 
-    def load_store(self):
-        store_path = cached_store_writing(dir_data=dir_data, dir_meta=dir_meta, assembly=ASSEMBLY)
+    def load_store(self, organism, organ):
+        store_path = cached_store_writing(dir_data=dir_data, dir_meta=dir_meta, assembly=ASSEMBLY[organism],
+                                          organism=organism, organ=organ)
         store = DistributedStore(cache_path=store_path)
+        store.subset(attr_key="organism", values=organism)
+        store.subset(attr_key="organ", values=organ)
         self.data = store
 
     @abc.abstractmethod
-    def init_topology(self, model_type: str, feature_space: str):
+    def init_topology(self, model_type: str, feature_space: str, organism: str):
         pass
 
     @abc.abstractmethod
@@ -100,7 +109,7 @@ class HelperEstimatorBase:
         """
         pass
 
-    def estimator_train(self, test_split):
+    def estimator_train(self, test_split, randomized_batch_access):
         self.estimator.init_model()
         self.estimator.train(
             optimizer="adam",
@@ -111,27 +120,29 @@ class HelperEstimatorBase:
             test_split=test_split,
             validation_batch_size=4,
             max_validation_steps=1,
-            shuffle_buffer_size=10,
+            shuffle_buffer_size=None if randomized_batch_access else 10,
             cache_full=False,
+            randomized_batch_access=randomized_batch_access,
         )
 
     @abc.abstractmethod
     def basic_estimator_test(self, test_split):
         pass
 
-    def load_estimator(self, model_type, data_type, feature_space, test_split):
-        self.init_topology(model_type=model_type, feature_space=feature_space)
+    def load_estimator(self, model_type, data_type, feature_space, test_split, organism="human", organ="lung",
+                       randomized_batch_access=False):
+        self.init_topology(model_type=model_type, feature_space=feature_space, organism=organism)
         np.random.seed(1)
         if data_type == "adata":
             self.load_adata()
         else:
-            self.load_store()
+            self.load_store(organism=organism, organ=organ)
         self.init_estimator()
-        self.estimator_train(test_split=test_split)
+        self.estimator_train(test_split=test_split, randomized_batch_access=randomized_batch_access)
 
     def fatal_estimator_test(self, model_type, data_type, test_split=0.1, feature_space="small"):
         self.load_estimator(model_type=model_type, data_type=data_type, feature_space=feature_space,
-                            test_split=test_split)
+                            test_split=test_split, randomized_batch_access=False)
         self.basic_estimator_test()
 
 
@@ -141,14 +152,17 @@ class HelperEstimatorKerasEmbedding(HelperEstimatorBase):
     model_type: str
     tc: TopologyContainer
 
-    def init_topology(self, model_type: str, feature_space: str):
+    def init_topology(self, model_type: str, feature_space: str, organism: str):
         topology = TOPOLOGY_EMBEDDING_MODEL.copy()
         if feature_space == "full":
             # Read 500 genes (not full protein coding) to compromise between being able to distinguish observations
             # and reducing run time of unit tests.
-            tab = pd.read_csv(os.path.join(cache_dir, ASSEMBLY + ".csv"))
+            tab = pd.read_csv(os.path.join(cache_dir, ASSEMBLY[organism] + ".csv"))
             genes_full = tab.loc[tab["gene_biotype"].values == "protein_coding", "gene_id"].values[:500].tolist()
             topology["input"]["genes"] = ["ensg", genes_full]
+        else:
+            topology["input"]["genes"] = ["ensg", GENES[organism]]
+        topology["input"]["genome"] = ASSEMBLY[organism]
         topology["model_type"] = model_type
         if model_type == "linear":
             topology["hyper_parameters"]["latent_dim"] = 2
@@ -190,9 +204,11 @@ class HelperEstimatorKerasCelltype(HelperEstimatorBase):
     model_type: str
     tc: TopologyContainer
 
-    def init_topology(self, model_type: str, feature_space: str):
+    def init_topology(self, model_type: str, feature_space: str, organism: str):
         topology = TOPOLOGY_CELLTYPE_MODEL.copy()
         topology["model_type"] = model_type
+        topology["input"]["genome"] = ASSEMBLY[organism]
+        topology["input"]["genes"] = ["ensg", GENES[organism]]
         if model_type == "mlp":
             topology["hyper_parameters"]["units"] = (2,)
         self.model_type = model_type
@@ -211,7 +227,8 @@ class HelperEstimatorKerasCelltype(HelperEstimatorBase):
         )
         if isinstance(self.data, DistributedStore):
             leaves = self.estimator.celltype_universe.onto_cl.get_effective_leaves(
-                x=self.data.obs["cell_ontology_class"].values
+                x=[x for x in self.data.obs["cell_ontology_class"].values
+                   if x != self.data._adata_ids_sfaira.unknown_celltype_identifier]
             )
             self.nleaves = len(leaves)
             self.estimator.celltype_universe.onto_cl.leaves = leaves
@@ -247,14 +264,16 @@ def test_for_fatal_linear(data_type):
     test_estim.fatal_estimator_test(model_type="linear", data_type=data_type)
 
 
-def test_for_fatal_ae():
+@pytest.mark.parametrize("data_type", ["adata"])
+def test_for_fatal_ae(data_type):
     test_estim = HelperEstimatorKerasEmbedding()
-    test_estim.fatal_estimator_test(model_type="ae", data_type="adata")
+    test_estim.fatal_estimator_test(model_type="ae", data_type=data_type)
 
 
-def test_for_fatal_vae():
+@pytest.mark.parametrize("data_type", ["adata"])
+def test_for_fatal_vae(data_type):
     test_estim = HelperEstimatorKerasEmbedding()
-    test_estim.fatal_estimator_test(model_type="vae", data_type="adata")
+    test_estim.fatal_estimator_test(model_type="vae", data_type=data_type)
 
 
 # Test cell type predictor models:
@@ -266,17 +285,22 @@ def test_for_fatal_mlp(data_type):
     test_estim.fatal_estimator_test(model_type="mlp", data_type=data_type)
 
 
-def test_for_fatal_marker():
+@pytest.mark.parametrize("data_type", ["adata"])
+def test_for_fatal_marker(data_type):
     test_estim = HelperEstimatorKerasCelltype()
-    test_estim.fatal_estimator_test(model_type="marker", data_type="adata")
+    test_estim.fatal_estimator_test(model_type="marker", data_type=data_type)
 
 
 # Test index sets
 
 
-@pytest.mark.parametrize("data_type", ["adata", "store"])
+@pytest.mark.parametrize("organism", ["human"])
+@pytest.mark.parametrize("organ", ["lung"])
+#@pytest.mark.parametrize("data_type", ["adata", "store"])
+@pytest.mark.parametrize("data_type", ["store"])
+@pytest.mark.parametrize("randomized_batch_access", [False, True])
 @pytest.mark.parametrize("test_split", [0.3, {"assay_sc": "10x sequencing"}])
-def test_split_index_sets(data_type: str, test_split):
+def test_split_index_sets(organism: str, organ: str, data_type: str, randomized_batch_access: bool, test_split):
     """
     Test that train, val, test split index sets are correct:
 
@@ -289,7 +313,8 @@ def test_split_index_sets(data_type: str, test_split):
     # Need full feature space here because observations are not necessarily different in small model testing feature
     # space with only two genes:
     t0 = time.time()
-    test_estim.load_estimator(model_type="linear", data_type=data_type, test_split=test_split, feature_space="full")
+    test_estim.load_estimator(model_type="linear", data_type=data_type, test_split=test_split, feature_space="full",
+                              organism=organism, organ=organ, randomized_batch_access=randomized_batch_access)
     print(f"time for running estimator test: {time.time() - t0}s")
     idx_train = test_estim.estimator.idx_train
     idx_eval = test_estim.estimator.idx_eval
@@ -331,23 +356,30 @@ def test_split_index_sets(data_type: str, test_split):
                 np.any([y in idx_test for y in x])  # at least one match of data set to split index set
                 for x in idx_raw
             ])[0]
-            assert datasets_train == datasets_eval, (datasets_train, datasets_eval, datasets_test)
+            assert np.all(datasets_train == datasets_eval), (datasets_train, datasets_eval, datasets_test)
             assert len(set(datasets_train).intersection(set(datasets_test))) == 0, \
                 (datasets_train, datasets_eval, datasets_test)
     # 4) Assert that observations mapped to indices are actually unique based on expression vectors:
     # Build numpy arrays of expression input data sets from tensorflow data sets directly from estimator.
     # These data sets are the most processed transformation of the data and stand directly in concat with the model.
+    shuffle_buffer_size = None if randomized_batch_access else 2
     t0 = time.time()
-    ds_train = test_estim.estimator._get_dataset(idx=idx_train, batch_size=128, mode='eval', shuffle_buffer_size=0,
-                                                 retrieval_batch_size=128)
+    ds_train = test_estim.estimator._get_dataset(idx=idx_train, batch_size=1024, mode='eval',
+                                                 shuffle_buffer_size=shuffle_buffer_size,
+                                                 retrieval_batch_size=128,
+                                                 randomized_batch_access=randomized_batch_access)
     print(f"time for building training data set: {time.time() - t0}s")
     t0 = time.time()
-    ds_eval = test_estim.estimator._get_dataset(idx=idx_eval, batch_size=128, mode='eval', shuffle_buffer_size=0,
-                                                retrieval_batch_size=128)
+    ds_eval = test_estim.estimator._get_dataset(idx=idx_eval, batch_size=1024, mode='eval',
+                                                shuffle_buffer_size=shuffle_buffer_size,
+                                                retrieval_batch_size=128,
+                                                randomized_batch_access=randomized_batch_access)
     print(f"time for building validation data set: {time.time() - t0}s")
     t0 = time.time()
-    ds_test = test_estim.estimator._get_dataset(idx=idx_test, batch_size=128, mode='eval', shuffle_buffer_size=0,
-                                                retrieval_batch_size=128)
+    ds_test = test_estim.estimator._get_dataset(idx=idx_test, batch_size=1024, mode='eval',
+                                                shuffle_buffer_size=shuffle_buffer_size,
+                                                retrieval_batch_size=128,
+                                                randomized_batch_access=randomized_batch_access)
     print(f"time for building test data set: {time.time() - t0}s")
     x_train = []
     x_eval = []
@@ -370,32 +402,34 @@ def test_split_index_sets(data_type: str, test_split):
     # Validate size of recovered numpy data sets:
     print(f"shapes received {(x_train.shape[0], x_eval.shape[0], x_test.shape[0])}")
     print(f"shapes expected {(len(idx_train), len(idx_eval), len(idx_test))}")
+    assert x_train.shape[0] + x_eval.shape[0] + x_test.shape[0] == test_estim.data.n_obs
+    assert len(idx_train) + len(idx_eval) + len(idx_test) == test_estim.data.n_obs
     assert x_train.shape[0] == len(idx_train)
     assert x_eval.shape[0] == len(idx_eval)
     assert x_test.shape[0] == len(idx_test)
     # Assert that observations are unique within partition:
     assert np.all([
-        np.sum([np.abs(x_train[i] - x_train[j]).sum() == 0 for j in range(x_train.shape[0])]) == 1
+        np.sum(np.abs(x_train[[i], :] - x_train).sum(axis=1) == 0) == 1
         for i in range(x_train.shape[0])
     ])
     assert np.all([
-        np.sum([np.abs(x_eval[i] - x_eval[j]).sum() == 0 for j in range(x_eval.shape[0])]) == 1
+        np.sum(np.abs(x_eval[[i], :] - x_eval).sum(axis=1) == 0) == 1
         for i in range(x_eval.shape[0])
     ])
     assert np.all([
-        np.sum([np.abs(x_test[i] - x_test[j]).sum() == 0 for j in range(x_test.shape[0])]) == 1
+        np.sum(np.abs(x_test[[i], :] - x_test).sum(axis=1) == 0) == 1
         for i in range(x_test.shape[0])
     ])
     # Assert that observations are not replicated across partitions:
     assert not np.any([
-        np.any([np.abs(x_train[i] - x_eval[j]).sum() == 0 for j in range(x_eval.shape[0])])
+        np.any(np.abs(x_train[[i], :] - x_eval).sum(axis=1) == 0)
         for i in range(x_train.shape[0])
     ])
     assert not np.any([
-        np.any([np.abs(x_train[i] - x_test[j]).sum() == 0 for j in range(x_test.shape[0])])
+        np.any(np.abs(x_train[[i], :] - x_test).sum(axis=1) == 0)
         for i in range(x_train.shape[0])
     ])
     assert not np.any([
-        np.any([np.abs(x_test[i] - x_eval[j]).sum() == 0 for j in range(x_eval.shape[0])])
-        for i in range(x_test.shape[0])
+        np.any(np.abs(x_eval[[i], :] - x_test).sum(axis=1) == 0)
+        for i in range(x_eval.shape[0])
     ])

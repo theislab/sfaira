@@ -185,6 +185,7 @@ class EstimatorKeras:
             cache_full: bool,
             weighted: bool,
             retrieval_batch_size: int,
+            randomized_batch_access: bool,
     ):
         pass
 
@@ -270,6 +271,54 @@ class EstimatorKeras:
             metrics=self._metrics()
         )
 
+    def split_train_val_test(self, val_split: float, test_split: Union[float, dict]):
+        # Split training and evaluation data.
+        np.random.seed(1)
+        all_idx = np.arange(0, self.data.n_obs)  # n_obs is both a property of AnnData and DistributedStore
+        if isinstance(test_split, float) or isinstance(test_split, int):
+            self.idx_test = np.sort(np.random.choice(
+                a=all_idx,
+                size=round(self.data.n_obs * test_split),
+                replace=False,
+            ))
+        elif isinstance(test_split, dict):
+            in_test = np.ones((self.data.n_obs,), dtype=int) == 1
+            for k, v in test_split.items():
+                if isinstance(v, bool) or isinstance(v, int) or isinstance(v, list):
+                    v = [v]
+                if isinstance(self.data, anndata.AnnData):
+                    if k not in self.data.obs.columns:
+                        raise ValueError(f"Did not find column {k} used to define test set in self.data.")
+                    in_test = np.logical_and(in_test, np.array([x in v for x in self.data.obs[k].values]))
+                elif isinstance(self.data, DistributedStore):
+                    idx = self.data.get_subset_idx_global(attr_key=k, values=v)
+                    in_test_k = np.ones((self.data.n_obs,), dtype=int) == 0
+                    in_test_k[idx] = True
+                    in_test = np.logical_and(in_test, in_test_k)
+                else:
+                    assert False
+            self.idx_test = np.sort(np.where(in_test)[0])
+            print(f"Found {len(self.idx_test)} out of {self.data.n_obs} cells that correspond to held out data set")
+            print(self.idx_test)
+        else:
+            raise ValueError("type of test_split %s not recognized" % type(test_split))
+        idx_train_eval = np.array([x for x in all_idx if x not in self.idx_test])
+        np.random.seed(1)
+        self.idx_eval = np.sort(np.random.choice(
+            a=idx_train_eval,
+            size=round(len(idx_train_eval) * val_split),
+            replace=False
+        ))
+        self.idx_train = np.sort([x for x in idx_train_eval if x not in self.idx_eval])
+
+        # Check that none of the train, test, eval partitions are empty
+        if not len(self.idx_test):
+            warnings.warn("Test partition is empty!")
+        if not len(self.idx_eval):
+            raise ValueError("The evaluation dataset is empty.")
+        if not len(self.idx_train):
+            raise ValueError("The train dataset is empty.")
+
     def train(
             self,
             optimizer: str,
@@ -281,12 +330,14 @@ class EstimatorKeras:
             test_split: Union[float, dict] = 0.,
             validation_batch_size: int = 256,
             max_validation_steps: Union[int, None] = 10,
-            cache_full: bool = False,
             patience: int = 20,
             lr_schedule_min_lr: float = 1e-5,
             lr_schedule_factor: float = 0.2,
             lr_schedule_patience: int = 5,
-            shuffle_buffer_size: int = int(1e4),
+            shuffle_buffer_size: Union[int, None] = None,
+            cache_full: bool = False,
+            randomized_batch_access: bool = True,
+            retrieval_batch_size: int = 512,
             log_dir: Union[str, None] = None,
             callbacks: Union[list, None] = None,
             weighted: bool = False,
@@ -313,6 +364,11 @@ class EstimatorKeras:
             when plateau is reached.
         :param lr_schedule_patience: Patience for learning rate reduction in learning rate reduction schedule.
         :param shuffle_buffer_size: tf.Dataset.shuffle(): buffer_size argument.
+        :param cache_full: Whether to use tensorflow caching on full training and validation data.
+        :param randomized_batch_access: Whether to randomize batches during reading (in generator). Lifts necessity of
+            using a shuffle buffer on generator, however, batch composition stays unchanged over epochs unless there
+            is overhangs in retrieval_batch_size in the raw data files, which often happens and results in modest
+            changes in batch composition.
         :param log_dir: Directory to save tensorboard callback to. Disabled if None.
         :param callbacks: Add additional callbacks to the training call
         :param weighted:
@@ -384,69 +440,34 @@ class EstimatorKeras:
             # callbacks needs to be a list
             cbs += callbacks
 
-        # Split training and evaluation data.
-        np.random.seed(1)
-        all_idx = np.arange(0, self.data.n_obs)  # n_obs is both a property of AnnData and DistributedStore
-        if isinstance(test_split, float) or isinstance(test_split, int):
-            self.idx_test = np.random.choice(
-                a=all_idx,
-                size=round(self.data.n_obs * test_split),
-                replace=False,
-            )
-        elif isinstance(test_split, dict):
-            in_test = np.ones((self.data.n_obs,), dtype=int) == 1
-            for k, v in test_split.items():
-                if isinstance(v, bool) or isinstance(v, int) or isinstance(v, list):
-                    v = [v]
-                if isinstance(self.data, anndata.AnnData):
-                    if k not in self.data.obs.columns:
-                        raise ValueError(f"Did not find column {k} used to define test set in self.data.")
-                    in_test = np.logical_and(in_test, np.array([x in v for x in self.data.obs[k].values]))
-                elif isinstance(self.data, DistributedStore):
-                    idx = self.data.get_subset_idx_global(attr_key=k, values=v)
-                    in_test_k = np.ones((self.data.n_obs,), dtype=int) == 0
-                    in_test_k[idx] = True
-                    in_test = np.logical_and(in_test, in_test_k)
-                else:
-                    assert False
-            self.idx_test = np.where(in_test)[0]
-            print(f"Found {len(self.idx_test)} out of {self.data.n_obs} cells that correspond to held out data set")
-            print(self.idx_test)
-        else:
-            raise ValueError("type of test_split %s not recognized" % type(test_split))
-        idx_train_eval = np.array([x for x in all_idx if x not in self.idx_test])
-        np.random.seed(1)
-        self.idx_eval = np.random.choice(
-            a=idx_train_eval,
-            size=round(len(idx_train_eval) * validation_split),
-            replace=False
-        )
-        self.idx_train = np.array([x for x in idx_train_eval if x not in self.idx_eval])
-
-        # Check that none of the train, test, eval partitions are empty
-        if not len(self.idx_test):
-            warnings.warn("Test partition is empty!")
-        if not len(self.idx_eval):
-            raise ValueError("The evaluation dataset is empty.")
-        if not len(self.idx_train):
-            raise ValueError("The train dataset is empty.")
-
+        # Check randomisation settings:
+        if shuffle_buffer_size is not None and shuffle_buffer_size > 0 and randomized_batch_access:
+            raise ValueError("You are using shuffle_buffer_size and randomized_batch_access, this is likely not "
+                             "intended.")
+        if cache_full and randomized_batch_access:
+            raise ValueError("You are using cache_full and randomized_batch_access, this is likely not intended.")
+        self.split_train_val_test(val_split=validation_split, test_split=test_split)
         self._compile_models(optimizer=optim)
+        shuffle_buffer_size = shuffle_buffer_size if shuffle_buffer_size is not None else 0
         train_dataset = self._get_dataset(
             idx=self.idx_train,
             batch_size=batch_size,
+            retrieval_batch_size=retrieval_batch_size,
             mode='train',
             shuffle_buffer_size=min(shuffle_buffer_size, len(self.idx_train)),
             weighted=weighted,
             cache_full=cache_full,
+            randomized_batch_access=randomized_batch_access,
         )
         eval_dataset = self._get_dataset(
             idx=self.idx_eval,
             batch_size=validation_batch_size,
+            retrieval_batch_size=retrieval_batch_size,
             mode='train_val',
             shuffle_buffer_size=min(shuffle_buffer_size, len(self.idx_eval)),
             weighted=weighted,
             cache_full=cache_full,
+            randomized_batch_access=randomized_batch_access,
         )
 
         steps_per_epoch = min(max(len(self.idx_train) // batch_size, 1), max_steps_per_epoch)
@@ -494,7 +515,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
 
     def __init__(
             self,
-            data: Union[anndata.AnnData, np.ndarray],
+            data: Union[anndata.AnnData, np.ndarray, DistributedStore],
             model_dir: Union[str, None],
             model_id: Union[str, None],
             model_topology: TopologyContainer,
@@ -556,7 +577,8 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             self,
             generator_helper,
             idx: Union[np.ndarray, None],
-            batch_size: int = 1,
+            batch_size: int,
+            randomized_batch_access: bool,
     ):
         """
         Yield a basic generator based on which a tf dataset can be built.
@@ -567,6 +589,11 @@ class EstimatorKerasEmbedding(EstimatorKeras):
 
             - x_sample is a gene expression vector of a cell
         :param idx: Indicies of data set to include in generator.
+        :param batch_size: Number of observations read from disk in each batched access.
+        :param randomized_batch_access: Whether to randomize batches during reading (in generator). Lifts necessity of
+            using a shuffle buffer on generator, however, batch composition stays unchanged over epochs unless there
+            is overhangs in retrieval_batch_size in the raw data files, which often happens and results in modest
+            changes in batch composition.
         :return:
         """
         if idx is None:
@@ -579,6 +606,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 batch_size=batch_size,
                 obs_keys=[],
                 return_dense=True,
+                randomized_batch_access=randomized_batch_access,
             )
 
             def generator():
@@ -624,6 +652,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             cache_full: bool = False,
             weighted: bool = False,
             retrieval_batch_size: int = 128,
+            randomized_batch_access: bool = False,
     ):
         """
 
@@ -632,6 +661,11 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         :param mode:
         :param shuffle_buffer_size:
         :param weighted: Whether to use weights. Not implemented for embedding models yet.
+        :param retrieval_batch_size: Number of observations read from disk in each batched access.
+        :param randomized_batch_access: Whether to randomize batches during reading (in generator). Lifts necessity of
+            using a shuffle buffer on generator, however, batch composition stays unchanged over epochs unless there
+            is overhangs in retrieval_batch_size in the raw data files, which often happens and results in modest
+            changes in batch composition.
         :return:
         """
         # Determine model type [ae, vae(iaf, vamp)]
@@ -651,6 +685,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 generator_helper=generator_helper,
                 idx=idx,
                 batch_size=retrieval_batch_size,
+                randomized_batch_access=randomized_batch_access,
             )
             output_types, output_shapes = self._get_output_dim(n_features=n_features, model_type=model_type, mode=mode)
             dataset = tf.data.Dataset.from_generator(
@@ -663,11 +698,12 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             # Only shuffle in train modes
             if mode in ['train', 'train_val']:
                 dataset = dataset.repeat()
-                dataset = dataset.shuffle(
-                    buffer_size=min(n_samples, shuffle_buffer_size),
-                    seed=None,
-                    reshuffle_each_iteration=True)
-            dataset = dataset.batch(batch_size).prefetch(tf.data.AUTOTUNE)
+                if shuffle_buffer_size is not None and shuffle_buffer_size > 0:
+                    dataset = dataset.shuffle(
+                        buffer_size=min(n_samples, shuffle_buffer_size),
+                        seed=None,
+                        reshuffle_each_iteration=True)
+            dataset = dataset.batch(batch_size, drop_remainder=False).prefetch(tf.data.AUTOTUNE)
 
             return dataset
 
@@ -724,7 +760,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 buffer_size=shuffle_buffer_size,
                 seed=None,
                 reshuffle_each_iteration=True
-            ).batch(batch_size).prefetch(tf.data.AUTOTUNE)
+            ).batch(batch_size, drop_remainder=False).prefetch(tf.data.AUTOTUNE)
 
             return dataset
 
@@ -956,7 +992,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
 
     def __init__(
             self,
-            data: Union[anndata.AnnData, np.ndarray],
+            data: Union[anndata.AnnData, DistributedStore],
             model_dir: Union[str, None],
             model_id: Union[str, None],
             model_topology: TopologyContainer,
@@ -973,6 +1009,21 @@ class EstimatorKerasCelltype(EstimatorKeras):
             weights_md5=weights_md5,
             cache_path=cache_path
         )
+        # Remove cells without type label from store:
+        if isinstance(self.data, DistributedStore):
+            self.data.subset(attr_key="cell_ontology_class", excluded_values=[
+                self._adata_ids.unknown_celltype_identifier,
+                self._adata_ids.not_a_cell_celltype_identifier,
+            ])
+        elif isinstance(self.data, anndata.AnnData):
+            self.data = self.data[np.where([
+                x not in [
+                    self._adata_ids.unknown_celltype_identifier,
+                    self._adata_ids.not_a_cell_celltype_identifier,
+                ] for x in self.data.obs["cell_ontology_class"].values
+            ])[0], :]
+        else:
+            assert False
         assert "cl" in self.topology_container.output.keys(), self.topology_container.output.keys()
         assert "targets" in self.topology_container.output.keys(), self.topology_container.output.keys()
         self.max_class_weight = max_class_weight
@@ -1092,8 +1143,9 @@ class EstimatorKerasCelltype(EstimatorKeras):
             self,
             generator_helper,
             idx: Union[np.ndarray, None],
-            weighted: bool = False,
-            batch_size: int = 1,
+            weighted: bool,
+            batch_size: int,
+            randomized_batch_access: bool,
     ):
         """
         Yield a basic generator based on which a tf dataset can be built.
@@ -1106,6 +1158,11 @@ class EstimatorKerasCelltype(EstimatorKeras):
             - y_sample is a one-hot encoded label vector of a cell
             - w_sample is a weight scalar of a cell
         :param idx: Indicies of data set to include in generator.
+        :param batch_size: Number of observations read from disk in each batched access.
+        :param randomized_batch_access: Whether to randomize batches during reading (in generator). Lifts necessity of
+            using a shuffle buffer on generator, however, batch composition stays unchanged over epochs unless there
+            is overhangs in retrieval_batch_size in the raw data files, which often happens and results in modest
+            changes in batch composition.
         :return:
         """
         if idx is None:
@@ -1120,6 +1177,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
                 batch_size=batch_size,
                 obs_keys=["cell_ontology_class"],
                 return_dense=True,
+                randomized_batch_access=randomized_batch_access,
             )
             onehot_encoder = self._one_hot_encoder()
 
@@ -1175,6 +1233,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             cache_full: bool = False,
             weighted: bool = False,
             retrieval_batch_size: int = 128,
+            randomized_batch_access: bool = False,
     ):
         """
 
@@ -1183,6 +1242,11 @@ class EstimatorKerasCelltype(EstimatorKeras):
         :param mode:
         :param shuffle_buffer_size:
         :param weighted: Whether to use weights.
+        :param retrieval_batch_size: Number of observations read from disk in each batched access.
+        :param randomized_batch_access: Whether to randomize batches during reading (in generator). Lifts necessity of
+            using a shuffle buffer on generator, however, batch composition stays unchanged over epochs unless there
+            is overhangs in retrieval_batch_size in the raw data files, which often happens and results in modest
+            changes in batch composition.
         :return:
         """
         # This is a basic cell type prediction model estimator class, the standard generator is fine.
@@ -1198,6 +1262,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             idx=idx,
             weighted=weighted,
             batch_size=retrieval_batch_size,
+            randomized_batch_access=randomized_batch_access,
         )
         output_types, output_shapes = self._get_output_dim(n_features=n_features, n_labels=n_labels, mode=mode)
         dataset = tf.data.Dataset.from_generator(
@@ -1209,12 +1274,12 @@ class EstimatorKerasCelltype(EstimatorKeras):
             dataset = dataset.cache()
         if mode == 'train' or mode == 'train_val':
             dataset = dataset.repeat()
-            dataset = dataset.shuffle(
-                buffer_size=min(n_samples, shuffle_buffer_size),
-                seed=None,
-                reshuffle_each_iteration=True
-            )
-        dataset = dataset.batch(batch_size).prefetch(tf.data.AUTOTUNE)
+            if shuffle_buffer_size is not None and shuffle_buffer_size > 0:
+                dataset = dataset.shuffle(
+                    buffer_size=min(n_samples, shuffle_buffer_size),
+                    seed=None,
+                    reshuffle_each_iteration=True)
+        dataset = dataset.batch(batch_size, drop_remainder=False).prefetch(tf.data.AUTOTUNE)
 
         return dataset
 

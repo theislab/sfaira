@@ -37,7 +37,7 @@ def map_fn(inputs):
             return x
         else:
             return None
-    except FileNotFoundError as e:
+    except (FileNotFoundError, OSError) as e:
         return ds.id, e,
 
 

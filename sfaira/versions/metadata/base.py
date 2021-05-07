@@ -3,6 +3,7 @@ import networkx
 import numpy as np
 import obonet
 import os
+import pickle
 import requests
 from typing import Dict, List, Tuple, Union
 
@@ -23,6 +24,52 @@ data here.
 
 ToDo explain usage of ontology extension.
 """
+
+
+def get_base_ontology_cache() -> str:
+    folder = FILE_PATH.split(os.sep)[:-4]
+    folder.insert(1, os.sep)
+    return os.path.join(*folder, "cache", "ontologies")
+
+
+def cached_load_obo(url, ontology_cache_dir, ontology_cache_fn):
+    if os.name == "nt":  # if running on windows, do not download obo file, but rather pass url directly to obonet
+        obofile = url
+    else:
+        ontology_cache_dir = os.path.join(get_base_ontology_cache(), ontology_cache_dir)
+        obofile = os.path.join(ontology_cache_dir, ontology_cache_fn)
+        # Download if necessary:
+        if not os.path.isfile(obofile):
+            os.makedirs(name=ontology_cache_dir, exist_ok=True)
+
+            def download_obo():
+                print(f"Downloading: {ontology_cache_fn}")
+                if not os.path.exists(ontology_cache_dir):
+                    os.makedirs(ontology_cache_dir)
+                r = requests.get(url, allow_redirects=True)
+                open(obofile, 'wb').write(r.content)
+
+            download_obo()
+    return obofile
+
+
+def cached_load_ebi(ontology_cache_dir, ontology_cache_fn) -> (networkx.MultiDiGraph, os.PathLike):
+    """
+    Load pickled graph object if available.
+
+    :param ontology_cache_dir:
+    :param ontology_cache_fn:
+    :return:
+    """
+    ontology_cache_dir = os.path.join(get_base_ontology_cache(), ontology_cache_dir)
+    picklefile = os.path.join(ontology_cache_dir, ontology_cache_fn)
+    if os.path.isfile(picklefile):
+        with open(picklefile, 'rb') as f:
+            graph = pickle.load(f)
+    else:
+        os.makedirs(name=ontology_cache_dir, exist_ok=True)
+        graph = None
+    return graph, picklefile
 
 
 class Ontology:
@@ -307,6 +354,7 @@ class OntologyEbi(OntologyHierarchical):
             root_term: str,
             additional_terms: dict,
             additional_edges: List[Tuple[str, str]],
+            ontology_cache_fn: str,
             **kwargs
     ):
         def get_url_self(iri):
@@ -373,15 +421,21 @@ class OntologyEbi(OntologyHierarchical):
             edges_new.extend([(k_self, k_c) for k_c in direct_children])
             return nodes_new, edges_new
 
-        self.graph = networkx.MultiDiGraph()
-        nodes, edges = recursive_search(iri=root_term)
-        nodes.update(additional_terms)
-        edges.extend(additional_edges)
-        for k, v in nodes.items():
-            self.graph.add_node(node_for_adding=k, **v)
-        for x in edges:
-            parent, child = x
-            self.graph.add_edge(child, parent)
+        graph, picklefile = cached_load_ebi(ontology_cache_dir=ontology, ontology_cache_fn=ontology_cache_fn)
+        if graph is None:
+            self.graph = networkx.MultiDiGraph()
+            nodes, edges = recursive_search(iri=root_term)
+            nodes.update(additional_terms)
+            edges.extend(additional_edges)
+            for k, v in nodes.items():
+                self.graph.add_node(node_for_adding=k, **v)
+            for x in edges:
+                parent, child = x
+                self.graph.add_edge(child, parent)
+            with open(picklefile, 'wb') as f:
+                pickle.dump(obj=self.graph, file=f)
+        else:
+            self.graph = graph
 
     def map_node_suggestion(self, x: str, include_synonyms: bool = True, n_suggest: int = 10):
         """
@@ -515,7 +569,12 @@ class OntologyUberon(OntologyExtendedObo):
             self,
             **kwargs
     ):
-        super().__init__(obo="http://purl.obolibrary.org/obo/uberon.obo")
+        obofile = cached_load_obo(
+            url=f"http://purl.obolibrary.org/obo/uberon.obo",
+            ontology_cache_dir="uberon",
+            ontology_cache_fn=f"uberon.obo",
+        )
+        super().__init__(obo=obofile)
 
         # Clean up nodes:
         nodes_to_delete = []
@@ -683,26 +742,11 @@ class OntologyCl(OntologyExtendedObo):
         :param use_developmental_relationships: Whether to keep developmental relationships.
         :param kwargs:
         """
-        if os.name == "nt":  # if running on windows, do not download obo file, but rather pass url directly to obonet
-            obofile = f"https://raw.github.com/obophenotype/cell-ontology/{branch}/cl.obo"
-        else:
-            # Identify cache:
-            folder = FILE_PATH.split(os.sep)[:-4]
-            folder.insert(1, os.sep)
-            ontology_cache_dir = os.path.join(*folder, "cache", "ontologies", "cl")
-            fn = f"{branch}_cl.obo"
-            obofile = os.path.join(ontology_cache_dir, fn)
-            # Download if necessary:
-            if not os.path.isfile(obofile):
-                def download_cl():
-                    url = f"https://raw.github.com/obophenotype/cell-ontology/{branch}/cl.obo"
-                    print(f"Downloading: {fn}")
-                    if not os.path.exists(ontology_cache_dir):
-                        os.makedirs(ontology_cache_dir)
-                    r = requests.get(url, allow_redirects=True)
-                    open(obofile, 'wb').write(r.content)
-                download_cl()
-
+        obofile = cached_load_obo(
+            url=f"https://raw.github.com/obophenotype/cell-ontology/{branch}/cl.obo",
+            ontology_cache_dir="cl",
+            ontology_cache_fn=f"{branch}_cl.obo",
+        )
         super().__init__(obo=obofile)
 
         # Clean up nodes:
@@ -760,7 +804,12 @@ class OntologyHsapdv(OntologyExtendedObo):
             self,
             **kwargs
     ):
-        super().__init__(obo="http://purl.obolibrary.org/obo/hsapdv.obo")
+        obofile = cached_load_obo(
+            url="http://purl.obolibrary.org/obo/hsapdv.obo",
+            ontology_cache_dir="hsapdv",
+            ontology_cache_fn=f"hsapdv.obo",
+        )
+        super().__init__(obo=obofile)
 
         # Clean up nodes:
         nodes_to_delete = []
@@ -781,7 +830,12 @@ class OntologyMmusdv(OntologyExtendedObo):
             self,
             **kwargs
     ):
-        super().__init__(obo="http://purl.obolibrary.org/obo/mmusdv.obo")
+        obofile = cached_load_obo(
+            url="http://purl.obolibrary.org/obo/mmusdv.obo",
+            ontology_cache_dir="mmusdv",
+            ontology_cache_fn=f"mmusdv.obo",
+        )
+        super().__init__(obo=obofile)
 
         # Clean up nodes:
         nodes_to_delete = []
@@ -802,7 +856,12 @@ class OntologyMondo(OntologyExtendedObo):
             self,
             **kwargs
     ):
-        super().__init__(obo="http://purl.obolibrary.org/obo/mondo.obo")
+        obofile = cached_load_obo(
+            url="http://purl.obolibrary.org/obo/mondo.obo",
+            ontology_cache_dir="mondo",
+            ontology_cache_fn=f"mondo.obo",
+        )
+        super().__init__(obo=obofile)
 
         # Clean up nodes:
         nodes_to_delete = []
@@ -832,27 +891,12 @@ class OntologyCellosaurus(OntologyExtendedObo):
             self,
             **kwargs
     ):
-        download_link = "https://ftp.expasy.org/databases/cellosaurus/cellosaurus.obo"
-
-        if os.name == "nt":  # if running on windows, do not download obo file, but rather pass url directly to obonet
-            super().__init__(obo=download_link)
-        else:
-            # Identify cache:
-            folder = FILE_PATH.split(os.sep)[:-4]
-            folder.insert(1, os.sep)
-            ontology_cache_dir = os.path.join(*folder, "cache", "ontologies", "cellosaurus")
-            fn = "cellosaurus.obo"
-            obofile = os.path.join(ontology_cache_dir, fn)
-            # Download if necessary:
-            if not os.path.isfile(obofile):
-                def download_cl():
-                    print(f"Downloading: {fn}")
-                    if not os.path.exists(ontology_cache_dir):
-                        os.makedirs(ontology_cache_dir)
-                    r = requests.get(download_link, allow_redirects=True)
-                    open(obofile, 'wb').write(r.content)
-                download_cl()
-            super().__init__(obo=obofile)
+        obofile = cached_load_obo(
+            url="https://ftp.expasy.org/databases/cellosaurus/cellosaurus.obo",
+            ontology_cache_dir="cellosaurus",
+            ontology_cache_fn=f"cellosaurus.obo",
+        )
+        super().__init__(obo=obofile)
 
         # Clean up nodes:
         # edge_types = ["derived_from", "originate_from_same_individual_as"]
@@ -881,5 +925,6 @@ class OntologySinglecellLibraryConstruction(OntologyEbi):
             additional_edges=[
                 ("EFO:0010183", "microwell-seq"),
                 ("EFO:0010183", "sci-plex"),
-            ]
+            ],
+            ontology_cache_fn="efo.pickle"
         )
