@@ -1081,7 +1081,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
                     node=y,
                     return_type="idx",
                     include_self=True,
-                ) if not y in [
+                ) if y not in [
                     self._adata_ids.unknown_celltype_identifier,
                     self._adata_ids.not_a_cell_celltype_identifier,
                 ] else np.array([])

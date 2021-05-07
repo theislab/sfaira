@@ -39,7 +39,7 @@ class DataloaderTester:
         """
         print('[bold blue]Conflicts are not automatically resolved.')
         print('[bold blue]Please go back to [bold]https://www.ebi.ac.uk/ols/ontologies/cl[blue] for every mismatch or conflicts '
-              'and add the correct cell ontology class name into the .csv "target" column.')
+              'and add the correct cell ontology class name into the .tsv "target" column.')
 
         os.chdir(f'{self.path}/sfaira/unit_tests/data_contribution')
 

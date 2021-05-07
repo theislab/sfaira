@@ -291,7 +291,7 @@ class DatasetGroup:
         for k, v in self.datasets.items():
             if v.annotated:
                 labels_original = np.sort(np.unique(np.concatenate([
-                    v.adata.obs[self._adata_ids.cell_types_original].values
+                    v.adata.obs[v.cell_types_original_obs_key].values
                 ])))
                 tab.append(v.celltypes_universe.prepare_celltype_map_tab(
                     source=labels_original,
