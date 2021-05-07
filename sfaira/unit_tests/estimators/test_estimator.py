@@ -103,14 +103,13 @@ class HelperEstimatorBase:
         pass
 
     @abc.abstractmethod
-    def init_estimator(self):
+    def init_estimator(self, test_split):
         """
         Initialise target estimator as .estimator attribute.
         """
         pass
 
     def estimator_train(self, test_split, randomized_batch_access):
-        self.estimator.init_model()
         self.estimator.train(
             optimizer="adam",
             lr=0.005,
@@ -129,21 +128,20 @@ class HelperEstimatorBase:
     def basic_estimator_test(self, test_split):
         pass
 
-    def load_estimator(self, model_type, data_type, feature_space, test_split, organism="human", organ="lung",
-                       randomized_batch_access=False):
+    def load_estimator(self, model_type, data_type, feature_space, test_split, organism="human", organ="lung"):
         self.init_topology(model_type=model_type, feature_space=feature_space, organism=organism)
         np.random.seed(1)
         if data_type == "adata":
             self.load_adata()
         else:
             self.load_store(organism=organism, organ=organ)
-        self.init_estimator()
-        self.estimator_train(test_split=test_split, randomized_batch_access=randomized_batch_access)
+        self.init_estimator(test_split=test_split)
 
     def fatal_estimator_test(self, model_type, data_type, test_split=0.1, feature_space="small"):
         self.load_estimator(model_type=model_type, data_type=data_type, feature_space=feature_space,
-                            test_split=test_split, randomized_batch_access=False)
-        self.basic_estimator_test()
+                            test_split=test_split)
+        self.estimator_train(test_split=test_split, randomized_batch_access=False)
+        self.basic_estimator_test(test_split=test_split)
 
 
 class HelperEstimatorKerasEmbedding(HelperEstimatorBase):
@@ -171,13 +169,15 @@ class HelperEstimatorKerasEmbedding(HelperEstimatorBase):
         self.model_type = model_type
         self.tc = TopologyContainer(topology=topology, topology_id="0.1")
 
-    def init_estimator(self):
+    def init_estimator(self, test_split):
         self.estimator = EstimatorKerasEmbedding(
             data=self.data,
             model_dir=None,
             model_id="testid",
             model_topology=self.tc
         )
+        self.estimator.init_model()
+        self.estimator.split_train_val_test(test_split=test_split, val_split=0.1)
 
     def basic_estimator_test(self, test_split=0.1):
         _ = self.estimator.evaluate()
@@ -214,7 +214,7 @@ class HelperEstimatorKerasCelltype(HelperEstimatorBase):
         self.model_type = model_type
         self.tc = TopologyContainer(topology=topology, topology_id="0.0.1")
 
-    def init_estimator(self):
+    def init_estimator(self, test_split):
         tc = self.tc
         if isinstance(self.data, DistributedStore):
             # Reset leaves below:
@@ -234,6 +234,8 @@ class HelperEstimatorKerasCelltype(HelperEstimatorBase):
             self.estimator.celltype_universe.onto_cl.leaves = leaves
         else:
             self.nleaves = None
+        self.estimator.init_model()
+        self.estimator.split_train_val_test(test_split=test_split, val_split=0.1)
 
     def basic_estimator_test(self, test_split=0.1):
         _ = self.estimator.evaluate()
@@ -312,19 +314,22 @@ def test_split_index_sets(organism: str, organ: str, data_type: str, randomized_
     test_estim = HelperEstimatorKerasEmbedding()
     # Need full feature space here because observations are not necessarily different in small model testing feature
     # space with only two genes:
-    t0 = time.time()
     test_estim.load_estimator(model_type="linear", data_type=data_type, test_split=test_split, feature_space="full",
-                              organism=organism, organ=organ, randomized_batch_access=randomized_batch_access)
-    print(f"time for running estimator test: {time.time() - t0}s")
+                              organism=organism, organ=organ)
     idx_train = test_estim.estimator.idx_train
     idx_eval = test_estim.estimator.idx_eval
     idx_test = test_estim.estimator.idx_test
     print(idx_train)
     print(idx_eval)
     print(idx_test)
-    # 1) Assert that index assignments sum up to full data set:
+    # 1) Assert that index assignment sets sum up to full data set:
+    # Make sure that there are no repeated indices in each set.
+    assert len(idx_train) == len(np.unique(idx_train))
+    assert len(idx_eval) == len(np.unique(idx_eval))
+    assert len(idx_test) == len(np.unique(idx_test))
     assert len(idx_train) + len(idx_eval) + len(idx_test) == test_estim.data.n_obs, \
         (len(idx_train), len(idx_eval), len(idx_test), test_estim.data.n_obs)
+    assert np.sum([v.shape[0] for v in test_estim.data.adatas_sliced.values()]) == test_estim.data.n_obs
     # 2) Assert that index assignments are exclusive to each split:
     assert len(set(idx_train).intersection(set(idx_eval))) == 0
     assert len(set(idx_train).intersection(set(idx_test))) == 0
@@ -364,6 +369,12 @@ def test_split_index_sets(organism: str, organ: str, data_type: str, randomized_
     # These data sets are the most processed transformation of the data and stand directly in concat with the model.
     shuffle_buffer_size = None if randomized_batch_access else 2
     t0 = time.time()
+    ds_full = test_estim.estimator._get_dataset(idx=None, batch_size=1024, mode='eval',
+                                                shuffle_buffer_size=shuffle_buffer_size,
+                                                retrieval_batch_size=2048,
+                                                randomized_batch_access=randomized_batch_access)
+    print(f"time for building full data set: {time.time() - t0}s")
+    t0 = time.time()
     ds_train = test_estim.estimator._get_dataset(idx=idx_train, batch_size=1024, mode='eval',
                                                  shuffle_buffer_size=shuffle_buffer_size,
                                                  retrieval_batch_size=2048,
@@ -381,27 +392,43 @@ def test_split_index_sets(organism: str, organ: str, data_type: str, randomized_
                                                 retrieval_batch_size=2048,
                                                 randomized_batch_access=randomized_batch_access)
     print(f"time for building test data set: {time.time() - t0}s")
+    # Create two copies of test data set to make sure that re-instantiation of a subset does not cause issues.
+    ds_test2 = test_estim.estimator._get_dataset(idx=idx_test, batch_size=1024, mode='eval',
+                                                 shuffle_buffer_size=shuffle_buffer_size,
+                                                 retrieval_batch_size=2048,
+                                                 randomized_batch_access=randomized_batch_access)
+    print(f"time for building test data set: {time.time() - t0}s")
     x_train = []
     x_eval = []
     x_test = []
+    x_test2_shape = 0
+    x_full_shape = 0
     t0 = time.time()
-    for x, y in ds_train.as_numpy_iterator():
+    for x, _ in ds_full:
+        x_full_shape += x[0].shape[0]
+    print(f"time for iterating over full data set: {time.time() - t0}s")
+    t0 = time.time()
+    for x, _ in ds_train.as_numpy_iterator():
         x_train.append(x[0])
     x_train = np.concatenate(x_train, axis=0)
     print(f"time for iterating over training data set: {time.time() - t0}s")
     t0 = time.time()
-    for x, y in ds_eval.as_numpy_iterator():
+    for x, _ in ds_eval.as_numpy_iterator():
         x_eval.append(x[0])
     x_eval = np.concatenate(x_eval, axis=0)
     print(f"time for iterating over validation data set: {time.time() - t0}s")
     t0 = time.time()
-    for x, y in ds_test.as_numpy_iterator():
+    for x, _ in ds_test.as_numpy_iterator():
         x_test.append(x[0])
     x_test = np.concatenate(x_test, axis=0)
     print(f"time for iterating over test data set: {time.time() - t0}s")
+    for x, _ in ds_test2:
+        x_test2_shape += x[0].shape[0]
+    assert x_test2_shape == x_test.shape[0]
     # Validate size of recovered numpy data sets:
-    print(f"shapes received {(x_train.shape[0], x_eval.shape[0], x_test.shape[0])}")
+    print(f"shapes received {(x_full_shape, x_train.shape[0], x_eval.shape[0], x_test.shape[0])}")
     print(f"shapes expected {(len(idx_train), len(idx_eval), len(idx_test))}")
+    assert x_full_shape == test_estim.data.n_obs
     assert x_train.shape[0] + x_eval.shape[0] + x_test.shape[0] == test_estim.data.n_obs
     assert len(idx_train) + len(idx_eval) + len(idx_test) == test_estim.data.n_obs
     assert x_train.shape[0] == len(idx_train)

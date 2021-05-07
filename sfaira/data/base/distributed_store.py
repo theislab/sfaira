@@ -45,7 +45,7 @@ class DistributedStore:
     """
 
     _adatas: Dict[str, anndata.AnnData]
-    indices: Dict[str, np.ndarray]
+    _indices: Dict[str, np.ndarray]
 
     def __init__(self, cache_path: Union[str, os.PathLike, None] = None):
         """
@@ -107,6 +107,7 @@ class DistributedStore:
     def __validate_global_indices(self, idx: Union[np.ndarray, list]) -> np.ndarray:
         assert np.max(idx) < self.n_obs, f"maximum of supplied index vector {np.max(idx)} exceeds number of modelled " \
                                          f"observations {self.n_obs}"
+        assert len(idx) == len(np.unique(idx)), f"there were {len(idx) - len(np.unique(idx))} repeated indices in idx"
         if isinstance(idx, np.ndarray):
             assert len(idx.shape) == 1, idx.shape
             assert idx.dtype == np.int
@@ -143,6 +144,18 @@ class DistributedStore:
     @adatas.setter
     def adatas(self, x: Dict[str, anndata.AnnData]):
         self._adatas = x
+
+    @property
+    def indices(self) -> Dict[str, np.ndarray]:
+        return self._indices
+
+    @indices.setter
+    def indices(self, x: Dict[str, np.ndarray]):
+        for k, v in x.items():
+            assert k in self._adatas.keys(), f"did not find key {k}"
+            assert np.max(v) < self._adatas[k].n_obs, f"found index for key {k} that exceeded data set size"
+            assert len(v) == len(np.unique(v)), f"found duplicated indices for key {k}"
+        self._indices = x
 
     @property
     def genome_container(self) -> Union[GenomeContainer, None]:

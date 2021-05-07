@@ -186,7 +186,7 @@ class EstimatorKeras:
             weighted: bool,
             retrieval_batch_size: int,
             randomized_batch_access: bool,
-    ):
+    ) -> tf.data.Dataset:
         pass
 
     def _get_class_dict(
@@ -653,7 +653,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             weighted: bool = False,
             retrieval_batch_size: int = 128,
             randomized_batch_access: bool = False,
-    ):
+    ) -> tf.data.Dataset:
         """
 
         :param idx:
@@ -1234,7 +1234,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             weighted: bool = False,
             retrieval_batch_size: int = 128,
             randomized_batch_access: bool = False,
-    ):
+    ) -> tf.data.Dataset:
         """
 
         :param idx:
