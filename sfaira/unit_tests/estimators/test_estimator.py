@@ -334,10 +334,9 @@ def test_dataset_size(organism: str, organ: str, batch_size: int, randomized_bat
     assert x_train_shape == len(idx_train)
 
 
-@pytest.mark.parametrize("organism", ["human"])
+@pytest.mark.parametrize("organism", ["mouse"])
 @pytest.mark.parametrize("organ", ["lung"])
-#@pytest.mark.parametrize("data_type", ["adata", "store"])
-@pytest.mark.parametrize("data_type", ["store"])
+@pytest.mark.parametrize("data_type", ["adata", "store"])
 @pytest.mark.parametrize("randomized_batch_access", [False, True])
 @pytest.mark.parametrize("test_split", [0.3, {"assay_sc": "10x sequencing"}])
 def test_split_index_sets(organism: str, organ: str, data_type: str, randomized_batch_access: bool, test_split):
@@ -367,7 +366,8 @@ def test_split_index_sets(organism: str, organ: str, data_type: str, randomized_
     assert len(idx_test) == len(np.unique(idx_test))
     assert len(idx_train) + len(idx_eval) + len(idx_test) == test_estim.data.n_obs, \
         (len(idx_train), len(idx_eval), len(idx_test), test_estim.data.n_obs)
-    assert np.sum([v.shape[0] for v in test_estim.data.adatas_sliced.values()]) == test_estim.data.n_obs
+    if isinstance(test_estim.data, DistributedStore):
+        assert np.sum([v.shape[0] for v in test_estim.data.adatas_sliced.values()]) == test_estim.data.n_obs
     # 2) Assert that index assignments are exclusive to each split:
     assert len(set(idx_train).intersection(set(idx_eval))) == 0
     assert len(set(idx_train).intersection(set(idx_test))) == 0
@@ -407,12 +407,6 @@ def test_split_index_sets(organism: str, organ: str, data_type: str, randomized_
     # These data sets are the most processed transformation of the data and stand directly in concat with the model.
     shuffle_buffer_size = None if randomized_batch_access else 2
     t0 = time.time()
-    ds_full = test_estim.estimator._get_dataset(idx=None, batch_size=1024, mode='eval',
-                                                shuffle_buffer_size=shuffle_buffer_size,
-                                                retrieval_batch_size=2048,
-                                                randomized_batch_access=randomized_batch_access)
-    print(f"time for building full data set: {time.time() - t0}s")
-    t0 = time.time()
     ds_train = test_estim.estimator._get_dataset(idx=idx_train, batch_size=1024, mode='eval',
                                                  shuffle_buffer_size=shuffle_buffer_size,
                                                  retrieval_batch_size=2048,
@@ -442,10 +436,6 @@ def test_split_index_sets(organism: str, organ: str, data_type: str, randomized_
     x_test2_shape = 0
     x_full_shape = 0
     t0 = time.time()
-    for x, _ in ds_full:
-        x_full_shape += x[0].shape[0]
-    print(f"time for iterating over full data set: {time.time() - t0}s")
-    t0 = time.time()
     for x, _ in ds_train.as_numpy_iterator():
         x_train.append(x[0])
     x_train = np.concatenate(x_train, axis=0)
@@ -467,10 +457,6 @@ def test_split_index_sets(organism: str, organ: str, data_type: str, randomized_
     # Validate size of recovered numpy data sets:
     print(test_estim.data.n_obs)
     print(f"shapes expected {(len(idx_train), len(idx_eval), len(idx_test))}")
-    print(np.sum([v.shape[0] for v in test_estim.data.adatas.values()]))
-    print(np.sum([v.shape[0] for v in test_estim.data.indices.values()]))
-    print(np.sum([v.shape[0] for v in test_estim.data.adatas_sliced.values()]))
-    print(np.sum([x in idx_train for v in test_estim.data.indices_global.values() for x in v]))
     print(f"shapes received {(x_full_shape, x_train.shape[0], x_eval.shape[0], x_test.shape[0])}")
     assert x_full_shape == test_estim.data.n_obs
     assert x_train.shape[0] + x_eval.shape[0] + x_test.shape[0] == test_estim.data.n_obs
