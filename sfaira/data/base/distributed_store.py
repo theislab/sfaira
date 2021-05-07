@@ -127,11 +127,12 @@ class DistributedStore:
             indices_subsetted = {}
             counter = 0
             for k, v in self.indices.items():
-                indices_global = v + counter
+                n_obs_k = len(v)
+                indices_global = np.arange(counter, counter + n_obs_k)
                 indices_subset_k = [x for x, y in zip(v, indices_global) if y in idx]
                 if len(indices_subset_k) > 0:
                     indices_subsetted[k] = indices_subset_k
-                counter += len(v)
+                counter += n_obs_k
             assert counter == self.n_obs
             return dict([(k, self._adatas[k][v, :]) for k, v in indices_subsetted.items()])
         else:
@@ -151,10 +152,19 @@ class DistributedStore:
 
     @indices.setter
     def indices(self, x: Dict[str, np.ndarray]):
+        """
+        Setter imposes a few constraints on indices:
+
+            1) checks that keys are contained ._adatas.keys()
+            2) checks that indices are contained in size of values of ._adatas
+            3) checks that indces are not duplicated
+            4) checks that indices are sorted
+        """
         for k, v in x.items():
             assert k in self._adatas.keys(), f"did not find key {k}"
             assert np.max(v) < self._adatas[k].n_obs, f"found index for key {k} that exceeded data set size"
             assert len(v) == len(np.unique(v)), f"found duplicated indices for key {k}"
+            assert np.all(np.diff(v) >= 0), f"indices not sorted for key {k}"
         self._indices = x
 
     @property
