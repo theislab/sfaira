@@ -85,6 +85,7 @@ for organism, organs in configs_to_write.items():
     for organ in organs:
         print(f"Writing {organism} {organ}")
         store = DistributedStore(cache_path=store_path)
+        store.subset(attr_key="sample_source", values=["primary_tissue"])
         store.subset(attr_key="organism", values=[organism])
         store.subset(attr_key="organ", values=[organ])
         store.write_config(os.path.join(config_path, f"config_{clean_string(organism)}_{clean_string(organ)}"))

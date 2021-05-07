@@ -434,7 +434,6 @@ def test_split_index_sets(organism: str, organ: str, data_type: str, randomized_
     x_eval = []
     x_test = []
     x_test2_shape = 0
-    x_full_shape = 0
     t0 = time.time()
     for x, _ in ds_train.as_numpy_iterator():
         x_train.append(x[0])
@@ -457,8 +456,7 @@ def test_split_index_sets(organism: str, organ: str, data_type: str, randomized_
     # Validate size of recovered numpy data sets:
     print(test_estim.data.n_obs)
     print(f"shapes expected {(len(idx_train), len(idx_eval), len(idx_test))}")
-    print(f"shapes received {(x_full_shape, x_train.shape[0], x_eval.shape[0], x_test.shape[0])}")
-    assert x_full_shape == test_estim.data.n_obs
+    print(f"shapes received {(x_train.shape[0], x_eval.shape[0], x_test.shape[0])}")
     assert x_train.shape[0] + x_eval.shape[0] + x_test.shape[0] == test_estim.data.n_obs
     assert len(idx_train) + len(idx_eval) + len(idx_test) == test_estim.data.n_obs
     assert x_train.shape[0] == len(idx_train)
