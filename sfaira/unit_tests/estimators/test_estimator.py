@@ -298,6 +298,44 @@ def test_for_fatal_marker(data_type):
 
 @pytest.mark.parametrize("organism", ["human"])
 @pytest.mark.parametrize("organ", ["lung"])
+@pytest.mark.parametrize("batch_size", [1024, 2048, 4096])
+@pytest.mark.parametrize("randomized_batch_access", [False, True])
+def test_dataset_size(organism: str, organ: str, batch_size: int, randomized_batch_access: bool):
+    """
+    Test that tf data set from estimator has same size as generator invoked directly from store based on number of
+    observations in emitted batches.
+
+    Tests for batch sizes smaller, equal to and larger than retrieval batch size and with and without randomized
+    batch access.
+    """
+    test_estim = HelperEstimatorKerasEmbedding()
+    retrieval_batch_size = 2048
+    # Need full feature space here because observations are not necessarily different in small model testing feature
+    # space with only two genes:
+    test_estim.load_estimator(model_type="linear", data_type="store", feature_space="reduced", test_split=0.2,
+                              organism=organism, organ=organ)
+    idx_train = test_estim.estimator.idx_train
+    shuffle_buffer_size = None if randomized_batch_access else 2
+    ds_train = test_estim.estimator._get_dataset(idx=idx_train, batch_size=batch_size, mode='eval',
+                                                 shuffle_buffer_size=shuffle_buffer_size,
+                                                 retrieval_batch_size=retrieval_batch_size,
+                                                 randomized_batch_access=randomized_batch_access)
+    x_train_shape = 0
+    for x, _ in ds_train.as_numpy_iterator():
+        x_train_shape += x[0].shape[0]
+    # Define raw store generator on train data to compare and check that it has the same size as tf generator exposed
+    # by estimator:
+    g_train = test_estim.estimator.data.generator(idx=idx_train, batch_size=retrieval_batch_size,
+                                                  randomized_batch_access=randomized_batch_access)
+    x_train2_shape = 0
+    for x, _ in g_train():
+        x_train2_shape += x.shape[0]
+    assert x_train_shape == x_train2_shape
+    assert x_train_shape == len(idx_train)
+
+
+@pytest.mark.parametrize("organism", ["human"])
+@pytest.mark.parametrize("organ", ["lung"])
 #@pytest.mark.parametrize("data_type", ["adata", "store"])
 @pytest.mark.parametrize("data_type", ["store"])
 @pytest.mark.parametrize("randomized_batch_access", [False, True])
@@ -422,12 +460,18 @@ def test_split_index_sets(organism: str, organ: str, data_type: str, randomized_
         x_test.append(x[0])
     x_test = np.concatenate(x_test, axis=0)
     print(f"time for iterating over test data set: {time.time() - t0}s")
+    # Assert that duplicate of test data has the same shape:
     for x, _ in ds_test2:
         x_test2_shape += x[0].shape[0]
     assert x_test2_shape == x_test.shape[0]
     # Validate size of recovered numpy data sets:
-    print(f"shapes received {(x_full_shape, x_train.shape[0], x_eval.shape[0], x_test.shape[0])}")
+    print(test_estim.data.n_obs)
     print(f"shapes expected {(len(idx_train), len(idx_eval), len(idx_test))}")
+    print(np.sum([v.shape[0] for v in test_estim.data.adatas.values()]))
+    print(np.sum([v.shape[0] for v in test_estim.data.indices.values()]))
+    print(np.sum([v.shape[0] for v in test_estim.data.adatas_sliced.values()]))
+    print(np.sum([x in idx_train for v in test_estim.data.indices_global.values() for x in v]))
+    print(f"shapes received {(x_full_shape, x_train.shape[0], x_eval.shape[0], x_test.shape[0])}")
     assert x_full_shape == test_estim.data.n_obs
     assert x_train.shape[0] + x_eval.shape[0] + x_test.shape[0] == test_estim.data.n_obs
     assert len(idx_train) + len(idx_eval) + len(idx_test) == test_estim.data.n_obs
