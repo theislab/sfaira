@@ -234,10 +234,12 @@ class DistributedStore:
                 if n_obs > 0:  # Skip data objects without matched cells.
                     # Cells left over after batching to batch size, accounting for overhang:
                     remainder = n_obs % batch_size
-                    key_batch_starts_ends.extend([
+                    key_batch_starts_ends_k = [
                         (k, (int(x * batch_size), int(np.minimum((x * batch_size) + batch_size, n_obs))))
                         for x in np.arange(0, n_obs // batch_size + int(remainder > 0))
-                    ])
+                    ]
+                    assert np.sum([v2 - v1 for k, (v1, v2) in key_batch_starts_ends_k]) == n_obs
+                    key_batch_starts_ends.extend(key_batch_starts_ends_k)
             batch_range = np.arange(0, len(key_batch_starts_ends))
             if randomized_batch_access:
                 np.random.shuffle(batch_range)
