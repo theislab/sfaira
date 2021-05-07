@@ -1011,7 +1011,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
         )
         # Remove cells without type label from store:
         if isinstance(self.data, DistributedStore):
-            self.data.subset(attr_key="cell_ontology_class", excluded_values=[
+            self.data.subset(attr_key="cellontology_class", excluded_values=[
                 self._adata_ids.unknown_celltype_identifier,
                 self._adata_ids.not_a_cell_celltype_identifier,
             ])
@@ -1020,7 +1020,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
                 x not in [
                     self._adata_ids.unknown_celltype_identifier,
                     self._adata_ids.not_a_cell_celltype_identifier,
-                ] for x in self.data.obs["cell_ontology_class"].values
+                ] for x in self.data.obs[self._adata_ids.cell_ontology_class].values
             ])[0], :]
         else:
             assert False
