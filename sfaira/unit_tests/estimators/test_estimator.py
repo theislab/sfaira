@@ -366,19 +366,19 @@ def test_split_index_sets(organism: str, organ: str, data_type: str, randomized_
     t0 = time.time()
     ds_train = test_estim.estimator._get_dataset(idx=idx_train, batch_size=1024, mode='eval',
                                                  shuffle_buffer_size=shuffle_buffer_size,
-                                                 retrieval_batch_size=128,
+                                                 retrieval_batch_size=2048,
                                                  randomized_batch_access=randomized_batch_access)
     print(f"time for building training data set: {time.time() - t0}s")
     t0 = time.time()
     ds_eval = test_estim.estimator._get_dataset(idx=idx_eval, batch_size=1024, mode='eval',
                                                 shuffle_buffer_size=shuffle_buffer_size,
-                                                retrieval_batch_size=128,
+                                                retrieval_batch_size=2048,
                                                 randomized_batch_access=randomized_batch_access)
     print(f"time for building validation data set: {time.time() - t0}s")
     t0 = time.time()
     ds_test = test_estim.estimator._get_dataset(idx=idx_test, batch_size=1024, mode='eval',
                                                 shuffle_buffer_size=shuffle_buffer_size,
-                                                retrieval_batch_size=128,
+                                                retrieval_batch_size=2048,
                                                 randomized_batch_access=randomized_batch_access)
     print(f"time for building test data set: {time.time() - t0}s")
     x_train = []
