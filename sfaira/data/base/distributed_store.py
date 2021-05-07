@@ -3,13 +3,23 @@ import numpy as np
 import os
 import pandas as pd
 import pickle
-import scipy.sparse
 from typing import Dict, List, Union
 
 from sfaira.consts import AdataIdsSfaira, OCS
 from sfaira.data.base.dataset import is_child, UNS_STRING_META_IN_OBS
 from sfaira.versions.genomes import GenomeContainer
-from sfaira.versions.metadata import CelltypeUniverse
+
+
+def access_helper(adata, s, e, j, return_dense, obs_keys) -> tuple:
+    x = adata.X[s:e, :]
+    # Do dense conversion now so that col-wise indexing is not slow, often, dense conversion
+    # would be done later anyway.
+    if return_dense:
+        x = x.todense()
+    if j is not None:
+        x = x[:, j]
+    obs = adata.obs[obs_keys].iloc[s:e, :]
+    return x, obs
 
 
 class DistributedStore:
@@ -34,8 +44,8 @@ class DistributedStore:
     example.
     """
 
-    adatas: Dict[str, anndata.AnnData]
-    indices: Dict[str, np.ndarray]
+    _adatas: Dict[str, anndata.AnnData]
+    _indices: Dict[str, np.ndarray]
 
     def __init__(self, cache_path: Union[str, os.PathLike, None] = None):
         """
@@ -56,10 +66,14 @@ class DistributedStore:
             if os.path.isfile(os.path.join(cache_path, f)):  # only files
                 # Narrow down to supported file types:
                 if f.split(".")[-1] == "h5ad":
-                    adata = anndata.read_h5ad(
-                        filename=os.path.join(cache_path, f),
-                        backed="r",
-                    )
+                    try:
+                        adata = anndata.read_h5ad(
+                            filename=os.path.join(cache_path, f),
+                            backed="r",
+                        )
+                    except OSError as e:
+                        adata = None
+                        print(f"WARNING: for data set {f}: {e}")
                 elif f.split(".")[-1] == "zarr":
                     # TODO this reads into memory! Might need to directly interface the zarr arrays to work with dask.
                     adata = anndata.read_zarr(os.path.join(cache_path, f))
@@ -77,11 +91,81 @@ class DistributedStore:
 
     @property
     def adata(self):
-        return self.adatas[list(self.adatas.keys())[0]].concatenate(
-            *[self.adatas[k] for k in list(self.adatas.keys())[1:]],
+        return self.adatas_sliced[list(self.adatas_sliced.keys())[0]].concatenate(
+            *[self.adatas_sliced[k] for k in list(self.adatas_sliced.keys())[1:]],
             batch_key="dataset_id",
-            batch_categories=list(self.adatas.keys()),
+            batch_categories=list(self.adatas_sliced.keys()),
         )
+
+    @property
+    def adatas_sliced(self) -> Dict[str, anndata.AnnData]:
+        """
+        Only exposes the subset and slices of the adata instances contained in ._adatas defined in .indices.
+        """
+        return dict([(k, self._adatas[k][v, :]) for k, v in self.indices.items()])
+
+    def __validate_global_indices(self, idx: Union[np.ndarray, list]) -> np.ndarray:
+        assert np.max(idx) < self.n_obs, f"maximum of supplied index vector {np.max(idx)} exceeds number of modelled " \
+                                         f"observations {self.n_obs}"
+        assert len(idx) == len(np.unique(idx)), f"there were {len(idx) - len(np.unique(idx))} repeated indices in idx"
+        if isinstance(idx, np.ndarray):
+            assert len(idx.shape) == 1, idx.shape
+            assert idx.dtype == np.int
+        else:
+            assert isinstance(idx, list)
+            assert isinstance(idx[0], int) or isinstance(idx[0], np.int)
+            idx = np.asarray(idx)
+        return idx
+
+    def adatas_sliced_subset(self, idx: Union[np.ndarray, list]) -> Dict[str, anndata.AnnData]:
+        """
+        Subsets adatas_sliced as if it was one object, ie behaves the same way as self.adata[idx] but stays out of
+        memory.
+        """
+        if idx is not None:
+            idx = self.__validate_global_indices(idx)
+            indices_subsetted = {}
+            counter = 0
+            for k, v in self.indices.items():
+                n_obs_k = len(v)
+                indices_global = np.arange(counter, counter + n_obs_k)
+                indices_subset_k = [x for x, y in zip(v, indices_global) if y in idx]
+                if len(indices_subset_k) > 0:
+                    indices_subsetted[k] = indices_subset_k
+                counter += n_obs_k
+            assert counter == self.n_obs
+            return dict([(k, self._adatas[k][v, :]) for k, v in indices_subsetted.items()])
+        else:
+            return self.adatas_sliced
+
+    @property
+    def adatas(self) -> Dict[str, anndata.AnnData]:
+        return self._adatas
+
+    @adatas.setter
+    def adatas(self, x: Dict[str, anndata.AnnData]):
+        self._adatas = x
+
+    @property
+    def indices(self) -> Dict[str, np.ndarray]:
+        return self._indices
+
+    @indices.setter
+    def indices(self, x: Dict[str, np.ndarray]):
+        """
+        Setter imposes a few constraints on indices:
+
+            1) checks that keys are contained ._adatas.keys()
+            2) checks that indices are contained in size of values of ._adatas
+            3) checks that indces are not duplicated
+            4) checks that indices are sorted
+        """
+        for k, v in x.items():
+            assert k in self._adatas.keys(), f"did not find key {k}"
+            assert np.max(v) < self._adatas[k].n_obs, f"found index for key {k} that exceeded data set size"
+            assert len(v) == len(np.unique(v)), f"found duplicated indices for key {k}"
+            assert np.all(np.diff(v) >= 0), f"indices not sorted for key {k}"
+        self._indices = x
 
     @property
     def genome_container(self) -> Union[GenomeContainer, None]:
@@ -100,10 +184,12 @@ class DistributedStore:
         """
         Assert that the data sets which were kept have the same feature names.
         """
-        var_names = self.adatas[list(self.adatas.keys())[0]].var_names.tolist()
-        for k, v in self.adatas.items():
-            assert len(var_names) == len(v.var_names), f"number of features in store differed in object {k}"
-            assert np.all(var_names == v.var_names), f"var_names in store were not matched in object {k}"
+        var_names = self.adatas_sliced[list(self.adatas_sliced.keys())[0]].var_names.tolist()
+        for k, v in self.adatas_sliced.items():
+            assert len(var_names) == len(v.var_names), f"number of features in store differed in object {k} compared " \
+                                                       f"to {list(self.adatas_sliced.keys())[0]}"
+            assert np.all(var_names == v.var_names), f"var_names in store were not matched in object {k} compared " \
+                                                     f"to {list(self.adatas_sliced.keys())[0]}"
         return var_names
 
     def generator(
@@ -112,6 +198,7 @@ class DistributedStore:
             batch_size: int = 1,
             obs_keys: List[str] = [],
             return_dense: bool = True,
+            randomized_batch_access: bool = False,
     ) -> iter:
         """
         Yields an unbiased generator over observations in the contained data sets.
@@ -119,13 +206,15 @@ class DistributedStore:
         :param idx: Global idx to query from store. These is an array with indicies corresponding to a contiuous index
             along all observations in self.adatas, ordered along a hypothetical concatenation along the keys of
             self.adatas.
-        :param batch_size: Number of observations in each batch (generator invocation). Increasing this may result in
-            large speed-ups in query time but removes the ability of upstream generators to fully shuffle cells, as
-            these batches are the smallest data unit that upstream generators can access.
+        :param batch_size: Number of observations read from disk in each batched access (generator invocation).
         :param obs_keys: .obs columns to return in the generator. These have to be a subset of the columns available
             in self.adatas.
         :param return_dense: Whether to return count data .X as dense batches. This allows more efficient feature
             indexing if the store is sparse (column indexing on csr matrices is slow).
+        :param randomized_batch_access: Whether to randomize batches during reading (in generator). Lifts necessity of
+            using a shuffle buffer on generator, however, batch composition stays unchanged over epochs unless there
+            is overhangs in retrieval_batch_size in the raw data files, which often happens and results in modest
+            changes in batch composition.
         :return: Generator function which yields batch_size at every invocation.
             The generator returns a tuple of (.X, .obs) with types:
 
@@ -134,7 +223,7 @@ class DistributedStore:
         # Make sure that features are ordered in the same way in each object so that generator yields consistent cell
         # vectors.
         _ = self.__validate_feature_space_homogeneity()
-        var_names_store = self.adatas[list(self.adatas.keys())[0]].var_names.tolist()
+        var_names_store = self.adatas_sliced[list(self.adatas_sliced.keys())[0]].var_names.tolist()
         # Use feature space sub-selection based on assembly if provided, will use full feature space otherwise.
         if self.genome_container is not None:
             var_names_target = self.genome_container.ensembl
@@ -144,65 +233,36 @@ class DistributedStore:
                 var_idx = None
         else:
             var_idx = None
+        if idx is not None:
+            idx = self.__validate_global_indices(idx)
 
-        def generator() -> tuple:
-            global_index_set = self.indices_global
-            for i, (k, v) in enumerate(self.adatas.items()):
-                # Define batch partitions:
-                # Get subset of target indices that fall into this data set.
-                # Use indices relative to this data (via .index here).
-                # continuous_slices is evaluated to establish whether slicing can be performed as the potentially
-                # faster [start:end] or needs to tbe index wise [indices]
-                if idx is not None:
-                    idx_i = [global_index_set[k].tolist().index(x) for x in idx if x in global_index_set[k]]
-                    idx_i = np.sort(idx_i)
-                    continuous_slices = np.all(idx_i == np.arange(0, v.n_obs))
-                else:
-                    idx_i = np.arange(0, v.n_obs)
-                    continuous_slices = True
-                if len(idx_i) > 0:  # Skip data objects without matched cells.
-                    n_obs = len(idx_i)
+        def generator():
+            adatas_sliced_subset = self.adatas_sliced_subset(idx=idx)
+            key_batch_starts_ends = []  # List of tuples of data set key and (start, end) index set of batches.
+            for k, adata in adatas_sliced_subset.items():
+                n_obs = adata.shape[0]
+                if n_obs > 0:  # Skip data objects without matched cells.
                     # Cells left over after batching to batch size, accounting for overhang:
                     remainder = n_obs % batch_size
-                    batch_starts_ends = [
-                        (int(x * batch_size), int(x * batch_size) + batch_size)
+                    key_batch_starts_ends_k = [
+                        (k, (int(x * batch_size), int(np.minimum((x * batch_size) + batch_size, n_obs))))
                         for x in np.arange(0, n_obs // batch_size + int(remainder > 0))
                     ]
-                    # Iterate over batches:
-                    for j, (s, e) in enumerate(batch_starts_ends):
-                        if continuous_slices:
-                            e = idx_i[e] if e < n_obs else n_obs
-                            x = v.X[idx_i[s]:e, :]
-                        else:
-                            x = v.X[idx_i[s:e], :]
-                        # Do dense conversion now so that col-wise indexing is not slow, often, dense conversion
-                        # would be done later anyway.
-                        if return_dense:
-                            x = x.todense()
-                        if var_idx is not None:
-                            x = x[:, var_idx]
-                        if continuous_slices:
-                            e = idx_i[e] if e < n_obs else n_obs
-                            obs = v.obs[obs_keys].iloc[idx_i[s]:e, :]
-                        else:
-                            obs = v.obs[obs_keys].iloc[idx_i[s:e], :]
-                        assert isinstance(obs, pd.DataFrame), f"{type(obs)}"
-                        # Yield current batch.
-                        yield x, obs
+                    assert np.sum([v2 - v1 for k, (v1, v2) in key_batch_starts_ends_k]) == n_obs
+                    key_batch_starts_ends.extend(key_batch_starts_ends_k)
+            batch_range = np.arange(0, len(key_batch_starts_ends))
+            if randomized_batch_access:
+                np.random.shuffle(batch_range)
+            for i in batch_range:
+                k, (s, e) = key_batch_starts_ends[i]
+                x, obs = access_helper(adata=adatas_sliced_subset[k], s=s, e=e, j=var_idx, return_dense=return_dense,
+                                       obs_keys=obs_keys)
+                yield x, obs
 
         return generator
 
-    @property
-    def celltypes_universe(self) -> CelltypeUniverse:
-        if self._celltype_universe is None:
-            self._celltype_universe = CelltypeUniverse(
-                cl=self.ontology_container.cellontology_class,
-                uberon=self.ontology_container.organ,
-                organism=None,  # TODO Does not load extensions!
-            )
-        return self._celltype_universe
-
-    def _get_subset_idx(self, attr_key, values: Union[str, List[str]]) -> dict:
+    def get_subset_idx(self, attr_key, values: Union[str, List[str], None],
+                       excluded_values: Union[str, List[str], None]) -> dict:
         """
         Get indices of subset list of adata objects based on cell-wise properties.
 
@@ -220,13 +280,16 @@ class DistributedStore:
             - "sample_source" points to self.sample_source_obs_key
             - "sex" points to self.sex_obs_key
             - "state_exact" points to self.state_exact_obs_key
-        :param values: Classes to overlap to.
+        :param values: Classes to overlap to. Supply either values or excluded_values.
+        :param excluded_values: Classes to exclude from match list. Supply either values or excluded_values.
         :return dictionary of files and observation indices by file.
         """
         if not isinstance(values, list):
             values = [values]
+        assert (values is None or excluded_values is not None) or (values is not None or excluded_values is None), \
+            "supply either values or excluded_values"
 
-        def get_subset_idx(adata, k, dataset):
+        def get_idx(adata, k, v, xv, dataset):
             # Use cell-wise annotation if data set-wide maps are ambiguous:
             # This can happen if the different cell-wise annotations are summarised as a union in .uns.
             if getattr(self._adata_ids_sfaira, k) in adata.uns.keys() and \
@@ -254,30 +317,40 @@ class DistributedStore:
             except AttributeError:
                 raise ValueError(f"{k} not a valid property of ontology_container object")
             # Test only unique elements found in ontology to save time.
-            values_found_unique_matched = [
-                x for x in values_found_unique if np.any([
-                    is_child(query=x, ontology=ontology, ontology_parent=y)
-                    for y in values
-                ])
-            ]
+            if v is not None:
+                values_found_unique_matched = [
+                    x for x in values_found_unique if np.any([
+                        is_child(query=x, ontology=ontology, ontology_parent=y)
+                        for y in v
+                    ])
+                ]
+            else:
+                values_found_unique_matched = [
+                    x for x in values_found_unique if np.all([
+                        not is_child(query=x, ontology=ontology, ontology_parent=y)
+                        for y in xv
+                    ])
+                ]
             # TODO keep this logging for now to catch undesired behaviour resulting from loaded edges in ontologies.
             print(f"matched cell-wise keys {str(values_found_unique_matched)} in data set {dataset}")
             idx = np.where([x in values_found_unique_matched for x in values_found])[0]
             return idx
 
         indices = {}
-        for k, v in self.indices.items():
-            idx_old = v.tolist()
+        for k, adata_k in self.adatas_sliced.items():
             if k not in self.adatas.keys():
                 raise ValueError(f"data set {k} queried by indices does not exist in store (.adatas)")
-            idx_new = get_subset_idx(adata=self.adatas[k], k=attr_key, dataset=k)
+            # Get indices of idx_old to keep:
+            idx_subset = get_idx(adata=adata_k, k=attr_key, v=values, xv=excluded_values, dataset=k)
             # Keep intersection of old and new hits.
-            idx_new = list(set(idx_old).intersection(set(idx_new)))
+            idx_old = self.indices[k]
+            idx_new = np.asarray(idx_old)[idx_subset]
             if len(idx_new) > 0:
                 indices[k] = np.asarray(idx_new, dtype="int32")
         return indices
 
-    def subset(self, attr_key, values: Union[str, List[str]]):
+    def subset(self, attr_key, values: Union[str, List[str], None] = None,
+               excluded_values: Union[str, List[str], None] = None):
         """
         Subset list of adata objects based on cell-wise properties.
 
@@ -297,15 +370,15 @@ class DistributedStore:
             - "sample_source" points to self.sample_source_obs_key
             - "sex" points to self.sex_obs_key
             - "state_exact" points to self.state_exact_obs_key
-        :param values: Classes to overlap to.
+        :param values: Classes to overlap to. Supply either values or excluded_values.
+        :param excluded_values: Classes to exclude from match list. Supply either values or excluded_values.
         """
-        self.indices = self._get_subset_idx(attr_key=attr_key, values=values)
+        self.indices = self.get_subset_idx(attr_key=attr_key, values=values, excluded_values=excluded_values)
+        if self.n_obs == 0:
+            print("WARNING: store is now empty.")
 
-        for k in list(self.adatas.keys()):
-            if k not in self.indices or self.indices[k].shape[0] == 0:  # No observations (cells) left.
-                del self.adatas[k]
-
-    def subset_cells_idx_global(self, attr_key, values: Union[str, List[str]]) -> np.ndarray:
+    def get_subset_idx_global(self, attr_key, values: Union[str, List[str], None] = None,
+                              excluded_values: Union[str, List[str], None] = None) -> np.ndarray:
         """
         Get indices of subset list of adata objects based on cell-wise properties treating instance as single array.
 
@@ -329,13 +402,15 @@ class DistributedStore:
         :return Index vector
         """
         # Get indices of of cells in target set by file.
-        idx_by_dataset = self._get_subset_idx(attr_key=attr_key, values=values)
+        idx_by_dataset = self.get_subset_idx(attr_key=attr_key, values=values, excluded_values=excluded_values)
         # Translate file-wise indices into global index list across all data sets.
         idx = []
         counter = 0
-        for k, v in idx_by_dataset.items():
-            idx.extend((v + counter).tolist())
-            counter += self.adatas[k].n_obs
+        for k, v in self.indices.items():
+            for x in v:
+                if k in idx_by_dataset.keys() and x in idx_by_dataset[k]:
+                    idx.append(counter)
+                counter += 1
         return np.asarray(idx)
 
     @property
@@ -343,6 +418,11 @@ class DistributedStore:
         """
         Increasing indices across data sets which can be concatenated into a single index vector with unique entries
         for cells.
+
+        E.g.: For two data sets of 10 cells each, the return value would be {A:[0..9], B:[10..19]}.
+        Note that this operates over pre-selected indices, if this store was subsetted before resulting in only the
+        second half B to be kept, the return value would be {A:[0..9], B:[10..14]}, where .indices would be
+        {A:[0..9], B:[15..19]}.
         """
         counter = 0
         indices = {}
@@ -412,4 +492,16 @@ class DistributedStore:
 
         :return: .obs data frame.
         """
-        return pd.concat([v.obs for v in self.adatas.values()], axis=0)
+        return pd.concat([v.obs for v in self.adatas_sliced.values()], axis=0)
+
+    def n_counts(self, idx: Union[np.ndarray, list, None] = None) -> np.ndarray:
+        """
+        Compute sum over features for each observation in index.
+
+        :param idx: See parameter idx in .adatas_sliced_subset().
+        :return: Array with sum per observations: (number of observations in index,)
+        """
+        return np.concatenate([
+            np.asarray(v.X.sum(axis=1)).flatten()
+            for v in self.adatas_sliced_subset(idx=idx).values()
+        ], axis=0)

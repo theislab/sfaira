@@ -2,7 +2,7 @@ VAEIAF_TOPOLOGIES = {
     "0.1": {
         "model_type": "vaeiaf",
         "input": {
-            "genome": "Homo_sapiens.GRCh38.102",
+            "genome": "Mus_musculus.GRCm38.102",
             "genes": ["biotype", "protein_coding"],
         },
         "output": {},
@@ -21,7 +21,7 @@ VAEIAF_TOPOLOGIES = {
     "0.2": {
         "model_type": "vaeiaf",
         "input": {
-            "genome": "Homo_sapiens.GRCh38.102",
+            "genome": "Mus_musculus.GRCm38.102",
             "genes": ["biotype", "protein_coding"],
         },
         "output": {},

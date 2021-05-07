@@ -82,8 +82,7 @@ class CellTypeMlpVersioned(CellTypeMlp):
     ):
         """
 
-        :param genome:
-        :param organ:
+        :param celltypes_version:
         :param topology_container:
         :param override_hyperpar: Dictionary with hyper-parameters of model to override in preset hyper-parameter
             dictionary that is queried based on the topology_id. Can contain a subset of all hyperparameters.

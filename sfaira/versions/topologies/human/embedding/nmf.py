@@ -1,8 +1,11 @@
 NMF_TOPOLOGIES = {
     "0.1": {
         "model_type": "linear",
-        "genome": "Homo_sapiens.GRCh38.102",
-        "genes": ["biotype", "protein_coding"],
+        "input": {
+            "genome": "Homo_sapiens.GRCh38.102",
+            "genes": ["biotype", "protein_coding"],
+        },
+        "output": {},
         "hyper_parameters": {
             "latent_dim": 64,
             "l1_coef": 0.,
@@ -14,8 +17,11 @@ NMF_TOPOLOGIES = {
 
     "0.2": {
         "model_type": "linear",
-        "genome": "Homo_sapiens.GRCh38.102",
-        "genes": ["biotype", "protein_coding"],
+        "input": {
+            "genome": "Homo_sapiens.GRCh38.102",
+            "genes": ["biotype", "protein_coding"],
+        },
+        "output": {},
         "hyper_parameters": {
             "latent_dim": 128,
             "l1_coef": 0.,

@@ -1,9 +1,8 @@
-import numpy as np
 try:
     import tensorflow as tf
 except ImportError:
     tf = None
-from typing import List, Union
+from typing import Union
 
 from sfaira.versions.metadata import CelltypeUniverse
 from sfaira.versions.topologies import TopologyContainer
@@ -107,8 +106,7 @@ class CellTypeMarkerVersioned(CellTypeMarker):
     ):
         """
 
-        :param genome:
-        :param organ:
+        :param celltypes_version:
         :param topology_container:
         :param override_hyperpar: Dictionary with hyper-parameters of model to override in preset hyper-parameter
             dictionary that is queried based on the topology_id. Can contain a subset of all hyperparameters.

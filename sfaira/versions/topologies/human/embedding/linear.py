@@ -32,8 +32,11 @@ LINEAR_TOPOLOGIES = {
     },
 
     "0.3": {
-        "genome": "Homo_sapiens.GRCh38.102",
-        "genes": ["biotype", "protein_coding"],
+        "input": {
+            "genome": "Homo_sapiens.GRCh38.102",
+            "genes": ["biotype", "protein_coding"],
+        },
+        "output": {},
         "hyper_parameters": {
             "latent_dim": 128,
             "l1_coef": 0.,

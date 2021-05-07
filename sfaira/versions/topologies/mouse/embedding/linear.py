@@ -2,7 +2,7 @@ LINEAR_TOPOLOGIES = {
     "0.1": {
         "model_type": "linear",
         "input": {
-            "genome": "Homo_sapiens.GRCh38.102",
+            "genome": "Mus_musculus.GRCm38.102",
             "genes": ["biotype", "protein_coding"],
         },
         "output": {},
@@ -18,7 +18,7 @@ LINEAR_TOPOLOGIES = {
     "0.2": {
         "model_type": "linear",
         "input": {
-            "genome": "Homo_sapiens.GRCh38.102",
+            "genome": "Mus_musculus.GRCm38.102",
             "genes": ["biotype", "protein_coding"],
         },
         "output": {},
@@ -34,7 +34,7 @@ LINEAR_TOPOLOGIES = {
     "0.3": {
         "model_type": "linear",
         "input": {
-            "genome": "Homo_sapiens.GRCh38.102",
+            "genome": "Mus_musculus.GRCm38.102",
             "genes": ["biotype", "protein_coding"],
         },
         "output": {},

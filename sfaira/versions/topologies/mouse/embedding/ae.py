@@ -1,8 +1,11 @@
 AE_TOPOLOGIES = {
     "0.1": {
         "model_type": "ae",
-        "genome": "Mus_musculus.GRCm38.102",
-        "genes": ["biotype", "protein_coding"],
+        "input": {
+            "genome": "Mus_musculus.GRCm38.102",
+            "genes": ["biotype", "protein_coding"],
+        },
+        "output": {},
         "hyper_parameters": {
             "latent_dim": (512, 64, 512),
             "l1_coef": 0.,
@@ -18,8 +21,11 @@ AE_TOPOLOGIES = {
 
     "0.2": {
         "model_type": "ae",
-        "genome": "Mus_musculus.GRCm38.102",
-        "genes": ["biotype", "protein_coding"],
+        "input": {
+            "genome": "Mus_musculus.GRCm38.102",
+            "genes": ["biotype", "protein_coding"],
+        },
+        "output": {},
         "hyper_parameters": {
             "latent_dim": (256, 128, 64, 128, 256),
             "l1_coef": 0.,
@@ -35,8 +41,11 @@ AE_TOPOLOGIES = {
 
     "0.3": {
         "model_type": "ae",
-        "genome": "Mus_musculus.GRCm38.102",
-        "genes": ["biotype", "protein_coding"],
+        "input": {
+            "genome": "Mus_musculus.GRCm38.102",
+            "genes": ["biotype", "protein_coding"],
+        },
+        "output": {},
         "hyper_parameters": {
             "latent_dim": (512, 256, 128, 256, 512),
             "l1_coef": 0.,
@@ -53,7 +62,7 @@ AE_TOPOLOGIES = {
     "0.4": {
         "model_type": "ae",
         "input": {
-            "genome": "Homo_sapiens.GRCh38.102",
+            "genome": "Mus_musculus.GRCm38.102",
             "genes": ["biotype", "protein_coding"],
         },
         "output": {},

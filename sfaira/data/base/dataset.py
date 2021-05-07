@@ -1183,15 +1183,15 @@ class DatasetBase(abc.ABC):
                     adata_fields.not_a_cell_celltype_identifier
                 ],
             )
-            results[adata_fields.cell_ontology_class] = labels_mapped
-            results[adata_fields.cell_ontology_id] = ids_mapped
+            results[adata_fields.cellontology_class] = labels_mapped
+            results[adata_fields.cellontology_id] = ids_mapped
             if update_fields:
-                self.cellontology_id_obs_key = adata_fields.cell_ontology_id
+                self.cellontology_id_obs_key = adata_fields.cellontology_id
         else:
-            results[adata_fields.cell_ontology_class] = labels_original
+            results[adata_fields.cellontology_class] = labels_original
         results[adata_fields.cell_types_original] = labels_original
         if update_fields:
-            self.cellontology_class_obs_key = adata_fields.cell_ontology_class
+            self.cellontology_class_obs_key = adata_fields.cellontology_class
             self.cell_types_original_obs_key = adata_fields.cell_types_original
         if copy:
             return pd.DataFrame(results, index=self.adata.obs.index)
@@ -1340,12 +1340,12 @@ class DatasetBase(abc.ABC):
         # Add cell types into table if available:
         if self.cell_types_original_obs_key is not None:
             mappings = self.project_celltypes_to_ontology(copy=True, update_fields=False)
-            meta[self._adata_ids.cell_ontology_class] = (mappings[self._adata_ids.cell_ontology_class].unique(),)
-            meta[self._adata_ids.cell_ontology_id] = (mappings[self._adata_ids.cell_ontology_id].unique(),)
+            meta[self._adata_ids.cellontology_class] = (mappings[self._adata_ids.cellontology_class].unique(),)
+            meta[self._adata_ids.cellontology_id] = (mappings[self._adata_ids.cellontology_id].unique(),)
             meta[self._adata_ids.cell_types_original] = (mappings[self._adata_ids.cell_types_original].unique(),)
         else:
-            meta[self._adata_ids.cell_ontology_class] = " "
-            meta[self._adata_ids.cell_ontology_id] = " "
+            meta[self._adata_ids.cellontology_class] = " "
+            meta[self._adata_ids.cellontology_id] = " "
             meta[self._adata_ids.cell_types_original] = " "
         meta.to_csv(fn_meta)
 

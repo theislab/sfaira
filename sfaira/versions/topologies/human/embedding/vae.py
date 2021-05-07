@@ -20,8 +20,11 @@ VAE_TOPOLOGIES = {
 
     "0.2": {
         "model_type": "vae",
-        "genome": "Homo_sapiens.GRCh38.102",
-        "genes": ["biotype", "protein_coding"],
+        "input": {
+            "genome": "Homo_sapiens.GRCh38.102",
+            "genes": ["biotype", "protein_coding"],
+        },
+        "output": {},
         "hyper_parameters": {
             "latent_dim": (256, 128, 64, 128, 256),
             "l1_coef": 0.,

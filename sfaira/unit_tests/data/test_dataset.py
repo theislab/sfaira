@@ -75,7 +75,7 @@ def test_dsgs_subset_cell_wise(organ: str, celltype: str):
         for k, v in x.datasets.items():
             assert v.organism == "mouse", v.id
             assert v.ontology_container_sfaira.organ.is_a(query=v.organ, reference=organ), v.organ
-            for y in np.unique(v.adata.obs[v._adata_ids.cell_ontology_class].values):
+            for y in np.unique(v.adata.obs[v._adata_ids.cellontology_class].values):
                 assert v.ontology_container_sfaira.cellontology_class.is_a(query=y, reference=celltype), y
 
 
