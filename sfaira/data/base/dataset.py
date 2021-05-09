@@ -953,6 +953,7 @@ class DatasetBase(abc.ABC):
             compression, compression_opts.
         :param chunks: Observation axes of chunk size of zarr array, see anndata.AnnData.write_zarr documentation.
             Only relevant for store=="zarr". The feature dimension of the chunks is always is the full feature space.
+            Uses zarr default chunking across both axes if None.
         """
         self.__assert_loaded()
         if store == "h5ad":
@@ -974,7 +975,7 @@ class DatasetBase(abc.ABC):
             elif not dense and isinstance(self.adata.X, np.matrix):
                 self.adata.X = scipy.sparse.csr_matrix(np.asarray(self.adata.X))
             fn = os.path.join(dir_cache, self.doi_cleaned_id)
-            chunks = (chunks, self.adata.X.shape[1])
+            chunks = (chunks, self.adata.X.shape[1]) if chunks is not None else True
             self.adata.write_zarr(store=fn, chunks=chunks, **compression_kwargs)
         else:
             raise ValueError()
