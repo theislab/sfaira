@@ -951,8 +951,8 @@ class DatasetBase(abc.ABC):
         :param dense: Whether to write sparse or dense store, this will be homogenously enforced.
         :param compression_kwargs: Compression key word arguments to give to h5py, see also anndata.AnnData.write_h5ad:
             compression, compression_opts.
-        :param chunks: Chunk size of zarr array, see anndata.AnnData.write_zarr documentation.
-            Only relevant for store=="zarr".
+        :param chunks: Observation axes of chunk size of zarr array, see anndata.AnnData.write_zarr documentation.
+            Only relevant for store=="zarr". The feature dimension of the chunks is always is the full feature space.
         """
         self.__assert_loaded()
         if store == "h5ad":
@@ -974,6 +974,7 @@ class DatasetBase(abc.ABC):
             elif not dense and isinstance(self.adata.X, np.matrix):
                 self.adata.X = scipy.sparse.csr_matrix(np.asarray(self.adata.X))
             fn = os.path.join(dir_cache, self.doi_cleaned_id)
+            chunks = (chunks, self.adata.X.shape[1])
             self.adata.write_zarr(store=fn, chunks=chunks, **compression_kwargs)
         else:
             raise ValueError()

@@ -17,7 +17,7 @@ if store_type == "h5ad":
     compression_kwargs = {"dense": False, "compression_kwargs": {}}
 elif store_type == "zarr":
     # Write dense arrays in zarr.
-    compression_kwargs = {"dense": True, "chunks": 128,
+    compression_kwargs = {"dense": True, "chunks": 64,
                           "compression_kwargs": {"dtype": "float32", "compressor": "default", "overwrite": True,
                                                  "order": "C"}}
 else:
