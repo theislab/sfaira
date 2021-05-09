@@ -964,8 +964,17 @@ class DatasetBase(abc.ABC):
             print(f"writing {self.adata.shape} into {fn}")
             self.adata.write_h5ad(filename=fn, as_dense=as_dense, **compression_kwargs)
         elif store == "zarr":
+            # Convert data object to sparse / dense as required:
+            if dense and isinstance(self.adata.X, scipy.sparse.spmatrix):
+                self.adata.X = np.asarray(self.adata.X.todense())
+            elif dense and isinstance(self.adata.X, np.matrix):
+                self.adata.X = np.asarray(self.adata.X)
+            elif not dense and isinstance(self.adata.X, np.ndarray):
+                self.adata.X = scipy.sparse.csr_matrix(self.adata.X)
+            elif not dense and isinstance(self.adata.X, np.matrix):
+                self.adata.X = scipy.sparse.csr_matrix(np.asarray(self.adata.X))
             fn = os.path.join(dir_cache, self.doi_cleaned_id)
-            self.adata.write_zarr(store=fn, chunks=chunks)
+            self.adata.write_zarr(store=fn, chunks=chunks, **compression_kwargs)
         else:
             raise ValueError()
 
