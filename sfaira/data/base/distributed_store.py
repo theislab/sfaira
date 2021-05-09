@@ -310,7 +310,8 @@ class DistributedStore:
                 if getattr(self._adata_ids_sfaira, k) in adata.obs.keys():
                     values_found = adata.obs[getattr(self._adata_ids_sfaira, k)].values
                 else:
-                    raise ValueError(f"did not find unique attribute {k} in data set {dataset}")
+                    values_found = []
+                    print(f"WARNING: did not find attribute {k} in data set {dataset}")
             values_found_unique = np.unique(values_found)
             try:
                 ontology = getattr(self.ontology_container, k)
