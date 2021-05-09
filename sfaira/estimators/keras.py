@@ -186,6 +186,7 @@ class EstimatorKeras:
             weighted: bool,
             retrieval_batch_size: int,
             randomized_batch_access: bool,
+            prefetch: Union[int, None],
     ) -> tf.data.Dataset:
         pass
 
@@ -338,6 +339,7 @@ class EstimatorKeras:
             cache_full: bool = False,
             randomized_batch_access: bool = True,
             retrieval_batch_size: int = 512,
+            prefetch: Union[int, None] = 1,
             log_dir: Union[str, None] = None,
             callbacks: Union[list, None] = None,
             weighted: bool = False,
@@ -458,6 +460,7 @@ class EstimatorKeras:
             weighted=weighted,
             cache_full=cache_full,
             randomized_batch_access=randomized_batch_access,
+            prefetch=prefetch,
         )
         eval_dataset = self._get_dataset(
             idx=self.idx_eval,
@@ -468,6 +471,7 @@ class EstimatorKeras:
             weighted=weighted,
             cache_full=cache_full,
             randomized_batch_access=randomized_batch_access,
+            prefetch=prefetch,
         )
 
         steps_per_epoch = min(max(len(self.idx_train) // batch_size, 1), max_steps_per_epoch)
@@ -653,6 +657,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             weighted: bool = False,
             retrieval_batch_size: int = 128,
             randomized_batch_access: bool = False,
+            prefetch: Union[int, None] = 1,
     ) -> tf.data.Dataset:
         """
 
@@ -703,7 +708,9 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                         buffer_size=min(n_samples, shuffle_buffer_size),
                         seed=None,
                         reshuffle_each_iteration=True)
-            dataset = dataset.batch(batch_size, drop_remainder=False).prefetch(tf.data.AUTOTUNE)
+            if prefetch is None:
+                prefetch = tf.data.AUTOTUNE
+            dataset = dataset.batch(batch_size, drop_remainder=False).prefetch(prefetch)
 
             return dataset
 
@@ -1234,6 +1241,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             weighted: bool = False,
             retrieval_batch_size: int = 128,
             randomized_batch_access: bool = False,
+            prefetch: Union[int, None] = 1,
     ) -> tf.data.Dataset:
         """
 
@@ -1279,7 +1287,9 @@ class EstimatorKerasCelltype(EstimatorKeras):
                     buffer_size=min(n_samples, shuffle_buffer_size),
                     seed=None,
                     reshuffle_each_iteration=True)
-        dataset = dataset.batch(batch_size, drop_remainder=False).prefetch(tf.data.AUTOTUNE)
+        if prefetch is None:
+            prefetch = tf.data.AUTOTUNE
+        dataset = dataset.batch(batch_size, drop_remainder=False).prefetch(prefetch)
 
         return dataset
 
