@@ -76,7 +76,7 @@ by `_`, below referred to as `--DOI-folder--`:
 6. Write load function.
     Fill load function in `sfaira/data/dataloaders/loaders/--DOI-folder--NA_NA_2021_NA_Einstein_001.py`.
 
-7. Clean the dataloader with a supervicial check (lint).
+7. Clean the dataloader with a superficial check (clean).
     This step is optional.
 
 .. code-block::
@@ -86,13 +86,13 @@ by `_`, below referred to as `--DOI-folder--`:
 ..
 
 8. Validate the dataloader with the CLI.
-    Next validate the integrity of your dataloader content with ``sfaira lint-dataloader <path to *.yaml>``.
+    Next validate the integrity of your dataloader content with ``sfaira validate-dataloader <path to *.yaml>``.
     All tests must pass! If any of the tests fail please revisit your dataloader and add the missing information.
 
 .. code-block::
 
     # make sure you are in the top-level sfaira directory from step 1
-    sfaira lint-dataloader <path>``
+    sfaira validate-dataloader <path>``
 ..
 
 9. Create cell type annotation if your data set is annotated.
@@ -448,7 +448,7 @@ Now simply fill in all missing properties in your dataloader scripts and yaml fi
 When done optionally run ``sfaira clean-dataloader <path to *.yaml>`` on the just filled out dataloader yaml file.
 All unused attributes will be removed.
 
-Next validate the integrity of your dataloader content with ``sfaira lint-dataloader <path to *.yaml>``.
+Next validate the integrity of your dataloader content with ``sfaira validate-dataloader <path to *.yaml>``.
 All tests must pass! If any of the tests fail please revisit your dataloader and add the missing information.
 
 Finally, copy your dataloader into the ``sfaira/dataloaders/loaders/`` folder.
