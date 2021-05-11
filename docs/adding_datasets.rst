@@ -3,6 +3,14 @@ Adding data sets
 
 Adding datasets to sfaira is a great way to increase the visibility of your dataset and to make it available to a large audience.
 This process requires a couple of steps as outlined in the following sections.
+
+
+.. figure:: https://user-images.githubusercontent.com/21954664/117845386-c6744a00-b280-11eb-9d86-8c47132a3949.png
+   :alt: sfaira adding datasets
+
+   Overview of contributing dataloaders to sfaira. First, ensure that your data is not yet available as a dataloader.
+   Next, create a dataloader and validate it. Afterwards, annotate it to finally test it. Finally, submit your dataloader to sfaira.
+
 sfaira features an interactive way of creating, formatting and testing dataloaders through a command line interface (CLI).
 The common workflow using the CLI looks as follows:
 
