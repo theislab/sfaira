@@ -10,6 +10,7 @@ numpy>=1.16.4
 obonet
 openpyxl
 pandas
+pyarrow
 pytest>=6.2.2
 python-Levenshtein
 PyYAML

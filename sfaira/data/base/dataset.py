@@ -21,6 +21,7 @@ import ssl
 from sfaira.versions.genomes import GenomeContainer
 from sfaira.versions.metadata import Ontology, OntologyHierarchical, CelltypeUniverse
 from sfaira.consts import AdataIds, AdataIdsCellxgene, AdataIdsSfaira, META_DATA_FIELDS, OCS
+from sfaira.data.base.zarr_andata import write_zarr
 from sfaira.data.utils import collapse_matrix, read_yaml
 
 UNS_STRING_META_IN_OBS = "__obs__"
@@ -993,8 +994,7 @@ class DatasetBase(abc.ABC):
                 self.adata.X = scipy.sparse.csr_matrix(np.asarray(self.adata.X))
             fn = os.path.join(dir_cache, self.doi_cleaned_id)
             chunks = (chunks, self.adata.X.shape[1]) if chunks is not None else True
-            # The write_zarr method of AnnData object does not propagate kwargs yet, use raw function here:
-            anndata._io.write_zarr(store=fn, adata=self.adata, chunks=chunks, **compression_kwargs)
+            write_zarr(store=fn, adata=self.adata, chunks=chunks, compression_kwargs=compression_kwargs)
         else:
             raise ValueError()
 
