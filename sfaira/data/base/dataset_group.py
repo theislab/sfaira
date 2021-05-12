@@ -228,8 +228,9 @@ class DatasetGroup:
         :param dense: Whether to write sparse or dense store, this will be homogenously enforced.
         :param compression_kwargs: Compression key word arguments to give to h5py, see also anndata.AnnData.write_h5ad:
             compression, compression_opts.
-        :param chunks: Chunk size of zarr array, see anndata.AnnData.write_zarr documentation.
-            Only relevant for store=="zarr".
+        :param chunks: Observation axes of chunk size of zarr array, see anndata.AnnData.write_zarr documentation.
+            Only relevant for store=="zarr". The feature dimension of the chunks is always is the full feature space.
+            Uses zarr default chunking across both axes if None.
         """
         for _, v in self.datasets.items():
             v.write_distributed_store(dir_cache=dir_cache, store=store, dense=dense,
@@ -1001,8 +1002,9 @@ class DatasetSuperGroup:
         :param dense: Whether to write sparse or dense store, this will be homogenously enforced.
         :param compression_kwargs: Compression key word arguments to give to h5py, see also anndata.AnnData.write_h5ad:
             compression, compression_opts.
-        :param chunks: Chunk size of zarr array, see anndata.AnnData.write_zarr documentation.
-            Only relevant for store=="zarr".
+        :param chunks: Observation axes of chunk size of zarr array, see anndata.AnnData.write_zarr documentation.
+            Only relevant for store=="zarr". The feature dimension of the chunks is always is the full feature space.
+            Uses zarr default chunking across both axes if None.
         """
         for x in self.dataset_groups:
             x.write_distributed_store(dir_cache=dir_cache, store=store, dense=dense,
