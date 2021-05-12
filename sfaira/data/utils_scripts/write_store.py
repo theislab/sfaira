@@ -14,12 +14,12 @@ store_type = str(sys.argv[5]).lower()
 # On disk format hyperparameters
 if store_type == "h5ad":
     # Write sparse arrays in h5ad.
-    compression_kwargs = {"dense": False, "compression_kwargs": {}}
+    kwargs = {"dense": False}
+    compression_kwargs = {}
 elif store_type == "zarr":
     # Write dense arrays in zarr.
-    compression_kwargs = {"dense": True, "chunks": 512,
-                          "compression_kwargs": {"dtype": "float32", "compressor": "default", "overwrite": True,
-                                                 "order": "C"}}
+    kwargs = {"dense": True, "chunks": 128}
+    compression_kwargs = {"compressor": "default", "overwrite": True, "order": "C"}
 else:
     assert False, store_type
 
@@ -47,5 +47,6 @@ for k, ds in universe.datasets.items():
         )
         ds.streamline_metadata(schema="sfaira", uns_to_obs=True, clean_obs=True, clean_var=True, clean_uns=True,
                                clean_obs_names=True)
-        ds.write_distributed_store(dir_cache=path_store, store_format=store_type, **compression_kwargs)
+        ds.write_distributed_store(dir_cache=path_store, store_format=store_type, compression_kwargs=compression_kwargs,
+                                   **kwargs)
         ds.clear()

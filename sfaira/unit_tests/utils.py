@@ -2,7 +2,7 @@ import anndata
 import numpy as np
 import os
 
-from sfaira.data import DistributedStore, Universe
+from sfaira.data import Universe
 
 
 def simulate_anndata(genes, n_obs, targets=None, assays=None) -> anndata.AnnData:
@@ -17,12 +17,12 @@ def simulate_anndata(genes, n_obs, targets=None, assays=None) -> anndata.AnnData
     if assays is not None:
         data.obs["assay_sc"] = [
             assays[np.random.randint(0, len(assays))]
-            for i in range(n_obs)
+            for _ in range(n_obs)
         ]
     if targets is not None:
         data.obs["cell_ontology_class"] = [
             targets[np.random.randint(0, len(targets))]
-            for i in range(n_obs)
+            for _ in range(n_obs)
         ]
     data.var["ensembl"] = genes
     return data
@@ -42,7 +42,8 @@ def cached_store_writing(dir_data, dir_meta, assembly, organism: str = "mouse", 
     # Only load files that are not already in cache.
     anticipated_files = np.unique([
         v.doi[0] if isinstance(v.doi, list) else v.doi for k, v in ds.datasets.items()
-        if (not os.path.exists(os.path.join(store_path, v.doi_cleaned_id + "." + store_format)) and store_format == "h5ad") or
+        if (not os.path.exists(os.path.join(store_path, v.doi_cleaned_id + "." + store_format)) and
+            store_format == "h5ad") or
            (not os.path.exists(os.path.join(store_path, v.doi_cleaned_id)) and store_format == "zarr")
     ]).tolist()
     ds.subset(key="doi", values=anticipated_files)
@@ -51,5 +52,10 @@ def cached_store_writing(dir_data, dir_meta, assembly, organism: str = "mouse", 
                            subset_genes_to_type="protein_coding")
     ds.streamline_metadata(schema="sfaira", uns_to_obs=True, clean_obs=True, clean_var=True, clean_uns=True,
                            clean_obs_names=True)
-    ds.write_distributed_store(dir_cache=store_path, store_format=store_format, dense=store_format == "zarr")
+    if store_format == "zarr":
+        compression_kwargs = {"compressor": "default", "overwrite": True, "order": "C"}
+    else:
+        compression_kwargs = {}
+    ds.write_distributed_store(dir_cache=store_path, store_format=store_format, dense=store_format == "zarr",
+                               chunks=128, compression_kwargs=compression_kwargs)
     return store_path
