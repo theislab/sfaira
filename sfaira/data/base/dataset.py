@@ -810,7 +810,13 @@ class DatasetBase(abc.ABC):
         # Map cell type names from raw IDs to ontology maintained ones:
         if self.cell_types_original_obs_key is not None:
             obs_cl = self.project_celltypes_to_ontology(copy=True, adata_fields=adata_target_ids)
-            obs_new = pd.concat([obs_new, obs_cl], axis=1)
+        else:
+            obs_cl = pd.DataFrame({
+                adata_target_ids.cellontology_class: [None] * self.adata.n_obs,
+                adata_target_ids.cellontology_id: [None] * self.adata.n_obs,
+                adata_target_ids.cell_types_original: [None] * self.adata.n_obs,
+            }, index=self.adata.obs.index)
+        obs_new = pd.concat([obs_new, obs_cl], axis=1)
 
         # Add new annotation to adata and delete old fields if requested
         if clean_var:
@@ -1210,6 +1216,7 @@ class DatasetBase(abc.ABC):
                 self.cellontology_id_obs_key = adata_fields.cellontology_id
         else:
             results[adata_fields.cellontology_class] = labels_original
+            results[adata_fields.cellontology_id] = [None] * self.adata.n_obs
         results[adata_fields.cell_types_original] = labels_original
         if update_fields:
             self.cellontology_class_obs_key = adata_fields.cellontology_class
