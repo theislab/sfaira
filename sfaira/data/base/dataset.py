@@ -949,8 +949,16 @@ class DatasetBase(abc.ABC):
                     access if the files are csr, so further compression potentially not necessary.
             - "zarr": Allows access as zarr array.
         :param dense: Whether to write sparse or dense store, this will be homogenously enforced.
-        :param compression_kwargs: Compression key word arguments to give to h5py, see also anndata.AnnData.write_h5ad:
-            compression, compression_opts.
+        :param compression_kwargs: Compression key word arguments to give to h5py or zarr
+            See also anndata.AnnData.write_h5ad:
+                - compression,
+                - compression_opts.
+            See also anndata.AnnData.write_zarr which relays kwargs to zarr.hierarchy.create_dataset:
+                - dtype
+                - compressor
+                - overwrite
+                - order
+                and others.
         :param chunks: Observation axes of chunk size of zarr array, see anndata.AnnData.write_zarr documentation.
             Only relevant for store=="zarr". The feature dimension of the chunks is always is the full feature space.
             Uses zarr default chunking across both axes if None.
@@ -966,6 +974,8 @@ class DatasetBase(abc.ABC):
             self.adata.write_h5ad(filename=fn, as_dense=as_dense, **compression_kwargs)
         elif store == "zarr":
             # Convert data object to sparse / dense as required:
+            if not dense:
+                print("WARNING: sparse zarr array performance may not be optimal, consider writing as dense and consider that zarr arrays can be compressed on disk")
             if dense and isinstance(self.adata.X, scipy.sparse.spmatrix):
                 self.adata.X = np.asarray(self.adata.X.todense())
             elif dense and isinstance(self.adata.X, np.matrix):

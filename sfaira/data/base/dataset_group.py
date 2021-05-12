@@ -226,8 +226,16 @@ class DatasetGroup:
                     access if the files are csr, so further compression potentially not necessary.
             - "zarr": Allows access as zarr array.
         :param dense: Whether to write sparse or dense store, this will be homogenously enforced.
-        :param compression_kwargs: Compression key word arguments to give to h5py, see also anndata.AnnData.write_h5ad:
-            compression, compression_opts.
+        :param compression_kwargs: Compression key word arguments to give to h5py or zarr
+            See also anndata.AnnData.write_h5ad:
+                - compression,
+                - compression_opts.
+            See also anndata.AnnData.write_zarr which relays kwargs to zarr.hierarchy.create_dataset:
+                - dtype
+                - compressor
+                - overwrite
+                - order
+                and others.
         :param chunks: Observation axes of chunk size of zarr array, see anndata.AnnData.write_zarr documentation.
             Only relevant for store=="zarr". The feature dimension of the chunks is always is the full feature space.
             Uses zarr default chunking across both axes if None.
@@ -1000,8 +1008,16 @@ class DatasetSuperGroup:
                     access if the files are csr, so further compression potentially not necessary.
             - "zarr": Allows access as zarr array.
         :param dense: Whether to write sparse or dense store, this will be homogenously enforced.
-        :param compression_kwargs: Compression key word arguments to give to h5py, see also anndata.AnnData.write_h5ad:
-            compression, compression_opts.
+        :param compression_kwargs: Compression key word arguments to give to h5py or zarr
+            See also anndata.AnnData.write_h5ad:
+                - compression,
+                - compression_opts.
+            See also anndata.AnnData.write_zarr which relays kwargs to zarr.hierarchy.create_dataset:
+                - dtype
+                - compressor
+                - overwrite
+                - order
+                and others.
         :param chunks: Observation axes of chunk size of zarr array, see anndata.AnnData.write_zarr documentation.
             Only relevant for store=="zarr". The feature dimension of the chunks is always is the full feature space.
             Uses zarr default chunking across both axes if None.
