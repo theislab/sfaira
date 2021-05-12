@@ -570,9 +570,9 @@ class OntologyUberon(OntologyExtendedObo):
             **kwargs
     ):
         obofile = cached_load_obo(
-            url=f"http://purl.obolibrary.org/obo/uberon.obo",
+            url="http://purl.obolibrary.org/obo/uberon.obo",
             ontology_cache_dir="uberon",
-            ontology_cache_fn=f"uberon.obo",
+            ontology_cache_fn="uberon.obo",
         )
         super().__init__(obo=obofile)
 
@@ -807,7 +807,7 @@ class OntologyHsapdv(OntologyExtendedObo):
         obofile = cached_load_obo(
             url="http://purl.obolibrary.org/obo/hsapdv.obo",
             ontology_cache_dir="hsapdv",
-            ontology_cache_fn=f"hsapdv.obo",
+            ontology_cache_fn="hsapdv.obo",
         )
         super().__init__(obo=obofile)
 
@@ -833,7 +833,7 @@ class OntologyMmusdv(OntologyExtendedObo):
         obofile = cached_load_obo(
             url="http://purl.obolibrary.org/obo/mmusdv.obo",
             ontology_cache_dir="mmusdv",
-            ontology_cache_fn=f"mmusdv.obo",
+            ontology_cache_fn="mmusdv.obo",
         )
         super().__init__(obo=obofile)
 
@@ -859,7 +859,7 @@ class OntologyMondo(OntologyExtendedObo):
         obofile = cached_load_obo(
             url="http://purl.obolibrary.org/obo/mondo.obo",
             ontology_cache_dir="mondo",
-            ontology_cache_fn=f"mondo.obo",
+            ontology_cache_fn="mondo.obo",
         )
         super().__init__(obo=obofile)
 
@@ -894,7 +894,7 @@ class OntologyCellosaurus(OntologyExtendedObo):
         obofile = cached_load_obo(
             url="https://ftp.expasy.org/databases/cellosaurus/cellosaurus.obo",
             ontology_cache_dir="cellosaurus",
-            ontology_cache_fn=f"cellosaurus.obo",
+            ontology_cache_fn="cellosaurus.obo",
         )
         super().__init__(obo=obofile)
 

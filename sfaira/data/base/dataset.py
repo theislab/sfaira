@@ -981,7 +981,8 @@ class DatasetBase(abc.ABC):
         elif store == "zarr":
             # Convert data object to sparse / dense as required:
             if not dense:
-                print("WARNING: sparse zarr array performance may not be optimal, consider writing as dense and consider that zarr arrays can be compressed on disk")
+                print("WARNING: sparse zarr array performance may not be optimal, "
+                      "consider writing as dense and consider that zarr arrays can be compressed on disk")
             if dense and isinstance(self.adata.X, scipy.sparse.spmatrix):
                 self.adata.X = np.asarray(self.adata.X.todense())
             elif dense and isinstance(self.adata.X, np.matrix):
