@@ -930,7 +930,7 @@ class DatasetBase(abc.ABC):
     def write_distributed_store(
             self,
             dir_cache: Union[str, os.PathLike],
-            store: str = "h5ad",
+            store_format: str = "zarr",
             dense: bool = False,
             compression_kwargs: dict = {},
             chunks: Union[int, None] = None,
@@ -942,7 +942,7 @@ class DatasetBase(abc.ABC):
         data sets that are accessed. Use .streamline_* before calling this method to streamline the data sets.
 
         :param dir_cache: Directory to write cache in.
-        :param store: Disk format for objects in cache:
+        :param store_format: Disk format for objects in cache. Recommended is "zarr".
 
             - "h5ad": Allows access via backed .h5ad.
                 Note on compression: .h5ad supports sparse data with is a good compression that gives fast row-wise
@@ -964,7 +964,7 @@ class DatasetBase(abc.ABC):
             Uses zarr default chunking across both axes if None.
         """
         self.__assert_loaded()
-        if store == "h5ad":
+        if store_format == "h5ad":
             if not isinstance(self.adata.X, scipy.sparse.csr_matrix):
                 print(f"WARNING: high-perfomances caches based on .h5ad work better with .csr formatted expression "
                       f"data, found {type(self.adata.X)}")
@@ -972,7 +972,7 @@ class DatasetBase(abc.ABC):
             as_dense = ("X",) if dense else ()
             print(f"writing {self.adata.shape} into {fn}")
             self.adata.write_h5ad(filename=fn, as_dense=as_dense, **compression_kwargs)
-        elif store == "zarr":
+        elif store_format == "zarr":
             # Convert data object to sparse / dense as required:
             if not dense:
                 print("WARNING: sparse zarr array performance may not be optimal, consider writing as dense and consider that zarr arrays can be compressed on disk")

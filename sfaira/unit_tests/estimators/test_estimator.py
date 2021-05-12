@@ -367,7 +367,7 @@ def test_split_index_sets(organism: str, organ: str, data_type: str, randomized_
     assert len(idx_train) + len(idx_eval) + len(idx_test) == test_estim.data.n_obs, \
         (len(idx_train), len(idx_eval), len(idx_test), test_estim.data.n_obs)
     if isinstance(test_estim.data, DistributedStore):
-        assert np.sum([v.shape[0] for v in test_estim.data.adatas_sliced.values()]) == test_estim.data.n_obs
+        assert np.sum([v.shape[0] for v in test_estim.data.adata.values()]) == test_estim.data.n_obs
     # 2) Assert that index assignments are exclusive to each split:
     assert len(set(idx_train).intersection(set(idx_eval))) == 0
     assert len(set(idx_train).intersection(set(idx_test))) == 0

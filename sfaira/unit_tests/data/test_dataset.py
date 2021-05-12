@@ -121,7 +121,7 @@ def test_dsg_write_store(store: str, dense: bool, clean_obs: bool):
                            subset_genes_to_type="protein_coding")
     ds.streamline_metadata(schema="sfaira", uns_to_obs=False, clean_obs=clean_obs, clean_var=True, clean_uns=True,
                            clean_obs_names=True)
-    ds.write_distributed_store(dir_cache=os.path.join(dir_data, "store"), store=store, dense=dense)
+    ds.write_distributed_store(dir_cache=os.path.join(dir_data, "store"), store_format=store, dense=dense)
 
 
 def test_dsg_load():

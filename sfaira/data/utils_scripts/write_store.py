@@ -17,7 +17,7 @@ if store_type == "h5ad":
     compression_kwargs = {"dense": False, "compression_kwargs": {}}
 elif store_type == "zarr":
     # Write dense arrays in zarr.
-    compression_kwargs = {"dense": True, "chunks": 64,
+    compression_kwargs = {"dense": True, "chunks": 512,
                           "compression_kwargs": {"dtype": "float32", "compressor": "default", "overwrite": True,
                                                  "order": "C"}}
 else:
@@ -26,7 +26,12 @@ else:
 universe = sfaira.data.dataloaders.Universe(data_path=data_path, meta_path=path_meta, cache_path=path_cache)
 
 for k, ds in universe.datasets.items():
-    fn_store = os.path.join(path_store, ds.doi_cleaned_id + ".h5ad")
+    if store_type == "h5ad":
+        fn_store = os.path.join(path_store, ds.doi_cleaned_id + ".h5ad")
+    elif store_type == "zarr":
+        fn_store = os.path.join(path_store, ds.doi_cleaned_id)
+    else:
+        assert False
     if os.path.exists(fn_store):
         print(f"SCRIPT skipping {k}")
     else:
@@ -42,5 +47,5 @@ for k, ds in universe.datasets.items():
         )
         ds.streamline_metadata(schema="sfaira", uns_to_obs=True, clean_obs=True, clean_var=True, clean_uns=True,
                                clean_obs_names=True)
-        ds.write_distributed_store(dir_cache=path_store, store=store_type, **compression_kwargs)
+        ds.write_distributed_store(dir_cache=path_store, store_format=store_type, **compression_kwargs)
         ds.clear()

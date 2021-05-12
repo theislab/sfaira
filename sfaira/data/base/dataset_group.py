@@ -206,7 +206,7 @@ class DatasetGroup:
     def write_distributed_store(
             self,
             dir_cache: Union[str, os.PathLike],
-            store: str = "h5ad",
+            store_format: str = "zarr",
             dense: bool = False,
             compression_kwargs: dict = {},
             chunks: Union[int, None] = None,
@@ -219,7 +219,7 @@ class DatasetGroup:
         This method writes a separate file for each data set in this object.
 
         :param dir_cache: Directory to write cache in.
-        :param store: Disk format for objects in cache:
+        :param store_format: Disk format for objects in cache. Recommended is "zarr".
 
             - "h5ad": Allows access via backed .h5ad.
                 Note on compression: .h5ad supports sparse data with is a good compression that gives fast row-wise
@@ -241,7 +241,7 @@ class DatasetGroup:
             Uses zarr default chunking across both axes if None.
         """
         for _, v in self.datasets.items():
-            v.write_distributed_store(dir_cache=dir_cache, store=store, dense=dense,
+            v.write_distributed_store(dir_cache=dir_cache, store_format=store_format, dense=dense,
                                       compression_kwargs=compression_kwargs, chunks=chunks)
 
     def write_backed(
@@ -988,7 +988,7 @@ class DatasetSuperGroup:
     def write_distributed_store(
             self,
             dir_cache: Union[str, os.PathLike],
-            store: str = "h5ad",
+            store_format: str = "zarr",
             dense: bool = False,
             compression_kwargs: dict = {},
             chunks: Union[int, None] = None,
@@ -1001,7 +1001,7 @@ class DatasetSuperGroup:
         This method writes a separate file for each data set in this object.
 
         :param dir_cache: Directory to write cache in.
-        :param store: Disk format for objects in cache:
+        :param store_format: Disk format for objects in cache. Recommended is "zarr".
 
             - "h5ad": Allows access via backed .h5ad.
                 Note on compression: .h5ad supports sparse data with is a good compression that gives fast row-wise
@@ -1023,7 +1023,7 @@ class DatasetSuperGroup:
             Uses zarr default chunking across both axes if None.
         """
         for x in self.dataset_groups:
-            x.write_distributed_store(dir_cache=dir_cache, store=store, dense=dense,
+            x.write_distributed_store(dir_cache=dir_cache, store_format=store_format, dense=dense,
                                       compression_kwargs=compression_kwargs, chunks=chunks)
 
     def write_backed(
