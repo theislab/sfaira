@@ -206,7 +206,7 @@ class DatasetGroup:
     def write_distributed_store(
             self,
             dir_cache: Union[str, os.PathLike],
-            store_format: str = "zarr",
+            store_format: str = "dao",
             dense: bool = False,
             compression_kwargs: dict = {},
             chunks: Union[int, None] = None,
@@ -219,25 +219,26 @@ class DatasetGroup:
         This method writes a separate file for each data set in this object.
 
         :param dir_cache: Directory to write cache in.
-        :param store_format: Disk format for objects in cache. Recommended is "zarr".
+        :param store_format: Disk format for objects in cache. Recommended is "dao".
 
             - "h5ad": Allows access via backed .h5ad.
                 Note on compression: .h5ad supports sparse data with is a good compression that gives fast row-wise
                     access if the files are csr, so further compression potentially not necessary.
-            - "zarr": Allows access as zarr array.
+            - "dao": Distributed access optimised format, recommended for batched access in optimisation, for example.
         :param dense: Whether to write sparse or dense store, this will be homogenously enforced.
         :param compression_kwargs: Compression key word arguments to give to h5py or zarr
-            See also anndata.AnnData.write_h5ad:
+            For store_format=="h5ad", see also anndata.AnnData.write_h5ad:
                 - compression,
                 - compression_opts.
-            See also anndata.AnnData.write_zarr which relays kwargs to zarr.hierarchy.create_dataset:
+            For store_format=="dao", see also sfaira.data.write_dao which relays kwargs to
+            zarr.hierarchy.create_dataset:
                 - dtype
                 - compressor
                 - overwrite
                 - order
                 and others.
         :param chunks: Observation axes of chunk size of zarr array, see anndata.AnnData.write_zarr documentation.
-            Only relevant for store=="zarr". The feature dimension of the chunks is always is the full feature space.
+            Only relevant for store=="dao". The feature dimension of the chunks is always is the full feature space.
             Uses zarr default chunking across both axes if None.
         """
         for _, v in self.datasets.items():
@@ -988,7 +989,7 @@ class DatasetSuperGroup:
     def write_distributed_store(
             self,
             dir_cache: Union[str, os.PathLike],
-            store_format: str = "zarr",
+            store_format: str = "dao",
             dense: bool = False,
             compression_kwargs: dict = {},
             chunks: Union[int, None] = None,
@@ -1001,25 +1002,26 @@ class DatasetSuperGroup:
         This method writes a separate file for each data set in this object.
 
         :param dir_cache: Directory to write cache in.
-        :param store_format: Disk format for objects in cache. Recommended is "zarr".
+        :param store_format: Disk format for objects in cache. Recommended is "dao".
 
             - "h5ad": Allows access via backed .h5ad.
                 Note on compression: .h5ad supports sparse data with is a good compression that gives fast row-wise
                     access if the files are csr, so further compression potentially not necessary.
-            - "zarr": Allows access as zarr array.
+            - "dao": Distributed access optimised format, recommended for batched access in optimisation, for example.
         :param dense: Whether to write sparse or dense store, this will be homogenously enforced.
         :param compression_kwargs: Compression key word arguments to give to h5py or zarr
-            See also anndata.AnnData.write_h5ad:
+            For store_format=="h5ad", see also anndata.AnnData.write_h5ad:
                 - compression,
                 - compression_opts.
-            See also anndata.AnnData.write_zarr which relays kwargs to zarr.hierarchy.create_dataset:
+            For store_format=="dao", see also sfaira.data.write_dao which relays kwargs to
+            zarr.hierarchy.create_dataset:
                 - dtype
                 - compressor
                 - overwrite
                 - order
                 and others.
         :param chunks: Observation axes of chunk size of zarr array, see anndata.AnnData.write_zarr documentation.
-            Only relevant for store=="zarr". The feature dimension of the chunks is always is the full feature space.
+            Only relevant for store=="dao". The feature dimension of the chunks is always is the full feature space.
             Uses zarr default chunking across both axes if None.
         """
         for x in self.dataset_groups:

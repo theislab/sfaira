@@ -19,7 +19,6 @@ class HelperTrainerBase:
 
     data: Union[anndata.AnnData, load_store]
     trainer: Union[TrainModelCelltype, TrainModelEmbedding]
-    zoo: ModelZoo
 
     def __init__(self, zoo: ModelZoo):
         self.model_id = zoo.model_id
@@ -40,7 +39,7 @@ class HelperTrainerBase:
         self.data = self._simulate()
 
     def load_store(self):
-        store_path = cached_store_writing(dir_data=dir_data, dir_meta=dir_meta, assembly=ASSEMBLY)
+        store_path = cached_store_writing(dir_data=dir_data, dir_meta=dir_meta, assembly=ASSEMBLY, organism="mouse")
         store = load_store(cache_path=store_path)
         self.data = store
 
@@ -57,10 +56,12 @@ class HelperTrainerBase:
             data=self.data,
             model_path=dir_meta,
         )
+        self.trainer.zoo.model_id = self.model_id
         self.trainer.init_estim(override_hyperpar={})
 
     def test_save(self):
-        self.trainer.estimator.train(epochs=1, max_steps_per_epoch=1, test_split=0.1, validation_split=0.1)
+        self.trainer.estimator.train(epochs=1, max_steps_per_epoch=1, test_split=0.1, validation_split=0.1,
+                                     optimizer="adam", lr=0.005)
         self.trainer.save(fn=os.path.join(dir_data, "trainer_test"), model=True, specific=True)
 
 

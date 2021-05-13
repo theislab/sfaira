@@ -53,7 +53,7 @@ def cached_store_writing(dir_data, dir_meta, assembly, organism: str = "mouse", 
         v.doi[0] if isinstance(v.doi, list) else v.doi for k, v in ds.datasets.items()
         if (not os.path.exists(os.path.join(store_path, v.doi_cleaned_id + "." + store_format)) and
             store_format == "h5ad") or
-           (not os.path.exists(os.path.join(store_path, v.doi_cleaned_id)) and store_format == "zarr")
+           (not os.path.exists(os.path.join(store_path, v.doi_cleaned_id)) and store_format == "dao")
     ]).tolist()
     ds.subset(key=adata_ids_sfaira.doi, values=anticipated_files)
     ds.load(allow_caching=True)
@@ -65,6 +65,6 @@ def cached_store_writing(dir_data, dir_meta, assembly, organism: str = "mouse", 
         compression_kwargs = {"compressor": "default", "overwrite": True, "order": "C"}
     else:
         compression_kwargs = {}
-    ds.write_distributed_store(dir_cache=store_path, store_format=store_format, dense=store_format == "zarr",
+    ds.write_distributed_store(dir_cache=store_path, store_format=store_format, dense=store_format == "dao",
                                chunks=128, compression_kwargs=compression_kwargs)
     return store_path

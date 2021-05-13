@@ -21,7 +21,7 @@ import ssl
 from sfaira.versions.genomes import GenomeContainer
 from sfaira.versions.metadata import Ontology, OntologyHierarchical, CelltypeUniverse
 from sfaira.consts import AdataIds, AdataIdsCellxgene, AdataIdsSfaira, META_DATA_FIELDS, OCS
-from sfaira.data.base.zarr_andata import write_zarr
+from sfaira.data.base.io_dao import write_dao
 from sfaira.data.utils import collapse_matrix, read_yaml
 
 UNS_STRING_META_IN_OBS = "__obs__"
@@ -937,7 +937,7 @@ class DatasetBase(abc.ABC):
     def write_distributed_store(
             self,
             dir_cache: Union[str, os.PathLike],
-            store_format: str = "zarr",
+            store_format: str = "dao",
             dense: bool = False,
             compression_kwargs: dict = {},
             chunks: Union[int, None] = None,
@@ -949,25 +949,26 @@ class DatasetBase(abc.ABC):
         data sets that are accessed. Use .streamline_* before calling this method to streamline the data sets.
 
         :param dir_cache: Directory to write cache in.
-        :param store_format: Disk format for objects in cache. Recommended is "zarr".
+        :param store_format: Disk format for objects in cache. Recommended is "dao".
 
             - "h5ad": Allows access via backed .h5ad.
                 Note on compression: .h5ad supports sparse data with is a good compression that gives fast row-wise
                     access if the files are csr, so further compression potentially not necessary.
-            - "zarr": Allows access as zarr array.
+            - "dao": Distributed access optimised format, recommended for batched access in optimisation, for example.
         :param dense: Whether to write sparse or dense store, this will be homogenously enforced.
         :param compression_kwargs: Compression key word arguments to give to h5py or zarr
-            See also anndata.AnnData.write_h5ad:
+            For store_format=="h5ad", see also anndata.AnnData.write_h5ad:
                 - compression,
                 - compression_opts.
-            See also anndata.AnnData.write_zarr which relays kwargs to zarr.hierarchy.create_dataset:
+            For store_format=="dao", see also sfaira.data.write_dao which relays kwargs to
+            zarr.hierarchy.create_dataset:
                 - dtype
                 - compressor
                 - overwrite
                 - order
                 and others.
         :param chunks: Observation axes of chunk size of zarr array, see anndata.AnnData.write_zarr documentation.
-            Only relevant for store=="zarr". The feature dimension of the chunks is always is the full feature space.
+            Only relevant for store=="dao". The feature dimension of the chunks is always is the full feature space.
             Uses zarr default chunking across both axes if None.
         """
         self.__assert_loaded()
@@ -979,7 +980,7 @@ class DatasetBase(abc.ABC):
             as_dense = ("X",) if dense else ()
             print(f"writing {self.adata.shape} into {fn}")
             self.adata.write_h5ad(filename=fn, as_dense=as_dense, **compression_kwargs)
-        elif store_format == "zarr":
+        elif store_format == "dao":
             # Convert data object to sparse / dense as required:
             if not dense:
                 print("WARNING: sparse zarr array performance may not be optimal, "
@@ -994,7 +995,7 @@ class DatasetBase(abc.ABC):
                 self.adata.X = scipy.sparse.csr_matrix(np.asarray(self.adata.X))
             fn = os.path.join(dir_cache, self.doi_cleaned_id)
             chunks = (chunks, self.adata.X.shape[1]) if chunks is not None else True
-            write_zarr(store=fn, adata=self.adata, chunks=chunks, compression_kwargs=compression_kwargs)
+            write_dao(store=fn, adata=self.adata, chunks=chunks, compression_kwargs=compression_kwargs)
         else:
             raise ValueError()
 

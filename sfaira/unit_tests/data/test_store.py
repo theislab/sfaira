@@ -21,7 +21,7 @@ TODO tests from here on down require cached data for mouse lung
 """
 
 
-@pytest.mark.parametrize("store_format", ["h5ad", "zarr"])
+@pytest.mark.parametrize("store_format", ["h5ad", "dao"])
 def test_fatal(store_format: str):
     """
     Test if basic methods abort.
@@ -41,7 +41,7 @@ def test_fatal(store_format: str):
     _ = store.n_counts(idx=[1, 3])
 
 
-@pytest.mark.parametrize("store_format", ["h5ad", "zarr"])
+@pytest.mark.parametrize("store_format", ["h5ad", "dao"])
 def test_config(store_format: str):
     """
     Test that data set config files can be set, written and recovered.
@@ -59,7 +59,7 @@ def test_config(store_format: str):
     assert np.all([np.all(store.indices[k] == store2.indices[k]) for k in store.indices.keys()])
 
 
-@pytest.mark.parametrize("store_format", ["h5ad", "zarr"])
+@pytest.mark.parametrize("store_format", ["h5ad", "dao"])
 @pytest.mark.parametrize("idx", [np.array([2, 1020, 3, 20000, 20100]),
                                  np.concatenate([np.arange(150, 200), np.array([1, 100, 2003, 33])])])
 @pytest.mark.parametrize("batch_size", [1, 7])

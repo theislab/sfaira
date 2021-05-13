@@ -12,7 +12,7 @@ from typing import Dict, List, Tuple, Union
 
 from sfaira.consts import AdataIdsSfaira, OCS
 from sfaira.data.base.dataset import is_child, UNS_STRING_META_IN_OBS
-from sfaira.data.base.zarr_andata import read_zarr
+from sfaira.data.base.io_dao import read_dao
 from sfaira.versions.genomes import GenomeContainer
 
 """
@@ -580,7 +580,7 @@ class DistributedStoreH5ad(DistributedStoreBase):
         return indices
 
 
-class DistributedStoreZarr(DistributedStoreBase):
+class DistributedStoreDao(DistributedStoreBase):
 
     def __init__(self, cache_path: Union[str, os.PathLike], columns: Union[None, List[str]] = None):
         """
@@ -590,7 +590,6 @@ class DistributedStoreZarr(DistributedStoreBase):
         """
         # Collect all data loaders from files in directory:
         adata_by_key = {}
-        obs_by_key = {}
         indices = {}
         for f in os.listdir(cache_path):
             adata = None
@@ -599,15 +598,14 @@ class DistributedStoreZarr(DistributedStoreBase):
                 # zarr-backed anndata are saved as directories with the elements of the array group as further sub
                 # directories, e.g. a directory called "X", and a file ".zgroup" which identifies the zarr group.
                 if [".zgroup" in os.listdir(trial_path)]:
-                    adata, obs = read_zarr(trial_path, use_dask=True, columns=columns)
+                    adata = read_dao(trial_path, use_dask=True, columns=columns, obs_separate=False)
                     print(f"Discovered {f} as zarr group, "
                           f"sized {round(sys.getsizeof(adata) / np.power(1024, 2), 1)}MB")
             if adata is not None:
                 adata_by_key[adata.uns["id"]] = adata
-                obs_by_key[adata.uns["id"]] = obs
                 indices[adata.uns["id"]] = np.arange(0, adata.n_obs)
         self._x_as_dask = True
-        super(DistributedStoreZarr, self).__init__(adata_by_key=adata_by_key, indices=indices, obs_by_key=obs_by_key)
+        super(DistributedStoreDao, self).__init__(adata_by_key=adata_by_key, indices=indices, obs_by_key=None)
 
     @property
     def adata_dict(self) -> Dict[str, anndata.AnnData]:
@@ -633,8 +631,9 @@ class DistributedStoreZarr(DistributedStoreBase):
 
         :return: .obs data frame.
         """
+        # TODO Using loc indexing here instead of iloc, this might be faster on larger tables?
         return pd.concat([
-            self.obs_by_key[k].iloc[v, :]
+            self.adata_by_key[k].obs.loc[self.adata_by_key[k].obs.index[v], :]
             for k, v in self.indices.items()
         ], axis=0, join="inner", ignore_index=True, copy=False)
 
@@ -721,23 +720,23 @@ class DistributedStoreZarr(DistributedStoreBase):
         return generator
 
 
-def load_store(cache_path: Union[str, os.PathLike], store_format: str = "zarr",
-               columns: Union[None, List[str]] = None) -> Union[DistributedStoreH5ad, DistributedStoreZarr]:
+def load_store(cache_path: Union[str, os.PathLike], store_format: str = "dao",
+               columns: Union[None, List[str]] = None) -> Union[DistributedStoreH5ad, DistributedStoreDao]:
     """
     Instantiates a distributed store class.
 
     :param cache_path: Store directory.
-    :param store_format: Format of store {"h5ad", "zarr"}.
+    :param store_format: Format of store {"h5ad", "dao"}.
 
         - "h5ad": Returns instance of DistributedStoreH5ad.
-        - "zarr": Returns instance of DistributedStoreZarr.
+        - "dao": Returns instance of DistributedStoreDoa (distributed access optimsied).
     :param columns: Which columns to read into the obs copy in the output, see pandas.read_parquet().
-        Only relevant if store_format is "zarr".
+        Only relevant if store_format is "dao".
     :return: Instances of a distributed store class.
     """
     if store_format == "h5ad":
         return DistributedStoreH5ad(cache_path=cache_path)
-    elif store_format == "zarr":
-        return DistributedStoreZarr(cache_path=cache_path, columns=columns)
+    elif store_format == "dao":
+        return DistributedStoreDao(cache_path=cache_path, columns=columns)
     else:
         raise ValueError(f"Did not recognize store_format {store_format}.")
