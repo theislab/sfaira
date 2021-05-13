@@ -227,7 +227,7 @@ class HelperEstimatorKerasCelltype(HelperEstimatorBase):
         )
         if isinstance(self.data, DistributedStoreBase):
             leaves = self.estimator.celltype_universe.onto_cl.get_effective_leaves(
-                x=[x for x in self.data.obs["cell_ontology_class"].values
+                x=[x for x in self.data.obs[self.data._adata_ids_sfaira.cellontology_class].values
                    if x != self.data._adata_ids_sfaira.unknown_celltype_identifier]
             )
             self.nleaves = len(leaves)
