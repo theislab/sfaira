@@ -336,6 +336,25 @@ class OntologyHierarchical(Ontology, abc.ABC):
         if return_type == "idx":
             return np.sort([i for i, x in enumerate(leaves) if x in ancestors])
 
+    def prepare_maps_to_leaves(
+            self,
+            include_self: bool = True
+    ) -> Dict[str, np.ndarray]:
+        """
+        Precomputes all maps of nodes to their leave nodes.
+
+        :param include_self: whether to include node itself
+        :return: Dictionary of index vectors of leave node matches for each node (key).
+        """
+        nodes = self.node_ids
+        maps = {}
+        import time
+        t0 = time.time()
+        for x in nodes:
+            maps[x] = self.map_to_leaves(node=x, return_type="idx", include_self=include_self)
+        print(f"time for precomputing ancestors: {time.time()-t0}")
+        return maps
+
     @abc.abstractmethod
     def synonym_node_properties(self) -> List[str]:
         pass

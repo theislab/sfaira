@@ -6,19 +6,19 @@ import pickle
 from typing import Union
 
 from sfaira.consts import AdataIdsSfaira
-from sfaira.data import DistributedStore, Universe
+from sfaira.data import DistributedStoreBase, Universe
 from sfaira.estimators import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
 from sfaira.interface import ModelZoo
 
 
 class TrainModel:
 
-    data: Union[anndata.AnnData, DistributedStore]
+    data: Union[anndata.AnnData, DistributedStoreBase]
     estimator: EstimatorKeras
 
     def __init__(
             self,
-            data: Union[str, anndata.AnnData, Universe, DistributedStore],
+            data: Union[str, anndata.AnnData, Universe, DistributedStoreBase],
     ):
         # Check if handling backed anndata or base path to directory of raw files:
         if isinstance(data, str) and data.split(".")[-1] == "h5ad":
@@ -30,7 +30,7 @@ class TrainModel:
             self.data = data
         elif isinstance(data, Universe):
             self.data = data.adata
-        elif isinstance(data, DistributedStore):
+        elif isinstance(data, DistributedStoreBase):
             self.data = data
         else:
             raise ValueError(f"did not recongize data of type {type(data)}")
@@ -39,10 +39,10 @@ class TrainModel:
 
     def load_into_memory(self):
         """
-        Loads backed objects from DistributedStore into single adata object in memory in .data slot.
+        Loads backed objects from DistributedStoreBase into single adata object in memory in .data slot.
         :return:
         """
-        if isinstance(self.data, DistributedStore):
+        if isinstance(self.data, DistributedStoreBase):
             adata = None
             for k, v in self.data.indices.items():
                 x = self.data.adatas[k][v, :].to_memory()
@@ -92,7 +92,7 @@ class TrainModel:
             return np.asarray(
                 self.estimator.data.X[np.sort(idx), :].sum(axis=1)[np.argsort(idx)]
             ).flatten()
-        elif isinstance(self.estimator.data, DistributedStore):
+        elif isinstance(self.estimator.data, DistributedStoreBase):
             return self.estimator.data.n_counts(idx=idx)
         else:
             assert False
@@ -105,7 +105,7 @@ class TrainModelEmbedding(TrainModel):
     def __init__(
             self,
             model_path: str,
-            data: Union[str, anndata.AnnData, Universe, DistributedStore],
+            data: Union[str, anndata.AnnData, Universe, DistributedStoreBase],
     ):
         super(TrainModelEmbedding, self).__init__(data=data)
         self.estimator = None
@@ -161,7 +161,7 @@ class TrainModelCelltype(TrainModel):
     def __init__(
             self,
             model_path: str,
-            data: Union[str, anndata.AnnData, Universe, DistributedStore],
+            data: Union[str, anndata.AnnData, Universe, DistributedStoreBase],
             fn_target_universe: str,
     ):
         super(TrainModelCelltype, self).__init__(data=data)

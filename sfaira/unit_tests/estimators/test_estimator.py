@@ -7,7 +7,7 @@ import pytest
 import time
 from typing import Union
 
-from sfaira.data import DistributedStore
+from sfaira.data import load_store, DistributedStoreBase
 from sfaira.estimators import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
 from sfaira.versions.topologies import TopologyContainer
 from sfaira.unit_tests.utils import cached_store_writing, simulate_anndata
@@ -64,7 +64,7 @@ TOPOLOGY_CELLTYPE_MODEL = {
 
 class HelperEstimatorBase:
 
-    data: Union[anndata.AnnData, DistributedStore]
+    data: Union[anndata.AnnData, DistributedStoreBase]
     estimator: Union[EstimatorKeras]
     model_type: str
     tc: TopologyContainer
@@ -93,7 +93,7 @@ class HelperEstimatorBase:
     def load_store(self, organism, organ):
         store_path = cached_store_writing(dir_data=dir_data, dir_meta=dir_meta, assembly=ASSEMBLY[organism],
                                           organism=organism, organ=organ)
-        store = DistributedStore(cache_path=store_path)
+        store = load_store(cache_path=store_path)
         store.subset(attr_key="organism", values=organism)
         store.subset(attr_key="organ", values=organ)
         self.data = store
@@ -128,7 +128,7 @@ class HelperEstimatorBase:
     def basic_estimator_test(self, test_split):
         pass
 
-    def load_estimator(self, model_type, data_type, feature_space, test_split, organism="human", organ="lung"):
+    def load_estimator(self, model_type, data_type, feature_space, test_split, organism="mouse", organ="lung"):
         self.init_topology(model_type=model_type, feature_space=feature_space, organism=organism)
         np.random.seed(1)
         if data_type == "adata":
@@ -216,7 +216,7 @@ class HelperEstimatorKerasCelltype(HelperEstimatorBase):
 
     def init_estimator(self, test_split):
         tc = self.tc
-        if isinstance(self.data, DistributedStore):
+        if isinstance(self.data, DistributedStoreBase):
             # Reset leaves below:
             tc.topology["output"]["targets"] = None
         self.estimator = EstimatorKerasCelltype(
@@ -225,7 +225,7 @@ class HelperEstimatorKerasCelltype(HelperEstimatorBase):
             model_id="testid",
             model_topology=tc
         )
-        if isinstance(self.data, DistributedStore):
+        if isinstance(self.data, DistributedStoreBase):
             leaves = self.estimator.celltype_universe.onto_cl.get_effective_leaves(
                 x=[x for x in self.data.obs["cell_ontology_class"].values
                    if x != self.data._adata_ids_sfaira.unknown_celltype_identifier]
@@ -366,16 +366,16 @@ def test_split_index_sets(organism: str, organ: str, data_type: str, randomized_
     assert len(idx_test) == len(np.unique(idx_test))
     assert len(idx_train) + len(idx_eval) + len(idx_test) == test_estim.data.n_obs, \
         (len(idx_train), len(idx_eval), len(idx_test), test_estim.data.n_obs)
-    if isinstance(test_estim.data, DistributedStore):
+    if isinstance(test_estim.data, DistributedStoreBase):
         assert np.sum([v.shape[0] for v in test_estim.data.adata.values()]) == test_estim.data.n_obs
     # 2) Assert that index assignments are exclusive to each split:
     assert len(set(idx_train).intersection(set(idx_eval))) == 0
     assert len(set(idx_train).intersection(set(idx_test))) == 0
     assert len(set(idx_test).intersection(set(idx_eval))) == 0
     # 3) Check partition of index vectors over store data sets matches test split scenario:
-    if isinstance(test_estim.estimator.data, DistributedStore):
+    if isinstance(test_estim.estimator.data, DistributedStoreBase):
         # Prepare data set-wise index vectors that are numbered in the same way as global split index vectors.
-        # See also EstimatorKeras.train and DistributedStore.subset_cells_idx_global
+        # See also EstimatorKeras.train and DistributedStoreBase.subset_cells_idx_global
         idx_raw = test_estim.estimator.data.indices_global.values()
         if isinstance(test_split, float):
             # Make sure that indices from each split are in each data set:

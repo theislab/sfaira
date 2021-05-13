@@ -709,6 +709,7 @@ class DistributedStoreZarr(DistributedStoreBase):
                     x_i = x[epoch_indices[s:e], :]
                 else:
                     # Use slicing because observations accessed in batch are ordered in data set:
+                    # Note that epoch_indices[i] == i if not random_access.
                     x_i = x[s:e, :]
                 # Exploit fact that index of obs is just increasing list of integers, so we can use the (faster?) .loc
                 # indexing instead of .iloc:
@@ -720,13 +721,10 @@ class DistributedStoreZarr(DistributedStoreBase):
         return generator
 
 
-def DistributedStore(cache_path: Union[str, os.PathLike], store_format: str = "zarr",
-                     columns: Union[None, List[str]] = None) -> Union[DistributedStoreH5ad, DistributedStoreZarr]:
+def load_store(cache_path: Union[str, os.PathLike], store_format: str = "zarr",
+               columns: Union[None, List[str]] = None) -> Union[DistributedStoreH5ad, DistributedStoreZarr]:
     """
     Instantiates a distributed store class.
-
-    Note: this function mimics a class constructor, therefore the upper-case usage in the name.
-    This function effectively serves as a conditional constructor.
 
     :param cache_path: Store directory.
     :param store_format: Format of store {"h5ad", "zarr"}.

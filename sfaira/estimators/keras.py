@@ -13,7 +13,7 @@ import warnings
 from tqdm import tqdm
 
 from sfaira.consts import AdataIdsSfaira, OCS
-from sfaira.data import DistributedStore
+from sfaira.data import DistributedStoreBase
 from sfaira.models import BasicModelKeras
 from sfaira.versions.metadata import CelltypeUniverse, OntologyCl
 from sfaira.versions.topologies import TopologyContainer
@@ -40,7 +40,7 @@ class EstimatorKeras:
     """
     Estimator base class for keras models.
     """
-    data: Union[anndata.AnnData, DistributedStore]
+    data: Union[anndata.AnnData, DistributedStoreBase]
     model: Union[BasicModelKeras, None]
     topology_container: Union[TopologyContainer, None]
     model_id: Union[str, None]
@@ -54,7 +54,7 @@ class EstimatorKeras:
 
     def __init__(
             self,
-            data: Union[anndata.AnnData, np.ndarray, DistributedStore],
+            data: Union[anndata.AnnData, np.ndarray, DistributedStoreBase],
             model_dir: Union[str, None],
             model_class: str,
             model_id: Union[str, None],
@@ -69,7 +69,7 @@ class EstimatorKeras:
         self.model_class = model_class
         self.topology_container = model_topology
         # Prepare store with genome container sub-setting:
-        if isinstance(self.data, DistributedStore):
+        if isinstance(self.data, DistributedStoreBase):
             self.data.genome_container = self.topology_container.gc
 
         self.history = None
@@ -275,7 +275,7 @@ class EstimatorKeras:
     def split_train_val_test(self, val_split: float, test_split: Union[float, dict]):
         # Split training and evaluation data.
         np.random.seed(1)
-        all_idx = np.arange(0, self.data.n_obs)  # n_obs is both a property of AnnData and DistributedStore
+        all_idx = np.arange(0, self.data.n_obs)  # n_obs is both a property of AnnData and DistributedStoreBase
         if isinstance(test_split, float) or isinstance(test_split, int):
             self.idx_test = np.sort(np.random.choice(
                 a=all_idx,
@@ -291,7 +291,7 @@ class EstimatorKeras:
                     if k not in self.data.obs.columns:
                         raise ValueError(f"Did not find column {k} used to define test set in self.data.")
                     in_test = np.logical_and(in_test, np.array([x in v for x in self.data.obs[k].values]))
-                elif isinstance(self.data, DistributedStore):
+                elif isinstance(self.data, DistributedStoreBase):
                     idx = self.data.get_subset_idx_global(attr_key=k, values=v)
                     in_test_k = np.ones((self.data.n_obs,), dtype=int) == 0
                     in_test_k[idx] = True
@@ -497,7 +497,7 @@ class EstimatorKeras:
 
     @property
     def using_store(self) -> bool:
-        return isinstance(self.data, DistributedStore)
+        return isinstance(self.data, DistributedStoreBase)
 
     @property
     def obs_train(self):
@@ -519,7 +519,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
 
     def __init__(
             self,
-            data: Union[anndata.AnnData, np.ndarray, DistributedStore],
+            data: Union[anndata.AnnData, np.ndarray, DistributedStoreBase],
             model_dir: Union[str, None],
             model_id: Union[str, None],
             model_topology: TopologyContainer,
@@ -722,7 +722,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 generator_raw = self.data.generator(
                     idx=idx,
                     batch_size=1,
-                    obs_keys=["cell_ontology_class"],
+                    obs_keys=[self._adata_ids.cellontology_class],
                     return_dense=True,
                 )
 
@@ -733,7 +733,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                             x_sample = x_sample.todense()
                         x_sample = np.asarray(x_sample).flatten()
                         sf_sample = prepare_sf(x=x_sample)[0]
-                        y_sample = z[1]["cell_ontology_class"].values[0]
+                        y_sample = z[1][self._adata_ids.cellontology_class].values[0]
                         yield (x_sample, sf_sample), (x_sample, cell_to_class[y_sample])
 
             elif isinstance(self.data, anndata.AnnData) and self.data.isbacked:
@@ -744,7 +744,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                     for i in idx:
                         x_sample = self.data.X[i, :].toarray().flatten() if sparse else self.data.X[i, :].flatten()
                         sf_sample = prepare_sf(x=x_sample)[0]
-                        y_sample = self.data.obs[self._adata_ids.cellontology_class][i]
+                        y_sample = self.data.obs[self._adata_ids.cellontology_id][i]
                         yield (x_sample, sf_sample), (x, cell_to_class[y_sample])
             else:
                 x = self._prepare_data_matrix(idx=idx)
@@ -999,7 +999,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
 
     def __init__(
             self,
-            data: Union[anndata.AnnData, DistributedStore],
+            data: Union[anndata.AnnData, DistributedStoreBase],
             model_dir: Union[str, None],
             model_id: Union[str, None],
             model_topology: TopologyContainer,
@@ -1017,8 +1017,8 @@ class EstimatorKerasCelltype(EstimatorKeras):
             cache_path=cache_path
         )
         # Remove cells without type label from store:
-        if isinstance(self.data, DistributedStore):
-            self.data.subset(attr_key="cellontology_class", excluded_values=[
+        if isinstance(self.data, DistributedStoreBase):
+            self.data.subset(attr_key=self._adata_ids.cellontology_class, excluded_values=[
                 self._adata_ids.unknown_celltype_identifier,
                 self._adata_ids.not_a_cell_celltype_identifier,
             ])
@@ -1078,17 +1078,14 @@ class EstimatorKerasCelltype(EstimatorKeras):
         return self.celltype_universe.onto_cl.convert_to_name(self.celltype_universe.onto_cl.leaves)
 
     def _one_hot_encoder(self):
+        leave_maps = self.celltype_universe.onto_cl.prepare_maps_to_leaves(include_self=True)
 
         def encoder(x) -> np.ndarray:
             if isinstance(x, str):
                 x = [x]
             # Encodes unknowns to empty rows.
             idx = [
-                self.celltype_universe.onto_cl.map_to_leaves(
-                    node=y,
-                    return_type="idx",
-                    include_self=True,
-                ) if y not in [
+                leave_maps[y] if y not in [
                     self._adata_ids.unknown_celltype_identifier,
                     self._adata_ids.not_a_cell_celltype_identifier,
                 ] else np.array([])
@@ -1119,7 +1116,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
         onehot_encoder = self._one_hot_encoder()
         y = np.concatenate([
             onehot_encoder(z)
-            for z in self.data.obs[self._adata_ids.cellontology_class].values[idx].tolist()
+            for z in self.data.obs[self._adata_ids.cellontology_id].values[idx].tolist()
         ], axis=0)
         # Distribute aggregated class weight for computation of weights:
         freq = np.mean(y / np.sum(y, axis=1, keepdims=True), axis=0, keepdims=True)
@@ -1182,7 +1179,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             generator_raw = self.data.generator(
                 idx=idx,
                 batch_size=batch_size,
-                obs_keys=["cell_ontology_class"],
+                obs_keys=[self._adata_ids.cellontology_id],
                 return_dense=True,
                 randomized_batch_access=randomized_batch_access,
             )
@@ -1194,7 +1191,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
                     if isinstance(x_sample, scipy.sparse.csr_matrix):
                         x_sample = x_sample.todense()
                     x_sample = np.asarray(x_sample)
-                    y_sample = onehot_encoder(z[1]["cell_ontology_class"].values)
+                    y_sample = onehot_encoder(z[1][self._adata_ids.cellontology_id].values)
                     for i in range(x_sample.shape[0]):
                         if y_sample[i].sum() > 0:
                             yield generator_helper(x_sample[i], y_sample[i], 1.)

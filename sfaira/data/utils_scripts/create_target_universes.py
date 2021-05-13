@@ -3,7 +3,7 @@ import sys
 
 # Any data loader here to extract path:
 from sfaira.consts import OCS
-from sfaira.data import DistributedStore
+from sfaira.data import load_store
 from sfaira.versions.metadata import CelltypeUniverse, OntologyCl
 
 
@@ -25,7 +25,7 @@ for f in os.listdir(config_path):
             print(f"Writing target universe for {f}")
             organism = f.split("_")[1]
             organ = f.split("_")[2].split(".")[0]
-            store = DistributedStore(cache_path=store_path)
+            store = load_store(cache_path=store_path)
             store.load_config(fn=fn)
             celltypes_found = set([])
             for k, idx in store.indices.items():

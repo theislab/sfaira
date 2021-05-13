@@ -3,7 +3,7 @@ import numpy as np
 import os
 from typing import Union
 
-from sfaira.data import DistributedStore
+from sfaira.data import load_store
 from sfaira.interface import ModelZoo
 from sfaira.train import TrainModelCelltype, TrainModelEmbedding
 from sfaira.unit_tests.utils import cached_store_writing, simulate_anndata
@@ -17,7 +17,7 @@ TARGETS = ["T cell", "stromal cell"]
 
 class HelperTrainerBase:
 
-    data: Union[anndata.AnnData, DistributedStore]
+    data: Union[anndata.AnnData, load_store]
     trainer: Union[TrainModelCelltype, TrainModelEmbedding]
     zoo: ModelZoo
 
@@ -41,7 +41,7 @@ class HelperTrainerBase:
 
     def load_store(self):
         store_path = cached_store_writing(dir_data=dir_data, dir_meta=dir_meta, assembly=ASSEMBLY)
-        store = DistributedStore(cache_path=store_path)
+        store = load_store(cache_path=store_path)
         self.data = store
 
     def load_data(self, data_type):

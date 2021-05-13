@@ -4,7 +4,7 @@ import pytest
 import time
 from typing import List
 
-from sfaira.data import DistributedStore
+from sfaira.data import load_store
 from sfaira.versions.genomes import GenomeContainer
 from sfaira.unit_tests.utils import cached_store_writing
 
@@ -28,7 +28,7 @@ def test_fatal(store_format: str):
     """
     store_path = cached_store_writing(dir_data=dir_data, dir_meta=dir_meta, assembly=MOUSE_GENOME_ANNOTATION,
                                       store_format=store_format)
-    store = DistributedStore(cache_path=store_path, store_format=store_format)
+    store = load_store(cache_path=store_path, store_format=store_format)
     store.subset(attr_key="organism", values=["mouse"])
     store.subset(attr_key="assay_sc", values=["10x sequencing"])
     _ = store.n_obs
@@ -49,11 +49,11 @@ def test_config(store_format: str):
     store_path = cached_store_writing(dir_data=dir_data, dir_meta=dir_meta, assembly=MOUSE_GENOME_ANNOTATION,
                                       store_format=store_format)
     config_path = os.path.join(store_path, "config_lung")
-    store = DistributedStore(cache_path=store_path, store_format=store_format)
+    store = load_store(cache_path=store_path, store_format=store_format)
     store.subset(attr_key="organism", values=["mouse"])
     store.subset(attr_key="assay_sc", values=["10x sequencing"])
     store.write_config(fn=config_path)
-    store2 = DistributedStore(cache_path=store_path, store_format=store_format)
+    store2 = load_store(cache_path=store_path, store_format=store_format)
     store2.load_config(fn=config_path + ".pickle")
     assert np.all(store.indices.keys() == store2.indices.keys())
     assert np.all([np.all(store.indices[k] == store2.indices[k]) for k in store.indices.keys()])
@@ -74,7 +74,7 @@ def test_generator_shapes(store_format: str, idx, batch_size: int, obs_keys: Lis
     assembly, subset = gc
     store_path = cached_store_writing(dir_data=dir_data, dir_meta=dir_meta, assembly=MOUSE_GENOME_ANNOTATION,
                                       store_format=store_format)
-    store = DistributedStore(cache_path=store_path, store_format=store_format)
+    store = load_store(cache_path=store_path, store_format=store_format)
     store.subset(attr_key="organism", values=["mouse"])
     if assembly is not None:
         gc = GenomeContainer(assembly=assembly)
