@@ -740,7 +740,7 @@ class DatasetBase(abc.ABC):
         # set var index
         var_new.index = var_new[adata_target_ids.gene_id_index].tolist()
 
-        per_cell_labels = ["cell_types_original", "cell_ontology_class", "cell_ontology_id"]
+        per_cell_labels = ["cell_types_original", "cellontology_class", "cellontology_id"]
         experiment_batch_labels = ["bio_sample", "individual", "tech_sample"]
 
         # Prepare .obs column name dict (process keys below with other .uns keys if they're set dataset-wide)
@@ -1343,7 +1343,7 @@ class DatasetBase(abc.ABC):
         meta = pandas.DataFrame(index=range(1))
         # Expand table by variably cell-wise or data set-wise meta data:
         for x in self._adata_ids.controlled_meta_fields:
-            if x in ["cell_types_original", "cell_ontology_class", "cell_ontology_id"]:
+            if x in ["cell_types_original", "cellontology_class", "cellontology_id"]:
                 continue
             elif x in ["bio_sample", "individual", "tech_sample"] and \
                     hasattr(self, f"{x}_obs_key") and \
