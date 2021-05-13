@@ -16,7 +16,7 @@ if store_type == "h5ad":
     # Write sparse arrays in h5ad.
     kwargs = {"dense": False}
     compression_kwargs = {}
-elif store_type == "zarr":
+elif store_type == "dao":
     # Write dense arrays in zarr.
     kwargs = {"dense": True, "chunks": 128}
     compression_kwargs = {"compressor": "default", "overwrite": True, "order": "C"}
@@ -28,7 +28,7 @@ universe = sfaira.data.dataloaders.Universe(data_path=data_path, meta_path=path_
 for k, ds in universe.datasets.items():
     if store_type == "h5ad":
         fn_store = os.path.join(path_store, ds.doi_cleaned_id + ".h5ad")
-    elif store_type == "zarr":
+    elif store_type == "dao":
         fn_store = os.path.join(path_store, ds.doi_cleaned_id)
     else:
         assert False
