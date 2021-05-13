@@ -45,7 +45,7 @@ class TrainModel:
         if isinstance(self.data, DistributedStoreBase):
             adata = None
             for k, v in self.data.indices.items():
-                x = self.data.adatas[k][v, :].to_memory()
+                x = self.data.adata_by_key[k][v, :].to_memory()
                 x.obs["dataset_id"] = k
                 if adata is None:
                     adata = x
