@@ -57,7 +57,7 @@ def write_dao(store: Union[str, Path], adata: anndata.AnnData, chunks: Union[boo
     :param compression_kwargs: Compression kwargs for zarr.
     """
     # Write numeric matrix as zarr array:
-    f = zarr.open(path_x(store), mode="w")
+    f = zarr.open(store=path_x(store), mode="w")
     # If adata.X is already a dense array in memory, it can be safely written fully to a zarr array. Otherwise:
     # Create empty store and then write in dense chunks to avoid having to load entire adata.X into a dense array in
     # memory.
@@ -67,7 +67,7 @@ def write_dao(store: Union[str, Path], adata: anndata.AnnData, chunks: Union[boo
         # Initialise empty array
         dtype = adata.X.dtype
         shape = adata.X.shape
-        f.create_dataset("X", data=np.zeros(shape), chunks=chunks, dtype=dtype, **compression_kwargs)
+        f.create_dataset("X", shape=shape, dtype=dtype, fill_value=np.nan, chunks=chunks, **compression_kwargs)
         batch_size = 128  # Use a batch size that guarantees that the dense batch fits easily into memory.
         n_batches = shape[0] // batch_size + int(shape[0] % batch_size > 0)
         batches = [(i * batch_size, min(i * batch_size + batch_size, shape[0])) for i in range(n_batches)]
@@ -79,7 +79,7 @@ def write_dao(store: Union[str, Path], adata: anndata.AnnData, chunks: Union[boo
     else:
         raise ValueError(f"did not recognise array format {type(adata.X)}")
     f2 = zarr.open(path_x(store), mode="r")
-    assert np.all(f2.shape == shape), (f2.shape, shape)
+    assert np.all(f2[...].shape == shape), (f2.shape, shape)
     assert dask.array.sum(f2["X"]).compute() == adata.X.sum(), \
         (f2["X"][...].sum(), dask.array.sum(f2["X"]).compute(), counter, adata.X.sum())
     # Write .uns into pickle:
