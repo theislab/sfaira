@@ -75,11 +75,13 @@ def write_dao(store: Union[str, Path], adata: anndata.AnnData, chunks: Union[boo
         for s, e in batches:
             counter += np.asarray(adata.X[s:e, :].todense(), dtype=dtype).sum()
             f["X"][s:e, :] = np.asarray(adata.X[s:e, :].todense(), dtype=dtype)
-            assert f["X"][s:e, :][...].sum() == adata.X[s:e, :].sum(), (f["X"][s:e, :][...].sum(), adata.X[s:e, :].sum())
-        assert dask.array.sum(f["X"]).compute() == adata.X.sum(), \
-            (f["X"][...].sum(), dask.array.sum(f["X"]).compute(), counter, adata.X.sum())
+        del f
     else:
         raise ValueError(f"did not recognise array format {type(adata.X)}")
+    f2 = zarr.open(path_x(store), mode="r")
+    assert np.all(f2.shape == shape), (f2.shape, shape)
+    assert dask.array.sum(f2["X"]).compute() == adata.X.sum(), \
+        (f2["X"][...].sum(), dask.array.sum(f2["X"]).compute(), counter, adata.X.sum())
     # Write .uns into pickle:
     with open(path_uns(store), "wb") as f:
         pickle.dump(obj=adata.uns, file=f)

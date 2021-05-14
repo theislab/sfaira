@@ -266,9 +266,10 @@ class DistributedStoreBase(abc.ABC):
                 raise ValueError(f"data set {k} queried by indices does not exist in store (.adata_by_key)")
             # Get indices of idx_old to keep:
             obs_k = self.obs_by_key[k]
-            idx_subset = get_idx(adata=adata_k, obs=obs_k, k=attr_key, v=values, xv=excluded_values, dataset=k)
-            # Keep intersection of old and new hits.
             idx_old = self.indices[k]
+            idx_subset = get_idx(adata=adata_k[idx_old, :], obs=obs_k.iloc[idx_old, :], k=attr_key, v=values,
+                                 xv=excluded_values, dataset=k)
+            # Keep intersection of old and new hits.
             idx_new = np.asarray(idx_old)[idx_subset]
             if len(idx_new) > 0:
                 indices[k] = np.asarray(idx_new, dtype="int32")
