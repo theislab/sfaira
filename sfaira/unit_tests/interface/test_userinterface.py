@@ -1,12 +1,11 @@
 import numpy as np
 import os
 from typing import Union
-import unittest
 
 from sfaira.interface import UserInterface
 
 
-class TestUi(unittest.TestCase):
+class TestUi:
     ui: Union[UserInterface]
     data: np.ndarray
 
@@ -27,7 +26,7 @@ class TestUi(unittest.TestCase):
         """
         pass
 
-    def test_basic(self):
+    def _test_basic(self):
         """
         Test all relevant model methods.
 
@@ -47,7 +46,3 @@ class TestUi(unittest.TestCase):
         temp_fn = os.path.join(str(os.path.dirname(os.path.abspath(__file__))), '../test_data')
         self.ui = UserInterface(custom_repo=temp_fn, sfaira_repo=False)
         self.ui.compute_embedding_kipoi()
-
-
-if __name__ == '__main__':
-    unittest.main()

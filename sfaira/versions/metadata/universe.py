@@ -41,7 +41,7 @@ class CelltypeUniverse:
         """
         tab = pd.read_csv(fn, sep="\t", index_col=None)
         self.__validate_target_universe_table(tab=tab)
-        self.leaves = tab["name"].values
+        self.onto_cl.leaves = tab["name"].values
 
     def write_target_universe(
             self,

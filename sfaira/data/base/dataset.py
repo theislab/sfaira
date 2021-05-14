@@ -21,6 +21,7 @@ import ssl
 from sfaira.versions.genomes import GenomeContainer
 from sfaira.versions.metadata import Ontology, OntologyHierarchical, CelltypeUniverse
 from sfaira.consts import AdataIds, AdataIdsCellxgene, AdataIdsSfaira, META_DATA_FIELDS, OCS
+from sfaira.data.base.io_dao import write_dao
 from sfaira.data.utils import collapse_matrix, read_yaml
 
 UNS_STRING_META_IN_OBS = "__obs__"
@@ -301,11 +302,12 @@ class DatasetBase(abc.ABC):
         if not os.path.exists(os.path.join(self.data_dir_base, self.directory_formatted_doi)):
             os.makedirs(os.path.join(self.data_dir_base, self.directory_formatted_doi))
 
-        urls = self.download_url_data[0][0] + self.download_url_meta[0][0]
+        urls = self.download_url_data[0] + self.download_url_meta[0]
 
         for url in urls:
             if url is None:
                 continue
+            # Special case for data that is not publically available
             if url.split(",")[0] == 'private':
                 if "," in url:
                     fn = ','.join(url.split(',')[1:])
@@ -318,14 +320,23 @@ class DatasetBase(abc.ABC):
                 else:
                     warnings.warn(f"A file for dataset {self.id} is not available for automatic download, please"
                                   f"manually copy the associated file to the following location: {self.data_dir}")
-
+            # Special case for data from the synapse portal
             elif url.split(",")[0].startswith('syn'):
                 fn = ",".join(url.split(",")[1:])
                 if os.path.isfile(os.path.join(self.data_dir, fn)):
                     print(f"File {fn} already found on disk, skipping download.")
                 else:
                     self._download_synapse(url.split(",")[0], fn, **kwargs)
-
+            # Special case for public data that is labelled as not automatically downloadable
+            elif url.split(",")[0] == 'manual':
+                u = ",".join(url.split(",")[2:])
+                fn = url.split(",")[1]
+                if os.path.isfile(os.path.join(self.data_dir, fn)):
+                    print(f"File {fn} already found on disk, skipping download.")
+                else:
+                    print(f"Data file {fn} for dataset {self.id} cannot be retrieved automatically. "
+                          f"Please download it from {u} and copy to {os.path.join(self.data_dir, fn)}")
+            # All other cases
             else:
                 url = urllib.parse.unquote(url)
                 try:
@@ -674,7 +685,8 @@ class DatasetBase(abc.ABC):
         :param schema: Export format.
             - "sfaira"
             - "cellxgene"
-        :param uns_to_obs: Whether to move metadata in .uns to .obs to make sure it's not lost when concatenating multiple objects.
+        :param uns_to_obs: Whether to move metadata in .uns to .obs to make sure it's not lost when concatenating
+            multiple objects. Retains .id in .uns.
         :param clean_obs: Whether to delete non-streamlined fields in .obs, .obsm and .obsp.
         :param clean_var: Whether to delete non-streamlined fields in .var, .varm and .varp.
         :param clean_uns: Whether to delete non-streamlined fields in .uns.
@@ -728,7 +740,7 @@ class DatasetBase(abc.ABC):
         # set var index
         var_new.index = var_new[adata_target_ids.gene_id_index].tolist()
 
-        per_cell_labels = ["cell_types_original", "cell_ontology_class", "cell_ontology_id"]
+        per_cell_labels = ["cell_types_original", "cellontology_class", "cellontology_id"]
         experiment_batch_labels = ["bio_sample", "individual", "tech_sample"]
 
         # Prepare .obs column name dict (process keys below with other .uns keys if they're set dataset-wide)
@@ -799,7 +811,13 @@ class DatasetBase(abc.ABC):
         # Map cell type names from raw IDs to ontology maintained ones:
         if self.cell_types_original_obs_key is not None:
             obs_cl = self.project_celltypes_to_ontology(copy=True, adata_fields=adata_target_ids)
-            obs_new = pd.concat([obs_new, obs_cl], axis=1)
+        else:
+            obs_cl = pd.DataFrame({
+                adata_target_ids.cellontology_class: [adata_target_ids.unknown_metadata_identifier] * self.adata.n_obs,
+                adata_target_ids.cellontology_id: [adata_target_ids.unknown_metadata_identifier] * self.adata.n_obs,
+                adata_target_ids.cell_types_original: [adata_target_ids.unknown_metadata_identifier] * self.adata.n_obs,
+            }, index=self.adata.obs.index)
+        obs_new = pd.concat([obs_new, obs_cl], axis=1)
 
         # Add new annotation to adata and delete old fields if requested
         if clean_var:
@@ -909,7 +927,9 @@ class DatasetBase(abc.ABC):
             for k, v in self.adata.uns.items():
                 if k not in self.adata.obs_keys():
                     self.adata.obs[k] = [v for i in range(self.adata.n_obs)]
-            self.adata.uns = {}
+            # Retain only target uns keys in .uns.
+            self.adata.uns = dict([(k, v) for k, v in self.adata.uns.items()
+                                   if k in [getattr(adata_target_ids, kk) for kk in ["id"]]])
 
         self._adata_ids = adata_target_ids  # set new adata fields to class after conversion
         self.streamlined_meta = True
@@ -917,7 +937,7 @@ class DatasetBase(abc.ABC):
     def write_distributed_store(
             self,
             dir_cache: Union[str, os.PathLike],
-            store: str = "h5ad",
+            store_format: str = "dao",
             dense: bool = False,
             compression_kwargs: dict = {},
             chunks: Union[int, None] = None,
@@ -929,29 +949,44 @@ class DatasetBase(abc.ABC):
         data sets that are accessed. Use .streamline_* before calling this method to streamline the data sets.
 
         :param dir_cache: Directory to write cache in.
-        :param store: Disk format for objects in cache:
+        :param store_format: Disk format for objects in cache. Recommended is "dao".
 
             - "h5ad": Allows access via backed .h5ad.
                 Note on compression: .h5ad supports sparse data with is a good compression that gives fast row-wise
                     access if the files are csr, so further compression potentially not necessary.
-            - "zarr": Allows access as zarr array.
+            - "dao": Distributed access optimised format, recommended for batched access in optimisation, for example.
         :param dense: Whether to write sparse or dense store, this will be homogenously enforced.
-        :param compression_kwargs: Compression key word arguments to give to h5py, see also anndata.AnnData.write_h5ad:
-            compression, compression_opts.
-        :param chunks: Chunk size of zarr array, see anndata.AnnData.write_zarr documentation.
-            Only relevant for store=="zarr".
+        :param compression_kwargs: Compression key word arguments to give to h5py or zarr
+            For store_format=="h5ad", see also anndata.AnnData.write_h5ad:
+                - compression,
+                - compression_opts.
+            For store_format=="dao", see also sfaira.data.write_dao which relays kwargs to
+            zarr.hierarchy.create_dataset:
+                - compressor
+                - overwrite
+                - order
+                and others.
+        :param chunks: Observation axes of chunk size of zarr array, see anndata.AnnData.write_zarr documentation.
+            Only relevant for store=="dao". The feature dimension of the chunks is always is the full feature space.
+            Uses zarr default chunking across both axes if None.
         """
         self.__assert_loaded()
-        if store == "h5ad":
+        if store_format == "h5ad":
             if not isinstance(self.adata.X, scipy.sparse.csr_matrix):
                 print(f"WARNING: high-perfomances caches based on .h5ad work better with .csr formatted expression "
                       f"data, found {type(self.adata.X)}")
             fn = os.path.join(dir_cache, self.doi_cleaned_id + ".h5ad")
             as_dense = ("X",) if dense else ()
+            print(f"writing {self.adata.shape} into {fn}")
             self.adata.write_h5ad(filename=fn, as_dense=as_dense, **compression_kwargs)
-        elif store == "zarr":
+        elif store_format == "dao":
+            # Convert data object to sparse / dense as required:
+            if not dense:
+                raise ValueError("WARNING: sparse zarr array performance is not be optimal and not supported yet, "
+                                 "consider writing as dense and consider that zarr arrays are compressed on disk!")
             fn = os.path.join(dir_cache, self.doi_cleaned_id)
-            self.adata.write_zarr(store=fn, chunks=chunks)
+            chunks = (chunks, self.adata.X.shape[1]) if chunks is not None else True
+            write_dao(store=fn, adata=self.adata, chunks=chunks, compression_kwargs=compression_kwargs)
         else:
             raise ValueError()
 
@@ -1054,7 +1089,7 @@ class DatasetBase(abc.ABC):
         if not self.annotated:
             warnings.warn(f"attempted to write ontology classmaps for data set {self.id} without annotation")
         else:
-            labels_original = np.sort(np.unique(self.adata.obs[self._adata_ids.cell_types_original].values))
+            labels_original = np.sort(np.unique(self.adata.obs[self.cell_types_original_obs_key].values))
             tab = self.celltypes_universe.prepare_celltype_map_tab(
                 source=labels_original,
                 match_only=False,
@@ -1169,15 +1204,16 @@ class DatasetBase(abc.ABC):
                     adata_fields.not_a_cell_celltype_identifier
                 ],
             )
-            results[adata_fields.cell_ontology_class] = labels_mapped
-            results[adata_fields.cell_ontology_id] = ids_mapped
+            results[adata_fields.cellontology_class] = labels_mapped
+            results[adata_fields.cellontology_id] = ids_mapped
             if update_fields:
-                self.cellontology_id_obs_key = adata_fields.cell_ontology_id
+                self.cellontology_id_obs_key = adata_fields.cellontology_id
         else:
-            results[adata_fields.cell_ontology_class] = labels_original
+            results[adata_fields.cellontology_class] = labels_original
+            results[adata_fields.cellontology_id] = [adata_fields.unknown_metadata_identifier] * self.adata.n_obs
         results[adata_fields.cell_types_original] = labels_original
         if update_fields:
-            self.cellontology_class_obs_key = adata_fields.cell_ontology_class
+            self.cellontology_class_obs_key = adata_fields.cellontology_class
             self.cell_types_original_obs_key = adata_fields.cell_types_original
         if copy:
             return pd.DataFrame(results, index=self.adata.obs.index)
@@ -1299,7 +1335,7 @@ class DatasetBase(abc.ABC):
         meta = pandas.DataFrame(index=range(1))
         # Expand table by variably cell-wise or data set-wise meta data:
         for x in self._adata_ids.controlled_meta_fields:
-            if x in ["cell_types_original", "cell_ontology_class", "cell_ontology_id"]:
+            if x in ["cell_types_original", "cellontology_class", "cellontology_id"]:
                 continue
             elif x in ["bio_sample", "individual", "tech_sample"] and \
                     hasattr(self, f"{x}_obs_key") and \
@@ -1326,12 +1362,12 @@ class DatasetBase(abc.ABC):
         # Add cell types into table if available:
         if self.cell_types_original_obs_key is not None:
             mappings = self.project_celltypes_to_ontology(copy=True, update_fields=False)
-            meta[self._adata_ids.cell_ontology_class] = (mappings[self._adata_ids.cell_ontology_class].unique(),)
-            meta[self._adata_ids.cell_ontology_id] = (mappings[self._adata_ids.cell_ontology_id].unique(),)
+            meta[self._adata_ids.cellontology_class] = (mappings[self._adata_ids.cellontology_class].unique(),)
+            meta[self._adata_ids.cellontology_id] = (mappings[self._adata_ids.cellontology_id].unique(),)
             meta[self._adata_ids.cell_types_original] = (mappings[self._adata_ids.cell_types_original].unique(),)
         else:
-            meta[self._adata_ids.cell_ontology_class] = " "
-            meta[self._adata_ids.cell_ontology_id] = " "
+            meta[self._adata_ids.cellontology_class] = " "
+            meta[self._adata_ids.cellontology_id] = " "
             meta[self._adata_ids.cell_types_original] = " "
         meta.to_csv(fn_meta)
 
