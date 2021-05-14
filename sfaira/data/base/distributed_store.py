@@ -270,7 +270,8 @@ class DistributedStoreBase(abc.ABC):
             # Cannot index on view here as indexing on view of views of backed anndata objects is not yet supported.
             idx_subset = get_idx(adata=adata_k, obs=obs_k, k=attr_key, v=values, xv=excluded_values, dataset=k)
             # Keep intersection of old and new hits.
-            idx_new = set(np.asarray(idx_old).tolist()).intersection(set(np.asarray(idx_subset).tolist()))
+            idx_new = np.asarray(list(set(np.asarray(idx_old).tolist()).intersection(
+                set(np.asarray(idx_subset).tolist()))))
             if len(idx_new) > 0:
                 indices[k] = np.asarray(idx_new, dtype="int32")
         return indices
