@@ -232,7 +232,6 @@ class DatasetGroup:
                 - compression_opts.
             For store_format=="dao", see also sfaira.data.write_dao which relays kwargs to
             zarr.hierarchy.create_dataset:
-                - dtype
                 - compressor
                 - overwrite
                 - order
@@ -1015,7 +1014,6 @@ class DatasetSuperGroup:
                 - compression_opts.
             For store_format=="dao", see also sfaira.data.write_dao which relays kwargs to
             zarr.hierarchy.create_dataset:
-                - dtype
                 - compressor
                 - overwrite
                 - order

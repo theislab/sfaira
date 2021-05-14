@@ -1,10 +1,12 @@
 import anndata
 import dask.array
 import dask.dataframe
+import numpy as np
 import os
 import pandas as pd
 from pathlib import Path
 import pickle
+import scipy.sparse
 from typing import List, Tuple, Union
 import zarr
 
@@ -34,7 +36,8 @@ def path_x(path):
     return os.path.join(path, "zarr")
 
 
-def write_dao(store: Union[str, Path], adata, chunks, compression_kwargs):
+def write_dao(store: Union[str, Path], adata: anndata.AnnData, chunks: Union[bool, Tuple[int, int]],
+              compression_kwargs: dict):
     """
     Writes a distributed access optimised ("dao") store of a dataset based on an AnnData instance.
 
@@ -55,7 +58,28 @@ def write_dao(store: Union[str, Path], adata, chunks, compression_kwargs):
     """
     # Write numeric matrix as zarr array:
     f = zarr.open(path_x(store), mode="w")
-    f.create_dataset("X", data=adata.X, chunks=chunks, **compression_kwargs)
+    # If adata.X is already a dense array in memory, it can be safely written fully to a zarr array. Otherwise:
+    # Create empty store and then write in dense chunks to avoid having to load entire adata.X into a dense array in
+    # memory.
+    if isinstance(adata.X, np.ndarray) or isinstance(adata.X, np.matrix):
+        f.create_dataset("X", data=adata.X, chunks=chunks, dtype=adata.X.dtype, **compression_kwargs)
+    elif isinstance(adata.X, scipy.sparse.spmatrix):
+        # Initialise empty array
+        dtype = adata.X.dtype
+        shape = adata.X.shape
+        f.create_dataset("X", data=np.zeros(shape), chunks=chunks, dtype=dtype, **compression_kwargs)
+        batch_size = 128  # Use a batch size that guarantees that the dense batch fits easily into memory.
+        n_batches = shape[0] // batch_size + int(shape[0] % batch_size > 0)
+        batches = [(i * batch_size, min(i * batch_size + batch_size, shape[0])) for i in range(n_batches)]
+        counter = 0.
+        for s, e in batches:
+            counter += np.asarray(adata.X[s:e, :].todense(), dtype=dtype).sum()
+            f["X"][s:e, :] = np.asarray(adata.X[s:e, :].todense(), dtype=dtype)
+            assert f["X"][s:e, :][...].sum() == adata.X[s:e, :].sum(), (f["X"][s:e, :][...].sum(), adata.X[s:e, :].sum())
+        assert dask.array.sum(f["X"]).compute() == adata.X.sum(), \
+            (f["X"][...].sum(), dask.array.sum(f["X"]).compute(), counter, adata.X.sum())
+    else:
+        raise ValueError(f"did not recognise array format {type(adata.X)}")
     # Write .uns into pickle:
     with open(path_uns(store), "wb") as f:
         pickle.dump(obj=adata.uns, file=f)

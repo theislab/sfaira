@@ -962,7 +962,6 @@ class DatasetBase(abc.ABC):
                 - compression_opts.
             For store_format=="dao", see also sfaira.data.write_dao which relays kwargs to
             zarr.hierarchy.create_dataset:
-                - dtype
                 - compressor
                 - overwrite
                 - order
@@ -983,16 +982,8 @@ class DatasetBase(abc.ABC):
         elif store_format == "dao":
             # Convert data object to sparse / dense as required:
             if not dense:
-                print("WARNING: sparse zarr array performance may not be optimal, "
-                      "consider writing as dense and consider that zarr arrays can be compressed on disk")
-            if dense and isinstance(self.adata.X, scipy.sparse.spmatrix):
-                self.adata.X = np.asarray(self.adata.X.todense())
-            elif dense and isinstance(self.adata.X, np.matrix):
-                self.adata.X = np.asarray(self.adata.X)
-            elif not dense and isinstance(self.adata.X, np.ndarray):
-                self.adata.X = scipy.sparse.csr_matrix(self.adata.X)
-            elif not dense and isinstance(self.adata.X, np.matrix):
-                self.adata.X = scipy.sparse.csr_matrix(np.asarray(self.adata.X))
+                raise ValueError("WARNING: sparse zarr array performance is not be optimal and not supported yet, "
+                                 "consider writing as dense and consider that zarr arrays are compressed on disk!")
             fn = os.path.join(dir_cache, self.doi_cleaned_id)
             chunks = (chunks, self.adata.X.shape[1]) if chunks is not None else True
             write_dao(store=fn, adata=self.adata, chunks=chunks, compression_kwargs=compression_kwargs)
