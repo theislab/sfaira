@@ -63,9 +63,10 @@ def write_dao(store: Union[str, Path], adata: anndata.AnnData, chunks: Union[boo
     # memory.
     if isinstance(adata.X, np.ndarray) or isinstance(adata.X, np.matrix) or True:
         f.create_dataset("X", data=adata.X.todense(), chunks=chunks, dtype=adata.X.dtype, **compression_kwargs)
+        counter = 0
     elif isinstance(adata.X, scipy.sparse.spmatrix):
         # Initialise empty array
-        dtype = adata.X.dtype
+        dtype = adata.X.data.dtype
         shape = adata.X.shape
         f.create_dataset("X", shape=shape, dtype=dtype, fill_value=0., chunks=chunks, **compression_kwargs)
         batch_size = 128  # Use a batch size that guarantees that the dense batch fits easily into memory.
@@ -79,8 +80,22 @@ def write_dao(store: Union[str, Path], adata: anndata.AnnData, chunks: Union[boo
     else:
         raise ValueError(f"did not recognise array format {type(adata.X)}")
     f2 = zarr.open(path_x(store), mode="r")
+    assert np.all(np.where(f2["X"][...] > 0)[0] == np.where(adata.X.todense() > 0)[0])
+    assert np.all(np.where(f2["X"][...] > 0)[1] == np.where(adata.X.todense() > 0)[1])
+    assert np.all(f2["X"][...] - adata.X.todense() == 0.)
+    assert f2["X"][...].dtype == adata.X.data.dtype, (f2["X"][...].dtype, adata.X.todense().dtype, adata.X.data.dtype)
+    print(np.sort(np.unique(adata.X.todense().sum() - adata.X.sum())))
+    print(np.min(adata.X.todense()))
+    print(np.min(adata.X))
+    print(np.max(adata.X.todense()))
+    print(np.max(adata.X))
+    print(np.where(adata.X.todense() - adata.X != 0))
+    print(np.where(f2["X"][...] - adata.X != 0))
+    print(adata.X.todense().sum())
+    print(adata.X.sum())
+    print(f2["X"][...].sum())
     assert dask.array.sum(f2["X"]).compute() == adata.X.sum(), \
-        (f2["X"][...].sum(), dask.array.sum(f2["X"]).compute(), counter, adata.X.sum())
+        (f2["X"][...].sum(), dask.array.sum(f2["X"]).compute(), counter, adata.X.todense().sum(), adata.X.sum())
     # Write .uns into pickle:
     with open(path_uns(store), "wb") as f:
         pickle.dump(obj=adata.uns, file=f)

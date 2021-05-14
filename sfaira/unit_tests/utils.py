@@ -1,6 +1,7 @@
 import anndata
 import numpy as np
 import os
+from typing import Tuple, Union
 
 from sfaira.consts import AdataIdsSfaira, OCS
 from sfaira.data import Universe
@@ -37,7 +38,7 @@ def simulate_anndata(genes, n_obs, targets=None, assays=None) -> anndata.AnnData
 
 
 def cached_store_writing(dir_data, dir_meta, assembly, organism: str = "mouse", organ: str = "lung",
-                         store_format: str = "h5ad") -> str:
+                         store_format: str = "h5ad", return_ds: bool = False) -> Union[str, Tuple[str, Universe]]:
     """
     Writes a store if it does not already exist.
 
@@ -67,4 +68,7 @@ def cached_store_writing(dir_data, dir_meta, assembly, organism: str = "mouse", 
         compression_kwargs = {}
     ds.write_distributed_store(dir_cache=store_path, store_format=store_format, dense=store_format == "dao",
                                chunks=128, compression_kwargs=compression_kwargs)
-    return store_path
+    if return_ds:
+        return store_path, ds
+    else:
+        return store_path

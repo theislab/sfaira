@@ -1,10 +1,12 @@
+import dask.array
 import numpy as np
 import os
 import pytest
+import scipy.sparse
 import time
 from typing import List
 
-from sfaira.data import load_store
+from sfaira.data import load_store, Universe
 from sfaira.versions.genomes import GenomeContainer
 from sfaira.unit_tests.utils import cached_store_writing
 
@@ -39,6 +41,38 @@ def test_fatal(store_format: str):
     _ = store.indices
     _ = store.genome_container
     _ = store.n_counts(idx=[1, 3])
+
+
+@pytest.mark.parametrize("store_format", ["h5ad", "dao"])
+@pytest.mark.parametrize("dataset", ["mouse_lung_2019_10xsequencing_pisco_022"])
+def test_data(store_format: str, dataset: str):
+    """
+    Test if store data matrix and meta data is the same as in the dataset.
+    """
+    store_path, ds = cached_store_writing(dir_data=dir_data, dir_meta=dir_meta, assembly=MOUSE_GENOME_ANNOTATION,
+                                          store_format=store_format, return_ds=True)
+    store = load_store(cache_path=store_path, store_format=store_format)
+    store.subset(attr_key="id", values=[dataset])
+    adata_store = store.adata_by_key[dataset]
+    adata_ds = ds.datasets[dataset].adata
+    # Check .X
+    x_store = adata_store.X
+    x_ds = adata_ds.X
+    if isinstance(x_store, dask.array.Array):
+        x_store = x_store.compute()
+    if isinstance(x_store, scipy.sparse.spmatrix):
+        x_store = x_store.todense()
+    x_ds = x_ds.todense()
+    assert np.all(np.where(x_store > 0)[0] == np.where(x_ds > 0)[0])
+    assert np.all(np.where(x_store > 0)[1] == np.where(x_ds > 0)[1])
+    assert np.all(x_store - x_ds == 0.)
+    assert x_store.dtype == x_ds.dtype
+    assert x_ds.sum() == x_store.sum()
+    # Check .obs
+    obs_store = adata_store.obs
+    obs_ds = adata_ds.obs
+    assert np.all(obs_store.columns == obs_ds.columns), (obs_store.columns, obs_ds.columns)
+    assert np.all(obs_store.values == obs_ds.values)
 
 
 @pytest.mark.parametrize("store_format", ["h5ad", "dao"])
