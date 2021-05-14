@@ -814,6 +814,16 @@ class OntologyCl(OntologyExtendedObo):
         return ["synonym"]
 
 
+class OntologyOboCustom(OntologyExtendedObo):
+
+    def __init__(
+            self,
+            obo: str,
+            **kwargs
+    ):
+        super().__init__(obo=obo, **kwargs)
+
+
 # use OWL for OntologyHancestro
 
 
