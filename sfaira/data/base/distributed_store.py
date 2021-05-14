@@ -226,7 +226,7 @@ class DistributedStoreBase(abc.ABC):
                     values_found = None  # Go to cell-wise annotation.
                 else:
                     # Replicate unique property along cell dimension.
-                    values_found = [values_found[0] for i in range(adata.n_obs)]
+                    values_found = [values_found[0] for _ in range(adata.n_obs)]
             else:
                 values_found = None
             if values_found is None:
@@ -261,19 +261,19 @@ class DistributedStoreBase(abc.ABC):
             return idx
 
         indices = {}
-        for k, adata_k in self.adata_dict.items():
-            if k not in self.adata_by_key.keys():
-                raise ValueError(f"data set {k} queried by indices does not exist in store (.adata_by_key)")
+        for key, adata_k in self.adata_dict.items():
+            if key not in self.adata_by_key.keys():
+                raise ValueError(f"data set {key} queried by indices does not exist in store (.adata_by_key)")
             # Get indices of idx_old to keep:
-            obs_k = self.obs_by_key[k]
-            idx_old = self.indices[k]
+            obs_k = self.obs_by_key[key]
+            idx_old = self.indices[key]
             # Cannot index on view here as indexing on view of views of backed anndata objects is not yet supported.
-            idx_subset = get_idx(adata=adata_k, obs=obs_k, k=attr_key, v=values, xv=excluded_values, dataset=k)
+            idx_subset = get_idx(adata=adata_k, obs=obs_k, k=attr_key, v=values, xv=excluded_values, dataset=key)
             # Keep intersection of old and new hits.
             idx_new = np.asarray(list(set(np.asarray(idx_old).tolist()).intersection(
                 set(np.asarray(idx_subset).tolist()))))
             if len(idx_new) > 0:
-                indices[k] = np.asarray(idx_new, dtype="int32")
+                indices[key] = np.asarray(idx_new, dtype="int32")
         return indices
 
     def subset(self, attr_key, values: Union[str, List[str], None] = None,
@@ -673,7 +673,7 @@ class DistributedStoreDao(DistributedStoreBase):
             is overhangs in retrieval_batch_size in the raw data files, which often happens and results in modest
             changes in batch composition.
             Do not use randomized_batch_access and random_access.
-        :param randomized_batch_access: Whether to fully shuffle observations before batched access takes place. May
+        :param random_access: Whether to fully shuffle observations before batched access takes place. May
             slow down access compared randomized_batch_access and to no randomization.
             Do not use randomized_batch_access and random_access.
         :return: Generator function which yields batch_size at every invocation.
@@ -720,8 +720,8 @@ class DistributedStoreDao(DistributedStoreBase):
                         x_i = x[s:e, var_idx]
                     else:
                         x_i = x[s:e, :]
-                # Exploit fact that index of obs is just increasing list of integers, so we can use the (faster?) .loc
-                # indexing instead of .iloc:
+                # Exploit fact that index of obs is just increasing list of integers, so we can use the .loc[] indexing
+                # instead of .iloc[]:
                 obs_i = obs[obs_keys].loc[epoch_indices[s:e].tolist(), :]
                 yield x_i, obs_i
 
@@ -737,7 +737,7 @@ def load_store(cache_path: Union[str, os.PathLike], store_format: str = "dao",
     :param store_format: Format of store {"h5ad", "dao"}.
 
         - "h5ad": Returns instance of DistributedStoreH5ad.
-        - "dao": Returns instance of DistributedStoreDoa (distributed access optimsied).
+        - "dao": Returns instance of DistributedStoreDoa (distributed access optimized).
     :param columns: Which columns to read into the obs copy in the output, see pandas.read_parquet().
         Only relevant if store_format is "dao".
     :return: Instances of a distributed store class.

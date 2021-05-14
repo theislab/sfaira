@@ -1,3 +1,4 @@
+import anndata
 import dask.array
 import numpy as np
 import os
@@ -6,7 +7,7 @@ import scipy.sparse
 import time
 from typing import List
 
-from sfaira.data import load_store, Universe
+from sfaira.data import load_store
 from sfaira.versions.genomes import GenomeContainer
 from sfaira.unit_tests.utils import cached_store_writing
 
@@ -19,7 +20,7 @@ dir_meta = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_data",
 
 
 """
-TODO tests from here on down require cached data for mouse lung
+Tests from here on down require cached data for mouse lung
 """
 
 
@@ -44,35 +45,53 @@ def test_fatal(store_format: str):
 
 
 @pytest.mark.parametrize("store_format", ["h5ad", "dao"])
-@pytest.mark.parametrize("dataset", ["mouse_lung_2019_10xsequencing_pisco_022"])
+@pytest.mark.parametrize("dataset", ["mouse_lung_2019_10xsequencing_pisco_022_10.1101/661728"])
 def test_data(store_format: str, dataset: str):
     """
-    Test if store data matrix and meta data is the same as in the dataset.
+    Test if the data exposed by the store are the same as in the original Dataset instance after streamlining.
     """
     store_path, ds = cached_store_writing(dir_data=dir_data, dir_meta=dir_meta, assembly=MOUSE_GENOME_ANNOTATION,
                                           store_format=store_format, return_ds=True)
     store = load_store(cache_path=store_path, store_format=store_format)
-    store.subset(attr_key="id", values=[dataset])
+    dataset_key_reduced = dataset.split("_10.")[0]
+    store.subset(attr_key="id", values=[dataset_key_reduced])
     adata_store = store.adata_by_key[dataset]
     adata_ds = ds.datasets[dataset].adata
     # Check .X
     x_store = adata_store.X
-    x_ds = adata_ds.X
+    x_ds = adata_ds.X.todense()
     if isinstance(x_store, dask.array.Array):
         x_store = x_store.compute()
-    if isinstance(x_store, scipy.sparse.spmatrix):
+    if isinstance(x_store, anndata._core.sparse_dataset.SparseDataset):
+        # Need to load sparse matrix into memory if it comes from a backed anndata object.
+        x_store = x_store[:, :]
+    if isinstance(x_store, scipy.sparse.csr_matrix):
         x_store = x_store.todense()
-    x_ds = x_ds.todense()
+    # Check that non-zero elements are the same:
     assert np.all(np.where(x_store > 0)[0] == np.where(x_ds > 0)[0])
     assert np.all(np.where(x_store > 0)[1] == np.where(x_ds > 0)[1])
     assert np.all(x_store - x_ds == 0.)
     assert x_store.dtype == x_ds.dtype
-    assert x_ds.sum() == x_store.sum()
+    # Note: Do not run test on sum across entire object if dtype is float32 as this can result in test failures because
+    # of float overflows.
     # Check .obs
     obs_store = adata_store.obs
     obs_ds = adata_ds.obs
     assert np.all(obs_store.columns == obs_ds.columns), (obs_store.columns, obs_ds.columns)
-    assert np.all(obs_store.values == obs_ds.values)
+    for k, v in obs_store.items():
+        assert np.all(np.asarray(v.values.tolist()) == np.asarray(obs_ds[k].values.tolist()))
+    # Check .var
+    var_store = adata_store.var
+    var_ds = adata_ds.var
+    assert np.all(var_store.columns == var_ds.columns), (var_store.columns, var_ds.columns)
+    for k, v in var_store.items():
+        assert np.all(np.asarray(v.values.tolist()) == np.asarray(var_ds[k].values.tolist()))
+    # Check .uns
+    uns_store = adata_store.uns
+    uns_ds = adata_ds.uns
+    assert np.all(uns_store.keys() == uns_ds.keys()), (uns_store.keys(), uns_ds.keys())
+    for k, v in uns_store.items():
+        assert np.all(v == uns_ds[k])
 
 
 @pytest.mark.parametrize("store_format", ["h5ad", "dao"])
@@ -123,6 +142,8 @@ def test_generator_shapes(store_format: str, idx, batch_size: int, obs_keys: Lis
     nobs = len(idx) if idx is not None else store.n_obs
     batch_sizes = []
     t0 = time.time()
+    x = None
+    obs = None
     for i, z in enumerate(g()):
         x_i, obs_i = z
         assert x_i.shape[0] == obs_i.shape[0]

@@ -69,6 +69,14 @@ def cached_store_writing(dir_data, dir_meta, assembly, organism: str = "mouse", 
     ds.write_distributed_store(dir_cache=store_path, store_format=store_format, dense=store_format == "dao",
                                chunks=128, compression_kwargs=compression_kwargs)
     if return_ds:
+        ds = Universe(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
+        ds.subset(key=adata_ids_sfaira.organism, values=[organism])
+        ds.subset(key=adata_ids_sfaira.organ, values=[organ])
+        ds.load(allow_caching=True)
+        ds.streamline_features(remove_gene_version=True, match_to_reference={organism: assembly},
+                               subset_genes_to_type="protein_coding")
+        ds.streamline_metadata(schema="sfaira", uns_to_obs=True, clean_obs=True, clean_var=True, clean_uns=True,
+                               clean_obs_names=True)
         return store_path, ds
     else:
         return store_path
