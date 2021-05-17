@@ -109,7 +109,7 @@ class DistributedStoreBase(abc.ABC):
         # Make sure that features are ordered in the same way in each object so that generator yields consistent cell
         # vectors.
         _ = self._validate_feature_space_homogeneity()
-        var_names_store = self.adata_dict[list(self.indices.keys())[0]].var_names.tolist()
+        var_names_store = self.adata_by_key[list(self.indices.keys())[0]].var_names.tolist()
         # Use feature space sub-selection based on assembly if provided, will use full feature space otherwise.
         if self.genome_container is not None:
             var_names_target = self.genome_container.ensembl
@@ -255,16 +255,18 @@ class DistributedStoreBase(abc.ABC):
                         for y in xv
                     ])
                 ]
-            # TODO keep this logging for now to catch undesired behaviour resulting from loaded edges in ontologies.
-            print(f"matched cell-wise keys {str(values_found_unique_matched)} in data set {dataset}")
             idx = np.where([x in values_found_unique_matched for x in values_found])[0]
+            if len(idx) > 0:
+                # TODO keep this logging for now to catch undesired behaviour resulting from loaded edges in ontologies.
+                print(f"matched keys {str(values_found_unique_matched)} in data set {dataset}")
             return idx
 
         indices = {}
-        for key, adata_k in self.adata_dict.items():
+        for key in self.indices.keys():
             if key not in self.adata_by_key.keys():
                 raise ValueError(f"data set {key} queried by indices does not exist in store (.adata_by_key)")
             # Get indices of idx_old to keep:
+            adata_k = self.adata_by_key[key]
             obs_k = self.obs_by_key[key]
             idx_old = self.indices[key]
             # Cannot index on view here as indexing on view of views of backed anndata objects is not yet supported.
@@ -325,12 +327,10 @@ class DistributedStoreBase(abc.ABC):
         """
         with open(fn, 'rb') as f:
             self.indices = pickle.load(f)
-        # Subset to described data sets:
+        # Make sure all declared data sets are found in store:
         for x in self.indices.keys():
             if x not in self.adata_by_key.keys():
                 raise ValueError(f"did not find object with name {x} in currently loaded universe")
-        # Only retain data sets with which are mentioned in config file.
-        self.subset(attr_key="id", values=list(self.indices.keys()))
 
     @property
     def var_names(self):
@@ -367,11 +367,6 @@ class DistributedStoreBase(abc.ABC):
             return_dense: bool = True,
             randomized_batch_access: bool = False,
     ) -> iter:
-        pass
-
-    @property
-    @abc.abstractmethod
-    def adata_dict(self) -> Dict[str, anndata.AnnData]:
         pass
 
     @property
@@ -417,7 +412,7 @@ class DistributedStoreH5ad(DistributedStoreBase):
         super(DistributedStoreH5ad, self).__init__(adata_by_key=adata_by_key, indices=indices)
 
     @property
-    def adata_dict(self) -> Dict[str, anndata.AnnData]:
+    def adata_sliced(self) -> Dict[str, anndata.AnnData]:
         """
         Only exposes the subset and slices of the adata instances contained in ._adata_by_key defined in .indices.
         """
@@ -525,7 +520,7 @@ class DistributedStoreH5ad(DistributedStoreBase):
             assert counter == self.n_obs
             return dict([(k, self._adata_by_key[k][v, :]) for k, v in indices_subsetted.items()])
         else:
-            return self.adata_dict
+            return self.adata_sliced
 
     def get_subset_idx_global(self, attr_key, values: Union[str, List[str], None] = None,
                               excluded_values: Union[str, List[str], None] = None) -> np.ndarray:
@@ -608,13 +603,6 @@ class DistributedStoreDao(DistributedStoreBase):
                 indices[adata.uns["id"]] = np.arange(0, adata.n_obs)
         self._x_as_dask = True
         super(DistributedStoreDao, self).__init__(adata_by_key=adata_by_key, indices=indices, obs_by_key=None)
-
-    @property
-    def adata_dict(self) -> Dict[str, anndata.AnnData]:
-        """
-        Only exposes the subset and slices of the adata instances contained in ._adata_by_key defined in .indices.
-        """
-        return dict([(k, self._adata_by_key[k][v, :]) for k, v in self.indices.items()])
 
     @property
     def X(self) -> Union[dask.array.Array]:
