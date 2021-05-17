@@ -1207,13 +1207,16 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         if self.summary_tab.shape[0] == 0:
             raise ValueError("summary_tab was empty")
 
-    def best_model_embedding(
+    def best_model_embedding_latentspace(
             self,
             subset: dict = {},
             partition: str = "val",
             metric: str = "loss",
             cvs: Union[None, List[int]] = None
     ):
+        """
+        Returns the best model id and associated latent space and coviariance matrix.
+        """
         model_id, _, _ = self.get_best_model_ids(
             tab=self.summary_tab,
             partition_select=partition,
@@ -1616,7 +1619,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         with plt.style.context("seaborn-whitegrid"):
             plt.figure(figsize=(12, 6))
             for model in models:
-                model_id, embedding, covar = self.best_model_embedding(
+                model_id, embedding, covar = self.best_model_embedding_latentspace(
                     subset={"model_type": model, "organ": organ, "topology": topology_version},
                     partition="val",
                     metric="loss",
@@ -1671,7 +1674,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
             plt.figure(figsize=(12, 6))
             plt.axhline(np.log(0.01), color="k", linestyle='dashed', linewidth=2, label="active unit threshold")
             for i, model in enumerate(models):
-                model_id, embedding, covar = self.best_model_embedding(
+                model_id, embedding, covar = self.best_model_embedding_latentspace(
                     subset={"model_type": model, "organ": organ, "topology": topology_version},
                     partition="val",
                     metric="loss",
