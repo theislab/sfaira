@@ -7,6 +7,7 @@ import warnings
 from typing import Union, List
 import os
 
+from sfaira.versions.topologies import TopologyContainer, TOPOLOGIES
 from sfaira.versions.metadata import CelltypeUniverse
 from sfaira.estimators import EstimatorKerasEmbedding
 from sfaira.data import Universe
@@ -125,6 +126,15 @@ class GridsearchContainer:
         self.source_path = source_path
         self.summary_tab = None
 
+    @staticmethod
+    def create_topology(model_id):
+        model_class = model_id.split('_')[0]
+        organism = model_id.split('_')[1]
+        model_type = model_id.split('_')[3]
+        topo_id = model_id.split('_')[5]
+        topology = TOPOLOGIES[organism][model_class][model_type][topo_id]
+        return topology
+    
     def load_gs(
             self,
             gs_ids: List[str]
@@ -150,6 +160,7 @@ class GridsearchContainer:
         model_hyperpars = {}
         run_ids_proc = []
         gs_keys = []
+        topologies = []
         for i, indir in enumerate(res_dirs):
             for x in run_ids[i]:
                 fn_history = os.path.join(indir, f"{x}_history.pickle")
@@ -182,6 +193,8 @@ class GridsearchContainer:
 
                 run_ids_proc.append(x)
                 gs_keys.append(os.path.normpath(indir).split(os.path.sep)[-2])
+            topo = self.create_topology(run_ids_proc[0])
+            topologies.append(topo)
 
         self.run_ids = run_ids_proc
         self.gs_keys = dict(zip(run_ids_proc, gs_keys))
@@ -189,6 +202,7 @@ class GridsearchContainer:
         self.hyperpars = hyperpars
         self.model_hyperpars = model_hyperpars
         self.histories = histories
+        self.gs_topologies = dict(zip(gs_keys, topologies))
 
     def load_y(
             self,
@@ -1233,8 +1247,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                 ]
             else:
                 fns = [os.path.join(self.source_path, self.gs_keys[model_id], "results", model_id)]
-            embedding = None #[np.load(f"{x}_embedding.npy") for x in fns]
-            covar = None #[pandas.read_csv(f"{x}_covar.csv") for x in fns]
+            embedding = [np.load(f"{x}_embedding.npy") for x in fns]
+            covar = [pandas.read_csv(f"{x}_covar.csv") for x in fns]
             return model_id, embedding, covar
         else:
             return None, [None], [None]
@@ -1348,7 +1362,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         """
         Compute gradients across latent units with respect to input features for each cell type.
 
-        :param organ:
+        :param model_organ:
+        :param data_organ:
         :param organism:
         :param model_type:
         :param metric_select:
@@ -1388,8 +1403,13 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
             if not dataset.flatten().datasets:
                 raise ValueError(f"No datasets matching organism: {organism} and organ: {data_organ} found")
             dataset.load(allow_caching=False)
+            # Map genome version
+            gs_id = self.gs_keys[model_id]
+            genome_version = self.gs_topologies[gs_id]['input']['genome']
+            human_genome = genome_version if organism=='human' else genome_version.replace("Mus_musculus", "Homo_sapiens")
+            mouse_genome = genome_version if organism=='mouse' else genome_version.replace("Homo_sapiens", "Mus_musculus")
             dataset.streamline_features(
-                match_to_reference={"human": "Homo_sapiens.GRCh38.102", "mouse": "Mus_musculus.GRCm38.102"},
+                match_to_reference={"human": human_genome, "mouse": mouse_genome},
                 subset_genes_to_type="protein_coding"
             )
             dataset.streamline_metadata(schema="sfaira")
@@ -1397,11 +1417,14 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
             print('Compute gradients (2/3): load embedding')
             # load embedding
             adata = dataset.adata
+            topology = self.gs_topologies[self.gs_keys[model_id]]
+            topo_id = model_id.split('_')[5]
+            topology_container = TopologyContainer(topology=topology, topology_id=topo_id)
             embedding = EstimatorKerasEmbedding(
                 data=adata,
                 model_dir="",
                 model_id="",
-                model_topology=model_id.split('_')[5]
+                model_topology=topology_container
             )
             embedding.init_model()
             embedding.model.training_model.load_weights(os.path.join(resultspath, f'{model_id}_weights.h5'))
