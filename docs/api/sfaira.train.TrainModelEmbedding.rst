@@ -14,23 +14,13 @@
    .. autosummary::
    
       ~TrainModelEmbedding.__init__
-      ~TrainModelEmbedding.human_target
       ~TrainModelEmbedding.init_estim
-      ~TrainModelEmbedding.mouse_target
+      ~TrainModelEmbedding.load_into_memory
       ~TrainModelEmbedding.save
       ~TrainModelEmbedding.save_eval
-      ~TrainModelEmbedding.set_data
-      ~TrainModelEmbedding.write_celltypes_tocsv_human
-      ~TrainModelEmbedding.write_celltypes_tocsv_mouse
    
    
 
    
-   
-   .. rubric:: Attributes
-
-   .. autosummary::
-   
-      ~TrainModelEmbedding.adata
    
    

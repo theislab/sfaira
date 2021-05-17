@@ -10,7 +10,7 @@ from rich import print
 from sfaira.commands.test_dataloader import DataloaderTester
 
 from sfaira.commands.clean_dataloader import DataloaderCleaner
-from sfaira.commands.lint_dataloader import DataloaderLinter
+from sfaira.commands.validate_dataloader import DataloaderValidator
 
 import sfaira
 from sfaira.commands.create_dataloader import DataloaderCreator
@@ -92,14 +92,14 @@ def clean_dataloader(path) -> None:
 
 @sfaira_cli.command()
 @click.argument('path', type=click.Path(exists=True))
-def lint_dataloader(path) -> None:
+def validate_dataloader(path) -> None:
     """
     Verifies the dataloader against sfaira's requirements.
 
     PATH to the dataloader script.
     """
-    dataloader_linter = DataloaderLinter(path)
-    dataloader_linter.lint()
+    dataloader_validator = DataloaderValidator(path)
+    dataloader_validator.validate()
 
 
 @sfaira_cli.command()
