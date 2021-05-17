@@ -788,14 +788,8 @@ class DatasetSuperGroup:
             self,
             genome: str = None
     ):
-        if genome.lower().startswith("homo_sapiens"):
+        if genome.lower().startswith("homo_sapiens") or genome.lower().startswith("mus_musculus"):
             g = GenomeContainer(
-                organism="human",
-                assembly=genome
-            )
-        elif genome.lower().startswith("mus_musculus"):
-            g = GenomeContainer(
-                organism="mouse",
                 assembly=genome
             )
         else:
@@ -1044,7 +1038,7 @@ class DatasetSuperGroup:
         Example usage:
 
             ds = DatasetSuperGroup([...])
-            ds.load_all_tobacked(
+            ds.write_backed(
                 fn_backed="...",
                 target_genome="...",
                 annotated_only=False
@@ -1094,7 +1088,7 @@ class DatasetSuperGroup:
             self._adata_ids.development_stage,
             self._adata_ids.normalization,
             self._adata_ids.organ,
-            self._adata_ids.sample_type,
+            self._adata_ids.bio_sample,
             self._adata_ids.state_exact,
             self._adata_ids.year,
         ]
