@@ -744,7 +744,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                     for i in idx:
                         x_sample = self.data.X[i, :].toarray().flatten() if sparse else self.data.X[i, :].flatten()
                         sf_sample = prepare_sf(x=x_sample)[0]
-                        y_sample = self.data.obs[self._adata_ids.cellontology_id][i]
+                        y_sample = self.data.obs[self._adata_ids.cellontology_class][i]
                         yield (x_sample, sf_sample), (x_sample, cell_to_class[y_sample])
             else:
                 x = self._prepare_data_matrix(idx=idx)
