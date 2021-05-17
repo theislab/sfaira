@@ -1162,19 +1162,20 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
 
     def create_summary_tab(self):
         metrics = list(self.evals.values())[0]['val'].keys()
+        run_ids = [run_id.replace('-', '_') for run_id in self.run_ids]
         self.summary_tab = pandas.DataFrame(dict(
             list({
-                "depth": [id_i.split("_")[self.model_id_len + 0] for id_i in self.run_ids],
-                "width": [id_i.split("_")[self.model_id_len + 1] for id_i in self.run_ids],
-                "lr": [id_i.split("_")[self.model_id_len + 2] for id_i in self.run_ids],
-                "dropout": [id_i.split("_")[self.model_id_len + 3] for id_i in self.run_ids],
-                "l1": [id_i.split("_")[self.model_id_len + 4] for id_i in self.run_ids],
-                "l2": [id_i.split("_")[self.model_id_len + 5] for id_i in self.run_ids],
-                "cv": [id_i.split("_")[-1] if self.cv else "1" for id_i in self.run_ids],
-                "model": ["_".join(id_i.split("_")[:self.model_id_len]) for id_i in self.run_ids],
-                "organ": [id_i.split("_")[2] for id_i in self.run_ids],
-                "model_type": [id_i.split("_")[3] for id_i in self.run_ids],
-                "model_gs_id": ["_".join(id_i.split("_")[:(self.model_id_len + 6)]) for id_i in self.run_ids],
+                "depth": [id_i.split("_")[self.model_id_len + 0] for id_i in run_ids],
+                "width": [id_i.split("_")[self.model_id_len + 1] for id_i in run_ids],
+                "lr": [id_i.split("_")[self.model_id_len + 2] for id_i in run_ids],
+                "dropout": [id_i.split("_")[self.model_id_len + 3] for id_i in run_ids],
+                "l1": [id_i.split("_")[self.model_id_len + 4] for id_i in run_ids],
+                "l2": [id_i.split("_")[self.model_id_len + 5] for id_i in run_ids],
+                "cv": [id_i.split("_")[-1] if self.cv else "1" for id_i in run_ids],
+                "model": ["_".join(id_i.split("_")[:self.model_id_len]) for id_i in run_ids],
+                "organ": [id_i.split("_")[2] for id_i in run_ids],
+                "model_type": [id_i.split("_")[3] for id_i in run_ids],
+                "model_gs_id": [id_i for id_i in self.run_ids], #["-".join(id_i.split("_")[:(self.model_id_len + 6)]) for id_i in run_ids],
                 "run": self.run_ids,
             }.items()) +
             # TODO: Hacky solution to make sure metrics are called the same in VAE and other models
@@ -1232,8 +1233,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                 ]
             else:
                 fns = [os.path.join(self.source_path, self.gs_keys[model_id], "results", model_id)]
-            embedding = [np.load(f"{x}_embedding.npy") for x in fns]
-            covar = [pandas.read_csv(f"{x}_covar.csv") for x in fns]
+            embedding = None #[np.load(f"{x}_embedding.npy") for x in fns]
+            covar = None #[pandas.read_csv(f"{x}_covar.csv") for x in fns]
             return model_id, embedding, covar
         else:
             return None, [None], [None]
@@ -1331,7 +1332,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
 
     def get_gradients_by_celltype(
             self,
-            organ: str,
+            model_organ: str,
+            data_organ: str,
             organism: str,
             model_type: Union[str, List[str]],
             metric_select: str,
@@ -1364,7 +1366,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
             metric_select=metric_select,
             partition_select=partition_select,
             subset={
-                "organ": organ,
+                "organ": model_organ,
                 "model_type": model_type,
             }
         )
@@ -1381,17 +1383,17 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
             # load data
             dataset = Universe(data_path=datapath, meta_path=metapath, cache_path=cachepath)
             dataset.subset(key="organism", values=[organism])
-            dataset.subset(key="organ", values=[organ])
+            dataset.subset(key="organ", values=[data_organ])
             dataset.subset(key="annotated", values=[True])
             if not dataset.flatten().datasets:
-                raise ValueError(f"No datasets matching organism: {organism} and organ: {organ} found")
+                raise ValueError(f"No datasets matching organism: {organism} and organ: {data_organ} found")
             dataset.load(allow_caching=False)
             dataset.streamline_features(
                 match_to_reference={"human": "Homo_sapiens.GRCh38.102", "mouse": "Mus_musculus.GRCm38.102"},
                 subset_genes_to_type="protein_coding"
             )
             dataset.streamline_metadata(schema="sfaira")
-
+            
             print('Compute gradients (2/3): load embedding')
             # load embedding
             adata = dataset.adata
@@ -1426,7 +1428,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
 
     def plot_gradient_distr(
             self,
-            organ: str,
+            model_organ: str,
+            data_organ: str,
             organism: str,
             model_type: Union[str, List[str]],
             metric_select: str,
@@ -1463,7 +1466,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         celltypes = {}
         for modelt in model_type:
             avg_grads[modelt], celltypes[modelt] = self.get_gradients_by_celltype(
-                organ=organ,
+                model_organ=model_organ,
+                data_organ=data_organ,
                 organism=organism,
                 model_type=modelt,
                 metric_select=metric_select,
@@ -1526,7 +1530,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
 
     def plot_gradient_cor(
             self,
-            organ: str,
+            model_organ: str,
+            data_organ: str,
             organism: str,
             model_type: Union[str, List[str]],
             metric_select: str,
@@ -1547,7 +1552,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         """
         Plot correlation heatmap of gradient vectors accumulated on input features between cell types or models.
 
-        :param organ:
+        :param model_organ:
+        :param data_organ:
         :param organism:
         :param model_type:
         :param metric_select:
@@ -1582,7 +1588,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         celltypes = {}
         for modelt in model_type:
             avg_grads[modelt], celltypes[modelt] = self.get_gradients_by_celltype(
-                organ=organ,
+                model_organ=model_organ,
+                data_organ=data_organ,
                 organism=organism,
                 model_type=modelt,
                 metric_select=metric_select,
