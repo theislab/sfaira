@@ -1189,7 +1189,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                 "model": ["_".join(id_i.split("_")[:self.model_id_len]) for id_i in run_ids],
                 "organ": [id_i.split("_")[2] for id_i in run_ids],
                 "model_type": [id_i.split("_")[3] for id_i in run_ids],
-                "model_gs_id": [id_i for id_i in self.run_ids], #["-".join(id_i.split("_")[:(self.model_id_len + 6)]) for id_i in run_ids],
+                "model_gs_id": self.run_ids,
                 "run": self.run_ids,
             }.items()) +
             # TODO: Hacky solution to make sure metrics are called the same in VAE and other models
