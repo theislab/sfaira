@@ -127,7 +127,7 @@ class ModelZoo(abc.ABC):
         """
         Set model ID to a manually supplied ID.
 
-        :param x: Model ID to set. Format: pipeline_genome_organ_model_organisation_topology_version
+        :param x: Model ID to set. Format: modelclass_organism-organ-modeltype-topology-version_organisation
         """
         assert len(x.split('_')) == 3, f'model_id {x} is invalid'
         self._model_id = x

@@ -10,7 +10,7 @@ from rich.progress import Progress, BarColumn
 log = logging.getLogger(__name__)
 
 
-class DataloaderLinter:
+class DataloaderValidator:
 
     def __init__(self, path='.'):
         self.path: str = path
@@ -18,11 +18,11 @@ class DataloaderLinter:
         self.passed: dict = {}
         self.warned: dict = {}
         self.failed: dict = {}
-        self.linting_functions: list = [
-            '_lint_required_attributes',
+        self.validation_functions: list = [
+            '_validate_required_attributes',
         ]
 
-    def lint(self) -> None:
+    def validate(self) -> None:
         """
         Statically verifies a yaml dataloader file against a predefined set of rules.
         Every rule is a function defined in this class, which must be part of this class' linting_functions.
@@ -34,15 +34,15 @@ class DataloaderLinter:
                             "[bold yellow]{task.completed} of {task.total}[reset] [bold green]{task.fields[func_name]}")
         with progress:
             lint_progress = progress.add_task("Running lint checks",
-                                              total=len(self.linting_functions),
-                                              func_name=self.linting_functions)
-            for fun_name in self.linting_functions:
+                                              total=len(self.validation_functions),
+                                              func_name=self.validation_functions)
+            for fun_name in self.validation_functions:
                 progress.update(lint_progress, advance=1, func_name=fun_name)
                 getattr(self, fun_name)()
 
         self._print_results()
 
-    def _lint_required_attributes(self):
+    def _validate_required_attributes(self):
         """
         Verifies that all required attributes for every dataloader are present.
         """

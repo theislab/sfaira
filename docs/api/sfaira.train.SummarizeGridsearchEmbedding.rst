@@ -15,7 +15,7 @@
    
       ~SummarizeGridsearchEmbedding.__init__
       ~SummarizeGridsearchEmbedding.best_model_by_partition
-      ~SummarizeGridsearchEmbedding.best_model_embedding
+      ~SummarizeGridsearchEmbedding.best_model_embedding_latentspace
       ~SummarizeGridsearchEmbedding.create_summary_tab
       ~SummarizeGridsearchEmbedding.get_best_model_ids
       ~SummarizeGridsearchEmbedding.get_gradients_by_celltype
