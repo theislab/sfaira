@@ -134,7 +134,7 @@ class GridsearchContainer:
         topo_id = model_id.split('_')[5]
         topology = TOPOLOGIES[organism][model_class][model_type][topo_id]
         return topology
-    
+
     def load_gs(
             self,
             gs_ids: List[str]
@@ -1406,14 +1406,14 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
             # Map genome version
             gs_id = self.gs_keys[model_id]
             genome_version = self.gs_topologies[gs_id]['input']['genome']
-            human_genome = genome_version if organism=='human' else genome_version.replace("Mus_musculus", "Homo_sapiens")
-            mouse_genome = genome_version if organism=='mouse' else genome_version.replace("Homo_sapiens", "Mus_musculus")
+            human_genome = genome_version if organism == 'human' else genome_version.replace("Mus_musculus", "Homo_sapiens")
+            mouse_genome = genome_version if organism == 'mouse' else genome_version.replace("Homo_sapiens", "Mus_musculus")
             dataset.streamline_features(
                 match_to_reference={"human": human_genome, "mouse": mouse_genome},
                 subset_genes_to_type="protein_coding"
             )
             dataset.streamline_metadata(schema="sfaira")
-            
+
             print('Compute gradients (2/3): load embedding')
             # load embedding
             adata = dataset.adata
