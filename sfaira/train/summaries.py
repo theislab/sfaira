@@ -1207,13 +1207,16 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         if self.summary_tab.shape[0] == 0:
             raise ValueError("summary_tab was empty")
 
-    def best_model_embedding(
+    def best_model_embedding_latentspace(
             self,
             subset: dict = {},
             partition: str = "val",
             metric: str = "loss",
             cvs: Union[None, List[int]] = None
     ):
+        """
+        Returns the best model id and associated latent space and coviariance matrix.
+        """
         model_id, _, _ = self.get_best_model_ids(
             tab=self.summary_tab,
             partition_select=partition,
@@ -1333,6 +1336,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
             model_type: Union[str, List[str]],
             metric_select: str,
             datapath,
+            cachepath,
+            metapath,
             test_data=True,
             partition_select: str = "val",
             ignore_cache=False,
@@ -1346,6 +1351,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         :param model_type:
         :param metric_select:
         :param datapath:
+        :param cachepath:
+        :param metapath:
         :param test_data:
         :param partition_select:
         :param ignore_cache:
@@ -1372,14 +1379,18 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         else:
             print('Compute gradients (1/3): load data')
             # load data
-            dataset = Universe(data_path=datapath)
+            dataset = Universe(data_path=datapath, meta_path=metapath, cache_path=cachepath)
             dataset.subset(key="organism", values=[organism])
             dataset.subset(key="organ", values=[organ])
             dataset.subset(key="annotated", values=[True])
             if not dataset.flatten().datasets:
                 raise ValueError(f"No datasets matching organism: {organism} and organ: {organ} found")
-            dataset.load()
-            dataset = dataset.flatten()
+            dataset.load(allow_caching=False)
+            dataset.streamline_features(
+                match_to_reference={"human": "Homo_sapiens.GRCh38.102", "mouse": "Mus_musculus.GRCm38.102"},
+                subset_genes_to_type="protein_coding"
+            )
+            dataset.streamline_metadata(schema="sfaira")
 
             print('Compute gradients (2/3): load embedding')
             # load embedding
@@ -1388,9 +1399,6 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                 data=adata,
                 model_dir="",
                 model_id="",
-                organism=organism,
-                organ=organ,
-                model_type=model_type,
                 model_topology=model_id.split('_')[5]
             )
             embedding.init_model()
@@ -1423,6 +1431,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
             model_type: Union[str, List[str]],
             metric_select: str,
             datapath,
+            cachepath,
+            metapath,
             test_data=True,
             partition_select: str = "val",
             normalize=True,
@@ -1458,6 +1468,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                 model_type=modelt,
                 metric_select=metric_select,
                 datapath=datapath,
+                cachepath=cachepath,
+                metapath=metapath,
                 test_data=test_data,
                 partition_select=partition_select,
                 ignore_cache=ignore_cache,
@@ -1519,6 +1531,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
             model_type: Union[str, List[str]],
             metric_select: str,
             datapath,
+            cachepath,
+            metapath,
             test_data=True,
             partition_select: str = "val",
             height_fig=7,
@@ -1538,6 +1552,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         :param model_type:
         :param metric_select:
         :param datapath:
+        :param cachepath:
+        :param metapath:
         :param test_data:
         :param partition_select:
         :param height_fig:
@@ -1571,6 +1587,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                 model_type=modelt,
                 metric_select=metric_select,
                 datapath=datapath,
+                cachepath=cachepath,
+                metapath=metapath,
                 test_data=test_data,
                 partition_select=partition_select,
                 ignore_cache=ignore_cache,
@@ -1616,7 +1634,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         with plt.style.context("seaborn-whitegrid"):
             plt.figure(figsize=(12, 6))
             for model in models:
-                model_id, embedding, covar = self.best_model_embedding(
+                model_id, embedding, covar = self.best_model_embedding_latentspace(
                     subset={"model_type": model, "organ": organ, "topology": topology_version},
                     partition="val",
                     metric="loss",
@@ -1671,7 +1689,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
             plt.figure(figsize=(12, 6))
             plt.axhline(np.log(0.01), color="k", linestyle='dashed', linewidth=2, label="active unit threshold")
             for i, model in enumerate(models):
-                model_id, embedding, covar = self.best_model_embedding(
+                model_id, embedding, covar = self.best_model_embedding_latentspace(
                     subset={"model_type": model, "organ": organ, "topology": topology_version},
                     partition="val",
                     metric="loss",

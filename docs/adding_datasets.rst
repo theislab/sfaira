@@ -3,6 +3,14 @@ Adding data sets
 
 Adding datasets to sfaira is a great way to increase the visibility of your dataset and to make it available to a large audience.
 This process requires a couple of steps as outlined in the following sections.
+
+
+.. figure:: https://user-images.githubusercontent.com/21954664/117845386-c6744a00-b280-11eb-9d86-8c47132a3949.png
+   :alt: sfaira adding datasets
+
+   Overview of contributing dataloaders to sfaira. First, ensure that your data is not yet available as a dataloader.
+   Next, create a dataloader and validate it. Afterwards, annotate it to finally test it. Finally, submit your dataloader to sfaira.
+
 sfaira features an interactive way of creating, formatting and testing dataloaders through a command line interface (CLI).
 The common workflow using the CLI looks as follows:
 
@@ -76,26 +84,17 @@ by `_`, below referred to as `--DOI-folder--`:
 6. Write load function.
     Fill load function in `sfaira/data/dataloaders/loaders/--DOI-folder--NA_NA_2021_NA_Einstein_001.py`.
 
-7. Clean the dataloader with a supervicial check (lint).
-    This step is optional.
-
-.. code-block::
-
-    # make sure you are in the top-level sfaira directory from step 1
-    sfaira clean-dataloader <path to *.yaml>
-..
-
-8. Validate the dataloader with the CLI.
-    Next validate the integrity of your dataloader content with ``sfaira lint-dataloader <path to *.yaml>``.
+7. Validate the dataloader with the CLI.
+    Next validate the integrity of your dataloader content with ``sfaira validate-dataloader <path to *.yaml>``.
     All tests must pass! If any of the tests fail please revisit your dataloader and add the missing information.
 
 .. code-block::
 
     # make sure you are in the top-level sfaira directory from step 1
-    sfaira lint-dataloader <path>``
+    sfaira validate-dataloader <path>``
 ..
 
-9. Create cell type annotation if your data set is annotated.
+8. Create cell type annotation if your data set is annotated.
     Note that this will abort with error if there are bugs in your data loader.
 
 .. code-block::
@@ -104,7 +103,7 @@ by `_`, below referred to as `--DOI-folder--`:
     # sfaira annotate <path>`` TODO
 ..
 
-10. Mitigate automated cell type maps.
+9. Mitigate automated cell type maps.
         Sfaira creates a cell type mapping `.tsv` file in the directory in which your data loaders is located if you
         indicated that annotation is present by filling `cell_types_original_obs_key`.
         This file is: `NA_NA_2021_NA_Einstein_001.tsv`.
@@ -121,16 +120,16 @@ by `_`, below referred to as `--DOI-folder--`:
         Note that you do not have to include the non-human-readable IDs here as they are added later in a fully
         automated fashion.
 
-11. Test data loader.
+10. Test data loader.
         Note that this will abort with error if there are bugs in your data loader.
 
 .. code-block::
 
     # make sure you are in the top-level sfaira directory from step 1
-    # sfaira test <path>`` TODO
+    # sfaira test-dataloader <path>`` TODO
 ..
 
-12. Make loader public.
+11. Make loader public.
         You can contribute the data loader to public sfaira as code through a pull request.
         Note that you can also just keep the data loader in your local installation or keep it in sfaira_extensions
         if you do not want to make it public.
@@ -448,7 +447,7 @@ Now simply fill in all missing properties in your dataloader scripts and yaml fi
 When done optionally run ``sfaira clean-dataloader <path to *.yaml>`` on the just filled out dataloader yaml file.
 All unused attributes will be removed.
 
-Next validate the integrity of your dataloader content with ``sfaira lint-dataloader <path to *.yaml>``.
+Next validate the integrity of your dataloader content with ``sfaira validate-dataloader <path to *.yaml>``.
 All tests must pass! If any of the tests fail please revisit your dataloader and add the missing information.
 
 Finally, copy your dataloader into the ``sfaira/dataloaders/loaders/`` folder.

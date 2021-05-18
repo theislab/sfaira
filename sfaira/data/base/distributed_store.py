@@ -109,7 +109,7 @@ class DistributedStoreBase(abc.ABC):
         # Make sure that features are ordered in the same way in each object so that generator yields consistent cell
         # vectors.
         _ = self._validate_feature_space_homogeneity()
-        var_names_store = self.adata_dict[list(self.indices.keys())[0]].var_names.tolist()
+        var_names_store = self.adata_by_key[list(self.indices.keys())[0]].var_names.tolist()
         # Use feature space sub-selection based on assembly if provided, will use full feature space otherwise.
         if self.genome_container is not None:
             var_names_target = self.genome_container.ensembl
@@ -226,7 +226,7 @@ class DistributedStoreBase(abc.ABC):
                     values_found = None  # Go to cell-wise annotation.
                 else:
                     # Replicate unique property along cell dimension.
-                    values_found = [values_found[0] for i in range(adata.n_obs)]
+                    values_found = [values_found[0] for _ in range(adata.n_obs)]
             else:
                 values_found = None
             if values_found is None:
@@ -255,25 +255,27 @@ class DistributedStoreBase(abc.ABC):
                         for y in xv
                     ])
                 ]
-            # TODO keep this logging for now to catch undesired behaviour resulting from loaded edges in ontologies.
-            print(f"matched cell-wise keys {str(values_found_unique_matched)} in data set {dataset}")
             idx = np.where([x in values_found_unique_matched for x in values_found])[0]
+            if len(idx) > 0:
+                # TODO keep this logging for now to catch undesired behaviour resulting from loaded edges in ontologies.
+                print(f"matched keys {str(values_found_unique_matched)} in data set {dataset}")
             return idx
 
         indices = {}
-        for k, adata_k in self.adata_dict.items():
-            if k not in self.adata_by_key.keys():
-                raise ValueError(f"data set {k} queried by indices does not exist in store (.adata_by_key)")
+        for key in self.indices.keys():
+            if key not in self.adata_by_key.keys():
+                raise ValueError(f"data set {key} queried by indices does not exist in store (.adata_by_key)")
             # Get indices of idx_old to keep:
-            obs_k = self.obs_by_key[k]
-            idx_old = self.indices[k]
+            adata_k = self.adata_by_key[key]
+            obs_k = self.obs_by_key[key]
+            idx_old = self.indices[key]
             # Cannot index on view here as indexing on view of views of backed anndata objects is not yet supported.
-            idx_subset = get_idx(adata=adata_k, obs=obs_k, k=attr_key, v=values, xv=excluded_values, dataset=k)
+            idx_subset = get_idx(adata=adata_k, obs=obs_k, k=attr_key, v=values, xv=excluded_values, dataset=key)
             # Keep intersection of old and new hits.
-            idx_new = np.asarray(list(set(np.asarray(idx_old).tolist()).intersection(
+            idx_new = np.sort(list(set(np.asarray(idx_old).tolist()).intersection(
                 set(np.asarray(idx_subset).tolist()))))
             if len(idx_new) > 0:
-                indices[k] = np.asarray(idx_new, dtype="int32")
+                indices[key] = np.asarray(idx_new, dtype="int32")
         return indices
 
     def subset(self, attr_key, values: Union[str, List[str], None] = None,
@@ -325,12 +327,10 @@ class DistributedStoreBase(abc.ABC):
         """
         with open(fn, 'rb') as f:
             self.indices = pickle.load(f)
-        # Subset to described data sets:
+        # Make sure all declared data sets are found in store:
         for x in self.indices.keys():
             if x not in self.adata_by_key.keys():
                 raise ValueError(f"did not find object with name {x} in currently loaded universe")
-        # Only retain data sets with which are mentioned in config file.
-        self.subset(attr_key="id", values=list(self.indices.keys()))
 
     @property
     def var_names(self):
@@ -367,11 +367,6 @@ class DistributedStoreBase(abc.ABC):
             return_dense: bool = True,
             randomized_batch_access: bool = False,
     ) -> iter:
-        pass
-
-    @property
-    @abc.abstractmethod
-    def adata_dict(self) -> Dict[str, anndata.AnnData]:
         pass
 
     @property
@@ -417,7 +412,7 @@ class DistributedStoreH5ad(DistributedStoreBase):
         super(DistributedStoreH5ad, self).__init__(adata_by_key=adata_by_key, indices=indices)
 
     @property
-    def adata_dict(self) -> Dict[str, anndata.AnnData]:
+    def adata_sliced(self) -> Dict[str, anndata.AnnData]:
         """
         Only exposes the subset and slices of the adata instances contained in ._adata_by_key defined in .indices.
         """
@@ -525,7 +520,7 @@ class DistributedStoreH5ad(DistributedStoreBase):
             assert counter == self.n_obs
             return dict([(k, self._adata_by_key[k][v, :]) for k, v in indices_subsetted.items()])
         else:
-            return self.adata_dict
+            return self.adata_sliced
 
     def get_subset_idx_global(self, attr_key, values: Union[str, List[str], None] = None,
                               excluded_values: Union[str, List[str], None] = None) -> np.ndarray:
@@ -610,13 +605,6 @@ class DistributedStoreDao(DistributedStoreBase):
         super(DistributedStoreDao, self).__init__(adata_by_key=adata_by_key, indices=indices, obs_by_key=None)
 
     @property
-    def adata_dict(self) -> Dict[str, anndata.AnnData]:
-        """
-        Only exposes the subset and slices of the adata instances contained in ._adata_by_key defined in .indices.
-        """
-        return dict([(k, self._adata_by_key[k][v, :]) for k, v in self.indices.items()])
-
-    @property
     def X(self) -> Union[dask.array.Array]:
         assert np.all([isinstance(self._adata_by_key[k].X, dask.array.Array) for k in self.indices.keys()])
         return dask.array.vstack([
@@ -673,7 +661,7 @@ class DistributedStoreDao(DistributedStoreBase):
             is overhangs in retrieval_batch_size in the raw data files, which often happens and results in modest
             changes in batch composition.
             Do not use randomized_batch_access and random_access.
-        :param randomized_batch_access: Whether to fully shuffle observations before batched access takes place. May
+        :param random_access: Whether to fully shuffle observations before batched access takes place. May
             slow down access compared randomized_batch_access and to no randomization.
             Do not use randomized_batch_access and random_access.
         :return: Generator function which yields batch_size at every invocation.
@@ -720,8 +708,8 @@ class DistributedStoreDao(DistributedStoreBase):
                         x_i = x[s:e, var_idx]
                     else:
                         x_i = x[s:e, :]
-                # Exploit fact that index of obs is just increasing list of integers, so we can use the (faster?) .loc
-                # indexing instead of .iloc:
+                # Exploit fact that index of obs is just increasing list of integers, so we can use the .loc[] indexing
+                # instead of .iloc[]:
                 obs_i = obs[obs_keys].loc[epoch_indices[s:e].tolist(), :]
                 yield x_i, obs_i
 
@@ -737,7 +725,7 @@ def load_store(cache_path: Union[str, os.PathLike], store_format: str = "dao",
     :param store_format: Format of store {"h5ad", "dao"}.
 
         - "h5ad": Returns instance of DistributedStoreH5ad.
-        - "dao": Returns instance of DistributedStoreDoa (distributed access optimsied).
+        - "dao": Returns instance of DistributedStoreDoa (distributed access optimized).
     :param columns: Which columns to read into the obs copy in the output, see pandas.read_parquet().
         Only relevant if store_format is "dao".
     :return: Instances of a distributed store class.

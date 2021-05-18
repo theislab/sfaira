@@ -118,7 +118,7 @@ class AdataIdsSfaira(AdataIds):
 
         self.unknown_celltype_identifier = "UNKNOWN"
         self.not_a_cell_celltype_identifier = "NOT_A_CELL"
-        self.unknown_metadata_identifier = None
+        self.unknown_metadata_identifier = "unknown"
 
         self.obs_keys = [
             "assay_sc",

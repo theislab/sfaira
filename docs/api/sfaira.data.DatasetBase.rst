@@ -15,14 +15,19 @@
    
       ~DatasetBase.__init__
       ~DatasetBase.clear
+      ~DatasetBase.collapse_counts
+      ~DatasetBase.download
       ~DatasetBase.load
       ~DatasetBase.load_meta
       ~DatasetBase.load_ontology_class_map
-      ~DatasetBase.load_tobacked
       ~DatasetBase.project_celltypes_to_ontology
-      ~DatasetBase.set_raw_full_group_object
-      ~DatasetBase.set_unkown_class_id
+      ~DatasetBase.set_dataset_id
+      ~DatasetBase.show_summary
+      ~DatasetBase.streamline_features
+      ~DatasetBase.streamline_metadata
       ~DatasetBase.subset_cells
+      ~DatasetBase.write_backed
+      ~DatasetBase.write_distributed_store
       ~DatasetBase.write_meta
       ~DatasetBase.write_ontology_class_map
    
@@ -34,56 +39,68 @@
 
    .. autosummary::
    
-      ~DatasetBase.age
+      ~DatasetBase.additional_annotation_key
       ~DatasetBase.annotated
-      ~DatasetBase.assay_sc
       ~DatasetBase.assay_differentiation
+      ~DatasetBase.assay_differentiation_obs_key
+      ~DatasetBase.assay_sc
+      ~DatasetBase.assay_sc_obs_key
       ~DatasetBase.assay_type_differentiation
+      ~DatasetBase.assay_type_differentiation_obs_key
       ~DatasetBase.author
-      ~DatasetBase.citation
-      ~DatasetBase.dev_stage
-      ~DatasetBase.directory_formatted_doi
+      ~DatasetBase.bio_sample
+      ~DatasetBase.bio_sample_obs_key
+      ~DatasetBase.cache_fn
       ~DatasetBase.cell_line
+      ~DatasetBase.cell_line_obs_key
+      ~DatasetBase.cell_ontology_map
+      ~DatasetBase.cell_types_original_obs_key
+      ~DatasetBase.cellontology_class_obs_key
+      ~DatasetBase.cellontology_id_obs_key
+      ~DatasetBase.celltypes_universe
+      ~DatasetBase.citation
+      ~DatasetBase.data_dir
+      ~DatasetBase.default_embedding
+      ~DatasetBase.development_stage
+      ~DatasetBase.development_stage_obs_key
+      ~DatasetBase.directory_formatted_doi
+      ~DatasetBase.disease
+      ~DatasetBase.disease_obs_key
       ~DatasetBase.doi
       ~DatasetBase.doi_cleaned_id
-      ~DatasetBase.download
-      ~DatasetBase.download_meta
+      ~DatasetBase.doi_main
+      ~DatasetBase.download_url_data
+      ~DatasetBase.download_url_meta
       ~DatasetBase.ethnicity
+      ~DatasetBase.ethnicity_obs_key
       ~DatasetBase.fn_ontology_class_map_tsv
-      ~DatasetBase.healthy
-      ~DatasetBase.healthy_state_healthy
+      ~DatasetBase.gene_id_ensembl_var_key
+      ~DatasetBase.gene_id_symbols_var_key
       ~DatasetBase.id
+      ~DatasetBase.individual
+      ~DatasetBase.individual_obs_key
       ~DatasetBase.loaded
       ~DatasetBase.meta
       ~DatasetBase.meta_fn
       ~DatasetBase.ncells
       ~DatasetBase.normalization
-      ~DatasetBase.obs_key_age
-      ~DatasetBase.obs_key_assay_sc
-      ~DatasetBase.obs_key_assay_differentiation
-      ~DatasetBase.obs_key_assay_type_differentiation
-      ~DatasetBase.obs_key_cell_line
-      ~DatasetBase.obs_key_cellontology_id
-      ~DatasetBase.obs_key_cell_types_original
-      ~DatasetBase.obs_key_dev_stage
-      ~DatasetBase.obs_key_ethnicity
-      ~DatasetBase.obs_key_healthy
-      ~DatasetBase.obs_key_organ
-      ~DatasetBase.obs_key_organism
-      ~DatasetBase.obs_key_sample
-      ~DatasetBase.obs_key_sample_source
-      ~DatasetBase.obs_key_sex
-      ~DatasetBase.obs_key_state_exact
       ~DatasetBase.ontology_celltypes
-      ~DatasetBase.ontology_class_map
+      ~DatasetBase.ontology_organ
       ~DatasetBase.organ
+      ~DatasetBase.organ_obs_key
       ~DatasetBase.organism
-      ~DatasetBase.sex
+      ~DatasetBase.organism_obs_key
+      ~DatasetBase.primary_data
       ~DatasetBase.sample_source
+      ~DatasetBase.sample_source_obs_key
+      ~DatasetBase.sex
+      ~DatasetBase.sex_obs_key
       ~DatasetBase.source
       ~DatasetBase.state_exact
-      ~DatasetBase.gene_id_ensembl_var_key
-      ~DatasetBase.gene_id_symbols_var_key
+      ~DatasetBase.state_exact_obs_key
+      ~DatasetBase.tech_sample
+      ~DatasetBase.tech_sample_obs_key
+      ~DatasetBase.title
       ~DatasetBase.year
    
    
