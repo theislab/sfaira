@@ -13,7 +13,7 @@ class TopologyContainer:
             self,
             topology: dict,
             topology_id: str,
-            custom_genome_constainer: Union[GenomeContainer, None],
+            custom_genome_constainer: Union[GenomeContainer, None] = None,
     ):
         self.topology = topology
         if custom_genome_constainer is None:
