@@ -202,7 +202,7 @@ class GridsearchContainer:
             hat_or_true: str,
             run_id: str
     ):
-        fn = os.path.join(self.gs_dirs[run_id], self.gs_keys[run_id], "results", f"{run_id}_y{hat_or_true}.npy")
+        fn = os.path.join(self.gs_dirs[run_id], f"{run_id}_y{hat_or_true}.npy")
         return np.load(fn)
 
     def best_model_by_partition(
@@ -640,7 +640,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         :param run_id:
         :return:
         """
-        fn = os.path.join(self.gs_dirs[run_id], self.gs_keys[run_id], "results", f"{run_id}_ontology_names.pickle")
+        fn = os.path.join(self.gs_dirs[run_id], f"{run_id}_ontology_names.pickle")
         if not os.path.isfile(fn):
             raise FileNotFoundError(f"file {run_id}_ontology_names.pickle not found")
         with open(fn, 'rb') as f:
@@ -926,6 +926,10 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         store.load_config(configpath)
         store.subset(attr_key="id", values=[k for k in store.indices.keys()
                                             if 'cell_ontology_class' in store.adata_by_key[k].obs.columns])
+        store.subset(attr_key="cellontology_class", excluded_values=[
+            store._adata_ids_sfaira.unknown_celltype_identifier,
+            store._adata_ids_sfaira.not_a_cell_celltype_identifier,
+        ])
         cu = CelltypeUniverse(
             cl=OntologyCl(branch="v2021-02-01"),
             uberon=OCS.organ,
@@ -935,7 +939,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         celltypelist = list(cell_counts.keys()).copy()
         leaves = cu.onto_cl.convert_to_name(cu.onto_cl.leaves)
         for k in celltypelist:
-            leafnodes = cu.onto_cl.convert_to_name(cu.onto_cl.map_to_leaves(node=k, return_type="id", include_self=True))
+            leafnodes = cu.onto_cl.convert_to_name(cu.onto_cl.map_to_leaves(node=k, return_type="ids", include_self=True))
             # Replace count on intermediate nodes with counts over leaves
             if k not in leaves:
                 for leaf in leaves:
@@ -962,9 +966,6 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         model_types = sns_tab["model_type"].unique()
         model_types.sort()
         classes = self.load_ontology_names(run_id=sns_tab["run"].values[0])
-        if 'unknown' not in classes and 'Unknown' not in classes:
-            classes = classes + ['Unknown']
-            cell_counts['Unknown'] = 0
         hm = np.zeros((len(classes), len(model_types))) + np.nan
         # mask = np.isnan(hm)
         for i, m in enumerate(model_types):
@@ -1088,16 +1089,20 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         store.load_config(configpath)
         store.subset(attr_key="id", values=[k for k in store.indices.keys()
                                             if 'cell_ontology_id' in store.adata_by_key[k].obs.columns])
+        store.subset(attr_key="cellontology_class", excluded_values=[
+            store._adata_ids_sfaira.unknown_celltype_identifier,
+            store._adata_ids_sfaira.not_a_cell_celltype_identifier,
+        ])
         cu = CelltypeUniverse(
             cl=OntologyCl(branch="v2021-02-01"),
             uberon=OCS.organ,
         )
         cu.load_target_universe(targetpath)
-        cell_counts = store.obs['cell_ontology_id'].value_counts().to_dict()
+        cell_counts = store.obs['cell_ontology_class'].value_counts().to_dict()
         celltypelist = list(cell_counts.keys()).copy()
         leaves = cu.onto_cl.convert_to_name(cu.onto_cl.leaves)
         for k in celltypelist:
-            leafnodes = cu.onto_cl.convert_to_name(cu.onto_cl.map_to_leaves(node=k, return_type="id", include_self=True))
+            leafnodes = cu.onto_cl.convert_to_name(cu.onto_cl.map_to_leaves(node=k, return_type="ids", include_self=True))
             # Replace count on intermediate nodes with counts over leaves
             if k not in leaves:
                 for leaf in leaves:
@@ -1123,9 +1128,6 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         # Build figure.
         model_types = sns_tab["model_type"].unique()
         classes = self.load_ontology_names(run_id=sns_tab["run"].values[0])
-        if 'unknown' not in classes and 'Unknown' not in classes:
-            classes = classes + ['Unknown']
-            cell_counts['Unknown'] = 0
         hm = np.zeros((len(classes), len(model_types))) + np.nan
         # mask = np.isnan(hm)
         for i, m in enumerate(model_types):
@@ -1171,6 +1173,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
             axs = sns.scatterplot(x='Number of cells in whole dataset',
                                   y='Classwise f1 score',
                                   style='Model type',
+                                  alpha=0.8,
                                   data=sns_data_scatter,
                                   ax=axs
                                   )
@@ -1267,7 +1270,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         if model_id is not None:
             if cvs is not None:
                 fns = [
-                    os.path.join(self.gs_dirs[f"{model_id}_cv{x}"], self.gs_keys[f"{model_id}_cv{x}"], "results", f"{model_id}_cv{x}")
+                    os.path.join(self.gs_dirs[f"{model_id}_cv{x}"], f"{model_id}_cv{x}")
                     for x in cvs
                 ]
             else:
@@ -1406,7 +1409,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         )
         # check cached file
 
-        resultspath = os.path.join(self.gs_dirs[model_id], self.gs_keys[model_id], 'results', '')
+        resultspath = os.path.join(self.gs_dirs[model_id], '')
 
         if os.path.isfile(os.path.join(resultspath, f'{model_id}_grads.pickle')) and not ignore_cache:
             print('Load gradients from cached file...')
@@ -1415,18 +1418,18 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         else:
             print('Compute gradients (1/3): load data')
             # load data
-            dataset = Universe(data_path=datapath)
-            dataset.subset(key="organism", values=[organism])
-            dataset.subset(key="organ", values=[organ])
-            dataset.subset(key="annotated", values=[True])
-            if not dataset.flatten().datasets:
-                raise ValueError(f"No datasets matching organism: {organism} and organ: {organ} found")
-            dataset.load()
-            dataset = dataset.flatten()
+            store = load_store(cache_path=datapath, store_format=store_format)
+            store.load_config(configpath)
+            store.subset(attr_key="id", values=[k for k in store.indices.keys()
+                                                if 'cell_ontology_id' in store.adata_by_key[k].obs.columns])
+            store.subset(attr_key="cellontology_class", excluded_values=[
+                store._adata_ids_sfaira.unknown_celltype_identifier,
+                store._adata_ids_sfaira.not_a_cell_celltype_identifier,
+            ])
 
             print('Compute gradients (2/3): load embedding')
             # load embedding
-            adata = dataset.adata
+            adata = store.adata
             embedding = EstimatorKerasEmbedding(
                 data=adata,
                 model_dir="",
