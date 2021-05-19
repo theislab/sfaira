@@ -15,7 +15,7 @@ from tqdm import tqdm
 from sfaira.consts import AdataIdsSfaira, OCS
 from sfaira.data import DistributedStoreBase
 from sfaira.models import BasicModelKeras
-from sfaira.versions.metadata import CelltypeUniverse, OntologyCl
+from sfaira.versions.metadata import CelltypeUniverse, OntologyCl, OntologyObo
 from sfaira.versions.topologies import TopologyContainer
 from .losses import LossLoglikelihoodNb, LossLoglikelihoodGaussian, LossCrossentropyAgg, KLLoss
 from .metrics import custom_mse, custom_negll_nb, custom_negll_gaussian, custom_kl, \
@@ -1005,6 +1005,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             model_topology: TopologyContainer,
             weights_md5: Union[str, None] = None,
             cache_path: str = os.path.join('cache', ''),
+            celltype_ontology: Union[OntologyObo, None] = None,
             max_class_weight: float = 1e3
     ):
         super(EstimatorKerasCelltype, self).__init__(
@@ -1034,8 +1035,10 @@ class EstimatorKerasCelltype(EstimatorKeras):
         assert "cl" in self.topology_container.output.keys(), self.topology_container.output.keys()
         assert "targets" in self.topology_container.output.keys(), self.topology_container.output.keys()
         self.max_class_weight = max_class_weight
+        if celltype_ontology is None:
+            celltype_ontology = OntologyCl(branch=self.topology_container.output["cl"])
         self.celltype_universe = CelltypeUniverse(
-            cl=OntologyCl(branch=self.topology_container.output["cl"]),
+            cl=celltype_ontology,
             uberon=OCS.organ,
         )
         # Set leaves if they are defined in topology:

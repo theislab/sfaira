@@ -9,6 +9,8 @@ from typing import Union
 
 from sfaira.data import load_store, DistributedStoreBase
 from sfaira.estimators import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
+from sfaira.versions.genomes import CustomFeatureContainer
+from sfaira.versions.metadata import OntologyOboCustom
 from sfaira.versions.topologies import TopologyContainer
 from sfaira.unit_tests.utils import cached_store_writing, simulate_anndata
 
@@ -257,6 +259,48 @@ class HelperEstimatorKerasCelltype(HelperEstimatorBase):
             assert np.allclose(prediction_output, new_prediction_output, rtol=1e-6, atol=1e-6)
 
 
+class HelperEstimatorKerasCelltypeCustomObo(HelperEstimatorKerasCelltype):
+
+    def init_obo_custom(self) -> OntologyOboCustom:
+        return OntologyOboCustom(obo=os.path.join(os.path.dirname(__file__), "custom.obo"))
+
+    def init_genome_custom(self, n_features) -> CustomFeatureContainer:
+        return CustomFeatureContainer(genome_tab=pd.DataFrame({
+            "gene_name": ["dim_" + str(i) for i in range(n_features)],
+            "gene_id": ["dim_" + str(i) for i in range(n_features)],
+            "gene_biotype": ["embedding" for _ in range(n_features)],
+        }))
+
+    def init_topology_custom(self, model_type: str, n_features):
+        topology = TOPOLOGY_CELLTYPE_MODEL.copy()
+        topology["model_type"] = model_type
+        topology["input"]["genome"] = "custom"
+        topology["input"]["genes"] = ["biotype", "embedding"]
+        topology["output"]["cl"] = "custom"
+        topology["output"]["targets"] = ["MYONTO:02", "MYONTO:03"]
+        if model_type == "mlp":
+            topology["hyper_parameters"]["units"] = (2,)
+        self.model_type = model_type
+        gc = self.init_genome_custom(n_features=n_features)
+        self.tc = TopologyContainer(topology=topology, topology_id="0.0.1", custom_genome_constainer=gc)
+
+    def fatal_estimator_test_custom(self):
+        self.init_topology_custom(model_type="mlp", n_features=50)
+        obo = self.init_obo_custom()
+        np.random.seed(1)
+        self.data = simulate_anndata(n_obs=100, genes=self.tc.gc.ensembl,
+                                     targets=["MYONTO:01", "MYONTO:02", "MYONTO:03"], obo=obo)
+        self.estimator = EstimatorKerasCelltype(
+            data=self.data,
+            model_dir=None,
+            model_id="testid",
+            model_topology=self.tc,
+            celltype_ontology=obo,
+        )
+        self.estimator.init_model()
+        self.estimator_train(test_split=0.1, randomized_batch_access=False)
+        self.basic_estimator_test(test_split=0.1)
+
 # Test embedding models:
 
 
@@ -292,6 +336,10 @@ def test_for_fatal_marker(data_type):
     test_estim = HelperEstimatorKerasCelltype()
     test_estim.fatal_estimator_test(model_type="marker", data_type=data_type)
 
+
+def test_for_fatal_mlp_custom():
+    test_estim = HelperEstimatorKerasCelltypeCustomObo()
+    test_estim.fatal_estimator_test_custom()
 
 # Test index sets
 
