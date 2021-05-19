@@ -333,8 +333,10 @@ class OntologyHierarchical(Ontology, abc.ABC):
         leaves = self.convert_to_id(self.leaves)
         if return_type == "ids":
             return [x for x in leaves if x in ancestors]
-        if return_type == "idx":
+        elif return_type == "idx":
             return np.sort([i for i, x in enumerate(leaves) if x in ancestors])
+        else:
+            raise ValueError(f"return_type {return_type} not recognized")
 
     def prepare_maps_to_leaves(
             self,
