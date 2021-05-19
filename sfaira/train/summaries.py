@@ -380,11 +380,10 @@ class GridsearchContainer:
         for i, m in enumerate(model_types):
             for j, o in enumerate(organs):
                 n_by_gridpoint = sns_tab.loc[
-                                 np.logical_and(
-                                     sns_tab["model_type"].values == m,
-                                     sns_tab["organ"].values == o
-                                 ), :
-                                 ].groupby(groupby).size().values
+                    np.logical_and(
+                        sns_tab["model_type"].values == m,
+                        sns_tab["organ"].values == o
+                    ), :].groupby(groupby).size().values
                 # Assume that largest number of successful completions is maximum (all completed:
                 hm[j, i] = np.sum(n_by_gridpoint == np.max(n_by_gridpoint)) if len(n_by_gridpoint) > 0 else 0
         sns_data_heatmap = pandas.DataFrame(
@@ -651,25 +650,25 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         metrics = list(self.evals.values())[0]['val'].keys()
         self.summary_tab = pandas.DataFrame(dict(
             list({
-                     "depth":       [id_i.split("_")[self.model_id_len + 0] for id_i in self.run_ids],
-                     "width":       [id_i.split("_")[self.model_id_len + 1] for id_i in self.run_ids],
-                     "lr":          [id_i.split("_")[self.model_id_len + 2] for id_i in self.run_ids],
-                     "dropout":     [id_i.split("_")[self.model_id_len + 3] for id_i in self.run_ids],
-                     "l1":          [id_i.split("_")[self.model_id_len + 4] for id_i in self.run_ids],
-                     "l2":          [id_i.split("_")[self.model_id_len + 5] for id_i in self.run_ids],
-                     "cv":          [id_i.split("_")[-1] if self.cv else "1" for id_i in self.run_ids],
-                     "model":       ["_".join(id_i.split("_")[:self.model_id_len]) for id_i in self.run_ids],
-                     "organism":    [id_i.split("_")[1].split("-")[0] for id_i in self.run_ids],
-                     "organ":       [id_i.split("_")[1].split("-")[1] for id_i in self.run_ids],
-                     "model_type":  [
-                         "linear" if (id_i.split("_")[1].split("-")[2] == "mlp" and id_i.split("_")[1].split("-")[3].split(".")[1] == "0")
-                         else id_i.split("_")[1].split("-")[2]
-                         for id_i in self.run_ids
-                     ],
-                     "version":     [id_i.split("_")[1].split("-")[3] for id_i in self.run_ids],
-                     "model_gs_id": ["_".join(id_i.split("_")[:(self.model_id_len + 6)]) for id_i in self.run_ids],
-                     "run":         self.run_ids,
-                 }.items()) +  # noqa: W504
+                "depth":       [id_i.split("_")[self.model_id_len + 0] for id_i in self.run_ids],
+                "width":       [id_i.split("_")[self.model_id_len + 1] for id_i in self.run_ids],
+                "lr":          [id_i.split("_")[self.model_id_len + 2] for id_i in self.run_ids],
+                "dropout":     [id_i.split("_")[self.model_id_len + 3] for id_i in self.run_ids],
+                "l1":          [id_i.split("_")[self.model_id_len + 4] for id_i in self.run_ids],
+                "l2":          [id_i.split("_")[self.model_id_len + 5] for id_i in self.run_ids],
+                "cv":          [id_i.split("_")[-1] if self.cv else "1" for id_i in self.run_ids],
+                "model":       ["_".join(id_i.split("_")[:self.model_id_len]) for id_i in self.run_ids],
+                "organism":    [id_i.split("_")[1].split("-")[0] for id_i in self.run_ids],
+                "organ":       [id_i.split("_")[1].split("-")[1] for id_i in self.run_ids],
+                "model_type":  [
+                "linear" if (id_i.split("_")[1].split("-")[2] == "mlp" and id_i.split("_")[1].split("-")[3].split(".")[1] == "0")
+                else id_i.split("_")[1].split("-")[2]
+                for id_i in self.run_ids
+                ],
+                "version":     [id_i.split("_")[1].split("-")[3] for id_i in self.run_ids],
+                "model_gs_id": ["_".join(id_i.split("_")[:(self.model_id_len + 6)]) for id_i in self.run_ids],
+                "run":         self.run_ids,
+            }.items()) +  # noqa: W504
             list(dict([("train_" + m, [self.evals[x]["train"][m] for x in self.run_ids]) for m in metrics]).items()) +  # noqa: W504
             list(dict([("test_" + m, [self.evals[x]["test"][m] for x in self.run_ids]) for m in metrics]).items()) +  # noqa: W504
             list(dict([("val_" + m, [self.evals[x]["val"][m] for x in self.run_ids]) for m in metrics]).items()) +  # noqa: W504
@@ -930,7 +929,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
                 for leaf in leaves:
                     if leaf not in cell_counts.keys():
                         cell_counts[leaf] = 0
-                    cell_counts[leaf] += 1/len(leafnodes)
+                    cell_counts[leaf] += 1. / len(leafnodes)
                 del cell_counts[k]
 
         # Compute class-wise metrics
@@ -1021,7 +1020,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
             height_fig: int = 7,
             width_fig: int = 7,
             annotate_thres_ncells: int = 1000,
-            annotate_thres_f1: float = 0.5
+            annotate_thres_f1: float = 0.5,
     ):
         """
         Plot evaluation metric scatterplot for specified organ by cell classes and model types.
@@ -1095,7 +1094,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
                 for leaf in leaves:
                     if leaf not in cell_counts.keys():
                         cell_counts[leaf] = 0
-                    cell_counts[leaf] += 1/len(leafnodes)
+                    cell_counts[leaf] += 1. / len(leafnodes)
                 del cell_counts[k]
 
         # Compute class-wise metrics
@@ -1203,21 +1202,21 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         metrics = list(self.evals.values())[0]['val'].keys()
         self.summary_tab = pandas.DataFrame(dict(
             list({
-                     "depth":         [id_i.split("_")[self.model_id_len + 0] for id_i in self.run_ids],
-                     "width":         [id_i.split("_")[self.model_id_len + 1] for id_i in self.run_ids],
-                     "lr":            [id_i.split("_")[self.model_id_len + 2] for id_i in self.run_ids],
-                     "dropout":       [id_i.split("_")[self.model_id_len + 3] for id_i in self.run_ids],
-                     "l1":            [id_i.split("_")[self.model_id_len + 4] for id_i in self.run_ids],
-                     "l2":            [id_i.split("_")[self.model_id_len + 5] for id_i in self.run_ids],
-                     "cv":            [id_i.split("_")[-1] if self.cv else "1" for id_i in self.run_ids],
-                     "model":         ["_".join(id_i.split("_")[:self.model_id_len]) for id_i in self.run_ids],
-                     "organism":      [id_i.split("_")[1].split("-")[0] for id_i in self.run_ids],
-                     "organ":         [id_i.split("_")[1].split("-")[1] for id_i in self.run_ids],
-                     "model_type":    [id_i.split("_")[1].split("-")[2] for id_i in self.run_ids],
-                     "version":       [id_i.split("_")[1].split("-")[3] for id_i in self.run_ids],
-                     "model_gs_id":   ["_".join(id_i.split("_")[:(self.model_id_len + 6)]) for id_i in self.run_ids],
-                     "run":           self.run_ids,
-                 }.items()) +
+                "depth":         [id_i.split("_")[self.model_id_len + 0] for id_i in self.run_ids],
+                "width":         [id_i.split("_")[self.model_id_len + 1] for id_i in self.run_ids],
+                "lr":            [id_i.split("_")[self.model_id_len + 2] for id_i in self.run_ids],
+                "dropout":       [id_i.split("_")[self.model_id_len + 3] for id_i in self.run_ids],
+                "l1":            [id_i.split("_")[self.model_id_len + 4] for id_i in self.run_ids],
+                "l2":            [id_i.split("_")[self.model_id_len + 5] for id_i in self.run_ids],
+                "cv":            [id_i.split("_")[-1] if self.cv else "1" for id_i in self.run_ids],
+                "model":         ["_".join(id_i.split("_")[:self.model_id_len]) for id_i in self.run_ids],
+                "organism":      [id_i.split("_")[1].split("-")[0] for id_i in self.run_ids],
+                "organ":         [id_i.split("_")[1].split("-")[1] for id_i in self.run_ids],
+                "model_type":    [id_i.split("_")[1].split("-")[2] for id_i in self.run_ids],
+                "version":       [id_i.split("_")[1].split("-")[3] for id_i in self.run_ids],
+                "model_gs_id":   ["_".join(id_i.split("_")[:(self.model_id_len + 6)]) for id_i in self.run_ids],
+                "run":           self.run_ids,
+            }.items()) +
             list(dict([("train_" + m, [self.evals[x]["train"][m] if m in self.evals[x]["train"].keys() else
                                        self.evals[x]["train"]['neg_ll_'+m] for x in self.run_ids])
                        for m in metrics]).items()) +
@@ -1372,12 +1371,11 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
     def get_gradients_by_celltype(
             self,
             organ: str,
-            organism: str,
             model_type: Union[str, List[str]],
             metric_select: str,
             datapath,
-            configpath = None,
-            store_format = None,
+            configpath: Union[None, str] = None,
+            store_format: Union[None, str] = None,
             test_data=True,
             partition_select: str = "val",
             ignore_cache=False,
