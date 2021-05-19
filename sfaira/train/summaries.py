@@ -595,8 +595,6 @@ class GridsearchContainer:
             else:
                 file_path_base = os.path.join(
                     self.gs_dirs[f"{best_model_id}_cv{cvs[0]}"],
-                    self.gs_keys[f"{best_model_id}_cv{cvs[0]}"],
-                    'results',
                     f"{best_model_id}_cv{cvs[0]}",
                 )
 
