@@ -1379,6 +1379,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
             model_type: Union[str, List[str]],
             metric_select: str,
             datapath,
+            configpath = None,
+            store_format = None,
             test_data=True,
             partition_select: str = "val",
             ignore_cache=False,
@@ -1398,7 +1400,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         :param min_cells:
         :return: (cell types, input features) cumulative gradients
         """
-        model_id, _, _ = self.get_best_model_ids(
+        model_id, run_id, _ = self.get_best_model_ids(
             tab=self.summary_tab,
             metric_select=metric_select,
             partition_select=partition_select,
@@ -1407,10 +1409,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                 "model_type": model_type,
             }
         )
-        # check cached file
-
-        resultspath = os.path.join(self.gs_dirs[model_id], '')
-
+        resultspath = os.path.join(self.gs_dirs[run_id], '')
         if os.path.isfile(os.path.join(resultspath, f'{model_id}_grads.pickle')) and not ignore_cache:
             print('Load gradients from cached file...')
             with open(os.path.join(resultspath, f'{model_id}_grads.pickle'), 'rb') as f:
@@ -1467,6 +1466,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
             model_type: Union[str, List[str]],
             metric_select: str,
             datapath,
+            configpath = None,
+            store_format = None,
             test_data=True,
             partition_select: str = "val",
             normalize=True,
@@ -1502,6 +1503,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                 model_type=modelt,
                 metric_select=metric_select,
                 datapath=datapath,
+                configpath=configpath,
+                store_format=store_format,
                 test_data=test_data,
                 partition_select=partition_select,
                 ignore_cache=ignore_cache,
@@ -1563,6 +1566,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
             model_type: Union[str, List[str]],
             metric_select: str,
             datapath,
+            configpath=None,
+            store_format=None,
             test_data=True,
             partition_select: str = "val",
             height_fig=7,
@@ -1615,6 +1620,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                 model_type=modelt,
                 metric_select=metric_select,
                 datapath=datapath,
+                configpath=configpath,
+                store_format=store_format,
                 test_data=test_data,
                 partition_select=partition_select,
                 ignore_cache=ignore_cache,
