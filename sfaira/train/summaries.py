@@ -661,17 +661,18 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
                 "organism":    [id_i.split("_")[1].split("-")[0] for id_i in self.run_ids],
                 "organ":       [id_i.split("_")[1].split("-")[1] for id_i in self.run_ids],
                 "model_type":  [
-                "linear" if (id_i.split("_")[1].split("-")[2] == "mlp" and id_i.split("_")[1].split("-")[3].split(".")[1] == "0")
-                else id_i.split("_")[1].split("-")[2]
-                for id_i in self.run_ids
+                    "linear" if (id_i.split("_")[1].split("-")[2] == "mlp" and
+                                 id_i.split("_")[1].split("-")[3].split(".")[1] == "0")
+                    else id_i.split("_")[1].split("-")[2]
+                    for id_i in self.run_ids
                 ],
                 "version":     [id_i.split("_")[1].split("-")[3] for id_i in self.run_ids],
                 "model_gs_id": ["_".join(id_i.split("_")[:(self.model_id_len + 6)]) for id_i in self.run_ids],
                 "run":         self.run_ids,
-            }.items()) +  # noqa: W504
-            list(dict([("train_" + m, [self.evals[x]["train"][m] for x in self.run_ids]) for m in metrics]).items()) +  # noqa: W504
-            list(dict([("test_" + m, [self.evals[x]["test"][m] for x in self.run_ids]) for m in metrics]).items()) +  # noqa: W504
-            list(dict([("val_" + m, [self.evals[x]["val"][m] for x in self.run_ids]) for m in metrics]).items()) +  # noqa: W504
+            }.items()) +  # noqa: E241,W504
+            list(dict([("train_" + m, [self.evals[x]["train"][m] for x in self.run_ids]) for m in metrics]).items()) +
+            list(dict([("test_" + m, [self.evals[x]["test"][m] for x in self.run_ids]) for m in metrics]).items()) +
+            list(dict([("val_" + m, [self.evals[x]["val"][m] for x in self.run_ids]) for m in metrics]).items()) +
             list(dict([("all_" + m, [self.evals[x]["all"][m] for x in self.run_ids]) for m in metrics]).items())
         ))
         if self.summary_tab.shape[0] == 0:
@@ -1216,7 +1217,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                 "version":       [id_i.split("_")[1].split("-")[3] for id_i in self.run_ids],
                 "model_gs_id":   ["_".join(id_i.split("_")[:(self.model_id_len + 6)]) for id_i in self.run_ids],
                 "run":           self.run_ids,
-            }.items()) +
+            }.items()) +  # noqa: E241
             list(dict([("train_" + m, [self.evals[x]["train"][m] if m in self.evals[x]["train"].keys() else
                                        self.evals[x]["train"]['neg_ll_'+m] for x in self.run_ids])
                        for m in metrics]).items()) +
@@ -1358,7 +1359,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         fig, axs = plt.subplots(1, 1, figsize=(height_fig, width_fig))
         with sns.axes_style("dark"):
             axs = sns.heatmap(
-                sns_data_heatmap,  # mask=mask,
+                sns_data_heatmap,
                 annot=True, fmt=".2f",
                 ax=axs,
                 xticklabels=True, yticklabels=True,
@@ -1422,12 +1423,15 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
             ])
 
             print('Compute gradients (2/3): load embedding')
-            # load embedding
-            adata = store.adata_sliced[list(store.indices.keys())[0]]
-            if len(store.indices.keys()) > 0:
-                adata = adata.concatenate(*[store.adata_sliced[k] for k in list(store.indices.keys())[1:]])
+            adatas = store.adata_sliced
+            # Load into memory:
+            for k in adatas.keys():
+                adatas[k] = adatas[k].to_memory()
+            adata = adatas[list(adatas.keys())[0]]
+            if len(adatas.keys()) > 0:
+                adata = adata.concatenate(*[adatas[k] for k in list(adatas.keys())[1:]])
             zoo = ModelZoo()
-            zoo.model_id = model_id
+            zoo.model_id = "_".join(model_id.split("_")[:3])
             embedding = EstimatorKerasEmbedding(
                 data=adata,
                 model_dir="",
