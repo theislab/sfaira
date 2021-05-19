@@ -8,8 +8,9 @@ from typing import Union, List
 import os
 
 from sfaira.consts import OCS
-from sfaira.data import load_store, Universe
+from sfaira.data import load_store
 from sfaira.estimators import EstimatorKerasEmbedding
+from sfaira.interface import ModelZoo
 from sfaira.versions.metadata import CelltypeUniverse, OntologyCl
 
 
@@ -607,7 +608,6 @@ class GridsearchContainer:
             # Read optimizer hyperparameter
             with open(f"{file_path_base}_hyperparam.pickle", 'rb') as file:
                 hyparam_optim = pickle.load(file)
-
             # Write both hyperparameter dicts
             with open(os.path.join(write_path, f"{best_model_id[:-12]}_best_hyperparam.txt"), 'w') as file:
                 file.write(json.dumps({"model": hyparam_model, "optimizer": hyparam_optim}))
@@ -722,17 +722,13 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         Plot accuracy or other metric heatmap by organ and model type.
 
         :param rename_levels:
-        :param metric: Metric to plot in heatmap.
-
-             - acc
-             - f1
-        :param collapse_cv: How to collapse values from cross validation into single scalar:
-
-            - mean
-            - median
-            - max
-        :param ylim:
-        :param xrot:
+        :param partition_select:
+        :param partition_show:
+        :param metric_select:
+        :param metric_show:
+        :param collapse_cv:
+        :param vmin:
+        :param vmax:
         :param height_fig:
         :param width_fig:
         :return:
@@ -826,6 +822,9 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         :param organ: Organ to plot in heatmap.
         :param organism: Species that the gridsearch was run on
         :param datapath: Path to the local sfaira data repository
+        :param store_format:
+        :param targetpath:
+        :param configpath:
         :param partition_select: Based on which partition to select the best model
             - train
             - val
@@ -870,7 +869,6 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
                 yhat_true = np.asarray(yhat == np.max(yhat, axis=1, keepdims=True), dtype="float32")
                 return np.sum(yhat_true * ytrue, axis=0)
 
-
             def _fp(yhat, ytrue):
                 """
                 Class wise false positive count.
@@ -881,19 +879,6 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
                 """
                 yhat_true = np.asarray(yhat == np.max(yhat, axis=1, keepdims=True), dtype="float32")
                 return np.sum(yhat_true * (1. - ytrue), axis=0)
-
-
-            def _tn(yhat, ytrue):
-                """
-                Class wise true negative count.
-
-                :param yhat:
-                :param ytrue:
-                :return:
-                """
-                yhat_true = np.asarray(yhat < np.max(yhat, axis=1, keepdims=True), dtype="float32")
-                return np.sum(yhat_true * (1. - ytrue), axis=0)
-
 
             def _fn(yhat, ytrue):
                 """
@@ -1044,7 +1029,9 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         :param organ: Organ to plot in heatmap.
         :param organism: Organism that the gridsearch was run on
         :param datapath: Path to the local sfaira data repository
-        :param celltype_version: Version in sfaira celltype universe
+        :param store_format:
+        :param targetpath:
+        :param configpath:
         :param partition_select: Based on which partition to select the best model
             - train
             - val
@@ -1231,12 +1218,19 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                      "model_gs_id":   ["_".join(id_i.split("_")[:(self.model_id_len + 6)]) for id_i in self.run_ids],
                      "run":           self.run_ids,
                  }.items()) +
-            list(dict([("train_" + m, [self.evals[x]["train"][m] if m in self.evals[x]["train"].keys() else self.evals[x]["train"]['neg_ll_'+m] for x in self.run_ids]) for m in metrics]).items()) +  # TODO: Hacky solution to make sure metrics are called the same in VAE and other models
-            list(dict([("test_" + m, [self.evals[x]["test"][m] if m in self.evals[x]["test"].keys() else self.evals[x]["test"]['neg_ll_'+m] for x in self.run_ids]) for m in metrics]).items()) +  # TODO: Hacky solution to make sure metrics are called the same in VAE and other models
-            list(dict([("val_" + m, [self.evals[x]["val"][m] if m in self.evals[x]["val"].keys() else self.evals[x]["val"]['neg_ll_'+m] for x in self.run_ids]) for m in metrics]).items()) +  # TODO: Hacky solution to make sure metrics are called the same in VAE and other models
-            list(dict([("all_" + m, [self.evals[x]["all"][m] if m in self.evals[x]["all"].keys() else self.evals[x]["all"]['neg_ll_'+m] for x in self.run_ids]) for m in metrics]).items())  # TODO: Hacky solution to make sure metrics are called the same in VAE and other models
+            list(dict([("train_" + m, [self.evals[x]["train"][m] if m in self.evals[x]["train"].keys() else
+                                       self.evals[x]["train"]['neg_ll_'+m] for x in self.run_ids])
+                       for m in metrics]).items()) +
+            list(dict([("test_" + m, [self.evals[x]["test"][m] if m in self.evals[x]["test"].keys() else
+                                      self.evals[x]["test"]['neg_ll_'+m] for x in self.run_ids])
+                       for m in metrics]).items()) +
+            list(dict([("val_" + m, [self.evals[x]["val"][m] if m in self.evals[x]["val"].keys()
+                                     else self.evals[x]["val"]['neg_ll_'+m] for x in self.run_ids])
+                       for m in metrics]).items()) +
+            list(dict([("all_" + m, [self.evals[x]["all"][m] if m in self.evals[x]["all"].keys()
+                                     else self.evals[x]["all"]['neg_ll_'+m] for x in self.run_ids])
+                       for m in metrics]).items())
         ))
-
         # TODO: Hacky solution to make sure metrics are called the same in VAE and other models
         rename_dict = {
             "train_neg_ll_custom_mse": "train_custom_mse",
@@ -1297,10 +1291,13 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         """
 
         :param rename_levels:
+        :param partition_select:
+        :param partition_show:
+        :param metric_select:
+        :param metric_show:
         :param collapse_cv:
-        :param metric:
-        :param ylim:
-        :param xrot:
+        :param vmin:
+        :param vmax:
         :param height_fig:
         :param width_fig:
         :return:
@@ -1409,7 +1406,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                 "model_type": model_type,
             }
         )
-        resultspath = os.path.join(self.gs_dirs[run_id], '')
+        resultspath = self.gs_dirs[run_id]
         if os.path.isfile(os.path.join(resultspath, f'{model_id}_grads.pickle')) and not ignore_cache:
             print('Load gradients from cached file...')
             with open(os.path.join(resultspath, f'{model_id}_grads.pickle'), 'rb') as f:
@@ -1428,13 +1425,16 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
 
             print('Compute gradients (2/3): load embedding')
             # load embedding
-            adata = store.adata
+            adata = store.adata_sliced[list(store.indices.keys())[0]]
+            if len(store.indices.keys()) > 0:
+                adata = adata.concatenate(*[store.adata_sliced[k] for k in list(store.indices.keys())[1:]])
+            zoo = ModelZoo()
+            zoo.model_id = model_id
             embedding = EstimatorKerasEmbedding(
                 data=adata,
                 model_dir="",
-                model_id="",
-                model_type=model_type,
-                model_topology=model_id.split('_')[5]
+                model_id=model_id,
+                model_topology=zoo.topology_container
             )
             embedding.init_model()
             embedding.model.training_model.load_weights(os.path.join(resultspath, f'{model_id}_weights.h5'))
@@ -1466,8 +1466,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
             model_type: Union[str, List[str]],
             metric_select: str,
             datapath,
-            configpath = None,
-            store_format = None,
+            configpath: Union[None, str] = None,
+            store_format: Union[None, str] = None,
             test_data=True,
             partition_select: str = "val",
             normalize=True,
@@ -1513,11 +1513,9 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
 
             if normalize:
                 avg_grads[modelt] = np.abs(avg_grads[modelt])
-                avg_grads[modelt] = (avg_grads[modelt] - np.min(avg_grads[modelt], axis=1, keepdims=True)) / \
-                                    np.maximum(
-                                        np.max(avg_grads[modelt], axis=1, keepdims=True) - np.min(avg_grads[modelt],
-                                                                                                  axis=1,
-                                                                                                  keepdims=True), 1e-8)
+                avg_grads[modelt] = (avg_grads[modelt] - np.min(avg_grads[modelt], axis=1, keepdims=True)) /\
+                    np.maximum(np.max(avg_grads[modelt], axis=1, keepdims=True) -
+                               np.min(avg_grads[modelt], axis=1, keepdims=True), 1e-8)
 
         fig, axs = plt.subplots(1, 1, figsize=(width_fig, height_fig))
 
@@ -1566,8 +1564,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
             model_type: Union[str, List[str]],
             metric_select: str,
             datapath,
-            configpath=None,
-            store_format=None,
+            configpath: Union[None, str] = None,
+            store_format: Union[None, str] = None,
             test_data=True,
             partition_select: str = "val",
             height_fig=7,
@@ -1587,6 +1585,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         :param model_type:
         :param metric_select:
         :param datapath:
+        :param configpath:
+        :param store_format:
         :param test_data:
         :param partition_select:
         :param height_fig:
@@ -1704,7 +1704,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         the model will use z, and not z_mean.
         """
 
-        colors = ['red', 'blue', 'green', 'cyan', 'magenta', 'yellow', 'darkgreen', 'lime', 'navy', 'royalblue', 'pink', 'peru']
+        colors = ['red', 'blue', 'green', 'cyan', 'magenta', 'yellow', 'darkgreen', 'lime', 'navy', 'royalblue',
+                  'pink', 'peru']
 
         def active_latent_units_mask(z):
             var_x = np.diagonal(np.cov(z.T))
@@ -1749,8 +1750,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                 if model == "vaevamp":
                     z1, z2 = np.split(np.log(np.diagonal(np.cov(z.T))), 2)
                     plt.plot(range(1, int(latent_dim / 2) + 1), np.sort(z2)[::-1], color=colors[i], alpha=1.0,
-                             label=r"%s $z_2$ active units: %i" % (model, len(z2[z2 > np.log(0.01)])), linestyle='dashed',
-                             linewidth=3)
+                             label=r"%s $z_2$ active units: %i" % (model, len(z2[z2 > np.log(0.01)])),
+                             linestyle='dashed', linewidth=3)
                     plt.plot(range(1, int(latent_dim / 2) + 1), np.sort(z1)[::-1], color=colors[i], alpha=1.0,
                              label=r"%s $z_1$ active units: %i" % (model, len(z1[z1 > np.log(0.01)])),
                              linestyle='dotted', linewidth=3)
