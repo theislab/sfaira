@@ -273,8 +273,8 @@ class UserInterface:
             data: anndata.AnnData,
             gene_symbol_col: Union[str, None] = None,
             gene_ens_col: Union[str, None] = None,
-            remove_gene_version: bool = True,
-            match_to_reference: Union[str, None] = None,
+            obs_key_celltypes: Union[str, None] = None,
+            class_maps: dict = {},
     ):
         """
         Loads the provided AnnData object into sfaira.
@@ -287,9 +287,8 @@ class UserInterface:
         :param data: AnnData object to load
         :param gene_symbol_col: Var column name (or 'index') which contains gene symbols
         :param gene_ens_col: ar column name (or 'index') which contains ensembl ids
-        :param remove_gene_version: Remove gene version string from ENSEMBL ID so that different versions in different
-            data sets are superimposed.
-        :param match_to_reference: Reference genomes name.
+        :param obs_key_celltypes: .obs column name which contains cell type labels.
+        :param class_maps: Cell type class maps.
         """
         if self.zoo_embedding.model_organism is not None:
             organism = self.zoo_embedding.model_organism
@@ -308,9 +307,10 @@ class UserInterface:
             organism=organism,
             organ=organ,
             gene_symbol_col=gene_symbol_col,
-            gene_ens_col=gene_ens_col
+            gene_ens_col=gene_ens_col,
+            obs_key_celltypes=obs_key_celltypes,
+            class_maps=class_maps,
         )
-        dataset.load(load_raw=False, allow_caching=False, celltype_version=None, data_dir=None)
         self.data = dataset.adata
 
     def load_model_embedding(self):
@@ -322,8 +322,8 @@ class UserInterface:
         :return: Model ID loaded.
         """
         assert self.zoo_embedding.model_id is not None, "choose embedding model first"
-        model_dir = self.model_lookuptable.model_file_path[self.model_lookuptable.model_id == self.zoo_embedding.model_id].iloc[0]
-        md5 = self.model_lookuptable.md5[self.model_lookuptable.model_id == self.zoo_embedding.model_id].iloc[0]
+        model_dir = self.model_lookuptable["model_file_path"].loc[self.model_lookuptable["model_id"] == self.zoo_embedding.model_id].iloc[0]
+        md5 = self.model_lookuptable["md5"].loc[self.model_lookuptable["model_id"] == self.zoo_embedding.model_id].iloc[0]
         self.estimator_embedding = EstimatorKerasEmbedding(
             data=self.data,
             model_dir=model_dir,
@@ -344,8 +344,8 @@ class UserInterface:
         :return: Model ID loaded.
         """
         assert self.zoo_celltype.model_id is not None, "choose cell type model first"
-        model_dir = self.model_lookuptable.model_file_path[self.model_lookuptable.model_id == self.zoo_celltype.model_id].iloc[0]
-        md5 = self.model_lookuptable.md5[self.model_lookuptable.model_id == self.zoo_celltype.model_id].iloc[0]
+        model_dir = self.model_lookuptable["model_file_path"].loc[self.model_lookuptable["model_id"] == self.zoo_celltype.model_id].iloc[0]
+        md5 = self.model_lookuptable["md5"].loc[self.model_lookuptable["model_id"] == self.zoo_celltype.model_id].iloc[0]
         self.estimator_celltype = EstimatorKerasCelltype(
             data=self.data,
             model_dir=model_dir,
