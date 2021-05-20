@@ -53,12 +53,12 @@ class ModelZoo(abc.ABC):
             [i.split('_')[1:3] for i in ids],
             columns=['name', 'organisation']
         )
-        model = np.unique(id_df['name'])
-        zoo = dict.fromkeys(model)
-        for m in model:
-            id_df_m = id_df[id_df['name'] == m]
-            orga = np.unique(id_df_m['organisation'])
-            zoo[m] = dict.fromkeys(orga)
+        orgs = np.unique(id_df['organisation'])
+        zoo = dict.fromkeys(orgs)
+        for o in orgs:
+            id_df_o = id_df[id_df['organisation'] == o]
+            name = np.unique(id_df_o['name'])
+            zoo[o] = dict.fromkeys(name)
         return zoo
 
     @staticmethod
@@ -86,10 +86,10 @@ class ModelZoo(abc.ABC):
         :param organisation: Identifier of organisation to show versions for.
         :return: List of versions available.
         """
-        assert model_type in self.zoo.keys(), "model_type requested was not found in zoo"
-        assert organisation in self.zoo[model_type].keys(), \
-            "organisation requested was not found in zoo"
-        return self.zoo[model_type][organisation]
+        assert organisation in self.zoo.keys(), "organisation requested was not found in zoo"
+        assert model_type in self.zoo[organisation].keys(), \
+            "model_type requested was not found in zoo"
+        return self.zoo[organisation][model_type]
 
     def versions(
             self,
@@ -105,12 +105,12 @@ class ModelZoo(abc.ABC):
         :param model_topology: Identifier of model_topology to show versions for.
         :return: List of versions available.
         """
-        assert model_type in self.zoo.keys(), "model_type requested was not found in zoo"
-        assert organisation in self.zoo[model_type].keys(), \
-            "organisation requested was not found in zoo"
-        assert model_topology in self.zoo[model_type][organisation].keys(), \
+        assert organisation in self.zoo.keys(), "organisation requested was not found in zoo"
+        assert model_type in self.zoo[organisation].keys(), \
+            "model_type requested was not found in zoo"
+        assert model_topology in self.zoo[organisation][model_type].keys(), \
             "model_topology requested was not found in zoo"
-        return self.zoo[model_type][organisation][model_topology]
+        return self.zoo[organisation][model_type][model_topology]
 
     @property
     def topology_container(self) -> TopologyContainer:
