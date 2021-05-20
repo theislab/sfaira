@@ -93,7 +93,7 @@ class ModelZoo(abc.ABC):
 
         ids = [x for x in model_ids if (x.split('_')[0] == model_class or model_class is None)]
         id_df = pd.DataFrame(
-            [i.split('_')[1:2] for i in ids],
+            [i.split('_')[1:3] for i in ids],
             columns=['name', 'organisation']
         )
         model = np.unique(id_df['name'])
