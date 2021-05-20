@@ -487,14 +487,6 @@ class EstimatorKeras:
             verbose=verbose
         ).history
 
-    def get_citations(self):
-        """
-        Return papers to cite when using this model.
-
-        :return:
-        """
-        raise NotImplementedError()
-
     @property
     def using_store(self) -> bool:
         return isinstance(self.data, DistributedStoreBase)

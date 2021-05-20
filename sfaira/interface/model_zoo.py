@@ -33,51 +33,6 @@ class ModelZoo(abc.ABC):
         self._model_id = None
         self.celltypes = None
 
-    @property
-    def model_class(self):
-        assert self.model_id is not None, "set model_id first"
-        return self.model_id.split('_')[0]
-
-    @property
-    def model_name(self):
-        assert self.model_id is not None, "set model_id first"
-        return self.model_id.split('_')[1]
-
-    @property
-    def model_organism(self):
-        # TODO: this is a custom name ontology
-        assert self.model_id is not None, "set model_id first"
-        return self.model_id.split('_')[1].split("-")[0]
-
-    @property
-    def model_organ(self):
-        # TODO: this is a custom name ontology
-        assert self.model_id is not None, "set model_id first"
-        return self.model_id.split('_')[1].split("-")[1]
-
-    @property
-    def model_type(self):
-        # TODO: this is a custom name ontology
-        assert self.model_id is not None, "set model_id first"
-        return self.model_id.split('_')[1].split("-")[2]
-
-    @property
-    def model_topology(self):
-        # TODO: this is a custom name ontology
-        assert self.model_id is not None, "set model_id first"
-        return self.model_id.split('_')[1].split("-")[3]
-
-    @property
-    def model_version(self):
-        # TODO: this is a custom name ontology
-        assert self.model_id is not None, "set model_id first"
-        return self.model_id.split('_')[1].split("-")[4]
-
-    @property
-    def organisation(self):
-        assert self.model_id is not None, "set model_id first"
-        return self.model_id.split('_')[2]
-
     @staticmethod
     def load_ontology_from_model_ids(
             model_ids,
@@ -117,47 +72,6 @@ class ModelZoo(abc.ABC):
         versions.sort(key=lambda s: [int(u) for u in s.split('.')])
 
         return versions
-
-    @property
-    def model_id(self):
-        return self._model_id
-
-    @model_id.setter
-    def model_id(self, x: str):
-        """
-        Set model ID to a manually supplied ID.
-
-        :param x: Model ID to set. Format: modelclass_organism-organ-modeltype-topology-version_organisation
-        """
-        assert len(x.split('_')) == 3, f'model_id {x} is invalid'
-        self._model_id = x
-
-    def save_weights_to_remote(self, path=None):
-        """
-        Saves model weights to repository XY.
-        Increments 3rd digit of version number.
-        Adds model_id to the text file, updates model_index
-        """
-        raise NotImplementedError()
-
-    def save_weights_to_public(self):
-        """
-        Saves model weights to cloud under an organization name.
-        Increments 2nd digit of version number.
-        Adds model_id to the text file, updates model_index
-        """
-        raise NotImplementedError()
-
-    def call_kipoi(self):
-        """
-        Returns kipoi_experimental model call from remote directly on local data using kipoi_experimental.
-
-        Runs model defined in self.model_id.
-        For this, the remote server associated with the model_id has to be identified via find_remote().
-
-        :return: Predictions
-        """
-        raise NotImplementedError()
 
     def topology(
             self,
@@ -210,3 +124,62 @@ class ModelZoo(abc.ABC):
             topology=TOPOLOGIES[organism][self.model_class][self.model_type][self.model_topology],
             topology_id=self.model_version
         )
+
+    @property
+    def model_id(self):
+        return self._model_id
+
+    @model_id.setter
+    def model_id(self, x: str):
+        """
+        Set model ID to a manually supplied ID.
+
+        :param x: Model ID to set. Format: modelclass_organism-organ-modeltype-topology-version_organisation
+        """
+        assert len(x.split('_')) == 3, f'model_id {x} is invalid'
+        self._model_id = x
+
+    @property
+    def model_class(self):
+        assert self.model_id is not None, "set model_id first"
+        return self.model_id.split('_')[0]
+
+    @property
+    def model_name(self):
+        assert self.model_id is not None, "set model_id first"
+        return self.model_id.split('_')[1]
+
+    @property
+    def model_organism(self):
+        # TODO: this is a custom name ontology
+        assert self.model_id is not None, "set model_id first"
+        return self.model_id.split('_')[1].split("-")[0]
+
+    @property
+    def model_organ(self):
+        # TODO: this is a custom name ontology
+        assert self.model_id is not None, "set model_id first"
+        return self.model_id.split('_')[1].split("-")[1]
+
+    @property
+    def model_type(self):
+        # TODO: this is a custom name ontology
+        assert self.model_id is not None, "set model_id first"
+        return self.model_id.split('_')[1].split("-")[2]
+
+    @property
+    def model_topology(self):
+        # TODO: this is a custom name ontology
+        assert self.model_id is not None, "set model_id first"
+        return self.model_id.split('_')[1].split("-")[3]
+
+    @property
+    def model_version(self):
+        # TODO: this is a custom name ontology
+        assert self.model_id is not None, "set model_id first"
+        return self.model_id.split('_')[1].split("-")[4]
+
+    @property
+    def organisation(self):
+        assert self.model_id is not None, "set model_id first"
+        return self.model_id.split('_')[2]

@@ -31,7 +31,7 @@ class UserInterface:
     ui.load_data(anndata.read("/path/to/file.h5ad"))  # load your dataset into sfaira
     ui.load_model_embedding()
     ui.load_model_celltype()
-    ui.compute_all()
+    ui.predict_all()
     adata = ui.data
     scanpy.pp.neighbors(adata, use_rep="X_sfaira")
     scanpy.tl.umap(adata)
@@ -83,9 +83,6 @@ class UserInterface:
             if not sfaira_repo:
                 raise ValueError("please either provide a custom folder/repository with model weights or specify "
                                  "`sfaira_repo=True` to access the public weight repository")
-
-        # TODO: workaround to deal with model ids bearing file endings in model lookuptable (as is the case in first sfaira model repo upload)
-        self.model_lookuptable['model_id'] = [i.replace('.h5', '').replace('.data-00000-of-00001', '') for i in self.model_lookuptable['model_id']]
 
         self.zoo_embedding = ModelZoo(model_lookuptable=self.model_lookuptable, model_class="embedding")
         self.zoo_celltype = ModelZoo(model_lookuptable=self.model_lookuptable, model_class="celltype")
@@ -316,15 +313,6 @@ class UserInterface:
         dataset.load(load_raw=False, allow_caching=False, celltype_version=None, data_dir=None)
         self.data = dataset.adata
 
-    def filter_cells(self):
-        """
-        Filters cells with a basic pre-defined filter.
-
-        :return:
-        """
-        # call cell_filter()
-        raise NotImplementedError()
-
     def load_model_embedding(self):
         """
         Initialise embedding model and load parameters from public parameter repository.
@@ -402,7 +390,7 @@ class UserInterface:
         """
         self.data.layers[key] = denoised_data
 
-    def compute_celltype(self):
+    def predict_celltypes(self):
         """
         Run local cell type prediction model and add predictions to adata.obs.
 
@@ -416,7 +404,7 @@ class UserInterface:
         else:
             raise ValueError("celltype zoo has to be set before local model can be run.")
 
-    def compute_embedding(self):
+    def predict_embedding(self):
         """
         Run local embedding prediction model and add embedding to adata.obsm.
 
@@ -430,14 +418,14 @@ class UserInterface:
         else:
             raise ValueError("embedding zoo has to be set before local model can be run.")
 
-    def compute_all(self):
+    def predict_all(self):
         """
         Run local cell type prediction and embedding models and add results of both to adata.
 
         :return:
         """
-        self.compute_embedding()
-        self.compute_celltype()
+        self.predict_embedding()
+        self.predict_celltypes()
 
     def compute_denoised_expression(self):
         """
@@ -453,52 +441,12 @@ class UserInterface:
         else:
             raise ValueError("embedding zoo has to be set before local model can be run.")
 
-    def compute_celltype_kipoi(self):
-        """
-        Run executable cell type prediction model from kipoi_experimental and add prediction to adata.obs.
-
-        :return:
-        """
-        raise NotImplementedError()
-
-    def compute_embedding_kipoi(self):
-        """
-        Run executable embedding prediction model from kipoi_experimental and add embedding to adata.obsm.
-
-        :return:
-        """
-        raise NotImplementedError()
-
-    def compute_all_kipoi(self):
-        """
-        Run executable cell type prediction and embedding models from kipoi_experimental and add results to adata.
-
-        :return:
-        """
-        raise NotImplementedError()
-
-    def compute_denoised_expression_kipoi(self):
-        """
-        Run executable embedding prediction model from kipoi_experimental and add denoised expression to adata layer.
-
-        :return:
-        """
-        raise NotImplementedError()
-
     def celltype_summary(self):
         """
         Return type with frequencies of predicted cell types.
 
         :return:
         """
+        assert "celltype_sfaira" in self.data.obs.keys(), \
+            "Column celltype_sfaira not found in the data. Please run UserInterface.predict_celltypes() first."
         return self.data.obs['celltype_sfaira'].value_counts()
-
-    def get_references(self):
-        """
-        Return papers to cite when using the embedding model.
-
-        Collects references from the estimators of each model type.
-
-        :return:
-        """
-        return self.estimator_embedding.get_citations()
