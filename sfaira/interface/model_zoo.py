@@ -16,6 +16,7 @@ class ModelZoo(abc.ABC):
     zoo: Union[dict, None]
     _model_id: Union[str, None]
     celltypes: Union[CelltypeUniverse, None]
+    available_model_ids: Union[list, None]
 
     def __init__(
             self,
@@ -27,19 +28,24 @@ class ModelZoo(abc.ABC):
         :param model_class: Model class to subset to.
         """
         self._ontology_container_sfaira = OntologyContainerSfaira()
-        if model_lookuptable is not None:  # check if models in repository
-            self.zoo = self.load_zoo_from_model_ids(model_ids=model_lookuptable['model_id'].values,
-                                                    model_class=model_class)
-        else:
-            self.zoo = None
         self._model_id = None
         self.celltypes = None
 
-    @staticmethod
-    def load_zoo_from_model_ids(
+        if model_lookuptable is not None:  # check if models in repository
+            self._load_model_ids(model_ids=model_lookuptable['model_id'].values, model_class=model_class)
+            self._construct_zoo_from_model_ids()
+        else:
+            self.zoo = None
+            self.available_model_ids = None
+
+    def _load_model_ids(
+            self,
             model_ids,
             model_class: Union[str, None] = None,
-    ) -> dict:
+    ):
+        self.available_model_ids = [x for x in model_ids if (x.split('_')[0] == model_class or model_class is None)]
+
+    def _construct_zoo_from_model_ids(self):
         """
         Load model zoo based on models available in model lookup tables.
 
@@ -47,10 +53,8 @@ class ModelZoo(abc.ABC):
         :param model_class: Model class to subset to.
         :return: Dictionary formatted zoo.
         """
-
-        ids = [x for x in model_ids if (x.split('_')[0] == model_class or model_class is None)]
         id_df = pd.DataFrame(
-            [i.split('_')[1:3] for i in ids],
+            [i.split('_')[1:3] for i in self.available_model_ids],
             columns=['name', 'organisation']
         )
         orgs = np.unique(id_df['organisation'])
@@ -59,7 +63,7 @@ class ModelZoo(abc.ABC):
             id_df_o = id_df[id_df['organisation'] == o]
             name = np.unique(id_df_o['name'])
             zoo[o] = dict.fromkeys(name)
-        return zoo
+        self.zoo = zoo
 
     @staticmethod
     def _order_versions(
