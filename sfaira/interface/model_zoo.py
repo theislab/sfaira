@@ -99,7 +99,7 @@ class ModelZoo(abc.ABC):
         model = np.unique(id_df['name'])
         ontology = dict.fromkeys(model)
         for m in model:
-            id_df_m = id_df[id_df.model_type == m]
+            id_df_m = id_df[id_df['name'] == m]
             orga = np.unique(id_df_m['organisation'])
             ontology[m] = dict.fromkeys(orga)
         return ontology
