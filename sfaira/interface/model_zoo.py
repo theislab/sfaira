@@ -78,8 +78,8 @@ class ModelZoo(abc.ABC):
         assert self.model_id is not None, "set model_id first"
         return self.model_id.split('_')[2]
 
+    @staticmethod
     def load_ontology_from_model_ids(
-            self,
             model_ids,
             model_class: Union[str, None] = None,
     ) -> dict:
@@ -93,19 +93,19 @@ class ModelZoo(abc.ABC):
 
         ids = [x for x in model_ids if (x.split('_')[0] == model_class or model_class is None)]
         id_df = pd.DataFrame(
-            [i.split('_')[1:6] for i in ids],
+            [i.split('_')[1:3] for i in ids],
             columns=['name', 'organisation']
         )
         model = np.unique(id_df['name'])
         ontology = dict.fromkeys(model)
         for m in model:
-            id_df_m = id_df[id_df.model_type == m]
+            id_df_m = id_df[id_df['name'] == m]
             orga = np.unique(id_df_m['organisation'])
             ontology[m] = dict.fromkeys(orga)
         return ontology
 
+    @staticmethod
     def _order_versions(
-            self,
             versions: List[str]
     ):
         """

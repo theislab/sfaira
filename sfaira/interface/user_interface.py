@@ -137,9 +137,8 @@ class UserInterface:
                     file_names.append(file)
                     with open(os.path.join(subdir, file), 'rb') as f:
                         md5.append(hashlib.md5(f.read()).hexdigest())
-        s = [i.split('_')[0:7] for i in file_names]
-        ids = ['_'.join(i) for i in s]
-        ids_cleaned = [i.replace('.h5', '').replace('.data-00000-of-00001', '') for i in ids]  # remove file extensions from ids
+        ids = ['_'.join(i.split('_')[0:3]) for i in file_names]
+        ids_cleaned = [i.replace('.h5', '').replace('.data-00000-of-00001', '') for i in ids]  # remove file extensions
 
         if ids:
             pd.DataFrame(
@@ -295,12 +294,12 @@ class UserInterface:
             data sets are superimposed.
         :param match_to_reference: Reference genomes name.
         """
-        if self.zoo_embedding.organism is not None:
-            organism = self.zoo_embedding.organism
-            organ = self.zoo_embedding.organ
-        elif self.zoo_celltype.organism is not None:
-            organism = self.zoo_celltype.organism
-            organ = self.zoo_celltype.organ
+        if self.zoo_embedding.model_organism is not None:
+            organism = self.zoo_embedding.model_organism
+            organ = self.zoo_embedding.model_organ
+        elif self.zoo_celltype.model_organism is not None:
+            organism = self.zoo_celltype.model_organism
+            organ = self.zoo_celltype.model_organ
         else:
             raise ValueError("Please first set which model_id to use via the model zoo before loading the data")
 
@@ -341,9 +340,6 @@ class UserInterface:
             data=self.data,
             model_dir=model_dir,
             model_id=self.zoo_embedding.model_id,
-            organism=self.zoo_embedding.organism,
-            organ=self.zoo_embedding.organ,
-            model_type=self.zoo_embedding.model_type,
             model_topology=self.zoo_embedding.model_topology,
             weights_md5=md5,
             cache_path=self.cache_path
@@ -366,9 +362,6 @@ class UserInterface:
             data=self.data,
             model_dir=model_dir,
             model_id=self.zoo_celltype.model_id,
-            organism=self.zoo_celltype.organism,
-            organ=self.zoo_celltype.organ,
-            model_type=self.zoo_celltype.model_type,
             model_topology=self.zoo_celltype.model_topology,
             weights_md5=md5,
             cache_path=self.cache_path
@@ -466,14 +459,7 @@ class UserInterface:
 
         :return:
         """
-        if self.zoo_celltype is not None:
-            self.model_kipoi_celltype = self.zoo_celltype.get_kipoi_model()
-            self._adata_write_celltype(
-                labels=self.model_kipoi_celltype.pipeline.predict(dict(adata=self.data)),
-                key="celltype_sfaira"
-            )
-        else:
-            raise ValueError("celltype zoo has to be set before kipoi_experimental model can be run.")
+        raise NotImplementedError()
 
     def compute_embedding_kipoi(self):
         """
@@ -481,14 +467,7 @@ class UserInterface:
 
         :return:
         """
-        if self.zoo_embedding is not None:
-            self.model_kipoi_embedding = self.zoo_embedding.get_kipoi_model()
-            self._adata_write_embedding(
-                embedding=self.model_kipoi_embedding.pipeline.predict_embedding(dict(adata=self.data)),
-                key="X_sfaira"
-            )
-        else:
-            raise ValueError("embedding zoo has to be set before kipoi_experimental model can be run.")
+        raise NotImplementedError()
 
     def compute_all_kipoi(self):
         """
@@ -496,8 +475,7 @@ class UserInterface:
 
         :return:
         """
-        self.compute_embedding_kipoi()
-        self.compute_celltype_kipoi()
+        raise NotImplementedError()
 
     def compute_denoised_expression_kipoi(self):
         """
@@ -505,14 +483,7 @@ class UserInterface:
 
         :return:
         """
-        if self.zoo_embedding is not None:
-            self.model_kipoi_embedding = self.zoo_embedding.get_kipoi_model()
-            self._adata_write_denoised_data(
-                denoised_data=self.model_kipoi_embedding.pipeline.predict(dict(adata=self.data)),
-                key="denoised_sfaira"
-            )
-        else:
-            raise ValueError("embedding zoo has to be set before local model can be run.")
+        raise NotImplementedError()
 
     def celltype_summary(self):
         """
