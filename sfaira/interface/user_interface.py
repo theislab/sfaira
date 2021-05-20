@@ -32,7 +32,7 @@ class UserInterface:
     ui.load_model_embedding()
     ui.load_model_celltype()
     ui.predict_all()
-    adata = ui.data
+    adata = ui.data.adata
     scanpy.pp.neighbors(adata, use_rep="X_sfaira")
     scanpy.tl.umap(adata)
     scanpy.pl.umap(adata, color="celltype_sfaira", show=True, save="UMAP_sfaira.png")
@@ -45,7 +45,7 @@ class UserInterface:
     model_kipoi_celltype: Union[BaseModel, None]
     zoo_embedding: Union[ModelZoo, None]
     zoo_celltype: Union[ModelZoo, None]
-    data: Union[anndata.AnnData]
+    data: Union[DatasetInteractive, None]
     model_lookuptable: Union[pd.DataFrame, None]
 
     def __init__(
@@ -58,6 +58,7 @@ class UserInterface:
         self.model_kipoi_celltype = None
         self.estimator_embedding = None
         self.estimator_celltype = None
+        self.data = None
         self.use_sfaira_repo = sfaira_repo
         self.cache_path = os.path.join(cache_path, '')
 
@@ -302,7 +303,7 @@ class UserInterface:
         if gene_ens_col is None and gene_symbol_col is None:
             raise ValueError("Please provide either the gene_ens_col or the gene_symbol_col argument.")
 
-        dataset = DatasetInteractive(
+        self.data = DatasetInteractive(
             data=data,
             organism=organism,
             organ=organ,
@@ -311,7 +312,6 @@ class UserInterface:
             obs_key_celltypes=obs_key_celltypes,
             class_maps=class_maps,
         )
-        self.data = dataset.adata
 
     def load_model_embedding(self):
         """
@@ -325,7 +325,7 @@ class UserInterface:
         model_dir = self.model_lookuptable["model_file_path"].loc[self.model_lookuptable["model_id"] == self.zoo_embedding.model_id].iloc[0]
         md5 = self.model_lookuptable["md5"].loc[self.model_lookuptable["model_id"] == self.zoo_embedding.model_id].iloc[0]
         self.estimator_embedding = EstimatorKerasEmbedding(
-            data=self.data,
+            data=self.data.adata,
             model_dir=model_dir,
             model_id=self.zoo_embedding.model_id,
             model_topology=self.zoo_embedding.model_topology,
@@ -347,7 +347,7 @@ class UserInterface:
         model_dir = self.model_lookuptable["model_file_path"].loc[self.model_lookuptable["model_id"] == self.zoo_celltype.model_id].iloc[0]
         md5 = self.model_lookuptable["md5"].loc[self.model_lookuptable["model_id"] == self.zoo_celltype.model_id].iloc[0]
         self.estimator_celltype = EstimatorKerasCelltype(
-            data=self.data,
+            data=self.data.adata,
             model_dir=model_dir,
             model_id=self.zoo_celltype.model_id,
             model_topology=self.zoo_celltype.model_topology,
@@ -366,7 +366,7 @@ class UserInterface:
         Writes a list of cell type labels into the column of adata.obs indicated
         :return:
         """
-        self.data.obs[key] = [self.zoo_celltype.celltypes[i][0] for i in np.argmax(labels, axis=1)]
+        self.data.adata.obs[key] = [self.zoo_celltype.celltypes[i][0] for i in np.argmax(labels, axis=1)]
 
     def _adata_write_embedding(
             self,
@@ -377,7 +377,7 @@ class UserInterface:
         Writes the embedding matrix into adata.obsm with the key indicated.
         :return:
         """
-        self.data.obsm[key] = embedding
+        self.data.adata.obsm[key] = embedding
 
     def _adata_write_denoised_data(
             self,
@@ -388,7 +388,7 @@ class UserInterface:
         Writes the denoised expression matrix into adata.obsm with the key indicated.
         :return:
         """
-        self.data.layers[key] = denoised_data
+        self.data.adata.layers[key] = denoised_data
 
     def predict_celltypes(self):
         """
@@ -447,6 +447,6 @@ class UserInterface:
 
         :return:
         """
-        assert "celltype_sfaira" in self.data.obs.keys(), \
+        assert "celltype_sfaira" in self.data.adata.obs.keys(), \
             "Column celltype_sfaira not found in the data. Please run UserInterface.predict_celltypes() first."
         return self.data.obs['celltype_sfaira'].value_counts()
