@@ -137,9 +137,8 @@ class UserInterface:
                     file_names.append(file)
                     with open(os.path.join(subdir, file), 'rb') as f:
                         md5.append(hashlib.md5(f.read()).hexdigest())
-        s = [i.split('_')[0:7] for i in file_names]
-        ids = ['_'.join(i) for i in s]
-        ids_cleaned = [i.replace('.h5', '').replace('.data-00000-of-00001', '') for i in ids]  # remove file extensions from ids
+        ids = ['_'.join(i.split('_')[0:3]) for i in file_names]
+        ids_cleaned = [i.replace('.h5', '').replace('.data-00000-of-00001', '') for i in ids]  # remove file extensions
 
         if ids:
             pd.DataFrame(
