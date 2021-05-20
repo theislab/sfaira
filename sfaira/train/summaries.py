@@ -407,7 +407,7 @@ class GridsearchContainer:
             partition_select: str = "val",
             partition_show: str = "test",
             subset: dict = {},
-            param_x=['lr', 'depth', 'width', 'dropout', 'l1', 'l2'],
+            param_x = ('lr', 'depth', 'width', 'dropout', 'l1', 'l2'),
             show_swarm: bool = False,
             panel_width: float = 4.,
             panel_height: float = 2.
@@ -511,9 +511,9 @@ class GridsearchContainer:
             )
             if cv_key is None:
                 sns_data = []
-                for run in np.unique(
+                for run in list(np.unique(
                         self.summary_tab.loc[self.summary_tab["model_gs_id"].values == model_gs_id, "run"].values
-                ).tolist():
+                )):
                     sns_data_temp = pandas.DataFrame(self.histories[run])
                     sns_data_temp["epoch"] = np.arange(0, sns_data_temp.shape[0])
                     sns_data_temp["cv"] = run[-1]
@@ -648,26 +648,26 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         metrics = list(self.evals.values())[0]['val'].keys()
         self.summary_tab = pandas.DataFrame(dict(
             list({
-                "depth":       [id_i.split("_")[self.model_id_len + 0] for id_i in self.run_ids],
-                "width":       [id_i.split("_")[self.model_id_len + 1] for id_i in self.run_ids],
-                "lr":          [id_i.split("_")[self.model_id_len + 2] for id_i in self.run_ids],
-                "dropout":     [id_i.split("_")[self.model_id_len + 3] for id_i in self.run_ids],
-                "l1":          [id_i.split("_")[self.model_id_len + 4] for id_i in self.run_ids],
-                "l2":          [id_i.split("_")[self.model_id_len + 5] for id_i in self.run_ids],
-                "cv":          [id_i.split("_")[-1] if self.cv else "1" for id_i in self.run_ids],
-                "model":       ["_".join(id_i.split("_")[:self.model_id_len]) for id_i in self.run_ids],
-                "organism":    [id_i.split("_")[1].split("-")[0] for id_i in self.run_ids],
-                "organ":       [id_i.split("_")[1].split("-")[1] for id_i in self.run_ids],
-                "model_type":  [
+                "depth":       [id_i.split("_")[self.model_id_len + 0] for id_i in self.run_ids],  # noqa: E241
+                "width":       [id_i.split("_")[self.model_id_len + 1] for id_i in self.run_ids],  # noqa: E241
+                "lr":          [id_i.split("_")[self.model_id_len + 2] for id_i in self.run_ids],  # noqa: E241
+                "dropout":     [id_i.split("_")[self.model_id_len + 3] for id_i in self.run_ids],  # noqa: E241
+                "l1":          [id_i.split("_")[self.model_id_len + 4] for id_i in self.run_ids],  # noqa: E241
+                "l2":          [id_i.split("_")[self.model_id_len + 5] for id_i in self.run_ids],  # noqa: E241
+                "cv":          [id_i.split("_")[-1] if self.cv else "1" for id_i in self.run_ids],  # noqa: E241
+                "model":       ["_".join(id_i.split("_")[:self.model_id_len]) for id_i in self.run_ids],  # noqa: E241
+                "organism":    [id_i.split("_")[1].split("-")[0] for id_i in self.run_ids],  # noqa: E241
+                "organ":       [id_i.split("_")[1].split("-")[1] for id_i in self.run_ids],  # noqa: E241
+                "model_type":  [  # noqa: E241
                     "linear" if (id_i.split("_")[1].split("-")[2] == "mlp" and
                                  id_i.split("_")[1].split("-")[3].split(".")[1] == "0")
                     else id_i.split("_")[1].split("-")[2]
                     for id_i in self.run_ids
                 ],
-                "version":     [id_i.split("_")[1].split("-")[3] for id_i in self.run_ids],
-                "model_gs_id": ["_".join(id_i.split("_")[:(self.model_id_len + 6)]) for id_i in self.run_ids],
-                "run":         self.run_ids,
-            }.items()) +  # noqa: E241,W504
+                "version":     [id_i.split("_")[1].split("-")[3] for id_i in self.run_ids],  # noqa: E241
+                "model_gs_id": ["_".join(id_i.split("_")[:(self.model_id_len + 6)]) for id_i in self.run_ids],  # noqa: E241
+                "run":         self.run_ids,  # noqa: E241
+            }.items()) +
             list(dict([("train_" + m, [self.evals[x]["train"][m] for x in self.run_ids]) for m in metrics]).items()) +
             list(dict([("test_" + m, [self.evals[x]["test"][m] for x in self.run_ids]) for m in metrics]).items()) +
             list(dict([("val_" + m, [self.evals[x]["val"][m] for x in self.run_ids]) for m in metrics]).items()) +
@@ -1201,32 +1201,32 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         metrics = list(self.evals.values())[0]['val'].keys()
         self.summary_tab = pandas.DataFrame(dict(
             list({
-                "depth":         [id_i.split("_")[self.model_id_len + 0] for id_i in self.run_ids],
-                "width":         [id_i.split("_")[self.model_id_len + 1] for id_i in self.run_ids],
-                "lr":            [id_i.split("_")[self.model_id_len + 2] for id_i in self.run_ids],
-                "dropout":       [id_i.split("_")[self.model_id_len + 3] for id_i in self.run_ids],
-                "l1":            [id_i.split("_")[self.model_id_len + 4] for id_i in self.run_ids],
-                "l2":            [id_i.split("_")[self.model_id_len + 5] for id_i in self.run_ids],
-                "cv":            [id_i.split("_")[-1] if self.cv else "1" for id_i in self.run_ids],
-                "model":         ["_".join(id_i.split("_")[:self.model_id_len]) for id_i in self.run_ids],
-                "organism":      [id_i.split("_")[1].split("-")[0] for id_i in self.run_ids],
-                "organ":         [id_i.split("_")[1].split("-")[1] for id_i in self.run_ids],
-                "model_type":    [id_i.split("_")[1].split("-")[2] for id_i in self.run_ids],
-                "version":       [id_i.split("_")[1].split("-")[3] for id_i in self.run_ids],
-                "model_gs_id":   ["_".join(id_i.split("_")[:(self.model_id_len + 6)]) for id_i in self.run_ids],
-                "run":           self.run_ids,
-            }.items()) +  # noqa: E241
+                "depth":         [id_i.split("_")[self.model_id_len + 0] for id_i in self.run_ids],  # noqa: E241
+                "width":         [id_i.split("_")[self.model_id_len + 1] for id_i in self.run_ids],  # noqa: E241
+                "lr":            [id_i.split("_")[self.model_id_len + 2] for id_i in self.run_ids],  # noqa: E241
+                "dropout":       [id_i.split("_")[self.model_id_len + 3] for id_i in self.run_ids],  # noqa: E241
+                "l1":            [id_i.split("_")[self.model_id_len + 4] for id_i in self.run_ids],  # noqa: E241
+                "l2":            [id_i.split("_")[self.model_id_len + 5] for id_i in self.run_ids],  # noqa: E241
+                "cv":            [id_i.split("_")[-1] if self.cv else "1" for id_i in self.run_ids],  # noqa: E241
+                "model":         ["_".join(id_i.split("_")[:self.model_id_len]) for id_i in self.run_ids],  # noqa: E241
+                "organism":      [id_i.split("_")[1].split("-")[0] for id_i in self.run_ids],  # noqa: E241
+                "organ":         [id_i.split("_")[1].split("-")[1] for id_i in self.run_ids],  # noqa: E241
+                "model_type":    [id_i.split("_")[1].split("-")[2] for id_i in self.run_ids],  # noqa: E241
+                "version":       [id_i.split("_")[1].split("-")[3] for id_i in self.run_ids],  # noqa: E241
+                "model_gs_id":   ["_".join(id_i.split("_")[:(self.model_id_len + 6)]) for id_i in self.run_ids],  # noqa: E241
+                "run":           self.run_ids,  # noqa: E241
+            }.items()) +
             list(dict([("train_" + m, [self.evals[x]["train"][m] if m in self.evals[x]["train"].keys() else
-                                       self.evals[x]["train"]['neg_ll_'+m] for x in self.run_ids])
+                                       self.evals[x]["train"]['neg_ll_' + m] for x in self.run_ids])
                        for m in metrics]).items()) +
             list(dict([("test_" + m, [self.evals[x]["test"][m] if m in self.evals[x]["test"].keys() else
-                                      self.evals[x]["test"]['neg_ll_'+m] for x in self.run_ids])
+                                      self.evals[x]["test"]['neg_ll_' + m] for x in self.run_ids])
                        for m in metrics]).items()) +
             list(dict([("val_" + m, [self.evals[x]["val"][m] if m in self.evals[x]["val"].keys()
-                                     else self.evals[x]["val"]['neg_ll_'+m] for x in self.run_ids])
+                                     else self.evals[x]["val"]['neg_ll_' + m] for x in self.run_ids])
                        for m in metrics]).items()) +
             list(dict([("all_" + m, [self.evals[x]["all"][m] if m in self.evals[x]["all"].keys()
-                                     else self.evals[x]["all"]['neg_ll_'+m] for x in self.run_ids])
+                                     else self.evals[x]["all"]['neg_ll_' + m] for x in self.run_ids])
                        for m in metrics]).items())
         ))
         # TODO: Hacky solution to make sure metrics are called the same in VAE and other models

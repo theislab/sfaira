@@ -10,10 +10,10 @@ from sfaira.versions.topologies import TopologyContainer, TOPOLOGIES
 
 class ModelZoo(abc.ABC):
     """
-    Model ontology base class.
+    Model zoo base class.
     """
     topology_container: TopologyContainer
-    ontology: dict
+    zoo: Union[dict, None]
     _model_id: Union[str, None]
     celltypes: Union[CelltypeUniverse, None]
 
@@ -28,67 +28,24 @@ class ModelZoo(abc.ABC):
         """
         self._ontology_container_sfaira = OntologyContainerSfaira()
         if model_lookuptable is not None:  # check if models in repository
-            self.ontology = self.load_ontology_from_model_ids(model_ids=model_lookuptable['model_id'].values,
-                                                              model_class=model_class)
+            self.zoo = self.load_zoo_from_model_ids(model_ids=model_lookuptable['model_id'].values,
+                                                    model_class=model_class)
+        else:
+            self.zoo = None
         self._model_id = None
         self.celltypes = None
 
-    @property
-    def model_class(self):
-        assert self.model_id is not None, "set model_id first"
-        return self.model_id.split('_')[0]
-
-    @property
-    def model_name(self):
-        assert self.model_id is not None, "set model_id first"
-        return self.model_id.split('_')[1]
-
-    @property
-    def model_organism(self):
-        # TODO: this is a custom name ontology
-        assert self.model_id is not None, "set model_id first"
-        return self.model_id.split('_')[1].split("-")[0]
-
-    @property
-    def model_organ(self):
-        # TODO: this is a custom name ontology
-        assert self.model_id is not None, "set model_id first"
-        return self.model_id.split('_')[1].split("-")[1]
-
-    @property
-    def model_type(self):
-        # TODO: this is a custom name ontology
-        assert self.model_id is not None, "set model_id first"
-        return self.model_id.split('_')[1].split("-")[2]
-
-    @property
-    def model_topology(self):
-        # TODO: this is a custom name ontology
-        assert self.model_id is not None, "set model_id first"
-        return self.model_id.split('_')[1].split("-")[3]
-
-    @property
-    def model_version(self):
-        # TODO: this is a custom name ontology
-        assert self.model_id is not None, "set model_id first"
-        return self.model_id.split('_')[1].split("-")[4]
-
-    @property
-    def organisation(self):
-        assert self.model_id is not None, "set model_id first"
-        return self.model_id.split('_')[2]
-
     @staticmethod
-    def load_ontology_from_model_ids(
+    def load_zoo_from_model_ids(
             model_ids,
             model_class: Union[str, None] = None,
     ) -> dict:
         """
-        Load model ontology based on models available in model lookup tables.
+        Load model zoo based on models available in model lookup tables.
 
         :param model_ids: Table listing all available model_ids.
         :param model_class: Model class to subset to.
-        :return: Dictionary formatted ontology.
+        :return: Dictionary formatted zoo.
         """
 
         ids = [x for x in model_ids if (x.split('_')[0] == model_class or model_class is None)]
@@ -97,12 +54,12 @@ class ModelZoo(abc.ABC):
             columns=['name', 'organisation']
         )
         model = np.unique(id_df['name'])
-        ontology = dict.fromkeys(model)
+        zoo = dict.fromkeys(model)
         for m in model:
             id_df_m = id_df[id_df['name'] == m]
             orga = np.unique(id_df_m['organisation'])
-            ontology[m] = dict.fromkeys(orga)
-        return ontology
+            zoo[m] = dict.fromkeys(orga)
+        return zoo
 
     @staticmethod
     def _order_versions(
@@ -115,49 +72,7 @@ class ModelZoo(abc.ABC):
         :return: Ordered list of versions.
         """
         versions.sort(key=lambda s: [int(u) for u in s.split('.')])
-
         return versions
-
-    @property
-    def model_id(self):
-        return self._model_id
-
-    @model_id.setter
-    def model_id(self, x: str):
-        """
-        Set model ID to a manually supplied ID.
-
-        :param x: Model ID to set. Format: modelclass_organism-organ-modeltype-topology-version_organisation
-        """
-        assert len(x.split('_')) == 3, f'model_id {x} is invalid'
-        self._model_id = x
-
-    def save_weights_to_remote(self, path=None):
-        """
-        Saves model weights to repository XY.
-        Increments 3rd digit of version number.
-        Adds model_id to the text file, updates model_index
-        """
-        raise NotImplementedError()
-
-    def save_weights_to_public(self):
-        """
-        Saves model weights to cloud under an organization name.
-        Increments 2nd digit of version number.
-        Adds model_id to the text file, updates model_index
-        """
-        raise NotImplementedError()
-
-    def call_kipoi(self):
-        """
-        Returns kipoi_experimental model call from remote directly on local data using kipoi_experimental.
-
-        Runs model defined in self.model_id.
-        For this, the remote server associated with the model_id has to be identified via find_remote().
-
-        :return: Predictions
-        """
-        raise NotImplementedError()
 
     def topology(
             self,
@@ -171,10 +86,10 @@ class ModelZoo(abc.ABC):
         :param organisation: Identifier of organisation to show versions for.
         :return: List of versions available.
         """
-        assert model_type in self.ontology.keys(), "model_type requested was not found in ontology"
-        assert organisation in self.ontology[model_type].keys(), \
-            "organisation requested was not found in ontology"
-        return self.ontology[model_type][organisation]
+        assert model_type in self.zoo.keys(), "model_type requested was not found in zoo"
+        assert organisation in self.zoo[model_type].keys(), \
+            "organisation requested was not found in zoo"
+        return self.zoo[model_type][organisation]
 
     def versions(
             self,
@@ -190,23 +105,81 @@ class ModelZoo(abc.ABC):
         :param model_topology: Identifier of model_topology to show versions for.
         :return: List of versions available.
         """
-        assert model_type in self.ontology.keys(), "model_type requested was not found in ontology"
-        assert organisation in self.ontology[model_type].keys(), \
-            "organisation requested was not found in ontology"
-        assert model_topology in self.ontology[model_type][organisation].keys(), \
-            "model_topology requested was not found in ontology"
-        return self.ontology[model_type][organisation][model_topology]
-
-    @property
-    def model_hyperparameters(self) -> dict:
-        assert self.topology_container is not None
-        return self.topology_container.topology["hyper_parameters"]
+        assert model_type in self.zoo.keys(), "model_type requested was not found in zoo"
+        assert organisation in self.zoo[model_type].keys(), \
+            "organisation requested was not found in zoo"
+        assert model_topology in self.zoo[model_type][organisation].keys(), \
+            "model_topology requested was not found in zoo"
+        return self.zoo[model_type][organisation][model_topology]
 
     @property
     def topology_container(self) -> TopologyContainer:
-        # TODO: this ID decomposition to organism is custom to the topologies handled in this package.
-        organism = self.model_name.split("-")[0]
         return TopologyContainer(
-            topology=TOPOLOGIES[organism][self.model_class][self.model_type][self.model_topology],
+            topology=TOPOLOGIES[self.model_organism][self.model_class][self.model_type][self.model_topology],
             topology_id=self.model_version
         )
+
+    @property
+    def model_hyperparameters(self) -> dict:
+        return self.topology_container.topology["hyper_parameters"]
+
+    @property
+    def model_id(self):
+        return self._model_id
+
+    @model_id.setter
+    def model_id(self, x: str):
+        """
+        Set model ID to a manually supplied ID.
+
+        :param x: Model ID to set. Format: modelclass_organism-organ-modeltype-topology-version_organisation
+        """
+        assert self.zoo is None or x.split("_")[1] in self.zoo.keys(),\
+            f"{x} not found in model zoo, please check available models using ModelZoo.zoo"
+        assert len(x.split('_')) == 3, f'model_id {x} is invalid'
+        self._model_id = x
+
+    @property
+    def model_class(self):
+        assert self.model_id is not None, "set model_id first"
+        return self.model_id.split('_')[0]
+
+    @property
+    def model_name(self):
+        assert self.model_id is not None, "set model_id first"
+        return self.model_id.split('_')[1]
+
+    @property
+    def model_organism(self):
+        # TODO: this relies on theislab model_name formatting
+        assert self.model_id is not None, "set model_id first"
+        return self.model_id.split('_')[1].split("-")[0]
+
+    @property
+    def model_organ(self):
+        # TODO: this relies on theislab model_name formatting
+        assert self.model_id is not None, "set model_id first"
+        return self.model_id.split('_')[1].split("-")[1]
+
+    @property
+    def model_type(self):
+        # TODO: this relies on theislab model_name formatting
+        assert self.model_id is not None, "set model_id first"
+        return self.model_id.split('_')[1].split("-")[2]
+
+    @property
+    def model_topology(self):
+        # TODO: this relies on theislab model_name formatting
+        assert self.model_id is not None, "set model_id first"
+        return self.model_id.split('_')[1].split("-")[3]
+
+    @property
+    def model_version(self):
+        # TODO: this relies on theislab model_name formatting
+        assert self.model_id is not None, "set model_id first"
+        return self.model_id.split('_')[1].split("-")[4]
+
+    @property
+    def organisation(self):
+        assert self.model_id is not None, "set model_id first"
+        return self.model_id.split('_')[2]
