@@ -1003,7 +1003,8 @@ class EstimatorKerasCelltype(EstimatorKeras):
             weights_md5: Union[str, None] = None,
             cache_path: str = os.path.join('cache', ''),
             celltype_ontology: Union[OntologyObo, None] = None,
-            max_class_weight: float = 1e3
+            max_class_weight: float = 1e3,
+            remove_unlabeled_cells: bool = True
     ):
         super(EstimatorKerasCelltype, self).__init__(
             data=data,
@@ -1012,27 +1013,28 @@ class EstimatorKerasCelltype(EstimatorKeras):
             model_id=model_id,
             model_topology=model_topology,
             weights_md5=weights_md5,
-            cache_path=cache_path
+            cache_path=cache_path,
         )
-        # Remove cells without type label from store:
-        if isinstance(self.data, DistributedStoreBase):
-            self.data.subset(attr_key="cellontology_class", excluded_values=[
-                self._adata_ids.unknown_celltype_identifier,
-                self._adata_ids.not_a_cell_celltype_identifier,
-                None,  # TODO: it may be possible to remove this in the future
-                np.nan,  # TODO: it may be possible to remove this in the future
-            ])
-        elif isinstance(self.data, anndata.AnnData):
-            self.data = self.data[np.where([
-                x not in [
+        if remove_unlabeled_cells:
+            # Remove cells without type label from store:
+            if isinstance(self.data, DistributedStoreBase):
+                self.data.subset(attr_key="cellontology_class", excluded_values=[
                     self._adata_ids.unknown_celltype_identifier,
                     self._adata_ids.not_a_cell_celltype_identifier,
                     None,  # TODO: it may be possible to remove this in the future
                     np.nan,  # TODO: it may be possible to remove this in the future
-                ] for x in self.data.obs[self._adata_ids.cellontology_class].values
-            ])[0], :]
-        else:
-            assert False
+                ])
+            elif isinstance(self.data, anndata.AnnData):
+                self.data = self.data[np.where([
+                    x not in [
+                        self._adata_ids.unknown_celltype_identifier,
+                        self._adata_ids.not_a_cell_celltype_identifier,
+                        None,  # TODO: it may be possible to remove this in the future
+                        np.nan,  # TODO: it may be possible to remove this in the future
+                    ] for x in self.data.obs[self._adata_ids.cellontology_class].values
+                ])[0], :]
+            else:
+                assert False
         assert "cl" in self.topology_container.output.keys(), self.topology_container.output.keys()
         assert "targets" in self.topology_container.output.keys(), self.topology_container.output.keys()
         self.max_class_weight = max_class_weight
