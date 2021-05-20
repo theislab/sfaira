@@ -407,7 +407,7 @@ class GridsearchContainer:
             partition_select: str = "val",
             partition_show: str = "test",
             subset: dict = {},
-            param_x = ('lr', 'depth', 'width', 'dropout', 'l1', 'l2'),
+            param_x: Union[tuple, list] = ('lr', 'depth', 'width', 'dropout', 'l1', 'l2'),
             show_swarm: bool = False,
             panel_width: float = 4.,
             panel_height: float = 2.
