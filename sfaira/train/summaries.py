@@ -1560,7 +1560,6 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
     def plot_gradient_cor(
             self,
             organ: str,
-            organism: str,
             model_type: Union[str, List[str]],
             metric_select: str,
             datapath,
@@ -1581,7 +1580,6 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         Plot correlation heatmap of gradient vectors accumulated on input features between cell types or models.
 
         :param organ:
-        :param organism:
         :param model_type:
         :param metric_select:
         :param datapath:
@@ -1616,7 +1614,6 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         for modelt in model_type:
             avg_grads[modelt], celltypes[modelt] = self.get_gradients_by_celltype(
                 organ=organ,
-                organism=organism,
                 model_type=modelt,
                 metric_select=metric_select,
                 datapath=datapath,
