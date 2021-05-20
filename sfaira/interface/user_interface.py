@@ -328,7 +328,7 @@ class UserInterface:
             data=self.data.adata,
             model_dir=model_dir,
             model_id=self.zoo_embedding.model_id,
-            model_topology=self.zoo_embedding.model_topology,
+            model_topology=self.zoo_embedding.topology_container,
             weights_md5=md5,
             cache_path=self.cache_path
         )
@@ -350,7 +350,7 @@ class UserInterface:
             data=self.data.adata,
             model_dir=model_dir,
             model_id=self.zoo_celltype.model_id,
-            model_topology=self.zoo_celltype.model_topology,
+            model_topology=self.zoo_celltype.topology_container,
             weights_md5=md5,
             cache_path=self.cache_path
         )

@@ -16,6 +16,7 @@ class ModelZoo(abc.ABC):
     zoo: Union[dict, None]
     _model_id: Union[str, None]
     celltypes: Union[CelltypeUniverse, None]
+    available_model_ids: Union[list, None]
 
     def __init__(
             self,
@@ -27,39 +28,44 @@ class ModelZoo(abc.ABC):
         :param model_class: Model class to subset to.
         """
         self._ontology_container_sfaira = OntologyContainerSfaira()
-        if model_lookuptable is not None:  # check if models in repository
-            self.zoo = self.load_zoo_from_model_ids(model_ids=model_lookuptable['model_id'].values,
-                                                    model_class=model_class)
-        else:
-            self.zoo = None
         self._model_id = None
         self.celltypes = None
 
-    @staticmethod
-    def load_zoo_from_model_ids(
+        if model_lookuptable is not None:  # check if models in repository
+            self._load_model_ids(model_ids=model_lookuptable['model_id'].values, model_class=model_class)
+            self._construct_zoo_from_model_ids()
+        else:
+            self.zoo = None
+            self.available_model_ids = None
+
+    def _load_model_ids(
+            self,
             model_ids,
             model_class: Union[str, None] = None,
-    ) -> dict:
+    ):
         """
-        Load model zoo based on models available in model lookup tables.
+        Load model ids based on models available in model lookup tables.
 
         :param model_ids: Table listing all available model_ids.
-        :param model_class: Model class to subset to.
-        :return: Dictionary formatted zoo.
+        :param model_class: Model class to subset to
         """
+        self.available_model_ids = [x for x in model_ids if (x.split('_')[0] == model_class or model_class is None)]
 
-        ids = [x for x in model_ids if (x.split('_')[0] == model_class or model_class is None)]
+    def _construct_zoo_from_model_ids(self):
+        """
+        Load model zoo based on models available model_ids.
+        """
         id_df = pd.DataFrame(
-            [i.split('_')[1:3] for i in ids],
+            [i.split('_')[1:3] for i in self.available_model_ids],
             columns=['name', 'organisation']
         )
-        model = np.unique(id_df['name'])
-        zoo = dict.fromkeys(model)
-        for m in model:
-            id_df_m = id_df[id_df['name'] == m]
-            orga = np.unique(id_df_m['organisation'])
-            zoo[m] = dict.fromkeys(orga)
-        return zoo
+        orgs = np.unique(id_df['organisation'])
+        zoo = dict.fromkeys(orgs)
+        for o in orgs:
+            id_df_o = id_df[id_df['organisation'] == o]
+            name = np.unique(id_df_o['name'])
+            zoo[o] = dict.fromkeys(name)
+        self.zoo = zoo
 
     @staticmethod
     def _order_versions(
@@ -86,10 +92,10 @@ class ModelZoo(abc.ABC):
         :param organisation: Identifier of organisation to show versions for.
         :return: List of versions available.
         """
-        assert model_type in self.zoo.keys(), "model_type requested was not found in zoo"
-        assert organisation in self.zoo[model_type].keys(), \
-            "organisation requested was not found in zoo"
-        return self.zoo[model_type][organisation]
+        assert organisation in self.zoo.keys(), "organisation requested was not found in zoo"
+        assert model_type in self.zoo[organisation].keys(), \
+            "model_type requested was not found in zoo"
+        return self.zoo[organisation][model_type]
 
     def versions(
             self,
@@ -105,12 +111,12 @@ class ModelZoo(abc.ABC):
         :param model_topology: Identifier of model_topology to show versions for.
         :return: List of versions available.
         """
-        assert model_type in self.zoo.keys(), "model_type requested was not found in zoo"
-        assert organisation in self.zoo[model_type].keys(), \
-            "organisation requested was not found in zoo"
-        assert model_topology in self.zoo[model_type][organisation].keys(), \
+        assert organisation in self.zoo.keys(), "organisation requested was not found in zoo"
+        assert model_type in self.zoo[organisation].keys(), \
+            "model_type requested was not found in zoo"
+        assert model_topology in self.zoo[organisation][model_type].keys(), \
             "model_topology requested was not found in zoo"
-        return self.zoo[model_type][organisation][model_topology]
+        return self.zoo[organisation][model_type][model_topology]
 
     @property
     def topology_container(self) -> TopologyContainer:
@@ -134,8 +140,8 @@ class ModelZoo(abc.ABC):
 
         :param x: Model ID to set. Format: modelclass_organism-organ-modeltype-topology-version_organisation
         """
-        assert self.zoo is None or x.split("_")[1] in self.zoo.keys(),\
-            f"{x} not found in model zoo, please check available models using ModelZoo.zoo"
+        assert self.available_model_ids is None or x in self.available_model_ids,\
+            f"{x} not found in available_model_ids, please check available models using ModelZoo.available_model_ids"
         assert len(x.split('_')) == 3, f'model_id {x} is invalid'
         self._model_id = x
 
