@@ -43,15 +43,17 @@ class ModelZoo(abc.ABC):
             model_ids,
             model_class: Union[str, None] = None,
     ):
+        """
+        Load model ids based on models available in model lookup tables.
+
+        :param model_ids: Table listing all available model_ids.
+        :param model_class: Model class to subset to
+        """
         self.available_model_ids = [x for x in model_ids if (x.split('_')[0] == model_class or model_class is None)]
 
     def _construct_zoo_from_model_ids(self):
         """
-        Load model zoo based on models available in model lookup tables.
-
-        :param model_ids: Table listing all available model_ids.
-        :param model_class: Model class to subset to.
-        :return: Dictionary formatted zoo.
+        Load model zoo based on models available model_ids.
         """
         id_df = pd.DataFrame(
             [i.split('_')[1:3] for i in self.available_model_ids],
@@ -138,8 +140,8 @@ class ModelZoo(abc.ABC):
 
         :param x: Model ID to set. Format: modelclass_organism-organ-modeltype-topology-version_organisation
         """
-        assert self.zoo is None or x.split("_")[1] in self.zoo.keys(),\
-            f"{x} not found in model zoo, please check available models using ModelZoo.zoo"
+        assert self.available_model_ids is None or x in self.available_model_ids,\
+            f"{x} not found in available_model_ids, please check available models using ModelZoo.available_model_ids"
         assert len(x.split('_')) == 3, f'model_id {x} is invalid'
         self._model_id = x
 
