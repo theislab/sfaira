@@ -1022,12 +1022,16 @@ class EstimatorKerasCelltype(EstimatorKeras):
             self.data.subset(attr_key="cellontology_class", excluded_values=[
                 self._adata_ids.unknown_celltype_identifier,
                 self._adata_ids.not_a_cell_celltype_identifier,
+                None,  # TODO: it may be possible to remove this in the future
+                np.nan,  # TODO: it may be possible to remove this in the future
             ])
         elif isinstance(self.data, anndata.AnnData):
             self.data = self.data[np.where([
                 x not in [
                     self._adata_ids.unknown_celltype_identifier,
                     self._adata_ids.not_a_cell_celltype_identifier,
+                    None,  # TODO: it may be possible to remove this in the future
+                    np.nan,  # TODO: it may be possible to remove this in the future
                 ] for x in self.data.obs[self._adata_ids.cellontology_class].values
             ])[0], :]
         else:
