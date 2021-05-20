@@ -78,8 +78,8 @@ class ModelZoo(abc.ABC):
         assert self.model_id is not None, "set model_id first"
         return self.model_id.split('_')[2]
 
+    @staticmethod
     def load_ontology_from_model_ids(
-            self,
             model_ids,
             model_class: Union[str, None] = None,
     ) -> dict:
@@ -104,8 +104,8 @@ class ModelZoo(abc.ABC):
             ontology[m] = dict.fromkeys(orga)
         return ontology
 
+    @staticmethod
     def _order_versions(
-            self,
             versions: List[str]
     ):
         """
