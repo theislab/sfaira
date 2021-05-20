@@ -1201,24 +1201,12 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         metrics = list(self.evals.values())[0]['val'].keys()
         self.summary_tab = pandas.DataFrame(dict(
             list({
-                "depth":         [id_i.split("_")[self.model_id_len + 0]
-                                  if len(id_i.split("_")) > self.model_id_len + 1 else "none"
-                                  for id_i in self.run_ids],  # noqa: E241
-                "width":         [id_i.split("_")[self.model_id_len + 1]
-                                  if len(id_i.split("_")) > self.model_id_len + 2 else "none"
-                                  for id_i in self.run_ids],  # noqa: E241
-                "lr":            [id_i.split("_")[self.model_id_len + 2]
-                                  if len(id_i.split("_")) > self.model_id_len + 3 else "none"
-                                  for id_i in self.run_ids],  # noqa: E241
-                "dropout":       [id_i.split("_")[self.model_id_len + 3]
-                                  if len(id_i.split("_")) > self.model_id_len + 4 else "none"
-                                  for id_i in self.run_ids],  # noqa: E241
-                "l1":            [id_i.split("_")[self.model_id_len + 4]
-                                  if len(id_i.split("_")) > self.model_id_len + 5 else "none"
-                                  for id_i in self.run_ids],  # noqa: E241
-                "l2":            [id_i.split("_")[self.model_id_len + 5]
-                                  if len(id_i.split("_")) > self.model_id_len + 6 else "none"
-                                  for id_i in self.run_ids],  # noqa: E241
+                "depth":         [id_i.split("_")[self.model_id_len + 0] for id_i in self.run_ids],  # noqa: E241
+                "width":         [id_i.split("_")[self.model_id_len + 1] for id_i in self.run_ids],  # noqa: E241
+                "lr":            [id_i.split("_")[self.model_id_len + 2] for id_i in self.run_ids],  # noqa: E241
+                "dropout":       [id_i.split("_")[self.model_id_len + 3] for id_i in self.run_ids],  # noqa: E241
+                "l1":            [id_i.split("_")[self.model_id_len + 4] for id_i in self.run_ids],  # noqa: E241
+                "l2":            [id_i.split("_")[self.model_id_len + 5] for id_i in self.run_ids],  # noqa: E241
                 "cv":            [id_i.split("_")[-1] if self.cv else "1" for id_i in self.run_ids],  # noqa: E241
                 "model":         ["_".join(id_i.split("_")[:self.model_id_len]) for id_i in self.run_ids],  # noqa: E241
                 "organism":      [id_i.split("_")[1].split("-")[0] for id_i in self.run_ids],  # noqa: E241
