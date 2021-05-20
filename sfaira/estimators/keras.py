@@ -18,7 +18,7 @@ from sfaira.models import BasicModelKeras
 from sfaira.versions.metadata import CelltypeUniverse, OntologyCl, OntologyObo
 from sfaira.versions.topologies import TopologyContainer
 from .losses import LossLoglikelihoodNb, LossLoglikelihoodGaussian, LossCrossentropyAgg, KLLoss
-from .metrics import custom_mse, custom_negll_nb, custom_negll_gaussian, custom_kl, \
+from .metrics import custom_mse, custom_negll_nb, custom_negll_gaussian, \
     CustomAccAgg, CustomF1Classwise, CustomFprClasswise, CustomTprClasswise, custom_cce_agg
 
 
@@ -114,9 +114,10 @@ class EstimatorKeras:
                     fn = os.path.join(self.cache_path, f"{self.model_id}_weights.h5")
                 except HTTPError:
                     try:
-                        urllib.request.urlretrieve(urljoin(self.model_dir, f'{self.model_id}_weights.data-00000-of-00001'),
-                                                   os.path.join(self.cache_path, f'{self.model_id}_weights.data-00000-of-00001')
-                                                   )
+                        urllib.request.urlretrieve(
+                            urljoin(self.model_dir, f'{self.model_id}_weights.data-00000-of-00001'),
+                            os.path.join(self.cache_path, f'{self.model_id}_weights.data-00000-of-00001')
+                        )
                         fn = os.path.join(self.cache_path, f"{self.model_id}_weights.data-00000-of-00001")
                     except HTTPError:
                         raise FileNotFoundError('cannot find remote weightsfile')
@@ -165,8 +166,8 @@ class EstimatorKeras:
                     file_path = os.path.join(os.path.join(self.cache_path, 'weights'), file)
                     os.remove(file_path)
 
+    @staticmethod
     def _assert_md5_sum(
-            self,
             fn,
             target_md5
     ):
@@ -846,7 +847,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         """
         return self.evaluate_any(idx=self.idx_test, batch_size=batch_size, max_steps=max_steps)
 
-    def predict(self, batch_size: int = 128, max_steps: int = np.inf):
+    def predict(self, batch_size: int = 128):
         """
         return the prediction of the model
 
@@ -865,7 +866,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         else:
             return np.array([])
 
-    def predict_embedding(self, batch_size: int = 128, max_steps: int = np.inf):
+    def predict_embedding(self, batch_size: int = 128):
         """
         return the prediction in the latent space (z_mean for variational models)
 
