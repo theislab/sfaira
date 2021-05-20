@@ -737,6 +737,8 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                         yield (x_sample, sf_sample), (x_sample, cell_to_class[y_sample])
 
             elif isinstance(self.data, anndata.AnnData) and self.data.isbacked:
+                if idx is None:
+                    idx = np.arange(0, self.data.n_obs)
                 n_features = self.data.X.shape[1]
 
                 def generator():
@@ -747,9 +749,11 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                         y_sample = self.data.obs[self._adata_ids.cellontology_id][i]
                         yield (x_sample, sf_sample), (x_sample, cell_to_class[y_sample])
             else:
+                if idx is None:
+                    idx = np.arange(0, self.data.n_obs)
                 x = self._prepare_data_matrix(idx=idx)
                 sf = prepare_sf(x=x)
-                y = self.data.obs[self._adata_ids.cellontology_class][idx]
+                y = self.data.obs[self._adata_ids.cellontology_class].values[idx]
                 # for gradients per celltype in compute_gradients_input()
                 n_features = x.shape[1]
 
@@ -767,7 +771,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 buffer_size=shuffle_buffer_size,
                 seed=None,
                 reshuffle_each_iteration=True
-            ).batch(batch_size, drop_remainder=False).prefetch(tf.data.AUTOTUNE)
+            ).batch(batch_size, drop_remainder=False).prefetch(prefetch)
 
             return dataset
 
