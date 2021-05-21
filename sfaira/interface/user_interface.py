@@ -32,7 +32,7 @@ class UserInterface:
     adata = ui.data.adata
     scanpy.pp.neighbors(adata, use_rep="X_sfaira")
     scanpy.tl.umap(adata)
-    scanpy.pl.umap(adata, color="celltype_sfaira", show=True, save="UMAP_sfaira.png")
+    scanpy.pl.umap(adata, color="celltypes_sfaira", show=True, save="UMAP_sfaira.png")
     ```
     """
 
@@ -371,7 +371,7 @@ class UserInterface:
         Writes a list of cell type labels into the column of adata.obs indicated
         :return:
         """
-        self.data.adata.obs[key] = [self.zoo_celltype.celltypes[i][0] for i in np.argmax(labels, axis=1)]
+        self.data.adata.obs[key] = [self.zoo_celltype.celltypes[i] for i in np.argmax(labels, axis=1)]
 
     def _adata_write_embedding(
             self,
@@ -404,7 +404,7 @@ class UserInterface:
         if self.zoo_celltype is not None:
             self._adata_write_celltype(
                 labels=self.estimator_celltype.predict(),
-                key="celltype_sfaira"
+                key="celltypes_sfaira"
             )
         else:
             raise ValueError("celltype zoo has to be set before local model can be run.")
@@ -452,6 +452,6 @@ class UserInterface:
 
         :return:
         """
-        assert "celltype_sfaira" in self.data.adata.obs.keys(), \
-            "Column celltype_sfaira not found in the data. Please run UserInterface.predict_celltypes() first."
-        return self.data.obs['celltype_sfaira'].value_counts()
+        assert "celltypes_sfaira" in self.data.adata.obs.keys(), \
+            "Column celltypes_sfaira not found in the data. Please run UserInterface.predict_celltypes() first."
+        return self.data.adata.obs['celltypes_sfaira'].value_counts()
