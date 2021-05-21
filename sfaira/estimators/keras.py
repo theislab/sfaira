@@ -236,11 +236,10 @@ class EstimatorKeras:
                 x = x[idx, :]
 
             # If the feature space is already mapped to the right reference, return the data matrix immediately
-            if 'mapped_features' in self.data.uns_keys():
-                if self.data.uns[self._adata_ids.mapped_features] == \
-                        self.topology_container.gc.assembly:
-                    print(f"found {x.shape[0]} observations")
-                    return x
+            if self._adata_ids.mapped_features in self.data.uns_keys() and \
+                    self.data.uns[self._adata_ids.mapped_features] == self.topology_container.gc.assembly:
+                print(f"found {x.shape[0]} observations")
+                return x
 
             # Compute indices of genes to keep
             data_ids = self.data.var[self._adata_ids.gene_id_ensembl].values.tolist()
@@ -1157,7 +1156,6 @@ class EstimatorKerasCelltype(EstimatorKeras):
 
     def _get_base_generator(
             self,
-            generator_helper,
             idx: Union[np.ndarray, None],
             yield_labels: bool,
             weighted: bool,
