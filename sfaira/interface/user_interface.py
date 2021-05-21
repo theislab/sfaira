@@ -372,6 +372,7 @@ class UserInterface:
         :return:
         """
         self.data.adata.obs[key] = [self.zoo_celltype.celltypes[i] for i in np.argmax(labels, axis=1)]
+        self.data.adata.obs[key] = self.data.adata.obs[key].astype('category')
 
     def _adata_write_embedding(
             self,
