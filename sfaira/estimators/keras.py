@@ -1150,6 +1150,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             self,
             generator_helper,
             idx: Union[np.ndarray, None],
+            yield_labels: bool,
             weighted: bool,
             batch_size: int,
             randomized_batch_access: bool,
@@ -1165,6 +1166,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             - y_sample is a one-hot encoded label vector of a cell
             - w_sample is a weight scalar of a cell
         :param idx: Indicies of data set to include in generator.
+        :param yield_labels:
         :param batch_size: Number of observations read from disk in each batched access.
         :param randomized_batch_access: Whether to randomize batches during reading (in generator). Lifts necessity of
             using a shuffle buffer on generator, however, batch composition stays unchanged over epochs unless there
@@ -1186,7 +1188,8 @@ class EstimatorKerasCelltype(EstimatorKeras):
                 return_dense=True,
                 randomized_batch_access=randomized_batch_access,
             )
-            onehot_encoder = self._one_hot_encoder()
+            if yield_labels:
+                onehot_encoder = self._one_hot_encoder()
 
             def generator():
                 for z in generator_raw():
@@ -1194,17 +1197,21 @@ class EstimatorKerasCelltype(EstimatorKeras):
                     if isinstance(x_sample, scipy.sparse.csr_matrix):
                         x_sample = x_sample.todense()
                     x_sample = np.asarray(x_sample)
-                    y_sample = onehot_encoder(z[1][self._adata_ids.cellontology_id].values)
-                    for i in range(x_sample.shape[0]):
-                        if y_sample[i].sum() > 0:
-                            yield generator_helper(x_sample[i], y_sample[i], 1.)
-
+                    if yield_labels:
+                        y_sample = onehot_encoder(z[1][self._adata_ids.cellontology_id].values)
+                        for i in range(x_sample.shape[0]):
+                            if y_sample[i].sum() > 0:
+                                yield x_sample[i], y_sample[i], 1.
+                    else:
+                        for i in range(x_sample.shape[0]):
+                            yield x_sample[i],
             n_features = self.data.n_vars
             n_samples = self.data.n_obs
         else:
-            weights, y = self._get_celltype_out(idx=idx)
-            if not weighted:
-                weights = np.ones_like(weights)
+            if yield_labels:
+                weights, y = self._get_celltype_out(idx=idx)
+                if not weighted:
+                    weights = np.ones_like(weights)
             x = self.data.X if self.data.isbacked else self._prepare_data_matrix(idx=idx)
             is_sparse = isinstance(x, scipy.sparse.spmatrix)
             indices = idx if self.data.isbacked else range(x.shape[0])
@@ -1217,13 +1224,16 @@ class EstimatorKerasCelltype(EstimatorKeras):
 
             def generator():
                 for s, e in batch_starts_ends:
-                    x_sample = np.asarray(x[indices[s:e], :].todense()) if is_sparse \
-                        else x[indices[s:e], :]
-                    y_sample = y[indices[s:e], :]
-                    w_sample = weights[indices[s:e]]
-                    for i in range(x_sample.shape[0]):
-                        if y_sample[i].sum() > 0:
-                            yield generator_helper(x_sample[i], y_sample[i], w_sample[i])
+                    x_sample = np.asarray(x[indices[s:e], :].todense()) if is_sparse else x[indices[s:e], :]
+                    if yield_labels:
+                        y_sample = y[indices[s:e], :]
+                        w_sample = weights[indices[s:e]]
+                        for i in range(x_sample.shape[0]):
+                            if y_sample[i].sum() > 0:
+                                yield x_sample[i], y_sample[i], w_sample[i]
+                    else:
+                        for i in range(x_sample.shape[0]):
+                            yield x_sample[i],
 
             n_features = x.shape[1]
             n_samples = x.shape[0]
@@ -1257,17 +1267,9 @@ class EstimatorKerasCelltype(EstimatorKeras):
             changes in batch composition.
         :return:
         """
-        # This is a basic cell type prediction model estimator class, the standard generator is fine.
-        def generator_helper(x_sample, y_sample, w_sample):
-            # Only yields samples with annotation, ie not unknown labels.
-            if mode in ['train', 'train_val', 'eval']:
-                return x_sample, y_sample, w_sample
-            else:
-                return x_sample,
-
         generator, n_samples, n_features, n_labels = self._get_base_generator(
-            generator_helper=generator_helper,
             idx=idx,
+            yield_labels=mode in ['train', 'train_val', 'eval'],
             weighted=weighted,
             batch_size=retrieval_batch_size,
             randomized_batch_access=randomized_batch_access,
