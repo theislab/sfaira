@@ -12,7 +12,7 @@ import os
 import warnings
 from tqdm import tqdm
 
-from sfaira.consts import AdataIdsSfaira, OCS
+from sfaira.consts import AdataIdsSfaira, OCS, AdataIds
 from sfaira.data import DistributedStoreBase
 from sfaira.models import BasicModelKeras
 from sfaira.versions.metadata import CelltypeUniverse, OntologyCl, OntologyObo
@@ -51,6 +51,7 @@ class EstimatorKeras:
     idx_train: Union[np.ndarray, None]
     idx_eval: Union[np.ndarray, None]
     idx_test: Union[np.ndarray, None]
+    adata_ids: AdataIds
 
     def __init__(
             self,
@@ -60,7 +61,8 @@ class EstimatorKeras:
             model_id: Union[str, None],
             model_topology: TopologyContainer,
             weights_md5: Union[str, None] = None,
-            cache_path: str = os.path.join('cache', '')
+            cache_path: str = os.path.join('cache', ''),
+            adata_ids: AdataIds = AdataIdsSfaira()
     ):
         self.data = data
         self.model = None
@@ -79,7 +81,7 @@ class EstimatorKeras:
         self.idx_test = None
         self.md5 = weights_md5
         self.cache_path = cache_path
-        self._adata_ids = AdataIdsSfaira()
+        self._adata_ids = adata_ids
 
     @property
     def model_type(self):
@@ -517,7 +519,8 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             model_id: Union[str, None],
             model_topology: TopologyContainer,
             weights_md5: Union[str, None] = None,
-            cache_path: str = os.path.join('cache', '')
+            cache_path: str = os.path.join('cache', ''),
+            adata_ids: AdataIds = AdataIdsSfaira()
     ):
         super(EstimatorKerasEmbedding, self).__init__(
             data=data,
@@ -526,7 +529,8 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             model_id=model_id,
             model_topology=model_topology,
             weights_md5=weights_md5,
-            cache_path=cache_path
+            cache_path=cache_path,
+            adata_ids=adata_ids
         )
 
     def init_model(
@@ -1004,7 +1008,8 @@ class EstimatorKerasCelltype(EstimatorKeras):
             cache_path: str = os.path.join('cache', ''),
             celltype_ontology: Union[OntologyObo, None] = None,
             max_class_weight: float = 1e3,
-            remove_unlabeled_cells: bool = True
+            remove_unlabeled_cells: bool = True,
+            adata_ids: AdataIds = AdataIdsSfaira()
     ):
         super(EstimatorKerasCelltype, self).__init__(
             data=data,
@@ -1014,6 +1019,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             model_topology=model_topology,
             weights_md5=weights_md5,
             cache_path=cache_path,
+            adata_ids=adata_ids
         )
         if remove_unlabeled_cells:
             # Remove cells without type label from store:

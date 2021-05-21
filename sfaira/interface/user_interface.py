@@ -1,8 +1,4 @@
 import anndata
-try:
-    from kipoi.model import BaseModel
-except ImportError:
-    BaseModel = None
 import numpy as np
 import pandas as pd
 import os
@@ -12,6 +8,7 @@ import warnings
 from sfaira.data import DatasetInteractive
 from sfaira.estimators import EstimatorKerasEmbedding, EstimatorKerasCelltype
 from sfaira.interface.model_zoo import ModelZoo
+from sfaira.consts import AdataIdsSfaira, AdataIds
 
 
 class UserInterface:
@@ -41,12 +38,11 @@ class UserInterface:
 
     estimator_embedding: Union[EstimatorKerasEmbedding, None]
     estimator_celltype: Union[EstimatorKerasCelltype, None]
-    model_kipoi_embedding: Union[None]
-    model_kipoi_celltype: Union[BaseModel, None]
     zoo_embedding: Union[ModelZoo, None]
     zoo_celltype: Union[ModelZoo, None]
     data: Union[DatasetInteractive, None]
     model_lookuptable: Union[pd.DataFrame, None]
+    adata_ids: AdataIds
 
     def __init__(
             self,
@@ -61,6 +57,7 @@ class UserInterface:
         self.data = None
         self.use_sfaira_repo = sfaira_repo
         self.cache_path = os.path.join(cache_path, '')
+        self.adata_ids = AdataIdsSfaira()
 
         if sfaira_repo:  # check if public sfaira repository should be accessed
             self.model_lookuptable = self._load_lookuptable("https://zenodo.org/record/4304660/files/")
@@ -312,6 +309,11 @@ class UserInterface:
             obs_key_celltypes=obs_key_celltypes,
             class_maps=class_maps,
         )
+        # Align to correct featurespace
+        self.data.streamline_features(
+            match_to_reference=self.zoo_embedding.topology_container.gc.assembly,
+            subset_genes_to_type=list(set(self.zoo_embedding.topology_container.gc.biotype))
+        )
 
     def load_model_embedding(self):
         """
@@ -330,7 +332,8 @@ class UserInterface:
             model_id=self.zoo_embedding.model_id,
             model_topology=self.zoo_embedding.topology_container,
             weights_md5=md5,
-            cache_path=self.cache_path
+            cache_path=self.cache_path,
+            adata_ids=self.adata_ids
         )
         self.estimator_embedding.init_model()
         self.estimator_embedding.load_pretrained_weights()
@@ -353,7 +356,8 @@ class UserInterface:
             model_topology=self.zoo_celltype.topology_container,
             weights_md5=md5,
             cache_path=self.cache_path,
-            remove_unlabeled_cells=False
+            remove_unlabeled_cells=False,
+            adata_ids=self.adata_ids
         )
         self.estimator_celltype.init_model()
         self.estimator_celltype.load_pretrained_weights()
