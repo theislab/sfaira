@@ -17,6 +17,7 @@ class ModelZoo(abc.ABC):
     _model_id: Union[str, None]
     celltypes: Union[CelltypeUniverse, None]
     available_model_ids: Union[list, None]
+    topology_container: Union[None, TopologyContainer]
 
     def __init__(
             self,
@@ -29,7 +30,7 @@ class ModelZoo(abc.ABC):
         """
         self._ontology_container_sfaira = OCS
         self._model_id = None
-        self.celltypes = None
+        self.topology_container = None
 
         if model_lookuptable is not None:  # check if models in repository
             self._load_model_ids(model_ids=model_lookuptable['model_id'].values, model_class=model_class)
@@ -119,15 +120,19 @@ class ModelZoo(abc.ABC):
         return self.zoo[organisation][model_type][model_topology]
 
     @property
-    def topology_container(self) -> TopologyContainer:
-        return TopologyContainer(
-            topology=TOPOLOGIES[self.model_organism][self.model_class][self.model_type][self.model_topology],
-            topology_id=self.model_version
-        )
+    def model_hyperparameters(self) -> dict:
+        assert self.topology_container is not None, "set model_id first"
+        return self.topology_container.topology["hyper_parameters"]
 
     @property
-    def model_hyperparameters(self) -> dict:
-        return self.topology_container.topology["hyper_parameters"]
+    def celltypes(self):
+        assert self.topology_container is not None, "set model_id first"
+        return self.topology_container.topology["output"]["targets"]
+
+    @celltypes.setter
+    def celltypes(self, x: np.array):
+        assert self.topology_container is not None, "set model_id first"
+        self.topology_container.topology["output"]["targets"] = x
 
     @property
     def model_id(self):
@@ -136,7 +141,7 @@ class ModelZoo(abc.ABC):
     @model_id.setter
     def model_id(self, x: str):
         """
-        Set model ID to a manually supplied ID.
+        Set model ID to a manually supplied ID and automatically set topology container.
 
         :param x: Model ID to set. Format: modelclass_organism-organ-modeltype-topology-version_organisation
         """
@@ -144,6 +149,10 @@ class ModelZoo(abc.ABC):
             f"{x} not found in available_model_ids, please check available models using ModelZoo.available_model_ids"
         assert len(x.split('_')) == 3, f'model_id {x} is invalid'
         self._model_id = x
+        self.topology_container = TopologyContainer(
+            topology=TOPOLOGIES[self.model_organism][self.model_class][self.model_type][self.model_topology],
+            topology_id=self.model_version
+        )
 
     @property
     def model_class(self):
