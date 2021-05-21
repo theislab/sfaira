@@ -121,7 +121,7 @@ gh_url = 'https://github.com/{github_user}/{github_repo}'.format_map(html_contex
 
 
 def setup(app):
-    app.add_stylesheet('css/custom.css')
+    app.add_css_file('css/custom.css')
     app.connect('autodoc-process-docstring', insert_function_images)
     app.add_role('pr', autolink(f'{gh_url}/pull/{{}}', 'PR {}'))
 

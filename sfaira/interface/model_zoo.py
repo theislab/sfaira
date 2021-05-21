@@ -4,7 +4,7 @@ import pandas as pd
 from typing import List, Union
 
 from sfaira.versions.metadata import CelltypeUniverse
-from sfaira.consts import OntologyContainerSfaira
+from sfaira.consts import OCS
 from sfaira.versions.topologies import TopologyContainer, TOPOLOGIES
 
 
@@ -27,7 +27,7 @@ class ModelZoo(abc.ABC):
         :param model_lookuptable: model_lookuptable.
         :param model_class: Model class to subset to.
         """
-        self._ontology_container_sfaira = OntologyContainerSfaira()
+        self._ontology_container_sfaira = OCS
         self._model_id = None
         self.celltypes = None
 

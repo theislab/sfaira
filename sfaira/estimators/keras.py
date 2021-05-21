@@ -12,13 +12,13 @@ import os
 import warnings
 from tqdm import tqdm
 
-from sfaira.consts import AdataIdsSfaira, OCS
+from sfaira.consts import AdataIdsSfaira, OCS, AdataIds
 from sfaira.data import DistributedStoreBase
 from sfaira.models import BasicModelKeras
 from sfaira.versions.metadata import CelltypeUniverse, OntologyCl, OntologyObo
 from sfaira.versions.topologies import TopologyContainer
 from .losses import LossLoglikelihoodNb, LossLoglikelihoodGaussian, LossCrossentropyAgg, KLLoss
-from .metrics import custom_mse, custom_negll_nb, custom_negll_gaussian, custom_kl, \
+from .metrics import custom_mse, custom_negll_nb, custom_negll_gaussian, \
     CustomAccAgg, CustomF1Classwise, CustomFprClasswise, CustomTprClasswise, custom_cce_agg
 
 
@@ -51,6 +51,7 @@ class EstimatorKeras:
     idx_train: Union[np.ndarray, None]
     idx_eval: Union[np.ndarray, None]
     idx_test: Union[np.ndarray, None]
+    adata_ids: AdataIds
 
     def __init__(
             self,
@@ -60,7 +61,8 @@ class EstimatorKeras:
             model_id: Union[str, None],
             model_topology: TopologyContainer,
             weights_md5: Union[str, None] = None,
-            cache_path: str = os.path.join('cache', '')
+            cache_path: str = os.path.join('cache', ''),
+            adata_ids: AdataIds = AdataIdsSfaira()
     ):
         self.data = data
         self.model = None
@@ -79,7 +81,7 @@ class EstimatorKeras:
         self.idx_test = None
         self.md5 = weights_md5
         self.cache_path = cache_path
-        self._adata_ids = AdataIdsSfaira()
+        self._adata_ids = adata_ids
 
     @property
     def model_type(self):
@@ -114,9 +116,10 @@ class EstimatorKeras:
                     fn = os.path.join(self.cache_path, f"{self.model_id}_weights.h5")
                 except HTTPError:
                     try:
-                        urllib.request.urlretrieve(urljoin(self.model_dir, f'{self.model_id}_weights.data-00000-of-00001'),
-                                                   os.path.join(self.cache_path, f'{self.model_id}_weights.data-00000-of-00001')
-                                                   )
+                        urllib.request.urlretrieve(
+                            urljoin(self.model_dir, f'{self.model_id}_weights.data-00000-of-00001'),
+                            os.path.join(self.cache_path, f'{self.model_id}_weights.data-00000-of-00001')
+                        )
                         fn = os.path.join(self.cache_path, f"{self.model_id}_weights.data-00000-of-00001")
                     except HTTPError:
                         raise FileNotFoundError('cannot find remote weightsfile')
@@ -165,8 +168,8 @@ class EstimatorKeras:
                     file_path = os.path.join(os.path.join(self.cache_path, 'weights'), file)
                     os.remove(file_path)
 
+    @staticmethod
     def _assert_md5_sum(
-            self,
             fn,
             target_md5
     ):
@@ -516,7 +519,8 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             model_id: Union[str, None],
             model_topology: TopologyContainer,
             weights_md5: Union[str, None] = None,
-            cache_path: str = os.path.join('cache', '')
+            cache_path: str = os.path.join('cache', ''),
+            adata_ids: AdataIds = AdataIdsSfaira()
     ):
         super(EstimatorKerasEmbedding, self).__init__(
             data=data,
@@ -525,7 +529,8 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             model_id=model_id,
             model_topology=model_topology,
             weights_md5=weights_md5,
-            cache_path=cache_path
+            cache_path=cache_path,
+            adata_ids=adata_ids
         )
 
     def init_model(
@@ -846,7 +851,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         """
         return self.evaluate_any(idx=self.idx_test, batch_size=batch_size, max_steps=max_steps)
 
-    def predict(self, batch_size: int = 128, max_steps: int = np.inf):
+    def predict(self, batch_size: int = 128):
         """
         return the prediction of the model
 
@@ -865,7 +870,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         else:
             return np.array([])
 
-    def predict_embedding(self, batch_size: int = 128, max_steps: int = np.inf):
+    def predict_embedding(self, batch_size: int = 128):
         """
         return the prediction in the latent space (z_mean for variational models)
 
@@ -1002,7 +1007,9 @@ class EstimatorKerasCelltype(EstimatorKeras):
             weights_md5: Union[str, None] = None,
             cache_path: str = os.path.join('cache', ''),
             celltype_ontology: Union[OntologyObo, None] = None,
-            max_class_weight: float = 1e3
+            max_class_weight: float = 1e3,
+            remove_unlabeled_cells: bool = True,
+            adata_ids: AdataIds = AdataIdsSfaira()
     ):
         super(EstimatorKerasCelltype, self).__init__(
             data=data,
@@ -1011,27 +1018,29 @@ class EstimatorKerasCelltype(EstimatorKeras):
             model_id=model_id,
             model_topology=model_topology,
             weights_md5=weights_md5,
-            cache_path=cache_path
+            cache_path=cache_path,
+            adata_ids=adata_ids
         )
-        # Remove cells without type label from store:
-        if isinstance(self.data, DistributedStoreBase):
-            self.data.subset(attr_key="cellontology_class", excluded_values=[
-                self._adata_ids.unknown_celltype_identifier,
-                self._adata_ids.not_a_cell_celltype_identifier,
-                None,  # TODO: it may be possible to remove this in the future
-                np.nan,  # TODO: it may be possible to remove this in the future
-            ])
-        elif isinstance(self.data, anndata.AnnData):
-            self.data = self.data[np.where([
-                x not in [
+        if remove_unlabeled_cells:
+            # Remove cells without type label from store:
+            if isinstance(self.data, DistributedStoreBase):
+                self.data.subset(attr_key="cellontology_class", excluded_values=[
                     self._adata_ids.unknown_celltype_identifier,
                     self._adata_ids.not_a_cell_celltype_identifier,
                     None,  # TODO: it may be possible to remove this in the future
                     np.nan,  # TODO: it may be possible to remove this in the future
-                ] for x in self.data.obs[self._adata_ids.cellontology_class].values
-            ])[0], :]
-        else:
-            assert False
+                ])
+            elif isinstance(self.data, anndata.AnnData):
+                self.data = self.data[np.where([
+                    x not in [
+                        self._adata_ids.unknown_celltype_identifier,
+                        self._adata_ids.not_a_cell_celltype_identifier,
+                        None,  # TODO: it may be possible to remove this in the future
+                        np.nan,  # TODO: it may be possible to remove this in the future
+                    ] for x in self.data.obs[self._adata_ids.cellontology_class].values
+                ])[0], :]
+            else:
+                assert False
         assert "cl" in self.topology_container.output.keys(), self.topology_container.output.keys()
         assert "targets" in self.topology_container.output.keys(), self.topology_container.output.keys()
         self.max_class_weight = max_class_weight

@@ -667,6 +667,7 @@ class DatasetBase(abc.ABC):
             var=var_new,
             uns=self.adata.uns
         )
+        self.adata.uns[self._adata_ids.mapped_features] = match_to_reference
 
     def streamline_metadata(
             self,
