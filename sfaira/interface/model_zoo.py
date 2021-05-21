@@ -130,7 +130,7 @@ class ModelZoo(abc.ABC):
         return self.topology_container.topology["output"]["targets"]
 
     @celltypes.setter
-    def celltypes(self, x: np.array):
+    def celltypes(self, x: List):
         assert self.topology_container is not None, "set model_id first"
         self.topology_container.topology["output"]["targets"] = x
 
