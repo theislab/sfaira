@@ -5,9 +5,11 @@ from typing import Tuple, Union
 
 from sfaira.consts import AdataIdsSfaira, OCS
 from sfaira.data import Universe
+from sfaira.versions.metadata import OntologyOboCustom
 
 
-def simulate_anndata(genes, n_obs, targets=None, assays=None) -> anndata.AnnData:
+def simulate_anndata(genes, n_obs, targets=None, assays=None, obo: Union[None, OntologyOboCustom] = None) -> \
+        anndata.AnnData:
     """
     Simulate basic data example.
 
@@ -27,12 +29,22 @@ def simulate_anndata(genes, n_obs, targets=None, assays=None) -> anndata.AnnData
             targets[np.random.randint(0, len(targets))]
             for _ in range(n_obs)
         ]
-        data.obs[adata_ids_sfaira.cellontology_id] = [
-            OCS.cellontology_class.convert_to_id(x)
-            if x not in [adata_ids_sfaira.unknown_celltype_identifier, adata_ids_sfaira.not_a_cell_celltype_identifier]
-            else x
-            for x in data.obs[adata_ids_sfaira.cellontology_class].values
-        ]
+        if obo is None:
+            data.obs[adata_ids_sfaira.cellontology_id] = [
+                OCS.cellontology_class.convert_to_id(x)
+                if x not in [adata_ids_sfaira.unknown_celltype_identifier,
+                             adata_ids_sfaira.not_a_cell_celltype_identifier]
+                else x
+                for x in data.obs[adata_ids_sfaira.cellontology_class].values
+            ]
+        else:
+            data.obs[adata_ids_sfaira.cellontology_id] = [
+                obo.convert_to_id(x)
+                if x not in [adata_ids_sfaira.unknown_celltype_identifier,
+                             adata_ids_sfaira.not_a_cell_celltype_identifier]
+                else x
+                for x in data.obs[adata_ids_sfaira.cellontology_class].values
+            ]
     data.var[adata_ids_sfaira.gene_id_ensembl] = genes
     return data
 

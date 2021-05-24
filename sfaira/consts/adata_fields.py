@@ -38,6 +38,10 @@ class AdataIds:
     tech_sample: str
     year: str
 
+    load_raw: str
+    mapped_features: str
+    remove_gene_version: str
+
     obs_keys: List[str]
     var_keys: List[str]
     uns_keys: List[str]

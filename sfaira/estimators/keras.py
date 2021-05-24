@@ -12,13 +12,13 @@ import os
 import warnings
 from tqdm import tqdm
 
-from sfaira.consts import AdataIdsSfaira, OCS
+from sfaira.consts import AdataIdsSfaira, OCS, AdataIds
 from sfaira.data import DistributedStoreBase
 from sfaira.models import BasicModelKeras
-from sfaira.versions.metadata import CelltypeUniverse, OntologyCl
+from sfaira.versions.metadata import CelltypeUniverse, OntologyCl, OntologyObo
 from sfaira.versions.topologies import TopologyContainer
 from .losses import LossLoglikelihoodNb, LossLoglikelihoodGaussian, LossCrossentropyAgg, KLLoss
-from .metrics import custom_mse, custom_negll_nb, custom_negll_gaussian, custom_kl, \
+from .metrics import custom_mse, custom_negll_nb, custom_negll_gaussian, \
     CustomAccAgg, CustomF1Classwise, CustomFprClasswise, CustomTprClasswise, custom_cce_agg
 
 
@@ -51,6 +51,7 @@ class EstimatorKeras:
     idx_train: Union[np.ndarray, None]
     idx_eval: Union[np.ndarray, None]
     idx_test: Union[np.ndarray, None]
+    adata_ids: AdataIds
 
     def __init__(
             self,
@@ -60,7 +61,8 @@ class EstimatorKeras:
             model_id: Union[str, None],
             model_topology: TopologyContainer,
             weights_md5: Union[str, None] = None,
-            cache_path: str = os.path.join('cache', '')
+            cache_path: str = os.path.join('cache', ''),
+            adata_ids: AdataIds = AdataIdsSfaira()
     ):
         self.data = data
         self.model = None
@@ -79,7 +81,7 @@ class EstimatorKeras:
         self.idx_test = None
         self.md5 = weights_md5
         self.cache_path = cache_path
-        self._adata_ids = AdataIdsSfaira()
+        self._adata_ids = adata_ids
 
     @property
     def model_type(self):
@@ -114,9 +116,10 @@ class EstimatorKeras:
                     fn = os.path.join(self.cache_path, f"{self.model_id}_weights.h5")
                 except HTTPError:
                     try:
-                        urllib.request.urlretrieve(urljoin(self.model_dir, f'{self.model_id}_weights.data-00000-of-00001'),
-                                                   os.path.join(self.cache_path, f'{self.model_id}_weights.data-00000-of-00001')
-                                                   )
+                        urllib.request.urlretrieve(
+                            urljoin(self.model_dir, f'{self.model_id}_weights.data-00000-of-00001'),
+                            os.path.join(self.cache_path, f'{self.model_id}_weights.data-00000-of-00001')
+                        )
                         fn = os.path.join(self.cache_path, f"{self.model_id}_weights.data-00000-of-00001")
                     except HTTPError:
                         raise FileNotFoundError('cannot find remote weightsfile')
@@ -165,8 +168,8 @@ class EstimatorKeras:
                     file_path = os.path.join(os.path.join(self.cache_path, 'weights'), file)
                     os.remove(file_path)
 
+    @staticmethod
     def _assert_md5_sum(
-            self,
             fn,
             target_md5
     ):
@@ -233,11 +236,10 @@ class EstimatorKeras:
                 x = x[idx, :]
 
             # If the feature space is already mapped to the right reference, return the data matrix immediately
-            if 'mapped_features' in self.data.uns_keys():
-                if self.data.uns[self._adata_ids.mapped_features] == \
-                        self.topology_container.gc.assembly:
-                    print(f"found {x.shape[0]} observations")
-                    return x
+            if self._adata_ids.mapped_features in self.data.uns_keys() and \
+                    self.data.uns[self._adata_ids.mapped_features] == self.topology_container.gc.assembly:
+                print(f"found {x.shape[0]} observations")
+                return x
 
             # Compute indices of genes to keep
             data_ids = self.data.var[self._adata_ids.gene_id_ensembl].values.tolist()
@@ -487,14 +489,6 @@ class EstimatorKeras:
             verbose=verbose
         ).history
 
-    def get_citations(self):
-        """
-        Return papers to cite when using this model.
-
-        :return:
-        """
-        raise NotImplementedError()
-
     @property
     def using_store(self) -> bool:
         return isinstance(self.data, DistributedStoreBase)
@@ -524,7 +518,8 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             model_id: Union[str, None],
             model_topology: TopologyContainer,
             weights_md5: Union[str, None] = None,
-            cache_path: str = os.path.join('cache', '')
+            cache_path: str = os.path.join('cache', ''),
+            adata_ids: AdataIds = AdataIdsSfaira()
     ):
         super(EstimatorKerasEmbedding, self).__init__(
             data=data,
@@ -533,7 +528,8 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             model_id=model_id,
             model_topology=model_topology,
             weights_md5=weights_md5,
-            cache_path=cache_path
+            cache_path=cache_path,
+            adata_ids=adata_ids
         )
 
     def init_model(
@@ -737,6 +733,8 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                         yield (x_sample, sf_sample), (x_sample, cell_to_class[y_sample])
 
             elif isinstance(self.data, anndata.AnnData) and self.data.isbacked:
+                if idx is None:
+                    idx = np.arange(0, self.data.n_obs)
                 n_features = self.data.X.shape[1]
 
                 def generator():
@@ -747,9 +745,11 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                         y_sample = self.data.obs[self._adata_ids.cellontology_class][i]
                         yield (x_sample, sf_sample), (x_sample, cell_to_class[y_sample])
             else:
+                if idx is None:
+                    idx = np.arange(0, self.data.n_obs)
                 x = self._prepare_data_matrix(idx=idx)
                 sf = prepare_sf(x=x)
-                y = self.data.obs[self._adata_ids.cellontology_class][idx]
+                y = self.data.obs[self._adata_ids.cellontology_class].values[idx]
                 # for gradients per celltype in compute_gradients_input()
                 n_features = x.shape[1]
 
@@ -767,7 +767,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 buffer_size=shuffle_buffer_size,
                 seed=None,
                 reshuffle_each_iteration=True
-            ).batch(batch_size, drop_remainder=False).prefetch(tf.data.AUTOTUNE)
+            ).batch(batch_size, drop_remainder=False).prefetch(prefetch)
 
             return dataset
 
@@ -850,7 +850,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         """
         return self.evaluate_any(idx=self.idx_test, batch_size=batch_size, max_steps=max_steps)
 
-    def predict(self, batch_size: int = 128, max_steps: int = np.inf):
+    def predict(self, batch_size: int = 128):
         """
         return the prediction of the model
 
@@ -869,7 +869,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         else:
             return np.array([])
 
-    def predict_embedding(self, batch_size: int = 128, max_steps: int = np.inf):
+    def predict_embedding(self, batch_size: int = 128):
         """
         return the prediction in the latent space (z_mean for variational models)
 
@@ -1005,7 +1005,10 @@ class EstimatorKerasCelltype(EstimatorKeras):
             model_topology: TopologyContainer,
             weights_md5: Union[str, None] = None,
             cache_path: str = os.path.join('cache', ''),
-            max_class_weight: float = 1e3
+            celltype_ontology: Union[OntologyObo, None] = None,
+            max_class_weight: float = 1e3,
+            remove_unlabeled_cells: bool = True,
+            adata_ids: AdataIds = AdataIdsSfaira()
     ):
         super(EstimatorKerasCelltype, self).__init__(
             data=data,
@@ -1014,28 +1017,36 @@ class EstimatorKerasCelltype(EstimatorKeras):
             model_id=model_id,
             model_topology=model_topology,
             weights_md5=weights_md5,
-            cache_path=cache_path
+            cache_path=cache_path,
+            adata_ids=adata_ids
         )
-        # Remove cells without type label from store:
-        if isinstance(self.data, DistributedStoreBase):
-            self.data.subset(attr_key="cellontology_class", excluded_values=[
-                self._adata_ids.unknown_celltype_identifier,
-                self._adata_ids.not_a_cell_celltype_identifier,
-            ])
-        elif isinstance(self.data, anndata.AnnData):
-            self.data = self.data[np.where([
-                x not in [
+        if remove_unlabeled_cells:
+            # Remove cells without type label from store:
+            if isinstance(self.data, DistributedStoreBase):
+                self.data.subset(attr_key="cellontology_class", excluded_values=[
                     self._adata_ids.unknown_celltype_identifier,
                     self._adata_ids.not_a_cell_celltype_identifier,
-                ] for x in self.data.obs[self._adata_ids.cellontology_class].values
-            ])[0], :]
-        else:
-            assert False
+                    None,  # TODO: it may be possible to remove this in the future
+                    np.nan,  # TODO: it may be possible to remove this in the future
+                ])
+            elif isinstance(self.data, anndata.AnnData):
+                self.data = self.data[np.where([
+                    x not in [
+                        self._adata_ids.unknown_celltype_identifier,
+                        self._adata_ids.not_a_cell_celltype_identifier,
+                        None,  # TODO: it may be possible to remove this in the future
+                        np.nan,  # TODO: it may be possible to remove this in the future
+                    ] for x in self.data.obs[self._adata_ids.cellontology_class].values
+                ])[0], :]
+            else:
+                assert False
         assert "cl" in self.topology_container.output.keys(), self.topology_container.output.keys()
         assert "targets" in self.topology_container.output.keys(), self.topology_container.output.keys()
         self.max_class_weight = max_class_weight
+        if celltype_ontology is None:
+            celltype_ontology = OntologyCl(branch=self.topology_container.output["cl"])
         self.celltype_universe = CelltypeUniverse(
-            cl=OntologyCl(branch=self.topology_container.output["cl"]),
+            cl=celltype_ontology,
             uberon=OCS.organ,
         )
         # Set leaves if they are defined in topology:
@@ -1145,8 +1156,8 @@ class EstimatorKerasCelltype(EstimatorKeras):
 
     def _get_base_generator(
             self,
-            generator_helper,
             idx: Union[np.ndarray, None],
+            yield_labels: bool,
             weighted: bool,
             batch_size: int,
             randomized_batch_access: bool,
@@ -1162,6 +1173,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             - y_sample is a one-hot encoded label vector of a cell
             - w_sample is a weight scalar of a cell
         :param idx: Indicies of data set to include in generator.
+        :param yield_labels:
         :param batch_size: Number of observations read from disk in each batched access.
         :param randomized_batch_access: Whether to randomize batches during reading (in generator). Lifts necessity of
             using a shuffle buffer on generator, however, batch composition stays unchanged over epochs unless there
@@ -1183,7 +1195,8 @@ class EstimatorKerasCelltype(EstimatorKeras):
                 return_dense=True,
                 randomized_batch_access=randomized_batch_access,
             )
-            onehot_encoder = self._one_hot_encoder()
+            if yield_labels:
+                onehot_encoder = self._one_hot_encoder()
 
             def generator():
                 for z in generator_raw():
@@ -1191,17 +1204,21 @@ class EstimatorKerasCelltype(EstimatorKeras):
                     if isinstance(x_sample, scipy.sparse.csr_matrix):
                         x_sample = x_sample.todense()
                     x_sample = np.asarray(x_sample)
-                    y_sample = onehot_encoder(z[1][self._adata_ids.cellontology_id].values)
-                    for i in range(x_sample.shape[0]):
-                        if y_sample[i].sum() > 0:
-                            yield generator_helper(x_sample[i], y_sample[i], 1.)
-
+                    if yield_labels:
+                        y_sample = onehot_encoder(z[1][self._adata_ids.cellontology_id].values)
+                        for i in range(x_sample.shape[0]):
+                            if y_sample[i].sum() > 0:
+                                yield x_sample[i], y_sample[i], 1.
+                    else:
+                        for i in range(x_sample.shape[0]):
+                            yield x_sample[i],
             n_features = self.data.n_vars
             n_samples = self.data.n_obs
         else:
-            weights, y = self._get_celltype_out(idx=idx)
-            if not weighted:
-                weights = np.ones_like(weights)
+            if yield_labels:
+                weights, y = self._get_celltype_out(idx=idx)
+                if not weighted:
+                    weights = np.ones_like(weights)
             x = self.data.X if self.data.isbacked else self._prepare_data_matrix(idx=idx)
             is_sparse = isinstance(x, scipy.sparse.spmatrix)
             indices = idx if self.data.isbacked else range(x.shape[0])
@@ -1214,13 +1231,16 @@ class EstimatorKerasCelltype(EstimatorKeras):
 
             def generator():
                 for s, e in batch_starts_ends:
-                    x_sample = np.asarray(x[indices[s:e], :].todense()) if is_sparse \
-                        else x[indices[s:e], :]
-                    y_sample = y[indices[s:e], :]
-                    w_sample = weights[indices[s:e]]
-                    for i in range(x_sample.shape[0]):
-                        if y_sample[i].sum() > 0:
-                            yield generator_helper(x_sample[i], y_sample[i], w_sample[i])
+                    x_sample = np.asarray(x[indices[s:e], :].todense()) if is_sparse else x[indices[s:e], :]
+                    if yield_labels:
+                        y_sample = y[indices[s:e], :]
+                        w_sample = weights[indices[s:e]]
+                        for i in range(x_sample.shape[0]):
+                            if y_sample[i].sum() > 0:
+                                yield x_sample[i], y_sample[i], w_sample[i]
+                    else:
+                        for i in range(x_sample.shape[0]):
+                            yield x_sample[i],
 
             n_features = x.shape[1]
             n_samples = x.shape[0]
@@ -1254,17 +1274,9 @@ class EstimatorKerasCelltype(EstimatorKeras):
             changes in batch composition.
         :return:
         """
-        # This is a basic cell type prediction model estimator class, the standard generator is fine.
-        def generator_helper(x_sample, y_sample, w_sample):
-            # Only yields samples with annotation, ie not unknown labels.
-            if mode in ['train', 'train_val', 'eval']:
-                return x_sample, y_sample, w_sample
-            else:
-                return x_sample,
-
         generator, n_samples, n_features, n_labels = self._get_base_generator(
-            generator_helper=generator_helper,
             idx=idx,
+            yield_labels=mode in ['train', 'train_val', 'eval'],
             weighted=weighted,
             batch_size=retrieval_batch_size,
             randomized_batch_access=randomized_batch_access,

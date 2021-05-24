@@ -14,7 +14,7 @@ from sfaira.interface import ModelZoo
 class TrainModel:
 
     data: Union[anndata.AnnData, DistributedStoreBase]
-    estimator: EstimatorKeras
+    estimator: Union[EstimatorKeras, None]
 
     def __init__(
             self,

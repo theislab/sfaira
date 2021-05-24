@@ -1,8 +1,4 @@
 import anndata
-try:
-    from kipoi.model import BaseModel
-except ImportError:
-    BaseModel = None
 import numpy as np
 import pandas as pd
 import os
@@ -12,6 +8,7 @@ import warnings
 from sfaira.data import DatasetInteractive
 from sfaira.estimators import EstimatorKerasEmbedding, EstimatorKerasCelltype
 from sfaira.interface.model_zoo import ModelZoo
+from sfaira.consts import AdataIdsSfaira, AdataIds
 
 
 class UserInterface:
@@ -31,22 +28,21 @@ class UserInterface:
     ui.load_data(anndata.read("/path/to/file.h5ad"))  # load your dataset into sfaira
     ui.load_model_embedding()
     ui.load_model_celltype()
-    ui.compute_all()
-    adata = ui.data
+    ui.predict_all()
+    adata = ui.data.adata
     scanpy.pp.neighbors(adata, use_rep="X_sfaira")
     scanpy.tl.umap(adata)
-    scanpy.pl.umap(adata, color="celltype_sfaira", show=True, save="UMAP_sfaira.png")
+    scanpy.pl.umap(adata, color="celltypes_sfaira", show=True, save="UMAP_sfaira.png")
     ```
     """
 
     estimator_embedding: Union[EstimatorKerasEmbedding, None]
     estimator_celltype: Union[EstimatorKerasCelltype, None]
-    model_kipoi_embedding: Union[None]
-    model_kipoi_celltype: Union[BaseModel, None]
     zoo_embedding: Union[ModelZoo, None]
     zoo_celltype: Union[ModelZoo, None]
-    data: Union[anndata.AnnData]
+    data: Union[DatasetInteractive, None]
     model_lookuptable: Union[pd.DataFrame, None]
+    adata_ids: AdataIds
 
     def __init__(
             self,
@@ -58,8 +54,10 @@ class UserInterface:
         self.model_kipoi_celltype = None
         self.estimator_embedding = None
         self.estimator_celltype = None
+        self.data = None
         self.use_sfaira_repo = sfaira_repo
         self.cache_path = os.path.join(cache_path, '')
+        self.adata_ids = AdataIdsSfaira()
 
         if sfaira_repo:  # check if public sfaira repository should be accessed
             self.model_lookuptable = self._load_lookuptable("https://zenodo.org/record/4304660/files/")
@@ -83,9 +81,6 @@ class UserInterface:
             if not sfaira_repo:
                 raise ValueError("please either provide a custom folder/repository with model weights or specify "
                                  "`sfaira_repo=True` to access the public weight repository")
-
-        # TODO: workaround to deal with model ids bearing file endings in model lookuptable (as is the case in first sfaira model repo upload)
-        self.model_lookuptable['model_id'] = [i.replace('.h5', '').replace('.data-00000-of-00001', '') for i in self.model_lookuptable['model_id']]
 
         self.zoo_embedding = ModelZoo(model_lookuptable=self.model_lookuptable, model_class="embedding")
         self.zoo_celltype = ModelZoo(model_lookuptable=self.model_lookuptable, model_class="celltype")
@@ -137,9 +132,8 @@ class UserInterface:
                     file_names.append(file)
                     with open(os.path.join(subdir, file), 'rb') as f:
                         md5.append(hashlib.md5(f.read()).hexdigest())
-        s = [i.split('_')[0:7] for i in file_names]
-        ids = ['_'.join(i) for i in s]
-        ids_cleaned = [i.replace('.h5', '').replace('.data-00000-of-00001', '') for i in ids]  # remove file extensions from ids
+        ids = ['_'.join(i.split('_')[0:3]) for i in file_names]
+        ids_cleaned = [i.replace('.h5', '').replace('.data-00000-of-00001', '') for i in ids]  # remove file extensions
 
         if ids:
             pd.DataFrame(
@@ -277,8 +271,8 @@ class UserInterface:
             data: anndata.AnnData,
             gene_symbol_col: Union[str, None] = None,
             gene_ens_col: Union[str, None] = None,
-            remove_gene_version: bool = True,
-            match_to_reference: Union[str, None] = None,
+            obs_key_celltypes: Union[str, None] = None,
+            class_maps: dict = {},
     ):
         """
         Loads the provided AnnData object into sfaira.
@@ -291,40 +285,35 @@ class UserInterface:
         :param data: AnnData object to load
         :param gene_symbol_col: Var column name (or 'index') which contains gene symbols
         :param gene_ens_col: ar column name (or 'index') which contains ensembl ids
-        :param remove_gene_version: Remove gene version string from ENSEMBL ID so that different versions in different
-            data sets are superimposed.
-        :param match_to_reference: Reference genomes name.
+        :param obs_key_celltypes: .obs column name which contains cell type labels.
+        :param class_maps: Cell type class maps.
         """
-        if self.zoo_embedding.organism is not None:
-            organism = self.zoo_embedding.organism
-            organ = self.zoo_embedding.organ
-        elif self.zoo_celltype.organism is not None:
-            organism = self.zoo_celltype.organism
-            organ = self.zoo_celltype.organ
+        if self.zoo_embedding.model_organism is not None:
+            organism = self.zoo_embedding.model_organism
+            organ = self.zoo_embedding.model_organ
+        elif self.zoo_celltype.model_organism is not None:
+            organism = self.zoo_celltype.model_organism
+            organ = self.zoo_celltype.model_organ
         else:
             raise ValueError("Please first set which model_id to use via the model zoo before loading the data")
 
         if gene_ens_col is None and gene_symbol_col is None:
             raise ValueError("Please provide either the gene_ens_col or the gene_symbol_col argument.")
 
-        dataset = DatasetInteractive(
+        self.data = DatasetInteractive(
             data=data,
             organism=organism,
             organ=organ,
             gene_symbol_col=gene_symbol_col,
-            gene_ens_col=gene_ens_col
+            gene_ens_col=gene_ens_col,
+            obs_key_celltypes=obs_key_celltypes,
+            class_maps=class_maps,
         )
-        dataset.load(load_raw=False, allow_caching=False, celltype_version=None, data_dir=None)
-        self.data = dataset.adata
-
-    def filter_cells(self):
-        """
-        Filters cells with a basic pre-defined filter.
-
-        :return:
-        """
-        # call cell_filter()
-        raise NotImplementedError()
+        # Align to correct featurespace
+        self.data.streamline_features(
+            match_to_reference=self.zoo_embedding.topology_container.gc.assembly,
+            subset_genes_to_type=list(set(self.zoo_embedding.topology_container.gc.biotype))
+        )
 
     def load_model_embedding(self):
         """
@@ -335,18 +324,16 @@ class UserInterface:
         :return: Model ID loaded.
         """
         assert self.zoo_embedding.model_id is not None, "choose embedding model first"
-        model_dir = self.model_lookuptable.model_file_path[self.model_lookuptable.model_id == self.zoo_embedding.model_id].iloc[0]
-        md5 = self.model_lookuptable.md5[self.model_lookuptable.model_id == self.zoo_embedding.model_id].iloc[0]
+        model_dir = self.model_lookuptable["model_file_path"].loc[self.model_lookuptable["model_id"] == self.zoo_embedding.model_id].iloc[0]
+        md5 = self.model_lookuptable["md5"].loc[self.model_lookuptable["model_id"] == self.zoo_embedding.model_id].iloc[0]
         self.estimator_embedding = EstimatorKerasEmbedding(
-            data=self.data,
+            data=self.data.adata,
             model_dir=model_dir,
             model_id=self.zoo_embedding.model_id,
-            organism=self.zoo_embedding.organism,
-            organ=self.zoo_embedding.organ,
-            model_type=self.zoo_embedding.model_type,
-            model_topology=self.zoo_embedding.model_topology,
+            model_topology=self.zoo_embedding.topology_container,
             weights_md5=md5,
-            cache_path=self.cache_path
+            cache_path=self.cache_path,
+            adata_ids=self.adata_ids
         )
         self.estimator_embedding.init_model()
         self.estimator_embedding.load_pretrained_weights()
@@ -360,18 +347,17 @@ class UserInterface:
         :return: Model ID loaded.
         """
         assert self.zoo_celltype.model_id is not None, "choose cell type model first"
-        model_dir = self.model_lookuptable.model_file_path[self.model_lookuptable.model_id == self.zoo_celltype.model_id].iloc[0]
-        md5 = self.model_lookuptable.md5[self.model_lookuptable.model_id == self.zoo_celltype.model_id].iloc[0]
+        model_dir = self.model_lookuptable["model_file_path"].loc[self.model_lookuptable["model_id"] == self.zoo_celltype.model_id].iloc[0]
+        md5 = self.model_lookuptable["md5"].loc[self.model_lookuptable["model_id"] == self.zoo_celltype.model_id].iloc[0]
         self.estimator_celltype = EstimatorKerasCelltype(
-            data=self.data,
+            data=self.data.adata,
             model_dir=model_dir,
             model_id=self.zoo_celltype.model_id,
-            organism=self.zoo_celltype.organism,
-            organ=self.zoo_celltype.organ,
-            model_type=self.zoo_celltype.model_type,
-            model_topology=self.zoo_celltype.model_topology,
+            model_topology=self.zoo_celltype.topology_container,
             weights_md5=md5,
-            cache_path=self.cache_path
+            cache_path=self.cache_path,
+            remove_unlabeled_cells=False,
+            adata_ids=self.adata_ids
         )
         self.estimator_celltype.init_model()
         self.estimator_celltype.load_pretrained_weights()
@@ -385,7 +371,8 @@ class UserInterface:
         Writes a list of cell type labels into the column of adata.obs indicated
         :return:
         """
-        self.data.obs[key] = [self.zoo_celltype.celltypes[i][0] for i in np.argmax(labels, axis=1)]
+        self.data.adata.obs[key] = [self.zoo_celltype.celltypes[i] for i in np.argmax(labels, axis=1)]
+        self.data.adata.obs[key] = self.data.adata.obs[key].astype('category')
 
     def _adata_write_embedding(
             self,
@@ -396,7 +383,7 @@ class UserInterface:
         Writes the embedding matrix into adata.obsm with the key indicated.
         :return:
         """
-        self.data.obsm[key] = embedding
+        self.data.adata.obsm[key] = embedding
 
     def _adata_write_denoised_data(
             self,
@@ -407,9 +394,9 @@ class UserInterface:
         Writes the denoised expression matrix into adata.obsm with the key indicated.
         :return:
         """
-        self.data.layers[key] = denoised_data
+        self.data.adata.layers[key] = denoised_data
 
-    def compute_celltype(self):
+    def predict_celltypes(self):
         """
         Run local cell type prediction model and add predictions to adata.obs.
 
@@ -418,12 +405,12 @@ class UserInterface:
         if self.zoo_celltype is not None:
             self._adata_write_celltype(
                 labels=self.estimator_celltype.predict(),
-                key="celltype_sfaira"
+                key="celltypes_sfaira"
             )
         else:
             raise ValueError("celltype zoo has to be set before local model can be run.")
 
-    def compute_embedding(self):
+    def predict_embedding(self):
         """
         Run local embedding prediction model and add embedding to adata.obsm.
 
@@ -437,14 +424,14 @@ class UserInterface:
         else:
             raise ValueError("embedding zoo has to be set before local model can be run.")
 
-    def compute_all(self):
+    def predict_all(self):
         """
         Run local cell type prediction and embedding models and add results of both to adata.
 
         :return:
         """
-        self.compute_embedding()
-        self.compute_celltype()
+        self.predict_embedding()
+        self.predict_celltypes()
 
     def compute_denoised_expression(self):
         """
@@ -460,74 +447,12 @@ class UserInterface:
         else:
             raise ValueError("embedding zoo has to be set before local model can be run.")
 
-    def compute_celltype_kipoi(self):
-        """
-        Run executable cell type prediction model from kipoi_experimental and add prediction to adata.obs.
-
-        :return:
-        """
-        if self.zoo_celltype is not None:
-            self.model_kipoi_celltype = self.zoo_celltype.get_kipoi_model()
-            self._adata_write_celltype(
-                labels=self.model_kipoi_celltype.pipeline.predict(dict(adata=self.data)),
-                key="celltype_sfaira"
-            )
-        else:
-            raise ValueError("celltype zoo has to be set before kipoi_experimental model can be run.")
-
-    def compute_embedding_kipoi(self):
-        """
-        Run executable embedding prediction model from kipoi_experimental and add embedding to adata.obsm.
-
-        :return:
-        """
-        if self.zoo_embedding is not None:
-            self.model_kipoi_embedding = self.zoo_embedding.get_kipoi_model()
-            self._adata_write_embedding(
-                embedding=self.model_kipoi_embedding.pipeline.predict_embedding(dict(adata=self.data)),
-                key="X_sfaira"
-            )
-        else:
-            raise ValueError("embedding zoo has to be set before kipoi_experimental model can be run.")
-
-    def compute_all_kipoi(self):
-        """
-        Run executable cell type prediction and embedding models from kipoi_experimental and add results to adata.
-
-        :return:
-        """
-        self.compute_embedding_kipoi()
-        self.compute_celltype_kipoi()
-
-    def compute_denoised_expression_kipoi(self):
-        """
-        Run executable embedding prediction model from kipoi_experimental and add denoised expression to adata layer.
-
-        :return:
-        """
-        if self.zoo_embedding is not None:
-            self.model_kipoi_embedding = self.zoo_embedding.get_kipoi_model()
-            self._adata_write_denoised_data(
-                denoised_data=self.model_kipoi_embedding.pipeline.predict(dict(adata=self.data)),
-                key="denoised_sfaira"
-            )
-        else:
-            raise ValueError("embedding zoo has to be set before local model can be run.")
-
     def celltype_summary(self):
         """
         Return type with frequencies of predicted cell types.
 
         :return:
         """
-        return self.data.obs['celltype_sfaira'].value_counts()
-
-    def get_references(self):
-        """
-        Return papers to cite when using the embedding model.
-
-        Collects references from the estimators of each model type.
-
-        :return:
-        """
-        return self.estimator_embedding.get_citations()
+        assert "celltypes_sfaira" in self.data.adata.obs.keys(), \
+            "Column celltypes_sfaira not found in the data. Please run UserInterface.predict_celltypes() first."
+        return self.data.adata.obs['celltypes_sfaira'].value_counts()
