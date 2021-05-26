@@ -351,7 +351,8 @@ class UserInterface:
         topology_dir = self.model_lookuptable["model_path"].loc[self.model_lookuptable["model_id"] ==
                                                                 self.zoo_embedding.model_id].iloc[0]
         tc = TopologyContainer(
-            topology=self._load_topology_dict(model_dir=topology_dir, model_id=self.zoo_embedding.model_id),
+            topology=self._load_topology_dict(model_dir=topology_dir,
+                                              model_id=self.zoo_embedding.model_id + "_best_hyperparam"),
             topology_id=self.zoo_embedding.topology_container.topology_id
         )
         self.estimator_embedding = EstimatorKerasEmbedding(
@@ -384,7 +385,8 @@ class UserInterface:
         topology_dir = self.model_lookuptable["model_path"].loc[self.model_lookuptable["model_id"] ==
                                                                 self.zoo_embedding.model_id].iloc[0]
         tc = TopologyContainer(
-            topology=self._load_topology_dict(model_dir=topology_dir, model_id=self.zoo_embedding.model_id),
+            topology=self._load_topology_dict(model_dir=topology_dir,
+                                              model_id=self.zoo_embedding.model_id + "_best_hyperparam"),
             topology_id=self.zoo_embedding.topology_container.topology_id
         )
         self.estimator_celltype = EstimatorKerasCelltype(
