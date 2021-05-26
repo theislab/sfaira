@@ -1,14 +1,16 @@
 import anndata
 import numpy as np
-import pandas as pd
 import os
+import pandas as pd
+import pickle
 from typing import List, Union
 import warnings
 
+from sfaira.consts import AdataIdsSfaira, AdataIds
 from sfaira.data import DatasetInteractive
 from sfaira.estimators import EstimatorKerasEmbedding, EstimatorKerasCelltype
 from sfaira.interface.model_zoo import ModelZoo
-from sfaira.consts import AdataIdsSfaira, AdataIds
+from sfaira.versions.topologies import TopologyContainer
 
 
 class UserInterface:
@@ -23,8 +25,6 @@ class UserInterface:
     # initialise your sfaira instance with a model lookuptable.
     # instead of setting `custom_repo` when initialising the UI you can also use `sfaira_repo=True` to use public weights
     ui = sfaira.ui.UserInterface(custom_repo="/path/to/local/repo/folder/or/zenodo/repo/URL", sfaira_repo=False)
-    ui.zoo_embedding.set_latest(organism, organ, model_type, organisation, model_topology)
-    ui.zoo_celltype.set_latest(organism, organ, model_type, organisation, model_topology)
     ui.load_data(anndata.read("/path/to/file.h5ad"))  # load your dataset into sfaira
     ui.load_model_embedding()
     ui.load_model_celltype()
@@ -50,8 +50,6 @@ class UserInterface:
             sfaira_repo: bool = False,
             cache_path: str = os.path.join('cache', '')
     ):
-        self.model_kipoi_embedding = None
-        self.model_kipoi_celltype = None
         self.estimator_embedding = None
         self.estimator_celltype = None
         self.data = None
@@ -315,6 +313,26 @@ class UserInterface:
             subset_genes_to_type=list(set(self.zoo_embedding.topology_container.gc.biotype))
         )
 
+    def _load_topology_dict(self, model_dir, model_id) -> dict:
+        # Download into cache if file is on a remote server.
+        fn = model_id + "_topology.pickle"
+        if model_dir.startswith('http'):
+            if not os.path.exists(self.cache_path):
+                os.makedirs(self.cache_path)
+
+            import urllib.request
+            from urllib.error import HTTPError
+            try:
+                urllib.request.urlretrieve(model_dir, os.path.join(self.cache_path, os.path.basename(model_dir)))
+                fn = os.path.join(self.cache_path, os.path.basename(model_dir))
+            except HTTPError:
+                raise FileNotFoundError(f"cannot find remote topology file for model {model_id}")
+        else:
+            fn = os.path.join(model_dir, fn)
+        with open(fn, "rb") as f:
+            topology = pickle.load(f)
+        return topology
+
     def load_model_embedding(self):
         """
         Initialise embedding model and load parameters from public parameter repository.
@@ -324,13 +342,21 @@ class UserInterface:
         :return: Model ID loaded.
         """
         assert self.zoo_embedding.model_id is not None, "choose embedding model first"
-        model_dir = self.model_lookuptable["model_file_path"].loc[self.model_lookuptable["model_id"] == self.zoo_embedding.model_id].iloc[0]
-        md5 = self.model_lookuptable["md5"].loc[self.model_lookuptable["model_id"] == self.zoo_embedding.model_id].iloc[0]
+        model_dir = self.model_lookuptable["model_file_path"].loc[self.model_lookuptable["model_id"] ==
+                                                                  self.zoo_embedding.model_id].iloc[0]
+        md5 = self.model_lookuptable["md5"].loc[self.model_lookuptable["model_id"] ==
+                                                self.zoo_embedding.model_id].iloc[0]
+        # This loads a TC from the topology dictionary in the  model accompanying pickle file. Note that the version
+        # is separately added from the zoo here, this could be solved differently in the future.
+        tc = TopologyContainer(
+            topology=self._load_topology_dict(model_dir=model_dir, model_id=self.zoo_embedding.model_id),
+            topology_id=self.zoo_embedding.topology_container.topology_id
+        )
         self.estimator_embedding = EstimatorKerasEmbedding(
             data=self.data.adata,
             model_dir=model_dir,
             model_id=self.zoo_embedding.model_id,
-            model_topology=self.zoo_embedding.topology_container,
+            model_topology=tc,
             weights_md5=md5,
             cache_path=self.cache_path,
             adata_ids=self.adata_ids
@@ -347,13 +373,22 @@ class UserInterface:
         :return: Model ID loaded.
         """
         assert self.zoo_celltype.model_id is not None, "choose cell type model first"
-        model_dir = self.model_lookuptable["model_file_path"].loc[self.model_lookuptable["model_id"] == self.zoo_celltype.model_id].iloc[0]
-        md5 = self.model_lookuptable["md5"].loc[self.model_lookuptable["model_id"] == self.zoo_celltype.model_id].iloc[0]
+        model_dir = self.model_lookuptable["model_file_path"].loc[self.model_lookuptable["model_id"] ==
+                                                                  self.zoo_celltype.model_id].iloc[0]
+        md5 = self.model_lookuptable["md5"].loc[self.model_lookuptable["model_id"] ==
+                                                self.zoo_celltype.model_id].iloc[0]
+        tc = self.zoo_embedding.topology_container
+        # This loads a TC from the topology dictionary in the  model accompanying pickle file. Note that the version
+        # is separately added from the zoo here, this could be solved differently in the future.
+        tc = TopologyContainer(
+            topology=self._load_topology_dict(model_dir=model_dir, model_id=self.zoo_embedding.model_id),
+            topology_id=self.zoo_embedding.topology_container.topology_id
+        )
         self.estimator_celltype = EstimatorKerasCelltype(
             data=self.data.adata,
             model_dir=model_dir,
             model_id=self.zoo_celltype.model_id,
-            model_topology=self.zoo_celltype.topology_container,
+            model_topology=tc,
             weights_md5=md5,
             cache_path=self.cache_path,
             remove_unlabeled_cells=False,

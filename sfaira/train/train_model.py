@@ -163,7 +163,7 @@ class TrainModelEmbedding(TrainModel):
         np.save(file=fn + "_embedding", arr=embedding)
         df_summary.to_csv(fn + "_covar.csv")
         with open(fn + "_topology.pickle", "wb") as f:
-            pickle.dump(obj=self.topology_dict(), file=f)
+            pickle.dump(obj=self.topology_dict, file=f)
 
 
 class TrainModelCelltype(TrainModel):
@@ -244,7 +244,7 @@ class TrainModelCelltype(TrainModel):
         with open(fn + '_ontology_ids.pickle', 'wb') as f:
             pickle.dump(obj=self.estimator.ontology_ids, file=f)
         with open(fn + "_topology.pickle", "wb") as f:
-            pickle.dump(obj=self.topology_dict(), file=f)
+            pickle.dump(obj=self.topology_dict, file=f)
 
         cell_counts = obs['cell_ontology_class'].value_counts().to_dict()
         with open(fn + '_celltypes_valuecounts_wholedata.pickle', 'wb') as f:
