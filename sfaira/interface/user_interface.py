@@ -348,8 +348,10 @@ class UserInterface:
                                                 self.zoo_embedding.model_id].iloc[0]
         # This loads a TC from the topology dictionary in the  model accompanying pickle file. Note that the version
         # is separately added from the zoo here, this could be solved differently in the future.
+        topology_dir = self.model_lookuptable["model_path"].loc[self.model_lookuptable["model_id"] ==
+                                                                self.zoo_embedding.model_id].iloc[0]
         tc = TopologyContainer(
-            topology=self._load_topology_dict(model_dir=model_dir, model_id=self.zoo_embedding.model_id),
+            topology=self._load_topology_dict(model_dir=topology_dir, model_id=self.zoo_embedding.model_id),
             topology_id=self.zoo_embedding.topology_container.topology_id
         )
         self.estimator_embedding = EstimatorKerasEmbedding(
@@ -377,11 +379,12 @@ class UserInterface:
                                                                   self.zoo_celltype.model_id].iloc[0]
         md5 = self.model_lookuptable["md5"].loc[self.model_lookuptable["model_id"] ==
                                                 self.zoo_celltype.model_id].iloc[0]
-        tc = self.zoo_embedding.topology_container
         # This loads a TC from the topology dictionary in the  model accompanying pickle file. Note that the version
         # is separately added from the zoo here, this could be solved differently in the future.
+        topology_dir = self.model_lookuptable["model_path"].loc[self.model_lookuptable["model_id"] ==
+                                                                self.zoo_embedding.model_id].iloc[0]
         tc = TopologyContainer(
-            topology=self._load_topology_dict(model_dir=model_dir, model_id=self.zoo_embedding.model_id),
+            topology=self._load_topology_dict(model_dir=topology_dir, model_id=self.zoo_embedding.model_id),
             topology_id=self.zoo_embedding.topology_container.topology_id
         )
         self.estimator_celltype = EstimatorKerasCelltype(
