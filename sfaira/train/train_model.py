@@ -53,6 +53,11 @@ class TrainModel:
                     adata = adata.concatenate(x)
             self.data = adata
 
+    @property
+    @abc.abstractmethod
+    def topology_dict(self) -> dict:
+        pass
+
     @abc.abstractmethod
     def init_estim(self):
         pass
@@ -111,6 +116,11 @@ class TrainModelEmbedding(TrainModel):
         self.estimator = None
         self.model_dir = model_path
 
+    @property
+    def topology_dict(self) -> dict:
+        topology_dict = self.zoo.topology_container.topology
+        return topology_dict
+
     def init_estim(
             self,
             override_hyperpar: Union[dict, None] = None
@@ -152,6 +162,8 @@ class TrainModelEmbedding(TrainModel):
         df_summary["ncounts"] = self.n_counts(idx=self.estimator.idx_test)
         np.save(file=fn + "_embedding", arr=embedding)
         df_summary.to_csv(fn + "_covar.csv")
+        with open(fn + "_topology.pickle", "wb") as f:
+            pickle.dump(obj=self.topology_dict(), file=f)
 
 
 class TrainModelCelltype(TrainModel):
@@ -168,6 +180,13 @@ class TrainModelCelltype(TrainModel):
         self.estimator = None
         self.model_dir = model_path
         self.fn_target_universe = fn_target_universe
+
+    @property
+    def topology_dict(self) -> dict:
+        topology_dict = self.zoo.topology_container.topology
+        # Load target universe leaves into topology dict:
+        topology_dict["output"]["targets"] = self.estimator.celltype_universe.onto_cl.leaves
+        return topology_dict
 
     def init_estim(
             self,
@@ -224,6 +243,8 @@ class TrainModelCelltype(TrainModel):
             pickle.dump(obj=self.estimator.ontology_names, file=f)
         with open(fn + '_ontology_ids.pickle', 'wb') as f:
             pickle.dump(obj=self.estimator.ontology_ids, file=f)
+        with open(fn + "_topology.pickle", "wb") as f:
+            pickle.dump(obj=self.topology_dict(), file=f)
 
         cell_counts = obs['cell_ontology_class'].value_counts().to_dict()
         with open(fn + '_celltypes_valuecounts_wholedata.pickle', 'wb') as f:
