@@ -331,7 +331,7 @@ class UserInterface:
 
     def _load_topology_dict(self, model_weights_file) -> dict:
         topology_filepath = ".".join(model_weights_file.split(".")[:-1])
-        re.sub(r"_weights$", "", topology_filepath)
+        topology_filepath = re.sub(r"_weights$", "", topology_filepath)
         topology_filepath += "_topology.pickle"
         if topology_filepath.startswith('http'):
             # Download into cache if file is on a remote server.
