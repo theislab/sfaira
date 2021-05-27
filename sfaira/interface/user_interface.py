@@ -357,7 +357,7 @@ class UserInterface:
         """
         assert self.zoo_embedding.model_id is not None, "choose embedding model first"
         model_weights_file = self.model_lookuptable["model_file_path"].loc[self.model_lookuptable["model_id"] ==
-                                                                  self.zoo_embedding.model_id].iloc[0]
+                                                                           self.zoo_embedding.model_id].iloc[0]
         md5 = self.model_lookuptable["md5"].loc[self.model_lookuptable["model_id"] ==
                                                 self.zoo_embedding.model_id].iloc[0]
         topology_filepath = ".".join(model_weights_file.split(".")[:-1])
@@ -388,7 +388,7 @@ class UserInterface:
         """
         assert self.zoo_celltype.model_id is not None, "choose cell type model first"
         model_weights_file = self.model_lookuptable["model_file_path"].loc[self.model_lookuptable["model_id"] ==
-                                                                  self.zoo_celltype.model_id].iloc[0]
+                                                                           self.zoo_celltype.model_id].iloc[0]
         md5 = self.model_lookuptable["md5"].loc[self.model_lookuptable["model_id"] ==
                                                 self.zoo_celltype.model_id].iloc[0]
         topology_filepath = ".".join(model_weights_file.split(".")[:-1])
