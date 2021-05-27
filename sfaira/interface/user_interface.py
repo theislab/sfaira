@@ -1,6 +1,7 @@
 import anndata
 import numpy as np
 import os
+import re
 import pandas as pd
 import pickle
 from typing import List, Union
@@ -328,7 +329,10 @@ class UserInterface:
             subset_genes_to_type=list(set(self.zoo_embedding.topology_container.gc.biotype))
         )
 
-    def _load_topology_dict(self, topology_filepath) -> dict:
+    def _load_topology_dict(self, model_weights_file) -> dict:
+        topology_filepath = ".".join(model_weights_file.split(".")[:-1])
+        re.sub(r"_weights$", "", topology_filepath)
+        topology_filepath += "_topology.pickle"
         if topology_filepath.startswith('http'):
             # Download into cache if file is on a remote server.
             if not os.path.exists(self.cache_path):
@@ -360,10 +364,8 @@ class UserInterface:
                                                                            self.zoo_embedding.model_id].iloc[0]
         md5 = self.model_lookuptable["md5"].loc[self.model_lookuptable["model_id"] ==
                                                 self.zoo_embedding.model_id].iloc[0]
-        topology_filepath = ".".join(model_weights_file.split(".")[:-1])
-        topology_filepath += "_topology.pickle"
         tc = TopologyContainer(
-            topology=self._load_topology_dict(topology_filepath=topology_filepath),
+            topology=self._load_topology_dict(model_weights_file=model_weights_file),
             topology_id=self.zoo_embedding.topology_container.topology_id
         )
         self.estimator_embedding = EstimatorKerasEmbedding(
@@ -391,10 +393,8 @@ class UserInterface:
                                                                            self.zoo_celltype.model_id].iloc[0]
         md5 = self.model_lookuptable["md5"].loc[self.model_lookuptable["model_id"] ==
                                                 self.zoo_celltype.model_id].iloc[0]
-        topology_filepath = ".".join(model_weights_file.split(".")[:-1])
-        topology_filepath += "_topology.pickle"
         tc = TopologyContainer(
-            topology=self._load_topology_dict(topology_filepath=topology_filepath),
+            topology=self._load_topology_dict(model_weights_file=model_weights_file),
             topology_id=self.zoo_celltype.topology_container.topology_id
         )
         self.estimator_celltype = EstimatorKerasCelltype(
