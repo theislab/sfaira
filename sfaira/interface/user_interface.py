@@ -411,8 +411,11 @@ class UserInterface:
         Writes a list of cell type labels into the column of adata.obs indicated
         :return:
         """
-        self.data.adata.obs[key] = [self.zoo_celltype.celltypes[i] for i in np.argmax(labels, axis=1)]
+        key_id = key + "_id"
+        self.data.adata.obs[key] = [self.estimator_celltype.ontology_names[i] for i in np.argmax(labels, axis=1)]
         self.data.adata.obs[key] = self.data.adata.obs[key].astype('category')
+        self.data.adata.obs[key_id] = [self.estimator_celltype.ontology_ids[i] for i in np.argmax(labels, axis=1)]
+        self.data.adata.obs[key_id] = self.data.adata.obs[key_id].astype('category')
 
     def _adata_write_embedding(
             self,
