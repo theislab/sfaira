@@ -155,7 +155,8 @@ class UserInterface:
             description: str,
             metadata: dict = {},
             publish: bool = False,
-            sandbox: bool = False
+            sandbox: bool = False,
+            deposit_topologies: bool = True
     ):
         """
         Deposit all models in model lookup table on Zenodo. If publish is set to false, files will be uploaded to a
@@ -174,7 +175,9 @@ class UserInterface:
         :param publish: Set this to True to directly publish the weights on Zenodo.
          When set to False a draft will be created, which can be edited in the browser before publishing.
         :param sandbox: If True, use the Zenodo testing platform at https://sandbox.zenodo.org for your deposition.
-         We recommend testing your upload with sandbox first as depositions cannot be deleted from the main Zenodo platfowm once created.
+         We recommend testing your upload with sandbox first as depositions cannot be deleted from the main Zenodo platform once created.
+         :param deposit_topologies: If true, an associated topology file for every weights file will be uploaded to zenodo.
+         The naming format for the topology files is <model_id>_topology.pickle
         """
 
         import requests
@@ -201,10 +204,10 @@ class UserInterface:
 
         # Loop over files in model lookup table and upload them one by one
         for i, weight_path in enumerate(self.model_lookuptable['model_file_path']):
-            filename = os.path.basename(weight_path)
+            basepath, filename_weights = os.path.split(weight_path)
             with open(weight_path, "rb") as fp:
                 r = requests.put(
-                    f"{bucket_url}/{filename}",
+                    f"{bucket_url}/{filename_weights}",
                     data=fp,
                     params=params,
                 )
@@ -212,6 +215,18 @@ class UserInterface:
             if r.json()['checksum'][4:] != self.model_lookuptable['md5'][i]:
                 warnings.warn(f"The md5 checksum in your model_lookuptable for {self.model_lookuptable['model_id'][i]} "
                               f"does not match the md5 checksum of the uploaded file.")
+            if deposit_topologies:  # Deposit associated topology file
+                filename_topology = ".".join(filename_weights.split(".")[:-1])
+                filename_topology += "_topology.pickle"
+                topology_path = os.path.join(basepath, filename_topology)
+                assert os.path.isfile(topology_path), f"topology file {topology_path} not found. " \
+                                                      f"consider deactivating the deposition of topology files."
+                with open(topology_path, "rb") as fp:
+                    r = requests.put(
+                        f"{bucket_url}/{filename_topology}",
+                        data=fp,
+                        params=params,
+                    )
 
         # Add model lookup table to zenodo
         df = self.model_lookuptable.copy()
