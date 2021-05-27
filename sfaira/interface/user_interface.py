@@ -328,23 +328,22 @@ class UserInterface:
             subset_genes_to_type=list(set(self.zoo_embedding.topology_container.gc.biotype))
         )
 
-    def _load_topology_dict(self, model_dir, model_id) -> dict:
-        # Download into cache if file is on a remote server.
-        fn = model_id + "_topology.pickle"
-        if model_dir.startswith('http'):
+    def _load_topology_dict(self, topology_filepath) -> dict:
+        if topology_filepath.startswith('http'):
+            # Download into cache if file is on a remote server.
             if not os.path.exists(self.cache_path):
                 os.makedirs(self.cache_path)
-
             import urllib.request
             from urllib.error import HTTPError
             try:
-                urllib.request.urlretrieve(model_dir, os.path.join(self.cache_path, os.path.basename(model_dir)))
-                fn = os.path.join(self.cache_path, os.path.basename(model_dir))
+                urllib.request.urlretrieve(
+                    topology_filepath,
+                    os.path.join(self.cache_path, os.path.basename(topology_filepath))
+                )
+                topology_filepath = os.path.join(self.cache_path, os.path.basename(topology_filepath))
             except HTTPError:
-                raise FileNotFoundError(f"cannot find remote topology file for model {model_id}")
-        else:
-            fn = os.path.join(model_dir, fn)
-        with open(fn, "rb") as f:
+                raise FileNotFoundError(f"cannot find remote topology file {topology_filepath}")
+        with open(topology_filepath, "rb") as f:
             topology = pickle.load(f)
         return topology
 
@@ -357,22 +356,19 @@ class UserInterface:
         :return: Model ID loaded.
         """
         assert self.zoo_embedding.model_id is not None, "choose embedding model first"
-        model_dir = self.model_lookuptable["model_file_path"].loc[self.model_lookuptable["model_id"] ==
+        model_weights_file = self.model_lookuptable["model_file_path"].loc[self.model_lookuptable["model_id"] ==
                                                                   self.zoo_embedding.model_id].iloc[0]
         md5 = self.model_lookuptable["md5"].loc[self.model_lookuptable["model_id"] ==
                                                 self.zoo_embedding.model_id].iloc[0]
-        # This loads a TC from the topology dictionary in the  model accompanying pickle file. Note that the version
-        # is separately added from the zoo here, this could be solved differently in the future.
-        topology_dir = self.model_lookuptable["model_path"].loc[self.model_lookuptable["model_id"] ==
-                                                                self.zoo_embedding.model_id].iloc[0]
+        topology_filepath = ".".join(model_weights_file.split(".")[:-1])
+        topology_filepath += "_topology.pickle"
         tc = TopologyContainer(
-            topology=self._load_topology_dict(model_dir=topology_dir,
-                                              model_id=self.zoo_embedding.model_id + "_best_hyperparam"),
+            topology=self._load_topology_dict(topology_filepath=topology_filepath),
             topology_id=self.zoo_embedding.topology_container.topology_id
         )
         self.estimator_embedding = EstimatorKerasEmbedding(
             data=self.data.adata,
-            model_dir=model_dir,
+            model_dir=model_weights_file,
             model_id=self.zoo_embedding.model_id,
             model_topology=tc,
             weights_md5=md5,
@@ -391,22 +387,19 @@ class UserInterface:
         :return: Model ID loaded.
         """
         assert self.zoo_celltype.model_id is not None, "choose cell type model first"
-        model_dir = self.model_lookuptable["model_file_path"].loc[self.model_lookuptable["model_id"] ==
+        model_weights_file = self.model_lookuptable["model_file_path"].loc[self.model_lookuptable["model_id"] ==
                                                                   self.zoo_celltype.model_id].iloc[0]
         md5 = self.model_lookuptable["md5"].loc[self.model_lookuptable["model_id"] ==
                                                 self.zoo_celltype.model_id].iloc[0]
-        # This loads a TC from the topology dictionary in the  model accompanying pickle file. Note that the version
-        # is separately added from the zoo here, this could be solved differently in the future.
-        topology_dir = self.model_lookuptable["model_path"].loc[self.model_lookuptable["model_id"] ==
-                                                                self.zoo_celltype.model_id].iloc[0]
+        topology_filepath = ".".join(model_weights_file.split(".")[:-1])
+        topology_filepath += "_topology.pickle"
         tc = TopologyContainer(
-            topology=self._load_topology_dict(model_dir=topology_dir,
-                                              model_id=self.zoo_celltype.model_id + "_best_hyperparam"),
+            topology=self._load_topology_dict(topology_filepath=topology_filepath),
             topology_id=self.zoo_celltype.topology_container.topology_id
         )
         self.estimator_celltype = EstimatorKerasCelltype(
             data=self.data.adata,
-            model_dir=model_dir,
+            model_dir=model_weights_file,
             model_id=self.zoo_celltype.model_id,
             model_topology=tc,
             weights_md5=md5,
