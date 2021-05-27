@@ -9,6 +9,7 @@ import os
 
 from sfaira.consts import OCS
 from sfaira.data import load_store
+from sfaira.data.dataloaders import Universe
 from sfaira.estimators import EstimatorKerasEmbedding
 from sfaira.interface import ModelZoo
 from sfaira.versions.metadata import CelltypeUniverse, OntologyCl
@@ -1369,9 +1370,12 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
 
     def get_gradients_by_celltype(
             self,
-            organ: str,
+            organ: Union[str, None],
+            organism: Union[str, None],
+            genome: Union[str, None, dict],
             model_type: Union[str, List[str]],
             metric_select: str,
+            data_source: str,
             datapath,
             configpath: Union[None, str] = None,
             store_format: Union[None, str] = None,
@@ -1411,23 +1415,40 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         else:
             print('Compute gradients (1/3): load data')
             # load data
-            store = load_store(cache_path=datapath, store_format=store_format)
-            store.load_config(configpath)
-            store.subset(attr_key="id", values=[k for k in store.indices.keys()
-                                                if 'cell_ontology_id' in store.adata_by_key[k].obs.columns])
-            store.subset(attr_key="cellontology_class", excluded_values=[
-                store._adata_ids_sfaira.unknown_celltype_identifier,
-                store._adata_ids_sfaira.not_a_cell_celltype_identifier,
-            ])
+            if data_source == "store":
+                if genome is not None:
+                    warnings.warn("Using data_source='store', the provided genome will be ignored")
+                store = load_store(cache_path=datapath, store_format=store_format)
+                store.load_config(configpath)
+                store.subset(attr_key="id", values=[k for k in store.indices.keys()
+                                                    if 'cell_ontology_id' in store.adata_by_key[k].obs.columns])
+                store.subset(attr_key="cellontology_class", excluded_values=[
+                    store._adata_ids_sfaira.unknown_celltype_identifier,
+                    store._adata_ids_sfaira.not_a_cell_celltype_identifier,
+                ])
+                adatas = store.adata_sliced
+                # Load into memory:
+                for k in adatas.keys():
+                    adatas[k] = adatas[k].to_memory()
+                adata = adatas[list(adatas.keys())[0]]
+                if len(adatas.keys()) > 0:
+                    adata = adata.concatenate(*[adatas[k] for k in list(adatas.keys())[1:]])
+            elif data_source == "universe":
+                if configpath is not None or store_format is not None:
+                    warnings.warn("Using data_source='universe', the provided configpath and store_format will be ignored")
+                u = Universe(data_path=datapath)
+                if organism is not None:
+                    u.subset("organism", organism)
+                if organ is not None:
+                    u.subset("organ", organ)
+                u.load(allow_caching=False)
+                u.streamline_features(match_to_reference=genome)
+                u.streamline_metadata()
+                adata = u.adata
+            else:
+                raise ValueError("data_source has to be 'universe' or 'store'")
 
             print('Compute gradients (2/3): load embedding')
-            adatas = store.adata_sliced
-            # Load into memory:
-            for k in adatas.keys():
-                adatas[k] = adatas[k].to_memory()
-            adata = adatas[list(adatas.keys())[0]]
-            if len(adatas.keys()) > 0:
-                adata = adata.concatenate(*[adatas[k] for k in list(adatas.keys())[1:]])
             zoo = ModelZoo()
             zoo.model_id = "_".join(model_id.split("_")[:3])
             embedding = EstimatorKerasEmbedding(
@@ -1464,7 +1485,10 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
             organ: str,
             model_type: Union[str, List[str]],
             metric_select: str,
-            datapath,
+            datapath: str,
+            data_source: str,
+            organism: Union[str, None] = None,
+            genome: Union[str, None] = None,
             configpath: Union[None, str] = None,
             store_format: Union[None, str] = None,
             test_data=True,
@@ -1498,8 +1522,11 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         for modelt in model_type:
             avg_grads[modelt], celltypes[modelt] = self.get_gradients_by_celltype(
                 organ=organ,
+                organism=organism,
                 model_type=modelt,
                 metric_select=metric_select,
+                genome=genome,
+                data_source=data_source,
                 datapath=datapath,
                 configpath=configpath,
                 store_format=store_format,
@@ -1560,7 +1587,10 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
             organ: str,
             model_type: Union[str, List[str]],
             metric_select: str,
-            datapath,
+            datapath: str,
+            data_source: str,
+            organism: Union[str, None] = None,
+            genome: Union[str, None] = None,
             configpath: Union[None, str] = None,
             store_format: Union[None, str] = None,
             test_data=True,
@@ -1612,8 +1642,11 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         for modelt in model_type:
             avg_grads[modelt], celltypes[modelt] = self.get_gradients_by_celltype(
                 organ=organ,
+                organism=organism,
                 model_type=modelt,
                 metric_select=metric_select,
+                genome=genome,
+                data_source=data_source,
                 datapath=datapath,
                 configpath=configpath,
                 store_format=store_format,
