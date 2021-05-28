@@ -72,7 +72,8 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
     'sphinx.ext.napoleon',
-    'sphinx.ext.autosummary'
+    'sphinx.ext.autosummary',
+    'sphinx_click'
 ]
 
 # Generate the API documentation when building
@@ -112,12 +113,15 @@ html_context = dict(
     conf_py_path='/docs/',    # Path in the checkout to the docs root
 )
 html_static_path = ['_static']
+html_css_files = [
+    'custom_sfaira.css',
+]
 html_show_sphinx = False
 gh_url = 'https://github.com/{github_user}/{github_repo}'.format_map(html_context)
 
 
 def setup(app):
-    app.add_stylesheet('css/custom.css')
+    app.add_css_file('css/custom.css')
     app.connect('autodoc-process-docstring', insert_function_images)
     app.add_role('pr', autolink(f'{gh_url}/pull/{{}}', 'PR {}'))
 

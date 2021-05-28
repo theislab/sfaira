@@ -1,13 +1,17 @@
 import numpy as np
-import tensorflow as tf
+try:
+    import tensorflow as tf
+except ImportError:
+    tf = None
 from typing import List, Union
 
-from sfaira.models.celltype.external import BasicModel
-from sfaira.models.celltype.external import PreprocInput
-from sfaira.models.celltype.external import celltype_versions, Topologies
+from sfaira.versions.metadata import CelltypeUniverse
+from sfaira.versions.topologies import TopologyContainer
+from sfaira.models.base import BasicModelKeras
+from sfaira.models.pp_layer import PreprocInput
 
 
-class CellTypeMlp(BasicModel):
+class CellTypeMlp(BasicModelKeras):
     """
     Multi-layer perceptron to predict cell type.
 
@@ -69,51 +73,42 @@ class CellTypeMlp(BasicModel):
 
 
 class CellTypeMlpVersioned(CellTypeMlp):
-    cell_type_version: celltype_versions.CelltypeVersionsBase
 
     def __init__(
             self,
-            species: str,
-            organ: str,
-            topology_container: Topologies,
+            celltypes_version: CelltypeUniverse,
+            topology_container: TopologyContainer,
             override_hyperpar: Union[dict, None] = None
     ):
         """
 
-        :param genome:
-        :param organ:
+        :param celltypes_version:
         :param topology_container:
         :param override_hyperpar: Dictionary with hyper-parameters of model to override in preset hyper-parameter
             dictionary that is queried based on the topology_id. Can contain a subset of all hyperparameters.
         """
-        # Get cell type version instance based on topology ID, species and organ.
-        self.celltypes_version = celltype_versions.SPECIES_DICT[species.lower()][organ.lower()]
-        self.celltypes_version.set_version(version=topology_container.topology_id)
-
-        unkown_already_included = np.any([x.lower() == "unknown" for x in self.celltypes_version.ids])
+        # Get cell type version instance based on topology ID, organism and organ.
         hyperpar = topology_container.topology["hyper_parameters"]
         if override_hyperpar is not None:
             for k in list(override_hyperpar.keys()):
                 hyperpar[k] = override_hyperpar[k]
-        CellTypeMlp.__init__(
-            self=self,
-            in_dim=topology_container.ngenes,
-            out_dim=self.celltypes_version.ntypes if unkown_already_included else self.celltypes_version.ntypes + 1,
+        super().__init__(
+            in_dim=topology_container.n_var,
+            out_dim=celltypes_version.onto_cl.n_leaves,
             **hyperpar
         )
         print('passed hyperpar: \n', hyperpar)
         self._topology_id = topology_container.topology_id
-        self.genome_size = topology_container.ngenes
-        self.model_class = topology_container.model_class
+        self.genome_size = topology_container.n_var
+        self.model_class = "celltype"
         self.model_type = topology_container.model_type
         self.hyperparam = dict(
-            list(hyperpar.items()) +
+            list(hyperpar.items()) +  # noqa: W504
             [
                 ("topology_id", self._topology_id),
                 ("genome_size", self.genome_size),
                 ("model_class", self.model_class),
                 ("model_type", self.model_type),
-                ("ntypes", self.celltypes_version.ntypes),
-                ("celltypes_version", self.celltypes_version.version)
+                ("ntypes", celltypes_version.onto_cl.n_leaves),
             ]
         )

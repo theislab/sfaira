@@ -1,4 +1,7 @@
-import tensorflow as tf
+try:
+    import tensorflow as tf
+except ImportError:
+    tf = None
 import numpy as np
 
 
@@ -46,15 +49,15 @@ class LearningRateSchedule(tf.keras.callbacks.Callback):
         #       (epoch + 1, pseudo_inputs.max(), pseudo_inputs.mean(), pseudo_inputs.min()))
         if epoch == 199:
             lr = tf.keras.backend.get_value(self.model.optimizer.lr)
-            tf.keras.backend.set_value(self.model.optimizer.lr, lr/10)
+            tf.keras.backend.set_value(self.model.optimizer.lr, lr / 10)
             if self.verbose > 0:
-                print('\nReduce lr training at epoch %03d to %s' % (epoch + 1, lr/10))
+                print('\nReduce lr training at epoch %03d to %s' % (epoch + 1, lr / 10))
 
         if epoch == 249:
             lr = tf.keras.backend.get_value(self.model.optimizer.lr)
-            tf.keras.backend.set_value(self.model.optimizer.lr, lr/10)
+            tf.keras.backend.set_value(self.model.optimizer.lr, lr / 10)
             if self.verbose > 0:
-                print('\nReduce lr training at epoch %03d to %s' % (epoch + 1, lr/10))
+                print('\nReduce lr training at epoch %03d to %s' % (epoch + 1, lr / 10))
 
         if epoch == 299:
             self.model.stop_training = True

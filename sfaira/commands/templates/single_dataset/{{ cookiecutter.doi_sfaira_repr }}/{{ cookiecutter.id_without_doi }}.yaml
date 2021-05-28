@@ -1,0 +1,44 @@
+dataset_structure:
+    dataset_index: 1
+    sample_fns:
+        - "{{ cookiecutter.sample_fns }}"
+dataset_wise:
+    author: "{{ cookiecutter.author }}"
+    default_embedding: "{{ cookiecutter.default_embedding }}"
+    doi: "{{ cookiecutter.doi }}"
+    download_url_data: "{{ cookiecutter.download_url_data }}"
+    download_url_meta: "{{ cookiecutter.download_url_meta }}"
+    primary_data: {{ cookiecutter.primary_data }}
+    normalization: "{{ cookiecutter.normalization }}"
+    year: "{{ cookiecutter.year }}"
+dataset_or_observation_wise:
+    assay: "{{ cookiecutter.assay }}"
+    assay_obs_key:
+    bio_sample:
+    bio_sample_obs_key:
+    development_stage:
+    development_stage_obs_key:
+    disease: "{{ cookiecutter.disease }}"
+    disease_obs_key:
+    ethnicity:
+    ethnicity_obs_key:
+    individual:
+    individual_obs_key:
+    organ: "{{ cookiecutter.organ }}"
+    organ_obs_key:
+    organism: "{{ cookiecutter.organism }}"
+    organism_obs_key:
+    sex:
+    sex_obs_key:
+    state_exact: "{{ cookiecutter.state_exact }}"
+    state_exact_obs_key:
+    tech_sample:
+    tech_sample_obs_key:
+observation_wise:
+    cell_types_original_obs_key:
+feature_wise:
+    gene_id_ensembl_var_key:
+    gene_id_symbols_var_key:
+misc:
+meta:
+    version: "1.0"

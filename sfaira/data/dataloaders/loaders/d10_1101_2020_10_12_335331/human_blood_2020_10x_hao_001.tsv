@@ -1,0 +1,59 @@
+source	target	target_id
+ASDC_mDC	myeloid dendritic cell	CL:0000782
+ASDC_pDC	plasmacytoid dendritic cell	CL:0000784
+B intermediate kappa	B cell	CL:0000236
+B intermediate lambda	B cell	CL:0000236
+B memory kappa	memory B cell	CL:0000787
+B memory lambda	memory B cell	CL:0000787
+B naive kappa	naive B cell	CL:0000788
+B naive lambda	naive B cell	CL:0000788
+CD14 Mono	CD14-positive monocyte	CL:0001054
+CD16 Mono	CD14-low, CD16-positive monocyte	CL:0002396
+CD4 CTL	CD4-positive, alpha-beta cytotoxic T cell	CL:0000934
+CD4 Naive	naive thymus-derived CD4-positive, alpha-beta T cell	CL:0000895
+CD4 Proliferating	CD4-positive, alpha-beta T cell	CL:0000624
+CD4 TCM_1	central memory CD4-positive, alpha-beta T cell	CL:0000904
+CD4 TCM_2	central memory CD4-positive, alpha-beta T cell	CL:0000904
+CD4 TCM_3	central memory CD4-positive, alpha-beta T cell	CL:0000904
+CD4 TEM_1	effector memory CD4-positive, alpha-beta T cell	CL:0000905
+CD4 TEM_2	effector memory CD4-positive, alpha-beta T cell	CL:0000905
+CD4 TEM_3	effector memory CD4-positive, alpha-beta T cell	CL:0000905
+CD4 TEM_4	effector memory CD4-positive, alpha-beta T cell	CL:0000905
+CD8 Naive	naive thymus-derived CD8-positive, alpha-beta T cell	CL:0000900
+CD8 Naive_2	naive thymus-derived CD8-positive, alpha-beta T cell	CL:0000900
+CD8 Proliferating	CD8-positive, alpha-beta T cell	CL:0000625
+CD8 TCM_1	central memory CD8-positive, alpha-beta T cell	CL:0000907
+CD8 TCM_2	central memory CD8-positive, alpha-beta T cell	CL:0000907
+CD8 TCM_3	central memory CD8-positive, alpha-beta T cell	CL:0000907
+CD8 TEM_1	effector memory CD8-positive, alpha-beta T cell	CL:0000913
+CD8 TEM_2	effector memory CD8-positive, alpha-beta T cell	CL:0000913
+CD8 TEM_3	effector memory CD8-positive, alpha-beta T cell	CL:0000913
+CD8 TEM_4	effector memory CD8-positive, alpha-beta T cell	CL:0000913
+CD8 TEM_5	effector memory CD8-positive, alpha-beta T cell	CL:0000913
+CD8 TEM_6	effector memory CD8-positive, alpha-beta T cell	CL:0000913
+Doublet	UNKNOWN	UNKNOWN
+Eryth	erythrocyte	CL:0000232
+HSPC	hematopoietic multipotent progenitor cell	CL:0000837
+ILC	innate lymphoid cell	CL:0001065
+MAIT	mucosal invariant T cell	CL:0000940
+NK Proliferating	natural killer cell	CL:0000623
+NK_1	natural killer cell	CL:0000623
+NK_2	natural killer cell	CL:0000623
+NK_3	natural killer cell	CL:0000623
+NK_4	natural killer cell	CL:0000623
+NK_CD56bright	CD16-negative, CD56-bright natural killer cell, human	CL:0000938
+Plasma	plasma cell	CL:0000786
+Plasmablast	plasmablast	CL:0000980
+Platelet	platelet	CL:0000233
+Treg Memory	memory regulatory T cell	CL:0002678
+Treg Naive	naive regulatory T cell	CL:0002677
+cDC1	conventional dendritic cell	CL:0000990
+cDC2_1	conventional dendritic cell	CL:0000990
+cDC2_2	conventional dendritic cell	CL:0000990
+dnT_1	double negative thymocyte	CL:0002489
+dnT_2	double negative thymocyte	CL:0002489
+gdT_1	gamma-delta T cell	CL:0000798
+gdT_2	gamma-delta T cell	CL:0000798
+gdT_3	gamma-delta T cell	CL:0000798
+gdT_4	gamma-delta T cell	CL:0000798
+pDC	plasmacytoid dendritic cell	CL:0000784

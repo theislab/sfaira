@@ -5,11 +5,11 @@ from typing import Union
 
 class ExtractFeatureList:
     gene_table: Union[None, pandas.DataFrame]
-    species: Union[None, str]
+    organism: Union[None, str]
     release: Union[None, str]
 
     def __init__(self):
-        self.species = None
+        self.organism = None
         self.release = None
         self.gene_table = None
 
@@ -39,7 +39,7 @@ class ExtractFeatureListEnsemble(ExtractFeatureList):
         :return:
         """
         gtf_name = fn.split("/")[-1]
-        self.species = gtf_name.split(".")[0]
+        self.organism = gtf_name.split(".")[0]
         self.release = "_".join(gtf_name.split(".")[1:-1])
 
         tab = pandas.read_table(
@@ -63,4 +63,4 @@ class ExtractFeatureListEnsemble(ExtractFeatureList):
         self.reduce_types(types=["protein_coding"])
 
     def write_gene_table_to_csv(self, path):
-        self.gene_table.to_csv(path_or_buf=path + self.species + "_" + self.release + ".csv")
+        self.gene_table.to_csv(path_or_buf=path + self.organism + "_" + self.release + ".csv")

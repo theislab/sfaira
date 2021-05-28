@@ -1,0 +1,26 @@
+source	target	target_id
+Activated CD4 T	activated CD4-positive, alpha-beta T cell	CL:0000896
+B cell IgA Plasma	IgA plasma cell	CL:0000987
+B cell IgG Plasma	IgG plasma cell	CL:0000985
+B cell cycling	B cell	CL:0000236
+B cell memory	memory B cell	CL:0000787
+CD8 T	CD8-positive, alpha-beta T cell	CL:0000625
+Follicular B cell	follicular B cell	CL:0000843
+ILC	innate lymphoid cell	CL:0001065
+LYVE1 Macrophage	macrophage	CL:0000235
+Lymphoid DC	plasmacytoid dendritic cell	CL:0000784
+Macrophage	macrophage	CL:0000235
+Mast	mast cell	CL:0000097
+Monocyte	monocyte	CL:0000576
+NK	natural killer cell	CL:0000623
+Tcm	memory T cell	CL:0000813
+Tfh	T follicular helper cell	CL:0002038
+Th1	T-helper 1 cell	CL:0000545
+Th17	T-helper 17 cell	CL:0000899
+Treg	regulatory T cell	CL:0000815
+cDC1	conventional dendritic cell	CL:0000990
+cDC2	conventional dendritic cell	CL:0000990
+cycling DCs	dendritic cell	CL:0000451
+cycling gd T	gamma-delta T cell	CL:0000798
+gd T	gamma-delta T cell	CL:0000798
+pDC	plasmacytoid dendritic cell	CL:0000784

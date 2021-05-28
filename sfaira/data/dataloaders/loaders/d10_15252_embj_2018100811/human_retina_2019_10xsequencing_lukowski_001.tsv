@@ -1,0 +1,15 @@
+source	target	target_id
+Muller cell	Mueller cell	CL:0000636
+amacrine cell	amacrine cell	CL:0000561
+microglial cell	microglial cell	CL:0000129
+retinal bipolar neuron type A	retinal bipolar neuron	CL:0000748
+retinal bipolar neuron type B	retinal bipolar neuron	CL:0000748
+retinal bipolar neuron type C	retinal bipolar neuron	CL:0000748
+retinal bipolar neuron type D	retinal bipolar neuron	CL:0000748
+retinal cone cell	retinal cone cell	CL:0000573
+retinal ganglion cell	retinal ganglion cell	CL:0000740
+retinal rod cell type A	retinal rod cell	CL:0000604
+retinal rod cell type B	retinal rod cell	CL:0000604
+retinal rod cell type C	retinal rod cell	CL:0000604
+unannotated	UNKNOWN	UNKNOWN
+unspecified	UNKNOWN	UNKNOWN

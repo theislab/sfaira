@@ -1,12 +1,15 @@
 import numpy as np
-import tensorflow as tf
+try:
+    import tensorflow as tf
+except ImportError:
+    tf = None
 from typing import List, Union, Tuple
 
 from sfaira.models.embedding.output_layers import NegBinOutput, NegBinSharedDispOutput, NegBinConstDispOutput, \
     GaussianOutput, GaussianSharedStdOutput, GaussianConstStdOutput
-from sfaira.models.embedding.external import BasicModel
-from sfaira.models.embedding.external import PreprocInput
-from sfaira.models.embedding.external import Topologies
+from sfaira.versions.topologies import TopologyContainer
+from sfaira.models.base import BasicModelKeras
+from sfaira.models.pp_layer import PreprocInput
 
 
 class Encoder(tf.keras.layers.Layer):
@@ -58,8 +61,8 @@ class Encoder(tf.keras.layers.Layer):
                     self.layer_list.append(tf.keras.layers.Dropout(hid_drop, name='enc_%s_drop' % i))
 
     def call(self, x, **kwargs):
-        for l in self.layer_list:
-            x = l(x)
+        for layer in self.layer_list:
+            x = layer(x)
         return x
 
 
@@ -105,12 +108,12 @@ class Decoder(tf.keras.layers.Layer):
                     self.layer_list.append(tf.keras.layers.Dropout(hid_drop, name='dec_%s_drop' % i))
 
     def call(self, x, **kwargs):
-        for l in self.layer_list:
-            x = l(x)
+        for layer in self.layer_list:
+            x = layer(x)
         return x
 
 
-class ModelAe(BasicModel):
+class ModelKerasAe(BasicModelKeras):
     """Combines the encoder and decoder into an end-to-end model for training."""
     # Note: Original DCA implementation uses l1_l2 regularisation also on last layer (nb) - missing here
     # Note: Original DCA implementation uses softplus function instead of exponential as dispersion activation
@@ -185,7 +188,7 @@ class ModelAe(BasicModel):
         output_decoder_expfamily_concat = tf.keras.layers.Concatenate(axis=1, name="neg_ll")(output_decoder_expfamily)
 
         self.encoder_model = tf.keras.Model(
-            inputs=inputs_encoder,
+            inputs=[inputs_encoder, inputs_sf],
             outputs=output_encoder,
             name="encoder_model"
         )
@@ -195,37 +198,36 @@ class ModelAe(BasicModel):
             name="autoencoder"
         )
 
-    def predict_reconstructed(self, x: np.ndarray):
+    def predict_reconstructed(self, x):
         return np.split(self.training_model.predict(x), indices_or_sections=2, axis=1)[0]
 
-    def predict_embedding(self, x: np.ndarray, variational=False):
+    def predict_embedding(self, x, variational=False):
         if variational:
             raise ValueError("Cannot predict variational embedding on AE model.topo")
         return self.encoder_model.predict(x)
 
 
-class ModelAeVersioned(ModelAe):
+class ModelAeVersioned(ModelKerasAe):
     def __init__(
             self,
-            topology_container: Topologies,
+            topology_container: TopologyContainer,
             override_hyperpar: Union[dict, None] = None
     ):
         hyperpar = topology_container.topology["hyper_parameters"]
         if override_hyperpar is not None:
             for k in list(override_hyperpar.keys()):
                 hyperpar[k] = override_hyperpar[k]
-        ModelAe.__init__(
-            self=self,
-            in_dim=topology_container.ngenes,
+        super().__init__(
+            in_dim=topology_container.n_var,
             **hyperpar
         )
         print('passed hyperpar: \n', hyperpar)
         self._topology_id = topology_container.topology_id
-        self.genome_size = topology_container.ngenes
-        self.model_class = topology_container.model_class
+        self.genome_size = topology_container.n_var
+        self.model_class = "embedding"
         self.model_type = topology_container.model_type
         self.hyperparam = dict(
-            list(hyperpar.items()) +
+            list(hyperpar.items()) +  # noqa: W504
             [
                 ("topology_id", self._topology_id),
                 ("genome_size", self.genome_size),

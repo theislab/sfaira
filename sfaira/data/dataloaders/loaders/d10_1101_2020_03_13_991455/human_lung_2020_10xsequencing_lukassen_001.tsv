@@ -1,0 +1,23 @@
+source	target	target_id
+AT1	type I pneumocyte	CL:0002062
+AT2	type II pneumocyte	CL:0002063
+Basal1	respiratory basal cell	CL:0002633
+Basal2	respiratory basal cell	CL:0002633
+Basal3	respiratory basal cell	CL:0002633
+Basal_Mitotic	respiratory basal cell	CL:0002633
+Ciliated	lung ciliated cell	CL:1000271
+Ciliated1	lung ciliated cell	CL:1000271
+Ciliated2	lung ciliated cell	CL:1000271
+Club	club cell	CL:0000158
+Endothelial	endothelial cell	CL:0000115
+FOXN4	ciliated cell	CL:0000064
+Fibroblast	fibroblast of lung	CL:0002553
+Fibroblasts	fibroblast of lung	CL:0002553
+Goblet	lung goblet cell	CL:1000143
+Immuno_Monocytes	monocyte	CL:0000576
+Immuno_TCells	T cell	CL:0000084
+Ionocyte	ionocyte	CL:0005006
+LymphaticEndothelium	endothelial cell of lymphatic vessel	CL:0002138
+Secretory1	secretory cell	CL:0000151
+Secretory2	secretory cell	CL:0000151
+Secretory3	secretory cell	CL:0000151

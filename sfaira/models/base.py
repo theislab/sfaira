@@ -1,4 +1,8 @@
 import abc
+try:
+    import tensorflow as tf
+except ImportError:
+    tf = None
 
 
 class BasicModel(abc.ABC):
@@ -15,3 +19,11 @@ class BasicModel(abc.ABC):
     @property
     def version(self):
         return self._version
+
+
+class BasicModelKeras(BasicModel):
+    """
+    This base class defines model attributes shared across all tf.keras models.
+    """
+
+    training_model: tf.keras.Model

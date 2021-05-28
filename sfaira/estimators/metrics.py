@@ -1,6 +1,8 @@
-import abc
 import numpy as np
-import tensorflow as tf
+try:
+    import tensorflow as tf
+except ImportError:
+    tf = None
 
 
 def custom_mse(y_true, y_pred, sample_weight=None):
@@ -62,8 +64,8 @@ class CustomAccAgg(tf.keras.metrics.Metric):
     def update_state(self, y_true, y_pred, sample_weight=None):
         phat_pos_agg = tf.reduce_sum(y_true * y_pred, axis=1, keepdims=True)
         acc_agg = tf.cast(
-          phat_pos_agg > tf.reduce_max((tf.ones_like(y_true) - y_true) * y_pred, axis=1),
-          dtype=y_true.dtype
+            phat_pos_agg > tf.reduce_max((tf.ones_like(y_true) - y_true) * y_pred, axis=1),
+            dtype=y_true.dtype
         )
         # Do not use weighting for accuracy.
         self.acc_agg.assign_add(tf.reduce_mean(acc_agg))
@@ -86,8 +88,8 @@ class CustomTprClasswise(tf.keras.metrics.Metric):
 
     def update_state(self, y_true, y_pred, sample_weight=None):
         tp_by_class = tf.reduce_sum(tf.cast(
-          y_pred == tf.reduce_max(y_pred, axis=1, keepdims=True),
-          dtype=y_true.dtype
+            y_pred == tf.reduce_max(y_pred, axis=1, keepdims=True),
+            dtype=y_true.dtype
         ) * y_true, axis=0)
         fn_by_class = tf.reduce_sum(tf.cast(
             y_pred < tf.reduce_max(y_pred, axis=1, keepdims=True),
@@ -147,8 +149,8 @@ class CustomF1Classwise(tf.keras.metrics.Metric):
 
     def update_state(self, y_true, y_pred, sample_weight=None):
         tp_by_class = tf.reduce_sum(tf.cast(
-          y_pred == tf.reduce_max(y_pred, axis=1, keepdims=True),
-          dtype=y_true.dtype
+            y_pred == tf.reduce_max(y_pred, axis=1, keepdims=True),
+            dtype=y_true.dtype
         ) * y_true, axis=0)
         fp_by_class = tf.reduce_sum(tf.cast(
             y_pred == tf.reduce_max(y_pred, axis=1, keepdims=True),

@@ -1,0 +1,33 @@
+source	target	target_id
+DC1	dendritic cell	CL:0000451
+DC2	dendritic cell	CL:0000451
+EVT	extravillous trophoblast	CL:0008036
+Endo (f)	endothelial cell	CL:0000115
+Endo (m)	endothelial cell	CL:0000115
+Endo L	endothelial cell	CL:0000115
+Epi1	placental epithelial cell	CL:0002577
+Epi2	placental epithelial cell	CL:0002577
+Granulocytes	granulocyte	CL:0000094
+HB	Hofbauer cell	CL:3000001
+ILC3	group 3 innate lymphoid cell	CL:0001071
+MO	monocyte	CL:0000576
+NK CD16+	natural killer cell	CL:0000623
+NK CD16-	natural killer cell	CL:0000623
+Plasma	plasma cell	CL:0000786
+SCT	syncytiotrophoblast cell	CL:0000525
+Tcells	T cell	CL:0000084
+VCT	placental villous trophoblast	CL:2000060
+dM1	macrophage	CL:0000235
+dM2	macrophage	CL:0000235
+dM3	macrophage	CL:0000235
+dNK p	decidual natural killer cell, human	CL:0002343
+dNK1	decidual natural killer cell, human	CL:0002343
+dNK2	decidual natural killer cell, human	CL:0002343
+dNK3	decidual natural killer cell, human	CL:0002343
+dP1	smooth muscle cell	CL:0000192
+dP2	smooth muscle cell	CL:0000192
+dS1	decidual cell	CL:2000002
+dS2	decidual cell	CL:2000002
+dS3	decidual cell	CL:2000002
+fFB1	fibroblast	CL:0000057
+fFB2	fibroblast	CL:0000057

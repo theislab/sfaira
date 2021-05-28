@@ -1,0 +1,140 @@
+source	target	target_id
+Adventitial Fibroblast_P1	adventitial cell	CL:0002503
+Adventitial Fibroblast_P2	adventitial cell	CL:0002503
+Adventitial Fibroblast_P3	adventitial cell	CL:0002503
+Airway Smooth Muscle_P1	tracheobronchial smooth muscle cell	CL:0019019
+Airway Smooth Muscle_P2	tracheobronchial smooth muscle cell	CL:0019019
+Airway Smooth Muscle_P3	tracheobronchial smooth muscle cell	CL:0019019
+Alveolar Epithelial Type 1_P1	type I pneumocyte	CL:0002062
+Alveolar Epithelial Type 1_P2	type I pneumocyte	CL:0002062
+Alveolar Epithelial Type 1_P3	type I pneumocyte	CL:0002062
+Alveolar Epithelial Type 2_P1	type II pneumocyte	CL:0002063
+Alveolar Epithelial Type 2_P2	type II pneumocyte	CL:0002063
+Alveolar Epithelial Type 2_P3	type II pneumocyte	CL:0002063
+Alveolar Fibroblast_P1	fibroblast of lung	CL:0002553
+Alveolar Fibroblast_P2	fibroblast of lung	CL:0002553
+Alveolar Fibroblast_P3	fibroblast of lung	CL:0002553
+Artery_P1	endothelial cell	CL:0000115
+Artery_P2	endothelial cell	CL:0000115
+Artery_P3	endothelial cell	CL:0000115
+B_P1	B cell	CL:0000236
+B_P2	B cell	CL:0000236
+B_P3	B cell	CL:0000236
+Basal_P1	respiratory basal cell	CL:0002633
+Basal_P2	respiratory basal cell	CL:0002633
+Basal_P3	respiratory basal cell	CL:0002633
+Basophil/Mast 1_P1	myeloid leukocyte	CL:0000766
+Basophil/Mast 1_P2	myeloid leukocyte	CL:0000766
+Basophil/Mast 1_P3	myeloid leukocyte	CL:0000766
+Basophil/Mast 2_P3	myeloid leukocyte	CL:0000766
+Bronchial Vessel 1_P1	endothelial cell	CL:0000115
+Bronchial Vessel 1_P3	endothelial cell	CL:0000115
+Bronchial Vessel 2_P1	endothelial cell	CL:0000115
+Bronchial Vessel 2_P3	endothelial cell	CL:0000115
+CD4+ Memory/Effector T_P1	effector memory CD4-positive, alpha-beta T cell, terminally differentiated	CL:0001087
+CD4+ Memory/Effector T_P2	effector memory CD4-positive, alpha-beta T cell, terminally differentiated	CL:0001087
+CD4+ Memory/Effector T_P3	effector memory CD4-positive, alpha-beta T cell, terminally differentiated	CL:0001087
+CD4+ Naive T_P1	naive thymus-derived CD4-positive, alpha-beta T cell	CL:0000895
+CD4+ Naive T_P2	naive thymus-derived CD4-positive, alpha-beta T cell	CL:0000895
+CD4+ Naive T_P3	naive thymus-derived CD4-positive, alpha-beta T cell	CL:0000895
+CD8+ Memory/Effector T_P1	effector memory CD8-positive, alpha-beta T cell, terminally differentiated	CL:0001062
+CD8+ Memory/Effector T_P2	effector memory CD8-positive, alpha-beta T cell, terminally differentiated	CL:0001062
+CD8+ Memory/Effector T_P3	effector memory CD8-positive, alpha-beta T cell, terminally differentiated	CL:0001062
+CD8+ Naive T_P1	naive thymus-derived CD8-positive, alpha-beta T cell	CL:0000900
+CD8+ Naive T_P2	naive thymus-derived CD8-positive, alpha-beta T cell	CL:0000900
+CD8+ Naive T_P3	naive thymus-derived CD8-positive, alpha-beta T cell	CL:0000900
+Capillary Aerocyte_P1	endothelial cell	CL:0000115
+Capillary Aerocyte_P2	endothelial cell	CL:0000115
+Capillary Aerocyte_P3	endothelial cell	CL:0000115
+Capillary Intermediate 1_P2	endothelial cell	CL:0000115
+Capillary Intermediate 2_P2	endothelial cell	CL:0000115
+Capillary_P1	endothelial cell	CL:0000115
+Capillary_P2	endothelial cell	CL:0000115
+Capillary_P3	endothelial cell	CL:0000115
+Ciliated_P1	lung ciliated cell	CL:1000271
+Ciliated_P2	lung ciliated cell	CL:1000271
+Ciliated_P3	lung ciliated cell	CL:1000271
+Classical Monocyte_P1	classical monocyte	CL:0000860
+Classical Monocyte_P2	classical monocyte	CL:0000860
+Classical Monocyte_P3	classical monocyte	CL:0000860
+Club_P1	club cell	CL:0000158
+Club_P2	club cell	CL:0000158
+Club_P3	club cell	CL:0000158
+Dendritic_P1	dendritic cell	CL:0000451
+Differentiating Basal_P1	respiratory basal cell	CL:0002633
+Differentiating Basal_P3	respiratory basal cell	CL:0002633
+EREG+ Dendritic_P1	dendritic cell	CL:0000451
+EREG+ Dendritic_P2	dendritic cell	CL:0000451
+Fibromyocyte_P3	myofibroblast cell	CL:0000186
+Goblet_P1	lung goblet cell	CL:1000143
+Goblet_P2	lung goblet cell	CL:1000143
+Goblet_P3	lung goblet cell	CL:1000143
+IGSF21+ Dendritic_P1	dendritic cell	CL:0000451
+IGSF21+ Dendritic_P2	dendritic cell	CL:0000451
+IGSF21+ Dendritic_P3	dendritic cell	CL:0000451
+Intermediate Monocyte_P2	intermediate monocyte	CL:0002393
+Intermediate Monocyte_P3	intermediate monocyte	CL:0002393
+Ionocyte_P3	ionocyte	CL:0005006
+Lipofibroblast_P1	fibroblast of lung	CL:0002553
+Lymphatic_P1	endothelial cell of lymphatic vessel	CL:0002138
+Lymphatic_P2	endothelial cell of lymphatic vessel	CL:0002138
+Lymphatic_P3	endothelial cell of lymphatic vessel	CL:0002138
+Macrophage_P1	lung macrophage	CL:1001603
+Macrophage_P2	lung macrophage	CL:1001603
+Macrophage_P3	lung macrophage	CL:1001603
+Mesothelial_P1	mesothelial cell	CL:0000077
+Mucous_P2	mucus secreting cell	CL:0000319
+Mucous_P3	mucus secreting cell	CL:0000319
+Myeloid Dendritic Type 1_P1	myeloid dendritic cell	CL:0000782
+Myeloid Dendritic Type 1_P2	myeloid dendritic cell	CL:0000782
+Myeloid Dendritic Type 1_P3	myeloid dendritic cell	CL:0000782
+Myeloid Dendritic Type 2_P1	myeloid dendritic cell	CL:0000782
+Myeloid Dendritic Type 2_P2	myeloid dendritic cell	CL:0000782
+Myeloid Dendritic Type 2_P3	myeloid dendritic cell	CL:0000782
+Myofibroblast_P1	myofibroblast cell	CL:0000186
+Myofibroblast_P2	myofibroblast cell	CL:0000186
+Myofibroblast_P3	myofibroblast cell	CL:0000186
+Natural Killer T_P2	mature NK T cell	CL:0000814
+Natural Killer T_P3	mature NK T cell	CL:0000814
+Natural Killer_P1	natural killer cell	CL:0000623
+Natural Killer_P2	natural killer cell	CL:0000623
+Natural Killer_P3	natural killer cell	CL:0000623
+Neuroendocrine_P1	neuroendocrine cell	CL:0000165
+Neuroendocrine_P3	neuroendocrine cell	CL:0000165
+Neutrophil_P1	neutrophil	CL:0000775
+Neutrophil_P2	neutrophil	CL:0000775
+Neutrophil_P3	neutrophil	CL:0000775
+Nonclassical Monocyte_P1	non-classical monocyte	CL:0000875
+Nonclassical Monocyte_P2	non-classical monocyte	CL:0000875
+Nonclassical Monocyte_P3	non-classical monocyte	CL:0000875
+OLR1+ Classical Monocyte_P2	classical monocyte	CL:0000860
+Pericyte_P1	pericyte cell	CL:0000669
+Pericyte_P2	pericyte cell	CL:0000669
+Pericyte_P3	pericyte cell	CL:0000669
+Plasma_P1	plasma cell	CL:0000786
+Plasma_P3	plasma cell	CL:0000786
+Plasmacytoid Dendritic_P1	plasmacytoid dendritic cell	CL:0000784
+Plasmacytoid Dendritic_P2	plasmacytoid dendritic cell	CL:0000784
+Plasmacytoid Dendritic_P3	plasmacytoid dendritic cell	CL:0000784
+Platelet/Megakaryocyte_P1	megakaryocyte	CL:0000556
+Platelet/Megakaryocyte_P3	megakaryocyte	CL:0000556
+Proliferating Basal_P1	respiratory basal cell	CL:0002633
+Proliferating Basal_P3	respiratory basal cell	CL:0002633
+Proliferating Macrophage_P1	macrophage	CL:0000235
+Proliferating Macrophage_P2	macrophage	CL:0000235
+Proliferating Macrophage_P3	macrophage	CL:0000235
+Proliferating NK/T_P2	mature NK T cell	CL:0000814
+Proliferating NK/T_P3	mature NK T cell	CL:0000814
+Proximal Basal_P3	respiratory basal cell	CL:0002633
+Proximal Ciliated_P3	lung ciliated cell	CL:1000271
+Serous_P3	serous secreting cell	CL:0000313
+Signaling Alveolar Epithelial Type 2_P1	type II pneumocyte	CL:0002063
+Signaling Alveolar Epithelial Type 2_P3	type II pneumocyte	CL:0002063
+TREM2+ Dendritic_P1	dendritic cell	CL:0000451
+TREM2+ Dendritic_P3	dendritic cell	CL:0000451
+Vascular Smooth Muscle_P1	vascular associated smooth muscle cell	CL:0000359
+Vascular Smooth Muscle_P2	vascular associated smooth muscle cell	CL:0000359
+Vascular Smooth Muscle_P3	vascular associated smooth muscle cell	CL:0000359
+Vein_P1	endothelial cell	CL:0000115
+Vein_P2	endothelial cell	CL:0000115
+Vein_P3	endothelial cell	CL:0000115

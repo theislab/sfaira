@@ -1,0 +1,22 @@
+source	target	target_id
+1.CD4rest	CD4-positive, alpha-beta T cell	CL:0000624
+10.CD8EM/TRMact	effector memory CD8-positive, alpha-beta T cell	CL:0000913
+10.CD8TEMRAact	effector memory CD8-positive, alpha-beta T cell	CL:0000913
+11.CD8TEMRA	effector memory CD8-positive, alpha-beta T cell	CL:0000913
+2.CD4act1	CD4-positive, alpha-beta T cell	CL:0000624
+2.CD4rest2	CD4-positive, alpha-beta T cell	CL:0000624
+3.CD4act1	CD4-positive, alpha-beta T cell	CL:0000624
+3.CD4act2	CD4-positive, alpha-beta T cell	CL:0000624
+4.CD4act2	CD4-positive, alpha-beta T cell	CL:0000624
+4.CD4act3	CD4-positive, alpha-beta T cell	CL:0000624
+5.CD4TRMrest	CD4-positive, alpha-beta T cell	CL:0000624
+5.CD4act3	CD4-positive, alpha-beta T cell	CL:0000624
+6.CD4TRMact	CD4-positive, alpha-beta T cell	CL:0000624
+6.CD4Treg	CD4-positive, CD25-positive, alpha-beta regulatory T cell	CL:0000792
+7.CD4Treg	CD4-positive, CD25-positive, alpha-beta regulatory T cell	CL:0000792
+7.CD8EM/TRMrest	effector memory CD8-positive, alpha-beta T cell	CL:0000913
+8.CD8EM/TRMact	effector memory CD8-positive, alpha-beta T cell	CL:0000913
+8.CD8EM/TRMrest	effector memory CD8-positive, alpha-beta T cell	CL:0000913
+9.CD8TEMRArest	effector memory CD8-positive, alpha-beta T cell	CL:0000913
+9.CD8TRMrest	effector memory CD8-positive, alpha-beta T cell	CL:0000913
+unknown	UNKNOWN	UNKNOWN

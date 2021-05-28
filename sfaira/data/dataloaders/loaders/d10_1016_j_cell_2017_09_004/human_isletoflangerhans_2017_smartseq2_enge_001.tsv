@@ -1,0 +1,8 @@
+source	target	target_id
+acinar	pancreatic acinar cell	CL:0002064
+alpha	pancreatic A cell	CL:0000171
+beta	type B pancreatic cell	CL:0000169
+delta	pancreatic D cell	CL:0000173
+ductal	pancreatic ductal cell	CL:0002079
+mesenchymal	mesenchymal cell	CL:0008019
+unsure	UNKNOWN	UNKNOWN

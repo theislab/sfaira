@@ -1,0 +1,635 @@
+source	target	target_id
+0	UNKNOWN	UNKNOWN
+AT1 cell	type I pneumocyte	CL:0002062
+AT2 cell	type II pneumocyte	CL:0002063
+Absorptive cell	absorptive cell	CL:0000212
+Acinar cell_CLPS high	acinar cell	CL:0000622
+Acinar cell_CPA1 high	acinar cell	CL:0000622
+Acinar cell_CPA2 high	acinar cell	CL:0000622
+Acinar cell_REG1B high	acinar cell	CL:0000622
+Acniar cell_ANXA4 high	acinar cell	CL:0000622
+Activated T cell	T cell	CL:0000084
+Actived T cell	T cell	CL:0000084
+Adenocarcinoma epithelial cell	abnormal cell	CL:0001061
+Adipocyte _FGR high	fat cell	CL:0000136
+Adipocyte_SPP1 high	fat cell	CL:0000136
+Adipose tissue	fat cell	CL:0000136
+Adrenocortical cell	cortical cell of adrenal gland	CL:0002097
+Adrenocortical cell_NOV high	cortical cell of adrenal gland	CL:0002097
+Adrenocortical cell_TPM2 high	cortical cell of adrenal gland	CL:0002097
+Airway smooth muscle cell	smooth muscle cell of trachea	CL:0002600
+Alpha cell	pancreatic A cell	CL:0000171
+Alveolar bipotent/intermediate cell	pneumocyte	CL:0000322
+Antigen presenting cell	professional antigen presenting cell	CL:0000145
+Antigen-presenting cell	professional antigen presenting cell	CL:0000145
+Arterial endothelial cell	endothelial cell of artery	CL:1000413
+Arterial endothelial cell_GJA5 high	endothelial cell of artery	CL:1000413
+Artry endothelial cell	endothelial cell of artery	CL:1000413
+Astrocyte	astrocyte	CL:0000127
+Astrocyte(Bergmann glia)	Bergmann glial cell	CL:0000644
+Atrial cardiomyocyte_MT high	regular atrial cardiac myocyte	CL:0002129
+Atrial cardiomyocyte_MYH6 high	regular atrial cardiac myocyte	CL:0002129
+Atrial cardiomyocyte_NPPA high	regular atrial cardiac myocyte	CL:0002129
+B cell	B cell	CL:0000236
+B cell (Centrocyte)	B cell	CL:0000236
+B cell (Plasmocyte)	plasma cell	CL:0000786
+B cell (Plasmocyte)_IGHA high	plasma cell	CL:0000786
+B cell (Plasmocyte)_IGHA/HG high	plasma cell	CL:0000786
+B cell (Plasmocyte)_IGHA/HM high	plasma cell	CL:0000786
+B cell (Plasmocyte)_IGHA/HM_IGK high	plasma cell	CL:0000786
+B cell (Plasmocyte)_IGHA/HM_IGL high	plasma cell	CL:0000786
+B cell (Plasmocyte)_IGHA_IGK high	plasma cell	CL:0000786
+B cell (Plasmocyte)_IGHA_IGL high	plasma cell	CL:0000786
+B cell (Plasmocyte)_IGHG high	plasma cell	CL:0000786
+B cell (Plasmocyte)_IGHG/HA high	plasma cell	CL:0000786
+B cell (Plasmocyte)_IGHG/HA_IGK high	plasma cell	CL:0000786
+B cell (Plasmocyte)_IGHG3 high	plasma cell	CL:0000786
+B cell (Plasmocyte)_IGHG_IGK high	plasma cell	CL:0000786
+B cell (Plasmocyte)_IGHG_IGL high	plasma cell	CL:0000786
+B cell (Plasmocyte)_IGHM/HA_IGK high	plasma cell	CL:0000786
+B cell (Plasmocyte)_IGHM/HA_IGL high	plasma cell	CL:0000786
+B cell (Plasmocyte)_IGHM/HG high	plasma cell	CL:0000786
+B cell (Plasmocyte)_IGLV3-1 high	plasma cell	CL:0000786
+B cell (centrocyte)	B cell	CL:0000236
+B cell(Centrocyte)	B cell	CL:0000236
+B cell(Centrocyte)_IGLC2 high	B cell	CL:0000236
+B cell(Centrocyte)_IGLL1 high	B cell	CL:0000236
+B cell(Plasmocyte)	plasma cell	CL:0000786
+B cell(Plasmocyte)_IGHG1 high	plasma cell	CL:0000786
+B cell(Plasmocyte)_IGHG4 high	plasma cell	CL:0000786
+B cell(Plasmocyte)_IGHM high	plasma cell	CL:0000786
+B cell(Plasmocyte)_IGKC high	plasma cell	CL:0000786
+B cell(Plasmocyte)_IGLC3 high	plasma cell	CL:0000786
+B cell(Plasmocyte)_IGLL5 high	plasma cell	CL:0000786
+B cell(Unknown)	B cell	CL:0000236
+B cell(plasmocyte)_IGHA1 high	plasma cell	CL:0000786
+B cell(plasmocyte)_IGHG3 high	plasma cell	CL:0000786
+B cell_Contamination	B cell	CL:0000236
+B cell_JCHAIN high	B cell	CL:0000236
+Basal  cell	basal cell	CL:0000646
+Basal cell	basal cell	CL:0000646
+Basal cell_KRT6A high	basal cell	CL:0000646
+Basal/Epithelial cell	basal cell	CL:0000646
+Basal/epithelial cell	basal cell	CL:0000646
+Beta cell	type B pancreatic cell	CL:0000169
+CD4_T cell	CD4-positive, alpha-beta T cell	CL:0000624
+CD8 T cell	CD8-positive, alpha-beta T cell	CL:0000625
+CD8+ T cell	CD8-positive, alpha-beta T cell	CL:0000625
+CD8_T cell	CD8-positive, alpha-beta T cell	CL:0000625
+Cardiomyocyte	cardiac muscle cell	CL:0000746
+Cervical Mesothelial cell	mesothelial cell	CL:0000077
+Cholangiocyte	cholangiocyte	CL:1000488
+Chondrocyte	chondrocyte	CL:0000138
+Chondrocyte_CYTL1 high	chondrocyte	CL:0000138
+Chondrocyte_PANX3 high	chondrocyte	CL:0000138
+Chromaffin cell	chromaffin cell	CL:0000166
+Chromaffin cell_SPOCK3 high	chromaffin cell	CL:0000166
+Chromaffin cell_VIP high	chromaffin cell	CL:0000166
+Ciliated  epithelial cell	ciliated epithelial cell	CL:0000067
+Ciliated cell	ciliated cell	CL:0000064
+Club cell	club cell	CL:0000158
+Club cell_BPIFB1 high	club cell	CL:0000158
+Club cell_KLK11 high	club cell	CL:0000158
+Collecting duct cell	kidney collecting duct cell	CL:1001225
+Collecting duct cell_CRABP1 high	kidney collecting duct cell	CL:1001225
+Conventional dendritic cell	conventional dendritic cell	CL:0000990
+Conventional dendritic cell_FECER1A high	conventional dendritic cell	CL:0000990
+Conventional dendritic cell_IL8 high	conventional dendritic cell	CL:0000990
+Cytotrophoblast	mononuclear cytotrophoblast cell	CL:0000523
+Cytotrophoblast_PAGE4 high	mononuclear cytotrophoblast cell	CL:0000523
+Cytotrophoblast_PEG10 high	mononuclear cytotrophoblast cell	CL:0000523
+D cell/ X/A cell	type D cell of stomach	CL:0002267
+Dendritic cell	dendritic cell	CL:0000451
+Dendritic cell_CPVL high	dendritic cell	CL:0000451
+Dendritic cell_FCER1A high	dendritic cell	CL:0000451
+Dendritic cell_HLA-DRA high	dendritic cell	CL:0000451
+Dendritic cell_LGALS2 high	dendritic cell	CL:0000451
+Dendritic cell_LYZ high	dendritic cell	CL:0000451
+Dendritic cell_WDFY4 high	dendritic cell	CL:0000451
+Dermis fibroblast	fibroblast of dermis	CL:0002551
+Distal progenitor cell	epithelial cell of distal tubule	CL:0002305
+Distal tubule cell	epithelial cell of distal tubule	CL:0002305
+Distal tubule cell_SLC12A3 high	epithelial cell of distal tubule	CL:0002305
+Distal tubule progenitor cell	epithelial cell of distal tubule	CL:0002305
+Duct cell	pancreatic ductal cell	CL:0002079
+Ductal cell	pancreatic ductal cell	CL:0002079
+ES_ANXA1 high	embryonic stem cell	CL:0002322
+ES_S100A6 high	embryonic stem cell	CL:0002322
+ES_TERF1 high	embryonic stem cell	CL:0002322
+Effector T cell	effector T cell	CL:0000911
+Endocardial cell	endocardial cell	CL:0002350
+Endocervix Mesothelial cell	epithelial cell of cervix	CL:0002535
+Endocrine cell	pancreatic endocrine cell	CL:0008024
+Endometrial cell	stromal cell of endometrium	CL:0002255
+Endothelial  cell	gut endothelial cell	CL:0000131
+Endothelial cell	endothelial cell	CL:0000115
+Endothelial cell (non-professional APC)	endothelial cell	CL:0000115
+Endothelial cell in EMT	endothelial cell	CL:0000115
+Endothelial cell_A2M high	endothelial cell	CL:0000115
+Endothelial cell_ACKR1 high	endothelial cell	CL:0000115
+Endothelial cell_APC	endothelial cell	CL:0000115
+Endothelial cell_APLNR high	endothelial cell	CL:0000115
+Endothelial cell_CCL2 high	endothelial cell	CL:0000115
+Endothelial cell_CCL21 high	endothelial cell	CL:0000115
+Endothelial cell_COL15A1 high	endothelial cell	CL:0000115
+Endothelial cell_Col4A1 high	endothelial cell	CL:0000115
+Endothelial cell_EMCN high	endothelial cell	CL:0000115
+Endothelial cell_ESAM high	endothelial cell	CL:0000115
+Endothelial cell_ESM1 high	endothelial cell	CL:0000115
+Endothelial cell_FABP4 high	endothelial cell	CL:0000115
+Endothelial cell_GJA4 high	endothelial cell	CL:0000115
+Endothelial cell_IGFBP3 high	endothelial cell	CL:0000115
+Endothelial cell_IGFBP5 high	endothelial cell	CL:0000115
+Endothelial cell_IL6 high	endothelial cell	CL:0000115
+Endothelial cell_NEAT1 high	endothelial cell	CL:0000115
+Endothelial cell_NTS high	endothelial cell	CL:0000115
+Endothelial cell_PLVAP high	endothelial cell	CL:0000115
+Endothelial cell_PODXL high	endothelial cell	CL:0000115
+Endothelial cell_SELE high	endothelial cell	CL:0000115
+Endothelial cell_SOCS3 high	endothelial cell	CL:0000115
+Endothelial cell_SPARCL1 high	endothelial cell	CL:0000115
+Endothelial cell_STC1 high	endothelial cell	CL:0000115
+Endothelial cell_TM4SF1 high	endothelial cell	CL:0000115
+Endothelial cell_TMEM100 high	endothelial cell	CL:0000115
+Endothelial cell_VWF high	endothelial cell	CL:0000115
+Endothelial progenitor cell	endothelial cell	CL:0000115
+Enteric glial cell	glial cell	CL:0000125
+Enteric nerval cell	neuron	CL:0000540
+Enterocyte	enterocyte	CL:0000584
+Enterocyte progenitor	enterocyte	CL:0000584
+Enterocyte progenitor_APOA4 high	enterocyte	CL:0000584
+Enterocyte progenitor_APOC3 high	enterocyte	CL:0000584
+Enterocyte progenitor_GUCA2B high	enterocyte	CL:0000584
+Enterocyte progenitor_OLFM4 high	enterocyte	CL:0000584
+Enterocyte progenitor_REG1A high	enterocyte	CL:0000584
+Enterocyte progenitor_TSPAN8 high	enterocyte	CL:0000584
+Enterocyte_AGR2 high	enterocyte	CL:0000584
+Enterocyte_APOA1 high	enterocyte	CL:0000584
+Enterocyte_APOA4 high	enterocyte	CL:0000584
+Enterocyte_BEST4 high	enterocyte	CL:0000584
+Enterocyte_CA1 high	enterocyte	CL:0000584
+Enterocyte_CA7 high	enterocyte	CL:0000584
+Enterocyte_FABP1 low	enterocyte	CL:0000584
+Enterocyte_GUCA2A high	enterocyte	CL:0000584
+Enterocyte_MT gene high	enterocyte	CL:0000584
+Enterocyte_OTOP2 high	enterocyte	CL:0000584
+Enterocyte_PHGR1 high	enterocyte	CL:0000584
+Enterocyte_RBP2 high	enterocyte	CL:0000584
+Enterocyte_RN7SK high	enterocyte	CL:0000584
+Enterocyte_SELENBP1 high	enterocyte	CL:0000584
+Enterocyte_SLC26A3 high	enterocyte	CL:0000584
+Enteroendocrine cell	enteroendocrine cell	CL:0000164
+Eosinophil	eosinophil	CL:0000771
+Ependymal cell	ependymal cell	CL:0000065
+Epithelial cell	epithelial cell	CL:0000066
+Epithelial cell_CCL21 high	epithelial cell	CL:0000066
+Epithelial cell_CCNB1 high	epithelial cell	CL:0000066
+Epithelial cell_CD24 high	epithelial cell	CL:0000066
+Epithelial cell_CLCA1 high	epithelial cell	CL:0000066
+Epithelial cell_CYSTM1 high	epithelial cell	CL:0000066
+Epithelial cell_EDN1 high	epithelial cell	CL:0000066
+Epithelial cell_FABP1 high	epithelial cell	CL:0000066
+Epithelial cell_HP high	epithelial cell	CL:0000066
+Epithelial cell_IGFBP5 high	epithelial cell	CL:0000066
+Epithelial cell_ITLN high	epithelial cell	CL:0000066
+Epithelial cell_KRT13 high	epithelial cell of esophagus	CL:0002252
+Epithelial cell_KRT14 high	epithelial cell of esophagus	CL:0002252
+Epithelial cell_KRT16 high	epithelial cell of esophagus	CL:0002252
+Epithelial cell_KRT17 high	epithelial cell of esophagus	CL:0002252
+Epithelial cell_KRT4 high	epithelial cell of esophagus	CL:0002252
+Epithelial cell_KRT7 high	epithelial cell of esophagus	CL:0002252
+Epithelial cell_MMP10 high	epithelial cell of lower respiratory tract	CL:0002632
+Epithelial cell_MMP7 high	epithelial cell of esophagus	CL:0002252
+Epithelial cell_MT1G high	epithelial cell	CL:0000066
+Epithelial cell_MT1L high	epithelial cell	CL:0000066
+Epithelial cell_NR4A2 high	epithelial cell	CL:0000066
+Epithelial cell_PLA2G2A high	epithelial cell of lung	CL:0000082
+Epithelial cell_S100A2 high	epithelial cell of lung	CL:0000082
+Epithelial cell_SCGB3A1 high	epithelial cell	CL:0000066
+Epithelial cell_TM4SF4 high	epithelial cell	CL:0000066
+Epithelial cell_TPPP3 high	epithelial cell	CL:0000066
+Epithelial progenitor cell	epithelial cell	CL:0000066
+Epithelial_cell_NUPR1 high	epithelial cell	CL:0000066
+Epithelial¨Cmesenchymal transition	epithelial cell	CL:0000066
+Erythroid cell	erythroid lineage cell	CL:0000764
+Erythroid cell_AHSP high	erythroid lineage cell	CL:0000764
+Erythroid cell_HBA1 high	erythroid lineage cell	CL:0000764
+Erythroid cell_HBB high	erythroid lineage cell	CL:0000764
+Erythroid cell_HBB_high	erythroid lineage cell	CL:0000764
+Erythroid cell_HBE1 high	erythroid lineage cell	CL:0000764
+Erythroid cell_HBM high	erythroid lineage cell	CL:0000764
+Erythroid cell_HBZ high	erythroid lineage cell	CL:0000764
+Erythroid cell_HBZ_high	erythroid lineage cell	CL:0000764
+Erythroid cell_PRDX2 high	erythroid lineage cell	CL:0000764
+Erythroid cell_SLC4A1 high	erythroid lineage cell	CL:0000764
+Erythroid cell__HBD high	erythroid lineage cell	CL:0000764
+Erythroid progenitor cell	erythroblast	CL:0000765
+Erythroid progenitor cell_NPM1 high	erythroblast	CL:0000765
+Erythroid progenitor cell_REXO2 high	erythroblast	CL:0000765
+Erythroid/Basophil Progenitor	erythroblast	CL:0000765
+Excitatory neuron	excitatory neuron	CL:0008030
+Exocrine cell	pancreas exocrine glandular cell	CL:1001599
+Exocrine cell_SAA1 high	pancreas exocrine glandular cell	CL:1001599
+Extravillous trophoblast_AOC1 high	extravillous trophoblast	CL:0008036
+Extravillous trophoblast_HPGD high	extravillous trophoblast	CL:0008036
+Extravillous trophoblast_LAIR2 high	extravillous trophoblast	CL:0008036
+Extravillous trophoblast_MMP12 high	extravillous trophoblast	CL:0008036
+Extravillous trophoblast_NOTUM high	extravillous trophoblast	CL:0008036
+Extravillous trophoblast_TIMP3 high	extravillous trophoblast	CL:0008036
+Fast skeletal muscle cell	fast muscle cell	CL:0000190
+Fenestrated endothelial cell_EMCN high	fenestrated cell	CL:0000666
+Fenestrated endothelial cell_SELE high	fenestrated cell	CL:0000666
+Fetal leydig cell	Leydig cell	CL:0000178
+Fibroblast	fibroblast	CL:0000057
+Fibroblast cell_MFAP5 high	fibroblast	CL:0000057
+Fibroblast_ CXCL12 high	fibroblast	CL:0000057
+Fibroblast_A2M high	fibroblast	CL:0000057
+Fibroblast_APOD high	fibroblast	CL:0000057
+Fibroblast_COL1A1 high	fibroblast of choroid plexus	CL:0002549
+Fibroblast_COL3A1 high	fibroblast	CL:0000057
+Fibroblast_COL5A2 high	fibroblast of dermis	CL:0002551
+Fibroblast_DCN high	fibroblast	CL:0000057
+Fibroblast_EFEMP1 high	fibroblast of dermis	CL:0002551
+Fibroblast_FBLN1 high	fibroblast	CL:0000057
+Fibroblast_FNDC1 high	fibroblast	CL:0000057
+Fibroblast_HMGB2 high	fibroblast	CL:0000057
+Fibroblast_IBSP_high	fibroblast	CL:0000057
+Fibroblast_LUM high	fibroblast	CL:0000057
+Fibroblast_MFAP4 high	fibroblast	CL:0000057
+Fibroblast_MFAP5 high	fibroblast	CL:0000057
+Fibroblast_MGP high	fibroblast	CL:0000057
+Fibroblast_MGP_high	fibroblast	CL:0000057
+Fibroblast_PENK high	fibroblast	CL:0000057
+Fibroblast_POSTN high	fibroblast	CL:0000057
+Fibroblast_PTX3 high	fibroblast	CL:0000057
+Fibroblast_SFPR4 high	fibroblast of dermis	CL:0002551
+Fibroblast_SFRP high	fibroblast	CL:0000057
+Fibroblast_ZFAND2A high	fibroblast	CL:0000057
+Follicular dendritic cell	follicular dendritic cell	CL:0000442
+Ganglion cell	neural cell	CL:0002319
+Gastric chief cell	peptic cell	CL:0000155
+Gastric chief cell_CHIA high	peptic cell	CL:0000155
+Gastric chief cell_MT high	peptic cell	CL:0000155
+Gastric chief cell_PGA3 high	peptic cell	CL:0000155
+Gastric mucosa cell	mucous cell of stomach	CL:0002180
+Germ cell	germ cell	CL:0000586
+Glial cell	glial cell	CL:0000125
+Glomerular endothelial cell_AQP1 high	glomerular endothelial cell	CL:0002188
+Goblet cell	goblet cell	CL:0000160
+Goblet cell_FCGBP high	goblet cell	CL:0000160
+Goblet cell_PIGR high	goblet cell	CL:0000160
+Granulocyte	granulocyte	CL:0000094
+HSPC	hematopoietic stem cell	CL:0000037
+Hepatocyte	hepatocyte	CL:0000182
+Hepatocyte-like cell	hepatocyte	CL:0000182
+Hepatocyte_FGB high	hepatocyte	CL:0000182
+Hepatocyte_GSTA1 high	hepatocyte	CL:0000182
+Hepatocyte_HP high	hepatocyte	CL:0000182
+Hepatocyte_TF high	hepatocyte	CL:0000182
+Hofbauer cell	Hofbauer cell	CL:3000001
+Hypertrophic chondrocyte	hypertrophic chondrocyte	CL:0000743
+IC-tran-PC	kidney cell	CL:1000497
+Immature sertoli cell(Pre-Sertoli cell)	Sertoli cell	CL:0000216
+Immune response stromal cell	stromal cell	CL:0000499
+Inflammatory cell	inflammatory cell	CL:0009002
+Inflammatory stromal cell_HSPA1A high	inflammatory cell	CL:0009002
+Inflammatory stromal cell_MT-RNR2 high	inflammatory cell	CL:0009002
+Inflammed  epithelial cell	inflammatory cell	CL:0009002
+Inhibitory neuron	inhibitory neuron	CL:0008029
+Intercalated cell	renal intercalated cell	CL:0005010
+Intercalated cell_SLC26A4 high	renal intercalated cell	CL:0005010
+Intercalated cell_SPINK1 high	renal intercalated cell	CL:0005010
+Intermediate Epithelial cell	intermediate epitheliocyte	CL:0002209
+Intermediated cell	UNKNOWN	UNKNOWN
+Interneuron	interneuron	CL:0000099
+Interstitial cell_POSTN high	kidney interstitial cell	CL:1000500
+Interstitial cell_PTN high	kidney interstitial cell	CL:1000500
+Interstitial progenitor cell	kidney interstitial cell	CL:1000500
+Intra-adrenal chromoblast	pigment cell	CL:0000147
+Intra-adrenal ganglion neuron	neuron	CL:0000540
+Keratinocyte	keratinocyte	CL:0000312
+Kerationcyte	keratinocyte	CL:0000312
+Kidney Epithelial cell	kidney epithelial cell	CL:0002518
+Kupffer cell	Kupffer cell	CL:0000091
+Kuppfer Cell	Kupffer cell	CL:0000091
+Kuppfer cell	Kupffer cell	CL:0000091
+Lens epithelial cell	lens epithelial cell	CL:0002224
+Loop of Henle(Thick ascending limb)	kidney loop of Henle thick ascending limb epithelial cell	CL:1001106
+Loop of Henle (Thick ascending limb)	kidney loop of Henle thick ascending limb epithelial cell	CL:1001106
+Loop of henle _ANXA1 high	kidney loop of Henle epithelial cell	CL:1000909
+Loop of henle _KNG1 high	kidney loop of Henle epithelial cell	CL:1000909
+Loop of henle _UMOD high	kidney loop of Henle epithelial cell	CL:1000909
+Loop of henle progenitor cell	kidney loop of Henle epithelial cell	CL:1000909
+Loop of henle_SFN high	kidney loop of Henle epithelial cell	CL:1000909
+Loop of henle_SLPI high	kidney loop of Henle epithelial cell	CL:1000909
+Loop of henle_SOD3 high	kidney loop of Henle epithelial cell	CL:1000909
+Loop of henle_SPP1 high	kidney loop of Henle epithelial cell	CL:1000909
+Luminal cell	luminal epithelial cell of prostatic duct	CL:0002237
+Luminal epithelium	placental epithelial cell	CL:0002577
+Lung mesenchyme cell (cardiopulmonary progenitor)	mesenchymal cell	CL:0008019
+Lymphatic endothelial cell	endothelial cell	CL:0000115
+Lymphatic endothelial cell_CCL21 high	endothelial cell	CL:0000115
+Lymphatic endothelial cell_NTS high	endothelial cell	CL:0000115
+Lymphocyte	lymphocyte	CL:0000542
+Lymphoid progenitor cell	lymphoid lineage restricted progenitor cell	CL:0000838
+M1 Macrophage	inflammatory macrophage	CL:0000863
+M1 Macrophage_CCL2_high	inflammatory macrophage	CL:0000863
+M1 Macrophage_CXCL8_high	inflammatory macrophage	CL:0000863
+M2 Macrophage	alternatively activated macrophage	CL:0000890
+M2 macrophage	alternatively activated macrophage	CL:0000890
+M2 macrophage_CXCL8 high	alternatively activated macrophage	CL:0000890
+M2 macrophage_MALAT1 high	alternatively activated macrophage	CL:0000890
+Macrophage	macrophage	CL:0000235
+Macrophage_APOC1 high	macrophage	CL:0000235
+Macrophage_C1QB high	macrophage	CL:0000235
+Macrophage_CCL20 high	macrophage	CL:0000235
+Macrophage_CCL3L3 high	macrophage	CL:0000235
+Macrophage_CD52 high	macrophage	CL:0000235
+Macrophage_CTSB high	macrophage	CL:0000235
+Macrophage_CXCL2 high	macrophage	CL:0000235
+Macrophage_CXCL8 high	macrophage	CL:0000235
+Macrophage_FABP5 high	macrophage	CL:0000235
+Macrophage_FCGR3A high	macrophage	CL:0000235
+Macrophage_GPR183 high	macrophage	CL:0000235
+Macrophage_HLA-DRA high	macrophage	CL:0000235
+Macrophage_IL1B high	macrophage	CL:0000235
+Macrophage_M2	macrophage	CL:0000235
+Macrophage_RGS1 high	macrophage	CL:0000235
+Macrophage_RNASE1 high	macrophage	CL:0000235
+Macrophage_SDS high	macrophage	CL:0000235
+Macrophage_SPP1 high	macrophage	CL:0000235
+Macrophage_TPSB2 high	macrophage	CL:0000235
+Macrophage_VSIG4 high	macrophage	CL:0000235
+Mast	mast cell	CL:0000097
+Mast cell	mast cell	CL:0000097
+Mast progenitor cell	mast cell	CL:0000097
+Megakaryocyte	megakaryocyte	CL:0000556
+Megakaryocyte/Erythroid Progenitor	megakaryocyte-erythroid progenitor cell	CL:0000050
+Megakaryocyte/Erythtoid progenitor cell	megakaryocyte-erythroid progenitor cell	CL:0000050
+Melanocyte	melanocyte	CL:0000148
+Melanocyte_MLANA high	melanocyte	CL:0000148
+Melanocyte_S100B high	melanocyte	CL:0000148
+Mesangial cell	mesangial cell	CL:0000650
+Mesenchymal  cell	mesenchymal cell	CL:0008019
+Mesothelial cell	mesothelial cell of peritoneum	CL:1000490
+Mesothelial cell_CPA3 high	mesothelial cell of peritoneum	CL:1000490
+Mesothelial cell_ITLN high	mesothelial cell of peritoneum	CL:1000490
+Mesothelial cell_MT gene high	mesothelial cell of peritoneum	CL:1000490
+Microglia	microglial cell	CL:0000129
+Microglia_ALOX5AP high	microglial cell	CL:0000129
+Microglia_C3 high	microglial cell	CL:0000129
+Microglia_SPP1_high	microglial cell	CL:0000129
+Microvascular endothelial cell	microvascular endothelial cell	CL:2000008
+Monocyte	monocyte	CL:0000576
+Monocyte/DC progenitor	macrophage dendritic cell progenitor	CL:0002009
+Monocyte_CXCL8 high	monocyte	CL:0000576
+Monocyte_CXCR2 high	monocyte	CL:0000576
+Monocyte_FCGR3A high	monocyte	CL:0000576
+Monocyte_FTL high	monocyte	CL:0000576
+Monocyte_IGHG4 high	monocyte	CL:0000576
+Monocyte_ISG15 high	monocyte	CL:0000576
+Monocyte_S100A12 high	monocyte	CL:0000576
+Monocyte_S100A9 high	monocyte	CL:0000576
+Monocyte_TPPP3 high	monocyte	CL:0000576
+Motile liver macrophage	macrophage	CL:0000235
+Motor neuron	motor neuron	CL:0000100
+MT high	UNKNOWN	UNKNOWN
+MT-gene high cell	UNKNOWN	UNKNOWN
+Mucosal aquamous Epithelial cell	mucous cell of stomach	CL:0002180
+Mucous Epithelial cell	epithelial cell	CL:0000066
+Mucous Epithelial cell_REG1A high	epithelial cell	CL:0000066
+Mucous Epithelial cell_TFF1 high	epithelial cell	CL:0000066
+Mucous neck cell	mucous neck cell	CL:0000651
+Multipotential  progenitor cell	multi fate stem cell	CL:0000048
+Muscle progenitor cell	cell of skeletal muscle	CL:0000188
+Myelinating oligodendrocyte	oligodendrocyte	CL:0000128
+Myeloid cell	myeloid cell	CL:0000763
+Myocyte	muscle cell	CL:0000187
+Myoepithelial cell	myoepithelial cell	CL:0000185
+Myofibroblast	myofibroblast cell	CL:0000186
+Myofibroblast_ELN high	myofibroblast cell	CL:0000186
+Myofibroblast_POSTN high	myofibroblast cell	CL:0000186
+Myofibroblast_TAGLN high	myofibroblast cell	CL:0000186
+Myogenic precursor cell	cell of skeletal muscle	CL:0000188
+M¨¹ller glia	Mueller cell	CL:0000636
+NK cell	natural killer cell	CL:0000623
+Natural killer cell	natural killer cell	CL:0000623
+Nephrogenic mesenchyme cell	nephrogenic mesenchyme stem cell	CL:0000383
+Nephrogenic mesenchyme cell_DAPL1 high	nephrogenic mesenchyme stem cell	CL:0000383
+Neuroendocrine cell	neuroendocrine cell	CL:0000165
+Neuroendocrine cell_ACPP high	neuroendocrine cell	CL:0000165
+Neuroendocrine cell_CCL21 high	neuroendocrine cell	CL:0000165
+Neuroendocrine cell_SST high	neuroendocrine cell	CL:0000165
+Neuron	neuron	CL:0000540
+Neuron_GAP43 high	neuron	CL:0000540
+Neuron_LINC00682 HIGH	neuron	CL:0000540
+Neuron_NEUROD6 high	neuron	CL:0000540
+Neuron_PENK high	neuron	CL:0000540
+Neuron_PLP1 high	neuron	CL:0000540
+Neuron_PPP1R17 high	neuron	CL:0000540
+Neuron_RELN high	neuron	CL:0000540
+Neuron_S100B high	neuron	CL:0000540
+Neuron_TMEM233 high	neuron	CL:0000540
+Neuron_XPR1 high	neuron	CL:0000540
+Neutriophil	neutrophil	CL:0000775
+Neutrophil	neutrophil	CL:0000775
+Neutrophil _S100A8 high	neutrophil	CL:0000775
+Neutrophil_CAMP high	neutrophil	CL:0000775
+Neutrophil_CAMP_high	neutrophil	CL:0000775
+Neutrophil_CD177 high	neutrophil	CL:0000775
+Neutrophil_CXCL3 high	neutrophil	CL:0000775
+Neutrophil_DEFA3 high	neutrophil	CL:0000775
+Neutrophil_DEFA4 high	neutrophil	CL:0000775
+Neutrophil_DEFA4_high	neutrophil	CL:0000775
+Neutrophil_ELANE high	neutrophil	CL:0000775
+Neutrophil_FCGR3B high	neutrophil	CL:0000775
+Neutrophil_IL1B high	neutrophil	CL:0000775
+Neutrophil_LCN2 high	neutrophil	CL:0000775
+Neutrophil_LTF high	neutrophil	CL:0000775
+Neutrophil_LYZ high	neutrophil	CL:0000775
+Neutrophil_MMP high	neutrophil	CL:0000775
+Neutrophil_MMP9 high	neutrophil	CL:0000775
+Neutrophil_MPO high	neutrophil	CL:0000775
+Neutrophil_MPO_high	neutrophil	CL:0000775
+Neutrophil_OLFM4 high	neutrophil	CL:0000775
+Neutrophil_OLFM42 high	neutrophil	CL:0000775
+Neutrophil_PRTN3 high	neutrophil	CL:0000775
+Neutrophil_RNASE2 high	neutrophil	CL:0000775
+Neutrophil_S100A12 high	neutrophil	CL:0000775
+Neutrophil_S100A8 high	neutrophil	CL:0000775
+Neutrophil_S100A9 high	neutrophil	CL:0000775
+Neutrophil_S100P high	neutrophil	CL:0000775
+Neutrophil__S100A12 high	neutrophil	CL:0000775
+Oligodendrocyte	oligodendrocyte	CL:0000128
+Oligodendrocyte progenitor cell	oligodendrocyte	CL:0000128
+Oligodendrocyte_MT gene high	oligodendrocyte	CL:0000128
+Oligodendrocyte_TF high	oligodendrocyte	CL:0000128
+Osteoblast	osteoblast	CL:0000062
+Osteoblast_IBSP high	osteoblast	CL:0000062
+Osteoclast	osteoclast	CL:0000092
+Osteoclast_ACP5 high	osteoclast	CL:0000092
+Oviductal epithelial  cell	epithelial cell	CL:0000066
+Paneth cell	paneth cell	CL:0000510
+Paneth cell_DEFA5 high	paneth cell	CL:0000510
+Paneth cell_REG3A high	paneth cell	CL:0000510
+Parietal cell	parietal cell	CL:0000162
+Parietal cell_ATP4B high	parietal cell	CL:0000162
+Parietal cell_GIF high	parietal cell	CL:0000162
+Pericyte	pericyte cell	CL:0000669
+Pit cell	hepatic pit cell	CL:2000054
+Pit cell_FOXQ1 high	hepatic pit cell	CL:2000054
+Pit cell_MUC6 high	hepatic pit cell	CL:2000054
+Pit cell_TFF2 high	hepatic pit cell	CL:2000054
+Pit cell_WFDC21P high	hepatic pit cell	CL:2000054
+Plasmacytoid dendritic cell	plasmacytoid dendritic cell, human	CL:0001058
+Podocyte	glomerular visceral epithelial cell	CL:0000653
+Pre B cell	precursor B cell	CL:0000817
+Primordial germ cell	primordial germ cell	CL:0000670
+Primordial germ cell_GTSF1 high	primordial germ cell	CL:0000670
+Primordial germ cell_TCL1A high	primordial germ cell	CL:0000670
+Principle cell	renal principal cell	CL:0005009
+Proliferating  B cell	B cell	CL:0000236
+Proliferating  cell	UNKNOWN	UNKNOWN
+Proliferating  keratinocyte	keratinocyte	CL:0000312
+Proliferating B cell	B cell	CL:0000236
+Proliferating Intra-adrenal ganglion neuron	neuron	CL:0000540
+Proliferating T cell	T cell	CL:0000084
+Proliferating alveolar bipotent progenitor cell	pneumocyte	CL:0000322
+Proliferating cell	UNKNOWN	UNKNOWN
+Proliferating cell_C7 high	UNKNOWN	UNKNOWN
+Proliferating cell_CCNB1 high	UNKNOWN	UNKNOWN
+Proliferating cell_FABP5 high	UNKNOWN	UNKNOWN
+Proliferating cell_HMGB2 high	UNKNOWN	UNKNOWN
+Proliferating cell_KIAA0101 high	UNKNOWN	UNKNOWN
+Proliferating cell_KIAA0101_high	UNKNOWN	UNKNOWN
+Proliferating cell_PTTG1 high	UNKNOWN	UNKNOWN
+Proliferating cell_TOP2A high	UNKNOWN	UNKNOWN
+Proliferating cell_UBE2C  high	UNKNOWN	UNKNOWN
+Proliferating cell_UBE2C high	UNKNOWN	UNKNOWN
+Proliferating cell_UBE2C_high	UNKNOWN	UNKNOWN
+Proliferating endothelial cell	endothelial cell	CL:0000115
+Proliferating fibroblast	fibroblast	CL:0000057
+Proliferating lung mesenchyme cell_HIST1H4C high	mesenchymal cell	CL:0008019
+Proliferating lung mesenchyme cell_UBE2C high	mesenchymal cell	CL:0008019
+Proliferating mesothelial cell	mesothelial cell of pleura	CL:1000491
+Proliferating monocyte	monocyte	CL:0000576
+Proliferating radial glia	radial glial cell	CL:0000681
+Proliferating smooth muscle cell	smooth muscle cell	CL:0000192
+Proliferating stromal cell	stromal cell	CL:0000499
+Proximal progenitor cell	epithelial cell of lung	CL:0000082
+Proximal progenitor cell_GRP high	epithelial cell of lung	CL:0000082
+Proximal progenitor cell_SCGB3A2 high	epithelial cell of lung	CL:0000082
+Proximal tubule cell	epithelial cell of proximal tubule	CL:0002306
+Proximal tubule cell_ALDOB high	epithelial cell of proximal tubule	CL:0002306
+Proximal tubule cell_MT1G high	epithelial cell of proximal tubule	CL:0002306
+Proximal tubule cell_SOX4 high	epithelial cell of proximal tubule	CL:0002306
+Proximal tubule progenitor cell	epithelial cell of proximal tubule	CL:0002306
+Purkinje cell	Purkinje cell	CL:0000121
+Radial glia	radial glial cell	CL:0000681
+Radial glia_HES1 high	radial glial cell	CL:0000681
+Radial glia_HES1_high	radial glial cell	CL:0000681
+Retinal pigment epithelal cell	retinal pigment epithelial cell	CL:0002586
+Retinal pigment epithelal cell_MLANA high	retinal pigment epithelial cell	CL:0002586
+Retinal progenitor cell_ATP1A2 high	retinal progenitor cell	CL:0002672
+Retinal progenitor cell_FABP7 high	retinal progenitor cell	CL:0002672
+S-shaped body cell	kidney cell	CL:1000497
+S-shaped body cell_CFAP126 high	kidney cell	CL:1000497
+S-shaped body cell_LINC01158 high	kidney cell	CL:1000497
+S-shaped body medial cell	kidney cell	CL:1000497
+Secretory epithelial cell	serous cell of epithelium of trachea	CL:1000330
+Sertoli cell_DLK1 high	Sertoli cell	CL:0000216
+Sinusoidal endothelial cell	endothelial cell of hepatic sinusoid	CL:1000398
+Sinusoidal endothelial cell_FCN1 high	endothelial cell of hepatic sinusoid	CL:1000398
+Smooth muscel cell	smooth muscle cell	CL:0000192
+Smooth muscle cell	smooth muscle cell	CL:0000192
+Smooth muscle cell_ACTA2 high	smooth muscle cell	CL:0000192
+Smooth muscle cell_ACTG2 high	smooth muscle cell	CL:0000192
+Smooth muscle cell_ADIRF high	smooth muscle cell	CL:0000192
+Smooth muscle cell_CCL19 high	smooth muscle cell	CL:0000192
+Smooth muscle cell_CCL4L2 high	smooth muscle cell	CL:0000192
+Smooth muscle cell_CYCS high	smooth muscle cell of the pulmonary artery	CL:0002591
+Smooth muscle cell_MYL9 high	smooth muscle cell	CL:0000192
+Smooth muscle cell_MYLK high	smooth muscle cell	CL:0000192
+Smooth muscle cell_PDK4 high	smooth muscle cell	CL:0000192
+Smooth muscle cell_TAGLN high	smooth muscle cell	CL:0000192
+Soomth muscle cell	smooth muscle cell	CL:0000192
+Spermatocyte	spermatocyte	CL:0000017
+Stomach fundus cell	mucous cell of stomach	CL:0002180
+Striated muscle cell	striated muscle cell	CL:0000737
+Stromal cell	stromal cell	CL:0000499
+Stromal cell_APOD high	stromal cell	CL:0000499
+Stromal cell_ASPN high	stromal cell	CL:0000499
+Stromal cell_CLEC3B high	stromal cell	CL:0000499
+Stromal cell_COL1A1 high	stromal cell	CL:0000499
+Stromal cell_COL3A1 high	stromal cell	CL:0000499
+Stromal cell_CXCL14 high	stromal cell	CL:0000499
+Stromal cell_DCN high	stromal cell	CL:0000499
+Stromal cell_ERRFI1 high	stromal cell of endometrium	CL:0002255
+Stromal cell_GPX3 high	stromal cell	CL:0000499
+Stromal cell_HES1 high	stromal cell	CL:0000499
+Stromal cell_LOX high	stromal cell	CL:0000499
+Stromal cell_LUM high	stromal cell	CL:0000499
+Stromal cell_MFAP4 high	stromal cell	CL:0000499
+Stromal cell_MFAP5 high	stromal cell	CL:0000499
+Stromal cell_MGP high	stromal cell	CL:0000499
+Stromal cell_NOV high	stromal cell	CL:0000499
+Stromal cell_PCP4 high	stromal cell	CL:0000499
+Stromal cell_PLA2G2A high	stromal cell	CL:0000499
+Stromal cell_PRG4 high	stromal cell	CL:0000499
+Stromal cell_PTGDS high	stromal cell	CL:0000499
+Stromal cell_PTGDS_high	stromal cell	CL:0000499
+Stromal cell_SFRP2 high	stromal cell	CL:0000499
+Stromal cell_SULT1E1 high	stromal cell	CL:0000499
+Stromal cell_TSLP high	stromal cell	CL:0000499
+Superficial cell	ureteral cell	CL:1000601
+Sympathetic neuron	sympathetic neuron	CL:0011103
+Syncytiotrophoblast	syncytiotrophoblast cell	CL:0000525
+Syncytiotrophoblast cell	syncytiotrophoblast cell	CL:0000525
+T cell	T cell	CL:0000084
+T cell_CCL4 high	T cell	CL:0000084
+T cell_CCL5 high	T cell	CL:0000084
+T cell_GNLY high	T cell	CL:0000084
+T cell_GZMA high	T cell	CL:0000084
+T cell_IFNG high	T cell	CL:0000084
+T cell_IL7R high	T cell	CL:0000084
+T cell_LEPROTL1 high	T cell	CL:0000084
+T cell_TRAC high	T cell	CL:0000084
+Tendon cell_GCG high	tendon cell	CL:0000388
+Theca cell	theca cell	CL:0000503
+Thyroid follicular cell	thyroid follicular cell	CL:0002258
+Treg cell	regulatory T cell	CL:0000815
+Unknown	UNKNOWN	UNKNOWN
+Unknown Epithelial cell_EFNA1 high	epithelial cell	CL:0000066
+Unknown Epithelial cell_FOS high	epithelial cell	CL:0000066
+Unknown1	UNKNOWN	UNKNOWN
+Unknown2	UNKNOWN	UNKNOWN
+Ureteric Epithelial cell	epithelial cell	CL:0000066
+Ureteric bud cell	epithelial cell	CL:0000066
+Ureteric epithelial cell	epithelial cell	CL:0000066
+Ureteric smooth muscle cell	ureter smooth muscle cell	CL:1000979
+Urothelial cell	bladder urothelial cell	CL:1001428
+Vascular endothelial cell	endothelial cell of vascular tree	CL:0002139
+Vascular endothelial cell_A2M high	endothelial cell of vascular tree	CL:0002139
+Vascular endothelial cell_AQP1 high	endothelial cell of vascular tree	CL:0002139
+Vascular endothelial cell_CD34 high	endothelial cell of vascular tree	CL:0002139
+Vascular endothelial cell_FABP4 high	endothelial cell of vascular tree	CL:0002139
+Vascular endothelial cell_FABP5 high	endothelial cell of vascular tree	CL:0002139
+Vascular endothelial cell_IGFBP3 high	endothelial cell of vascular tree	CL:0002139
+Vascular endothelial cell_SELE high	endothelial cell of vascular tree	CL:0002139
+Vascular endothelial cell_VWF high	endothelial cell of vascular tree	CL:0002139
+Vascular epithelial cell	epithelial cell	CL:0000066
+Vascular smooth muscle cell	vascular associated smooth muscle cell	CL:0000359
+Ventricle Cardiomyocyte_MYL2 high	cardiac muscle cell	CL:0000746
+Ventricle cardiomyocyte	cardiac muscle cell	CL:0000746
+Ventricle cardiomyocyte_CSRP3 high	cardiac muscle cell	CL:0000746
+Ventricle cardiomyocyte_MB high	cardiac muscle cell	CL:0000746
+Ventricle cardiomyocyte_MT gene high	cardiac muscle cell	CL:0000746
+Villous trophoblast cell	trophoblast cell	CL:0000351
+Zona fasciculata cell	cortical cell of adrenal gland	CL:0002097
+Zona fasciculata cell_CYP11B2 high	cortical cell of adrenal gland	CL:0002097
+Zona fasciculata cell_FDX1 high	cortical cell of adrenal gland	CL:0002097
+Zona fasciculata cell_GSTA1 high	cortical cell of adrenal gland	CL:0002097
+Zona fasciculata cell_HSD3B2 high	cortical cell of adrenal gland	CL:0002097
+activative T cell	T cell	CL:0000084
+inflammatory cell	inflammatory cell	CL:0009002
+lymphatic endothelial cell	endothelial cell of lymphatic vessel	CL:0002138

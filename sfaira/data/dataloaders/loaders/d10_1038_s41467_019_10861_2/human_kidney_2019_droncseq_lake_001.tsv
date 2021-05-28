@@ -1,0 +1,29 @@
+source	target	target_id
+Collecting Duct - Intercalated Cells Type A (cortex)	kidney collecting duct intercalated cell	CL:1001432
+Collecting Duct - Intercalated Cells Type A (medulla)	kidney collecting duct intercalated cell	CL:1001432
+Collecting Duct - Intercalated Cells Type B	kidney collecting duct intercalated cell	CL:1001432
+Collecting Duct - PCs - Stressed Dissoc Subset	kidney collecting duct principal cell	CL:1001431
+Collecting Duct - Principal Cells (cortex)	kidney collecting duct principal cell	CL:1001431
+Collecting Duct - Principal Cells (medulla)	kidney collecting duct principal cell	CL:1001431
+Connecting Tubule	kidney connecting tubule epithelial cell	CL:1000768
+Decending Limb	kidney loop of Henle descending limb epithelial cell	CL:1001021
+Distal Convoluted Tubule	kidney distal convoluted tubule epithelial cell	CL:1000849
+Endothelial Cells (unassigned)	endothelial cell	CL:0000115
+Endothelial Cells - AEA & DVR 	kidney blood vessel cell	CL:1000854
+Endothelial Cells - AVR	kidney blood vessel cell	CL:1000854
+Endothelial Cells - glomerular capillaries	glomerular capillary endothelial cell	CL:1001005
+Epithelial Cells (unassigned)	renal intercalated cell	CL:0005010
+Immune Cells - Macrophages	macrophage	CL:0000235
+Interstitium	kidney interstitial cell	CL:1000500
+Mesangial Cells	mesangial cell	CL:0000650
+Podocytes	glomerular visceral epithelial cell	CL:0000653
+Proximal Tubule Epithelial Cells (S1)	epithelial cell of proximal tubule	CL:0002306
+Proximal Tubule Epithelial Cells (S2)	epithelial cell of proximal tubule	CL:0002306
+Proximal Tubule Epithelial Cells (S3)	epithelial cell of proximal tubule	CL:0002306
+Proximal Tubule Epithelial Cells - Fibrinogen+ (S3)	epithelial cell of proximal tubule	CL:0002306
+Proximal Tubule Epithelial Cells - Stress/Inflam	epithelial cell of proximal tubule	CL:0002306
+Thick Ascending Limb	kidney loop of Henle thick ascending limb epithelial cell	CL:1001106
+Thin ascending limb	kidney loop of Henle thin ascending limb epithelial cell	CL:1001107
+Vascular Smooth Muscle Cells and pericytes	kidney pelvis smooth muscle cell	CL:1000702
+Unknown - Novel PT CFH+ Subpopulation (S2)	UNKNOWN	UNKNOWN
+Unknown	UNKNOWN	UNKNOWN

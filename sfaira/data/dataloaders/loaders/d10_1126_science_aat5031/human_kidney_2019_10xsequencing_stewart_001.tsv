@@ -1,0 +1,71 @@
+source	target	target_id
+Ascending vasa recta endothelium	vasa recta ascending limb cell	CL:1001131
+B cell	B cell	CL:0000236
+CD4 T cell	CD4-positive, alpha-beta T cell	CL:0000624
+CD8 T cell	CD8-positive, alpha-beta T cell	CL:0000625
+CNT/PC - proximal UB	UNKNOWN	UNKNOWN
+Cap mesenchyme	mesenchymal cell	CL:0008019
+Connecting tubule	kidney connecting tubule epithelial cell	CL:1000768
+Descending vasa recta endothelium	vasa recta descending limb cell	CL:1001285
+Distal S shaped body	UNKNOWN	UNKNOWN
+Distal renal vesicle	epithelial cell	CL:0000066
+Distinct proximal tubule 1	epithelial cell of proximal tubule	CL:0002306
+Distinct proximal tubule 2	epithelial cell of proximal tubule	CL:0002306
+Endothelium	endothelial cell	CL:0000115
+Epithelial progenitor cell	epithelial cell	CL:0000066
+Erythroid	erythrocyte	CL:0000232
+Fibroblast	fibroblast	CL:0000057
+Fibroblast 1	fibroblast	CL:0000057
+Fibroblast 2	fibroblast	CL:0000057
+Glomerular endothelium	glomerular capillary endothelial cell	CL:1001005
+Indistinct intercalated cell	renal intercalated cell	CL:0005010
+Innate like lymphocyte	innate lymphoid cell	CL:0001065
+Loop of Henle	kidney loop of Henle epithelial cell	CL:1000909
+MNP-a/classical monocyte derived	classical monocyte	CL:0000860
+MNP-b/non-classical monocyte derived	non-classical monocyte	CL:0000875
+MNP-c/dendritic cell	dendritic cell	CL:0000451
+MNP-d/Tissue macrophage	macrophage	CL:0000235
+Macrophage 1	macrophage	CL:0000235
+Macrophage 2	macrophage	CL:0000235
+Mast cell	mast cell	CL:0000097
+Mast cells	mast cell	CL:0000097
+Medial S shaped body	UNKNOWN	UNKNOWN
+Megakaryocyte	megakaryocyte	CL:0000556
+Monocyte	monocyte	CL:0000576
+Myofibroblast	kidney interstitial myofibroblast	CL:1000691
+Myofibroblast 1	kidney interstitial myofibroblast	CL:1000691
+Myofibroblast 2	kidney interstitial myofibroblast	CL:1000691
+NK cell	natural killer cell	CL:0000623
+NKT cell	mature NK T cell	CL:0000814
+Neuron	neuron	CL:0000540
+Neutrophil	neutrophil	CL:0000775
+Pelvic epithelium	epithelial cell	CL:0000066
+Pelvic epithelium - distal UB	epithelial cell	CL:0000066
+Peritubular capillary endothelium 1	peritubular capillary endothelial cell	CL:1001033
+Peritubular capillary endothelium 2	peritubular capillary endothelial cell	CL:1001033
+Plasmacytoid dendritic cell	plasmacytoid dendritic cell	CL:0000784
+Podocyte	glomerular visceral epithelial cell	CL:0000653
+Principal cell	kidney collecting duct principal cell	CL:1001431
+Proliferating B cell	B cell	CL:0000236
+Proliferating NK cell	natural killer cell	CL:0000623
+Proliferating Proximal Tubule	kidney proximal straight tubule epithelial cell	CL:1000839
+Proliferating cDC2	conventional dendritic cell	CL:0000990
+Proliferating cap mesenchyme	nephrogenic mesenchyme stem cell	CL:0000383
+Proliferating distal renal vesicle	kidney blood vessel cell	CL:1000854
+Proliferating fibroblast	fibroblast	CL:0000057
+Proliferating macrophage	macrophage	CL:0000235
+Proliferating monocyte	monocyte	CL:0000576
+Proliferating myofibroblast	kidney interstitial myofibroblast	CL:1000691
+Proliferating stroma progenitor	UNKNOWN	UNKNOWN
+Proximal S shaped body	UNKNOWN	UNKNOWN
+Proximal UB	UNKNOWN	UNKNOWN
+Proximal renal vesicle	kidney blood vessel cell	CL:1000854
+Proximal tubule	epithelial cell of proximal tubule	CL:0002306
+Stroma progenitor	UNKNOWN	UNKNOWN
+Thick ascending limb of Loop of Henle	kidney loop of Henle thick ascending limb epithelial cell	CL:1001106
+Transitional urothelium	urothelial cell	CL:0000731
+Type A intercalated cell	renal intercalated cell	CL:0005010
+Type B intercalated cell	renal intercalated cell	CL:0005010
+cDC1	conventional dendritic cell	CL:0000990
+cDC2	conventional dendritic cell	CL:0000990
+pDC	plasmacytoid dendritic cell	CL:0000784

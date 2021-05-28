@@ -1,0 +1,78 @@
+source	target	target_id
+AFP_ALB positive cells	UNKNOWN	UNKNOWN
+Acinar cells	acinar cell	CL:0000622
+Adrenocortical cells	cortical cell of adrenal gland	CL:0002097
+Amacrine cells	amacrine cell	CL:0000561
+Antigen presenting cells	professional antigen presenting cell	CL:0000145
+Astrocytes	astrocyte	CL:0000127
+Bipolar cells	bipolar neuron	CL:0000103
+Bronchiolar and alveolar epithelial cells	epithelial cell	CL:0000066
+CCL19_CCL21 positive cells	UNKNOWN	UNKNOWN
+CLC_IL5RA positive cells	UNKNOWN	UNKNOWN
+CSH1_CSH2 positive cells	UNKNOWN	UNKNOWN
+Cardiomyocytes	cardiac muscle cell	CL:0000746
+Chromaffin cells	chromaffin cell	CL:0000166
+Ciliated epithelial cells	ciliated epithelial cell	CL:0000067
+Corneal and conjunctival epithelial cells	epithelial cell	CL:0000066
+Ductal cells	pancreatic ductal cell	CL:0002079
+ELF3_AGBL2 positive cells	UNKNOWN	UNKNOWN
+ENS glia	glial cell	CL:0000125
+ENS neurons	enteric neuron	CL:0007011
+Endocardial cells	endocardial cell	CL:0002350
+Epicardial fat cells	epicardial adipocyte	CL:1000309
+Erythroblasts	erythroblast	CL:0000765
+Excitatory neurons	excitatory neuron	CL:0008030
+Extravillous trophoblasts	extravillous trophoblast	CL:0008036
+Ganglion cells	CNS neuron (sensu Vertebrata)	CL:0000117
+Goblet cells	goblet cell	CL:0000160
+Granule neurons	granule cell	CL:0000120
+Hematopoietic stem cells	hematopoietic stem cell	CL:0000037
+Hepatoblasts	hepatoblast	CL:0005026
+Horizontal cells	retina horizontal cell	CL:0000745
+IGFBP1_DKK1 positive cells	UNKNOWN	UNKNOWN
+Inhibitory interneurons	inhibitory interneuron	CL:0000498
+Inhibitory neurons	inhibitory neuron	CL:0008029
+Intestinal epithelial cells	intestinal epithelial cell	CL:0002563
+Islet endocrine cells	endocrine cell	CL:0000163
+Lens fibre cells	lens fiber cell	CL:0011004
+Limbic system neurons	neuron of cerebral cortex	CL:0002609
+Lymphatic endothelial cells	endothelial cell of lymphatic vessel	CL:0002138
+Lymphoid cells	innate lymphoid cell	CL:0001065
+MUC13_DMBT1 positive cells	UNKNOWN	UNKNOWN
+Megakaryocytes	megakaryocyte	CL:0000556
+Mesangial cells	mesangial cell	CL:0000650
+Mesothelial cells	mesothelial cell	CL:0000077
+Metanephric cells	kidney cell	CL:1000497
+Microglia	microglial cell	CL:0000129
+Myeloid cells	myeloid cell	CL:0000763
+Neuroendocrine cells	neuroendocrine cell	CL:0000165
+Oligodendrocytes	oligodendrocyte	CL:0000128
+PAEP_MECOM positive cells	UNKNOWN	UNKNOWN
+PDE11A_FAM19A2 positive cells	UNKNOWN	UNKNOWN
+PDE1C_ACSM3 positive cells	UNKNOWN	UNKNOWN
+Parietal and chief cells	parietal cell	CL:0000162
+Photoreceptor cells	photoreceptor cell	CL:0000210
+Purkinje neurons	Purkinje cell	CL:0000121
+Retinal pigment cells	visual pigment cell	CL:0000149
+Retinal progenitors and Muller glia	retinal progenitor cell	CL:0002672
+SATB2_LRRC7 positive cells	UNKNOWN	UNKNOWN
+SKOR2_NPSR1 positive cells	UNKNOWN	UNKNOWN
+SLC24A4_PEX5L positive cells	UNKNOWN	UNKNOWN
+SLC26A4_PAEP positive cells	UNKNOWN	UNKNOWN
+STC2_TLX1 positive cells	UNKNOWN	UNKNOWN
+Satellite cells	skeletal muscle satellite cell	CL:0000594
+Schwann cells	Schwann cell	CL:0002573
+Skeletal muscle cells	cell of skeletal muscle	CL:0000188
+Smooth muscle cells	smooth muscle cell	CL:0000192
+Squamous epithelial cells	squamous epithelial cell	CL:0000076
+Stellate cells	hepatic stellate cell	CL:0000632
+Stromal cells	stromal cell	CL:0000499
+Sympathoblasts	neural progenitor cell	CL:0011020
+Syncytiotrophoblasts and villous cytotrophoblasts	trophoblast cell	CL:0000351
+Thymic epithelial cells	epithelial cell of thymus	CL:0002293
+Thymocytes	thymocyte	CL:0000893
+Trophoblast giant cells	trophoblast giant cell	CL:0002488
+Unipolar brush cells	brush cell	CL:0002204
+Ureteric bud cells	ureteral cell	CL:1000601
+Vascular endothelial cells	endothelial cell of vascular tree	CL:0002139
+Visceral neurons	visceromotor neuron	CL:0005025
