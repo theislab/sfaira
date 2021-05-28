@@ -6,6 +6,7 @@ import pandas as pd
 import pickle
 from typing import List, Union
 import warnings
+import time
 
 from sfaira.consts import AdataIdsSfaira, AdataIds
 from sfaira.data import DatasetInteractive
@@ -155,6 +156,7 @@ class UserInterface:
             authors: list,
             description: str,
             metadata: dict = {},
+            update_existing_deposition: Union[None, str] = None,
             publish: bool = False,
             sandbox: bool = False,
             deposit_topologies: bool = True
@@ -173,6 +175,8 @@ class UserInterface:
         :param description: Description of the Zenodo deposition.
         :param metadata: Dictionary with further metadata attributes of the deposit.
          See the Zenodo API refenrece for accepted keys: https://developers.zenodo.org/#representation
+        :param update_existing_deposition: If None, a new deposition will be created.
+        If an existing deposition ID is provided as a sting, than this deposition will be updated with a new version.
         :param publish: Set this to True to directly publish the weights on Zenodo.
          When set to False a draft will be created, which can be edited in the browser before publishing.
         :param sandbox: If True, use the Zenodo testing platform at https://sandbox.zenodo.org for your deposition.
@@ -193,15 +197,43 @@ class UserInterface:
             raise ValueError(
                 "Your Zenodo access token was not accepted by the API. Please provide a valid access token.")
 
-        # Create empty deposition
-        r = requests.post(f'https://{sandbox}zenodo.org/api/deposit/depositions',
-                          params=params,
-                          json={},
-                          headers=headers)
+        if update_existing_deposition is None:
+            # Create empty deposition
+            r = requests.post(f'https://{sandbox}zenodo.org/api/deposit/depositions',
+                              params=params,
+                              json={},
+                              headers=headers)
+            # Obtain bucket URL and deposition ID
+            bucket_url = r.json()["links"]["bucket"]
+            deposition_id = r.json()['id']
+        else:
+            # Create a new version of the existing deposition
+            r = requests.post(
+                f'https://{sandbox}zenodo.org/api/deposit/depositions/{update_existing_deposition}/actions/newversion',
+                params=params)
+            if r.status_code != 201:
+                raise ValueError(
+                    f"A new version of deposition {update_existing_deposition} could not be created, "
+                    f"please make sure your API key is associated with the account that owns this deposition.")
+            deposition_id = r.json()["links"]["latest_draft"].split("/")[-1]
+            r = requests.get(f'https://{sandbox}zenodo.org/api/deposit/depositions/{deposition_id}', params=params)
+            bucket_url = r.json()["links"]["bucket"]
 
-        # Obtain bucket URL and deposition ID
-        bucket_url = r.json()["links"]["bucket"]
-        deposition_id = r.json()['id']
+            # Delete all existing files from new version
+            r_files = requests.get(f'https://{sandbox}zenodo.org/api/deposit/depositions/{deposition_id}/files',
+                                   params=params)
+            while len(r_files.json()) > 0:
+                for file_dict in r_files.json():
+                    r_del = requests.delete(
+                        f'https://{sandbox}zenodo.org/api/deposit/depositions/{deposition_id}/files/{file_dict["id"]}',
+                        params=params)
+                r_files = requests.get(f'https://{sandbox}zenodo.org/api/deposit/depositions/{deposition_id}/files',
+                                       params=params)
+                while isinstance(r_files.json(), dict):
+                    print("Pausing due to Zenodo API rate limitng")
+                    time.sleep(10)
+                    r_files = requests.get(f'https://{sandbox}zenodo.org/api/deposit/depositions/{deposition_id}/files',
+                                           params=params)
 
         # Loop over files in model lookup table and upload them one by one
         for i, weight_path in enumerate(self.model_lookuptable['model_file_path']):
