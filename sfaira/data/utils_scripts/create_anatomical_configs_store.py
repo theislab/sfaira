@@ -3,7 +3,7 @@ import sys
 import tensorflow as tf
 
 # Any data loader here to extract path:
-from sfaira.data import DistributedStore, clean_string
+from sfaira.data import load_store, clean_string
 
 print(tf.__version__)
 
@@ -49,7 +49,6 @@ configs_to_write = {
         "trachea",
         "ureter",
         "urinary bladder",
-        "uterine cervix",
         "uterus",
         "vault of skull",
     ],
@@ -85,7 +84,8 @@ configs_to_write = {
 for organism, organs in configs_to_write.items():
     for organ in organs:
         print(f"Writing {organism} {organ}")
-        store = DistributedStore(cache_path=store_path)
+        store = load_store(cache_path=store_path)
+        store.subset(attr_key="sample_source", values=["primary_tissue"])
         store.subset(attr_key="organism", values=[organism])
         store.subset(attr_key="organ", values=[organ])
         store.write_config(os.path.join(config_path, f"config_{clean_string(organism)}_{clean_string(organ)}"))

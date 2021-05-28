@@ -1,10 +1,10 @@
-import numpy as np
 import os
 import sys
-import tensorflow as tf
 
 # Any data loader here to extract path:
-from sfaira.data import DistributedStore
+from sfaira.consts import OCS
+from sfaira.data import load_store
+from sfaira.versions.metadata import CelltypeUniverse, OntologyCl
 
 
 # Set global variables.
@@ -15,6 +15,7 @@ config_path = str(sys.argv[2])
 out_path = str(sys.argv[3])
 
 col_name_annot = "cell_ontology_class"
+cl_branch = "v2021-02-01"
 
 for f in os.listdir(config_path):
     fn = os.path.join(config_path, f)
@@ -24,7 +25,7 @@ for f in os.listdir(config_path):
             print(f"Writing target universe for {f}")
             organism = f.split("_")[1]
             organ = f.split("_")[2].split(".")[0]
-            store = DistributedStore(cache_path=store_path)
+            store = load_store(cache_path=store_path)
             store.load_config(fn=fn)
             celltypes_found = set([])
             for k, idx in store.indices.items():
@@ -40,8 +41,12 @@ for f in os.listdir(config_path):
             if len(celltypes_found) == 0:
                 print(f"WARNING: No cells found for {organism} {organ}, skipping.")
             else:
-                celltypes_found = store.celltypes_universe.onto_cl.get_effective_leaves(x=celltypes_found)
-                store.celltypes_universe.write_target_universe(
+                celltypes_universe = CelltypeUniverse(
+                    cl=OntologyCl(branch=cl_branch),
+                    uberon=OCS.organ,
+                )
+                celltypes_found = celltypes_universe.onto_cl.get_effective_leaves(x=celltypes_found)
+                celltypes_universe.write_target_universe(
                     fn=os.path.join(out_path, f"targets_{organism}_{organ}.csv"),
                     x=celltypes_found,
                 )

@@ -37,7 +37,7 @@ def map_fn(inputs):
             return x
         else:
             return None
-    except FileNotFoundError as e:
+    except (FileNotFoundError, OSError) as e:
         return ds.id, e,
 
 
@@ -206,7 +206,7 @@ class DatasetGroup:
     def write_distributed_store(
             self,
             dir_cache: Union[str, os.PathLike],
-            store: str = "h5ad",
+            store_format: str = "dao",
             dense: bool = False,
             compression_kwargs: dict = {},
             chunks: Union[int, None] = None,
@@ -219,20 +219,29 @@ class DatasetGroup:
         This method writes a separate file for each data set in this object.
 
         :param dir_cache: Directory to write cache in.
-        :param store: Disk format for objects in cache:
+        :param store_format: Disk format for objects in cache. Recommended is "dao".
 
             - "h5ad": Allows access via backed .h5ad.
                 Note on compression: .h5ad supports sparse data with is a good compression that gives fast row-wise
                     access if the files are csr, so further compression potentially not necessary.
-            - "zarr": Allows access as zarr array.
+            - "dao": Distributed access optimised format, recommended for batched access in optimisation, for example.
         :param dense: Whether to write sparse or dense store, this will be homogenously enforced.
-        :param compression_kwargs: Compression key word arguments to give to h5py, see also anndata.AnnData.write_h5ad:
-            compression, compression_opts.
-        :param chunks: Chunk size of zarr array, see anndata.AnnData.write_zarr documentation.
-            Only relevant for store=="zarr".
+        :param compression_kwargs: Compression key word arguments to give to h5py or zarr
+            For store_format=="h5ad", see also anndata.AnnData.write_h5ad:
+                - compression,
+                - compression_opts.
+            For store_format=="dao", see also sfaira.data.write_dao which relays kwargs to
+            zarr.hierarchy.create_dataset:
+                - compressor
+                - overwrite
+                - order
+                and others.
+        :param chunks: Observation axes of chunk size of zarr array, see anndata.AnnData.write_zarr documentation.
+            Only relevant for store=="dao". The feature dimension of the chunks is always is the full feature space.
+            Uses zarr default chunking across both axes if None.
         """
         for _, v in self.datasets.items():
-            v.write_distributed_store(dir_cache=dir_cache, store=store, dense=dense,
+            v.write_distributed_store(dir_cache=dir_cache, store_format=store_format, dense=dense,
                                       compression_kwargs=compression_kwargs, chunks=chunks)
 
     def write_backed(
@@ -779,14 +788,8 @@ class DatasetSuperGroup:
             self,
             genome: str = None
     ):
-        if genome.lower().startswith("homo_sapiens"):
+        if genome.lower().startswith("homo_sapiens") or genome.lower().startswith("mus_musculus"):
             g = GenomeContainer(
-                organism="human",
-                assembly=genome
-            )
-        elif genome.lower().startswith("mus_musculus"):
-            g = GenomeContainer(
-                organism="mouse",
                 assembly=genome
             )
         else:
@@ -979,7 +982,7 @@ class DatasetSuperGroup:
     def write_distributed_store(
             self,
             dir_cache: Union[str, os.PathLike],
-            store: str = "h5ad",
+            store_format: str = "dao",
             dense: bool = False,
             compression_kwargs: dict = {},
             chunks: Union[int, None] = None,
@@ -992,20 +995,29 @@ class DatasetSuperGroup:
         This method writes a separate file for each data set in this object.
 
         :param dir_cache: Directory to write cache in.
-        :param store: Disk format for objects in cache:
+        :param store_format: Disk format for objects in cache. Recommended is "dao".
 
             - "h5ad": Allows access via backed .h5ad.
                 Note on compression: .h5ad supports sparse data with is a good compression that gives fast row-wise
                     access if the files are csr, so further compression potentially not necessary.
-            - "zarr": Allows access as zarr array.
+            - "dao": Distributed access optimised format, recommended for batched access in optimisation, for example.
         :param dense: Whether to write sparse or dense store, this will be homogenously enforced.
-        :param compression_kwargs: Compression key word arguments to give to h5py, see also anndata.AnnData.write_h5ad:
-            compression, compression_opts.
-        :param chunks: Chunk size of zarr array, see anndata.AnnData.write_zarr documentation.
-            Only relevant for store=="zarr".
+        :param compression_kwargs: Compression key word arguments to give to h5py or zarr
+            For store_format=="h5ad", see also anndata.AnnData.write_h5ad:
+                - compression,
+                - compression_opts.
+            For store_format=="dao", see also sfaira.data.write_dao which relays kwargs to
+            zarr.hierarchy.create_dataset:
+                - compressor
+                - overwrite
+                - order
+                and others.
+        :param chunks: Observation axes of chunk size of zarr array, see anndata.AnnData.write_zarr documentation.
+            Only relevant for store=="dao". The feature dimension of the chunks is always is the full feature space.
+            Uses zarr default chunking across both axes if None.
         """
         for x in self.dataset_groups:
-            x.write_distributed_store(dir_cache=dir_cache, store=store, dense=dense,
+            x.write_distributed_store(dir_cache=dir_cache, store_format=store_format, dense=dense,
                                       compression_kwargs=compression_kwargs, chunks=chunks)
 
     def write_backed(
@@ -1026,7 +1038,7 @@ class DatasetSuperGroup:
         Example usage:
 
             ds = DatasetSuperGroup([...])
-            ds.load_all_tobacked(
+            ds.write_backed(
                 fn_backed="...",
                 target_genome="...",
                 annotated_only=False
@@ -1072,11 +1084,11 @@ class DatasetSuperGroup:
             self._adata_ids.author,
             self._adata_ids.cell_line,
             self._adata_ids.dataset,
-            self._adata_ids.cell_ontology_class,
+            self._adata_ids.cellontology_class,
             self._adata_ids.development_stage,
             self._adata_ids.normalization,
             self._adata_ids.organ,
-            self._adata_ids.sample_type,
+            self._adata_ids.bio_sample,
             self._adata_ids.state_exact,
             self._adata_ids.year,
         ]
