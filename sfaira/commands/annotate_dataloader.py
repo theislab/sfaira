@@ -176,4 +176,3 @@ class DataloaderAnnotater:
                         protected_writing=True,
                         n_suggest=4,
                     )
-                    ds.clean_ontology_class_map()

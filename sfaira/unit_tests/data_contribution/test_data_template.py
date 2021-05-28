@@ -42,6 +42,9 @@ def _get_ds(doi_sfaira_repr: str, test_data: str):
 
 def test_load(doi_sfaira_repr: str, test_data: str):
     ds, cache_path = _get_ds(doi_sfaira_repr=doi_sfaira_repr, test_data=test_data)
+
+    ds.clean_ontology_class_map()
+
     # TODO try-except with good error description saying that the data loader is broken here:
     ds.load(
         remove_gene_version=True,
