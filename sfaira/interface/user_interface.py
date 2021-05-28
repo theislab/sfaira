@@ -253,6 +253,14 @@ class UserInterface:
                     data=fp,
                     params=params,
                 )
+            while r.status_code != 200:
+                warnings.warn(f"Upload of {weight_path} was not successful (status code {r.status_code}), retrying")
+                with open(weight_path, "rb") as fp:
+                    r = requests.put(
+                        f"{bucket_url}/{filename_weights}",
+                        data=fp,
+                        params=params,
+                    )
             # Verify checksum after upload
             if r.json()['checksum'][4:] != self.model_lookuptable['md5'][i]:
                 warnings.warn(f"The md5 checksum in your model_lookuptable for {self.model_lookuptable['model_id'][i]} "
