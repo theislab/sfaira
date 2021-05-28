@@ -216,6 +216,7 @@ class UserInterface:
             try:
                 deposition_id = r.json()["links"]["latest_draft"].split("/")[-1]
             except json.decoder.JSONDecodeError:
+                time.sleep(10)
                 r = requests.post(
                     f'https://{sandbox}zenodo.org/api/deposit/depositions/{update_existing_deposition}/actions/newversion',
                     params=params)
