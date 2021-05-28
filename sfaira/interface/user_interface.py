@@ -224,7 +224,7 @@ class UserInterface:
                                    params=params)
             while len(r_files.json()) > 0:
                 for file_dict in r_files.json():
-                    r_del = requests.delete(
+                    requests.delete(
                         f'https://{sandbox}zenodo.org/api/deposit/depositions/{deposition_id}/files/{file_dict["id"]}',
                         params=params)
                 r_files = requests.get(f'https://{sandbox}zenodo.org/api/deposit/depositions/{deposition_id}/files',
