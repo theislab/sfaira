@@ -60,7 +60,7 @@ class UserInterface:
         self.adata_ids = AdataIdsSfaira()
 
         if sfaira_repo:  # check if public sfaira repository should be accessed
-            self.model_lookuptable = self._load_lookuptable("https://zenodo.org/record/4304660/files/")
+            self.model_lookuptable = self._load_lookuptable("https://zenodo.org/record/4836517/files/")
 
         if custom_repo:
             if isinstance(custom_repo, str):
