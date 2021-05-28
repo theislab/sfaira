@@ -105,14 +105,17 @@ def validate_dataloader(path) -> None:
 
 
 @sfaira_cli.command()
+@click.argument('path', type=click.Path(exists=True))
 @click.option('--doi', type=str, default=None)
 @click.option('--test-data', type=click.Path(exists=True))
-def annotate_dataloader(doi, test_data) -> None:
+def annotate_dataloader(path, doi, test_data) -> None:
     """
     Annotates a dataloader.
+
+    PATH is the absolute path of the root of your sfaira clone.
     """
     dataloader_annotater = DataloaderAnnotater()
-    dataloader_annotater.annotate(doi, test_data)
+    dataloader_annotater.annotate(path, doi, test_data)
 
 
 @sfaira_cli.command()

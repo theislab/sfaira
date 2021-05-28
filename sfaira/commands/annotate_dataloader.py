@@ -23,7 +23,7 @@ class DataloaderAnnotater:
         self.dir_loader_sfairae = None
         self.package_source = None
 
-    def annotate(self, doi: str, test_data: str):
+    def annotate(self, path: str, doi: str, test_data: str):
         """
         Annotates a provided dataloader.
 
@@ -37,7 +37,7 @@ class DataloaderAnnotater:
         """
         doi_sfaira_repr = f'd{doi.translate({ord(c): "_" for c in r"!@#$%^&*()[]/{};:,.<>?|`~-=_+"})}'
         self._setup_loader(doi_sfaira_repr)
-        self._annotate(test_data)
+        self._annotate(test_data, path, doi)
 
     def _setup_loader(self, doi_sfaira_repr: str):
         """
@@ -96,7 +96,7 @@ class DataloaderAnnotater:
         assert len(ds.ids) > 0, f"no data sets loaded, make sure raw data is in {test_data}"
         return ds
 
-    def _annotate(self, test_data: str):
+    def _annotate(self, test_data: str, path: str, doi: str):
         ds = self.buffered_load(test_data=test_data)
         # Create cell type conversion table:
         cwd = os.path.dirname(self.file_path)
@@ -169,10 +169,11 @@ class DataloaderAnnotater:
                     # II) Build a data set group from the already loaded data sets and use the group ontology writing
                     # function.
                     dsg_f = DatasetGroup(datasets=dict([(x.id, ds.datasets[x.id]) for x in datasets_f]))
-                    # III) Write this directly into sfaira installation so that it can be committed via git.
+                    # III) Write this directly into the sfaira clone so that it can be committed via git.
                     # TODO any errors not to be caught here?
+                    doi_sfaira_repr = f'd{doi.translate({ord(c): "_" for c in r"!@#$%^&*()[]/{};:,.<>?|`~-=_+"})}'
                     dsg_f.write_ontology_class_map(
-                        fn=os.path.join(cwd, file_module + ".tsv"),
+                        fn=os.path.join(f"{path}/sfaira/data/dataloaders/loaders/{doi_sfaira_repr}/{file_module}.tsv"),
                         protected_writing=True,
                         n_suggest=4,
                     )
