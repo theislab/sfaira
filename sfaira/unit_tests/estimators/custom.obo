@@ -1,0 +1,16 @@
+format-version: 1.2
+ontology: custom
+
+[Term]
+id: MYONTO:01
+name: Name1
+
+[Term]
+id: MYONTO:02
+name: Name2
+is_a: MYONTO:01
+
+[Term]
+id: MYONTO:03
+name: Name3
+is_a: MYONTO:01

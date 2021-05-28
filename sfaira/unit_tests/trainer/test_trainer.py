@@ -1,11 +1,10 @@
 import anndata
 import numpy as np
 import os
-import pytest
 from typing import Union
 
-from sfaira.data import DistributedStore
-from sfaira.interface import ModelZoo, ModelZooCelltype, ModelZooEmbedding
+from sfaira.data import load_store
+from sfaira.interface import ModelZoo
 from sfaira.train import TrainModelCelltype, TrainModelEmbedding
 from sfaira.unit_tests.utils import cached_store_writing, simulate_anndata
 
@@ -18,9 +17,8 @@ TARGETS = ["T cell", "stromal cell"]
 
 class HelperTrainerBase:
 
-    data: Union[anndata.AnnData, DistributedStore]
+    data: Union[anndata.AnnData, load_store]
     trainer: Union[TrainModelCelltype, TrainModelEmbedding]
-    zoo: ModelZoo
 
     def __init__(self, zoo: ModelZoo):
         self.model_id = zoo.model_id
@@ -41,8 +39,8 @@ class HelperTrainerBase:
         self.data = self._simulate()
 
     def load_store(self):
-        store_path = cached_store_writing(dir_data=dir_data, dir_meta=dir_meta, assembly=ASSEMBLY)
-        store = DistributedStore(cache_path=store_path)
+        store_path = cached_store_writing(dir_data=dir_data, dir_meta=dir_meta, assembly=ASSEMBLY, organism="mouse")
+        store = load_store(cache_path=store_path)
         self.data = store
 
     def load_data(self, data_type):
@@ -52,27 +50,34 @@ class HelperTrainerBase:
         else:
             self.load_store()
 
-    def test_for_fatal(self, cls):
+    def test_init(self, cls):
         self.load_data(data_type="adata")
-        trainer = cls(
+        self.trainer = cls(
             data=self.data,
             model_path=dir_meta,
         )
-        trainer.zoo.set_model_id(model_id=self.model_id)
-        trainer.init_estim(override_hyperpar={})
+        self.trainer.zoo.model_id = self.model_id
+        self.trainer.init_estim(override_hyperpar={})
+
+    def test_save(self):
+        self.trainer.estimator.train(epochs=1, max_steps_per_epoch=1, test_split=0.1, validation_split=0.1,
+                                     optimizer="adam", lr=0.005)
+        self.trainer.save(fn=os.path.join(dir_data, "trainer_test"), model=True, specific=True)
 
 
-def test_for_fatal_embedding():
-    model_id = "embedding_human-lung_linear_mylab_0.1_0.1"
-    zoo = ModelZooEmbedding()
-    zoo.set_model_id(model_id=model_id)
+def test_save_embedding():
+    model_id = "embedding_human-lung-linear-0.1-0.1_mylab"
+    zoo = ModelZoo()
+    zoo.model_id = model_id
     test_trainer = HelperTrainerBase(zoo=zoo)
-    test_trainer.test_for_fatal(cls=TrainModelEmbedding)
+    test_trainer.test_init(cls=TrainModelEmbedding)
+    test_trainer.test_save()
 
 
-def test_for_fatal():
-    model_id = "celltype_human-lung_mlp_mylab_0.0.1_0.1"
-    zoo = ModelZooCelltype()
-    zoo.set_model_id(model_id=model_id)
+def test_save_celltypes():
+    model_id = "celltype_human-lung-mlp-0.0.1-0.1_mylab"
+    zoo = ModelZoo()
+    zoo.model_id = model_id
     test_trainer = HelperTrainerBase(zoo=zoo)
-    test_trainer.test_for_fatal(cls=TrainModelCelltype)
+    test_trainer.test_init(cls=TrainModelCelltype)
+    test_trainer.test_save()

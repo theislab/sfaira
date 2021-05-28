@@ -22,8 +22,6 @@ ds = sfaira.data.dataloaders.Universe(
 )
 ds.load(
     annotated_only=False,
-    match_to_reference=None,
-    remove_gene_version=True,
     load_raw=True,
     allow_caching=False,
     processes=processes,

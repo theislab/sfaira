@@ -75,7 +75,7 @@ def test_dsgs_subset_cell_wise(organ: str, celltype: str):
         for k, v in x.datasets.items():
             assert v.organism == "mouse", v.id
             assert v.ontology_container_sfaira.organ.is_a(query=v.organ, reference=organ), v.organ
-            for y in np.unique(v.adata.obs[v._adata_ids.cell_ontology_class].values):
+            for y in np.unique(v.adata.obs[v._adata_ids.cellontology_class].values):
                 assert v.ontology_container_sfaira.cellontology_class.is_a(query=y, reference=celltype), y
 
 
@@ -121,7 +121,7 @@ def test_dsg_write_store(store: str, dense: bool, clean_obs: bool):
                            subset_genes_to_type="protein_coding")
     ds.streamline_metadata(schema="sfaira", uns_to_obs=False, clean_obs=clean_obs, clean_var=True, clean_uns=True,
                            clean_obs_names=True)
-    ds.write_distributed_store(dir_cache=os.path.join(dir_data, "store"), store=store, dense=dense)
+    ds.write_distributed_store(dir_cache=os.path.join(dir_data, "store"), store_format=store, dense=dense)
 
 
 def test_dsg_load():

@@ -68,13 +68,13 @@ class GtfInterface:
         os.remove(temp_file)  # Delete temporary file .gtf.gz.
         tab = tab.loc[tab[KEY_GTF_REGION_TYPE].values == VALUE_GTF_GENE, :]
         conversion_tab = pandas.DataFrame({
-            "gene_id": [
+            KEY_ID: [
                 x.split(";")[IDX_GTF_REGION_DETAIL_FIELD_ID].split(" ")[-1].strip("\"")
                 for x in tab[KEY_GTF_REGION_DETAIL_FIELD].values],
-            "gene_name": [
+            KEY_SYMBOL: [
                 x.split(";")[IDX_GTF_REGION_DETAIL_FIELD_SYMBOL].split(" ")[-1].strip("\"")
                 for x in tab[KEY_GTF_REGION_DETAIL_FIELD].values],
-            "gene_biotype": [
+            KEY_TYPE: [
                 x.split(";")[IDX_GTF_REGION_DETAIL_FIELD_TYPE].split(" ")[-1].strip("\"")
                 for x in tab[KEY_GTF_REGION_DETAIL_FIELD].values],
         }).sort_values("gene_id")
@@ -209,3 +209,25 @@ class GenomeContainer:
     def strippednames_to_id_dict(self):
         return dict(zip([i.split(".")[0] for i in self.genome_tab[KEY_SYMBOL]],
                         self.genome_tab[KEY_ID].values.tolist()))
+
+
+class CustomFeatureContainer(GenomeContainer):
+
+    def __init__(
+            self,
+            genome_tab: pandas.DataFrame,
+    ):
+        """
+
+        :param genome_tab: Table characterising feature space. Must be a data frame with 3 columns:
+
+            - "gene_name": Name of features.
+            - "gene_id": ID of features, can be the same as values of "gene_name"
+            - "gene_biotype": Types of features, can be arbitrary like "embedding"
+        """
+        self.assembly = "custom"
+        assert len(genome_tab.columns) == 3
+        assert KEY_SYMBOL in genome_tab.columns
+        assert KEY_ID in genome_tab.columns
+        assert KEY_TYPE in genome_tab.columns
+        self.genome_tab = genome_tab

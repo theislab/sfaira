@@ -2,7 +2,6 @@ import abc
 import anndata
 import hashlib
 import numpy as np
-import pandas as pd
 import scipy.sparse
 try:
     import tensorflow as tf
@@ -13,13 +12,13 @@ import os
 import warnings
 from tqdm import tqdm
 
-from sfaira.consts import AdataIdsSfaira, OCS
-from sfaira.data import DistributedStore
+from sfaira.consts import AdataIdsSfaira, OCS, AdataIds
+from sfaira.data import DistributedStoreBase
 from sfaira.models import BasicModelKeras
-from sfaira.versions.metadata import CelltypeUniverse, OntologyCl
+from sfaira.versions.metadata import CelltypeUniverse, OntologyCl, OntologyObo
 from sfaira.versions.topologies import TopologyContainer
 from .losses import LossLoglikelihoodNb, LossLoglikelihoodGaussian, LossCrossentropyAgg, KLLoss
-from .metrics import custom_mse, custom_negll_nb, custom_negll_gaussian, custom_kl, \
+from .metrics import custom_mse, custom_negll_nb, custom_negll_gaussian, \
     CustomAccAgg, CustomF1Classwise, CustomFprClasswise, CustomTprClasswise, custom_cce_agg
 
 
@@ -41,7 +40,7 @@ class EstimatorKeras:
     """
     Estimator base class for keras models.
     """
-    data: Union[anndata.AnnData, DistributedStore]
+    data: Union[anndata.AnnData, DistributedStoreBase]
     model: Union[BasicModelKeras, None]
     topology_container: Union[TopologyContainer, None]
     model_id: Union[str, None]
@@ -52,16 +51,18 @@ class EstimatorKeras:
     idx_train: Union[np.ndarray, None]
     idx_eval: Union[np.ndarray, None]
     idx_test: Union[np.ndarray, None]
+    adata_ids: AdataIds
 
     def __init__(
             self,
-            data: Union[anndata.AnnData, np.ndarray, DistributedStore],
+            data: Union[anndata.AnnData, np.ndarray, DistributedStoreBase],
             model_dir: Union[str, None],
             model_class: str,
             model_id: Union[str, None],
             model_topology: TopologyContainer,
             weights_md5: Union[str, None] = None,
-            cache_path: str = os.path.join('cache', '')
+            cache_path: str = os.path.join('cache', ''),
+            adata_ids: AdataIds = AdataIdsSfaira()
     ):
         self.data = data
         self.model = None
@@ -70,7 +71,7 @@ class EstimatorKeras:
         self.model_class = model_class
         self.topology_container = model_topology
         # Prepare store with genome container sub-setting:
-        if isinstance(self.data, DistributedStore):
+        if isinstance(self.data, DistributedStoreBase):
             self.data.genome_container = self.topology_container.gc
 
         self.history = None
@@ -80,7 +81,7 @@ class EstimatorKeras:
         self.idx_test = None
         self.md5 = weights_md5
         self.cache_path = cache_path
-        self._adata_ids = AdataIdsSfaira()
+        self._adata_ids = adata_ids
 
     @property
     def model_type(self):
@@ -115,9 +116,10 @@ class EstimatorKeras:
                     fn = os.path.join(self.cache_path, f"{self.model_id}_weights.h5")
                 except HTTPError:
                     try:
-                        urllib.request.urlretrieve(urljoin(self.model_dir, f'{self.model_id}_weights.data-00000-of-00001'),
-                                                   os.path.join(self.cache_path, f'{self.model_id}_weights.data-00000-of-00001')
-                                                   )
+                        urllib.request.urlretrieve(
+                            urljoin(self.model_dir, f'{self.model_id}_weights.data-00000-of-00001'),
+                            os.path.join(self.cache_path, f'{self.model_id}_weights.data-00000-of-00001')
+                        )
                         fn = os.path.join(self.cache_path, f"{self.model_id}_weights.data-00000-of-00001")
                     except HTTPError:
                         raise FileNotFoundError('cannot find remote weightsfile')
@@ -166,8 +168,8 @@ class EstimatorKeras:
                     file_path = os.path.join(os.path.join(self.cache_path, 'weights'), file)
                     os.remove(file_path)
 
+    @staticmethod
     def _assert_md5_sum(
-            self,
             fn,
             target_md5
     ):
@@ -186,7 +188,9 @@ class EstimatorKeras:
             cache_full: bool,
             weighted: bool,
             retrieval_batch_size: int,
-    ):
+            randomized_batch_access: bool,
+            prefetch: Union[int, None],
+    ) -> tf.data.Dataset:
         pass
 
     def _get_class_dict(
@@ -232,11 +236,10 @@ class EstimatorKeras:
                 x = x[idx, :]
 
             # If the feature space is already mapped to the right reference, return the data matrix immediately
-            if 'mapped_features' in self.data.uns_keys():
-                if self.data.uns[self._adata_ids.mapped_features] == \
-                        self.topology_container.gc.assembly:
-                    print(f"found {x.shape[0]} observations")
-                    return x
+            if self._adata_ids.mapped_features in self.data.uns_keys() and \
+                    self.data.uns[self._adata_ids.mapped_features] == self.topology_container.gc.assembly:
+                print(f"found {x.shape[0]} observations")
+                return x
 
             # Compute indices of genes to keep
             data_ids = self.data.var[self._adata_ids.gene_id_ensembl].values.tolist()
@@ -271,6 +274,54 @@ class EstimatorKeras:
             metrics=self._metrics()
         )
 
+    def split_train_val_test(self, val_split: float, test_split: Union[float, dict]):
+        # Split training and evaluation data.
+        np.random.seed(1)
+        all_idx = np.arange(0, self.data.n_obs)  # n_obs is both a property of AnnData and DistributedStoreBase
+        if isinstance(test_split, float) or isinstance(test_split, int):
+            self.idx_test = np.sort(np.random.choice(
+                a=all_idx,
+                size=round(self.data.n_obs * test_split),
+                replace=False,
+            ))
+        elif isinstance(test_split, dict):
+            in_test = np.ones((self.data.n_obs,), dtype=int) == 1
+            for k, v in test_split.items():
+                if isinstance(v, bool) or isinstance(v, int) or isinstance(v, list):
+                    v = [v]
+                if isinstance(self.data, anndata.AnnData):
+                    if k not in self.data.obs.columns:
+                        raise ValueError(f"Did not find column {k} used to define test set in self.data.")
+                    in_test = np.logical_and(in_test, np.array([x in v for x in self.data.obs[k].values]))
+                elif isinstance(self.data, DistributedStoreBase):
+                    idx = self.data.get_subset_idx_global(attr_key=k, values=v)
+                    in_test_k = np.ones((self.data.n_obs,), dtype=int) == 0
+                    in_test_k[idx] = True
+                    in_test = np.logical_and(in_test, in_test_k)
+                else:
+                    assert False
+            self.idx_test = np.sort(np.where(in_test)[0])
+            print(f"Found {len(self.idx_test)} out of {self.data.n_obs} cells that correspond to held out data set")
+            print(self.idx_test)
+        else:
+            raise ValueError("type of test_split %s not recognized" % type(test_split))
+        idx_train_eval = np.array([x for x in all_idx if x not in self.idx_test])
+        np.random.seed(1)
+        self.idx_eval = np.sort(np.random.choice(
+            a=idx_train_eval,
+            size=round(len(idx_train_eval) * val_split),
+            replace=False
+        ))
+        self.idx_train = np.sort([x for x in idx_train_eval if x not in self.idx_eval])
+
+        # Check that none of the train, test, eval partitions are empty
+        if not len(self.idx_test):
+            warnings.warn("Test partition is empty!")
+        if not len(self.idx_eval):
+            raise ValueError("The evaluation dataset is empty.")
+        if not len(self.idx_train):
+            raise ValueError("The train dataset is empty.")
+
     def train(
             self,
             optimizer: str,
@@ -282,12 +333,15 @@ class EstimatorKeras:
             test_split: Union[float, dict] = 0.,
             validation_batch_size: int = 256,
             max_validation_steps: Union[int, None] = 10,
-            cache_full: bool = False,
             patience: int = 20,
             lr_schedule_min_lr: float = 1e-5,
             lr_schedule_factor: float = 0.2,
             lr_schedule_patience: int = 5,
-            shuffle_buffer_size: int = int(1e4),
+            shuffle_buffer_size: Union[int, None] = None,
+            cache_full: bool = False,
+            randomized_batch_access: bool = True,
+            retrieval_batch_size: int = 512,
+            prefetch: Union[int, None] = 1,
             log_dir: Union[str, None] = None,
             callbacks: Union[list, None] = None,
             weighted: bool = False,
@@ -314,6 +368,11 @@ class EstimatorKeras:
             when plateau is reached.
         :param lr_schedule_patience: Patience for learning rate reduction in learning rate reduction schedule.
         :param shuffle_buffer_size: tf.Dataset.shuffle(): buffer_size argument.
+        :param cache_full: Whether to use tensorflow caching on full training and validation data.
+        :param randomized_batch_access: Whether to randomize batches during reading (in generator). Lifts necessity of
+            using a shuffle buffer on generator, however, batch composition stays unchanged over epochs unless there
+            is overhangs in retrieval_batch_size in the raw data files, which often happens and results in modest
+            changes in batch composition.
         :param log_dir: Directory to save tensorboard callback to. Disabled if None.
         :param callbacks: Add additional callbacks to the training call
         :param weighted:
@@ -385,60 +444,36 @@ class EstimatorKeras:
             # callbacks needs to be a list
             cbs += callbacks
 
-        # Split training and evaluation data.
-        np.random.seed(1)
-        all_idx = np.arange(0, self.data.n_obs)  # n_obs is both a property of AnnData and DistributedStore
-        if isinstance(test_split, float) or isinstance(test_split, int):
-            self.idx_test = np.random.choice(
-                a=all_idx,
-                size=round(self.data.n_obs * test_split),
-                replace=False,
-            )
-        elif isinstance(test_split, dict):
-            in_test = np.ones((self.data.n_obs,), dtype=int) == 1
-            for k, v in test_split.items():
-                if isinstance(v, list):
-                    in_test = np.logical_and(in_test, np.array([x in v for x in self.data.obs[k].values]))
-                else:
-                    in_test = np.logical_and(in_test, self.data.obs[k].values == v)
-            self.idx_test = np.where(in_test)[0]
-            print(f"Found {len(self.idx_test)} out of {self.data.n_obs} cells that correspond to held out data set")
-            print(self.idx_test)
-        else:
-            raise ValueError("type of test_split %s not recognized" % type(test_split))
-        idx_train_eval = np.array([x for x in all_idx if x not in self.idx_test])
-        np.random.seed(1)
-        self.idx_eval = np.random.choice(
-            a=idx_train_eval,
-            size=round(len(idx_train_eval) * validation_split),
-            replace=False
-        )
-        self.idx_train = np.array([x for x in idx_train_eval if x not in self.idx_eval])
-
-        # Check that none of the train, test, eval partitions are empty
-        if not len(self.idx_test):
-            warnings.warn("Test partition is empty!")
-        if not len(self.idx_eval):
-            raise ValueError("The evaluation dataset is empty.")
-        if not len(self.idx_train):
-            raise ValueError("The train dataset is empty.")
-
+        # Check randomisation settings:
+        if shuffle_buffer_size is not None and shuffle_buffer_size > 0 and randomized_batch_access:
+            raise ValueError("You are using shuffle_buffer_size and randomized_batch_access, this is likely not "
+                             "intended.")
+        if cache_full and randomized_batch_access:
+            raise ValueError("You are using cache_full and randomized_batch_access, this is likely not intended.")
+        self.split_train_val_test(val_split=validation_split, test_split=test_split)
         self._compile_models(optimizer=optim)
+        shuffle_buffer_size = shuffle_buffer_size if shuffle_buffer_size is not None else 0
         train_dataset = self._get_dataset(
             idx=self.idx_train,
             batch_size=batch_size,
+            retrieval_batch_size=retrieval_batch_size,
             mode='train',
             shuffle_buffer_size=min(shuffle_buffer_size, len(self.idx_train)),
             weighted=weighted,
             cache_full=cache_full,
+            randomized_batch_access=randomized_batch_access,
+            prefetch=prefetch,
         )
         eval_dataset = self._get_dataset(
             idx=self.idx_eval,
             batch_size=validation_batch_size,
+            retrieval_batch_size=retrieval_batch_size,
             mode='train_val',
             shuffle_buffer_size=min(shuffle_buffer_size, len(self.idx_eval)),
             weighted=weighted,
             cache_full=cache_full,
+            randomized_batch_access=randomized_batch_access,
+            prefetch=prefetch,
         )
 
         steps_per_epoch = min(max(len(self.idx_train) // batch_size, 1), max_steps_per_epoch)
@@ -454,17 +489,9 @@ class EstimatorKeras:
             verbose=verbose
         ).history
 
-    def get_citations(self):
-        """
-        Return papers to cite when using this model.
-
-        :return:
-        """
-        raise NotImplementedError()
-
     @property
     def using_store(self) -> bool:
-        return isinstance(self.data, DistributedStore)
+        return isinstance(self.data, DistributedStoreBase)
 
     @property
     def obs_train(self):
@@ -486,12 +513,13 @@ class EstimatorKerasEmbedding(EstimatorKeras):
 
     def __init__(
             self,
-            data: Union[anndata.AnnData, np.ndarray],
+            data: Union[anndata.AnnData, np.ndarray, DistributedStoreBase],
             model_dir: Union[str, None],
             model_id: Union[str, None],
             model_topology: TopologyContainer,
             weights_md5: Union[str, None] = None,
-            cache_path: str = os.path.join('cache', '')
+            cache_path: str = os.path.join('cache', ''),
+            adata_ids: AdataIds = AdataIdsSfaira()
     ):
         super(EstimatorKerasEmbedding, self).__init__(
             data=data,
@@ -500,7 +528,8 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             model_id=model_id,
             model_topology=model_topology,
             weights_md5=weights_md5,
-            cache_path=cache_path
+            cache_path=cache_path,
+            adata_ids=adata_ids
         )
 
     def init_model(
@@ -548,7 +577,8 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             self,
             generator_helper,
             idx: Union[np.ndarray, None],
-            batch_size: int = 1,
+            batch_size: int,
+            randomized_batch_access: bool,
     ):
         """
         Yield a basic generator based on which a tf dataset can be built.
@@ -559,6 +589,11 @@ class EstimatorKerasEmbedding(EstimatorKeras):
 
             - x_sample is a gene expression vector of a cell
         :param idx: Indicies of data set to include in generator.
+        :param batch_size: Number of observations read from disk in each batched access.
+        :param randomized_batch_access: Whether to randomize batches during reading (in generator). Lifts necessity of
+            using a shuffle buffer on generator, however, batch composition stays unchanged over epochs unless there
+            is overhangs in retrieval_batch_size in the raw data files, which often happens and results in modest
+            changes in batch composition.
         :return:
         """
         if idx is None:
@@ -571,6 +606,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 batch_size=batch_size,
                 obs_keys=[],
                 return_dense=True,
+                randomized_batch_access=randomized_batch_access,
             )
 
             def generator():
@@ -616,7 +652,9 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             cache_full: bool = False,
             weighted: bool = False,
             retrieval_batch_size: int = 128,
-    ):
+            randomized_batch_access: bool = False,
+            prefetch: Union[int, None] = 1,
+    ) -> tf.data.Dataset:
         """
 
         :param idx:
@@ -624,6 +662,11 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         :param mode:
         :param shuffle_buffer_size:
         :param weighted: Whether to use weights. Not implemented for embedding models yet.
+        :param retrieval_batch_size: Number of observations read from disk in each batched access.
+        :param randomized_batch_access: Whether to randomize batches during reading (in generator). Lifts necessity of
+            using a shuffle buffer on generator, however, batch composition stays unchanged over epochs unless there
+            is overhangs in retrieval_batch_size in the raw data files, which often happens and results in modest
+            changes in batch composition.
         :return:
         """
         # Determine model type [ae, vae(iaf, vamp)]
@@ -643,6 +686,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 generator_helper=generator_helper,
                 idx=idx,
                 batch_size=retrieval_batch_size,
+                randomized_batch_access=randomized_batch_access,
             )
             output_types, output_shapes = self._get_output_dim(n_features=n_features, model_type=model_type, mode=mode)
             dataset = tf.data.Dataset.from_generator(
@@ -655,23 +699,26 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             # Only shuffle in train modes
             if mode in ['train', 'train_val']:
                 dataset = dataset.repeat()
-                dataset = dataset.shuffle(
-                    buffer_size=min(n_samples, shuffle_buffer_size),
-                    seed=None,
-                    reshuffle_each_iteration=True)
-            dataset = dataset.batch(batch_size).prefetch(tf.data.AUTOTUNE)
+                if shuffle_buffer_size is not None and shuffle_buffer_size > 0:
+                    dataset = dataset.shuffle(
+                        buffer_size=min(n_samples, shuffle_buffer_size),
+                        seed=None,
+                        reshuffle_each_iteration=True)
+            if prefetch is None:
+                prefetch = tf.data.AUTOTUNE
+            dataset = dataset.batch(batch_size, drop_remainder=False).prefetch(prefetch)
 
             return dataset
 
         elif mode == 'gradient_method':  # TODO depreceate this code
             # Prepare data reading according to whether anndata is backed or not:
-            cell_to_class = self._get_class_dict(obs_key=self._adata_ids.cell_ontology_class)
+            cell_to_class = self._get_class_dict(obs_key=self._adata_ids.cellontology_class)
             if self.using_store:
                 n_features = self.data.n_vars
                 generator_raw = self.data.generator(
                     idx=idx,
                     batch_size=1,
-                    obs_keys=["cell_ontology_class"],
+                    obs_keys=[self._adata_ids.cellontology_class],
                     return_dense=True,
                 )
 
@@ -682,10 +729,12 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                             x_sample = x_sample.todense()
                         x_sample = np.asarray(x_sample).flatten()
                         sf_sample = prepare_sf(x=x_sample)[0]
-                        y_sample = z[1]["cell_ontology_class"].values[0]
+                        y_sample = z[1][self._adata_ids.cellontology_class].values[0]
                         yield (x_sample, sf_sample), (x_sample, cell_to_class[y_sample])
 
             elif isinstance(self.data, anndata.AnnData) and self.data.isbacked:
+                if idx is None:
+                    idx = np.arange(0, self.data.n_obs)
                 n_features = self.data.X.shape[1]
 
                 def generator():
@@ -693,12 +742,14 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                     for i in idx:
                         x_sample = self.data.X[i, :].toarray().flatten() if sparse else self.data.X[i, :].flatten()
                         sf_sample = prepare_sf(x=x_sample)[0]
-                        y_sample = self.data.obs[self._adata_ids.cell_ontology_class][i]
+                        y_sample = self.data.obs[self._adata_ids.cellontology_id][i]
                         yield (x_sample, sf_sample), (x_sample, cell_to_class[y_sample])
             else:
+                if idx is None:
+                    idx = np.arange(0, self.data.n_obs)
                 x = self._prepare_data_matrix(idx=idx)
                 sf = prepare_sf(x=x)
-                y = self.data.obs[self._adata_ids.cell_ontology_class][idx]
+                y = self.data.obs[self._adata_ids.cellontology_class].values[idx]
                 # for gradients per celltype in compute_gradients_input()
                 n_features = x.shape[1]
 
@@ -716,7 +767,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 buffer_size=shuffle_buffer_size,
                 seed=None,
                 reshuffle_each_iteration=True
-            ).batch(batch_size).prefetch(tf.data.AUTOTUNE)
+            ).batch(batch_size, drop_remainder=False).prefetch(prefetch)
 
             return dataset
 
@@ -761,7 +812,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
 
         return {"neg_ll": [custom_mse, custom_negll]}
 
-    def evaluate_any(self, idx, batch_size: int = 1, max_steps: int = np.inf):
+    def evaluate_any(self, idx, batch_size: int = 128, max_steps: int = np.inf):
         """
         Evaluate the custom model on any local data.
 
@@ -779,6 +830,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 batch_size=batch_size,
                 mode='eval',
                 retrieval_batch_size=128,
+                shuffle_buffer_size=0,
             )
             steps = min(max(len(idx) // batch_size, 1), max_steps)
             results = self.model.training_model.evaluate(x=dataset, steps=steps)
@@ -786,7 +838,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         else:
             return {}
 
-    def evaluate(self, batch_size: int = 64, max_steps: int = np.inf):
+    def evaluate(self, batch_size: int = 128, max_steps: int = np.inf):
         """
         Evaluate the custom model on test data.
 
@@ -798,55 +850,58 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         """
         return self.evaluate_any(idx=self.idx_test, batch_size=batch_size, max_steps=max_steps)
 
-    def predict(self, batch_size: int = 64, max_steps: int = np.inf):
+    def predict(self, batch_size: int = 128):
         """
         return the prediction of the model
 
         :return:
         prediction
         """
-        if self.idx_test is None or self.idx_test.any():  # true if the array is not empty or if the passed value is None
+        if self.idx_test is None or self.idx_test.any():
             dataset = self._get_dataset(
                 idx=self.idx_test,
                 batch_size=batch_size,
                 mode='predict',
                 retrieval_batch_size=128,
+                shuffle_buffer_size=0,
             )
             return self.model.predict_reconstructed(x=dataset)
         else:
             return np.array([])
 
-    def predict_embedding(self, batch_size: int = 64, max_steps: int = np.inf):
+    def predict_embedding(self, batch_size: int = 128):
         """
         return the prediction in the latent space (z_mean for variational models)
 
         :return:
         latent space
         """
-        if self.idx_test is None or self.idx_test.any():  # true if the array is not empty or if the passed value is None
+        if self.idx_test is None or self.idx_test.any():
             dataset = self._get_dataset(
                 idx=self.idx_test,
                 batch_size=batch_size,
                 mode='predict',
                 retrieval_batch_size=128,
+                shuffle_buffer_size=0,
             )
             return self.model.predict_embedding(x=dataset, variational=False)
         else:
             return np.array([])
 
-    def predict_embedding_variational(self, batch_size: int = 64, max_steps: int = np.inf):
+    def predict_embedding_variational(self, batch_size: int = 128, max_steps: int = np.inf):
         """
         return the prediction of z, z_mean, z_log_var in the variational latent space
 
         :return:
         sample of latent space, mean of latent space, variance of latent space
         """
-        if self.idx_test is None or self.idx_test:  # true if the array is not empty or if the passed value is None
+        if self.idx_test is None or self.idx_test:
             dataset = self._get_dataset(
                 idx=self.idx_test,
                 batch_size=batch_size,
                 mode='predict',
                 retrieval_batch_size=128,
+                shuffle_buffer_size=0,
             )
             return self.model.predict_embedding(x=dataset, variational=True)
         else:
@@ -876,7 +931,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         )
 
         if per_celltype:
-            cell_to_id = self._get_class_dict(obs_key=self._adata_ids.cell_ontology_class)
+            cell_to_id = self._get_class_dict(obs_key=self._adata_ids.cellontology_class)
             cell_names = cell_to_id.keys()
             cell_id = cell_to_id.values()
             id_to_cell = dict([(key, value) for (key, value) in zip(cell_id, cell_names)])
@@ -944,13 +999,16 @@ class EstimatorKerasCelltype(EstimatorKeras):
 
     def __init__(
             self,
-            data: Union[anndata.AnnData, np.ndarray],
+            data: Union[anndata.AnnData, DistributedStoreBase],
             model_dir: Union[str, None],
             model_id: Union[str, None],
             model_topology: TopologyContainer,
             weights_md5: Union[str, None] = None,
             cache_path: str = os.path.join('cache', ''),
-            max_class_weight: float = 1e3
+            celltype_ontology: Union[OntologyObo, None] = None,
+            max_class_weight: float = 1e3,
+            remove_unlabeled_cells: bool = True,
+            adata_ids: AdataIds = AdataIdsSfaira()
     ):
         super(EstimatorKerasCelltype, self).__init__(
             data=data,
@@ -959,17 +1017,41 @@ class EstimatorKerasCelltype(EstimatorKeras):
             model_id=model_id,
             model_topology=model_topology,
             weights_md5=weights_md5,
-            cache_path=cache_path
+            cache_path=cache_path,
+            adata_ids=adata_ids
         )
+        if remove_unlabeled_cells:
+            # Remove cells without type label from store:
+            if isinstance(self.data, DistributedStoreBase):
+                self.data.subset(attr_key="cellontology_class", excluded_values=[
+                    self._adata_ids.unknown_celltype_identifier,
+                    self._adata_ids.not_a_cell_celltype_identifier,
+                    None,  # TODO: it may be possible to remove this in the future
+                    np.nan,  # TODO: it may be possible to remove this in the future
+                ])
+            elif isinstance(self.data, anndata.AnnData):
+                self.data = self.data[np.where([
+                    x not in [
+                        self._adata_ids.unknown_celltype_identifier,
+                        self._adata_ids.not_a_cell_celltype_identifier,
+                        None,  # TODO: it may be possible to remove this in the future
+                        np.nan,  # TODO: it may be possible to remove this in the future
+                    ] for x in self.data.obs[self._adata_ids.cellontology_class].values
+                ])[0], :]
+            else:
+                assert False
         assert "cl" in self.topology_container.output.keys(), self.topology_container.output.keys()
         assert "targets" in self.topology_container.output.keys(), self.topology_container.output.keys()
         self.max_class_weight = max_class_weight
+        if celltype_ontology is None:
+            celltype_ontology = OntologyCl(branch=self.topology_container.output["cl"])
         self.celltype_universe = CelltypeUniverse(
-            cl=OntologyCl(branch=self.topology_container.output["cl"]),
+            cl=celltype_ontology,
             uberon=OCS.organ,
-            organism=self.organism,
         )
-        self.celltype_universe.leaves = self.topology_container.output["targets"]
+        # Set leaves if they are defined in topology:
+        if self.topology_container.output["targets"] is not None:
+            self.celltype_universe.onto_cl.leaves = self.topology_container.output["targets"]
 
     def init_model(
             self,
@@ -995,33 +1077,36 @@ class EstimatorKerasCelltype(EstimatorKeras):
         )
 
     @property
-    def ids(self):
-        return self.celltype_universe.leaves
-
-    @property
     def ntypes(self):
         return self.celltype_universe.onto_cl.n_leaves
 
     @property
     def ontology_ids(self):
-        return self.celltype_universe.leaves
+        return self.celltype_universe.onto_cl.convert_to_id(self.celltype_universe.onto_cl.leaves)
+
+    @property
+    def ontology_names(self):
+        return self.celltype_universe.onto_cl.convert_to_name(self.celltype_universe.onto_cl.leaves)
 
     def _one_hot_encoder(self):
+        leave_maps = self.celltype_universe.onto_cl.prepare_maps_to_leaves(include_self=True)
 
         def encoder(x) -> np.ndarray:
             if isinstance(x, str):
                 x = [x]
+            # Encodes unknowns to empty rows.
             idx = [
-                self.celltype_universe.onto_cl.map_to_leaves(
-                    node=y,
-                    return_type="idx",
-                    include_self=True,
-                )
+                leave_maps[y] if y not in [
+                    self._adata_ids.unknown_celltype_identifier,
+                    self._adata_ids.not_a_cell_celltype_identifier,
+                ] else np.array([])
                 for y in x
             ]
             oh = np.zeros((len(x), self.ntypes,), dtype="float32")
             for i, y in enumerate(idx):
-                oh[i, y] = 1. / len(y)
+                scale = len(y)
+                if scale > 0:
+                    oh[i, y] = 1. / scale
             return oh
 
         return encoder
@@ -1042,7 +1127,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
         onehot_encoder = self._one_hot_encoder()
         y = np.concatenate([
             onehot_encoder(z)
-            for z in self.data.obs[self._adata_ids.cell_ontology_class].values[idx].tolist()
+            for z in self.data.obs[self._adata_ids.cellontology_id].values[idx].tolist()
         ], axis=0)
         # Distribute aggregated class weight for computation of weights:
         freq = np.mean(y / np.sum(y, axis=1, keepdims=True), axis=0, keepdims=True)
@@ -1071,10 +1156,11 @@ class EstimatorKerasCelltype(EstimatorKeras):
 
     def _get_base_generator(
             self,
-            generator_helper,
             idx: Union[np.ndarray, None],
-            weighted: bool = False,
-            batch_size: int = 1,
+            yield_labels: bool,
+            weighted: bool,
+            batch_size: int,
+            randomized_batch_access: bool,
     ):
         """
         Yield a basic generator based on which a tf dataset can be built.
@@ -1087,6 +1173,12 @@ class EstimatorKerasCelltype(EstimatorKeras):
             - y_sample is a one-hot encoded label vector of a cell
             - w_sample is a weight scalar of a cell
         :param idx: Indicies of data set to include in generator.
+        :param yield_labels:
+        :param batch_size: Number of observations read from disk in each batched access.
+        :param randomized_batch_access: Whether to randomize batches during reading (in generator). Lifts necessity of
+            using a shuffle buffer on generator, however, batch composition stays unchanged over epochs unless there
+            is overhangs in retrieval_batch_size in the raw data files, which often happens and results in modest
+            changes in batch composition.
         :return:
         """
         if idx is None:
@@ -1099,10 +1191,12 @@ class EstimatorKerasCelltype(EstimatorKeras):
             generator_raw = self.data.generator(
                 idx=idx,
                 batch_size=batch_size,
-                obs_keys=["cell_ontology_class"],
+                obs_keys=[self._adata_ids.cellontology_id],
                 return_dense=True,
+                randomized_batch_access=randomized_batch_access,
             )
-            onehot_encoder = self._one_hot_encoder()
+            if yield_labels:
+                onehot_encoder = self._one_hot_encoder()
 
             def generator():
                 for z in generator_raw():
@@ -1110,17 +1204,21 @@ class EstimatorKerasCelltype(EstimatorKeras):
                     if isinstance(x_sample, scipy.sparse.csr_matrix):
                         x_sample = x_sample.todense()
                     x_sample = np.asarray(x_sample)
-                    y_sample = onehot_encoder(z[1]["cell_ontology_class"].values)
-                    for i in range(x_sample.shape[0]):
-                        yield generator_helper(x_sample[i], y_sample[i], 1.)
-
+                    if yield_labels:
+                        y_sample = onehot_encoder(z[1][self._adata_ids.cellontology_id].values)
+                        for i in range(x_sample.shape[0]):
+                            if y_sample[i].sum() > 0:
+                                yield x_sample[i], y_sample[i], 1.
+                    else:
+                        for i in range(x_sample.shape[0]):
+                            yield x_sample[i],
             n_features = self.data.n_vars
             n_samples = self.data.n_obs
-            n_labels = self.data.celltypes_universe.onto_cl.n_leaves
         else:
-            weights, y = self._get_celltype_out(idx=idx)
-            if not weighted:
-                weights = np.ones_like(weights)
+            if yield_labels:
+                weights, y = self._get_celltype_out(idx=idx)
+                if not weighted:
+                    weights = np.ones_like(weights)
             x = self.data.X if self.data.isbacked else self._prepare_data_matrix(idx=idx)
             is_sparse = isinstance(x, scipy.sparse.spmatrix)
             indices = idx if self.data.isbacked else range(x.shape[0])
@@ -1133,17 +1231,21 @@ class EstimatorKerasCelltype(EstimatorKeras):
 
             def generator():
                 for s, e in batch_starts_ends:
-                    x_sample = np.asarray(x[indices[s:e], :].todense()) if is_sparse \
-                        else x[indices[s:e], :]
-                    y_sample = y[indices[s:e], :]
-                    w_sample = weights[indices[s:e]]
-                    for i in range(x_sample.shape[0]):
-                        yield generator_helper(x_sample[i], y_sample[i], w_sample[i])
+                    x_sample = np.asarray(x[indices[s:e], :].todense()) if is_sparse else x[indices[s:e], :]
+                    if yield_labels:
+                        y_sample = y[indices[s:e], :]
+                        w_sample = weights[indices[s:e]]
+                        for i in range(x_sample.shape[0]):
+                            if y_sample[i].sum() > 0:
+                                yield x_sample[i], y_sample[i], w_sample[i]
+                    else:
+                        for i in range(x_sample.shape[0]):
+                            yield x_sample[i],
 
             n_features = x.shape[1]
             n_samples = x.shape[0]
-            n_labels = y.shape[1]
 
+        n_labels = self.celltype_universe.onto_cl.n_leaves
         return generator, n_samples, n_features, n_labels
 
     def _get_dataset(
@@ -1155,7 +1257,9 @@ class EstimatorKerasCelltype(EstimatorKeras):
             cache_full: bool = False,
             weighted: bool = False,
             retrieval_batch_size: int = 128,
-    ):
+            randomized_batch_access: bool = False,
+            prefetch: Union[int, None] = 1,
+    ) -> tf.data.Dataset:
         """
 
         :param idx:
@@ -1163,20 +1267,19 @@ class EstimatorKerasCelltype(EstimatorKeras):
         :param mode:
         :param shuffle_buffer_size:
         :param weighted: Whether to use weights.
+        :param retrieval_batch_size: Number of observations read from disk in each batched access.
+        :param randomized_batch_access: Whether to randomize batches during reading (in generator). Lifts necessity of
+            using a shuffle buffer on generator, however, batch composition stays unchanged over epochs unless there
+            is overhangs in retrieval_batch_size in the raw data files, which often happens and results in modest
+            changes in batch composition.
         :return:
         """
-        # This is a basic cell type prediction model estimator class, the standard generator is fine.
-        def generator_helper(x_sample, y_sample, w_sample):
-            if mode in ['train', 'train_val', 'eval']:
-                return x_sample, y_sample, w_sample
-            else:
-                return x_sample,
-
         generator, n_samples, n_features, n_labels = self._get_base_generator(
-            generator_helper=generator_helper,
             idx=idx,
+            yield_labels=mode in ['train', 'train_val', 'eval'],
             weighted=weighted,
             batch_size=retrieval_batch_size,
+            randomized_batch_access=randomized_batch_access,
         )
         output_types, output_shapes = self._get_output_dim(n_features=n_features, n_labels=n_labels, mode=mode)
         dataset = tf.data.Dataset.from_generator(
@@ -1188,12 +1291,14 @@ class EstimatorKerasCelltype(EstimatorKeras):
             dataset = dataset.cache()
         if mode == 'train' or mode == 'train_val':
             dataset = dataset.repeat()
-            dataset = dataset.shuffle(
-                buffer_size=min(n_samples, shuffle_buffer_size),
-                seed=None,
-                reshuffle_each_iteration=True
-            )
-        dataset = dataset.batch(batch_size).prefetch(tf.data.AUTOTUNE)
+            if shuffle_buffer_size is not None and shuffle_buffer_size > 0:
+                dataset = dataset.shuffle(
+                    buffer_size=min(n_samples, shuffle_buffer_size),
+                    seed=None,
+                    reshuffle_each_iteration=True)
+        if prefetch is None:
+            prefetch = tf.data.AUTOTUNE
+        dataset = dataset.batch(batch_size, drop_remainder=False).prefetch(prefetch)
 
         return dataset
 
@@ -1210,7 +1315,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             CustomTprClasswise(k=self.ntypes)
         ]
 
-    def predict(self, batch_size: int = 64, max_steps: int = np.inf):
+    def predict(self, batch_size: int = 128, max_steps: int = np.inf):
         """
         Return the prediction of the model
 
@@ -1219,41 +1324,40 @@ class EstimatorKerasCelltype(EstimatorKeras):
         :return: Prediction tensor.
         """
         idx = self.idx_test
-        if idx is None or idx.any():   # true if the array is not empty or if the passed value is None
+        if idx is None or idx.any():
             dataset = self._get_dataset(
                 idx=idx,
                 batch_size=batch_size,
                 mode='predict',
                 retrieval_batch_size=128,
+                shuffle_buffer_size=0,
             )
-            steps = min(max(len(idx) // batch_size, 1), max_steps)
-            return self.model.training_model.predict(x=dataset, steps=steps)
+            return self.model.training_model.predict(x=dataset)
         else:
             return np.array([])
 
-    def ytrue(self, batch_size: int = 64, max_steps: int = np.inf):
+    def ytrue(self, batch_size: int = 128, max_steps: int = np.inf):
         """
         Return the true labels of the test set.
 
         :return: true labels
         """
-        if self.idx_test is None or self.idx_test.any():   # true if the array is not empty or if the passed value is None
-            x, y, w = self._get_dataset(
+        if self.idx_test is None or self.idx_test.any():
+            dataset = self._get_dataset(
                 idx=self.idx_test,
                 batch_size=batch_size,
-                mode='eval'
+                mode='eval',
+                shuffle_buffer_size=0,
             )
-            return y
+            y_true = []
+            for _, y, _ in dataset.as_numpy_iterator():
+                y_true.append(y)
+            y_true = np.concatenate(y_true, axis=0)
+            return y_true
         else:
             return np.array([])
 
-    def evaluate_any(
-            self,
-            idx,
-            batch_size: int = 1,
-            max_steps: int = np.inf,
-            weighted: bool = False
-    ):
+    def evaluate_any(self, idx, batch_size: int = 128, max_steps: int = np.inf, weighted: bool = False):
         """
         Evaluate the custom model on any local data.
 
@@ -1273,14 +1377,14 @@ class EstimatorKerasCelltype(EstimatorKeras):
                 mode='eval',
                 weighted=weighted,
                 retrieval_batch_size=128,
+                shuffle_buffer_size=0,
             )
-            steps = min(max(len(idx) // batch_size, 1), max_steps)
-            results = self.model.training_model.evaluate(x=dataset, steps=steps)
+            results = self.model.training_model.evaluate(x=dataset)
             return dict(zip(self.model.training_model.metrics_names, results))
         else:
             return {}
 
-    def evaluate(self, batch_size: int = 64, max_steps: int = np.inf, weighted: bool = False):
+    def evaluate(self, batch_size: int = 128, max_steps: int = np.inf, weighted: bool = False):
         """
         Evaluate the custom model on local data.
 

@@ -15,13 +15,13 @@
    
       ~ui.UserInterface.__init__
       ~ui.UserInterface.celltype_summary
-      ~ui.UserInterface.compute_all
+      ~ui.UserInterface.predict_all
       ~ui.UserInterface.compute_all_kipoi
-      ~ui.UserInterface.compute_celltype
+      ~ui.UserInterface.predict_celltypes
       ~ui.UserInterface.compute_celltype_kipoi
       ~ui.UserInterface.compute_denoised_expression
       ~ui.UserInterface.compute_denoised_expression_kipoi
-      ~ui.UserInterface.compute_embedding
+      ~ui.UserInterface.predict_embedding
       ~ui.UserInterface.compute_embedding_kipoi
       ~ui.UserInterface.deposit_zenodo
       ~ui.UserInterface.filter_cells
