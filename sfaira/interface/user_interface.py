@@ -218,6 +218,7 @@ class UserInterface:
                               f"does not match the md5 checksum of the uploaded file.")
             if deposit_topologies:  # Deposit associated topology file
                 filename_topology = ".".join(filename_weights.split(".")[:-1])
+                filename_topology = re.sub(r"_weights$", "", filename_topology)
                 filename_topology += "_topology.pickle"
                 topology_path = os.path.join(basepath, filename_topology)
                 assert os.path.isfile(topology_path), f"topology file {topology_path} not found. " \
