@@ -207,15 +207,23 @@ class UserInterface:
             bucket_url = r.json()["links"]["bucket"]
             deposition_id = r.json()['id']
         else:
+            update_existing_deposition = str(update_existing_deposition) if isinstance(update_existing_deposition, int)\
+                else update_existing_deposition
             # Create a new version of the existing deposition
             r = requests.post(
                 f'https://{sandbox}zenodo.org/api/deposit/depositions/{update_existing_deposition}/actions/newversion',
                 params=params)
+            try:
+                deposition_id = r.json()["links"]["latest_draft"].split("/")[-1]
+            except json.decoder.JSONDecodeError:
+                r = requests.post(
+                    f'https://{sandbox}zenodo.org/api/deposit/depositions/{update_existing_deposition}/actions/newversion',
+                    params=params)
+                deposition_id = r.json()["links"]["latest_draft"].split("/")[-1]
             if r.status_code != 201:
                 raise ValueError(
                     f"A new version of deposition {update_existing_deposition} could not be created, "
                     f"please make sure your API key is associated with the account that owns this deposition.")
-            deposition_id = r.json()["links"]["latest_draft"].split("/")[-1]
             r = requests.get(f'https://{sandbox}zenodo.org/api/deposit/depositions/{deposition_id}', params=params)
             bucket_url = r.json()["links"]["bucket"]
 
