@@ -24,7 +24,7 @@ class Dataset(DatasetBase):
         self.normalization = "raw"
         self.organ = "lung parenchyma"
         self.organism = "human"
-        self.assay_sc = "10x sequencing"
+        self.assay_sc = "10x technology"
         self.year = 2020
         self.sample_source = "primary_tissue"
 

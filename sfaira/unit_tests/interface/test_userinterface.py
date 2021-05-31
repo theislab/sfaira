@@ -35,14 +35,3 @@ class TestUi:
         """
         temp_fn = os.path.join(str(os.path.dirname(os.path.abspath(__file__))), '../test_data')
         self.ui = UserInterface(custom_repo=temp_fn, sfaira_repo=False)
-
-    def _test_kipoi(self):
-        """
-        Test all kipoi_experimental model methods.
-
-
-        :return:
-        """
-        temp_fn = os.path.join(str(os.path.dirname(os.path.abspath(__file__))), '../test_data')
-        self.ui = UserInterface(custom_repo=temp_fn, sfaira_repo=False)
-        self.ui.compute_embedding_kipoi()

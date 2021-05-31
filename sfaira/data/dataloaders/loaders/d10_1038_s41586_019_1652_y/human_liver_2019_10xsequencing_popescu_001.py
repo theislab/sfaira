@@ -11,7 +11,7 @@ class Dataset(DatasetBase):
         self.download_url_data = "private,fetal_liver_alladata_.h5ad"
         self.download_url_meta = None
 
-        self.assay_sc = "10x sequencing"
+        self.assay_sc = "10x technology"
         self.author = "Popescu"
         self.disease = "healthy"
         self.doi = "10.1038/s41586-019-1652-y"
