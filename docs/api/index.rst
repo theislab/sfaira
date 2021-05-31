@@ -3,7 +3,7 @@
    :noindex:
 
 API
-===
+====
 
 Import sfaira as::
 
@@ -12,125 +12,122 @@ Import sfaira as::
 
 
 Data: `data`
-------------
+-------------
 
 .. module:: sfaira.data
 .. currentmodule:: sfaira
 
 The sfaira data zoo API.
 
-
-Pre-defined data set collections
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This sub-module gives you access to curated subsets of the data zoo, e.g. all data sets from human lungs.
-
-.. autosummary::
-   :toctree: .
-
-   data.human
-   data.mouse
-
-
-Functionalities for interactive data analysis
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This sub-module gives you access to functionalities you need to define your own data set collections based on the sfaira data zoo.
+Dataset representing classes used for development:
 
 .. autosummary::
    :toctree: .
 
    data.DatasetBase
-   data.DatasetGroupBase
+   data.DatasetGroup
+   data.DatasetGroupDirectoryOriented
    data.DatasetSuperGroup
 
-
-Functionalities for interactive data analysis
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This sub-module gives you access to functionalities you need to load new data live into the data zoo to handle a raw data set in the context of zoo data sets.
+Interactive data class to use a loaded data object in the context sfaira tools:
 
 .. autosummary::
    :toctree: .
 
    data.DatasetInteractive
 
-
-Genomes: `genomes`
-------------------
-
-.. module:: sfaira.genomes
-.. currentmodule:: sfaira
-
-This sub-module gives you access to properties of the genome representations used in sfaira.
+Dataset universe to interact with all data loader classes:
 
 .. autosummary::
    :toctree: .
 
-   genomes.ExtractFeatureListEnsemble
+   data.Universe
+
+Data store handling:
+
+.. autosummary::
+   :toctree: .
+
+   data.load_store
+   data.DistributedStoreBase
+   data.DistributedStoreDao
+   data.DistributedStoreH5ad
 
 
-Models: `models`
-----------------
+Estimator classes: `estimators`
+--------------------------------
+
+.. module:: sfaira.estimators
+.. currentmodule:: sfaira
+
+Estimator classes from the sfaira model zoo API for advanced use.
+
+.. autosummary::
+   :toctree: .
+
+   estimators.EstimatorKeras
+   estimators.EstimatorKerasCelltype
+   estimators.EstimatorKerasEmbedding
+
+Model classes: `models`
+------------------------
 
 .. module:: sfaira.models
 .. currentmodule:: sfaira
 
-The sfaira model zoo API for advanced use.
-This API is structured by streamlined, task-specific APIs for specific analysis problems.
-This API is targeted at developers, see also `ui` for a user centric wrapping API for this model zoo.
+Model classes from the sfaira model zoo API for advanced use.
 
-
-Cell-type predictor models
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This sub-module handles models that predict cell types.
+Cell type models
+~~~~~~~~~~~~~~~~~
+Classes that wrap tensorflow cell type predictor models.
 
 .. autosummary::
    :toctree: .
 
-   models.celltype
-
+   models.celltype.CellTypeMarker
+   models.celltype.CellTypeMarker
+   models.celltype.CellTypeMlp
+   models.celltype.CellTypeMlpVersioned
 
 Embedding models
-~~~~~~~~~~~~~~~~
-
-This sub-module handles models that embed expression vectors (cells) into a latent space.
+~~~~~~~~~~~~~~~~~
+Classes that wrap tensorflow embedding models.
 
 .. autosummary::
    :toctree: .
 
-   models.embedding
-
+   models.embedding.ModelKerasAe
+   models.embedding.ModelAeVersioned
+   models.embedding.ModelKerasVae
+   models.embedding.ModelVaeVersioned
+   models.embedding.ModelKerasLinear
+   models.embedding.ModelLinearVersioned
+   models.embedding.ModelKerasVaeIAF
+   models.embedding.ModelVaeIAFVersioned
+   models.embedding.ModelKerasVaeVamp
+   models.embedding.ModelVaeVampVersioned
 
 Train: `train`
---------------
+---------------
 
 .. module:: sfaira.train
 .. currentmodule:: sfaira
 
 The interface for training sfaira compatible models.
-This is a sub-module dedicated for developers to ease model training and deployment.
 
 Trainer classes
-~~~~~~~~~~~~~~~
-
-Trainer class wrap estimator classes (which wrap model classes) and handle grid-search specific tasks centred on model fits,
-such as saving evaluation metrics and model weights.
+~~~~~~~~~~~~~~~~
+Classes that wrap estimator classes to use in grid search training.
 
 .. autosummary::
    :toctree: .
 
-   train.TargetZoos
    train.TrainModelCelltype
    train.TrainModelEmbedding
 
-
-Grid search summary classes
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Grid search summary classes allow a developer to easily interact with a finished grid search by loading and summarising results,
-which were saved through Trainer classes.
+Grid search summaries
+~~~~~~~~~~~~~~~~~~~~~
+Classes to pool evaluation metrics across fits in a grid search.
 
 .. autosummary::
    :toctree: .
@@ -139,8 +136,68 @@ which were saved through Trainer classes.
    train.SummarizeGridsearchCelltype
    train.SummarizeGridsearchEmbedding
 
+Versions: `versions`
+---------------------
+
+.. module:: sfaira.versions
+.. currentmodule:: sfaira
+
+The interface for sfaira metadata management.
+
+Genomes
+~~~~~~~~
+Genome management.
+
+.. autosummary::
+   :toctree: .
+
+   versions.genomes.GenomeContainer
+
+Metadata
+~~~~~~~~~
+Dataset metadata management.
+Base classes to manage ontology files:
+
+.. autosummary::
+   :toctree: .
+
+   versions.metadata.Ontology
+   versions.metadata.OntologyList
+   versions.metadata.OntologyHierarchical
+   versions.metadata.OntologyObo
+   versions.metadata.OntologyOboCustom
+
+Onotology-specific classes:
+
+.. autosummary::
+   :toctree: .
+
+   versions.metadata.OntologyCellosaurus
+   versions.metadata.OntologyCl
+   versions.metadata.OntologyHsapdv
+   versions.metadata.OntologyMondo
+   versions.metadata.OntologyMmusdv
+   versions.metadata.OntologySinglecellLibraryConstruction
+   versions.metadata.OntologyUberon
+
+Class wrapping cell type ontology for predictor models:
+
+.. autosummary::
+   :toctree: .
+
+   versions.metadata.CelltypeUniverse
+
+Topologies
+~~~~~~~~~~~
+Model topology management.
+
+.. autosummary::
+   :toctree: .
+
+   versions.topologies.TopologyContainer
+
 User interface: `ui`
---------------------
+---------------------
 
 .. module:: sfaira.ui
 .. currentmodule:: sfaira
