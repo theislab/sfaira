@@ -1,0 +1,458 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Using Data &mdash; sfaira 0+untagged.1.g7859fe8 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
+  <link rel="stylesheet" href="_static/custom_sfaira.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Adding data sets" href="adding_datasets.html" />
+    <link rel="prev" title="Tutorials" href="tutorials.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> sfaira
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0+untagged.1.g7859fe8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="commandline_interface.html">Commandline interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Using Data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#build-data-repository-locally">Build data repository locally</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#build-a-repository-structure">Build a repository structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#use-3rd-party-repositories">Use 3rd party repositories</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#genome-management">Genome management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#faq">FAQ</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#how-is-the-datasets-id-structured">How is the dataset’s ID structured?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#how-do-i-assemble-the-data-set-id-if-some-of-its-element-meta-data-are-not-unique">How do I assemble the data set ID if some of its element meta data are not unique?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#what-are-cell-wise-and-sample-wise-meta-data">What are cell-wise and sample-wise meta data?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#which-meta-data-objects-are-mandatory">Which meta data objects are mandatory?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#how-do-i-cache-data-sets">How do I cache data sets?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#how-do-i-add-cell-type-annotation">How do I add cell type annotation?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#why-are-constructor-init-and-loading-function-load-split-in-the-template-data-loader">Why are constructor (<code class="docutils literal notranslate"><span class="pre">__init__</span></code>) and loading function (<code class="docutils literal notranslate"><span class="pre">_load</span></code>) split in the template data loader?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#how-do-i-tell-sfaira-where-the-gene-names-are">How do I tell sfaira where the gene names are?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#i-only-have-gene-symbols-human-readable-names-often-abbreviations-such-as-hgnc-or-mgi-but-not-ensembl-identifiers-is-that-a-problem">I only have gene symbols (human readable names, often abbreviations), such as HGNC or MGI, but not ENSEMBL identifiers, is that a problem?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#i-have-cite-seq-data-where-can-i-put-the-protein-quantification">I have CITE-seq data, where can I put the protein quantification?</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="adding_datasets.html">Adding data sets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adding_dataset_classes.html">The class-based data loader python file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ecosystem.html">Ecosystem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">sfaira</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Using Data</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            
+              <a href="https://github.com/theislab/sfaira/blob/master/docs/using_data.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="using-data">
+<h1>Using Data<a class="headerlink" href="#using-data" title="Permalink to this headline">¶</a></h1>
+<a class="reference internal image-reference" href="https://raw.githubusercontent.com/theislab/sfaira/master/resources/images/data_zoo.png"><img alt="https://raw.githubusercontent.com/theislab/sfaira/master/resources/images/data_zoo.png" class="align-center" src="https://raw.githubusercontent.com/theislab/sfaira/master/resources/images/data_zoo.png" style="width: 600px;" /></a>
+<div class="section" id="build-data-repository-locally">
+<h2>Build data repository locally<a class="headerlink" href="#build-data-repository-locally" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="build-a-repository-structure">
+<h3>Build a repository structure<a class="headerlink" href="#build-a-repository-structure" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Choose a directory to dedicate to the data base, called root in the following.</p></li>
+<li><p>Run the sfaira download script (sfaira.data.utils.download_all). Alternatively, you can manually set up a data base by making subfolders for each study.</p></li>
+</ol>
+</div></blockquote>
+<p>Note that the automated download is a feature of sfaira but not the core purpose of the package:
+Sfaira allows you efficiently interact with such a local data repository.
+Some data sets cannot be automatically downloaded and need you manual intervention, which we report in the download script output.</p>
+</div>
+<div class="section" id="use-3rd-party-repositories">
+<h3>Use 3rd party repositories<a class="headerlink" href="#use-3rd-party-repositories" title="Permalink to this headline">¶</a></h3>
+<p>Some organization provide streamlined data objects that can be directly consumed by data zoos such as sfaira.
+One example for such an organization is the <a class="reference external" href="https://cellxgene.cziscience.com/">cellxgene</a> data portal.
+Through these repositories, one can easily build or extend a collection of data sets that can be easily interfaced with sfaira.
+Data loaders for cellxgene structured data objects will be available soon!
+Contact us for support of any other repositories.</p>
+</div>
+</div>
+<div class="section" id="genome-management">
+<h2>Genome management<a class="headerlink" href="#genome-management" title="Permalink to this headline">¶</a></h2>
+<p>We streamline feature spaces used by models by defining standardized gene sets that are used as model input.
+Per default, sfaira works with the protein coding genes of a genome assembly right now.
+A model topology version includes the genome it was trained for, which also defines the feature of this model as genes.
+As genome assemblies are updated, model topology version can be updated and models retrained to reflect these changes.
+Note that because protein coding genes do not change drastically between genome assemblies,
+sample can be carried over to assemblies they were not aligned against by matching gene identifiers.
+Sfaira automatically tries to overlap gene identifiers to the genome assembly selected through the current model.</p>
+</div>
+<div class="section" id="faq">
+<h2>FAQ<a class="headerlink" href="#faq" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="how-is-the-datasets-id-structured">
+<h3>How is the dataset’s ID structured?<a class="headerlink" href="#how-is-the-datasets-id-structured" title="Permalink to this headline">¶</a></h3>
+<p>Organism_Organ_Year_AssaySc_NumberOfDataset_FirstAuthorLastname_doi</p>
+</div>
+<div class="section" id="how-do-i-assemble-the-data-set-id-if-some-of-its-element-meta-data-are-not-unique">
+<h3>How do I assemble the data set ID if some of its element meta data are not unique?<a class="headerlink" href="#how-do-i-assemble-the-data-set-id-if-some-of-its-element-meta-data-are-not-unique" title="Permalink to this headline">¶</a></h3>
+<p>The data set ID is designed to be a unique identifier of a data set.
+Therefore, it is not an issue if it does not capture the full complexity of the data.
+Simply choose the meta data value out of the list of corresponding values which comes first in the alphabet.</p>
+</div>
+<div class="section" id="what-are-cell-wise-and-sample-wise-meta-data">
+<h3>What are cell-wise and sample-wise meta data?<a class="headerlink" href="#what-are-cell-wise-and-sample-wise-meta-data" title="Permalink to this headline">¶</a></h3>
+<p>Metadata can be set on a per sample level or, in some cases, per cell.
+Sample-wise meta data can be directly set in the constructor (e.g self.organism = “human”).
+Cell-wise metadata can be provided in <code class="docutils literal notranslate"><span class="pre">.obs</span></code> of the loaded data, here,
+a Dataset attribute contains the name of the <code class="docutils literal notranslate"><span class="pre">.obs</span></code> column that contains these cell-wise labels
+(e.g. self.obs_key_organism).
+Note that sample-wise meta data should be yielded as such and not as a column in <code class="docutils literal notranslate"><span class="pre">.obs</span></code> to simplify loading.</p>
+</div>
+<div class="section" id="which-meta-data-objects-are-mandatory">
+<h3>Which meta data objects are mandatory?<a class="headerlink" href="#which-meta-data-objects-are-mandatory" title="Permalink to this headline">¶</a></h3>
+<p>Mandatory on sample (self.attribute) or cell level (self.obs_key_attribute):</p>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt>.id: Dataset ID. This is used to identify the data set uniquely.</dt><dd><p>Example: self.id = “human_colon_2019_10x_smilie_001_10.1016/j.cell.2019.06.029”</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>.download_url_data: Link to data download website.</dt><dd><p>Example: self.download = “some URL”</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>.download_url_meta: Download link to metadata. Assumes that meta data is defined in .download_url_data if not</dt><dd><p>specified.
+Example: self.download_meta = “some URL”</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>.gene_id_symbols_var_key, .gene_id_ensembl_var_key: Location of gene name as gene symbol and/or ENSEMBL ID in adata.var</dt><dd><p>(if index of adata.var, set to “index”, otherwise to column name). One of the two must be provided.
+Example: self.gene_id_symbols_var_key = ‘index’, self.gene_id_ensembl_var_key = “GeneID”</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>.author: First author of publication (or list of all authors).</dt><dd><p>self.author = “Last name, first name” # or [“Last name, first name”, “Last name, first name”]</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>.doi: Doi of publication</dt><dd><p>Example: self.doi = “10.1016/j.cell.2019.06.029”</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>.organism (or .obs_key_organism): Organism sampled.</dt><dd><p>Example: self.organism = “human”</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>.sample_source (or .obs_key_sample_source): Whether data was obtained from primary tissue or cell culture</dt><dd><p>Example: self.sample_source = “primary_tissue”</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<p>Highly recommended:</p>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt>.normalization: Normalization of count data:</dt><dd><p>Example: self.normalization = “raw”</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>.organ (or .obs_key_organ): Organ sampled.</dt><dd><p>Example: self.organ = “liver”</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>.assay_sc (or .obs_key_assay_sc): Protocol with which data was collected.</dt><dd><p>Example: self.assay_sc = “10x”</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<p>Optional (if available):</p>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt>.age (or .obs_key_age): Age of individual sampled.</dt><dd><p>Example: self.age = 80  # (80 years old for human)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>.dev_stage (or .obs_key_dev_stage): Developmental stage of individual sampled.</dt><dd><p>Example: self.dev_stage = “mature”</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>.ethnicity (or .obs_key_ethnicity): Ethnicity of individual sampled (only for human).</dt><dd><p>Example: self.ethnicity = “free text”</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>.healthy (or .obs_key_healthy): Is the sampled from a disease individual? (bool)</dt><dd><p>Example: self.healthy = True</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>.sex (or .obs_key_sex): Sex of individual sampled.</dt><dd><p>Example: self.sex = “male”</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>.state_exact (or .obs_key_state_exact): Exact disease state</dt><dd><p>self.state_exact = free text</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>.obs_key_cell_types_original: Column in .obs in which free text cell type names are stored.</dt><dd><p>Example: self.obs_key_cell_types_original = ‘CellType’</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>.year: Year of publication:</dt><dd><p>Example: self.year = 2019</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>.cell_line: Which cell line was used for the experiment (for cell culture samples)</dt><dd><p>Example: self.cell_line = “409B2 (CVCL_K092)”</p>
+</dd>
+</dl>
+</li>
+<li><p>.assay_differentiation: Which protocol was used for the differentiation of the cells (for cell culture samples)</p></li>
+<li><dl class="simple">
+<dt>.assay_type_differentiation: Which protocol-type was used for the differentiation of the cells: guided or unguided</dt><dd><p>(for cell culture samples)</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="how-do-i-cache-data-sets">
+<h3>How do I cache data sets?<a class="headerlink" href="#how-do-i-cache-data-sets" title="Permalink to this headline">¶</a></h3>
+<p>When loading a dataset with <a href="#id1"><span class="problematic" id="id2">`</span></a>Dataset.load(),`you can specify if the adata object
+should be cached or not  (allow_caching= True).
+If set to True, the loaded adata object will be cached as an h5ad object for faster reloading.</p>
+</div>
+<div class="section" id="how-do-i-add-cell-type-annotation">
+<h3>How do I add cell type annotation?<a class="headerlink" href="#how-do-i-add-cell-type-annotation" title="Permalink to this headline">¶</a></h3>
+<p>We are simplifying this right now, new instructions will be available second half of January.</p>
+</div>
+<div class="section" id="why-are-constructor-init-and-loading-function-load-split-in-the-template-data-loader">
+<h3>Why are constructor (<code class="docutils literal notranslate"><span class="pre">__init__</span></code>) and loading function (<code class="docutils literal notranslate"><span class="pre">_load</span></code>) split in the template data loader?<a class="headerlink" href="#why-are-constructor-init-and-loading-function-load-split-in-the-template-data-loader" title="Permalink to this headline">¶</a></h3>
+<p>Initiation and data set loading are handled separately to allow lazy loading.
+All steps that are required to load the count data and
+additional metadata should be defined solely in the <code class="docutils literal notranslate"><span class="pre">_load</span></code> section.
+Setting of class metadata such as <code class="docutils literal notranslate"><span class="pre">.doi</span></code>, <code class="docutils literal notranslate"><span class="pre">.id</span></code> etc. should be done in the constructor.</p>
+</div>
+<div class="section" id="how-do-i-tell-sfaira-where-the-gene-names-are">
+<h3>How do I tell sfaira where the gene names are?<a class="headerlink" href="#how-do-i-tell-sfaira-where-the-gene-names-are" title="Permalink to this headline">¶</a></h3>
+<p>By setting the attributes <code class="docutils literal notranslate"><span class="pre">.gene_id_symbols_var_key</span></code> or <code class="docutils literal notranslate"><span class="pre">.gene_id_ensembl_var_key</span></code> in the constructor.
+If the gene names are in the index of this data frame, you can set “index” as the value of these attributes.</p>
+</div>
+<div class="section" id="i-only-have-gene-symbols-human-readable-names-often-abbreviations-such-as-hgnc-or-mgi-but-not-ensembl-identifiers-is-that-a-problem">
+<h3>I only have gene symbols (human readable names, often abbreviations), such as HGNC or MGI, but not ENSEMBL identifiers, is that a problem?<a class="headerlink" href="#i-only-have-gene-symbols-human-readable-names-often-abbreviations-such-as-hgnc-or-mgi-but-not-ensembl-identifiers-is-that-a-problem" title="Permalink to this headline">¶</a></h3>
+<p>No, that is not a problem. They will automatically be converted to Ensembl IDs.
+You can, however, specify the reference genome in <code class="docutils literal notranslate"><span class="pre">Dataset.load(match_to_reference</span> <span class="pre">=</span> <span class="pre">ReferenceGenomeName)</span></code>
+to which the names should be mapped to.</p>
+</div>
+<div class="section" id="i-have-cite-seq-data-where-can-i-put-the-protein-quantification">
+<h3>I have CITE-seq data, where can I put the protein quantification?<a class="headerlink" href="#i-have-cite-seq-data-where-can-i-put-the-protein-quantification" title="Permalink to this headline">¶</a></h3>
+<p>We will soon provide a structured interface for loading and accessing CITE-seq data,
+for now you can add it into <code class="docutils literal notranslate"><span class="pre">self.adata.obsm[“CITE”]</span></code>.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="adding_datasets.html" class="btn btn-neutral float-right" title="Adding data sets" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="tutorials.html" class="btn btn-neutral float-left" title="Tutorials" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Leander Dony, David S. Fischer, Lukas Heumos..
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

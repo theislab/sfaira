@@ -1,0 +1,944 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Adding data sets &mdash; sfaira 0+untagged.1.g7859fe8 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
+  <link rel="stylesheet" href="_static/custom_sfaira.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="The class-based data loader python file" href="adding_dataset_classes.html" />
+    <link rel="prev" title="Using Data" href="using_data.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> sfaira
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0+untagged.1.g7859fe8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="commandline_interface.html">Commandline interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="using_data.html">Using Data</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Adding data sets</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#writing-dataloaders">Writing dataloaders</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#the-study-centric-data-loader-module">The study-centric data loader module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-data-loader-python-file">The data loader python file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#loading-multiple-files-of-similar-structure">Loading multiple files of similar structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#loading-third-party-annotation">Loading third party annotation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#creating-dataloaders-with-the-commandline-interface">Creating dataloaders with the commandline interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#map-cell-type-labels-to-ontology">Map cell type labels to ontology</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#cell-type-ontology-management">Cell type ontology management</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#contribute-cell-types-to-ontology">Contribute cell types to ontology</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#metadata">Metadata</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#required-fields">Required fields</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#field-descriptions">Field descriptions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="adding_dataset_classes.html">The class-based data loader python file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ecosystem.html">Ecosystem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">sfaira</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Adding data sets</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            
+              <a href="https://github.com/theislab/sfaira/blob/master/docs/adding_datasets.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="adding-data-sets">
+<h1>Adding data sets<a class="headerlink" href="#adding-data-sets" title="Permalink to this headline">¶</a></h1>
+<p>Adding datasets to sfaira is a great way to increase the visibility of your dataset and to make it available to a large audience.
+This process requires a couple of steps as outlined in the following sections.</p>
+<div class="figure align-default" id="id1">
+<img alt="sfaira adding datasets" src="https://user-images.githubusercontent.com/21954664/117845386-c6744a00-b280-11eb-9d86-8c47132a3949.png" />
+<p class="caption"><span class="caption-text">Overview of contributing dataloaders to sfaira. First, ensure that your data is not yet available as a dataloader.
+Next, create a dataloader and validate it. Afterwards, annotate it to finally test it. Finally, submit your dataloader to sfaira.</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</div>
+<p>sfaira features an interactive way of creating, formatting and testing dataloaders through a command line interface (CLI).
+The common workflow using the CLI looks as follows:</p>
+<ol class="arabic simple">
+<li><dl class="simple">
+<dt>Check that the data loader was not already implemented.</dt><dd><p>We will open issues for all planned data loaders, so you can search both the <a class="reference external" href="https://github.com/theislab/sfaira/tree/dev">code</a> base and our GitHub <a class="reference external" href="https://github.com/theislab/sfaira/issues">issues</a> for
+matching data loaders before you start writing one.
+The core data loader identified is the directory compatible doi,
+which is the doi with all special characters replaced by “_” and a “d” prefix is used:
+“10.1016/j.cell.2019.06.029” becomes “d10_1016_j_cell_2019_06_029”.
+Searching for this string should yield a match if it is already implemented, take care to look for both
+preprint and publication DOIs if both are available.
+We will also mention publication names in issues, you will however not find these in the code.</p>
+</dd>
+</dl>
+</li>
+</ol>
+<ol class="arabic simple" start="2">
+<li><dl class="simple">
+<dt>Install sfaira.</dt><dd><p>Clone sfaira into a local repository from <code class="docutils literal notranslate"><span class="pre">dev</span></code> branch and install via pip.</p>
+</dd>
+</dl>
+</li>
+</ol>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">target_directory</span>
+<span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">theislab</span><span class="o">/</span><span class="n">sfaira</span><span class="o">.</span><span class="n">git</span>
+<span class="n">git</span> <span class="n">checkout</span> <span class="n">dev</span>
+<span class="c1"># git pull  # use this to update your installation</span>
+<span class="n">cd</span> <span class="n">sfaira</span>  <span class="c1"># go into sfaira directory</span>
+<span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="o">.</span>  <span class="c1"># install</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><dl class="simple">
+<dt>Create a new dataloader.</dt><dd><p>When creating a dataloader with <code class="docutils literal notranslate"><span class="pre">sfaira</span> <span class="pre">create-dataloader</span></code> dataloader specific attributes such as organ, organism
+and many more are prompted for.
+We provide a description of all meta data items at the bottom of this file.
+If the requested information is not available simply hit enter and continue until done.</p>
+</dd>
+</dl>
+</li>
+</ol>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># make sure you are in the top-level sfaira directory from step 1</span>
+<span class="n">git</span> <span class="n">checkout</span> <span class="o">-</span><span class="n">b</span> <span class="n">YOUR_BRANCH_NAME</span>  <span class="c1"># create a new branch for your data loader.</span>
+<span class="n">sfaira</span> <span class="n">create</span><span class="o">-</span><span class="n">dataloader</span>
+</pre></div>
+</div>
+<p>The created files are created in the sfaira installation under <code class="docutils literal notranslate"><span class="pre">sfaira/data/dataloaders/loaders/--DOI-folder--</span></code>,
+where the DOI-specific folder starts with <code class="docutils literal notranslate"><span class="pre">d</span></code> and is followed by the DOI in which all special characters are replaced
+by <code class="docutils literal notranslate"><span class="pre">_</span></code>, below referred to as <code class="docutils literal notranslate"><span class="pre">--DOI-folder--</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>├──sfaira/data/dataloaders/loaders/--DOI-folder--
+    ├── extra_description.txt &lt;- Optional extra description file
+    ├── __init__.py
+    ├── NA_NA_2021_NA_Einstein_001.py &lt;- Contains the load function to load the data
+    ├── NA_NA_2021_NA_Einstein_001.yaml &lt;- Specifies all data loader data
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li><dl class="simple">
+<dt>Correct yaml file.</dt><dd><p>Correct errors in <code class="docutils literal notranslate"><span class="pre">sfaira/data/dataloaders/loaders/--DOI-folder--/NA_NA_2021_NA_Einstein_001.yaml</span></code> file and add
+further attributes you may have forgotten in step 2.
+This step is optional.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Make downloaded data available to sfaira data loader testing.</dt><dd><p>Identify the raw files as indicated in the dataloader classes and copy them into your directory structure as
+required by your data loader.
+Note that this should be the exact files that are uploaded to cloud servers such as GEO:
+Do not decompress these files ff these files are archives such as zip, tar or gz.
+Instead, navigate the archives directly in the load function (step 5).
+Copy the data into <code class="docutils literal notranslate"><span class="pre">sfaira/unit_tests/template_data/--DOI-folder--/</span></code>.
+This folder is masked from git and only serves for temporarily using this data for loader testing.
+After finishing loader contribution, you can delete this data again without any consequences for your loader.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Write load function.</dt><dd><p>Fill load function in <code class="docutils literal notranslate"><span class="pre">sfaira/data/dataloaders/loaders/--DOI-folder--NA_NA_2021_NA_Einstein_001.py</span></code>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Validate the dataloader with the CLI.</dt><dd><p>Next validate the integrity of your dataloader content with <code class="docutils literal notranslate"><span class="pre">sfaira</span> <span class="pre">validate-dataloader</span> <span class="pre">&lt;path</span> <span class="pre">to</span> <span class="pre">*.yaml&gt;</span></code>.
+All tests must pass! If any of the tests fail please revisit your dataloader and add the missing information.</p>
+</dd>
+</dl>
+</li>
+</ol>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span># make sure you are in the top-level sfaira directory from step 1
+sfaira validate-dataloader &lt;path&gt;``
+</pre></div>
+</div>
+<ol class="arabic simple" start="8">
+<li><dl class="simple">
+<dt>Create cell type annotation if your data set is annotated.</dt><dd><p>Note that this will abort with error if there are bugs in your data loader.</p>
+</dd>
+</dl>
+</li>
+</ol>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># make sure you are in the top-level sfaira directory from step 1</span>
+<span class="c1"># sfaira annotate &lt;path&gt;`` TODO</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="9">
+<li><dl class="simple">
+<dt>Mitigate automated cell type maps.</dt><dd><p>Sfaira creates a cell type mapping <code class="docutils literal notranslate"><span class="pre">.tsv</span></code> file in the directory in which your data loaders is located if you
+indicated that annotation is present by filling <code class="docutils literal notranslate"><span class="pre">cell_types_original_obs_key</span></code>.
+This file is: <code class="docutils literal notranslate"><span class="pre">NA_NA_2021_NA_Einstein_001.tsv</span></code>.
+This file contains two columns with one row for each unique cell type label.
+The free text identifiers in the first column “source”,
+and the corresponding ontology term in the second column “target”.
+You can write this file entirely from scratch.
+Sfaira also allows you to generate a first guess of this file using fuzzy string matching
+which is automatically executed when you run the template data loader unit test for the first time with you new
+loader.
+Conflicts are not resolved in this first guess and you have to manually decide which free text field corresponds
+to which ontology term in the case of conflicts.
+Still, this first guess usually drastically speeds up this annotation harmonization.
+Note that you do not have to include the non-human-readable IDs here as they are added later in a fully
+automated fashion.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Test data loader.</dt><dd><p>Note that this will abort with error if there are bugs in your data loader.</p>
+</dd>
+</dl>
+</li>
+</ol>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># make sure you are in the top-level sfaira directory from step 1</span>
+<span class="c1"># sfaira test-dataloader &lt;path&gt;`` TODO</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="11">
+<li><dl class="simple">
+<dt>Make loader public.</dt><dd><p>You can contribute the data loader to public sfaira as code through a pull request.
+Note that you can also just keep the data loader in your local installation or keep it in sfaira_extensions
+if you do not want to make it public.
+Note that we do not manage data upload!
+During publication, you would upload this data set to a server like GEO and the data loader contributed to
+sfaira would use this download link.</p>
+</dd>
+</dl>
+</li>
+</ol>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># make sure you are in the top-level sfaira directory from step 1</span>
+<span class="n">git</span> <span class="n">add</span> <span class="o">*</span>
+<span class="n">git</span> <span class="n">commit</span>  <span class="c1"># enter your commit description</span>
+<span class="c1"># Next make sure you are up to date with dev</span>
+<span class="n">git</span> <span class="n">checkout</span> <span class="n">dev</span>
+<span class="n">git</span> <span class="n">pull</span>
+<span class="n">git</span> <span class="n">checkout</span> <span class="n">YOUR_BRANCH_NAME</span>
+<span class="n">git</span> <span class="n">merge</span> <span class="n">dev</span>
+<span class="n">git</span> <span class="n">push</span>  <span class="c1"># this starts the pull request.</span>
+</pre></div>
+</div>
+<p>The following sections will first describe the underlying design principles of sfaira dataloaders and
+then explain how to interactively create, validate and test dataloaders.</p>
+<div class="section" id="writing-dataloaders">
+<h2>Writing dataloaders<a class="headerlink" href="#writing-dataloaders" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="the-study-centric-data-loader-module">
+<h3>The study-centric data loader module<a class="headerlink" href="#the-study-centric-data-loader-module" title="Permalink to this headline">¶</a></h3>
+<p>In the sfaira code, data loaders are organised into directories, which correspond to publications.
+All data loaders corresponding to data sets of one study are grouped into this directory.
+Next, each data set is represented by one data loader python file in this directory.
+See below for more complex set ups with repetitive data loader code.</p>
+</div>
+<div class="section" id="the-data-loader-python-file">
+<h3>The data loader python file<a class="headerlink" href="#the-data-loader-python-file" title="Permalink to this headline">¶</a></h3>
+<p>Each data set, ie a single file or a set of files with similar structures, has its own data loader function and a yaml
+files that describes its meta data.
+Alternatively to the (preferred) yaml file, meta data can be also be described in a constructor of a class in the same python file
+as the loading function. For a documentation on writing a python class-based dataloader, please see here: <a class="reference external" href="https://github.com/theislab/sfaira/blob/dev/docs/adding_dataset_classes.rst">https://github.com/theislab/sfaira/blob/dev/docs/adding_dataset_classes.rst</a>
+A detailed description of all meta data is given at the bottom of this page.</p>
+<p>1. A yaml file or constructor of the following form that can be used to interact with the data set
+before it is loaded into memory:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">dataset_structure</span><span class="p">:</span>
+    <span class="nt">dataset_index</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
+    <span class="nt">sample_fns</span><span class="p">:</span>
+<span class="nt">dataset_wise</span><span class="p">:</span>
+    <span class="nt">author</span><span class="p">:</span>
+    <span class="nt">doi</span><span class="p">:</span>
+    <span class="nt">download_url_data</span><span class="p">:</span>
+    <span class="nt">download_url_meta</span><span class="p">:</span>
+    <span class="nt">normalization</span><span class="p">:</span>
+    <span class="nt">primary_data</span><span class="p">:</span>
+    <span class="nt">year</span><span class="p">:</span>
+<span class="nt">dataset_or_observation_wise</span><span class="p">:</span>
+    <span class="nt">assay_sc</span><span class="p">:</span>
+    <span class="nt">assay_sc_obs_key</span><span class="p">:</span>
+    <span class="nt">assay_differentiation</span><span class="p">:</span>
+    <span class="nt">assay_differentiation_obs_key</span><span class="p">:</span>
+    <span class="nt">assay_type_differentiation</span><span class="p">:</span>
+    <span class="nt">assay_type_differentiation_obs_key</span><span class="p">:</span>
+    <span class="nt">bio_sample</span><span class="p">:</span>
+    <span class="nt">bio_sample_obs_key</span><span class="p">:</span>
+    <span class="nt">cell_line</span><span class="p">:</span>
+    <span class="nt">cell_line_obs_key</span><span class="p">:</span>
+    <span class="nt">development_stage</span><span class="p">:</span>
+    <span class="nt">development_stage_obs_key</span><span class="p">:</span>
+    <span class="nt">disease_stage</span><span class="p">:</span>
+    <span class="nt">disease_obs_key</span><span class="p">:</span>
+    <span class="nt">ethnicity</span><span class="p">:</span>
+    <span class="nt">ethnicity_obs_key</span><span class="p">:</span>
+    <span class="nt">individual</span><span class="p">:</span>
+    <span class="nt">individual_obs_key</span><span class="p">:</span>
+    <span class="nt">organ</span><span class="p">:</span>
+    <span class="nt">organ_obs_key</span><span class="p">:</span>
+    <span class="nt">organism</span><span class="p">:</span>
+    <span class="nt">organism_obs_key</span><span class="p">:</span>
+    <span class="nt">sample_source</span><span class="p">:</span>
+    <span class="nt">sample_source_obs_key</span><span class="p">:</span>
+    <span class="nt">sex</span><span class="p">:</span>
+    <span class="nt">sex_obs_key</span><span class="p">:</span>
+    <span class="nt">state_exact</span><span class="p">:</span>
+    <span class="nt">state_exact_obs_key</span><span class="p">:</span>
+    <span class="nt">tech_sample</span><span class="p">:</span>
+    <span class="nt">tech_sample_obs_key</span><span class="p">:</span>
+<span class="nt">observation_wise</span><span class="p">:</span>
+    <span class="nt">cell_types_original_obs_key</span><span class="p">:</span>
+<span class="nt">feature_wise</span><span class="p">:</span>
+    <span class="nt">gene_id_ensembl_var_key</span><span class="p">:</span>
+    <span class="nt">gene_id_symbols_var_key</span><span class="p">:</span>
+<span class="nt">meta</span><span class="p">:</span>
+    <span class="nt">version</span><span class="p">:</span> <span class="s">&quot;1.0&quot;</span>
+</pre></div>
+</div>
+<p>2. A function called to load the data set into memory:
+It is important to set an automated path indicating the location of the raw files here.
+Our recommendation for this directory set-up is that you define a directory folder in your directory structure
+in which all of these raw files will be (self.path) and then add a sub-directory named as
+<code class="docutils literal notranslate"><span class="pre">self.directory_formatted_doi</span></code> (ie. the doi with all special characters replaced by “_” and place the raw files
+directly into this sub directory.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">fn</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">anndata</span><span class="o">.</span><span class="n">AnnData</span><span class="p">:</span>
+    <span class="n">fn</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s2">&quot;my.h5ad&quot;</span><span class="p">)</span>
+    <span class="n">adata</span> <span class="o">=</span> <span class="n">anndata</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>  <span class="c1"># loading instruction into adata, use other ones if the data is not h5ad</span>
+    <span class="k">return</span> <span class="n">adata</span>
+</pre></div>
+</div>
+<p>In summary, a the dataloader for a mouse lung data set could look like this:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">dataset_structure</span><span class="p">:</span>
+    <span class="nt">dataset_index</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
+    <span class="nt">sample_fns</span><span class="p">:</span>
+<span class="nt">dataset_wise</span><span class="p">:</span>
+    <span class="nt">author</span><span class="p">:</span> <span class="s">&quot;me&quot;</span>
+    <span class="nt">doi</span><span class="p">:</span>
+        <span class="p p-Indicator">-</span> <span class="s">&quot;my</span><span class="nv"> </span><span class="s">preprint&quot;</span>
+        <span class="p p-Indicator">-</span> <span class="s">&quot;my</span><span class="nv"> </span><span class="s">peer-reviewed</span><span class="nv"> </span><span class="s">publication&quot;</span>
+    <span class="nt">download_url_data</span><span class="p">:</span> <span class="s">&quot;my</span><span class="nv"> </span><span class="s">GEO</span><span class="nv"> </span><span class="s">upload&quot;</span>
+    <span class="nt">download_url_meta</span><span class="p">:</span>
+    <span class="nt">normalization</span><span class="p">:</span> <span class="s">&quot;raw&quot;</span>
+    <span class="nt">primary_data</span><span class="p">:</span>
+    <span class="nt">year</span><span class="p">:</span>
+<span class="nt">dataset_or_observation_wise</span><span class="p">:</span>
+    <span class="nt">assay_sc</span><span class="p">:</span> <span class="s">&quot;smart-seq2&quot;</span>
+    <span class="nt">assay_sc_obs_key</span><span class="p">:</span>
+    <span class="nt">assay_differentiation</span><span class="p">:</span>
+    <span class="nt">assay_differentiation_obs_key</span><span class="p">:</span>
+    <span class="nt">assay_type_differentiation</span><span class="p">:</span>
+    <span class="nt">assay_type_differentiation_obs_key</span><span class="p">:</span>
+    <span class="nt">bio_sample</span><span class="p">:</span>
+    <span class="nt">bio_sample_obs_key</span><span class="p">:</span>
+    <span class="nt">cell_line</span><span class="p">:</span>
+    <span class="nt">cell_line_obs_key</span><span class="p">:</span>
+    <span class="nt">development_stage</span><span class="p">:</span>
+    <span class="nt">development_stage_obs_key</span><span class="p">:</span>
+    <span class="nt">disease_stage</span><span class="p">:</span>
+    <span class="nt">disease_obs_key</span><span class="p">:</span>
+    <span class="nt">ethnicity</span><span class="p">:</span>
+    <span class="nt">ethnicity_obs_key</span><span class="p">:</span>
+    <span class="nt">individual</span><span class="p">:</span>
+    <span class="nt">individual_obs_key</span><span class="p">:</span>
+    <span class="nt">organ</span><span class="p">:</span> <span class="s">&quot;lung&quot;</span>
+    <span class="nt">organ_obs_key</span><span class="p">:</span>
+    <span class="nt">organism</span><span class="p">:</span> <span class="s">&quot;mouse&quot;</span>
+    <span class="nt">organism_obs_key</span><span class="p">:</span>
+    <span class="nt">sample_source</span><span class="p">:</span> <span class="s">&quot;primary_tissue&quot;</span>
+    <span class="nt">sample_source_obs_key</span><span class="p">:</span>
+    <span class="nt">sex</span><span class="p">:</span>
+    <span class="nt">sex_obs_key</span><span class="p">:</span>
+    <span class="nt">state_exact</span><span class="p">:</span>
+    <span class="nt">state_exact_obs_key</span><span class="p">:</span>
+    <span class="nt">tech_sample</span><span class="p">:</span>
+    <span class="nt">tech_sample_obs_key</span><span class="p">:</span>
+<span class="nt">observation_wise</span><span class="p">:</span>
+    <span class="nt">cell_types_original_obs_key</span><span class="p">:</span> <span class="s">&quot;louvain_named&quot;</span>
+<span class="nt">feature_wise</span><span class="p">:</span>
+    <span class="nt">gene_id_ensembl_var_key</span><span class="p">:</span>
+    <span class="nt">gene_id_symbols_var_key</span><span class="p">:</span>
+<span class="nt">meta</span><span class="p">:</span>
+    <span class="nt">version</span><span class="p">:</span> <span class="s">&quot;1.0&quot;</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">fn</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">anndata</span><span class="o">.</span><span class="n">AnnData</span><span class="p">:</span>
+    <span class="n">fn</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s2">&quot;my.h5ad&quot;</span><span class="p">)</span>
+    <span class="n">adata</span> <span class="o">=</span> <span class="n">anndata</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">adata</span>
+</pre></div>
+</div>
+<p>Data loaders can be added into a copy of the sfaira repository and can be used locally before they are contributed to
+the public sfaira repository.
+Alternatively, we also provide the optional dependency sfaira_extensions (<a class="reference external" href="https://github.com/theislab/sfaira_extension">https://github.com/theislab/sfaira_extension</a>)
+in which local data and cell type annotation can be managed separately but still be loaded as usual through sfaira.
+The data loaders and cell type annotation formats between sfaira and sfaira_extensions are identical and can be easily
+copied over.</p>
+</div>
+<div class="section" id="loading-multiple-files-of-similar-structure">
+<h3>Loading multiple files of similar structure<a class="headerlink" href="#loading-multiple-files-of-similar-structure" title="Permalink to this headline">¶</a></h3>
+<p>Only one loader has to be written for each set of files that are similarly structured which belong to one DOI.
+<code class="docutils literal notranslate"><span class="pre">sample_fns</span></code> in <code class="docutils literal notranslate"><span class="pre">dataset_structure</span></code> in the <code class="docutils literal notranslate"><span class="pre">.yaml</span></code> indicates the presence of these files.
+The identifiers listed there do not have to be the full file names.
+They are received by <code class="docutils literal notranslate"><span class="pre">load()</span></code>  as the argument <code class="docutils literal notranslate"><span class="pre">sample_fn</span></code> and can then be used in custom code in <code class="docutils literal notranslate"><span class="pre">load()</span></code> to load
+the correct file.
+This allows sharing code across these files in <code class="docutils literal notranslate"><span class="pre">load()</span></code>.
+If these files share all meta data in the <code class="docutils literal notranslate"><span class="pre">.yaml</span></code>, you do not have to change anything else here.
+If a some meta data items are file specific, you can further subdefine them under the keys in this <code class="docutils literal notranslate"><span class="pre">.yaml</span></code> via their
+identifiers stated here.
+In the following example, we show how this formalism can be used to identify one file declared as “A” as a healthy
+lung sample and another file “B” as a healthy pancreas sample.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dataset_structure</span><span class="p">:</span>
+    <span class="n">dataset_index</span><span class="p">:</span> <span class="mi">1</span>
+    <span class="n">sample_fns</span><span class="p">:</span>
+        <span class="o">-</span> <span class="s2">&quot;A&quot;</span>
+        <span class="o">-</span> <span class="s2">&quot;B&quot;</span>
+<span class="n">dataset_wise</span><span class="p">:</span>
+    <span class="c1"># ... part of yaml omitted ...</span>
+<span class="n">dataset_or_observation_wise</span><span class="p">:</span>
+    <span class="c1"># ... part of yaml omitted</span>
+    <span class="n">healthy</span><span class="p">:</span> <span class="kc">True</span>
+    <span class="n">healthy_obs_key</span><span class="p">:</span>
+    <span class="n">individual</span><span class="p">:</span>
+    <span class="n">individual_obs_key</span><span class="p">:</span>
+    <span class="n">organ</span><span class="p">:</span>
+        <span class="n">A</span><span class="p">:</span> <span class="s2">&quot;lung&quot;</span>
+        <span class="n">B</span><span class="p">:</span> <span class="s2">&quot;pancreas&quot;</span>
+    <span class="n">organ_obs_key</span><span class="p">:</span>
+    <span class="c1"># part of yaml omitted ...</span>
+</pre></div>
+</div>
+<p>Note that not all meta data items have to subdefined into “A” and “B” but only the ones with differing values!
+The corresponding <code class="docutils literal notranslate"><span class="pre">load</span></code> function would be:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">sample_fn</span><span class="p">,</span> <span class="n">fn</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">anndata</span><span class="o">.</span><span class="n">AnnData</span><span class="p">:</span>
+    <span class="c1"># The following reads either my_file_A.h5ad or my_file_B.h5ad which correspond to A and B in the yaml.</span>
+    <span class="n">fn</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;my_file_</span><span class="si">{</span><span class="n">sample_fn</span><span class="si">}</span><span class="s2">.h5ad&quot;</span><span class="p">)</span>
+    <span class="n">adata</span> <span class="o">=</span> <span class="n">anndata</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">adata</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="loading-third-party-annotation">
+<h3>Loading third party annotation<a class="headerlink" href="#loading-third-party-annotation" title="Permalink to this headline">¶</a></h3>
+<p>In some cases, the data set in question is already in the sfaira zoo but there is alternative (third party), cell-wise
+annotation of the data.
+This could be different cell type annotation for example.
+The underlying data (count matrix and variable names) stay the same in these cases, and often, even some cell-wise
+meta data are kept and only some are added or replaced.
+Therefore, these cases do not require an additional <code class="docutils literal notranslate"><span class="pre">load()</span></code> function.
+Instead, you can contribute <code class="docutils literal notranslate"><span class="pre">load_annotation_*()</span></code> functions into the <code class="docutils literal notranslate"><span class="pre">.py</span></code> file of the corresponding study.
+You can chose an arbitrary suffix for the function but ideally one that identifies the source of this additional
+annotation in a human readable manner at least to someone who is familiar with this data set.
+Second you need to add this function into the dictionary <code class="docutils literal notranslate"><span class="pre">LOAD_ANNOTATION</span></code> in the <code class="docutils literal notranslate"><span class="pre">.py</span></code> file, with the suffix as a key.
+If this dictionary does not exist yet, you need to add it into the <code class="docutils literal notranslate"><span class="pre">.py</span></code> file with this function as its sole entry.
+Here an example of a <code class="docutils literal notranslate"><span class="pre">.py</span></code> file with additional annotation:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">sample_fn</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<span class="k">def</span> <span class="nf">load_annotation_meta_study_x</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">sample_fn</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="c1"># Read a tabular file indexed with the observation names used in the adata used in load().</span>
+    <span class="k">pass</span>
+
+<span class="k">def</span> <span class="nf">load_annotation_meta_study_y</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">sample_fn</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="c1"># Read a tabular file indexed with the observation names used in the adata used in load().</span>
+    <span class="k">pass</span>
+
+<span class="n">LOAD_ANNOTATION</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;meta_study_x&quot;</span><span class="p">:</span> <span class="n">load_annotation_meta_study_x</span><span class="p">,</span>
+    <span class="s2">&quot;meta_study_y&quot;</span><span class="p">:</span> <span class="n">load_annotation_meta_study_y</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The table returned by <code class="docutils literal notranslate"><span class="pre">load_annotation_meta_study_x</span></code> needs to be indexed with the observation names used in <code class="docutils literal notranslate"><span class="pre">.adata</span></code>,
+the object generated in <code class="docutils literal notranslate"><span class="pre">load()</span></code>.
+If <code class="docutils literal notranslate"><span class="pre">load_annotation_meta_study_x</span></code> contains a subset of the observations defined in <code class="docutils literal notranslate"><span class="pre">load()</span></code>,
+and this alternative annotation is chosen,
+<code class="docutils literal notranslate"><span class="pre">.adata</span></code> is subsetted to these observations during loading.</p>
+<p>You can also add functions in the <code class="docutils literal notranslate"><span class="pre">.py</span></code> file in the same DOI-based module in sfaira_extensions if you want to keep this
+additional annotation private.
+For this to work with a public data loader, you need nothing more than the <code class="docutils literal notranslate"><span class="pre">.py</span></code> file with this <code class="docutils literal notranslate"><span class="pre">load_annotation_*()</span></code>
+function and the <code class="docutils literal notranslate"><span class="pre">LOAD_ANNOTATION</span></code> of these private functions in sfaira_extensions.</p>
+<p>To access additional annotation during loading, use the setter functions <code class="docutils literal notranslate"><span class="pre">additional_annotation_key</span></code> on an instance of
+either <code class="docutils literal notranslate"><span class="pre">Dataset</span></code>, <code class="docutils literal notranslate"><span class="pre">DatasetGroup</span></code> or <code class="docutils literal notranslate"><span class="pre">DatasetSuperGroup</span></code> to define data sets
+for which you want to load additional annotation and which additional you want to load for these.
+See also the docstrings of these functions for further details on how these can be set.</p>
+</div>
+<div class="section" id="creating-dataloaders-with-the-commandline-interface">
+<h3>Creating dataloaders with the commandline interface<a class="headerlink" href="#creating-dataloaders-with-the-commandline-interface" title="Permalink to this headline">¶</a></h3>
+<p>sfaira features an interactive way of creating, formatting and testing dataloaders.
+The common workflow look as follows:</p>
+<ol class="arabic simple">
+<li><p>Create a new dataloader with <code class="docutils literal notranslate"><span class="pre">sfaira</span> <span class="pre">create-dataloader</span></code></p></li>
+<li><p>Validate the dataloader with <code class="docutils literal notranslate"><span class="pre">sfaira</span> <span class="pre">lint-dataloader</span> <span class="pre">&lt;path&gt;</span></code></p></li>
+<li><p>Test the dataloader with <code class="docutils literal notranslate"><span class="pre">sfaira</span> <span class="pre">test-dataloader</span> <span class="pre">.</span> <span class="pre">--doi</span> <span class="pre">&lt;doi&gt;</span> <span class="pre">--test-data</span> <span class="pre">&lt;folder_above_test_data&gt;</span></code></p></li>
+</ol>
+<p>When creating a dataloader with <code class="docutils literal notranslate"><span class="pre">sfaira</span> <span class="pre">create-dataloader</span></code> common information such as
+your name and email are prompted for, followed by dataloader specific attributes such as organ, organism and many more.
+If the requested information is not available simply hit enter and continue until done. If you have mixed organ or organism
+data you will have to resolve this manually later. Your dataloader template will be created in your current working directory
+in a folder resembling your doi.</p>
+<p>The created files are:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>├── extra_description.txt &lt;- Optional extra description file
+├── __init__.py
+├── NA_NA_2021_NA_Einstein_001.py &lt;- Contains the load function to load the data
+├── NA_NA_2021_NA_Einstein_001.yaml &lt;- Specifies all data loader data
+</pre></div>
+</div>
+<p>Now simply fill in all missing properties in your dataloader scripts and yaml file.
+When done optionally run <code class="docutils literal notranslate"><span class="pre">sfaira</span> <span class="pre">clean-dataloader</span> <span class="pre">&lt;path</span> <span class="pre">to</span> <span class="pre">*.yaml&gt;</span></code> on the just filled out dataloader yaml file.
+All unused attributes will be removed.</p>
+<p>Next validate the integrity of your dataloader content with <code class="docutils literal notranslate"><span class="pre">sfaira</span> <span class="pre">validate-dataloader</span> <span class="pre">&lt;path</span> <span class="pre">to</span> <span class="pre">*.yaml&gt;</span></code>.
+All tests must pass! If any of the tests fail please revisit your dataloader and add the missing information.</p>
+<p>Finally, copy your dataloader into the <code class="docutils literal notranslate"><span class="pre">sfaira/dataloaders/loaders/</span></code> folder.
+Now you can test your dataloader with <code class="docutils literal notranslate"><span class="pre">sfaira</span> <span class="pre">test-dataloader</span> <span class="pre">&lt;path_to_sfaira&gt;</span> <span class="pre">--doi</span> <span class="pre">&lt;doi&gt;</span> <span class="pre">--test-data</span> <span class="pre">&lt;template_data_folder&gt;</span></code>.
+Note that sfaira expects a folder structure for the test data such as:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>├── template_data
+│   └── d10_1016_j_cmet_2019_01_021
+│       ├── GSE117770_RAW.tar
+│       ├── GSM3308545_NOD_08w_A_annotation.csv
+│       ├── GSM3308547_NOD_08w_C_annotation.csv
+│       ├── GSM3308548_NOD_14w_A_annotation.csv
+│       ├── GSM3308549_NOD_14w_B_annotation.csv
+│       ├── GSM3308550_NOD_14w_C_annotation.csv
+│       ├── GSM3308551_NOD_16w_A_annotation.csv
+│       ├── GSM3308552_NOD_16w_B_annotation.csv
+│       └── GSM3308553_NOD_16w_C_annotation.csv
+</pre></div>
+</div>
+<p>Pass the path to the template_data folder, not the doi. Sfaira will use this path to cache further data for speedups.
+All tests must pass! If any of the tests fail please revisit your dataloader and fix the error.</p>
+</div>
+<div class="section" id="map-cell-type-labels-to-ontology">
+<h3>Map cell type labels to ontology<a class="headerlink" href="#map-cell-type-labels-to-ontology" title="Permalink to this headline">¶</a></h3>
+<p>The entries in <code class="docutils literal notranslate"><span class="pre">self.cell_types_original_obs_key</span></code> are free text but are mapped to an ontology via a .tsv file with
+the same name and directory as the python file in which the data loader is located.
+This .tsv contains two columns with one row for each unique cell type label.
+The free text identifiers in the first column “source”,
+and the corresponding ontology term in the second column “target”.
+You can write this file entirely from scratch.
+Sfaira also allows you to generate a first guess of this file using fuzzy string matching
+which is automatically executed when you run the template data loader unit test for the first time with you new loader.
+Conflicts are not resolved in this first guess and you have to manually decide which free text field corresponds to which
+ontology term in the case of conflicts.
+Still, this first guess usually drastically speeds up this annotation harmonization.</p>
+</div>
+</div>
+<div class="section" id="cell-type-ontology-management">
+<h2>Cell type ontology management<a class="headerlink" href="#cell-type-ontology-management" title="Permalink to this headline">¶</a></h2>
+<p>Sfaira maintains a wrapper of the Cell Ontology as a class which allows additions to this ontology.
+This allows us to use the core ontology used in the community as a backbone and to keep up with newly identifed cell types on our own.
+We require all extensions of the core ontology not to break the directed acyclic graph that is the ontology:
+Usually, such extensions would be additional leave nodes.</p>
+<p>Second, we maintain cell type universes for anatomic structures.
+These are dedicated for cell type-dependent models which require a defined set of cell types.
+Such a universe is a set of nodes in the ontology.</p>
+<div class="section" id="contribute-cell-types-to-ontology">
+<h3>Contribute cell types to ontology<a class="headerlink" href="#contribute-cell-types-to-ontology" title="Permalink to this headline">¶</a></h3>
+<p>Please open an issue on the sfaira repo with a description what type of cell type you want to add.</p>
+</div>
+</div>
+<div class="section" id="metadata">
+<h2>Metadata<a class="headerlink" href="#metadata" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="required-fields">
+<h3>Required fields<a class="headerlink" href="#required-fields" title="Permalink to this headline">¶</a></h3>
+<p>Most meta data fields are optional in sfaira.
+Required are:</p>
+<ul class="simple">
+<li><p>dataset_structure: dataset_index is required.</p></li>
+<li><p>dataset_wise: author, doi, download_url_data, normalisation and year are required.</p></li>
+<li><p>dataset_or_observation_wise: organism is required.</p></li>
+<li><p>observation_wise: None are required.</p></li>
+<li><p>feature_wise: gene_id_ensembl_var_key or gene_id_symbols_var_key is required.</p></li>
+<li><p>misc: None are required.</p></li>
+</ul>
+</div>
+<div class="section" id="field-descriptions">
+<h3>Field descriptions<a class="headerlink" href="#field-descriptions" title="Permalink to this headline">¶</a></h3>
+<p>We constrain meta data by ontologies where possible.
+Meta data can either be dataset-wise, observation-wise or feature-wise.</p>
+<p>Dataset structure meta data are in the section <code class="docutils literal notranslate"><span class="pre">dataset_structure</span></code> in the <code class="docutils literal notranslate"><span class="pre">.yaml</span></code> file.</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>dataset_index [int]</dt><dd><p>Numeric identifier of the first loader defined by this python file.
+Only relevant if multiple python files for one DOI generate loaders of the same name.
+In these cases, this numeric index can be used to distinguish them.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>sample_fns [list of strings]</dt><dd><p>If there are multiple data files which can be covered by one <code class="docutils literal notranslate"><span class="pre">load()</span></code> function and <code class="docutils literal notranslate"><span class="pre">.yaml</span></code> file because they are
+structured similarly, these can identified here.
+See also section <code class="docutils literal notranslate"><span class="pre">Loading</span> <span class="pre">multiple</span> <span class="pre">files</span> <span class="pre">of</span> <span class="pre">similar</span> <span class="pre">structure</span></code>.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>Dataset-wise meta data are in the section <code class="docutils literal notranslate"><span class="pre">dataset_wise</span></code> in the <code class="docutils literal notranslate"><span class="pre">.yaml</span></code> file.</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>author [list of strings]</dt><dd><p>List of author names of dataset (not of loader).</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>doi [list of strings]</dt><dd><p>DOIs associated with dataset.
+These can be preprints and journal publication DOIs.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>download_url_data [list of strings]</dt><dd><p>Download links for data.
+Full URLs of all data files such as count matrices. Note that distinct observation-wise annotation files can be
+supplied in download_url_meta.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>download_url_meta [list of strings]</dt><dd><p>Download links for observation-wise data.
+Full URLs of all observation-wise meta data files such as count matrices.
+This attribute is optional and not necessary ff observation-wise meta data is already in the files defined in
+<code class="docutils literal notranslate"><span class="pre">download_url_data</span></code>, e.g. often the case for .h5ad`.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>normalization: Data normalisation {“raw”, “scaled”}</dt><dd><p>Type of normalisation of data stored in <code class="docutils literal notranslate"><span class="pre">adata.X</span></code> emitted by the <code class="docutils literal notranslate"><span class="pre">load()</span></code> function.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>year: Year in which sample was first described [integer]</dt><dd><p>Pre-print publication year.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>Meta-data which can either be dataset- or observation-wise are in the section <code class="docutils literal notranslate"><span class="pre">dataset_or_observation_wise</span></code> in the
+<code class="docutils literal notranslate"><span class="pre">.yaml</span></code> file.
+They can all be supplied as <code class="docutils literal notranslate"><span class="pre">NAME</span></code> or as <code class="docutils literal notranslate"><span class="pre">NAME_obs_key</span></code>:
+The former indicates that the entire data set has the value stated in the yaml.
+The latter, <code class="docutils literal notranslate"><span class="pre">NAME_obs_key</span></code>, indicates that there is a column in <code class="docutils literal notranslate"><span class="pre">adata.obs</span></code> emitted by the <code class="docutils literal notranslate"><span class="pre">load()</span></code> function of the name
+<code class="docutils literal notranslate"><span class="pre">NAME_obs_key</span></code> which contains the annotation per observation for this meta data item.
+Note that in both cases the value, or the column values, have to fulfill contraints imposed on the meta data item as
+outlined below.</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>assay_sc and assay_sc_obs_key [ontology term]</dt><dd><p>Choose a term from <a class="reference external" href="https://www.ebi.ac.uk/ols/ontologies/efo/terms?iri=http%3A%2F%2Fwww.ebi.ac.uk%2Fefo%2FEFO_0010183&amp;viewMode=All&amp;siblings=false">https://www.ebi.ac.uk/ols/ontologies/efo/terms?iri=http%3A%2F%2Fwww.ebi.ac.uk%2Fefo%2FEFO_0010183&amp;viewMode=All&amp;siblings=false</a></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>assay_differentiation and assay_differentiation_obs_key [string]</dt><dd><p>Try to provide a base differentiation protocol (eg. “Lancaster, 2014”) as well as any amendments to the original
+protocol.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>assay_type_differentiation and assay_type_differentiation_obs_key {“guided”, “unguided”}</dt><dd><p>For cell-culture samples: Whether a guided (patterned) differentiation protocol was used in the experiment.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>bio_sample and bio_sample_obs_key [string]</dt><dd><p>Column name in <code class="docutils literal notranslate"><span class="pre">adata.obs</span></code> emitted by the <code class="docutils literal notranslate"><span class="pre">load()</span></code> function which reflects biologically distinct samples, either
+different in condition or biological replicates, as a categorical variable.
+The values of this column are not constrained and can be arbitrary identifiers of observation groups.
+You can concatenate multiple columns to build more fine grained observation groupings by concatenating the column
+keys with <code class="docutils literal notranslate"><span class="pre">*</span></code> in this string, e.g. <code class="docutils literal notranslate"><span class="pre">patient*treatment</span></code> to get one <code class="docutils literal notranslate"><span class="pre">bio_sample</span></code> for each patient and treatment.
+Note that the notion of biologically distinct sample is slightly subjective, we allow this element to allow
+researchers to distinguish technical and biological replicates within one study for example.
+See also the meta data items <code class="docutils literal notranslate"><span class="pre">individual</span></code> and <code class="docutils literal notranslate"><span class="pre">tech_sample</span></code>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>cell_line and cell_line_obs_key [ontology term]</dt><dd><p>Cell line name from the cellosaurus cell line database (<a class="reference external" href="https://web.expasy.org/cellosaurus/">https://web.expasy.org/cellosaurus/</a>)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>developmental_stage and developmental_stage_obs_key [ontology term]</dt><dd><p>Developmental stage (age) of individual sampled.
+Choose from HSAPDV (<a class="reference external" href="https://www.ebi.ac.uk/ols/ontologies/hsapdv">https://www.ebi.ac.uk/ols/ontologies/hsapdv</a>) for human
+or from MMUSDEV (<a class="reference external" href="https://www.ebi.ac.uk/ols/ontologies/mmusdv">https://www.ebi.ac.uk/ols/ontologies/mmusdv</a>) for mouse.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>disease and disease_obs_key [ontology term]</dt><dd><p>Choose from MONDO (<a class="reference external" href="https://www.ebi.ac.uk/ols/ontologies/mondo">https://www.ebi.ac.uk/ols/ontologies/mondo</a>) for human</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>ethnicity and ethnicity_obs_key [ontology term]</dt><dd><p>Choose from HANCESTRO (<a class="reference external" href="https://www.ebi.ac.uk/ols/ontologies/hancestro">https://www.ebi.ac.uk/ols/ontologies/hancestro</a>)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>individual and individual_obs_key [string]</dt><dd><p>Column name in <code class="docutils literal notranslate"><span class="pre">adata.obs</span></code> emitted by the <code class="docutils literal notranslate"><span class="pre">load()</span></code> function which reflects the indvidual sampled as a categorical
+variable.
+The values of this column are not constrained and can be arbitrary identifiers of observation groups.
+You can concatenate multiple columns to build more fine grained observation groupings by concatenating the column
+keys with <code class="docutils literal notranslate"><span class="pre">*</span></code> in this string, e.g. <code class="docutils literal notranslate"><span class="pre">group1*group2</span></code> to get one <code class="docutils literal notranslate"><span class="pre">individual</span></code> for each group1 and group2 entry.
+Note that the notion of individuals is slightly mal-defined in some cases, we allow this element to allow
+researchers to distinguish sample groups that originate from biological material with distinct genotypes.
+See also the meta data items <code class="docutils literal notranslate"><span class="pre">individual</span></code> and <code class="docutils literal notranslate"><span class="pre">tech_sample</span></code>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>organ and organ_obs_key [ontology term]</dt><dd><p>The UBERON anatomic location of the sample (<a class="reference external" href="https://www.ebi.ac.uk/ols/ontologies/uberon">https://www.ebi.ac.uk/ols/ontologies/uberon</a>).</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>organism and organism_obs_key. {“mouse”, “human”}.</dt><dd><p>The organism from which the sample originates.
+In the future, we will use NCBITAXON (<a class="reference external" href="https://www.ebi.ac.uk/ols/ontologies/ncbitaxon">https://www.ebi.ac.uk/ols/ontologies/ncbitaxon</a>).</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>primary_data [bool]</dt><dd><p>Whether contains cells that were measured in this study (ie this is not a meta study on published data).</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>sample_source and sample_source_obs_key. {“primary_tissue”, “2d_culture”, “3d_culture”, “tumor”}</dt><dd><p>Which cellular system the sample was derived from.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>sex and sex_obs_key. Sex of individual sampled. {“female”, “male”, None}</dt><dd><p>Sex of the individual sampled.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>state_exact and state_exact_obs_key [string]</dt><dd><p>Free text description of condition.
+If you give treatment concentrations, intervals or similar measurements use square brackets around the quantity
+and use units: <code class="docutils literal notranslate"><span class="pre">[1g]</span></code></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>tech_sample and tech_sample_obs_key [string]</dt><dd><p>Column name in <code class="docutils literal notranslate"><span class="pre">adata.obs</span></code> emitted by the <code class="docutils literal notranslate"><span class="pre">load()</span></code> function which reflects technically distinct samples, either
+different in condition or technical replicates, as a categorical variable.
+Any data batch is a <code class="docutils literal notranslate"><span class="pre">tech_sample</span></code>.
+The values of this column are not constrained and can be arbitrary identifiers of observation groups.
+You can concatenate multiple columns to build more fine grained observation groupings by concatenating the column
+keys with <code class="docutils literal notranslate"><span class="pre">*</span></code> in this string, e.g. <code class="docutils literal notranslate"><span class="pre">patient*treatment*protocol</span></code> to get one <code class="docutils literal notranslate"><span class="pre">tech_sample</span></code> for each patient, treatment
+and measurement protocol.
+See also the meta data items <code class="docutils literal notranslate"><span class="pre">individual</span></code> and <code class="docutils literal notranslate"><span class="pre">tech_sample</span></code>.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>Meta-data which are strictly observation-wise are in the section <code class="docutils literal notranslate"><span class="pre">observation_wise</span></code> in the <code class="docutils literal notranslate"><span class="pre">.yaml</span></code> file:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>cell_types_original_obs_key [string]</dt><dd><p>Column name in <code class="docutils literal notranslate"><span class="pre">adata.obs</span></code> emitted by the <code class="docutils literal notranslate"><span class="pre">load()</span></code> function which contains free text cell type labels.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>Meta-data which are feature-wise are in the section <code class="docutils literal notranslate"><span class="pre">feature_wise</span></code> in the <code class="docutils literal notranslate"><span class="pre">.yaml</span></code> file:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>gene_id_ensembl_var_key [string]</dt><dd><p>Name of the column in <code class="docutils literal notranslate"><span class="pre">adata.var</span></code> emitted by the <code class="docutils literal notranslate"><span class="pre">load()</span></code> which contains ENSEMBL gene IDs.
+This can also be “index” if the ENSEMBL gene names are in the index of the <code class="docutils literal notranslate"><span class="pre">adata.var</span></code> data frame.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>gene_id_symbols_var_key:.[string]</dt><dd><p>Name of the column in <code class="docutils literal notranslate"><span class="pre">adata.var</span></code> emitted by the <code class="docutils literal notranslate"><span class="pre">load()</span></code> which contains gene symbol:
+HGNC for human and MGI for mouse.
+This can also be “index” if the gene symbol are in the index of the <code class="docutils literal notranslate"><span class="pre">adata.var</span></code> data frame.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>The meta data on the meta data file do not have to modified by you are automatically controlled are in the section
+<code class="docutils literal notranslate"><span class="pre">meta</span></code> in the <code class="docutils literal notranslate"><span class="pre">.yaml</span></code> file:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>version: [string]</dt><dd><p>Version identifier of meta data scheme.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="adding_dataset_classes.html" class="btn btn-neutral float-right" title="The class-based data loader python file" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="using_data.html" class="btn btn-neutral float-left" title="Using Data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Leander Dony, David S. Fischer, Lukas Heumos..
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
