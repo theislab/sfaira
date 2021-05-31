@@ -1,0 +1,13 @@
+source	target	target_id
+Bcells	B cell	CL:0000236
+Cholangiocytes	intrahepatic cholangiocyte	CL:0002538
+Endothelia	endothelial cell	CL:0000115
+Hepatocytes	hepatocyte	CL:0000182
+ILCs	innate lymphoid cell	CL:0001065
+MPs	mononuclear phagocyte	CL:0000113
+Mast cells	mast cell	CL:0000097
+Mesenchyme	mesenchymal cell	CL:0008019
+Mesothelia	mesothelial cell	CL:0000077
+Plasma Bcells	plasma cell	CL:0000786
+Tcells	T cell	CL:0000084
+pDCs	plasmacytoid dendritic cell	CL:0000784

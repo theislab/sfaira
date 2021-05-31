@@ -1,16 +1,18 @@
 import anndata
-try:
-    from kipoi.model import BaseModel
-except ImportError:
-    BaseModel = None
 import numpy as np
-import pandas as pd
 import os
+import re
+import pandas as pd
+import pickle
 from typing import List, Union
 import warnings
+import time
 
-from .external import EstimatorKerasEmbedding, EstimatorKerasCelltype, DatasetInteractive
-from .model_zoo import ModelZooEmbedding, ModelZooCelltype
+from sfaira.consts import AdataIdsSfaira, AdataIds
+from sfaira.data import DatasetInteractive
+from sfaira.estimators import EstimatorKerasEmbedding, EstimatorKerasCelltype
+from sfaira.interface.model_zoo import ModelZoo
+from sfaira.versions.topologies import TopologyContainer
 
 
 class UserInterface:
@@ -25,27 +27,27 @@ class UserInterface:
     # initialise your sfaira instance with a model lookuptable.
     # instead of setting `custom_repo` when initialising the UI you can also use `sfaira_repo=True` to use public weights
     ui = sfaira.ui.UserInterface(custom_repo="/path/to/local/repo/folder/or/zenodo/repo/URL", sfaira_repo=False)
-    ui.zoo_embedding.set_latest(species, organ, model_type, organisation, model_topology)
-    ui.zoo_celltype.set_latest(species, organ, model_type, organisation, model_topology)
     ui.load_data(anndata.read("/path/to/file.h5ad"))  # load your dataset into sfaira
+    ui.zoo_embedding.model_id = 'embedding_human-blood-ae-0.2-0.1_theislab'  # pick desired model here
+    ui.zoo_celltype.model_id = 'celltype_human-blood-mlp-0.1.3-0.1_theislab'  # pick desired model here
+    ui.load_data(anndata.read("/path/to/file.h5ad"), gene_symbol_col='index', gene_ens_col='gene_ids')  # load your dataset into sfaira
     ui.load_model_embedding()
     ui.load_model_celltype()
-    ui.compute_all()
-    adata = ui.data
+    ui.predict_all()
+    adata = ui.data.adata
     scanpy.pp.neighbors(adata, use_rep="X_sfaira")
     scanpy.tl.umap(adata)
-    scanpy.pl.umap(adata, color="celltype_sfaira", show=True, save="UMAP_sfaira.png")
+    scanpy.pl.umap(adata, color="celltypes_sfaira", show=True, save="UMAP_sfaira.png")
     ```
     """
 
     estimator_embedding: Union[EstimatorKerasEmbedding, None]
     estimator_celltype: Union[EstimatorKerasCelltype, None]
-    model_kipoi_embedding: Union[None]
-    model_kipoi_celltype: Union[BaseModel, None]
-    zoo_embedding: Union[ModelZooEmbedding, None]
-    zoo_celltype: Union[ModelZooCelltype, None]
-    data: Union[anndata.AnnData]
+    zoo_embedding: Union[ModelZoo, None]
+    zoo_celltype: Union[ModelZoo, None]
+    data: Union[DatasetInteractive, None]
     model_lookuptable: Union[pd.DataFrame, None]
+    adata_ids: AdataIds
 
     def __init__(
             self,
@@ -53,15 +55,15 @@ class UserInterface:
             sfaira_repo: bool = False,
             cache_path: str = os.path.join('cache', '')
     ):
-        self.model_kipoi_embedding = None
-        self.model_kipoi_celltype = None
         self.estimator_embedding = None
         self.estimator_celltype = None
+        self.data = None
         self.use_sfaira_repo = sfaira_repo
         self.cache_path = os.path.join(cache_path, '')
+        self.adata_ids = AdataIdsSfaira()
 
         if sfaira_repo:  # check if public sfaira repository should be accessed
-            self.model_lookuptable = self._load_lookuptable("https://zenodo.org/record/4304660/files/")
+            self.model_lookuptable = self._load_lookuptable("https://zenodo.org/record/4836517/files/")
 
         if custom_repo:
             if isinstance(custom_repo, str):
@@ -83,11 +85,8 @@ class UserInterface:
                 raise ValueError("please either provide a custom folder/repository with model weights or specify "
                                  "`sfaira_repo=True` to access the public weight repository")
 
-        # TODO: workaround to deal with model ids bearing file endings in model lookuptable (as is the case in first sfaira model repo upload)
-        self.model_lookuptable['model_id'] = [i.replace('.h5', '').replace('.data-00000-of-00001', '') for i in self.model_lookuptable['model_id']]
-
-        self.zoo_embedding = ModelZooEmbedding(self.model_lookuptable)
-        self.zoo_celltype = ModelZooCelltype(self.model_lookuptable)
+        self.zoo_embedding = ModelZoo(model_lookuptable=self.model_lookuptable, model_class="embedding")
+        self.zoo_celltype = ModelZoo(model_lookuptable=self.model_lookuptable, model_class="celltype")
 
     def _load_lookuptable(
             self,
@@ -136,15 +135,14 @@ class UserInterface:
                     file_names.append(file)
                     with open(os.path.join(subdir, file), 'rb') as f:
                         md5.append(hashlib.md5(f.read()).hexdigest())
-        s = [i.split('_')[0:7] for i in file_names]
-        ids = ['_'.join(i) for i in s]
-        ids_cleaned = [i.replace('.h5', '').replace('.data-00000-of-00001', '') for i in ids]  # remove file extensions from ids
+        ids = ['_'.join(i.split('_')[0:3]) for i in file_names]
+        ids_cleaned = [i.replace('.h5', '').replace('.data-00000-of-00001', '') for i in ids]  # remove file extensions
 
         if ids:
             pd.DataFrame(
-                    list(zip(ids_cleaned, model_paths, file_paths, md5)),
-                    columns=['model_id', 'model_path', 'model_file_path', 'md5']
-                )\
+                list(zip(ids_cleaned, model_paths, file_paths, md5)),
+                columns=['model_id', 'model_path', 'model_file_path', 'md5']
+            )\
                 .sort_values('model_id')\
                 .reset_index(drop=True)\
                 .to_csv(os.path.join(repo_path, 'model_lookuptable.csv'))
@@ -161,8 +159,10 @@ class UserInterface:
             authors: list,
             description: str,
             metadata: dict = {},
+            update_existing_deposition: Union[None, str] = None,
             publish: bool = False,
-            sandbox: bool = False
+            sandbox: bool = False,
+            deposit_topologies: bool = True
     ):
         """
         Deposit all models in model lookup table on Zenodo. If publish is set to false, files will be uploaded to a
@@ -171,11 +171,21 @@ class UserInterface:
 
         :param zenodo_access_token: Your personal Zenodo API access token. Create one here: https://zenodo.org/account/settings/applications/tokens/new/
         :param title: Title of the Zenodo deposition
-        :param authors: List of dicts, where each dict defines one author (dict keys: name: Name of creator in the format "Family name, Given names", affiliation: Affiliation of creator (optional), orcid: ORCID identifier of creator (optional), gnd: GND identifier of creator (optional)
+        :param authors: List of dicts, where each dict defines one author (dict keys:
+         name: Name of creator in the format "Family name, Given names",
+         affiliation: Affiliation of creator (optional), orcid: ORCID identifier of creator (optional),
+         gnd: GND identifier of creator (optional)
         :param description: Description of the Zenodo deposition.
-        :param metadata: Dictionary with further metadata attributes of the deposit. See the Zenodo API refenrece for accepted keys: https://developers.zenodo.org/#representation
-        :param publish: Set this to True to directly publish the weights on Zenodo. When set to False a draft will be created, which can be edited in the browser before publishing.
-        :param sandbox: If True, use the Zenodo testing platform at https://sandbox.zenodo.org for your deposition. We recommend testing your upload with sandbox first as depositions cannot be deleted from the main Zenodo platfowm once created.
+        :param metadata: Dictionary with further metadata attributes of the deposit.
+         See the Zenodo API refenrece for accepted keys: https://developers.zenodo.org/#representation
+        :param update_existing_deposition: If None, a new deposition will be created.
+        If an existing deposition ID is provided as a sting, than this deposition will be updated with a new version.
+        :param publish: Set this to True to directly publish the weights on Zenodo.
+         When set to False a draft will be created, which can be edited in the browser before publishing.
+        :param sandbox: If True, use the Zenodo testing platform at https://sandbox.zenodo.org for your deposition.
+         We recommend testing your upload with sandbox first as depositions cannot be deleted from the main Zenodo platform once created.
+         :param deposit_topologies: If true, an associated topology file for every weights file will be uploaded to zenodo.
+         The naming format for the topology files is <model_id>_topology.pickle
         """
 
         import requests
@@ -190,29 +200,88 @@ class UserInterface:
             raise ValueError(
                 "Your Zenodo access token was not accepted by the API. Please provide a valid access token.")
 
-        # Create empty deposition
-        r = requests.post(f'https://{sandbox}zenodo.org/api/deposit/depositions',
-                          params=params,
-                          json={},
-                          headers=headers)
+        if update_existing_deposition is None:
+            # Create empty deposition
+            r = requests.post(f'https://{sandbox}zenodo.org/api/deposit/depositions',
+                              params=params,
+                              json={},
+                              headers=headers)
+            # Obtain bucket URL and deposition ID
+            bucket_url = r.json()["links"]["bucket"]
+            deposition_id = r.json()['id']
+        else:
+            update_existing_deposition = str(update_existing_deposition) if isinstance(update_existing_deposition, int)\
+                else update_existing_deposition
+            # Create a new version of the existing deposition
+            r = requests.post(
+                f'https://{sandbox}zenodo.org/api/deposit/depositions/{update_existing_deposition}/actions/newversion',
+                params=params)
+            try:
+                deposition_id = r.json()["links"]["latest_draft"].split("/")[-1]
+            except json.decoder.JSONDecodeError:
+                time.sleep(10)
+                r = requests.post(
+                    f'https://{sandbox}zenodo.org/api/deposit/depositions/{update_existing_deposition}/actions/newversion',
+                    params=params)
+                deposition_id = r.json()["links"]["latest_draft"].split("/")[-1]
+            if r.status_code != 201:
+                raise ValueError(
+                    f"A new version of deposition {update_existing_deposition} could not be created, "
+                    f"please make sure your API key is associated with the account that owns this deposition.")
+            r = requests.get(f'https://{sandbox}zenodo.org/api/deposit/depositions/{deposition_id}', params=params)
+            bucket_url = r.json()["links"]["bucket"]
 
-        # Obtain bucket URL and deposition ID
-        bucket_url = r.json()["links"]["bucket"]
-        deposition_id = r.json()['id']
+            # Delete all existing files from new version
+            r_files = requests.get(f'https://{sandbox}zenodo.org/api/deposit/depositions/{deposition_id}/files',
+                                   params=params)
+            while len(r_files.json()) > 0:
+                for file_dict in r_files.json():
+                    requests.delete(
+                        f'https://{sandbox}zenodo.org/api/deposit/depositions/{deposition_id}/files/{file_dict["id"]}',
+                        params=params)
+                r_files = requests.get(f'https://{sandbox}zenodo.org/api/deposit/depositions/{deposition_id}/files',
+                                       params=params)
+                while isinstance(r_files.json(), dict):
+                    print("Pausing due to Zenodo API rate limitng")
+                    time.sleep(10)
+                    r_files = requests.get(f'https://{sandbox}zenodo.org/api/deposit/depositions/{deposition_id}/files',
+                                           params=params)
 
         # Loop over files in model lookup table and upload them one by one
         for i, weight_path in enumerate(self.model_lookuptable['model_file_path']):
-            filename = os.path.basename(weight_path)
+            basepath, filename_weights = os.path.split(weight_path)
             with open(weight_path, "rb") as fp:
                 r = requests.put(
-                    f"{bucket_url}/{filename}",
+                    f"{bucket_url}/{filename_weights}",
                     data=fp,
                     params=params,
                 )
+            while r.status_code != 200:
+                print(f"Upload of {weight_path} was not successful (status code {r.status_code}), retrying")
+                time.sleep(10)
+                with open(weight_path, "rb") as fp:
+                    r = requests.put(
+                        f"{bucket_url}/{filename_weights}",
+                        data=fp,
+                        params=params,
+                    )
             # Verify checksum after upload
             if r.json()['checksum'][4:] != self.model_lookuptable['md5'][i]:
                 warnings.warn(f"The md5 checksum in your model_lookuptable for {self.model_lookuptable['model_id'][i]} "
                               f"does not match the md5 checksum of the uploaded file.")
+            if deposit_topologies:  # Deposit associated topology file
+                filename_topology = ".".join(filename_weights.split(".")[:-1])
+                filename_topology = re.sub(r"_weights$", "", filename_topology)
+                filename_topology += "_topology.pickle"
+                topology_path = os.path.join(basepath, filename_topology)
+                assert os.path.isfile(topology_path), f"topology file {topology_path} not found. " \
+                                                      f"consider deactivating the deposition of topology files."
+                with open(topology_path, "rb") as fp:
+                    r = requests.put(
+                        f"{bucket_url}/{filename_topology}",
+                        data=fp,
+                        params=params,
+                    )
 
         # Add model lookup table to zenodo
         df = self.model_lookuptable.copy()
@@ -233,7 +302,7 @@ class UserInterface:
             'license': 'cc-by-4.0',
             'upload_type': 'dataset',
             'access_right': 'open'
-            }
+        }
         meta = {**meta_core, **metadata}
         r = requests.put(f'https://{sandbox}zenodo.org/api/deposit/depositions/{deposition_id}',
                          params=params,
@@ -269,47 +338,72 @@ class UserInterface:
             self,
             data: anndata.AnnData,
             gene_symbol_col: Union[str, None] = None,
-            gene_ens_col: Union[str, None] = None
+            gene_ens_col: Union[str, None] = None,
+            obs_key_celltypes: Union[str, None] = None,
+            class_maps: dict = {},
     ):
         """
         Loads the provided AnnData object into sfaira.
-        If genes in the provided AnnData object are annotated as gene symbols, please provide the name of the corresponding var column (or 'index') through the gene_symbol_col argument.
-        If genes in the provided AnnData object are annotated as ensembl ids, please provide the name of the corresponding var column (or 'index') through the gene_ens_col argument.
+
+        If genes in the provided AnnData object are annotated as gene symbols,
+         please provide the name of the corresponding var column (or 'index') through the gene_symbol_col argument.
+        If genes in the provided AnnData object are annotated as ensembl ids,
+         please provide the name of the corresponding var column (or 'index') through the gene_ens_col argument.
         You need to provide at least one of the two.
         :param data: AnnData object to load
         :param gene_symbol_col: Var column name (or 'index') which contains gene symbols
         :param gene_ens_col: ar column name (or 'index') which contains ensembl ids
+        :param obs_key_celltypes: .obs column name which contains cell type labels.
+        :param class_maps: Cell type class maps.
         """
-        if self.zoo_embedding.species is not None:
-            species = self.zoo_embedding.species
-            organ = self.zoo_embedding.organ
-        elif self.zoo_celltype.species is not None:
-            species = self.zoo_celltype.species
-            organ = self.zoo_celltype.organ
+        if self.zoo_embedding.model_organism is not None:
+            organism = self.zoo_embedding.model_organism
+            organ = self.zoo_embedding.model_organ
+        elif self.zoo_celltype.model_organism is not None:
+            organism = self.zoo_celltype.model_organism
+            organ = self.zoo_celltype.model_organ
         else:
             raise ValueError("Please first set which model_id to use via the model zoo before loading the data")
 
         if gene_ens_col is None and gene_symbol_col is None:
             raise ValueError("Please provide either the gene_ens_col or the gene_symbol_col argument.")
 
-        dataset = DatasetInteractive(
-                    data=data,
-                    species=species,
-                    organ=organ,
-                    gene_symbol_col=gene_symbol_col,
-                    gene_ens_col=gene_ens_col
+        self.data = DatasetInteractive(
+            data=data,
+            organism=organism,
+            organ=organ,
+            gene_symbol_col=gene_symbol_col,
+            gene_ens_col=gene_ens_col,
+            obs_key_celltypes=obs_key_celltypes,
+            class_maps=class_maps,
+        )
+        # Align to correct featurespace
+        self.data.streamline_features(
+            match_to_reference=self.zoo_embedding.topology_container.gc.assembly,
+            subset_genes_to_type=list(set(self.zoo_embedding.topology_container.gc.biotype))
+        )
+
+    def _load_topology_dict(self, model_weights_file) -> dict:
+        topology_filepath = ".".join(model_weights_file.split(".")[:-1])
+        topology_filepath = re.sub(r"_weights$", "", topology_filepath)
+        topology_filepath += "_topology.pickle"
+        if topology_filepath.startswith('http'):
+            # Download into cache if file is on a remote server.
+            if not os.path.exists(self.cache_path):
+                os.makedirs(self.cache_path)
+            import urllib.request
+            from urllib.error import HTTPError
+            try:
+                urllib.request.urlretrieve(
+                    topology_filepath,
+                    os.path.join(self.cache_path, os.path.basename(topology_filepath))
                 )
-        dataset.load()
-        self.data = dataset.adata
-
-    def filter_cells(self):
-        """
-        Filters cells with a basic pre-defined filter.
-
-        :return:
-        """
-        # call cell_filter()
-        raise NotImplementedError()
+                topology_filepath = os.path.join(self.cache_path, os.path.basename(topology_filepath))
+            except HTTPError:
+                raise FileNotFoundError(f"cannot find remote topology file {topology_filepath}")
+        with open(topology_filepath, "rb") as f:
+            topology = pickle.load(f)
+        return topology
 
     def load_model_embedding(self):
         """
@@ -320,18 +414,22 @@ class UserInterface:
         :return: Model ID loaded.
         """
         assert self.zoo_embedding.model_id is not None, "choose embedding model first"
-        model_dir = self.model_lookuptable.model_file_path[self.model_lookuptable.model_id == self.zoo_embedding.model_id].iloc[0]
-        md5 = self.model_lookuptable.md5[self.model_lookuptable.model_id == self.zoo_embedding.model_id].iloc[0]
+        model_weights_file = self.model_lookuptable["model_file_path"].loc[self.model_lookuptable["model_id"] ==
+                                                                           self.zoo_embedding.model_id].iloc[0]
+        md5 = self.model_lookuptable["md5"].loc[self.model_lookuptable["model_id"] ==
+                                                self.zoo_embedding.model_id].iloc[0]
+        tc = TopologyContainer(
+            topology=self._load_topology_dict(model_weights_file=model_weights_file),
+            topology_id=self.zoo_embedding.topology_container.topology_id
+        )
         self.estimator_embedding = EstimatorKerasEmbedding(
-            data=self.data,
-            model_dir=model_dir,
+            data=self.data.adata,
+            model_dir=model_weights_file,
             model_id=self.zoo_embedding.model_id,
-            species=self.zoo_embedding.species,
-            organ=self.zoo_embedding.organ,
-            model_type=self.zoo_embedding.model_type,
-            model_topology=self.zoo_embedding.model_topology,
+            model_topology=tc,
             weights_md5=md5,
-            cache_path=self.cache_path
+            cache_path=self.cache_path,
+            adata_ids=self.adata_ids
         )
         self.estimator_embedding.init_model()
         self.estimator_embedding.load_pretrained_weights()
@@ -345,18 +443,23 @@ class UserInterface:
         :return: Model ID loaded.
         """
         assert self.zoo_celltype.model_id is not None, "choose cell type model first"
-        model_dir = self.model_lookuptable.model_file_path[self.model_lookuptable.model_id == self.zoo_celltype.model_id].iloc[0]
-        md5 = self.model_lookuptable.md5[self.model_lookuptable.model_id == self.zoo_celltype.model_id].iloc[0]
+        model_weights_file = self.model_lookuptable["model_file_path"].loc[self.model_lookuptable["model_id"] ==
+                                                                           self.zoo_celltype.model_id].iloc[0]
+        md5 = self.model_lookuptable["md5"].loc[self.model_lookuptable["model_id"] ==
+                                                self.zoo_celltype.model_id].iloc[0]
+        tc = TopologyContainer(
+            topology=self._load_topology_dict(model_weights_file=model_weights_file),
+            topology_id=self.zoo_celltype.topology_container.topology_id
+        )
         self.estimator_celltype = EstimatorKerasCelltype(
-            data=self.data,
-            model_dir=model_dir,
+            data=self.data.adata,
+            model_dir=model_weights_file,
             model_id=self.zoo_celltype.model_id,
-            species=self.zoo_celltype.species,
-            organ=self.zoo_celltype.organ,
-            model_type=self.zoo_celltype.model_type,
-            model_topology=self.zoo_celltype.model_topology,
+            model_topology=tc,
             weights_md5=md5,
-            cache_path=self.cache_path
+            cache_path=self.cache_path,
+            remove_unlabeled_cells=False,
+            adata_ids=self.adata_ids
         )
         self.estimator_celltype.init_model()
         self.estimator_celltype.load_pretrained_weights()
@@ -370,7 +473,11 @@ class UserInterface:
         Writes a list of cell type labels into the column of adata.obs indicated
         :return:
         """
-        self.data.obs[key] = [self.zoo_celltype.celltypes[i][0] for i in np.argmax(labels, axis=1)]
+        key_id = key + "_id"
+        self.data.adata.obs[key] = [self.estimator_celltype.ontology_names[i] for i in np.argmax(labels, axis=1)]
+        self.data.adata.obs[key] = self.data.adata.obs[key].astype('category')
+        self.data.adata.obs[key_id] = [self.estimator_celltype.ontology_ids[i] for i in np.argmax(labels, axis=1)]
+        self.data.adata.obs[key_id] = self.data.adata.obs[key_id].astype('category')
 
     def _adata_write_embedding(
             self,
@@ -381,7 +488,7 @@ class UserInterface:
         Writes the embedding matrix into adata.obsm with the key indicated.
         :return:
         """
-        self.data.obsm[key] = embedding
+        self.data.adata.obsm[key] = embedding
 
     def _adata_write_denoised_data(
             self,
@@ -392,9 +499,9 @@ class UserInterface:
         Writes the denoised expression matrix into adata.obsm with the key indicated.
         :return:
         """
-        self.data.layers[key] = denoised_data
+        self.data.adata.layers[key] = denoised_data
 
-    def compute_celltype(self):
+    def predict_celltypes(self):
         """
         Run local cell type prediction model and add predictions to adata.obs.
 
@@ -403,12 +510,12 @@ class UserInterface:
         if self.zoo_celltype is not None:
             self._adata_write_celltype(
                 labels=self.estimator_celltype.predict(),
-                key="celltype_sfaira"
+                key="celltypes_sfaira"
             )
         else:
             raise ValueError("celltype zoo has to be set before local model can be run.")
 
-    def compute_embedding(self):
+    def predict_embedding(self):
         """
         Run local embedding prediction model and add embedding to adata.obsm.
 
@@ -422,14 +529,14 @@ class UserInterface:
         else:
             raise ValueError("embedding zoo has to be set before local model can be run.")
 
-    def compute_all(self):
+    def predict_all(self):
         """
         Run local cell type prediction and embedding models and add results of both to adata.
 
         :return:
         """
-        self.compute_embedding()
-        self.compute_celltype()
+        self.predict_embedding()
+        self.predict_celltypes()
 
     def compute_denoised_expression(self):
         """
@@ -445,74 +552,12 @@ class UserInterface:
         else:
             raise ValueError("embedding zoo has to be set before local model can be run.")
 
-    def compute_celltype_kipoi(self):
-        """
-        Run executable cell type prediction model from kipoi_experimental and add prediction to adata.obs.
-
-        :return:
-        """
-        if self.zoo_celltype is not None:
-            self.model_kipoi_celltype = self.zoo_celltype.get_kipoi_model()
-            self._adata_write_celltype(
-                labels=self.model_kipoi_celltype.pipeline.predict(dict(adata=self.data)),
-                key="celltype_sfaira"
-            )
-        else:
-            raise ValueError("celltype zoo has to be set before kipoi_experimental model can be run.")
-
-    def compute_embedding_kipoi(self):
-        """
-        Run executable embedding prediction model from kipoi_experimental and add embedding to adata.obsm.
-
-        :return:
-        """
-        if self.zoo_embedding is not None:
-            self.model_kipoi_embedding = self.zoo_embedding.get_kipoi_model()
-            self._adata_write_embedding(
-                embedding=self.model_kipoi_embedding.pipeline.predict_embedding(dict(adata=self.data)),
-                key="X_sfaira"
-            )
-        else:
-            raise ValueError("embedding zoo has to be set before kipoi_experimental model can be run.")
-
-    def compute_all_kipoi(self):
-        """
-        Run executable cell type prediction and embedding models from kipoi_experimental and add results to adata.
-
-        :return:
-        """
-        self.compute_embedding_kipoi()
-        self.compute_celltype_kipoi()
-
-    def compute_denoised_expression_kipoi(self):
-        """
-        Run executable embedding prediction model from kipoi_experimental and add denoised expression to adata layer.
-
-        :return:
-        """
-        if self.zoo_embedding is not None:
-            self.model_kipoi_embedding = self.zoo_embedding.get_kipoi_model()
-            self._adata_write_denoised_data(
-                denoised_data=self.model_kipoi_embedding.pipeline.predict(dict(adata=self.data)),
-                key="denoised_sfaira"
-            )
-        else:
-            raise ValueError("embedding zoo has to be set before local model can be run.")
-
     def celltype_summary(self):
         """
         Return type with frequencies of predicted cell types.
 
         :return:
         """
-        return self.data.obs['celltype_sfaira'].value_counts()
-
-    def get_references(self):
-        """
-        Return papers to cite when using the embedding model.
-
-        Collects references from the estimators of each model type.
-
-        :return:
-        """
-        return self.estimator_embedding.get_citations()
+        assert "celltypes_sfaira" in self.data.adata.obs.keys(), \
+            "Column celltypes_sfaira not found in the data. Please run UserInterface.predict_celltypes() first."
+        return self.data.adata.obs['celltypes_sfaira'].value_counts()

@@ -1,0 +1,14 @@
+source	target	target_id
+acinar	pancreatic acinar cell	CL:0002064
+alpha	pancreatic A cell	CL:0000171
+beta	type B pancreatic cell	CL:0000169
+delta	pancreatic D cell	CL:0000173
+ductal	pancreatic ductal cell	CL:0002079
+endothelial	endothelial cell	CL:0000115
+erythroblast	erythroblast	CL:0000765
+fibroblast	fibroblast	CL:0000057
+leukocyte	leukocyte	CL:0000738
+lymphatic endothelial cell	endothelial cell of lymphatic vessel	CL:0002138
+pp	pancreatic PP cell	CL:0002275
+smooth_muscle	smooth muscle cell	CL:0000192
+stellate cell	pancreatic stellate cell	CL:0002410

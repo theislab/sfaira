@@ -1,0 +1,154 @@
+source	target	target_id
+B cell	B cell	CL:0000236
+Bergmann glial cell	Bergmann glial cell	CL:0000644
+Brush cell of epithelium proper of large intestine	brush cell of epithelium proper of large intestine	CL:0002203
+CD4-positive, alpha-beta T cell	CD4-positive, alpha-beta T cell	CL:0000624
+CD8-positive, alpha-beta T cell	CD8-positive, alpha-beta T cell	CL:0000625
+DN3 thymocyte	DN3 thymocyte	CL:0000807
+DN4 thymocyte	DN4 thymocyte	CL:0000808
+Kupffer cell	Kupffer cell	CL:0000091
+Langerhans cell	Langerhans cell	CL:0000453
+NK cell	natural killer cell	CL:0000623
+Schwann cell	Schwann cell	CL:0002573
+T cell	T cell	CL:0000084
+adventitial cell	adventitial cell	CL:0002503
+alveolar macrophage	alveolar macrophage	CL:0000583
+aortic endothelial cell	aortic endothelial cell	CL:0002544
+astrocyte	astrocyte	CL:0000127
+atrial myocyte	regular atrial cardiac myocyte	CL:0002129
+basal cell	basal cell	CL:0000646
+basal cell of epidermis	basal cell of epidermis	CL:0002187
+basal epithelial cell of tracheobronchial tree	basal epithelial cell of tracheobronchial tree	CL:0002329
+basophil	basophil	CL:0000767
+bladder cell	bladder cell	CL:1001319
+bladder urothelial cell	bladder urothelial cell	CL:1001428
+blood cell	blood cell	CL:0000081
+brain pericyte	brain pericyte	CL:2000043
+bronchial smooth muscle cell	bronchial smooth muscle cell	CL:0002598
+brush cell	brush cell	CL:0002204
+bulge keratinocyte	keratinocyte stem cell	CL:0002337
+cardiac neuron	cardiac neuron	CL:0010022
+cardiomyocyte	cardiac muscle cell	CL:0000746
+chondrocyte	chondrocyte	CL:0000138
+ciliated columnar cell of tracheobronchial tree	ciliated columnar cell of tracheobronchial tree	CL:0002145
+classical monocyte	classical monocyte	CL:0000860
+club cell of bronchiole	club cell	CL:0000158
+dendritic cell	dendritic cell	CL:0000451
+double negative T cell	double negative thymocyte	CL:0002489
+duct epithelial cell	duct epithelial cell	CL:0000068
+early pro-B cell	early pro-B cell	CL:0002046
+endocardial cell	endocardial cell	CL:0002350
+endothelial cell	endothelial cell	CL:0000115
+endothelial cell of coronary artery	endothelial cell of coronary artery	CL:2000018
+endothelial cell of hepatic sinusoid	endothelial cell of hepatic sinusoid	CL:1000398
+endothelial cell of lymphatic vessel	endothelial cell of lymphatic vessel	CL:0002138
+enterocyte of epithelium of large intestine	enterocyte of epithelium of large intestine	CL:0002071
+enteroendocrine cell	enteroendocrine cell	CL:0000164
+ependymal cell	ependymal cell	CL:0000065
+epidermal cell	epidermal cell	CL:0000362
+epithelial cell	epithelial cell	CL:0000066
+epithelial cell of large intestine	epithelial cell of large intestine	CL:0002253
+epithelial cell of proximal tubule	epithelial cell of proximal tubule	CL:0002306
+epithelial cell of thymus	epithelial cell of thymus	CL:0002293
+erythroblast	erythroblast	CL:0000765
+erythrocyte	erythrocyte	CL:0000232
+erythroid progenitor	erythroid progenitor cell	CL:0000038
+fenestrated cell	fenestrated cell	CL:0000666
+fibroblast	fibroblast	CL:0000057
+fibroblast of cardiac tissue	fibroblast of cardiac tissue	CL:0002548
+fibroblast of lung	fibroblast of lung	CL:0002553
+fibrocyte	fibrocyte	CL:0000135
+granulocyte	granulocyte	CL:0000094
+granulocyte monocyte progenitor cell	granulocyte monocyte progenitor cell	CL:0000557
+granulocytopoietic cell	granulocytopoietic cell	CL:0002191
+hematopoietic precursor cell	hematopoietic precursor cell	CL:0008001
+hematopoietic stem cell	hematopoietic stem cell	CL:0000037
+hepatic stellate cell	hepatic stellate cell	CL:0000632
+hepatocyte	hepatocyte	CL:0000182
+immature B cell	immature B cell	CL:0000816
+immature T cell	immature T cell	CL:0002420
+intermediate monocyte	intermediate monocyte	CL:0002393
+interneuron	interneuron	CL:0000099
+intestinal crypt stem cell	intestinal crypt stem cell	CL:0002250
+keratinocyte	keratinocyte	CL:0000312
+keratinocyte stem cell	keratinocyte stem cell	CL:0002337
+kidney capillary endothelial cell	kidney capillary endothelial cell	CL:1000892
+kidney cell	kidney cell	CL:1000497
+kidney collecting duct epithelial cell	kidney collecting duct epithelial cell	CL:1000454
+kidney collecting duct principal cell	kidney collecting duct principal cell	CL:1001431
+kidney cortex artery cell	kidney cortex artery cell	CL:1001045
+kidney distal convoluted tubule epithelial cell	kidney distal convoluted tubule epithelial cell	CL:1000849
+kidney interstitial fibroblast	kidney interstitial fibroblast	CL:1000692
+kidney loop of Henle ascending limb epithelial cell	kidney loop of Henle ascending limb epithelial cell	CL:1001016
+kidney loop of Henle thick ascending limb epithelial cell	kidney loop of Henle thick ascending limb epithelial cell	CL:1001106
+kidney mesangial cell	mesangial cell	CL:0000650
+kidney proximal convoluted tubule epithelial cell	kidney proximal straight tubule epithelial cell	CL:1000839
+kidney proximal straight tubule epithelial cell	kidney proximal straight tubule epithelial cell	CL:1000839
+large intestine goblet cell	large intestine goblet cell	CL:1000320
+late pro-B cell	late pro-B cell	CL:0002048
+leukocyte	leukocyte	CL:0000738
+luminal epithelial cell of mammary gland	mammary alveolar cell	CL:0002325
+lung macrophage	macrophage	CL:0000235
+lung neuroendocrine cell	lung neuroendocrine cell	CL:1000223
+lymphocyte	lymphocyte	CL:0000542
+lymphoid progenitor cell	common lymphoid progenitor	CL:0000051
+macrophage	macrophage	CL:0000235
+mast cell	mast cell	CL:0000097
+mature NK T cell	mature NK T cell	CL:0000814
+mature alpha-beta T cell	mature alpha-beta T cell	CL:0000791
+medium spiny neuron	medium spiny neuron	CL:1001474
+megakaryocyte-erythroid progenitor cell	megakaryocyte-erythroid progenitor cell	CL:0000050
+mesangial cell	mesangial cell	CL:0000650
+mesenchymal cell	mesenchymal cell	CL:0008019
+mesenchymal progenitor cell	mesenchymal cell	CL:0008019
+mesenchymal stem cell	mesenchymal stem cell	CL:0000134
+mesenchymal stem cell of adipose	mesenchymal stem cell of adipose	CL:0002570
+microglial cell	microglial cell	CL:0000129
+monocyte	monocyte	CL:0000576
+mucus secreting cell	mucus secreting cell	CL:0000319
+myeloid cell	myeloid cell	CL:0000763
+myeloid dendritic cell	myeloid dendritic cell	CL:0000782
+myeloid leukocyte	myeloid leukocyte	CL:0000766
+naive B cell	naive B cell	CL:0000788
+naive T cell	naive T cell	CL:0000898
+neuroendocrine cell	neuroendocrine cell	CL:0000165
+neuroepithelial cell	neuroepithelial stem cell	CL:0002259
+neuron	neuron	CL:0000540
+neuronal stem cell	neuronal stem cell	CL:0000047
+neutrophil	neutrophil	CL:0000775
+non-classical monocyte	non-classical monocyte	CL:0000875
+oligodendrocyte	oligodendrocyte	CL:0000128
+oligodendrocyte precursor cell	oligodendrocyte precursor cell	CL:0002453
+pancreatic A cell	pancreatic A cell	CL:0000171
+pancreatic B cell	type B pancreatic cell	CL:0000169
+pancreatic D cell	pancreatic D cell	CL:0000173
+pancreatic PP cell	pancreatic PP cell	CL:0002275
+pancreatic acinar cell	pancreatic acinar cell	CL:0002064
+pancreatic ductal cel	pancreatic ductal cell	CL:0002079
+pancreatic ductal cell	pancreatic ductal cell	CL:0002079
+pancreatic stellate cell	pancreatic stellate cell	CL:0002410
+pericyte cell	pericyte cell	CL:0000669
+plasma cell	plasma cell	CL:0000786
+plasmacytoid dendritic cell	plasmacytoid dendritic cell	CL:0000784
+podocyte	glomerular visceral epithelial cell	CL:0000653
+precursor B cell	precursor B cell	CL:0000817
+proerythroblast	proerythroblast	CL:0000547
+professional antigen presenting cell	professional antigen presenting cell	CL:0000145
+promonocyte	promonocyte	CL:0000559
+pulmonary interstitial fibroblast	pulmonary interstitial fibroblast	CL:0002241
+regulatory T cell	regulatory T cell	CL:0000815
+respiratory basal cell	respiratory basal cell	CL:0002633
+secretory cell	secretory cell	CL:0000151
+skeletal muscle cell	cell of skeletal muscle	CL:0000188
+skeletal muscle satellite cell	skeletal muscle satellite cell	CL:0000594
+smooth muscle cell	smooth muscle cell	CL:0000192
+smooth muscle cell of the pulmonary artery	smooth muscle cell of the pulmonary artery	CL:0002591
+smooth muscle cell of trachea	smooth muscle cell of trachea	CL:0002600
+stem cell of epidermis	stem cell of epidermis	CL:1000428
+stromal cell	stromal cell	CL:0000499
+thymocyte	thymocyte	CL:0000893
+type I pneumocyte	type I pneumocyte	CL:0002062
+type II pneumocyte	type II pneumocyte	CL:0002063
+valve cell	valve cell	CL:0000663
+vein endothelial cell	vein endothelial cell	CL:0002543
+ventricular myocyte	regular ventricular cardiac myocyte	CL:0002131

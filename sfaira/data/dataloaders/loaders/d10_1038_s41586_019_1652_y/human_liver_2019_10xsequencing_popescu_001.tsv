@@ -1,0 +1,28 @@
+source	target	target_id
+B cell	B cell	CL:0000236
+DC precursor	common dendritic progenitor	CL:0001029
+DC1	dendritic cell	CL:0000451
+DC2	dendritic cell	CL:0000451
+Early Erythroid	erythroid progenitor cell	CL:0000038
+Early lymphoid_T lymphocyte	early lymphoid progenitor	CL:0000936
+Endothelial cell	endothelial cell	CL:0000115
+Fibroblast	fibroblast	CL:0000057
+HSC_MPP	hematopoietic multipotent progenitor cell	CL:0000837
+Hepatocyte	hepatocyte	CL:0000182
+ILC precursor	immature innate lymphoid cell	CL:0001082
+Kupffer Cell	Kupffer cell	CL:0000091
+Late Erythroid	erythroid progenitor cell	CL:0000038
+MEMP	megakaryocyte-erythroid progenitor cell	CL:0000050
+Mast cell	mast cell	CL:0000097
+Megakaryocyte	megakaryocyte	CL:0000556
+Mid Erythroid	erythroid progenitor cell	CL:0000038
+Mono-Mac	myeloid leukocyte	CL:0000766
+Monocyte	monocyte	CL:0000576
+Monocyte precursor	granulocyte monocyte progenitor cell	CL:0000557
+NK	natural killer cell	CL:0000623
+Neutrophil-myeloid progenitor	common myeloid progenitor	CL:0000049
+Pre pro B cell	Fraction A pre-pro B cell	CL:0002045
+VCAM1+ EI macrophage	macrophage	CL:0000235
+pDC precursor	plasmacytoid dendritic cell	CL:0000784
+pre-B cell	precursor B cell	CL:0000817
+pro-B cell	pro-B cell	CL:0000826

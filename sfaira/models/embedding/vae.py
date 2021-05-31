@@ -1,12 +1,15 @@
 import numpy as np
-import tensorflow as tf
+try:
+    import tensorflow as tf
+except ImportError:
+    tf = None
 from typing import List, Union, Tuple
 
 from sfaira.models.embedding.output_layers import NegBinOutput, NegBinSharedDispOutput, NegBinConstDispOutput, \
     GaussianOutput, GaussianSharedStdOutput, GaussianConstStdOutput
-from sfaira.models.embedding.external import BasicModel
-from sfaira.models.embedding.external import PreprocInput
-from sfaira.models.embedding.external import Topologies
+from sfaira.versions.topologies import TopologyContainer
+from sfaira.models.base import BasicModelKeras
+from sfaira.models.pp_layer import PreprocInput
 
 
 class Sampling(tf.keras.layers.Layer):
@@ -137,7 +140,7 @@ class Decoder(tf.keras.layers.Layer):
         return x
 
 
-class ModelVae(BasicModel):
+class ModelKerasVae(BasicModelKeras):
 
     def predict_reconstructed(self, x: np.ndarray):
         return np.split(self.training_model.predict(x)[0], indices_or_sections=2, axis=1)[0]
@@ -154,13 +157,12 @@ class ModelVae(BasicModel):
             init='glorot_uniform',
             output_layer="nb"
     ):
-        super(ModelVae, self).__init__()
+        super(ModelKerasVae, self).__init__()
         # Check length of latent dim to divide encoder-decoder stack:
         if len(latent_dim) % 2 == 1:
             n_layers_enc = len(latent_dim) // 2 + 1
         else:
             raise ValueError("len(latent_dim)=%i should be uneven to provide a defined bottleneck" % len(latent_dim))
-
 
         inputs_encoder = tf.keras.Input(shape=(in_dim,), name='counts')
         inputs_sf = tf.keras.Input(shape=(1,), name='size_factors')
@@ -210,7 +212,7 @@ class ModelVae(BasicModel):
         output_decoder_expfamily_concat = tf.keras.layers.Concatenate(axis=1, name="neg_ll")(output_decoder_expfamily)
 
         self.encoder_model = tf.keras.Model(
-            inputs=inputs_encoder,
+            inputs=[inputs_encoder, inputs_sf],
             outputs=[z, z_mean, z_log_var],
             name="encoder_model"
         )
@@ -220,35 +222,34 @@ class ModelVae(BasicModel):
             name="autoencoder"
         )
 
-    def predict_embedding(self, x: np.ndarray, variational=False):
+    def predict_embedding(self, x, variational=False):
         if variational:
             return self.encoder_model.predict(x)
         else:
             return self.encoder_model.predict(x)[1]
 
 
-class ModelVaeVersioned(ModelVae):
+class ModelVaeVersioned(ModelKerasVae):
     def __init__(
             self,
-            topology_container: Topologies,
+            topology_container: TopologyContainer,
             override_hyperpar: Union[dict, None] = None
     ):
         hyperpar = topology_container.topology["hyper_parameters"]
         if override_hyperpar is not None:
             for k in list(override_hyperpar.keys()):
                 hyperpar[k] = override_hyperpar[k]
-        ModelVae.__init__(
-            self=self,
-            in_dim=topology_container.ngenes,
+        super().__init__(
+            in_dim=topology_container.n_var,
             **hyperpar
         )
         print('passed hyperpar: \n', hyperpar)
         self._topology_id = topology_container.topology_id
-        self.genome_size = topology_container.ngenes
-        self.model_class = topology_container.model_class
+        self.genome_size = topology_container.n_var
+        self.model_class = "embedding"
         self.model_type = topology_container.model_type
         self.hyperparam = dict(
-            list(hyperpar.items()) +
+            list(hyperpar.items()) +  # noqa: W504
             [
                 ("topology_id", self._topology_id),
                 ("genome_size", self.genome_size),

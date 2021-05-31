@@ -1,13 +1,16 @@
 import numpy as np
-import tensorflow as tf
+try:
+    import tensorflow as tf
+except ImportError:
+    tf = None
 from typing import Union, Tuple
 
 from sfaira.models.embedding.output_layers import NegBinOutput, NegBinSharedDispOutput, NegBinConstDispOutput, \
     GaussianOutput, GaussianSharedStdOutput, GaussianConstStdOutput
-from sfaira.models.embedding.external import BasicModel
-from sfaira.models.embedding.external import PreprocInput
-from sfaira.models.embedding.external import Topologies
-from sfaira.models.embedding.external import MaskingDense
+from sfaira.versions.topologies import TopologyContainer
+from sfaira.models.base import BasicModelKeras
+from sfaira.models.pp_layer import PreprocInput
+from sfaira.models.made import MaskingDense
 
 
 class Sampling(tf.keras.layers.Layer):
@@ -96,17 +99,17 @@ class Encoder(tf.keras.layers.Layer):
 
 class IAF(tf.keras.layers.Layer):
     def __init__(
-                self,
-                bottleneck: int,
-                n_iaf: int,
-                l1_coef: float,
-                l2_coef: float,
-                masking_dim=320,
-                n_made=2,
-                activation="relu",
-                name='iaf',
-                **kwargs
-        ):
+        self,
+        bottleneck: int,
+        n_iaf: int,
+        l1_coef: float,
+        l2_coef: float,
+        masking_dim=320,
+        n_made=2,
+        activation="relu",
+        name='iaf',
+        **kwargs
+    ):
         """
         Transforms latent space with simple distribution to one with a more flexible one.
 
@@ -218,7 +221,7 @@ class Decoder(tf.keras.layers.Layer):
         return x
 
 
-class ModelVaeIAF(BasicModel):
+class ModelKerasVaeIAF(BasicModelKeras):
 
     def __init__(
             self,
@@ -234,13 +237,12 @@ class ModelVaeIAF(BasicModel):
             init='glorot_uniform',
             output_layer="nb"
     ):
-        super(ModelVaeIAF, self).__init__()
+        super(ModelKerasVaeIAF, self).__init__()
         # Check length of latent dim to divide encoder-decoder stack:
         if len(latent_dim) % 2 == 1:
             n_layers_enc = len(latent_dim) // 2 + 1
         else:
             raise ValueError("len(latent_dim)=%i should be uneven to provide a defined bottleneck" % len(latent_dim))
-
 
         inputs_encoder = tf.keras.Input(shape=(in_dim,), name='counts')
         inputs_sf = tf.keras.Input(shape=(1,), name='size_factors')
@@ -255,7 +257,7 @@ class ModelVaeIAF(BasicModel):
             kernel_initializer=init
         )
         iaf = IAF(
-            bottleneck=latent_dim[n_layers_enc-1],
+            bottleneck=latent_dim[n_layers_enc - 1],
             n_iaf=n_iaf,
             l1_coef=l1_coef,
             l2_coef=l2_coef
@@ -284,8 +286,8 @@ class ModelVaeIAF(BasicModel):
             z, s_t_sigmas = iaf([z, h])
             z_t_square_mc += tf.square(z)
             z_t_mean += z
-        z_t_square_mc = z_t_square_mc/mc_samples
-        z_t_mean = z_t_mean/mc_samples
+        z_t_square_mc = z_t_square_mc / mc_samples
+        z_t_mean = z_t_mean / mc_samples
 
         cum_s_t_log_var = 0
         for s_t_sigma in s_t_sigmas:
@@ -317,7 +319,7 @@ class ModelVaeIAF(BasicModel):
         output_decoder_expfamily_concat = tf.keras.layers.Concatenate(axis=1, name="neg_ll")(output_decoder_expfamily)
 
         self.encoder_model = tf.keras.Model(
-            inputs=inputs_encoder,
+            inputs=[inputs_encoder, inputs_sf],
             outputs=[z_t, z_t_mean, z_0],
             name="encoder_model"
         )
@@ -327,10 +329,10 @@ class ModelVaeIAF(BasicModel):
             name="autoencoder"
         )
 
-    def predict_reconstructed(self, x: np.ndarray):
+    def predict_reconstructed(self, x):
         return np.split(self.training_model.predict(x)[0], indices_or_sections=2, axis=1)[0]
 
-    def predict_embedding(self, x: np.ndarray, variational=False, return_z0=False):
+    def predict_embedding(self, x, variational=False, return_z0=False):
         if return_z0 and variational:
             z_t, z_t_mean, z_0 = self.encoder_model.predict(x)
             return z_t, z_t_mean, z_0
@@ -345,28 +347,27 @@ class ModelVaeIAF(BasicModel):
             return z_t_mean
 
 
-class ModelVaeIAFVersioned(ModelVaeIAF):
+class ModelVaeIAFVersioned(ModelKerasVaeIAF):
     def __init__(
             self,
-            topology_container: Topologies,
+            topology_container: TopologyContainer,
             override_hyperpar: Union[dict, None] = None
     ):
         hyperpar = topology_container.topology["hyper_parameters"]
         if override_hyperpar is not None:
             for k in list(override_hyperpar.keys()):
                 hyperpar[k] = override_hyperpar[k]
-        ModelVaeIAF.__init__(
-            self=self,
-            in_dim=topology_container.ngenes,
+        super().__init__(
+            in_dim=topology_container.n_var,
             **hyperpar
         )
         print('passed hyperpar: \n', hyperpar)
         self._topology_id = topology_container.topology_id
-        self.genome_size = topology_container.ngenes
-        self.model_class = topology_container.model_class
+        self.genome_size = topology_container.n_var
+        self.model_class = "embedding"
         self.model_type = topology_container.model_type
         self.hyperparam = dict(
-            list(hyperpar.items()) +
+            list(hyperpar.items()) +  # noqa: W504
             [
                 ("topology_id", self._topology_id),
                 ("genome_size", self.genome_size),

@@ -1,0 +1,463 @@
+source	target	target_id
+AT1 Cell(Lung)	type I pneumocyte	CL:0002062
+AT2 Cell(Lung)	type II pneumocyte	CL:0002063
+Acinar cell(Pancreas)	pancreatic acinar cell	CL:0002064
+Adipocyte(Fetal_Kidney)	fat cell	CL:0000136
+Adipocyte(Neonatal-Skin)	fat cell	CL:0000136
+Adipocyte (Neonatal-Muscle)	fat cell	CL:0000136
+Alveolar bipotent progenitor(Lung)	pneumocyte	CL:0000322
+Alveolar macrophage_Ear2 high(Lung)	alveolar macrophage	CL:0000583
+Alveolar macrophage_Pclaf high(Lung)	alveolar macrophage	CL:0000583
+Antral mucous cell (Stomach)	mucous cell of stomach	CL:0002180
+Astrocyte_Atp1b2 high(Brain)	astrocyte	CL:0000127
+Astrocyte_Mfe8 high(Brain)	astrocyte	CL:0000127
+Astrocyte_Pla2g7 high(Brain)	astrocyte	CL:0000127
+Astroglial cell(Bergman glia)(Brain)	Bergmann glial cell	CL:0000644
+Atrial cardiomyocyte(Neonatal-Heart)	regular atrial cardiac myocyte	CL:0002129
+Atrial cardiomyocyte_Acta2 high(Neonatal-Heart)	regular atrial cardiac myocyte	CL:0002129
+B Cell(Lung)	B cell	CL:0000236
+B cell(Bone-Marrow_c-kit)	B cell	CL:0000236
+B cell(Kidney)	B cell	CL:0000236
+B cell(Neonatal-Muscle)	B cell	CL:0000236
+B cell(Neonatal-Rib)	B cell	CL:0000236
+B cell(Pancreas)	B cell	CL:0000236
+B cell(Thymus)	B cell	CL:0000236
+B cell(Uterus)	B cell	CL:0000236
+B cell_Cd79a&Fcer2a high(Mammary-Gland-Virgin)	B cell	CL:0000236
+B cell_Cd79a&Iglc2 high(Mammary-Gland-Virgin)	B cell	CL:0000236
+B cell_Fcmr high(Liver)	B cell	CL:0000236
+B cell_Igha high(Peripheral_Blood)	B cell	CL:0000236
+B cell_Ighd high(Small-Intestine)	B cell	CL:0000236
+B cell_Igkc high(Bone-Marrow)	B cell	CL:0000236
+B cell_Igkv12-46 high(Small-Intestine)	B cell	CL:0000236
+B cell_Jchain high(Liver)	B cell	CL:0000236
+B cell_Jchain high(Mammary-Gland-Virgin)	B cell	CL:0000236
+B cell_Jchain high(Muscle)	B cell	CL:0000236
+B cell_Jchain high(Small-Intestine)	B cell	CL:0000236
+B cell_Ly6d high(Peripheral_Blood)	B cell	CL:0000236
+B cell_Ms4a1 high(Small-Intestine)	B cell	CL:0000236
+B cell_Rps27rt high(Peripheral_Blood)	B cell	CL:0000236
+B cell_Vpreb3 high(Muscle)	B cell	CL:0000236
+B cell_Vpreb3 high(Peripheral_Blood)	B cell	CL:0000236
+Basal epithelial cell(Bladder)	bladder urothelial cell	CL:1001428
+Basophil(Bone-Marrow_c-kit)	basophil	CL:0000767
+Basophil(Lung)	basophil	CL:0000767
+Basophil_Prss34 high(Peripheral_Blood)	basophil	CL:0000767
+Brown adipose tissue(Neonatal-Muscle)	brown fat cell	CL:0000449
+Brown adipose tissue_Cidea high(Neonatal-Skin)	brown fat cell	CL:0000449
+Brown adipose tissue_Cox8b high(Neonatal-Skin)	brown fat cell	CL:0000449
+Brown adipose tissue_mt-Nd5 high(Neonatal-Skin)	brown fat cell	CL:0000449
+Cardiac muscle cell(Neonatal-Heart)	cardiac muscle cell	CL:0000746
+Cartilage cell_Clu high(Neonatal-Rib)	chondrocyte	CL:0000138
+Cartilage cell_Col2a1 high(Neonatal-Rib)	chondrocyte	CL:0000138
+Cartilage cell_Cxcl14 high(Neonatal-Rib)	chondrocyte	CL:0000138
+Cartilage cell_Ppa1 high(Neonatal-Rib)	chondrocyte	CL:0000138
+Cartilage cell_Prg4 high(Neonatal-Rib)	chondrocyte	CL:0000138
+Cell in cell cycle(Fetal_Kidney)	UNKNOWN	UNKNOWN
+Chondrocyte(Neonatal-Muscle)	chondrocyte	CL:0000138
+Ciliated cell(Lung)	ciliated cell	CL:0000064
+Clara Cell(Lung)	club cell	CL:0000158
+Columnar epithelium(Small-Intestine)	epithelial cell	CL:0000066
+Conventional dendritic cell_Gngt2 high(Lung)	conventional dendritic cell	CL:0000990
+Conventional dendritic cell_H2-M2 high(Lung)	conventional dendritic cell	CL:0000990
+Conventional dendritic cell_Mgl2 high(Lung)	conventional dendritic cell	CL:0000990
+Conventional dendritic cell_Tubb5 high(Lung)	conventional dendritic cell	CL:0000990
+Cumulus cell_Car14 high(Ovary)	cumulus cell	CL:0000711
+Cumulus cell_Nupr1 high(Ovary)	cumulus cell	CL:0000711
+Cumulus cell_Ube2c high(Ovary)	cumulus cell	CL:0000711
+DPT cell(Thymus)	double-positive, alpha-beta thymocyte	CL:0000809
+Dendritic cell(Muscle)	dendritic cell	CL:0000451
+Dendritic cell(Neonatal-Heart)	dendritic cell	CL:0000451
+Dendritic cell(Neonatal-Muscle)	dendritic cell	CL:0000451
+Dendritic cell(Prostate)	dendritic cell	CL:0000451
+Dendritic cell(Stomach)	dendritic cell	CL:0000451
+Dendritic cell(Uterus)	dendritic cell	CL:0000451
+Dendritic cell_Ccr7 high(Kidney)	dendritic cell	CL:0000451
+Dendritic cell_Cd74 high(Bladder)	dendritic cell	CL:0000451
+Dendritic cell_Cst3 high(Kidney)	dendritic cell	CL:0000451
+Dendritic cell_Cst3 high(Liver)	dendritic cell	CL:0000451
+Dendritic cell_Cst3 high(Mammary-Gland-Virgin)	dendritic cell	CL:0000451
+Dendritic cell_Fscn1 high(Mammary-Gland-Virgin)	dendritic cell	CL:0000451
+Dendritic cell_H2-Eb1 high(Bone-Marrow)	dendritic cell	CL:0000451
+Dendritic cell_Lyz2 high(Bladder)	dendritic cell	CL:0000451
+Dendritic cell_Naaa high(Lung)	dendritic cell	CL:0000451
+Dendritic cell_S100a4 high(Spleen)	dendritic cell	CL:0000451
+Dendritic cell_Siglech high(Bone-Marrow)	dendritic cell	CL:0000451
+Dendritic cell_Siglech high(Liver)	dendritic cell	CL:0000451
+Dendritic cell_Siglech high(Mammary-Gland-Virgin)	dendritic cell	CL:0000451
+Dendritic cell_Siglech high(Peripheral_Blood)	dendritic cell	CL:0000451
+Dendritic cell_Siglech high(Small-Intestine)	dendritic cell	CL:0000451
+Dendritic cell_Siglech high(Spleen)	dendritic cell	CL:0000451
+Dendrtic cell(Pancreas)	dendritic cell	CL:0000451
+Dendrtic cell_Cst3 high(Small-Intestine)	dendritic cell	CL:0000451
+Distal collecting duct principal cell_Cldn4 high(Kidney)	kidney collecting duct principal cell	CL:1001431
+Distal collecting duct principal cell_Hsd11b2 high(Kidney)	kidney collecting duct principal cell	CL:1001431
+Distal convoluted tubule_Pvalb high(Kidney)	kidney distal convoluted tubule epithelial cell	CL:1000849
+Distal convoluted tubule_S100g high(Kidney)	kidney distal convoluted tubule epithelial cell	CL:1000849
+Dividing cell(Mammary-Gland-Virgin)	UNKNOWN	UNKNOWN
+Dividing cell(Neonatal-Heart)	UNKNOWN	UNKNOWN
+Dividing cell(Neonatal-Rib)	UNKNOWN	UNKNOWN
+Dividing cell(Neonatal-Skin)	UNKNOWN	UNKNOWN
+Dividing cell(Pancreas)	UNKNOWN	UNKNOWN
+Dividing cell(Stomach)	UNKNOWN	UNKNOWN
+Dividing cells(Lung)	UNKNOWN	UNKNOWN
+Dividng cell(Neonatal-Calvaria)	UNKNOWN	UNKNOWN
+Dividing T cells(Lung)	T cell	CL:0000084
+Dividing dendritic cells(Lung)	dendritic cell	CL:0000451
+Ductal cell(Pancreas)	pancreatic ductal cell	CL:0002079
+Elongating spermatid(Testis)	spermatid	CL:0000018
+Endocrine cell(Pancreas)	pancreatic endocrine cell	CL:0008024
+Endothelial cell(Kidney)	endothelial cell	CL:0000115
+Endothelial cell(Liver)	endothelial cell	CL:0000115
+Endothelial cell(Muscle)	endothelial cell	CL:0000115
+Endothelial cell(Neonatal-Calvaria)	endothelial cell	CL:0000115
+Endothelial cell(Neonatal-Muscle)	endothelial cell	CL:0000115
+Endothelial cell(Neonatal-Rib)	endothelial cell	CL:0000115
+Endothelial cell(Neonatal-Skin)	endothelial cell	CL:0000115
+Endothelial cell_Cldn5 high(Uterus)	endothelial cell	CL:0000115
+Endothelial cell_Eln high(Neonatal-Heart)	endothelial cell	CL:0000115
+Endothelial cell_Enpp2 high(Neonatal-Heart)	endothelial cell	CL:0000115
+Endothelial cell_Fabp4 high(Pancreas)	endothelial cell	CL:0000115
+Endothelial cell_Igfbp5 high(Neonatal-Heart)	endothelial cell	CL:0000115
+Endothelial cell_Kdr high(Lung)	endothelial cell	CL:0000115
+Endothelial cell_Lrg1 high(Pancreas)	endothelial cell	CL:0000115
+Endothelial cell_Ly6c1 high(Bladder)	endothelial cell	CL:0000115
+Endothelial cell_Tm4sf1 high(Pancreas)	endothelial cell	CL:0000115
+Endothelial cell_Tm4sf1 high(Uterus)	endothelial cell	CL:0000115
+Endothelial cell_Tmem100 high(Lung)	endothelial cell	CL:0000115
+Endothelial cells_Vwf high(Lung)	endothelial cell	CL:0000115
+Eosinophil granulocyte(Lung)	eosinophil	CL:0000771
+Eosinophil progenitor cell(Bone-Marrow_c-kit)	eosinophil progenitor cell	CL:0000611
+Epithelia cell_Spp1 high(Liver)	epithelial cell	CL:0000066
+Epithelial cell(Liver)	epithelial cell	CL:0000066
+Epithelial cell(Neonatal-Heart)	epithelial cell	CL:0000066
+Epithelial cell(Neonatal-Muscle)	epithelial cell	CL:0000066
+Epithelial cell(Neonatal-Skin)	epithelial cell	CL:0000066
+Epithelial cell(Prostate)	epithelial cell of prostatic duct	CL:0002232
+Epithelial cell_Cryab high(Kidney)	kidney epithelial cell	CL:0002518
+Epithelial cell_Gkn3 high(Stomach)	epithelial cell	CL:0000066
+Epithelial cell_Gm23935 high(Bladder)	bladder urothelial cell	CL:1001428
+Epithelial cell_Kcne3 high(Small-Intestine)	epithelial cell	CL:0000066
+Epithelial cell_Krt20 high(Stomach)	epithelial cell	CL:0000066
+Epithelial cell_Pla2g1b high(Stomach)	epithelial cell	CL:0000066
+Epithelial cell_Sh2d6 high(Small-Intestine)	epithelial cell	CL:0000066
+Epithelial cell_Upk3a high(Bladder)	bladder urothelial cell	CL:1001428
+Epithelium of small intestinal villi_Fabp1 high(Small-Intestine)	epithelial cell of small intestine	CL:0002254
+Epithelium of small intestinal villi_Fabp6 high(Small-Intestine)	epithelial cell of small intestine	CL:0002254
+Epithelium of small intestinal villi_Gm23935 high(Small-Intestine)	epithelial cell of small intestine	CL:0002254
+Epithelium of small intestinal villi_S100g high(Small-Intestine)	epithelial cell of small intestine	CL:0002254
+Epithelium of small intestinal villi_mt-Nd1 high(Small-Intestine)	epithelial cell of small intestine	CL:0002254
+Erythroblast(Bone-Marrow)	erythroblast	CL:0000765
+Erythroblast(Neonatal-Calvaria)	erythroblast	CL:0000765
+Erythroblast(Neonatal-Skin)	erythroblast	CL:0000765
+Erythroblast(Small-Intestine)	erythroblast	CL:0000765
+Erythroblast(Spleen)	erythroblast	CL:0000765
+Erythroblast_Car1 high(Muscle)	erythroblast	CL:0000765
+Erythroblast_Car2 high(Muscle)	erythroblast	CL:0000765
+Erythroblast_Car2 high(Neonatal-Muscle)	erythroblast	CL:0000765
+Erythroblast_Car2 high(Peripheral_Blood)	erythroblast	CL:0000765
+Erythroblast_Hba-a1 high(Neonatal-Rib)	erythroblast	CL:0000765
+Erythroblast_Hba-a2 high(Peripheral_Blood)	erythroblast	CL:0000765
+Erythroblast_Hbb-bs high(Liver)	erythroblast	CL:0000765
+Erythroblast_Hbb-bs high(Neonatal-Muscle)	erythroblast	CL:0000765
+Erythroblast_Hbb-bs high(Testis)	erythroblast	CL:0000765
+Erythroblast_Hbb-bt high(Liver)	erythroblast	CL:0000765
+Erythroblast_Hbb-bt high(Pancreas)	erythroblast	CL:0000765
+Erythroblast_Igkc high(Pancreas)	erythroblast	CL:0000765
+Erythroblast_Ttr high(Neonatal-Rib)	erythroblast	CL:0000765
+Erythrocyte progenitor_Car1 high(Bone-Marrow_c-kit)	megakaryocyte-erythroid progenitor cell	CL:0000050
+Erythrocyte progenitor_Hba-a1 high(Bone-Marrow_c-kit)	megakaryocyte-erythroid progenitor cell	CL:0000050
+Fenestrated endothelial cell_Plvap high(Kidney)	glomerular endothelial cell	CL:0002188
+Fenestrated endothelial cell_Tm4sf1 high(Kidney)	glomerular endothelial cell	CL:0002188
+G cell(Stomach)	type G enteroendocrine cell	CL:0000508
+Gastric mucosal cell(Stomach)	mucous cell of stomach	CL:0002180
+Glandular epithelium(Prostate)	endocrine-paracrine cell of prostate gland	CL:0002313
+Glandular epithelium_Ltf high(Uterus)	uterine cervix glandular cell	CL:1001587
+Glandular epithelium_Sprr2f high(Uterus)	uterine cervix glandular cell	CL:1001587
+Glial cell(Neonatal-Muscle)	glial cell	CL:0000125
+Glial cell(Pancreas)	glial cell	CL:0000125
+Glomerular epithelial cell_Aldh1a2 high(Fetal_Kidney)	kidney glomerular epithelial cell	CL:1000510
+Granulocyte monocyte progenitor cell(Muscle)	granulocyte monocyte progenitor cell	CL:0000557
+Granulocyte monocyte progenitor cell(Neonatal-Calvaria)	granulocyte monocyte progenitor cell	CL:0000557
+Granulocyte(Liver)	granulocyte	CL:0000094
+Granulocyte(Neonatal-Rib)	granulocyte	CL:0000094
+Granulocyte(Pancreas)	granulocyte	CL:0000094
+Granulocyte(Spleen)	granulocyte	CL:0000094
+Granulocyte(Uterus)	granulocyte	CL:0000094
+Granulocyte_Il33 high(Brain)	granulocyte	CL:0000094
+Granulocyte_Ngp high(Brain)	granulocyte	CL:0000094
+Granulosa cell_Inhba high(Ovary)	granulosa cell	CL:0000501
+Granulosa cell_Kctd14 high(Ovary)	granulosa cell	CL:0000501
+Hematopoietic stem progenitor cell(Bone-Marrow)	hematopoietic stem cell	CL:0000037
+Hepatocyte_Fabp1 high(Liver)	hepatocyte	CL:0000182
+Hepatocyte_mt-Nd4 high(Liver)	hepatocyte	CL:0000182
+Hypothalamic ependymal cell(Brain)	ependymal cell	CL:0000065
+Ig−producing B cell(Lung)	plasmablast	CL:0000980
+Intercalated cells of collecting duct_Aqp6 high(Kidney)	renal intercalated cell	CL:0005010
+Intercalated cells of collecting duct_Slc26a4 high(Kidney)	renal intercalated cell	CL:0005010
+Interstitial macrophage(Lung)	macrophage	CL:0000235
+Keratinocyte(Neonatal-Skin)	keratinocyte	CL:0000312
+Keratinocyte(Uterus)	keratinocyte	CL:0000312
+Kuppfer cell(Liver)	Kupffer cell	CL:0000091
+Large luteal cell(Ovary)	large luteal cell	CL:0000592
+Left ventricle cardiomyocyte_Myl2 high(Neonatal-Heart)	ventricular cardiac muscle cell	CL:2000046
+Leydig cell(Testis)	Leydig cell	CL:0000178
+Luminal cell_Krt19 high (Mammary-Gland-Virgin)	mammary alveolar cell	CL:0002325
+Luminal progenitor(Mammary-Gland-Virgin)	mammary alveolar cell	CL:0002325
+Lymphatic vessel endothelial cell(Neonatal-Skin)	dermis lymphatic vessel endothelial cell	CL:2000011
+Macrophage(Neonatal-Heart)	macrophage	CL:0000235
+Macrophage(Pancreas)	macrophage	CL:0000235
+Macrophage(Spleen)	macrophage	CL:0000235
+Macrophage(Stomach)	macrophage	CL:0000235
+Macrophage(Uterus)	macrophage	CL:0000235
+Macrophage_Ace high(Peripheral_Blood)	macrophage	CL:0000235
+Macrophage_Apoe high(Small-Intestine)	macrophage	CL:0000235
+Macrophage_C1qc high(Bone-Marrow_c-kit)	macrophage	CL:0000235
+Macrophage_C1qc high(Mammary-Gland-Virgin)	macrophage	CL:0000235
+Macrophage_C1qc high(Neonatal-Rib)	macrophage	CL:0000235
+Macrophage_Ccl4 high (Kidney)	macrophage	CL:0000235
+Macrophage_Cd74 high(Bone-Marrow_c-kit)	macrophage	CL:0000235
+Macrophage_Cd74 high(Neonatal-Skin)	macrophage	CL:0000235
+Macrophage_Chil3 high(Liver)	macrophage	CL:0000235
+Macrophage_Ctss high(Neonatal-Rib)	macrophage	CL:0000235
+Macrophage_Cxcl2 high(Small-Intestine)	macrophage	CL:0000235
+Macrophage_Flt-ps1 high(Peripheral_Blood)	macrophage	CL:0000235
+Macrophage_G0s2 high(Small-Intestine)	macrophage	CL:0000235
+Macrophage_Klf2 high(Brain)	macrophage	CL:0000235
+Macrophage_Ly6c2 high(Pancreas)	macrophage	CL:0000235
+Macrophage_Lyz1 high(Mammary-Gland-Virgin)	macrophage	CL:0000235
+Macrophage_Lyz2 high(Brain)	macrophage	CL:0000235
+Macrophage_Lyz2 high(Kidney)	macrophage	CL:0000235
+Macrophage_Lyz2 high(Neonatal-Muscle)	macrophage	CL:0000235
+Macrophage_Lyz2 high(Neonatal-Skin)	macrophage	CL:0000235
+Macrophage_Lyz2 high(Ovary)	macrophage	CL:0000235
+Macrophage_Lyz2 high(Testis)	macrophage	CL:0000235
+Macrophage_Ms4a6c high(Bone-Marrow)	macrophage	CL:0000235
+Macrophage_Ms4a6c high(Muscle)	macrophage	CL:0000235
+Macrophage_Pf4 high(Bladder)	macrophage	CL:0000235
+Macrophage_Pf4 high(Neonatal-Muscle)	macrophage	CL:0000235
+Macrophage_Pf4 high(Neonatal-Skin)	macrophage	CL:0000235
+Macrophage_Pf4 high(Peripheral_Blood)	macrophage	CL:0000235
+Macrophage_Retnla high(Muscle)	macrophage	CL:0000235
+Macrophage_S100a4 high(Bone-Marrow)	macrophage	CL:0000235
+Macrophage_S100a4 high(Bone-Marrow_c-kit)	macrophage	CL:0000235
+Macrophage_S100a4 high(Peripheral_Blood)	macrophage	CL:0000235
+Marcrophage_Cd74 high(Ovary)	macrophage	CL:0000235
+Marginal zone B cell(Spleen)	marginal zone B cell	CL:0000845
+Mast cell(Bone-Marrow)	mast cell	CL:0000097
+Mast cell(Neonatal-Calvaria)	mast cell	CL:0000097
+Mast cell(Neonatal-Muscle)	mast cell	CL:0000097
+Mast cell(Neonatal-Skin)	mast cell	CL:0000097
+Mast cell(Small-Intestine)	mast cell	CL:0000097
+Megakaryocyte progenitor cell(Bone-Marrow_c-kit)	megakaryocyte progenitor cell	CL:0000553
+Melanocyte(Neonatal-Skin)	dermal melanocyte	CL:0002482
+Mesenchymal cell(Neonatal-Muscle)	mesenchymal cell	CL:0008019
+Mesenchymal stromal cell(Bladder)	mesenchymal cell	CL:0008019
+Metanephric mesenchyme(Fetal_Kidney)	metanephric mesenchyme stem cell	CL:0000324
+Microglia(Brain)	microglial cell	CL:0000129
+Monocyte progenitor cell(Lung)	granulocyte monocyte progenitor cell	CL:0000557
+Monocyte progenitor cell_Ctsg high(Bone-Marrow_c-kit)	granulocyte monocyte progenitor cell	CL:0000557
+Monocyte progenitor cell_Prtn3 high(Bone-Marrow_c-kit)	granulocyte monocyte progenitor cell	CL:0000557
+Monocyte progenitor(Bone-Marrow_c-kit)	granulocyte monocyte progenitor cell	CL:0000557
+Monocyte(Spleen)	monocyte	CL:0000576
+Monocyte(Uterus)	monocyte	CL:0000576
+Monocyte_Elane high(Peripheral_Blood)	monocyte	CL:0000576
+Monocyte_F13a1 high(Peripheral_Blood)	monocyte	CL:0000576
+Monocyte_Mif high(Bone-Marrow)	monocyte	CL:0000576
+Monocyte_Prtn3 high(Bone-Marrow)	monocyte	CL:0000576
+Multipotent progenitor_Ctla2a high(Bone-Marrow_c-kit)	hematopoietic multipotent progenitor cell	CL:0000837
+Muscle cell(Neonatal-Rib)	cell of skeletal muscle	CL:0000188
+Muscle cell(Stomach)	cell of skeletal muscle	CL:0000188
+Muscle cell_Acta2 high(Neonatal-Rib)	cell of skeletal muscle	CL:0000188
+Muscle cell_Actc1 high(Neonatal-Calvaria)	cell of skeletal muscle	CL:0000188
+Muscle cell_Actc1 high(Neonatal-Muscle)	cell of skeletal muscle	CL:0000188
+Muscle cell_Actc1 high(Neonatal-Rib)	cell of skeletal muscle	CL:0000188
+Muscle cell_Actc1 high(Neonatal-Skin)	cell of skeletal muscle	CL:0000188
+Muscle cell_Junb high(Neonatal-Calvaria)	cell of skeletal muscle	CL:0000188
+Muscle cell_Lrrc15 high(Neonatal-Skin)	cell of skeletal muscle	CL:0000188
+Muscle cell_Mgp high(Uterus)	myometrial cell	CL:0002366
+Muscle cell_Myl9 high(Neonatal-Calvaria)	cell of skeletal muscle	CL:0000188
+Muscle cell_Myl9 high(Neonatal-Muscle)	cell of skeletal muscle	CL:0000188
+Muscle cell_Pcp4 high(Uterus)	myometrial cell	CL:0002366
+Muscle cell_Tnnc1 high(Muscle)	cell of skeletal muscle	CL:0000188
+Muscle cell_Tnnc2 high(Muscle)	cell of skeletal muscle	CL:0000188
+Muscle progenitor cell(Muscle)	cell of skeletal muscle	CL:0000188
+Myelinating oligodendrocyte(Brain)	oligodendrocyte	CL:0000128
+NK Cell(Lung)	mature natural killer cell	CL:0000824
+NK cell(Bladder)	mature natural killer cell	CL:0000824
+NK cell(Mammary-Gland-Virgin)	mature natural killer cell	CL:0000824
+NK cell(Spleen)	mature natural killer cell	CL:0000824
+NK cell(Uterus)	mature natural killer cell	CL:0000824
+NK cell_Gzma high(Peripheral_Blood)	mature natural killer cell	CL:0000824
+Neuron(Brain)	neuron	CL:0000540
+Neuron(Neonatal-Calvaria)	neuron	CL:0000540
+Neuron(Neonatal-Muscle)	neuron	CL:0000540
+Neuron(Neonatal-Skin)	neuron	CL:0000540
+Neuron_Mpz high(Neonatal-Rib)	neuron	CL:0000540
+Neuron_Stmn2 high(Neonatal-Rib)	neuron	CL:0000540
+Neutrophil granulocyte(Lung)	neutrophil	CL:0000775
+Neutrophil progenitor(Bone-Marrow)	neutrophil progenitor cell	CL:0000834
+Neutrophil progenitor_S100a8 high(Kidney)	neutrophil progenitor cell	CL:0000834
+Neutrophil(Neonatal-Calvaria)	neutrophil	CL:0000775
+Neutrophil(Neonatal-Rib)	neutrophil	CL:0000775
+Neutrophil(Neonatal-Skin)	neutrophil	CL:0000775
+Neutrophil(Spleen)	neutrophil	CL:0000775
+Neutrophil_Camp high(Muscle)	neutrophil	CL:0000775
+Neutrophil_Camp high(Peripheral_Blood)	neutrophil	CL:0000775
+Neutrophil_Cebpe high(Bone-Marrow)	neutrophil	CL:0000775
+Neutrophil_Elane high(Neonatal-Muscle)	neutrophil	CL:0000775
+Neutrophil_Elane high(Neonatal-Rib)	neutrophil	CL:0000775
+Neutrophil_Fcnb high(Bone-Marrow)	neutrophil	CL:0000775
+Neutrophil_Fcnb high(Bone-Marrow_c-kit)	neutrophil	CL:0000775
+Neutrophil_Hmox1 high(Neonatal-Muscle)	neutrophil	CL:0000775
+Neutrophil_Ighg1 high(Bone-Marrow_c-kit)	neutrophil	CL:0000775
+Neutrophil_Il1b high(Peripheral_Blood)	neutrophil	CL:0000775
+Neutrophil_Lcn2 high(Bone-Marrow_c-kit)	neutrophil	CL:0000775
+Neutrophil_Ltf high(Bone-Marrow_c-kit)	neutrophil	CL:0000775
+Neutrophil_Ltf high(Peripheral_Blood)	neutrophil	CL:0000775
+Neutrophil_Mmp8 high(Bone-Marrow)	neutrophil	CL:0000775
+Neutrophil_Ngp high(Bone-Marrow)	neutrophil	CL:0000775
+Neutrophil_Ngp high(Bone-Marrow_c-kit)	neutrophil	CL:0000775
+Neutrophil_Ngp high(Liver)	neutrophil	CL:0000775
+Neutrophil_Ngp high(Neonatal-Heart)	neutrophil	CL:0000775
+Neutrophil_Prg2 high(Muscle)	neutrophil	CL:0000775
+Neutrophil_Retnlg high(Bone-Marrow_c-kit)	neutrophil	CL:0000775
+Neutrophil_Retnlg high(Muscle)	neutrophil	CL:0000775
+Neutrophil_Retnlg high(Neonatal-Heart)	neutrophil	CL:0000775
+Neutrophil_Retnlg high(Peripheral_Blood)	neutrophil	CL:0000775
+Neutrophil_Stfa3 high(Neonatal-Muscle)	neutrophil	CL:0000775
+Nuocyte(Lung)	group 2 innate lymphoid cell	CL:0001069
+Oligodendrocyte precursor cell(Brain)	oligodendrocyte precursor cell	CL:0002453
+Oligodendrocyte(Neonatal-Rib)	oligodendrocyte	CL:0000128
+Osteoblast(Neonatal-Rib)	osteoblast	CL:0000062
+Osteoblast_Dlk1 high(Neonatal-Skin)	osteoblast	CL:0000062
+Osteoblast_Ppic high(Neonatal-Skin)	osteoblast	CL:0000062
+Osteoblast (Neonatal-Calvaria)	calvarial osteoblast	CL:2000058
+Osteoclast(Neonatal-Rib)	osteoclast	CL:0000092
+Ovarian surface epithelium cell(Ovary)	ovarian surface epithelial cell	CL:2000064
+Ovarian vascular surface endothelium cell(Ovary)	ovarian microvascular endothelial cell	CL:2000065
+Pan-GABAergic(Brain)	GABAergic neuron	CL:0000617
+Paneth cell(Small-Intestine)	paneth cell of epithelium of small intestine	CL:1000343
+Parietal cell (Stomach)	parietal cell	CL:0000162
+Pericentral (PC) hepatocytes(Liver)	centrilobular region hepatocyte	CL:0019029
+Periportal (PP) hepatocyte(Liver)	periportal region hepatocyte	CL:0019026
+Pit cell_Gm26917 high(Stomach)	natural killer cell	CL:0000623
+Pit cell_Ifrd1 high(Stomach)	natural killer cell	CL:0000623
+Plasma cell(Spleen)	plasma cell	CL:0000786
+Plasmacytoid dendritic cell(Lung)	plasmacytoid dendritic cell	CL:0000784
+Pre T cell(Thymus)	thymocyte	CL:0000893
+Pre-Sertoli cell_Cst9 high(Testis)	Sertoli cell	CL:0000216
+Pre-Sertoli cell_Ctsl high(Testis)	Sertoli cell	CL:0000216
+Pre-pro B cell(Bone-Marrow)	Fraction A pre-pro B cell	CL:0002045
+Preleptotene spermatogonia(Testis)	primary spermatocyte	CL:0000656
+Preosteoblast/Osteoblast/Bone cell/Cartilage cell(Neonatal-Calvaria)	non-terminally differentiated cell	CL:0000055
+Proliferating thymocyte(Thymus)	thymocyte	CL:0000893
+Prostate gland cell(Prostate)	endocrine-paracrine cell of prostate gland	CL:0002313
+Proximal tubule brush border cell(Kidney)	epithelial cell of proximal tubule	CL:0002306
+Proximal tubule cell_Cyp4a14 high(Kidney)	epithelial cell of proximal tubule	CL:0002306
+Proximal tubule cell_Osgin1 high(Kidney)	epithelial cell of proximal tubule	CL:0002306
+S cell_Chgb high(Small-Intestine)	type S enteroendocrine cell	CL:0002281
+S cell_Gip high(Small-Intestine)	type S enteroendocrine cell	CL:0002281
+S1 proximal tubule cells(Kidney)	epithelial cell of proximal tubule	CL:0002306
+S3 proximal tubule cells(Kidney)	epithelial cell of proximal tubule	CL:0002306
+Schwann cell(Brain)	Schwann cell	CL:0002573
+Sertoli cell(Testis)	Sertoli cell	CL:0000216
+Skeletal muscle cell_Myl1 high(Neonatal-Muscle)	cell of skeletal muscle	CL:0000188
+Skeletal muscle cell_Tnnc2 high(Neonatal-Muscle)	cell of skeletal muscle	CL:0000188
+Small luteal cell(Ovary)	small luteal cell	CL:0000590
+Smooth muscle cell(Bladder)	smooth muscle cell of bladder	CL:0002597
+Smooth muscle cell(Neonatal-Heart)	smooth muscle cell	CL:0000192
+Smooth muscle cell_Acta2 high(Neonatal-Skin)	smooth muscle cell	CL:0000192
+Smooth muscle cell_Acta2 high(Pancreas)	smooth muscle cell	CL:0000192
+Smooth muscle cell_Mylk high(Neonatal-Muscle)	cell of skeletal muscle	CL:0000188
+Smooth muscle cell_Rgs5 high(Pancreas)	smooth muscle cell	CL:0000192
+Smooth muscle cell_Rgs5 high(Uterus)	uterine smooth muscle cell	CL:0002601
+Spermatids_1700016P04Rik high(Testis)	spermatid	CL:0000018
+Spermatids_Cst13 high(Testis)	spermatid	CL:0000018
+Spermatids_Hmgb4 high(Testis)	spermatid	CL:0000018
+Spermatids_Tnp1 high(Testis)	spermatid	CL:0000018
+Spermatocyte_1700001F09Rik high(Testis)	spermatocyte	CL:0000017
+Spermatocyte_Cabs1 high(Testis)	spermatocyte	CL:0000017
+Spermatocyte_Calm2 high(Testis)	spermatocyte	CL:0000017
+Spermatocyte_Mesp1 high(Testis)	spermatocyte	CL:0000017
+Spermatocyte_Slc2a3 high(Testis)	spermatocyte	CL:0000017
+Spermatogonia_1700001P01Rik high(Testis)	primary spermatocyte	CL:0000656
+Spermatogonia_Tbc1d23 high(Testis)	primary spermatocyte	CL:0000656
+Stem and progenitor cell(Mammary-Gland-Virgin)	stem cell	CL:0000034
+Stomach cell_Gkn2 high(Stomach)	UNKNOWN	UNKNOWN
+Stomach cell_Mt2 high(Stomach)	UNKNOWN	UNKNOWN
+Stomach cell_Muc5ac high(Stomach)	mucous cell of stomach	CL:0002180
+Stroma cell (Ovary)	stromal cell of ovary	CL:0002132
+Stromal cell(Liver)	stromal cell	CL:0000499
+Stromal cell(Muscle)	stromal cell	CL:0000499
+Stromal cell(Prostate)	prostate stromal cell	CL:0002622
+Stromal cell_Acta1 high(Neonatal-Rib)	stromal cell	CL:0000499
+Stromal cell_Acta2 high(Lung)	stromal cell	CL:0000499
+Stromal cell_Adamdec1 high(Small-Intestine)	stromal cell	CL:0000499
+Stromal cell_Akr1c18 high(Neonatal-Skin)	stromal cell	CL:0000499
+Stromal cell_Ankrd1 high(Kidney)	stromal cell	CL:0000499
+Stromal cell_Car3 high(Bladder)	stromal cell	CL:0000499
+Stromal cell_Ccl11 high(Uterus)	stromal cell	CL:0000499
+Stromal cell_Col1a1 high(Neonatal-Calvaria)	stromal cell	CL:0000499
+Stromal cell_Col3a1 high(Mammary-Gland-Virgin)	stromal cell	CL:0000499
+Stromal cell_Col3a1 high(Neonatal-Calvaria)	stromal cell	CL:0000499
+Stromal cell_Col3a1 high(Neonatal-Heart)	stromal cell	CL:0000499
+Stromal cell_Cxcl10 high(Kidney)	stromal cell	CL:0000499
+Stromal cell_Cxcl14 high(Uterus)	stromal cell	CL:0000499
+Stromal cell_Dcn high(Kidney)	stromal cell	CL:0000499
+Stromal cell_Dcn high(Lung)	stromal cell	CL:0000499
+Stromal cell_Dcn high(Small-Intestine)	stromal cell	CL:0000499
+Stromal cell_Dpt high(Bladder)	stromal cell	CL:0000499
+Stromal cell_Fmod high(Neonatal-Heart)	stromal cell	CL:0000499
+Stromal cell_Fn1 high(Pancreas)	stromal cell of pancreas	CL:0002574
+Stromal cell_Gas6 high(Neonatal-Skin)	stromal cell	CL:0000499
+Stromal cell_Gm23935 high(Uterus)	stromal cell	CL:0000499
+Stromal cell_Has1 high(Uterus)	stromal cell	CL:0000499
+Stromal cell_Hsd11b2 high(Uterus)	stromal cell	CL:0000499
+Stromal cell_Inmt high(Lung)	stromal cell	CL:0000499
+Stromal cell_Mfap4 high(Pancreas)	stromal cell	CL:0000499
+Stromal cell_Mgp high(Fetal_Kidney)	stromal cell	CL:0000499
+Stromal cell_Mgp high(Kidney)	stromal cell	CL:0000499
+Stromal cell_Ndn high(Neonatal-Muscle)	stromal cell	CL:0000499
+Stromal cell_Pi16 high(Mammary-Gland-Virgin)	stromal cell	CL:0000499
+Stromal cell_Ptgds high(Kidney)	stromal cell	CL:0000499
+Stromal cell_Smoc2 high(Pancreas)	stromal cell of pancreas	CL:0002574
+Stromal cell_Spp1 high(Neonatal-Muscle)	stromal cell	CL:0000499
+Stromal cell_Tnmd high(Neonatal-Rib)	stromal cell	CL:0000499
+T Cell_Cd8b1 high(Lung)	CD8-positive, alpha-beta T cell	CL:0000625
+T cell(Kidney)	T cell	CL:0000084
+T cell(Muscle)	T cell	CL:0000084
+T cell(Neonatal-Muscle)	T cell	CL:0000084
+T cell(Pancreas)	T cell	CL:0000084
+T cell(Prostate)	T cell	CL:0000084
+T cell(Spleen)	T cell	CL:0000084
+T cell_Ccl5 high(Small-Intestine)	T cell	CL:0000084
+T cell_Cd7 high(Small-Intestine)	T cell	CL:0000084
+T cell_Cd8b1 high(Mammary-Gland-Virgin)	CD8-positive, alpha-beta T cell	CL:0000625
+T cell_Gm14303 high(Peripheral_Blood)	T cell	CL:0000084
+T cell_Gzma high(Liver)	T cell	CL:0000084
+T cell_Icos high(Small-Intestine)	T cell	CL:0000084
+T cell_Id2 high(Thymus)	T cell	CL:0000084
+T cell_Ly6c2 high(Mammary-Gland-Virgin)	T cell	CL:0000084
+T cell_Ms4a4b high(Bone-Marrow)	T cell	CL:0000084
+T cell_Ms4a4b high(Small-Intestine)	T cell	CL:0000084
+T cell_Ms4a4b high(Thymus)	T cell	CL:0000084
+T cell_Trbc2 high(Liver)	T cell	CL:0000084
+T cell_Trbc2 high(Peripheral_Blood)	T cell	CL:0000084
+T-cells_Ctla4 high(Mammary-Gland-Virgin)	T cell	CL:0000084
+Tendon stem/progenitor cell(Neonatal-Muscle)	preosteoblast	CL:0007010
+Thecal cell(Ovary)	theca cell	CL:0000503
+Thick ascending limb of the loop of Henle(Kidney)	kidney loop of Henle thick ascending limb epithelial cell	CL:1001106
+Tuft cell(Stomach)	brush cell	CL:0002204
+Umbrella cell(Bladder)	bladder urothelial cell	CL:1001428
+Ureteric epithelium(Kidney)	epithelial cell	CL:0000066
+Urothelium(Bladder)	bladder urothelial cell	CL:1001428
+Vascular endothelial cell(Bladder)	endothelial cell of vascular tree	CL:0002139
+Vascular endothelial cell(Neonatal-Heart)	endothelial cell of vascular tree	CL:0002139
+Vascular smooth muscle progenitor cell(Bladder)	vascular associated smooth muscle cell	CL:0000359
+Ventricle cardiomyocyte_Kcnj8 high(Neonatal-Heart)	ventricular cardiac muscle cell	CL:2000046
+abT cell(Thymus)	immature alpha-beta T cell	CL:0000790
+gdT cell (Thymus)	gamma-delta thymocyte	CL:0002405
+luteal cells(Ovary)	luteal cell	CL:0000175
+unknown	UNKNOWN	UNKNOWN
+β-cell(Pancreas)	type B pancreatic cell	CL:0000169

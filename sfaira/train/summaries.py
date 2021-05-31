@@ -6,10 +6,13 @@ import shutil
 import warnings
 from typing import Union, List
 import os
-from .train_model import TargetZoos
-from .external import SPECIES_DICT
 
-from .external import EstimatorKerasEmbedding
+from sfaira.consts import OCS
+from sfaira.data import load_store
+from sfaira.data.dataloaders import Universe
+from sfaira.estimators import EstimatorKerasEmbedding
+from sfaira.interface import ModelZoo
+from sfaira.versions.metadata import CelltypeUniverse, OntologyCl
 
 
 def _tp(yhat, ytrue):
@@ -109,12 +112,12 @@ class GridsearchContainer:
     gs_keys: Union[None, dict]
     summary_tab: Union[None, pandas.DataFrame]
     cv: bool
-    source_path: str
+    source_path: dict
     model_id_len: Union[None, int]
 
     def __init__(
             self,
-            source_path: str,
+            source_path: dict,
             cv: bool
     ):
         self.histories = None
@@ -135,12 +138,15 @@ class GridsearchContainer:
         :param gs_ids:
         :return:
         """
-        res_dirs = [os.path.join(self.source_path, x, "results", "") for x in gs_ids]
+        res_dirs = [
+            os.path.join(self.source_path[x], x, "results", "")
+            for x in gs_ids
+        ]
         run_ids = [
             np.sort(np.unique([
-                x.split("_history.pickle")[0]
+                x.split("_evaluation.pickle")[0]
                 for x in os.listdir(indir)
-                if "_history.pickle" in x
+                if "_evaluation.pickle" in x
             ]))
             for i, indir in enumerate(res_dirs)
         ]
@@ -150,6 +156,7 @@ class GridsearchContainer:
         model_hyperpars = {}
         run_ids_proc = []
         gs_keys = []
+        gs_dirs = []
         for i, indir in enumerate(res_dirs):
             for x in run_ids[i]:
                 fn_history = os.path.join(indir, f"{x}_history.pickle")
@@ -182,9 +189,11 @@ class GridsearchContainer:
 
                 run_ids_proc.append(x)
                 gs_keys.append(os.path.normpath(indir).split(os.path.sep)[-2])
+                gs_dirs.append(indir)
 
         self.run_ids = run_ids_proc
         self.gs_keys = dict(zip(run_ids_proc, gs_keys))
+        self.gs_dirs = dict(zip(run_ids_proc, gs_dirs))
         self.evals = evals
         self.hyperpars = hyperpars
         self.model_hyperpars = model_hyperpars
@@ -195,7 +204,7 @@ class GridsearchContainer:
             hat_or_true: str,
             run_id: str
     ):
-        fn = os.path.join(self.source_path, self.gs_keys[run_id], "results", f"{run_id}_y{hat_or_true}.npy")
+        fn = os.path.join(self.gs_dirs[run_id], f"{run_id}_y{hat_or_true}.npy")
         return np.load(fn)
 
     def best_model_by_partition(
@@ -279,23 +288,23 @@ class GridsearchContainer:
         metric_select = f"{partition_select}_{metric_select}"
 
         if cv_mode.lower() == "mean":
-            best_model = tab.groupby("run", as_index=False)[metric_select].mean().\
+            best_model = tab.groupby("run", as_index=False)[metric_select].mean(). \
                 sort_values([metric_select], ascending=ascending)
         elif cv_mode.lower() == "median":
-            best_model = tab.groupby("run", as_index=False)[metric_select].median().\
+            best_model = tab.groupby("run", as_index=False)[metric_select].median(). \
                 sort_values([metric_select], ascending=ascending)
         elif cv_mode.lower() == "max":
-            best_model = tab.groupby("run", as_index=False)[metric_select].max().\
+            best_model = tab.groupby("run", as_index=False)[metric_select].max(). \
                 sort_values([metric_select], ascending=ascending)
         elif cv_mode.lower() == "min":
-            best_model = tab.groupby("run", as_index=False)[metric_select].min().\
+            best_model = tab.groupby("run", as_index=False)[metric_select].min(). \
                 sort_values([metric_select], ascending=ascending)
         else:
             raise ValueError("cv_mode %s not recognized" % cv_mode)
 
         best_run_id = best_model['run'].values[0] if best_model.shape[0] > 0 else None
 
-        best_cv = tab[tab["run"] == best_run_id].\
+        best_cv = tab[tab["run"] == best_run_id]. \
             sort_values([metric_select], ascending=ascending)['cv'].values[0] if best_run_id is not None \
             else None
 
@@ -340,7 +349,7 @@ class GridsearchContainer:
             subset=subset,
         )
         shutil.copyfile(
-            os.path.join(self.source_path, self.gs_keys[model_id], "results", f"{model_id}_weights.h5"),
+            os.path.join(self.gs_dirs[model_id], self.gs_keys[model_id], "results", f"{model_id}_weights.h5"),
             os.path.join(path, f"{model_id}_weights.h5")
         )
 
@@ -375,8 +384,7 @@ class GridsearchContainer:
                     np.logical_and(
                         sns_tab["model_type"].values == m,
                         sns_tab["organ"].values == o
-                    ), :
-                ].groupby(groupby).size().values
+                    ), :].groupby(groupby).size().values
                 # Assume that largest number of successful completions is maximum (all completed:
                 hm[j, i] = np.sum(n_by_gridpoint == np.max(n_by_gridpoint)) if len(n_by_gridpoint) > 0 else 0
         sns_data_heatmap = pandas.DataFrame(
@@ -400,7 +408,7 @@ class GridsearchContainer:
             partition_select: str = "val",
             partition_show: str = "test",
             subset: dict = {},
-            param_x=['lr', 'depth', 'width', 'dropout', 'l1', 'l2'],
+            param_x: Union[tuple, list] = ('lr', 'depth', 'width', 'dropout', 'l1', 'l2'),
             show_swarm: bool = False,
             panel_width: float = 4.,
             panel_height: float = 2.
@@ -504,12 +512,12 @@ class GridsearchContainer:
             )
             if cv_key is None:
                 sns_data = []
-                for run in np.unique(
+                for run in list(np.unique(
                         self.summary_tab.loc[self.summary_tab["model_gs_id"].values == model_gs_id, "run"].values
-                ).tolist():
+                )):
                     sns_data_temp = pandas.DataFrame(self.histories[run])
                     sns_data_temp["epoch"] = np.arange(0, sns_data_temp.shape[0])
-                    sns_data_temp["cv"] = int(run.split("_")[-1])
+                    sns_data_temp["cv"] = run[-1]
                     sns_data.append(sns_data_temp)
                 sns_data = pandas.concat(sns_data, axis=0)
             else:
@@ -580,16 +588,14 @@ class GridsearchContainer:
         if best_model_id is not None:
             if cvs is None:
                 file_path_base = os.path.join(
-                    self.source_path,
+                    self.gs_dirs[best_model_id],
                     self.gs_keys[best_model_id],
                     'results',
                     best_model_id,
                 )
             else:
                 file_path_base = os.path.join(
-                    self.source_path,
-                    self.gs_keys[f"{best_model_id}_cv{cvs[0]}"],
-                    'results',
+                    self.gs_dirs[f"{best_model_id}_cv{cvs[0]}"],
                     f"{best_model_id}_cv{cvs[0]}",
                 )
 
@@ -600,7 +606,6 @@ class GridsearchContainer:
             # Read optimizer hyperparameter
             with open(f"{file_path_base}_hyperparam.pickle", 'rb') as file:
                 hyparam_optim = pickle.load(file)
-
             # Write both hyperparameter dicts
             with open(os.path.join(write_path, f"{best_model_id[:-12]}_best_hyperparam.txt"), 'w') as file:
                 file.write(json.dumps({"model": hyparam_model, "optimizer": hyparam_optim}))
@@ -613,9 +618,9 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
 
     def __init__(
             self,
-            source_path: str,
+            source_path: dict,
             cv: bool,
-            model_id_len: int = 7
+            model_id_len: int = 3
     ):
         super(SummarizeGridsearchCelltype, self).__init__(
             source_path=source_path,
@@ -633,7 +638,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         :param run_id:
         :return:
         """
-        fn = os.path.join(self.source_path, self.gs_keys[run_id], "results", f"{run_id}_ontology_names.pickle")
+        fn = os.path.join(self.gs_dirs[run_id], f"{run_id}_ontology_names.pickle")
         if not os.path.isfile(fn):
             raise FileNotFoundError(f"file {run_id}_ontology_names.pickle not found")
         with open(fn, 'rb') as f:
@@ -641,47 +646,28 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         return ids
 
     def create_summary_tab(self):
-        """
-        metrics = list(self.evals.values())[0]['val'].keys()
-        hyperpar = list(self.hyperpars.keys())
-        model_hyperpar = list(self.hyperpars.keys())
-        self.summary_tab = pandas.DataFrame(dict(
-            list({
-                "cv": [id_i.split("_")[-1] if self.cv else "1" for id_i in self.run_ids],
-                "model": ["_".join(id_i.split("_")[:self.model_id_len]) for id_i in self.run_ids],
-                "model_type": [id_i.split("_")[3] for id_i in self.run_ids],
-                "run": self.run_ids,
-            }.items()) +
-            list(dict([(hp, [self.hyperpars[id_i][hp] for id_i in self.run_ids]) for hp in hyperpar]).items()) +
-            list(dict([(hp, [self.model_hyperpar[id_i][hp] for id_i in self.run_ids]) for hp in model_hyperpar]).items()) +
-            list(dict(
-                [("train_" + m, [self.evals[id_i]["train"][m] for id_i in self.run_ids]) for m in metrics]).items()) +
-            list(dict(
-                [("test_" + m, [self.evals[id_i]["test"][m] for id_i in self.run_ids]) for m in metrics]).items()) +
-            list(dict([("val_" + m, [self.evals[id_i]["val"][m] for id_i in self.run_ids]) for m in metrics]).items()) +
-            list(dict([("all_" + m, [self.evals[id_i]["all"][m] for id_i in self.run_ids]) for m in metrics]).items())
-        ))
-        :return:
-        """
         metrics = list(self.evals.values())[0]['val'].keys()
         self.summary_tab = pandas.DataFrame(dict(
             list({
-                "depth":   [id_i.split("_")[self.model_id_len + 0] for id_i in self.run_ids],
-                "width":   [id_i.split("_")[self.model_id_len + 1] for id_i in self.run_ids],
-                "lr":      [id_i.split("_")[self.model_id_len + 2] for id_i in self.run_ids],
-                "dropout": [id_i.split("_")[self.model_id_len + 3] for id_i in self.run_ids],
-                "l1":      [id_i.split("_")[self.model_id_len + 4] for id_i in self.run_ids],
-                "l2":      [id_i.split("_")[self.model_id_len + 5] for id_i in self.run_ids],
-                "cv":      [id_i.split("_")[-1] if self.cv else "cv0" for id_i in self.run_ids],
-                "model":   ["_".join(id_i.split("_")[:self.model_id_len]) for id_i in self.run_ids],
-                "organ":   [id_i.split("_")[2] for id_i in self.run_ids],
-                "model_type": [
-                    "linear" if (id_i.split("_")[3] == "mlp" and id_i.split("_")[5].split(".")[1] == "0")
-                    else id_i.split("_")[3]
+                "depth":       [id_i.split("_")[self.model_id_len + 0] for id_i in self.run_ids],  # noqa: E241
+                "width":       [id_i.split("_")[self.model_id_len + 1] for id_i in self.run_ids],  # noqa: E241
+                "lr":          [id_i.split("_")[self.model_id_len + 2] for id_i in self.run_ids],  # noqa: E241
+                "dropout":     [id_i.split("_")[self.model_id_len + 3] for id_i in self.run_ids],  # noqa: E241
+                "l1":          [id_i.split("_")[self.model_id_len + 4] for id_i in self.run_ids],  # noqa: E241
+                "l2":          [id_i.split("_")[self.model_id_len + 5] for id_i in self.run_ids],  # noqa: E241
+                "cv":          [id_i.split("_")[-1] if self.cv else "1" for id_i in self.run_ids],  # noqa: E241
+                "model":       ["_".join(id_i.split("_")[:self.model_id_len]) for id_i in self.run_ids],  # noqa: E241
+                "organism":    [id_i.split("_")[1].split("-")[0] for id_i in self.run_ids],  # noqa: E241
+                "organ":       [id_i.split("_")[1].split("-")[1] for id_i in self.run_ids],  # noqa: E241
+                "model_type":  [  # noqa: E241
+                    "linear" if (id_i.split("_")[1].split("-")[2] == "mlp" and
+                                 id_i.split("_")[1].split("-")[3].split(".")[1] == "0")
+                    else id_i.split("_")[1].split("-")[2]
                     for id_i in self.run_ids
                 ],
-                "model_gs_id": ["_".join(id_i.split("_")[:(self.model_id_len + 6)]) for id_i in self.run_ids],
-                "run": self.run_ids
+                "version":     [id_i.split("_")[1].split("-")[3] for id_i in self.run_ids],  # noqa: E241
+                "model_gs_id": ["_".join(id_i.split("_")[:(self.model_id_len + 6)]) for id_i in self.run_ids],  # noqa: E241
+                "run":         self.run_ids,  # noqa: E241
             }.items()) +
             list(dict([("train_" + m, [self.evals[x]["train"][m] for x in self.run_ids]) for m in metrics]).items()) +
             list(dict([("test_" + m, [self.evals[x]["test"][m] for x in self.run_ids]) for m in metrics]).items()) +
@@ -708,11 +694,11 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         if model_id is not None:
             if cvs is not None:
                 fns = [
-                    os.path.join(self.source_path, self.gs_keys[f"{model_id}_cv{x}"], "results", f"{model_id}_cv{x}")
+                    os.path.join(self.gs_dirs[f"{model_id}_cv{x}"], self.gs_keys[f"{model_id}_cv{x}"], "results", f"{model_id}_cv{x}")
                     for x in cvs
                 ]
             else:
-                fns = [os.path.join(self.source_path, self.gs_keys[model_id], "results", model_id)]
+                fns = [os.path.join(self.gs_dirs[model_id], self.gs_keys[model_id], "results", model_id)]
             covar = [pandas.read_csv(f"{x}_covar.csv") for x in fns]
             return model_id, covar
         else:
@@ -735,17 +721,13 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         Plot accuracy or other metric heatmap by organ and model type.
 
         :param rename_levels:
-        :param metric: Metric to plot in heatmap.
-
-             - acc
-             - f1
-        :param collapse_cv: How to collapse values from cross validation into single scalar:
-
-            - mean
-            - median
-            - max
-        :param ylim:
-        :param xrot:
+        :param partition_select:
+        :param partition_show:
+        :param metric_select:
+        :param metric_show:
+        :param collapse_cv:
+        :param vmin:
+        :param vmax:
         :param height_fig:
         :param width_fig:
         :return:
@@ -808,7 +790,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         fig, axs = plt.subplots(1, 1, figsize=(height_fig, width_fig))
         with sns.axes_style("dark"):
             axs = sns.heatmap(
-                sns_data_heatmap, #mask=mask,
+                sns_data_heatmap,  # mask=mask,
                 annot=True, fmt=".2f",
                 ax=axs, vmin=0, vmax=1,
                 xticklabels=True, yticklabels=True,
@@ -822,7 +804,9 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
             organ: str,
             organism: str,
             datapath: str,
-            celltype_version: str = "0",
+            store_format: str,
+            targetpath: str,
+            configpath: str,
             partition_select: str = "val",
             metric_select: str = "custom_cce_agg",
             metric_show: str = "f1",
@@ -837,7 +821,9 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         :param organ: Organ to plot in heatmap.
         :param organism: Species that the gridsearch was run on
         :param datapath: Path to the local sfaira data repository
-        :param celltype_version: Version in sfaira celltype universe
+        :param store_format:
+        :param targetpath:
+        :param configpath:
         :param partition_select: Based on which partition to select the best model
             - train
             - val
@@ -860,9 +846,52 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         :param width_fig: Figure width.
         :return: fig, axs, sns_data_heatmap
         """
-
         import matplotlib.pyplot as plt
         import seaborn as sns
+
+        def f1(yhat, ytrue):
+            """
+            Class wise F1.
+
+            :param yhat:
+            :param ytrue:
+            :return:
+            """
+            def _tp(yhat, ytrue):
+                """
+                Class wise true positive count.
+
+                :param yhat:
+                :param ytrue:
+                :return:
+                """
+                yhat_true = np.asarray(yhat == np.max(yhat, axis=1, keepdims=True), dtype="float32")
+                return np.sum(yhat_true * ytrue, axis=0)
+
+            def _fp(yhat, ytrue):
+                """
+                Class wise false positive count.
+
+                :param yhat:
+                :param ytrue:
+                :return:
+                """
+                yhat_true = np.asarray(yhat == np.max(yhat, axis=1, keepdims=True), dtype="float32")
+                return np.sum(yhat_true * (1. - ytrue), axis=0)
+
+            def _fn(yhat, ytrue):
+                """
+                Class wise false negative count.
+
+                :param yhat:
+                :param ytrue:
+                :return:
+                """
+                yhat_true = np.asarray(yhat < np.max(yhat, axis=1, keepdims=True), dtype="float32")
+                return np.sum(yhat_true * ytrue, axis=0)
+            precision = _tp(yhat, ytrue) / (_tp(yhat, ytrue) + _fp(yhat, ytrue))
+            recall = _tp(yhat, ytrue) / (_tp(yhat, ytrue) + _fn(yhat, ytrue))
+            return 2 * 1 / (1 / precision + 1 / recall)
 
         if self.summary_tab is None:
             self.create_summary_tab()
@@ -877,30 +906,30 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         )
         sns_tab = sns_tab[sns_tab['organ'] == organ]
 
-        tz = TargetZoos(path=datapath)
-        if organism == "human":
-            dataset = tz.data_human[organ]
-        elif organism == "mouse":
-            dataset = tz.data_mouse[organ]
-        else:
-            raise(ValueError(f"Supplied organism {organism} not recognised. Should be one of ('mouse', 'human')"))
-        dataset.load_all()
-        cell_counts = dataset.obs_concat(keys=['cell_ontology_class'])['cell_ontology_class'].value_counts().to_dict()
-
-        celltype_versions = SPECIES_DICT.copy()
-        celltype_versions[organism][organ].set_version(celltype_version)
-        leafnodes = celltype_versions[organism][organ].ids
-        ontology = celltype_versions[organism][organ].ontology[celltype_version]["names"]
-
+        store = load_store(cache_path=datapath, store_format=store_format)
+        store.load_config(configpath)
+        store.subset(attr_key="id", values=[k for k in store.indices.keys()
+                                            if 'cell_ontology_class' in store.adata_by_key[k].obs.columns])
+        store.subset(attr_key="cellontology_class", excluded_values=[
+            store._adata_ids_sfaira.unknown_celltype_identifier,
+            store._adata_ids_sfaira.not_a_cell_celltype_identifier,
+        ])
+        cu = CelltypeUniverse(
+            cl=OntologyCl(branch="v2021-02-01"),
+            uberon=OCS.organ,
+        )
+        cu.load_target_universe(targetpath)
+        cell_counts = store.obs['cell_ontology_class'].value_counts().to_dict()
         celltypelist = list(cell_counts.keys()).copy()
+        leaves = cu.onto_cl.convert_to_name(cu.onto_cl.leaves)
         for k in celltypelist:
-            if k not in leafnodes:
-                if k not in ontology.keys():
-                    raise(ValueError(f"Celltype '{k}' not found in celltype universe"))
-                for leaf in ontology[k]:
+            leafnodes = cu.onto_cl.convert_to_name(cu.onto_cl.map_to_leaves(node=k, return_type="ids", include_self=True))
+            # Replace count on intermediate nodes with counts over leaves
+            if k not in leaves:
+                for leaf in leaves:
                     if leaf not in cell_counts.keys():
                         cell_counts[leaf] = 0
-                    cell_counts[leaf] += 1/len(ontology[k])
+                    cell_counts[leaf] += 1. / len(leafnodes)
                 del cell_counts[k]
 
         # Compute class-wise metrics
@@ -921,9 +950,6 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         model_types = sns_tab["model_type"].unique()
         model_types.sort()
         classes = self.load_ontology_names(run_id=sns_tab["run"].values[0])
-        if 'unknown' not in classes and 'Unknown' not in classes:
-            classes = classes + ['Unknown']
-            cell_counts['Unknown'] = 0
         hm = np.zeros((len(classes), len(model_types))) + np.nan
         # mask = np.isnan(hm)
         for i, m in enumerate(model_types):
@@ -983,7 +1009,9 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
             organ: str,
             organism: str,
             datapath: str,
-            celltype_version: str = "0",
+            store_format: str,
+            targetpath: str,
+            configpath: str,
             partition_select: str = "val",
             metric_select: str = "custom_cce_agg",
             metric_show: str = "f1",
@@ -992,15 +1020,17 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
             height_fig: int = 7,
             width_fig: int = 7,
             annotate_thres_ncells: int = 1000,
-            annotate_thres_f1: float = 0.5
+            annotate_thres_f1: float = 0.5,
     ):
         """
         Plot evaluation metric scatterplot for specified organ by cell classes and model types.
 
         :param organ: Organ to plot in heatmap.
-        :param organism: Species that the gridsearch was run on
+        :param organism: Organism that the gridsearch was run on
         :param datapath: Path to the local sfaira data repository
-        :param celltype_version: Version in sfaira celltype universe
+        :param store_format:
+        :param targetpath:
+        :param configpath:
         :param partition_select: Based on which partition to select the best model
             - train
             - val
@@ -1025,7 +1055,6 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         :param annotate_thres_f1:
         :return: fig, axs, sns_data_scatter
         """
-
         import matplotlib.pyplot as plt
         import seaborn as sns
 
@@ -1042,30 +1071,30 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         )
         sns_tab = sns_tab[sns_tab['organ'] == organ]
 
-        tz = TargetZoos(path=datapath)
-        if organism == "human":
-            dataset = tz.data_human[organ]
-        elif organism == "mouse":
-            dataset = tz.data_mouse[organ]
-        else:
-            raise(ValueError(f"Supplied organism {organism} not recognised. Should be one of ('mouse', 'human')"))
-        dataset.load_all()
-        cell_counts = dataset.obs_concat(keys=['cell_ontology_class'])['cell_ontology_class'].value_counts().to_dict()
-
-        celltype_versions = SPECIES_DICT.copy()
-        celltype_versions[organism][organ].set_version(celltype_version)
-        leafnodes = celltype_versions[organism][organ].ids
-        ontology = celltype_versions[organism][organ].ontology[celltype_version]["names"]
-
+        store = load_store(cache_path=datapath, store_format=store_format)
+        store.load_config(configpath)
+        store.subset(attr_key="id", values=[k for k in store.indices.keys()
+                                            if 'cell_ontology_id' in store.adata_by_key[k].obs.columns])
+        store.subset(attr_key="cellontology_class", excluded_values=[
+            store._adata_ids_sfaira.unknown_celltype_identifier,
+            store._adata_ids_sfaira.not_a_cell_celltype_identifier,
+        ])
+        cu = CelltypeUniverse(
+            cl=OntologyCl(branch="v2021-02-01"),
+            uberon=OCS.organ,
+        )
+        cu.load_target_universe(targetpath)
+        cell_counts = store.obs['cell_ontology_class'].value_counts().to_dict()
         celltypelist = list(cell_counts.keys()).copy()
+        leaves = cu.onto_cl.convert_to_name(cu.onto_cl.leaves)
         for k in celltypelist:
-            if k not in leafnodes:
-                if k not in ontology.keys():
-                    raise(ValueError(f"Celltype '{k}' not found in celltype universe"))
-                for leaf in ontology[k]:
+            leafnodes = cu.onto_cl.convert_to_name(cu.onto_cl.map_to_leaves(node=k, return_type="ids", include_self=True))
+            # Replace count on intermediate nodes with counts over leaves
+            if k not in leaves:
+                for leaf in leaves:
                     if leaf not in cell_counts.keys():
                         cell_counts[leaf] = 0
-                    cell_counts[leaf] += 1/len(ontology[k])
+                    cell_counts[leaf] += 1. / len(leafnodes)
                 del cell_counts[k]
 
         # Compute class-wise metrics
@@ -1085,9 +1114,6 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         # Build figure.
         model_types = sns_tab["model_type"].unique()
         classes = self.load_ontology_names(run_id=sns_tab["run"].values[0])
-        if 'unknown' not in classes and 'Unknown' not in classes:
-            classes = classes + ['Unknown']
-            cell_counts['Unknown'] = 0
         hm = np.zeros((len(classes), len(model_types))) + np.nan
         # mask = np.isnan(hm)
         for i, m in enumerate(model_types):
@@ -1111,7 +1137,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
             if c in cell_counts.keys():
                 n_cells.append(np.round(cell_counts[c]))
             else:
-                warnings.warn(f"Celltype {c} from cell ontology not found in {organism} {organ} dataset")
+                warnings.warn(f"Celltype {c} from cell cu not found in {organism} {organ} dataset")
                 n_cells.append(np.nan)
         n_cells = np.array(n_cells)[:, None]
         sns_data_scatter = pandas.DataFrame(
@@ -1133,6 +1159,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
             axs = sns.scatterplot(x='Number of cells in whole dataset',
                                   y='Classwise f1 score',
                                   style='Model type',
+                                  alpha=0.8,
                                   data=sns_data_scatter,
                                   ax=axs
                                   )
@@ -1157,11 +1184,11 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
 
     def __init__(
             self,
-            source_path: str,
+            source_path: dict,
             cv: bool,
             loss_idx: int = 0,
             mse_idx: int = 1,
-            model_id_len: int = 7
+            model_id_len: int = 3
     ):
         super(SummarizeGridsearchEmbedding, self).__init__(
             source_path=source_path,
@@ -1175,25 +1202,34 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         metrics = list(self.evals.values())[0]['val'].keys()
         self.summary_tab = pandas.DataFrame(dict(
             list({
-                "depth":       [id_i.split("_")[self.model_id_len + 0] for id_i in self.run_ids],
-                "width":       [id_i.split("_")[self.model_id_len + 1] for id_i in self.run_ids],
-                "lr":          [id_i.split("_")[self.model_id_len + 2] for id_i in self.run_ids],
-                "dropout":     [id_i.split("_")[self.model_id_len + 3] for id_i in self.run_ids],
-                "l1":          [id_i.split("_")[self.model_id_len + 4] for id_i in self.run_ids],
-                "l2":          [id_i.split("_")[self.model_id_len + 5] for id_i in self.run_ids],
-                "cv":          [id_i.split("_")[-1] if self.cv else "1" for id_i in self.run_ids],
-                "model":       ["_".join(id_i.split("_")[:self.model_id_len]) for id_i in self.run_ids],
-                "organ":       [id_i.split("_")[2] for id_i in self.run_ids],
-                "model_type":  [id_i.split("_")[3] for id_i in self.run_ids],
-                "model_gs_id": ["_".join(id_i.split("_")[:(self.model_id_len + 6)]) for id_i in self.run_ids],
-                "run": self.run_ids,
-        }.items()) +
-            list(dict([("train_" + m, [self.evals[x]["train"][m] if m in self.evals[x]["train"].keys() else self.evals[x]["train"]['neg_ll_'+m] for x in self.run_ids]) for m in metrics]).items()) +  # TODO: Hacky solution to make sure metrics are called the same in VAE and other models
-            list(dict([("test_" + m, [self.evals[x]["test"][m] if m in self.evals[x]["test"].keys() else self.evals[x]["test"]['neg_ll_'+m] for x in self.run_ids]) for m in metrics]).items()) +  # TODO: Hacky solution to make sure metrics are called the same in VAE and other models
-            list(dict([("val_" + m, [self.evals[x]["val"][m] if m in self.evals[x]["val"].keys() else self.evals[x]["val"]['neg_ll_'+m] for x in self.run_ids]) for m in metrics]).items()) +  # TODO: Hacky solution to make sure metrics are called the same in VAE and other models
-            list(dict([("all_" + m, [self.evals[x]["all"][m] if m in self.evals[x]["all"].keys() else self.evals[x]["all"]['neg_ll_'+m] for x in self.run_ids]) for m in metrics]).items())  # TODO: Hacky solution to make sure metrics are called the same in VAE and other models
+                "depth":         [id_i.split("_")[self.model_id_len + 0] for id_i in self.run_ids],  # noqa: E241
+                "width":         [id_i.split("_")[self.model_id_len + 1] for id_i in self.run_ids],  # noqa: E241
+                "lr":            [id_i.split("_")[self.model_id_len + 2] for id_i in self.run_ids],  # noqa: E241
+                "dropout":       [id_i.split("_")[self.model_id_len + 3] for id_i in self.run_ids],  # noqa: E241
+                "l1":            [id_i.split("_")[self.model_id_len + 4] for id_i in self.run_ids],  # noqa: E241
+                "l2":            [id_i.split("_")[self.model_id_len + 5] for id_i in self.run_ids],  # noqa: E241
+                "cv":            [id_i.split("_")[-1] if self.cv else "1" for id_i in self.run_ids],  # noqa: E241
+                "model":         ["_".join(id_i.split("_")[:self.model_id_len]) for id_i in self.run_ids],  # noqa: E241
+                "organism":      [id_i.split("_")[1].split("-")[0] for id_i in self.run_ids],  # noqa: E241
+                "organ":         [id_i.split("_")[1].split("-")[1] for id_i in self.run_ids],  # noqa: E241
+                "model_type":    [id_i.split("_")[1].split("-")[2] for id_i in self.run_ids],  # noqa: E241
+                "version":       [id_i.split("_")[1].split("-")[3] for id_i in self.run_ids],  # noqa: E241
+                "model_gs_id":   ["_".join(id_i.split("_")[:(self.model_id_len + 6)]) for id_i in self.run_ids],  # noqa: E241
+                "run":           self.run_ids,  # noqa: E241
+            }.items()) +
+            list(dict([("train_" + m, [self.evals[x]["train"][m] if m in self.evals[x]["train"].keys() else
+                                       self.evals[x]["train"]['neg_ll_' + m] for x in self.run_ids])
+                       for m in metrics]).items()) +
+            list(dict([("test_" + m, [self.evals[x]["test"][m] if m in self.evals[x]["test"].keys() else
+                                      self.evals[x]["test"]['neg_ll_' + m] for x in self.run_ids])
+                       for m in metrics]).items()) +
+            list(dict([("val_" + m, [self.evals[x]["val"][m] if m in self.evals[x]["val"].keys()
+                                     else self.evals[x]["val"]['neg_ll_' + m] for x in self.run_ids])
+                       for m in metrics]).items()) +
+            list(dict([("all_" + m, [self.evals[x]["all"][m] if m in self.evals[x]["all"].keys()
+                                     else self.evals[x]["all"]['neg_ll_' + m] for x in self.run_ids])
+                       for m in metrics]).items())
         ))
-
         # TODO: Hacky solution to make sure metrics are called the same in VAE and other models
         rename_dict = {
             "train_neg_ll_custom_mse": "train_custom_mse",
@@ -1227,11 +1263,11 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         if model_id is not None:
             if cvs is not None:
                 fns = [
-                    os.path.join(self.source_path, self.gs_keys[f"{model_id}_cv{x}"], "results", f"{model_id}_cv{x}")
+                    os.path.join(self.gs_dirs[f"{model_id}_cv{x}"], f"{model_id}_cv{x}")
                     for x in cvs
                 ]
             else:
-                fns = [os.path.join(self.source_path, self.gs_keys[model_id], "results", model_id)]
+                fns = [os.path.join(self.gs_dirs[model_id], self.gs_keys[model_id], "results", model_id)]
             embedding = [np.load(f"{x}_embedding.npy") for x in fns]
             covar = [pandas.read_csv(f"{x}_covar.csv") for x in fns]
             return model_id, embedding, covar
@@ -1254,10 +1290,13 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         """
 
         :param rename_levels:
+        :param partition_select:
+        :param partition_show:
+        :param metric_select:
+        :param metric_show:
         :param collapse_cv:
-        :param metric:
-        :param ylim:
-        :param xrot:
+        :param vmin:
+        :param vmax:
         :param height_fig:
         :param width_fig:
         :return:
@@ -1292,7 +1331,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                     np.logical_and(
                         sns_tab["model_type"].values == m,
                         sns_tab["organ"].values == o
-                    ),  f"{partition_show}_{metric_show}"
+                    ), f"{partition_show}_{metric_show}"
                 ]
                 if data_temp.shape[0] > 0:
                     if self.cv:
@@ -1319,7 +1358,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         fig, axs = plt.subplots(1, 1, figsize=(height_fig, width_fig))
         with sns.axes_style("dark"):
             axs = sns.heatmap(
-                sns_data_heatmap, #mask=mask,
+                sns_data_heatmap,
                 annot=True, fmt=".2f",
                 ax=axs,
                 xticklabels=True, yticklabels=True,
@@ -1331,11 +1370,15 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
 
     def get_gradients_by_celltype(
             self,
-            organ: str,
-            organism: str,
+            organ: Union[str, None],
+            organism: Union[str, None],
+            genome: Union[str, None, dict],
             model_type: Union[str, List[str]],
             metric_select: str,
+            data_source: str,
             datapath,
+            configpath: Union[None, str] = None,
+            store_format: Union[None, str] = None,
             test_data=True,
             partition_select: str = "val",
             ignore_cache=False,
@@ -1355,7 +1398,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         :param min_cells:
         :return: (cell types, input features) cumulative gradients
         """
-        model_id, _, _ = self.get_best_model_ids(
+        model_id, run_id, _ = self.get_best_model_ids(
             tab=self.summary_tab,
             metric_select=metric_select,
             partition_select=partition_select,
@@ -1364,10 +1407,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                 "model_type": model_type,
             }
         )
-        # check cached file
-
-        resultspath = os.path.join(self.source_path, self.gs_keys[model_id], 'results', '')
-
+        resultspath = self.gs_dirs[run_id]
         if os.path.isfile(os.path.join(resultspath, f'{model_id}_grads.pickle')) and not ignore_cache:
             print('Load gradients from cached file...')
             with open(os.path.join(resultspath, f'{model_id}_grads.pickle'), 'rb') as f:
@@ -1375,27 +1415,47 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         else:
             print('Compute gradients (1/3): load data')
             # load data
-            tz = TargetZoos(path=datapath)
-            if organism == "human":
-                dataset = tz.data_human[organ]
-            elif organism == "mouse":
-                dataset = tz.data_mouse[organ]
+            if data_source == "store":
+                if genome is not None:
+                    warnings.warn("Using data_source='store', the provided genome will be ignored")
+                store = load_store(cache_path=datapath, store_format=store_format)
+                store.load_config(configpath)
+                store.subset(attr_key="id", values=[k for k in store.indices.keys()
+                                                    if 'cell_ontology_id' in store.adata_by_key[k].obs.columns])
+                store.subset(attr_key="cellontology_class", excluded_values=[
+                    store._adata_ids_sfaira.unknown_celltype_identifier,
+                    store._adata_ids_sfaira.not_a_cell_celltype_identifier,
+                ])
+                adatas = store.adata_sliced
+                # Load into memory:
+                for k in adatas.keys():
+                    adatas[k] = adatas[k].to_memory()
+                adata = adatas[list(adatas.keys())[0]]
+                if len(adatas.keys()) > 0:
+                    adata = adata.concatenate(*[adatas[k] for k in list(adatas.keys())[1:]])
+            elif data_source == "universe":
+                if configpath is not None or store_format is not None:
+                    warnings.warn("Using data_source='universe', the provided configpath and store_format will be ignored")
+                u = Universe(data_path=datapath)
+                if organism is not None:
+                    u.subset("organism", organism)
+                if organ is not None:
+                    u.subset("organ", organ)
+                u.load(allow_caching=False)
+                u.streamline_features(match_to_reference=genome)
+                u.streamline_metadata()
+                adata = u.adata
             else:
-                raise (ValueError(f"Supplied organism {organism} not recognised. Should be one of ('mouse', 'human')"))
-            dataset.load_all(annotated_only=True)
+                raise ValueError("data_source has to be 'universe' or 'store'")
 
             print('Compute gradients (2/3): load embedding')
-            # load embedding
-            adata = dataset.adata
-            topology = model_id
+            zoo = ModelZoo()
+            zoo.model_id = "_".join(model_id.split("_")[:3])
             embedding = EstimatorKerasEmbedding(
                 data=adata,
                 model_dir="",
-                model_id="",
-                species=organism,
-                organ=organ,
-                model_type=model_type,
-                model_topology=model_id.split('_')[5]
+                model_id=model_id,
+                model_topology=zoo.topology_container
             )
             embedding.init_model()
             embedding.model.training_model.load_weights(os.path.join(resultspath, f'{model_id}_weights.h5'))
@@ -1423,10 +1483,14 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
     def plot_gradient_distr(
             self,
             organ: str,
-            organism: str,
             model_type: Union[str, List[str]],
             metric_select: str,
-            datapath,
+            datapath: str,
+            data_source: str,
+            organism: Union[str, None] = None,
+            genome: Union[str, None] = None,
+            configpath: Union[None, str] = None,
+            store_format: Union[None, str] = None,
             test_data=True,
             partition_select: str = "val",
             normalize=True,
@@ -1461,7 +1525,11 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                 organism=organism,
                 model_type=modelt,
                 metric_select=metric_select,
+                genome=genome,
+                data_source=data_source,
                 datapath=datapath,
+                configpath=configpath,
+                store_format=store_format,
                 test_data=test_data,
                 partition_select=partition_select,
                 ignore_cache=ignore_cache,
@@ -1470,11 +1538,9 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
 
             if normalize:
                 avg_grads[modelt] = np.abs(avg_grads[modelt])
-                avg_grads[modelt] = (avg_grads[modelt] - np.min(avg_grads[modelt], axis=1, keepdims=True)) / \
-                                    np.maximum(
-                                        np.max(avg_grads[modelt], axis=1, keepdims=True) - np.min(avg_grads[modelt],
-                                                                                                  axis=1,
-                                                                                                  keepdims=True), 1e-8)
+                avg_grads[modelt] = (avg_grads[modelt] - np.min(avg_grads[modelt], axis=1, keepdims=True)) /\
+                    np.maximum(np.max(avg_grads[modelt], axis=1, keepdims=True) -
+                               np.min(avg_grads[modelt], axis=1, keepdims=True), 1e-8)
 
         fig, axs = plt.subplots(1, 1, figsize=(width_fig, height_fig))
 
@@ -1519,10 +1585,14 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
     def plot_gradient_cor(
             self,
             organ: str,
-            organism: str,
             model_type: Union[str, List[str]],
             metric_select: str,
-            datapath,
+            datapath: str,
+            data_source: str,
+            organism: Union[str, None] = None,
+            genome: Union[str, None] = None,
+            configpath: Union[None, str] = None,
+            store_format: Union[None, str] = None,
             test_data=True,
             partition_select: str = "val",
             height_fig=7,
@@ -1538,10 +1608,11 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         Plot correlation heatmap of gradient vectors accumulated on input features between cell types or models.
 
         :param organ:
-        :param organism:
         :param model_type:
         :param metric_select:
         :param datapath:
+        :param configpath:
+        :param store_format:
         :param test_data:
         :param partition_select:
         :param height_fig:
@@ -1574,7 +1645,11 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                 organism=organism,
                 model_type=modelt,
                 metric_select=metric_select,
+                genome=genome,
+                data_source=data_source,
                 datapath=datapath,
+                configpath=configpath,
+                store_format=store_format,
                 test_data=test_data,
                 partition_select=partition_select,
                 ignore_cache=ignore_cache,
@@ -1600,10 +1675,10 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         plt.show()
 
     def plot_npc(
-        self,
-        organ,
-        topology_version,
-        cvs=None
+            self,
+            organ,
+            topology_version,
+            cvs=None
     ):
         """
         Plots the explained variance ration that accumulates explained variation of the latent space’s ordered
@@ -1613,10 +1688,10 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         """
         import matplotlib.pyplot as plt
         if self.summary_tab is None:
-            self.create_summary_tab() 
+            self.create_summary_tab()
         models = np.unique(self.summary_tab["model_type"]).tolist()
         self.summary_tab["topology"] = [x.split("_")[5] for x in self.summary_tab["model_gs_id"].values]
-        
+
         with plt.style.context("seaborn-whitegrid"):
             plt.figure(figsize=(12, 6))
             for model in models:
@@ -1635,7 +1710,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                 eig_sum = sum(eig_vals)
                 var_exp = [(i / eig_sum) for i in sorted(eig_vals, reverse=True)]
                 cum_var_exp = np.cumsum([0] + var_exp)
-                plt.step(range(0, eig_vals.shape[0]+1), cum_var_exp, where="post", linewidth=3,
+                plt.step(range(0, eig_vals.shape[0] + 1), cum_var_exp, where="post", linewidth=3,
                          label="%s cumulative explained variance (95%%: %s / 99%%: %s)" % (model, np.sum(cum_var_exp < .95), np.sum(cum_var_exp < .99)))
             plt.yticks([0.0, .25, .50, .75, .95, .99])
             plt.ylabel("Explained variance ratio", fontsize=16)
@@ -1645,10 +1720,10 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
             plt.show()
 
     def plot_active_latent_units(
-        self, 
-        organ, 
-        topology_version,
-        cvs=None
+            self,
+            organ,
+            topology_version,
+            cvs=None
     ):
         """
         Plots latent unit activity measured by empirical variance of the expected latent space.
@@ -1657,14 +1732,15 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         the model will use z, and not z_mean.
         """
 
-        colors = ['red', 'blue', 'green', 'cyan', 'magenta', 'yellow', 'darkgreen', 'lime', 'navy', 'royalblue', 'pink', 'peru']
+        colors = ['red', 'blue', 'green', 'cyan', 'magenta', 'yellow', 'darkgreen', 'lime', 'navy', 'royalblue',
+                  'pink', 'peru']
 
         def active_latent_units_mask(z):
             var_x = np.diagonal(np.cov(z.T))
             min_var_x = 0.01
             active_units_mask = var_x > min_var_x
             return active_units_mask
-        
+
         import matplotlib.pyplot as plt
         if self.summary_tab is None:
             self.create_summary_tab()
@@ -1676,11 +1752,11 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
             plt.axhline(np.log(0.01), color="k", linestyle='dashed', linewidth=2, label="active unit threshold")
             for i, model in enumerate(models):
                 model_id, embedding, covar = self.best_model_embedding(
-                        subset={"model_type": model, "organ": organ, "topology": topology_version},
-                        partition="val",
-                        metric="loss",
-                        cvs=cvs,
-                    )
+                    subset={"model_type": model, "organ": organ, "topology": topology_version},
+                    partition="val",
+                    metric="loss",
+                    cvs=cvs,
+                )
                 if len(embedding[0].shape) == 3:
                     z = embedding[0][0]  # in case of three-dimensional VAE embedding (z, z_mean, z_var), use z
                 else:
@@ -1690,7 +1766,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                 log_var = np.log(var)
                 active_units = np.log(var[active_latent_units_mask(z)])
 
-                plt.plot(range(1,log_var.shape[0]+1), log_var, color=colors[i], alpha=1.0, linewidth=3,
+                plt.plot(range(1, log_var.shape[0] + 1), log_var, color=colors[i], alpha=1.0, linewidth=3,
                          label="%s active units: %i" % (model, len(active_units)))
                 # to plot vertical lines
                 log_var_cut = var.copy()
@@ -1698,13 +1774,13 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                 log_var_cut = np.log(log_var_cut)
                 num_active = np.argmax(log_var_cut)
                 if num_active > 0:
-                    plt.vlines(num_active, ymin = -.15, ymax = 0.15, color=colors[i], linestyle='solid', linewidth=3)
+                    plt.vlines(num_active, ymin=-.15, ymax=0.15, color=colors[i], linestyle='solid', linewidth=3)
                 if model == "vaevamp":
-                    z1, z2 = np.split(np.log(np.diagonal(np.cov(z.T))),2)
-                    plt.plot(range(1, int(latent_dim/2)+1), np.sort(z2)[::-1], color=colors[i], alpha=1.0,
-                             label=r"%s $z_2$ active units: %i" % (model, len(z2[z2>np.log(0.01)])), linestyle='dashed',
-                             linewidth=3)
-                    plt.plot(range(1, int(latent_dim/2)+1), np.sort(z1)[::-1], color=colors[i], alpha=1.0,
+                    z1, z2 = np.split(np.log(np.diagonal(np.cov(z.T))), 2)
+                    plt.plot(range(1, int(latent_dim / 2) + 1), np.sort(z2)[::-1], color=colors[i], alpha=1.0,
+                             label=r"%s $z_2$ active units: %i" % (model, len(z2[z2 > np.log(0.01)])),
+                             linestyle='dashed', linewidth=3)
+                    plt.plot(range(1, int(latent_dim / 2) + 1), np.sort(z1)[::-1], color=colors[i], alpha=1.0,
                              label=r"%s $z_1$ active units: %i" % (model, len(z1[z1 > np.log(0.01)])),
                              linestyle='dotted', linewidth=3)
             plt.xlabel(r'Latent unit $i$', fontsize=16)

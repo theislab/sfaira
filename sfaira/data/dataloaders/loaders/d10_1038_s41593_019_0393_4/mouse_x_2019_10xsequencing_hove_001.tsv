@@ -1,0 +1,16 @@
+source	target	target_id
+B cells	B cell	CL:0000236
+BAM	macrophage	CL:0000235
+ILC	innate lymphoid cell	CL:0001065
+Microglia	brain macroglial cell	CL:2000005
+Monocytes/Mdc	monocyte	CL:0000576
+NK cells	natural killer cell	CL:0000623
+Neutorphils	neutrophil	CL:0000775
+Neutrophils	neutrophil	CL:0000775
+T/NKT cells	alpha-beta T cell	CL:0000789
+cDC1	conventional dendritic cell	CL:0000990
+cDC2	conventional dendritic cell	CL:0000990
+migDC	dendritic cell	CL:0000451
+isnan	UNKNOWN	UNKNOWN
+pDC	plasmacytoid dendritic cell	CL:0000784
+yd T cells	gamma-delta T cell	CL:0000798
