@@ -7,11 +7,8 @@ import rich
 import rich.logging
 from rich import traceback
 from rich import print
-<<<<<<< HEAD
-=======
 
 from sfaira.commands.annotate_dataloader import DataloaderAnnotater
->>>>>>> dev
 from sfaira.commands.test_dataloader import DataloaderTester
 
 from sfaira.commands.clean_dataloader import DataloaderCleaner
@@ -109,8 +106,6 @@ def validate_dataloader(path) -> None:
 
 @sfaira_cli.command()
 @click.argument('path', type=click.Path(exists=True))
-<<<<<<< HEAD
-=======
 @click.option('--doi', type=str, default=None)
 @click.option('--test-data', type=click.Path(exists=True))
 def annotate_dataloader(path, doi, test_data) -> None:
@@ -125,7 +120,6 @@ def annotate_dataloader(path, doi, test_data) -> None:
 
 @sfaira_cli.command()
 @click.argument('path', type=click.Path(exists=True))
->>>>>>> dev
 @click.option('--test-data', type=click.Path(exists=True))
 @click.option('--doi', type=str, default=None)
 def test_dataloader(path, test_data, doi) -> None:
