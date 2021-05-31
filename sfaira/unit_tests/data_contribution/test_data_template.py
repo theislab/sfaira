@@ -2,14 +2,20 @@ import os
 import pydoc
 import shutil
 
+<<<<<<< HEAD
 from sfaira.data import DatasetGroupDirectoryOriented, DatasetGroup, DatasetBase
 from sfaira.data.utils import read_yaml
+=======
+from sfaira.data import DatasetGroupDirectoryOriented
+
+>>>>>>> dev
 try:
     import sfaira_extension as sfairae
 except ImportError:
     sfairae = None
 
 
+<<<<<<< HEAD
 def test_load(doi_sfaira_repr: str, test_data: str):
     """
     Unit test to assist with data set contribution.
@@ -38,6 +44,9 @@ def test_load(doi_sfaira_repr: str, test_data: str):
     flattened_doi = doi_sfaira_repr
     # Define file names and loader paths in sfaira or sfaira_extension:
     # Define base paths of loader collections in sfaira and sfaira_extension:
+=======
+def _get_ds(doi_sfaira_repr: str, test_data: str):
+>>>>>>> dev
     dir_loader_sfaira = "sfaira.data.dataloaders.loaders."
     file_path_sfaira = "/" + "/".join(pydoc.locate(dir_loader_sfaira + "FILE_PATH").split("/")[:-1])
     if sfairae is not None:
@@ -46,6 +55,7 @@ def test_load(doi_sfaira_repr: str, test_data: str):
     else:
         file_path_sfairae = None
     # Check if loader name is a directory either in sfaira or sfaira_extension loader collections:
+<<<<<<< HEAD
     if flattened_doi in os.listdir(file_path_sfaira):
         dir_loader = dir_loader_sfaira + "." + flattened_doi
         package_source = "sfaira"
@@ -56,6 +66,15 @@ def test_load(doi_sfaira_repr: str, test_data: str):
         raise ValueError("data loader not found in sfaira and also not in sfaira_extension")
     file_path = pydoc.locate(dir_loader + ".FILE_PATH")
     meta_path = None
+=======
+    if doi_sfaira_repr in os.listdir(file_path_sfaira):
+        dir_loader = dir_loader_sfaira + "." + doi_sfaira_repr
+    elif doi_sfaira_repr in os.listdir(file_path_sfairae):
+        dir_loader = dir_loader_sfairae + "." + doi_sfaira_repr
+    else:
+        raise ValueError("data loader not found in sfaira and also not in sfaira_extension")
+    file_path = pydoc.locate(dir_loader + ".FILE_PATH")
+>>>>>>> dev
     cache_path = None
     # Clear dataset cache
     shutil.rmtree(cache_path, ignore_errors=True)
@@ -66,6 +85,7 @@ def test_load(doi_sfaira_repr: str, test_data: str):
         meta_path=None,
         cache_path=None
     )
+<<<<<<< HEAD
     # Test raw loading and caching:
     # You can set load_raw to True while debugging when caching works already to speed the test up,
     # but be sure to set load_raw to True for final tests.
@@ -172,4 +192,31 @@ def test_load(doi_sfaira_repr: str, test_data: str):
     # Test concatenation:
     _ = ds.adata
     # Clear dataset cache
+=======
+
+    return ds, cache_path
+
+
+def test_load(doi_sfaira_repr: str, test_data: str):
+    ds, cache_path = _get_ds(doi_sfaira_repr=doi_sfaira_repr, test_data=test_data)
+
+    ds.clean_ontology_class_map()
+
+    # TODO try-except with good error description saying that the data loader is broken here:
+    ds.load(
+        remove_gene_version=True,
+        # match_to_reference=TODO get organism here,
+        load_raw=True,
+        allow_caching=True
+    )
+    # Try loading from cache:
+    ds = _get_ds(doi_sfaira_repr=doi_sfaira_repr, test_data=test_data)
+    # TODO try-except with good error description saying that the data loader is broken here:
+    ds.load(
+        remove_gene_version=True,
+        # match_to_reference=TODO get organism here,
+        load_raw=False,
+        allow_caching=True
+    )
+>>>>>>> dev
     shutil.rmtree(cache_path, ignore_errors=True)

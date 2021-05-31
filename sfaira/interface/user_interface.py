@@ -27,6 +27,7 @@ class UserInterface:
     # initialise your sfaira instance with a model lookuptable.
     # instead of setting `custom_repo` when initialising the UI you can also use `sfaira_repo=True` to use public weights
     ui = sfaira.ui.UserInterface(custom_repo="/path/to/local/repo/folder/or/zenodo/repo/URL", sfaira_repo=False)
+    ui.load_data(anndata.read("/path/to/file.h5ad"))  # load your dataset into sfaira
     ui.zoo_embedding.model_id = 'embedding_human-blood-ae-0.2-0.1_theislab'  # pick desired model here
     ui.zoo_celltype.model_id = 'celltype_human-blood-mlp-0.1.3-0.1_theislab'  # pick desired model here
     ui.load_data(anndata.read("/path/to/file.h5ad"), gene_symbol_col='index', gene_ens_col='gene_ids')  # load your dataset into sfaira
