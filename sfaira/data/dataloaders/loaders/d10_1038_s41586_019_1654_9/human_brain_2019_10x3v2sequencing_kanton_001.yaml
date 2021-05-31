@@ -14,7 +14,7 @@ dataset_wise:
     normalization: "raw"
     year: 2019
 dataset_or_observation_wise:
-    assay_sc: "10x 3' v2 sequencing"
+    assay_sc: "10x 3' v2"
     assay_sc_obs_key:
     assay_differentiation: "Lancaster, 2014 (doi: 10.1038/nprot.2014.158)"
     assay_differentiation_obs_key:
