@@ -33,7 +33,7 @@ class Dataset(DatasetBase):
         self.normalization = "raw"
         self.organ = "pancreas"
         self.organism = "mouse"
-        self.assay_sc = "Drop-seq"
+        self.assay_sc = "10x 3' v2"
         self.state_exact = "diabetic"
         self.year = 2019
         self.sample_source = "primary_tissue"
