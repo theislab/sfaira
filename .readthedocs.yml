@@ -10,6 +10,6 @@ sphinx:
 formats: all
 
 python:
-  version: 3.9
+  version: 3.8
   install:
     - requirements: docs/requirements.txt
