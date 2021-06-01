@@ -3,7 +3,7 @@ Tutorials
 
 We provide multiple tutorials in separate repository_.
 
-* A tutorial for interacting with the data loaders via the `Universe class (universe_).
+* A tutorial for interacting with the data loaders via the `Universe` class (universe_).
 * A tutorial for general usage of the user interface (user_interface_).
 * A tutorial for zero-shot analysis with the user interface (pbmc3k_).
 * A tutorial for creating meta data-based data zoo overview figure (meta_data_)
