@@ -3,7 +3,6 @@ cache/ontologies/cl/*
 
 # Docs
 docs/api/
-!docs/_templates
 
 # Unit test temporary data:
 sfaira/unit_tests/test_data_loaders/*
