@@ -1,7 +1,3 @@
-.. module:: sfaira
-.. automodule:: sfaira
-   :noindex:
-
 API
 ====
 
@@ -22,7 +18,7 @@ The sfaira data zoo API.
 Dataset representing classes used for development:
 
 .. autosummary::
-   :toctree: .
+   :toctree: api
 
    data.DatasetBase
    data.DatasetGroup
@@ -32,21 +28,21 @@ Dataset representing classes used for development:
 Interactive data class to use a loaded data object in the context sfaira tools:
 
 .. autosummary::
-   :toctree: .
+   :toctree: api
 
    data.DatasetInteractive
 
 Dataset universe to interact with all data loader classes:
 
 .. autosummary::
-   :toctree: .
+   :toctree: api
 
    data.Universe
 
 Data store handling:
 
 .. autosummary::
-   :toctree: .
+   :toctree: api
 
    data.load_store
    data.DistributedStoreBase
@@ -63,7 +59,7 @@ Estimator classes: `estimators`
 Estimator classes from the sfaira model zoo API for advanced use.
 
 .. autosummary::
-   :toctree: .
+   :toctree: api
 
    estimators.EstimatorKeras
    estimators.EstimatorKerasCelltype
@@ -82,7 +78,7 @@ Cell type models
 Classes that wrap tensorflow cell type predictor models.
 
 .. autosummary::
-   :toctree: .
+   :toctree: api
 
    models.celltype.CellTypeMarker
    models.celltype.CellTypeMarker
@@ -94,7 +90,7 @@ Embedding models
 Classes that wrap tensorflow embedding models.
 
 .. autosummary::
-   :toctree: .
+   :toctree: api
 
    models.embedding.ModelKerasAe
    models.embedding.ModelAeVersioned
@@ -120,7 +116,7 @@ Trainer classes
 Classes that wrap estimator classes to use in grid search training.
 
 .. autosummary::
-   :toctree: .
+   :toctree: api
 
    train.TrainModelCelltype
    train.TrainModelEmbedding
@@ -130,7 +126,7 @@ Grid search summaries
 Classes to pool evaluation metrics across fits in a grid search.
 
 .. autosummary::
-   :toctree: .
+   :toctree: api
 
    train.GridsearchContainer
    train.SummarizeGridsearchCelltype
@@ -149,7 +145,7 @@ Genomes
 Genome management.
 
 .. autosummary::
-   :toctree: .
+   :toctree: api
 
    versions.genomes.GenomeContainer
 
@@ -159,7 +155,7 @@ Dataset metadata management.
 Base classes to manage ontology files:
 
 .. autosummary::
-   :toctree: .
+   :toctree: api
 
    versions.metadata.Ontology
    versions.metadata.OntologyList
@@ -170,7 +166,7 @@ Base classes to manage ontology files:
 Onotology-specific classes:
 
 .. autosummary::
-   :toctree: .
+   :toctree: api
 
    versions.metadata.OntologyCellosaurus
    versions.metadata.OntologyCl
@@ -183,7 +179,7 @@ Onotology-specific classes:
 Class wrapping cell type ontology for predictor models:
 
 .. autosummary::
-   :toctree: .
+   :toctree: api
 
    versions.metadata.CelltypeUniverse
 
@@ -192,7 +188,7 @@ Topologies
 Model topology management.
 
 .. autosummary::
-   :toctree: .
+   :toctree: api
 
    versions.topologies.TopologyContainer
 
@@ -206,6 +202,6 @@ This sub-module gives users access to the model zoo, including model query from 
 This API is designed to be used in analysis workflows and does not require any understanding of the way models are defined and stored.
 
 .. autosummary::
-   :toctree: .
+   :toctree: api
 
    ui.UserInterface
