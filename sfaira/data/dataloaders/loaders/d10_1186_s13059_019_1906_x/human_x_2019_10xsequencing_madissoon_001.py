@@ -33,7 +33,7 @@ class Dataset(DatasetBase):
 
         self.download_url_meta = None
 
-        self.assay_sc = "10x sequencing"
+        self.assay_sc = "10x technology"
         self.author = "Madissoon"
         self.disease = "healthy"
         self.doi = "10.1186/s13059-019-1906-x"

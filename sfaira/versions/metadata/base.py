@@ -950,12 +950,12 @@ class OntologySinglecellLibraryConstruction(OntologyEbi):
             ontology="efo",
             root_term="EFO_0010183",
             additional_terms={
-                "microwell-seq": {"name": "microwell-seq"},
-                "sci-plex": {"name": "sci-plex"}
+                "sci-plex": {"name": "sci-plex"},
+                "sci-RNA-seq": {"name": "sci-RNA-seq"},
             },
             additional_edges=[
-                ("EFO:0010183", "microwell-seq"),
                 ("EFO:0010183", "sci-plex"),
+                ("EFO:0010183", "sci-RNA-seq"),
             ],
             ontology_cache_fn="efo.pickle"
         )

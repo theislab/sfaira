@@ -35,14 +35,13 @@ Latest additions
    :hidden:
 
    installation
-   api/index
+   api
    commandline_interface
    tutorials
-   using_data
    adding_datasets
-   adding_dataset_classes
+   consuming_data
    models
    ecosystem
    roadmap
-   development
+   faq
    changelog
