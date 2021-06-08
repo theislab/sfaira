@@ -2,7 +2,7 @@ import numpy as np
 import os
 from typing import Union
 
-from sfaira.interface import UserInterface
+from sfaira.ui import UserInterface
 
 
 class TestUi:
@@ -10,7 +10,7 @@ class TestUi:
     data: np.ndarray
 
     """
-    Contains functions _test* to test individual functions and attributes of the user interface class.
+    Contains functions _test* to test individual functions and attributes of the user ui class.
 
     TODO for everybody working on this, add one _test* function in here and add it into
     basic_estimator_test(). See _test_call() for an example.
@@ -35,14 +35,3 @@ class TestUi:
         """
         temp_fn = os.path.join(str(os.path.dirname(os.path.abspath(__file__))), '../test_data')
         self.ui = UserInterface(custom_repo=temp_fn, sfaira_repo=False)
-
-    def _test_kipoi(self):
-        """
-        Test all kipoi_experimental model methods.
-
-
-        :return:
-        """
-        temp_fn = os.path.join(str(os.path.dirname(os.path.abspath(__file__))), '../test_data')
-        self.ui = UserInterface(custom_repo=temp_fn, sfaira_repo=False)
-        self.ui.compute_embedding_kipoi()

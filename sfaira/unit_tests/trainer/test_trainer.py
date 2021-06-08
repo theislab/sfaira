@@ -4,7 +4,7 @@ import os
 from typing import Union
 
 from sfaira.data import load_store
-from sfaira.interface import ModelZoo
+from sfaira.ui import ModelZoo
 from sfaira.train import TrainModelCelltype, TrainModelEmbedding
 from sfaira.unit_tests.utils import cached_store_writing, simulate_anndata
 

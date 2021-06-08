@@ -11,34 +11,32 @@ import time
 from sfaira.consts import AdataIdsSfaira, AdataIds
 from sfaira.data import DatasetInteractive
 from sfaira.estimators import EstimatorKerasEmbedding, EstimatorKerasCelltype
-from sfaira.interface.model_zoo import ModelZoo
+from sfaira.ui.model_zoo import ModelZoo
 from sfaira.versions.topologies import TopologyContainer
 
 
 class UserInterface:
     """
     This class performs data set handling and coordinates estimators for the different model types.
-    Example code to obtain a UMAP embedding plot of the embedding created from your data with cell-type labels:
-    ```
-    import sfaira
-    import anndata
-    import scanpy
+    Example code to obtain a UMAP embedding plot of the embedding created from your data with cell-type labels::
 
-    # initialise your sfaira instance with a model lookuptable.
-    # instead of setting `custom_repo` when initialising the UI you can also use `sfaira_repo=True` to use public weights
-    ui = sfaira.ui.UserInterface(custom_repo="/path/to/local/repo/folder/or/zenodo/repo/URL", sfaira_repo=False)
-    ui.load_data(anndata.read("/path/to/file.h5ad"))  # load your dataset into sfaira
-    ui.zoo_embedding.model_id = 'embedding_human-blood-ae-0.2-0.1_theislab'  # pick desired model here
-    ui.zoo_celltype.model_id = 'celltype_human-blood-mlp-0.1.3-0.1_theislab'  # pick desired model here
-    ui.load_data(anndata.read("/path/to/file.h5ad"), gene_symbol_col='index', gene_ens_col='gene_ids')  # load your dataset into sfaira
-    ui.load_model_embedding()
-    ui.load_model_celltype()
-    ui.predict_all()
-    adata = ui.data.adata
-    scanpy.pp.neighbors(adata, use_rep="X_sfaira")
-    scanpy.tl.umap(adata)
-    scanpy.pl.umap(adata, color="celltypes_sfaira", show=True, save="UMAP_sfaira.png")
-    ```
+        import sfaira
+        import anndata
+        import scanpy
+
+        # initialise your sfaira instance with a model lookuptable.
+        ui = sfaira.ui.UserInterface(custom_repo="/path/to/local/repo/folder/or/zenodo/repo/URL", sfaira_repo=False)
+        ui.zoo_embedding.model_id = 'embedding_human-blood-ae-0.2-0.1_theislab'  # pick desired model here
+        ui.zoo_celltype.model_id = 'celltype_human-blood-mlp-0.1.3-0.1_theislab'  # pick desired model here
+        ui.load_data(anndata.read("/path/to/file.h5ad"), gene_symbol_col='index', gene_ens_col='gene_ids')
+        ui.load_model_embedding()
+        ui.load_model_celltype()
+        ui.predict_all()
+        adata = ui.data.adata
+        scanpy.pp.neighbors(adata, use_rep="X_sfaira")
+        scanpy.tl.umap(adata)
+        scanpy.pl.umap(adata, color="celltypes_sfaira", show=True, save="UMAP_sfaira.png")
+
     """
 
     estimator_embedding: Union[EstimatorKerasEmbedding, None]

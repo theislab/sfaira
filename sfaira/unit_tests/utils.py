@@ -58,6 +58,8 @@ def cached_store_writing(dir_data, dir_meta, assembly, organism: str = "mouse", 
     """
     adata_ids_sfaira = AdataIdsSfaira()
     store_path = os.path.join(dir_data, "store")
+    if not os.path.exists(store_path):
+        os.mkdir(store_path)
     ds = Universe(data_path=dir_data, meta_path=dir_meta, cache_path=dir_data)
     ds.subset(key=adata_ids_sfaira.organism, values=[organism])
     ds.subset(key=adata_ids_sfaira.organ, values=[organ])

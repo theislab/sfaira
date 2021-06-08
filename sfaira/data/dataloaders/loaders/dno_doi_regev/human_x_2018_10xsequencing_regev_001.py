@@ -12,7 +12,7 @@ class Dataset(DatasetBase):
                                  "cc95ff89-2e68-4a08-a234-480eca21ce79.homo_sapiens.loom"
         self.download_url_meta = None
 
-        self.assay_sc = "10x sequencing"
+        self.assay_sc = "10x technology"
         self.author = "Regev"
         self.disease = "healthy"
         self.doi = "no_doi_regev"

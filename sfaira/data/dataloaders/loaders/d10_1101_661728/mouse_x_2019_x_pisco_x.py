@@ -87,7 +87,7 @@ class Dataset(DatasetBase):
         self.normalization = "norm"
         self.organism = "mouse"
         self.organ = organ
-        self.assay_sc = "10x sequencing" if self.sample_fn.split("-")[3] == "droplet" else "Smart-seq2"
+        self.assay_sc = "10x technology" if self.sample_fn.split("-")[3] == "droplet" else "Smart-seq2"
         self.year = 2019
         self.sample_source = "primary_tissue"
 

@@ -8,7 +8,7 @@ from typing import Union
 from sfaira.consts import AdataIdsSfaira
 from sfaira.data import DistributedStoreBase, Universe
 from sfaira.estimators import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
-from sfaira.interface import ModelZoo
+from sfaira.ui import ModelZoo
 
 
 class TrainModel:
