@@ -190,6 +190,7 @@ class AdataIdsCellxgene(AdataIds):
         self.doi_preprint = "preprint_doi"
         self.disease = "disease"
         self.gene_id_symbols = "gene_symbol"
+        self.gene_id_ensembl = "ensembl"
         self.gene_id_index = self.gene_id_symbols
         self.id = "id"
         self.ncells = "ncells"
@@ -233,6 +234,7 @@ class AdataIdsCellxgene(AdataIds):
             "tech_sample",
         ]
         self.var_keys = [
+            "gene_id_ensembl",
             "gene_id_symbols",
         ]
         self.uns_keys = [

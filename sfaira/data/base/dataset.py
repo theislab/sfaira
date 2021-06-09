@@ -572,13 +572,15 @@ class DatasetBase(abc.ABC):
         adata.var columns that are not defined as gene_id_ensembl_var_key or gene_id_symbol_var_key in the dataloader.
 
         :param match_to_reference: Which annotation to map the feature space to. Can be:
-            - str: Provide the name of the annotation in the format Organism.Assembly.Release
-            - dict: Mapping of organism to name of the annotation (see str format). Chooses annotation for each data set
-                based on organism annotation.
-        :param remove_gene_version: Whether to remove the version number after the colon sometimes found in ensembl gene ids.
-        :param subset_genes_to_type: Type(s) to subset to. Can be a single type or a list of types or None. Types can be:
-            - None: All genes in assembly.
-            - "protein_coding": All protein coding genes in assembly.
+                - str: Provide the name of the annotation in the format Organism.Assembly.Release
+                - dict: Mapping of organism to name of the annotation (see str format). Chooses annotation for each
+                    data set based on organism annotation.
+        :param remove_gene_version: Whether to remove the version number after the colon sometimes found in ensembl
+            gene ids.
+        :param subset_genes_to_type: Type(s) to subset to. Can be a single type or a list of types or None.
+            Types can be:
+                - None: All genes in assembly.
+                - "protein_coding": All protein coding genes in assembly.
         """
         self.__assert_loaded()
 
