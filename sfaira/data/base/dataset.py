@@ -751,34 +751,35 @@ class DatasetBase(abc.ABC):
         # set var index
         var_new.index = var_new[adata_target_ids.gene_id_index].tolist()
 
-        per_cell_labels = ["cell_types_original", "cellontology_class", "cellontology_id"]
-        experiment_batch_labels = ["bio_sample", "individual", "tech_sample"]
-
-        # Prepare .obs column name dict (process keys below with other .uns keys if they're set dataset-wide)
-        obs_cols = {}
-        for k in adata_target_ids.obs_keys:
-            # Skip any per-cell labels for now and process them in the next code block
-            if k in per_cell_labels:
-                continue
-            else:
-                if hasattr(self, f"{k}_obs_key") and getattr(self, f"{k}_obs_key") is not None:
-                    obs_cols[k] = (getattr(self, f"{k}_obs_key"), getattr(adata_target_ids, k))
-                else:
-                    adata_target_ids.uns_keys.append(k)
-
         # Prepare new .uns dict:
         uns_new = {}
         for k in adata_target_ids.uns_keys:
             val = getattr(self, k)
-            while hasattr(val, '__len__') and not isinstance(val, str) and len(val) == 1:  # unpack nested lists/tuples
+            if val is None and hasattr(self, f"{k}_obs_key"):
+                val = np.sort(self.adata.obs[getattr(self, f"{k}_obs_key")].values.tolist())
+            while hasattr(val, '__len__') and not isinstance(val, str) and len(val) == 1:  # Unpack nested lists/tuples.
                 val = val[0]
             uns_new[getattr(adata_target_ids, k)] = val
 
         # Prepare new .obs dataframe
+        experiment_batch_labels = ["bio_sample", "individual", "tech_sample"]
+        per_cell_labels = ["cell_types_original", "cellontology_class", "cellontology_id"]
         obs_new = pd.DataFrame(index=self.adata.obs.index)
-        for k, (old_col, new_col) in obs_cols.items():
+        # Handle non-cell type labels:
+        for k in [x for x in adata_target_ids.obs_keys if x not in per_cell_labels]:
+            if hasattr(self, f"{k}_obs_key") and getattr(self, f"{k}_obs_key") is not None:
+                old_col = getattr(self, f"{k}_obs_key")
+                val = self.adata.obs[old_col].values.tolist()
+            else:
+                old_col = None
+                val = getattr(self, k)
+                # Unpack nested lists/tuples:
+                while hasattr(val, '__len__') and not isinstance(val, str) and len(val) == 1:
+                    val = val[0]
+                val = [val for _ in range(self.adata.n_obs)]
+            new_col = getattr(adata_target_ids, k)
             # Handle batch-annotation columns which can be provided as a combination of columns separated by an asterisk
-            if k in experiment_batch_labels and "*" in old_col:
+            if old_col is not None and k in experiment_batch_labels and "*" in old_col:
                 batch_cols = []
                 for batch_col in old_col.split("*"):
                     if batch_col in self.adata.obs_keys():
@@ -789,37 +790,23 @@ class DatasetBase(abc.ABC):
                         # in .obs set.
                         print(f"WARNING: attribute {new_col} of data set {self.id} was not found in column {batch_col}")
                 # Build a combination label out of all columns used to describe this group.
-                obs_new[new_col] = [
+                val = [
                     "_".join([str(xxx) for xxx in xx])
                     for xx in zip(*[self.adata.obs[batch_col].values.tolist() for batch_col in batch_cols])
                 ]
-                setattr(self, f"{k}_obs_key", new_col)  # update _obs_column attribute of this class to match the new column
             # All other .obs fields are interpreted below as provided
             else:
-                # Search for direct match of the sought-after column name or for attribute specific obs key.
-                if old_col in self.adata.obs_keys():
-                    # Include flag in .uns that this attribute is in .obs:
-                    uns_new[new_col] = UNS_STRING_META_IN_OBS
-                    # Remove potential pd.Categorical formatting:
-                    ontology = getattr(self.ontology_container_sfaira, k) if hasattr(self.ontology_container_sfaira, k) else None
-                    if k == "development_stage":
-                        ontology = ontology[self.organism]
-                    if k == "ethnicity":
-                        ontology = ontology[self.organism]
-                    self._value_protection(attr=new_col, allowed=ontology, attempted=np.unique(self.adata.obs[old_col].values).tolist())
-                    obs_new[new_col] = self.adata.obs[old_col].values.tolist()
-                    del self.adata.obs[old_col]
-                    setattr(self, f"{k}_obs_key", new_col)  # update _obs_column attribute of this class to match the new column
-                else:
-                    # This should not occur in single data set loaders (see warning below) but can occur in
-                    # streamlined data loaders if not all instances of the streamlined data sets have all columns
-                    # in .obs set.
-                    uns_new[new_col] = None
-                    print(f"WARNING: attribute {new_col} of data set {self.id} was not found in column {old_col}")
-
-        # Set cell-wise attributes (.obs): (None so far other than celltypes.)
+                # Check values for validity:
+                ontology = getattr(self.ontology_container_sfaira, k) \
+                    if hasattr(self.ontology_container_sfaira, k) else None
+                if k == "development_stage":
+                    ontology = ontology[self.organism]
+                if k == "ethnicity":
+                    ontology = ontology[self.organism]
+                self._value_protection(attr=new_col, allowed=ontology, attempted=np.unique(val).tolist())
+            obs_new[new_col] = val
+            setattr(self, f"{k}_obs_key", new_col)
         # Set cell types:
-        # Map cell type names from raw IDs to ontology maintained ones:
         if self.cell_types_original_obs_key is not None:
             obs_cl = self.project_celltypes_to_ontology(copy=True, adata_fields=adata_target_ids)
         else:
@@ -828,7 +815,8 @@ class DatasetBase(abc.ABC):
                 adata_target_ids.cellontology_id: [adata_target_ids.unknown_metadata_identifier] * self.adata.n_obs,
                 adata_target_ids.cell_types_original: [adata_target_ids.unknown_metadata_identifier] * self.adata.n_obs,
             }, index=self.adata.obs.index)
-        obs_new = pd.concat([obs_new, obs_cl], axis=1)
+        for k in [x for x in per_cell_labels if x not in adata_target_ids.obs_keys]:
+            obs_new[k] = obs_cl[k]
 
         # Add new annotation to adata and delete old fields if requested
         if clean_var:
@@ -2179,7 +2167,8 @@ class DatasetBase(abc.ABC):
                     if k == "author":
                         pass
                     return x
-        except ValueError:
+        except ValueError as e:
+            print(f"ValueError: {e}")
             return None
         except ConnectionError as e:
             print(f"ConnectionError: {e}")

@@ -34,7 +34,7 @@ for doi in dois.split(","):
         )
         ds.streamline_metadata(
             schema=schema.lower(),
-            uns_to_obs=True,
+            uns_to_obs=False,
             clean_obs=False,
             clean_var=True,
             clean_uns=True,

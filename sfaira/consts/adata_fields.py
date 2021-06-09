@@ -239,7 +239,6 @@ class AdataIdsCellxgene(AdataIds):
             "doi_journal",
             "doi_preprint",
             "default_embedding",
-            "id",
             "title",
         ]
         # These attributes related to obs and uns keys above are also in the data set attributes that can be
