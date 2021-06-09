@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Tutorials &mdash; sfaira 0+untagged.1.g7859fe8 documentation</title>
+  <title>Tutorials &mdash; sfaira 0+untagged.1.gff3f387 documentation</title>
   
 
   
@@ -43,7 +43,7 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Using Data" href="using_data.html" />
+    <link rel="next" title="Contributing data" href="adding_datasets.html" />
     <link rel="prev" title="Commandline interface" href="commandline_interface.html" /> 
 </head>
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                0+untagged.1.g7859fe8
+                0+untagged.1.gff3f387
               </div>
             
           
@@ -95,20 +95,15 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="commandline_interface.html">Commandline interface</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorials</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#queries-to-data-zoo">Queries to data zoo</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#queries-to-model-zoo">Queries to model zoo</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="using_data.html">Using Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adding_datasets.html">Adding data sets</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adding_dataset_classes.html">The class-based data loader python file</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adding_datasets.html">Contributing data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="consuming_data.html">Consuming Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ecosystem.html">Ecosystem</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
-<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 </ul>
 
@@ -181,14 +176,13 @@
             
   <div class="section" id="tutorials">
 <h1>Tutorials<a class="headerlink" href="#tutorials" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="queries-to-data-zoo">
-<h2>Queries to data zoo<a class="headerlink" href="#queries-to-data-zoo" title="Permalink to this headline">¶</a></h2>
-<p>We provide a tutorial for queries to the data zoo through our python API (<a class="reference external" href="https://nbviewer.jupyter.org/github.com/theislab/sfaira_tutorials/blob/master/tutorials/data_loaders.ipynb">dataloaders</a>) and for assembling meta data across the zoo (<a class="reference external" href="https://nbviewer.jupyter.org/github.com/theislab/sfaira_tutorials/blob/master/tutorials/meta_data.ipynb">metadata</a>).</p>
-</div>
-<div class="section" id="queries-to-model-zoo">
-<h2>Queries to model zoo<a class="headerlink" href="#queries-to-model-zoo" title="Permalink to this headline">¶</a></h2>
-<p>We provide a tutorial for interacting with our model zoo through a python API in a scanpy workflow through our <a class="reference external" href="https://nbviewer.jupyter.org/github.com/theislab/sfaira_tutorials/blob/master/tutorials/user_interface.ipynb">user interface</a></p>
-</div>
+<p>We provide multiple tutorials in separate <a class="reference external" href="https://github.com/theislab/sfaira_tutorials/">repository</a>.</p>
+<ul class="simple">
+<li><p>A tutorial for interacting with the data loaders via the <code class="docutils literal notranslate"><span class="pre">Universe</span></code> class (<a class="reference external" href="https://github.com/theislab/sfaira_tutorials/blob/master/tutorials/data_loaders.ipynb">universe</a>).</p></li>
+<li><p>A tutorial for general usage of the user interface (<a class="reference external" href="https://github.com/theislab/sfaira_tutorials/blob/master/tutorials/user_interface.ipynb">user_interface</a>).</p></li>
+<li><p>A tutorial for zero-shot analysis with the user interface (<a class="reference external" href="https://github.com/theislab/sfaira_tutorials/blob/master/tutorials/pbmc3k.ipynb">pbmc3k</a>).</p></li>
+<li><p>A tutorial for creating meta data-based data zoo overview figure (<a class="reference external" href="https://github.com/theislab/sfaira_tutorials/blob/master/summaries/meta_data.ipynb">meta_data</a>)</p></li>
+</ul>
 </div>
 
 
@@ -197,7 +191,7 @@
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="using_data.html" class="btn btn-neutral float-right" title="Using Data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="adding_datasets.html" class="btn btn-neutral float-right" title="Contributing data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
         <a href="commandline_interface.html" class="btn btn-neutral float-left" title="Commandline interface" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 

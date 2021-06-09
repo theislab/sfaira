@@ -1,4 +1,41 @@
-﻿sfaira.data.DatasetBase
+﻿..
+    This code was adapted from https://github.com/theislab/cellrank/tree/master/docs/_templates/autosummary/class.rst
+    This file is therefore licensed under the license of the cellrank project,
+    available from https://github.com/theislab/cellrank and copied here at the time of accession.
+
+    BSD 3-Clause License
+
+    Copyright (c) 2019, Theis Lab
+    All rights reserved.
+
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions are met:
+
+    1. Redistributions of source code must retain the above copyright notice, this
+       list of conditions and the following disclaimer.
+
+    2. Redistributions in binary form must reproduce the above copyright notice,
+       this list of conditions and the following disclaimer in the documentation
+       and/or other materials provided with the distribution.
+
+    3. Neither the name of the copyright holder nor the names of its
+       contributors may be used to endorse or promote products derived from
+       this software without specific prior written permission.
+
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+    DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+    FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+    DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+    SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+:github_url: sfaira.data.DatasetBase
+
+sfaira.data.DatasetBase
 =======================
 
 .. currentmodule:: sfaira.data
@@ -6,101 +43,106 @@
 .. autoclass:: DatasetBase
 
    
-   .. automethod:: __init__
-
-   
-   .. rubric:: Methods
-
-   .. autosummary::
-   
-      ~DatasetBase.__init__
-      ~DatasetBase.clear
-      ~DatasetBase.collapse_counts
-      ~DatasetBase.download
-      ~DatasetBase.load
-      ~DatasetBase.load_meta
-      ~DatasetBase.load_ontology_class_map
-      ~DatasetBase.project_celltypes_to_ontology
-      ~DatasetBase.set_dataset_id
-      ~DatasetBase.show_summary
-      ~DatasetBase.streamline_features
-      ~DatasetBase.streamline_metadata
-      ~DatasetBase.subset_cells
-      ~DatasetBase.write_backed
-      ~DatasetBase.write_distributed_store
-      ~DatasetBase.write_meta
-      ~DatasetBase.write_ontology_class_map
-   
-   
-
-   
    
    .. rubric:: Attributes
 
    .. autosummary::
+      :toctree: .
    
-      ~DatasetBase.additional_annotation_key
-      ~DatasetBase.annotated
-      ~DatasetBase.assay_differentiation
-      ~DatasetBase.assay_differentiation_obs_key
-      ~DatasetBase.assay_sc
-      ~DatasetBase.assay_sc_obs_key
-      ~DatasetBase.assay_type_differentiation
-      ~DatasetBase.assay_type_differentiation_obs_key
-      ~DatasetBase.author
-      ~DatasetBase.bio_sample
-      ~DatasetBase.bio_sample_obs_key
-      ~DatasetBase.cache_fn
-      ~DatasetBase.cell_line
-      ~DatasetBase.cell_line_obs_key
-      ~DatasetBase.cell_ontology_map
-      ~DatasetBase.cell_types_original_obs_key
-      ~DatasetBase.cellontology_class_obs_key
-      ~DatasetBase.cellontology_id_obs_key
-      ~DatasetBase.celltypes_universe
-      ~DatasetBase.citation
-      ~DatasetBase.data_dir
-      ~DatasetBase.default_embedding
-      ~DatasetBase.development_stage
-      ~DatasetBase.development_stage_obs_key
-      ~DatasetBase.directory_formatted_doi
-      ~DatasetBase.disease
-      ~DatasetBase.disease_obs_key
-      ~DatasetBase.doi
-      ~DatasetBase.doi_cleaned_id
-      ~DatasetBase.doi_main
-      ~DatasetBase.download_url_data
-      ~DatasetBase.download_url_meta
-      ~DatasetBase.ethnicity
-      ~DatasetBase.ethnicity_obs_key
-      ~DatasetBase.fn_ontology_class_map_tsv
-      ~DatasetBase.gene_id_ensembl_var_key
-      ~DatasetBase.gene_id_symbols_var_key
-      ~DatasetBase.id
-      ~DatasetBase.individual
-      ~DatasetBase.individual_obs_key
-      ~DatasetBase.loaded
-      ~DatasetBase.meta
-      ~DatasetBase.meta_fn
-      ~DatasetBase.ncells
-      ~DatasetBase.normalization
-      ~DatasetBase.ontology_celltypes
-      ~DatasetBase.ontology_organ
-      ~DatasetBase.organ
-      ~DatasetBase.organ_obs_key
-      ~DatasetBase.organism
-      ~DatasetBase.organism_obs_key
-      ~DatasetBase.primary_data
-      ~DatasetBase.sample_source
-      ~DatasetBase.sample_source_obs_key
-      ~DatasetBase.sex
-      ~DatasetBase.sex_obs_key
-      ~DatasetBase.source
-      ~DatasetBase.state_exact
-      ~DatasetBase.state_exact_obs_key
-      ~DatasetBase.tech_sample
-      ~DatasetBase.tech_sample_obs_key
-      ~DatasetBase.title
-      ~DatasetBase.year
+      ~sfaira.data.DatasetBase.additional_annotation_key
+      ~sfaira.data.DatasetBase.annotated
+      ~sfaira.data.DatasetBase.assay_differentiation
+      ~sfaira.data.DatasetBase.assay_differentiation_obs_key
+      ~sfaira.data.DatasetBase.assay_sc
+      ~sfaira.data.DatasetBase.assay_sc_obs_key
+      ~sfaira.data.DatasetBase.assay_type_differentiation
+      ~sfaira.data.DatasetBase.assay_type_differentiation_obs_key
+      ~sfaira.data.DatasetBase.author
+      ~sfaira.data.DatasetBase.bio_sample
+      ~sfaira.data.DatasetBase.bio_sample_obs_key
+      ~sfaira.data.DatasetBase.cache_fn
+      ~sfaira.data.DatasetBase.cell_line
+      ~sfaira.data.DatasetBase.cell_line_obs_key
+      ~sfaira.data.DatasetBase.cell_ontology_map
+      ~sfaira.data.DatasetBase.cell_types_original_obs_key
+      ~sfaira.data.DatasetBase.cellontology_class_obs_key
+      ~sfaira.data.DatasetBase.cellontology_id_obs_key
+      ~sfaira.data.DatasetBase.celltypes_universe
+      ~sfaira.data.DatasetBase.citation
+      ~sfaira.data.DatasetBase.data_dir
+      ~sfaira.data.DatasetBase.default_embedding
+      ~sfaira.data.DatasetBase.development_stage
+      ~sfaira.data.DatasetBase.development_stage_obs_key
+      ~sfaira.data.DatasetBase.directory_formatted_doi
+      ~sfaira.data.DatasetBase.disease
+      ~sfaira.data.DatasetBase.disease_obs_key
+      ~sfaira.data.DatasetBase.doi
+      ~sfaira.data.DatasetBase.doi_cleaned_id
+      ~sfaira.data.DatasetBase.doi_main
+      ~sfaira.data.DatasetBase.download_url_data
+      ~sfaira.data.DatasetBase.download_url_meta
+      ~sfaira.data.DatasetBase.ethnicity
+      ~sfaira.data.DatasetBase.ethnicity_obs_key
+      ~sfaira.data.DatasetBase.fn_ontology_class_map_tsv
+      ~sfaira.data.DatasetBase.gene_id_ensembl_var_key
+      ~sfaira.data.DatasetBase.gene_id_symbols_var_key
+      ~sfaira.data.DatasetBase.id
+      ~sfaira.data.DatasetBase.individual
+      ~sfaira.data.DatasetBase.individual_obs_key
+      ~sfaira.data.DatasetBase.loaded
+      ~sfaira.data.DatasetBase.meta
+      ~sfaira.data.DatasetBase.meta_fn
+      ~sfaira.data.DatasetBase.ncells
+      ~sfaira.data.DatasetBase.normalization
+      ~sfaira.data.DatasetBase.ontology_celltypes
+      ~sfaira.data.DatasetBase.ontology_organ
+      ~sfaira.data.DatasetBase.organ
+      ~sfaira.data.DatasetBase.organ_obs_key
+      ~sfaira.data.DatasetBase.organism
+      ~sfaira.data.DatasetBase.organism_obs_key
+      ~sfaira.data.DatasetBase.primary_data
+      ~sfaira.data.DatasetBase.sample_source
+      ~sfaira.data.DatasetBase.sample_source_obs_key
+      ~sfaira.data.DatasetBase.sex
+      ~sfaira.data.DatasetBase.sex_obs_key
+      ~sfaira.data.DatasetBase.source
+      ~sfaira.data.DatasetBase.state_exact
+      ~sfaira.data.DatasetBase.state_exact_obs_key
+      ~sfaira.data.DatasetBase.tech_sample
+      ~sfaira.data.DatasetBase.tech_sample_obs_key
+      ~sfaira.data.DatasetBase.title
+      ~sfaira.data.DatasetBase.year
    
    
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~sfaira.data.DatasetBase.clear
+      ~sfaira.data.DatasetBase.collapse_counts
+      ~sfaira.data.DatasetBase.download
+      ~sfaira.data.DatasetBase.load
+      ~sfaira.data.DatasetBase.load_meta
+      ~sfaira.data.DatasetBase.load_ontology_class_map
+      ~sfaira.data.DatasetBase.project_celltypes_to_ontology
+      ~sfaira.data.DatasetBase.set_dataset_id
+      ~sfaira.data.DatasetBase.show_summary
+      ~sfaira.data.DatasetBase.streamline_features
+      ~sfaira.data.DatasetBase.streamline_metadata
+      ~sfaira.data.DatasetBase.subset_cells
+      ~sfaira.data.DatasetBase.write_backed
+      ~sfaira.data.DatasetBase.write_distributed_store
+      ~sfaira.data.DatasetBase.write_meta
+      ~sfaira.data.DatasetBase.write_ontology_class_map
+   
+   
+
+   .. _sphx_glr_backref_sfaira.data.DatasetBase:
+
+   .. minigallery:: sfaira.data.DatasetBase
+       :add-heading: Examples
+       :heading-level: -

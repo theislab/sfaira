@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Adding data sets &mdash; sfaira 0+untagged.1.g7859fe8 documentation</title>
+  <title>Contributing data &mdash; sfaira 0+untagged.1.gff3f387 documentation</title>
   
 
   
@@ -43,8 +43,8 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="The class-based data loader python file" href="adding_dataset_classes.html" />
-    <link rel="prev" title="Using Data" href="using_data.html" /> 
+    <link rel="next" title="Consuming Data" href="consuming_data.html" />
+    <link rel="prev" title="Tutorials" href="tutorials.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                0+untagged.1.g7859fe8
+                0+untagged.1.gff3f387
               </div>
             
           
@@ -95,11 +95,10 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/index.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="commandline_interface.html">Commandline interface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="using_data.html">Using Data</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Adding data sets</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Contributing data</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#writing-dataloaders">Writing dataloaders</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#the-study-centric-data-loader-module">The study-centric data loader module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#the-data-loader-python-file">The data loader python file</a></li>
@@ -118,13 +117,14 @@
 <li class="toctree-l3"><a class="reference internal" href="#field-descriptions">Field descriptions</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#the-class-based-data-loader-python-file">The class-based data loader python file</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="adding_dataset_classes.html">The class-based data loader python file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="consuming_data.html">Consuming Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ecosystem.html">Ecosystem</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
-<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 </ul>
 
@@ -174,7 +174,7 @@
     
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Adding data sets</li>
+      <li>Contributing data</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -195,8 +195,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="adding-data-sets">
-<h1>Adding data sets<a class="headerlink" href="#adding-data-sets" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="contributing-data">
+<h1>Contributing data<a class="headerlink" href="#contributing-data" title="Permalink to this headline">¶</a></h1>
 <p>Adding datasets to sfaira is a great way to increase the visibility of your dataset and to make it available to a large audience.
 This process requires a couple of steps as outlined in the following sections.</p>
 <div class="figure align-default" id="id1">
@@ -899,6 +899,114 @@ This can also be “index” if the gene symbol are in the index of the <code cl
 </ul>
 </div>
 </div>
+<div class="section" id="the-class-based-data-loader-python-file">
+<h2>The class-based data loader python file<a class="headerlink" href="#the-class-based-data-loader-python-file" title="Permalink to this headline">¶</a></h2>
+<p>As an alternative to the preferred yaml-based dataloaders, users can provide a dataloader class together with the load function.
+In this scenario, meta data is described in a constructor of a class in the same python file as the loading function.</p>
+<ol class="arabic simple">
+<li><p>A constructor of the following form that contains all the relevant metadata that is available before the actual dataset is loaded to memory.</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">meta_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">cache_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">meta_path</span><span class="o">=</span><span class="n">meta_path</span><span class="p">,</span> <span class="n">cache_path</span><span class="o">=</span><span class="n">cache_path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="c1"># Data set meta data: You do not have to include all of these and can simply skip lines corresponding</span>
+    <span class="c1"># to attritbutes that you do not have access to. These are meta data on a sample level.</span>
+    <span class="c1"># The meta data attributes labeled with (*) may als be supplied per cell, see below,</span>
+    <span class="c1"># in this case, if you supply a .obs_key* attribute, you ccan leave out the sample-wise attribute.</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">x</span>  <span class="c1"># unique identifier of data set (Organism_Organ_Year_AssaySc_NumberOfDataset_FirstAuthorLastname_doi).</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">author</span> <span class="o">=</span> <span class="n">x</span>  <span class="c1"># author (list) who sampled / created the data set</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">doi</span> <span class="o">=</span> <span class="n">x</span>  <span class="c1"># doi of data set accompanying manuscript</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">download_url_data</span> <span class="o">=</span> <span class="n">x</span>  <span class="c1"># download website(s) of data files</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">download_url_meta</span> <span class="o">=</span> <span class="n">x</span>  <span class="c1"># download website(s) of meta data files</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">assay_sc</span> <span class="o">=</span> <span class="n">x</span>  <span class="c1"># (*, optional) protocol used to sample data (e.g. smart-seq2)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assay_differentiation</span> <span class="o">=</span> <span class="n">x</span>  <span class="c1"># (*, optional) protocol used to differentiate the cell line (e.g. Lancaster, 2014)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assay_type_differentiation</span> <span class="o">=</span> <span class="n">x</span>  <span class="c1"># (*, optional) type of protocol used to differentiate the cell line (guided/unguided)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">cell_line</span> <span class="o">=</span> <span class="n">x</span> <span class="c1"># (*, optional) cell line used (for cell culture samples)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">dev_stage</span> <span class="o">=</span> <span class="n">x</span>  <span class="c1"># (*, optional) developmental stage of organism</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ethnicity</span> <span class="o">=</span> <span class="n">x</span>  <span class="c1"># (*, optional) ethnicity of sample</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">healthy</span> <span class="o">=</span> <span class="n">x</span>  <span class="c1"># (*, optional) whether sample represents a healthy organism</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">normalisation</span> <span class="o">=</span> <span class="n">x</span>  <span class="c1"># (optional) normalisation applied to raw data loaded (ideally counts, &quot;raw&quot;)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">organ</span> <span class="o">=</span> <span class="n">x</span>  <span class="c1"># (*, optional) organ (anatomical structure)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">organism</span> <span class="o">=</span> <span class="n">x</span>  <span class="c1"># (*) species / organism</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sample_source</span> <span class="o">=</span> <span class="n">x</span>  <span class="c1"># (*) whether the sample came from primary tissue or cell culture</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sex</span> <span class="o">=</span> <span class="n">x</span>  <span class="c1"># (*, optional) sex</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">state_exact</span> <span class="o">=</span> <span class="n">x</span>  <span class="c1"># (*, optional) exact disease, treatment or perturbation state of sample</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">year</span> <span class="o">=</span> <span class="n">x</span>  <span class="c1"># year in which sample was acquired</span>
+
+    <span class="c1"># The following meta data may instead also be supplied on a cell level if an appropriate column is present in the</span>
+    <span class="c1"># anndata instance (specifically in .obs) after loading.</span>
+    <span class="c1"># You need to make sure this is loaded in the loading script)!</span>
+    <span class="c1"># See above for a description what these meta data attributes mean.</span>
+    <span class="c1"># Again, if these attributes are note available, you can simply leave this out.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">obs_key_assay_sc</span> <span class="o">=</span> <span class="n">x</span>  <span class="c1"># (optional, see above, do not provide if .assay_sc is provided)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">obs_key_assay_differentiation</span> <span class="o">=</span> <span class="n">x</span>  <span class="c1"># (optional, see above, do not provide if .age is assay_differentiation)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">obs_key_assay_type_differentiation</span> <span class="o">=</span> <span class="n">x</span>  <span class="c1"># (optional, see above, do not provide if .assay_type_differentiation is provided)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">obs_key_cell_line</span> <span class="o">=</span> <span class="n">x</span> <span class="c1"># (optional, see above, do not provide if .cell_line is provided)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">obs_key_dev_stage</span> <span class="o">=</span> <span class="n">x</span>  <span class="c1"># (optional, see above, do not provide if .dev_stage is provided)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">obs_key_ethnicity</span> <span class="o">=</span> <span class="n">x</span>  <span class="c1"># (optional, see above, do not provide if .ethnicity is provided)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">obs_key_healthy</span> <span class="o">=</span> <span class="n">x</span>  <span class="c1"># (optional, see above, do not provide if .healthy is provided)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">obs_key_organ</span> <span class="o">=</span> <span class="n">x</span>  <span class="c1"># (optional, see above, do not provide if .organ is provided)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">obs_key_organism</span> <span class="o">=</span> <span class="n">x</span>  <span class="c1"># (optional, see above, do not provide if .organism is provided)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">obs_key_sample_source</span> <span class="o">=</span> <span class="n">x</span>  <span class="c1"># (optional, see above, do not provide if .sample_source is provided)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">obs_key_sex</span> <span class="o">=</span> <span class="n">x</span>  <span class="c1"># (optional, see above, do not provide if .sex is provided)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">obs_key_state_exact</span> <span class="o">=</span> <span class="n">x</span>  <span class="c1"># (optional, see above, do not provide if .state_exact is provided)</span>
+    <span class="c1"># Additionally, cell type annotation is ALWAYS provided per cell in .obs, this annotation is optional though.</span>
+    <span class="c1"># name of column which contain streamlined cell ontology cell type classes:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">obs_key_cell_types_original</span> <span class="o">=</span> <span class="n">x</span>  <span class="c1"># (optional)</span>
+    <span class="c1"># This cell type annotation is free text but is mapped to an ontology via a .tsv file with the same name and</span>
+    <span class="c1"># directory as the python file of this data loader (see below).</span>
+</pre></div>
+</div>
+<p>2. A function called to load the data set into memory:
+It is important to set an automated path indicating the location of the raw files here.
+Our recommendation for this directory set-up is that you define a directory folder in your directory structure
+in which all of these raw files will be (self.path) and then add a sub-directory named as
+<code class="docutils literal notranslate"><span class="pre">self.directory_formatted_doi</span></code> (ie. the doi with all special characters replaced by “_” and place the raw files
+directly into this sub directory.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">fn</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">anndata</span><span class="o">.</span><span class="n">AnnData</span><span class="p">:</span>
+    <span class="n">fn</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s2">&quot;my.h5ad&quot;</span><span class="p">)</span>
+    <span class="n">adata</span> <span class="o">=</span> <span class="n">anndata</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>  <span class="c1"># loading instruction into adata, use other ones if the data is not h5ad</span>
+    <span class="k">return</span> <span class="n">adata</span>
+</pre></div>
+</div>
+<p>In summary, a python file for a mouse lung data set could look like this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyDataset</span><span class="p">(</span><span class="n">DatasetBase</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">meta_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">cache_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">meta_path</span><span class="o">=</span><span class="n">meta_path</span><span class="p">,</span> <span class="n">cache_path</span><span class="o">=</span><span class="n">cache_path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">author</span> <span class="o">=</span> <span class="s2">&quot;me&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">doi</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;my preprint&quot;</span><span class="p">,</span> <span class="s2">&quot;my peer-reviewed publication&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">download_url_data</span> <span class="o">=</span> <span class="s2">&quot;my GEO upload&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">normalisation</span> <span class="o">=</span> <span class="s2">&quot;raw&quot;</span>  <span class="c1"># because I uploaded raw counts, which is good practice!</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">organ</span> <span class="o">=</span> <span class="s2">&quot;lung&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">organism</span> <span class="o">=</span> <span class="s2">&quot;mouse&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assay_sc</span> <span class="o">=</span> <span class="s2">&quot;smart-seq2&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">year</span> <span class="o">=</span> <span class="s2">&quot;2020&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_source</span> <span class="o">=</span> <span class="s2">&quot;primary_tissue&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">obs_key_cell_types_original</span> <span class="o">=</span> <span class="s2">&quot;louvain_named&quot;</span>  <span class="c1"># i save my cell type names in here</span>
+
+<span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">fn</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">anndata</span><span class="o">.</span><span class="n">AnnData</span><span class="p">:</span>
+    <span class="n">fn</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s2">&quot;my.h5ad&quot;</span><span class="p">)</span>
+    <span class="n">adata</span> <span class="o">=</span> <span class="n">anndata</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">adata</span>
+</pre></div>
+</div>
+</div>
 </div>
 
 
@@ -907,8 +1015,8 @@ This can also be “index” if the gene symbol are in the index of the <code cl
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="adding_dataset_classes.html" class="btn btn-neutral float-right" title="The class-based data loader python file" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="using_data.html" class="btn btn-neutral float-left" title="Using Data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="consuming_data.html" class="btn btn-neutral float-right" title="Consuming Data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="tutorials.html" class="btn btn-neutral float-left" title="Tutorials" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

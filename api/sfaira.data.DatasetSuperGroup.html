@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>sfaira.data.DatasetSuperGroup &mdash; sfaira 0+untagged.1.g7859fe8 documentation</title>
+  <title>sfaira.data.DatasetSuperGroup &mdash; sfaira 0+untagged.1.gff3f387 documentation</title>
   
 
   
@@ -43,8 +43,8 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="sfaira.data.DatasetInteractive" href="sfaira.data.DatasetInteractive.html" />
-    <link rel="prev" title="sfaira.data.DatasetBase" href="sfaira.data.DatasetBase.html" /> 
+    <link rel="next" title="sfaira.data.DatasetSuperGroup.adata" href="sfaira.data.DatasetSuperGroup.adata.html" />
+    <link rel="prev" title="sfaira.data.DatasetGroupDirectoryOriented.write_ontology_class_map" href="sfaira.data.DatasetGroupDirectoryOriented.write_ontology_class_map.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                0+untagged.1.g7859fe8
+                0+untagged.1.gff3f387
               </div>
             
           
@@ -95,32 +95,65 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">API</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="index.html#module-sfaira.data">Data: <code class="docutils literal notranslate"><span class="pre">data</span></code></a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="index.html#pre-defined-data-set-collections">Pre-defined data set collections</a></li>
-<li class="toctree-l3 current"><a class="reference internal" href="index.html#functionalities-for-interactive-data-analysis">Functionalities for interactive data analysis</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.html">sfaira.data.DatasetBase</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">sfaira.data.DatasetSuperGroup</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#module-sfaira.data">Data: <code class="docutils literal notranslate"><span class="pre">data</span></code></a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.DatasetBase.html">sfaira.data.DatasetBase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.DatasetGroup.html">sfaira.data.DatasetGroup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.DatasetGroupDirectoryOriented.html">sfaira.data.DatasetGroupDirectoryOriented</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">sfaira.data.DatasetSuperGroup</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetSuperGroup.adata.html">sfaira.data.DatasetSuperGroup.adata</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetSuperGroup.adata_ls.html">sfaira.data.DatasetSuperGroup.adata_ls</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetSuperGroup.additional_annotation_key.html">sfaira.data.DatasetSuperGroup.additional_annotation_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetSuperGroup.datasets.html">sfaira.data.DatasetSuperGroup.datasets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetSuperGroup.ids.html">sfaira.data.DatasetSuperGroup.ids</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetSuperGroup.collapse_counts.html">sfaira.data.DatasetSuperGroup.collapse_counts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetSuperGroup.delete_backed.html">sfaira.data.DatasetSuperGroup.delete_backed</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetSuperGroup.download.html">sfaira.data.DatasetSuperGroup.download</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetSuperGroup.extend_dataset_groups.html">sfaira.data.DatasetSuperGroup.extend_dataset_groups</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetSuperGroup.flatten.html">sfaira.data.DatasetSuperGroup.flatten</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetSuperGroup.get_gc.html">sfaira.data.DatasetSuperGroup.get_gc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetSuperGroup.load.html">sfaira.data.DatasetSuperGroup.load</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetSuperGroup.load_cached_backed.html">sfaira.data.DatasetSuperGroup.load_cached_backed</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetSuperGroup.load_config.html">sfaira.data.DatasetSuperGroup.load_config</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetSuperGroup.ncells.html">sfaira.data.DatasetSuperGroup.ncells</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetSuperGroup.ncells_bydataset.html">sfaira.data.DatasetSuperGroup.ncells_bydataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetSuperGroup.ncells_bydataset_flat.html">sfaira.data.DatasetSuperGroup.ncells_bydataset_flat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetSuperGroup.project_celltypes_to_ontology.html">sfaira.data.DatasetSuperGroup.project_celltypes_to_ontology</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetSuperGroup.remove_duplicates.html">sfaira.data.DatasetSuperGroup.remove_duplicates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetSuperGroup.set_dataset_groups.html">sfaira.data.DatasetSuperGroup.set_dataset_groups</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetSuperGroup.show_summary.html">sfaira.data.DatasetSuperGroup.show_summary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetSuperGroup.streamline_features.html">sfaira.data.DatasetSuperGroup.streamline_features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetSuperGroup.streamline_metadata.html">sfaira.data.DatasetSuperGroup.streamline_metadata</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetSuperGroup.subset.html">sfaira.data.DatasetSuperGroup.subset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetSuperGroup.subset_cells.html">sfaira.data.DatasetSuperGroup.subset_cells</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetSuperGroup.write_backed.html">sfaira.data.DatasetSuperGroup.write_backed</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetSuperGroup.write_config.html">sfaira.data.DatasetSuperGroup.write_config</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetSuperGroup.write_distributed_store.html">sfaira.data.DatasetSuperGroup.write_distributed_store</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="index.html#id1">Functionalities for interactive data analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.DatasetInteractive.html">sfaira.data.DatasetInteractive</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.Universe.html">sfaira.data.Universe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.load_store.html">sfaira.data.load_store</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.DistributedStoreBase.html">sfaira.data.DistributedStoreBase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.DistributedStoreDao.html">sfaira.data.DistributedStoreDao</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.DistributedStoreH5ad.html">sfaira.data.DistributedStoreH5ad</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#module-sfaira.genomes">Genomes: <code class="docutils literal notranslate"><span class="pre">genomes</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#module-sfaira.models">Models: <code class="docutils literal notranslate"><span class="pre">models</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#module-sfaira.train">Train: <code class="docutils literal notranslate"><span class="pre">train</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#module-sfaira.ui">User interface: <code class="docutils literal notranslate"><span class="pre">ui</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.estimators">Estimator classes: <code class="docutils literal notranslate"><span class="pre">estimators</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.models">Model classes: <code class="docutils literal notranslate"><span class="pre">models</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.train">Train: <code class="docutils literal notranslate"><span class="pre">train</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.versions">Versions: <code class="docutils literal notranslate"><span class="pre">versions</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.ui">User interface: <code class="docutils literal notranslate"><span class="pre">ui</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../commandline_interface.html">Commandline interface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../using_data.html">Using Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../adding_datasets.html">Adding data sets</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../adding_dataset_classes.html">The class-based data loader python file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../adding_datasets.html">Contributing data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../consuming_data.html">Consuming Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../models.html">Models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ecosystem.html">Ecosystem</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Roadmap</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
 </ul>
 
@@ -164,13 +197,15 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-          <li><a href="index.html">API</a> &raquo;</li>
+          <li><a href="../api.html">API</a> &raquo;</li>
         
       <li>sfaira.data.DatasetSuperGroup</li>
     
@@ -179,7 +214,8 @@
         
           
             
-              <a href="https://github.com/theislab/sfaira/blob/master/docs/api/sfaira.data.DatasetSuperGroup.rst" class="fa fa-github"> Edit on GitHub</a>
+              <!-- User defined GitHub URL -->
+              <a href="sfaira.data.DatasetSuperGroup" class="fa fa-github"> Edit on GitHub</a>
             
           
         
@@ -197,97 +233,10 @@
 <h1>sfaira.data.DatasetSuperGroup<a class="headerlink" href="#sfaira-data-datasetsupergroup" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="sfaira.data.DatasetSuperGroup">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">sfaira.data.</span></span><span class="sig-name descname"><span class="pre">DatasetSuperGroup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset_groups</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">sfaira.data.base.dataset_group.DatasetGroup</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#sfaira.data.DatasetSuperGroup" title="sfaira.data.base.dataset_group.DatasetSuperGroup"><span class="pre">sfaira.data.base.dataset_group.DatasetSuperGroup</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sfaira.data.DatasetSuperGroup" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">sfaira.data.</span></span><span class="sig-name descname"><span class="pre">DatasetSuperGroup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset_groups</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="sfaira.data.DatasetGroup.html#sfaira.data.DatasetGroup" title="sfaira.data.base.dataset_group.DatasetGroup"><span class="pre">sfaira.data.base.dataset_group.DatasetGroup</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#sfaira.data.DatasetSuperGroup" title="sfaira.data.base.dataset_group.DatasetSuperGroup"><span class="pre">sfaira.data.base.dataset_group.DatasetSuperGroup</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sfaira.data.DatasetSuperGroup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Container for multiple DatasetGroup instances.</p>
 <p>Used to manipulate structured dataset collections. Primarly designed for this manipulation, convert to DatasetGroup
 via flatten() for more functionalities.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="sfaira.data.DatasetSuperGroup.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset_groups</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">sfaira.data.base.dataset_group.DatasetGroup</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#sfaira.data.DatasetSuperGroup" title="sfaira.data.base.dataset_group.DatasetSuperGroup"><span class="pre">sfaira.data.base.dataset_group.DatasetSuperGroup</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sfaira.data.DatasetSuperGroup.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
-</dd></dl>
-
-<p class="rubric">Methods</p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#sfaira.data.DatasetSuperGroup.__init__" title="sfaira.data.DatasetSuperGroup.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(dataset_groups)</p></td>
-<td><p>Initialize self.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">collapse_counts</span></code>()</p></td>
-<td><p>Collapse count matrix along duplicated index.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">delete_backed</span></code>()</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">download</span></code>(**kwargs)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">extend_dataset_groups</span></code>(dataset_groups)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">flatten</span></code>()</p></td>
-<td><p>Returns DatasetGroup (rather than self = DatasetSuperGroup) containing all listed data sets.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_gc</span></code>([genome])</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code>([annotated_only, load_raw, …])</p></td>
-<td><p>Loads data set human into anndata object.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_cached_backed</span></code>(fn)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_config</span></code>(fn)</p></td>
-<td><p>Load a config file and recreates a data sub-setting.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ncells</span></code>([annotated_only])</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ncells_bydataset</span></code>([annotated_only])</p></td>
-<td><p>List of list of length of all data sets by data set group.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ncells_bydataset_flat</span></code>([annotated_only])</p></td>
-<td><p>Flattened list of length of all data sets.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">project_celltypes_to_ontology</span></code>([…])</p></td>
-<td><p>Project free text cell type names to ontology based on mapping table.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_duplicates</span></code>([supplier_hierarchy])</p></td>
-<td><p>Remove duplicate data loaders from super group, e.g.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_dataset_groups</span></code>(dataset_groups)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_summary</span></code>()</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">streamline_features</span></code>(match_to_reference[, …])</p></td>
-<td><p>Subset and sort genes to genes defined in an assembly or genes of a particular type, such as protein coding. :param match_to_reference: Which annotation to map the feature space to. Can be:     - str: Provide the name of the annotation in the format Organism.Assembly.Release     - dict: Mapping of organism to name of the annotation (see str format). Chooses annotation for each data set         based on organism annotation. :param remove_gene_version: Whether to remove the version number after the colon sometimes found in ensembl gene ids. :param subset_genes_to_type: Type(s) to subset to. Can be a single type or a list of types or None. Types can be:     - None: All genes in assembly. - “protein_coding”: All protein coding genes in assembly.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">streamline_metadata</span></code>([schema, uns_to_obs, …])</p></td>
-<td><p>Streamline the adata instance in each group and each data set to output format.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">subset</span></code>(key, values)</p></td>
-<td><p>Subset list of adata objects based on match to values in key property.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">subset_cells</span></code>(key, values)</p></td>
-<td><p>Subset list of adata objects based on cell-wise properties.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_backed</span></code>(fn_backed, genome[, shuffled, …])</p></td>
-<td><p>Loads data set human into backed anndata object.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_config</span></code>(fn)</p></td>
-<td><p>Writes a config file that describes the current data sub-setting.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_distributed_store</span></code>(dir_cache[, …])</p></td>
-<td><p>Write data set into a format that allows distributed access to data set on disk.</p></td>
-</tr>
-</tbody>
-</table>
 <p class="rubric">Attributes</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -295,21 +244,99 @@ via flatten() for more functionalities.</p>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">adata</span></code></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetSuperGroup.adata.html#sfaira.data.DatasetSuperGroup.adata" title="sfaira.data.DatasetSuperGroup.adata"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adata</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">adata_ls</span></code></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetSuperGroup.adata_ls.html#sfaira.data.DatasetSuperGroup.adata_ls" title="sfaira.data.DatasetSuperGroup.adata_ls"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adata_ls</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">additional_annotation_key</span></code></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetSuperGroup.additional_annotation_key.html#sfaira.data.DatasetSuperGroup.additional_annotation_key" title="sfaira.data.DatasetSuperGroup.additional_annotation_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">additional_annotation_key</span></code></a></p></td>
 <td><p><p>”</p>
 </p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">datasets</span></code></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetSuperGroup.datasets.html#sfaira.data.DatasetSuperGroup.datasets" title="sfaira.data.DatasetSuperGroup.datasets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">datasets</span></code></a></p></td>
 <td><p>Returns DatasetGroup (rather than self = DatasetSuperGroup) containing all listed data sets.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ids</span></code></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetSuperGroup.ids.html#sfaira.data.DatasetSuperGroup.ids" title="sfaira.data.DatasetSuperGroup.ids"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ids</span></code></a></p></td>
 <td><p></p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetSuperGroup.collapse_counts.html#sfaira.data.DatasetSuperGroup.collapse_counts" title="sfaira.data.DatasetSuperGroup.collapse_counts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">collapse_counts</span></code></a>()</p></td>
+<td><p>Collapse count matrix along duplicated index.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetSuperGroup.delete_backed.html#sfaira.data.DatasetSuperGroup.delete_backed" title="sfaira.data.DatasetSuperGroup.delete_backed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">delete_backed</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetSuperGroup.download.html#sfaira.data.DatasetSuperGroup.download" title="sfaira.data.DatasetSuperGroup.download"><code class="xref py py-obj docutils literal notranslate"><span class="pre">download</span></code></a>(**kwargs)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetSuperGroup.extend_dataset_groups.html#sfaira.data.DatasetSuperGroup.extend_dataset_groups" title="sfaira.data.DatasetSuperGroup.extend_dataset_groups"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extend_dataset_groups</span></code></a>(dataset_groups)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetSuperGroup.flatten.html#sfaira.data.DatasetSuperGroup.flatten" title="sfaira.data.DatasetSuperGroup.flatten"><code class="xref py py-obj docutils literal notranslate"><span class="pre">flatten</span></code></a>()</p></td>
+<td><p>Returns DatasetGroup (rather than self = DatasetSuperGroup) containing all listed data sets.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetSuperGroup.get_gc.html#sfaira.data.DatasetSuperGroup.get_gc" title="sfaira.data.DatasetSuperGroup.get_gc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_gc</span></code></a>([genome])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetSuperGroup.load.html#sfaira.data.DatasetSuperGroup.load" title="sfaira.data.DatasetSuperGroup.load"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code></a>([annotated_only, load_raw, …])</p></td>
+<td><p>Loads data set human into anndata object.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetSuperGroup.load_cached_backed.html#sfaira.data.DatasetSuperGroup.load_cached_backed" title="sfaira.data.DatasetSuperGroup.load_cached_backed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_cached_backed</span></code></a>(fn)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetSuperGroup.load_config.html#sfaira.data.DatasetSuperGroup.load_config" title="sfaira.data.DatasetSuperGroup.load_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_config</span></code></a>(fn)</p></td>
+<td><p>Load a config file and recreates a data sub-setting.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetSuperGroup.ncells.html#sfaira.data.DatasetSuperGroup.ncells" title="sfaira.data.DatasetSuperGroup.ncells"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ncells</span></code></a>([annotated_only])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetSuperGroup.ncells_bydataset.html#sfaira.data.DatasetSuperGroup.ncells_bydataset" title="sfaira.data.DatasetSuperGroup.ncells_bydataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ncells_bydataset</span></code></a>([annotated_only])</p></td>
+<td><p>List of list of length of all data sets by data set group.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetSuperGroup.ncells_bydataset_flat.html#sfaira.data.DatasetSuperGroup.ncells_bydataset_flat" title="sfaira.data.DatasetSuperGroup.ncells_bydataset_flat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ncells_bydataset_flat</span></code></a>([annotated_only])</p></td>
+<td><p>Flattened list of length of all data sets.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetSuperGroup.project_celltypes_to_ontology.html#sfaira.data.DatasetSuperGroup.project_celltypes_to_ontology" title="sfaira.data.DatasetSuperGroup.project_celltypes_to_ontology"><code class="xref py py-obj docutils literal notranslate"><span class="pre">project_celltypes_to_ontology</span></code></a>([…])</p></td>
+<td><p>Project free text cell type names to ontology based on mapping table.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetSuperGroup.remove_duplicates.html#sfaira.data.DatasetSuperGroup.remove_duplicates" title="sfaira.data.DatasetSuperGroup.remove_duplicates"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_duplicates</span></code></a>([supplier_hierarchy])</p></td>
+<td><p>Remove duplicate data loaders from super group, e.g.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetSuperGroup.set_dataset_groups.html#sfaira.data.DatasetSuperGroup.set_dataset_groups" title="sfaira.data.DatasetSuperGroup.set_dataset_groups"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_dataset_groups</span></code></a>(dataset_groups)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetSuperGroup.show_summary.html#sfaira.data.DatasetSuperGroup.show_summary" title="sfaira.data.DatasetSuperGroup.show_summary"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_summary</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetSuperGroup.streamline_features.html#sfaira.data.DatasetSuperGroup.streamline_features" title="sfaira.data.DatasetSuperGroup.streamline_features"><code class="xref py py-obj docutils literal notranslate"><span class="pre">streamline_features</span></code></a>(match_to_reference[, …])</p></td>
+<td><p>Subset and sort genes to genes defined in an assembly or genes of a particular type, such as protein coding. :param match_to_reference: Which annotation to map the feature space to. Can be:     - str: Provide the name of the annotation in the format Organism.Assembly.Release     - dict: Mapping of organism to name of the annotation (see str format). Chooses annotation for each data set         based on organism annotation. :param remove_gene_version: Whether to remove the version number after the colon sometimes found in ensembl gene ids. :param subset_genes_to_type: Type(s) to subset to. Can be a single type or a list of types or None. Types can be:     - None: All genes in assembly. - “protein_coding”: All protein coding genes in assembly.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetSuperGroup.streamline_metadata.html#sfaira.data.DatasetSuperGroup.streamline_metadata" title="sfaira.data.DatasetSuperGroup.streamline_metadata"><code class="xref py py-obj docutils literal notranslate"><span class="pre">streamline_metadata</span></code></a>([schema, uns_to_obs, …])</p></td>
+<td><p>Streamline the adata instance in each group and each data set to output format.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetSuperGroup.subset.html#sfaira.data.DatasetSuperGroup.subset" title="sfaira.data.DatasetSuperGroup.subset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">subset</span></code></a>(key, values)</p></td>
+<td><p>Subset list of adata objects based on match to values in key property.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetSuperGroup.subset_cells.html#sfaira.data.DatasetSuperGroup.subset_cells" title="sfaira.data.DatasetSuperGroup.subset_cells"><code class="xref py py-obj docutils literal notranslate"><span class="pre">subset_cells</span></code></a>(key, values)</p></td>
+<td><p>Subset list of adata objects based on cell-wise properties.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetSuperGroup.write_backed.html#sfaira.data.DatasetSuperGroup.write_backed" title="sfaira.data.DatasetSuperGroup.write_backed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_backed</span></code></a>(fn_backed, genome[, shuffled, …])</p></td>
+<td><p>Loads data set human into backed anndata object.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetSuperGroup.write_config.html#sfaira.data.DatasetSuperGroup.write_config" title="sfaira.data.DatasetSuperGroup.write_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_config</span></code></a>(fn)</p></td>
+<td><p>Writes a config file that describes the current data sub-setting.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetSuperGroup.write_distributed_store.html#sfaira.data.DatasetSuperGroup.write_distributed_store" title="sfaira.data.DatasetSuperGroup.write_distributed_store"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_distributed_store</span></code></a>(dir_cache[, …])</p></td>
+<td><p>Write data set into a format that allows distributed access to data set on disk.</p></td>
 </tr>
 </tbody>
 </table>
@@ -323,8 +350,8 @@ via flatten() for more functionalities.</p>
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="sfaira.data.DatasetInteractive.html" class="btn btn-neutral float-right" title="sfaira.data.DatasetInteractive" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="sfaira.data.DatasetBase.html" class="btn btn-neutral float-left" title="sfaira.data.DatasetBase" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="sfaira.data.DatasetSuperGroup.adata.html" class="btn btn-neutral float-right" title="sfaira.data.DatasetSuperGroup.adata" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="sfaira.data.DatasetGroupDirectoryOriented.write_ontology_class_map.html" class="btn btn-neutral float-left" title="sfaira.data.DatasetGroupDirectoryOriented.write_ontology_class_map" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

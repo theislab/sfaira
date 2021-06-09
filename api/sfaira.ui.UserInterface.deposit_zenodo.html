@@ -1,0 +1,288 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>sfaira.ui.UserInterface.deposit_zenodo &mdash; sfaira 0+untagged.1.gff3f387 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom_sfaira.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="sfaira.ui.UserInterface.load_data" href="sfaira.ui.UserInterface.load_data.html" />
+    <link rel="prev" title="sfaira.ui.UserInterface.compute_denoised_expression" href="sfaira.ui.UserInterface.compute_denoised_expression.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> sfaira
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0+untagged.1.gff3f387
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.data">Data: <code class="docutils literal notranslate"><span class="pre">data</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.estimators">Estimator classes: <code class="docutils literal notranslate"><span class="pre">estimators</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.models">Model classes: <code class="docutils literal notranslate"><span class="pre">models</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.train">Train: <code class="docutils literal notranslate"><span class="pre">train</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.versions">Versions: <code class="docutils literal notranslate"><span class="pre">versions</span></code></a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#module-sfaira.ui">User interface: <code class="docutils literal notranslate"><span class="pre">ui</span></code></a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="sfaira.ui.UserInterface.html">sfaira.ui.UserInterface</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="sfaira.ui.UserInterface.celltype_summary.html">sfaira.ui.UserInterface.celltype_summary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.ui.UserInterface.compute_denoised_expression.html">sfaira.ui.UserInterface.compute_denoised_expression</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">sfaira.ui.UserInterface.deposit_zenodo</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.ui.UserInterface.load_data.html">sfaira.ui.UserInterface.load_data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.ui.UserInterface.load_model_celltype.html">sfaira.ui.UserInterface.load_model_celltype</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.ui.UserInterface.load_model_embedding.html">sfaira.ui.UserInterface.load_model_embedding</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.ui.UserInterface.predict_all.html">sfaira.ui.UserInterface.predict_all</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.ui.UserInterface.predict_celltypes.html">sfaira.ui.UserInterface.predict_celltypes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.ui.UserInterface.predict_embedding.html">sfaira.ui.UserInterface.predict_embedding</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.ui.UserInterface.write_lookuptable.html">sfaira.ui.UserInterface.write_lookuptable</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../commandline_interface.html">Commandline interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../adding_datasets.html">Contributing data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../consuming_data.html">Consuming Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ecosystem.html">Ecosystem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">sfaira</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../api.html">API</a> &raquo;</li>
+        
+          <li><a href="sfaira.ui.UserInterface.html">sfaira.ui.UserInterface</a> &raquo;</li>
+        
+      <li>sfaira.ui.UserInterface.deposit_zenodo</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            
+              <!-- User defined GitHub URL -->
+              <a href="sfaira.ui.UserInterface.deposit_zenodo" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="sfaira-ui-userinterface-deposit-zenodo">
+<h1>sfaira.ui.UserInterface.deposit_zenodo<a class="headerlink" href="#sfaira-ui-userinterface-deposit-zenodo" title="Permalink to this headline">¶</a></h1>
+<dl class="py method">
+<dt class="sig sig-object py" id="sfaira.ui.UserInterface.deposit_zenodo">
+<span class="sig-prename descclassname"><span class="pre">UserInterface.</span></span><span class="sig-name descname"><span class="pre">deposit_zenodo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zenodo_access_token</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">authors</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_existing_deposition</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">publish</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sandbox</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deposit_topologies</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sfaira.ui.UserInterface.deposit_zenodo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deposit all models in model lookup table on Zenodo. If publish is set to false, files will be uploaded to a
+deposition draft, which can be further edited (additional metadata, files etc.). Returns the DOI link if
+publish=True or a link to the deposition draft if publish=False.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>zenodo_access_token</strong> – Your personal Zenodo API access token. Create one here: <a class="reference external" href="https://zenodo.org/account/settings/applications/tokens/new/">https://zenodo.org/account/settings/applications/tokens/new/</a></p></li>
+<li><p><strong>title</strong> – Title of the Zenodo deposition</p></li>
+<li><p><strong>authors</strong> – List of dicts, where each dict defines one author (dict keys:
+name: Name of creator in the format “Family name, Given names”,
+affiliation: Affiliation of creator (optional), orcid: ORCID identifier of creator (optional),
+gnd: GND identifier of creator (optional)</p></li>
+<li><p><strong>description</strong> – Description of the Zenodo deposition.</p></li>
+<li><p><strong>metadata</strong> – Dictionary with further metadata attributes of the deposit.
+See the Zenodo API refenrece for accepted keys: <a class="reference external" href="https://developers.zenodo.org/#representation">https://developers.zenodo.org/#representation</a></p></li>
+<li><p><strong>update_existing_deposition</strong> – If None, a new deposition will be created.</p></li>
+</ul>
+</dd>
+</dl>
+<p>If an existing deposition ID is provided as a sting, than this deposition will be updated with a new version.
+:param publish: Set this to True to directly publish the weights on Zenodo.</p>
+<blockquote>
+<div><p>When set to False a draft will be created, which can be edited in the browser before publishing.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sandbox</strong> – If True, use the Zenodo testing platform at <a class="reference external" href="https://sandbox.zenodo.org">https://sandbox.zenodo.org</a> for your deposition.
+We recommend testing your upload with sandbox first as depositions cannot be deleted from the main Zenodo platform once created.
+:param deposit_topologies: If true, an associated topology file for every weights file will be uploaded to zenodo.
+The naming format for the topology files is &lt;model_id&gt;_topology.pickle</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="sfaira.ui.UserInterface.load_data.html" class="btn btn-neutral float-right" title="sfaira.ui.UserInterface.load_data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="sfaira.ui.UserInterface.compute_denoised_expression.html" class="btn btn-neutral float-left" title="sfaira.ui.UserInterface.compute_denoised_expression" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Leander Dony, David S. Fischer, Lukas Heumos..
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

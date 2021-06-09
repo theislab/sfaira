@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>sfaira.data.DatasetInteractive &mdash; sfaira 0+untagged.1.g7859fe8 documentation</title>
+  <title>sfaira.data.DatasetInteractive &mdash; sfaira 0+untagged.1.gff3f387 documentation</title>
   
 
   
@@ -43,8 +43,8 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="sfaira.genomes.ExtractFeatureListEnsemble" href="sfaira.genomes.ExtractFeatureListEnsemble.html" />
-    <link rel="prev" title="sfaira.data.DatasetSuperGroup" href="sfaira.data.DatasetSuperGroup.html" /> 
+    <link rel="next" title="sfaira.data.DatasetInteractive.additional_annotation_key" href="sfaira.data.DatasetInteractive.additional_annotation_key.html" />
+    <link rel="prev" title="sfaira.data.DatasetSuperGroup.write_distributed_store" href="sfaira.data.DatasetSuperGroup.write_distributed_store.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                0+untagged.1.g7859fe8
+                0+untagged.1.gff3f387
               </div>
             
           
@@ -95,31 +95,116 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">API</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="index.html#module-sfaira.data">Data: <code class="docutils literal notranslate"><span class="pre">data</span></code></a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="index.html#pre-defined-data-set-collections">Pre-defined data set collections</a></li>
-<li class="toctree-l3"><a class="reference internal" href="index.html#functionalities-for-interactive-data-analysis">Functionalities for interactive data analysis</a></li>
-<li class="toctree-l3 current"><a class="reference internal" href="index.html#id1">Functionalities for interactive data analysis</a><ul class="current">
-<li class="toctree-l4 current"><a class="current reference internal" href="#">sfaira.data.DatasetInteractive</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#module-sfaira.data">Data: <code class="docutils literal notranslate"><span class="pre">data</span></code></a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.DatasetBase.html">sfaira.data.DatasetBase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.DatasetGroup.html">sfaira.data.DatasetGroup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.DatasetGroupDirectoryOriented.html">sfaira.data.DatasetGroupDirectoryOriented</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.DatasetSuperGroup.html">sfaira.data.DatasetSuperGroup</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">sfaira.data.DatasetInteractive</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.additional_annotation_key.html">sfaira.data.DatasetInteractive.additional_annotation_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.annotated.html">sfaira.data.DatasetInteractive.annotated</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.assay_differentiation.html">sfaira.data.DatasetInteractive.assay_differentiation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.assay_differentiation_obs_key.html">sfaira.data.DatasetInteractive.assay_differentiation_obs_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.assay_sc.html">sfaira.data.DatasetInteractive.assay_sc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.assay_sc_obs_key.html">sfaira.data.DatasetInteractive.assay_sc_obs_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.assay_type_differentiation.html">sfaira.data.DatasetInteractive.assay_type_differentiation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.assay_type_differentiation_obs_key.html">sfaira.data.DatasetInteractive.assay_type_differentiation_obs_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.author.html">sfaira.data.DatasetInteractive.author</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.bio_sample.html">sfaira.data.DatasetInteractive.bio_sample</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.bio_sample_obs_key.html">sfaira.data.DatasetInteractive.bio_sample_obs_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.cache_fn.html">sfaira.data.DatasetInteractive.cache_fn</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.cell_line.html">sfaira.data.DatasetInteractive.cell_line</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.cell_line_obs_key.html">sfaira.data.DatasetInteractive.cell_line_obs_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.cell_ontology_map.html">sfaira.data.DatasetInteractive.cell_ontology_map</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.cell_types_original_obs_key.html">sfaira.data.DatasetInteractive.cell_types_original_obs_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.cellontology_class_obs_key.html">sfaira.data.DatasetInteractive.cellontology_class_obs_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.cellontology_id_obs_key.html">sfaira.data.DatasetInteractive.cellontology_id_obs_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.celltypes_universe.html">sfaira.data.DatasetInteractive.celltypes_universe</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.citation.html">sfaira.data.DatasetInteractive.citation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.data_dir.html">sfaira.data.DatasetInteractive.data_dir</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.default_embedding.html">sfaira.data.DatasetInteractive.default_embedding</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.development_stage.html">sfaira.data.DatasetInteractive.development_stage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.development_stage_obs_key.html">sfaira.data.DatasetInteractive.development_stage_obs_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.directory_formatted_doi.html">sfaira.data.DatasetInteractive.directory_formatted_doi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.disease.html">sfaira.data.DatasetInteractive.disease</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.disease_obs_key.html">sfaira.data.DatasetInteractive.disease_obs_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.doi.html">sfaira.data.DatasetInteractive.doi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.doi_cleaned_id.html">sfaira.data.DatasetInteractive.doi_cleaned_id</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.doi_main.html">sfaira.data.DatasetInteractive.doi_main</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.download_url_data.html">sfaira.data.DatasetInteractive.download_url_data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.download_url_meta.html">sfaira.data.DatasetInteractive.download_url_meta</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.ethnicity.html">sfaira.data.DatasetInteractive.ethnicity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.ethnicity_obs_key.html">sfaira.data.DatasetInteractive.ethnicity_obs_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.fn_ontology_class_map_tsv.html">sfaira.data.DatasetInteractive.fn_ontology_class_map_tsv</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.gene_id_ensembl_var_key.html">sfaira.data.DatasetInteractive.gene_id_ensembl_var_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.gene_id_symbols_var_key.html">sfaira.data.DatasetInteractive.gene_id_symbols_var_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.id.html">sfaira.data.DatasetInteractive.id</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.individual.html">sfaira.data.DatasetInteractive.individual</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.individual_obs_key.html">sfaira.data.DatasetInteractive.individual_obs_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.loaded.html">sfaira.data.DatasetInteractive.loaded</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.meta.html">sfaira.data.DatasetInteractive.meta</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.meta_fn.html">sfaira.data.DatasetInteractive.meta_fn</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.ncells.html">sfaira.data.DatasetInteractive.ncells</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.normalization.html">sfaira.data.DatasetInteractive.normalization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.ontology_celltypes.html">sfaira.data.DatasetInteractive.ontology_celltypes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.ontology_organ.html">sfaira.data.DatasetInteractive.ontology_organ</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.organ.html">sfaira.data.DatasetInteractive.organ</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.organ_obs_key.html">sfaira.data.DatasetInteractive.organ_obs_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.organism.html">sfaira.data.DatasetInteractive.organism</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.organism_obs_key.html">sfaira.data.DatasetInteractive.organism_obs_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.primary_data.html">sfaira.data.DatasetInteractive.primary_data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.sample_source.html">sfaira.data.DatasetInteractive.sample_source</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.sample_source_obs_key.html">sfaira.data.DatasetInteractive.sample_source_obs_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.sex.html">sfaira.data.DatasetInteractive.sex</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.sex_obs_key.html">sfaira.data.DatasetInteractive.sex_obs_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.source.html">sfaira.data.DatasetInteractive.source</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.state_exact.html">sfaira.data.DatasetInteractive.state_exact</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.state_exact_obs_key.html">sfaira.data.DatasetInteractive.state_exact_obs_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.tech_sample.html">sfaira.data.DatasetInteractive.tech_sample</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.tech_sample_obs_key.html">sfaira.data.DatasetInteractive.tech_sample_obs_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.title.html">sfaira.data.DatasetInteractive.title</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.year.html">sfaira.data.DatasetInteractive.year</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.clear.html">sfaira.data.DatasetInteractive.clear</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.collapse_counts.html">sfaira.data.DatasetInteractive.collapse_counts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.download.html">sfaira.data.DatasetInteractive.download</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.load.html">sfaira.data.DatasetInteractive.load</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.load_meta.html">sfaira.data.DatasetInteractive.load_meta</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.load_ontology_class_map.html">sfaira.data.DatasetInteractive.load_ontology_class_map</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.project_celltypes_to_ontology.html">sfaira.data.DatasetInteractive.project_celltypes_to_ontology</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.set_dataset_id.html">sfaira.data.DatasetInteractive.set_dataset_id</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.show_summary.html">sfaira.data.DatasetInteractive.show_summary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.streamline_features.html">sfaira.data.DatasetInteractive.streamline_features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.streamline_metadata.html">sfaira.data.DatasetInteractive.streamline_metadata</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.subset_cells.html">sfaira.data.DatasetInteractive.subset_cells</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.write_backed.html">sfaira.data.DatasetInteractive.write_backed</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.write_distributed_store.html">sfaira.data.DatasetInteractive.write_distributed_store</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.write_meta.html">sfaira.data.DatasetInteractive.write_meta</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetInteractive.write_ontology_class_map.html">sfaira.data.DatasetInteractive.write_ontology_class_map</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.Universe.html">sfaira.data.Universe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.load_store.html">sfaira.data.load_store</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.DistributedStoreBase.html">sfaira.data.DistributedStoreBase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.DistributedStoreDao.html">sfaira.data.DistributedStoreDao</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.DistributedStoreH5ad.html">sfaira.data.DistributedStoreH5ad</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#module-sfaira.genomes">Genomes: <code class="docutils literal notranslate"><span class="pre">genomes</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#module-sfaira.models">Models: <code class="docutils literal notranslate"><span class="pre">models</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#module-sfaira.train">Train: <code class="docutils literal notranslate"><span class="pre">train</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#module-sfaira.ui">User interface: <code class="docutils literal notranslate"><span class="pre">ui</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.estimators">Estimator classes: <code class="docutils literal notranslate"><span class="pre">estimators</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.models">Model classes: <code class="docutils literal notranslate"><span class="pre">models</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.train">Train: <code class="docutils literal notranslate"><span class="pre">train</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.versions">Versions: <code class="docutils literal notranslate"><span class="pre">versions</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.ui">User interface: <code class="docutils literal notranslate"><span class="pre">ui</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../commandline_interface.html">Commandline interface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../using_data.html">Using Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../adding_datasets.html">Adding data sets</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../adding_dataset_classes.html">The class-based data loader python file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../adding_datasets.html">Contributing data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../consuming_data.html">Consuming Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../models.html">Models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ecosystem.html">Ecosystem</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Roadmap</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
 </ul>
 
@@ -163,13 +248,15 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-          <li><a href="index.html">API</a> &raquo;</li>
+          <li><a href="../api.html">API</a> &raquo;</li>
         
       <li>sfaira.data.DatasetInteractive</li>
     
@@ -178,7 +265,8 @@
         
           
             
-              <a href="https://github.com/theislab/sfaira/blob/master/docs/api/sfaira.data.DatasetInteractive.rst" class="fa fa-github"> Edit on GitHub</a>
+              <!-- User defined GitHub URL -->
+              <a href="sfaira.data.DatasetInteractive" class="fa fa-github"> Edit on GitHub</a>
             
           
         
@@ -197,29 +285,204 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="sfaira.data.DatasetInteractive">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">sfaira.data.</span></span><span class="sig-name descname"><span class="pre">DatasetInteractive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://anndata.readthedocs.io/en/latest/anndata.AnnData.html#anndata.AnnData" title="(in anndata v0.7.7.dev2+ge7a3a3e)"><span class="pre">anndata._core.anndata.AnnData</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">organism</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">organ</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">gene_symbol_col</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'index'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gene_ens_col</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obs_key_celltypes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_maps</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'interactive_dataset'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'.'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sfaira.data.DatasetInteractive" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py method">
-<dt class="sig sig-object py" id="sfaira.data.DatasetInteractive.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://anndata.readthedocs.io/en/latest/anndata.AnnData.html#anndata.AnnData" title="(in anndata v0.7.7.dev2+ge7a3a3e)"><span class="pre">anndata._core.anndata.AnnData</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">organism</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">organ</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">gene_symbol_col</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'index'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gene_ens_col</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obs_key_celltypes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_maps</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'interactive_dataset'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'.'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sfaira.data.DatasetInteractive.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Load data set into sfaira data format.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> – Data set.</p></li>
-<li><p><strong>organism</strong> – Organism of data set.</p></li>
-<li><p><strong>organ</strong> – Organ of data set.</p></li>
-<li><p><strong>gene_symbol_col</strong> – Column name in .var which contains gene symbols. Set to “index” to use the index.</p></li>
-<li><p><strong>gene_ens_col</strong> – Column name in .var which contains ENSG symbols. Set to “index” to use the index.</p></li>
-<li><p><strong>obs_key_celltypes</strong> – .obs column name which contains cell type labels.</p></li>
-<li><p><strong>class_maps</strong> – Cell type class maps.</p></li>
-<li><p><strong>dataset_id</strong> – Identifer of data set.</p></li>
-<li><p><strong>data_path</strong> – </p></li>
-<li><p><strong>meta_path</strong> – </p></li>
-<li><p><strong>cache_path</strong> – </p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
+<dd><p class="rubric">Attributes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.additional_annotation_key.html#sfaira.data.DatasetInteractive.additional_annotation_key" title="sfaira.data.DatasetInteractive.additional_annotation_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">additional_annotation_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.annotated.html#sfaira.data.DatasetInteractive.annotated" title="sfaira.data.DatasetInteractive.annotated"><code class="xref py py-obj docutils literal notranslate"><span class="pre">annotated</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.assay_differentiation.html#sfaira.data.DatasetInteractive.assay_differentiation" title="sfaira.data.DatasetInteractive.assay_differentiation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assay_differentiation</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.assay_differentiation_obs_key.html#sfaira.data.DatasetInteractive.assay_differentiation_obs_key" title="sfaira.data.DatasetInteractive.assay_differentiation_obs_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assay_differentiation_obs_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.assay_sc.html#sfaira.data.DatasetInteractive.assay_sc" title="sfaira.data.DatasetInteractive.assay_sc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assay_sc</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.assay_sc_obs_key.html#sfaira.data.DatasetInteractive.assay_sc_obs_key" title="sfaira.data.DatasetInteractive.assay_sc_obs_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assay_sc_obs_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.assay_type_differentiation.html#sfaira.data.DatasetInteractive.assay_type_differentiation" title="sfaira.data.DatasetInteractive.assay_type_differentiation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assay_type_differentiation</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.assay_type_differentiation_obs_key.html#sfaira.data.DatasetInteractive.assay_type_differentiation_obs_key" title="sfaira.data.DatasetInteractive.assay_type_differentiation_obs_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assay_type_differentiation_obs_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.author.html#sfaira.data.DatasetInteractive.author" title="sfaira.data.DatasetInteractive.author"><code class="xref py py-obj docutils literal notranslate"><span class="pre">author</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.bio_sample.html#sfaira.data.DatasetInteractive.bio_sample" title="sfaira.data.DatasetInteractive.bio_sample"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bio_sample</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.bio_sample_obs_key.html#sfaira.data.DatasetInteractive.bio_sample_obs_key" title="sfaira.data.DatasetInteractive.bio_sample_obs_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bio_sample_obs_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.cache_fn.html#sfaira.data.DatasetInteractive.cache_fn" title="sfaira.data.DatasetInteractive.cache_fn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cache_fn</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.cell_line.html#sfaira.data.DatasetInteractive.cell_line" title="sfaira.data.DatasetInteractive.cell_line"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cell_line</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.cell_line_obs_key.html#sfaira.data.DatasetInteractive.cell_line_obs_key" title="sfaira.data.DatasetInteractive.cell_line_obs_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cell_line_obs_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.cell_ontology_map.html#sfaira.data.DatasetInteractive.cell_ontology_map" title="sfaira.data.DatasetInteractive.cell_ontology_map"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cell_ontology_map</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.cell_types_original_obs_key.html#sfaira.data.DatasetInteractive.cell_types_original_obs_key" title="sfaira.data.DatasetInteractive.cell_types_original_obs_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cell_types_original_obs_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.cellontology_class_obs_key.html#sfaira.data.DatasetInteractive.cellontology_class_obs_key" title="sfaira.data.DatasetInteractive.cellontology_class_obs_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellontology_class_obs_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.cellontology_id_obs_key.html#sfaira.data.DatasetInteractive.cellontology_id_obs_key" title="sfaira.data.DatasetInteractive.cellontology_id_obs_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellontology_id_obs_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.celltypes_universe.html#sfaira.data.DatasetInteractive.celltypes_universe" title="sfaira.data.DatasetInteractive.celltypes_universe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">celltypes_universe</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.citation.html#sfaira.data.DatasetInteractive.citation" title="sfaira.data.DatasetInteractive.citation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">citation</span></code></a></p></td>
+<td><p>Return all information necessary to cite data set.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.data_dir.html#sfaira.data.DatasetInteractive.data_dir" title="sfaira.data.DatasetInteractive.data_dir"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_dir</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.default_embedding.html#sfaira.data.DatasetInteractive.default_embedding" title="sfaira.data.DatasetInteractive.default_embedding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_embedding</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.development_stage.html#sfaira.data.DatasetInteractive.development_stage" title="sfaira.data.DatasetInteractive.development_stage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">development_stage</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.development_stage_obs_key.html#sfaira.data.DatasetInteractive.development_stage_obs_key" title="sfaira.data.DatasetInteractive.development_stage_obs_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">development_stage_obs_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.directory_formatted_doi.html#sfaira.data.DatasetInteractive.directory_formatted_doi" title="sfaira.data.DatasetInteractive.directory_formatted_doi"><code class="xref py py-obj docutils literal notranslate"><span class="pre">directory_formatted_doi</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.disease.html#sfaira.data.DatasetInteractive.disease" title="sfaira.data.DatasetInteractive.disease"><code class="xref py py-obj docutils literal notranslate"><span class="pre">disease</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.disease_obs_key.html#sfaira.data.DatasetInteractive.disease_obs_key" title="sfaira.data.DatasetInteractive.disease_obs_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">disease_obs_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.doi.html#sfaira.data.DatasetInteractive.doi" title="sfaira.data.DatasetInteractive.doi"><code class="xref py py-obj docutils literal notranslate"><span class="pre">doi</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.doi_cleaned_id.html#sfaira.data.DatasetInteractive.doi_cleaned_id" title="sfaira.data.DatasetInteractive.doi_cleaned_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">doi_cleaned_id</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.doi_main.html#sfaira.data.DatasetInteractive.doi_main" title="sfaira.data.DatasetInteractive.doi_main"><code class="xref py py-obj docutils literal notranslate"><span class="pre">doi_main</span></code></a></p></td>
+<td><p>Yields the main DOI associated with the study, defined as the DOI that comes first in alphabetical order.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.download_url_data.html#sfaira.data.DatasetInteractive.download_url_data" title="sfaira.data.DatasetInteractive.download_url_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">download_url_data</span></code></a></p></td>
+<td><p>Data download website(s).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.download_url_meta.html#sfaira.data.DatasetInteractive.download_url_meta" title="sfaira.data.DatasetInteractive.download_url_meta"><code class="xref py py-obj docutils literal notranslate"><span class="pre">download_url_meta</span></code></a></p></td>
+<td><p>Meta data download website(s).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.ethnicity.html#sfaira.data.DatasetInteractive.ethnicity" title="sfaira.data.DatasetInteractive.ethnicity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ethnicity</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.ethnicity_obs_key.html#sfaira.data.DatasetInteractive.ethnicity_obs_key" title="sfaira.data.DatasetInteractive.ethnicity_obs_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ethnicity_obs_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.fn_ontology_class_map_tsv.html#sfaira.data.DatasetInteractive.fn_ontology_class_map_tsv" title="sfaira.data.DatasetInteractive.fn_ontology_class_map_tsv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fn_ontology_class_map_tsv</span></code></a></p></td>
+<td><p>Standardised file name under which cell type conversion tables are saved.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.gene_id_ensembl_var_key.html#sfaira.data.DatasetInteractive.gene_id_ensembl_var_key" title="sfaira.data.DatasetInteractive.gene_id_ensembl_var_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gene_id_ensembl_var_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.gene_id_symbols_var_key.html#sfaira.data.DatasetInteractive.gene_id_symbols_var_key" title="sfaira.data.DatasetInteractive.gene_id_symbols_var_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gene_id_symbols_var_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.id.html#sfaira.data.DatasetInteractive.id" title="sfaira.data.DatasetInteractive.id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">id</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.individual.html#sfaira.data.DatasetInteractive.individual" title="sfaira.data.DatasetInteractive.individual"><code class="xref py py-obj docutils literal notranslate"><span class="pre">individual</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.individual_obs_key.html#sfaira.data.DatasetInteractive.individual_obs_key" title="sfaira.data.DatasetInteractive.individual_obs_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">individual_obs_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.loaded.html#sfaira.data.DatasetInteractive.loaded" title="sfaira.data.DatasetInteractive.loaded"><code class="xref py py-obj docutils literal notranslate"><span class="pre">loaded</span></code></a></p></td>
+<td><p>return: Whether DataSet was loaded into memory.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.meta.html#sfaira.data.DatasetInteractive.meta" title="sfaira.data.DatasetInteractive.meta"><code class="xref py py-obj docutils literal notranslate"><span class="pre">meta</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.meta_fn.html#sfaira.data.DatasetInteractive.meta_fn" title="sfaira.data.DatasetInteractive.meta_fn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">meta_fn</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.ncells.html#sfaira.data.DatasetInteractive.ncells" title="sfaira.data.DatasetInteractive.ncells"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ncells</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.normalization.html#sfaira.data.DatasetInteractive.normalization" title="sfaira.data.DatasetInteractive.normalization"><code class="xref py py-obj docutils literal notranslate"><span class="pre">normalization</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.ontology_celltypes.html#sfaira.data.DatasetInteractive.ontology_celltypes" title="sfaira.data.DatasetInteractive.ontology_celltypes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ontology_celltypes</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.ontology_organ.html#sfaira.data.DatasetInteractive.ontology_organ" title="sfaira.data.DatasetInteractive.ontology_organ"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ontology_organ</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.organ.html#sfaira.data.DatasetInteractive.organ" title="sfaira.data.DatasetInteractive.organ"><code class="xref py py-obj docutils literal notranslate"><span class="pre">organ</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.organ_obs_key.html#sfaira.data.DatasetInteractive.organ_obs_key" title="sfaira.data.DatasetInteractive.organ_obs_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">organ_obs_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.organism.html#sfaira.data.DatasetInteractive.organism" title="sfaira.data.DatasetInteractive.organism"><code class="xref py py-obj docutils literal notranslate"><span class="pre">organism</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.organism_obs_key.html#sfaira.data.DatasetInteractive.organism_obs_key" title="sfaira.data.DatasetInteractive.organism_obs_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">organism_obs_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.primary_data.html#sfaira.data.DatasetInteractive.primary_data" title="sfaira.data.DatasetInteractive.primary_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">primary_data</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.sample_source.html#sfaira.data.DatasetInteractive.sample_source" title="sfaira.data.DatasetInteractive.sample_source"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_source</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.sample_source_obs_key.html#sfaira.data.DatasetInteractive.sample_source_obs_key" title="sfaira.data.DatasetInteractive.sample_source_obs_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_source_obs_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.sex.html#sfaira.data.DatasetInteractive.sex" title="sfaira.data.DatasetInteractive.sex"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sex</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.sex_obs_key.html#sfaira.data.DatasetInteractive.sex_obs_key" title="sfaira.data.DatasetInteractive.sex_obs_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sex_obs_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.source.html#sfaira.data.DatasetInteractive.source" title="sfaira.data.DatasetInteractive.source"><code class="xref py py-obj docutils literal notranslate"><span class="pre">source</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.state_exact.html#sfaira.data.DatasetInteractive.state_exact" title="sfaira.data.DatasetInteractive.state_exact"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state_exact</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.state_exact_obs_key.html#sfaira.data.DatasetInteractive.state_exact_obs_key" title="sfaira.data.DatasetInteractive.state_exact_obs_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state_exact_obs_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.tech_sample.html#sfaira.data.DatasetInteractive.tech_sample" title="sfaira.data.DatasetInteractive.tech_sample"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tech_sample</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.tech_sample_obs_key.html#sfaira.data.DatasetInteractive.tech_sample_obs_key" title="sfaira.data.DatasetInteractive.tech_sample_obs_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tech_sample_obs_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.title.html#sfaira.data.DatasetInteractive.title" title="sfaira.data.DatasetInteractive.title"><code class="xref py py-obj docutils literal notranslate"><span class="pre">title</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.year.html#sfaira.data.DatasetInteractive.year" title="sfaira.data.DatasetInteractive.year"><code class="xref py py-obj docutils literal notranslate"><span class="pre">year</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
 <p class="rubric">Methods</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -227,19 +490,16 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#sfaira.data.DatasetInteractive.__init__" title="sfaira.data.DatasetInteractive.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(data, organism, organ[, …])</p></td>
-<td><p>Load data set into sfaira data format.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear</span></code>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.clear.html#sfaira.data.DatasetInteractive.clear" title="sfaira.data.DatasetInteractive.clear"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear</span></code></a>()</p></td>
 <td><p>Remove loaded .adata to reduce memory footprint.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">collapse_counts</span></code>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.collapse_counts.html#sfaira.data.DatasetInteractive.collapse_counts" title="sfaira.data.DatasetInteractive.collapse_counts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">collapse_counts</span></code></a>()</p></td>
 <td><p>Collapse count matrix along duplicated index.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">download</span></code>(**kwargs)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.download.html#sfaira.data.DatasetInteractive.download" title="sfaira.data.DatasetInteractive.download"><code class="xref py py-obj docutils literal notranslate"><span class="pre">download</span></code></a>(**kwargs)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code>([load_raw, allow_caching])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.load.html#sfaira.data.DatasetInteractive.load" title="sfaira.data.DatasetInteractive.load"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code></a>([load_raw, allow_caching])</p></td>
 <td><p><dl class="field-list simple">
 <dt class="field-odd">param remove_gene_version</dt>
 <dd class="field-odd"><p>Remove gene version string from ENSEMBL ID so that different versions in different data sets are superimposed.</p>
@@ -247,239 +507,41 @@
 </dl>
 </p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_meta</span></code>(fn)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.load_meta.html#sfaira.data.DatasetInteractive.load_meta" title="sfaira.data.DatasetInteractive.load_meta"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_meta</span></code></a>(fn)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_ontology_class_map</span></code>(fn)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.load_ontology_class_map.html#sfaira.data.DatasetInteractive.load_ontology_class_map" title="sfaira.data.DatasetInteractive.load_ontology_class_map"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_ontology_class_map</span></code></a>(fn)</p></td>
 <td><p>Load class maps of free text cell types to ontology classes.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">project_celltypes_to_ontology</span></code>([…])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.project_celltypes_to_ontology.html#sfaira.data.DatasetInteractive.project_celltypes_to_ontology" title="sfaira.data.DatasetInteractive.project_celltypes_to_ontology"><code class="xref py py-obj docutils literal notranslate"><span class="pre">project_celltypes_to_ontology</span></code></a>([…])</p></td>
 <td><p>Project free text cell type names to ontology based on mapping table.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_dataset_id</span></code>([idx])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.set_dataset_id.html#sfaira.data.DatasetInteractive.set_dataset_id" title="sfaira.data.DatasetInteractive.set_dataset_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_dataset_id</span></code></a>([idx])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_summary</span></code>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.show_summary.html#sfaira.data.DatasetInteractive.show_summary" title="sfaira.data.DatasetInteractive.show_summary"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_summary</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">streamline_features</span></code>(match_to_reference[, …])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.streamline_features.html#sfaira.data.DatasetInteractive.streamline_features" title="sfaira.data.DatasetInteractive.streamline_features"><code class="xref py py-obj docutils literal notranslate"><span class="pre">streamline_features</span></code></a>(match_to_reference[, …])</p></td>
 <td><p>Subset and sort genes to genes defined in an assembly or genes of a particular type, such as protein coding.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">streamline_metadata</span></code>([schema, uns_to_obs, …])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.streamline_metadata.html#sfaira.data.DatasetInteractive.streamline_metadata" title="sfaira.data.DatasetInteractive.streamline_metadata"><code class="xref py py-obj docutils literal notranslate"><span class="pre">streamline_metadata</span></code></a>([schema, uns_to_obs, …])</p></td>
 <td><p>Streamline the adata instance to a defined output schema.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">subset_cells</span></code>(key, values)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.subset_cells.html#sfaira.data.DatasetInteractive.subset_cells" title="sfaira.data.DatasetInteractive.subset_cells"><code class="xref py py-obj docutils literal notranslate"><span class="pre">subset_cells</span></code></a>(key, values)</p></td>
 <td><p>Subset list of adata objects based on cell-wise properties.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_backed</span></code>(adata_backed, genome, idx[, …])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.write_backed.html#sfaira.data.DatasetInteractive.write_backed" title="sfaira.data.DatasetInteractive.write_backed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_backed</span></code></a>(adata_backed, genome, idx[, …])</p></td>
 <td><p>Loads data set into slice of backed anndata object.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_distributed_store</span></code>(dir_cache[, …])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.write_distributed_store.html#sfaira.data.DatasetInteractive.write_distributed_store" title="sfaira.data.DatasetInteractive.write_distributed_store"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_distributed_store</span></code></a>(dir_cache[, …])</p></td>
 <td><p>Write data set into a format that allows distributed access to data set on disk.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_meta</span></code>([fn_meta, dir_out])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.write_meta.html#sfaira.data.DatasetInteractive.write_meta" title="sfaira.data.DatasetInteractive.write_meta"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_meta</span></code></a>([fn_meta, dir_out])</p></td>
 <td><p>Write meta data object for data set.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_ontology_class_map</span></code>(fn[, protected_writing])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetInteractive.write_ontology_class_map.html#sfaira.data.DatasetInteractive.write_ontology_class_map" title="sfaira.data.DatasetInteractive.write_ontology_class_map"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_ontology_class_map</span></code></a>(fn[, protected_writing])</p></td>
 <td><p>Load class maps of free text cell types to ontology classes.</p></td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">Attributes</p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">additional_annotation_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">annotated</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assay_differentiation</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assay_differentiation_obs_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assay_sc</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assay_sc_obs_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assay_type_differentiation</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assay_type_differentiation_obs_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">author</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">bio_sample</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">bio_sample_obs_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cache_fn</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cell_line</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cell_line_obs_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cell_ontology_map</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cell_types_original_obs_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellontology_class_obs_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellontology_id_obs_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">celltypes_universe</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">citation</span></code></p></td>
-<td><p>Return all information necessary to cite data set.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_dir</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_embedding</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">development_stage</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">development_stage_obs_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">directory_formatted_doi</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">disease</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">disease_obs_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">doi</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">doi_cleaned_id</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">doi_main</span></code></p></td>
-<td><p>Yields the main DOI associated with the study, defined as the DOI that comes first in alphabetical order.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">download_url_data</span></code></p></td>
-<td><p>Data download website(s).</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">download_url_meta</span></code></p></td>
-<td><p>Meta data download website(s).</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ethnicity</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ethnicity_obs_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fn_ontology_class_map_tsv</span></code></p></td>
-<td><p>Standardised file name under which cell type conversion tables are saved.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">gene_id_ensembl_var_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">gene_id_symbols_var_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">id</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">individual</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">individual_obs_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">loaded</span></code></p></td>
-<td><p>return: Whether DataSet was loaded into memory.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">meta</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">meta_fn</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ncells</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">normalization</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ontology_celltypes</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ontology_organ</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">organ</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">organ_obs_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">organism</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">organism_obs_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">primary_data</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_source</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_source_obs_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sex</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sex_obs_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">source</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">state_exact</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">state_exact_obs_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tech_sample</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tech_sample_obs_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">title</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">year</span></code></p></td>
-<td><p></p></td>
 </tr>
 </tbody>
 </table>
@@ -493,8 +555,8 @@
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="sfaira.genomes.ExtractFeatureListEnsemble.html" class="btn btn-neutral float-right" title="sfaira.genomes.ExtractFeatureListEnsemble" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="sfaira.data.DatasetSuperGroup.html" class="btn btn-neutral float-left" title="sfaira.data.DatasetSuperGroup" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="sfaira.data.DatasetInteractive.additional_annotation_key.html" class="btn btn-neutral float-right" title="sfaira.data.DatasetInteractive.additional_annotation_key" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="sfaira.data.DatasetSuperGroup.write_distributed_store.html" class="btn btn-neutral float-left" title="sfaira.data.DatasetSuperGroup.write_distributed_store" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

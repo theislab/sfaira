@@ -1,0 +1,337 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>sfaira.estimators.EstimatorKerasEmbedding &mdash; sfaira 0+untagged.1.gff3f387 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom_sfaira.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="sfaira.estimators.EstimatorKerasEmbedding.model_type" href="sfaira.estimators.EstimatorKerasEmbedding.model_type.html" />
+    <link rel="prev" title="sfaira.estimators.EstimatorKerasCelltype.ytrue" href="sfaira.estimators.EstimatorKerasCelltype.ytrue.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> sfaira
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0+untagged.1.gff3f387
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.data">Data: <code class="docutils literal notranslate"><span class="pre">data</span></code></a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#module-sfaira.estimators">Estimator classes: <code class="docutils literal notranslate"><span class="pre">estimators</span></code></a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="sfaira.estimators.EstimatorKeras.html">sfaira.estimators.EstimatorKeras</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.estimators.EstimatorKerasCelltype.html">sfaira.estimators.EstimatorKerasCelltype</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">sfaira.estimators.EstimatorKerasEmbedding</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.estimators.EstimatorKerasEmbedding.model_type.html">sfaira.estimators.EstimatorKerasEmbedding.model_type</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.estimators.EstimatorKerasEmbedding.obs_eval.html">sfaira.estimators.EstimatorKerasEmbedding.obs_eval</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.estimators.EstimatorKerasEmbedding.obs_test.html">sfaira.estimators.EstimatorKerasEmbedding.obs_test</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.estimators.EstimatorKerasEmbedding.obs_train.html">sfaira.estimators.EstimatorKerasEmbedding.obs_train</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.estimators.EstimatorKerasEmbedding.organism.html">sfaira.estimators.EstimatorKerasEmbedding.organism</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.estimators.EstimatorKerasEmbedding.using_store.html">sfaira.estimators.EstimatorKerasEmbedding.using_store</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.estimators.EstimatorKerasEmbedding.compute_gradients_input.html">sfaira.estimators.EstimatorKerasEmbedding.compute_gradients_input</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.estimators.EstimatorKerasEmbedding.evaluate.html">sfaira.estimators.EstimatorKerasEmbedding.evaluate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.estimators.EstimatorKerasEmbedding.evaluate_any.html">sfaira.estimators.EstimatorKerasEmbedding.evaluate_any</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.estimators.EstimatorKerasEmbedding.init_model.html">sfaira.estimators.EstimatorKerasEmbedding.init_model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.estimators.EstimatorKerasEmbedding.load_pretrained_weights.html">sfaira.estimators.EstimatorKerasEmbedding.load_pretrained_weights</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.estimators.EstimatorKerasEmbedding.load_weights_from_cache.html">sfaira.estimators.EstimatorKerasEmbedding.load_weights_from_cache</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.estimators.EstimatorKerasEmbedding.predict.html">sfaira.estimators.EstimatorKerasEmbedding.predict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.estimators.EstimatorKerasEmbedding.predict_embedding.html">sfaira.estimators.EstimatorKerasEmbedding.predict_embedding</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.estimators.EstimatorKerasEmbedding.predict_embedding_variational.html">sfaira.estimators.EstimatorKerasEmbedding.predict_embedding_variational</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.estimators.EstimatorKerasEmbedding.save_weights_to_cache.html">sfaira.estimators.EstimatorKerasEmbedding.save_weights_to_cache</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.estimators.EstimatorKerasEmbedding.split_train_val_test.html">sfaira.estimators.EstimatorKerasEmbedding.split_train_val_test</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.estimators.EstimatorKerasEmbedding.train.html">sfaira.estimators.EstimatorKerasEmbedding.train</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.models">Model classes: <code class="docutils literal notranslate"><span class="pre">models</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.train">Train: <code class="docutils literal notranslate"><span class="pre">train</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.versions">Versions: <code class="docutils literal notranslate"><span class="pre">versions</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.ui">User interface: <code class="docutils literal notranslate"><span class="pre">ui</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../commandline_interface.html">Commandline interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../adding_datasets.html">Contributing data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../consuming_data.html">Consuming Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ecosystem.html">Ecosystem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">sfaira</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../api.html">API</a> &raquo;</li>
+        
+      <li>sfaira.estimators.EstimatorKerasEmbedding</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            
+              <!-- User defined GitHub URL -->
+              <a href="sfaira.estimators.EstimatorKerasEmbedding" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="sfaira-estimators-estimatorkerasembedding">
+<h1>sfaira.estimators.EstimatorKerasEmbedding<a class="headerlink" href="#sfaira-estimators-estimatorkerasembedding" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="sfaira.estimators.EstimatorKerasEmbedding">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">sfaira.estimators.</span></span><span class="sig-name descname"><span class="pre">EstimatorKerasEmbedding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">data:</span> <span class="pre">Union[anndata._core.anndata.AnnData,</span> <span class="pre">numpy.ndarray,</span> <span class="pre">sfaira.data.base.distributed_store.DistributedStoreBase],</span> <span class="pre">model_dir:</span> <span class="pre">Optional[str],</span> <span class="pre">model_id:</span> <span class="pre">Optional[str],</span> <span class="pre">model_topology:</span> <span class="pre">sfaira.versions.topologies.class_interface.TopologyContainer,</span> <span class="pre">weights_md5:</span> <span class="pre">Optional[str]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">cache_path:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'cache/',</span> <span class="pre">adata_ids:</span> <span class="pre">sfaira.consts.adata_fields.AdataIds</span> <span class="pre">=</span> <span class="pre">&lt;sfaira.consts.adata_fields.AdataIdsSfaira</span> <span class="pre">object&gt;</span></em><span class="sig-paren">)</span><a class="headerlink" href="#sfaira.estimators.EstimatorKerasEmbedding" title="Permalink to this definition">¶</a></dt>
+<dd><p>Estimator class for the embedding model.</p>
+<p class="rubric">Attributes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.estimators.EstimatorKerasEmbedding.model_type.html#sfaira.estimators.EstimatorKerasEmbedding.model_type" title="sfaira.estimators.EstimatorKerasEmbedding.model_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">model_type</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.estimators.EstimatorKerasEmbedding.obs_eval.html#sfaira.estimators.EstimatorKerasEmbedding.obs_eval" title="sfaira.estimators.EstimatorKerasEmbedding.obs_eval"><code class="xref py py-obj docutils literal notranslate"><span class="pre">obs_eval</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.estimators.EstimatorKerasEmbedding.obs_test.html#sfaira.estimators.EstimatorKerasEmbedding.obs_test" title="sfaira.estimators.EstimatorKerasEmbedding.obs_test"><code class="xref py py-obj docutils literal notranslate"><span class="pre">obs_test</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.estimators.EstimatorKerasEmbedding.obs_train.html#sfaira.estimators.EstimatorKerasEmbedding.obs_train" title="sfaira.estimators.EstimatorKerasEmbedding.obs_train"><code class="xref py py-obj docutils literal notranslate"><span class="pre">obs_train</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.estimators.EstimatorKerasEmbedding.organism.html#sfaira.estimators.EstimatorKerasEmbedding.organism" title="sfaira.estimators.EstimatorKerasEmbedding.organism"><code class="xref py py-obj docutils literal notranslate"><span class="pre">organism</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.estimators.EstimatorKerasEmbedding.using_store.html#sfaira.estimators.EstimatorKerasEmbedding.using_store" title="sfaira.estimators.EstimatorKerasEmbedding.using_store"><code class="xref py py-obj docutils literal notranslate"><span class="pre">using_store</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.estimators.EstimatorKerasEmbedding.compute_gradients_input.html#sfaira.estimators.EstimatorKerasEmbedding.compute_gradients_input" title="sfaira.estimators.EstimatorKerasEmbedding.compute_gradients_input"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_gradients_input</span></code></a>([batch_size, …])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.estimators.EstimatorKerasEmbedding.evaluate.html#sfaira.estimators.EstimatorKerasEmbedding.evaluate" title="sfaira.estimators.EstimatorKerasEmbedding.evaluate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">evaluate</span></code></a>([batch_size, max_steps])</p></td>
+<td><p>Evaluate the custom model on test data.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.estimators.EstimatorKerasEmbedding.evaluate_any.html#sfaira.estimators.EstimatorKerasEmbedding.evaluate_any" title="sfaira.estimators.EstimatorKerasEmbedding.evaluate_any"><code class="xref py py-obj docutils literal notranslate"><span class="pre">evaluate_any</span></code></a>(idx[, batch_size, max_steps])</p></td>
+<td><p>Evaluate the custom model on any local data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.estimators.EstimatorKerasEmbedding.init_model.html#sfaira.estimators.EstimatorKerasEmbedding.init_model" title="sfaira.estimators.EstimatorKerasEmbedding.init_model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">init_model</span></code></a>([clear_weight_cache, …])</p></td>
+<td><p>instantiate the model :return:</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.estimators.EstimatorKerasEmbedding.load_pretrained_weights.html#sfaira.estimators.EstimatorKerasEmbedding.load_pretrained_weights" title="sfaira.estimators.EstimatorKerasEmbedding.load_pretrained_weights"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_pretrained_weights</span></code></a>()</p></td>
+<td><p>Loads model weights from local directory or zenodo.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.estimators.EstimatorKerasEmbedding.load_weights_from_cache.html#sfaira.estimators.EstimatorKerasEmbedding.load_weights_from_cache" title="sfaira.estimators.EstimatorKerasEmbedding.load_weights_from_cache"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_weights_from_cache</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.estimators.EstimatorKerasEmbedding.predict.html#sfaira.estimators.EstimatorKerasEmbedding.predict" title="sfaira.estimators.EstimatorKerasEmbedding.predict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">predict</span></code></a>([batch_size])</p></td>
+<td><p>return the prediction of the model</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.estimators.EstimatorKerasEmbedding.predict_embedding.html#sfaira.estimators.EstimatorKerasEmbedding.predict_embedding" title="sfaira.estimators.EstimatorKerasEmbedding.predict_embedding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">predict_embedding</span></code></a>([batch_size])</p></td>
+<td><p>return the prediction in the latent space (z_mean for variational models)</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.estimators.EstimatorKerasEmbedding.predict_embedding_variational.html#sfaira.estimators.EstimatorKerasEmbedding.predict_embedding_variational" title="sfaira.estimators.EstimatorKerasEmbedding.predict_embedding_variational"><code class="xref py py-obj docutils literal notranslate"><span class="pre">predict_embedding_variational</span></code></a>([batch_size, …])</p></td>
+<td><p>return the prediction of z, z_mean, z_log_var in the variational latent space</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.estimators.EstimatorKerasEmbedding.save_weights_to_cache.html#sfaira.estimators.EstimatorKerasEmbedding.save_weights_to_cache" title="sfaira.estimators.EstimatorKerasEmbedding.save_weights_to_cache"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_weights_to_cache</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.estimators.EstimatorKerasEmbedding.split_train_val_test.html#sfaira.estimators.EstimatorKerasEmbedding.split_train_val_test" title="sfaira.estimators.EstimatorKerasEmbedding.split_train_val_test"><code class="xref py py-obj docutils literal notranslate"><span class="pre">split_train_val_test</span></code></a>(val_split, test_split)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.estimators.EstimatorKerasEmbedding.train.html#sfaira.estimators.EstimatorKerasEmbedding.train" title="sfaira.estimators.EstimatorKerasEmbedding.train"><code class="xref py py-obj docutils literal notranslate"><span class="pre">train</span></code></a>(optimizer, lr[, epochs, …])</p></td>
+<td><p>Train model.</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="sfaira.estimators.EstimatorKerasEmbedding.model_type.html" class="btn btn-neutral float-right" title="sfaira.estimators.EstimatorKerasEmbedding.model_type" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="sfaira.estimators.EstimatorKerasCelltype.ytrue.html" class="btn btn-neutral float-left" title="sfaira.estimators.EstimatorKerasCelltype.ytrue" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Leander Dony, David S. Fischer, Lukas Heumos..
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

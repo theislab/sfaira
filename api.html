@@ -1,0 +1,638 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>API &mdash; sfaira 0+untagged.1.gff3f387 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
+  <link rel="stylesheet" href="_static/custom_sfaira.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="sfaira.data.DatasetBase" href="api/sfaira.data.DatasetBase.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> sfaira
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0+untagged.1.gff3f387
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-sfaira.data">Data: <code class="docutils literal notranslate"><span class="pre">data</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/sfaira.data.DatasetBase.html">sfaira.data.DatasetBase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/sfaira.data.DatasetGroup.html">sfaira.data.DatasetGroup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/sfaira.data.DatasetGroupDirectoryOriented.html">sfaira.data.DatasetGroupDirectoryOriented</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/sfaira.data.DatasetSuperGroup.html">sfaira.data.DatasetSuperGroup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/sfaira.data.DatasetInteractive.html">sfaira.data.DatasetInteractive</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/sfaira.data.Universe.html">sfaira.data.Universe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/sfaira.data.load_store.html">sfaira.data.load_store</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/sfaira.data.DistributedStoreBase.html">sfaira.data.DistributedStoreBase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/sfaira.data.DistributedStoreDao.html">sfaira.data.DistributedStoreDao</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/sfaira.data.DistributedStoreH5ad.html">sfaira.data.DistributedStoreH5ad</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-sfaira.estimators">Estimator classes: <code class="docutils literal notranslate"><span class="pre">estimators</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/sfaira.estimators.EstimatorKeras.html">sfaira.estimators.EstimatorKeras</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/sfaira.estimators.EstimatorKerasCelltype.html">sfaira.estimators.EstimatorKerasCelltype</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/sfaira.estimators.EstimatorKerasEmbedding.html">sfaira.estimators.EstimatorKerasEmbedding</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-sfaira.models">Model classes: <code class="docutils literal notranslate"><span class="pre">models</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#cell-type-models">Cell type models</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/sfaira.models.celltype.CellTypeMarker.html">sfaira.models.celltype.CellTypeMarker</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/sfaira.models.celltype.CellTypeMarker.html">sfaira.models.celltype.CellTypeMarker</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/sfaira.models.celltype.CellTypeMlp.html">sfaira.models.celltype.CellTypeMlp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/sfaira.models.celltype.CellTypeMlpVersioned.html">sfaira.models.celltype.CellTypeMlpVersioned</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#embedding-models">Embedding models</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/sfaira.models.embedding.ModelKerasAe.html">sfaira.models.embedding.ModelKerasAe</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/sfaira.models.embedding.ModelAeVersioned.html">sfaira.models.embedding.ModelAeVersioned</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/sfaira.models.embedding.ModelKerasVae.html">sfaira.models.embedding.ModelKerasVae</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/sfaira.models.embedding.ModelVaeVersioned.html">sfaira.models.embedding.ModelVaeVersioned</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/sfaira.models.embedding.ModelKerasLinear.html">sfaira.models.embedding.ModelKerasLinear</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/sfaira.models.embedding.ModelLinearVersioned.html">sfaira.models.embedding.ModelLinearVersioned</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/sfaira.models.embedding.ModelKerasVaeIAF.html">sfaira.models.embedding.ModelKerasVaeIAF</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/sfaira.models.embedding.ModelVaeIAFVersioned.html">sfaira.models.embedding.ModelVaeIAFVersioned</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/sfaira.models.embedding.ModelKerasVaeVamp.html">sfaira.models.embedding.ModelKerasVaeVamp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/sfaira.models.embedding.ModelVaeVampVersioned.html">sfaira.models.embedding.ModelVaeVampVersioned</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-sfaira.train">Train: <code class="docutils literal notranslate"><span class="pre">train</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#trainer-classes">Trainer classes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/sfaira.train.TrainModelCelltype.html">sfaira.train.TrainModelCelltype</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/sfaira.train.TrainModelEmbedding.html">sfaira.train.TrainModelEmbedding</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#grid-search-summaries">Grid search summaries</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/sfaira.train.GridsearchContainer.html">sfaira.train.GridsearchContainer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/sfaira.train.SummarizeGridsearchCelltype.html">sfaira.train.SummarizeGridsearchCelltype</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/sfaira.train.SummarizeGridsearchEmbedding.html">sfaira.train.SummarizeGridsearchEmbedding</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-sfaira.versions">Versions: <code class="docutils literal notranslate"><span class="pre">versions</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#genomes">Genomes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/sfaira.versions.genomes.GenomeContainer.html">sfaira.versions.genomes.GenomeContainer</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#metadata">Metadata</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/sfaira.versions.metadata.Ontology.html">sfaira.versions.metadata.Ontology</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/sfaira.versions.metadata.OntologyList.html">sfaira.versions.metadata.OntologyList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/sfaira.versions.metadata.OntologyHierarchical.html">sfaira.versions.metadata.OntologyHierarchical</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/sfaira.versions.metadata.OntologyObo.html">sfaira.versions.metadata.OntologyObo</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/sfaira.versions.metadata.OntologyOboCustom.html">sfaira.versions.metadata.OntologyOboCustom</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/sfaira.versions.metadata.OntologyCellosaurus.html">sfaira.versions.metadata.OntologyCellosaurus</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/sfaira.versions.metadata.OntologyCl.html">sfaira.versions.metadata.OntologyCl</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/sfaira.versions.metadata.OntologyHsapdv.html">sfaira.versions.metadata.OntologyHsapdv</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/sfaira.versions.metadata.OntologyMondo.html">sfaira.versions.metadata.OntologyMondo</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/sfaira.versions.metadata.OntologyMmusdv.html">sfaira.versions.metadata.OntologyMmusdv</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/sfaira.versions.metadata.OntologySinglecellLibraryConstruction.html">sfaira.versions.metadata.OntologySinglecellLibraryConstruction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/sfaira.versions.metadata.OntologyUberon.html">sfaira.versions.metadata.OntologyUberon</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/sfaira.versions.metadata.CelltypeUniverse.html">sfaira.versions.metadata.CelltypeUniverse</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#topologies">Topologies</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/sfaira.versions.topologies.TopologyContainer.html">sfaira.versions.topologies.TopologyContainer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-sfaira.ui">User interface: <code class="docutils literal notranslate"><span class="pre">ui</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/sfaira.ui.UserInterface.html">sfaira.ui.UserInterface</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="commandline_interface.html">Commandline interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adding_datasets.html">Contributing data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="consuming_data.html">Consuming Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ecosystem.html">Ecosystem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">sfaira</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>API</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            
+              <a href="https://github.com/theislab/sfaira/blob/master/docs/api.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="api">
+<h1>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h1>
+<p>Import sfaira as:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sfaira</span>
+</pre></div>
+</div>
+<div class="section" id="module-sfaira.data">
+<span id="data-data"></span><h2>Data: <code class="docutils literal notranslate"><span class="pre">data</span></code><a class="headerlink" href="#module-sfaira.data" title="Permalink to this headline">¶</a></h2>
+<p>The sfaira data zoo API.</p>
+<p>Dataset representing classes used for development:</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/sfaira.data.DatasetBase.html#sfaira.data.DatasetBase" title="sfaira.data.DatasetBase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data.DatasetBase</span></code></a>(data_path, meta_path, …)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/sfaira.data.DatasetGroup.html#sfaira.data.DatasetGroup" title="sfaira.data.DatasetGroup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data.DatasetGroup</span></code></a>(datasets)</p></td>
+<td><p>Container class that co-manages multiple data sets, removing need to call Dataset() methods directly through wrapping them.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/sfaira.data.DatasetGroupDirectoryOriented.html#sfaira.data.DatasetGroupDirectoryOriented" title="sfaira.data.DatasetGroupDirectoryOriented"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data.DatasetGroupDirectoryOriented</span></code></a>(…)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/sfaira.data.DatasetSuperGroup.html#sfaira.data.DatasetSuperGroup" title="sfaira.data.DatasetSuperGroup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data.DatasetSuperGroup</span></code></a>(dataset_groups, …)</p></td>
+<td><p>Container for multiple DatasetGroup instances.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Interactive data class to use a loaded data object in the context sfaira tools:</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/sfaira.data.DatasetInteractive.html#sfaira.data.DatasetInteractive" title="sfaira.data.DatasetInteractive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data.DatasetInteractive</span></code></a>(data, organism, …)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<p>Dataset universe to interact with all data loader classes:</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/sfaira.data.Universe.html#sfaira.data.Universe" title="sfaira.data.Universe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data.Universe</span></code></a>(data_path, meta_path, cache_path)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<p>Data store handling:</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/sfaira.data.load_store.html#sfaira.data.load_store" title="sfaira.data.load_store"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data.load_store</span></code></a>(cache_path[, store_format, …])</p></td>
+<td><p>Instantiates a distributed store class.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/sfaira.data.DistributedStoreBase.html#sfaira.data.DistributedStoreBase" title="sfaira.data.DistributedStoreBase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data.DistributedStoreBase</span></code></a>(adata_by_key, …)</p></td>
+<td><p>Data set group class tailored to data access requirements common in high-performance computing (HPC).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/sfaira.data.DistributedStoreDao.html#sfaira.data.DistributedStoreDao" title="sfaira.data.DistributedStoreDao"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data.DistributedStoreDao</span></code></a>(cache_path, …)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/sfaira.data.DistributedStoreH5ad.html#sfaira.data.DistributedStoreH5ad" title="sfaira.data.DistributedStoreH5ad"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data.DistributedStoreH5ad</span></code></a>(cache_path, …)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="module-sfaira.estimators">
+<span id="estimator-classes-estimators"></span><h2>Estimator classes: <code class="docutils literal notranslate"><span class="pre">estimators</span></code><a class="headerlink" href="#module-sfaira.estimators" title="Permalink to this headline">¶</a></h2>
+<p>Estimator classes from the sfaira model zoo API for advanced use.</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/sfaira.estimators.EstimatorKeras.html#sfaira.estimators.EstimatorKeras" title="sfaira.estimators.EstimatorKeras"><code class="xref py py-obj docutils literal notranslate"><span class="pre">estimators.EstimatorKeras</span></code></a>(data, …)</p></td>
+<td><p>Estimator base class for keras models.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/sfaira.estimators.EstimatorKerasCelltype.html#sfaira.estimators.EstimatorKerasCelltype" title="sfaira.estimators.EstimatorKerasCelltype"><code class="xref py py-obj docutils literal notranslate"><span class="pre">estimators.EstimatorKerasCelltype</span></code></a>(data, …)</p></td>
+<td><p>Estimator class for the cell type model.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/sfaira.estimators.EstimatorKerasEmbedding.html#sfaira.estimators.EstimatorKerasEmbedding" title="sfaira.estimators.EstimatorKerasEmbedding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">estimators.EstimatorKerasEmbedding</span></code></a>(data, …)</p></td>
+<td><p>Estimator class for the embedding model.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="module-sfaira.models">
+<span id="model-classes-models"></span><h2>Model classes: <code class="docutils literal notranslate"><span class="pre">models</span></code><a class="headerlink" href="#module-sfaira.models" title="Permalink to this headline">¶</a></h2>
+<p>Model classes from the sfaira model zoo API for advanced use.</p>
+<div class="section" id="cell-type-models">
+<h3>Cell type models<a class="headerlink" href="#cell-type-models" title="Permalink to this headline">¶</a></h3>
+<p>Classes that wrap tensorflow cell type predictor models.</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/sfaira.models.celltype.CellTypeMarker.html#sfaira.models.celltype.CellTypeMarker" title="sfaira.models.celltype.CellTypeMarker"><code class="xref py py-obj docutils literal notranslate"><span class="pre">models.celltype.CellTypeMarker</span></code></a>(in_dim, …)</p></td>
+<td><p>Marker gene-based cell type classifier: Learns whether or not each gene exceeds requires threshold and learns cell type assignment as linear combination of these marker gene presence probabilities.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/sfaira.models.celltype.CellTypeMarker.html#sfaira.models.celltype.CellTypeMarker" title="sfaira.models.celltype.CellTypeMarker"><code class="xref py py-obj docutils literal notranslate"><span class="pre">models.celltype.CellTypeMarker</span></code></a>(in_dim, …)</p></td>
+<td><p>Marker gene-based cell type classifier: Learns whether or not each gene exceeds requires threshold and learns cell type assignment as linear combination of these marker gene presence probabilities.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/sfaira.models.celltype.CellTypeMlp.html#sfaira.models.celltype.CellTypeMlp" title="sfaira.models.celltype.CellTypeMlp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">models.celltype.CellTypeMlp</span></code></a>(in_dim, out_dim, …)</p></td>
+<td><p>Multi-layer perceptron to predict cell type.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/sfaira.models.celltype.CellTypeMlpVersioned.html#sfaira.models.celltype.CellTypeMlpVersioned" title="sfaira.models.celltype.CellTypeMlpVersioned"><code class="xref py py-obj docutils literal notranslate"><span class="pre">models.celltype.CellTypeMlpVersioned</span></code></a>(…)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="embedding-models">
+<h3>Embedding models<a class="headerlink" href="#embedding-models" title="Permalink to this headline">¶</a></h3>
+<p>Classes that wrap tensorflow embedding models.</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/sfaira.models.embedding.ModelKerasAe.html#sfaira.models.embedding.ModelKerasAe" title="sfaira.models.embedding.ModelKerasAe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">models.embedding.ModelKerasAe</span></code></a>(in_dim, …[, …])</p></td>
+<td><p>Combines the encoder and decoder into an end-to-end model for training.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/sfaira.models.embedding.ModelAeVersioned.html#sfaira.models.embedding.ModelAeVersioned" title="sfaira.models.embedding.ModelAeVersioned"><code class="xref py py-obj docutils literal notranslate"><span class="pre">models.embedding.ModelAeVersioned</span></code></a>(…)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/sfaira.models.embedding.ModelKerasVae.html#sfaira.models.embedding.ModelKerasVae" title="sfaira.models.embedding.ModelKerasVae"><code class="xref py py-obj docutils literal notranslate"><span class="pre">models.embedding.ModelKerasVae</span></code></a>(in_dim[, …])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/sfaira.models.embedding.ModelVaeVersioned.html#sfaira.models.embedding.ModelVaeVersioned" title="sfaira.models.embedding.ModelVaeVersioned"><code class="xref py py-obj docutils literal notranslate"><span class="pre">models.embedding.ModelVaeVersioned</span></code></a>(…)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/sfaira.models.embedding.ModelKerasLinear.html#sfaira.models.embedding.ModelKerasLinear" title="sfaira.models.embedding.ModelKerasLinear"><code class="xref py py-obj docutils literal notranslate"><span class="pre">models.embedding.ModelKerasLinear</span></code></a>(in_dim, …)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/sfaira.models.embedding.ModelLinearVersioned.html#sfaira.models.embedding.ModelLinearVersioned" title="sfaira.models.embedding.ModelLinearVersioned"><code class="xref py py-obj docutils literal notranslate"><span class="pre">models.embedding.ModelLinearVersioned</span></code></a>(…)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/sfaira.models.embedding.ModelKerasVaeIAF.html#sfaira.models.embedding.ModelKerasVaeIAF" title="sfaira.models.embedding.ModelKerasVaeIAF"><code class="xref py py-obj docutils literal notranslate"><span class="pre">models.embedding.ModelKerasVaeIAF</span></code></a>(in_dim[, …])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/sfaira.models.embedding.ModelVaeIAFVersioned.html#sfaira.models.embedding.ModelVaeIAFVersioned" title="sfaira.models.embedding.ModelVaeIAFVersioned"><code class="xref py py-obj docutils literal notranslate"><span class="pre">models.embedding.ModelVaeIAFVersioned</span></code></a>(…)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/sfaira.models.embedding.ModelKerasVaeVamp.html#sfaira.models.embedding.ModelKerasVaeVamp" title="sfaira.models.embedding.ModelKerasVaeVamp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">models.embedding.ModelKerasVaeVamp</span></code></a>(in_dim[, …])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/sfaira.models.embedding.ModelVaeVampVersioned.html#sfaira.models.embedding.ModelVaeVampVersioned" title="sfaira.models.embedding.ModelVaeVampVersioned"><code class="xref py py-obj docutils literal notranslate"><span class="pre">models.embedding.ModelVaeVampVersioned</span></code></a>(…)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="module-sfaira.train">
+<span id="train-train"></span><h2>Train: <code class="docutils literal notranslate"><span class="pre">train</span></code><a class="headerlink" href="#module-sfaira.train" title="Permalink to this headline">¶</a></h2>
+<p>The interface for training sfaira compatible models.</p>
+<div class="section" id="trainer-classes">
+<h3>Trainer classes<a class="headerlink" href="#trainer-classes" title="Permalink to this headline">¶</a></h3>
+<p>Classes that wrap estimator classes to use in grid search training.</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/sfaira.train.TrainModelCelltype.html#sfaira.train.TrainModelCelltype" title="sfaira.train.TrainModelCelltype"><code class="xref py py-obj docutils literal notranslate"><span class="pre">train.TrainModelCelltype</span></code></a>(model_path, data, …)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/sfaira.train.TrainModelEmbedding.html#sfaira.train.TrainModelEmbedding" title="sfaira.train.TrainModelEmbedding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">train.TrainModelEmbedding</span></code></a>(model_path, data, …)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="grid-search-summaries">
+<h3>Grid search summaries<a class="headerlink" href="#grid-search-summaries" title="Permalink to this headline">¶</a></h3>
+<p>Classes to pool evaluation metrics across fits in a grid search.</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/sfaira.train.GridsearchContainer.html#sfaira.train.GridsearchContainer" title="sfaira.train.GridsearchContainer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">train.GridsearchContainer</span></code></a>(source_path, cv)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/sfaira.train.SummarizeGridsearchCelltype.html#sfaira.train.SummarizeGridsearchCelltype" title="sfaira.train.SummarizeGridsearchCelltype"><code class="xref py py-obj docutils literal notranslate"><span class="pre">train.SummarizeGridsearchCelltype</span></code></a>(…)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/sfaira.train.SummarizeGridsearchEmbedding.html#sfaira.train.SummarizeGridsearchEmbedding" title="sfaira.train.SummarizeGridsearchEmbedding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">train.SummarizeGridsearchEmbedding</span></code></a>(…)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="module-sfaira.versions">
+<span id="versions-versions"></span><h2>Versions: <code class="docutils literal notranslate"><span class="pre">versions</span></code><a class="headerlink" href="#module-sfaira.versions" title="Permalink to this headline">¶</a></h2>
+<p>The interface for sfaira metadata management.</p>
+<div class="section" id="genomes">
+<h3>Genomes<a class="headerlink" href="#genomes" title="Permalink to this headline">¶</a></h3>
+<p>Genome management.</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/sfaira.versions.genomes.GenomeContainer.html#sfaira.versions.genomes.GenomeContainer" title="sfaira.versions.genomes.GenomeContainer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">versions.genomes.GenomeContainer</span></code></a>(assembly)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="metadata">
+<h3>Metadata<a class="headerlink" href="#metadata" title="Permalink to this headline">¶</a></h3>
+<p>Dataset metadata management.
+Base classes to manage ontology files:</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/sfaira.versions.metadata.Ontology.html#sfaira.versions.metadata.Ontology" title="sfaira.versions.metadata.Ontology"><code class="xref py py-obj docutils literal notranslate"><span class="pre">versions.metadata.Ontology</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/sfaira.versions.metadata.OntologyList.html#sfaira.versions.metadata.OntologyList" title="sfaira.versions.metadata.OntologyList"><code class="xref py py-obj docutils literal notranslate"><span class="pre">versions.metadata.OntologyList</span></code></a>(terms, bool, …)</p></td>
+<td><p>Basic unordered ontology container</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/sfaira.versions.metadata.OntologyHierarchical.html#sfaira.versions.metadata.OntologyHierarchical" title="sfaira.versions.metadata.OntologyHierarchical"><code class="xref py py-obj docutils literal notranslate"><span class="pre">versions.metadata.OntologyHierarchical</span></code></a>()</p></td>
+<td><p>Basic ordered ontology container</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/sfaira.versions.metadata.OntologyObo.html#sfaira.versions.metadata.OntologyObo" title="sfaira.versions.metadata.OntologyObo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">versions.metadata.OntologyObo</span></code></a>(obo, **kwargs)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/sfaira.versions.metadata.OntologyOboCustom.html#sfaira.versions.metadata.OntologyOboCustom" title="sfaira.versions.metadata.OntologyOboCustom"><code class="xref py py-obj docutils literal notranslate"><span class="pre">versions.metadata.OntologyOboCustom</span></code></a>(obo, …)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<p>Onotology-specific classes:</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/sfaira.versions.metadata.OntologyCellosaurus.html#sfaira.versions.metadata.OntologyCellosaurus" title="sfaira.versions.metadata.OntologyCellosaurus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">versions.metadata.OntologyCellosaurus</span></code></a>(**kwargs)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/sfaira.versions.metadata.OntologyCl.html#sfaira.versions.metadata.OntologyCl" title="sfaira.versions.metadata.OntologyCl"><code class="xref py py-obj docutils literal notranslate"><span class="pre">versions.metadata.OntologyCl</span></code></a>(branch, …)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/sfaira.versions.metadata.OntologyHsapdv.html#sfaira.versions.metadata.OntologyHsapdv" title="sfaira.versions.metadata.OntologyHsapdv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">versions.metadata.OntologyHsapdv</span></code></a>(**kwargs)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/sfaira.versions.metadata.OntologyMondo.html#sfaira.versions.metadata.OntologyMondo" title="sfaira.versions.metadata.OntologyMondo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">versions.metadata.OntologyMondo</span></code></a>(**kwargs)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/sfaira.versions.metadata.OntologyMmusdv.html#sfaira.versions.metadata.OntologyMmusdv" title="sfaira.versions.metadata.OntologyMmusdv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">versions.metadata.OntologyMmusdv</span></code></a>(**kwargs)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/sfaira.versions.metadata.OntologySinglecellLibraryConstruction.html#sfaira.versions.metadata.OntologySinglecellLibraryConstruction" title="sfaira.versions.metadata.OntologySinglecellLibraryConstruction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">versions.metadata.OntologySinglecellLibraryConstruction</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/sfaira.versions.metadata.OntologyUberon.html#sfaira.versions.metadata.OntologyUberon" title="sfaira.versions.metadata.OntologyUberon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">versions.metadata.OntologyUberon</span></code></a>(**kwargs)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<p>Class wrapping cell type ontology for predictor models:</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/sfaira.versions.metadata.CelltypeUniverse.html#sfaira.versions.metadata.CelltypeUniverse" title="sfaira.versions.metadata.CelltypeUniverse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">versions.metadata.CelltypeUniverse</span></code></a>(cl, …)</p></td>
+<td><p>Cell type universe (list) and ontology (hierarchy) container class.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="topologies">
+<h3>Topologies<a class="headerlink" href="#topologies" title="Permalink to this headline">¶</a></h3>
+<p>Model topology management.</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/sfaira.versions.topologies.TopologyContainer.html#sfaira.versions.topologies.TopologyContainer" title="sfaira.versions.topologies.TopologyContainer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">versions.topologies.TopologyContainer</span></code></a>(…)</p></td>
+<td><p>Class interface for a YAML-style defined model topology that loads a genome container tailored to the model.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="module-sfaira.ui">
+<span id="user-interface-ui"></span><h2>User interface: <code class="docutils literal notranslate"><span class="pre">ui</span></code><a class="headerlink" href="#module-sfaira.ui" title="Permalink to this headline">¶</a></h2>
+<p>This sub-module gives users access to the model zoo, including model query from remote servers.
+This API is designed to be used in analysis workflows and does not require any understanding of the way models are defined and stored.</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/sfaira.ui.UserInterface.html#sfaira.ui.UserInterface" title="sfaira.ui.UserInterface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ui.UserInterface</span></code></a>(custom_repo, str]] = None, …)</p></td>
+<td><p>This class performs data set handling and coordinates estimators for the different model types. Example code to obtain a UMAP embedding plot of the embedding created from your data with cell-type labels::.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="api/sfaira.data.DatasetBase.html" class="btn btn-neutral float-right" title="sfaira.data.DatasetBase" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Leander Dony, David S. Fischer, Lukas Heumos..
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

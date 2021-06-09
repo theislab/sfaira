@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>sfaira.data.DatasetBase &mdash; sfaira 0+untagged.1.g7859fe8 documentation</title>
+  <title>sfaira.data.DatasetBase &mdash; sfaira 0+untagged.1.gff3f387 documentation</title>
   
 
   
@@ -43,8 +43,8 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="sfaira.data.DatasetSuperGroup" href="sfaira.data.DatasetSuperGroup.html" />
-    <link rel="prev" title="API" href="index.html" /> 
+    <link rel="next" title="sfaira.data.DatasetBase.additional_annotation_key" href="sfaira.data.DatasetBase.additional_annotation_key.html" />
+    <link rel="prev" title="API" href="../api.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                0+untagged.1.g7859fe8
+                0+untagged.1.gff3f387
               </div>
             
           
@@ -95,32 +95,116 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">API</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="index.html#module-sfaira.data">Data: <code class="docutils literal notranslate"><span class="pre">data</span></code></a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="index.html#pre-defined-data-set-collections">Pre-defined data set collections</a></li>
-<li class="toctree-l3 current"><a class="reference internal" href="index.html#functionalities-for-interactive-data-analysis">Functionalities for interactive data analysis</a><ul class="current">
-<li class="toctree-l4 current"><a class="current reference internal" href="#">sfaira.data.DatasetBase</a></li>
-<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetSuperGroup.html">sfaira.data.DatasetSuperGroup</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#module-sfaira.data">Data: <code class="docutils literal notranslate"><span class="pre">data</span></code></a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">sfaira.data.DatasetBase</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.additional_annotation_key.html">sfaira.data.DatasetBase.additional_annotation_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.annotated.html">sfaira.data.DatasetBase.annotated</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.assay_differentiation.html">sfaira.data.DatasetBase.assay_differentiation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.assay_differentiation_obs_key.html">sfaira.data.DatasetBase.assay_differentiation_obs_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.assay_sc.html">sfaira.data.DatasetBase.assay_sc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.assay_sc_obs_key.html">sfaira.data.DatasetBase.assay_sc_obs_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.assay_type_differentiation.html">sfaira.data.DatasetBase.assay_type_differentiation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.assay_type_differentiation_obs_key.html">sfaira.data.DatasetBase.assay_type_differentiation_obs_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.author.html">sfaira.data.DatasetBase.author</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.bio_sample.html">sfaira.data.DatasetBase.bio_sample</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.bio_sample_obs_key.html">sfaira.data.DatasetBase.bio_sample_obs_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.cache_fn.html">sfaira.data.DatasetBase.cache_fn</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.cell_line.html">sfaira.data.DatasetBase.cell_line</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.cell_line_obs_key.html">sfaira.data.DatasetBase.cell_line_obs_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.cell_ontology_map.html">sfaira.data.DatasetBase.cell_ontology_map</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.cell_types_original_obs_key.html">sfaira.data.DatasetBase.cell_types_original_obs_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.cellontology_class_obs_key.html">sfaira.data.DatasetBase.cellontology_class_obs_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.cellontology_id_obs_key.html">sfaira.data.DatasetBase.cellontology_id_obs_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.celltypes_universe.html">sfaira.data.DatasetBase.celltypes_universe</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.citation.html">sfaira.data.DatasetBase.citation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.data_dir.html">sfaira.data.DatasetBase.data_dir</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.default_embedding.html">sfaira.data.DatasetBase.default_embedding</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.development_stage.html">sfaira.data.DatasetBase.development_stage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.development_stage_obs_key.html">sfaira.data.DatasetBase.development_stage_obs_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.directory_formatted_doi.html">sfaira.data.DatasetBase.directory_formatted_doi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.disease.html">sfaira.data.DatasetBase.disease</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.disease_obs_key.html">sfaira.data.DatasetBase.disease_obs_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.doi.html">sfaira.data.DatasetBase.doi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.doi_cleaned_id.html">sfaira.data.DatasetBase.doi_cleaned_id</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.doi_main.html">sfaira.data.DatasetBase.doi_main</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.download_url_data.html">sfaira.data.DatasetBase.download_url_data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.download_url_meta.html">sfaira.data.DatasetBase.download_url_meta</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.ethnicity.html">sfaira.data.DatasetBase.ethnicity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.ethnicity_obs_key.html">sfaira.data.DatasetBase.ethnicity_obs_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.fn_ontology_class_map_tsv.html">sfaira.data.DatasetBase.fn_ontology_class_map_tsv</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.gene_id_ensembl_var_key.html">sfaira.data.DatasetBase.gene_id_ensembl_var_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.gene_id_symbols_var_key.html">sfaira.data.DatasetBase.gene_id_symbols_var_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.id.html">sfaira.data.DatasetBase.id</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.individual.html">sfaira.data.DatasetBase.individual</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.individual_obs_key.html">sfaira.data.DatasetBase.individual_obs_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.loaded.html">sfaira.data.DatasetBase.loaded</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.meta.html">sfaira.data.DatasetBase.meta</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.meta_fn.html">sfaira.data.DatasetBase.meta_fn</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.ncells.html">sfaira.data.DatasetBase.ncells</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.normalization.html">sfaira.data.DatasetBase.normalization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.ontology_celltypes.html">sfaira.data.DatasetBase.ontology_celltypes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.ontology_organ.html">sfaira.data.DatasetBase.ontology_organ</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.organ.html">sfaira.data.DatasetBase.organ</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.organ_obs_key.html">sfaira.data.DatasetBase.organ_obs_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.organism.html">sfaira.data.DatasetBase.organism</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.organism_obs_key.html">sfaira.data.DatasetBase.organism_obs_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.primary_data.html">sfaira.data.DatasetBase.primary_data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.sample_source.html">sfaira.data.DatasetBase.sample_source</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.sample_source_obs_key.html">sfaira.data.DatasetBase.sample_source_obs_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.sex.html">sfaira.data.DatasetBase.sex</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.sex_obs_key.html">sfaira.data.DatasetBase.sex_obs_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.source.html">sfaira.data.DatasetBase.source</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.state_exact.html">sfaira.data.DatasetBase.state_exact</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.state_exact_obs_key.html">sfaira.data.DatasetBase.state_exact_obs_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.tech_sample.html">sfaira.data.DatasetBase.tech_sample</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.tech_sample_obs_key.html">sfaira.data.DatasetBase.tech_sample_obs_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.title.html">sfaira.data.DatasetBase.title</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.year.html">sfaira.data.DatasetBase.year</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.clear.html">sfaira.data.DatasetBase.clear</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.collapse_counts.html">sfaira.data.DatasetBase.collapse_counts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.download.html">sfaira.data.DatasetBase.download</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.load.html">sfaira.data.DatasetBase.load</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.load_meta.html">sfaira.data.DatasetBase.load_meta</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.load_ontology_class_map.html">sfaira.data.DatasetBase.load_ontology_class_map</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.project_celltypes_to_ontology.html">sfaira.data.DatasetBase.project_celltypes_to_ontology</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.set_dataset_id.html">sfaira.data.DatasetBase.set_dataset_id</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.show_summary.html">sfaira.data.DatasetBase.show_summary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.streamline_features.html">sfaira.data.DatasetBase.streamline_features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.streamline_metadata.html">sfaira.data.DatasetBase.streamline_metadata</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.subset_cells.html">sfaira.data.DatasetBase.subset_cells</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.write_backed.html">sfaira.data.DatasetBase.write_backed</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.write_distributed_store.html">sfaira.data.DatasetBase.write_distributed_store</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.write_meta.html">sfaira.data.DatasetBase.write_meta</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetBase.write_ontology_class_map.html">sfaira.data.DatasetBase.write_ontology_class_map</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="index.html#id1">Functionalities for interactive data analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.DatasetGroup.html">sfaira.data.DatasetGroup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.DatasetGroupDirectoryOriented.html">sfaira.data.DatasetGroupDirectoryOriented</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.DatasetSuperGroup.html">sfaira.data.DatasetSuperGroup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.DatasetInteractive.html">sfaira.data.DatasetInteractive</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.Universe.html">sfaira.data.Universe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.load_store.html">sfaira.data.load_store</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.DistributedStoreBase.html">sfaira.data.DistributedStoreBase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.DistributedStoreDao.html">sfaira.data.DistributedStoreDao</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.DistributedStoreH5ad.html">sfaira.data.DistributedStoreH5ad</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#module-sfaira.genomes">Genomes: <code class="docutils literal notranslate"><span class="pre">genomes</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#module-sfaira.models">Models: <code class="docutils literal notranslate"><span class="pre">models</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#module-sfaira.train">Train: <code class="docutils literal notranslate"><span class="pre">train</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#module-sfaira.ui">User interface: <code class="docutils literal notranslate"><span class="pre">ui</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.estimators">Estimator classes: <code class="docutils literal notranslate"><span class="pre">estimators</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.models">Model classes: <code class="docutils literal notranslate"><span class="pre">models</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.train">Train: <code class="docutils literal notranslate"><span class="pre">train</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.versions">Versions: <code class="docutils literal notranslate"><span class="pre">versions</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.ui">User interface: <code class="docutils literal notranslate"><span class="pre">ui</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../commandline_interface.html">Commandline interface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../using_data.html">Using Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../adding_datasets.html">Adding data sets</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../adding_dataset_classes.html">The class-based data loader python file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../adding_datasets.html">Contributing data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../consuming_data.html">Consuming Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../models.html">Models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ecosystem.html">Ecosystem</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Roadmap</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
 </ul>
 
@@ -164,13 +248,15 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-          <li><a href="index.html">API</a> &raquo;</li>
+          <li><a href="../api.html">API</a> &raquo;</li>
         
       <li>sfaira.data.DatasetBase</li>
     
@@ -179,7 +265,8 @@
         
           
             
-              <a href="https://github.com/theislab/sfaira/blob/master/docs/api/sfaira.data.DatasetBase.rst" class="fa fa-github"> Edit on GitHub</a>
+              <!-- User defined GitHub URL -->
+              <a href="sfaira.data.DatasetBase" class="fa fa-github"> Edit on GitHub</a>
             
           
         
@@ -198,34 +285,204 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="sfaira.data.DatasetBase">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">sfaira.data.</span></span><span class="sig-name descname"><span class="pre">DatasetBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dict_load_func_annotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yaml_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_fn</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_fns</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_annotation_key</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sfaira.data.DatasetBase" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py method">
-<dt class="sig sig-object py" id="sfaira.data.DatasetBase.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dict_load_func_annotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yaml_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_fn</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_fns</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_annotation_key</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sfaira.data.DatasetBase.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>data_path</strong> – </p></li>
-<li><p><strong>meta_path</strong> – </p></li>
-<li><p><strong>cache_path</strong> – </p></li>
-<li><p><strong>load_func</strong> – <p>Function to load data from disk into memory.</p>
-<p>Signature: load(data_dir, sample_fn, <a href="#id1"><span class="problematic" id="id2">**</span></a>kwargs)</p>
-</p></li>
-<li><p><strong>dict_load_func_annotation</strong> – <p>Dictionary of functions to load additional observatino-wise annotation. The
-functions in the values of the dictionary can be selected via  self.additional_annotation_key which needs
-to correspond to a key of the dictionary.</p>
-<p>Signature: Dict[str, load_annotation(data_dir, sample_fn, additional_annotation_key, <a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs)]</p>
-</p></li>
-<li><p><strong>yaml_path</strong> – </p></li>
-<li><p><strong>sample_fn</strong> – </p></li>
-<li><p><strong>sample_fns</strong> – </p></li>
-<li><p><strong>additional_annotation_key</strong> – Key used by dict_load_func_annotation to identify which additional annotation
-is to be loaded.</p></li>
-<li><p><strong>kwargs</strong> – </p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
+<dd><p class="rubric">Attributes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.additional_annotation_key.html#sfaira.data.DatasetBase.additional_annotation_key" title="sfaira.data.DatasetBase.additional_annotation_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">additional_annotation_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.annotated.html#sfaira.data.DatasetBase.annotated" title="sfaira.data.DatasetBase.annotated"><code class="xref py py-obj docutils literal notranslate"><span class="pre">annotated</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.assay_differentiation.html#sfaira.data.DatasetBase.assay_differentiation" title="sfaira.data.DatasetBase.assay_differentiation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assay_differentiation</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.assay_differentiation_obs_key.html#sfaira.data.DatasetBase.assay_differentiation_obs_key" title="sfaira.data.DatasetBase.assay_differentiation_obs_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assay_differentiation_obs_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.assay_sc.html#sfaira.data.DatasetBase.assay_sc" title="sfaira.data.DatasetBase.assay_sc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assay_sc</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.assay_sc_obs_key.html#sfaira.data.DatasetBase.assay_sc_obs_key" title="sfaira.data.DatasetBase.assay_sc_obs_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assay_sc_obs_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.assay_type_differentiation.html#sfaira.data.DatasetBase.assay_type_differentiation" title="sfaira.data.DatasetBase.assay_type_differentiation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assay_type_differentiation</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.assay_type_differentiation_obs_key.html#sfaira.data.DatasetBase.assay_type_differentiation_obs_key" title="sfaira.data.DatasetBase.assay_type_differentiation_obs_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assay_type_differentiation_obs_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.author.html#sfaira.data.DatasetBase.author" title="sfaira.data.DatasetBase.author"><code class="xref py py-obj docutils literal notranslate"><span class="pre">author</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.bio_sample.html#sfaira.data.DatasetBase.bio_sample" title="sfaira.data.DatasetBase.bio_sample"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bio_sample</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.bio_sample_obs_key.html#sfaira.data.DatasetBase.bio_sample_obs_key" title="sfaira.data.DatasetBase.bio_sample_obs_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bio_sample_obs_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.cache_fn.html#sfaira.data.DatasetBase.cache_fn" title="sfaira.data.DatasetBase.cache_fn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cache_fn</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.cell_line.html#sfaira.data.DatasetBase.cell_line" title="sfaira.data.DatasetBase.cell_line"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cell_line</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.cell_line_obs_key.html#sfaira.data.DatasetBase.cell_line_obs_key" title="sfaira.data.DatasetBase.cell_line_obs_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cell_line_obs_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.cell_ontology_map.html#sfaira.data.DatasetBase.cell_ontology_map" title="sfaira.data.DatasetBase.cell_ontology_map"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cell_ontology_map</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.cell_types_original_obs_key.html#sfaira.data.DatasetBase.cell_types_original_obs_key" title="sfaira.data.DatasetBase.cell_types_original_obs_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cell_types_original_obs_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.cellontology_class_obs_key.html#sfaira.data.DatasetBase.cellontology_class_obs_key" title="sfaira.data.DatasetBase.cellontology_class_obs_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellontology_class_obs_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.cellontology_id_obs_key.html#sfaira.data.DatasetBase.cellontology_id_obs_key" title="sfaira.data.DatasetBase.cellontology_id_obs_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellontology_id_obs_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.celltypes_universe.html#sfaira.data.DatasetBase.celltypes_universe" title="sfaira.data.DatasetBase.celltypes_universe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">celltypes_universe</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.citation.html#sfaira.data.DatasetBase.citation" title="sfaira.data.DatasetBase.citation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">citation</span></code></a></p></td>
+<td><p>Return all information necessary to cite data set.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.data_dir.html#sfaira.data.DatasetBase.data_dir" title="sfaira.data.DatasetBase.data_dir"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_dir</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.default_embedding.html#sfaira.data.DatasetBase.default_embedding" title="sfaira.data.DatasetBase.default_embedding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_embedding</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.development_stage.html#sfaira.data.DatasetBase.development_stage" title="sfaira.data.DatasetBase.development_stage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">development_stage</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.development_stage_obs_key.html#sfaira.data.DatasetBase.development_stage_obs_key" title="sfaira.data.DatasetBase.development_stage_obs_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">development_stage_obs_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.directory_formatted_doi.html#sfaira.data.DatasetBase.directory_formatted_doi" title="sfaira.data.DatasetBase.directory_formatted_doi"><code class="xref py py-obj docutils literal notranslate"><span class="pre">directory_formatted_doi</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.disease.html#sfaira.data.DatasetBase.disease" title="sfaira.data.DatasetBase.disease"><code class="xref py py-obj docutils literal notranslate"><span class="pre">disease</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.disease_obs_key.html#sfaira.data.DatasetBase.disease_obs_key" title="sfaira.data.DatasetBase.disease_obs_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">disease_obs_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.doi.html#sfaira.data.DatasetBase.doi" title="sfaira.data.DatasetBase.doi"><code class="xref py py-obj docutils literal notranslate"><span class="pre">doi</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.doi_cleaned_id.html#sfaira.data.DatasetBase.doi_cleaned_id" title="sfaira.data.DatasetBase.doi_cleaned_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">doi_cleaned_id</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.doi_main.html#sfaira.data.DatasetBase.doi_main" title="sfaira.data.DatasetBase.doi_main"><code class="xref py py-obj docutils literal notranslate"><span class="pre">doi_main</span></code></a></p></td>
+<td><p>Yields the main DOI associated with the study, defined as the DOI that comes first in alphabetical order.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.download_url_data.html#sfaira.data.DatasetBase.download_url_data" title="sfaira.data.DatasetBase.download_url_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">download_url_data</span></code></a></p></td>
+<td><p>Data download website(s).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.download_url_meta.html#sfaira.data.DatasetBase.download_url_meta" title="sfaira.data.DatasetBase.download_url_meta"><code class="xref py py-obj docutils literal notranslate"><span class="pre">download_url_meta</span></code></a></p></td>
+<td><p>Meta data download website(s).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.ethnicity.html#sfaira.data.DatasetBase.ethnicity" title="sfaira.data.DatasetBase.ethnicity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ethnicity</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.ethnicity_obs_key.html#sfaira.data.DatasetBase.ethnicity_obs_key" title="sfaira.data.DatasetBase.ethnicity_obs_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ethnicity_obs_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.fn_ontology_class_map_tsv.html#sfaira.data.DatasetBase.fn_ontology_class_map_tsv" title="sfaira.data.DatasetBase.fn_ontology_class_map_tsv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fn_ontology_class_map_tsv</span></code></a></p></td>
+<td><p>Standardised file name under which cell type conversion tables are saved.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.gene_id_ensembl_var_key.html#sfaira.data.DatasetBase.gene_id_ensembl_var_key" title="sfaira.data.DatasetBase.gene_id_ensembl_var_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gene_id_ensembl_var_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.gene_id_symbols_var_key.html#sfaira.data.DatasetBase.gene_id_symbols_var_key" title="sfaira.data.DatasetBase.gene_id_symbols_var_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gene_id_symbols_var_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.id.html#sfaira.data.DatasetBase.id" title="sfaira.data.DatasetBase.id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">id</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.individual.html#sfaira.data.DatasetBase.individual" title="sfaira.data.DatasetBase.individual"><code class="xref py py-obj docutils literal notranslate"><span class="pre">individual</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.individual_obs_key.html#sfaira.data.DatasetBase.individual_obs_key" title="sfaira.data.DatasetBase.individual_obs_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">individual_obs_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.loaded.html#sfaira.data.DatasetBase.loaded" title="sfaira.data.DatasetBase.loaded"><code class="xref py py-obj docutils literal notranslate"><span class="pre">loaded</span></code></a></p></td>
+<td><p>return: Whether DataSet was loaded into memory.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.meta.html#sfaira.data.DatasetBase.meta" title="sfaira.data.DatasetBase.meta"><code class="xref py py-obj docutils literal notranslate"><span class="pre">meta</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.meta_fn.html#sfaira.data.DatasetBase.meta_fn" title="sfaira.data.DatasetBase.meta_fn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">meta_fn</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.ncells.html#sfaira.data.DatasetBase.ncells" title="sfaira.data.DatasetBase.ncells"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ncells</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.normalization.html#sfaira.data.DatasetBase.normalization" title="sfaira.data.DatasetBase.normalization"><code class="xref py py-obj docutils literal notranslate"><span class="pre">normalization</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.ontology_celltypes.html#sfaira.data.DatasetBase.ontology_celltypes" title="sfaira.data.DatasetBase.ontology_celltypes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ontology_celltypes</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.ontology_organ.html#sfaira.data.DatasetBase.ontology_organ" title="sfaira.data.DatasetBase.ontology_organ"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ontology_organ</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.organ.html#sfaira.data.DatasetBase.organ" title="sfaira.data.DatasetBase.organ"><code class="xref py py-obj docutils literal notranslate"><span class="pre">organ</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.organ_obs_key.html#sfaira.data.DatasetBase.organ_obs_key" title="sfaira.data.DatasetBase.organ_obs_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">organ_obs_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.organism.html#sfaira.data.DatasetBase.organism" title="sfaira.data.DatasetBase.organism"><code class="xref py py-obj docutils literal notranslate"><span class="pre">organism</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.organism_obs_key.html#sfaira.data.DatasetBase.organism_obs_key" title="sfaira.data.DatasetBase.organism_obs_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">organism_obs_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.primary_data.html#sfaira.data.DatasetBase.primary_data" title="sfaira.data.DatasetBase.primary_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">primary_data</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.sample_source.html#sfaira.data.DatasetBase.sample_source" title="sfaira.data.DatasetBase.sample_source"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_source</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.sample_source_obs_key.html#sfaira.data.DatasetBase.sample_source_obs_key" title="sfaira.data.DatasetBase.sample_source_obs_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_source_obs_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.sex.html#sfaira.data.DatasetBase.sex" title="sfaira.data.DatasetBase.sex"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sex</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.sex_obs_key.html#sfaira.data.DatasetBase.sex_obs_key" title="sfaira.data.DatasetBase.sex_obs_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sex_obs_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.source.html#sfaira.data.DatasetBase.source" title="sfaira.data.DatasetBase.source"><code class="xref py py-obj docutils literal notranslate"><span class="pre">source</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.state_exact.html#sfaira.data.DatasetBase.state_exact" title="sfaira.data.DatasetBase.state_exact"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state_exact</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.state_exact_obs_key.html#sfaira.data.DatasetBase.state_exact_obs_key" title="sfaira.data.DatasetBase.state_exact_obs_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state_exact_obs_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.tech_sample.html#sfaira.data.DatasetBase.tech_sample" title="sfaira.data.DatasetBase.tech_sample"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tech_sample</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.tech_sample_obs_key.html#sfaira.data.DatasetBase.tech_sample_obs_key" title="sfaira.data.DatasetBase.tech_sample_obs_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tech_sample_obs_key</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.title.html#sfaira.data.DatasetBase.title" title="sfaira.data.DatasetBase.title"><code class="xref py py-obj docutils literal notranslate"><span class="pre">title</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.year.html#sfaira.data.DatasetBase.year" title="sfaira.data.DatasetBase.year"><code class="xref py py-obj docutils literal notranslate"><span class="pre">year</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
 <p class="rubric">Methods</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -233,23 +490,16 @@ is to be loaded.</p></li>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#sfaira.data.DatasetBase.__init__" title="sfaira.data.DatasetBase.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([data_path, meta_path, cache_path, …])</p></td>
-<td><p><dl class="field-list simple">
-<dt class="field-odd">param data_path</dt>
-<dd class="field-odd"><p></p></dd>
-</dl>
-</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear</span></code>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.clear.html#sfaira.data.DatasetBase.clear" title="sfaira.data.DatasetBase.clear"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear</span></code></a>()</p></td>
 <td><p>Remove loaded .adata to reduce memory footprint.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">collapse_counts</span></code>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.collapse_counts.html#sfaira.data.DatasetBase.collapse_counts" title="sfaira.data.DatasetBase.collapse_counts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">collapse_counts</span></code></a>()</p></td>
 <td><p>Collapse count matrix along duplicated index.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">download</span></code>(**kwargs)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.download.html#sfaira.data.DatasetBase.download" title="sfaira.data.DatasetBase.download"><code class="xref py py-obj docutils literal notranslate"><span class="pre">download</span></code></a>(**kwargs)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code>([load_raw, allow_caching])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.load.html#sfaira.data.DatasetBase.load" title="sfaira.data.DatasetBase.load"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code></a>([load_raw, allow_caching])</p></td>
 <td><p><dl class="field-list simple">
 <dt class="field-odd">param remove_gene_version</dt>
 <dd class="field-odd"><p>Remove gene version string from ENSEMBL ID so that different versions in different data sets are superimposed.</p>
@@ -257,239 +507,41 @@ is to be loaded.</p></li>
 </dl>
 </p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_meta</span></code>(fn)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.load_meta.html#sfaira.data.DatasetBase.load_meta" title="sfaira.data.DatasetBase.load_meta"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_meta</span></code></a>(fn)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_ontology_class_map</span></code>(fn)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.load_ontology_class_map.html#sfaira.data.DatasetBase.load_ontology_class_map" title="sfaira.data.DatasetBase.load_ontology_class_map"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_ontology_class_map</span></code></a>(fn)</p></td>
 <td><p>Load class maps of free text cell types to ontology classes.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">project_celltypes_to_ontology</span></code>([…])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.project_celltypes_to_ontology.html#sfaira.data.DatasetBase.project_celltypes_to_ontology" title="sfaira.data.DatasetBase.project_celltypes_to_ontology"><code class="xref py py-obj docutils literal notranslate"><span class="pre">project_celltypes_to_ontology</span></code></a>([…])</p></td>
 <td><p>Project free text cell type names to ontology based on mapping table.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_dataset_id</span></code>([idx])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.set_dataset_id.html#sfaira.data.DatasetBase.set_dataset_id" title="sfaira.data.DatasetBase.set_dataset_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_dataset_id</span></code></a>([idx])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_summary</span></code>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.show_summary.html#sfaira.data.DatasetBase.show_summary" title="sfaira.data.DatasetBase.show_summary"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_summary</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">streamline_features</span></code>(match_to_reference[, …])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.streamline_features.html#sfaira.data.DatasetBase.streamline_features" title="sfaira.data.DatasetBase.streamline_features"><code class="xref py py-obj docutils literal notranslate"><span class="pre">streamline_features</span></code></a>(match_to_reference[, …])</p></td>
 <td><p>Subset and sort genes to genes defined in an assembly or genes of a particular type, such as protein coding.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">streamline_metadata</span></code>([schema, uns_to_obs, …])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.streamline_metadata.html#sfaira.data.DatasetBase.streamline_metadata" title="sfaira.data.DatasetBase.streamline_metadata"><code class="xref py py-obj docutils literal notranslate"><span class="pre">streamline_metadata</span></code></a>([schema, uns_to_obs, …])</p></td>
 <td><p>Streamline the adata instance to a defined output schema.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">subset_cells</span></code>(key, values)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.subset_cells.html#sfaira.data.DatasetBase.subset_cells" title="sfaira.data.DatasetBase.subset_cells"><code class="xref py py-obj docutils literal notranslate"><span class="pre">subset_cells</span></code></a>(key, values)</p></td>
 <td><p>Subset list of adata objects based on cell-wise properties.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_backed</span></code>(adata_backed, genome, idx[, …])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.write_backed.html#sfaira.data.DatasetBase.write_backed" title="sfaira.data.DatasetBase.write_backed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_backed</span></code></a>(adata_backed, genome, idx[, …])</p></td>
 <td><p>Loads data set into slice of backed anndata object.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_distributed_store</span></code>(dir_cache[, …])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.write_distributed_store.html#sfaira.data.DatasetBase.write_distributed_store" title="sfaira.data.DatasetBase.write_distributed_store"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_distributed_store</span></code></a>(dir_cache[, …])</p></td>
 <td><p>Write data set into a format that allows distributed access to data set on disk.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_meta</span></code>([fn_meta, dir_out])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.write_meta.html#sfaira.data.DatasetBase.write_meta" title="sfaira.data.DatasetBase.write_meta"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_meta</span></code></a>([fn_meta, dir_out])</p></td>
 <td><p>Write meta data object for data set.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_ontology_class_map</span></code>(fn[, protected_writing])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.data.DatasetBase.write_ontology_class_map.html#sfaira.data.DatasetBase.write_ontology_class_map" title="sfaira.data.DatasetBase.write_ontology_class_map"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_ontology_class_map</span></code></a>(fn[, protected_writing])</p></td>
 <td><p>Load class maps of free text cell types to ontology classes.</p></td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">Attributes</p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">additional_annotation_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">annotated</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assay_differentiation</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assay_differentiation_obs_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assay_sc</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assay_sc_obs_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assay_type_differentiation</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assay_type_differentiation_obs_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">author</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">bio_sample</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">bio_sample_obs_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cache_fn</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cell_line</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cell_line_obs_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cell_ontology_map</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cell_types_original_obs_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellontology_class_obs_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cellontology_id_obs_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">celltypes_universe</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">citation</span></code></p></td>
-<td><p>Return all information necessary to cite data set.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_dir</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_embedding</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">development_stage</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">development_stage_obs_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">directory_formatted_doi</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">disease</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">disease_obs_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">doi</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">doi_cleaned_id</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">doi_main</span></code></p></td>
-<td><p>Yields the main DOI associated with the study, defined as the DOI that comes first in alphabetical order.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">download_url_data</span></code></p></td>
-<td><p>Data download website(s).</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">download_url_meta</span></code></p></td>
-<td><p>Meta data download website(s).</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ethnicity</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ethnicity_obs_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fn_ontology_class_map_tsv</span></code></p></td>
-<td><p>Standardised file name under which cell type conversion tables are saved.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">gene_id_ensembl_var_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">gene_id_symbols_var_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">id</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">individual</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">individual_obs_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">loaded</span></code></p></td>
-<td><p>return: Whether DataSet was loaded into memory.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">meta</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">meta_fn</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ncells</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">normalization</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ontology_celltypes</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ontology_organ</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">organ</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">organ_obs_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">organism</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">organism_obs_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">primary_data</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_source</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_source_obs_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sex</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sex_obs_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">source</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">state_exact</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">state_exact_obs_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tech_sample</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tech_sample_obs_key</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">title</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">year</span></code></p></td>
-<td><p></p></td>
 </tr>
 </tbody>
 </table>
@@ -503,8 +555,8 @@ is to be loaded.</p></li>
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="sfaira.data.DatasetSuperGroup.html" class="btn btn-neutral float-right" title="sfaira.data.DatasetSuperGroup" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="index.html" class="btn btn-neutral float-left" title="API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="sfaira.data.DatasetBase.additional_annotation_key.html" class="btn btn-neutral float-right" title="sfaira.data.DatasetBase.additional_annotation_key" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../api.html" class="btn btn-neutral float-left" title="API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

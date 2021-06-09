@@ -1,0 +1,90 @@
+﻿..
+    This code was adapted from https://github.com/theislab/cellrank/tree/master/docs/_templates/autosummary/class.rst
+    This file is therefore licensed under the license of the cellrank project,
+    available from https://github.com/theislab/cellrank and copied here at the time of accession.
+
+    BSD 3-Clause License
+
+    Copyright (c) 2019, Theis Lab
+    All rights reserved.
+
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions are met:
+
+    1. Redistributions of source code must retain the above copyright notice, this
+       list of conditions and the following disclaimer.
+
+    2. Redistributions in binary form must reproduce the above copyright notice,
+       this list of conditions and the following disclaimer in the documentation
+       and/or other materials provided with the distribution.
+
+    3. Neither the name of the copyright holder nor the names of its
+       contributors may be used to endorse or promote products derived from
+       this software without specific prior written permission.
+
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+    DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+    FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+    DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+    SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+:github_url: sfaira.versions.metadata.OntologyMmusdv
+
+sfaira.versions.metadata.OntologyMmusdv
+=======================================
+
+.. currentmodule:: sfaira.versions.metadata
+
+.. autoclass:: OntologyMmusdv
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: .
+   
+      ~sfaira.versions.metadata.OntologyMmusdv.leaves
+      ~sfaira.versions.metadata.OntologyMmusdv.n_leaves
+      ~sfaira.versions.metadata.OntologyMmusdv.node_ids
+      ~sfaira.versions.metadata.OntologyMmusdv.node_names
+      ~sfaira.versions.metadata.OntologyMmusdv.nodes
+      ~sfaira.versions.metadata.OntologyMmusdv.nodes_dict
+      ~sfaira.versions.metadata.OntologyMmusdv.synonym_node_properties
+   
+   
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~sfaira.versions.metadata.OntologyMmusdv.add_extension
+      ~sfaira.versions.metadata.OntologyMmusdv.convert_to_id
+      ~sfaira.versions.metadata.OntologyMmusdv.convert_to_name
+      ~sfaira.versions.metadata.OntologyMmusdv.get_ancestors
+      ~sfaira.versions.metadata.OntologyMmusdv.get_descendants
+      ~sfaira.versions.metadata.OntologyMmusdv.get_effective_leaves
+      ~sfaira.versions.metadata.OntologyMmusdv.is_a
+      ~sfaira.versions.metadata.OntologyMmusdv.is_a_node_id
+      ~sfaira.versions.metadata.OntologyMmusdv.is_a_node_name
+      ~sfaira.versions.metadata.OntologyMmusdv.is_node
+      ~sfaira.versions.metadata.OntologyMmusdv.map_node_suggestion
+      ~sfaira.versions.metadata.OntologyMmusdv.map_to_leaves
+      ~sfaira.versions.metadata.OntologyMmusdv.prepare_maps_to_leaves
+      ~sfaira.versions.metadata.OntologyMmusdv.validate_node
+   
+   
+
+   .. _sphx_glr_backref_sfaira.versions.metadata.OntologyMmusdv:
+
+   .. minigallery:: sfaira.versions.metadata.OntologyMmusdv
+       :add-heading: Examples
+       :heading-level: -

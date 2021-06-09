@@ -1,0 +1,340 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>sfaira.versions.metadata.OntologyMondo &mdash; sfaira 0+untagged.1.gff3f387 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom_sfaira.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="sfaira.versions.metadata.OntologyMondo.leaves" href="sfaira.versions.metadata.OntologyMondo.leaves.html" />
+    <link rel="prev" title="sfaira.versions.metadata.OntologyHsapdv.validate_node" href="sfaira.versions.metadata.OntologyHsapdv.validate_node.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> sfaira
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0+untagged.1.gff3f387
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.data">Data: <code class="docutils literal notranslate"><span class="pre">data</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.estimators">Estimator classes: <code class="docutils literal notranslate"><span class="pre">estimators</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.models">Model classes: <code class="docutils literal notranslate"><span class="pre">models</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.train">Train: <code class="docutils literal notranslate"><span class="pre">train</span></code></a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#module-sfaira.versions">Versions: <code class="docutils literal notranslate"><span class="pre">versions</span></code></a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../api.html#genomes">Genomes</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../api.html#metadata">Metadata</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="sfaira.versions.metadata.Ontology.html">sfaira.versions.metadata.Ontology</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.versions.metadata.OntologyList.html">sfaira.versions.metadata.OntologyList</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.versions.metadata.OntologyHierarchical.html">sfaira.versions.metadata.OntologyHierarchical</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.versions.metadata.OntologyObo.html">sfaira.versions.metadata.OntologyObo</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.versions.metadata.OntologyOboCustom.html">sfaira.versions.metadata.OntologyOboCustom</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.versions.metadata.OntologyCellosaurus.html">sfaira.versions.metadata.OntologyCellosaurus</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.versions.metadata.OntologyCl.html">sfaira.versions.metadata.OntologyCl</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.versions.metadata.OntologyHsapdv.html">sfaira.versions.metadata.OntologyHsapdv</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">sfaira.versions.metadata.OntologyMondo</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.versions.metadata.OntologyMmusdv.html">sfaira.versions.metadata.OntologyMmusdv</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.versions.metadata.OntologySinglecellLibraryConstruction.html">sfaira.versions.metadata.OntologySinglecellLibraryConstruction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.versions.metadata.OntologyUberon.html">sfaira.versions.metadata.OntologyUberon</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.versions.metadata.CelltypeUniverse.html">sfaira.versions.metadata.CelltypeUniverse</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#topologies">Topologies</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.ui">User interface: <code class="docutils literal notranslate"><span class="pre">ui</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../commandline_interface.html">Commandline interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../adding_datasets.html">Contributing data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../consuming_data.html">Consuming Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ecosystem.html">Ecosystem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">sfaira</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../api.html">API</a> &raquo;</li>
+        
+      <li>sfaira.versions.metadata.OntologyMondo</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            
+              <!-- User defined GitHub URL -->
+              <a href="sfaira.versions.metadata.OntologyMondo" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="sfaira-versions-metadata-ontologymondo">
+<h1>sfaira.versions.metadata.OntologyMondo<a class="headerlink" href="#sfaira-versions-metadata-ontologymondo" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="sfaira.versions.metadata.OntologyMondo">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">sfaira.versions.metadata.</span></span><span class="sig-name descname"><span class="pre">OntologyMondo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sfaira.versions.metadata.OntologyMondo" title="Permalink to this definition">¶</a></dt>
+<dd><p class="rubric">Attributes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.versions.metadata.OntologyMondo.leaves.html#sfaira.versions.metadata.OntologyMondo.leaves" title="sfaira.versions.metadata.OntologyMondo.leaves"><code class="xref py py-obj docutils literal notranslate"><span class="pre">leaves</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.versions.metadata.OntologyMondo.n_leaves.html#sfaira.versions.metadata.OntologyMondo.n_leaves" title="sfaira.versions.metadata.OntologyMondo.n_leaves"><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_leaves</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.versions.metadata.OntologyMondo.node_ids.html#sfaira.versions.metadata.OntologyMondo.node_ids" title="sfaira.versions.metadata.OntologyMondo.node_ids"><code class="xref py py-obj docutils literal notranslate"><span class="pre">node_ids</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.versions.metadata.OntologyMondo.node_names.html#sfaira.versions.metadata.OntologyMondo.node_names" title="sfaira.versions.metadata.OntologyMondo.node_names"><code class="xref py py-obj docutils literal notranslate"><span class="pre">node_names</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.versions.metadata.OntologyMondo.nodes.html#sfaira.versions.metadata.OntologyMondo.nodes" title="sfaira.versions.metadata.OntologyMondo.nodes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nodes</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.versions.metadata.OntologyMondo.nodes_dict.html#sfaira.versions.metadata.OntologyMondo.nodes_dict" title="sfaira.versions.metadata.OntologyMondo.nodes_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nodes_dict</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.versions.metadata.OntologyMondo.synonym_node_properties.html#sfaira.versions.metadata.OntologyMondo.synonym_node_properties" title="sfaira.versions.metadata.OntologyMondo.synonym_node_properties"><code class="xref py py-obj docutils literal notranslate"><span class="pre">synonym_node_properties</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.versions.metadata.OntologyMondo.add_extension.html#sfaira.versions.metadata.OntologyMondo.add_extension" title="sfaira.versions.metadata.OntologyMondo.add_extension"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_extension</span></code></a>(dict_ontology)</p></td>
+<td><p>Extend ontology by additional edges and nodes defined in a dictionary.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.versions.metadata.OntologyMondo.convert_to_id.html#sfaira.versions.metadata.OntologyMondo.convert_to_id" title="sfaira.versions.metadata.OntologyMondo.convert_to_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_to_id</span></code></a>(x)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.versions.metadata.OntologyMondo.convert_to_name.html#sfaira.versions.metadata.OntologyMondo.convert_to_name" title="sfaira.versions.metadata.OntologyMondo.convert_to_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_to_name</span></code></a>(x)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.versions.metadata.OntologyMondo.get_ancestors.html#sfaira.versions.metadata.OntologyMondo.get_ancestors" title="sfaira.versions.metadata.OntologyMondo.get_ancestors"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_ancestors</span></code></a>(node)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.versions.metadata.OntologyMondo.get_descendants.html#sfaira.versions.metadata.OntologyMondo.get_descendants" title="sfaira.versions.metadata.OntologyMondo.get_descendants"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_descendants</span></code></a>(node)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.versions.metadata.OntologyMondo.get_effective_leaves.html#sfaira.versions.metadata.OntologyMondo.get_effective_leaves" title="sfaira.versions.metadata.OntologyMondo.get_effective_leaves"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_effective_leaves</span></code></a>(x)</p></td>
+<td><p>Get effective leaves in ontology given set of observed nodes.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.versions.metadata.OntologyMondo.is_a.html#sfaira.versions.metadata.OntologyMondo.is_a" title="sfaira.versions.metadata.OntologyMondo.is_a"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_a</span></code></a>(query, reference)</p></td>
+<td><p>Checks if query node is reference node or an ancestor thereof.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.versions.metadata.OntologyMondo.is_a_node_id.html#sfaira.versions.metadata.OntologyMondo.is_a_node_id" title="sfaira.versions.metadata.OntologyMondo.is_a_node_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_a_node_id</span></code></a>(x)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.versions.metadata.OntologyMondo.is_a_node_name.html#sfaira.versions.metadata.OntologyMondo.is_a_node_name" title="sfaira.versions.metadata.OntologyMondo.is_a_node_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_a_node_name</span></code></a>(x)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.versions.metadata.OntologyMondo.is_node.html#sfaira.versions.metadata.OntologyMondo.is_node" title="sfaira.versions.metadata.OntologyMondo.is_node"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_node</span></code></a>(x)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.versions.metadata.OntologyMondo.map_node_suggestion.html#sfaira.versions.metadata.OntologyMondo.map_node_suggestion" title="sfaira.versions.metadata.OntologyMondo.map_node_suggestion"><code class="xref py py-obj docutils literal notranslate"><span class="pre">map_node_suggestion</span></code></a>(x[, include_synonyms, …])</p></td>
+<td><p>Map free text node name to ontology node names via fuzzy string matching.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.versions.metadata.OntologyMondo.map_to_leaves.html#sfaira.versions.metadata.OntologyMondo.map_to_leaves" title="sfaira.versions.metadata.OntologyMondo.map_to_leaves"><code class="xref py py-obj docutils literal notranslate"><span class="pre">map_to_leaves</span></code></a>(node[, return_type, include_self])</p></td>
+<td><p>Map a given node to leave nodes.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sfaira.versions.metadata.OntologyMondo.prepare_maps_to_leaves.html#sfaira.versions.metadata.OntologyMondo.prepare_maps_to_leaves" title="sfaira.versions.metadata.OntologyMondo.prepare_maps_to_leaves"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prepare_maps_to_leaves</span></code></a>([include_self])</p></td>
+<td><p>Precomputes all maps of nodes to their leave nodes.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sfaira.versions.metadata.OntologyMondo.validate_node.html#sfaira.versions.metadata.OntologyMondo.validate_node" title="sfaira.versions.metadata.OntologyMondo.validate_node"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_node</span></code></a>(x)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="sfaira.versions.metadata.OntologyMondo.leaves.html" class="btn btn-neutral float-right" title="sfaira.versions.metadata.OntologyMondo.leaves" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="sfaira.versions.metadata.OntologyHsapdv.validate_node.html" class="btn btn-neutral float-left" title="sfaira.versions.metadata.OntologyHsapdv.validate_node" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Leander Dony, David S. Fischer, Lukas Heumos..
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

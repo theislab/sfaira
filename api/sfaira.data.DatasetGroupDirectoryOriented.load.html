@@ -1,0 +1,319 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>sfaira.data.DatasetGroupDirectoryOriented.load &mdash; sfaira 0+untagged.1.gff3f387 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom_sfaira.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="sfaira.data.DatasetGroupDirectoryOriented.ncells" href="sfaira.data.DatasetGroupDirectoryOriented.ncells.html" />
+    <link rel="prev" title="sfaira.data.DatasetGroupDirectoryOriented.download" href="sfaira.data.DatasetGroupDirectoryOriented.download.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> sfaira
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0+untagged.1.gff3f387
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#module-sfaira.data">Data: <code class="docutils literal notranslate"><span class="pre">data</span></code></a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.DatasetBase.html">sfaira.data.DatasetBase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.DatasetGroup.html">sfaira.data.DatasetGroup</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="sfaira.data.DatasetGroupDirectoryOriented.html">sfaira.data.DatasetGroupDirectoryOriented</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetGroupDirectoryOriented.adata.html">sfaira.data.DatasetGroupDirectoryOriented.adata</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetGroupDirectoryOriented.adata_ls.html">sfaira.data.DatasetGroupDirectoryOriented.adata_ls</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetGroupDirectoryOriented.additional_annotation_key.html">sfaira.data.DatasetGroupDirectoryOriented.additional_annotation_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetGroupDirectoryOriented.doi.html">sfaira.data.DatasetGroupDirectoryOriented.doi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetGroupDirectoryOriented.ids.html">sfaira.data.DatasetGroupDirectoryOriented.ids</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetGroupDirectoryOriented.ontology_celltypes.html">sfaira.data.DatasetGroupDirectoryOriented.ontology_celltypes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetGroupDirectoryOriented.supplier.html">sfaira.data.DatasetGroupDirectoryOriented.supplier</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetGroupDirectoryOriented.clean_ontology_class_map.html">sfaira.data.DatasetGroupDirectoryOriented.clean_ontology_class_map</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetGroupDirectoryOriented.collapse_counts.html">sfaira.data.DatasetGroupDirectoryOriented.collapse_counts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetGroupDirectoryOriented.download.html">sfaira.data.DatasetGroupDirectoryOriented.download</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">sfaira.data.DatasetGroupDirectoryOriented.load</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetGroupDirectoryOriented.ncells.html">sfaira.data.DatasetGroupDirectoryOriented.ncells</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetGroupDirectoryOriented.ncells_bydataset.html">sfaira.data.DatasetGroupDirectoryOriented.ncells_bydataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetGroupDirectoryOriented.obs_concat.html">sfaira.data.DatasetGroupDirectoryOriented.obs_concat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetGroupDirectoryOriented.project_celltypes_to_ontology.html">sfaira.data.DatasetGroupDirectoryOriented.project_celltypes_to_ontology</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetGroupDirectoryOriented.show_summary.html">sfaira.data.DatasetGroupDirectoryOriented.show_summary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetGroupDirectoryOriented.streamline_features.html">sfaira.data.DatasetGroupDirectoryOriented.streamline_features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetGroupDirectoryOriented.streamline_metadata.html">sfaira.data.DatasetGroupDirectoryOriented.streamline_metadata</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetGroupDirectoryOriented.subset.html">sfaira.data.DatasetGroupDirectoryOriented.subset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetGroupDirectoryOriented.subset_cells.html">sfaira.data.DatasetGroupDirectoryOriented.subset_cells</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetGroupDirectoryOriented.write_backed.html">sfaira.data.DatasetGroupDirectoryOriented.write_backed</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetGroupDirectoryOriented.write_distributed_store.html">sfaira.data.DatasetGroupDirectoryOriented.write_distributed_store</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DatasetGroupDirectoryOriented.write_ontology_class_map.html">sfaira.data.DatasetGroupDirectoryOriented.write_ontology_class_map</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.DatasetSuperGroup.html">sfaira.data.DatasetSuperGroup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.DatasetInteractive.html">sfaira.data.DatasetInteractive</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.Universe.html">sfaira.data.Universe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.load_store.html">sfaira.data.load_store</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.DistributedStoreBase.html">sfaira.data.DistributedStoreBase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.DistributedStoreDao.html">sfaira.data.DistributedStoreDao</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.DistributedStoreH5ad.html">sfaira.data.DistributedStoreH5ad</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.estimators">Estimator classes: <code class="docutils literal notranslate"><span class="pre">estimators</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.models">Model classes: <code class="docutils literal notranslate"><span class="pre">models</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.train">Train: <code class="docutils literal notranslate"><span class="pre">train</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.versions">Versions: <code class="docutils literal notranslate"><span class="pre">versions</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.ui">User interface: <code class="docutils literal notranslate"><span class="pre">ui</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../commandline_interface.html">Commandline interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../adding_datasets.html">Contributing data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../consuming_data.html">Consuming Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ecosystem.html">Ecosystem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">sfaira</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../api.html">API</a> &raquo;</li>
+        
+          <li><a href="sfaira.data.DatasetGroupDirectoryOriented.html">sfaira.data.DatasetGroupDirectoryOriented</a> &raquo;</li>
+        
+      <li>sfaira.data.DatasetGroupDirectoryOriented.load</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            
+              <!-- User defined GitHub URL -->
+              <a href="sfaira.data.DatasetGroupDirectoryOriented.load" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="sfaira-data-datasetgroupdirectoryoriented-load">
+<h1>sfaira.data.DatasetGroupDirectoryOriented.load<a class="headerlink" href="#sfaira-data-datasetgroupdirectoryoriented-load" title="Permalink to this headline">¶</a></h1>
+<dl class="py method">
+<dt class="sig sig-object py" id="sfaira.data.DatasetGroupDirectoryOriented.load">
+<span class="sig-prename descclassname"><span class="pre">DatasetGroupDirectoryOriented.</span></span><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">annotated_only</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_raw</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_caching</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">processes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs_func</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sfaira.data.DatasetGroupDirectoryOriented.load" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>Load all datasets in group (option for temporary loading).</p>
+<p>Note: This method automatically subsets to the group to the data sets for which input files were found.</p>
+<p>This method also allows temporarily loading data sets to execute function on loaded data sets (supply func).
+In this setting, datasets are removed from memory after the function has been executed.</p>
+<dl class="field-list">
+<dt class="field-odd">param annotated_only</dt>
+<dd class="field-odd"><p></p></dd>
+<dt class="field-even">param load_raw</dt>
+<dd class="field-even"><p></p></dd>
+<dt class="field-odd">param allow_caching</dt>
+<dd class="field-odd"><p></p></dd>
+<dt class="field-even">param processes</dt>
+<dd class="field-even"><p>Processes to parallelise loading over. Uses python multiprocessing if &gt; 1, for loop otherwise.</p>
+</dd>
+<dt class="field-odd">param func</dt>
+<dd class="field-odd"><p>Function to run on loaded datasets. map_fun should only take one argument, which is a Dataset
+instance. The return can be empty:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>def func(dataset, <a href="#id1"><span class="problematic" id="id2">**</span></a>kwargs_func):</dt><dd><p># code manipulating dataset and generating output x.
+return x</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd>
+<dt class="field-even">param kwargs_func</dt>
+<dd class="field-even"><p>Kwargs of func.</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>remove_gene_version</strong> – Remove gene version string from ENSEMBL ID so that different versions in different data sets are superimposed.</p></li>
+<li><p><strong>match_to_reference</strong> – Reference genomes name or False to keep original feature space.</p></li>
+<li><p><strong>load_raw</strong> – Loads unprocessed version of data if available in data loader.</p></li>
+<li><p><strong>allow_caching</strong> – Whether to allow method to cache adata object for faster re-loading.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="sfaira.data.DatasetGroupDirectoryOriented.ncells.html" class="btn btn-neutral float-right" title="sfaira.data.DatasetGroupDirectoryOriented.ncells" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="sfaira.data.DatasetGroupDirectoryOriented.download.html" class="btn btn-neutral float-left" title="sfaira.data.DatasetGroupDirectoryOriented.download" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Leander Dony, David S. Fischer, Lukas Heumos..
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

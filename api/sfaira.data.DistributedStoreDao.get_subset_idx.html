@@ -1,0 +1,297 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>sfaira.data.DistributedStoreDao.get_subset_idx &mdash; sfaira 0+untagged.1.gff3f387 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom_sfaira.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="sfaira.data.DistributedStoreDao.load_config" href="sfaira.data.DistributedStoreDao.load_config.html" />
+    <link rel="prev" title="sfaira.data.DistributedStoreDao.generator" href="sfaira.data.DistributedStoreDao.generator.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> sfaira
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0+untagged.1.gff3f387
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#module-sfaira.data">Data: <code class="docutils literal notranslate"><span class="pre">data</span></code></a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.DatasetBase.html">sfaira.data.DatasetBase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.DatasetGroup.html">sfaira.data.DatasetGroup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.DatasetGroupDirectoryOriented.html">sfaira.data.DatasetGroupDirectoryOriented</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.DatasetSuperGroup.html">sfaira.data.DatasetSuperGroup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.DatasetInteractive.html">sfaira.data.DatasetInteractive</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.Universe.html">sfaira.data.Universe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.load_store.html">sfaira.data.load_store</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.DistributedStoreBase.html">sfaira.data.DistributedStoreBase</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="sfaira.data.DistributedStoreDao.html">sfaira.data.DistributedStoreDao</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DistributedStoreDao.X.html">sfaira.data.DistributedStoreDao.X</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DistributedStoreDao.adata_by_key.html">sfaira.data.DistributedStoreDao.adata_by_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DistributedStoreDao.genome_container.html">sfaira.data.DistributedStoreDao.genome_container</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DistributedStoreDao.indices.html">sfaira.data.DistributedStoreDao.indices</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DistributedStoreDao.n_obs.html">sfaira.data.DistributedStoreDao.n_obs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DistributedStoreDao.n_vars.html">sfaira.data.DistributedStoreDao.n_vars</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DistributedStoreDao.obs.html">sfaira.data.DistributedStoreDao.obs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DistributedStoreDao.obs_by_key.html">sfaira.data.DistributedStoreDao.obs_by_key</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DistributedStoreDao.shape.html">sfaira.data.DistributedStoreDao.shape</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DistributedStoreDao.var_names.html">sfaira.data.DistributedStoreDao.var_names</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DistributedStoreDao.generator.html">sfaira.data.DistributedStoreDao.generator</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">sfaira.data.DistributedStoreDao.get_subset_idx</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DistributedStoreDao.load_config.html">sfaira.data.DistributedStoreDao.load_config</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DistributedStoreDao.n_counts.html">sfaira.data.DistributedStoreDao.n_counts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DistributedStoreDao.subset.html">sfaira.data.DistributedStoreDao.subset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sfaira.data.DistributedStoreDao.write_config.html">sfaira.data.DistributedStoreDao.write_config</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sfaira.data.DistributedStoreH5ad.html">sfaira.data.DistributedStoreH5ad</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.estimators">Estimator classes: <code class="docutils literal notranslate"><span class="pre">estimators</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.models">Model classes: <code class="docutils literal notranslate"><span class="pre">models</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.train">Train: <code class="docutils literal notranslate"><span class="pre">train</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.versions">Versions: <code class="docutils literal notranslate"><span class="pre">versions</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-sfaira.ui">User interface: <code class="docutils literal notranslate"><span class="pre">ui</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../commandline_interface.html">Commandline interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../adding_datasets.html">Contributing data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../consuming_data.html">Consuming Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ecosystem.html">Ecosystem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">sfaira</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../api.html">API</a> &raquo;</li>
+        
+          <li><a href="sfaira.data.DistributedStoreDao.html">sfaira.data.DistributedStoreDao</a> &raquo;</li>
+        
+      <li>sfaira.data.DistributedStoreDao.get_subset_idx</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            
+              <!-- User defined GitHub URL -->
+              <a href="sfaira.data.DistributedStoreDao.get_subset_idx" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="sfaira-data-distributedstoredao-get-subset-idx">
+<h1>sfaira.data.DistributedStoreDao.get_subset_idx<a class="headerlink" href="#sfaira-data-distributedstoredao-get-subset-idx" title="Permalink to this headline">¶</a></h1>
+<dl class="py method">
+<dt class="sig sig-object py" id="sfaira.data.DistributedStoreDao.get_subset_idx">
+<span class="sig-prename descclassname"><span class="pre">DistributedStoreDao.</span></span><span class="sig-name descname"><span class="pre">get_subset_idx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr_key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">excluded_values</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><a class="headerlink" href="#sfaira.data.DistributedStoreDao.get_subset_idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get indices of subset list of adata objects based on cell-wise properties.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>attr_key</strong> – <p>Property to subset by. Options:</p>
+<ul>
+<li><p>”assay_differentiation” points to self.assay_differentiation_obs_key</p></li>
+<li><p>”assay_sc” points to self.assay_sc_obs_key</p></li>
+<li><p>”assay_type_differentiation” points to self.assay_type_differentiation_obs_key</p></li>
+<li><p>”cell_line” points to self.cell_line</p></li>
+<li><p>”cellontology_class” points to self.cellontology_class_obs_key</p></li>
+<li><p>”developmental_stage” points to self.developmental_stage_obs_key</p></li>
+<li><p>”ethnicity” points to self.ethnicity_obs_key</p></li>
+<li><p>”organ” points to self.organ_obs_key</p></li>
+<li><p>”organism” points to self.organism_obs_key</p></li>
+<li><p>”sample_source” points to self.sample_source_obs_key</p></li>
+<li><p>”sex” points to self.sex_obs_key</p></li>
+<li><p>”state_exact” points to self.state_exact_obs_key</p></li>
+</ul>
+</p></li>
+<li><p><strong>values</strong> – Classes to overlap to. Supply either values or excluded_values.</p></li>
+<li><p><strong>excluded_values</strong> – Classes to exclude from match list. Supply either values or excluded_values.</p></li>
+</ul>
+</dd>
+</dl>
+<p>:return dictionary of files and observation indices by file.</p>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="sfaira.data.DistributedStoreDao.load_config.html" class="btn btn-neutral float-right" title="sfaira.data.DistributedStoreDao.load_config" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="sfaira.data.DistributedStoreDao.generator.html" class="btn btn-neutral float-left" title="sfaira.data.DistributedStoreDao.generator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Leander Dony, David S. Fischer, Lukas Heumos..
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
