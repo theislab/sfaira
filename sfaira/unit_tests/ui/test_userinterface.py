@@ -2,7 +2,7 @@ import numpy as np
 import os
 from typing import Union
 
-from sfaira.interface import UserInterface
+from sfaira.ui import UserInterface
 
 
 class TestUi:
@@ -10,7 +10,7 @@ class TestUi:
     data: np.ndarray
 
     """
-    Contains functions _test* to test individual functions and attributes of the user interface class.
+    Contains functions _test* to test individual functions and attributes of the user ui class.
 
     TODO for everybody working on this, add one _test* function in here and add it into
     basic_estimator_test(). See _test_call() for an example.

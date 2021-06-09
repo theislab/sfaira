@@ -1,5 +1,5 @@
 import os
-from sfaira.interface import ModelZoo
+from sfaira.ui import ModelZoo
 
 dir_data = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_data")
 dir_meta = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_data/meta")
