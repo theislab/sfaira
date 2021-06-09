@@ -2,6 +2,8 @@ import os
 import sfaira
 import sys
 
+from sfaira.data import clean_string
+
 # Set global variables.
 print("sys.argv", sys.argv)
 
@@ -31,7 +33,7 @@ for doi in dois.split(","):
         )
         ds.streamline_metadata(
             schema=schema.lower(),
-            uns_to_obs=False,
+            uns_to_obs=True,
             clean_obs=False,
             clean_var=True,
             clean_uns=True,
@@ -42,6 +44,7 @@ for doi in dois.split(","):
     dsg = ds.dataset_groups[0]
     for k, v in dsg.datasets.items():
         fn = v.doi_cleaned_id + ".h5ad"
-        if not os.path.exists(os.path.join(path_out, doi)):
-            os.makedirs(os.path.join(path_out, doi))
-        v.adata.write_h5ad(os.path.join(path_out, doi, fn))
+        dir_name = v.directory_formatted_doi
+        if not os.path.exists(os.path.join(path_out, dir_name)):
+            os.makedirs(os.path.join(path_out, dir_name))
+        v.adata.write_h5ad(os.path.join(path_out, dir_name, fn))

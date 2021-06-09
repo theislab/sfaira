@@ -862,6 +862,22 @@ class DatasetBase(abc.ABC):
         else:
             self.adata.uns = {**self.adata.uns, **uns_new}
 
+        # Make sure that correct unknown_metadata_identifier is used in .uns, .obs and .var metadata
+        self.adata.obs = self.adata.obs.replace({None: adata_target_ids.unknown_metadata_identifier})
+        self.adata.var = self.adata.var.replace({None: adata_target_ids.unknown_metadata_identifier})
+        for k in self.adata.uns_keys():
+            if self.adata.uns[k] is None:
+                self.adata.uns[k] = adata_target_ids.unknown_metadata_identifier
+
+        # Move all uns annotation to obs columns if requested
+        if uns_to_obs:
+            for k, v in self.adata.uns.items():
+                if k not in self.adata.obs_keys():
+                    self.adata.obs[k] = [v for i in range(self.adata.n_obs)]
+            # Retain only target uns keys in .uns.
+            self.adata.uns = dict([(k, v) for k, v in self.adata.uns.items()
+                                   if k in [getattr(adata_target_ids, kk) for kk in ["id"]]])
+
         # Add additional hard-coded description changes for cellxgene schema:
         if schema == "cellxgene":
             self.adata.uns["layer_descriptions"] = {"X": "raw"}
@@ -879,7 +895,7 @@ class DatasetBase(abc.ABC):
             else:
                 raise ValueError(f"organism {self.organism} currently not supported by cellxgene schema")
             # Add ontology IDs where necessary (note that human readable terms are also kept):
-            for k in ["organ", "assay_sc", "disease", "ethnicity", "development_stage"]:
+            for k in ["organ", "assay_sc", "disease", "ethnicity", "development_stage", "sex"]:
                 if getattr(adata_target_ids, k) in self.adata.obs.columns:
                     ontology = getattr(self.ontology_container_sfaira, k)
                     # Disambiguate organism-dependent ontologies:
@@ -917,22 +933,6 @@ class DatasetBase(abc.ABC):
                       f"{np.max([x % 1. if x % 1. < 0.5 else 1. - x % 1. for x in count_values])}. "
                       f"The count matrix is rounded.")
                 self.adata.X.data = np.rint(self.adata.X.data)
-
-        # Make sure that correct unknown_metadata_identifier is used in .uns, .obs and .var metadata
-        self.adata.obs = self.adata.obs.replace({None: adata_target_ids.unknown_metadata_identifier})
-        self.adata.var = self.adata.var.replace({None: adata_target_ids.unknown_metadata_identifier})
-        for k in self.adata.uns_keys():
-            if self.adata.uns[k] is None:
-                self.adata.uns[k] = adata_target_ids.unknown_metadata_identifier
-
-        # Move all uns annotation to obs columns if requested
-        if uns_to_obs:
-            for k, v in self.adata.uns.items():
-                if k not in self.adata.obs_keys():
-                    self.adata.obs[k] = [v for i in range(self.adata.n_obs)]
-            # Retain only target uns keys in .uns.
-            self.adata.uns = dict([(k, v) for k, v in self.adata.uns.items()
-                                   if k in [getattr(adata_target_ids, kk) for kk in ["id"]]])
 
         self._adata_ids = adata_target_ids  # set new adata fields to class after conversion
         self.streamlined_meta = True
