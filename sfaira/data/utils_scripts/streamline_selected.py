@@ -14,11 +14,11 @@ dois = str(sys.argv[6])
 
 path_cache = path_cache if path_cache != "None" else None
 
-for x in dois.split(","):
+for doi in dois.split(","):
     ds = sfaira.data.dataloaders.Universe(
         data_path=data_path, meta_path=path_meta, cache_path=path_cache
     )
-    ds.subset(key="doi", values=[x])
+    ds.subset(key="doi", values=[doi])
     ds.load(
         load_raw=False,
         allow_caching=True,
@@ -42,4 +42,6 @@ for x in dois.split(","):
     dsg = ds.dataset_groups[0]
     for k, v in dsg.datasets.items():
         fn = v.doi_cleaned_id + ".h5ad"
-        v.adata.write_h5ad(os.path.join(path_out, fn))
+        if not os.path.exists(os.path.join(path_out, doi)):
+            os.makedirs(os.path.join(path_out, doi))
+        v.adata.write_h5ad(os.path.join(path_out, doi, fn))
