@@ -1605,14 +1605,7 @@ class DatasetBase(abc.ABC):
         The prepring publication (secondary) DOI associated with the study.
         See also `.doi_journal`.
         """
-        if self._doi_journal is not None:
-            return self._doi_journal
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is None or self._adata_ids.doi_journal not in self.meta.columns:
-                raise ValueError("doi_journal must be set but was neither set in constructor nor in meta data")
-            return self.meta[self._adata_ids.doi_journal]
+        return self._doi_journal
 
     @doi_journal.setter
     def doi_journal(self, x: str):
@@ -1624,14 +1617,7 @@ class DatasetBase(abc.ABC):
         The journal publication (main) DOI associated with the study.
         See also `.doi_preprint`.
         """
-        if self._doi_preprint is not None:
-            return self._doi_preprint
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is None or self._adata_ids.doi_preprint not in self.meta.columns:
-                raise ValueError("doi_preprint must be set but was neither set in constructor nor in meta data")
-            return self.meta[self._adata_ids.doi_journal]
+        return self._doi_preprint
 
     @doi_preprint.setter
     def doi_preprint(self, x: str):
@@ -1657,12 +1643,7 @@ class DatasetBase(abc.ABC):
         Save as tuple with single element, which is a list of all download websites relevant to dataset.
         :return:
         """
-        if self._download_url_data is not None:
-            x = self._download_url_data
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            x = self.meta[self._adata_ids.download_url_data]
+        x = self._download_url_data
         if isinstance(x, str) or x is None:
             x = [x]
         if isinstance(x, list):
