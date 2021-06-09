@@ -921,8 +921,8 @@ class DatasetBase(abc.ABC):
                         ontology=ontology,
                         key_in=getattr(adata_target_ids, k),
                         key_out=getattr(adata_target_ids, k) + "_ontology_term_id",
-                        map_exceptions=[],
-                        map_exceptions_value=adata_target_ids.unknown_metadata_identifier,
+                        map_exceptions=[adata_target_ids.unknown_metadata_identifier],
+                        map_exceptions_value=adata_target_ids.unknown_metadata_ontology_id_identifier,
                     )
                 else:
                     self.adata.obs[getattr(adata_target_ids, k)] = adata_target_ids.unknown_metadata_identifier
