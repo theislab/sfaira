@@ -17,7 +17,8 @@ class AdataIds:
     cellontology_id: str
     development_stage: str
     disease: str
-    doi: str
+    doi_journal: str
+    doi_preprint: str
     download_url_data: str
     download_url_meta: str
     dataset: str
@@ -87,7 +88,8 @@ class AdataIdsSfaira(AdataIds):
         self.cellontology_id = "cell_ontology_id"
         self.default_embedding = "default_embedding"
         self.disease = "disease"
-        self.doi = "doi"
+        self.doi_journal = "doi_journal"
+        self.doi_preprint = "doi_preprint"
         self.dataset = "dataset"
         self.dataset_group = "dataset_group"
         self.download_url_data = "download_url_data"
@@ -152,7 +154,8 @@ class AdataIdsSfaira(AdataIds):
             "annotated",
             "author",
             "default_embedding",
-            "doi",
+            "doi_journal",
+            "doi_preprint",
             "download_url_data",
             "download_url_meta",
             "id",
@@ -182,7 +185,8 @@ class AdataIdsCellxgene(AdataIds):
         self.cellontology_class = "cell_type"
         self.cellontology_id = "cell_type_ontology_term_id"
         self.default_embedding = "default_embedding"
-        self.doi = "preprint_doi"
+        self.doi_journal = "publication_doi"
+        self.doi_preprint = "preprint_doi"
         self.disease = "disease"
         self.gene_id_symbols = "gene_symbol"
         self.gene_id_index = self.gene_id_symbols
@@ -231,6 +235,8 @@ class AdataIdsCellxgene(AdataIds):
             "gene_id_symbols",
         ]
         self.uns_keys = [
+            "doi_journal",
+            "doi_preprint"
             "default_embedding",
             "id",
             "title",

@@ -892,6 +892,11 @@ class DatasetBase(abc.ABC):
                 "corpora_encoding_version": "0.1.0",
                 "corpora_schema_version": "1.1.0",
             }
+            self.adata.uns["contributors"] = {
+                "name": "sfaira",
+                "email": "https://github.com/theislab/sfaira/issues",
+                "institution": "sfaira",
+            }
             # TODO port this into organism ontology handling.
             if self.organism == "mouse":
                 self.adata.uns["organism"] = "Mus musculus"
