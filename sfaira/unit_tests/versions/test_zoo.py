@@ -5,7 +5,7 @@ import pandas as pd
 from typing import Union
 import unittest
 
-from sfaira.ui.model_zoo import ModelZoo, ModelZooCelltype, ModelZooEmbedding
+from sfaira.ui.model_zoo import ModelZoo
 
 
 class _TestZoo:
@@ -38,14 +38,6 @@ class _TestZoo:
         """
         pass
 
-    def _test_kipoi_call(self):
-        """
-        Test whether kipoi_experimental model call works.
-
-        :return:
-        """
-        self.zoo.call_kipoi()
-
     def _test_basic(self, id: str):
         """
         Test all relevant model methods.
@@ -56,7 +48,6 @@ class _TestZoo:
         np.random.seed(1)
         self.simulate()
         self.init_zoo()
-        # self._test_kipoi_call()
         self.zoo_manual.set_model_id(id)
 
 
@@ -68,8 +59,8 @@ class TestZooKerasEmbedding(unittest.TestCase, _TestZoo):
             os.path.join(package_dir, '../test_data', 'model_lookuptable.csv'),
             header=0, index_col=0
         )
-        self.zoo = ModelZooEmbedding(model_lookuptable=lookup_table)
-        self.zoo_manual = ModelZooEmbedding(model_lookuptable=None)
+        self.zoo = ModelZoo(model_lookuptable=lookup_table)
+        self.zoo_manual = ModelZoo(model_lookuptable=None)
 
     def test_basic(self):
         self._test_basic(id="embedding_mouse_lung_vae_theislab_0.1_0.1")
@@ -86,8 +77,8 @@ class TestZooKerasCelltype(unittest.TestCase, _TestZoo):
             os.path.join(package_dir, '../test_data', 'model_lookuptable.csv'),
             header=0, index_col=0
         )
-        self.zoo = ModelZooCelltype(model_lookuptable=lookup_table)
-        self.zoo_manual = ModelZooCelltype(model_lookuptable=None)
+        self.zoo = ModelZoo(model_lookuptable=lookup_table)
+        self.zoo_manual = ModelZoo(model_lookuptable=None)
 
     def test_basic(self):
         self._test_basic(id="celltype_mouse_lung_mlp_theislab_0.0.1_0.1")
