@@ -1624,6 +1624,19 @@ class DatasetBase(abc.ABC):
         self._doi_preprint = x
 
     @property
+    def doi(self) -> List[str]:
+        """
+        All publication DOI associated with the study which are the journal publication and the preprint.
+        See also `.doi_preprint`, `.doi_journal`.
+        """
+        dois = []
+        if self.doi_journal is not None:
+            dois.append(self.doi_journal)
+        if self.doi_preprint is not None:
+            dois.append(self.doi_preprint)
+        return dois
+
+    @property
     def doi_main(self) -> str:
         """
         The main DOI associated with the study which is the journal publication if available, otherwise the preprint.

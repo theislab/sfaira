@@ -565,7 +565,7 @@ class DatasetGroup:
             if isinstance(vdoi, str):
                 vdoi = [vdoi]
             dois.extend(vdoi)
-        return np.sort(np.unique(vdoi)).tolist()
+        return np.sort(np.unique(dois)).tolist()
 
     @property
     def supplier(self) -> List[str]:
