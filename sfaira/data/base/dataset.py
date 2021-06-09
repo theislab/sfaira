@@ -871,11 +871,8 @@ class DatasetBase(abc.ABC):
         # Make sure that correct unknown_metadata_identifier is used in .uns, .obs and .var metadata
         unknown_old = self._adata_ids.unknown_metadata_identifier
         unknown_new = adata_target_ids.unknown_metadata_identifier
-        unknown_id_old = self._adata_ids.unknown_metadata_ontology_id_identifier
-        unknown_id_new = adata_target_ids.unknown_metadata_ontology_id_identifier
         self.adata.obs = self.adata.obs.replace({None: unknown_new})
         self.adata.obs = self.adata.obs.replace({unknown_old: unknown_new})
-        self.adata.obs = self.adata.obs.replace({unknown_id_old: unknown_id_new})
         self.adata.var = self.adata.var.replace({None: unknown_new})
         self.adata.var = self.adata.var.replace({unknown_old: unknown_new})
         for k in self.adata.uns_keys():
