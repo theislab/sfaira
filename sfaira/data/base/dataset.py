@@ -903,7 +903,8 @@ class DatasetBase(abc.ABC):
                 raise ValueError(f"organism {self.organism} currently not supported by cellxgene schema")
             # Add ontology IDs where necessary (note that human readable terms are also kept):
             for k in ["organ", "assay_sc", "disease", "ethnicity", "development_stage", "sex"]:
-                if getattr(adata_target_ids, k) in self.adata.obs.columns:
+                # TODO enable ethinicity once the distinction between ontology for human and None for mouse works.
+                if getattr(adata_target_ids, k) in self.adata.obs.columns and k != "ethnicity":
                     ontology = getattr(self.ontology_container_sfaira, k)
                     # Disambiguate organism-dependent ontologies:
                     if isinstance(ontology, dict):
