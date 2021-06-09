@@ -778,7 +778,7 @@ class DatasetBase(abc.ABC):
                 # Unpack nested lists/tuples:
                 while hasattr(val, '__len__') and not isinstance(val, str) and len(val) == 1:
                     val = val[0]
-                val = [val for _ in range(self.adata.n_obs)]
+                val = [val] * self.adata.n_obs
             new_col = getattr(adata_target_ids, k)
             # Handle batch-annotation columns which can be provided as a combination of columns separated by an asterisk
             if old_col is not None and k in experiment_batch_labels and "*" in old_col:
@@ -815,16 +815,18 @@ class DatasetBase(abc.ABC):
             obs_new[new_col] = val
             setattr(self, f"{k}_obs_key", new_col)
         # Set cell types:
+        # Build auxilliary table with cell type information:
         if self.cell_types_original_obs_key is not None:
-            obs_cl = self.project_celltypes_to_ontology(copy=True, adata_fields=adata_target_ids)
+            obs_cl = self.project_celltypes_to_ontology(copy=True, adata_fields=self._adata_ids)
         else:
             obs_cl = pd.DataFrame({
-                adata_target_ids.cellontology_class: [adata_target_ids.unknown_metadata_identifier] * self.adata.n_obs,
-                adata_target_ids.cellontology_id: [adata_target_ids.unknown_metadata_identifier] * self.adata.n_obs,
-                adata_target_ids.cell_types_original: [adata_target_ids.unknown_metadata_identifier] * self.adata.n_obs,
+                self._adata_ids.cellontology_class: [self._adata_ids.unknown_metadata_identifier] * self.adata.n_obs,
+                self._adata_ids.cellontology_id: [self._adata_ids.unknown_metadata_identifier] * self.adata.n_obs,
+                self._adata_ids.cell_types_original: [self._adata_ids.unknown_metadata_identifier] * self.adata.n_obs,
             }, index=self.adata.obs.index)
-        for k in [x for x in per_cell_labels if x not in adata_target_ids.obs_keys]:
-            obs_new[k] = obs_cl[k]
+        for k in [x for x in per_cell_labels if x in adata_target_ids.obs_keys]:
+            obs_new[getattr(adata_target_ids, k)] = obs_cl[getattr(self._adata_ids, k)]
+        del obs_cl
 
         # Add new annotation to adata and delete old fields if requested
         if clean_var:
