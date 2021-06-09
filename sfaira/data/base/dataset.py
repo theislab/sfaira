@@ -275,7 +275,10 @@ class DatasetBase(abc.ABC):
                         assert self.sample_fn in v.keys(), f"did not find key {self.sample_fn} in yamls keys for {k}"
                         setattr(self, k, v[self.sample_fn])
                     else:  # v is a meta-data item
-                        setattr(self, k, v)
+                        try:
+                            setattr(self, k, v)
+                        except AttributeError as e:
+                            raise ValueError(f"An error occured when setting {k} as {v}: {e}")
             # ID can be set now already because YAML was used as input instead of child class constructor.
             self.set_dataset_id(idx=yaml_vals["meta"]["dataset_index"])
 
