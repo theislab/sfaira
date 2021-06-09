@@ -773,6 +773,8 @@ class DatasetBase(abc.ABC):
             else:
                 old_col = None
                 val = getattr(self, k)
+                if val is None:
+                    val = self._adata_ids.unknown_metadata_identifier
                 # Unpack nested lists/tuples:
                 while hasattr(val, '__len__') and not isinstance(val, str) and len(val) == 1:
                     val = val[0]
@@ -803,7 +805,13 @@ class DatasetBase(abc.ABC):
                     ontology = ontology[self.organism]
                 if k == "ethnicity":
                     ontology = ontology[self.organism]
-                self._value_protection(attr=new_col, allowed=ontology, attempted=np.unique(val).tolist())
+                self._value_protection(attr=new_col, allowed=ontology, attempted=[
+                    x for x in np.unique(val)
+                    if x not in [
+                        self._adata_ids.unknown_metadata_identifier,
+                        self._adata_ids.unknown_metadata_ontology_id_identifier,
+                    ]
+                ])
             obs_new[new_col] = val
             setattr(self, f"{k}_obs_key", new_col)
         # Set cell types:
@@ -861,17 +869,29 @@ class DatasetBase(abc.ABC):
             self.adata.uns = {**self.adata.uns, **uns_new}
 
         # Make sure that correct unknown_metadata_identifier is used in .uns, .obs and .var metadata
-        self.adata.obs = self.adata.obs.replace({None: adata_target_ids.unknown_metadata_identifier})
-        self.adata.var = self.adata.var.replace({None: adata_target_ids.unknown_metadata_identifier})
+        unknown_old = self._adata_ids.unknown_metadata_identifier
+        unknown_new = adata_target_ids.unknown_metadata_identifier
+        unknown_id_old = self._adata_ids.unknown_metadata_ontology_id_identifier
+        unknown_id_new = adata_target_ids.unknown_metadata_ontology_id_identifier
+        self.adata.obs = self.adata.obs.replace({None: unknown_new})
+        self.adata.obs = self.adata.obs.replace({unknown_old: unknown_new})
+        self.adata.obs = self.adata.obs.replace({unknown_id_old: unknown_id_new})
+        self.adata.var = self.adata.var.replace({None: unknown_new})
+        self.adata.var = self.adata.var.replace({unknown_old: unknown_new})
         for k in self.adata.uns_keys():
-            if self.adata.uns[k] is None:
-                self.adata.uns[k] = adata_target_ids.unknown_metadata_identifier
+            if self.adata.uns[k] is None or self.adata.uns[k] == unknown_old:
+                self.adata.uns[k] = unknown_new
 
         # Move all uns annotation to obs columns if requested
         if uns_to_obs:
             for k, v in self.adata.uns.items():
                 if k not in self.adata.obs_keys():
-                    self.adata.obs[k] = [v for i in range(self.adata.n_obs)]
+                    if v is None:
+                        v = self._adata_ids.unknown_metadata_identifier
+                    # Unpack nested lists/tuples:
+                    while hasattr(v, '__len__') and not isinstance(v, str) and len(v) == 1:
+                        v = v[0]
+                    self.adata.obs[k] = [v for _ in range(self.adata.n_obs)]
             # Retain only target uns keys in .uns.
             self.adata.uns = dict([(k, v) for k, v in self.adata.uns.items()
                                    if k in [getattr(adata_target_ids, kk) for kk in ["id"]]])
