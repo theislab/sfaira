@@ -14,7 +14,8 @@ path_out = str(sys.argv[4])
 schema = str(sys.argv[5])
 dois = str(sys.argv[6])
 
-path_cache = path_cache if path_cache != "None" else None
+path_cache = path_cache if path_cache.lower() != "none" else None
+path_meta = path_meta if path_meta.lower() != "none" else None
 
 for doi in dois.split(","):
     ds = sfaira.data.dataloaders.Universe(
