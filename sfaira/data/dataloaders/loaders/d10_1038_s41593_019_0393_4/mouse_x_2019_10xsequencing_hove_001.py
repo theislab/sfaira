@@ -19,7 +19,7 @@ class Dataset(DatasetBase):
         self.assay_sc = "10x technology"
         self.author = "Hove"
         self.disease = "healthy"
-        self.doi = "10.1038/s41593-019-0393-4"
+        self.doi_journal = "10.1038/s41593-019-0393-4"
         self.normalization = "raw"
         self.organism = "mouse"
         self.sample_source = "primary_tissue"

@@ -83,7 +83,8 @@ class Dataset(DatasetBase):
 
         self.author = "Pisco"
         self.disease = "healthy"
-        self.doi = "10.1101/661728"
+        self.doi_journal = "10.1038/s41586-020-2496-1"
+        self.doi_preprint = "10.1101/661728"
         self.normalization = "norm"
         self.organism = "mouse"
         self.organ = organ

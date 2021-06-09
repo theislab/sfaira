@@ -21,7 +21,7 @@ class Dataset(DatasetBase):
         self.assay_sc = "10x technology"
         self.author = "Henry"
         self.disease = "healthy"
-        self.doi = "10.1016/j.celrep.2018.11.086"
+        self.doi_journal = "10.1016/j.celrep.2018.11.086"
         self.normalization = "raw"
         self.sample_source = "primary_tissue"
         self.state_exact = "healthy"

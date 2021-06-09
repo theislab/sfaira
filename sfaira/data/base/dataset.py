@@ -71,6 +71,10 @@ def clean_string(s):
     return s
 
 
+def get_directory_formatted_doi(x:str) -> str:
+    return "d" + "_".join("_".join("_".join(x.split("/")).split(".")).split("-"))
+
+
 class DatasetBase(abc.ABC):
     adata: Union[None, anndata.AnnData]
     class_maps: dict
@@ -91,7 +95,8 @@ class DatasetBase(abc.ABC):
     _default_embedding: Union[None, str]
     _development_stage: Union[None, str]
     _disease: Union[None, str]
-    _doi: Union[None, str]
+    _doi_journal: Union[None, str]
+    _doi_preprint: Union[None, str]
     _download_url_data: Union[Tuple[List[None]], Tuple[List[str]], None]
     _download_url_meta: Union[Tuple[List[None]], Tuple[List[str]], None]
     _ethnicity: Union[None, str]
@@ -198,7 +203,8 @@ class DatasetBase(abc.ABC):
         self._default_embedding = None
         self._development_stage = None
         self._disease = None
-        self._doi = None
+        self._doi_journal = None
+        self._doi_preprint = None
         self._download_url_data = None
         self._download_url_meta = None
         self._ethnicity = None
@@ -391,6 +397,7 @@ class DatasetBase(abc.ABC):
     @property
     def cache_fn(self):
         if self.directory_formatted_doi is None or self._directory_formatted_id is None:
+            # TODO is this case necessary?
             warnings.warn("Caching enabled, but Dataset.id or Dataset.doi not set. Disabling caching for now.")
             return None
         else:
@@ -1269,7 +1276,7 @@ class DatasetBase(abc.ABC):
 
         :return:
         """
-        return [self.author, self.year, self.doi]
+        return [self.author, self.year, self.doi_journal]
 
     # Meta data handling code: Reading, writing and selected properties. Properties are either set in constructor
     # (and saved in self._somename) or accessed in self.meta.
@@ -1517,8 +1524,17 @@ class DatasetBase(abc.ABC):
             return None
         else:
             sfaira_path = os.path.join(self.data_dir_base, self.directory_formatted_doi)
+            # Allow checking in secondary path, named after second DOI associated with study.
+            # This allows association of raw data already downloaded even after DOI is updated.
+            if self.doi_preprint is not None:
+                sfaira_path_secondary = os.path.join(self.data_dir_base,
+                                                     get_directory_formatted_doi(x=self.doi_preprint))
+            else:
+                sfaira_path_secondary = None
             if os.path.exists(sfaira_path):
                 return sfaira_path
+            elif self.doi_preprint is not None and os.path.exists(sfaira_path_secondary):
+                return sfaira_path_secondary
             else:
                 return self.data_dir_base
 
@@ -1578,31 +1594,54 @@ class DatasetBase(abc.ABC):
         self._disease = x
 
     @property
-    def doi(self) -> Union[str, List[str]]:
-        if self._doi is not None:
-            return self._doi
+    def doi_journal(self) -> str:
+        """
+        The prepring publication (secondary) DOI associated with the study.
+        See also `.doi_journal`.
+        """
+        if self._doi_journal is not None:
+            return self._doi_journal
         else:
             if self.meta is None:
                 self.load_meta(fn=None)
-            if self.meta is None or self._adata_ids.doi not in self.meta.columns:
-                raise ValueError("doi must be set but was neither set in constructor nor in meta data")
-            return self.meta[self._adata_ids.doi]
+            if self.meta is None or self._adata_ids.doi_journal not in self.meta.columns:
+                raise ValueError("doi_journal must be set but was neither set in constructor nor in meta data")
+            return self.meta[self._adata_ids.doi_journal]
 
-    @doi.setter
-    def doi(self, x: Union[str, List[str]]):
-        self._doi = x
+    @doi_journal.setter
+    def doi_journal(self, x: str):
+        self._doi_journal = x
+
+    @property
+    def doi_preprint(self) -> str:
+        """
+        The journal publication (main) DOI associated with the study.
+        See also `.doi_preprint`.
+        """
+        if self._doi_preprint is not None:
+            return self._doi_preprint
+        else:
+            if self.meta is None:
+                self.load_meta(fn=None)
+            if self.meta is None or self._adata_ids.doi_preprint not in self.meta.columns:
+                raise ValueError("doi_preprint must be set but was neither set in constructor nor in meta data")
+            return self.meta[self._adata_ids.doi_journal]
+
+    @doi_preprint.setter
+    def doi_preprint(self, x: str):
+        self._doi_preprint = x
 
     @property
     def doi_main(self) -> str:
         """
-        Yields the main DOI associated with the study, defined as the DOI that comes first in alphabetical order.
+        The main DOI associated with the study which is the journal publication if available, otherwise the preprint.
+        See also `.doi_preprint`, `.doi_journal`.
         """
-        return self.doi if isinstance(self.doi, str) else np.sort(self.doi)[0]
+        return self.doi_preprint if self.doi_journal is None else self.doi_journal
 
     @property
     def directory_formatted_doi(self) -> str:
-        # Chose first doi in list.
-        return "d" + "_".join("_".join("_".join(self.doi_main.split("/")).split(".")).split("-"))
+        return get_directory_formatted_doi(x=self.doi_main)
 
     @property
     def download_url_data(self) -> Union[Tuple[List[str]], Tuple[List[None]]]:

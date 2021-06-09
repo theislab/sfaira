@@ -561,7 +561,7 @@ class DatasetGroup:
         """
         dois = []
         for _, v in self.datasets.items():
-            vdoi = v.doi
+            vdoi = v.doi_journal
             if isinstance(vdoi, str):
                 vdoi = [vdoi]
             dois.extend(vdoi)

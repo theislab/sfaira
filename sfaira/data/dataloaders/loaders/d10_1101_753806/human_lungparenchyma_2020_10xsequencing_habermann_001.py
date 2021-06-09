@@ -20,7 +20,8 @@ class Dataset(DatasetBase):
         self.download_url_meta = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE135nnn/GSE135893/suppl/GSE135893%5FIPF%5Fmetadata%2Ecsv%2Egz"
 
         self.author = "Habermann"
-        self.doi = "10.1101/753806"
+        self.doi_journal = "10.1126/sciadv.aba1972"
+        self.doi_preprint = "10.1101/753806"
         self.normalization = "raw"
         self.organ = "lung parenchyma"
         self.organism = "human"

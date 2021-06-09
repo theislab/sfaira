@@ -5,8 +5,8 @@ dataset_wise:
     author:
         - "Cao"
     default_embedding:
-    doi:
-        - "10.1126/science.aba7721"
+    doi_journal: "10.1126/science.aba7721"
+    doi_preprint:
     download_url_data: "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE156793&format=file&file=GSE156793%5FS3%5Fgene%5Fcount%2Eloom%2Egz"
     download_url_meta:
     normalization: "raw"

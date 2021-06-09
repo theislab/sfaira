@@ -15,7 +15,7 @@ class Dataset(DatasetBase):
         self.assay_sc = "10x technology"
         self.author = "Regev"
         self.disease = "healthy"
-        self.doi = "no_doi_regev"
+        self.doi_journal = "no_doi_regev"
         self.normalization = "raw"
         self.organ_obs_key = "derived_organ_parts_label"
         self.organism = "human"

@@ -15,7 +15,7 @@ class Dataset(DatasetBase):
         self.assay_sc = "Drop-seq"
         self.author = "Braga"
         self.disease = "healthy"
-        self.doi = "10.1038/s41591-019-0468-5"
+        self.doi_journal = "10.1038/s41591-019-0468-5"
         self.normalization = "raw"
         self.organ = "lung"
         self.organism = "human"

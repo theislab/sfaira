@@ -19,7 +19,7 @@ class Dataset(DatasetBase):
         ]
 
         self.author = "Han"
-        self.doi = "10.1038/s41586-020-2157-4"
+        self.doi_journal = "10.1038/s41586-020-2157-4"
         self.healthy = True
         self.normalization = "raw"
         self.organism = "human"

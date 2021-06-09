@@ -36,7 +36,7 @@ class Dataset(DatasetBase):
         self.assay_sc = "10x technology"
         self.author = "Madissoon"
         self.disease = "healthy"
-        self.doi = "10.1186/s13059-019-1906-x"
+        self.doi_journal = "10.1186/s13059-019-1906-x"
         self.normalization = "raw"  # ToDo "madissoon19_lung.processed.h5ad" is close to integer but not quire (~1e-4)
         self.organ = "lung parenchyma" if self.sample_fn == "madissoon19_lung.processed.h5ad" else \
             "esophagus" if self.sample_fn == "oesophagus.cellxgene.h5ad" else "spleen"
