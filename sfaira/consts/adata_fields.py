@@ -236,7 +236,7 @@ class AdataIdsCellxgene(AdataIds):
         ]
         self.uns_keys = [
             "doi_journal",
-            "doi_preprint"
+            "doi_preprint",
             "default_embedding",
             "id",
             "title",
