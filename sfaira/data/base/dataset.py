@@ -919,7 +919,9 @@ class DatasetBase(abc.ABC):
             else:
                 raise ValueError(f"organism {self.organism} currently not supported by cellxgene schema")
             # Add ontology IDs where necessary (note that human readable terms are also kept):
-            for k in ["organ", "assay_sc", "disease", "ethnicity", "development_stage", "sex"]:
+            ontology_cols = ["organ", "assay_sc", "disease", "ethnicity", "development_stage"]
+            non_ontology_cols = ["sex"]
+            for k in ontology_cols:
                 # TODO enable ethinicity once the distinction between ontology for human and None for mouse works.
                 if getattr(adata_target_ids, k) in self.adata.obs.columns and k != "ethnicity":
                     ontology = getattr(self.ontology_container_sfaira, k)
@@ -937,6 +939,13 @@ class DatasetBase(abc.ABC):
                     self.adata.obs[getattr(adata_target_ids, k)] = adata_target_ids.unknown_metadata_identifier
                     self.adata.obs[getattr(adata_target_ids, k) + "_ontology_term_id"] = \
                         adata_target_ids.unknown_metadata_ontology_id_identifier
+            # Reorder data frame to put ontology columns first:
+            cellxgene_cols = [getattr(adata_target_ids, x) for x in ontology_cols] + \
+                             [getattr(adata_target_ids, x) for x in non_ontology_cols] + \
+                             [getattr(adata_target_ids, x) + "_ontology_term_id" for x in ontology_cols]
+            self.adata.obs = self.adata.obs[
+                cellxgene_cols + [x for x in self.adata.obs.columns if x not in cellxgene_cols]
+            ]
             # Adapt var columns naming.
             if self.organism == "human":
                 gene_id_new = "hgnc_gene_symbol"
