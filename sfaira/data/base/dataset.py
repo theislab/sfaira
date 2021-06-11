@@ -939,6 +939,17 @@ class DatasetBase(abc.ABC):
                     self.adata.obs[getattr(adata_target_ids, k)] = adata_target_ids.unknown_metadata_identifier
                     self.adata.obs[getattr(adata_target_ids, k) + "_ontology_term_id"] = \
                         adata_target_ids.unknown_metadata_ontology_id_identifier
+            # Correct unknown cell type entries:
+            self.adata.obs[getattr(adata_target_ids, "cellontology_class")] = [
+                x if x not in [self._adata_ids.unknown_celltype_identifier,
+                               self._adata_ids.not_a_cell_celltype_identifier]
+                else "native cell"
+                for x in self.adata.obs[getattr(adata_target_ids, "cellontology_class")]]
+            self.adata.obs[getattr(adata_target_ids, "cellontology_id")] = [
+                x if x not in [self._adata_ids.unknown_celltype_identifier,
+                               self._adata_ids.not_a_cell_celltype_identifier]
+                else "CL:0000003"
+                for x in self.adata.obs[getattr(adata_target_ids, "cellontology_id")]]
             # Reorder data frame to put ontology columns first:
             cellxgene_cols = [getattr(adata_target_ids, x) for x in ontology_cols] + \
                              [getattr(adata_target_ids, x) for x in non_ontology_cols] + \
