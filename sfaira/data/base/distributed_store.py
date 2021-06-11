@@ -153,6 +153,18 @@ class DistributedStoreBase(abc.ABC):
         self._indices = x
 
     @property
+    def idx_dataset_start(self):
+        """
+        Global indices corresponding to first cell of each data set.
+        """
+        idx = []
+        counter = 0
+        for k, v in self.indices.items():
+            idx.append(counter)
+            counter += len(v)
+        return idx
+
+    @property
     def obs_by_key(self) -> Dict[str, Union[pd.DataFrame, dask.dataframe.DataFrame]]:
         if self._obs_by_key is not None:
             # Run sanity checks to validate that this external obs can be used in the context of .adata_by_key:
