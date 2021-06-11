@@ -274,9 +274,6 @@ class DistributedStoreBase(abc.ABC):
                     ])
                 ]
             idx = np.where([x in values_found_unique_matched for x in values_found])[0]
-            if len(idx) > 0:
-                # TODO keep this logging for now to catch undesired behaviour resulting from loaded edges in ontologies.
-                print(f"matched keys {str(values_found_unique_matched)} in data set {dataset}")
             return idx
 
         indices = {}

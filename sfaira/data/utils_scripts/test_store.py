@@ -83,7 +83,7 @@ store = sfaira.data.load_store(cache_path=path_store_dao, store_format="dao")
 store.subset(attr_key="organism", values="human")
 k_datasets_dao = list(store.indices.keys())
 # Sort by size:
-k_datasets_dao = np.asarray(k_datasets_dao)[np.argsort(store.n_obs)].tolist()
+k_datasets_dao = np.asarray(k_datasets_dao)[np.argsort([len(v) for v in store.indices.values()])].tolist()
 store = sfaira.data.load_store(cache_path=path_store_h5ad, store_format="h5ad")
 store.subset(attr_key="organism", values="human")
 k_datasets_h5ad = list(store.indices.keys())
