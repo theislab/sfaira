@@ -54,11 +54,11 @@ def time_gen(_store, store_format, kwargs) -> List[float]:
     #_store = sfaira.data.load_store(cache_path=path_store, store_format=store_format)
     if store_format == "h5ad":
         del kwargs["random_access"]
-    if kwargs["varsubset"]:
+    if kwargs["var_subset"]:
         gc = sfaira.versions.genomes.genomes.GenomeContainer(assembly="Homo_sapiens.GRCh38.102")
         gc.subset(symbols=["VTA1", "MLXIPL", "BAZ1B", "RANBP9", "PPARGC1A", "DDX25", "CRYAB"])
         _store.genome_container = gc
-    del kwargs["varsubset"]
+    del kwargs["var_subset"]
     _gen = _store.generator(**kwargs)
     _measurements = []
     for _ in range(REPS):
@@ -119,6 +119,7 @@ for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, comp
 
         # Measure load_sequential_from_one_dataset time.
         scenario = "load_sequential_from_one_dataset"
+        print(scenario)
         for dense_varsubset in [(False, False), (True, False), (True, True)]:
             dense, varsubset = dense_varsubset
             suffix = "_todense_varsubet" if dense and varsubset else "_todense" if dense and not varsubset else ""
@@ -135,6 +136,7 @@ for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, comp
 
         # Measure load_sequential_from_many_datasets time.
         scenario = "load_sequential_from_many_datasets"
+        print(scenario)
         for dense_varsubset in [(False, False), (True, False), (True, True)]:
             dense, varsubset = dense_varsubset
             suffix = "_todense_varsubet" if dense and varsubset else "_todense" if dense and not varsubset else ""
@@ -151,6 +153,7 @@ for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, comp
 
         # Measure load_random_from_one_dataset time.
         scenario = "load_random_from_one_dataset"
+        print(scenario)
         for dense_varsubset in [(False, False), (True, False), (True, True)]:
             dense, varsubset = dense_varsubset
             suffix = "_todense_varsubet" if dense and varsubset else "_todense" if dense and not varsubset else ""
@@ -169,6 +172,7 @@ for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, comp
 
         # Measure load_random_from_many_datasets time.
         scenario = "load_random_from_many_datasets"
+        print(scenario)
         for dense_varsubset in [(False, False), (True, False), (True, True)]:
             dense, varsubset = dense_varsubset
             suffix = "_todense_varsubet" if dense and varsubset else "_todense" if dense and not varsubset else ""
