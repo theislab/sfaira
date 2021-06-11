@@ -87,6 +87,8 @@ store = sfaira.data.load_store(cache_path=path_store_h5ad, store_format="h5ad")
 k_datasets_h5ad = list(store.indices.keys())
 # Only retain intersection of data sets while keeping order.
 k_datasets = [x for x in k_datasets_dao if x in k_datasets_h5ad]
+print(k_datasets_dao)
+print(k_datasets_h5ad)
 print(f"running benchmark on {len(k_datasets)} data sets: {k_datasets}")
 for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, compression_kwargs):
     path_store = path_store_h5ad if store_type_i == "h5ad" else path_store_dao
