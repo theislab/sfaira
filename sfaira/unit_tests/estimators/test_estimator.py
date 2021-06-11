@@ -9,7 +9,7 @@ from typing import Union
 
 from sfaira.data import load_store, DistributedStoreBase
 from sfaira.estimators import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
-from sfaira.versions.genomes import CustomFeatureContainer
+from sfaira.versions.genomes.genomes import CustomFeatureContainer
 from sfaira.versions.metadata import OntologyOboCustom
 from sfaira.versions.topologies import TopologyContainer
 from sfaira.unit_tests.utils import cached_store_writing, simulate_anndata

@@ -47,7 +47,7 @@ time_measurements = {
 }
 
 
-def time_gen(_store, kwargs) -> List[float]:
+def time_gen(_store, store_format, kwargs) -> List[float]:
     """
     Take samples from generator and measure time taken to generate each sample.
     """
@@ -55,7 +55,7 @@ def time_gen(_store, kwargs) -> List[float]:
     if store_format == "h5ad":
         del kwargs["random_access"]
     if kwargs["varsubset"]:
-        gc = sfaira.versions.genomes.GenomeContainer(assembly="Homo_sapiens.GRCh38.102")
+        gc = sfaira.versions.genomes.genomes.GenomeContainer(assembly="Homo_sapiens.GRCh38.102")
         gc.subset(symbols=["VTA1", "MLXIPL", "BAZ1B", "RANBP9", "PPARGC1A", "DDX25", "CRYAB"])
         _store.genome_container = gc
     del kwargs["varsubset"]
@@ -128,7 +128,8 @@ for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, comp
                 "random_access": False,
                 "var_subset": varsubset,
             }
-            time_measurements[scenario + suffix][store_type_i][key_bs] = time_gen(_store=store, kwargs=kwargs)
+            time_measurements[scenario + suffix][store_type_i][key_bs] = time_gen(
+                _store=store, store_format=store_type_i, kwargs=kwargs)
 
         # Measure load_sequential_from_many_datasets time.
         scenario = "load_sequential_from_many_datasets"
@@ -143,7 +144,8 @@ for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, comp
                 "random_access": False,
                 "var_subset": varsubset,
             }
-            time_measurements[scenario + suffix][store_type_i][key_bs] = time_gen(_store=store, kwargs=kwargs)
+            time_measurements[scenario + suffix][store_type_i][key_bs] = time_gen(
+                _store=store, store_format=store_type_i, kwargs=kwargs)
 
         # Measure load_random_from_one_dataset time.
         scenario = "load_random_from_one_dataset"
@@ -160,7 +162,8 @@ for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, comp
                 "random_access": True,
                 "var_subset": varsubset,
             }
-            time_measurements[scenario + suffix][store_type_i][key_bs] = time_gen(_store=store, kwargs=kwargs)
+            time_measurements[scenario + suffix][store_type_i][key_bs] = time_gen(
+                _store=store, store_format=store_type_i, kwargs=kwargs)
 
         # Measure load_random_from_many_datasets time.
         scenario = "load_random_from_many_datasets"
@@ -177,7 +180,8 @@ for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, comp
                 "random_access": True,
                 "var_subset": varsubset,
             }
-            time_measurements[scenario + suffix][store_type_i][key_bs] = time_gen(_store=store, kwargs=kwargs)
+            time_measurements[scenario + suffix][store_type_i][key_bs] = time_gen(
+                _store=store, store_format=store_type_i, kwargs=kwargs)
 
 ncols = 2
 fig, axs = plt.subplots(nrows=3, ncols=2, figsize=(14, 12))

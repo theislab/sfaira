@@ -8,7 +8,7 @@ import time
 from typing import List
 
 from sfaira.data import load_store
-from sfaira.versions.genomes import GenomeContainer
+from sfaira.versions.genomes.genomes import GenomeContainer
 from sfaira.unit_tests.utils import cached_store_writing
 
 

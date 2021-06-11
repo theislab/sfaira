@@ -18,7 +18,7 @@ import urllib.error
 import cgi
 import ssl
 
-from sfaira.versions.genomes import GenomeContainer
+from sfaira.versions.genomes.genomes import GenomeContainer
 from sfaira.versions.metadata import Ontology, OntologyHierarchical, CelltypeUniverse
 from sfaira.consts import AdataIds, AdataIdsCellxgene, AdataIdsSfaira, META_DATA_FIELDS, OCS
 from sfaira.data.base.io_dao import write_dao
@@ -494,7 +494,7 @@ class DatasetBase(abc.ABC):
                              " dataloader")
         elif not self.gene_id_symbols_var_key and self.gene_id_ensembl_var_key:
             # Convert ensembl ids to gene symbols
-            id_dict = self.genome_container.id_to_names_dict
+            id_dict = self.genome_container.id_to_symbols_dict
             ensids = self.adata.var.index if self.gene_id_ensembl_var_key == "index" else self.adata.var[self.gene_id_ensembl_var_key]
             self.adata.var[gene_id_symbols] = [
                 id_dict[n.split(".")[0]] if n.split(".")[0] in id_dict.keys() else 'n/a'
@@ -503,7 +503,7 @@ class DatasetBase(abc.ABC):
             self.gene_id_symbols_var_key = gene_id_symbols
         elif self.gene_id_symbols_var_key and not self.gene_id_ensembl_var_key:
             # Convert gene symbols to ensembl ids
-            id_dict = self.genome_container.names_to_id_dict
+            id_dict = self.genome_container.symbol_to_id_dict
             id_strip_dict = self.genome_container.strippednames_to_id_dict
             # Matching gene names to ensembl ids in the following way: if the gene is present in the ensembl dictionary,
             # match it straight away, if it is not in there we try to match everything in front of the first period in

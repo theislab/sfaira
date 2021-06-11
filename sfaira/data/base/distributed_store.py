@@ -13,7 +13,7 @@ from typing import Dict, List, Tuple, Union
 from sfaira.consts import AdataIdsSfaira, OCS
 from sfaira.data.base.dataset import is_child, UNS_STRING_META_IN_OBS
 from sfaira.data.base.io_dao import read_dao
-from sfaira.versions.genomes import GenomeContainer
+from sfaira.versions.genomes.genomes import GenomeContainer
 
 """
 Distributed stores are array-like classes that sit on groups of on disk representations of anndata instances files.

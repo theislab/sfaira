@@ -5,7 +5,7 @@ Functionalities to interact with gene sets defined in an assembly and gene-annot
 import gzip
 import numpy as np
 import os
-from typing import List, Union
+from typing import Iterable, List, Union
 import pandas
 import pathlib
 import urllib.error
@@ -32,7 +32,7 @@ class GtfInterface:
         """
         The cache dir is in a cache directory in the sfaira installation that is excempt from git versioning.
         """
-        cache_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "cache", "genomes")
+        cache_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "cache", "")
         cache_dir_path = pathlib.Path(cache_dir)
         cache_dir_path.mkdir(parents=True, exist_ok=True)
         return cache_dir
@@ -88,6 +88,12 @@ class GtfInterface:
 
 
 class GenomeContainer:
+    """
+    Container class for a genome annotation for a specific release.
+
+    This class can be used to translate between symbols and ENSEMBL IDs for a specific assembly, to store specific gene
+    subsets of an assembly, and to subselect genes by biotypes in an assembly.
+    """
 
     genome_tab: pandas.DataFrame
     assembly: str
@@ -96,6 +102,16 @@ class GenomeContainer:
             self,
             assembly: str = None,
     ):
+        """
+        Are you not sure which assembly to use?
+
+            - You could use the newest one for example, check the ENSEMBL site regularly for updates:
+                http://ftp.ensembl.org/pub/
+            - You could use one used by a specific aligner, the assemblies used by 10x cellranger are described here
+                for example: https://support.10xgenomics.com/single-cell-gene-expression/software/release-notes/build
+
+        :param assembly: The full name of the genome assembly, e.g. Homo_sapiens.GRCh38.102.
+        """
         if not isinstance(assembly, str):
             raise ValueError(f"supplied assembly {assembly} was not a string")
         self.assembly = assembly
@@ -167,26 +183,43 @@ class GenomeContainer:
         self.genome_tab = self.genome_tab.loc[subset, :].copy()
 
     @property
-    def symbols(self):
+    def symbols(self) -> List[str]:
+        """
+        List of symbols of genes in genome container.
+        """
         return self.genome_tab[KEY_SYMBOL].values.tolist()
 
     @property
-    def ensembl(self):
+    def ensembl(self) -> List[str]:
+        """
+        List of ENSEMBL IDs of genes in genome container.
+        """
         return self.genome_tab[KEY_ID].values.tolist()
 
     @property
-    def biotype(self):
+    def biotype(self) -> List[str]:
+        """
+        List of biotypes of genes in genome container.
+        """
         return self.genome_tab[KEY_TYPE].values.tolist()
 
-    def __validate_ensembl(self, x: List[str]):
-        not_found = [y for y in x if y not in self.ensembl]
+    def __validate_ensembl(self, x: List[str], enforce_captitalization: bool = True):
+        if enforce_captitalization:
+            not_found = [y for y in x if y not in self.ensembl]
+        else:
+            ensembl_upper = [y.upper() for y in self.ensembl]
+            not_found = [y for y in x if y.upper() not in ensembl_upper]
         if len(not_found) > 0:
-            raise ValueError(f"Could not find ensembl: {not_found}")
+            raise ValueError(f"Could not find ENSEMBL ID: {not_found}")
 
-    def __validate_symbols(self, x: List[str]):
-        not_found = [y for y in x if y not in self.symbols]
+    def __validate_symbols(self, x: List[str], enforce_captitalization: bool = True):
+        if enforce_captitalization:
+            not_found = [y for y in x if y not in self.symbols]
+        else:
+            symbols_upper = [y.upper() for y in self.symbols]
+            not_found = [y for y in x if y.upper() not in symbols_upper]
         if len(not_found) > 0:
-            raise ValueError(f"Could not find names: {not_found}")
+            raise ValueError(f"Could not find symbol: {not_found}")
 
     def __validate_types(self, x: List[str]):
         not_found = [y for y in x if y not in self.biotype]
@@ -195,15 +228,56 @@ class GenomeContainer:
 
     @property
     def n_var(self) -> int:
+        """
+        Number of genes in genome container.
+        """
         return self.genome_tab.shape[0]
 
     @property
-    def names_to_id_dict(self):
+    def symbol_to_id_dict(self):
+        """
+        Dictionary-formatted map of gene symbols to ENSEMBL IDs.
+        """
         return dict(zip(self.genome_tab[KEY_SYMBOL].values.tolist(), self.genome_tab[KEY_ID].values.tolist()))
 
     @property
-    def id_to_names_dict(self):
+    def id_to_symbols_dict(self):
+        """
+        Dictionary-formatted map of ENSEMBL IDs to gene symbols.
+        """
         return dict(zip(self.genome_tab[KEY_ID].values.tolist(), self.genome_tab[KEY_SYMBOL].values.tolist()))
+
+    def translate_symbols_to_id(self, x: Union[str, Iterable[str]]) -> Union[str, List[str]]:
+        """
+        Translate gene symbols to ENSEMBL IDs.
+
+        :param x: Symbol(s) to translate.
+        :return: ENSEMBL IDs
+        """
+        if isinstance(x, str):
+            x = [x]
+        self.__validate_symbols(x=x, enforce_captitalization=False)
+        map_dict = dict([(k.upper(), v) for k, v in self.symbol_to_id_dict.items()])
+        y = [map_dict[xx.upper()] for xx in x]
+        if len(y) == 1:
+            y = y[0]
+        return y
+
+    def translate_id_to_symbols(self, x: Union[str, Iterable[str]]) -> Union[str, List[str]]:
+        """
+        Translate ENSEMBL IDs to gene symbols.
+
+        :param x: ENSEMBL ID(s) to translate.
+        :return: Gene symbols.
+        """
+        if isinstance(x, str):
+            x = [x]
+        self.__validate_ensembl(x=x, enforce_captitalization=False)
+        map_dict = dict([(k.upper(), v) for k, v in self.id_to_symbols_dict.items()])
+        y = [map_dict[xx.upper()] for xx in x]
+        if len(y) == 1:
+            y = y[0]
+        return y
 
     @property
     def strippednames_to_id_dict(self):
