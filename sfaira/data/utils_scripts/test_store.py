@@ -69,13 +69,13 @@ def time_gen(store_format, kwargs) -> List[float]:
 
 
 def get_idx_dataset_start(_store, k_target):
-    idx = []
+    idx = {}
     counter = 0
     for k, v in _store.indices.items():
         if k in k_target:
-            idx.append(counter)
+            idx[k] = counter
         counter += len(v)
-    return idx
+    return [idx[k] for k in k_target]
 
 
 # Define data objects to be comparable:
