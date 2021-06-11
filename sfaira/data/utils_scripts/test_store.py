@@ -98,7 +98,6 @@ for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, comp
         t0 = time.time()
         store = sfaira.data.load_store(cache_path=path_store, store_format=store_type_i)
         time_measurements["initiate"][store_type_i].append(time.time() - t0)
-    idx_dataset_start = get_idx_dataset_start(_store=store, k_target=k_datasets)
 
     time_measurements["load_sequential_from_one_dataset"][store_type_i] = {}
     time_measurements["load_sequential_from_many_datasets"][store_type_i] = {}
@@ -114,6 +113,8 @@ for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, comp
     time_measurements["load_random_from_many_datasets_todense_varsubet"][store_type_i] = {}
     store = sfaira.data.load_store(cache_path=path_store, store_format=store_type_i)
     store.subset(attr_key="organism", values="human")
+    idx_dataset_start = get_idx_dataset_start(_store=store, k_target=k_datasets)
+    idx_dataset_end = [i + len(store.indices[x]) for i, x in zip(idx_dataset_start, k_datasets)]
     for bs in BATCH_SIZES:
         key_bs = "bs" + str(bs)
 
@@ -124,24 +125,9 @@ for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, comp
             dense, varsubset = dense_varsubset
             suffix = "_todense_varsubet" if dense and varsubset else "_todense" if dense and not varsubset else ""
             kwargs = {
-                "idx": np.arange(idx_dataset_start[0], idx_dataset_start[0] + bs * REPS),
-                "batch_size": bs,
-                "return_dense": dense,
-                "randomized_batch_access": False,
-                "random_access": False,
-                "var_subset": varsubset,
-            }
-            time_measurements[scenario + suffix][store_type_i][key_bs] = time_gen(
-                _store=store, store_format=store_type_i, kwargs=kwargs)
-
-        # Measure load_sequential_from_many_datasets time.
-        scenario = "load_sequential_from_many_datasets"
-        print(scenario)
-        for dense_varsubset in [(False, False), (True, False), (True, True)]:
-            dense, varsubset = dense_varsubset
-            suffix = "_todense_varsubet" if dense and varsubset else "_todense" if dense and not varsubset else ""
-            kwargs = {
-                "idx": np.concatenate([np.arange(x, x + bs) for x in idx_dataset_start]),
+                "idx": np.concatenate([
+                    np.arange(idx_dataset_start[0], idx_dataset_start[0] + bs)
+                    for _ in range(REPS)]),
                 "batch_size": bs,
                 "return_dense": dense,
                 "randomized_batch_access": False,
@@ -159,8 +145,25 @@ for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, comp
             suffix = "_todense_varsubet" if dense and varsubset else "_todense" if dense and not varsubset else ""
             kwargs = {
                 "idx": np.concatenate([
-                    np.random.choice(np.arange(idx_dataset_start[0], idx_dataset_start[1]), size=bs, replace=False)
+                    np.random.choice(np.arange(idx_dataset_start[0], idx_dataset_end[0]), size=bs, replace=False)
                     for _ in range(REPS)]),
+                "batch_size": bs,
+                "return_dense": dense,
+                "randomized_batch_access": False,
+                "random_access": False,
+                "var_subset": varsubset,
+            }
+            time_measurements[scenario + suffix][store_type_i][key_bs] = time_gen(
+                _store=store, store_format=store_type_i, kwargs=kwargs)
+
+        # Measure load_sequential_from_many_datasets time.
+        scenario = "load_sequential_from_many_datasets"
+        print(scenario)
+        for dense_varsubset in [(False, False), (True, False), (True, True)]:
+            dense, varsubset = dense_varsubset
+            suffix = "_todense_varsubet" if dense and varsubset else "_todense" if dense and not varsubset else ""
+            kwargs = {
+                "idx": np.concatenate([np.arange(s, s + bs) for s in idx_dataset_start]),
                 "batch_size": bs,
                 "return_dense": dense,
                 "randomized_batch_access": False,
@@ -179,7 +182,7 @@ for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, comp
             kwargs = {
                 "idx": np.concatenate([
                     np.random.choice(np.arange(s, e), size=bs, replace=False)
-                    for s, e in zip(idx_dataset_start[:-1], idx_dataset_start[1:])]),
+                    for s, e in zip(idx_dataset_start, idx_dataset_end)]),
                 "batch_size": bs,
                 "return_dense": dense,
                 "randomized_batch_access": False,
