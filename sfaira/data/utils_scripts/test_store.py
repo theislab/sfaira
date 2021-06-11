@@ -80,10 +80,12 @@ def get_idx_dataset_start(_store, k_target):
 
 # Define data objects to be comparable:
 store = sfaira.data.load_store(cache_path=path_store_dao, store_format="dao")
+store.subset(attr_key="organism", values="human")
 k_datasets_dao = list(store.indices.keys())
 # Sort by size:
 k_datasets_dao = np.asarray(k_datasets_dao)[np.argsort(store.n_obs)].tolist()
 store = sfaira.data.load_store(cache_path=path_store_h5ad, store_format="h5ad")
+store.subset(attr_key="organism", values="human")
 k_datasets_h5ad = list(store.indices.keys())
 # Only retain intersection of data sets while keeping order.
 k_datasets = [x for x in k_datasets_dao if x in k_datasets_h5ad]
@@ -114,6 +116,7 @@ for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, comp
     time_measurements["load_random_from_one_dataset_todense_varsubet"][store_type_i] = {}
     time_measurements["load_random_from_many_datasets_todense_varsubet"][store_type_i] = {}
     store = sfaira.data.load_store(cache_path=path_store, store_format=store_type_i)
+    store.subset(attr_key="organism", values="human")
     for bs in BATCH_SIZES:
         key_bs = "bs" + str(bs)
 
