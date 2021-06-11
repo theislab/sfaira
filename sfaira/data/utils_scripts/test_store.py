@@ -51,7 +51,6 @@ def time_gen(_store, store_format, kwargs) -> List[float]:
     """
     Take samples from generator and measure time taken to generate each sample.
     """
-    #_store = sfaira.data.load_store(cache_path=path_store, store_format=store_format)
     if store_format == "h5ad":
         del kwargs["random_access"]
     if kwargs["var_subset"]:
@@ -59,7 +58,7 @@ def time_gen(_store, store_format, kwargs) -> List[float]:
         gc.subset(symbols=["VTA1", "MLXIPL", "BAZ1B", "RANBP9", "PPARGC1A", "DDX25", "CRYAB"])
         _store.genome_container = gc
     del kwargs["var_subset"]
-    _gen = _store.generator(**kwargs)
+    _gen = _store.generator(**kwargs)()
     _measurements = []
     for _ in range(REPS):
         _t0 = time.time()
@@ -89,9 +88,7 @@ store.subset(attr_key="organism", values="human")
 k_datasets_h5ad = list(store.indices.keys())
 # Only retain intersection of data sets while keeping order.
 k_datasets = [x for x in k_datasets_dao if x in k_datasets_h5ad]
-print(k_datasets_dao)
-print(k_datasets_h5ad)
-print(f"running benchmark on {len(k_datasets)} data sets: {k_datasets}")
+print(f"running benchmark on {len(k_datasets)} data sets.")
 for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, compression_kwargs):
     path_store = path_store_h5ad if store_type_i == "h5ad" else path_store_dao
 
