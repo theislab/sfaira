@@ -408,7 +408,7 @@ class DistributedStoreH5ad(DistributedStoreBase):
         # Collect all data loaders from files in directory:
         adata_by_key = {}
         indices = {}
-        for f in os.listdir(cache_path):
+        for f in np.sort(os.listdir(cache_path)):
             adata = None
             trial_path = os.path.join(cache_path, f)
             if os.path.isfile(trial_path):
@@ -605,14 +605,13 @@ class DistributedStoreDao(DistributedStoreBase):
         # Collect all data loaders from files in directory:
         adata_by_key = {}
         indices = {}
-        for f in os.listdir(cache_path):
+        for f in np.sort(os.listdir(cache_path)):
             adata = None
             trial_path = os.path.join(cache_path, f)
             if os.path.isdir(trial_path):
                 # zarr-backed anndata are saved as directories with the elements of the array group as further sub
                 # directories, e.g. a directory called "X", and a file ".zgroup" which identifies the zarr group.
-                if [".zgroup" in os.listdir(trial_path)]:
-                    adata = read_dao(trial_path, use_dask=True, columns=columns, obs_separate=False)
+                adata = read_dao(trial_path, use_dask=True, columns=columns, obs_separate=False)
             if adata is not None:
                 adata_by_key[adata.uns["id"]] = adata
                 indices[adata.uns["id"]] = np.arange(0, adata.n_obs)
