@@ -131,6 +131,12 @@ class DistributedStoreBase(abc.ABC):
     def adata_by_key(self, x: Dict[str, anndata.AnnData]):
         self._adata_by_key = x
 
+    def adata_memory_footprint(self, k):
+        """
+        Memory foot-print of data set k in MB.
+        """
+        return sys.getsizeof(self.adata_by_key[k]) / np.power(1024, 2)
+
     @property
     def indices(self) -> Dict[str, np.ndarray]:
         return self._indices
@@ -408,7 +414,6 @@ class DistributedStoreH5ad(DistributedStoreBase):
             if os.path.isfile(trial_path):
                 # Narrow down to supported file types:
                 if f.split(".")[-1] == "h5ad":
-                    print(f"Discovered {f} as .h5ad file.")
                     try:
                         adata = anndata.read_h5ad(
                             filename=trial_path,
@@ -608,8 +613,6 @@ class DistributedStoreDao(DistributedStoreBase):
                 # directories, e.g. a directory called "X", and a file ".zgroup" which identifies the zarr group.
                 if [".zgroup" in os.listdir(trial_path)]:
                     adata = read_dao(trial_path, use_dask=True, columns=columns, obs_separate=False)
-                    print(f"Discovered {f} as zarr group, "
-                          f"sized {round(sys.getsizeof(adata) / np.power(1024, 2), 1)}MB")
             if adata is not None:
                 adata_by_key[adata.uns["id"]] = adata
                 indices[adata.uns["id"]] = np.arange(0, adata.n_obs)
