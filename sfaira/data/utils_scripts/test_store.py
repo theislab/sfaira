@@ -126,8 +126,8 @@ for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, comp
             suffix = "_todense_varsubet" if dense and varsubset else "_todense" if dense and not varsubset else ""
             kwargs = {
                 "idx": np.concatenate([
-                    np.arange(idx_dataset_start[0], idx_dataset_start[0] + bs)
-                    for _ in range(REPS)]),
+                    np.arange(idx_dataset_start[0] + bs * i, idx_dataset_start[0] + bs * (i + 1))
+                    for i in range(REPS)]),
                 "batch_size": bs,
                 "return_dense": dense,
                 "randomized_batch_access": False,
@@ -144,9 +144,9 @@ for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, comp
             dense, varsubset = dense_varsubset
             suffix = "_todense_varsubet" if dense and varsubset else "_todense" if dense and not varsubset else ""
             kwargs = {
-                "idx": np.concatenate([
-                    np.random.choice(np.arange(idx_dataset_start[0], idx_dataset_end[0]), size=bs, replace=False)
-                    for _ in range(REPS)]),
+                "idx": np.random.choice(
+                    np.arange(idx_dataset_start[0], np.max(idx_dataset_end[0], idx_dataset_start[0] + bs * REPS)),
+                    size=bs * REPS, replace=False),
                 "batch_size": bs,
                 "return_dense": dense,
                 "randomized_batch_access": False,
@@ -181,7 +181,7 @@ for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, comp
             suffix = "_todense_varsubet" if dense and varsubset else "_todense" if dense and not varsubset else ""
             kwargs = {
                 "idx": np.concatenate([
-                    np.random.choice(np.arange(s, e), size=bs, replace=False)
+                    np.random.choice(np.arange(s, np.max(e, s + bs)), size=bs, replace=False)
                     for s, e in zip(idx_dataset_start, idx_dataset_end)]),
                 "batch_size": bs,
                 "return_dense": dense,
