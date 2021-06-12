@@ -708,17 +708,15 @@ class DistributedStoreDao(DistributedStoreBase):
                 # Feature indexing: Run in same operation as observation index so that feature chunking can be
                 # efficiently used if available. TODO does this make a difference in dask?
                 if random_access:
+                    x_i = x[epoch_indices[s:e], :]
                     if var_idx is not None:
-                        x_i = x[epoch_indices[s:e], var_idx]
-                    else:
-                        x_i = x[epoch_indices[s:e], :]
+                        x_i = x[:, var_idx]
                 else:
                     # Use slicing because observations accessed in batch are ordered in data set:
                     # Note that epoch_indices[i] == i if not random_access.
+                    x_i = x[s:e, :]
                     if var_idx is not None:
-                        x_i = x[s:e, var_idx]
-                    else:
-                        x_i = x[s:e, :]
+                        x_i = x[:, var_idx]
                 # Exploit fact that index of obs is just increasing list of integers, so we can use the .loc[] indexing
                 # instead of .iloc[]:
                 obs_i = obs[obs_keys].loc[epoch_indices[s:e].tolist(), :]
