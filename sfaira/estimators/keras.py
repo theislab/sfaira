@@ -159,7 +159,7 @@ class EstimatorKeras:
 
     def init_model(self, clear_weight_cache=True, override_hyperpar=None):
         """
-        instantiate the model
+        Instantiate the model.
         :return:
         """
         if clear_weight_cache:

@@ -30,8 +30,8 @@ store_type.append("dao")
 kwargs.append({"dense": True, "chunks": 128})
 compression_kwargs.append({"compressor": "default", "overwrite": True, "order": "C"})
 
+time_measurements_initiate = {}
 time_measurements = {
-    "initiate": {},
     "load_sequential_from_one_dataset": {},
     "load_sequential_from_many_datasets": {},
     "load_random_from_one_dataset": {},
@@ -93,11 +93,11 @@ for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, comp
     path_store = path_store_h5ad if store_type_i == "h5ad" else path_store_dao
 
     # Measure initiate time.
-    time_measurements["initiate"][store_type_i] = []
+    time_measurements_initiate[store_type_i] = []
     for _ in range(REPS):
         t0 = time.time()
         store = sfaira.data.load_store(cache_path=path_store, store_format=store_type_i)
-        time_measurements["initiate"][store_type_i].append(time.time() - t0)
+        time_measurements_initiate[store_type_i].append(time.time() - t0)
 
     time_measurements["load_sequential_from_one_dataset"][store_type_i] = {}
     time_measurements["load_sequential_from_many_datasets"][store_type_i] = {}
@@ -220,7 +220,21 @@ for i, x in enumerate([
         "load_random_from_many_datasets_todense_varsubet",
     ],
 ]):
-    if len(x) > 0:
+    if i == 0:
+        df_sb = pd.concat([
+            pd.DataFrame({
+                "log10 time / s": np.log(time_measurements_initiate[m]) / np.log(10),
+                "store": m,
+                "draw": range(len(time_measurements[m])),
+            })
+            for m in time_measurements_initiate.keys()
+        ], axis=0)
+        sb.lineplot(
+            df_sb,
+            x="draw", y="log10 time / s", style="store",
+            ax=axs[i // ncols, i % ncols]
+        )
+    elif len(x) > 0:
         df_sb = pd.concat([
             pd.concat([
                 pd.concat([

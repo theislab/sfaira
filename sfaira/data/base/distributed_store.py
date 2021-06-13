@@ -77,7 +77,10 @@ class DistributedStoreBase(abc.ABC):
         self._adata_ids_sfaira = AdataIdsSfaira()
         self._celltype_universe = None
 
-    def _validate_idx(self, idx: Union[np.ndarray, list]) -> np.ndarray:
+    def _validate_idx(self, idx: Union[np.ndarray, list]) -> Dict[str, np.ndarray]:
+        """
+        Validate global index vector and transform into a dictionary over organisms.
+        """
         assert np.max(idx) < self.n_obs, f"maximum of supplied index vector {np.max(idx)} exceeds number of modelled " \
                                          f"observations {self.n_obs}"
         assert len(idx) == len(np.unique(idx)), f"there were {len(idx) - len(np.unique(idx))} repeated indices in idx"
@@ -88,35 +91,86 @@ class DistributedStoreBase(abc.ABC):
             assert isinstance(idx, list)
             assert isinstance(idx[0], int) or isinstance(idx[0], np.int)
             idx = np.asarray(idx)
-        return idx
+        idx_dict = {}
+        organisms_by_key = self.organisms_by_key
+        for x in self.organisms:
+            # Check which cells are assigned to organism `x` and which of these cells are selected by `idx`:
+            idx_global_in_organism = np.where(np.concatenate([
+                np.ones_like(v) == 1 if organisms_by_key[k] == x else np.ones_like(v) == 0
+                for k, v in self.indices.items()
+            ]))[0]
+            idx_dict[x] = np.asarray(list(set(idx_global_in_organism).intersection(set(idx))))
+        # Sanity check that all indices were assigned uniquely to an organism:
+        # TODO this check can be removed in the future or refactored into a unit test:
+        assert len(idx) == np.sum([len(x) for x in idx_dict.values()])
+        for i, x in enumerate(idx_dict.values()):
+            for j, y in enumerate(list(idx_dict.values())[(i + 1):]):
+                assert len(set(x).intersection(set(y))) == 0, f"overlap between {self.organisms[i]} and " \
+                                                              f"{self.organisms[i + j]}:\n{x}\n{y}"
+        return idx_dict
 
-    def _validate_feature_space_homogeneity(self) -> List[str]:
+    @property
+    def organisms_by_key(self) -> Dict[str, str]:
         """
-        Assert that the data sets which were kept have the same feature names.
+        Data set-wise organism label as dictionary of data set keys.
         """
-        var_names = self._adata_by_key[list(self.indices.keys())[0]].var_names.tolist()
-        for k, v in self.indices.items():
-            assert len(var_names) == len(self._adata_by_key[k].var_names), \
-                f"number of features in store differed in object {k} compared to {list(self._adata_by_key.keys())[0]}"
-            assert np.all(var_names == self._adata_by_key[k].var_names), \
-                f"var_names in store were not matched in object {k} compared to {list(self._adata_by_key.keys())[0]}"
-        return var_names
+        ks = self.indices.keys()
+        organisms = [self._adata_by_key[k].uns[self._adata_ids_sfaira.organism] for k in ks]
+        # Flatten list, assumes that each data set maps to one organism:
+        organisms = [x[0] if (isinstance(x, list) or isinstance(x, tuple)) else x for x in organisms]
+        return dict(list(zip(ks, organisms)))
+
+    @property
+    def organisms(self):
+        """
+        Organisms in store.
+        """
+        return np.sort(np.unique(list(self.organisms_by_key.values())))
+
+    def _validate_feature_space_homogeneity(self) -> Union[List[str], Dict[str, List[str]]]:
+        """
+        Assert that the data sets which were kept have the same feature names within each organism.
+
+        :return: List of feature names in shared feature space or dictionary of list of features by organism.
+        """
+        organisms = self.organisms_by_key
+        organisms_unique = self.organisms
+        var_names = {}
+        for x in organisms_unique:
+            ks_x = [y for y, z in organisms.items() if z == x]
+            var_names_x = self._adata_by_key[ks_x[0]].var_names.tolist()
+            for k in ks_x:
+                assert len(var_names_x) == len(self._adata_by_key[k].var_names), \
+                    f"number of features in store differed in object {k} compared to {ks_x[0]}"
+                assert np.all(var_names_x == self._adata_by_key[k].var_names), \
+                    f"var_names in store were not matched in object {k} compared to {ks_x[0]}"
+            var_names[x] = var_names_x
+        # Return as list if all data sets come from the same organism and have the same feature space, otherwise as
+        # organism-wise dictionary of feature names.
+        if len(var_names.keys()) == 1:
+            return var_names[list(var_names.keys())[0]]
+        else:
+            return var_names
 
     def _generator_helper(
             self,
             idx: Union[np.ndarray, None] = None,
-    ) -> Tuple[Union[np.ndarray, None], Union[np.ndarray, None]]:
+    ) -> Tuple[Union[np.ndarray, None], Union[np.ndarray, Dict[str, np.ndarray], None]]:
         # Make sure that features are ordered in the same way in each object so that generator yields consistent cell
         # vectors.
-        _ = self._validate_feature_space_homogeneity()
-        var_names_store = self.adata_by_key[list(self.indices.keys())[0]].var_names.tolist()
+        var_names = self._validate_feature_space_homogeneity()
         # Use feature space sub-selection based on assembly if provided, will use full feature space otherwise.
         if self.genome_container is not None:
-            var_names_target = self.genome_container.ensembl
-            var_idx = np.sort([var_names_store.index(x) for x in var_names_target])
-            # Check if index vector is just full ordered list of indices, in this case, sub-setting is unnecessary.
-            if len(var_idx) == len(var_names_store) and np.all(var_idx == np.arange(0, len(var_names_store))):
-                var_idx = None
+            for k in self.genome_container.keys():
+                assert k in var_names.keys(), f"did not match {k} from var_names in GenomeContainer " \
+                                              f"{self.genome_container.keys()}"
+            var_idx = {}
+            for k, v in self.genome_container.items():
+                var_names_target = v.ensembl
+                var_idx[k] = np.sort([var_names[k].index(x) for x in var_names_target])
+                # Check if index vector is just full ordered list of indices, in this case, sub-setting is unnecessary.
+                if len(var_idx[k]) == len(var_names[k]) and np.all(var_idx[k] == np.arange(0, len(var_names[k]))):
+                    var_idx[k] = None
         else:
             var_idx = None
         if idx is not None:
@@ -190,16 +244,27 @@ class DistributedStoreBase(abc.ABC):
         self._obs_by_key = x
 
     @property
-    def genome_container(self) -> Union[GenomeContainer, None]:
+    def genome_container(self) -> Union[GenomeContainer, Dict[str, GenomeContainer], None]:
         return self._genome_container
 
     @genome_container.setter
-    def genome_container(self, x: GenomeContainer):
+    def genome_container(self, x: Union[GenomeContainer, Dict[str, GenomeContainer]]):
+        if isinstance(x, GenomeContainer):
+            # Transform into dictionary first.
+            organisms = self.organisms
+            if len(organisms) > 1:
+                raise ValueError(f"Gave a single GenomeContainer for a store instance that has mulitiple organism: "
+                                 f"{organisms}, either further subset the store or give a dictionary of "
+                                 f"GenomeContainers")
+            else:
+                x = {organisms[0]: x}
         var_names = self._validate_feature_space_homogeneity()
         # Validate genome container choice:
         # Make sure that all var names defined in genome container are also contained in loaded data sets.
-        assert np.all([y in var_names for y in x.ensembl]), \
-            "did not find variable names from genome container in store"
+        for k, v in var_names.items():
+            assert k in x.keys(), f"did not find organism {k} which occurs in store in x"
+            assert np.all([y in v for y in x[k].ensembl]), \
+                "did not find variable names from genome container in store"
         self._genome_container = x
 
     def get_subset_idx(self, attr_key, values: Union[str, List[str], None],
@@ -348,30 +413,50 @@ class DistributedStoreBase(abc.ABC):
                 raise ValueError(f"did not find object with name {x} in currently loaded universe")
 
     @property
-    def var_names(self):
+    def var_names(self) -> Dict[str, List[str]]:
+        """
+        Feature names of selected genes by organism in store.
+        """
         var_names = self._validate_feature_space_homogeneity()
         # Use feature space sub-selection based on assembly if provided, will use full feature space otherwise.
         if self.genome_container is None:
             return var_names
         else:
-            return self.genome_container.ensembl
+            return dict([(k, v.ensembl) for k, v in self.genome_container.items()])
 
     @property
-    def n_vars(self):
+    def n_vars(self) -> Dict[str, int]:
+        """
+        Number of selected features per organism in store
+        """
         var_names = self._validate_feature_space_homogeneity()
         # Use feature space sub-selection based on assembly if provided, will use full feature space otherwise.
         if self.genome_container is None:
-            return len(var_names)
+            return dict([(k, len(v)) for k, v in var_names.items()])
         else:
-            return self.genome_container.n_var
+            return dict([(k, v.n_var) for k, v in self.genome_container.items()])
 
     @property
-    def n_obs(self):
+    def n_obs(self) -> int:
+        """
+        Number of observations selected in store.
+        """
         return np.sum([len(v) for v in self.indices.values()])
 
     @property
-    def shape(self):
-        return [self.n_obs, self.n_vars]
+    def n_obs_organism(self) -> Dict[str, int]:
+        """
+        Number of observations selected in store per organism as dictionary.
+        """
+        organisms_by_key = self.organisms_by_key
+        return dict([
+            (x, np.sum([len(v) for k,v in self.indices.items() if organisms_by_key[k] == x]))
+            for x in self.organisms
+        ])
+
+    @property
+    def shape(self) -> Dict[str, Tuple[int, int]]:
+        return dict([(k, (self.n_obs_organism[k], v)) for k, v in self.n_vars])
 
     @abc.abstractmethod
     def generator(
@@ -509,8 +594,8 @@ class DistributedStoreH5ad(DistributedStoreBase):
                 np.random.shuffle(batch_range)
             for i in batch_range:
                 k, (s, e) = key_batch_starts_ends[i]
-                x, obs = access_helper(adata=adatas_sliced_subset[k], s=s, e=e, j=var_idx, return_dense=return_dense,
-                                       obs_keys=obs_keys)
+                x, obs = access_helper(adata=adatas_sliced_subset[k], s=s, e=e, j=var_idx[self.organisms_by_key[k]],
+                                       return_dense=return_dense, obs_keys=obs_keys)
                 yield x, obs
 
         return generator
@@ -558,6 +643,7 @@ class DistributedStoreH5ad(DistributedStoreBase):
             - "sex" points to self.sex_obs_key
             - "state_exact" points to self.state_exact_obs_key
         :param values: Classes to overlap to.
+        :param excluded_values: Classes to exclude from match list. Supply either values or excluded_values.
         :return Index vector
         """
         # Get indices of of cells in target set by file.
@@ -616,27 +702,37 @@ class DistributedStoreDao(DistributedStoreBase):
         super(DistributedStoreDao, self).__init__(adata_by_key=adata_by_key, indices=indices, obs_by_key=None)
 
     @property
-    def X(self) -> Union[dask.array.Array]:
+    def X(self) -> Dict[str, dask.array.Array]:
+        """
+        One dask array of all cells per organism in store
+        """
         assert np.all([isinstance(self._adata_by_key[k].X, dask.array.Array) for k in self.indices.keys()])
-        return dask.array.vstack([
-            self._adata_by_key[k].X[v, :]
-            for k, v in self.indices.items()
+        return dict([
+            (organism, dask.array.vstack([
+                self._adata_by_key[k].X[v, :]
+                for k, v in self.indices.items()
+                if self.organisms_by_key[k] == organism
+            ])) for organism in self.organisms
         ])
 
     @property
-    def obs(self) -> Union[pd.DataFrame]:
+    def obs(self) -> Dict[str, pd.DataFrame]:
         """
-        Assemble .obs table of subset of selected data.
+        Assemble .obs table of subset of selected data per organism.
 
         Resulting index is increasing integers starting with zero.
 
         :return: .obs data frame.
         """
         # TODO Using loc indexing here instead of iloc, this might be faster on larger tables?
-        return pd.concat([
-            self.adata_by_key[k].obs.loc[self.adata_by_key[k].obs.index[v], :]
-            for k, v in self.indices.items()
-        ], axis=0, join="inner", ignore_index=True, copy=False)
+        return dict([
+            (organism, pd.concat([
+                self.adata_by_key[k].obs.loc[self.adata_by_key[k].obs.index[v], :]
+                for k, v in self.indices.items()
+                if self.organisms_by_key[k] == organism
+            ], axis=0, join="inner", ignore_index=True, copy=False))
+            for organism in self.organisms
+        ])
 
     def n_counts(self, idx: Union[np.ndarray, list, None] = None) -> np.ndarray:
         """
@@ -645,7 +741,9 @@ class DistributedStoreDao(DistributedStoreBase):
         :param idx: Index vector over observations in object.
         :return: Array with sum per observations: (number of observations in index,)
         """
-        return np.asarray(self.X.sum(axis=1)).flatten()
+        if idx is not None:
+            raise NotImplementedError()
+        return np.sum([np.asarray(x.sum(axis=1)).flatten() for x in self.X.values()])
 
     def generator(
             self,
@@ -683,44 +781,48 @@ class DistributedStoreDao(DistributedStoreBase):
         idx, var_idx = self._generator_helper(idx=idx)
         if randomized_batch_access and random_access:
             raise ValueError("Do not use randomized_batch_access and random_access.")
+        x_dict = self.X
+        obs_dict = self.obs
 
         def generator():
-            # Can treat full data set as a single array because dask keeps expression data and obs out of memory.
-            x = self.X[idx, :]
-            obs = self.obs.iloc[idx, :]
-            # Redefine index so that .loc indexing can be used instead of .iloc indexing:
-            obs.index = np.arange(0, obs.shape[0])
-            n_obs = x.shape[0]
-            remainder = n_obs % batch_size
-            assert n_obs == obs.shape[0]
-            batch_starts_ends = [
-                (int(x * batch_size), int(np.minimum((x * batch_size) + batch_size, n_obs)))
-                for x in np.arange(0, n_obs // batch_size + int(remainder > 0))
-            ]
-            batch_range = np.arange(0, len(batch_starts_ends))
-            if randomized_batch_access:
-                np.random.shuffle(batch_range)
-            epoch_indices = np.arange(0, n_obs)
-            if random_access:
-                np.random.shuffle(epoch_indices)
-            for i in batch_range:
-                s, e = batch_starts_ends[i]
-                # Feature indexing: Run in same operation as observation index so that feature chunking can be
-                # efficiently used if available. TODO does this make a difference in dask?
+            # Can all data sets corresponding to one organism as a single array because they share the second dimension
+            # and dask keeps expression data and obs out of memory.
+            for organism in self.organisms:
+                x = x_dict[organism][idx[organism], :]
+                obs = obs_dict[organism].loc[obs_dict[organism].index[idx[organism]], :]  # TODO better than iloc?
+                # Redefine index so that .loc indexing can be used instead of .iloc indexing:
+                obs.index = np.arange(0, obs.shape[0])
+                n_obs = x.shape[0]
+                remainder = n_obs % batch_size
+                assert n_obs == obs.shape[0]
+                batch_starts_ends = [
+                    (int(x * batch_size), int(np.minimum((x * batch_size) + batch_size, n_obs)))
+                    for x in np.arange(0, n_obs // batch_size + int(remainder > 0))
+                ]
+                batch_range = np.arange(0, len(batch_starts_ends))
+                if randomized_batch_access:
+                    np.random.shuffle(batch_range)
+                epoch_indices = np.arange(0, n_obs)
                 if random_access:
-                    x_i = x[epoch_indices[s:e], :]
-                    if var_idx is not None:
-                        x_i = x[:, var_idx]
-                else:
-                    # Use slicing because observations accessed in batch are ordered in data set:
-                    # Note that epoch_indices[i] == i if not random_access.
-                    x_i = x[s:e, :]
-                    if var_idx is not None:
-                        x_i = x[:, var_idx]
-                # Exploit fact that index of obs is just increasing list of integers, so we can use the .loc[] indexing
-                # instead of .iloc[]:
-                obs_i = obs[obs_keys].loc[epoch_indices[s:e].tolist(), :]
-                yield x_i, obs_i
+                    np.random.shuffle(epoch_indices)
+                for i in batch_range:
+                    s, e = batch_starts_ends[i]
+                    # Feature indexing: Run in same operation as observation index so that feature chunking can be
+                    # efficiently used if available. TODO does this make a difference in dask?
+                    if random_access:
+                        x_i = x[epoch_indices[s:e], :]
+                        if var_idx[organism] is not None:
+                            x_i = x[:, var_idx[organism]]
+                    else:
+                        # Use slicing because observations accessed in batch are ordered in data set:
+                        # Note that epoch_indices[i] == i if not random_access.
+                        x_i = x[s:e, :]
+                        if var_idx[organism] is not None:
+                            x_i = x[:, var_idx[organism]]
+                    # Exploit fact that index of obs is just increasing list of integers, so we can use the .loc[] indexing
+                    # instead of .iloc[]:
+                    obs_i = obs[obs_keys].loc[epoch_indices[s:e].tolist(), :]
+                    yield x_i, obs_i
 
         return generator
 
