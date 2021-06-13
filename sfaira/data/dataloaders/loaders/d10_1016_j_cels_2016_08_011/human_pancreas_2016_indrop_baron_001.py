@@ -19,7 +19,7 @@ class Dataset(DatasetBase):
         self.assay_sc = "inDrop"
         self.author = "Baron"
         self.disease = "healthy"
-        self.doi = "10.1016/j.cels.2016.08.011"
+        self.doi_journal = "10.1016/j.cels.2016.08.011"
         self.normalization = "raw"
         self.organ = "pancreas"
         self.organism = "human"

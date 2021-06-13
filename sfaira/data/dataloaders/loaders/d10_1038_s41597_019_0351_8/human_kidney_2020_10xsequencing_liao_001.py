@@ -23,7 +23,7 @@ class Dataset(DatasetBase):
         self.organism = "human"
         self.sample_source = "primary_tissue"
         self.year = 2020
-        self.doi = "10.1038/s41597-019-0351-8"
+        self.doi_journal = "10.1038/s41597-019-0351-8"
 
         self.gene_id_symbols_var_key = "names"
         self.gene_id_ensembl_var_key = "ensembl"

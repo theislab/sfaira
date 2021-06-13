@@ -65,7 +65,7 @@ def cached_store_writing(dir_data, dir_meta, assembly, organism: str = "mouse", 
     ds.subset(key=adata_ids_sfaira.organ, values=[organ])
     # Only load files that are not already in cache.
     anticipated_files = np.unique([
-        v.doi[0] if isinstance(v.doi, list) else v.doi for k, v in ds.datasets.items()
+        v.doi_journal[0] if isinstance(v.doi_journal, list) else v.doi_journal for k, v in ds.datasets.items()
         if (not os.path.exists(os.path.join(store_path, v.doi_cleaned_id + "." + store_format)) and
             store_format == "h5ad") or
            (not os.path.exists(os.path.join(store_path, v.doi_cleaned_id)) and store_format == "dao")

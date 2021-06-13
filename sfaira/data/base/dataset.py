@@ -71,6 +71,10 @@ def clean_string(s):
     return s
 
 
+def get_directory_formatted_doi(x:str) -> str:
+    return "d" + "_".join("_".join("_".join(x.split("/")).split(".")).split("-"))
+
+
 class DatasetBase(abc.ABC):
     adata: Union[None, anndata.AnnData]
     class_maps: dict
@@ -91,7 +95,8 @@ class DatasetBase(abc.ABC):
     _default_embedding: Union[None, str]
     _development_stage: Union[None, str]
     _disease: Union[None, str]
-    _doi: Union[None, str]
+    _doi_journal: Union[None, str]
+    _doi_preprint: Union[None, str]
     _download_url_data: Union[Tuple[List[None]], Tuple[List[str]], None]
     _download_url_meta: Union[Tuple[List[None]], Tuple[List[str]], None]
     _ethnicity: Union[None, str]
@@ -198,7 +203,8 @@ class DatasetBase(abc.ABC):
         self._default_embedding = None
         self._development_stage = None
         self._disease = None
-        self._doi = None
+        self._doi_journal = None
+        self._doi_preprint = None
         self._download_url_data = None
         self._download_url_meta = None
         self._ethnicity = None
@@ -269,7 +275,10 @@ class DatasetBase(abc.ABC):
                         assert self.sample_fn in v.keys(), f"did not find key {self.sample_fn} in yamls keys for {k}"
                         setattr(self, k, v[self.sample_fn])
                     else:  # v is a meta-data item
-                        setattr(self, k, v)
+                        try:
+                            setattr(self, k, v)
+                        except AttributeError as e:
+                            raise ValueError(f"An error occured when setting {k} as {v}: {e}")
             # ID can be set now already because YAML was used as input instead of child class constructor.
             self.set_dataset_id(idx=yaml_vals["meta"]["dataset_index"])
 
@@ -391,6 +400,7 @@ class DatasetBase(abc.ABC):
     @property
     def cache_fn(self):
         if self.directory_formatted_doi is None or self._directory_formatted_id is None:
+            # TODO is this case necessary?
             warnings.warn("Caching enabled, but Dataset.id or Dataset.doi not set. Disabling caching for now.")
             return None
         else:
@@ -562,13 +572,15 @@ class DatasetBase(abc.ABC):
         adata.var columns that are not defined as gene_id_ensembl_var_key or gene_id_symbol_var_key in the dataloader.
 
         :param match_to_reference: Which annotation to map the feature space to. Can be:
-            - str: Provide the name of the annotation in the format Organism.Assembly.Release
-            - dict: Mapping of organism to name of the annotation (see str format). Chooses annotation for each data set
-                based on organism annotation.
-        :param remove_gene_version: Whether to remove the version number after the colon sometimes found in ensembl gene ids.
-        :param subset_genes_to_type: Type(s) to subset to. Can be a single type or a list of types or None. Types can be:
-            - None: All genes in assembly.
-            - "protein_coding": All protein coding genes in assembly.
+                - str: Provide the name of the annotation in the format Organism.Assembly.Release
+                - dict: Mapping of organism to name of the annotation (see str format). Chooses annotation for each
+                    data set based on organism annotation.
+        :param remove_gene_version: Whether to remove the version number after the colon sometimes found in ensembl
+            gene ids.
+        :param subset_genes_to_type: Type(s) to subset to. Can be a single type or a list of types or None.
+            Types can be:
+                - None: All genes in assembly.
+                - "protein_coding": All protein coding genes in assembly.
         """
         self.__assert_loaded()
 
@@ -741,34 +753,37 @@ class DatasetBase(abc.ABC):
         # set var index
         var_new.index = var_new[adata_target_ids.gene_id_index].tolist()
 
-        per_cell_labels = ["cell_types_original", "cellontology_class", "cellontology_id"]
-        experiment_batch_labels = ["bio_sample", "individual", "tech_sample"]
-
-        # Prepare .obs column name dict (process keys below with other .uns keys if they're set dataset-wide)
-        obs_cols = {}
-        for k in adata_target_ids.obs_keys:
-            # Skip any per-cell labels for now and process them in the next code block
-            if k in per_cell_labels:
-                continue
-            else:
-                if hasattr(self, f"{k}_obs_key") and getattr(self, f"{k}_obs_key") is not None:
-                    obs_cols[k] = (getattr(self, f"{k}_obs_key"), getattr(adata_target_ids, k))
-                else:
-                    adata_target_ids.uns_keys.append(k)
-
         # Prepare new .uns dict:
         uns_new = {}
         for k in adata_target_ids.uns_keys:
             val = getattr(self, k)
-            while hasattr(val, '__len__') and not isinstance(val, str) and len(val) == 1:  # unpack nested lists/tuples
+            if val is None and hasattr(self, f"{k}_obs_key"):
+                val = np.sort(self.adata.obs[getattr(self, f"{k}_obs_key")].values.tolist())
+            while hasattr(val, '__len__') and not isinstance(val, str) and len(val) == 1:  # Unpack nested lists/tuples.
                 val = val[0]
             uns_new[getattr(adata_target_ids, k)] = val
 
         # Prepare new .obs dataframe
+        experiment_batch_labels = ["bio_sample", "individual", "tech_sample"]
+        per_cell_labels = ["cell_types_original", "cellontology_class", "cellontology_id"]
         obs_new = pd.DataFrame(index=self.adata.obs.index)
-        for k, (old_col, new_col) in obs_cols.items():
+        # Handle non-cell type labels:
+        for k in [x for x in adata_target_ids.obs_keys if x not in per_cell_labels]:
+            if hasattr(self, f"{k}_obs_key") and getattr(self, f"{k}_obs_key") is not None:
+                old_col = getattr(self, f"{k}_obs_key")
+                val = self.adata.obs[old_col].values.tolist()
+            else:
+                old_col = None
+                val = getattr(self, k)
+                if val is None:
+                    val = self._adata_ids.unknown_metadata_identifier
+                # Unpack nested lists/tuples:
+                while hasattr(val, '__len__') and not isinstance(val, str) and len(val) == 1:
+                    val = val[0]
+                val = [val] * self.adata.n_obs
+            new_col = getattr(adata_target_ids, k)
             # Handle batch-annotation columns which can be provided as a combination of columns separated by an asterisk
-            if k in experiment_batch_labels and "*" in old_col:
+            if old_col is not None and k in experiment_batch_labels and "*" in old_col:
                 batch_cols = []
                 for batch_col in old_col.split("*"):
                     if batch_col in self.adata.obs_keys():
@@ -779,46 +794,41 @@ class DatasetBase(abc.ABC):
                         # in .obs set.
                         print(f"WARNING: attribute {new_col} of data set {self.id} was not found in column {batch_col}")
                 # Build a combination label out of all columns used to describe this group.
-                obs_new[new_col] = [
+                val = [
                     "_".join([str(xxx) for xxx in xx])
                     for xx in zip(*[self.adata.obs[batch_col].values.tolist() for batch_col in batch_cols])
                 ]
-                setattr(self, f"{k}_obs_key", new_col)  # update _obs_column attribute of this class to match the new column
             # All other .obs fields are interpreted below as provided
             else:
-                # Search for direct match of the sought-after column name or for attribute specific obs key.
-                if old_col in self.adata.obs_keys():
-                    # Include flag in .uns that this attribute is in .obs:
-                    uns_new[new_col] = UNS_STRING_META_IN_OBS
-                    # Remove potential pd.Categorical formatting:
-                    ontology = getattr(self.ontology_container_sfaira, k) if hasattr(self.ontology_container_sfaira, k) else None
-                    if k == "development_stage":
-                        ontology = ontology[self.organism]
-                    if k == "ethnicity":
-                        ontology = ontology[self.organism]
-                    self._value_protection(attr=new_col, allowed=ontology, attempted=np.unique(self.adata.obs[old_col].values).tolist())
-                    obs_new[new_col] = self.adata.obs[old_col].values.tolist()
-                    del self.adata.obs[old_col]
-                    setattr(self, f"{k}_obs_key", new_col)  # update _obs_column attribute of this class to match the new column
-                else:
-                    # This should not occur in single data set loaders (see warning below) but can occur in
-                    # streamlined data loaders if not all instances of the streamlined data sets have all columns
-                    # in .obs set.
-                    uns_new[new_col] = None
-                    print(f"WARNING: attribute {new_col} of data set {self.id} was not found in column {old_col}")
-
-        # Set cell-wise attributes (.obs): (None so far other than celltypes.)
+                # Check values for validity:
+                ontology = getattr(self.ontology_container_sfaira, k) \
+                    if hasattr(self.ontology_container_sfaira, k) else None
+                if k == "development_stage":
+                    ontology = ontology[self.organism]
+                if k == "ethnicity":
+                    ontology = ontology[self.organism]
+                self._value_protection(attr=new_col, allowed=ontology, attempted=[
+                    x for x in np.unique(val)
+                    if x not in [
+                        self._adata_ids.unknown_metadata_identifier,
+                        self._adata_ids.unknown_metadata_ontology_id_identifier,
+                    ]
+                ])
+            obs_new[new_col] = val
+            setattr(self, f"{k}_obs_key", new_col)
         # Set cell types:
-        # Map cell type names from raw IDs to ontology maintained ones:
+        # Build auxilliary table with cell type information:
         if self.cell_types_original_obs_key is not None:
-            obs_cl = self.project_celltypes_to_ontology(copy=True, adata_fields=adata_target_ids)
+            obs_cl = self.project_celltypes_to_ontology(copy=True, adata_fields=self._adata_ids)
         else:
             obs_cl = pd.DataFrame({
-                adata_target_ids.cellontology_class: [adata_target_ids.unknown_metadata_identifier] * self.adata.n_obs,
-                adata_target_ids.cellontology_id: [adata_target_ids.unknown_metadata_identifier] * self.adata.n_obs,
-                adata_target_ids.cell_types_original: [adata_target_ids.unknown_metadata_identifier] * self.adata.n_obs,
+                self._adata_ids.cellontology_class: [self._adata_ids.unknown_metadata_identifier] * self.adata.n_obs,
+                self._adata_ids.cellontology_id: [self._adata_ids.unknown_metadata_identifier] * self.adata.n_obs,
+                self._adata_ids.cell_types_original: [self._adata_ids.unknown_metadata_identifier] * self.adata.n_obs,
             }, index=self.adata.obs.index)
-        obs_new = pd.concat([obs_new, obs_cl], axis=1)
+        for k in [x for x in per_cell_labels if x in adata_target_ids.obs_keys]:
+            obs_new[getattr(adata_target_ids, k)] = obs_cl[getattr(self._adata_ids, k)]
+        del obs_cl
 
         # Add new annotation to adata and delete old fields if requested
         if clean_var:
@@ -862,12 +872,42 @@ class DatasetBase(abc.ABC):
         else:
             self.adata.uns = {**self.adata.uns, **uns_new}
 
+        # Make sure that correct unknown_metadata_identifier is used in .uns, .obs and .var metadata
+        unknown_old = self._adata_ids.unknown_metadata_identifier
+        unknown_new = adata_target_ids.unknown_metadata_identifier
+        self.adata.obs = self.adata.obs.replace({None: unknown_new})
+        self.adata.obs = self.adata.obs.replace({unknown_old: unknown_new})
+        self.adata.var = self.adata.var.replace({None: unknown_new})
+        self.adata.var = self.adata.var.replace({unknown_old: unknown_new})
+        for k in self.adata.uns_keys():
+            if self.adata.uns[k] is None or self.adata.uns[k] == unknown_old:
+                self.adata.uns[k] = unknown_new
+
+        # Move all uns annotation to obs columns if requested
+        if uns_to_obs:
+            for k, v in self.adata.uns.items():
+                if k not in self.adata.obs_keys():
+                    if v is None:
+                        v = self._adata_ids.unknown_metadata_identifier
+                    # Unpack nested lists/tuples:
+                    while hasattr(v, '__len__') and not isinstance(v, str) and len(v) == 1:
+                        v = v[0]
+                    self.adata.obs[k] = [v for _ in range(self.adata.n_obs)]
+            # Retain only target uns keys in .uns.
+            self.adata.uns = dict([(k, v) for k, v in self.adata.uns.items()
+                                   if k in [getattr(adata_target_ids, kk) for kk in ["id"]]])
+
         # Add additional hard-coded description changes for cellxgene schema:
         if schema == "cellxgene":
             self.adata.uns["layer_descriptions"] = {"X": "raw"}
             self.adata.uns["version"] = {
                 "corpora_encoding_version": "0.1.0",
                 "corpora_schema_version": "1.1.0",
+            }
+            self.adata.uns["contributors"] = {
+                "name": "sfaira",
+                "email": "https://github.com/theislab/sfaira/issues",
+                "institution": "sfaira",
             }
             # TODO port this into organism ontology handling.
             if self.organism == "mouse":
@@ -879,8 +919,11 @@ class DatasetBase(abc.ABC):
             else:
                 raise ValueError(f"organism {self.organism} currently not supported by cellxgene schema")
             # Add ontology IDs where necessary (note that human readable terms are also kept):
-            for k in ["organ", "assay_sc", "disease", "ethnicity", "development_stage"]:
-                if getattr(adata_target_ids, k) in self.adata.obs.columns:
+            ontology_cols = ["organ", "assay_sc", "disease", "ethnicity", "development_stage"]
+            non_ontology_cols = ["sex"]
+            for k in ontology_cols:
+                # TODO enable ethinicity once the distinction between ontology for human and None for mouse works.
+                if getattr(adata_target_ids, k) in self.adata.obs.columns and k != "ethnicity":
                     ontology = getattr(self.ontology_container_sfaira, k)
                     # Disambiguate organism-dependent ontologies:
                     if isinstance(ontology, dict):
@@ -889,13 +932,31 @@ class DatasetBase(abc.ABC):
                         ontology=ontology,
                         key_in=getattr(adata_target_ids, k),
                         key_out=getattr(adata_target_ids, k) + "_ontology_term_id",
-                        map_exceptions=[],
+                        map_exceptions=[adata_target_ids.unknown_metadata_identifier],
                         map_exceptions_value=adata_target_ids.unknown_metadata_ontology_id_identifier,
                     )
                 else:
                     self.adata.obs[getattr(adata_target_ids, k)] = adata_target_ids.unknown_metadata_identifier
                     self.adata.obs[getattr(adata_target_ids, k) + "_ontology_term_id"] = \
                         adata_target_ids.unknown_metadata_ontology_id_identifier
+            # Correct unknown cell type entries:
+            self.adata.obs[getattr(adata_target_ids, "cellontology_class")] = [
+                x if x not in [self._adata_ids.unknown_celltype_identifier,
+                               self._adata_ids.not_a_cell_celltype_identifier]
+                else "native cell"
+                for x in self.adata.obs[getattr(adata_target_ids, "cellontology_class")]]
+            self.adata.obs[getattr(adata_target_ids, "cellontology_id")] = [
+                x if x not in [self._adata_ids.unknown_celltype_identifier,
+                               self._adata_ids.not_a_cell_celltype_identifier]
+                else "CL:0000003"
+                for x in self.adata.obs[getattr(adata_target_ids, "cellontology_id")]]
+            # Reorder data frame to put ontology columns first:
+            cellxgene_cols = [getattr(adata_target_ids, x) for x in ontology_cols] + \
+                             [getattr(adata_target_ids, x) for x in non_ontology_cols] + \
+                             [getattr(adata_target_ids, x) + "_ontology_term_id" for x in ontology_cols]
+            self.adata.obs = self.adata.obs[
+                cellxgene_cols + [x for x in self.adata.obs.columns if x not in cellxgene_cols]
+            ]
             # Adapt var columns naming.
             if self.organism == "human":
                 gene_id_new = "hgnc_gene_symbol"
@@ -911,26 +972,12 @@ class DatasetBase(abc.ABC):
             # Check if .X is counts: The conversion are based on the assumption that .X is csr.
             assert isinstance(self.adata.X, scipy.sparse.csr_matrix), type(self.adata.X)
             count_values = np.unique(np.asarray(self.adata.X.todense()))
-            is_counts = np.all(count_values % 1. == 0.)
-            if not is_counts:
-                print(f"WARNING: not all count entries were counts {is_counts}. rounding.")
+            if not np.all(count_values % 1. == 0.):
+                print(f"WARNING: not all count entries were counts, "
+                      f"the maximum deviation from integer is "
+                      f"{np.max([x % 1. if x % 1. < 0.5 else 1. - x % 1. for x in count_values])}. "
+                      f"The count matrix is rounded.")
                 self.adata.X.data = np.rint(self.adata.X.data)
-
-        # Make sure that correct unknown_metadata_identifier is used in .uns, .obs and .var metadata
-        self.adata.obs = self.adata.obs.replace({None: adata_target_ids.unknown_metadata_identifier})
-        self.adata.var = self.adata.var.replace({None: adata_target_ids.unknown_metadata_identifier})
-        for k in self.adata.uns_keys():
-            if self.adata.uns[k] is None:
-                self.adata.uns[k] = adata_target_ids.unknown_metadata_identifier
-
-        # Move all uns annotation to obs columns if requested
-        if uns_to_obs:
-            for k, v in self.adata.uns.items():
-                if k not in self.adata.obs_keys():
-                    self.adata.obs[k] = [v for i in range(self.adata.n_obs)]
-            # Retain only target uns keys in .uns.
-            self.adata.uns = dict([(k, v) for k, v in self.adata.uns.items()
-                                   if k in [getattr(adata_target_ids, kk) for kk in ["id"]]])
 
         self._adata_ids = adata_target_ids  # set new adata fields to class after conversion
         self.streamlined_meta = True
@@ -1267,7 +1314,7 @@ class DatasetBase(abc.ABC):
 
         :return:
         """
-        return [self.author, self.year, self.doi]
+        return [self.author, self.year, self.doi_journal]
 
     # Meta data handling code: Reading, writing and selected properties. Properties are either set in constructor
     # (and saved in self._somename) or accessed in self.meta.
@@ -1515,8 +1562,17 @@ class DatasetBase(abc.ABC):
             return None
         else:
             sfaira_path = os.path.join(self.data_dir_base, self.directory_formatted_doi)
+            # Allow checking in secondary path, named after second DOI associated with study.
+            # This allows association of raw data already downloaded even after DOI is updated.
+            if self.doi_preprint is not None:
+                sfaira_path_secondary = os.path.join(self.data_dir_base,
+                                                     get_directory_formatted_doi(x=self.doi_preprint))
+            else:
+                sfaira_path_secondary = None
             if os.path.exists(sfaira_path):
                 return sfaira_path
+            elif self.doi_preprint is not None and os.path.exists(sfaira_path_secondary):
+                return sfaira_path_secondary
             else:
                 return self.data_dir_base
 
@@ -1576,31 +1632,53 @@ class DatasetBase(abc.ABC):
         self._disease = x
 
     @property
-    def doi(self) -> Union[str, List[str]]:
-        if self._doi is not None:
-            return self._doi
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is None or self._adata_ids.doi not in self.meta.columns:
-                raise ValueError("doi must be set but was neither set in constructor nor in meta data")
-            return self.meta[self._adata_ids.doi]
+    def doi_journal(self) -> str:
+        """
+        The prepring publication (secondary) DOI associated with the study.
+        See also `.doi_journal`.
+        """
+        return self._doi_journal
 
-    @doi.setter
-    def doi(self, x: Union[str, List[str]]):
-        self._doi = x
+    @doi_journal.setter
+    def doi_journal(self, x: str):
+        self._doi_journal = x
+
+    @property
+    def doi_preprint(self) -> str:
+        """
+        The journal publication (main) DOI associated with the study.
+        See also `.doi_preprint`.
+        """
+        return self._doi_preprint
+
+    @doi_preprint.setter
+    def doi_preprint(self, x: str):
+        self._doi_preprint = x
+
+    @property
+    def doi(self) -> List[str]:
+        """
+        All publication DOI associated with the study which are the journal publication and the preprint.
+        See also `.doi_preprint`, `.doi_journal`.
+        """
+        dois = []
+        if self.doi_journal is not None:
+            dois.append(self.doi_journal)
+        if self.doi_preprint is not None:
+            dois.append(self.doi_preprint)
+        return dois
 
     @property
     def doi_main(self) -> str:
         """
-        Yields the main DOI associated with the study, defined as the DOI that comes first in alphabetical order.
+        The main DOI associated with the study which is the journal publication if available, otherwise the preprint.
+        See also `.doi_preprint`, `.doi_journal`.
         """
-        return self.doi if isinstance(self.doi, str) else np.sort(self.doi)[0]
+        return self.doi_preprint if self.doi_journal is None else self.doi_journal
 
     @property
     def directory_formatted_doi(self) -> str:
-        # Chose first doi in list.
-        return "d" + "_".join("_".join("_".join(self.doi_main.split("/")).split(".")).split("-"))
+        return get_directory_formatted_doi(x=self.doi_main)
 
     @property
     def download_url_data(self) -> Union[Tuple[List[str]], Tuple[List[None]]]:
@@ -1610,12 +1688,7 @@ class DatasetBase(abc.ABC):
         Save as tuple with single element, which is a list of all download websites relevant to dataset.
         :return:
         """
-        if self._download_url_data is not None:
-            x = self._download_url_data
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            x = self.meta[self._adata_ids.download_url_data]
+        x = self._download_url_data
         if isinstance(x, str) or x is None:
             x = [x]
         if isinstance(x, list):
@@ -2135,7 +2208,8 @@ class DatasetBase(abc.ABC):
                     if k == "author":
                         pass
                     return x
-        except ValueError:
+        except ValueError as e:
+            print(f"ValueError: {e}")
             return None
         except ConnectionError as e:
             print(f"ConnectionError: {e}")
