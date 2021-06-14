@@ -756,9 +756,12 @@ class DatasetBase(abc.ABC):
         # Prepare new .uns dict:
         uns_new = {}
         for k in adata_target_ids.uns_keys:
-            val = getattr(self, k)
-            if val is None and hasattr(self, f"{k}_obs_key"):
-                val = np.sort(self.adata.obs[getattr(self, f"{k}_obs_key")].values.tolist())
+            if hasattr(self, k) and getattr(self, k) is not None:
+                val = getattr(self, k)
+            elif hasattr(self, f"{k}_obs_key") and getattr(self, f"{k}_obs_key") is not None:
+                val = np.sort(np.unique(self.adata.obs[getattr(self, f"{k}_obs_key")].values)).tolist()
+            else:
+                val = None
             while hasattr(val, '__len__') and not isinstance(val, str) and len(val) == 1:  # Unpack nested lists/tuples.
                 val = val[0]
             uns_new[getattr(adata_target_ids, k)] = val

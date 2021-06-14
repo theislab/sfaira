@@ -116,8 +116,6 @@ def read_dao(store: Union[str, Path], use_dask: bool = True, columns: Union[None
         uns = pickle.load(file=f)
     # Read tables:
     obs = pd.read_parquet(path_obs(store), columns=columns, engine="pyarrow")
-    print(obs.columns)
-    assert False
     var = pd.read_parquet(path_var(store), engine="pyarrow")
     # Convert to categorical variables where possible to save memory:
     #for k, dtype in zip(list(obs.columns), obs.dtypes):

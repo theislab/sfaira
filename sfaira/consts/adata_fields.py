@@ -160,8 +160,6 @@ class AdataIdsSfaira(AdataIds):
             "download_url_data",
             "download_url_meta",
             "id",
-            "mapped_features",
-            "ncells",
             "normalization",
             "primary_data",
             "title",
@@ -169,7 +167,7 @@ class AdataIdsSfaira(AdataIds):
             "load_raw",
             "mapped_features",
             "remove_gene_version",
-        ]
+        ] + self.obs_keys
 
 
 class AdataIdsCellxgene(AdataIds):

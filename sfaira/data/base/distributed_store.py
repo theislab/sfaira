@@ -77,6 +77,18 @@ class DistributedStoreBase(abc.ABC):
         self._adata_ids_sfaira = AdataIdsSfaira()
         self._celltype_universe = None
 
+    @property
+    def idx_by_organism(self) -> Dict[str, np.ndarray]:
+        idx_dict = {}
+        organisms_by_key = self.organisms_by_key
+        for x in self.organisms:
+            idx_global_in_organism = np.where(np.concatenate([
+                np.ones_like(v) == 1 if organisms_by_key[k] == x else np.ones_like(v) == 0
+                for k, v in self.indices.items()
+            ]))[0]
+            idx_dict[x] = idx_global_in_organism
+        return idx_dict
+
     def _validate_idx(self, idx: Union[np.ndarray, list]) -> Dict[str, np.ndarray]:
         """
         Validate global index vector and transform into a dictionary over organisms.
@@ -91,15 +103,9 @@ class DistributedStoreBase(abc.ABC):
             assert isinstance(idx, list)
             assert isinstance(idx[0], int) or isinstance(idx[0], np.int)
             idx = np.asarray(idx)
-        idx_dict = {}
-        organisms_by_key = self.organisms_by_key
-        for x in self.organisms:
-            # Check which cells are assigned to organism `x` and which of these cells are selected by `idx`:
-            idx_global_in_organism = np.where(np.concatenate([
-                np.ones_like(v) == 1 if organisms_by_key[k] == x else np.ones_like(v) == 0
-                for k, v in self.indices.items()
-            ]))[0]
-            idx_dict[x] = np.asarray(list(set(idx_global_in_organism).intersection(set(idx))))
+        idx_dict = self.idx_by_organism
+        for k, v in idx_dict.items():
+            idx_dict[k] = np.asarray(list(set(v).intersection(set(idx))))
         # Sanity check that all indices were assigned uniquely to an organism:
         # TODO this check can be removed in the future or refactored into a unit test:
         assert len(idx) == np.sum([len(x) for x in idx_dict.values()])
@@ -155,7 +161,7 @@ class DistributedStoreBase(abc.ABC):
     def _generator_helper(
             self,
             idx: Union[np.ndarray, None] = None,
-    ) -> Tuple[Union[np.ndarray, None], Union[np.ndarray, Dict[str, np.ndarray], None]]:
+    ) -> Tuple[Union[Dict[str, np.ndarray], None], Union[Dict[str, np.ndarray], None]]:
         # Make sure that features are ordered in the same way in each object so that generator yields consistent cell
         # vectors.
         var_names = self._validate_feature_space_homogeneity()
@@ -299,7 +305,8 @@ class DistributedStoreBase(abc.ABC):
             # Use cell-wise annotation if data set-wide maps are ambiguous:
             # This can happen if the different cell-wise annotations are summarised as a union in .uns.
             if getattr(self._adata_ids_sfaira, k) in adata.uns.keys() and \
-                    adata.uns[getattr(self._adata_ids_sfaira, k)] != UNS_STRING_META_IN_OBS:
+                    adata.uns[getattr(self._adata_ids_sfaira, k)] != UNS_STRING_META_IN_OBS and \
+                    getattr(self._adata_ids_sfaira, k) not in obs.columns:
                 values_found = adata.uns[getattr(self._adata_ids_sfaira, k)]
                 if isinstance(values_found, np.ndarray):
                     values_found = values_found.tolist()
@@ -702,7 +709,20 @@ class DistributedStoreDao(DistributedStoreBase):
         super(DistributedStoreDao, self).__init__(adata_by_key=adata_by_key, indices=indices, obs_by_key=None)
 
     @property
-    def X(self) -> Dict[str, dask.array.Array]:
+    def X(self) -> dask.array.Array:
+        """
+        One dask array of all cells.
+
+        Requires feature dimension to be shared.
+        """
+        assert np.all([isinstance(self._adata_by_key[k].X, dask.array.Array) for k in self.indices.keys()])
+        return dask.array.vstack([
+            self._adata_by_key[k].X[v, :]
+            for k, v in self.indices.items()
+        ])
+
+    @property
+    def X_by_organism(self) -> Dict[str, dask.array.Array]:
         """
         One dask array of all cells per organism in store
         """
@@ -716,7 +736,22 @@ class DistributedStoreDao(DistributedStoreBase):
         ])
 
     @property
-    def obs(self) -> Dict[str, pd.DataFrame]:
+    def obs(self) -> pd.DataFrame:
+        """
+        Assemble .obs table of subset of selected data.
+
+        Resulting index is increasing integers starting with zero.
+
+        :return: .obs data frame.
+        """
+        # TODO Using loc indexing here instead of iloc, this might be faster on larger tables?
+        return pd.concat([
+            self.adata_by_key[k].obs.loc[self.adata_by_key[k].obs.index[v], :]
+            for k, v in self.indices.items()
+        ], axis=0, join="inner", ignore_index=True, copy=False)
+
+    @property
+    def obs_by_organism(self) -> Dict[str, pd.DataFrame]:
         """
         Assemble .obs table of subset of selected data per organism.
 
@@ -778,18 +813,32 @@ class DistributedStoreDao(DistributedStoreBase):
 
                 - if store format is h5ad: (Union[scipy.sparse.csr_matrix, np.ndarray], pandas.DataFrame)
         """
-        idx, var_idx = self._generator_helper(idx=idx)
+        idx_dict, var_idx_dict = self._generator_helper(idx=idx)
+        # Normalise cell indices such that each organism is indexed starting at zero:
+        # This is required below because each organism is represented as its own dask array.
+        idx_dict_organism = self.idx_by_organism
+        for k, v in idx_dict.items():
+            ref_idx = idx_dict_organism[k].tolist()
+            idx_dict[k] = np.array([ref_idx.index(x) for x in v])
         if randomized_batch_access and random_access:
             raise ValueError("Do not use randomized_batch_access and random_access.")
-        x_dict = self.X
-        obs_dict = self.obs
+        if batch_size > np.min([len(v) for v in idx_dict.values()]):
+            batch_size_new = np.min([len(v) for v in idx_dict.values()])
+            print(f"WARNING: reduing retieval batch size according to data availability in store "
+                  f"from {batch_size} to {batch_size_new}")
+            batch_size = batch_size_new
+        x_dict = self.X_by_organism
+        obs_dict = self.obs_by_organism
 
         def generator():
             # Can all data sets corresponding to one organism as a single array because they share the second dimension
             # and dask keeps expression data and obs out of memory.
             for organism in self.organisms:
-                x = x_dict[organism][idx[organism], :]
-                obs = obs_dict[organism].loc[obs_dict[organism].index[idx[organism]], :]  # TODO better than iloc?
+                idx_o = idx_dict[organism]
+                var_idx = var_idx_dict[organism]
+                x = x_dict[organism][idx_o, :]
+                obs = obs_dict[organism]
+                obs = obs.loc[obs.index[idx_o], obs_keys]  # TODO better than iloc?
                 # Redefine index so that .loc indexing can be used instead of .iloc indexing:
                 obs.index = np.arange(0, obs.shape[0])
                 n_obs = x.shape[0]
@@ -811,17 +860,17 @@ class DistributedStoreDao(DistributedStoreBase):
                     # efficiently used if available. TODO does this make a difference in dask?
                     if random_access:
                         x_i = x[epoch_indices[s:e], :]
-                        if var_idx[organism] is not None:
-                            x_i = x[:, var_idx[organism]]
+                        if var_idx is not None:
+                            x_i = x_i[:, var_idx]
                     else:
                         # Use slicing because observations accessed in batch are ordered in data set:
                         # Note that epoch_indices[i] == i if not random_access.
                         x_i = x[s:e, :]
-                        if var_idx[organism] is not None:
-                            x_i = x[:, var_idx[organism]]
-                    # Exploit fact that index of obs is just increasing list of integers, so we can use the .loc[] indexing
-                    # instead of .iloc[]:
-                    obs_i = obs[obs_keys].loc[epoch_indices[s:e].tolist(), :]
+                        if var_idx is not None:
+                            x_i = x_i[:, var_idx]
+                    # Exploit fact that index of obs is just increasing list of integers, so we can use the .loc[]
+                    # indexing instead of .iloc[]:
+                    obs_i = obs.loc[epoch_indices[s:e], :]
                     yield x_i, obs_i
 
         return generator
