@@ -71,7 +71,7 @@ def clean_string(s):
     return s
 
 
-def get_directory_formatted_doi(x:str) -> str:
+def get_directory_formatted_doi(x: str) -> str:
     return "d" + "_".join("_".join("_".join(x.split("/")).split(".")).split("-"))
 
 
