@@ -17,7 +17,8 @@ class AdataIds:
     cellontology_id: str
     development_stage: str
     disease: str
-    doi: str
+    doi_journal: str
+    doi_preprint: str
     download_url_data: str
     download_url_meta: str
     dataset: str
@@ -87,7 +88,8 @@ class AdataIdsSfaira(AdataIds):
         self.cellontology_id = "cell_ontology_id"
         self.default_embedding = "default_embedding"
         self.disease = "disease"
-        self.doi = "doi"
+        self.doi_journal = "doi_journal"
+        self.doi_preprint = "doi_preprint"
         self.dataset = "dataset"
         self.dataset_group = "dataset_group"
         self.download_url_data = "download_url_data"
@@ -123,6 +125,7 @@ class AdataIdsSfaira(AdataIds):
         self.unknown_celltype_identifier = "UNKNOWN"
         self.not_a_cell_celltype_identifier = "NOT_A_CELL"
         self.unknown_metadata_identifier = "unknown"
+        self.unknown_metadata_ontology_id_identifier = "unknown"
 
         self.obs_keys = [
             "assay_sc",
@@ -152,7 +155,8 @@ class AdataIdsSfaira(AdataIds):
             "annotated",
             "author",
             "default_embedding",
-            "doi",
+            "doi_journal",
+            "doi_preprint",
             "download_url_data",
             "download_url_meta",
             "id",
@@ -182,9 +186,11 @@ class AdataIdsCellxgene(AdataIds):
         self.cellontology_class = "cell_type"
         self.cellontology_id = "cell_type_ontology_term_id"
         self.default_embedding = "default_embedding"
-        self.doi = "preprint_doi"
+        self.doi_journal = "publication_doi"
+        self.doi_preprint = "preprint_doi"
         self.disease = "disease"
         self.gene_id_symbols = "gene_symbol"
+        self.gene_id_ensembl = "ensembl"
         self.gene_id_index = self.gene_id_symbols
         self.id = "id"
         self.ncells = "ncells"
@@ -228,11 +234,13 @@ class AdataIdsCellxgene(AdataIds):
             "tech_sample",
         ]
         self.var_keys = [
+            "gene_id_ensembl",
             "gene_id_symbols",
         ]
         self.uns_keys = [
+            "doi_journal",
+            "doi_preprint",
             "default_embedding",
-            "id",
             "title",
         ]
         # These attributes related to obs and uns keys above are also in the data set attributes that can be

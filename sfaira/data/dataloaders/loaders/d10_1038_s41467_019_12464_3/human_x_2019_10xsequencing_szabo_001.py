@@ -60,7 +60,7 @@ class Dataset(DatasetBase):
 
         self.assay_sc = "10x technology"
         self.author = "Szabo"
-        self.doi = "10.1038/s41467-019-12464-3"
+        self.doi_journal = "10.1038/s41467-019-12464-3"
         self.individual = SAMPLE_DICT[self.sample_fn][1]
         self.normalization = "raw"
         self.organ = SAMPLE_DICT[self.sample_fn][0]

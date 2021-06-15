@@ -16,7 +16,7 @@ class Dataset(DatasetBase):
         self.assay_sc = "10x technology"
         self.author = "Smilie"
         self.disease = "healthy"
-        self.doi = "10.1016/j.cell.2019.06.029"
+        self.doi_journal = "10.1016/j.cell.2019.06.029"
         self.normalization = "raw"
         self.organ = "colonic epithelium"
         self.organism = "human"

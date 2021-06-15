@@ -18,7 +18,8 @@ class Dataset(DatasetBase):
 
         self.author = "Enge"
         self.disease = "healthy"
-        self.doi = "10.1016/j.cell.2017.09.004"
+        self.doi_journal = "10.1016/j.cell.2017.09.004"
+        self.doi_preprint = "10.1101/108043"
         self.normalization = "raw"
         self.assay_sc = "Smart-seq2"
         self.organ = "islet of Langerhans"

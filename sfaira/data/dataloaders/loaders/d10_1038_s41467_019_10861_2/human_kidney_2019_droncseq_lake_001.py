@@ -17,7 +17,7 @@ class Dataset(DatasetBase):
         self.assay_sc = "DroNc-seq"
         self.author = "Lake"
         self.disease = "healthy"
-        self.doi = "10.1038/s41467-019-10861-2"
+        self.doi_journal = "10.1038/s41467-019-10861-2"
         self.normalization = "raw"
         self.organ = "kidney"
         self.organism = "human"

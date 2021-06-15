@@ -17,7 +17,7 @@ class Dataset(DatasetBase):
         self.download_url_meta = "https://www.ebi.ac.uk/arrayexpress/files/E-MTAB-5061/E-MTAB-5061.sdrf.txt"
 
         self.author = "Segerstolpe"
-        self.doi = "10.1016/j.cmet.2016.08.020"
+        self.doi_journal = "10.1016/j.cmet.2016.08.020"
         self.normalization = "raw"
         self.organ = "pancreas"
         self.organism = "human"

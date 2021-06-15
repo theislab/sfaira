@@ -7,9 +7,9 @@ dataset_wise:
     author:
         - "Travaglini"
     default_embedding: "X_tSNE"
-    doi:
-        - "10.1038/s41586-020-2922-4"
-    download_url_data:
+    doi_journal: "10.1038/s41586-020-2922-4"
+    doi_preprint:
+    download_url_data: 
         droplet_normal_lung_blood_scanpy.20200205.RC4.h5ad: "syn21625095,droplet_normal_lung_blood_scanpy.20200205.RC4.h5ad"
         facs_normal_lung_blood_scanpy.20200205.RC4.h5ad: "syn21625142,facs_normal_lung_blood_scanpy.20200205.RC4.h5ad"
     download_url_meta:

@@ -301,7 +301,7 @@ class Dataset(DatasetBase):
         self.author = "Han"
         self.dev_stage = sample_dev_stage_dict[self.sample_fn]
         self.disease = "healthy"
-        self.doi = "10.1016/j.cell.2018.02.001"
+        self.doi_journal = "10.1016/j.cell.2018.02.001"
         self.normalization = "raw"
         self.organism = "mouse"
         self.assay_sc = "microwell-seq"
