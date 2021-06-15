@@ -109,6 +109,7 @@ class DataloaderAnnotater:
         # Group data sets by file module:
         # Note that if we were not grouping the cell type map .tsv files by file module, we could directly call
         # write_ontology_class_map on the ds.
+        tsvs_written = []
         for f in os.listdir(cwd):
             if os.path.isfile(os.path.join(cwd, f)):  # only files
                 # Narrow down to data set files:
@@ -177,8 +178,11 @@ class DataloaderAnnotater:
                     # III) Write this directly into the sfaira clone so that it can be committed via git.
                     # TODO any errors not to be caught here?
                     doi_sfaira_repr = f'd{doi.translate({ord(c): "_" for c in r"!@#$%^&*()[]/{};:,.<>?|`~-=_+"})}'
+                    fn_tsv = os.path.join(path, doi_sfaira_repr, f"{file_module}.tsv")
                     dsg_f.write_ontology_class_map(
-                        fn=os.path.join(f"{path}/sfaira/data/dataloaders/loaders/{doi_sfaira_repr}/{file_module}.tsv"),
+                        fn=fn_tsv,
                         protected_writing=True,
                         n_suggest=4,
                     )
+                    tsvs_written.append(fn_tsv)
+        print(f"Completed annotation. Wrote {len(tsvs_written)} files:\n" + "\n".join(tsvs_written))

@@ -22,10 +22,10 @@ class DataloaderTester:
         """
         Runs a predefined unit test on a given dataloader.
         """
-        print('[bold blue]Please ensure that your dataloader is in sfaira/dataloaders/loaders/<doi_flattened>.')
         if not self.doi:
             self._prompt_doi()
         self.doi_sfaira_repr = f'd{self.doi.translate({ord(c): "_" for c in r"!@#$%^&*()[]/{};:,.<>?|`~-=_+"})}'
+        print(f'[bold blue]Please ensure that your dataloader is in sfaira/dataloaders/loaders/{self.doi_sfaira_repr}.')
         self._run_unittest()
 
     def _prompt_doi(self):
