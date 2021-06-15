@@ -90,14 +90,13 @@ class DataloaderAnnotater:
             raise ValueError(f"did not find data folder named {doi_sfaira_repr} in test-data directory "
                              f"{test_data}, only found {os.listdir(test_data)}")
         ds = self._get_ds(test_data=test_data)
-        # TODO try-except with good error description saying that the data loader is broken here:
         ds.load(
             remove_gene_version=False,
             match_to_reference=None,
             load_raw=True,  # Force raw load so non confound future tests by data loader bugs in previous versions.
-            allow_caching=True,
+            allow_caching=False,
+            verbose=3
         )
-
         assert len(ds.ids) > 0, f"no data sets loaded, make sure raw data is in {test_data}, "\
                                 f"found {os.listdir(os.path.join(test_data, doi_sfaira_repr))}"
         return ds
