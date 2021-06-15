@@ -86,7 +86,7 @@ class DataloaderAnnotater:
     def buffered_load(self, test_data: str, doi_sfaira_repr: str):
         if not os.path.exists(test_data):
             raise ValueError(f"test-data directory {test_data} does not exist.")
-        if not doi_sfaira_repr in os.listdir(test_data):
+        if doi_sfaira_repr not in os.listdir(test_data):
             raise ValueError(f"did not find data folder named {doi_sfaira_repr} in test-data directory "
                              f"{test_data}, only found {os.listdir(test_data)}")
         ds = self._get_ds(test_data=test_data)
@@ -98,7 +98,7 @@ class DataloaderAnnotater:
             allow_caching=True,
         )
 
-        assert len(ds.ids) > 0, f"no data sets loaded, make sure raw data is in {test_data}, "
+        assert len(ds.ids) > 0, f"no data sets loaded, make sure raw data is in {test_data}, "\
                                 f"found {os.listdir(os.path.join(test_data, doi_sfaira_repr))}"
         return ds
 
