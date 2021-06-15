@@ -12,7 +12,6 @@ from sfaira.estimators import EstimatorKeras, EstimatorKerasCelltype, EstimatorK
 from sfaira.versions.genomes.genomes import CustomFeatureContainer
 from sfaira.versions.metadata import OntologyOboCustom
 from sfaira.versions.topologies import TopologyContainer
-from sfaira.unit_tests.utils import cached_store_writing, simulate_anndata
 
 dir_data = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_data")
 dir_meta = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_data", "meta")

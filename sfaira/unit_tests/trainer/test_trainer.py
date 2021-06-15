@@ -6,7 +6,6 @@ from typing import Union
 from sfaira.data import load_store
 from sfaira.ui import ModelZoo
 from sfaira.train import TrainModelCelltype, TrainModelEmbedding
-from sfaira.unit_tests.utils import cached_store_writing, simulate_anndata
 
 dir_data = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_data")
 dir_meta = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_data/meta")

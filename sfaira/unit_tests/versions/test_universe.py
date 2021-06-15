@@ -1,6 +1,7 @@
 import os
 
 from sfaira.versions.metadata import CelltypeUniverse, OntologyCl, OntologyUberon
+from ..mock_data import DIR_TEMP
 
 """
 CelltypeUniverse
@@ -8,7 +9,7 @@ CelltypeUniverse
 
 
 def test_universe_io():
-    tmp_fn = "./universe_tempp.csv"
+    tmp_fn = os.path.join(DIR_TEMP, "universe_temp.csv")
     targets = ["stromal cell", "lymphocyte", "T-helper 1 cell", "T-helper 17 cell"]
     cl = OntologyCl(branch="v2021-02-01")
     uberon = OntologyUberon()

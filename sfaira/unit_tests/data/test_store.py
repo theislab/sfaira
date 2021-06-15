@@ -9,14 +9,8 @@ from typing import List
 
 from sfaira.data import load_store
 from sfaira.versions.genomes.genomes import GenomeContainer
-from sfaira.unit_tests.utils import cached_store_writing
 
-
-MOUSE_GENOME_ANNOTATION = "Mus_musculus.GRCm38.102"
-HUMAN_GENOME_ANNOTATION = "Homo_sapiens.GRCh38.102"
-
-dir_data = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_data")
-dir_meta = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_data", "meta")
+from sfaira.unit_tests.mock_data import ASSEMBLY_MOUSE, prepare_dsg, prepare_store
 
 
 """
@@ -29,11 +23,9 @@ def test_fatal(store_format: str):
     """
     Test if basic methods abort.
     """
-    store_path = cached_store_writing(dir_data=dir_data, dir_meta=dir_meta, assembly=MOUSE_GENOME_ANNOTATION,
-                                      store_format=store_format)
+    store_path = prepare_store(store_format=store_format)
     store = load_store(cache_path=store_path, store_format=store_format)
     store.subset(attr_key="organism", values=["mouse"])
-    store.subset(attr_key="assay_sc", values=["10x sequencing"])
     _ = store.n_obs
     _ = store.n_vars
     _ = store.var_names
@@ -45,18 +37,18 @@ def test_fatal(store_format: str):
 
 
 @pytest.mark.parametrize("store_format", ["h5ad", "dao"])
-@pytest.mark.parametrize("dataset", ["mouse_lung_2019_10xsequencing_pisco_022_10.1101/661728"])
-def test_data(store_format: str, dataset: str):
+def test_data(store_format: str):
     """
     Test if the data exposed by the store are the same as in the original Dataset instance after streamlining.
     """
-    store_path, ds = cached_store_writing(dir_data=dir_data, dir_meta=dir_meta, assembly=MOUSE_GENOME_ANNOTATION,
-                                          store_format=store_format, return_ds=True)
+    store_path = prepare_store(store_format=store_format)
     store = load_store(cache_path=store_path, store_format=store_format)
-    dataset_key_reduced = dataset.split("_10.")[0]
-    store.subset(attr_key="id", values=[dataset_key_reduced])
-    adata_store = store.adata_by_key[dataset]
-    adata_ds = ds.datasets[dataset].adata
+    store.subset(attr_key="doi_journal", values=["no_doi_mock1"])
+    dataset_id = store.adata_by_key[list(store.indices.keys())[0]].uns["id"]
+    adata_store = store.adata_by_key[dataset_id]
+    dsg = prepare_dsg()
+    dsg.load(allow_caching=False)
+    adata_ds = dsg.datasets[dataset_id].adata
     # Check .X
     x_store = adata_store.X
     x_ds = adata_ds.X.todense()
@@ -67,6 +59,11 @@ def test_data(store_format: str, dataset: str):
         x_store = x_store[:, :]
     if isinstance(x_store, scipy.sparse.csr_matrix):
         x_store = x_store.todense()
+    if isinstance(x_ds, anndata._core.sparse_dataset.SparseDataset):
+        # Need to load sparse matrix into memory if it comes from a backed anndata object.
+        x_ds = x_ds[:, :]
+    if isinstance(x_ds, scipy.sparse.csr_matrix):
+        x_ds = x_ds.todense()
     # Check that non-zero elements are the same:
     assert np.all(np.where(x_store > 0)[0] == np.where(x_ds > 0)[0])
     assert np.all(np.where(x_store > 0)[1] == np.where(x_ds > 0)[1])
@@ -99,12 +96,11 @@ def test_config(store_format: str):
     """
     Test that data set config files can be set, written and recovered.
     """
-    store_path = cached_store_writing(dir_data=dir_data, dir_meta=dir_meta, assembly=MOUSE_GENOME_ANNOTATION,
-                                      store_format=store_format)
+    store_path = prepare_store(store_format=store_format)
     config_path = os.path.join(store_path, "config_lung")
     store = load_store(cache_path=store_path, store_format=store_format)
     store.subset(attr_key="organism", values=["mouse"])
-    store.subset(attr_key="assay_sc", values=["10x sequencing"])
+    store.subset(attr_key="assay_sc", values=["10x technology"])
     store.write_config(fn=config_path)
     store2 = load_store(cache_path=store_path, store_format=store_format)
     store2.load_config(fn=config_path + ".pickle")
@@ -117,7 +113,7 @@ def test_config(store_format: str):
                                  np.concatenate([np.arange(150, 200), np.array([1, 100, 2003, 33])])])
 @pytest.mark.parametrize("batch_size", [1, 7])
 @pytest.mark.parametrize("obs_keys", [[], ["cell_ontology_class"]])
-@pytest.mark.parametrize("gc", [(None, {}), (MOUSE_GENOME_ANNOTATION, {"biotype": "protein_coding"})])
+@pytest.mark.parametrize("gc", [(None, {}), (ASSEMBLY_MOUSE, {"biotype": "protein_coding"})])
 @pytest.mark.parametrize("randomized_batch_access", [True, False])
 def test_generator_shapes(store_format: str, idx, batch_size: int, obs_keys: List[str], gc: tuple,
                           randomized_batch_access: bool):
@@ -125,8 +121,7 @@ def test_generator_shapes(store_format: str, idx, batch_size: int, obs_keys: Lis
     Test generators queries do not throw errors and that output shapes are correct.
     """
     assembly, subset = gc
-    store_path = cached_store_writing(dir_data=dir_data, dir_meta=dir_meta, assembly=MOUSE_GENOME_ANNOTATION,
-                                      store_format=store_format)
+    store_path = prepare_store(store_format=store_format)
     store = load_store(cache_path=store_path, store_format=store_format)
     store.subset(attr_key="organism", values=["mouse"])
     if assembly is not None:

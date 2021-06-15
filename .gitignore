@@ -6,8 +6,8 @@ docs/api/
 
 # Unit test temporary data:
 sfaira/unit_tests/test_data_loaders/*
-sfaira/unit_tests/test_data/*
-sfaira/unit_tests/template_data/*
+sfaira/unit_tests/mock_data/store*
+sfaira/unit_tests/mock_data/temp*
 
 # General patterns:
 git abuild

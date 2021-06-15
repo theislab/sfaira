@@ -133,7 +133,7 @@ class DistributedStoreBase(abc.ABC):
         """
         return np.sort(np.unique(list(self.organisms_by_key.values())))
 
-    def _validate_feature_space_homogeneity(self) -> Union[List[str], Dict[str, List[str]]]:
+    def _validate_feature_space_homogeneity(self) -> Dict[str, List[str]]:
         """
         Assert that the data sets which were kept have the same feature names within each organism.
 
@@ -151,12 +151,8 @@ class DistributedStoreBase(abc.ABC):
                 assert np.all(var_names_x == self._adata_by_key[k].var_names), \
                     f"var_names in store were not matched in object {k} compared to {ks_x[0]}"
             var_names[x] = var_names_x
-        # Return as list if all data sets come from the same organism and have the same feature space, otherwise as
-        # organism-wise dictionary of feature names.
-        if len(var_names.keys()) == 1:
-            return var_names[list(var_names.keys())[0]]
-        else:
-            return var_names
+        # Return as an organism-wise dictionary of feature names.
+        return var_names
 
     def _generator_helper(
             self,
@@ -463,7 +459,7 @@ class DistributedStoreBase(abc.ABC):
 
     @property
     def shape(self) -> Dict[str, Tuple[int, int]]:
-        return dict([(k, (self.n_obs_organism[k], v)) for k, v in self.n_vars])
+        return dict([(k, (self.n_obs_organism[k], v)) for k, v in self.n_vars.items()])
 
     @abc.abstractmethod
     def generator(
@@ -769,16 +765,17 @@ class DistributedStoreDao(DistributedStoreBase):
             for organism in self.organisms
         ])
 
-    def n_counts(self, idx: Union[np.ndarray, list, None] = None) -> np.ndarray:
+    def n_counts(self, idx: Union[Dict[str, Union[np.ndarray, list]], None] = None) -> Dict[str, np.ndarray]:
         """
         Compute sum over features for each observation in index.
 
         :param idx: Index vector over observations in object.
-        :return: Array with sum per observations: (number of observations in index,)
+        :return: Array with sum per observations per organism: (number of observations in index,)
         """
         if idx is not None:
-            raise NotImplementedError()
-        return np.sum([np.asarray(x.sum(axis=1)).flatten() for x in self.X.values()])
+            return np.sum([np.asarray(x.sum(axis=1)).flatten() for x in self.X.values()])
+        else:
+            return dict([(x, np.asarray(x.sum(axis=1)).flatten()) for k, v in self.X_by_organism.items()])
 
     def generator(
             self,

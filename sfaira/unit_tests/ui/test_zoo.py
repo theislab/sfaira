@@ -1,9 +1,6 @@
 import os
 from sfaira.ui import ModelZoo
 
-dir_data = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_data")
-dir_meta = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_data/meta")
-
 
 def test_for_fatal_embedding():
     model_id = "embedding_human-lung-linear-0.1-0.1_mylab"
