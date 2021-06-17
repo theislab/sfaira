@@ -142,7 +142,6 @@ class DatasetGroup:
     def streamline_metadata(
             self,
             schema: str = "sfaira",
-            uns_to_obs: bool = False,
             clean_obs: bool = True,
             clean_var: bool = True,
             clean_uns: bool = True,
@@ -155,7 +154,6 @@ class DatasetGroup:
         :param schema: Export format.
             - "sfaira"
             - "cellxgene"
-        :param uns_to_obs: Whether to move metadata in .uns to .obs to make sure it's not lost when concatenating multiple objects.
         :param clean_obs: Whether to delete non-streamlined fields in .obs, .obsm and .obsp.
         :param clean_var: Whether to delete non-streamlined fields in .var, .varm and .varp.
         :param clean_uns: Whether to delete non-streamlined fields in .uns.
@@ -165,7 +163,6 @@ class DatasetGroup:
         for x in self.ids:
             self.datasets[x].streamline_metadata(
                 schema=schema,
-                uns_to_obs=uns_to_obs,
                 clean_obs=clean_obs,
                 clean_var=clean_var,
                 clean_uns=clean_uns,
@@ -1146,7 +1143,6 @@ class DatasetSuperGroup:
     def streamline_metadata(
             self,
             schema: str = "sfaira",
-            uns_to_obs: bool = False,
             clean_obs: bool = True,
             clean_var: bool = True,
             clean_uns: bool = True,
@@ -1159,7 +1155,6 @@ class DatasetSuperGroup:
         :param schema: Export format.
             - "sfaira"
             - "cellxgene"
-        :param uns_to_obs: Whether to move metadata in .uns to .obs to make sure it's not lost when concatenating multiple objects.
         :param clean_obs: Whether to delete non-streamlined fields in .obs, .obsm and .obsp.
         :param clean_var: Whether to delete non-streamlined fields in .var, .varm and .varp.
         :param clean_uns: Whether to delete non-streamlined fields in .uns.
@@ -1170,7 +1165,6 @@ class DatasetSuperGroup:
             for xx in x.ids:
                 x.datasets[xx].streamline_metadata(
                     schema=schema,
-                    uns_to_obs=uns_to_obs,
                     clean_obs=clean_obs,
                     clean_var=clean_var,
                     clean_uns=clean_uns,
