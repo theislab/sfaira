@@ -46,6 +46,7 @@ class AdataIds:
     obs_keys: List[str]
     var_keys: List[str]
     uns_keys: List[str]
+    batch_keys: List[str]
 
     classmap_source_key: str
     classmap_target_key: str
@@ -127,6 +128,8 @@ class AdataIdsSfaira(AdataIds):
         self.unknown_metadata_identifier = "unknown"
         self.unknown_metadata_ontology_id_identifier = "unknown"
 
+        self.batch_keys = [self.bio_sample, self.individual, self.tech_sample]
+
         self.obs_keys = [
             "assay_sc",
             "assay_differentiation",
@@ -167,7 +170,7 @@ class AdataIdsSfaira(AdataIds):
             "load_raw",
             "mapped_features",
             "remove_gene_version",
-        ] + self.obs_keys
+        ] + [x for x in self.obs_keys if x not in self.batch_keys]
 
 
 class AdataIdsCellxgene(AdataIds):
@@ -212,6 +215,8 @@ class AdataIdsCellxgene(AdataIds):
         self.unknown_metadata_identifier = "unknown"
         self.invalid_metadata_identifier = "na"
         self.unknown_metadata_ontology_id_identifier = ""
+
+        self.batch_keys = []
 
         # accepted file names
         self.accepted_file_names = [

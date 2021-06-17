@@ -719,6 +719,7 @@ class DatasetBase(abc.ABC):
         if hasattr(adata_target_ids, "gene_id_ensembl") and not hasattr(self._adata_ids, "gene_id_ensembl"):
             raise ValueError(f"Cannot convert this object to schema {schema}, as the currently applied schema does not "
                              f"have an ensembl gene ID annotation. Please run .streamline_features() first.")
+        experiment_batch_labels = [getattr(self._adata_ids, x) for x in self._adata_ids.batch_keys]
 
         # Creating new var annotation
         var_new = pd.DataFrame()
@@ -767,7 +768,6 @@ class DatasetBase(abc.ABC):
             uns_new[getattr(adata_target_ids, k)] = val
 
         # Prepare new .obs dataframe
-        experiment_batch_labels = ["bio_sample", "individual", "tech_sample"]
         per_cell_labels = ["cell_types_original", "cellontology_class", "cellontology_id"]
         obs_new = pd.DataFrame(index=self.adata.obs.index)
         # Handle non-cell type labels:
