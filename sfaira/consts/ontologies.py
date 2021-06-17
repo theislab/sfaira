@@ -24,6 +24,8 @@ class OntologyContainerSfaira:
             "mouse": OntologyMmusdv(),
         }
         self.disease = OntologyMondo()
+        self.doi = None
+        self.doi_main = None
         self.doi_journal = None
         self.doi_preprint = None
         self.ethnicity = {
