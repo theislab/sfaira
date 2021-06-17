@@ -1,5 +1,6 @@
 anndata>=0.7.6
 crossref_commons
+cellxgene
 dask
 docutils
 fuzzywuzzy

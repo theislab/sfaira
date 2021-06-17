@@ -13,6 +13,7 @@ from sfaira.commands.test_dataloader import DataloaderTester
 
 from sfaira.commands.clean_dataloader import DataloaderCleaner
 from sfaira.commands.validate_dataloader import DataloaderValidator
+from sfaira.commands.validate_h5ad import H5adValidator
 
 import sfaira
 from sfaira.commands.create_dataloader import DataloaderCreator
@@ -129,6 +130,22 @@ def test_dataloader(path, test_data, doi) -> None:
     """
     dataloader_tester = DataloaderTester(path, test_data, doi)
     dataloader_tester.test_dataloader()
+
+
+@sfaira_cli.command()
+@click.argument('path', type=click.Path(exists=True))
+@click.option('--test-h5ad', type=click.Path(exists=True))
+@click.option('--schema', type=str, default=None)
+def test_h5ad(test_h5ad, schema) -> None:
+    """Runs a component test on a streamlined h5ad object.
+
+    test-h5ad is the absolute path of the .h5ad file to test.
+    schema is the schema type ("cellxgene",) to test.
+    version is the version of the schema to apply. Uses the newest version if None is given.
+    """
+    h5ad_tester = H5adValidator(test_h5ad, schema)
+    h5ad_tester.test_schema()
+    h5ad_tester.test_numeric_data()
 
 
 if __name__ == "__main__":

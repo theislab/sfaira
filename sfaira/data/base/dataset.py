@@ -772,51 +772,51 @@ class DatasetBase(abc.ABC):
         obs_new = pd.DataFrame(index=self.adata.obs.index)
         # Handle non-cell type labels:
         for k in [x for x in adata_target_ids.obs_keys if x not in per_cell_labels]:
-            if hasattr(self, f"{k}_obs_key") and getattr(self, f"{k}_obs_key") is not None:
-                old_col = getattr(self, f"{k}_obs_key")
-                val = self.adata.obs[old_col].values.tolist()
-            else:
-                old_col = None
-                val = getattr(self, k)
-                if val is None:
-                    val = self._adata_ids.unknown_metadata_identifier
-                # Unpack nested lists/tuples:
-                while hasattr(val, '__len__') and not isinstance(val, str) and len(val) == 1:
-                    val = val[0]
-                val = [val] * self.adata.n_obs
-            new_col = getattr(adata_target_ids, k)
             # Handle batch-annotation columns which can be provided as a combination of columns separated by an asterisk
-            if old_col is not None and k in experiment_batch_labels and "*" in old_col:
+            if k in experiment_batch_labels and getattr(self, f"{k}_obs_key") is not None and \
+                    "*" in getattr(self, f"{k}_obs_key"):
+                old_cols = getattr(self, f"{k}_obs_key")
                 batch_cols = []
-                for batch_col in old_col.split("*"):
+                for batch_col in old_cols.split("*"):
                     if batch_col in self.adata.obs_keys():
                         batch_cols.append(batch_col)
                     else:
                         # This should not occur in single data set loaders (see warning below) but can occur in
                         # streamlined data loaders if not all instances of the streamlined data sets have all columns
                         # in .obs set.
-                        print(f"WARNING: attribute {new_col} of data set {self.id} was not found in column {batch_col}")
+                        print(f"WARNING: attribute {batch_col} of data set {self.id} was not found in columns.")
                 # Build a combination label out of all columns used to describe this group.
                 val = [
                     "_".join([str(xxx) for xxx in xx])
                     for xx in zip(*[self.adata.obs[batch_col].values.tolist() for batch_col in batch_cols])
                 ]
-            # All other .obs fields are interpreted below as provided
             else:
-                # Check values for validity:
-                ontology = getattr(self.ontology_container_sfaira, k) \
-                    if hasattr(self.ontology_container_sfaira, k) else None
-                if k == "development_stage":
-                    ontology = ontology[self.organism]
-                if k == "ethnicity":
-                    ontology = ontology[self.organism]
-                self._value_protection(attr=new_col, allowed=ontology, attempted=[
-                    x for x in np.unique(val)
-                    if x not in [
-                        self._adata_ids.unknown_metadata_identifier,
-                        self._adata_ids.unknown_metadata_ontology_id_identifier,
-                    ]
-                ])
+                if hasattr(self, f"{k}_obs_key") and getattr(self, f"{k}_obs_key") is not None:
+                    old_col = getattr(self, f"{k}_obs_key")
+                    val = self.adata.obs[old_col].values.tolist()
+                else:
+                    val = getattr(self, k)
+                    if val is None:
+                        val = self._adata_ids.unknown_metadata_identifier
+                    # Unpack nested lists/tuples:
+                    while hasattr(val, '__len__') and not isinstance(val, str) and len(val) == 1:
+                        val = val[0]
+                    val = [val] * self.adata.n_obs
+            new_col = getattr(adata_target_ids, k)
+            # Check values for validity:
+            ontology = getattr(self.ontology_container_sfaira, k) \
+                if hasattr(self.ontology_container_sfaira, k) else None
+            if k == "development_stage":
+                ontology = ontology[self.organism]
+            if k == "ethnicity":
+                ontology = ontology[self.organism]
+            self._value_protection(attr=new_col, allowed=ontology, attempted=[
+                x for x in np.unique(val)
+                if x not in [
+                    self._adata_ids.unknown_metadata_identifier,
+                    self._adata_ids.unknown_metadata_ontology_id_identifier,
+                ]
+            ])
             obs_new[new_col] = val
             setattr(self, f"{k}_obs_key", new_col)
         # Set cell types:
