@@ -18,7 +18,7 @@ import urllib.error
 import cgi
 import ssl
 
-from sfaira.versions.genomes.genomes import GenomeContainer
+from sfaira.versions.genomes import GenomeContainer
 from sfaira.versions.metadata import Ontology, OntologyHierarchical, CelltypeUniverse
 from sfaira.consts import AdataIds, AdataIdsCellxgene, AdataIdsSfaira, META_DATA_FIELDS, OCS
 from sfaira.data.base.io_dao import write_dao
@@ -71,7 +71,7 @@ def clean_string(s):
     return s
 
 
-def get_directory_formatted_doi(x:str) -> str:
+def get_directory_formatted_doi(x: str) -> str:
     return "d" + "_".join("_".join("_".join(x.split("/")).split(".")).split("-"))
 
 
