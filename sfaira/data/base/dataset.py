@@ -684,7 +684,6 @@ class DatasetBase(abc.ABC):
     def streamline_metadata(
             self,
             schema: str = "sfaira",
-            uns_to_obs: bool = False,
             clean_obs: bool = True,
             clean_var: bool = True,
             clean_uns: bool = True,
@@ -698,8 +697,6 @@ class DatasetBase(abc.ABC):
         :param schema: Export format.
             - "sfaira"
             - "cellxgene"
-        :param uns_to_obs: Whether to move metadata in .uns to .obs to make sure it's not lost when concatenating
-            multiple objects. Retains .id in .uns.
         :param clean_obs: Whether to delete non-streamlined fields in .obs, .obsm and .obsp.
         :param clean_var: Whether to delete non-streamlined fields in .var, .varm and .varp.
         :param clean_uns: Whether to delete non-streamlined fields in .uns.

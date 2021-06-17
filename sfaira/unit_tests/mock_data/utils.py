@@ -99,8 +99,7 @@ def prepare_store(store_format: str) -> str:
         ds.load(allow_caching=False)
         ds.streamline_features(remove_gene_version=True, match_to_reference=match_to_reference,
                                subset_genes_to_type="protein_coding")
-        ds.streamline_metadata(schema="sfaira", uns_to_obs=False, clean_obs=True, clean_var=True, clean_uns=True,
-                               clean_obs_names=True)
+        ds.streamline_metadata(schema="sfaira", clean_obs=True, clean_var=True, clean_uns=True, clean_obs_names=True)
         if store_format == "dao":
             compression_kwargs = {"compressor": "default", "overwrite": True, "order": "C"}
         else:
