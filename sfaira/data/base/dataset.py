@@ -883,20 +883,6 @@ class DatasetBase(abc.ABC):
             if self.adata.uns[k] is None or self.adata.uns[k] == unknown_old:
                 self.adata.uns[k] = unknown_new
 
-        # Move all uns annotation to obs columns if requested
-        if uns_to_obs:
-            for k, v in self.adata.uns.items():
-                if k not in self.adata.obs_keys():
-                    if v is None:
-                        v = self._adata_ids.unknown_metadata_identifier
-                    # Unpack nested lists/tuples:
-                    while hasattr(v, '__len__') and not isinstance(v, str) and len(v) == 1:
-                        v = v[0]
-                    self.adata.obs[k] = [v for _ in range(self.adata.n_obs)]
-            # Retain only target uns keys in .uns.
-            self.adata.uns = dict([(k, v) for k, v in self.adata.uns.items()
-                                   if k in [getattr(adata_target_ids, kk) for kk in ["id"]]])
-
         # Add additional hard-coded description changes for cellxgene schema:
         if schema == "cellxgene":
             self.adata.uns["layer_descriptions"] = {"X": "raw"}

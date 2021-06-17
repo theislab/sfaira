@@ -133,15 +133,36 @@ def test_dataloader(path, test_data, doi) -> None:
 
 
 @sfaira_cli.command()
-@click.argument('path', type=click.Path(exists=True))
-@click.option('--test-h5ad', type=click.Path(exists=True))
+@click.argument('doi', type=str)
+@click.argument('schema', type=str, default=None)
+@click.argument('path_out', type=click.Path(exists=True))
+@click.argument('path_data', type=click.Path(exists=True))
+@click.option('--path_cache', type=click.Path(exists=True), default=None)
+def export_h5ad(test_h5ad, schema) -> None:
+    """Creates a collection of streamlined h5ad object for a given DOI.
+
+    doi is the doi(s) to select for export. You can enumerate multiple dois by suppling a string of dois separated by
+        a comma.
+    schema is the schema type ("cellxgene",) to use for streamlining.
+    path_out is the absolute path to save output into. The h5ad files will be in a folder named after the DOI.
+    path_data is the absolute path to raw data library, ie one folder above the DOI named folder that contains the raw
+        files necessary for the selected data loader(s).
+    path_cache is the optional absolute path to cached data library maintained by sfaira. Using such a cache speeds
+        up loading in sequential runs but is not necessary.
+    """
+    h5ad_tester = H5adValidator(test_h5ad, schema)
+    h5ad_tester.test_schema()
+    h5ad_tester.test_numeric_data()
+
+
+@sfaira_cli.command()
+@click.argument('test-h5ad', type=click.Path(exists=True))
 @click.option('--schema', type=str, default=None)
 def test_h5ad(test_h5ad, schema) -> None:
     """Runs a component test on a streamlined h5ad object.
 
     test-h5ad is the absolute path of the .h5ad file to test.
     schema is the schema type ("cellxgene",) to test.
-    version is the version of the schema to apply. Uses the newest version if None is given.
     """
     h5ad_tester = H5adValidator(test_h5ad, schema)
     h5ad_tester.test_schema()
