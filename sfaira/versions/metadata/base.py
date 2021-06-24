@@ -316,18 +316,18 @@ class OntologyHierarchical(Ontology, abc.ABC):
         """
         Map a given node to leave nodes.
 
-        :param node:
+        :param node: Node(s) to map as symbol(s) or ID(s).
         :param return_type:
 
             "ids": IDs of mapped leave nodes
             "idx": indicies in leave note list of mapped leave nodes
-        :param include_self: whether to include node itself
+        :param include_self: DEPRECEATED.
         :return:
         """
         node = self.convert_to_id(node)
         ancestors = self.get_ancestors(node)
-        if include_self:
-            ancestors = ancestors + [node]
+        # Add node itself to list of ancestors.
+        ancestors = ancestors + [node]
         if len(ancestors) > 0:
             ancestors = self.convert_to_id(ancestors)
         leaves = self.convert_to_id(self.leaves)

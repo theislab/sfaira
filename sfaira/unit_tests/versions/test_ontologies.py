@@ -59,18 +59,14 @@ def test_cl_set_leaves():
     assert set(leaves) == set(targets), leaves
     assert len(oc.node_ids) == 22
     assert np.all([x in oc.convert_to_name(oc.node_ids) for x in targets]), oc.convert_to_name(oc.node_ids)
-    leaf_map_1 = oc.convert_to_name(oc.map_to_leaves(node="lymphocyte", include_self=True))
-    leaf_map_2 = oc.convert_to_name(oc.map_to_leaves(node="lymphocyte", include_self=False))
-    leaf_map_3 = oc.map_to_leaves(node="lymphocyte", include_self=True, return_type="idx")
-    leaf_map_4 = oc.convert_to_name(oc.map_to_leaves(node="T-helper 1 cell", include_self=True))
-    leaf_map_5 = oc.map_to_leaves(node="T-helper 1 cell", include_self=False)
-    leaf_map_6 = oc.map_to_leaves(node="T-helper 1 cell", include_self=True, return_type="idx")
+    leaf_map_1 = oc.convert_to_name(oc.map_to_leaves(node="lymphocyte"))
+    leaf_map_2 = oc.map_to_leaves(node="lymphocyte", return_type="idx")
+    leaf_map_3 = oc.convert_to_name(oc.map_to_leaves(node="T-helper 1 cell"))
+    leaf_map_4 = oc.map_to_leaves(node="T-helper 1 cell", return_type="idx")
     assert set(leaf_map_1) == {"T-helper 1 cell", "T-helper 17 cell"}
-    assert set(leaf_map_2) == {"T-helper 1 cell", "T-helper 17 cell"}
-    assert np.all(leaf_map_3 == np.sort([oc.convert_to_name(oc.leaves).index(x) for x in list(leaf_map_1)]))
-    assert set(leaf_map_4) == {"T-helper 1 cell"}
-    assert leaf_map_5 == []
-    assert np.all(leaf_map_6 == np.sort([oc.convert_to_name(oc.leaves).index(x) for x in list(leaf_map_4)]))
+    assert np.all(leaf_map_2 == np.sort([oc.convert_to_name(oc.leaves).index(x) for x in list(leaf_map_1)]))
+    assert set(leaf_map_3) == {"T-helper 1 cell"}
+    assert np.all(leaf_map_4 == np.sort([oc.convert_to_name(oc.leaves).index(x) for x in list(leaf_map_4)]))
 
 
 """

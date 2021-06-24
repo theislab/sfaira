@@ -109,25 +109,22 @@ def test_config(store_format: str):
 
 
 @pytest.mark.parametrize("store_format", ["h5ad", "dao"])
-@pytest.mark.parametrize("idx", [np.array([2, 1020, 3, 20000, 20100]),
-                                 np.concatenate([np.arange(150, 200), np.array([1, 100, 2003, 33])])])
+@pytest.mark.parametrize("idx", [np.array([2, 5, 30, 50]),
+                                 np.concatenate([np.arange(30, 50), np.array([1, 4, 98])])])
 @pytest.mark.parametrize("batch_size", [1, 7])
 @pytest.mark.parametrize("obs_keys", [[], ["cell_ontology_class"]])
-@pytest.mark.parametrize("gc", [(None, {}), (ASSEMBLY_MOUSE, {"biotype": "protein_coding"})])
 @pytest.mark.parametrize("randomized_batch_access", [True, False])
-def test_generator_shapes(store_format: str, idx, batch_size: int, obs_keys: List[str], gc: tuple,
-                          randomized_batch_access: bool):
+def test_generator_shapes(store_format: str, idx, batch_size: int, obs_keys: List[str], randomized_batch_access: bool):
     """
     Test generators queries do not throw errors and that output shapes are correct.
     """
-    assembly, subset = gc
     store_path = prepare_store(store_format=store_format)
     store = load_store(cache_path=store_path, store_format=store_format)
     store.subset(attr_key="organism", values=["mouse"])
-    if assembly is not None:
-        gc = GenomeContainer(assembly=assembly)
-        gc.subset(**subset)
-        store.genome_container = gc
+    print(store.indices)
+    gc = GenomeContainer(assembly=ASSEMBLY_MOUSE)
+    gc.subset(**{"biotype": "protein_coding"})
+    store.genome_container = gc
     g = store.generator(
         idx=idx,
         batch_size=batch_size,
@@ -136,22 +133,19 @@ def test_generator_shapes(store_format: str, idx, batch_size: int, obs_keys: Lis
     )
     nobs = len(idx) if idx is not None else store.n_obs
     batch_sizes = []
-    t0 = time.time()
     x = None
     obs = None
+    counter = 0
     for i, z in enumerate(g()):
+        counter += 1
         x_i, obs_i = z
         assert x_i.shape[0] == obs_i.shape[0]
         if i == 0:
             x = x_i
             obs = obs_i
         batch_sizes.append(x_i.shape[0])
-    tdelta = time.time() - t0
-    print(f"time for iterating over generator:"
-          f" {tdelta}s for {np.sum(batch_sizes)} cells in {len(batch_sizes)} batches,"
-          f" {tdelta / len(batch_sizes)}s per batch.")
-    assert x.shape[1] == store.n_vars, (x.shape, store.n_vars)
+    assert counter > 0
+    assert x.shape[1] == store.n_vars["mouse"], (x.shape, store.n_vars["mouse"])
     assert obs.shape[1] == len(obs_keys), (obs.shape, obs_keys)
     assert np.sum(batch_sizes) == nobs, (batch_sizes, nobs)
-    if assembly is not None:
-        assert x.shape[1] == gc.n_var, (x.shape, gc.n_var)
+    assert x.shape[1] == gc.n_var, (x.shape, gc.n_var)

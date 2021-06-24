@@ -26,6 +26,8 @@ DistributedStoreZarr is adapted to classes that store an anndata instance as a z
 DistributedStoreH5ad is adapted to classes that store an anndata instance as a h5ad file.
 
 Note that in all cases, you can use standard anndata reading functions to load a single object into memory.
+
+TODO relay indexing via explicit organism-wise array like objects.
 """
 
 
@@ -39,6 +41,15 @@ def access_helper(adata, s, e, j, return_dense, obs_keys) -> tuple:
         x = x[:, j]
     obs = adata.obs[obs_keys].iloc[s:e, :]
     return x, obs
+
+
+def _process_batch_size(x: int, idx_dict: Dict[str, np.ndarray]) -> int:
+    if x > np.min([len(v) for v in idx_dict.values()]):
+        batch_size_new = np.min([len(v) for v in idx_dict.values()])
+        print(f"WARNING: reduing retieval batch size according to data availability in store "
+              f"from {x} to {batch_size_new}")
+        x = batch_size_new
+    return x
 
 
 class DistributedStoreBase(abc.ABC):
@@ -79,6 +90,9 @@ class DistributedStoreBase(abc.ABC):
 
     @property
     def idx_by_organism(self) -> Dict[str, np.ndarray]:
+        """
+        Global indices by organism.
+        """
         idx_dict = {}
         organisms_by_key = self.organisms_by_key
         for x in self.organisms:
@@ -174,7 +188,7 @@ class DistributedStoreBase(abc.ABC):
                 if len(var_idx[k]) == len(var_names[k]) and np.all(var_idx[k] == np.arange(0, len(var_names[k]))):
                     var_idx[k] = None
         else:
-            var_idx = None
+            var_idx = dict([(x, None) for x in self.organisms])
         if idx is not None:
             idx = self._validate_idx(idx)
         return idx, var_idx
@@ -213,18 +227,6 @@ class DistributedStoreBase(abc.ABC):
             assert len(v) == len(np.unique(v)), f"found duplicated indices for key {k}"
             assert np.all(np.diff(v) >= 0), f"indices not sorted for key {k}"
         self._indices = x
-
-    @property
-    def idx_dataset_start(self):
-        """
-        Global indices corresponding to first cell of each data set.
-        """
-        idx = []
-        counter = 0
-        for k, v in self.indices.items():
-            idx.append(counter)
-            counter += len(v)
-        return idx
 
     @property
     def obs_by_key(self) -> Dict[str, Union[pd.DataFrame, dask.dataframe.DataFrame]]:
@@ -577,6 +579,8 @@ class DistributedStoreH5ad(DistributedStoreBase):
                 - if store format is h5ad: (Union[scipy.sparse.csr_matrix, np.ndarray], pandas.DataFrame)
         """
         idx, var_idx = self._generator_helper(idx=idx)
+        # Remove organism wise split of indices, this is not necessary below as data sets are handled individually.
+        idx = np.sort(np.concatenate(list(idx.values()))) if idx is not None else None
 
         def generator():
             adatas_sliced_subset = self.adata_by_key_subset(idx=idx)
@@ -605,7 +609,7 @@ class DistributedStoreH5ad(DistributedStoreBase):
 
     def adata_by_key_subset(self, idx: Union[np.ndarray, list]) -> Dict[str, anndata.AnnData]:
         """
-        Subsets adata_by_key as if it was one object, ie behaves the same way as self.adata[idx]  without explicitly
+        Subsets adata_by_key as if it was one object, ie behaves the same way as self.adata[idx] without explicitly
         concatenating.
         """
         if idx is not None:
@@ -615,7 +619,7 @@ class DistributedStoreH5ad(DistributedStoreBase):
             for k, v in self.indices.items():
                 n_obs_k = len(v)
                 indices_global = np.arange(counter, counter + n_obs_k)
-                indices_subset_k = [x for x, y in zip(v, indices_global) if y in idx]
+                indices_subset_k = [x for x, y in zip(v, indices_global) if np.any([y in v for v in idx.values()])]
                 if len(indices_subset_k) > 0:
                     indices_subsetted[k] = indices_subset_k
                 counter += n_obs_k
@@ -682,6 +686,9 @@ class DistributedStoreH5ad(DistributedStoreBase):
 
 class DistributedStoreDao(DistributedStoreBase):
 
+    _obs_by_organism: Union[None, Dict[str, pd.DataFrame]]
+    _dataset_weights: Union[None, Dict[str, float]]
+
     def __init__(self, cache_path: Union[str, os.PathLike], columns: Union[None, List[str]] = None):
         """
 
@@ -702,6 +709,8 @@ class DistributedStoreDao(DistributedStoreBase):
                 adata_by_key[adata.uns["id"]] = adata
                 indices[adata.uns["id"]] = np.arange(0, adata.n_obs)
         self._x_as_dask = True
+        self._obs_by_organism = None
+        self._dataset_weights = None
         super(DistributedStoreDao, self).__init__(adata_by_key=adata_by_key, indices=indices, obs_by_key=None)
 
     @property
@@ -756,14 +765,26 @@ class DistributedStoreDao(DistributedStoreBase):
         :return: .obs data frame.
         """
         # TODO Using loc indexing here instead of iloc, this might be faster on larger tables?
-        return dict([
-            (organism, pd.concat([
-                self.adata_by_key[k].obs.loc[self.adata_by_key[k].obs.index[v], :]
-                for k, v in self.indices.items()
-                if self.organisms_by_key[k] == organism
-            ], axis=0, join="inner", ignore_index=True, copy=False))
-            for organism in self.organisms
-        ])
+        if self._obs_by_organism is None:
+            self._obs_by_organism = dict([
+                (organism, pd.concat([
+                    self.adata_by_key[k].obs.loc[self.adata_by_key[k].obs.index[v], :]
+                    for k, v in self.indices.items()
+                    if self.organisms_by_key[k] == organism
+                ], axis=0, join="inner", ignore_index=True, copy=False))
+                for organism in self.organisms
+            ])
+        return self._obs_by_organism
+
+    @property
+    def dataset_weights(self):
+        return self._dataset_weights
+
+    @dataset_weights.setter
+    def dataset_weights(self, x: Dict[str, float]):
+        assert np.all([k in self.adata_by_key.keys() for k in x.keys()]), "did not recognize some keys"
+        assert np.all([k in x.keys() for k in self.indices.keys()]), "some data sets in index were omitted"
+        self._dataset_weights = x
 
     def n_counts(self, idx: Union[Dict[str, Union[np.ndarray, list]], None] = None) -> Dict[str, np.ndarray]:
         """
@@ -775,7 +796,57 @@ class DistributedStoreDao(DistributedStoreBase):
         if idx is not None:
             return np.sum([np.asarray(x.sum(axis=1)).flatten() for x in self.X.values()])
         else:
-            return dict([(x, np.asarray(x.sum(axis=1)).flatten()) for k, v in self.X_by_organism.items()])
+            return dict([(k, np.asarray(v.sum(axis=1)).flatten()) for k, v in self.X_by_organism.items()])
+
+    def _generator(
+            self,
+            idx_dict_gen: iter,
+            var_idx_dict: Dict[str, np.ndarray],
+            obs_keys: List[str] = [],
+    ) -> iter:
+        """
+        Yields an unbiased generator over observations in the contained data sets.
+
+        :param idx_dict_gen: Generator that yield two elements in each draw:
+            - Dict[str, np.ndarray]: The cells to emit per organism (dictionary keys).
+            - Dict[str, List[Tuple[int, int]]: Batch start and end indices by organism (dictionary keys).
+                The indices defined with respect to .
+        :param var_idx_dict: The features to emit per organism (dictionary keys).
+        :param obs_keys: .obs columns to return in the generator. These have to be a subset of the columns available
+            in self.adata_by_key.
+        :return: Generator function which yields batch_size at every invocation.
+            The generator returns a tuple of (.X, .obs).
+        """
+        # Normalise cell indices such that each organism is indexed starting at zero:
+        # This is required below because each organism is represented as its own dask array.
+        idx_dict_organism = self.idx_by_organism
+        x_dict = self.X_by_organism
+        obs_dict = self.obs_by_organism
+
+        def generator():
+            # Can all data sets corresponding to one organism as a single array because they share the second dimension
+            # and dask keeps expression data and obs out of memory.
+            for idx_dict, batch_starts_ends in idx_dict_gen:
+                for k, v in idx_dict.items():
+                    ref_idx = idx_dict_organism[k].tolist()
+                    idx_dict[k] = np.array([ref_idx.index(x) for x in v])
+                for organism in self.organisms:
+                    idx_o = idx_dict[organism]
+                    x = x_dict[organism][idx_o, :]
+                    obs = obs_dict[organism]
+                    obs = obs.loc[obs.index[idx_o], obs_keys]  # TODO better than iloc?
+                    # Redefine index so that .loc indexing can be used instead of .iloc indexing:
+                    obs.index = np.arange(0, obs.shape[0])
+                    for s, e in batch_starts_ends[organism]:
+                        x_i = x[s:e, :]
+                        if var_idx_dict[organism] is not None:
+                            x_i = x_i[:, var_idx_dict[organism]]
+                        # Exploit fact that index of obs is just increasing list of integers, so we can use the .loc[]
+                        # indexing instead of .iloc[]:
+                        obs_i = obs.loc[obs.index[s:e], :]
+                        yield x_i, obs_i
+
+        return generator
 
     def generator(
             self,
@@ -785,6 +856,7 @@ class DistributedStoreDao(DistributedStoreBase):
             return_dense: bool = True,
             randomized_batch_access: bool = False,
             random_access: bool = False,
+            **kwargs
     ) -> iter:
         """
         Yields an unbiased generator over observations in the contained data sets.
@@ -806,71 +878,109 @@ class DistributedStoreDao(DistributedStoreBase):
             slow down access compared randomized_batch_access and to no randomization.
             Do not use randomized_batch_access and random_access.
         :return: Generator function which yields batch_size at every invocation.
-            The generator returns a tuple of (.X, .obs) with types:
-
-                - if store format is h5ad: (Union[scipy.sparse.csr_matrix, np.ndarray], pandas.DataFrame)
+            The generator returns a tuple of (.X, .obs).
         """
         idx_dict, var_idx_dict = self._generator_helper(idx=idx)
-        # Normalise cell indices such that each organism is indexed starting at zero:
-        # This is required below because each organism is represented as its own dask array.
-        idx_dict_organism = self.idx_by_organism
-        for k, v in idx_dict.items():
-            ref_idx = idx_dict_organism[k].tolist()
-            idx_dict[k] = np.array([ref_idx.index(x) for x in v])
+        batch_size = _process_batch_size(x=batch_size, idx_dict=idx_dict)
         if randomized_batch_access and random_access:
             raise ValueError("Do not use randomized_batch_access and random_access.")
-        if batch_size > np.min([len(v) for v in idx_dict.values()]):
-            batch_size_new = np.min([len(v) for v in idx_dict.values()])
-            print(f"WARNING: reduing retieval batch size according to data availability in store "
-                  f"from {batch_size} to {batch_size_new}")
-            batch_size = batch_size_new
-        x_dict = self.X_by_organism
-        obs_dict = self.obs_by_organism
 
-        def generator():
-            # Can all data sets corresponding to one organism as a single array because they share the second dimension
-            # and dask keeps expression data and obs out of memory.
+        def idx_dict_gen():
+            batch_starts_ends = {}
+            idx_dict_proc = {}
             for organism in self.organisms:
-                idx_o = idx_dict[organism]
-                var_idx = var_idx_dict[organism]
-                x = x_dict[organism][idx_o, :]
-                obs = obs_dict[organism]
-                obs = obs.loc[obs.index[idx_o], obs_keys]  # TODO better than iloc?
-                # Redefine index so that .loc indexing can be used instead of .iloc indexing:
-                obs.index = np.arange(0, obs.shape[0])
-                n_obs = x.shape[0]
+                n_obs = len(idx_dict[organism])
                 remainder = n_obs % batch_size
-                assert n_obs == obs.shape[0]
-                batch_starts_ends = [
+                batch_starts_ends[organism] = [
                     (int(x * batch_size), int(np.minimum((x * batch_size) + batch_size, n_obs)))
                     for x in np.arange(0, n_obs // batch_size + int(remainder > 0))
                 ]
-                batch_range = np.arange(0, len(batch_starts_ends))
+                batch_range = np.arange(0, len(batch_starts_ends[organism]))
                 if randomized_batch_access:
                     np.random.shuffle(batch_range)
-                epoch_indices = np.arange(0, n_obs)
+                batch_starts_ends[organism] = [batch_starts_ends[organism][i] for i in batch_range]
+                obs_idx = idx_dict[organism]
                 if random_access:
-                    np.random.shuffle(epoch_indices)
-                for i in batch_range:
-                    s, e = batch_starts_ends[i]
-                    # Feature indexing: Run in same operation as observation index so that feature chunking can be
-                    # efficiently used if available. TODO does this make a difference in dask?
-                    if random_access:
-                        x_i = x[epoch_indices[s:e], :]
-                        if var_idx is not None:
-                            x_i = x_i[:, var_idx]
-                    else:
-                        # Use slicing because observations accessed in batch are ordered in data set:
-                        # Note that epoch_indices[i] == i if not random_access.
-                        x_i = x[s:e, :]
-                        if var_idx is not None:
-                            x_i = x_i[:, var_idx]
-                    # Exploit fact that index of obs is just increasing list of integers, so we can use the .loc[]
-                    # indexing instead of .iloc[]:
-                    obs_i = obs.loc[epoch_indices[s:e], :]
-                    yield x_i, obs_i
+                    np.random.shuffle(obs_idx)
+                idx_dict_proc[organism] = obs_idx
+            yield idx_dict_proc, batch_starts_ends
 
-        return generator
+        return self._generator(idx_dict_gen=idx_dict_gen(), var_idx_dict=var_idx_dict, obs_keys=obs_keys)
+
+    def generator_balanced(
+            self,
+            idx: Union[np.ndarray, None] = None,
+            balance_obs: Union[str, None] = None,
+            balance_damping: float = 0.,
+            batch_size: int = 1,
+            obs_keys: List[str] = [],
+            **kwargs
+    ) -> iter:
+        """
+        Yields a data set balanced generator.
+
+        Yields one random batch per dataset. Assumes that data sets are annotated in .obs.
+        Uses self.dataset_weights if this are given to sample data sets with different frequencies.
+        Can additionally also balance across one meta data annotation within each data set.
+
+        Assume you have a data set with two classes (A=80, B=20 cells) in a column named "cellontology_class".
+        The single batch for this data set produced by this generator in each epoch contains N cells.
+        If balance_obs is False, these N cells are the result of a draw without replacement from all 100 cells in this
+        dataset in which each cell receives the same weight / success probability of 1.0.
+        If balance_obs is True, these N cells are the result of a draw without replacement from all 100 cells in this
+        data set with individual success probabilities such that classes are balanced: 0.2 for A and 0.8 for B.
+
+        :param idx: Global idx to query from store. These is an array with indicies corresponding to a contiuous index
+            along all observations in self.adata_by_key, ordered along a hypothetical concatenation along the keys of
+            self.adata_by_key.
+        :param balance_obs: .obs column key to balance samples from each data set over.
+            Note that each data set must contain this column in its .obs table.
+        :param balance_damping: Damping to apply to class weighting induced by balance_obs. The class-wise
+            wise sampling probabilities become `max(balance_damping, (1. - frequency))`
+        :param batch_size: Number of observations read from disk in each batched access (generator invocation).
+        :param obs_keys: .obs columns to return in the generator. These have to be a subset of the columns available
+            in self.adata_by_key.
+        :return: Generator function which yields batch_size at every invocation.
+            The generator returns a tuple of (.X, .obs).
+        """
+        idx_dict, var_idx_dict = self._generator_helper(idx=idx)
+        batch_size = _process_batch_size(x=batch_size, idx_dict=idx_dict)
+
+        def idx_dict_gen():
+            batch_starts_ends = {}
+            idx_dict_proc = {}
+            for organism in self.organisms:
+                batch_starts_ends[organism] = []
+                idx_dict_proc[organism] = []
+                val_dataset = self.obs_by_organism[organism][self._adata_ids_sfaira.dataset].values
+                datasets = np.unique(val_dataset)
+                if self.dataset_weights is not None:
+                    weights = np.array([self.dataset_weights[x] for x in datasets])
+                    p = weights / np.sum(weights)
+                    datasets = np.random.choice(a=datasets, replace=True, size=len(datasets), p=p)
+                if balance_obs is not None:
+                    val_meta = self.obs_by_organism[organism][balance_obs].values
+                for x in datasets:
+                    idx_x = np.where(val_dataset == x)[0]
+                    n_obs = len(idx_x)
+                    batch_size_o = int(np.minimum(batch_size, n_obs))
+                    batch_starts_ends[organism].append(np.array([(0, batch_size_o), ]))
+                    if balance_obs is None:
+                        p = np.ones_like(idx_x) / len(idx_x)
+                    else:
+                        if balance_obs not in self.obs_by_organism[organism].columns:
+                            raise ValueError(f"did not find column {balance_obs} in {organism}")
+                        val_meta_x = val_meta[idx_x]
+                        class_freq = dict([(y, np.mean(val_meta_x == y)) for y in np.unique(val_meta_x)])
+                        class_freq_x_by_obs = np.array([class_freq[y] for y in val_meta_x])
+                        damped_freq_coefficient = np.maximum(balance_damping, (1. - class_freq_x_by_obs))
+                        p = np.ones_like(idx_x) / len(idx_x) * damped_freq_coefficient
+                    idx_x_sample = np.random.choice(a=idx_x, replace=False, size=batch_size_o, p=p)
+                    idx_dict_proc[organism].append(idx_x_sample)
+                idx_dict_proc[organism] = np.asarray(idx_dict_proc[organism])
+            yield idx_dict_proc, batch_starts_ends
+
+        return self._generator(idx_dict_gen=idx_dict_gen(), var_idx_dict=var_idx_dict, obs_keys=obs_keys)
 
 
 def load_store(cache_path: Union[str, os.PathLike], store_format: str = "dao",

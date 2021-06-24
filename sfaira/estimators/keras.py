@@ -1161,6 +1161,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             weighted: bool,
             batch_size: int,
             randomized_batch_access: bool,
+            **kwargs,
     ):
         """
         Yield a basic generator based on which a tf dataset can be built.
