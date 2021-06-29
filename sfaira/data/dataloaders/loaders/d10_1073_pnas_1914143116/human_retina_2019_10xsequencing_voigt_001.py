@@ -15,7 +15,7 @@ class Dataset(DatasetBase):
         self.assay_sc = "10x technology"
         self.author = "Voigt"
         self.disease = "healthy"
-        self.doi = "10.1073/pnas.1914143116"
+        self.doi_journal = "10.1073/pnas.1914143116"
         self.normalization = "norm"
         self.organ = "retina"
         self.organism = "human"

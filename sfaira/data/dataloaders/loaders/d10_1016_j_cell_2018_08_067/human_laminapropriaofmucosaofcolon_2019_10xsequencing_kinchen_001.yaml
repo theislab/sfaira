@@ -7,9 +7,9 @@ dataset_wise:
     author:
         - "Kinchen"
     default_embedding:
-    doi:
-        - "10.1016/j.cell.2018.08.067"
-    download_url_data:
+    doi_journal: "10.1016/j.cell.2018.08.067"
+    doi_preprint:
+    download_url_data: 
         HC: "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE114374&format=file&file=GSE114374%5FHuman%5FHC%5Fexpression%5Fmatrix%2Etxt%2Egz"
         UC: "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE114374&format=file&file=GSE114374%5FHuman%5FUC%5Fexpression%5Fmatrix%2Etxt%2Egz"
     download_url_meta:

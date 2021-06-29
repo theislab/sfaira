@@ -15,7 +15,7 @@ class Dataset(DatasetBase):
         self.assay_sc = "CEL-seq2"
         self.author = "Aizarani"
         self.disease = "healthy"
-        self.doi = "10.1038/s41586-019-1373-2"
+        self.doi_journal = "10.1038/s41586-019-1373-2"
         self.normalization = "raw"
         self.sample_source = "primary_tissue"
         self.organ = "liver"

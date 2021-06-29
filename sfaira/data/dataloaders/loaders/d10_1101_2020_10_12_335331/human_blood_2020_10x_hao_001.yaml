@@ -5,7 +5,8 @@ dataset_wise:
     author:
         - "Hao, Yuhan"
     default_embedding:
-    doi: "10.1101/2020.10.12.335331"
+    doi_journal: "10.1016/j.cell.2021.04.048"
+    doi_preprint: "10.1101/2020.10.12.335331"
     download_url_data: "https://atlas.fredhutch.org/nygc/multimodal-pbmc/"
     download_url_meta: "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE164378&format=file&file=GSE164378%5Fsc%2Emeta%2Edata%5F3P%2Ecsv%2Egz"
     normalization: "raw"

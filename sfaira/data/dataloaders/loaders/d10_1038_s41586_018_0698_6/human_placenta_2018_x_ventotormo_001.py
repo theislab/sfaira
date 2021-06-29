@@ -22,7 +22,7 @@ class Dataset(DatasetBase):
         self.assay_sc = "10x technology" if self.sample_fn == "E-MTAB-6678.processed" else "Smart-seq2"
         self.author = "Ventotormo"
         self.disease = "healthy"
-        self.doi = "10.1038/s41586-018-0698-6"
+        self.doi_journal = "10.1038/s41586-018-0698-6"
         self.normalization = "raw"
         self.organ = "placenta"
         self.organism = "human"
