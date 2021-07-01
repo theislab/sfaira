@@ -173,3 +173,6 @@ class DataloaderCreator:
                      no_input=True,
                      overwrite_if_exists=True,
                      extra_context=self._template_attributes_to_dict())
+
+    def create_datadir(self, path_data):
+        os.makedirs(os.path.join(path_data, self.template_attributes.doi_sfaira_repr))

@@ -77,14 +77,20 @@ def sfaira_cli(ctx, verbose, log_file):
               type=click.Path(exists=True),
               help='Relative path from the current directory to the desired location of the dataloader.'
               )
-@click.option('--doi', type=str, default=None)
-def create_dataloader(path_loader, doi) -> None:
+@click.option('--path-data',
+              default="sfaira/unit_tests/template_data/",
+              type=click.Path(exists=True),
+              help='Relative path from the current directory to the datafiles used by this dataloader.'
+              )
+@click.option('--doi', type=str, default=None, help="The doi of the paper you would like to create a dataloader for.")
+def create_dataloader(path_loader, doi, path_data) -> None:
     """
     Interactively create a new sfaira dataloader.
     """
     if doi is None or re.match(r'\b10\.\d+/[\w.]+\b', doi):
         dataloader_creator = DataloaderCreator(path_loader, doi)
         dataloader_creator.create_dataloader()
+        dataloader_creator.create_datadir(path_data)
     else:
         print('[bold red]The supplied DOI is malformed!')  # noqa: W605
 
@@ -95,7 +101,7 @@ def create_dataloader(path_loader, doi) -> None:
               type=click.Path(exists=True),
               help='Relative path from the current directory to the desired location of the dataloader.'
               )
-@click.option('--doi', type=str, default=None)
+@click.option('--doi', type=str, default=None, help="The doi of the paper that the dataloader refers to.")
 def validate_dataloader(path_loader, doi) -> None:
     """
     Verifies the dataloader against sfaira's requirements.
@@ -120,7 +126,7 @@ def validate_dataloader(path_loader, doi) -> None:
               type=click.Path(exists=True),
               help='Relative path from the current directory to the datafiles used by this dataloader.'
               )
-@click.option('--doi', type=str, default=None)
+@click.option('--doi', type=str, default=None, help="The doi of the paper that the dataloader refers to.")
 def annotate_dataloader(path_loader, path_data, doi) -> None:
     """
     Annotates a dataloader.
@@ -147,7 +153,7 @@ def annotate_dataloader(path_loader, path_data, doi) -> None:
               type=click.Path(exists=True),
               help='Relative path from the current directory to the datafiles used by this dataloader.'
               )
-@click.option('--doi', type=str, default=None)
+@click.option('--doi', type=str, default=None, help="The doi of the paper that the dataloader refers to.")
 def test_dataloader(path_loader, path_data, doi) -> None:
     """Runs a dataloader integration test.
 
