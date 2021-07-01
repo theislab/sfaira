@@ -82,7 +82,7 @@ def create_dataloader(path_loader, doi) -> None:
     """
     Interactively create a new sfaira dataloader.
     """
-    if re.match(r'\b10\.\d+/[\w.]+\b', doi) or doi is None:
+    if doi is None or re.match(r'\b10\.\d+/[\w.]+\b', doi):
         dataloader_creator = DataloaderCreator(path_loader, doi)
         dataloader_creator.create_dataloader()
     else:
@@ -102,7 +102,7 @@ def validate_dataloader(path_loader, doi) -> None:
 
     PATH to the dataloader script.
     """
-    if re.match(r'\b10\.\d+/[\w.]+\b', doi) or doi is None:
+    if doi is None or re.match(r'\b10\.\d+/[\w.]+\b', doi):
         dataloader_validator = DataloaderValidator(path_loader, doi)
         dataloader_validator.validate()
     else:
@@ -127,7 +127,7 @@ def annotate_dataloader(path_loader, path_data, doi) -> None:
 
     PATH is the absolute path of the root of your sfaira clone.
     """
-    if re.match(r'\b10\.\d+/[\w.]+\b', doi) or doi is None:
+    if doi is None or re.match(r'\b10\.\d+/[\w.]+\b', doi):
         dataloader_validator = DataloaderValidator(path_loader, doi)
         dataloader_validator.validate()
         dataloader_annotater = DataloaderAnnotater()
@@ -153,7 +153,7 @@ def test_dataloader(path_loader, path_data, doi) -> None:
 
     PATH is the absolute path of the root of your sfaira clone.
     """
-    if re.match(r'\b10\.\d+/[\w.]+\b', doi) or doi is None:
+    if doi is None or re.match(r'\b10\.\d+/[\w.]+\b', doi):
         dataloader_tester = DataloaderTester(path_loader, path_data, doi)
         dataloader_tester.test_dataloader()
     else:
