@@ -1,4 +1,6 @@
 import logging
+import os
+import re
 
 import rich
 import yaml
@@ -7,13 +9,28 @@ from flatten_dict import flatten
 from flatten_dict.reducer import make_reducer
 from rich.progress import Progress, BarColumn
 
+from sfaira.consts.utils import clean_doi
+from sfaira.commands.questionary import sfaira_questionary
+
 log = logging.getLogger(__name__)
 
 
 class DataloaderValidator:
 
-    def __init__(self, path='.'):
-        self.path: str = path
+    def __init__(self, path_loader, doi):
+        if not doi:
+            doi = sfaira_questionary(function='text',
+                                     question='DOI:',
+                                     default='10.1000/j.journal.2021.01.001')
+            while not re.match(r'\b10\.\d+/[\w.]+\b', doi):
+                print('[bold red]The entered DOI is malformed!')  # noqa: W605
+                doi = sfaira_questionary(function='text',
+                                         question='DOI:',
+                                         default='10.1000/j.journal.2021.01.001')
+        doi = clean_doi(doi)
+
+        loader_filename = [i for i in os.listdir(os.path.join(path_loader, doi)) if str(i).endswith(".yaml")][0]
+        self.path_loader: str = os.path.join(path_loader, doi, loader_filename)
         self.content: dict = {}
         self.passed: dict = {}
         self.warned: dict = {}
@@ -27,7 +44,7 @@ class DataloaderValidator:
         Statically verifies a yaml dataloader file against a predefined set of rules.
         Every rule is a function defined in this class, which must be part of this class' linting_functions.
         """
-        with open(self.path) as yaml_file:
+        with open(self.path_loader) as yaml_file:
             self.content = yaml.load(yaml_file, Loader=yaml.FullLoader)
 
         progress = Progress("[bold green]{task.description}", BarColumn(bar_width=None),

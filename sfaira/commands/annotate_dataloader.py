@@ -1,9 +1,13 @@
 import os
 import pydoc
 import shutil
+import re
+from typing import Union
 
 from sfaira.data import DatasetGroupDirectoryOriented, DatasetGroup, DatasetBase
 from sfaira.data.utils import read_yaml
+from sfaira.consts.utils import clean_doi
+from sfaira.commands.questionary import sfaira_questionary
 
 try:
     import sfaira_extension as sfairae
@@ -23,7 +27,7 @@ class DataloaderAnnotater:
         self.dir_loader_sfairae = None
         self.package_source = None
 
-    def annotate(self, path: str, doi: str, test_data: str):
+    def annotate(self, path_loader: str, path_data: str, doi: Union[str, None]):
         """
         Annotates a provided dataloader.
 
@@ -35,9 +39,18 @@ class DataloaderAnnotater:
         (Note that columns are separated by ",")
         You can also manually check maps here: https://www.ebi.ac.uk/ols/ontologies/cl
         """
-        doi_sfaira_repr = f'd{doi.translate({ord(c): "_" for c in r"!@#$%^&*()[]/{};:,.<>?|`~-=_+"})}'
+        if not doi:
+            doi = sfaira_questionary(function='text',
+                                     question='DOI:',
+                                     default='10.1000/j.journal.2021.01.001')
+            while not re.match(r'\b10\.\d+/[\w.]+\b', doi):
+                print('[bold red]The entered DOI is malformed!')  # noqa: W605
+                doi = sfaira_questionary(function='text',
+                                         question='DOI:',
+                                         default='10.1000/j.journal.2021.01.001')
+        doi_sfaira_repr = clean_doi(doi)
         self._setup_loader(doi_sfaira_repr)
-        self._annotate(test_data, path, doi, doi_sfaira_repr)
+        self._annotate(path_data, path_loader, doi, doi_sfaira_repr)
 
     def _setup_loader(self, doi_sfaira_repr: str):
         """
