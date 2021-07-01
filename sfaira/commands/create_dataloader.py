@@ -131,7 +131,7 @@ class DataloaderCreator:
                                                                     default='raw')
         self.template_attributes.disease = sfaira_questionary(function='text',
                                                               question='Disease:',
-                                                              default='NA')
+                                                              default='healthy')
         self.template_attributes.state_exact = sfaira_questionary(function='text',
                                                                   question='Sample state:',
                                                                   default='healthy')
