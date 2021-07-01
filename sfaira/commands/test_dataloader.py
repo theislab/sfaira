@@ -88,7 +88,7 @@ class DataloaderTester:
             allow_caching=True
         )
         # Try loading from cache:
-        ds = self._get_ds()
+        ds, cache_path = self._get_ds()
         # TODO try-except with good error description saying that the data loader is broken here:
         ds.load(
             remove_gene_version=True,
