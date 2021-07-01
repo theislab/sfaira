@@ -83,7 +83,7 @@ class DataloaderAnnotater:
         self.meta_path = meta_path
         self.cache_path = cache_path
         self.dir_loader = dir_loader
-        self.dir_loader_sfairae = dir_loader_sfairae
+        self.dir_loader_sfairae = None if sfairae is None else dir_loader_sfairae
         self.package_source = package_source
 
     def _get_ds(self, test_data: str):
