@@ -79,7 +79,7 @@ def sfaira_cli(ctx, verbose, log_file):
               )
 @click.option('--path-data',
               default="sfaira/unit_tests/template_data/",
-              type=click.Path(exists=True),
+              type=click.Path(exists=False),
               help='Relative path from the current directory to the datafiles used by this dataloader.'
               )
 @click.option('--doi', type=str, default=None, help="The doi of the paper you would like to create a dataloader for.")
