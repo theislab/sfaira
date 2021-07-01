@@ -136,7 +136,6 @@ def annotate_dataloader(path_loader, path_data, doi) -> None:
         print('[bold red]The supplied DOI is malformed!')  # noqa: W605
 
 
-
 @sfaira_cli.command()
 @click.option('--path-loader',
               default="sfaira/data/dataloaders/loaders/",
