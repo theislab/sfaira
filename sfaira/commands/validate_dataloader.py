@@ -27,10 +27,10 @@ class DataloaderValidator:
                 doi = sfaira_questionary(function='text',
                                          question='DOI:',
                                          default='10.1000/j.journal.2021.01.001')
-        doi = clean_doi(doi)
+        self.doi = doi
 
-        loader_filename = [i for i in os.listdir(os.path.join(path_loader, doi)) if str(i).endswith(".yaml")][0]
-        self.path_loader: str = os.path.join(path_loader, doi, loader_filename)
+        loader_filename = [i for i in os.listdir(os.path.join(path_loader, clean_doi(doi))) if str(i).endswith(".yaml")][0]
+        self.path_loader: str = os.path.join(path_loader, clean_doi(doi), loader_filename)
         self.content: dict = {}
         self.passed: dict = {}
         self.warned: dict = {}

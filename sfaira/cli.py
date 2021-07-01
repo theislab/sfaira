@@ -137,7 +137,7 @@ def annotate_dataloader(path_loader, path_data, doi) -> None:
         dataloader_validator = DataloaderValidator(path_loader, doi)
         dataloader_validator.validate()
         dataloader_annotater = DataloaderAnnotater()
-        dataloader_annotater.annotate(path_loader, path_data, doi)
+        dataloader_annotater.annotate(path_loader, path_data, dataloader_validator.doi)
     else:
         print('[bold red]The supplied DOI is malformed!')  # noqa: W605
 
