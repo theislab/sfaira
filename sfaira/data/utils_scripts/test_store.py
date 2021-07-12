@@ -226,7 +226,7 @@ for i, x in enumerate([
             pd.DataFrame({
                 "log10 time / s": np.log(time_measurements_initiate[m]) / np.log(10),
                 "store": m,
-                "draw": range(len(time_measurements[m])),
+                "draw": range(len(time_measurements_initiate[m])),
             })
             for m in time_measurements_initiate.keys()
         ], axis=0)

@@ -256,6 +256,8 @@ class DistributedStoreBase(abc.ABC):
         if isinstance(x, GenomeContainer):
             # Transform into dictionary first.
             organisms = self.organisms
+            if isinstance(organisms, list) and len(organisms) == 0:
+                raise Warning("found empty organism lists in genome_container.setter")
             if len(organisms) > 1:
                 raise ValueError(f"Gave a single GenomeContainer for a store instance that has mulitiple organism: "
                                  f"{organisms}, either further subset the store or give a dictionary of "
