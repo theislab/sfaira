@@ -12,7 +12,7 @@ from typing import List
 print("sys.argv", sys.argv)
 
 REPS = 5
-BATCH_SIZES = [1, 8, 64, 512]
+BATCH_SIZES = [1, 8]
 
 path_store_h5ad = str(sys.argv[1])
 path_store_dao = str(sys.argv[2])
@@ -117,6 +117,7 @@ for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, comp
     idx_dataset_end = [i + len(store.indices[x]) for i, x in zip(idx_dataset_start, k_datasets)]
     for bs in BATCH_SIZES:
         key_bs = "bs" + str(bs)
+        print(key_bs)
 
         # Measure load_sequential_from_one_dataset time.
         scenario = "load_sequential_from_one_dataset"
