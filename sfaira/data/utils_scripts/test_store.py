@@ -244,6 +244,7 @@ for i, x in enumerate([
                         "scenario": " ".join(m.split("_")[4:]),
                         "store": n,
                         "batch size": o,
+                        "scenario - batch size": " ".join(m.split("_")[4:]) + str(o),
                         "draw": range(len(time_measurements[m][n][o])),
                     })
                     for o in time_measurements[m][n].keys()
@@ -255,7 +256,7 @@ for i, x in enumerate([
         # Could collapse draws to mean and put batch size on x.
         sb.lineplot(
             data=df_sb,
-            x="draw", y="log10 time sec", hue="scenario", style="store", units="batch size",
+            x="draw", y="log10 time sec", hue="scenario - batch size", style="store",
             ax=axs[i // ncols, i % ncols]
         )
 plt.tight_layout()
