@@ -11,7 +11,7 @@ from typing import List
 # Set global variables.
 print("sys.argv", sys.argv)
 
-REPS = 5
+REPS = 2
 BATCH_SIZES = [1, 8]
 
 path_store_h5ad = str(sys.argv[1])
@@ -224,15 +224,15 @@ for i, x in enumerate([
     if i == 0:
         df_sb = pd.concat([
             pd.DataFrame({
-                "log10 time / s": np.log(time_measurements_initiate[m]) / np.log(10),
+                "log10 time sec": np.log(time_measurements_initiate[m]) / np.log(10),
                 "store": m,
                 "draw": range(len(time_measurements_initiate[m])),
             })
             for m in time_measurements_initiate.keys()
         ], axis=0)
         sb.lineplot(
-            df_sb,
-            x="draw", y="log10 time / s", style="store",
+            data=df_sb,
+            x="draw", y="log10 time sec", style="store",
             ax=axs[i // ncols, i % ncols]
         )
     elif len(x) > 0:
@@ -240,7 +240,7 @@ for i, x in enumerate([
             pd.concat([
                 pd.concat([
                     pd.DataFrame({
-                        "log10 time / s": np.log(time_measurements[m][n][o]) / np.log(10),
+                        "log10 time sec": np.log(time_measurements[m][n][o]) / np.log(10),
                         "scenario": " ".join(m.split("_")[4:]),
                         "store": n,
                         "batch size": o,
@@ -254,8 +254,8 @@ for i, x in enumerate([
         ], axis=0)
         # Could collapse draws to mean and put batch size on x.
         sb.lineplot(
-            df_sb,
-            x="draw", y="log10 time / s", hue="scenario", style="store", units="batch size",
+            data=df_sb,
+            x="draw", y="log10 time sec", hue="scenario", style="store", units="batch size",
             ax=axs[i // ncols, i % ncols]
         )
 plt.tight_layout()
