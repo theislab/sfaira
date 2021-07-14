@@ -65,7 +65,33 @@ TOPOLOGY_CELLTYPE_MODEL = {
 }
 
 
-class HelperEstimatorBase:
+class TestHelperEstimatorBase:
+
+    data: Union[anndata.AnnData, DistributedStoreBase]
+    tc: TopologyContainer
+
+    """
+    TODO for everybody working on this, add one _test* function in here and add it into
+    basic_estimator_test(). See _test_call() for an example.
+    """
+
+    def load_adata(self):
+        """
+        Sets attribute .data with simulated data.
+        """
+        self.data = simulate_anndata(n_obs=100, assays=ASSAYS, genes=self.tc.gc.ensembl, targets=TARGETS)
+
+    def load_store(self, organism=None, organ=None):
+        store_path = prepare_store(store_format="dao")
+        store = load_store(cache_path=store_path, store_format="dao")
+        if organism is not None:
+            store.subset(attr_key="organism", values=organism)
+        if organ is not None:
+            store.subset(attr_key="organ", values=organ)
+        self.data = store
+
+
+class TestHelperEstimatorKeras(TestHelperEstimatorBase):
 
     data: Union[anndata.AnnData, DistributedStoreBase]
     estimator: Union[EstimatorKeras]
@@ -78,27 +104,6 @@ class HelperEstimatorBase:
     TODO for everybody working on this, add one _test* function in here and add it into
     basic_estimator_test(). See _test_call() for an example.
     """
-
-    def _simulate(self) -> anndata.AnnData:
-        """
-        Simulate basic data example used for unit test.
-
-        :return: Simulated data set.
-        """
-        return simulate_anndata(n_obs=100, assays=ASSAYS, genes=self.tc.gc.ensembl, targets=TARGETS)
-
-    def load_adata(self):
-        """
-        Sets attribute .data with simulated data.
-        """
-        self.data = self._simulate()
-
-    def load_store(self, organism, organ):
-        store_path = prepare_store(store_format="dao")
-        store = load_store(cache_path=store_path, store_format="dao")
-        store.subset(attr_key="organism", values=organism)
-        store.subset(attr_key="organ", values=organ)
-        self.data = store
 
     @abc.abstractmethod
     def init_topology(self, model_type: str, feature_space: str, organism: str):
@@ -130,13 +135,13 @@ class HelperEstimatorBase:
     def basic_estimator_test(self, test_split):
         pass
 
-    def load_estimator(self, model_type, data_type, feature_space, test_split, organism="mouse", organ="lung"):
+    def load_estimator(self, model_type, data_type, feature_space, test_split, organism="mouse"):
         self.init_topology(model_type=model_type, feature_space=feature_space, organism=organism)
         np.random.seed(1)
         if data_type == "adata":
             self.load_adata()
         else:
-            self.load_store(organism=organism, organ=organ)
+            self.load_store(organism=organism)
         self.init_estimator(test_split=test_split)
 
     def fatal_estimator_test(self, model_type, data_type, test_split=0.1, feature_space="small"):
@@ -146,7 +151,7 @@ class HelperEstimatorBase:
         self.basic_estimator_test(test_split=test_split)
 
 
-class HelperEstimatorKerasEmbedding(HelperEstimatorBase):
+class HelperEstimatorKerasEmbedding(TestHelperEstimatorKeras):
 
     estimator: EstimatorKerasEmbedding
     model_type: str
@@ -200,7 +205,7 @@ class HelperEstimatorKerasEmbedding(HelperEstimatorBase):
                 assert np.allclose(prediction_embed, new_prediction_embed, rtol=1e-6, atol=1e-6)
 
 
-class HelperEstimatorKerasCelltype(HelperEstimatorBase):
+class TestHelperEstimatorKerasCelltype(TestHelperEstimatorBase):
 
     estimator: EstimatorKerasCelltype
     model_type: str
@@ -259,7 +264,7 @@ class HelperEstimatorKerasCelltype(HelperEstimatorBase):
             assert np.allclose(prediction_output, new_prediction_output, rtol=1e-6, atol=1e-6)
 
 
-class HelperEstimatorKerasCelltypeCustomObo(HelperEstimatorKerasCelltype):
+class HelperEstimatorKerasCelltypeCustomObo(TestHelperEstimatorKerasCelltype):
 
     def init_obo_custom(self) -> OntologyOboCustom:
         return OntologyOboCustom(obo=os.path.join(os.path.dirname(__file__), "custom.obo"))
@@ -310,13 +315,13 @@ def test_for_fatal_linear(data_type):
     test_estim.fatal_estimator_test(model_type="linear", data_type=data_type)
 
 
-@pytest.mark.parametrize("data_type", ["adata"])
+@pytest.mark.parametrize("data_type", ["store"])
 def test_for_fatal_ae(data_type):
     test_estim = HelperEstimatorKerasEmbedding()
     test_estim.fatal_estimator_test(model_type="ae", data_type=data_type)
 
 
-@pytest.mark.parametrize("data_type", ["adata"])
+@pytest.mark.parametrize("data_type", ["store"])
 def test_for_fatal_vae(data_type):
     test_estim = HelperEstimatorKerasEmbedding()
     test_estim.fatal_estimator_test(model_type="vae", data_type=data_type)
@@ -327,13 +332,13 @@ def test_for_fatal_vae(data_type):
 
 @pytest.mark.parametrize("data_type", ["adata", "store"])
 def test_for_fatal_mlp(data_type):
-    test_estim = HelperEstimatorKerasCelltype()
+    test_estim = TestHelperEstimatorKerasCelltype()
     test_estim.fatal_estimator_test(model_type="mlp", data_type=data_type)
 
 
-@pytest.mark.parametrize("data_type", ["adata"])
+@pytest.mark.parametrize("data_type", ["store"])
 def test_for_fatal_marker(data_type):
-    test_estim = HelperEstimatorKerasCelltype()
+    test_estim = TestHelperEstimatorKerasCelltype()
     test_estim.fatal_estimator_test(model_type="marker", data_type=data_type)
 
 
@@ -345,10 +350,9 @@ def test_for_fatal_mlp_custom():
 
 
 @pytest.mark.parametrize("organism", ["human"])
-@pytest.mark.parametrize("organ", ["lung"])
 @pytest.mark.parametrize("batch_size", [1024, 2048, 4096])
 @pytest.mark.parametrize("randomized_batch_access", [False, True])
-def test_dataset_size(organism: str, organ: str, batch_size: int, randomized_batch_access: bool):
+def test_dataset_size(organism: str, batch_size: int, randomized_batch_access: bool):
     """
     Test that tf data set from estimator has same size as generator invoked directly from store based on number of
     observations in emitted batches.
@@ -361,7 +365,7 @@ def test_dataset_size(organism: str, organ: str, batch_size: int, randomized_bat
     # Need full feature space here because observations are not necessarily different in small model testing feature
     # space with only two genes:
     test_estim.load_estimator(model_type="linear", data_type="store", feature_space="reduced", test_split=0.2,
-                              organism=organism, organ=organ)
+                              organism=organism)
     idx_train = test_estim.estimator.idx_train
     shuffle_buffer_size = None if randomized_batch_access else 2
     ds_train = test_estim.estimator._get_dataset(idx=idx_train, batch_size=batch_size, mode='eval',
@@ -383,11 +387,10 @@ def test_dataset_size(organism: str, organ: str, batch_size: int, randomized_bat
 
 
 @pytest.mark.parametrize("organism", ["mouse"])
-@pytest.mark.parametrize("organ", ["lung"])
 @pytest.mark.parametrize("data_type", ["adata", "store"])
 @pytest.mark.parametrize("randomized_batch_access", [False, True])
 @pytest.mark.parametrize("test_split", [0.3, {"assay_sc": "10x sequencing"}])
-def test_split_index_sets(organism: str, organ: str, data_type: str, randomized_batch_access: bool, test_split):
+def test_split_index_sets(organism: str, data_type: str, randomized_batch_access: bool, test_split):
     """
     Test that train, val, test split index sets are correct:
 
@@ -400,7 +403,7 @@ def test_split_index_sets(organism: str, organ: str, data_type: str, randomized_
     # Need full feature space here because observations are not necessarily different in small model testing feature
     # space with only two genes:
     test_estim.load_estimator(model_type="linear", data_type=data_type, test_split=test_split, feature_space="full",
-                              organism=organism, organ=organ)
+                              organism=organism)
     idx_train = test_estim.estimator.idx_train
     idx_eval = test_estim.estimator.idx_eval
     idx_test = test_estim.estimator.idx_test

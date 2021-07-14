@@ -618,7 +618,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                     for i in range(x_sample.shape[0]):
                         yield generator_helper(x_sample=x_sample[i])
 
-            n_features = self.data.n_vars
+            n_features = self.data.n_vars_int
             n_samples = self.data.n_obs
         else:
             x = self.data.X if self.data.isbacked else self._prepare_data_matrix(idx=idx)

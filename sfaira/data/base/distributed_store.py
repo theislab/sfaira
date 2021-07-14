@@ -444,6 +444,21 @@ class DistributedStoreBase(abc.ABC):
             return dict([(k, v.n_var) for k, v in self.genome_container.items()])
 
     @property
+    def n_vars_int(self) -> int:
+        """
+        Number of selected features of seleccted organism in store
+
+        Return integer if single organism is selected an aborts with error otherwise.
+        """
+        n_vars = self.n_vars
+        if len(n_vars.keys()) > 1:
+            raise ValueError(f"Found more than one feature space in store ({n_vars.keys()}), "
+                             f"sub-select further ot use .n_vars")
+        else:
+            n_vars = list(n_vars.values())[0]
+        return n_vars
+
+    @property
     def n_obs(self) -> int:
         """
         Number of observations selected in store.
