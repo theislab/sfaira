@@ -11,8 +11,8 @@ from typing import List
 # Set global variables.
 print("sys.argv", sys.argv)
 
-REPS = 2
-BATCH_SIZES = [1, 8]
+REPS = 10
+BATCH_SIZES = [1, 512]
 
 path_store_h5ad = str(sys.argv[1])
 path_store_dao = str(sys.argv[2])
@@ -230,11 +230,12 @@ for i, x in enumerate([
             })
             for m in time_measurements_initiate.keys()
         ], axis=0)
-        sb.lineplot(
+        sb.boxplot(
             data=df_sb,
-            x="draw", y="log10 time sec", style="store",
+            x="store", y="log10 time sec",
             ax=axs[i // ncols, i % ncols]
         )
+        axs[i // ncols, i % ncols].set_title("initialisation")
     elif len(x) > 0:
         df_sb = pd.concat([
             pd.concat([
@@ -259,5 +260,6 @@ for i, x in enumerate([
             x="draw", y="log10 time sec", hue="scenario - batch size", style="store",
             ax=axs[i // ncols, i % ncols]
         )
+        axs[i // ncols, i % ncols].set_title(x[0])
 plt.tight_layout()
 plt.savefig(os.path.join(path_out, "data_store_benchmark.pdf"))
