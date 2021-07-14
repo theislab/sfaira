@@ -7,11 +7,13 @@ import pytest
 import time
 from typing import Union
 
-from sfaira.data import load_store, DistributedStoreBase
+from sfaira.data import DistributedStoreBase, load_store
 from sfaira.estimators import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
 from sfaira.versions.genomes.genomes import CustomFeatureContainer
 from sfaira.versions.metadata import OntologyOboCustom
 from sfaira.versions.topologies import TopologyContainer
+
+from sfaira.unit_tests.mock_data.utils import prepare_store, simulate_anndata
 
 dir_data = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_data")
 dir_meta = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_data", "meta")
@@ -92,9 +94,8 @@ class HelperEstimatorBase:
         self.data = self._simulate()
 
     def load_store(self, organism, organ):
-        store_path = cached_store_writing(dir_data=dir_data, dir_meta=dir_meta, assembly=ASSEMBLY[organism],
-                                          organism=organism, organ=organ)
-        store = load_store(cache_path=store_path)
+        store_path = prepare_store(store_format="dao")
+        store = load_store(cache_path=store_path, store_format="dao")
         store.subset(attr_key="organism", values=organism)
         store.subset(attr_key="organ", values=organ)
         self.data = store
