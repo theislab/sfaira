@@ -20,6 +20,7 @@ class ModelZoo:
     zoo: Union[dict, None]
 
     TOPOLOGIES = TOPOLOGIES
+    TOPOLOGY_CONTAINER_CLASS = TopologyContainer
 
     def __init__(
             self,
@@ -151,7 +152,7 @@ class ModelZoo:
             f"{x} not found in available_model_ids, please check available models using ModelZoo.available_model_ids"
         assert len(x.split('_')) == 3, f'model_id {x} is invalid'
         self._model_id = x
-        self.topology_container = TopologyContainer(
+        self.topology_container = self.TOPOLOGY_CONTAINER_CLASS(
             topology=self.TOPOLOGIES[self.model_organism][self.model_class][self.model_type][self.model_topology],
             topology_id=self.model_version
         )
