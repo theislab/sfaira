@@ -12,8 +12,8 @@ dataset_wise:
     normalization: "{{ cookiecutter.normalization }}"
     year: "{{ cookiecutter.year }}"
 dataset_or_observation_wise:
-    assay: "{{ cookiecutter.assay }}"
-    assay_obs_key:
+    assay_sc: "{{ cookiecutter.assay }}"
+    assay_sc_obs_key:
     bio_sample:
     bio_sample_obs_key:
     development_stage:

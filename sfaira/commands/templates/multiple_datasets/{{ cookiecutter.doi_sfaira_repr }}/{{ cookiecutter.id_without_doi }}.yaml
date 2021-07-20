@@ -15,9 +15,9 @@ dataset_structure:
     normalization: "{{ cookiecutter.normalization }}"
     year: "{{ cookiecutter.year }}"
 dataset_or_observation_wise:
-    assay:
+    assay_sc:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}: "{{ cookiecutter.assay }}"
-{% endfor %}    assay_obs_key:
+{% endfor %}    assay_sc_obs_key:
     bio_sample:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
 {% endfor %}    bio_sample_obs_key:

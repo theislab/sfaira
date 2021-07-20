@@ -27,7 +27,7 @@ class TemplateAttributes:
     download_url_meta: str = ''  # download website(s) of meta data files
     organ: str = ''  # (*) organ (anatomical structure)
     organism: str = ''  # (*) species / organism
-    assay: str = ''  # (*, optional) protocol used to sample data (e.g. smart-seq2)
+    assay_sc: str = ''  # (*, optional) protocol used to sample data (e.g. smart-seq2)
     normalization: str = ''  # raw or the used normalization technique
     default_embedding: str = ''  # Default embedding of the data
     primary_data: str = ''  # Is this a primary dataset?
@@ -118,9 +118,9 @@ class DataloaderCreator:
         self.template_attributes.organ = sfaira_questionary(function='text',
                                                             question='Organ:',
                                                             default='NA')
-        self.template_attributes.assay = sfaira_questionary(function='text',
-                                                            question='Assay:',
-                                                            default='NA')
+        self.template_attributes.assay_sc = sfaira_questionary(function='text',
+                                                               question='Assay:',
+                                                               default='NA')
         self.template_attributes.normalization = sfaira_questionary(function='text',
                                                                     question='Normalization:',
                                                                     default='raw')
@@ -143,7 +143,7 @@ class DataloaderCreator:
             print('[bold yellow] First author was not in the expected format. Using full first author for the id.')
             first_author_lastname = first_author
         self.template_attributes.id_without_doi = f'{self.template_attributes.organism}_{self.template_attributes.organ}_' \
-                                                  f'{self.template_attributes.year}_{self.template_attributes.assay}_' \
+                                                  f'{self.template_attributes.year}_{self.template_attributes.assay_sc}_' \
                                                   f'{first_author_lastname}_001'
         self.template_attributes.id = self.template_attributes.id_without_doi + f'_{self.template_attributes.doi_sfaira_repr}'
         if self.template_attributes.dataloader_type == 'single_dataset':
