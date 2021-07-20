@@ -62,7 +62,7 @@ dataset_or_observation_wise:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
 {% endfor %}    tech_sample_obs_key:
 observation_wise:
-    cell_types_original_obs_key:
+    cell_types_original_obs_key: "{{ cookiecutter.cell_types_original_obs_key }}"
 feature_wise:
     gene_id_ensembl_var_key:
     gene_id_symbols_var_key:

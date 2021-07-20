@@ -38,6 +38,8 @@ class TemplateAttributes:
     year: str = 2021  # year in which sample was acquired
     number_of_datasets: str = 1  # Required to determine the file names
 
+    cell_types_original_obs_key: str = ''  # Original cell type key in obs
+
 
 class DataloaderCreator:
 
@@ -153,6 +155,13 @@ class DataloaderCreator:
             self.template_attributes.download_url_meta = sfaira_questionary(function='text',
                                                                             question='URL to download the meta data',
                                                                             default='https://ftp.ncbi.nlm.nih.gov/geo/')
+        is_cell_type_annotation = sfaira_questionary(function='confirm',
+                                                     question='Does your dataset have a cell type annotation?',
+                                                     default='No')
+        if is_cell_type_annotation:
+            self.template_attributes.cell_types_original_obs_key = sfaira_questionary(function='text',
+                                                                                      question='Cell type annotation obs key:',
+                                                                                      default='')
         self.template_attributes.create_extra_description = sfaira_questionary(function='confirm',
                                                                                question='Do you want to add additional custom metadata?',
                                                                                default='Yes')
