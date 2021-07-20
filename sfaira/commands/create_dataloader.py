@@ -135,6 +135,13 @@ class DataloaderCreator:
         self.template_attributes.sample_source = sfaira_questionary(function='text',
                                                                     question='Sample source:',
                                                                     default='NA')
+        is_cell_type_annotation = sfaira_questionary(function='confirm',
+                                                     question='Does your dataset have a cell type annotation?',
+                                                     default='No')
+        if is_cell_type_annotation:
+            self.template_attributes.cell_types_original_obs_key = sfaira_questionary(function='text',
+                                                                                      question='Cell type annotation obs key:',
+                                                                                      default='')
         self.template_attributes.year = sfaira_questionary(function='text',
                                                            question='Year:',
                                                            default='2021')
@@ -155,16 +162,14 @@ class DataloaderCreator:
             self.template_attributes.download_url_meta = sfaira_questionary(function='text',
                                                                             question='URL to download the meta data',
                                                                             default='https://ftp.ncbi.nlm.nih.gov/geo/')
-        is_cell_type_annotation = sfaira_questionary(function='confirm',
-                                                     question='Does your dataset have a cell type annotation?',
-                                                     default='No')
-        if is_cell_type_annotation:
-            self.template_attributes.cell_types_original_obs_key = sfaira_questionary(function='text',
-                                                                                      question='Cell type annotation obs key:',
-                                                                                      default='')
         self.template_attributes.create_extra_description = sfaira_questionary(function='confirm',
                                                                                question='Do you want to add additional custom metadata?',
                                                                                default='Yes')
+        if is_cell_type_annotation:
+            print('[bold blue]You will have to run \'sfaira annotate-dataloader\' after the template has been created and filled.')
+        else:
+            print('[bold blue]You can skip \'sfaira annotate-dataloader\'.')
+
 
     def _template_attributes_to_dict(self) -> dict:
         """
