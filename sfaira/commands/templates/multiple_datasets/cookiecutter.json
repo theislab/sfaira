@@ -16,6 +16,7 @@
     "assay": "",
     "year": "",
     "individual": "",
+    "sample_source": "",
     "state_exact": "",
     "primary_data": "",
     "default_embedding": "",

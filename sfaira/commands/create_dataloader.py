@@ -33,6 +33,7 @@ class TemplateAttributes:
     primary_data: str = ''  # Is this a primary dataset?
     disease: str = ''  # name of the disease of the condition
     ethnicity: str = ''  # ethnicity of the sample
+    sample_source: str = ''  # source of the sample
     state_exact: str = ''  # state of the sample
     year: str = 2021  # year in which sample was acquired
     number_of_datasets: str = 1  # Required to determine the file names
@@ -129,6 +130,9 @@ class DataloaderCreator:
         self.template_attributes.state_exact = sfaira_questionary(function='text',
                                                                   question='Sample state:',
                                                                   default='healthy')
+        self.template_attributes.sample_source = sfaira_questionary(function='text',
+                                                                    question='Sample source:',
+                                                                    default='NA')
         self.template_attributes.year = sfaira_questionary(function='text',
                                                            question='Year:',
                                                            default='2021')

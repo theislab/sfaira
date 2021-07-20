@@ -39,6 +39,9 @@ dataset_or_observation_wise:
     organism:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}: "{{ cookiecutter.organism }}"
 {% endfor %}    organism_obs_key:
+    sample_source:
+{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}: "{{ cookiecutter.sample_source }}"
+{% endfor %}    sample_source_obs_key:
     sex:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
 {% endfor %}    sex_obs_key:

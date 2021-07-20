@@ -9,7 +9,6 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        python: [3.7, 3.8]
     env:
       PYTHONIOENCODING: utf-8
 
@@ -20,7 +19,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2.1.4
         with:
-          python-version: ${{ matrix.python }}
+          python-version: 3.8
 
       - name: Upgrade and install pip
         run: python -m pip install --upgrade pip
@@ -31,5 +30,5 @@ jobs:
       - name: Create single_dataset template
         run: |
           cd ..
-          echo -e "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" | sfaira create-dataloader
+          echo -e "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" | sfaira create-dataloader
           rm -rf d10_1000_j_journal_2021_01_001/
