@@ -6,7 +6,8 @@ dataset_structure:
     author: "{{ cookiecutter.author }}"
     default_embedding:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}: "{{ cookiecutter.default_embedding }}"
-{% endfor %}doi: "{{ cookiecutter.doi }}"
+{% endfor %}    doi_preprint:
+    doi_journal: "{{ cookiecutter.doi }}"
     download_url_data:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
 {% endfor %}    download_url_meta:
@@ -18,9 +19,18 @@ dataset_or_observation_wise:
     assay_sc:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}: "{{ cookiecutter.assay_sc }}"
 {% endfor %}    assay_sc_obs_key:
+    assay_differentiation:
+{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
+{% endfor %}    assay_differentiation_obs_key:
+    assay_type_differentiation:
+{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
+{% endfor %}    assay_type_differentiation_obs_key:
     bio_sample:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
 {% endfor %}    bio_sample_obs_key:
+    cell_line:
+{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
+{% endfor %}    cell_line_obs_key:
     development_stage:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
 {% endfor %}    development_stage_obs_key:

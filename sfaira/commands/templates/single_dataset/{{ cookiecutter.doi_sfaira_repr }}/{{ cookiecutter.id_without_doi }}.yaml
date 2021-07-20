@@ -5,7 +5,8 @@ dataset_structure:
 dataset_wise:
     author: "{{ cookiecutter.author }}"
     default_embedding: "{{ cookiecutter.default_embedding }}"
-    doi: "{{ cookiecutter.doi }}"
+    doi_preprint:
+    doi_journal: "{{ cookiecutter.doi }}"
     download_url_data: "{{ cookiecutter.download_url_data }}"
     download_url_meta: "{{ cookiecutter.download_url_meta }}"
     primary_data: {{ cookiecutter.primary_data }}
@@ -14,8 +15,14 @@ dataset_wise:
 dataset_or_observation_wise:
     assay_sc: "{{ cookiecutter.assay_sc }}"
     assay_sc_obs_key:
+    assay_differentiation:
+    assay_differentiation_obs_key:
+    assay_type_differentiation:
+    assay_type_differentiation_obs_key:
     bio_sample:
     bio_sample_obs_key:
+    cell_line:
+    cell_line_obs_key:
     development_stage:
     development_stage_obs_key:
     disease: "{{ cookiecutter.disease }}"
