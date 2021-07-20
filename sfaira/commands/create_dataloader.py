@@ -84,7 +84,7 @@ class DataloaderCreator:
                                  question='DOI:',
                                  default='10.1000/j.journal.2021.01.001')
         while not re.match(r'\b10\.\d+/[\w.]+\b', doi):
-            print('[bold red]The entered DOI is malformed!')  # noqa: W605
+            print('[bold red]The entered DOI is malformed!')
             doi = sfaira_questionary(function='text',
                                      question='DOI:',
                                      default='10.1000/j.journal.2021.01.001')
