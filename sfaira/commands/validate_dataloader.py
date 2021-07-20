@@ -57,7 +57,8 @@ class DataloaderValidator:
                       'dataset_wise:year',
                       'dataset_or_observation_wise:assay',
                       'dataset_or_observation_wise:organ',
-                      'dataset_or_observation_wise:organism']
+                      'dataset_or_observation_wise:organism',
+                      'dataset_or_observation_wise:sample_source']
 
         flattened_dict = flatten(self.content, reducer=make_reducer(delimiter=':'))
         for attribute in attributes:
