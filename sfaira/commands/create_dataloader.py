@@ -170,7 +170,6 @@ class DataloaderCreator:
         else:
             print('[bold blue]You can skip \'sfaira annotate-dataloader\'.')
 
-
     def _template_attributes_to_dict(self) -> dict:
         """
         Create a dict from the our Template Structure dataclass
