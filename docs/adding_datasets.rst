@@ -185,7 +185,8 @@ before it is loaded into memory:
         sample_fns:
     dataset_wise:
         author:
-        doi:
+        doi_preprint:
+        doi_journal:
         download_url_data:
         download_url_meta:
         normalization:
@@ -254,9 +255,8 @@ In summary, a the dataloader for a mouse lung data set could look like this:
         sample_fns:
     dataset_wise:
         author: "me"
-        doi:
-            - "my preprint"
-            - "my peer-reviewed publication"
+        doi_preprint: "my preprint"
+        doi_journal: "my journal"
         download_url_data: "my GEO upload"
         download_url_meta:
         normalization: "raw"
