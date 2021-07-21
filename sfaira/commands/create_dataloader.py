@@ -162,8 +162,8 @@ class DataloaderCreator:
                                                   f'{clean_id_str(self.template_attributes.year)}_' \
                                                   f'{clean_id_str(self.template_attributes.assay_sc)}_' \
                                                   f'{clean_id_str(first_author_lastname)}_001'
-        self.template_attributes.id = self.template_attributes.id_without_doi + \
-                                      f'_{self.template_attributes.doi_sfaira_repr}'
+        self.template_attributes.id = f'{self.template_attributes.id_without_doi}_' \
+                                      f'{self.template_attributes.doi_sfaira_repr}'
         if self.template_attributes.dataloader_type == 'single_dataset':
             self.template_attributes.download_url_data = sfaira_questionary(function='text',
                                                                             question='URL to download the data',
