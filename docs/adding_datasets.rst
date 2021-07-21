@@ -5,7 +5,7 @@ Adding datasets to sfaira is a great way to increase the visibility of your data
 This process requires a couple of steps as outlined in the following sections.
 
 
-.. figure:: https://user-images.githubusercontent.com/21954664/117845386-c6744a00-b280-11eb-9d86-8c47132a3949.png
+.. figure:: https://user-images.githubusercontent.com/21954664/126300611-c5ba18b7-7c88-4bb1-8865-a20587cd5f7b.png
    :alt: sfaira adding datasets
 
    Overview of contributing dataloaders to sfaira. First, ensure that your data is not yet available as a dataloader.
@@ -180,7 +180,8 @@ before it is loaded into memory:
         sample_fns:
     dataset_wise:
         author:
-        doi:
+        doi_preprint:
+        doi_journal:
         download_url_data:
         download_url_meta:
         normalization:
@@ -249,9 +250,8 @@ In summary, a the dataloader for a mouse lung data set could look like this:
         sample_fns:
     dataset_wise:
         author: "me"
-        doi:
-            - "my preprint"
-            - "my peer-reviewed publication"
+        doi_preprint: "my preprint"
+        doi_journal: "my journal"
         download_url_data: "my GEO upload"
         download_url_meta:
         normalization: "raw"
