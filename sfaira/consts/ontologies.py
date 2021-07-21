@@ -1,29 +1,40 @@
+from typing import Dict, Union
+
 from sfaira.versions.metadata import OntologyList, OntologyCl
 from sfaira.versions.metadata import OntologyCellosaurus, OntologyHsapdv, OntologyMondo, \
     OntologyMmusdv, OntologySinglecellLibraryConstruction, OntologyUberon
 
+DEFAULT_CL = "v2021-02-01"
+
 
 class OntologyContainerSfaira:
 
-    _cellontology_class: OntologyCl
+    """
+    The attributes that are relayed via properties, which have a corresponding private attribute "_*", are used to
+    lazily load these ontologies upon usage and redistribute loading time from package initialisation to actual
+    usage of ontology.
+    """
+
+    _assay_sc: Union[None, OntologySinglecellLibraryConstruction]
+    _cell_line: Union[None, OntologyCellosaurus]
+    _cellontology_class: Union[None, OntologyCl]
+    _development_stage: Union[None, Dict[str, Union[OntologyHsapdv, OntologyMmusdv]]]
+    _organ: Union[None, OntologyUberon]
 
     def __init__(self):
         self.annotated = OntologyList(terms=[True, False])
         self.author = None
         self.assay_differentiation = None
-        self.assay_sc = OntologySinglecellLibraryConstruction()
+        self._assay_sc = None
         self.assay_type_differentiation = OntologyList(terms=["guided", "unguided"])
         self.bio_sample = None
-        self.cell_line = OntologyCellosaurus()
-        self.cellontology_class = "v2021-02-01"
+        self._cell_line = None
+        self._cellontology_class = None
         self.cell_types_original = None
         self.collection_id = None
         self.default_embedding = None
-        self.development_stage = {
-            "human": OntologyHsapdv(),
-            "mouse": OntologyMmusdv(),
-        }
-        self.disease = OntologyMondo()
+        self._development_stage = None
+        self._disease = None
         self.doi = None
         self.doi_main = None
         self.doi_journal = None
@@ -35,7 +46,7 @@ class OntologyContainerSfaira:
         self.id = None
         self.individual = None
         self.normalization = None
-        self.organ = OntologyUberon()
+        self._organ = OntologyUberon()
         self.organism = OntologyList(terms=["mouse", "human"])  # TODO introduce NCBItaxon here
         self.primary_data = OntologyList(terms=[True, False])
         self.sample_source = OntologyList(terms=["primary_tissue", "2d_culture", "3d_culture", "tumor"])
@@ -46,9 +57,38 @@ class OntologyContainerSfaira:
         self.year = OntologyList(terms=list(range(2000, 3000)))
 
     @property
+    def assay_sc(self):
+        if self._assay_sc is None:
+            self._assay_sc = OntologySinglecellLibraryConstruction()
+        return self._assay_sc
+
+    @property
+    def cell_line(self):
+        if self._cell_line is None:
+            self._cell_line = OntologyCellosaurus()
+        return self._cell_line
+
+    @property
     def cellontology_class(self):
+        if self._cellontology_class is None:
+            self._cellontology_class = OntologyCl(branch=DEFAULT_CL)
         return self._cellontology_class
 
     @cellontology_class.setter
     def cellontology_class(self, x: str):
         self._cellontology_class = OntologyCl(branch=x)
+
+    @property
+    def development_stage(self):
+        if self._development_stage is None:
+            self._development_stage = {
+                "human": OntologyHsapdv(),
+                "mouse": OntologyMmusdv(),
+            }
+        return self._development_stage
+
+    @property
+    def disease(self):
+        if self._disease is None:
+            self._disease = OntologyMondo()
+        return self._disease
