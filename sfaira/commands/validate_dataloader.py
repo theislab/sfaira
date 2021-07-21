@@ -50,22 +50,35 @@ class DataloaderValidator:
 
         attributes = ['dataset_structure:sample_fns',
                       'dataset_wise:author',
-                      'dataset_wise:doi',
+                      ['dataset_wise:doi_preprint',
+                       'dataset_wise:doi_journal'],
                       'dataset_wise:download_url_data',
                       'dataset_wise:download_url_meta',
                       'dataset_wise:normalization',
                       'dataset_wise:year',
-                      'dataset_or_observation_wise:assay',
+                      'dataset_or_observation_wise:assay_sc',
                       'dataset_or_observation_wise:organ',
-                      'dataset_or_observation_wise:organism']
+                      'dataset_or_observation_wise:organism',
+                      'dataset_or_observation_wise:sample_source',
+                      ['feature_wise:gene_id_ensembl_var_key',
+                       'feature_wise:gene_id_symbol_var_key']]
 
+        # TODO This is some spaghetti which could be more performant with set look ups.
         flattened_dict = flatten(self.content, reducer=make_reducer(delimiter=':'))
         for attribute in attributes:
             try:
                 detected = False
-                for key in flattened_dict.keys():
-                    if key.startswith(attribute):
-                        detected = True
+                for key, val in flattened_dict.items():
+                    # Lists of attributes are handled in the following way:
+                    # One of the two keys must be present and one of them has to have a value
+                    if isinstance(attribute, list):
+                        for sub_attribute in attribute:
+                            if key.startswith(sub_attribute) and val:
+                                detected = True
+                    # Single string that has to have a value
+                    else:
+                        if key.startswith(attribute) and val:
+                            detected = True
                 if not detected:
                     passed_required_attributes = False
                     self.failed['-1'] = f'Missing attribute: {attribute}'
