@@ -12,7 +12,7 @@ from typing import List
 print("sys.argv", sys.argv)
 
 REPS = 10
-BATCH_SIZES = [1, 64]
+BATCH_SIZES = [64]
 
 path_store_h5ad = str(sys.argv[1])
 path_store_dao = str(sys.argv[2])

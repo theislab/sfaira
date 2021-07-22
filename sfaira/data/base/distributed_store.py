@@ -738,10 +738,10 @@ class DistributedStoreDao(DistributedStoreBase):
         Requires feature dimension to be shared.
         """
         assert np.all([isinstance(self._adata_by_key[k].X, dask.array.Array) for k in self.indices.keys()])
-        return dask.array.vstack([
+        return dask.optimize(dask.array.vstack([
             self._adata_by_key[k].X[v, :]
             for k, v in self.indices.items()
-        ])
+        ]))
 
     @property
     def X_by_organism(self) -> Dict[str, dask.array.Array]:
@@ -750,11 +750,11 @@ class DistributedStoreDao(DistributedStoreBase):
         """
         assert np.all([isinstance(self._adata_by_key[k].X, dask.array.Array) for k in self.indices.keys()])
         return dict([
-            (organism, dask.array.vstack([
+            (organism, dask.optimize(dask.array.vstack([
                 self._adata_by_key[k].X[v, :]
                 for k, v in self.indices.items()
                 if self.organisms_by_key[k] == organism
-            ])) for organism in self.organisms
+            ]))) for organism in self.organisms
         ])
 
     @property
