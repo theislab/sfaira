@@ -77,7 +77,7 @@ def prepare_dsg() -> DatasetSuperGroupMock:
     return dsg
 
 
-def prepare_store(store_format: str) -> str:
+def prepare_store(store_format: str, rewrite: bool = False) -> str:
     """
     Prepares mock data store and returns path to store.
     """
@@ -87,16 +87,21 @@ def prepare_store(store_format: str) -> str:
     if not os.path.exists(dir_store_formatted):
         os.mkdir(dir_store_formatted)
     # Only load files that are not already in cache.
-    anticipated_files = np.unique([
-        v.doi_journal for _, v in dsg.datasets.items()
-        if (not os.path.exists(os.path.join(dir_store_formatted, v.doi_cleaned_id + ".h5ad"))
-            and store_format == "h5ad") or
-           (not os.path.exists(os.path.join(dir_store_formatted, v.doi_cleaned_id)) and store_format == "dao")
-    ]).tolist()
+    if rewrite:
+        anticipated_files = np.unique([
+            v.doi_journal for _, v in dsg.datasets.items()
+        ]).tolist()
+    else:
+        anticipated_files = np.unique([
+            v.doi_journal for _, v in dsg.datasets.items()
+            if (not os.path.exists(os.path.join(dir_store_formatted, v.doi_cleaned_id + ".h5ad"))
+                and store_format == "h5ad") or
+               (not os.path.exists(os.path.join(dir_store_formatted, v.doi_cleaned_id)) and store_format == "dao")
+        ]).tolist()
     dsg.subset(key=adata_ids_sfaira.doi_journal, values=anticipated_files)
     match_to_reference = {"human": ASSEMBLY_HUMAN, "mouse": ASSEMBLY_MOUSE}
     for ds in dsg.datasets.values():
-        ds.load(allow_caching=False)
+        ds.load(allow_caching=True)
         ds.streamline_features(remove_gene_version=True, match_to_reference=match_to_reference,
                                subset_genes_to_type="protein_coding")
         ds.streamline_metadata(schema="sfaira", clean_obs=True, clean_var=True, clean_uns=True, clean_obs_names=True)

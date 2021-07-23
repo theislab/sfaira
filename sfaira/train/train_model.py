@@ -93,14 +93,9 @@ class TrainModel:
             self._save_specific(fn=fn)
 
     def n_counts(self, idx):
-        if isinstance(self.estimator.data, anndata.AnnData):
-            return np.asarray(
-                self.estimator.data.X[np.sort(idx), :].sum(axis=1)[np.argsort(idx)]
-            ).flatten()
-        elif isinstance(self.estimator.data, DistributedStoreBase):
-            return self.estimator.data.n_counts(idx=idx)
-        else:
-            assert False
+        return np.asarray(
+            self.estimator.data.X[np.sort(idx), :].sum(axis=1)[np.argsort(idx)]
+        ).flatten()
 
 
 class TrainModelEmbedding(TrainModel):

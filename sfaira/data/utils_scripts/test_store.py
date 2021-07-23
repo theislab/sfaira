@@ -31,6 +31,7 @@ kwargs.append({"dense": True, "chunks": 128})
 compression_kwargs.append({"compressor": "default", "overwrite": True, "order": "C"})
 
 time_measurements_initiate = {}
+memory_measurements_initiate = {}
 time_measurements = {
     "load_sequential_from_one_dataset": {},
     "load_sequential_from_many_datasets": {},
@@ -94,10 +95,12 @@ for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, comp
 
     # Measure initiate time.
     time_measurements_initiate[store_type_i] = []
+    memory_measurements_initiate[store_type_i] = []
     for _ in range(REPS):
         t0 = time.time()
         store = sfaira.data.load_store(cache_path=path_store, store_format=store_type_i)
         time_measurements_initiate[store_type_i].append(time.time() - t0)
+        memory_measurements_initiate[store_type_i].append(np.sum(list(store.adata_memory_footprint.values())))
 
     time_measurements["load_sequential_from_one_dataset"][store_type_i] = {}
     time_measurements["load_sequential_from_many_datasets"][store_type_i] = {}
@@ -197,9 +200,11 @@ ncols = 2
 fig, axs = plt.subplots(nrows=3, ncols=2, figsize=(14, 12))
 for i, x in enumerate([
     [
-        "initiate",
+        "initialisation time",
     ],
-    [],
+    [
+        "initialisation memory",
+    ],
     [
         "load_sequential_from_one_dataset",
         "load_sequential_from_one_dataset_todense",
@@ -221,21 +226,29 @@ for i, x in enumerate([
         "load_random_from_many_datasets_todense_varsubet",
     ],
 ]):
-    if i == 0:
+    if i == 0 or i == 1:
+        if i == 0:
+            measurements_initiate = time_measurements_initiate
+            ylabel = "memory MB"
+            log = False
+        else:
+            measurements_initiate = memory_measurements_initiate
+            ylabel = "log10 time sec"
+            log = True
         df_sb = pd.concat([
             pd.DataFrame({
-                "log10 time sec": np.log(time_measurements_initiate[m]) / np.log(10),
+                ylabel: np.log(measurements_initiate[m]) / np.log(10) if log else measurements_initiate[m],
                 "store": m,
-                "draw": range(len(time_measurements_initiate[m])),
+                "draw": range(len(measurements_initiate[m])),
             })
-            for m in time_measurements_initiate.keys()
+            for m in measurements_initiate.keys()
         ], axis=0)
         sb.boxplot(
             data=df_sb,
-            x="store", y="log10 time sec",
+            x="store", y=ylabel,
             ax=axs[i // ncols, i % ncols]
         )
-        axs[i // ncols, i % ncols].set_title("initialisation")
+        axs[i // ncols, i % ncols].set_title(x)
     elif len(x) > 0:
         df_sb = pd.concat([
             pd.concat([

@@ -1,16 +1,16 @@
 import anndata
 import dask.array
+import h5py
 import numpy as np
 import os
 import pytest
 import scipy.sparse
-import time
 from typing import List
 
 from sfaira.data import load_store
 from sfaira.versions.genomes.genomes import GenomeContainer
 
-from sfaira.unit_tests.mock_data import ASSEMBLY_MOUSE, prepare_dsg, prepare_store
+from sfaira.unit_tests.mock_data import ASSEMBLY_MOUSE,ASSEMBLY_HUMAN, prepare_dsg, prepare_store
 
 
 """
@@ -33,7 +33,6 @@ def test_fatal(store_format: str):
     _ = store.obs
     _ = store.indices
     _ = store.genome_container
-    _ = store.n_counts(idx=[1, 3])
 
 
 @pytest.mark.parametrize("store_format", ["h5ad", "dao"])
@@ -41,19 +40,29 @@ def test_data(store_format: str):
     """
     Test if the data exposed by the store are the same as in the original Dataset instance after streamlining.
     """
-    store_path = prepare_store(store_format=store_format)
+    # Run standard streamlining workflow on dsg and compare to object relayed via store.
+    # Prepare dsg.
+    dsg = prepare_dsg()
+    dsg.load(allow_caching=True)
+    match_to_reference = {"human": ASSEMBLY_HUMAN, "mouse": ASSEMBLY_MOUSE}
+    dsg.streamline_features(remove_gene_version=True, match_to_reference=match_to_reference,
+                            subset_genes_to_type="protein_coding")
+    dsg.streamline_metadata(schema="sfaira", clean_obs=True, clean_var=True, clean_uns=True, clean_obs_names=True)
+    # Prepare store.
+    store_path = prepare_store(store_format=store_format, rewrite=True)
     store = load_store(cache_path=store_path, store_format=store_format)
     store.subset(attr_key="doi_journal", values=["no_doi_mock1"])
     dataset_id = store.adata_by_key[list(store.indices.keys())[0]].uns["id"]
     adata_store = store.adata_by_key[dataset_id]
-    dsg = prepare_dsg()
-    dsg.load(allow_caching=False)
     adata_ds = dsg.datasets[dataset_id].adata
-    # Check .X
+    # Extract .X
     x_store = adata_store.X
     x_ds = adata_ds.X.todense()
     if isinstance(x_store, dask.array.Array):
         x_store = x_store.compute()
+    if isinstance(x_store, h5py.Dataset):
+        # Need to load sparse matrix into memory if it comes from a backed anndata object.
+        x_store = x_store[:, :]
     if isinstance(x_store, anndata._core.sparse_dataset.SparseDataset):
         # Need to load sparse matrix into memory if it comes from a backed anndata object.
         x_store = x_store[:, :]
@@ -65,9 +74,11 @@ def test_data(store_format: str):
     if isinstance(x_ds, scipy.sparse.csr_matrix):
         x_ds = x_ds.todense()
     # Check that non-zero elements are the same:
-    assert np.all(np.where(x_store > 0)[0] == np.where(x_ds > 0)[0])
-    assert np.all(np.where(x_store > 0)[1] == np.where(x_ds > 0)[1])
-    assert np.all(x_store - x_ds == 0.)
+    assert x_store.shape[0] == x_ds.shape[0]
+    assert x_store.shape[1] == x_ds.shape[1]
+    assert np.all(np.where(x_store > 0)[0] == np.where(x_ds > 0)[0]), (np.sum(x_store > 0), np.sum(x_ds > 0))
+    assert np.all(np.where(x_store > 0)[1] == np.where(x_ds > 0)[1]), (np.sum(x_store > 0), np.sum(x_ds > 0))
+    assert np.all(x_store - x_ds == 0.), (np.sum(x_store), np.sum(x_ds))
     assert x_store.dtype == x_ds.dtype
     # Note: Do not run test on sum across entire object if dtype is float32 as this can result in test failures because
     # of float overflows.

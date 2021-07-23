@@ -46,7 +46,7 @@ def access_helper(adata, s, e, j, return_dense, obs_keys) -> tuple:
 def _process_batch_size(x: int, idx_dict: Dict[str, np.ndarray]) -> int:
     if x > np.min([len(v) for v in idx_dict.values()]):
         batch_size_new = np.min([len(v) for v in idx_dict.values()])
-        print(f"WARNING: reduing retieval batch size according to data availability in store "
+        print(f"WARNING: reducing retrieval batch size according to data availability in store "
               f"from {x} to {batch_size_new}")
         x = batch_size_new
     return x
@@ -201,11 +201,12 @@ class DistributedStoreBase(abc.ABC):
     def adata_by_key(self, x: Dict[str, anndata.AnnData]):
         self._adata_by_key = x
 
-    def adata_memory_footprint(self, k):
+    @property
+    def adata_memory_footprint(self) -> Dict[str, float]:
         """
         Memory foot-print of data set k in MB.
         """
-        return sys.getsizeof(self.adata_by_key[k]) / np.power(1024, 2)
+        return dict([(k, sys.getsizeof(v) / np.power(1024, 2)) for k, v in self.adata_by_key.items()])
 
     @property
     def indices(self) -> Dict[str, np.ndarray]:
@@ -501,10 +502,6 @@ class DistributedStoreBase(abc.ABC):
     def obs(self) -> Union[pd.DataFrame]:
         pass
 
-    @abc.abstractmethod
-    def n_counts(self, idx: Union[np.ndarray, list, None] = None) -> np.ndarray:
-        pass
-
 
 class DistributedStoreH5ad(DistributedStoreBase):
 
@@ -554,18 +551,6 @@ class DistributedStoreH5ad(DistributedStoreBase):
             self._adata_by_key[k].obs.iloc[v, :]
             for k, v in self.indices.items()
         ], axis=0, join="inner", ignore_index=False, copy=False)
-
-    def n_counts(self, idx: Union[np.ndarray, list, None] = None) -> np.ndarray:
-        """
-        Compute sum over features for each observation in index.
-
-        :param idx: Index vector over observations in object.
-        :return: Array with sum per observations: (number of observations in index,)
-        """
-        return np.concatenate([
-            np.asarray(v.X.sum(axis=1)).flatten()
-            for v in self.adata_by_key_subset(idx=idx).values()
-        ], axis=0)
 
     def generator(
             self,
@@ -749,12 +734,14 @@ class DistributedStoreDao(DistributedStoreBase):
         One dask array of all cells per organism in store
         """
         assert np.all([isinstance(self._adata_by_key[k].X, dask.array.Array) for k in self.indices.keys()])
+        # Note: dask.optimize turns the stacked array into a tuple of length 1 with that array, so needs to be
+        # subsetted.
         return dict([
             (organism, dask.optimize(dask.array.vstack([
                 self._adata_by_key[k].X[v, :]
                 for k, v in self.indices.items()
                 if self.organisms_by_key[k] == organism
-            ]))) for organism in self.organisms
+            ]))[0]) for organism in self.organisms
         ])
 
     @property
@@ -802,18 +789,6 @@ class DistributedStoreDao(DistributedStoreBase):
         assert np.all([k in self.adata_by_key.keys() for k in x.keys()]), "did not recognize some keys"
         assert np.all([k in x.keys() for k in self.indices.keys()]), "some data sets in index were omitted"
         self._dataset_weights = x
-
-    def n_counts(self, idx: Union[Dict[str, Union[np.ndarray, list]], None] = None) -> Dict[str, np.ndarray]:
-        """
-        Compute sum over features for each observation in index.
-
-        :param idx: Index vector over observations in object.
-        :return: Array with sum per observations per organism: (number of observations in index,)
-        """
-        if idx is not None:
-            return np.sum([np.asarray(x.sum(axis=1)).flatten() for x in self.X.values()])
-        else:
-            return dict([(k, np.asarray(v.sum(axis=1)).flatten()) for k, v in self.X_by_organism.items()])
 
     def _generator(
             self,
