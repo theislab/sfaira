@@ -7,7 +7,6 @@ from sfaira.data import DatasetBase
 
 class Dataset(DatasetBase):
     """
-    ToDo: revisit gamma cell missing in CO
     TODO: move state exact to diesase
     """
 

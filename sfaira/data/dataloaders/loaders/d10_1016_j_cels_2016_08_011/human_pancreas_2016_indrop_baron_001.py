@@ -7,9 +7,6 @@ from sfaira.data import DatasetBase
 
 
 class Dataset(DatasetBase):
-    """
-    ToDo: revisit gamma cell missing in CO
-    """
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -31,25 +28,6 @@ class Dataset(DatasetBase):
         self.cell_types_original_obs_key = "CellType"
 
         self.set_dataset_id(idx=1)
-
-        self.class_maps = {
-            "0": {
-                "t_cell": "T cell",
-                "quiescent_stellate": "Quiescent Stellate cell",
-                "mast": "Mast cell",
-                "delta": "Delta cell",
-                "beta": "Beta cell",
-                "endothelial": "Endothelial cell",
-                "macrophage": "Macrophage",
-                "epsilon": "Epsilon cell",
-                "activated_stellate": "Activated Stellate cell",
-                "acinar": "Acinar cell",
-                "alpha": "Alpha cell",
-                "ductal": "Ductal cell",
-                "schwann": "Schwann cell",
-                "gamma": "Gamma cell",
-            },
-        }
 
 
 def load(data_dir, **kwargs):
