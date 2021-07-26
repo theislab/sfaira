@@ -94,9 +94,9 @@ def prepare_store(store_format: str, rewrite: bool = False) -> str:
     else:
         anticipated_files = np.unique([
             v.doi_journal for _, v in dsg.datasets.items()
-            if ((not os.path.exists(os.path.join(dir_store_formatted, v.doi_cleaned_id + ".h5ad"))
-                 and store_format == "h5ad") or
-                (not os.path.exists(os.path.join(dir_store_formatted, v.doi_cleaned_id)) and store_format == "dao"))
+            if (not os.path.exists(os.path.join(dir_store_formatted, v.doi_cleaned_id + ".h5ad")) and
+                store_format == "h5ad") or
+               (not os.path.exists(os.path.join(dir_store_formatted, v.doi_cleaned_id)) and store_format == "dao")
         ]).tolist()
     dsg.subset(key=adata_ids_sfaira.doi_journal, values=anticipated_files)
     match_to_reference = {"human": ASSEMBLY_HUMAN, "mouse": ASSEMBLY_MOUSE}
