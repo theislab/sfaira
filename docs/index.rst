@@ -40,6 +40,7 @@ Latest additions
    tutorials
    adding_datasets
    consuming_data
+   distributed_data
    models
    ecosystem
    roadmap
