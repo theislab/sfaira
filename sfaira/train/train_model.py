@@ -30,7 +30,7 @@ class TrainModel:
             self.data = data
         elif isinstance(data, Universe):
             self.data = data.adata
-        elif isinstance(data, DistributedStoreMultipleFeatureSpaceBase):
+        elif isinstance(data, DistributedStoreSingleFeatureSpace):
             self.data = data
         else:
             raise ValueError(f"did not recongize data of type {type(data)}")
@@ -42,7 +42,7 @@ class TrainModel:
         Loads backed objects from DistributedStoreBase into single adata object in memory in .data slot.
         :return:
         """
-        if isinstance(self.data, DistributedStoreMultipleFeatureSpaceBase):
+        if isinstance(self.data, DistributedStoreSingleFeatureSpace):
             adata = None
             for k, v in self.data.indices.items():
                 x = self.data.adata_by_key[k][v, :].to_memory()
@@ -105,7 +105,7 @@ class TrainModelEmbedding(TrainModel):
     def __init__(
             self,
             model_path: str,
-            data: Union[str, anndata.AnnData, Universe, DistributedStoreMultipleFeatureSpaceBase],
+            data: Union[str, anndata.AnnData, Universe, DistributedStoreSingleFeatureSpace],
     ):
         super(TrainModelEmbedding, self).__init__(data=data)
         self.estimator = None
@@ -168,7 +168,7 @@ class TrainModelCelltype(TrainModel):
     def __init__(
             self,
             model_path: str,
-            data: Union[str, anndata.AnnData, Universe, DistributedStoreMultipleFeatureSpaceBase],
+            data: Union[str, anndata.AnnData, Universe, DistributedStoreSingleFeatureSpace],
             fn_target_universe: str,
     ):
         super(TrainModelCelltype, self).__init__(data=data)

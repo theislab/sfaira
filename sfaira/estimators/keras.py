@@ -13,7 +13,7 @@ import warnings
 from tqdm import tqdm
 
 from sfaira.consts import AdataIdsSfaira, OCS, AdataIds
-from sfaira.data import DistributedStoreMultipleFeatureSpaceBase
+from sfaira.data.store.single_store import DistributedStoreSingleFeatureSpace
 from sfaira.models import BasicModelKeras
 from sfaira.versions.metadata import CelltypeUniverse, OntologyCl, OntologyObo
 from sfaira.versions.topologies import TopologyContainer
@@ -40,7 +40,7 @@ class EstimatorKeras:
     """
     Estimator base class for keras models.
     """
-    data: Union[anndata.AnnData, DistributedStoreMultipleFeatureSpaceBase]
+    data: Union[anndata.AnnData, DistributedStoreSingleFeatureSpace]
     model: Union[BasicModelKeras, None]
     topology_container: Union[TopologyContainer, None]
     model_id: Union[str, None]
@@ -55,7 +55,7 @@ class EstimatorKeras:
 
     def __init__(
             self,
-            data: Union[anndata.AnnData, np.ndarray, DistributedStoreMultipleFeatureSpaceBase],
+            data: Union[anndata.AnnData, np.ndarray, DistributedStoreSingleFeatureSpace],
             model_dir: Union[str, None],
             model_class: str,
             model_id: Union[str, None],
@@ -71,7 +71,7 @@ class EstimatorKeras:
         self.model_class = model_class
         self.topology_container = model_topology
         # Prepare store with genome container sub-setting:
-        if isinstance(self.data, DistributedStoreMultipleFeatureSpaceBase):
+        if isinstance(self.data, DistributedStoreSingleFeatureSpace):
             self.data.genome_containers = self.topology_container.gc
 
         self.history = None
@@ -293,7 +293,7 @@ class EstimatorKeras:
                     if k not in self.data.obs.columns:
                         raise ValueError(f"Did not find column {k} used to define test set in self.data.")
                     in_test = np.logical_and(in_test, np.array([x in v for x in self.data.obs[k].values]))
-                elif isinstance(self.data, DistributedStoreMultipleFeatureSpaceBase):
+                elif isinstance(self.data, DistributedStoreSingleFeatureSpace):
                     idx = self.data.get_subset_idx_global(attr_key=k, values=v)
                     in_test_k = np.ones((self.data.n_obs,), dtype=int) == 0
                     in_test_k[idx] = True
@@ -491,7 +491,7 @@ class EstimatorKeras:
 
     @property
     def using_store(self) -> bool:
-        return isinstance(self.data, DistributedStoreMultipleFeatureSpaceBase)
+        return isinstance(self.data, DistributedStoreSingleFeatureSpace)
 
     @property
     def obs_train(self):
@@ -513,7 +513,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
 
     def __init__(
             self,
-            data: Union[anndata.AnnData, np.ndarray, DistributedStoreMultipleFeatureSpaceBase],
+            data: Union[anndata.AnnData, np.ndarray, DistributedStoreSingleFeatureSpace],
             model_dir: Union[str, None],
             model_id: Union[str, None],
             model_topology: TopologyContainer,
@@ -999,7 +999,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
 
     def __init__(
             self,
-            data: Union[anndata.AnnData, DistributedStoreMultipleFeatureSpaceBase],
+            data: Union[anndata.AnnData, DistributedStoreSingleFeatureSpace],
             model_dir: Union[str, None],
             model_id: Union[str, None],
             model_topology: TopologyContainer,
@@ -1022,7 +1022,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
         )
         if remove_unlabeled_cells:
             # Remove cells without type label from store:
-            if isinstance(self.data, DistributedStoreMultipleFeatureSpaceBase):
+            if isinstance(self.data, DistributedStoreSingleFeatureSpace):
                 self.data.subset(attr_key="cellontology_class", excluded_values=[
                     self._adata_ids.unknown_celltype_identifier,
                     self._adata_ids.not_a_cell_celltype_identifier,
