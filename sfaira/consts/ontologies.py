@@ -44,7 +44,7 @@ class OntologyContainerSfaira:
         self.id = None
         self.individual = None
         self.normalization = None
-        self._organ = OntologyUberon()
+        self._organ = None
         self.organism = OntologyList(terms=["mouse", "human"])  # TODO introduce NCBItaxon here
         self.primary_data = OntologyList(terms=[True, False])
         self.sample_source = OntologyList(terms=["primary_tissue", "2d_culture", "3d_culture", "tumor"])
@@ -90,3 +90,9 @@ class OntologyContainerSfaira:
         if self._disease is None:
             self._disease = OntologyMondo()
         return self._disease
+
+    @property
+    def organ(self):
+        if self._organ is None:
+            self._organ = OntologyUberon()
+        return self._organ
