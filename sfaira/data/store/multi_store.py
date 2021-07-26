@@ -6,8 +6,8 @@ import pickle
 from typing import Dict, List, Tuple, Union
 
 from sfaira.consts import AdataIdsSfaira
-from sfaira.data.store.single_store import DistributedStoreSingleFeatureSpace, DistributedStoreDao, \
-    DistributedStoreH5ad
+from sfaira.data.store.single_store import DistributedStoreSingleFeatureSpace, \
+    DistributedStoreDao, DistributedStoreH5ad
 from sfaira.data.store.io_dao import read_dao
 from sfaira.versions.genomes.genomes import GenomeContainer
 
@@ -67,9 +67,17 @@ class DistributedStoreMultipleFeatureSpaceBase(abc.ABC):
     @property
     def adata_by_key(self) -> Dict[str, anndata.AnnData]:
         """
-        Dictionary of all adata objects contained in all stores.
+        Dictionary of all anndata instances for each selected data set in store, sub-setted by selected cells, for each
+        stores.
         """
         return dict([(kk, vv) for k, v in self.stores.items() for kk, vv in v.adata_by_key.items()])
+
+    @property
+    def data_by_key(self):
+        """
+        Data matrix for each selected data set in store, sub-setted by selected cells.
+        """
+        return dict([(kk, vv) for k, v in self.stores.items() for kk, vv in v.data_by_key.items()])
 
     @property
     def var_names(self) -> Dict[str, List[str]]:
@@ -181,10 +189,10 @@ class DistributedStoreMultipleFeatureSpaceBase(abc.ABC):
 
     def generator(
             self,
-            idx: Dict[str, Union[np.ndarray, None]],
+            idx: Union[Dict[str, Union[np.ndarray, None]], None] = None,
             intercalated: bool = True,
             **kwargs
-    ) -> iter:
+    ) -> Tuple[iter, int]:
         """
         Emission of batches from unbiased generators of all stores.
 
@@ -194,18 +202,20 @@ class DistributedStoreMultipleFeatureSpaceBase(abc.ABC):
         :param intercalated: Whether to do sequential or intercalated emission.
         :param kwargs: See parameters of DistributedStore*.generator().
         """
-        for k in self._stores.items():
-            assert k in idx.keys(), (idx.keys(), self._stores.keys())
+        if idx is None:
+            idx = dict([(k, None) for k in self.stores.keys()])
+        for k in self.stores.keys():
+            assert k in idx.keys(), (idx.keys(), self.stores.keys())
         generators = [
             v.generator(idx=idx[k], **kwargs)
-            for k, v in self._stores.items()
+            for k, v in self.stores.items()
         ]
         generator_fns = [x[0]() for x in generators]
         generator_len = [x[1] for x in generators]
 
         if intercalated:
             # Define relative drawing frequencies from iterators for intercalation.
-            ratio = np.round(np.max(generator_len) / np.asarray(generator_len), 0)
+            ratio = np.asarray(np.round(np.max(generator_len) / np.asarray(generator_len), 0), dtype="int64")
 
             def generator():
                 # Document which generators are still yielding batches:
@@ -214,53 +224,18 @@ class DistributedStoreMultipleFeatureSpaceBase(abc.ABC):
                     # Loop over one iterator length adjusted cycle of emissions.
                     for i, (g, n) in enumerate(zip(generator_fns, ratio)):
                         for _ in range(n):
-                            x = next(g)
-                            if x is None:
-                                yielding[i] = False
-                            else:
+                            try:
+                                x = next(g)
                                 yield x
+                            except StopIteration:
+                                yielding[i] = False
         else:
             def generator():
                 for g in generator_fns:
                     for x in g():
                         yield x
 
-        return generator
-
-
-class DistributedStoresH5ad(DistributedStoreMultipleFeatureSpaceBase):
-
-    def __init__(self, cache_path: Union[str, os.PathLike]):
-        # Collect all data loaders from files in directory:
-        self._adata_ids_sfaira = AdataIdsSfaira()
-        adata_by_key = {}
-        indices = {}
-        for f in np.sort(os.listdir(cache_path)):
-            adata = None
-            trial_path = os.path.join(cache_path, f)
-            if os.path.isfile(trial_path):
-                # Narrow down to supported file types:
-                if f.split(".")[-1] == "h5ad":
-                    try:
-                        adata = anndata.read_h5ad(
-                            filename=trial_path,
-                            backed="r",
-                        )
-                    except OSError as e:
-                        adata = None
-                        print(f"WARNING: for data set {f}: {e}")
-            if adata is not None:
-                organism = adata.uns[self._adata_ids_sfaira.organism]
-                if organism not in adata_by_key.keys():
-                    adata_by_key[organism] = {}
-                    indices[organism] = {}
-                adata_by_key[organism][adata.uns["id"]] = adata
-                indices[organism][adata.uns["id"]] = np.arange(0, adata.n_obs)
-        stores = dict([
-            (k, DistributedStoreH5ad(adata_by_key=adata_by_key[k], indices=indices[k]))
-            for k in adata_by_key.keys()
-        ])
-        super(DistributedStoresH5ad, self).__init__(stores=stores)
+        return generator, int(np.sum(generator_len))
 
 
 class DistributedStoresDao(DistributedStoreMultipleFeatureSpaceBase):
@@ -304,6 +279,45 @@ class DistributedStoresDao(DistributedStoreMultipleFeatureSpaceBase):
         super(DistributedStoresDao, self).__init__(stores=stores)
 
 
+class DistributedStoresH5ad(DistributedStoreMultipleFeatureSpaceBase):
+
+    def __init__(self, cache_path: Union[str, os.PathLike], in_memory: bool = False):
+        # Collect all data loaders from files in directory:
+        self._adata_ids_sfaira = AdataIdsSfaira()
+        adata_by_key = {}
+        indices = {}
+        for f in np.sort(os.listdir(cache_path)):
+            adata = None
+            trial_path = os.path.join(cache_path, f)
+            if os.path.isfile(trial_path):
+                # Narrow down to supported file types:
+                if f.split(".")[-1] == "h5ad":
+                    try:
+                        adata = anndata.read_h5ad(
+                            filename=trial_path,
+                            backed="r" if in_memory else None,
+                        )
+                    except OSError as e:
+                        adata = None
+                        print(f"WARNING: for data set {f}: {e}")
+            if adata is not None:
+                organism = adata.uns[self._adata_ids_sfaira.organism]
+                if organism not in adata_by_key.keys():
+                    adata_by_key[organism] = {}
+                    indices[organism] = {}
+                adata_by_key[organism][adata.uns["id"]] = adata
+                indices[organism][adata.uns["id"]] = np.arange(0, adata.n_obs)
+        if in_memory:
+            cls = DistributedStoreAnndata
+        else:
+            cls = DistributedStoreH5ad
+        stores = dict([
+            (k, cls(adata_by_key=adata_by_key[k], indices=indices[k], in_memory=in_memory))
+            for k in adata_by_key.keys()
+        ])
+        super(DistributedStoresH5ad, self).__init__(stores=stores)
+
+
 def load_store(cache_path: Union[str, os.PathLike], store_format: str = "dao",
                columns: Union[None, List[str]] = None) -> Union[DistributedStoresH5ad, DistributedStoresDao]:
     """
@@ -318,9 +332,11 @@ def load_store(cache_path: Union[str, os.PathLike], store_format: str = "dao",
         Only relevant if store_format is "dao".
     :return: Instances of a distributed store class.
     """
-    if store_format == "h5ad":
-        return DistributedStoresH5ad(cache_path=cache_path)
+    if store_format == "anndata":
+        return DistributedStoresH5ad(cache_path=cache_path, in_memory=True)
     elif store_format == "dao":
         return DistributedStoresDao(cache_path=cache_path, columns=columns)
+    elif store_format == "h5ad":
+        return DistributedStoresH5ad(cache_path=cache_path, in_memory=False)
     else:
         raise ValueError(f"Did not recognize store_format {store_format}.")

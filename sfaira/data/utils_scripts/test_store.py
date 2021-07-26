@@ -100,6 +100,8 @@ for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, comp
     for _ in range(3):
         t0 = time.time()
         store = sfaira.data.load_store(cache_path=path_store, store_format=store_type_i)
+        # Include initialisation of generator in timing to time overhead generated here.
+        _ = store.generator()
         time_measurements_initiate[store_type_i].append(time.time() - t0)
         memory_measurements_initiate[store_type_i].append(np.sum(list(store.adata_memory_footprint.values())))
 

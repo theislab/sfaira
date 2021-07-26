@@ -2,6 +2,7 @@ import abc
 import anndata
 import dask.array
 import dask.dataframe
+import h5py
 import numpy as np
 import os
 import pandas as pd
@@ -26,23 +27,12 @@ You can operate on multiple organisms at the same time by using an umbrella clas
 DistributedStoreMultipleFeatureSpaceBase.
 
 DistributedStoreBase is base class for any file format on disk.
-DistributedStoreDao is adapted to classes that store an anndata instance in the sfaira "dao" format.
-DistributedStoreH5ad is adapted to classes that store an anndata instance as a h5ad file.
+DistributedStoreDao wraps an on-disk representation of anndata instance in the sfaira "dao" format.
+DistributedStoreH5ad wraps an on-disk representation of anndata instances as a h5ad file.
+DistributedStoreAnndata wraps in-memory anndata instance.
 
 Note that in all cases, you can use standard anndata reading functions to load a single object into memory.
 """
-
-
-def access_helper(adata, s, e, j, return_dense, obs_keys) -> tuple:
-    x = adata.X[s:e, :]
-    # Do dense conversion now so that col-wise indexing is not slow, often, dense conversion
-    # would be done later anyway.
-    if return_dense and isinstance(x, scipy.sparse.spmatrix):
-        x = x.todense()
-    if j is not None:
-        x = x[:, j]
-    obs = adata.obs[obs_keys].iloc[s:e, :]
-    return x, obs
 
 
 def _process_batch_size(x: int, idx: np.ndarray) -> int:
@@ -54,7 +44,7 @@ def _process_batch_size(x: int, idx: np.ndarray) -> int:
     return x
 
 
-class DistributedStoreSingleFeatureSpace(abc.ABC):
+class DistributedStoreSingleFeatureSpace:
 
     """
     Data set group class tailored to data access requirements common in high-performance computing (HPC).
@@ -154,11 +144,21 @@ class DistributedStoreSingleFeatureSpace(abc.ABC):
 
     @property
     def adata_by_key(self) -> Dict[str, anndata.AnnData]:
+        """
+        Anndata instance for each selected data set in store, sub-setted by selected cells.
+        """
         return self._adata_by_key
 
     @adata_by_key.setter
     def adata_by_key(self, x: Dict[str, anndata.AnnData]):
         self._adata_by_key = x
+
+    @property
+    def data_by_key(self):
+        """
+        Data matrix for each selected data set in store, sub-setted by selected cells.
+        """
+        return dict([(k, v.X) for k, v in self.adata_by_key.items()])
 
     @property
     def adata_memory_footprint(self) -> Dict[str, float]:
@@ -484,7 +484,7 @@ class DistributedStoreSingleFeatureSpace(abc.ABC):
             raise ValueError("Do not use randomized_batch_access and random_access.")
         n_obs = len(idx)
         remainder = n_obs % batch_size
-        n_batches = n_obs // batch_size + int(remainder > 0)
+        n_batches = int(n_obs // batch_size + int(remainder > 0))
 
         def idx_gen():
             """
@@ -595,9 +595,12 @@ class DistributedStoreSingleFeatureSpace(abc.ABC):
 
 class DistributedStoreH5ad(DistributedStoreSingleFeatureSpace):
 
-    def __init__(self, **kwargs):
+    in_memory: bool
+
+    def __init__(self, in_memory: bool, **kwargs):
         super(DistributedStoreH5ad, self).__init__(**kwargs)
         self._x_as_dask = False
+        self.in_memory = in_memory
 
     @property
     def adata_sliced(self) -> Dict[str, anndata.AnnData]:
@@ -607,8 +610,30 @@ class DistributedStoreH5ad(DistributedStoreSingleFeatureSpace):
         return dict([(k, self._adata_by_key[k][v, :]) for k, v in self.indices.items()])
 
     @property
+    def indices_global(self) -> dict:
+        """
+        Increasing indices across data sets which can be concatenated into a single index vector with unique entries
+        for cells.
+
+        E.g.: For two data sets of 10 cells each, the return value would be {A:[0..9], B:[10..19]}.
+        Note that this operates over pre-selected indices, if this store was subsetted before resulting in only the
+        second half B to be kept, the return value would be {A:[0..9], B:[10..14]}, where .indices would be
+        {A:[0..9], B:[15..19]}.
+        """
+        counter = 0
+        indices = {}
+        for k, v in self.indices.items():
+            indices[k] = np.arange(counter, counter + len(v))
+            counter += len(v)
+        return indices
+
+    @property
     def X(self):
-        raise NotImplementedError()
+        if self.in_memory:
+            assert np.all([isinstance(v.X, scipy.sparse.spmatrix) for v in self.adata_by_key.values()])
+            return scipy.sparse.vstack([v.X for v in self.adata_by_key.values()])
+        else:
+            raise NotImplementedError()
 
     @property
     def obs(self) -> Union[pd.DataFrame]:
@@ -641,68 +666,107 @@ class DistributedStoreH5ad(DistributedStoreSingleFeatureSpace):
         :return: Generator function which yields batch_size at every invocation.
             The generator returns a tuple of (.X, .obs).
         """
-        # TODO merge this code with adata_by_key_subset.
+        adata_sliced = self.adata_sliced
+        # Speed up access to single object by skipping index overlap operations:
+        single_object = len(adata_sliced.keys()) == 1
+        if not single_object:
+            idx_dict_global = dict([(k, set(v)) for k, v in self.indices_global.items()])
 
         def generator():
-            for idx_dict, batch_starts_ends in idx_gen:
-                for k, v in idx_dict.items():
-                    ref_idx = idx.tolist()
-                    idx_dict[k] = np.array([ref_idx.index(y) for y in v])
+            for idx, batch_starts_ends in idx_gen:
                 for s, e in batch_starts_ends:
-                    x, obs = access_helper(adata=adatas_sliced_subset[k], s=s, e=e, j=var_idx[self.organisms_by_key[k]],
-                                           return_dense=return_dense, obs_keys=obs_keys)
+                    idx_i = idx[s:e]
+                    # Match adata objects that overlap to batch:
+                    if single_object:
+                        idx_i_dict = dict([(k, np.sort(idx_i)) for k in adata_sliced.keys()])
+                    else:
+                        idx_i_set = set(idx_i)
+                        idx_i_dict = dict([
+                            (k, np.sort(list(idx_i_set.intersection(v))))
+                            for k, v in idx_dict_global.items()
+                        ])
+                    # Only retain non-empty.
+                    idx_i_dict = dict([(k, v) for k, v in idx_i_dict.items() if len(v) > 0])
+                    # I) Prepare data matrix.
+                    x = [
+                        adata_sliced[k].X[v, :]
+                        for k, v in idx_i_dict.items()
+                    ]
+                    # Move from ArrayView to numpy if backed and dense:
+                    x = [
+                        xx.toarray() if isinstance(xx, anndata._core.views.ArrayView) else xx
+                        for xx in x
+                    ]
+                    # Do dense conversion now so that col-wise indexing is not slow, often, dense conversion
+                    # would be done later anyway.
+                    if return_dense:
+                        x = [np.asarray(xx.todense()) if isinstance(xx, scipy.sparse.spmatrix) else xx for xx in x]
+                        is_dense = True
+                    else:
+                        is_dense = isinstance(x[0], np.ndarray)
+                    # Concatenate blocks in observation dimension:
+                    if len(x) > 1:
+                        if is_dense:
+                            x = np.concatenate(x, axis=0)
+                        else:
+                            x = scipy.sparse.vstack(x)
+                    else:
+                        x = x[0]
+                    if var_idx is not None:
+                        x = x[:, var_idx]
+                    # Prepare .obs.
+                    obs = pd.concat([
+                        adata_sliced[k].obs[obs_keys].iloc[v, :]
+                        for k, v in idx_i_dict.items()
+                    ], axis=0, join="inner", ignore_index=True, copy=False)
                     yield x, obs
 
         return generator
-
-    def adata_by_key_adata_by_key_subsetsubset(self, idx: Union[np.ndarray, list]) -> Dict[str, anndata.AnnData]:
-        """
-        Subsets adata_by_key as if it was one object, ie behaves the same way as self.adata[idx] without explicitly
-        concatenating.
-        """
-        if idx is not None:
-            idx = self._validate_idx(idx)
-            indices_subsetted = {}
-            counter = 0
-            for k, v in self.indices.items():
-                n_obs_k = len(v)
-                indices_global = np.arange(counter, counter + n_obs_k)
-                indices_subset_k = [x for x, y in zip(v, indices_global) if np.any([y in v for v in idx.values()])]
-                if len(indices_subset_k) > 0:
-                    indices_subsetted[k] = indices_subset_k
-                counter += n_obs_k
-            assert counter == self.n_obs
-            return dict([(k, self._adata_by_key[k][v, :]) for k, v in indices_subsetted.items()])
-        else:
-            return self.adata_sliced
-
-    @property
-    def indices_global(self) -> dict:
-        """
-        Increasing indices across data sets which can be concatenated into a single index vector with unique entries
-        for cells.
-
-        E.g.: For two data sets of 10 cells each, the return value would be {A:[0..9], B:[10..19]}.
-        Note that this operates over pre-selected indices, if this store was subsetted before resulting in only the
-        second half B to be kept, the return value would be {A:[0..9], B:[10..14]}, where .indices would be
-        {A:[0..9], B:[15..19]}.
-        """
-        counter = 0
-        indices = {}
-        for k, v in self.indices.items():
-            indices[k] = np.arange(counter, counter + len(v))
-            counter += len(v)
-        return indices
 
 
 class DistributedStoreDao(DistributedStoreSingleFeatureSpace):
 
     _dataset_weights: Union[None, Dict[str, float]]
+    _x: Union[None, dask.array.Array]
+    _x_by_key: Union[None, dask.array.Array]
 
     def __init__(self, x_by_key, **kwargs):
         super(DistributedStoreDao, self).__init__(**kwargs)
+        self._x = None
         self._x_as_dask = True
         self._x_by_key = x_by_key
+
+    @property
+    def indices(self) -> Dict[str, np.ndarray]:
+        return super(DistributedStoreDao, self).indices
+
+    @indices.setter
+    def indices(self, x: Dict[str, np.ndarray]):
+        """
+        Extends setter in super class by wiping .X cache.
+
+        Setter imposes a few constraints on indices:
+
+            1) checks that keys are contained ._adata_by_key.keys()
+            2) checks that indices are contained in size of values of ._adata_by_key
+            3) checks that indces are not duplicated
+            4) checks that indices are sorted
+        """
+        self._x = None
+        for k, v in x.items():
+            assert k in self._adata_by_key.keys(), f"did not find key {k}"
+            assert np.max(v) < self._adata_by_key[k].n_obs, f"found index for key {k} that exceeded data set size"
+            assert len(v) == len(np.unique(v)), f"found duplicated indices for key {k}"
+            assert np.all(np.diff(v) >= 0), f"indices not sorted for key {k}"
+        self._indices = x
+
+    @property
+    def data_by_key(self):
+        """
+        Data matrix for each selected data set in store, sub-setted by selected cells.
+        """
+        # Accesses _x_by_key rather than _adata_by_key as long as the dask arrays are stored there.
+        return dict([(k, self._x_by_key[k][v, :]) for k, v in self.indices.items()])
 
     @property
     def X(self) -> dask.array.Array:
@@ -711,16 +775,18 @@ class DistributedStoreDao(DistributedStoreSingleFeatureSpace):
 
         Requires feature dimension to be shared.
         """
-        if self.data_source == "X":
-            # TODO avoiding anndata .X here
-            # assert np.all([isinstance(self._adata_by_key[k].X, dask.array.Array) for k in self.indices.keys()])
-            assert np.all([isinstance(self._x_by_key[k], dask.array.Array) for k in self.indices.keys()])
-            return dask.optimize(dask.array.vstack([
-                self._x_by_key[k][v, :]
-                for k, v in self.indices.items()
-            ]))[0]
-        else:
-            raise ValueError(f"Did not recongise data_source={self.data_source}.")
+        if self._x is None:
+            if self.data_source == "X":
+                # TODO avoiding anndata .X here
+                # assert np.all([isinstance(self._adata_by_key[k].X, dask.array.Array) for k in self.indices.keys()])
+                assert np.all([isinstance(self._x_by_key[k], dask.array.Array) for k in self.indices.keys()])
+                self._x = dask.optimize(dask.array.vstack([
+                    self._x_by_key[k][v, :]
+                    for k, v in self.indices.items()
+                ]))[0]
+            else:
+                raise ValueError(f"Did not recognise data_source={self.data_source}.")
+        return self._x
 
     @property
     def obs(self) -> pd.DataFrame:
@@ -758,32 +824,28 @@ class DistributedStoreDao(DistributedStoreSingleFeatureSpace):
         # Normalise cell indices such that each organism is indexed starting at zero:
         # This is required below because each organism is represented as its own dask array.
         # TODO this might take a lot of time as the dask array is built.
-        idx = self.idx
         t0 = time.time()
         x = self.X
         print(f"init X: {time.time() - t0}")
         t0 = time.time()
-        obs = self.obs
+        obs = self.obs[obs_keys]
+        # Redefine index so that .loc indexing can be used instead of .iloc indexing:
+        obs.index = np.arange(0, obs.shape[0])
         print(f"init obs: {time.time() - t0}")
 
         def generator():
             # Can all data sets corresponding to one organism as a single array because they share the second dimension
             # and dask keeps expression data and obs out of memory.
-            for idx_dict, batch_starts_ends in idx_gen:
-                for k, v in idx_dict.items():
-                    ref_idx = idx.tolist()
-                    idx_dict[k] = np.array([ref_idx.index(y) for y in v])
+            for idx, batch_starts_ends in idx_gen:
                 x_temp = x[idx, :]
-                obs_temp = obs.loc[obs.index[idx], obs_keys]  # TODO better than iloc?
-                # Redefine index so that .loc indexing can be used instead of .iloc indexing:
-                obs.index = np.arange(0, obs.shape[0])
+                obs_temp = obs.loc[obs.index[idx], :]  # TODO better than iloc?
                 for s, e in batch_starts_ends:
                     x_i = x_temp[s:e, :]
                     if var_idx is not None:
                         x_i = x_i[:, var_idx]
                     # Exploit fact that index of obs is just increasing list of integers, so we can use the .loc[]
                     # indexing instead of .iloc[]:
-                    obs_i = obs_temp.loc[obs.index[s:e], :]
+                    obs_i = obs_temp.loc[obs_temp.index[s:e], :]
                     yield x_i, obs_i
 
         return generator

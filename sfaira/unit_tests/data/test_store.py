@@ -44,14 +44,14 @@ def test_data(store_format: str):
                             subset_genes_to_type="protein_coding")
     dsg.streamline_metadata(schema="sfaira", clean_obs=True, clean_var=True, clean_uns=True, clean_obs_names=True)
     # Prepare store.
+    # Rewriting store to avoid mismatch of randomly generated data in cache and store.
     store_path = prepare_store(store_format=store_format, rewrite=True)
     store = load_store(cache_path=store_path, store_format=store_format)
     store.subset(attr_key="doi_journal", values=["no_doi_mock1"])
     dataset_id = store.adata_by_key[list(store.indices.keys())[0]].uns["id"]
     adata_store = store.adata_by_key[dataset_id]
+    x_store = store.data_by_key[dataset_id]
     adata_ds = dsg.datasets[dataset_id].adata
-    # Extract .X
-    x_store = adata_store.X
     x_ds = adata_ds.X.todense()
     if isinstance(x_store, dask.array.Array):
         x_store = x_store.compute()
@@ -131,7 +131,7 @@ def test_generator_shapes(store_format: str, idx, batch_size: int, obs_keys: Lis
     gc = GenomeContainer(assembly=ASSEMBLY_MOUSE)
     gc.subset(**{"biotype": "protein_coding"})
     store.genome_containers = gc
-    g = store.generator(
+    g, _ = store.generator(
         idx={"mouse": idx},
         batch_size=batch_size,
         obs_keys=obs_keys,
