@@ -4,6 +4,7 @@ import re
 from dataclasses import dataclass, asdict
 from typing import Union, Dict
 
+from sfaira.consts.utils import clean_doi, clean_id_str
 from sfaira.commands.questionary import sfaira_questionary
 from rich import print
 from cookiecutter.main import cookiecutter
@@ -43,10 +44,12 @@ class TemplateAttributes:
 
 class DataloaderCreator:
 
-    def __init__(self):
+    def __init__(self, path_loader, doi):
         self.WD = os.path.dirname(__file__)
         self.TEMPLATES_PATH = f'{self.WD}/templates'
         self.template_attributes = TemplateAttributes()
+        self.out_path = path_loader
+        self.doi = doi
 
     def create_dataloader(self):
         """
@@ -80,16 +83,19 @@ class DataloaderCreator:
                                     question='Author(s):',
                                     default='Einstein, Albert; Hawking, Stephen')
         self.template_attributes.author = author.split(';') if ';' in author else author
-        doi = sfaira_questionary(function='text',
-                                 question='DOI:',
-                                 default='10.1000/j.journal.2021.01.001')
-        while not re.match(r'\b10\.\d+/[\w.]+\b', doi):
-            print('[bold red]The entered DOI is malformed!')
+        if self.doi:
+            doi = self.doi
+        else:
             doi = sfaira_questionary(function='text',
                                      question='DOI:',
                                      default='10.1000/j.journal.2021.01.001')
+            while not re.match(r'\b10\.\d+/[\w.]+\b', doi):
+                print('[bold red]The entered DOI is malformed!')
+                doi = sfaira_questionary(function='text',
+                                         question='DOI:',
+                                         default='10.1000/j.journal.2021.01.001')
         self.template_attributes.doi = doi
-        self.template_attributes.doi_sfaira_repr = f'd{doi.translate({ord(c): "_" for c in r"!@#$%^&*()[]/{};:,.<>?|`~-=_+"})}'
+        self.template_attributes.doi_sfaira_repr = clean_doi(doi)
 
         self.template_attributes.number_of_datasets = sfaira_questionary(function='text',
                                                                          question='Number of datasets:',
@@ -128,7 +134,7 @@ class DataloaderCreator:
                                                                     default='raw')
         self.template_attributes.disease = sfaira_questionary(function='text',
                                                               question='Disease:',
-                                                              default='NA')
+                                                              default='healthy')
         self.template_attributes.state_exact = sfaira_questionary(function='text',
                                                                   question='Sample state:',
                                                                   default='healthy')
@@ -151,10 +157,13 @@ class DataloaderCreator:
         except KeyError:
             print('[bold yellow] First author was not in the expected format. Using full first author for the id.')
             first_author_lastname = first_author
-        self.template_attributes.id_without_doi = f'{self.template_attributes.organism}_{self.template_attributes.organ}_' \
-                                                  f'{self.template_attributes.year}_{self.template_attributes.assay_sc}_' \
-                                                  f'{first_author_lastname}_001'
-        self.template_attributes.id = self.template_attributes.id_without_doi + f'_{self.template_attributes.doi_sfaira_repr}'
+        self.template_attributes.id_without_doi = f'{clean_id_str(self.template_attributes.organism)}_' \
+                                                  f'{clean_id_str(self.template_attributes.organ)}_' \
+                                                  f'{clean_id_str(self.template_attributes.year)}_' \
+                                                  f'{clean_id_str(self.template_attributes.assay_sc)}_' \
+                                                  f'{clean_id_str(first_author_lastname)}_001'
+        self.template_attributes.id = f'{self.template_attributes.id_without_doi}_' \
+                                      f'{self.template_attributes.doi_sfaira_repr}'
         if self.template_attributes.dataloader_type == 'single_dataset':
             self.template_attributes.download_url_data = sfaira_questionary(function='text',
                                                                             question='URL to download the data',
@@ -180,6 +189,10 @@ class DataloaderCreator:
     def _create_dataloader_template(self):
         template_path = f'{self.TEMPLATES_PATH}/{self.template_attributes.dataloader_type}'
         cookiecutter(f'{template_path}',
+                     output_dir=self.out_path,
                      no_input=True,
                      overwrite_if_exists=True,
                      extra_context=self._template_attributes_to_dict())
+
+    def create_datadir(self, path_data):
+        os.makedirs(os.path.join(path_data, self.template_attributes.doi_sfaira_repr))

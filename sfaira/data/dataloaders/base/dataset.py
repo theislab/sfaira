@@ -24,6 +24,7 @@ from sfaira.consts import AdataIds, AdataIdsCellxgene, AdataIdsSfaira, META_DATA
 from sfaira.data.store.io_dao import write_dao
 from sfaira.data.dataloaders.base.utils import is_child, clean_string, get_directory_formatted_doi
 from sfaira.data.utils import collapse_matrix, read_yaml
+from sfaira.consts.utils import clean_id_str
 
 
 load_doc = \
@@ -1380,11 +1381,11 @@ class DatasetBase(abc.ABC):
 
         # Note: access private attributes here, e.g. _organism, to avoid loading of content via meta data, which would
         # invoke call to self.id before it is set.
-        self.id = f"{clean_string(self._organism)}_" \
-                  f"{clean_string(self._organ)}_" \
+        self.id = f"{clean_id_str(self._organism)}_" \
+                  f"{clean_id_str(self._organ)}_" \
                   f"{self._year}_" \
-                  f"{clean_string(self._assay_sc)}_" \
-                  f"{clean_string(author)}_" \
+                  f"{clean_id_str(self._assay_sc)}_" \
+                  f"{clean_id_str(author)}_" \
                   f"{idx}_" \
                   f"{self.doi_main}"
 

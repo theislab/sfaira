@@ -83,6 +83,7 @@ class DatasetGroup:
             processes: int = 1,
             func=None,
             kwargs_func: Union[None, dict] = None,
+            verbose: int = 0,
             **kwargs
     ):
         """
@@ -104,6 +105,12 @@ class DatasetGroup:
                     # code manipulating dataset and generating output x.
                     return x
         :param kwargs_func: Kwargs of func.
+        :param verbose: Verbosity of description of loading failure.
+
+                - 0: no indication of failure
+                - 1: indication of which data set failed in warning
+                - 2: 1 with error report in warning
+                - 3: reportin as in 2 but aborts with OSError
         """
         args = [
             load_raw,
@@ -133,7 +140,12 @@ class DatasetGroup:
                 x = map_fn(tuple([v] + args))
                 # Clear data sets that were not successfully loaded because of missing data:
                 if x is not None:
-                    warnings.warn(f"data set {k} not loaded")
+                    if verbose == 1:
+                        warnings.warn(f"data set {k} not loaded")
+                    if verbose == 2:
+                        warnings.warn(f"data set {k} not loaded\nin data set {x[0]}: {x[1]}")
+                    if verbose == 3:
+                        raise OSError(f"data set {k} not loaded\nin data set {x[0]}: {x[1]}")
                     datasets_to_remove.append(k)
             for k in datasets_to_remove:
                 del self.datasets[k]

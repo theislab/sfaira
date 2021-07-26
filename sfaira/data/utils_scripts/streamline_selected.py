@@ -2,8 +2,6 @@ import os
 import sfaira
 import sys
 
-from sfaira.data import clean_string
-
 # Set global variables.
 print("sys.argv", sys.argv)
 

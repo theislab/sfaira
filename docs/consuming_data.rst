@@ -1,4 +1,4 @@
-Consuming Data
+Consuming data
 ===============
 
 .. image:: https://raw.githubusercontent.com/theislab/sfaira/master/resources/images/data_zoo.png
