@@ -90,7 +90,7 @@ def test_dsgs_streamline_metadata(out_format: str, uns_to_obs: bool, clean_obs: 
     ds.load()
     ds.streamline_features(remove_gene_version=False, match_to_reference=ASSEMBLY_MOUSE,
                            subset_genes_to_type=None)
-    ds.streamline_metadata(schema=out_format, uns_to_obs=uns_to_obs, clean_obs=clean_obs, clean_var=clean_var,
+    ds.streamline_metadata(schema=out_format, clean_obs=clean_obs, clean_var=clean_var,
                            clean_uns=clean_uns, clean_obs_names=clean_obs_names)
 
 

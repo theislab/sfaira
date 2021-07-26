@@ -6,19 +6,19 @@ import pickle
 from typing import Union
 
 from sfaira.consts import AdataIdsSfaira
-from sfaira.data import DistributedStoreMultipleFeatureSpaceBase, Universe
+from sfaira.data import DistributedStoreSingleFeatureSpace, Universe
 from sfaira.estimators import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
 from sfaira.ui import ModelZoo
 
 
 class TrainModel:
 
-    data: Union[anndata.AnnData, DistributedStoreMultipleFeatureSpaceBase]
+    data: Union[anndata.AnnData, DistributedStoreSingleFeatureSpace]
     estimator: Union[EstimatorKeras, None]
 
     def __init__(
             self,
-            data: Union[str, anndata.AnnData, Universe, DistributedStoreMultipleFeatureSpaceBase],
+            data: Union[str, anndata.AnnData, Universe, DistributedStoreSingleFeatureSpace],
     ):
         # Check if handling backed anndata or base path to directory of raw files:
         if isinstance(data, str) and data.split(".")[-1] == "h5ad":
