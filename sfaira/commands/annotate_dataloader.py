@@ -1,9 +1,13 @@
 import os
 import pydoc
 import shutil
+import re
+from typing import Union
 
 from sfaira.data import DatasetGroupDirectoryOriented, DatasetGroup, DatasetBase
 from sfaira.data.utils import read_yaml
+from sfaira.consts.utils import clean_doi
+from sfaira.commands.questionary import sfaira_questionary
 
 try:
     import sfaira_extension as sfairae
@@ -23,7 +27,7 @@ class DataloaderAnnotater:
         self.dir_loader_sfairae = None
         self.package_source = None
 
-    def annotate(self, path: str, doi: str, test_data: str):
+    def annotate(self, path_loader: str, path_data: str, doi: Union[str, None]):
         """
         Annotates a provided dataloader.
 
@@ -35,9 +39,18 @@ class DataloaderAnnotater:
         (Note that columns are separated by ",")
         You can also manually check maps here: https://www.ebi.ac.uk/ols/ontologies/cl
         """
-        doi_sfaira_repr = f'd{doi.translate({ord(c): "_" for c in r"!@#$%^&*()[]/{};:,.<>?|`~-=_+"})}'
+        if not doi:
+            doi = sfaira_questionary(function='text',
+                                     question='DOI:',
+                                     default='10.1000/j.journal.2021.01.001')
+            while not re.match(r'\b10\.\d+/[\w.]+\b', doi):
+                print('[bold red]The entered DOI is malformed!')  # noqa: W605
+                doi = sfaira_questionary(function='text',
+                                         question='DOI:',
+                                         default='10.1000/j.journal.2021.01.001')
+        doi_sfaira_repr = clean_doi(doi)
         self._setup_loader(doi_sfaira_repr)
-        self._annotate(test_data, path, doi)
+        self._annotate(path_data, path_loader, doi, doi_sfaira_repr)
 
     def _setup_loader(self, doi_sfaira_repr: str):
         """
@@ -70,7 +83,7 @@ class DataloaderAnnotater:
         self.meta_path = meta_path
         self.cache_path = cache_path
         self.dir_loader = dir_loader
-        self.dir_loader_sfairae = dir_loader_sfairae
+        self.dir_loader_sfairae = None if sfairae is None else dir_loader_sfairae
         self.package_source = package_source
 
     def _get_ds(self, test_data: str):
@@ -83,27 +96,33 @@ class DataloaderAnnotater:
 
         return ds
 
-    def buffered_load(self, test_data: str):
+    def buffered_load(self, test_data: str, doi_sfaira_repr: str):
+        if not os.path.exists(test_data):
+            raise ValueError(f"test-data directory {test_data} does not exist.")
+        if doi_sfaira_repr not in os.listdir(test_data):
+            raise ValueError(f"did not find data folder named {doi_sfaira_repr} in test-data directory "
+                             f"{test_data}, only found {os.listdir(test_data)}")
         ds = self._get_ds(test_data=test_data)
-        # TODO try-except with good error description saying that the data loader is broken here:
         ds.load(
             remove_gene_version=False,
             match_to_reference=None,
             load_raw=True,  # Force raw load so non confound future tests by data loader bugs in previous versions.
-            allow_caching=True,
+            allow_caching=False,
+            verbose=3
         )
-
-        assert len(ds.ids) > 0, f"no data sets loaded, make sure raw data is in {test_data}"
+        assert len(ds.ids) > 0, f"no data sets loaded, make sure raw data is in {test_data}, "\
+                                f"found {os.listdir(os.path.join(test_data, doi_sfaira_repr))}"
         return ds
 
-    def _annotate(self, test_data: str, path: str, doi: str):
-        ds = self.buffered_load(test_data=test_data)
+    def _annotate(self, test_data: str, path: str, doi: str, doi_sfaira_repr: str):
+        ds = self.buffered_load(test_data=test_data, doi_sfaira_repr=doi_sfaira_repr)
         # Create cell type conversion table:
         cwd = os.path.dirname(self.file_path)
         dataset_module = str(cwd.split("/")[-1])
         # Group data sets by file module:
         # Note that if we were not grouping the cell type map .tsv files by file module, we could directly call
         # write_ontology_class_map on the ds.
+        tsvs_written = []
         for f in os.listdir(cwd):
             if os.path.isfile(os.path.join(cwd, f)):  # only files
                 # Narrow down to data set files:
@@ -172,8 +191,11 @@ class DataloaderAnnotater:
                     # III) Write this directly into the sfaira clone so that it can be committed via git.
                     # TODO any errors not to be caught here?
                     doi_sfaira_repr = f'd{doi.translate({ord(c): "_" for c in r"!@#$%^&*()[]/{};:,.<>?|`~-=_+"})}'
+                    fn_tsv = os.path.join(path, doi_sfaira_repr, f"{file_module}.tsv")
                     dsg_f.write_ontology_class_map(
-                        fn=os.path.join(f"{path}/sfaira/data/dataloaders/loaders/{doi_sfaira_repr}/{file_module}.tsv"),
+                        fn=fn_tsv,
                         protected_writing=True,
                         n_suggest=4,
                     )
+                    tsvs_written.append(fn_tsv)
+        print(f"Completed annotation. Wrote {len(tsvs_written)} files:\n" + "\n".join(tsvs_written))

@@ -48,6 +48,5 @@ observation_wise:
 feature_wise:
     gene_id_ensembl_var_key:
     gene_id_symbols_var_key:
-misc:
 meta:
     version: "1.0"

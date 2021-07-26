@@ -23,6 +23,7 @@ from sfaira.versions.metadata import Ontology, OntologyHierarchical, CelltypeUni
 from sfaira.consts import AdataIds, AdataIdsCellxgene, AdataIdsSfaira, META_DATA_FIELDS, OCS
 from sfaira.data.base.io_dao import write_dao
 from sfaira.data.utils import collapse_matrix, read_yaml
+from sfaira.consts.utils import clean_id_str
 
 UNS_STRING_META_IN_OBS = "__obs__"
 
@@ -63,12 +64,6 @@ def is_child(
             return query == ontology_parent
         else:
             raise ValueError(f"did not recognize ontology type {type(ontology)}")
-
-
-def clean_string(s):
-    if s is not None:
-        s = s.replace(',', '').replace(' ', '').replace('-', '').replace('_', '').replace("'", '').lower()
-    return s
 
 
 def get_directory_formatted_doi(x: str) -> str:
@@ -1434,11 +1429,11 @@ class DatasetBase(abc.ABC):
 
         # Note: access private attributes here, e.g. _organism, to avoid loading of content via meta data, which would
         # invoke call to self.id before it is set.
-        self.id = f"{clean_string(self._organism)}_" \
-                  f"{clean_string(self._organ)}_" \
+        self.id = f"{clean_id_str(self._organism)}_" \
+                  f"{clean_id_str(self._organ)}_" \
                   f"{self._year}_" \
-                  f"{clean_string(self._assay_sc)}_" \
-                  f"{clean_string(author)}_" \
+                  f"{clean_id_str(self._assay_sc)}_" \
+                  f"{clean_id_str(author)}_" \
                   f"{idx}_" \
                   f"{self.doi_main}"
 
