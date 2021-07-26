@@ -118,7 +118,7 @@ def read_dao(store: Union[str, Path], use_dask: bool = True, columns: Union[None
     obs = pd.read_parquet(path_obs(store), columns=columns, engine="pyarrow")
     var = pd.read_parquet(path_var(store), engine="pyarrow")
     # Convert to categorical variables where possible to save memory:
-    #for k, dtype in zip(list(obs.columns), obs.dtypes):
+    # for k, dtype in zip(list(obs.columns), obs.dtypes):
     #    if dtype == "object":
     #        obs[k] = obs[k].astype(dtype="category")
     d = {"var": var, "uns": uns}

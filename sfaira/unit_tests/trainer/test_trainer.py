@@ -5,6 +5,7 @@ from typing import Union
 
 from sfaira.data import load_store
 from sfaira.ui import ModelZoo
+from sfaira.unit_tests.mock_data.utils import simulate_anndata, prepare_store
 from sfaira.train import TrainModelCelltype, TrainModelEmbedding
 
 dir_data = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_data")
@@ -38,7 +39,7 @@ class HelperTrainerBase:
         self.data = self._simulate()
 
     def load_store(self):
-        store_path = cached_store_writing(dir_data=dir_data, dir_meta=dir_meta, assembly=ASSEMBLY, organism="mouse")
+        store_path = prepare_store(store_format="dao")
         store = load_store(cache_path=store_path)
         self.data = store
 

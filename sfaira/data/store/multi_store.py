@@ -307,12 +307,8 @@ class DistributedStoresH5ad(DistributedStoreMultipleFeatureSpaceBase):
                     indices[organism] = {}
                 adata_by_key[organism][adata.uns["id"]] = adata
                 indices[organism][adata.uns["id"]] = np.arange(0, adata.n_obs)
-        if in_memory:
-            cls = DistributedStoreAnndata
-        else:
-            cls = DistributedStoreH5ad
         stores = dict([
-            (k, cls(adata_by_key=adata_by_key[k], indices=indices[k], in_memory=in_memory))
+            (k, DistributedStoreH5ad(adata_by_key=adata_by_key[k], indices=indices[k], in_memory=in_memory))
             for k in adata_by_key.keys()
         ])
         super(DistributedStoresH5ad, self).__init__(stores=stores)

@@ -10,7 +10,7 @@ from typing import List
 from sfaira.data import load_store
 from sfaira.versions.genomes.genomes import GenomeContainer
 
-from sfaira.unit_tests.mock_data import ASSEMBLY_MOUSE,ASSEMBLY_HUMAN, prepare_dsg, prepare_store
+from sfaira.unit_tests.mock_data import ASSEMBLY_MOUSE, ASSEMBLY_HUMAN, prepare_dsg, prepare_store
 
 
 @pytest.mark.parametrize("store_format", ["h5ad", "dao"])
