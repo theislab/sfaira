@@ -614,6 +614,7 @@ class OntologyUberon(OntologyExtendedObo):
         edge_types = [
             'aboral_to',
             'adjacent_to',
+            'ambiguous_for_taxon',
             'anastomoses_with',
             'anterior_to',
             'anteriorly_connected_to',
@@ -621,14 +622,18 @@ class OntologyUberon(OntologyExtendedObo):
             'attaches_to_part_of',
             'bounding_layer_of',
             'branching_part_of',
+            'capable_of',
+            'capable_of_part_of',
             'channel_for',
             'channels_from',
             'channels_into',
             'composed_primarily_of',
             'conduit_for',
+            'confers_advantage_in',
             'connected_to',
             'connects',
             'contains',
+            'contains_process',
             'continuous_with',
             'contributes_to_morphology_of',
             'deep_to',
@@ -643,6 +648,7 @@ class OntologyUberon(OntologyExtendedObo):
             'distalmost_part_of',
             'dorsal_to',
             'drains',
+            'dubious_for_taxon',
             'ends',
             'ends_with',
             'existence_ends_during',
@@ -654,6 +660,7 @@ class OntologyUberon(OntologyExtendedObo):
             'existence_starts_with',
             'extends_fibers_into',
             'filtered_through',
+            'functionally_related_to',
             'has_boundary',
             'has_component',
             'has_developmental_contribution_from',
@@ -665,6 +672,7 @@ class OntologyUberon(OntologyExtendedObo):
             'has_part',
             'has_potential_to_develop_into',
             'has_potential_to_developmentally_contribute_to',
+            'has_quality',
             'has_skeleton',
             'immediate_transformation_of',
             'immediately_anterior_to',
@@ -685,10 +693,12 @@ class OntologyUberon(OntologyExtendedObo):
             'in_proximal_side_of',
             'in_right_side_of',
             'in_superficial_part_of',
+            'in_taxon',
             'in_ventral_side_of',
             'indirectly_supplies',
             'innervated_by',
             'innervates',
+            'input_of',
             'intersects_midsagittal_plane_of',
             'is_a',  # term DAG -> include because it connect conceptual tissue groups
             'layer_part_of',
@@ -696,23 +706,34 @@ class OntologyUberon(OntologyExtendedObo):
             'location_of',
             'lumen_of',
             'luminal_space_of',
+            'negatively_regulates',
+            'never_in_taxon',
+            'occurs_in',
+            'only_in_taxon',
+            'output_of',
             'overlaps',
             'part_of',  # anatomic DAG -> include because it reflects the anatomic coarseness / hierarchy
+            'participates_in',
+            'positively_regulates',
             'postaxialmost_part_of',
             'posterior_to',
             'posteriorly_connected_to',
             'preaxialmost_part_of',
             'preceded_by',
             'precedes',
+            'present_in_taxon',
             'produced_by',
             'produces',
             'protects',
             'proximal_to',
             'proximally_connected_to',
             'proximalmost_part_of',
+            'regulates',
             'seeAlso',
             'serially_homologous_to',
             'sexually_homologous_to',
+            'simultaneous_with',
+            'site_of',
             'skeleton_of',
             'starts',
             'starts_with',
@@ -721,6 +742,7 @@ class OntologyUberon(OntologyExtendedObo):
             'supplies',
             'surrounded_by',
             'surrounds',
+            'synapsed_by',
             'transformation_of',
             'tributary_of',
             'trunk_part_of',
@@ -728,7 +750,8 @@ class OntologyUberon(OntologyExtendedObo):
         ]
         edges_to_delete = []
         for i, x in enumerate(self.graph.edges):
-            assert x[2] in edge_types, x
+            if x[2] not in edge_types:
+                print(f"NON-CRITICAL WARNING: uberon edge type {x[2]} not in reference list yet")
             if x[2] not in [
                 "develops_from",
                 'develops_from_part_of',
@@ -804,7 +827,8 @@ class OntologyCl(OntologyExtendedObo):
         else:
             edges_allowed = ["is_a"]
         for i, x in enumerate(self.graph.edges):
-            assert x[2] in edge_types, x
+            if x[2] not in edge_types:
+                print(f"NON-CRITICAL WARNING: cl edge type {x[2]} not in reference list yet")
             if x[2] not in edges_allowed:
                 edges_to_delete.append((x[0], x[1]))
         for x in edges_to_delete:
