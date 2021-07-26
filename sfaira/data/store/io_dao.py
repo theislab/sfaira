@@ -84,7 +84,7 @@ def write_dao(store: Union[str, Path], adata: anndata.AnnData, chunks: Union[boo
 
 
 def read_dao(store: Union[str, Path], use_dask: bool = True, columns: Union[None, List[str]] = None,
-             obs_separate: bool = False) -> \
+             obs_separate: bool = False, x_separate: bool = False) -> \
         Union[Tuple[anndata.AnnData, Union[dask.dataframe.DataFrame, pd.DataFrame]], anndata.AnnData]:
     """
     Assembles an AnnData instance based on distributed access optimised ("dao") store of a dataset.
@@ -125,9 +125,11 @@ def read_dao(store: Union[str, Path], use_dask: bool = True, columns: Union[None
     # Assemble AnnData without obs to save memory:
     adata = anndata.AnnData(**d, shape=x.shape)
     # Need to add these attributes after initialisation so that they are not evaluated:
-    adata.X = x
+    if not x_separate:
+        adata.X = x
+    if not obs_separate:
+        adata.obs = obs
     if obs_separate:
         return adata, obs
-    else:
-        adata.obs = obs
-        return adata
+    if x_separate:
+        return adata, x

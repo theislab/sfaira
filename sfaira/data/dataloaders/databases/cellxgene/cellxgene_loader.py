@@ -2,7 +2,7 @@ import anndata
 import os
 from typing import Union
 
-from sfaira.data import DatasetBase
+from sfaira.data.dataloaders.base.dataset import DatasetBase
 from sfaira.consts import AdataIdsCellxgene
 
 

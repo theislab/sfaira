@@ -1,7 +1,7 @@
 import os
 from typing import Union
 
-from sfaira.data import DatasetGroup
+from sfaira.data.dataloaders.base.dataset_group import DatasetGroup
 from sfaira.consts import AdataIdsCellxgene
 
 from .cellxgene_loader import Dataset

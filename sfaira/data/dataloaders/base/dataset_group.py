@@ -12,7 +12,8 @@ import scipy.sparse
 from typing import Dict, List, Union
 import warnings
 
-from sfaira.data.base.dataset import is_child, DatasetBase
+from sfaira.data.dataloaders.base.dataset import DatasetBase
+from sfaira.data.dataloaders.base.utils import is_child
 from sfaira.versions.genomes.genomes import GenomeContainer
 from sfaira.consts import AdataIds, AdataIdsSfaira
 from sfaira.data.utils import read_yaml

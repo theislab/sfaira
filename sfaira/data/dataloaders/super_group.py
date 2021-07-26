@@ -7,7 +7,7 @@ except ImportError:
 
 from sfaira.data.dataloaders.loaders import DatasetSuperGroupLoaders
 from sfaira.data.dataloaders.databases import DatasetSuperGroupDatabases
-from sfaira.data import DatasetSuperGroup
+from sfaira.data.dataloaders.base.dataset_group import DatasetSuperGroup
 
 
 class Universe(DatasetSuperGroup):

@@ -7,7 +7,7 @@ import pytest
 import time
 from typing import Union
 
-from sfaira.data import DistributedStoreBase, load_store
+from sfaira.data import DistributedStoreMultipleFeatureSpaceBase, load_store
 from sfaira.estimators import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
 from sfaira.versions.genomes.genomes import CustomFeatureContainer
 from sfaira.versions.metadata import OntologyOboCustom
@@ -67,7 +67,7 @@ TOPOLOGY_CELLTYPE_MODEL = {
 
 class TestHelperEstimatorBase:
 
-    data: Union[anndata.AnnData, DistributedStoreBase]
+    data: Union[anndata.AnnData, DistributedStoreMultipleFeatureSpaceBase]
     tc: TopologyContainer
 
     """
@@ -93,7 +93,7 @@ class TestHelperEstimatorBase:
 
 class TestHelperEstimatorKeras(TestHelperEstimatorBase):
 
-    data: Union[anndata.AnnData, DistributedStoreBase]
+    data: Union[anndata.AnnData, DistributedStoreMultipleFeatureSpaceBase]
     estimator: Union[EstimatorKeras]
     model_type: str
     tc: TopologyContainer
@@ -223,7 +223,7 @@ class TestHelperEstimatorKerasCelltype(TestHelperEstimatorBase):
 
     def init_estimator(self, test_split):
         tc = self.tc
-        if isinstance(self.data, DistributedStoreBase):
+        if isinstance(self.data, DistributedStoreMultipleFeatureSpaceBase):
             # Reset leaves below:
             tc.topology["output"]["targets"] = None
         self.estimator = EstimatorKerasCelltype(
@@ -232,7 +232,7 @@ class TestHelperEstimatorKerasCelltype(TestHelperEstimatorBase):
             model_id="testid",
             model_topology=tc
         )
-        if isinstance(self.data, DistributedStoreBase):
+        if isinstance(self.data, DistributedStoreMultipleFeatureSpaceBase):
             leaves = self.estimator.celltype_universe.onto_cl.get_effective_leaves(
                 x=[x for x in self.data.obs[self.data._adata_ids_sfaira.cellontology_class].values
                    if x != self.data._adata_ids_sfaira.unknown_celltype_identifier]
@@ -417,14 +417,14 @@ def test_split_index_sets(organism: str, data_type: str, randomized_batch_access
     assert len(idx_test) == len(np.unique(idx_test))
     assert len(idx_train) + len(idx_eval) + len(idx_test) == test_estim.data.n_obs, \
         (len(idx_train), len(idx_eval), len(idx_test), test_estim.data.n_obs)
-    if isinstance(test_estim.data, DistributedStoreBase):
+    if isinstance(test_estim.data, DistributedStoreMultipleFeatureSpaceBase):
         assert np.sum([v.shape[0] for v in test_estim.data.adata_by_key.values()]) == test_estim.data.n_obs
     # 2) Assert that index assignments are exclusive to each split:
     assert len(set(idx_train).intersection(set(idx_eval))) == 0
     assert len(set(idx_train).intersection(set(idx_test))) == 0
     assert len(set(idx_test).intersection(set(idx_eval))) == 0
     # 3) Check partition of index vectors over store data sets matches test split scenario:
-    if isinstance(test_estim.estimator.data, DistributedStoreBase):
+    if isinstance(test_estim.estimator.data, DistributedStoreMultipleFeatureSpaceBase):
         # Prepare data set-wise index vectors that are numbered in the same way as global split index vectors.
         # See also EstimatorKeras.train and DistributedStoreBase.subset_cells_idx_global
         idx_raw = test_estim.estimator.data.indices_global.values()

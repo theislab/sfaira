@@ -13,11 +13,6 @@ from sfaira.versions.genomes.genomes import GenomeContainer
 from sfaira.unit_tests.mock_data import ASSEMBLY_MOUSE,ASSEMBLY_HUMAN, prepare_dsg, prepare_store
 
 
-"""
-Tests from here on down require cached data for mouse lung
-"""
-
-
 @pytest.mark.parametrize("store_format", ["h5ad", "dao"])
 def test_fatal(store_format: str):
     """
@@ -31,8 +26,8 @@ def test_fatal(store_format: str):
     _ = store.var_names
     _ = store.shape
     _ = store.obs
-    _ = store.indices
-    _ = store.genome_container
+    _ = store.stores["mouse"].indices
+    _ = store.genome_containers
 
 
 @pytest.mark.parametrize("store_format", ["h5ad", "dao"])
@@ -116,7 +111,8 @@ def test_config(store_format: str):
     store2 = load_store(cache_path=store_path, store_format=store_format)
     store2.load_config(fn=config_path + ".pickle")
     assert np.all(store.indices.keys() == store2.indices.keys())
-    assert np.all([np.all(store.indices[k] == store2.indices[k]) for k in store.indices.keys()])
+    assert np.all([np.all(store.indices[k] == store2.indices[k])
+                   for k in store.indices.keys()])
 
 
 @pytest.mark.parametrize("store_format", ["h5ad", "dao"])
@@ -132,12 +128,11 @@ def test_generator_shapes(store_format: str, idx, batch_size: int, obs_keys: Lis
     store_path = prepare_store(store_format=store_format)
     store = load_store(cache_path=store_path, store_format=store_format)
     store.subset(attr_key="organism", values=["mouse"])
-    print(store.indices)
     gc = GenomeContainer(assembly=ASSEMBLY_MOUSE)
     gc.subset(**{"biotype": "protein_coding"})
-    store.genome_container = gc
+    store.genome_containers = gc
     g = store.generator(
-        idx=idx,
+        idx={"mouse": idx},
         batch_size=batch_size,
         obs_keys=obs_keys,
         randomized_batch_access=randomized_batch_access,

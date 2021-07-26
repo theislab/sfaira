@@ -11,7 +11,7 @@ from typing import List
 # Set global variables.
 print("sys.argv", sys.argv)
 
-REPS = 10
+N_DRAWS = 10
 BATCH_SIZES = [64]
 
 path_store_h5ad = str(sys.argv[1])
@@ -57,11 +57,11 @@ def time_gen(_store, store_format, kwargs) -> List[float]:
     if kwargs["var_subset"]:
         gc = sfaira.versions.genomes.genomes.GenomeContainer(assembly="Homo_sapiens.GRCh38.102")
         gc.subset(symbols=["VTA1", "MLXIPL", "BAZ1B", "RANBP9", "PPARGC1A", "DDX25", "CRYAB"])
-        _store.genome_container = gc
+        _store.genome_containers = gc
     del kwargs["var_subset"]
     _gen = _store.generator(**kwargs)()
     _measurements = []
-    for _ in range(REPS):
+    for _ in range(N_DRAWS):
         _t0 = time.time()
         _ = next(_gen)
         _measurements.append(time.time() - _t0)
@@ -89,14 +89,15 @@ store.subset(attr_key="organism", values="human")
 k_datasets_h5ad = list(store.indices.keys())
 # Only retain intersection of data sets while keeping order.
 k_datasets = [x for x in k_datasets_dao if x in k_datasets_h5ad]
-print(f"running benchmark on {len(k_datasets)} data sets.")
+n_datasets = len(k_datasets)
+print(f"running benchmark on {n_datasets} data sets.")
 for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, compression_kwargs):
     path_store = path_store_h5ad if store_type_i == "h5ad" else path_store_dao
 
     # Measure initiate time.
     time_measurements_initiate[store_type_i] = []
     memory_measurements_initiate[store_type_i] = []
-    for _ in range(REPS):
+    for _ in range(3):
         t0 = time.time()
         store = sfaira.data.load_store(cache_path=path_store, store_format=store_type_i)
         time_measurements_initiate[store_type_i].append(time.time() - t0)
@@ -131,7 +132,7 @@ for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, comp
             kwargs = {
                 "idx": np.concatenate([
                     np.arange(idx_dataset_start[0] + bs * i, idx_dataset_start[0] + bs * (i + 1))
-                    for i in range(REPS)]),
+                    for i in range(N_DRAWS)]),
                 "batch_size": bs,
                 "return_dense": dense,
                 "randomized_batch_access": False,
@@ -149,8 +150,8 @@ for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, comp
             suffix = "_todense_varsubet" if dense and varsubset else "_todense" if dense and not varsubset else ""
             kwargs = {
                 "idx": np.random.choice(
-                    np.arange(idx_dataset_start[0], np.maximum(idx_dataset_end[0], idx_dataset_start[0] + bs * REPS)),
-                    size=bs * REPS, replace=False),
+                    np.arange(idx_dataset_start[0], np.maximum(idx_dataset_end[0], idx_dataset_start[0] + bs * N_DRAWS)),
+                    size=bs * N_DRAWS, replace=False),
                 "batch_size": bs,
                 "return_dense": dense,
                 "randomized_batch_access": False,
@@ -171,7 +172,7 @@ for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, comp
                 "batch_size": bs,
                 "return_dense": dense,
                 "randomized_batch_access": False,
-                "random_access": True,
+                "random_access": False,
                 "var_subset": varsubset,
             }
             time_measurements[scenario + suffix][store_type_i][key_bs] = time_gen(
@@ -229,12 +230,12 @@ for i, x in enumerate([
     if i == 0 or i == 1:
         if i == 0:
             measurements_initiate = time_measurements_initiate
-            ylabel = "memory MB"
-            log = False
-        else:
-            measurements_initiate = memory_measurements_initiate
             ylabel = "log10 time sec"
             log = True
+        else:
+            measurements_initiate = memory_measurements_initiate
+            ylabel = "memory MB"
+            log = False
         df_sb = pd.concat([
             pd.DataFrame({
                 ylabel: np.log(measurements_initiate[m]) / np.log(10) if log else measurements_initiate[m],
@@ -258,7 +259,7 @@ for i, x in enumerate([
                         "scenario": " ".join(m.split("_")[4:]),
                         "store": n,
                         "batch size": o,
-                        "scenario - batch size": " ".join(m.split("_")[4:]) + str(o),
+                        "scenario - batch size": " ".join(m.split("_")[4:]) + "_bs" + str(o),
                         "draw": range(len(time_measurements[m][n][o])),
                     })
                     for o in time_measurements[m][n].keys()

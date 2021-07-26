@@ -2,7 +2,7 @@ import pydoc
 import os
 from typing import List, Union
 from warnings import warn
-from sfaira.data import DatasetSuperGroup, DatasetGroupDirectoryOriented
+from sfaira.data.dataloaders.base.dataset_group import DatasetSuperGroup, DatasetGroupDirectoryOriented
 
 
 class DatasetSuperGroupLoaders(DatasetSuperGroup):
