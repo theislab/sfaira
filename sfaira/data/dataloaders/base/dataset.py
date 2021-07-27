@@ -2234,7 +2234,7 @@ class DatasetBase(abc.ABC):
                     else:
                         raise ValueError(f"'{x}' is not a valid entry for {attr}.")
             else:
-                raise ValueError(f"allowed of type {type(allowed)} is not a valid entry for {attr}.")
+                raise ValueError(f"argument allowed of type {type(allowed)} is not a valid entry for {attr}.")
         # Flatten attempts if only one was made:
         if len(attempted_clean) == 1:
             attempted_clean = attempted_clean[0]

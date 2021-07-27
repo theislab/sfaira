@@ -56,6 +56,20 @@ class OntologyContainerSfaira:
         self.title = None
         self.year = OntologyList(terms=list(range(2000, 3000)))
 
+    def reload_ontology(self, attr):
+        kwargs = {"recache": True}
+        if attr == "assay_sc":
+            self._assay_sc = OntologySinglecellLibraryConstruction(**kwargs)
+        elif attr == "cell_line":
+            self._cell_line = OntologyCellosaurus(**kwargs)
+        elif attr == "cellontology_class":
+            self._cellontology_class = OntologyCl(branch=DEFAULT_CL, **kwargs)
+        elif attr == "disease":
+            self._disease = OntologyMondo(**kwargs)
+        elif attr == "organ":
+            self._organ = OntologyUberon(**kwargs)
+        return self._assay_sc
+
     @property
     def assay_sc(self):
         if self._assay_sc is None:
