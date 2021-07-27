@@ -58,7 +58,7 @@ class Dataset(DatasetBase):
             "private,donor2.annotation.txt"
         ]
 
-        self.assay_sc = "10x technology"
+        self.assay_sc = "10x 3' transcription profiling"
         self.author = "Szabo"
         self.doi_journal = "10.1038/s41467-019-12464-3"
         self.individual = SAMPLE_DICT[self.sample_fn][1]

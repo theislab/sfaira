@@ -13,7 +13,7 @@ class Dataset(DatasetBase):
         self.download_url_data = "https://covid19.cog.sanger.ac.uk/miller20.processed.h5ad"
         self.download_url_meta = None
 
-        self.assay_sc = "10x technology"
+        self.assay_sc = "10x 3' v2"
         self.author = "Miller"
         self.disease = "healthy"
         self.doi_journal = "10.1016/j.devcel.2020.01.033"

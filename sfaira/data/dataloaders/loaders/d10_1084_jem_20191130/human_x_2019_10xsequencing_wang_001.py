@@ -21,7 +21,7 @@ class Dataset(DatasetBase):
 
         organ = self.sample_fn.split("_")[1].split(".")[0]
 
-        self.assay_sc = "10x technology"
+        self.assay_sc = "10x 3' transcription profiling"
         self.author = "Wang"
         self.disease = "healthy"
         self.doi_journal = "10.1084/jem.20191130"
