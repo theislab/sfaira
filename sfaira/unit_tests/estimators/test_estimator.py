@@ -88,7 +88,7 @@ class TestHelperEstimatorBase:
             store.subset(attr_key="organism", values=organism)
         if organ is not None:
             store.subset(attr_key="organ", values=organ)
-        self.data = store.stores["organism"]
+        self.data = store.stores[organism]
 
 
 class TestHelperEstimatorKeras(TestHelperEstimatorBase):
