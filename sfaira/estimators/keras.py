@@ -236,23 +236,20 @@ class EstimatorKeras:
                 x = x[idx, :]
 
             # If the feature space is already mapped to the right reference, return the data matrix immediately
-            if self._adata_ids.mapped_features in self.data.uns_keys() and \
-                    self.data.uns[self._adata_ids.mapped_features] == self.topology_container.gc.assembly:
-                print(f"found {x.shape[0]} observations")
-                return x
-
-            # Compute indices of genes to keep
-            data_ids = self.data.var[self._adata_ids.gene_id_ensembl].values.tolist()
-            target_ids = self.topology_container.gc.ensembl
-            idx_map = np.array([data_ids.index(z) for z in target_ids])
-            # Assert that each ID from target IDs appears exactly once in data IDs:
-            assert np.all([z in data_ids for z in target_ids]), "not all target feature IDs found in data"
-            assert np.all([np.sum(z == np.array(data_ids)) <= 1. for z in target_ids]), \
-                "duplicated target feature IDs exist in data"
-            # Map feature space.
-            x = x[:, idx_map]
-            print(f"found {len(idx_map)} intersecting features between {x.shape[1]} features in input data set and"
-                  f" {self.topology_container.n_var} features in reference genome")
+            if self.data.n_vars != self.topology_container.n_var or \
+                    not np.all(self.data.var[self._adata_ids.gene_id_ensembl] == self.topology_container.gc.ensembl):
+                # Compute indices of genes to keep
+                data_ids = self.data.var[self._adata_ids.gene_id_ensembl].values.tolist()
+                target_ids = self.topology_container.gc.ensembl
+                idx_map = np.array([data_ids.index(z) for z in target_ids])
+                # Assert that each ID from target IDs appears exactly once in data IDs:
+                assert np.all([z in data_ids for z in target_ids]), "not all target feature IDs found in data"
+                assert np.all([np.sum(z == np.array(data_ids)) <= 1. for z in target_ids]), \
+                    "duplicated target feature IDs exist in data"
+                # Map feature space.
+                x = x[:, idx_map]
+                print(f"found {len(idx_map)} intersecting features between {x.shape[1]} features in input data set and"
+                      f" {self.topology_container.n_var} features in reference genome")
             print(f"found {x.shape[0]} observations")
             return x
 

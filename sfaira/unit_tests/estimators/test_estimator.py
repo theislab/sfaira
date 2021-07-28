@@ -207,6 +207,7 @@ class HelperEstimatorKerasEmbedding(TestHelperEstimatorKeras):
 class TestHelperEstimatorKerasCelltype(TestHelperEstimatorKeras):
 
     estimator: EstimatorKerasCelltype
+    nleaves: int
     model_type: str
     tc: TopologyContainer
 
@@ -231,25 +232,19 @@ class TestHelperEstimatorKerasCelltype(TestHelperEstimatorKeras):
             model_id="testid",
             model_topology=tc
         )
-        if isinstance(self.data, DistributedStoreSingleFeatureSpace):
-            leaves = self.estimator.celltype_universe.onto_cl.get_effective_leaves(
-                x=[x for x in self.data.obs[self.data._adata_ids_sfaira.cellontology_class].values
-                   if x != self.data._adata_ids_sfaira.unknown_celltype_identifier]
-            )
-            self.nleaves = len(leaves)
-            self.estimator.celltype_universe.onto_cl.leaves = leaves
-        else:
-            self.nleaves = None
+        leaves = self.estimator.celltype_universe.onto_cl.get_effective_leaves(
+            x=[x for x in self.data.obs[self.data._adata_ids_sfaira.cellontology_class].values
+               if x != self.data._adata_ids_sfaira.unknown_celltype_identifier]
+        )
+        self.nleaves = len(leaves)
+        self.estimator.celltype_universe.onto_cl.leaves = leaves
         self.estimator.init_model()
         self.estimator.split_train_val_test(test_split=test_split, val_split=0.1)
 
     def basic_estimator_test(self, test_split=0.1):
         _ = self.estimator.evaluate()
         prediction_output = self.estimator.predict()
-        if isinstance(self.estimator.data, anndata.AnnData):
-            assert prediction_output.shape[1] == len(TARGET_UNIVERSE), prediction_output.shape
-        else:
-            assert prediction_output.shape[1] == self.nleaves, prediction_output.shape
+        assert prediction_output.shape[1] == self.nleaves, prediction_output.shape
         weights = self.estimator.model.training_model.get_weights()
         self.estimator.save_weights_to_cache()
         self.estimator.load_weights_from_cache()
@@ -284,6 +279,7 @@ class HelperEstimatorKerasCelltypeCustomObo(TestHelperEstimatorKerasCelltype):
         if model_type == "mlp":
             topology["hyper_parameters"]["units"] = (2,)
         self.model_type = model_type
+        self.nleaves = len(topology["output"]["targets"])
         gc = self.init_genome_custom(n_features=n_features)
         self.tc = TopologyContainer(topology=topology, topology_id="0.0.1", custom_genome_constainer=gc)
 
