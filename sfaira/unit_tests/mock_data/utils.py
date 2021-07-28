@@ -20,6 +20,8 @@ def simulate_anndata(genes, n_obs, targets=None, assays=None, obo: Union[None, O
     """
     Simulate basic data example.
 
+    TODO depreceate and replace by code below.
+
     :return: AnnData instance.
     """
     adata_ids_sfaira = AdataIdsSfaira()
@@ -56,7 +58,10 @@ def simulate_anndata(genes, n_obs, targets=None, assays=None, obo: Union[None, O
     return data
 
 
-def create_adata(celltypes, ncells, ngenes, assembly) -> anndata.AnnData:
+def _create_adata(celltypes, ncells, ngenes, assembly) -> anndata.AnnData:
+    """
+    Usesd by mock data loaders.
+    """
     gc = GenomeContainer(assembly=assembly)
     gc.subset(biotype="protein_coding")
     genes = gc.ensembl[:ngenes]
@@ -74,6 +79,10 @@ def prepare_dsg() -> DatasetSuperGroupMock:
     Prepares data set super group of mock data and return instance.
     """
     dsg = DatasetSuperGroupMock()
+    match_to_reference = {"human": ASSEMBLY_HUMAN, "mouse": ASSEMBLY_MOUSE}
+    dsg.load(allow_caching=True)
+    dsg.streamline_features(remove_gene_version=True, match_to_reference=match_to_reference)
+    dsg.streamline_metadata(schema="sfaira", clean_obs=True, clean_var=True, clean_uns=True, clean_obs_names=True)
     return dsg
 
 

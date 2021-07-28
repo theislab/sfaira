@@ -13,7 +13,8 @@ from sfaira.versions.genomes.genomes import CustomFeatureContainer
 from sfaira.versions.metadata import OntologyOboCustom
 from sfaira.versions.topologies import TopologyContainer
 
-from sfaira.unit_tests.mock_data.utils import prepare_store, simulate_anndata
+from sfaira.unit_tests.mock_data.consts import CELLTYPES
+from sfaira.unit_tests.mock_data.utils import prepare_dsg, prepare_store, simulate_anndata
 
 dir_data = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_data")
 dir_meta = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_data", "meta")
@@ -28,9 +29,10 @@ GENES = {
     "mouse": ["ENSMUSG00000000003", "ENSMUSG00000000028"],
     "human": ["ENSG00000000003", "ENSG00000000005"],
 }
-TARGETS = ["T cell", "CD4-positive helper T cell", "stromal cell", "UNKNOWN"]
-TARGET_UNIVERSE = ["CD4-positive helper T cell", "stromal cell"]
-ASSAYS = ["10x sequencing", "Smart-seq2"]
+TARGETS = CELLTYPES
+TARGET_UNIVERSE = CELLTYPES
+
+ASSAYS = ["10x technology", "Smart-seq2"]
 
 
 TOPOLOGY_EMBEDDING_MODEL = {
@@ -70,18 +72,15 @@ class TestHelperEstimatorBase:
     data: Union[anndata.AnnData, DistributedStoreSingleFeatureSpace]
     tc: TopologyContainer
 
-    """
-    TODO for everybody working on this, add one _test* function in here and add it into
-    basic_estimator_test(). See _test_call() for an example.
-    """
+    def load_adata(self, organism="human", organ=None):
+        dsg = prepare_dsg()
+        if organism is not None:
+            dsg.subset(key="organism", values=organism)
+        if organ is not None:
+            dsg.subset(key="organ", values=organ)
+        self.data = dsg.adata
 
-    def load_adata(self):
-        """
-        Sets attribute .data with simulated data.
-        """
-        self.data = simulate_anndata(n_obs=100, assays=ASSAYS, genes=self.tc.gc.ensembl, targets=TARGETS)
-
-    def load_store(self, organism=None, organ=None):
+    def load_store(self, organism="human", organ=None):
         store_path = prepare_store(store_format="dao")
         store = load_store(cache_path=store_path, store_format="dao")
         if organism is not None:
@@ -135,7 +134,7 @@ class TestHelperEstimatorKeras(TestHelperEstimatorBase):
     def basic_estimator_test(self, test_split):
         pass
 
-    def load_estimator(self, model_type, data_type, feature_space, test_split, organism="mouse"):
+    def load_estimator(self, model_type, data_type, feature_space, test_split, organism="human"):
         self.init_topology(model_type=model_type, feature_space=feature_space, organism=organism)
         np.random.seed(1)
         if data_type == "adata":
@@ -205,7 +204,7 @@ class HelperEstimatorKerasEmbedding(TestHelperEstimatorKeras):
                 assert np.allclose(prediction_embed, new_prediction_embed, rtol=1e-6, atol=1e-6)
 
 
-class TestHelperEstimatorKerasCelltype(TestHelperEstimatorBase):
+class TestHelperEstimatorKerasCelltype(TestHelperEstimatorKeras):
 
     estimator: EstimatorKerasCelltype
     model_type: str
@@ -256,7 +255,6 @@ class TestHelperEstimatorKerasCelltype(TestHelperEstimatorBase):
         self.estimator.load_weights_from_cache()
         new_prediction_output = self.estimator.predict()
         new_weights = self.estimator.model.training_model.get_weights()
-        print(self.estimator.model.training_model.summary())
         for i in range(len(weights)):
             if not np.any(np.isnan(weights[i])):
                 assert np.allclose(weights[i], new_weights[i], rtol=1e-6, atol=1e-6)
@@ -349,10 +347,9 @@ def test_for_fatal_mlp_custom():
 # Test index sets
 
 
-@pytest.mark.parametrize("organism", ["human"])
 @pytest.mark.parametrize("batch_size", [1024, 2048, 4096])
 @pytest.mark.parametrize("randomized_batch_access", [False, True])
-def test_dataset_size(organism: str, batch_size: int, randomized_batch_access: bool):
+def test_dataset_size(batch_size: int, randomized_batch_access: bool):
     """
     Test that tf data set from estimator has same size as generator invoked directly from store based on number of
     observations in emitted batches.
@@ -365,7 +362,7 @@ def test_dataset_size(organism: str, batch_size: int, randomized_batch_access: b
     # Need full feature space here because observations are not necessarily different in small model testing feature
     # space with only two genes:
     test_estim.load_estimator(model_type="linear", data_type="store", feature_space="reduced", test_split=0.2,
-                              organism=organism)
+                              organism="human")
     idx_train = test_estim.estimator.idx_train
     shuffle_buffer_size = None if randomized_batch_access else 2
     ds_train = test_estim.estimator._get_dataset(idx=idx_train, batch_size=batch_size, mode='eval',
@@ -377,8 +374,8 @@ def test_dataset_size(organism: str, batch_size: int, randomized_batch_access: b
         x_train_shape += x[0].shape[0]
     # Define raw store generator on train data to compare and check that it has the same size as tf generator exposed
     # by estimator:
-    g_train = test_estim.estimator.data.generator(idx=idx_train, batch_size=retrieval_batch_size,
-                                                  randomized_batch_access=randomized_batch_access)
+    g_train, _ = test_estim.estimator.data.generator(idx=idx_train, batch_size=retrieval_batch_size,
+                                                     randomized_batch_access=randomized_batch_access)
     x_train2_shape = 0
     for x, _ in g_train():
         x_train2_shape += x.shape[0]
@@ -386,11 +383,10 @@ def test_dataset_size(organism: str, batch_size: int, randomized_batch_access: b
     assert x_train_shape == len(idx_train)
 
 
-@pytest.mark.parametrize("organism", ["mouse"])
 @pytest.mark.parametrize("data_type", ["adata", "store"])
 @pytest.mark.parametrize("randomized_batch_access", [False, True])
-@pytest.mark.parametrize("test_split", [0.3, {"assay_sc": "10x sequencing"}])
-def test_split_index_sets(organism: str, data_type: str, randomized_batch_access: bool, test_split):
+@pytest.mark.parametrize("test_split", [0.3, {"id": "human_lung_2021_10xtechnology_mock1_001_no_doi_mock1"}])
+def test_split_index_sets(data_type: str, randomized_batch_access: bool, test_split):
     """
     Test that train, val, test split index sets are correct:
 
@@ -403,13 +399,10 @@ def test_split_index_sets(organism: str, data_type: str, randomized_batch_access
     # Need full feature space here because observations are not necessarily different in small model testing feature
     # space with only two genes:
     test_estim.load_estimator(model_type="linear", data_type=data_type, test_split=test_split, feature_space="full",
-                              organism=organism)
+                              organism="human")
     idx_train = test_estim.estimator.idx_train
     idx_eval = test_estim.estimator.idx_eval
     idx_test = test_estim.estimator.idx_test
-    print(idx_train)
-    print(idx_eval)
-    print(idx_test)
     # 1) Assert that index assignment sets sum up to full data set:
     # Make sure that there are no repeated indices in each set.
     assert len(idx_train) == len(np.unique(idx_train))
@@ -426,8 +419,11 @@ def test_split_index_sets(organism: str, data_type: str, randomized_batch_access
     # 3) Check partition of index vectors over store data sets matches test split scenario:
     if isinstance(test_estim.estimator.data, DistributedStoreSingleFeatureSpace):
         # Prepare data set-wise index vectors that are numbered in the same way as global split index vectors.
-        # See also EstimatorKeras.train and DistributedStoreBase.subset_cells_idx_global
-        idx_raw = test_estim.estimator.data.indices_global.values()
+        idx_raw = []
+        counter = 0
+        for v in test_estim.data.indices.values():
+            idx_raw.append(np.arange(counter, counter + len(v)))
+            counter += len(v)
         if isinstance(test_split, float):
             # Make sure that indices from each split are in each data set:
             for i, z in enumerate([idx_train, idx_eval, idx_test]):
@@ -457,57 +453,41 @@ def test_split_index_sets(organism: str, data_type: str, randomized_batch_access
     # Build numpy arrays of expression input data sets from tensorflow data sets directly from estimator.
     # These data sets are the most processed transformation of the data and stand directly in concat with the model.
     shuffle_buffer_size = None if randomized_batch_access else 2
-    t0 = time.time()
     ds_train = test_estim.estimator._get_dataset(idx=idx_train, batch_size=1024, mode='eval',
                                                  shuffle_buffer_size=shuffle_buffer_size,
                                                  retrieval_batch_size=2048,
                                                  randomized_batch_access=randomized_batch_access)
-    print(f"time for building training data set: {time.time() - t0}s")
-    t0 = time.time()
     ds_eval = test_estim.estimator._get_dataset(idx=idx_eval, batch_size=1024, mode='eval',
                                                 shuffle_buffer_size=shuffle_buffer_size,
                                                 retrieval_batch_size=2048,
                                                 randomized_batch_access=randomized_batch_access)
-    print(f"time for building validation data set: {time.time() - t0}s")
-    t0 = time.time()
     ds_test = test_estim.estimator._get_dataset(idx=idx_test, batch_size=1024, mode='eval',
                                                 shuffle_buffer_size=shuffle_buffer_size,
                                                 retrieval_batch_size=2048,
                                                 randomized_batch_access=randomized_batch_access)
-    print(f"time for building test data set: {time.time() - t0}s")
     # Create two copies of test data set to make sure that re-instantiation of a subset does not cause issues.
     ds_test2 = test_estim.estimator._get_dataset(idx=idx_test, batch_size=1024, mode='eval',
                                                  shuffle_buffer_size=shuffle_buffer_size,
                                                  retrieval_batch_size=2048,
                                                  randomized_batch_access=randomized_batch_access)
-    print(f"time for building test data set: {time.time() - t0}s")
     x_train = []
     x_eval = []
     x_test = []
     x_test2_shape = 0
-    t0 = time.time()
     for x, _ in ds_train.as_numpy_iterator():
         x_train.append(x[0])
     x_train = np.concatenate(x_train, axis=0)
-    print(f"time for iterating over training data set: {time.time() - t0}s")
-    t0 = time.time()
     for x, _ in ds_eval.as_numpy_iterator():
         x_eval.append(x[0])
     x_eval = np.concatenate(x_eval, axis=0)
-    print(f"time for iterating over validation data set: {time.time() - t0}s")
-    t0 = time.time()
     for x, _ in ds_test.as_numpy_iterator():
         x_test.append(x[0])
     x_test = np.concatenate(x_test, axis=0)
-    print(f"time for iterating over test data set: {time.time() - t0}s")
     # Assert that duplicate of test data has the same shape:
     for x, _ in ds_test2:
         x_test2_shape += x[0].shape[0]
     assert x_test2_shape == x_test.shape[0]
     # Validate size of recovered numpy data sets:
-    print(test_estim.data.n_obs)
-    print(f"shapes expected {(len(idx_train), len(idx_eval), len(idx_test))}")
-    print(f"shapes received {(x_train.shape[0], x_eval.shape[0], x_test.shape[0])}")
     assert x_train.shape[0] + x_eval.shape[0] + x_test.shape[0] == test_estim.data.n_obs
     assert len(idx_train) + len(idx_eval) + len(idx_test) == test_estim.data.n_obs
     assert x_train.shape[0] == len(idx_train)

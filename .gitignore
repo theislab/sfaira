@@ -8,6 +8,8 @@ docs/api/
 sfaira/unit_tests/test_data_loaders/*
 sfaira/unit_tests/mock_data/store*
 sfaira/unit_tests/mock_data/temp*
+sfaira/unit_tests/trainer/temp*
+sfaira/unit_tests/versions/temp*
 
 # General patterns:
 git abuild

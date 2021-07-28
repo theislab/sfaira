@@ -1,12 +1,12 @@
 import anndata
 
-from sfaira.unit_tests.mock_data.consts import ASSEMBLY_HUMAN
-from sfaira.unit_tests.mock_data.utils import create_adata
+from sfaira.unit_tests.mock_data.consts import ASSEMBLY_HUMAN, CELLTYPES
+from sfaira.unit_tests.mock_data.utils import _create_adata
 
 
 def load(data_dir, sample_fn, **kwargs) -> anndata.AnnData:
     ncells = 100
     ngenes = 50
-    adata = create_adata(celltypes=["adventitial cell", "endothelial cell"], ncells=ncells, ngenes=ngenes,
-                         assembly=ASSEMBLY_HUMAN)
+    adata = _create_adata(celltypes=CELLTYPES[:2], ncells=ncells, ngenes=ngenes,
+                          assembly=ASSEMBLY_HUMAN)
     return adata

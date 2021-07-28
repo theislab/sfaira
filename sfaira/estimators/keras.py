@@ -72,7 +72,7 @@ class EstimatorKeras:
         self.topology_container = model_topology
         # Prepare store with genome container sub-setting:
         if isinstance(self.data, DistributedStoreSingleFeatureSpace):
-            self.data.genome_containers = self.topology_container.gc
+            self.data.genome_container = self.topology_container.gc
 
         self.history = None
         self.train_hyperparam = None
@@ -294,17 +294,24 @@ class EstimatorKeras:
                         raise ValueError(f"Did not find column {k} used to define test set in self.data.")
                     in_test = np.logical_and(in_test, np.array([x in v for x in self.data.obs[k].values]))
                 elif isinstance(self.data, DistributedStoreSingleFeatureSpace):
-                    idx = self.data.get_subset_idx_global(attr_key=k, values=v)
+                    idx = self.data.get_subset_idx(attr_key=k, values=v, excluded_values=None)
+                    # Build continuous vector across all sliced data sets and establish which observations are kept
+                    # in subset.
                     in_test_k = np.ones((self.data.n_obs,), dtype=int) == 0
-                    in_test_k[idx] = True
+                    counter = 0
+                    for kk, vv in self.data.indices.items():
+                        if kk in idx.keys() and len(idx[kk]) > 0:
+                            in_test_k[np.where([x in idx[kk] for x in vv])[0] + counter] = True
+                        counter += len(vv)
                     in_test = np.logical_and(in_test, in_test_k)
                 else:
                     assert False
             self.idx_test = np.sort(np.where(in_test)[0])
-            print(f"Found {len(self.idx_test)} out of {self.data.n_obs} cells that correspond to held out data set")
-            print(self.idx_test)
         else:
             raise ValueError("type of test_split %s not recognized" % type(test_split))
+        print(f"Found {len(self.idx_test)} out of {self.data.n_obs} cells that correspond to test data set")
+        assert len(self.idx_test) < self.data.n_obs, "test set covers full data set, apply a more restrictive test " \
+                                                     "data definiton"
         idx_train_eval = np.array([x for x in all_idx if x not in self.idx_test])
         np.random.seed(1)
         self.idx_eval = np.sort(np.random.choice(
@@ -601,7 +608,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
 
         # Prepare data reading according to whether anndata is backed or not:
         if self.using_store:
-            generator_raw = self.data.generator(
+            generator_raw, _ = self.data.generator(
                 idx=idx,
                 batch_size=batch_size,
                 obs_keys=[],
@@ -1189,7 +1196,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
         if self.using_store:
             if weighted:
                 raise ValueError("using weights with store is not supported yet")
-            generator_raw = self.data.generator(
+            generator_raw, _ = self.data.generator(
                 idx=idx,
                 batch_size=batch_size,
                 obs_keys=[self._adata_ids.cellontology_id],

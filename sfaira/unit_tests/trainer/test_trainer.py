@@ -5,17 +5,14 @@ from typing import Union
 
 from sfaira.data import load_store
 from sfaira.ui import ModelZoo
-from sfaira.unit_tests.mock_data.utils import simulate_anndata, prepare_store
+from sfaira.unit_tests.estimators.test_estimator import TestHelperEstimatorBase, TARGETS
 from sfaira.train import TrainModelCelltype, TrainModelEmbedding
 from sfaira.versions.metadata import CelltypeUniverse, OntologyCl, OntologyUberon
 
 dir_temp = os.path.join(os.path.dirname(__file__), "temp")
 
-ASSEMBLY = "Mus_musculus.GRCm38.102"
-TARGETS = ["T cell", "stromal cell"]
 
-
-class HelperTrainerBase:
+class HelperTrainerBase(TestHelperEstimatorBase):
 
     data: Union[anndata.AnnData, load_store]
     trainer: Union[TrainModelCelltype, TrainModelEmbedding]
@@ -23,25 +20,6 @@ class HelperTrainerBase:
     def __init__(self, zoo: ModelZoo):
         self.model_id = zoo.model_id
         self.tc = zoo.topology_container
-
-    def _simulate(self) -> anndata.AnnData:
-        """
-        Simulate basic data example used for unit test.
-
-        :return: Simulated data set.
-        """
-        return simulate_anndata(n_obs=100, genes=self.tc.gc.ensembl, targets=TARGETS)
-
-    def load_adata(self):
-        """
-        Sets attribute .data with simulated data.
-        """
-        self.data = self._simulate()
-
-    def load_store(self):
-        store_path = prepare_store(store_format="dao")
-        store = load_store(cache_path=store_path)
-        self.data = store
 
     def load_data(self, data_type):
         np.random.seed(1)
