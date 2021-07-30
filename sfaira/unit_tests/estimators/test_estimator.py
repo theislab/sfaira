@@ -4,9 +4,9 @@ import numpy as np
 import os
 import pandas as pd
 import pytest
-import time
 from typing import Union
 
+from sfaira.consts import AdataIdsSfaira
 from sfaira.data import DistributedStoreSingleFeatureSpace, load_store
 from sfaira.estimators import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
 from sfaira.versions.genomes.genomes import CustomFeatureContainer
@@ -14,7 +14,7 @@ from sfaira.versions.metadata import OntologyOboCustom
 from sfaira.versions.topologies import TopologyContainer
 
 from sfaira.unit_tests.mock_data.consts import CELLTYPES
-from sfaira.unit_tests.mock_data.utils import prepare_dsg, prepare_store, simulate_anndata
+from sfaira.unit_tests.mock_data.utils import prepare_dsg, prepare_store
 
 dir_data = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_data")
 dir_meta = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_data", "meta")
@@ -69,6 +69,7 @@ TOPOLOGY_CELLTYPE_MODEL = {
 
 class TestHelperEstimatorBase:
 
+    adata_ids: AdataIdsSfaira
     data: Union[anndata.AnnData, DistributedStoreSingleFeatureSpace]
     tc: TopologyContainer
 
@@ -78,6 +79,7 @@ class TestHelperEstimatorBase:
             dsg.subset(key="organism", values=organism)
         if organ is not None:
             dsg.subset(key="organ", values=organ)
+        self.adata_ids = dsg.dataset_groups[0]._adata_ids
         self.data = dsg.adata
 
     def load_store(self, organism="human", organ=None):
@@ -87,6 +89,7 @@ class TestHelperEstimatorBase:
             store.subset(attr_key="organism", values=organism)
         if organ is not None:
             store.subset(attr_key="organ", values=organ)
+        self.adata_ids = store._adata_ids_sfaira
         self.data = store.stores[organism]
 
 
@@ -233,8 +236,8 @@ class TestHelperEstimatorKerasCelltype(TestHelperEstimatorKeras):
             model_topology=tc
         )
         leaves = self.estimator.celltype_universe.onto_cl.get_effective_leaves(
-            x=[x for x in self.data.obs[self.data._adata_ids_sfaira.cellontology_class].values
-               if x != self.data._adata_ids_sfaira.unknown_celltype_identifier]
+            x=[x for x in self.data.obs[self.adata_ids.cellontology_class].values
+               if x != self.adata_ids.unknown_celltype_identifier]
         )
         self.nleaves = len(leaves)
         self.estimator.celltype_universe.onto_cl.leaves = leaves
@@ -259,6 +262,8 @@ class TestHelperEstimatorKerasCelltype(TestHelperEstimatorKeras):
 
 class HelperEstimatorKerasCelltypeCustomObo(TestHelperEstimatorKerasCelltype):
 
+    custom_types = ["MYONTO:01", "MYONTO:02", "MYONTO:03"]
+
     def init_obo_custom(self) -> OntologyOboCustom:
         return OntologyOboCustom(obo=os.path.join(os.path.dirname(__file__), "custom.obo"))
 
@@ -275,7 +280,7 @@ class HelperEstimatorKerasCelltypeCustomObo(TestHelperEstimatorKerasCelltype):
         topology["input"]["genome"] = "custom"
         topology["input"]["genes"] = ["biotype", "embedding"]
         topology["output"]["cl"] = "custom"
-        topology["output"]["targets"] = ["MYONTO:02", "MYONTO:03"]
+        topology["output"]["targets"] = self.custom_types[1:]
         if model_type == "mlp":
             topology["hyper_parameters"]["units"] = (2,)
         self.model_type = model_type
@@ -287,8 +292,12 @@ class HelperEstimatorKerasCelltypeCustomObo(TestHelperEstimatorKerasCelltype):
         self.init_topology_custom(model_type="mlp", n_features=50)
         obo = self.init_obo_custom()
         np.random.seed(1)
-        self.data = simulate_anndata(n_obs=100, genes=self.tc.gc.ensembl,
-                                     targets=["MYONTO:01", "MYONTO:02", "MYONTO:03"], obo=obo)
+        self.load_adata()
+        self.data.obs[self.adata_ids.cellontology_class] = [
+            self.custom_types[np.random.randint(0, len(self.custom_types))]
+            for _ in range(self.data.n_obs)
+        ]
+        self.data.obs[self.adata_ids.cellontology_id] = self.data.obs[self.adata_ids.cellontology_class]
         self.estimator = EstimatorKerasCelltype(
             data=self.data,
             model_dir=None,

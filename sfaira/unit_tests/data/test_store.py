@@ -38,11 +38,6 @@ def test_data(store_format: str):
     # Run standard streamlining workflow on dsg and compare to object relayed via store.
     # Prepare dsg.
     dsg = prepare_dsg()
-    dsg.load(allow_caching=True)
-    match_to_reference = {"human": ASSEMBLY_HUMAN, "mouse": ASSEMBLY_MOUSE}
-    dsg.streamline_features(remove_gene_version=True, match_to_reference=match_to_reference,
-                            subset_genes_to_type="protein_coding")
-    dsg.streamline_metadata(schema="sfaira", clean_obs=True, clean_var=True, clean_uns=True, clean_obs_names=True)
     # Prepare store.
     # Rewriting store to avoid mismatch of randomly generated data in cache and store.
     store_path = prepare_store(store_format=store_format, rewrite=True)
