@@ -182,6 +182,7 @@ class AdataIdsCellxgene(AdataIds):
 
     def __init__(self):
         self.assay_sc = "assay"
+        self.author = None
         self.cell_types_original = "free_annotation"  # TODO "free_annotation" not always given
         # TODO: -> This will break streamlining though if self.cell_types_original is the same value as self.cellontology_class!!
         self.cellontology_class = "cell_type"
@@ -190,8 +191,8 @@ class AdataIdsCellxgene(AdataIds):
         self.doi_journal = "publication_doi"
         self.doi_preprint = "preprint_doi"
         self.disease = "disease"
-        self.gene_id_symbols = "gene_symbol"
-        self.gene_id_ensembl = "ensembl"
+        self.gene_id_symbols = "index"
+        self.gene_id_ensembl = None  # TODO not yet streamlined
         self.gene_id_index = self.gene_id_symbols
         self.id = "id"
         self.ncells = "ncells"
@@ -217,11 +218,6 @@ class AdataIdsCellxgene(AdataIds):
         self.unknown_metadata_ontology_id_identifier = ""
 
         self.batch_keys = []
-
-        # accepted file names
-        self.accepted_file_names = [
-            "krasnow_lab_human_lung_cell_atlas_smartseq2-2-remixed.h5ad",
-        ]
 
         self.obs_keys = [
             "assay_sc",

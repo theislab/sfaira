@@ -749,7 +749,10 @@ class DatasetBase(abc.ABC):
                     for xx in zip(*[self.adata.obs[batch_col].values.tolist() for batch_col in batch_cols])
                 ]
             else:
-                if hasattr(self, f"{k}_obs_key") and getattr(self, f"{k}_obs_key") is not None:
+                if hasattr(self, f"{k}_obs_key") and getattr(self, f"{k}_obs_key") is not None and \
+                        getattr(self, f"{k}_obs_key") in self.adata.obs.columns:
+                    # Last and-clause to check if this column is included in data sets. This may be violated if data
+                    # is obtained from a database which is not fully streamlined.
                     old_col = getattr(self, f"{k}_obs_key")
                     val = self.adata.obs[old_col].values.tolist()
                 else:

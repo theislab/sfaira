@@ -11,6 +11,8 @@ import pathlib
 import urllib.error
 import urllib.request
 
+from sfaira.consts.directories import CACHE_DIR_GENOMES
+
 KEY_SYMBOL = "gene_name"
 KEY_ID = "gene_id"
 KEY_TYPE = "gene_biotype"
@@ -32,10 +34,9 @@ class GtfInterface:
         """
         The cache dir is in a cache directory in the sfaira installation that is excempt from git versioning.
         """
-        cache_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "cache", "")
-        cache_dir_path = pathlib.Path(cache_dir)
+        cache_dir_path = pathlib.Path(CACHE_DIR_GENOMES)
         cache_dir_path.mkdir(parents=True, exist_ok=True)
-        return cache_dir
+        return CACHE_DIR_GENOMES
 
     @property
     def cache_fn(self):
@@ -58,11 +59,11 @@ class GtfInterface:
         Download .gtf file from ensembl FTP server and turn into reduced, gene-centric cache .csv.
         """
         temp_file = os.path.join(self.cache_dir, self.assembly + ".gtf.gz")
-        print(f"downloading {self.url_ensembl_ftp} into a temporary file {temp_file}")
         try:
             _ = urllib.request.urlretrieve(url=self.url_ensembl_ftp, filename=temp_file)
         except urllib.error.URLError as e:
-            raise ValueError(f"Could not download gtf from {self.url_ensembl_ftp} with urllib.error.URLError: {e}")
+            raise ValueError(f"Could not download gtf from {self.url_ensembl_ftp} with urllib.error.URLError: {e}, "
+                             f"check if assembly name '{self.assembly}' corresponds to an actual assembly.")
         with gzip.open(temp_file) as f:
             tab = pandas.read_csv(f, sep="\t", comment="#", header=None)
         os.remove(temp_file)  # Delete temporary file .gtf.gz.

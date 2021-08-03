@@ -7,7 +7,7 @@ import pickle
 import requests
 from typing import Dict, List, Tuple, Union
 
-FILE_PATH = __file__
+from sfaira.consts.directories import CACHE_DIR_ONTOLOGIES
 
 """
 Ontology managament classes.
@@ -26,18 +26,12 @@ ToDo explain usage of ontology extension.
 """
 
 
-def get_base_ontology_cache() -> str:
-    folder = FILE_PATH.split(os.sep)[:-4]
-    folder.insert(1, os.sep)
-    return os.path.join(*folder, "cache", "ontologies")
-
-
 def cached_load_obo(url, ontology_cache_dir, ontology_cache_fn, recache: bool = False):
     if os.name == "nt":  # if running on windows, do not download obo file, but rather pass url directly to obonet
         # TODO add caching option.
         obofile = url
     else:
-        ontology_cache_dir = os.path.join(get_base_ontology_cache(), ontology_cache_dir)
+        ontology_cache_dir = os.path.join(CACHE_DIR_ONTOLOGIES, ontology_cache_dir)
         obofile = os.path.join(ontology_cache_dir, ontology_cache_fn)
         # Download if necessary:
         if not os.path.isfile(obofile) or recache:
@@ -63,7 +57,7 @@ def cached_load_ebi(ontology_cache_dir, ontology_cache_fn, recache: bool = False
     :param recache:
     :return:
     """
-    ontology_cache_dir = os.path.join(get_base_ontology_cache(), ontology_cache_dir)
+    ontology_cache_dir = os.path.join(CACHE_DIR_ONTOLOGIES, ontology_cache_dir)
     picklefile = os.path.join(ontology_cache_dir, ontology_cache_fn)
     if os.path.isfile(picklefile) and not recache:
         with open(picklefile, 'rb') as f:

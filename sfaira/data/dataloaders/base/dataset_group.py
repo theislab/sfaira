@@ -66,10 +66,12 @@ class DatasetGroup:
     #dsg_humanlung.adata
     """
     datasets: Dict[str, DatasetBase]
+    _collection_id: str
 
-    def __init__(self, datasets: dict):
+    def __init__(self, datasets: dict, collection_id: str = "default"):
         self._adata_ids = AdataIdsSfaira()
         self.datasets = datasets
+        self._collection_id = collection_id
 
     @property
     def _unknown_celltype_identifiers(self):
@@ -337,6 +339,10 @@ class DatasetGroup:
     @property
     def ids(self):
         return list(self.datasets.keys())
+
+    @property
+    def collection_id(self):
+        return self._collection_id
 
     @property
     def adata_ls(self):
@@ -616,13 +622,13 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
         # Collect all data loaders from files in directory:
         datasets = []
         self._cwd = os.path.dirname(file_base)
-        dataset_module = str(self._cwd.split("/")[-1])
+        collection_id = str(self._cwd.split("/")[-1])
         package_source = "sfaira" if str(self._cwd.split("/")[-5]) == "sfaira" else "sfairae"
         loader_pydoc_path_sfaira = "sfaira.data.dataloaders.loaders."
         loader_pydoc_path_sfairae = "sfaira_extension.data.dataloaders.loaders."
         loader_pydoc_path = loader_pydoc_path_sfaira if package_source == "sfaira" else loader_pydoc_path_sfairae
         if "group.py" in os.listdir(self._cwd):
-            DatasetGroupFound = pydoc.locate(loader_pydoc_path + dataset_module + ".group.DatasetGroup")
+            DatasetGroupFound = pydoc.locate(loader_pydoc_path + collection_id + ".group.DatasetGroup")
             dsg = DatasetGroupFound(data_path=data_path, meta_path=meta_path, cache_path=cache_path)
             datasets.extend(list(dsg.datasets.values))
         else:
@@ -632,23 +638,23 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                     if f.split(".")[-1] == "py" and f.split(".")[0] not in ["__init__", "base", "group"]:
                         datasets_f = []
                         file_module = ".".join(f.split(".")[:-1])
-                        DatasetFound = pydoc.locate(loader_pydoc_path + dataset_module + "." + file_module + ".Dataset")
+                        DatasetFound = pydoc.locate(loader_pydoc_path + collection_id + "." + file_module + ".Dataset")
                         # Load objects from name space:
                         # - load(): Loading function that return anndata instance.
                         # - SAMPLE_FNS: File name list for DatasetBaseGroupLoadingManyFiles
-                        load_func = pydoc.locate(loader_pydoc_path + dataset_module + "." + file_module + ".load")
+                        load_func = pydoc.locate(loader_pydoc_path + collection_id + "." + file_module + ".load")
                         load_func_annotation = \
-                            pydoc.locate(loader_pydoc_path + dataset_module + "." + file_module + ".LOAD_ANNOTATION")
+                            pydoc.locate(loader_pydoc_path + collection_id + "." + file_module + ".LOAD_ANNOTATION")
                         # Also check sfaira_extension for additional load_func_annotation:
                         if package_source != "sfairae":
-                            load_func_annotation_sfairae = pydoc.locate(loader_pydoc_path_sfairae + dataset_module +
+                            load_func_annotation_sfairae = pydoc.locate(loader_pydoc_path_sfairae + collection_id +
                                                                         "." + file_module + ".LOAD_ANNOTATION")
                             # LOAD_ANNOTATION is a dictionary so we can use update to extend it.
                             if load_func_annotation_sfairae is not None and load_func_annotation is not None:
                                 load_func_annotation.update(load_func_annotation_sfairae)
                             elif load_func_annotation_sfairae is not None and load_func_annotation is None:
                                 load_func_annotation = load_func_annotation_sfairae
-                        sample_fns = pydoc.locate(loader_pydoc_path + dataset_module + "." + file_module +
+                        sample_fns = pydoc.locate(loader_pydoc_path + collection_id + "." + file_module +
                                                   ".SAMPLE_FNS")
                         fn_yaml = os.path.join(self._cwd, file_module + ".yaml")
                         fn_yaml = fn_yaml if os.path.exists(fn_yaml) else None
@@ -696,7 +702,7 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                         datasets.extend(datasets_f)
 
         keys = [x.id for x in datasets]
-        super().__init__(datasets=dict(zip(keys, datasets)))
+        super().__init__(datasets=dict(zip(keys, datasets)), collection_id=collection_id)
 
     def clean_ontology_class_map(self):
         """

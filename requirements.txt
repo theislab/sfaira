@@ -4,6 +4,7 @@ cellxgene-schema
 dask
 docutils
 fuzzywuzzy
+IPython
 loompy
 matplotlib
 networkx

@@ -5,11 +5,9 @@ cache/ontologies/cl/*
 docs/api/
 
 # Unit test temporary data:
-sfaira/unit_tests/test_data_loaders/*
-sfaira/unit_tests/mock_data/store*
-sfaira/unit_tests/mock_data/temp*
-sfaira/unit_tests/trainer/temp*
-sfaira/unit_tests/versions/temp*
+sfaira/unit_tests/data_for_testing/mock_data/store*
+**cache
+**temp
 
 # General patterns:
 git abuild

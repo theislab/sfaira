@@ -40,7 +40,7 @@ class OntologyContainerSfaira:
         self.doi_journal = None
         self.doi_preprint = None
         self.ethnicity = {
-            "human": None,  # TODO OntologyHancestro
+            "human": None,
             "mouse": None,
         }
         self.id = None

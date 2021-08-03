@@ -26,18 +26,23 @@ class Universe(DatasetSuperGroup):
         :param meta_path:
         :param cache_path:
         """
+        # TODO development flag excluding data bases from universes until this interface is finished.
+        exclude_databases = True
         dsgs = [
             DatasetSuperGroupLoaders(
                 data_path=data_path,
                 meta_path=meta_path,
                 cache_path=cache_path,
             ),
-            DatasetSuperGroupDatabases(
-                data_path=data_path,
-                meta_path=meta_path,
-                cache_path=cache_path,
-            )
         ]
+        if not exclude_databases:
+            dsgs.append(
+                DatasetSuperGroupDatabases(
+                    data_path=data_path,
+                    meta_path=meta_path,
+                    cache_path=cache_path,
+                )
+            )
         if sfairae is not None:
             dsgs.append(sfairae.data.dataloaders.loaders.DatasetSuperGroupLoaders(
                 data_path=data_path,
