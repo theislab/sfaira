@@ -211,7 +211,7 @@ class Dataset(DatasetBase):
                     counter += 1
                     assert counter < 2, f"found more than one {filetype} for data set {self.sample_fn}"
                     url = CELLXGENE_PRODUCTION_ENDPOINT + DOWNLOAD_DATASET + asset['dataset_id'] + "/asset/" + \
-                          asset['id']
+                        asset['id']
                     r = requests.post(url)
                     r.raise_for_status()
                     presigned_url = r.json()['presigned_url']
