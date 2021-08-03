@@ -6,13 +6,18 @@ from sfaira.data import DatasetBase
 
 class Dataset(DatasetBase):
 
+    """
+    TODO data link is outdated. Maybe update to this
+    https://data.humancellatlas.org/explore/projects/cc95ff89-2e68-4a08-a234-480eca21ce79/project-matrices.
+    """
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.download_url_data = "https://data.humancellatlas.org/project-assets/project-matrices/" \
                                  "cc95ff89-2e68-4a08-a234-480eca21ce79.homo_sapiens.loom"
         self.download_url_meta = None
 
-        self.assay_sc = "10x technology"
+        self.assay_sc = "10x 3' v2"
         self.author = "Regev"
         self.disease = "healthy"
         self.doi_journal = "no_doi_regev"
