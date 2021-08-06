@@ -1,4 +1,3 @@
-import abc
 import numpy as np
 import pandas as pd
 from typing import List, Union
@@ -8,16 +7,20 @@ from sfaira.consts import OCS
 from sfaira.versions.topologies import TopologyContainer, TOPOLOGIES
 
 
-class ModelZoo(abc.ABC):
+class ModelZoo:
+
     """
-    Model zoo base class.
+    Model zoo class.
     """
-    topology_container: TopologyContainer
-    zoo: Union[dict, None]
+
     _model_id: Union[str, None]
-    celltypes: Union[CelltypeUniverse, None]
     available_model_ids: Union[list, None]
+    celltypes: Union[CelltypeUniverse, None]
     topology_container: Union[None, TopologyContainer]
+    zoo: Union[dict, None]
+
+    TOPOLOGIES = TOPOLOGIES
+    TOPOLOGY_CONTAINER_CLASS = TopologyContainer
 
     def __init__(
             self,
@@ -149,8 +152,8 @@ class ModelZoo(abc.ABC):
             f"{x} not found in available_model_ids, please check available models using ModelZoo.available_model_ids"
         assert len(x.split('_')) == 3, f'model_id {x} is invalid'
         self._model_id = x
-        self.topology_container = TopologyContainer(
-            topology=TOPOLOGIES[self.model_organism][self.model_class][self.model_type][self.model_topology],
+        self.topology_container = self.TOPOLOGY_CONTAINER_CLASS(
+            topology=self.TOPOLOGIES[self.model_organism][self.model_class][self.model_type][self.model_topology],
             topology_id=self.model_version
         )
 

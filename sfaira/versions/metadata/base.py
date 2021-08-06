@@ -7,7 +7,7 @@ import pickle
 import requests
 from typing import Dict, List, Tuple, Union
 
-FILE_PATH = __file__
+from sfaira.consts.directories import CACHE_DIR_ONTOLOGIES
 
 """
 Ontology managament classes.
@@ -26,20 +26,15 @@ ToDo explain usage of ontology extension.
 """
 
 
-def get_base_ontology_cache() -> str:
-    folder = FILE_PATH.split(os.sep)[:-4]
-    folder.insert(1, os.sep)
-    return os.path.join(*folder, "cache", "ontologies")
-
-
-def cached_load_obo(url, ontology_cache_dir, ontology_cache_fn):
+def cached_load_obo(url, ontology_cache_dir, ontology_cache_fn, recache: bool = False):
     if os.name == "nt":  # if running on windows, do not download obo file, but rather pass url directly to obonet
+        # TODO add caching option.
         obofile = url
     else:
-        ontology_cache_dir = os.path.join(get_base_ontology_cache(), ontology_cache_dir)
+        ontology_cache_dir = os.path.join(CACHE_DIR_ONTOLOGIES, ontology_cache_dir)
         obofile = os.path.join(ontology_cache_dir, ontology_cache_fn)
         # Download if necessary:
-        if not os.path.isfile(obofile):
+        if not os.path.isfile(obofile) or recache:
             os.makedirs(name=ontology_cache_dir, exist_ok=True)
 
             def download_obo():
@@ -53,17 +48,18 @@ def cached_load_obo(url, ontology_cache_dir, ontology_cache_fn):
     return obofile
 
 
-def cached_load_ebi(ontology_cache_dir, ontology_cache_fn) -> (networkx.MultiDiGraph, os.PathLike):
+def cached_load_ebi(ontology_cache_dir, ontology_cache_fn, recache: bool = False) -> (networkx.MultiDiGraph, os.PathLike):
     """
     Load pickled graph object if available.
 
     :param ontology_cache_dir:
     :param ontology_cache_fn:
+    :param recache:
     :return:
     """
-    ontology_cache_dir = os.path.join(get_base_ontology_cache(), ontology_cache_dir)
+    ontology_cache_dir = os.path.join(CACHE_DIR_ONTOLOGIES, ontology_cache_dir)
     picklefile = os.path.join(ontology_cache_dir, ontology_cache_fn)
-    if os.path.isfile(picklefile):
+    if os.path.isfile(picklefile) and not recache:
         with open(picklefile, 'rb') as f:
             graph = pickle.load(f)
     else:
@@ -316,18 +312,18 @@ class OntologyHierarchical(Ontology, abc.ABC):
         """
         Map a given node to leave nodes.
 
-        :param node:
+        :param node: Node(s) to map as symbol(s) or ID(s).
         :param return_type:
 
             "ids": IDs of mapped leave nodes
             "idx": indicies in leave note list of mapped leave nodes
-        :param include_self: whether to include node itself
+        :param include_self: DEPRECEATED.
         :return:
         """
         node = self.convert_to_id(node)
         ancestors = self.get_ancestors(node)
-        if include_self:
-            ancestors = ancestors + [node]
+        # Add node itself to list of ancestors.
+        ancestors = ancestors + [node]
         if len(ancestors) > 0:
             ancestors = self.convert_to_id(ancestors)
         leaves = self.convert_to_id(self.leaves)
@@ -376,6 +372,7 @@ class OntologyEbi(OntologyHierarchical):
             additional_terms: dict,
             additional_edges: List[Tuple[str, str]],
             ontology_cache_fn: str,
+            recache: bool,
             **kwargs
     ):
         def get_url_self(iri):
@@ -442,7 +439,8 @@ class OntologyEbi(OntologyHierarchical):
             edges_new.extend([(k_self, k_c) for k_c in direct_children])
             return nodes_new, edges_new
 
-        graph, picklefile = cached_load_ebi(ontology_cache_dir=ontology, ontology_cache_fn=ontology_cache_fn)
+        graph, picklefile = cached_load_ebi(ontology_cache_dir=ontology, ontology_cache_fn=ontology_cache_fn,
+                                            recache=recache)
         if graph is None:
             self.graph = networkx.MultiDiGraph()
             nodes, edges = recursive_search(iri=root_term)
@@ -588,12 +586,14 @@ class OntologyUberon(OntologyExtendedObo):
 
     def __init__(
             self,
+            recache: bool = False,
             **kwargs
     ):
         obofile = cached_load_obo(
             url="http://purl.obolibrary.org/obo/uberon.obo",
             ontology_cache_dir="uberon",
             ontology_cache_fn="uberon.obo",
+            recache=recache,
         )
         super().__init__(obo=obofile)
 
@@ -776,6 +776,7 @@ class OntologyCl(OntologyExtendedObo):
             self,
             branch: str,
             use_developmental_relationships: bool = False,
+            recache: bool = False,
             **kwargs
     ):
         """
@@ -790,6 +791,7 @@ class OntologyCl(OntologyExtendedObo):
             url=f"https://raw.github.com/obophenotype/cell-ontology/{branch}/cl.obo",
             ontology_cache_dir="cl",
             ontology_cache_fn=f"{branch}_cl.obo",
+            recache=recache,
         )
         super().__init__(obo=obofile)
 
@@ -857,12 +859,14 @@ class OntologyHsapdv(OntologyExtendedObo):
 
     def __init__(
             self,
+            recache: bool = False,
             **kwargs
     ):
         obofile = cached_load_obo(
             url="http://purl.obolibrary.org/obo/hsapdv.obo",
             ontology_cache_dir="hsapdv",
             ontology_cache_fn="hsapdv.obo",
+            recache=recache,
         )
         super().__init__(obo=obofile)
 
@@ -883,12 +887,14 @@ class OntologyMmusdv(OntologyExtendedObo):
 
     def __init__(
             self,
+            recache: bool = False,
             **kwargs
     ):
         obofile = cached_load_obo(
             url="http://purl.obolibrary.org/obo/mmusdv.obo",
             ontology_cache_dir="mmusdv",
             ontology_cache_fn="mmusdv.obo",
+            recache=recache,
         )
         super().__init__(obo=obofile)
 
@@ -909,12 +915,14 @@ class OntologyMondo(OntologyExtendedObo):
 
     def __init__(
             self,
+            recache: bool = False,
             **kwargs
     ):
         obofile = cached_load_obo(
             url="http://purl.obolibrary.org/obo/mondo.obo",
             ontology_cache_dir="mondo",
             ontology_cache_fn="mondo.obo",
+            recache=recache,
         )
         super().__init__(obo=obofile)
 
@@ -944,12 +952,14 @@ class OntologyCellosaurus(OntologyExtendedObo):
 
     def __init__(
             self,
+            recache: bool = False,
             **kwargs
     ):
         obofile = cached_load_obo(
             url="https://ftp.expasy.org/databases/cellosaurus/cellosaurus.obo",
             ontology_cache_dir="cellosaurus",
             ontology_cache_fn="cellosaurus.obo",
+            recache=recache,
         )
         super().__init__(obo=obofile)
 
@@ -969,7 +979,7 @@ class OntologyCellosaurus(OntologyExtendedObo):
 
 class OntologySinglecellLibraryConstruction(OntologyEbi):
 
-    def __init__(self):
+    def __init__(self, recache: bool = False):
         super().__init__(
             ontology="efo",
             root_term="EFO_0010183",
@@ -981,5 +991,6 @@ class OntologySinglecellLibraryConstruction(OntologyEbi):
                 ("EFO:0010183", "sci-plex"),
                 ("EFO:0010183", "sci-RNA-seq"),
             ],
-            ontology_cache_fn="efo.pickle"
+            ontology_cache_fn="efo.pickle",
+            recache=recache,
         )

@@ -1,0 +1,52 @@
+dataset_structure:
+    dataset_index: 1
+    sample_fns:
+dataset_wise:
+    author:
+        - "mock3"
+    default_embedding:
+    doi_journal: "no_doi_mock2"
+    doi_preprint:
+    download_url_data: ""
+    download_url_meta: ""
+    normalization: "raw"
+    primary_data:
+    year: 2021
+dataset_or_observation_wise:
+    assay_sc: "10x technology"
+    assay_sc_obs_key:
+    assay_differentiation:
+    assay_differentiation_obs_key:
+    assay_type_differentiation:
+    assay_type_differentiation_obs_key:
+    bio_sample:
+    bio_sample_obs_key:
+    cell_line:
+    cell_line_obs_key:
+    development_stage:
+    development_stage_obs_key:
+    disease: "healthy"
+    disease_obs_key:
+    ethnicity:
+    ethnicity_obs_key:
+    individual:
+    individual_obs_key:
+    organ: "pancreas"
+    organ_obs_key:
+    organism: "mouse"
+    organism_obs_key:
+    sample_source: "primary_tissue"
+    sample_source_obs_key:
+    sex:
+    sex_obs_key:
+    state_exact:
+    state_exact_obs_key:
+    tech_sample:
+    tech_sample_obs_key:
+observation_wise:
+    cell_types_original_obs_key: "free_annotation"
+feature_wise:
+    gene_id_ensembl_var_key: "index"
+    gene_id_symbols_var_key:
+meta:
+    version: "1.0"

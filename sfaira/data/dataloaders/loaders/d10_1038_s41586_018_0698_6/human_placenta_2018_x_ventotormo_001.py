@@ -19,7 +19,7 @@ class Dataset(DatasetBase):
         self.download_url_meta = f"https://www.ebi.ac.uk/arrayexpress/files/{self.sample_fn.split('.')[0]}/" \
                                  f"{self.sample_fn}.2.zip"
 
-        self.assay_sc = "10x technology" if self.sample_fn == "E-MTAB-6678.processed" else "Smart-seq2"
+        self.assay_sc = "10x 3' v2" if self.sample_fn == "E-MTAB-6678.processed" else "Smart-seq2"
         self.author = "Ventotormo"
         self.disease = "healthy"
         self.doi_journal = "10.1038/s41586-018-0698-6"

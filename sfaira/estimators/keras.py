@@ -13,7 +13,7 @@ import warnings
 from tqdm import tqdm
 
 from sfaira.consts import AdataIdsSfaira, OCS, AdataIds
-from sfaira.data import DistributedStoreBase
+from sfaira.data.store.single_store import DistributedStoreSingleFeatureSpace
 from sfaira.models import BasicModelKeras
 from sfaira.versions.metadata import CelltypeUniverse, OntologyCl, OntologyObo
 from sfaira.versions.topologies import TopologyContainer
@@ -40,7 +40,7 @@ class EstimatorKeras:
     """
     Estimator base class for keras models.
     """
-    data: Union[anndata.AnnData, DistributedStoreBase]
+    data: Union[anndata.AnnData, DistributedStoreSingleFeatureSpace]
     model: Union[BasicModelKeras, None]
     topology_container: Union[TopologyContainer, None]
     model_id: Union[str, None]
@@ -55,7 +55,7 @@ class EstimatorKeras:
 
     def __init__(
             self,
-            data: Union[anndata.AnnData, np.ndarray, DistributedStoreBase],
+            data: Union[anndata.AnnData, np.ndarray, DistributedStoreSingleFeatureSpace],
             model_dir: Union[str, None],
             model_class: str,
             model_id: Union[str, None],
@@ -71,7 +71,7 @@ class EstimatorKeras:
         self.model_class = model_class
         self.topology_container = model_topology
         # Prepare store with genome container sub-setting:
-        if isinstance(self.data, DistributedStoreBase):
+        if isinstance(self.data, DistributedStoreSingleFeatureSpace):
             self.data.genome_container = self.topology_container.gc
 
         self.history = None
@@ -159,7 +159,7 @@ class EstimatorKeras:
 
     def init_model(self, clear_weight_cache=True, override_hyperpar=None):
         """
-        instantiate the model
+        Instantiate the model.
         :return:
         """
         if clear_weight_cache:
@@ -236,23 +236,20 @@ class EstimatorKeras:
                 x = x[idx, :]
 
             # If the feature space is already mapped to the right reference, return the data matrix immediately
-            if self._adata_ids.mapped_features in self.data.uns_keys() and \
-                    self.data.uns[self._adata_ids.mapped_features] == self.topology_container.gc.assembly:
-                print(f"found {x.shape[0]} observations")
-                return x
-
-            # Compute indices of genes to keep
-            data_ids = self.data.var[self._adata_ids.gene_id_ensembl].values.tolist()
-            target_ids = self.topology_container.gc.ensembl
-            idx_map = np.array([data_ids.index(z) for z in target_ids])
-            # Assert that each ID from target IDs appears exactly once in data IDs:
-            assert np.all([z in data_ids for z in target_ids]), "not all target feature IDs found in data"
-            assert np.all([np.sum(z == np.array(data_ids)) <= 1. for z in target_ids]), \
-                "duplicated target feature IDs exist in data"
-            # Map feature space.
-            x = x[:, idx_map]
-            print(f"found {len(idx_map)} intersecting features between {x.shape[1]} features in input data set and"
-                  f" {self.topology_container.n_var} features in reference genome")
+            if self.data.n_vars != self.topology_container.n_var or \
+                    not np.all(self.data.var[self._adata_ids.gene_id_ensembl] == self.topology_container.gc.ensembl):
+                # Compute indices of genes to keep
+                data_ids = self.data.var[self._adata_ids.gene_id_ensembl].values.tolist()
+                target_ids = self.topology_container.gc.ensembl
+                idx_map = np.array([data_ids.index(z) for z in target_ids])
+                # Assert that each ID from target IDs appears exactly once in data IDs:
+                assert np.all([z in data_ids for z in target_ids]), "not all target feature IDs found in data"
+                assert np.all([np.sum(z == np.array(data_ids)) <= 1. for z in target_ids]), \
+                    "duplicated target feature IDs exist in data"
+                # Map feature space.
+                x = x[:, idx_map]
+                print(f"found {len(idx_map)} intersecting features between {x.shape[1]} features in input data set and"
+                      f" {self.topology_container.n_var} features in reference genome")
             print(f"found {x.shape[0]} observations")
             return x
 
@@ -293,18 +290,25 @@ class EstimatorKeras:
                     if k not in self.data.obs.columns:
                         raise ValueError(f"Did not find column {k} used to define test set in self.data.")
                     in_test = np.logical_and(in_test, np.array([x in v for x in self.data.obs[k].values]))
-                elif isinstance(self.data, DistributedStoreBase):
-                    idx = self.data.get_subset_idx_global(attr_key=k, values=v)
+                elif isinstance(self.data, DistributedStoreSingleFeatureSpace):
+                    idx = self.data.get_subset_idx(attr_key=k, values=v, excluded_values=None)
+                    # Build continuous vector across all sliced data sets and establish which observations are kept
+                    # in subset.
                     in_test_k = np.ones((self.data.n_obs,), dtype=int) == 0
-                    in_test_k[idx] = True
+                    counter = 0
+                    for kk, vv in self.data.indices.items():
+                        if kk in idx.keys() and len(idx[kk]) > 0:
+                            in_test_k[np.where([x in idx[kk] for x in vv])[0] + counter] = True
+                        counter += len(vv)
                     in_test = np.logical_and(in_test, in_test_k)
                 else:
                     assert False
             self.idx_test = np.sort(np.where(in_test)[0])
-            print(f"Found {len(self.idx_test)} out of {self.data.n_obs} cells that correspond to held out data set")
-            print(self.idx_test)
         else:
             raise ValueError("type of test_split %s not recognized" % type(test_split))
+        print(f"Found {len(self.idx_test)} out of {self.data.n_obs} cells that correspond to test data set")
+        assert len(self.idx_test) < self.data.n_obs, "test set covers full data set, apply a more restrictive test " \
+                                                     "data definiton"
         idx_train_eval = np.array([x for x in all_idx if x not in self.idx_test])
         np.random.seed(1)
         self.idx_eval = np.sort(np.random.choice(
@@ -491,7 +495,7 @@ class EstimatorKeras:
 
     @property
     def using_store(self) -> bool:
-        return isinstance(self.data, DistributedStoreBase)
+        return isinstance(self.data, DistributedStoreSingleFeatureSpace)
 
     @property
     def obs_train(self):
@@ -513,7 +517,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
 
     def __init__(
             self,
-            data: Union[anndata.AnnData, np.ndarray, DistributedStoreBase],
+            data: Union[anndata.AnnData, np.ndarray, DistributedStoreSingleFeatureSpace],
             model_dir: Union[str, None],
             model_id: Union[str, None],
             model_topology: TopologyContainer,
@@ -601,7 +605,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
 
         # Prepare data reading according to whether anndata is backed or not:
         if self.using_store:
-            generator_raw = self.data.generator(
+            generator_raw, _ = self.data.generator(
                 idx=idx,
                 batch_size=batch_size,
                 obs_keys=[],
@@ -999,7 +1003,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
 
     def __init__(
             self,
-            data: Union[anndata.AnnData, DistributedStoreBase],
+            data: Union[anndata.AnnData, DistributedStoreSingleFeatureSpace],
             model_dir: Union[str, None],
             model_id: Union[str, None],
             model_topology: TopologyContainer,
@@ -1022,7 +1026,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
         )
         if remove_unlabeled_cells:
             # Remove cells without type label from store:
-            if isinstance(self.data, DistributedStoreBase):
+            if isinstance(self.data, DistributedStoreSingleFeatureSpace):
                 self.data.subset(attr_key="cellontology_class", excluded_values=[
                     self._adata_ids.unknown_celltype_identifier,
                     self._adata_ids.not_a_cell_celltype_identifier,
@@ -1161,6 +1165,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             weighted: bool,
             batch_size: int,
             randomized_batch_access: bool,
+            **kwargs,
     ):
         """
         Yield a basic generator based on which a tf dataset can be built.
@@ -1188,7 +1193,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
         if self.using_store:
             if weighted:
                 raise ValueError("using weights with store is not supported yet")
-            generator_raw = self.data.generator(
+            generator_raw, _ = self.data.generator(
                 idx=idx,
                 batch_size=batch_size,
                 obs_keys=[self._adata_ids.cellontology_id],
