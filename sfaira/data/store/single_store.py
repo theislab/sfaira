@@ -837,6 +837,7 @@ class DistributedStoreDao(DistributedStoreSingleFeatureSpace):
             # Can all data sets corresponding to one organism as a single array because they share the second dimension
             # and dask keeps expression data and obs out of memory.
             for idx, batch_starts_ends in idx_gen:
+                idx = np.sort(idx)
                 x_temp = x[idx, :]
                 obs_temp = obs.loc[obs.index[idx], :]  # TODO better than iloc?
                 for s, e in batch_starts_ends:
