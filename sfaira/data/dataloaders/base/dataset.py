@@ -2235,7 +2235,7 @@ class DatasetBase(abc.ABC):
                     if isinstance(allowed, OntologyHierarchical) and x in allowed.node_ids:
                         attempted_clean.append(allowed.convert_to_name(x))
                     else:
-                        raise ValueError(f"'{x}' is not a valid entry for {attr}.")
+                        raise ValueError(f"'{x}' is not a valid entry for {attr} in data set {self.doi}.")
             else:
                 raise ValueError(f"argument allowed of type {type(allowed)} is not a valid entry for {attr}.")
         # Flatten attempts if only one was made:

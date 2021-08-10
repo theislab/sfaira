@@ -13,6 +13,7 @@ import warnings
 from tqdm import tqdm
 
 from sfaira.consts import AdataIdsSfaira, OCS, AdataIds
+from sfaira.data.store.base import DistributedStoreBase
 from sfaira.data.store.single_store import DistributedStoreSingleFeatureSpace
 from sfaira.models import BasicModelKeras
 from sfaira.versions.metadata import CelltypeUniverse, OntologyCl, OntologyObo
@@ -34,6 +35,65 @@ def prepare_sf(x):
         raise ValueError("x.shape > 2")
     sf = np.log(np.maximum(sf / 1e4, 1e-3))
     return sf
+
+
+def split_idx(data: DistributedStoreSingleFeatureSpace, test_split, val_split):
+    """
+    Split training and evaluation data.
+    """
+    np.random.seed(1)
+    all_idx = np.arange(0, data.n_obs)  # n_obs is both a property of AnnData and DistributedStoreBase
+    if isinstance(test_split, float) or isinstance(test_split, int):
+        idx_test = np.sort(np.random.choice(
+            a=all_idx,
+            size=round(data.n_obs * test_split),
+            replace=False,
+        ))
+    elif isinstance(test_split, dict):
+        in_test = np.ones((data.n_obs,), dtype=int) == 1
+        for k, v in test_split.items():
+            if isinstance(v, bool) or isinstance(v, int) or isinstance(v, list):
+                v = [v]
+            if isinstance(data, anndata.AnnData):
+                if k not in data.obs.columns:
+                    raise ValueError(f"Did not find column {k} used to define test set in self.data.")
+                in_test = np.logical_and(in_test, np.array([x in v for x in data.obs[k].values]))
+            elif isinstance(data, DistributedStoreSingleFeatureSpace):
+                idx = data.get_subset_idx(attr_key=k, values=v, excluded_values=None)
+                # Build continuous vector across all sliced data sets and establish which observations are kept
+                # in subset.
+                in_test_k = np.ones((data.n_obs,), dtype=int) == 0
+                counter = 0
+                for kk, vv in data.indices.items():
+                    if kk in idx.keys() and len(idx[kk]) > 0:
+                        in_test_k[np.where([x in idx[kk] for x in vv])[0] + counter] = True
+                    counter += len(vv)
+                in_test = np.logical_and(in_test, in_test_k)
+            else:
+                assert False
+        idx_test = np.sort(np.where(in_test)[0])
+    else:
+        raise ValueError("type of test_split %s not recognized" % type(test_split))
+    print(f"Found {len(idx_test)} out of {data.n_obs} cells that correspond to test data set")
+    assert len(idx_test) < data.n_obs, "test set covers full data set, apply a more restrictive test " \
+                                       "data definiton"
+    idx_train_eval = np.array([x for x in all_idx if x not in idx_test])
+    np.random.seed(1)
+    idx_eval = np.sort(np.random.choice(
+        a=idx_train_eval,
+        size=round(len(idx_train_eval) * val_split),
+        replace=False
+    ))
+    idx_train = np.sort([x for x in idx_train_eval if x not in idx_eval])
+
+    # Check that none of the train, test, eval partitions are empty
+    if not len(idx_test):
+        warnings.warn("Test partition is empty!")
+    if not len(idx_eval):
+        raise ValueError("The evaluation dataset is empty.")
+    if not len(idx_train):
+        raise ValueError("The train dataset is empty.")
+    return idx_train, idx_eval, idx_test
 
 
 class EstimatorKeras:
@@ -71,7 +131,10 @@ class EstimatorKeras:
         self.model_class = model_class
         self.topology_container = model_topology
         # Prepare store with genome container sub-setting:
-        if isinstance(self.data, DistributedStoreSingleFeatureSpace):
+        # This class is tailored for DistributedStoreSingleFeatureSpace but we test for the base class here in the
+        # constructor so that genome_container can also be set in inheriting classes that may be centred around
+        # different child classes of DistributedStoreBase.
+        if isinstance(self.data, DistributedStoreBase):
             self.data.genome_container = self.topology_container.gc
 
         self.history = None
@@ -272,59 +335,21 @@ class EstimatorKeras:
         )
 
     def split_train_val_test(self, val_split: float, test_split: Union[float, dict]):
-        # Split training and evaluation data.
-        np.random.seed(1)
-        all_idx = np.arange(0, self.data.n_obs)  # n_obs is both a property of AnnData and DistributedStoreBase
-        if isinstance(test_split, float) or isinstance(test_split, int):
-            self.idx_test = np.sort(np.random.choice(
-                a=all_idx,
-                size=round(self.data.n_obs * test_split),
-                replace=False,
-            ))
-        elif isinstance(test_split, dict):
-            in_test = np.ones((self.data.n_obs,), dtype=int) == 1
-            for k, v in test_split.items():
-                if isinstance(v, bool) or isinstance(v, int) or isinstance(v, list):
-                    v = [v]
-                if isinstance(self.data, anndata.AnnData):
-                    if k not in self.data.obs.columns:
-                        raise ValueError(f"Did not find column {k} used to define test set in self.data.")
-                    in_test = np.logical_and(in_test, np.array([x in v for x in self.data.obs[k].values]))
-                elif isinstance(self.data, DistributedStoreSingleFeatureSpace):
-                    idx = self.data.get_subset_idx(attr_key=k, values=v, excluded_values=None)
-                    # Build continuous vector across all sliced data sets and establish which observations are kept
-                    # in subset.
-                    in_test_k = np.ones((self.data.n_obs,), dtype=int) == 0
-                    counter = 0
-                    for kk, vv in self.data.indices.items():
-                        if kk in idx.keys() and len(idx[kk]) > 0:
-                            in_test_k[np.where([x in idx[kk] for x in vv])[0] + counter] = True
-                        counter += len(vv)
-                    in_test = np.logical_and(in_test, in_test_k)
-                else:
-                    assert False
-            self.idx_test = np.sort(np.where(in_test)[0])
-        else:
-            raise ValueError("type of test_split %s not recognized" % type(test_split))
-        print(f"Found {len(self.idx_test)} out of {self.data.n_obs} cells that correspond to test data set")
-        assert len(self.idx_test) < self.data.n_obs, "test set covers full data set, apply a more restrictive test " \
-                                                     "data definiton"
-        idx_train_eval = np.array([x for x in all_idx if x not in self.idx_test])
-        np.random.seed(1)
-        self.idx_eval = np.sort(np.random.choice(
-            a=idx_train_eval,
-            size=round(len(idx_train_eval) * val_split),
-            replace=False
-        ))
-        self.idx_train = np.sort([x for x in idx_train_eval if x not in self.idx_eval])
+        """
+        Split indices in store into train, valiation and test split.
+        """
+        idx_train, idx_eval, idx_test = split_idx(data=self.data, test_split=test_split, val_split=val_split)
+        self.idx_train = idx_train
+        self.idx_eval = idx_eval
+        self.idx_test = idx_test
 
-        # Check that none of the train, test, eval partitions are empty
-        if not len(self.idx_test):
-            warnings.warn("Test partition is empty!")
-        if not len(self.idx_eval):
-            raise ValueError("The evaluation dataset is empty.")
-        if not len(self.idx_train):
-            raise ValueError("The train dataset is empty.")
+    def _process_idx_for_eval(self, idx):
+        """
+        Defaults to all observations if no indices are defined.
+        """
+        if idx is None:
+            idx = np.arange(0, self.data.n_obs)
+        return idx
 
     def train(
             self,
@@ -827,8 +852,8 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         :param max_steps: Maximum steps before evaluation round is considered complete.
         :return: Dictionary of metric names and values.
         """
-        if idx is None or idx.any():  # true if the array is not empty or if the passed value is None
-            idx = np.arange(0, self.data.n_obs) if idx is None else idx
+        idx = self._process_idx_for_eval(idx=idx)
+        if idx is not None:
             dataset = self._get_dataset(
                 idx=idx,
                 batch_size=batch_size,
@@ -852,7 +877,11 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         :param max_steps: Maximum steps before evaluation round is considered complete.
         :return: Dictionary of metric names and values.
         """
-        return self.evaluate_any(idx=self.idx_test, batch_size=batch_size, max_steps=max_steps)
+        idx = self._process_idx_for_eval(idx=self.idx_test)
+        if idx is not None:
+            return self.evaluate_any(idx=self.idx_test, batch_size=batch_size, max_steps=max_steps)
+        else:
+            return {}
 
     def predict(self, batch_size: int = 128):
         """
@@ -861,9 +890,10 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         :return:
         prediction
         """
-        if self.idx_test is None or self.idx_test.any():
+        idx = self._process_idx_for_eval(idx=self.idx_test)
+        if idx is not None:
             dataset = self._get_dataset(
-                idx=self.idx_test,
+                idx=idx,
                 batch_size=batch_size,
                 mode='predict',
                 retrieval_batch_size=128,
@@ -880,9 +910,10 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         :return:
         latent space
         """
-        if self.idx_test is None or self.idx_test.any():
+        idx = self._process_idx_for_eval(idx=self.idx_test)
+        if len(idx) > 0:
             dataset = self._get_dataset(
-                idx=self.idx_test,
+                idx=idx,
                 batch_size=batch_size,
                 mode='predict',
                 retrieval_batch_size=128,
@@ -899,9 +930,10 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         :return:
         sample of latent space, mean of latent space, variance of latent space
         """
-        if self.idx_test is None or self.idx_test:
+        idx = self._process_idx_for_eval(idx=self.idx_test)
+        if len(idx) > 0:
             dataset = self._get_dataset(
-                idx=self.idx_test,
+                idx=idx,
                 batch_size=batch_size,
                 mode='predict',
                 retrieval_batch_size=128,
@@ -1328,8 +1360,8 @@ class EstimatorKerasCelltype(EstimatorKeras):
         :param max_steps: Maximum steps before evaluation round is considered complete.
         :return: Prediction tensor.
         """
-        idx = self.idx_test
-        if idx is None or idx.any():
+        idx = self._process_idx_for_eval(idx=self.idx_test)
+        if len(idx) > 0:
             dataset = self._get_dataset(
                 idx=idx,
                 batch_size=batch_size,
@@ -1347,7 +1379,8 @@ class EstimatorKerasCelltype(EstimatorKeras):
 
         :return: true labels
         """
-        if self.idx_test is None or self.idx_test.any():
+        idx = self._process_idx_for_eval(idx=self.idx_test)
+        if len(idx) > 0:
             dataset = self._get_dataset(
                 idx=self.idx_test,
                 batch_size=batch_size,
@@ -1374,8 +1407,8 @@ class EstimatorKerasCelltype(EstimatorKeras):
         :param weighted: Whether to use class weights in evaluation.
         :return: Dictionary of metric names and values.
         """
-        if idx is None or idx.any():   # true if the array is not empty or if the passed value is None
-            idx = np.arange(0, self.data.n_obs) if idx is None else idx
+        idx = self._process_idx_for_eval(idx=idx)
+        if len(idx) > 0:
             dataset = self._get_dataset(
                 idx=idx,
                 batch_size=batch_size,

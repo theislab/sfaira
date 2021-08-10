@@ -1,18 +1,20 @@
-import abc
 import anndata
+import dask.dataframe
 import numpy as np
 import os
+import pandas as pd
 import pickle
 from typing import Dict, List, Tuple, Union
 
 from sfaira.consts import AdataIdsSfaira
+from sfaira.data.store.base import DistributedStoreBase
 from sfaira.data.store.single_store import DistributedStoreSingleFeatureSpace, \
     DistributedStoreDao, DistributedStoreH5ad
 from sfaira.data.store.io_dao import read_dao
 from sfaira.versions.genomes.genomes import GenomeContainer
 
 
-class DistributedStoreMultipleFeatureSpaceBase(abc.ABC):
+class DistributedStoreMultipleFeatureSpaceBase(DistributedStoreBase):
 
     """
     Umbrella class for a dictionary over multiple instances DistributedStoreSingleFeatureSpace.
@@ -38,11 +40,11 @@ class DistributedStoreMultipleFeatureSpaceBase(abc.ABC):
         raise NotImplementedError("cannot set this attribute, it s defined in constructor")
 
     @property
-    def genome_containers(self) -> Dict[str, Union[GenomeContainer, None]]:
+    def genome_container(self) -> Dict[str, Union[GenomeContainer, None]]:
         return dict([(k, v.genome_container) for k, v in self._stores.items()])
 
-    @genome_containers.setter
-    def genome_containers(self, x: Union[GenomeContainer, Dict[str, GenomeContainer]]):
+    @genome_container.setter
+    def genome_container(self, x: Union[GenomeContainer, Dict[str, GenomeContainer]]):
         if isinstance(x, GenomeContainer):
             # Transform into dictionary first.
             organisms = [k for k, v in self.stores.items()]
@@ -80,6 +82,14 @@ class DistributedStoreMultipleFeatureSpaceBase(abc.ABC):
         return dict([(kk, vv) for k, v in self.stores.items() for kk, vv in v.data_by_key.items()])
 
     @property
+    def obs_by_key(self) -> Dict[str, Union[pd.DataFrame, dask.dataframe.DataFrame]]:
+        """
+        Dictionary of all anndata instances for each selected data set in store, sub-setted by selected cells, for each
+        stores.
+        """
+        return dict([(k, v.obs) for k, v in self.adata_by_key.items()])
+
+    @property
     def var_names(self) -> Dict[str, List[str]]:
         """
         Dictionary of variable names by store.
@@ -94,7 +104,14 @@ class DistributedStoreMultipleFeatureSpaceBase(abc.ABC):
         return dict([(k, v.n_vars) for k, v in self.stores.items()])
 
     @property
-    def n_obs(self) -> Dict[str, int]:
+    def n_obs(self) -> int:
+        """
+        Dictionary of number of observations by store.
+        """
+        return np.asarray(np.sum([v.n_obs for v in self.stores.values()]), dtype="int32")
+
+    @property
+    def n_obs_dict(self) -> Dict[str, int]:
         """
         Dictionary of number of observations by store.
         """

@@ -7,13 +7,13 @@ import pytest
 from typing import Union
 
 from sfaira.consts import AdataIdsSfaira, CACHE_DIR
-from sfaira.data import DistributedStoreSingleFeatureSpace, load_store
+from sfaira.data import DistributedStoreSingleFeatureSpace, DistributedStoreMultipleFeatureSpaceBase, load_store
 from sfaira.estimators import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
 from sfaira.versions.genomes.genomes import CustomFeatureContainer
 from sfaira.versions.metadata import OntologyOboCustom
 from sfaira.versions.topologies import TopologyContainer
 
-from sfaira.unit_tests.data_for_tests.loaders.consts import CELLTYPES
+from sfaira.unit_tests.data_for_tests.loaders.consts import CELLTYPES, CL_VERSION
 from sfaira.unit_tests.data_for_tests.loaders.utils import prepare_dsg, prepare_store
 from sfaira.unit_tests.directories import DIR_TEMP
 
@@ -55,7 +55,7 @@ TOPOLOGY_CELLTYPE_MODEL = {
         "genes": None,
     },
     "output": {
-        "cl": "v2021-02-01",
+        "cl": CL_VERSION.split("_")[0],
         "targets": TARGET_UNIVERSE
     },
     "hyper_parameters": {
@@ -68,7 +68,7 @@ TOPOLOGY_CELLTYPE_MODEL = {
 class TestHelperEstimatorBase:
 
     adata_ids: AdataIdsSfaira
-    data: Union[anndata.AnnData, DistributedStoreSingleFeatureSpace]
+    data: Union[anndata.AnnData, DistributedStoreSingleFeatureSpace, DistributedStoreMultipleFeatureSpaceBase]
     tc: TopologyContainer
 
     def load_adata(self, organism="human", organ=None):
@@ -89,6 +89,12 @@ class TestHelperEstimatorBase:
             store.subset(attr_key="organ", values=organ)
         self.adata_ids = store._adata_ids_sfaira
         self.data = store.stores[organism]
+
+    def load_multistore(self):
+        store_path = prepare_store(store_format="dao")
+        store = load_store(cache_path=store_path, store_format="dao")
+        self.adata_ids = store._adata_ids_sfaira
+        self.data = store
 
 
 class TestHelperEstimatorKeras(TestHelperEstimatorBase):

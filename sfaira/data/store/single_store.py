@@ -2,7 +2,6 @@ import abc
 import anndata
 import dask.array
 import dask.dataframe
-import h5py
 import numpy as np
 import os
 import pandas as pd
@@ -14,6 +13,7 @@ from typing import Dict, List, Tuple, Union
 
 from sfaira.consts import AdataIdsSfaira, OCS
 from sfaira.data.dataloaders.base.utils import is_child, UNS_STRING_META_IN_OBS
+from sfaira.data.store.base import DistributedStoreBase
 from sfaira.versions.genomes.genomes import GenomeContainer
 
 """
@@ -44,7 +44,7 @@ def _process_batch_size(x: int, idx: np.ndarray) -> int:
     return x
 
 
-class DistributedStoreSingleFeatureSpace:
+class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
 
     """
     Data set group class tailored to data access requirements common in high-performance computing (HPC).

@@ -183,7 +183,10 @@ class OntologyHierarchical(Ontology, abc.ABC):
 
     @property
     def node_names(self) -> List[str]:
-        return [x["name"] for x in self.graph.nodes.values()]
+        try:
+            return [x["name"] for x in self.graph.nodes.values()]
+        except KeyError as e:
+            raise KeyError(f"KeyError '{e}' in {type(self)}")
 
     @property
     def node_ids(self) -> List[str]:
@@ -979,6 +982,10 @@ class OntologyCellosaurus(OntologyExtendedObo):
 
 class OntologySinglecellLibraryConstruction(OntologyEbi):
 
+    """
+    TODO CITE set not in API yet, added two nodes and edges temporarily.
+    """
+
     def __init__(self, recache: bool = False):
         super().__init__(
             ontology="efo",
@@ -986,10 +993,14 @@ class OntologySinglecellLibraryConstruction(OntologyEbi):
             additional_terms={
                 "sci-plex": {"name": "sci-plex"},
                 "sci-RNA-seq": {"name": "sci-RNA-seq"},
+                "EFO:0009294": {"name": "CITE-seq"},  # TODO not in API yet
+                "EFO:0030008": {"name": "CITE-seq (cell surface protein profiling)"},  # TODO not in API yet
             },
             additional_edges=[
                 ("EFO:0010183", "sci-plex"),
                 ("EFO:0010183", "sci-RNA-seq"),
+                ("EFO:0010183", "EFO:0009294"),  # TODO not in API yet
+                ("EFO:0009294", "EFO:0030008"),  # TODO not in API yet
             ],
             ontology_cache_fn="efo.pickle",
             recache=recache,

@@ -19,15 +19,18 @@ def test_fatal(store_format: str):
     Test if basic methods abort.
     """
     store_path = prepare_store(store_format=store_format)
-    store = load_store(cache_path=store_path, store_format=store_format)
-    store.subset(attr_key="organism", values=["mouse"])
-    _ = store.n_obs
-    _ = store.n_vars
-    _ = store.var_names
-    _ = store.shape
-    _ = store.obs
-    _ = store.stores["mouse"].indices
-    _ = store.genome_containers
+    stores = load_store(cache_path=store_path, store_format=store_format)
+    stores.subset(attr_key="organism", values=["mouse"])
+    store = stores.stores["mouse"]
+    # Test both single and multi-store:
+    for x in [store, stores]:
+        _ = x.n_obs
+        _ = x.n_vars
+        _ = x.var_names
+        _ = x.shape
+        _ = x.obs
+        _ = x.indices
+        _ = x.genome_container
 
 
 @pytest.mark.parametrize("store_format", ["h5ad", "dao"])
@@ -125,7 +128,7 @@ def test_generator_shapes(store_format: str, idx, batch_size: int, obs_keys: Lis
     store.subset(attr_key="organism", values=["mouse"])
     gc = GenomeContainer(assembly=ASSEMBLY_MOUSE)
     gc.subset(**{"biotype": "protein_coding"})
-    store.genome_containers = gc
+    store.genome_container = gc
     g, _ = store.generator(
         idx={"mouse": idx},
         batch_size=batch_size,

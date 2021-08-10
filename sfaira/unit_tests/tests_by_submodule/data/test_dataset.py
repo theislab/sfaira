@@ -13,6 +13,21 @@ def test_dsgs_instantiate():
     _ = Universe(data_path=DIR_DATA_LOADERS_CACHE, meta_path=DIR_DATA_LOADERS_CACHE, cache_path=DIR_DATA_LOADERS_CACHE)
 
 
+def test_dsgs_crossref():
+    """
+    Tests if crossref attributes can be retrieved for all data loader entries with DOI journal defined.
+    Attributes tested:
+        - title
+    """
+    universe = Universe(data_path=DIR_DATA_LOADERS_CACHE, meta_path=DIR_DATA_LOADERS_CACHE,
+                        cache_path=DIR_DATA_LOADERS_CACHE)
+    for k, v in universe.datasets.items():
+        title = v.title
+        if title is None:
+            if v.doi_journal is not None and "no_doi" not in v.doi_journal:
+                raise ValueError(f"did not retrieve title for data set {k} with DOI: {v.doi_journal}.")
+
+
 @pytest.mark.parametrize("organ", ["intestine", "ileum"])
 def test_dsgs_subset_dataset_wise(organ: str):
     """
