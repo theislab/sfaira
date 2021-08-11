@@ -59,7 +59,7 @@ def time_gen(_store, store_format, kwargs) -> List[float]:
         gc.subset(symbols=["VTA1", "MLXIPL", "BAZ1B", "RANBP9", "PPARGC1A", "DDX25", "CRYAB"])
         _store.genome_container = gc
     del kwargs["var_subset"]
-    _gen = _store.generator(**kwargs)()
+    _gen, _ = _store.generator(**kwargs)()
     _measurements = []
     for _ in range(N_DRAWS):
         _t0 = time.time()
@@ -103,7 +103,7 @@ for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, comp
         t0 = time.time()
         store = sfaira.data.load_store(cache_path=path_store, store_format=store_type_i)
         # Include initialisation of generator in timing to time overhead generated here.
-        _ = store.generator()
+        _, _ = store.generator()
         time_measurements_initiate[store_type_i].append(time.time() - t0)
         memory_measurements_initiate[store_type_i].append(np.sum(list(store.adata_memory_footprint.values())))
 
