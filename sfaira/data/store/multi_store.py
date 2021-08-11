@@ -106,7 +106,7 @@ class DistributedStoreMultipleFeatureSpaceBase(DistributedStoreBase):
     @property
     def n_obs(self) -> int:
         """
-        Dictionary of number of observations by store.
+        Dictionary of number of observations across stores.
         """
         return np.asarray(np.sum([v.n_obs for v in self.stores.values()]), dtype="int32")
 
@@ -123,6 +123,13 @@ class DistributedStoreMultipleFeatureSpaceBase(DistributedStoreBase):
         Dictionary of concatenated .obs tables by store, only including non-empty stores.
         """
         return dict([(k, v.obs) for k, v in self.stores.items()])
+
+    @property
+    def var_dict(self):
+        """
+        Dictionaries of .var tables by store, only including non-empty stores.
+        """
+        return dict([(k, v.var) for k, v in self.stores.items()])
 
     @property
     def X(self):

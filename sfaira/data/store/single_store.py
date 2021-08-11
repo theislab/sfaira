@@ -472,13 +472,13 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
             randomized_batch_access: bool = False,
             random_access: bool = False,
             **kwargs
-    ) -> iter:
+    ) -> Tuple[iter, int]:
         """
         Yields an unbiased generator over observations in the contained data sets.
 
         :param idx: Global idx to query from store. These is an array with indices corresponding to a contiuous index
             along all observations in self.adata_by_key, ordered along a hypothetical concatenation along the keys of
-            self.adata_by_key. If None, all observations are seleccted.
+            self.adata_by_key. If None, all observations are selected.
         :param batch_size: Number of observations read from disk in each batched access (generator invocation).
         :param obs_keys: .obs columns to return in the generator. These have to be a subset of the columns available
             in self.adata_by_key.
@@ -492,8 +492,10 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
         :param random_access: Whether to fully shuffle observations before batched access takes place. May
             slow down access compared randomized_batch_access and to no randomization.
             Do not use randomized_batch_access and random_access.
-        :return: Generator function which yields batch_size at every invocation.
-            The generator returns a tuple of (.X, .obs).
+        :return: Tuple of
+            - Generator function which yields batch_size at every invocation.
+                The generator returns a tuple of (.X, .obs).
+            - Number of batches in generator.
         """
         idx, var_idx, batch_size = self._index_curation_helper(idx=idx, batch_size=batch_size)
         if randomized_batch_access and random_access:
@@ -550,9 +552,9 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
         If balance_obs is True, these N cells are the result of a draw without replacement from all 100 cells in this
         data set with individual success probabilities such that classes are balanced: 0.2 for A and 0.8 for B.
 
-        :param idx: Global idx to query from store. These is an array with indicies corresponding to a contiuous index
+        :param idx: Global idx to query from store. These is an array with indices corresponding to a contiuous index
             along all observations in self.adata_by_key, ordered along a hypothetical concatenation along the keys of
-            self.adata_by_key.
+            self.adata_by_key. If None, all observations are selected.
         :param balance_obs: .obs column key to balance samples from each data set over.
             Note that each data set must contain this column in its .obs table.
         :param balance_damping: Damping to apply to class weighting induced by balance_obs. The class-wise
@@ -608,6 +610,75 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
     def obs(self) -> Union[pd.DataFrame]:
         pass
 
+    @property
+    def var(self) -> Union[pd.DataFrame]:
+        if self.genome_container is None:
+            var = pd.DataFrame({}, index=self.var_names)
+        else:
+            var = pd.DataFrame({
+                "ensg": self.genome_container.ensembl,
+                "symbol": self.genome_container.symbols,
+            }, index=self.var_names)
+        return var
+
+    def adata_slice(self, idx: np.ndarray, as_sparse: bool = True, **kwargs) -> anndata.AnnData:
+        """
+        Assembles a slice of a store as a anndata instance using a generator.
+
+        Avoids loading entire data into memory first to then index. Uses .X_slice and loads var annotation from
+        .genome_container.
+        Note: this slice is a slice based on the subset already selected via previous subsetting on this instance.
+
+        :param idx: Global idx to query from store. These is an array with indices corresponding to a contiuous index
+            along all observations in self.adata_by_key, ordered along a hypothetical concatenation along the keys of
+            self.adata_by_key. If None, all observations are selected.
+        :param as_sparse: Whether to format .X as a sparse matrix.
+        :param kwargs: kwargs to .generator().
+        :return: Slice of data array.
+        """
+        # Note: .obs is already in memory so can be sliced in memory without great disadvantages.
+        return anndata.AnnData(
+            X=self.X_slice(idx=idx, as_sparse=as_sparse, **kwargs),
+            obs=self.obs.iloc[idx, :],
+            var=self.var
+        )
+
+    def X_slice(self, idx: np.ndarray, as_sparse: bool = True, **kwargs) -> Union[np.ndarray, scipy.sparse.csr_matrix]:
+        """
+        Assembles a slice of a store data matrix as a numpy / scipy array using a generator.
+
+        Avoids loading entire data matrix first to then index, ie replaces:
+
+        ``` python
+        # idx = some indices
+        x = store.X
+        x = x[idx,:]
+        ```
+
+        Note: this slice is a slice based on the subset already selected via previous subsetting on this instance.
+
+        :param idx: Global idx to query from store. These is an array with indices corresponding to a contiuous index
+            along all observations in self.adata_by_key, ordered along a hypothetical concatenation along the keys of
+            self.adata_by_key. If None, all observations are selected.
+        :param as_sparse: Whether to return a sparse matrix.
+        :param kwargs: kwargs to .generator().
+        :return: Slice of data array.
+        """
+        batch_size = min(len(idx), 128)
+        g, _ = self.generator(idx=idx, batch_size=batch_size, return_dense=True, random_access=False,
+                              randomized_batch_access=False, **kwargs)
+        shape = (idx.shape[0], self.n_vars)
+        if as_sparse:
+            x = scipy.sparse.csr_matrix(np.zeros(shape))
+        else:
+            x = np.empty(shape)
+        counter = 0
+        for x_batch, _ in g():
+            batch_len = x_batch.shape[0]
+            x[counter:(counter + batch_len), :] = x_batch
+            counter += batch_len
+        return x
+
 
 class DistributedStoreH5ad(DistributedStoreSingleFeatureSpace):
 
@@ -619,7 +690,7 @@ class DistributedStoreH5ad(DistributedStoreSingleFeatureSpace):
         self.in_memory = in_memory
 
     @property
-    def adata_sliced(self) -> Dict[str, anndata.AnnData]:
+    def _adata_sliced(self) -> Dict[str, anndata.AnnData]:
         """
         Only exposes the subset and slices of the adata instances contained in ._adata_by_key defined in .indices.
         """
@@ -682,7 +753,7 @@ class DistributedStoreH5ad(DistributedStoreSingleFeatureSpace):
         :return: Generator function which yields batch_size at every invocation.
             The generator returns a tuple of (.X, .obs).
         """
-        adata_sliced = self.adata_sliced
+        adata_sliced = self._adata_sliced
         # Speed up access to single object by skipping index overlap operations:
         single_object = len(adata_sliced.keys()) == 1
         if not single_object:

@@ -13,6 +13,14 @@ from sfaira.versions.genomes.genomes import GenomeContainer
 from sfaira.unit_tests.data_for_tests.loaders import ASSEMBLY_MOUSE, prepare_dsg, prepare_store
 
 
+def _get_single_store(store_format: str):
+    store_path = prepare_store(store_format=store_format)
+    stores = load_store(cache_path=store_path, store_format=store_format)
+    stores.subset(attr_key="organism", values=["mouse"])
+    store = stores.stores["mouse"]
+    return store
+
+
 @pytest.mark.parametrize("store_format", ["h5ad", "dao"])
 def test_fatal(store_format: str):
     """
@@ -31,6 +39,37 @@ def test_fatal(store_format: str):
         _ = x.obs
         _ = x.indices
         _ = x.genome_container
+
+
+@pytest.mark.parametrize("store_format", ["h5ad", "dao"])
+@pytest.mark.parametrize("as_sparse", [True, False])
+def test_x_slice(store_format: str, as_sparse: bool):
+    """
+    Test if basic methods abort.
+    """
+    store = _get_single_store(store_format=store_format)
+    data = store.X_slice(idx=np.arange(0, 5), as_sparse=as_sparse)
+    assert data.shape[0] == 5
+    if as_sparse:
+        assert isinstance(data, scipy.sparse.csr_matrix)
+    else:
+        assert isinstance(data, np.ndarray)
+
+
+@pytest.mark.parametrize("store_format", ["h5ad", "dao"])
+@pytest.mark.parametrize("as_sparse", [True, False])
+def test_adata_slice(store_format: str, as_sparse: bool):
+    """
+    Test if basic methods abort.
+    """
+    store = _get_single_store(store_format=store_format)
+    data = store.adata_slice(idx=np.arange(0, 5), as_sparse=as_sparse)
+    assert data.shape[0] == 5
+    assert isinstance(data, anndata.AnnData)
+    if as_sparse:
+        assert isinstance(data.X, scipy.sparse.csr_matrix)
+    else:
+        assert isinstance(data.X, np.ndarray)
 
 
 @pytest.mark.parametrize("store_format", ["h5ad", "dao"])
