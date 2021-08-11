@@ -425,11 +425,25 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
     ) -> iter:
         pass
 
-    def _generator_helper(
+    def _index_curation_helper(
             self,
             idx: Union[np.ndarray, None],
             batch_size: int,
     ) -> Tuple[Union[np.ndarray, None], Union[np.ndarray, None], int]:
+        """
+        Process indices and batch size input for generator production.
+
+        Feature indicces are formatted based on previously loaded genome container.
+
+        :param idx: Global idx to query from store. These is an array with indices corresponding to a contiuous index
+            along all observations in self.adata_by_key, ordered along a hypothetical concatenation along the keys of
+            self.adata_by_key. If None, all observations are seleccted.
+        :param batch_size: Number of observations read from disk in each batched access (generator invocation).
+        :return: Tuple:
+            - idx: Processed observation index vector for generator to access.
+            - var_idx Processed feature index vector for generator to access.
+            - batch_size Processed retrieval batch size for generator to access.
+        """
         # Make sure that features are ordered in the same way in each object so that generator yields consistent cell
         # vectors.
         var_names = self._validate_feature_space_homogeneity()
@@ -442,8 +456,10 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
                 var_idx = None
         else:
             var_idx = None
-        if idx is not None:
-            idx = self._validate_idx(idx)
+        # Select all cells if idx was None:
+        if idx is None:
+            idx = np.arange(0, self.n_obs)
+        idx = self._validate_idx(idx)
         batch_size = _process_batch_size(x=batch_size, idx=idx)
         return idx, var_idx, batch_size
 
@@ -460,9 +476,9 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
         """
         Yields an unbiased generator over observations in the contained data sets.
 
-        :param idx: Global idx to query from store. These is an array with indicies corresponding to a contiuous index
+        :param idx: Global idx to query from store. These is an array with indices corresponding to a contiuous index
             along all observations in self.adata_by_key, ordered along a hypothetical concatenation along the keys of
-            self.adata_by_key.
+            self.adata_by_key. If None, all observations are seleccted.
         :param batch_size: Number of observations read from disk in each batched access (generator invocation).
         :param obs_keys: .obs columns to return in the generator. These have to be a subset of the columns available
             in self.adata_by_key.
@@ -479,7 +495,7 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
         :return: Generator function which yields batch_size at every invocation.
             The generator returns a tuple of (.X, .obs).
         """
-        idx, var_idx, batch_size = self._generator_helper(idx=idx, batch_size=batch_size)
+        idx, var_idx, batch_size = self._index_curation_helper(idx=idx, batch_size=batch_size)
         if randomized_batch_access and random_access:
             raise ValueError("Do not use randomized_batch_access and random_access.")
         n_obs = len(idx)
@@ -547,7 +563,7 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
         :return: Generator function which yields batch_size at every invocation.
             The generator returns a tuple of (.X, .obs).
         """
-        idx, var_idx, batch_size = self._generator_helper(idx=idx, batch_size=batch_size)
+        idx, var_idx, batch_size = self._index_curation_helper(idx=idx, batch_size=batch_size)
 
         def idx_gen():
             batch_starts_ends = []
