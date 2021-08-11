@@ -750,7 +750,8 @@ class DistributedStoreH5ad(DistributedStoreSingleFeatureSpace):
         # Speed up access to single object by skipping index overlap operations:
         single_object = len(adata_sliced.keys()) == 1
         if not single_object:
-            idx_dict_global = dict([(k, set(v)) for k, v in self.indices_global.items()])
+            idx_dict_global = dict([(k1, (v1, v2))
+                                    for (k1, v1), v2 in zip(self.indices_global.items(), self.indices.values())])
 
         def generator():
             for idx, batch_starts_ends in idx_gen:
@@ -761,9 +762,10 @@ class DistributedStoreH5ad(DistributedStoreSingleFeatureSpace):
                         idx_i_dict = dict([(k, np.sort(idx_i)) for k in adata_sliced.keys()])
                     else:
                         idx_i_set = set(idx_i)
+                        # Return data set-wise index if global index is in target set.
                         idx_i_dict = dict([
-                            (k, np.sort(list(idx_i_set.intersection(v))))
-                            for k, v in idx_dict_global.items()
+                            (k, np.sort([x2 for x1, x2 in zip(v1, v2) if x1 in idx_i_set]))
+                            for k, (v1, v2) in idx_dict_global.items()
                         ])
                     # Only retain non-empty.
                     idx_i_dict = dict([(k, v) for k, v in idx_i_dict.items() if len(v) > 0])
