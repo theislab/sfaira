@@ -59,7 +59,8 @@ def time_gen(_store, store_format, kwargs) -> List[float]:
         gc.subset(symbols=["VTA1", "MLXIPL", "BAZ1B", "RANBP9", "PPARGC1A", "DDX25", "CRYAB"])
         _store.genome_container = gc
     del kwargs["var_subset"]
-    _gen, _ = _store.generator(**kwargs)()
+    _gen, _ = _store.generator(**kwargs)
+    _gen = _gen()
     _measurements = []
     for _ in range(N_DRAWS):
         _t0 = time.time()
