@@ -125,7 +125,7 @@ class DistributedStoreMultipleFeatureSpaceBase(DistributedStoreBase):
         return dict([(k, v.obs) for k, v in self.stores.items()])
 
     @property
-    def var_dict(self):
+    def var(self):
         """
         Dictionaries of .var tables by store, only including non-empty stores.
         """

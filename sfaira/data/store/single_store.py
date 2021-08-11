@@ -161,13 +161,6 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
         return dict([(k, v.X) for k, v in self.adata_by_key.items()])
 
     @property
-    def adata_memory_footprint(self) -> Dict[str, float]:
-        """
-        Memory foot-print of data set k in MB.
-        """
-        return dict([(k, sys.getsizeof(v) / np.power(1024, 2)) for k, v in self.adata_by_key.items()])
-
-    @property
     def indices(self) -> Dict[str, np.ndarray]:
         """
         Indices of observations that are currently exposed in adata of this instance.
