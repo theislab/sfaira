@@ -6,6 +6,7 @@ import pickle
 from typing import Union
 
 from sfaira.consts import AdataIdsSfaira
+from sfaira.data.store.base import DistributedStoreBase
 from sfaira.data import DistributedStoreSingleFeatureSpace, Universe
 from sfaira.estimators import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
 from sfaira.ui import ModelZoo
@@ -30,7 +31,7 @@ class TrainModel:
             self.data = data
         elif isinstance(data, Universe):
             self.data = data.adata
-        elif isinstance(data, DistributedStoreSingleFeatureSpace):
+        elif isinstance(data, DistributedStoreBase):
             self.data = data
         else:
             raise ValueError(f"did not recongize data of type {type(data)}")

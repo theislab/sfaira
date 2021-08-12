@@ -12,6 +12,20 @@ from sfaira.unit_tests.tests_by_submodule.estimators import TestHelperEstimatorB
 from sfaira.unit_tests import DIR_TEMP
 
 
+def get_cu():
+    """
+    Get file name of a target universe for loading by trainer.
+    """
+    # Create temporary cell type universe to give to trainer.
+    fn = os.path.join(DIR_TEMP, "universe_temp.csv")
+    cl = OntologyCl(branch="v2021-02-01")
+    uberon = OntologyUberon()
+    cu = CelltypeUniverse(cl=cl, uberon=uberon)
+    cu.write_target_universe(fn=fn, x=TARGETS)
+    del cu
+    return fn
+
+
 class HelperTrainerBase(TestHelperEstimatorBase):
 
     data: Union[anndata.AnnData, load_store]
@@ -58,13 +72,7 @@ def test_save_embedding():
 
 
 def test_save_celltypes():
-    # Create temporary cell type universe to give to trainer.
-    tmp_fn = os.path.join(DIR_TEMP, "universe_temp.csv")
-    cl = OntologyCl(branch="v2021-02-01")
-    uberon = OntologyUberon()
-    cu = CelltypeUniverse(cl=cl, uberon=uberon)
-    cu.write_target_universe(fn=tmp_fn, x=TARGETS)
-    del cu
+    tmp_fn = get_cu()
     model_id = "celltype_human-lung-mlp-0.0.1-0.1_mylab"
     zoo = ModelZoo()
     zoo.model_id = model_id
