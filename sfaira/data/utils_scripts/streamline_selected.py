@@ -35,7 +35,10 @@ for doi in dois.split(","):
             clean_obs=False,
             clean_var=True,
             clean_uns=True,
-            clean_obs_names=False
+            clean_obs_names=False,
+            keep_orginal_obs=False,
+            keep_symbol_obs=True,
+            keep_id_obs=True,
         )
         ds.collapse_counts()
     assert len(ds.dataset_groups) == 1, len(ds.dataset_groups)

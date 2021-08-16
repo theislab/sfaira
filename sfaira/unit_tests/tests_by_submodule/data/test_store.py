@@ -156,7 +156,7 @@ def test_config(store_format: str):
 @pytest.mark.parametrize("idx", [np.arange(1, 10),
                                  np.concatenate([np.arange(30, 50), np.array([1, 4, 98])])])
 @pytest.mark.parametrize("batch_size", [1, 7])
-@pytest.mark.parametrize("obs_keys", [["cell_ontology_class"]])
+@pytest.mark.parametrize("obs_keys", [["cell_type"]])
 @pytest.mark.parametrize("randomized_batch_access", [True, False])
 def test_generator_shapes(store_format: str, idx, batch_size: int, obs_keys: List[str], randomized_batch_access: bool):
     """

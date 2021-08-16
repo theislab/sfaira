@@ -242,7 +242,7 @@ class TestHelperEstimatorKerasCelltype(TestHelperEstimatorKeras):
             model_topology=tc
         )
         leaves = self.estimator.celltype_universe.onto_cl.get_effective_leaves(
-            x=[x for x in self.data.obs[self.adata_ids.cellontology_class].values
+            x=[x for x in self.data.obs[self.adata_ids.cell_type].values
                if x != self.adata_ids.unknown_celltype_identifier]
         )
         self.nleaves = len(leaves)
@@ -293,11 +293,11 @@ class HelperEstimatorKerasCelltypeCustomObo(TestHelperEstimatorKerasCelltype):
         # - Subset to target feature space size:
         self.data = self.data[:, :self.tc.gc.n_var].copy()
         # - Add in custom cell types:
-        self.data.obs[self.adata_ids.cellontology_class] = [
+        self.data.obs[self.adata_ids.cell_type] = [
             self.custom_types[np.random.randint(0, len(self.custom_types))]
             for _ in range(self.data.n_obs)
         ]
-        self.data.obs[self.adata_ids.cellontology_id] = self.data.obs[self.adata_ids.cellontology_class]
+        self.data.obs[self.adata_ids.cell_type_id] = self.data.obs[self.adata_ids.cell_type]
         # - Add in custom features:
         self.data.var_names = ["dim_" + str(i) for i in range(self.data.n_vars)]
         self.data.var[self.adata_ids.gene_id_ensembl] = ["dim_" + str(i) for i in range(self.data.n_vars)]

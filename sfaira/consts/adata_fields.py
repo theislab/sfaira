@@ -12,9 +12,7 @@ class AdataIds:
     annotated: str
     assay_sc: str
     author: str
-    cell_types_original: str
-    cellontology_class: str
-    cellontology_id: str
+    cell_type: str
     development_stage: str
     disease: str
     doi_journal: str
@@ -39,9 +37,14 @@ class AdataIds:
     tech_sample: str
     year: str
 
+    ontology_id_suffix: str
+    ontology_original_suffix: str
+
     load_raw: str
     mapped_features: str
     remove_gene_version: str
+
+    ontology_constrained: List[str]
 
     obs_keys: List[str]
     var_keys: List[str]
@@ -77,6 +80,9 @@ class AdataIdsSfaira(AdataIds):
     cell_line: str
 
     def __init__(self):
+        self.ontology_id_suffix = "_ontology_term_id"
+        self.ontology_original_suffix = "_original"
+
         self.annotated = "annotated"
         self.assay_sc = "assay_sc"
         self.assay_differentiation = "assay_differentiation"
@@ -84,9 +90,7 @@ class AdataIdsSfaira(AdataIds):
         self.author = "author"
         self.bio_sample = "bio_sample"
         self.cell_line = "cell_line"
-        self.cell_types_original = "cell_types_original"
-        self.cellontology_class = "cell_ontology_class"
-        self.cellontology_id = "cell_ontology_id"
+        self.cell_type = "cell_type"
         self.default_embedding = "default_embedding"
         self.disease = "disease"
         self.doi_journal = "doi_journal"
@@ -126,19 +130,25 @@ class AdataIdsSfaira(AdataIds):
         self.unknown_celltype_identifier = "UNKNOWN"
         self.not_a_cell_celltype_identifier = "NOT_A_CELL"
         self.unknown_metadata_identifier = "unknown"
-        self.unknown_metadata_ontology_id_identifier = "unknown"
 
         self.batch_keys = [self.bio_sample, self.individual, self.tech_sample]
 
+        self.ontology_constrained = [
+            "assay_sc",
+            "cell_line",
+            "cell_type",
+            "development_stage",
+            "disease",
+            #"ethnicity", TODO once ontologies work
+            "organ",
+        ]
         self.obs_keys = [
             "assay_sc",
             "assay_differentiation",
             "assay_type_differentiation",
             "bio_sample",
             "cell_line",
-            "cell_types_original",
-            "cellontology_class",
-            "cellontology_id",
+            "cell_type",
             "development_stage",
             "disease",
             "ethnicity",
@@ -181,12 +191,12 @@ class AdataIdsCellxgene(AdataIds):
     accepted_file_names: List[str]
 
     def __init__(self):
+        self.ontology_id_suffix = "_ontology_term_id"
+        self.ontology_original_suffix = "_original"
+
         self.assay_sc = "assay"
         self.author = None
-        self.cell_types_original = "free_annotation"  # TODO "free_annotation" not always given
-        # TODO: -> This will break streamlining though if self.cell_types_original is the same value as self.cellontology_class!!
-        self.cellontology_class = "cell_type"
-        self.cellontology_id = "cell_type_ontology_term_id"
+        self.cell_type = "cell_type"
         self.default_embedding = "default_embedding"
         self.doi_journal = "publication_doi"
         self.doi_preprint = "preprint_doi"
@@ -215,15 +225,21 @@ class AdataIdsCellxgene(AdataIds):
         self.not_a_cell_celltype_identifier = self.unknown_celltype_identifier
         self.unknown_metadata_identifier = "unknown"
         self.invalid_metadata_identifier = "na"
-        self.unknown_metadata_ontology_id_identifier = ""
 
         self.batch_keys = []
 
+        self.ontology_constrained = [
+            "assay_sc",
+            "cell_type",
+            "development_stage",
+            "disease",
+            "ethnicity",
+            "organ",
+        ]
+
         self.obs_keys = [
             "assay_sc",
-            "cell_types_original",
-            "cellontology_class",
-            "cellontology_id",
+            "cell_type",
             "development_stage",
             "disease",
             "ethnicity",

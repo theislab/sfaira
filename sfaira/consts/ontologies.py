@@ -17,7 +17,7 @@ class OntologyContainerSfaira:
 
     _assay_sc: Union[None, OntologySinglecellLibraryConstruction]
     _cell_line: Union[None, OntologyCellosaurus]
-    _cellontology_class: Union[None, OntologyCl]
+    _cell_type: Union[None, OntologyCl]
     _development_stage: Union[None, Dict[str, Union[OntologyHsapdv, OntologyMmusdv]]]
     _organ: Union[None, OntologyUberon]
 
@@ -29,7 +29,7 @@ class OntologyContainerSfaira:
         self.assay_type_differentiation = OntologyList(terms=["guided", "unguided"])
         self.bio_sample = None
         self._cell_line = None
-        self._cellontology_class = None
+        self._cell_type = None
         self.cell_types_original = None
         self.collection_id = None
         self.default_embedding = None
@@ -63,7 +63,7 @@ class OntologyContainerSfaira:
         elif attr == "cell_line":
             self._cell_line = OntologyCellosaurus(**kwargs)
         elif attr == "cellontology_class":
-            self._cellontology_class = OntologyCl(branch=DEFAULT_CL, **kwargs)
+            self._cell_type = OntologyCl(branch=DEFAULT_CL, **kwargs)
         elif attr == "disease":
             self._disease = OntologyMondo(**kwargs)
         elif attr == "organ":
@@ -83,14 +83,14 @@ class OntologyContainerSfaira:
         return self._cell_line
 
     @property
-    def cellontology_class(self):
-        if self._cellontology_class is None:
-            self._cellontology_class = OntologyCl(branch=DEFAULT_CL)
-        return self._cellontology_class
+    def cell_type(self):
+        if self._cell_type is None:
+            self._cell_type = OntologyCl(branch=DEFAULT_CL)
+        return self._cell_type
 
-    @cellontology_class.setter
-    def cellontology_class(self, x: str):
-        self._cellontology_class = OntologyCl(branch=x)
+    @cell_type.setter
+    def cell_type(self, x: str):
+        self._cell_type = OntologyCl(branch=x)
 
     @property
     def development_stage(self):
