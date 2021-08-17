@@ -158,7 +158,7 @@ class DistributedStoreMultipleFeatureSpaceBase(DistributedStoreBase):
             - "assay_sc" points to self.assay_sc_obs_key
             - "assay_type_differentiation" points to self.assay_type_differentiation_obs_key
             - "cell_line" points to self.cell_line
-            - "cellontology_class" points to self.cellontology_class_obs_key
+            - "cell_type" points to self.cell_type_obs_key
             - "developmental_stage" points to self.developmental_stage_obs_key
             - "ethnicity" points to self.ethnicity_obs_key
             - "organ" points to self.organ_obs_key

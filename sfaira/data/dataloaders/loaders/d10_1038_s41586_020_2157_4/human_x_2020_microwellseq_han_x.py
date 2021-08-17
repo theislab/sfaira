@@ -29,7 +29,7 @@ class Dataset(DatasetBase):
         self.sample_source = "primary_tissue"
 
         self.bio_sample_obs_key = "sample"
-        self.cell_types_original_obs_key = "celltype_specific"
+        self.cell_type_obs_key = "celltype_specific"
         self.development_stage_obs_key = "dev_stage"
         self.organ_obs_key = "organ"
         self.sex_obs_key = "sex"

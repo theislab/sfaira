@@ -242,6 +242,6 @@ class TrainModelCelltype(TrainModel):
         with open(fn + "_topology.pickle", "wb") as f:
             pickle.dump(obj=self.topology_dict, file=f)
 
-        cell_counts = obs['cell_ontology_class'].value_counts().to_dict()
+        cell_counts = obs['cell_type'].value_counts().to_dict()
         with open(fn + '_celltypes_valuecounts_wholedata.pickle', 'wb') as f:
             pickle.dump(obj=[cell_counts], file=f)

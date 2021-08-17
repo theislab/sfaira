@@ -58,9 +58,7 @@ class Dataset(DatasetBase):
         # The h5ad objects from cellxgene follow a particular structure and the following attributes are guaranteed to
         # be in place. Note that these point at the anndata instance and will only be available for evaluation after
         # download. See below for attributes that are lazily available
-        self.cellontology_class_obs_key = self._adata_ids_cellxgene.cellontology_class
-        self.cellontology_id_obs_key = self._adata_ids_cellxgene.cellontology_id
-        self.cellontology_original_obs_key = self._adata_ids_cellxgene.cell_types_original
+        self.cell_type_obs_key = self._adata_ids_cellxgene.cell_type
         self.development_stage_obs_key = self._adata_ids_cellxgene.development_stage
         self.disease_obs_key = self._adata_ids_cellxgene.disease
         self.ethnicity_obs_key = self._adata_ids_cellxgene.ethnicity
@@ -70,7 +68,7 @@ class Dataset(DatasetBase):
 
         self.gene_id_symbols_var_key = self._adata_ids_cellxgene.gene_id_symbols
 
-        self._unknown_celltype_identifiers = self._adata_ids_cellxgene.unknown_celltype_identifier
+        self._unknown_celltype_identifiers = self._adata_ids_cellxgene.unknown_metadata_identifier
 
         self.collection_id = collection_id
         self.supplier = "cellxgene"
@@ -104,7 +102,7 @@ class Dataset(DatasetBase):
                         # TODO normal state label varies in disease annotation. This can be removed once streamlined.
                         v = "healthy"
                     elif k in ["assay_sc", "disease", "organ"] and \
-                            v["ontology_term_id"] != self._adata_ids_cellxgene.unknown_metadata_ontology_id_identifier:
+                            v["ontology_term_id"] != self._adata_ids_cellxgene.unknown_metadata_identifier:
                         v = v["ontology_term_id"]
                     else:
                         v = v["label"]
@@ -119,7 +117,7 @@ class Dataset(DatasetBase):
                         if v not in organism_map:
                             raise ValueError(f"value {v} not recognized")
                         v = organism_map[v]
-                if v != self._adata_ids_cellxgene.unknown_metadata_ontology_id_identifier and \
+                if v != self._adata_ids_cellxgene.unknown_metadata_identifier and \
                         v != self._adata_ids_cellxgene.invalid_metadata_identifier:
                     v_clean.append(v)
             try:
