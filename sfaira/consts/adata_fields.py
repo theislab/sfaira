@@ -37,8 +37,8 @@ class AdataIds:
     tech_sample: str
     year: str
 
-    ontology_id_suffix: str
-    ontology_original_suffix: str
+    onto_id_suffix: str
+    onto_original_suffix: str
 
     load_raw: str
     mapped_features: str
@@ -55,7 +55,7 @@ class AdataIds:
     classmap_target_key: str
     classmap_target_id_key: str
 
-    unknown_celltype_identifier: Union[str, None]
+    invalid_metadata_identifier: Union[str, None]
     not_a_cell_celltype_identifier: Union[str, None]
     unknown_metadata_identifier: Union[str, None]
 
@@ -80,8 +80,8 @@ class AdataIdsSfaira(AdataIds):
     cell_line: str
 
     def __init__(self):
-        self.ontology_id_suffix = "_ontology_term_id"
-        self.ontology_original_suffix = "_original"
+        self.onto_id_suffix = "_ontology_term_id"
+        self.onto_original_suffix = "_original"
 
         self.annotated = "annotated"
         self.assay_sc = "assay_sc"
@@ -127,7 +127,7 @@ class AdataIdsSfaira(AdataIds):
         self.classmap_target_key = "target"
         self.classmap_target_id_key = "target_id"
 
-        self.unknown_celltype_identifier = "UNKNOWN"
+        self.invalid_metadata_identifier = "na"
         self.not_a_cell_celltype_identifier = "NOT_A_CELL"
         self.unknown_metadata_identifier = "unknown"
 
@@ -139,7 +139,7 @@ class AdataIdsSfaira(AdataIds):
             "cell_type",
             "development_stage",
             "disease",
-            #"ethnicity", TODO once ontologies work
+            # "ethnicity", TODO once ontologies work
             "organ",
         ]
         self.obs_keys = [
@@ -191,8 +191,8 @@ class AdataIdsCellxgene(AdataIds):
     accepted_file_names: List[str]
 
     def __init__(self):
-        self.ontology_id_suffix = "_ontology_term_id"
-        self.ontology_original_suffix = "_original"
+        self.onto_id_suffix = "_ontology_term_id"
+        self.onto_original_suffix = "_original"
 
         self.assay_sc = "assay"
         self.author = None
@@ -221,10 +221,9 @@ class AdataIdsCellxgene(AdataIds):
         # selected element entries used for parsing:
         self.author_names = "names"
 
-        self.unknown_celltype_identifier = None
-        self.not_a_cell_celltype_identifier = self.unknown_celltype_identifier
-        self.unknown_metadata_identifier = "unknown"
         self.invalid_metadata_identifier = "na"
+        self.not_a_cell_celltype_identifier = "CL:0000003"
+        self.unknown_metadata_identifier = "unknown"
 
         self.batch_keys = []
 

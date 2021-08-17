@@ -239,7 +239,7 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
             - "assay_sc" points to self.assay_sc_obs_key
             - "assay_type_differentiation" points to self.assay_type_differentiation_obs_key
             - "cell_line" points to self.cell_line
-            - "cellontology_class" points to self.cellontology_class_obs_key
+            - "cell_type" points to self.cell_type_obs_key
             - "developmental_stage" points to self.developmental_stage_obs_key
             - "ethnicity" points to self.ethnicity_obs_key
             - "organ" points to self.organ_obs_key
@@ -333,7 +333,7 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
             - "assay_sc" points to self.assay_sc_obs_key
             - "assay_type_differentiation" points to self.assay_type_differentiation_obs_key
             - "cell_line" points to self.cell_line
-            - "cellontology_class" points to self.cellontology_class_obs_key
+            - "cell_type" points to self.cell_type_obs_key
             - "developmental_stage" points to self.developmental_stage_obs_key
             - "ethnicity" points to self.ethnicity_obs_key
             - "organ" points to self.organ_obs_key
@@ -538,7 +538,7 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
         Uses self.dataset_weights if this are given to sample data sets with different frequencies.
         Can additionally also balance across one meta data annotation within each data set.
 
-        Assume you have a data set with two classes (A=80, B=20 cells) in a column named "cellontology_class".
+        Assume you have a data set with two classes (A=80, B=20 cells) in a column named "cell_type".
         The single batch for this data set produced by this generator in each epoch contains N cells.
         If balance_obs is False, these N cells are the result of a draw without replacement from all 100 cells in this
         dataset in which each cell receives the same weight / success probability of 1.0.

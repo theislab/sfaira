@@ -68,7 +68,7 @@ class Dataset(DatasetBase):
 
         self.gene_id_symbols_var_key = self._adata_ids_cellxgene.gene_id_symbols
 
-        self._unknown_celltype_identifiers = self._adata_ids_cellxgene.unknown_celltype_identifier
+        self._unknown_celltype_identifiers = self._adata_ids_cellxgene.unknown_metadata_identifier
 
         self.collection_id = collection_id
         self.supplier = "cellxgene"

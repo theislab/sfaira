@@ -771,7 +771,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                     for i in idx:
                         x_sample = self.data.X[i, :].toarray().flatten() if sparse else self.data.X[i, :].flatten()
                         sf_sample = prepare_sf(x=x_sample)[0]
-                        y_sample = self.data.obs[self._adata_ids.cell_type_id][i]
+                        y_sample = self.data.obs[self._adata_ids.cell_type + self._adata_ids.onto_id_suffix][i]
                         yield (x_sample, sf_sample), (x_sample, cell_to_class[y_sample])
             else:
                 if idx is None:
@@ -1059,19 +1059,15 @@ class EstimatorKerasCelltype(EstimatorKeras):
         if remove_unlabeled_cells:
             # Remove cells without type label from store:
             if isinstance(self.data, DistributedStoreSingleFeatureSpace):
-                self.data.subset(attr_key="cellontology_class", excluded_values=[
-                    self._adata_ids.unknown_celltype_identifier,
+                self.data.subset(attr_key="cell_type", excluded_values=[
+                    self._adata_ids.unknown_metadata_identifier,
                     self._adata_ids.not_a_cell_celltype_identifier,
-                    None,  # TODO: it may be possible to remove this in the future
-                    np.nan,  # TODO: it may be possible to remove this in the future
                 ])
             elif isinstance(self.data, anndata.AnnData):
                 self.data = self.data[np.where([
                     x not in [
-                        self._adata_ids.unknown_celltype_identifier,
+                        self._adata_ids.unknown_metadata_identifier,
                         self._adata_ids.not_a_cell_celltype_identifier,
-                        None,  # TODO: it may be possible to remove this in the future
-                        np.nan,  # TODO: it may be possible to remove this in the future
                     ] for x in self.data.obs[self._adata_ids.cell_type].values
                 ])[0], :]
             else:
@@ -1133,7 +1129,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             # Encodes unknowns to empty rows.
             idx = [
                 leave_maps[y] if y not in [
-                    self._adata_ids.unknown_celltype_identifier,
+                    self._adata_ids.unknown_metadata_identifier,
                     self._adata_ids.not_a_cell_celltype_identifier,
                 ] else np.array([])
                 for y in x
@@ -1163,7 +1159,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
         onehot_encoder = self._one_hot_encoder()
         y = np.concatenate([
             onehot_encoder(z)
-            for z in self.data.obs[self._adata_ids.cell_type_id].values[idx].tolist()
+            for z in self.data.obs[self._adata_ids.cell_type + self._adata_ids.onto_id_suffix].values[idx].tolist()
         ], axis=0)
         # Distribute aggregated class weight for computation of weights:
         freq = np.mean(y / np.sum(y, axis=1, keepdims=True), axis=0, keepdims=True)
@@ -1228,7 +1224,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             generator_raw, _ = self.data.generator(
                 idx=idx,
                 batch_size=batch_size,
-                obs_keys=[self._adata_ids.cell_type_id],
+                obs_keys=[self._adata_ids.cell_type + self._adata_ids.onto_id_suffix],
                 return_dense=True,
                 randomized_batch_access=randomized_batch_access,
             )
@@ -1242,7 +1238,8 @@ class EstimatorKerasCelltype(EstimatorKeras):
                         x_sample = x_sample.todense()
                     x_sample = np.asarray(x_sample)
                     if yield_labels:
-                        y_sample = onehot_encoder(z[1][self._adata_ids.cell_type_id].values)
+                        y_sample = onehot_encoder(
+                            z[1][self._adata_ids.cell_type + self._adata_ids.onto_id_suffix].values)
                         for i in range(x_sample.shape[0]):
                             if y_sample[i].sum() > 0:
                                 yield x_sample[i], y_sample[i], 1.

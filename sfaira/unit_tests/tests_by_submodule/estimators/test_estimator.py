@@ -243,7 +243,7 @@ class TestHelperEstimatorKerasCelltype(TestHelperEstimatorKeras):
         )
         leaves = self.estimator.celltype_universe.onto_cl.get_effective_leaves(
             x=[x for x in self.data.obs[self.adata_ids.cell_type].values
-               if x != self.adata_ids.unknown_celltype_identifier]
+               if x != self.adata_ids.unknown_metadata_identifier]
         )
         self.nleaves = len(leaves)
         self.estimator.celltype_universe.onto_cl.leaves = leaves
@@ -297,7 +297,8 @@ class HelperEstimatorKerasCelltypeCustomObo(TestHelperEstimatorKerasCelltype):
             self.custom_types[np.random.randint(0, len(self.custom_types))]
             for _ in range(self.data.n_obs)
         ]
-        self.data.obs[self.adata_ids.cell_type_id] = self.data.obs[self.adata_ids.cell_type]
+        self.data.obs[self.adata_ids.cell_type + self.adata_ids.onto_id_suffix] = \
+            self.data.obs[self.adata_ids.cell_type]
         # - Add in custom features:
         self.data.var_names = ["dim_" + str(i) for i in range(self.data.n_vars)]
         self.data.var[self.adata_ids.gene_id_ensembl] = ["dim_" + str(i) for i in range(self.data.n_vars)]

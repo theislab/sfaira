@@ -205,7 +205,6 @@ class DatasetBase(abc.ABC):
         self.gene_id_ensembl_var_key = None
 
         self.class_maps = {"0": {}}
-        self._unknown_celltype_identifiers = self._adata_ids.unknown_celltype_identifier
 
         self._celltype_universe = None
         self._ontology_class_map = None
@@ -233,6 +232,9 @@ class DatasetBase(abc.ABC):
                         assert self.sample_fn in v.keys(), f"did not find key {self.sample_fn} in yamls keys for {k}"
                         setattr(self, k, v[self.sample_fn])
                     else:  # v is a meta-data item
+                        # Catches spelling errors in meta data definition (yaml keys).
+                        if not hasattr(self, k) and not hasattr(self, "_" + k):
+                            raise ValueError(f"Tried setting unavailable property {k}.")
                         try:
                             setattr(self, k, v)
                         except AttributeError as e:
@@ -665,8 +667,8 @@ class DatasetBase(abc.ABC):
         The initially annotated column may be any of these and is defined as "{attr}_obs_col".
         The resulting three column per meta data item are named:
             - ontology symbol: "{ADATA_FIELDS*.attr}"
-            - ontology ID: {ADATA_FIELDS*.attr}_{ADATA_FIELDS*.ontology_id_suffix}"
-            - original (free text) annotation: "{ADATA_FIELDS*.attr}_{ADATA_FIELDS*.ontology_original_suffix}"
+            - ontology ID: {ADATA_FIELDS*.attr}_{ADATA_FIELDS*.onto_id_suffix}"
+            - original (free text) annotation: "{ADATA_FIELDS*.attr}_{ADATA_FIELDS*.onto_original_suffix}"
 
         :param schema: Export format.
             - "sfaira"
@@ -782,10 +784,10 @@ class DatasetBase(abc.ABC):
         # The output columns are:
         # - for an ontology-constrained meta data item "attr":
         #   *  symbols:         "attr"
-        #   *  IDs:             "attr" + self._adata_ids.ontology_id_suffix
-        #   *  original labels: "attr" + self._adata_ids.ontology_original_suffix
+        #   *  IDs:             "attr" + self._adata_ids.onto_id_suffix
+        #   *  original labels: "attr" + self._adata_ids.onto_original_suffix
         # - for a non-ontology-constrained meta data item "attr":
-        #   *  original labels: "attr" + self._adata_ids.ontology_original_suffix
+        #   *  original labels: "attr" + self._adata_ids.onto_original_suffix
         obs_new = pd.DataFrame(index=self.adata.obs.index)
         for k in [x for x in adata_target_ids.obs_keys]:
             if k in experiment_batch_labels and getattr(self, f"{k}_obs_key") is not None and \
@@ -838,9 +840,9 @@ class DatasetBase(abc.ABC):
                     self.get_ontology(k=k).is_a_node_id(x) or x == self._adata_ids.unknown_metadata_identifier
                     for x in np.unique(val)
                 ]):  # 1a-III)
-                    new_col = getattr(adata_target_ids, k) + self._adata_ids.ontology_id_suffix
+                    new_col = getattr(adata_target_ids, k) + self._adata_ids.onto_id_suffix
                 else:  # 1a-I)
-                    new_col = getattr(adata_target_ids, k) + self._adata_ids.ontology_original_suffix
+                    new_col = getattr(adata_target_ids, k) + self._adata_ids.onto_original_suffix
             else:
                 # 1b-I.
                 new_col = getattr(adata_target_ids, k)
@@ -874,9 +876,9 @@ class DatasetBase(abc.ABC):
             self.__impute_ontology_cols_obs(attr=k)
             # Delete attribute-specific columns that are not desired.
             if not keep_id_obs:
-                del self.adata.obs[getattr(self._adata_ids, k) + self._adata_ids.ontology_id_suffix]
+                del self.adata.obs[getattr(self._adata_ids, k) + self._adata_ids.onto_id_suffix]
             if not keep_orginal_obs:
-                del self.adata.obs[getattr(self._adata_ids, k) + self._adata_ids.ontology_original_suffix]
+                del self.adata.obs[getattr(self._adata_ids, k) + self._adata_ids.onto_original_suffix]
             if not keep_symbol_obs:
                 del self.adata.obs[getattr(self._adata_ids, k)]
         if clean_obs_names:
@@ -915,21 +917,21 @@ class DatasetBase(abc.ABC):
             else:
                 raise ValueError(f"organism {self.organism} currently not supported by cellxgene schema")
             # Correct unknown cell type entries:
-            self.adata.obs[getattr(adata_target_ids, "cellontology_class")] = [
-                x if x not in [self._adata_ids.unknown_celltype_identifier,
+            self.adata.obs[getattr(adata_target_ids, "cell_type")] = [
+                x if x not in [self._adata_ids.unknown_metadata_identifier,
                                self._adata_ids.not_a_cell_celltype_identifier]
                 else "native cell"
-                for x in self.adata.obs[getattr(adata_target_ids, "cellontology_class")]]
-            self.adata.obs[getattr(adata_target_ids, "cellontology_id")] = [
-                x if x not in [self._adata_ids.unknown_celltype_identifier,
+                for x in self.adata.obs[getattr(adata_target_ids, "cell_type")]]
+            self.adata.obs[getattr(adata_target_ids, "cell_type" + adata_target_ids.onto_id_suffix)] = [
+                x if x not in [self._adata_ids.unknown_metadata_identifier,
                                self._adata_ids.not_a_cell_celltype_identifier]
                 else "CL:0000003"
-                for x in self.adata.obs[getattr(adata_target_ids, "cellontology_id")]]
+                for x in self.adata.obs[getattr(adata_target_ids, "cell_type" + adata_target_ids.onto_id_suffix)]]
             # Reorder data frame to put ontology columns first:
             cellxgene_cols = [getattr(adata_target_ids, x) for x in adata_target_ids.ontology_constrained] + \
                              [getattr(adata_target_ids, x) for x in adata_target_ids.obs_keys
                               if x not in adata_target_ids.ontology_constrained] + \
-                             [getattr(adata_target_ids, x) + adata_target_ids.ontology_id_suffix
+                             [getattr(adata_target_ids, x) + adata_target_ids.onto_id_suffix
                               for x in adata_target_ids.ontology_constrained]
             self.adata.obs = self.adata.obs[
                 cellxgene_cols + [x for x in self.adata.obs.columns if x not in cellxgene_cols]
@@ -1127,23 +1129,13 @@ class DatasetBase(abc.ABC):
                 match_only=False,
                 anatomical_constraint=self.organ,
                 include_synonyms=True,
-                omit_list=self._unknown_celltype_identifiers,
+                omit_list=[self._adata_ids.unknown_metadata_identifier],
                 **kwargs
             )
             if not os.path.exists(fn) or not protected_writing:
-                self._write_class_map(fn=fn, tab=tab)
+                tab.to_csv(fn, index=False, sep="\t")
 
-    def _write_class_map(self, fn, tab):
-        """
-        Write class map.
-
-        :param fn: File name of csv to write class maps to.
-        :param tab: Table to write
-        :return:
-        """
-        tab.to_csv(fn, index=False, sep="\t")
-
-    def _read_class_map(self, fn) -> pd.DataFrame:
+    def read_class_map(self, fn) -> pd.DataFrame:
         """
         Read class map.
 
@@ -1166,7 +1158,7 @@ class DatasetBase(abc.ABC):
         :return:
         """
         if os.path.exists(fn):
-            self.cell_type_map = self._read_class_map(fn=fn)
+            self.cell_type_map = self.read_class_map(fn=fn)
         else:
             if self.cell_type_obs_key is not None:
                 warnings.warn(f"file {fn} does not exist but cell_type_obs_key {self.cell_type_obs_key} is given")
@@ -1189,7 +1181,7 @@ class DatasetBase(abc.ABC):
         ontology_map = getattr(self, ontology_map)
         adata_fields = self._adata_ids
         results = {}
-        col_original = attr + adata_fields.ontology_original_suffix
+        col_original = attr + adata_fields.onto_original_suffix
         labels_original = self.adata.obs[col_original].values
         if ontology_map is not None:  # only if this was defined
             labels_mapped = [
@@ -1199,7 +1191,7 @@ class DatasetBase(abc.ABC):
             # Convert unknown celltype placeholders (needs to be hardcoded here as placeholders are also hardcoded in
             # conversion tsv files
             placeholder_conversion = {
-                "UNKNOWN": adata_fields.unknown_celltype_identifier,
+                "UNKNOWN": adata_fields.unknown_metadata_identifier,
                 "NOT_A_CELL": adata_fields.not_a_cell_celltype_identifier,
             }
             labels_mapped = [
@@ -1215,7 +1207,7 @@ class DatasetBase(abc.ABC):
                 attempted=[
                     x for x in list(set(labels_mapped))
                     if x not in [
-                        adata_fields.unknown_celltype_identifier,
+                        adata_fields.unknown_metadata_identifier,
                         adata_fields.not_a_cell_celltype_identifier
                     ]
                 ]
@@ -1229,16 +1221,16 @@ class DatasetBase(abc.ABC):
             self.__project_ontology_ids_obs(
                 attr=adata_fields.cell_type,
                 map_exceptions=[
-                    adata_fields.unknown_celltype_identifier,
+                    adata_fields.unknown_metadata_identifier,
                     adata_fields.not_a_cell_celltype_identifier
                 ],
                 in_id=False,
             )
         else:
             results[adata_fields.cell_type] = labels_original
-            results[adata_fields.cell_type + adata_fields.ontology_id_suffix] = \
+            results[adata_fields.cell_type + adata_fields.onto_id_suffix] = \
                 [adata_fields.unknown_metadata_identifier] * self.adata.n_obs
-        results[adata_fields.cell_type + adata_fields.ontology_original_suffix] = labels_original
+        results[adata_fields.cell_type + adata_fields.onto_original_suffix] = labels_original
         if copy:
             return pd.DataFrame(results, index=self.adata.obs.index)
         else:
@@ -1276,14 +1268,14 @@ class DatasetBase(abc.ABC):
             for x in np.unique(self.adata.obs[col_symbol].values)]) if symbol_col_present else False
         symbol_present = symbol_col_present and symbol_col_streamlined
         # IDs:
-        col_id = attr + self._adata_ids.ontology_id_suffix
+        col_id = attr + self._adata_ids.onto_id_suffix
         id_col_present = col_id in self.adata.obs.columns
         id_col_streamlined = np.all([
             ontology.is_a_node_id(x) or x == self._adata_ids.unknown_metadata_identifier
             for x in np.unique(self.adata.obs[col_id].values)]) if id_col_present else False
         id_present = id_col_present and id_col_streamlined
         # Original annotation (free text):
-        col_original = attr + self._adata_ids.ontology_original_suffix
+        col_original = attr + self._adata_ids.onto_original_suffix
         original_present = col_original in self.adata.obs.columns
         if original_present and not symbol_present and not id_present:  # 1)
             self.project_free_to_ontology(attr=attr, copy=False)
@@ -1323,24 +1315,29 @@ class DatasetBase(abc.ABC):
         ontology = self.get_ontology(k=attr)
         assert ontology is not None, f"cannot project value for {attr} because ontology is None"
         assert isinstance(attr, (str, list)), f"argument key_in needs to be of type str or list. Supplied" \
-                                                f"type: {type(attr)}"
+                                              f"type: {type(attr)}"
         map_exceptions = map_exceptions if map_exceptions is not None else [self._adata_ids.unknown_metadata_identifier]
-        map_exceptions_value = map_exceptions_value if map_exceptions_value is not None else \
-            self._adata_ids.unknown_metadata_identifier
+        map_exceptions = [x.lower() for x in map_exceptions]
+        if map_exceptions_value is None:
+            # TODO this may be simplified in the future once all unknown meta data labels are the same.
+            if attr == "cell_type":
+                map_exceptions_value = self._adata_ids.unknown_metadata_identifier
+            else:
+                map_exceptions_value = self._adata_ids.unknown_metadata_identifier
         input_values = self.adata.obs[attr].values if isinstance(attr, str) else attr
         map_vals = dict([
             (x, ontology.convert_to_name(x)) if in_id else
             (x, ontology.convert_to_id(x))
             for x in np.unique([
                 xx for xx in input_values
-                if (xx not in map_exceptions and xx is not None)
+                if (xx.lower() not in map_exceptions and xx is not None)
             ])
         ])
         output_values = [
             map_vals[x] if x in map_vals.keys() else map_exceptions_value
             for x in input_values
         ]
-        key_out = attr if in_id else attr + self._adata_ids.ontology_id_suffix
+        key_out = attr if in_id else attr + self._adata_ids.onto_id_suffix
         self.adata.obs[key_out] = output_values
 
     @property
@@ -1423,7 +1420,7 @@ class DatasetBase(abc.ABC):
                 col = getattr(self._adata_ids, x)
                 meta[col] = (self.adata.obs[col].unique(), )
                 if x in self._adata_ids.ontology_constrained:
-                    col = getattr(self._adata_ids, x + self._adata_ids.ontology_id_suffix)
+                    col = getattr(self._adata_ids, x + self._adata_ids.onto_id_suffix)
                     meta[col] = (self.adata.obs[col].unique(), )
             else:
                 meta[getattr(self._adata_ids, x)] = getattr(self, x)
@@ -1995,7 +1992,6 @@ class DatasetBase(abc.ABC):
     def tech_sample(self, x: str):
         self._tech_sample = x
 
-
     @property
     def year(self) -> Union[None, int]:
         if self._year is not None:
@@ -2173,7 +2169,7 @@ class DatasetBase(abc.ABC):
             - "assay_differentiation" points to self.assay_differentiation_obs_key
             - "assay_type_differentiation" points to self.assay_type_differentiation_obs_key
             - "cell_line" points to self.cell_line
-            - "cellontology_class" points to self.cellontology_class_obs_key
+            - "cell_type" points to self.cell_type_obs_key
             - "developmental_stage" points to self.developmental_stage_obs_key
             - "ethnicity" points to self.ethnicity_obs_key
             - "organ" points to self.organ_obs_key

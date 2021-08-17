@@ -38,6 +38,9 @@ class HelperUi:
         self.ui = UserInterface(custom_repo=temp_fn, sfaira_repo=False)
 
 
-def test_for_fatal():
+def _test_for_fatal():
+    """
+    TODO need to simulate/add look up table as part of unit tests locally
+    """
     ui = HelperUi()
     ui.test_basic()

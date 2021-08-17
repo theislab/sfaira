@@ -544,7 +544,7 @@ class DatasetGroup:
             - "assay_sc" points to self.assay_sc_obs_key
             - "assay_type_differentiation" points to self.assay_type_differentiation_obs_key
             - "cell_line" points to self.cell_line
-            - "cellontology_class" points to self.cellontology_class_obs_key
+            - "cell_type" points to self.cell_type_obs_key
             - "developmental_stage" points to self.developmental_stage_obs_key
             - "ethnicity" points to self.ethnicity_obs_key
             - "organ" points to self.organ_obs_key
@@ -734,7 +734,7 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                     fn_map = os.path.join(self._cwd, file_module + ".tsv")
                     if os.path.exists(fn_map):
                         # Access reading and value protection mechanisms from first data set loaded in group.
-                        tab = list(self.datasets.values())[0]._read_class_map(fn=fn_map)
+                        tab = list(self.datasets.values())[0].read_class_map(fn=fn_map)
                         # Checks that the assigned ontology class names appear in the ontology.
                         list(self.datasets.values())[0]._value_protection(
                             attr="celltypes",
@@ -742,7 +742,7 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                             attempted=[
                                 x for x in np.unique(tab[self._adata_ids.classmap_target_key].values).tolist()
                                 if x not in [
-                                    self._adata_ids.unknown_celltype_identifier,
+                                    self._adata_ids.unknown_metadata_identifier,
                                     self._adata_ids.not_a_cell_celltype_identifier
                                 ]
                             ]
@@ -750,9 +750,9 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                         # Adds a third column with the corresponding ontology IDs into the file.
                         tab[self._adata_ids.classmap_target_id_key] = [
                             self.ontology_celltypes.convert_to_id(x)
-                            if x != self._adata_ids.unknown_celltype_identifier and
-                            x != self._adata_ids.not_a_cell_celltype_identifier
-                            else self._adata_ids.unknown_celltype_identifier
+                            if x != self._adata_ids.unknown_metadata_identifier and
+                               x != self._adata_ids.not_a_cell_celltype_identifier
+                            else self._adata_ids.unknown_metadata_identifier
                             for x in tab[self._adata_ids.classmap_target_key].values
                         ]
                         list(self.datasets.values())[0]._write_class_map(fn=fn_map, tab=tab)
@@ -1303,7 +1303,7 @@ class DatasetSuperGroup:
             - "assay_differentiation" points to self.assay_differentiation_obs_key
             - "assay_type_differentiation" points to self.assay_type_differentiation_obs_key
             - "cell_line" points to self.cell_line
-            - "cellontology_class" points to self.cellontology_class_obs_key
+            - "cell_type" points to self.cell_type_obs_key
             - "developmental_stage" points to self.developmental_stage_obs_key
             - "ethnicity" points to self.ethnicity_obs_key
             - "organ" points to self.organ_obs_key

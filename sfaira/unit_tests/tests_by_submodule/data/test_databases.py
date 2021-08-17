@@ -3,7 +3,7 @@ import pytest
 import shutil
 from typing import List
 
-from sfaira.consts import AdataIdsCellxgene
+from sfaira.consts import AdataIdsSfaira
 from sfaira.unit_tests.directories import DIR_DATA_DATABASES_CACHE
 from sfaira.unit_tests.data_for_tests.databases.utils import prepare_dsg_database
 from sfaira.unit_tests.data_for_tests.databases.consts import CELLXGENE_DATASET_ID
@@ -73,10 +73,10 @@ def test_dsgs_streamline_metadata(database: str, subset_args: List[str], format:
                             subset_genes_to_type="protein_coding")
     dsg.streamline_metadata(schema=format)
     adata = dsg.datasets[subset_args[1]].adata
-    ids = AdataIdsCellxgene()
-    assert "CL:0000128" in adata.obs[ids.cell_type + ids.ontology_id_suffix].values
+    ids = AdataIdsSfaira()
+    assert "CL:0000128" in adata.obs[ids.cell_type + ids.onto_id_suffix].values
     assert "oligodendrocyte" in adata.obs[ids.cell_type].values
-    assert "HsapDv:0000087" in adata.obs[ids.development_stage + ids.ontology_id_suffix].values
+    assert "HsapDv:0000087" in adata.obs[ids.development_stage + ids.onto_id_suffix].values
     assert "human adult stage" in adata.obs[ids.development_stage].values
-    assert "UBERON:0000956" in adata.obs[ids.organ + ids.ontology_id_suffix].values
+    assert "UBERON:0000956" in adata.obs[ids.organ + ids.onto_id_suffix].values
     assert "cerebral cortex" in adata.obs[ids.organ].values
