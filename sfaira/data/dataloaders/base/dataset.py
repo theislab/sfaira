@@ -1107,6 +1107,17 @@ class DatasetBase(abc.ABC):
         """Standardised file name under which cell type conversion tables are saved."""
         return self.doi_cleaned_id + ".tsv"
 
+    def _write_ontology_class_map(self, fn, tab: pd.DataFrame):
+        """
+        Write class map to file.
+
+        Helper to allow direct interaction with written table instead of using table from instance.
+
+        :param fn: File name of csv to write class maps to.
+        :param tab: Class map table.
+        """
+        tab.to_csv(fn, index=False, sep="\t")
+
     def write_ontology_class_map(
             self,
             fn,
@@ -1133,11 +1144,13 @@ class DatasetBase(abc.ABC):
                 **kwargs
             )
             if not os.path.exists(fn) or not protected_writing:
-                tab.to_csv(fn, index=False, sep="\t")
+                self._write_ontology_class_map(fn=fn, tab=tab)
 
-    def read_class_map(self, fn) -> pd.DataFrame:
+    def _read_ontology_class_map(self, fn) -> pd.DataFrame:
         """
         Read class map.
+
+        Helper to allow direct interaction with resulting table instead of loading into instance.
 
         :param fn: File name of csv to load class maps from.
         :return:
@@ -1150,7 +1163,7 @@ class DatasetBase(abc.ABC):
             raise pandas.errors.ParserError(e)
         return tab
 
-    def load_ontology_class_map(self, fn):
+    def read_ontology_class_map(self, fn):
         """
         Load class maps of free text cell types to ontology classes.
 
@@ -1158,7 +1171,7 @@ class DatasetBase(abc.ABC):
         :return:
         """
         if os.path.exists(fn):
-            self.cell_type_map = self.read_class_map(fn=fn)
+            self.cell_type_map = self._read_ontology_class_map(fn=fn)
         else:
             if self.cell_type_obs_key is not None:
                 warnings.warn(f"file {fn} does not exist but cell_type_obs_key {self.cell_type_obs_key} is given")

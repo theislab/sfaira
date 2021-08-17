@@ -711,7 +711,7 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                                 )
                         # Load cell type maps:
                         for x in datasets_f:
-                            x.load_ontology_class_map(fn=os.path.join(self._cwd, file_module + ".tsv"))
+                            x.read_ontology_class_map(fn=os.path.join(self._cwd, file_module + ".tsv"))
                         datasets.extend(datasets_f)
 
         keys = [x.id for x in datasets]
@@ -734,13 +734,13 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                     fn_map = os.path.join(self._cwd, file_module + ".tsv")
                     if os.path.exists(fn_map):
                         # Access reading and value protection mechanisms from first data set loaded in group.
-                        tab = list(self.datasets.values())[0].read_class_map(fn=fn_map)
+                        tab = list(self.datasets.values())[0]._read_ontology_class_map(fn=fn_map)
                         # Checks that the assigned ontology class names appear in the ontology.
                         list(self.datasets.values())[0]._value_protection(
-                            attr="celltypes",
+                            attr="cell_type",
                             allowed=self.ontology_celltypes,
                             attempted=[
-                                x for x in np.unique(tab[self._adata_ids.classmap_target_key].values).tolist()
+                                x for x in np.unique(tab[self._adata_ids.classmap_target_key].values)
                                 if x not in [
                                     self._adata_ids.unknown_metadata_identifier,
                                     self._adata_ids.not_a_cell_celltype_identifier
@@ -750,12 +750,14 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                         # Adds a third column with the corresponding ontology IDs into the file.
                         tab[self._adata_ids.classmap_target_id_key] = [
                             self.ontology_celltypes.convert_to_id(x)
-                            if x != self._adata_ids.unknown_metadata_identifier and
-                               x != self._adata_ids.not_a_cell_celltype_identifier
+                            if (x != self._adata_ids.unknown_metadata_identifier and
+                                x != self._adata_ids.not_a_cell_celltype_identifier)
                             else self._adata_ids.unknown_metadata_identifier
                             for x in tab[self._adata_ids.classmap_target_key].values
                         ]
-                        list(self.datasets.values())[0]._write_class_map(fn=fn_map, tab=tab)
+                        # Get writing function from any (first) data set instance:
+                        k = list(self.datasets.keys())[0]
+                        self.datasets[k]._write_ontology_class_map(fn=fn_map, tab=tab)
 
 
 class DatasetSuperGroup:
