@@ -274,7 +274,8 @@ def load(data_dir, sample_fn, adata_ids: AdataIdsCellxgene, **kwargs):
     if adata.raw is not None:  # TODO still need this?
         adata.X = adata.raw.X
         del adata.raw
-    for k in adata.obs.columns:
-        if k in adata_ids.ontology_constrained:
-            adata.obs[k] = clean_cellxgene_meta_obs(k=k, val=adata.obs[k].values, adata_ids=adata_ids)
+    for k in adata_ids.ontology_constrained:
+        col_name = getattr(adata_ids, k)
+        if col_name in adata.obs.columns:
+            adata.obs[col_name] = clean_cellxgene_meta_obs(k=k, val=adata.obs[col_name].values, adata_ids=adata_ids)
     return adata
