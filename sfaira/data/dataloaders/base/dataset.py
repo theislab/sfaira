@@ -230,15 +230,14 @@ class DatasetBase(abc.ABC):
                 if v is not None and k not in ["organism", "sample_fns", "dataset_index"]:
                     if isinstance(v, dict):  # v is a dictionary over file-wise meta-data items
                         assert self.sample_fn in v.keys(), f"did not find key {self.sample_fn} in yamls keys for {k}"
-                        setattr(self, k, v[self.sample_fn])
-                    else:  # v is a meta-data item
-                        # Catches spelling errors in meta data definition (yaml keys).
-                        if not hasattr(self, k) and not hasattr(self, "_" + k):
-                            raise ValueError(f"Tried setting unavailable property {k}.")
-                        try:
-                            setattr(self, k, v)
-                        except AttributeError as e:
-                            raise ValueError(f"An error occured when setting {k} as {v}: {e}")
+                        v = v[self.sample_fn]
+                    # Catches spelling errors in meta data definition (yaml keys).
+                    if not hasattr(self, k) and not hasattr(self, "_" + k):
+                        raise ValueError(f"Tried setting unavailable property {k}.")
+                    try:
+                        setattr(self, k, v)
+                    except AttributeError as e:
+                        raise ValueError(f"An error occured when setting {k} as {v}: {e}")
             # ID can be set now already because YAML was used as input instead of child class constructor.
             self.set_dataset_id(idx=yaml_vals["meta"]["dataset_index"])
 
