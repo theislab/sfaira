@@ -61,8 +61,18 @@ class OntologyContainerSfaira:
             self._cell_line = OntologyCellosaurus(**kwargs)
         elif attr == "cellontology_class":
             self._cell_type = OntologyCl(branch=DEFAULT_CL, **kwargs)
+        elif attr == "development_stage":
+            self._development_stage = {
+                "human": OntologyHsapdv(),
+                "mouse": OntologyMmusdv(),
+            }
         elif attr == "disease":
             self._disease = OntologyMondo(**kwargs)
+        elif attr == "ethnicity":
+            self._ethnicity = {
+                "human": OntologyHancestro(),
+                "mouse": None,
+            }
         elif attr == "organ":
             self._organ = OntologyUberon(**kwargs)
         return self._assay_sc

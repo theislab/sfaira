@@ -139,7 +139,7 @@ class AdataIdsSfaira(AdataIds):
             "cell_type",
             "development_stage",
             "disease",
-            # "ethnicity", TODO once ontologies work
+            "ethnicity",
             "organ",
         ]
         self.obs_keys = [

@@ -1216,38 +1216,47 @@ class DatasetBase(abc.ABC):
         3) If original, ID and symbol columns are empty, no action is taken (meta data item was not set).
         """
         ontology = self.get_ontology(k=attr)
-        # Note that for symbol and ID, the columns may be filled but not streamlined according to the ontology,
-        # in that case the corresponding meta data is defined as absent.
-        # Check which level of meta data annotation is present.
-        # Symbols:
         col_symbol = getattr(adata_ids, attr)
-        symbol_col_present = col_symbol in self.adata.obs.columns
-        symbol_col_streamlined = np.all([
-            ontology.is_a_node_name(x) or x == self._adata_ids.unknown_metadata_identifier
-            for x in np.unique(self.adata.obs[col_symbol].values)]) if symbol_col_present else False
-        symbol_present = symbol_col_present and symbol_col_streamlined
-        # IDs:
         col_id = getattr(adata_ids, attr) + self._adata_ids.onto_id_suffix
-        id_col_present = col_id in self.adata.obs.columns
-        id_col_streamlined = np.all([
-            ontology.is_a_node_id(x) or x == self._adata_ids.unknown_metadata_identifier
-            for x in np.unique(self.adata.obs[col_id].values)]) if id_col_present else False
-        id_present = id_col_present and id_col_streamlined
-        # Original annotation (free text):
         col_original = getattr(adata_ids, attr) + self._adata_ids.onto_original_suffix
-        original_present = col_original in self.adata.obs.columns
-        if original_present and not symbol_present and not id_present:  # 1)
-            self.project_free_to_ontology(attr=attr, copy=False)
-        if symbol_present or id_present:  # 2)
-            if symbol_present and not id_present:  # 2a)
-                self.__project_ontology_ids_obs(attr=attr, from_id=False, adata_ids=adata_ids)
-            if not symbol_present and id_present:  # 2b)
-                self.__project_ontology_ids_obs(attr=attr, from_id=True, adata_ids=adata_ids)
-            if symbol_present and id_present:  # 2c)
-                self.__project_ontology_ids_obs(attr=attr, from_id=True, adata_ids=adata_ids)
-            if not original_present:
-                val = self.adata.obs[col_symbol]
-                self.adata.obs[col_original] = val
+        if ontology is None:
+            # Fill with invalid ontology identifiers if no ontology was found.
+            self.adata.obs[col_id] = \
+                [self._adata_ids.invalid_metadata_identifier for _ in range(self.adata.n_obs)]
+            self.adata.obs[col_original] = \
+                [self._adata_ids.invalid_metadata_identifier for _ in range(self.adata.n_obs)]
+            self.adata.obs[col_symbol] = \
+                [self._adata_ids.invalid_metadata_identifier for _ in range(self.adata.n_obs)]
+        else:
+            # Note that for symbol and ID, the columns may be filled but not streamlined according to the ontology,
+            # in that case the corresponding meta data is defined as absent.
+            # Check which level of meta data annotation is present.
+            # Symbols:
+            symbol_col_present = col_symbol in self.adata.obs.columns
+            symbol_col_streamlined = np.all([
+                ontology.is_a_node_name(x) or x == self._adata_ids.unknown_metadata_identifier
+                for x in np.unique(self.adata.obs[col_symbol].values)]) if symbol_col_present else False
+            symbol_present = symbol_col_present and symbol_col_streamlined
+            # IDs:
+            id_col_present = col_id in self.adata.obs.columns
+            id_col_streamlined = np.all([
+                ontology.is_a_node_id(x) or x == self._adata_ids.unknown_metadata_identifier
+                for x in np.unique(self.adata.obs[col_id].values)]) if id_col_present else False
+            id_present = id_col_present and id_col_streamlined
+            # Original annotation (free text):
+            original_present = col_original in self.adata.obs.columns
+            if original_present and not symbol_present and not id_present:  # 1)
+                self.project_free_to_ontology(attr=attr, copy=False)
+            if symbol_present or id_present:  # 2)
+                if symbol_present and not id_present:  # 2a)
+                    self.__project_ontology_ids_obs(attr=attr, from_id=False, adata_ids=adata_ids)
+                if not symbol_present and id_present:  # 2b)
+                    self.__project_ontology_ids_obs(attr=attr, from_id=True, adata_ids=adata_ids)
+                if symbol_present and id_present:  # 2c)
+                    self.__project_ontology_ids_obs(attr=attr, from_id=True, adata_ids=adata_ids)
+                if not original_present:
+                    val = self.adata.obs[col_symbol]
+                    self.adata.obs[col_original] = val
 
     def __project_ontology_ids_obs(
             self,

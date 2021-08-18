@@ -1,7 +1,7 @@
 from cellxgene_schema.validate import validate_adata
 import pytest
 
-from sfaira.unit_tests.data_for_tests.loaders import ASSEMBLY_MOUSE, prepare_dsg
+from sfaira.unit_tests.data_for_tests.loaders import ASSEMBLY_HUMAN, ASSEMBLY_MOUSE, prepare_dsg
 
 
 @pytest.mark.parametrize("out_format", ["sfaira", "cellxgene"])
@@ -32,20 +32,24 @@ def test_dsgs_streamline_metadata(out_format: str, clean_obs: bool, clean_var: b
 @pytest.mark.parametrize("schema_version", ["1_1_0"])
 @pytest.mark.parametrize("organism", ["human", "mouse"])
 def test_cellxgene_export(schema_version: str, organism: str):
+    """
+
+    This test can be extended by future versions.
+    """
     ds = prepare_dsg(load=False)
-    ds.subset(key="organism", values=[organism])
-    ds.subset(key="organ", values=["lung"])
     if organism == "human":
-        ds.subset(key="doi_journal", values=["no_doi_mock1", "no_doi_mock3"])
+        ds.subset(key="doi_journal", values=["no_doi_mock1"])
     else:
         ds.subset(key="doi_journal", values=["no_doi_mock2"])
     ds.load()
-    ds.streamline_features(remove_gene_version=False, match_to_reference=ASSEMBLY_MOUSE,
+    ds.streamline_features(remove_gene_version=False,
+                           match_to_reference={"human": ASSEMBLY_HUMAN, "mouse": ASSEMBLY_MOUSE},
                            subset_genes_to_type=None)
     ds.streamline_metadata(schema="cellxgene:" + schema_version, clean_obs=False, clean_var=True,
                            clean_uns=True, clean_obs_names=False,
                            keep_id_obs=True, keep_orginal_obs=False, keep_symbol_obs=True)
-    i = 0
-    for i, ds in enumerate(ds.datasets.values()):
+    counter = 0
+    for ds in ds.datasets.values():
         validate_adata(adata=ds.adata, shallow=False)
-    assert i > 0, "no data sets to test"
+        counter += 1
+    assert counter > 0, "no data sets to test"

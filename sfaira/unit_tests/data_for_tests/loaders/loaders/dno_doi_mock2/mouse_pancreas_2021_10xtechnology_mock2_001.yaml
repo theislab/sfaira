@@ -3,7 +3,7 @@ dataset_structure:
     sample_fns:
 dataset_wise:
     author:
-        - "mock3"
+        - "mock2"
     default_embedding:
     doi_journal: "no_doi_mock2"
     doi_preprint:
@@ -23,7 +23,7 @@ dataset_or_observation_wise:
     bio_sample_obs_key:
     cell_line:
     cell_line_obs_key:
-    development_stage:
+    development_stage: "2 weeks"
     development_stage_obs_key:
     disease: "healthy"
     disease_obs_key:
