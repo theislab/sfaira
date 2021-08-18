@@ -3,9 +3,9 @@ dataset_structure:
     sample_fns:
 dataset_wise:
     author:
-        - "mock3"
+        - "mock4"
     default_embedding:
-    doi_journal: "no_doi_mock3"
+    doi_journal: "no_doi_mock4"
     doi_preprint:
     download_url_data: ""
     download_url_meta: ""
@@ -13,7 +13,7 @@ dataset_wise:
     primary_data:
     year: 2021
 dataset_or_observation_wise:
-    assay_sc: "10x technology"
+    assay_sc:
     assay_sc_obs_key:
     assay_differentiation:
     assay_differentiation_obs_key:
@@ -25,7 +25,7 @@ dataset_or_observation_wise:
     cell_line_obs_key:
     development_stage:
     development_stage_obs_key:
-    disease: "healthy"
+    disease:
     disease_obs_key:
     ethnicity:
     ethnicity_obs_key:
@@ -44,7 +44,7 @@ dataset_or_observation_wise:
     tech_sample:
     tech_sample_obs_key:
 observation_wise:
-    cell_type_obs_key: "free_annotation"
+    cell_type_obs_key:
 feature_wise:
     gene_id_ensembl_var_key: "index"
     gene_id_symbols_var_key:

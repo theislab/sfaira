@@ -23,9 +23,9 @@ def _create_adata(celltypes, ncells, ngenes, assembly) -> anndata.AnnData:
     genes = gc.ensembl[:ngenes]
     x = scipy.sparse.csc_matrix(np.random.randint(low=0, high=100, size=(ncells, ngenes)))
     var = pd.DataFrame(index=genes)
-    obs = pd.DataFrame({
-        "free_annotation": [celltypes[i] for i in np.random.choice(a=[0, 1], size=ncells, replace=True)]
-    }, index=["cell_" + str(i) for i in range(ncells)])
+    obs = pd.DataFrame({}, index=["cell_" + str(i) for i in range(ncells)])
+    if len(celltypes) > 0:
+        obs["free_annotation"] = [celltypes[i] for i in np.random.choice(len(celltypes), size=ncells, replace=True)]
     adata = anndata.AnnData(X=x, obs=obs, var=var)
     return adata
 

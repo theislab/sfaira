@@ -98,7 +98,7 @@ def test_dsgs_subset_cell_wise(organ: str, celltype: str):
 def test_dsgs_streamline_metadata(out_format: str, uns_to_obs: bool, clean_obs: bool, clean_var: bool, clean_uns: bool,
                                   clean_obs_names: bool):
     ds = prepare_dsg(load=False)
-    ds.subset(key="organism", values=["mouse"])
+    ds.subset(key="organism", values=["human"])
     ds.subset(key="organ", values=["lung"])
     ds.load()
     ds.streamline_features(remove_gene_version=False, match_to_reference=ASSEMBLY_MOUSE,
