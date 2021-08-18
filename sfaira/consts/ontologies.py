@@ -30,7 +30,6 @@ class OntologyContainerSfaira:
         self.bio_sample = None
         self._cell_line = None
         self._cell_type = None
-        self.cell_types_original = None
         self.collection_id = None
         self.default_embedding = None
         self._development_stage = None

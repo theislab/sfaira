@@ -835,18 +835,22 @@ class DatasetBase(abc.ABC):
                     for x in np.unique(val)
                 ]):  # 1a-II)
                     new_col = getattr(adata_target_ids, k)
+                    validation_ontology = self.get_ontology(k=k)
                 elif isinstance(self.get_ontology(k=k), OntologyHierarchical) and np.all([
                     self.get_ontology(k=k).is_a_node_id(x) or x == self._adata_ids.unknown_metadata_identifier
                     for x in np.unique(val)
                 ]):  # 1a-III)
                     new_col = getattr(adata_target_ids, k) + self._adata_ids.onto_id_suffix
+                    validation_ontology = None
                 else:  # 1a-I)
                     new_col = getattr(adata_target_ids, k) + self._adata_ids.onto_original_suffix
+                    validation_ontology = None
             else:
                 # 1b-I.
                 new_col = getattr(adata_target_ids, k)
+                validation_ontology = self.get_ontology(k=k)
             # Check values for validity:
-            self._value_protection(attr=new_col, allowed=self.get_ontology(k=k), attempted=[
+            self._value_protection(attr=new_col, allowed=validation_ontology, attempted=[
                 x for x in np.unique(val)
                 if x not in [
                     self._adata_ids.unknown_metadata_identifier,
