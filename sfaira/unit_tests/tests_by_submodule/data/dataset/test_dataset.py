@@ -89,24 +89,6 @@ def test_dsgs_subset_cell_wise(organ: str, celltype: str):
                 assert v.ontology_container_sfaira.cell_type.is_a(query=y, reference=celltype), y
 
 
-@pytest.mark.parametrize("out_format", ["sfaira", "cellxgene"])
-@pytest.mark.parametrize("uns_to_obs", [True, False])
-@pytest.mark.parametrize("clean_obs", [True, False])
-@pytest.mark.parametrize("clean_var", [True, False])
-@pytest.mark.parametrize("clean_uns", [True, False])
-@pytest.mark.parametrize("clean_obs_names", [True, False])
-def test_dsgs_streamline_metadata(out_format: str, uns_to_obs: bool, clean_obs: bool, clean_var: bool, clean_uns: bool,
-                                  clean_obs_names: bool):
-    ds = prepare_dsg(load=False)
-    ds.subset(key="organism", values=["human"])
-    ds.subset(key="organ", values=["lung"])
-    ds.load()
-    ds.streamline_features(remove_gene_version=False, match_to_reference=ASSEMBLY_MOUSE,
-                           subset_genes_to_type=None)
-    ds.streamline_metadata(schema=out_format, clean_obs=clean_obs, clean_var=clean_var,
-                           clean_uns=clean_uns, clean_obs_names=clean_obs_names)
-
-
 @pytest.mark.parametrize("match_to_reference", ["Mus_musculus.GRCm38.102", {"mouse": ASSEMBLY_MOUSE}])
 @pytest.mark.parametrize("remove_gene_version", [False, True])
 @pytest.mark.parametrize("subset_genes_to_type", [None, "protein_coding"])

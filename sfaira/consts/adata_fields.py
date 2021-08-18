@@ -101,7 +101,7 @@ class AdataIdsSfaira(AdataIds):
         self.download_url_meta = "download_url_meta"
         self.gene_id_ensembl = "ensembl"
         self.gene_id_index = self.gene_id_ensembl
-        self.gene_id_symbols = "names"
+        self.gene_id_symbols = "gene_symbol"
         self.id = "id"
         self.individual = "individual"
         self.ncells = "ncells"
@@ -201,9 +201,8 @@ class AdataIdsCellxgene(AdataIds):
         self.doi_journal = "publication_doi"
         self.doi_preprint = "preprint_doi"
         self.disease = "disease"
-        self.gene_id_symbols = "index"
-        self.gene_id_ensembl = None  # TODO not yet streamlined
-        self.gene_id_index = self.gene_id_symbols
+        self.gene_id_ensembl = "ensembl"
+        self.gene_id_symbols = None
         self.id = "id"
         self.ncells = "ncells"
         self.organ = "tissue"
@@ -268,3 +267,29 @@ class AdataIdsCellxgene(AdataIds):
             "organism",
             "sex",
         ]
+
+    @property
+    def gene_id_index(self):
+        # Note this attribute is only filled in descendant classes.
+        return self.gene_id_symbols
+
+
+class AdataIdsCellxgeneHuman(AdataIdsCellxgene):
+
+    def __init__(self):
+        super(AdataIdsCellxgeneHuman, self).__init__()
+        self.gene_id_symbols = "hgnc_gene_symbol"
+
+
+class AdataIdsCellxgeneMouse(AdataIdsCellxgene):
+
+    def __init__(self):
+        super(AdataIdsCellxgeneMouse, self).__init__()
+        self.gene_id_symbols = "mgi_gene_symbol"
+
+
+class AdataIdsCellxgeneGeneral(AdataIdsCellxgene):
+
+    def __init__(self):
+        super(AdataIdsCellxgeneGeneral, self).__init__()
+        self.gene_id_symbols = "gene_symbol"

@@ -1,7 +1,7 @@
 from typing import Dict, Union
 
 from sfaira.versions.metadata import OntologyList, OntologyCl
-from sfaira.versions.metadata import OntologyCellosaurus, OntologyHsapdv, OntologyMondo, \
+from sfaira.versions.metadata import OntologyCellosaurus, OntologyHancestro, OntologyHsapdv, OntologyMondo, \
     OntologyMmusdv, OntologySinglecellLibraryConstruction, OntologyUberon
 
 DEFAULT_CL = "v2021-02-01"
@@ -19,6 +19,7 @@ class OntologyContainerSfaira:
     _cell_line: Union[None, OntologyCellosaurus]
     _cell_type: Union[None, OntologyCl]
     _development_stage: Union[None, Dict[str, Union[OntologyHsapdv, OntologyMmusdv]]]
+    _ethnicity: Union[None, Dict[str, Union[OntologyHancestro, None]]]
     _organ: Union[None, OntologyUberon]
 
     def __init__(self):
@@ -38,10 +39,7 @@ class OntologyContainerSfaira:
         self.doi_main = None
         self.doi_journal = None
         self.doi_preprint = None
-        self.ethnicity = {
-            "human": None,
-            "mouse": None,
-        }
+        self._ethnicity = None
         self.id = None
         self.individual = None
         self.normalization = None
@@ -105,6 +103,15 @@ class OntologyContainerSfaira:
         if self._disease is None:
             self._disease = OntologyMondo()
         return self._disease
+
+    @property
+    def ethnicity(self):
+        if self._ethnicity is None:
+            self._ethnicity = {
+                "human": OntologyHancestro(),
+                "mouse": None,
+            }
+        return self._ethnicity
 
     @property
     def organ(self):

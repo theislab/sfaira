@@ -378,13 +378,20 @@ class OntologyEbi(OntologyHierarchical):
             recache: bool,
             **kwargs
     ):
+        # Note on base URL: EBI OLS points to different resources depending on the ontology used, this needs to be
+        # accounted for here.
+        if ontology == "hancestro":
+            base_url = f"https://www.ebi.ac.uk/ols/api/ontologies/{ontology}/terms/" \
+                       f"http%253A%252F%252Fpurl.obolibrary.org%252Fobo%252F"
+        else:
+            base_url = f"https://www.ebi.ac.uk/ols/api/ontologies/{ontology}/terms/" \
+                       f"http%253A%252F%252Fwww.ebi.ac.uk%252F"
+
         def get_url_self(iri):
-            return f"https://www.ebi.ac.uk/ols/api/ontologies/{ontology}/terms/" \
-                   f"http%253A%252F%252Fwww.ebi.ac.uk%252F{ontology}%252F{iri}"
+            return f"{base_url}{iri}"
 
         def get_url_children(iri):
-            return f"https://www.ebi.ac.uk/ols/api/ontologies/{ontology}/terms/" \
-                   f"http%253A%252F%252Fwww.ebi.ac.uk%252F{ontology}%252F{iri}/children"
+            return f"{base_url}{iri}/children"
 
         def get_iri_from_node(x):
             return x["iri"].split("/")[-1]
@@ -410,13 +417,14 @@ class OntologyEbi(OntologyHierarchical):
                 - nodes (dictionaries of node ID and node values) and
                 - edges (node ID of parent and child).
             """
+            print(requests.get(get_url_children(iri=iri)).json())
             terms_children = requests.get(get_url_children(iri=iri)).json()["_embedded"]["terms"]
             nodes_new = {}
             edges_new = []
             direct_children = []
             k_self = get_id_from_iri(iri)
             # Define root node if this is the first iteration, this node is otherwise not defined through values.
-            if k_self == "EFO:0010183":
+            if k_self == ":".join(root_term.split("_")):
                 terms_self = requests.get(get_url_self(iri=iri)).json()
                 nodes_new[k_self] = {
                     "name": terms_self["label"],
@@ -978,6 +986,25 @@ class OntologyCellosaurus(OntologyExtendedObo):
     @property
     def synonym_node_properties(self) -> List[str]:
         return ["synonym"]
+
+
+class OntologyHancestro(OntologyEbi):
+
+    """
+    TODO move this to .owl backend once available.
+    TODO root term: No term HANCESTRO_0001 ("Thing"?) accessible through EBI interface, because of that country-related
+        higher order terms are not available as they are parallel to HANCESTRO_0004. Maybe fix with .owl backend?
+    """
+
+    def __init__(self, recache: bool = False):
+        super().__init__(
+            ontology="hancestro",
+            root_term="HANCESTRO_0004",
+            additional_terms={},
+            additional_edges=[],
+            ontology_cache_fn="hancestro.pickle",
+            recache=recache,
+        )
 
 
 class OntologySinglecellLibraryConstruction(OntologyEbi):
