@@ -1270,7 +1270,7 @@ class DatasetBase(abc.ABC):
                 Note that this setting allows usage of data sets which were streamlined with a different ontology
                 version.
             In all cases original is kept if it is set and is set to symbol otherwise.
-        3) If original, ID and symbol columns are empty, an error is thrown.
+        3) If original, ID and symbol columns are empty, no action is taken (meta data item was not set).
         """
         ontology = self.get_ontology(k=attr)
         # Note that for symbol and ID, the columns may be filled but not streamlined according to the ontology,
@@ -1305,9 +1305,6 @@ class DatasetBase(abc.ABC):
             if not original_present:
                 val = self.adata.obs[col_symbol]
                 self.adata.obs[col_original] = val
-        else:  # 3)
-            raise ValueError(f"could not impute obs columns for attribute {attr} because neither original annotation, "
-                             f"symbol nor ID was previously set.")
 
     def __project_ontology_ids_obs(
             self,
