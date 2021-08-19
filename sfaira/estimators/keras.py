@@ -300,9 +300,9 @@ class EstimatorKeras:
 
             # If the feature space is already mapped to the right reference, return the data matrix immediately
             if self.data.n_vars != self.topology_container.n_var or \
-                    not np.all(self.data.var[self._adata_ids.gene_id_ensembl] == self.topology_container.gc.ensembl):
+                    not np.all(self.data.var[self._adata_ids.feature_id] == self.topology_container.gc.ensembl):
                 # Compute indices of genes to keep
-                data_ids = self.data.var[self._adata_ids.gene_id_ensembl].values.tolist()
+                data_ids = self.data.var[self._adata_ids.feature_id].values.tolist()
                 target_ids = self.topology_container.gc.ensembl
                 idx_map = np.array([data_ids.index(z) for z in target_ids])
                 # Assert that each ID from target IDs appears exactly once in data IDs:

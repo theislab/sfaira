@@ -79,3 +79,11 @@ def cellxgene_export_adaptor_1_1_0(adata: anndata.AnnData, adata_ids: AdataIdsCe
               f"The count matrix is rounded.")
         adata.X.data = np.rint(adata.X.data)
     return adata
+
+
+def cellxgene_export_adaptor_2_0_0(adata: anndata.AnnData, adata_ids: AdataIdsCellxgene) -> anndata.AnnData:
+    """
+    Cellxgene-schema 2.0.0
+    """
+    adata = cellxgene_export_adaptor_1_1_0(adata=adata, adata_ids=adata_ids)
+    adata.var["feature_biotype"] = "gene"

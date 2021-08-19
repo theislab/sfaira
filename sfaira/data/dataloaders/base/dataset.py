@@ -20,7 +20,7 @@ import ssl
 
 from sfaira.versions.genomes import GenomeContainer
 from sfaira.versions.metadata import Ontology, OntologyHierarchical, CelltypeUniverse
-from sfaira.consts import AdataIds, AdataIdsCellxgeneGeneral, AdataIdsCellxgeneHuman, AdataIdsCellxgeneMouse, \
+from sfaira.consts import AdataIds, AdataIdsCellxgeneGeneral, AdataIdsCellxgeneHuman_v1_1_0, AdataIdsCellxgeneMouse_v1_1_0, \
     AdataIdsSfaira, META_DATA_FIELDS, OCS
 from sfaira.data.dataloaders.export_adaptors import cellxgene_export_adaptor
 from sfaira.data.store.io_dao import write_dao
@@ -448,31 +448,19 @@ class DatasetBase(abc.ABC):
             self,
             match_to_reference: Union[str, bool, None],
     ):
-        # If schema does not include symbols or ensebl ids, add them to the schema so we can do the conversion
-        if hasattr(self._adata_ids, "gene_id_symbols"):
-            gene_id_symbols = self._adata_ids.gene_id_symbols
-        else:
-            gene_id_symbols = "gene_symbol"  # add some default name if not in schema
-            self._adata_ids.gene_id_symbols = gene_id_symbols
-        if hasattr(self._adata_ids, "gene_id_ensembl"):
-            gene_id_ensembl = self._adata_ids.gene_id_ensembl
-        else:
-            gene_id_ensembl = "ensembl"  # add some default name if not in schema
-            self._adata_ids.gene_id_ensembl = gene_id_ensembl
-
-        if not self.gene_id_symbols_var_key and not self.gene_id_ensembl_var_key:
+        if self.gene_id_symbols_var_key is None and self.gene_id_ensembl_var_key is None:
             raise ValueError("Either gene_id_symbols_var_key or gene_id_ensembl_var_key needs to be provided in the"
                              " dataloader")
-        elif not self.gene_id_symbols_var_key and self.gene_id_ensembl_var_key:
+        elif self.gene_id_symbols_var_key is None and self.gene_id_ensembl_var_key:
             # Convert ensembl ids to gene symbols
             id_dict = self.genome_container.id_to_symbols_dict
             ensids = self.adata.var.index if self.gene_id_ensembl_var_key == "index" else self.adata.var[self.gene_id_ensembl_var_key]
-            self.adata.var[gene_id_symbols] = [
+            self.adata.var[self._adata_ids.feature_symbol] = [
                 id_dict[n.split(".")[0]] if n.split(".")[0] in id_dict.keys() else 'n/a'
                 for n in ensids
             ]
-            self.gene_id_symbols_var_key = gene_id_symbols
-        elif self.gene_id_symbols_var_key and not self.gene_id_ensembl_var_key:
+            self.gene_id_symbols_var_key = self._adata_ids.feature_symbol
+        elif self.gene_id_symbols_var_key and self.gene_id_ensembl_var_key is None:
             # Convert gene symbols to ensembl ids
             id_dict = self.genome_container.symbol_to_id_dict
             id_strip_dict = self.genome_container.strippednames_to_id_dict
@@ -489,8 +477,8 @@ class DatasetBase(abc.ABC):
                     ensids.append(id_strip_dict[n.split(".")[0]])
                 else:
                     ensids.append('n/a')
-            self.adata.var[gene_id_ensembl] = ensids
-            self.gene_id_ensembl_var_key = gene_id_ensembl
+            self.adata.var[self._adata_ids.feature_id] = ensids
+            self.gene_id_ensembl_var_key = self._adata_ids.feature_id
 
     def _collapse_ensembl_gene_id_versions(self):
         """
@@ -694,9 +682,9 @@ class DatasetBase(abc.ABC):
             adata_target_ids = AdataIdsSfaira()
         elif schema.startswith("cellxgene"):
             if self.organism == "human":
-                adata_target_ids = AdataIdsCellxgeneHuman()
+                adata_target_ids = AdataIdsCellxgeneHuman_v1_1_0()
             elif self.organism == "human":
-                adata_target_ids = AdataIdsCellxgeneHuman()
+                adata_target_ids = AdataIdsCellxgeneHuman_v1_1_0()
             else:
                 adata_target_ids = AdataIdsCellxgeneGeneral()
         else:
@@ -710,9 +698,9 @@ class DatasetBase(abc.ABC):
         # Creating new var annotation
         var_new = pd.DataFrame()
         for k in adata_target_ids.var_keys:
-            if k == "gene_id_ensembl":
+            if k == "feature_id":
                 if not self.gene_id_ensembl_var_key:
-                    raise ValueError("gene_id_ensembl_var_key not set in dataloader despite being required by the "
+                    raise ValueError("feature_id not set in dataloader despite being required by the "
                                      "selected meta data schema. please run streamline_features() first to create the "
                                      "missing annotation")
                 elif self.gene_id_ensembl_var_key == "index":
@@ -721,7 +709,7 @@ class DatasetBase(abc.ABC):
                     var_new[getattr(adata_target_ids, k)] = self.adata.var[self.gene_id_ensembl_var_key].tolist()
                     del self.adata.var[self.gene_id_ensembl_var_key]
                 self.gene_id_ensembl_var_key = getattr(adata_target_ids, k)
-            elif k == "gene_id_symbols":
+            elif k == "feature_symbol":
                 if not self.gene_id_symbols_var_key:
                     raise ValueError("gene_id_symbols_var_key not set in dataloader despite being required by the "
                                      "selected meta data schema. please run streamline_features() first to create the "
@@ -738,16 +726,16 @@ class DatasetBase(abc.ABC):
                     val = val[0]
                 var_new[getattr(adata_target_ids, k)] = val
         # set var index
-        var_new.index = var_new[adata_target_ids.gene_id_index].tolist()
+        var_new.index = var_new[adata_target_ids.feature_index].tolist()
         if clean_var:
             if self.adata.varm is not None:
                 del self.adata.varm
             if self.adata.varp is not None:
                 del self.adata.varp
             self.adata.var = var_new
-            if "gene_id_ensembl" not in adata_target_ids.var_keys:
+            if "feature_id" not in adata_target_ids.var_keys:
                 self.gene_id_ensembl_var_key = None
-            if "gene_id_symbols" not in adata_target_ids.var_keys:
+            if "feature_symbol" not in adata_target_ids.var_keys:
                 self.gene_id_symbols_var_key = None
         else:
             index_old = self.adata.var.index.copy()

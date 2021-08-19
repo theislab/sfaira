@@ -301,8 +301,8 @@ class HelperEstimatorKerasCelltypeCustomObo(TestHelperEstimatorKerasCelltype):
             self.data.obs[self.adata_ids.cell_type]
         # - Add in custom features:
         self.data.var_names = ["dim_" + str(i) for i in range(self.data.n_vars)]
-        self.data.var[self.adata_ids.gene_id_ensembl] = ["dim_" + str(i) for i in range(self.data.n_vars)]
-        self.data.var[self.adata_ids.gene_id_symbols] = ["dim_" + str(i) for i in range(self.data.n_vars)]
+        self.data.var[self.adata_ids.feature_id] = ["dim_" + str(i) for i in range(self.data.n_vars)]
+        self.data.var[self.adata_ids.feature_symbol] = ["dim_" + str(i) for i in range(self.data.n_vars)]
 
     def init_topology_custom(self, model_type: str, n_features):
         topology = TOPOLOGY_CELLTYPE_MODEL.copy()

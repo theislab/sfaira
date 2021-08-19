@@ -22,15 +22,17 @@ class AdataIds:
     dataset: str
     dataset_group: str
     ethnicity: str
-    gene_id_ensembl: str
-    gene_id_index: str
-    gene_id_symbols: str
+    feature_id: str
+    feature_index: str
+    feature_symbol: str
+    feature_biotype: str
     id: str
     individual: str
     ncells: str
     normalization: str
     organ: str
     organism: str
+    primary_data: str
     sample_source: str
     sex: str
     state_exact: str
@@ -99,9 +101,10 @@ class AdataIdsSfaira(AdataIds):
         self.dataset_group = "dataset_group"
         self.download_url_data = "download_url_data"
         self.download_url_meta = "download_url_meta"
-        self.gene_id_ensembl = "ensembl"
-        self.gene_id_index = self.gene_id_ensembl
-        self.gene_id_symbols = "gene_symbol"
+        self.feature_id = "ensembl"
+        self.feature_index = self.feature_id
+        self.feature_symbol = "gene_symbol"
+        self.feature_biotype = "feature_biotype"
         self.id = "id"
         self.individual = "individual"
         self.ncells = "ncells"
@@ -162,8 +165,8 @@ class AdataIdsSfaira(AdataIds):
             "tech_sample",
         ]
         self.var_keys = [
-            "gene_id_ensembl",
-            "gene_id_symbols",
+            "feature_id",
+            "feature_symbol",
         ]
         self.uns_keys = [
             "annotated",
@@ -201,12 +204,13 @@ class AdataIdsCellxgene(AdataIds):
         self.doi_journal = "publication_doi"
         self.doi_preprint = "preprint_doi"
         self.disease = "disease"
-        self.gene_id_ensembl = "ensembl"
-        self.gene_id_symbols = None
+        self.feature_id = "ensembl"
+        self.feature_symbol = None
         self.id = "id"
         self.ncells = "ncells"
         self.organ = "tissue"
         self.organism = "organism"
+        self.primary_data = "is_primary_data"
         self.title = "title"
         self.year = "year"
 
@@ -247,8 +251,8 @@ class AdataIdsCellxgene(AdataIds):
             "tech_sample",
         ]
         self.var_keys = [
-            "gene_id_ensembl",
-            "gene_id_symbols",
+            "feature_id",
+            "feature_symbol",
         ]
         self.uns_keys = [
             "doi_journal",
@@ -269,22 +273,22 @@ class AdataIdsCellxgene(AdataIds):
         ]
 
     @property
-    def gene_id_index(self):
+    def feature_index(self):
         # Note this attribute is only filled in descendant classes.
-        return self.gene_id_symbols
+        return self.feature_symbol
 
 
-class AdataIdsCellxgeneHuman(AdataIdsCellxgene):
-
-    def __init__(self):
-        super(AdataIdsCellxgeneHuman, self).__init__()
-        self.gene_id_symbols = "hgnc_gene_symbol"
-
-
-class AdataIdsCellxgeneMouse(AdataIdsCellxgene):
+class AdataIdsCellxgeneHuman_v1_1_0(AdataIdsCellxgene):
 
     def __init__(self):
-        super(AdataIdsCellxgeneMouse, self).__init__()
+        super(AdataIdsCellxgeneHuman_v1_1_0, self).__init__()
+        self.feature_symbol = "hgnc_gene_symbol"
+
+
+class AdataIdsCellxgeneMouse_v1_1_0(AdataIdsCellxgene):
+
+    def __init__(self):
+        super(AdataIdsCellxgeneMouse_v1_1_0, self).__init__()
         self.gene_id_symbols = "mgi_gene_symbol"
 
 
@@ -293,3 +297,17 @@ class AdataIdsCellxgeneGeneral(AdataIdsCellxgene):
     def __init__(self):
         super(AdataIdsCellxgeneGeneral, self).__init__()
         self.gene_id_symbols = "gene_symbol"
+
+
+class AdataIdsCellxgene_v2_0_0(AdataIdsCellxgene):
+
+    """
+    https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/2.0.0/corpora_schema.md
+    """
+
+    def __init__(self):
+        super(AdataIdsCellxgene_v2_0_0, self).__init__()
+        self.feature_symbol = "feature_name"
+        self.feature_id = "feature_id"
+        self.feature_biotype = "feature_biotype"
+        # feature_referencec

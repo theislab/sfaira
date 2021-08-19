@@ -9,7 +9,7 @@ from typing import List, Union
 import uuid
 
 from sfaira.data.dataloaders.base import DatasetBase
-from sfaira.consts import AdataIdsCellxgene
+from sfaira.consts import AdataIdsCellxgene, AdataIdsCellxgeneHuman_v1_1_0, AdataIdsCellxgeneMouse_v1_1_0
 from sfaira.consts.directories import CACHE_DIR_DATABASES_CELLXGENE
 from sfaira.data.dataloaders.databases.cellxgene.rest_helpers import get_collection, get_data
 from sfaira.data.dataloaders.databases.cellxgene.rest_helpers import CELLXGENE_PRODUCTION_ENDPOINT, DOWNLOAD_DATASET
@@ -109,24 +109,10 @@ class Dataset(DatasetBase):
             sample_fn=sample_fn,
             sample_fns=sample_fns,
         )
+        # General keys are defined in the shared IDs object. Further down, the species specific one is loaded to
+        # disambiguate species-dependent differences.
         self._adata_ids_cellxgene = AdataIdsCellxgene()
         self._collection = None
-
-        # The h5ad objects from cellxgene follow a particular structure and the following attributes are guaranteed to
-        # be in place. Note that these point at the anndata instance and will only be available for evaluation after
-        # download. See below for attributes that are lazily available
-        self.cell_type_obs_key = self._adata_ids_cellxgene.cell_type
-        self.development_stage_obs_key = self._adata_ids_cellxgene.development_stage
-        self.disease_obs_key = self._adata_ids_cellxgene.disease
-        self.ethnicity_obs_key = self._adata_ids_cellxgene.ethnicity
-        self.sex_obs_key = self._adata_ids_cellxgene.sex
-        self.organ_obs_key = self._adata_ids_cellxgene.organism
-        self.state_exact_obs_key = self._adata_ids_cellxgene.state_exact
-
-        self.gene_id_symbols_var_key = self._adata_ids_cellxgene.gene_id_symbols
-
-        self._unknown_celltype_identifiers = self._adata_ids_cellxgene.unknown_metadata_identifier
-
         self.collection_id = collection_id
         self.supplier = "cellxgene"
         doi = [x['link_url'] for x in self.collection["links"] if x['link_type'] == 'DOI']
@@ -159,8 +145,30 @@ class Dataset(DatasetBase):
             except ValueError as e:
                 if verbose > 0:
                     print(f"WARNING: {e} in {self.collection_id} and data set {self.id}")
+
+        if self.organism == "human":
+            self._adata_ids_cellxgene = AdataIdsCellxgeneHuman_v1_1_0()
+        elif self.organism == "mouse":
+            self._adata_ids_cellxgene = AdataIdsCellxgeneMouse_v1_1_0()
+        else:
+            assert False, self.organism
         # Add author information.  # TODO need to change this to contributor?
         setattr(self, "author", "cellxgene")
+        # The h5ad objects from cellxgene follow a particular structure and the following attributes are guaranteed to
+        # be in place. Note that these point at the anndata instance and will only be available for evaluation after
+        # download. See below for attributes that are lazily available
+        self.cell_type_obs_key = self._adata_ids_cellxgene.cell_type
+        self.development_stage_obs_key = self._adata_ids_cellxgene.development_stage
+        self.disease_obs_key = self._adata_ids_cellxgene.disease
+        self.ethnicity_obs_key = self._adata_ids_cellxgene.ethnicity
+        self.sex_obs_key = self._adata_ids_cellxgene.sex
+        self.organ_obs_key = self._adata_ids_cellxgene.organism
+        self.state_exact_obs_key = self._adata_ids_cellxgene.state_exact
+
+        self.gene_id_symbols_var_key = self._adata_ids_cellxgene.feature_symbol
+
+        self._unknown_celltype_identifiers = self._adata_ids_cellxgene.unknown_metadata_identifier
+
 
     @property
     def _collection_cache_dir(self):
