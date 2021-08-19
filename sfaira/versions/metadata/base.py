@@ -383,9 +383,11 @@ class OntologyEbi(OntologyHierarchical):
         if ontology == "hancestro":
             base_url = f"https://www.ebi.ac.uk/ols/api/ontologies/{ontology}/terms/" \
                        f"http%253A%252F%252Fpurl.obolibrary.org%252Fobo%252F"
-        else:
+        elif ontology == "efo":
             base_url = f"https://www.ebi.ac.uk/ols/api/ontologies/{ontology}/terms/" \
-                       f"http%253A%252F%252Fwww.ebi.ac.uk%252F"
+                       f"http%253A%252F%252Fwww.ebi.ac.uk%252F{ontology}%252F"
+        else:
+            assert False
 
         def get_url_self(iri):
             return f"{base_url}{iri}"
@@ -417,7 +419,6 @@ class OntologyEbi(OntologyHierarchical):
                 - nodes (dictionaries of node ID and node values) and
                 - edges (node ID of parent and child).
             """
-            print(requests.get(get_url_children(iri=iri)).json())
             terms_children = requests.get(get_url_children(iri=iri)).json()["_embedded"]["terms"]
             nodes_new = {}
             edges_new = []
