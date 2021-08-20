@@ -4,9 +4,9 @@
 import sfaira.consts
 import sfaira.data
 import sfaira.genomes
-import sfaira.interface as ui
 import sfaira.models
 import sfaira.train
+import sfaira.ui
 import sfaira.versions
 from ._version import get_versions
 

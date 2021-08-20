@@ -17,19 +17,18 @@ class Dataset(DatasetBase):
         self.download_url_data = f"https://covid19.cog.sanger.ac.uk/{self.sample_fn}"
         self.download_url_meta = None
 
+        self.assay_sc = "10x 3' transcription profiling"
         self.author = "Braga"
-        self.doi = "10.1038/s41591-019-0468-5"
-        self.healthy = True
+        self.disease = "healthy"
+        self.doi_journal = "10.1038/s41591-019-0468-5"
+        self.normalization = "scaled"
         self.organ = "bronchus" if self.sample_fn == "vieira19_Bronchi_anonymised.processed.h5ad" else "lung parenchyma"
         self.organism = "human"
-        self.assay_sc = "10X sequencing"
-        self.state_exact = "healthy"
-        self.year = 2019
-        self.normalization = "norm"
         self.sample_source = "primary_tissue"
+        self.year = 2019
 
-        self.var_symbol_col = "index"
-        self.cellontology_original_obs_key = "CellType"
+        self.gene_id_symbols_var_key = "index"
+        self.cell_types_original_obs_key = "CellType"
 
         self.set_dataset_id(idx=1)
 

@@ -15,10 +15,10 @@ sfaira - data and model repository for single-cell data
    :align: center
 
 sfaira_ is a model and a data repository in a single python package.
-We provide an interactive overview of the current state of the zoos on sfaira-site_.
+We provide an interactive overview of the current state of the zoos on sfaira-portal_.
 
 .. _sfaira: https://www.biorxiv.org/content/10.1101/2020.12.16.419036v1
-.. _sfaira-site: https://theislab.github.io/sfaira-site/index.html
+.. _sfaira-portal: https://theislab.github.io/sfaira-portal/
 
 .. include:: environment_brief.rst
 
@@ -35,14 +35,14 @@ Latest additions
    :hidden:
 
    installation
-   api/index
+   api
    commandline_interface
    tutorials
-   using_data
    adding_datasets
-   adding_dataset_classes
+   consuming_data
+   distributed_data
    models
    ecosystem
    roadmap
-   development
+   faq
    changelog

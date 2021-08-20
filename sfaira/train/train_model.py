@@ -5,212 +5,69 @@ import pandas as pd
 import pickle
 from typing import Union
 
-from sfaira.data import DatasetGroup, DatasetSuperGroup
+from sfaira.consts import AdataIdsSfaira
+from sfaira.data import DistributedStoreSingleFeatureSpace, Universe
 from sfaira.estimators import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
-from sfaira.interface import ModelZoo, ModelZooEmbedding, ModelZooCelltype
+from sfaira.ui import ModelZoo
 
 
-class TargetZoos:
-    """
-    Class that provides access to all available dataset human in sfaira.
+class TrainModel:
 
-    Parameters
-    ----------
-    data_path : str
-        Path to the files for this dataset on disk
-    meta_path : str
-        Path to the meta files for this dataset on disk
-    """
+    data: Union[anndata.AnnData, DistributedStoreSingleFeatureSpace]
+    estimator: Union[EstimatorKeras, None]
 
-    def __init__(self, data_path: Union[str, None], meta_path: Union[str, None] = None, cache_path: Union[str, None] = None):
-        if data_path is not None:
-            from sfaira.data.dataloaders.anatomical_groups import mouse, human
-            self.data_mouse = {
-                "bladder": mouse.DatasetGroupBladder(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                "brain": mouse.DatasetGroupBrain(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                "diaphragm": mouse.DatasetGroupDiaphragm(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                "adipose": mouse.DatasetGroupAdipose(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                "heart": mouse.DatasetGroupHeart(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                "kidney": mouse.DatasetGroupKidney(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                "colon": mouse.DatasetGroupColon(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                "muscle": mouse.DatasetGroupMuscle(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                "liver": mouse.DatasetGroupLiver(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                "lung": mouse.DatasetGroupLung(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                "mammarygland": mouse.DatasetGroupMammaryGland(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                "bone": mouse.DatasetGroupBone(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                "femalegonad": mouse.DatasetGroupFemalegonad(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                "pancreas": mouse.DatasetGroupPancreas(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                "blood": mouse.DatasetGroupBlood(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                "placenta": mouse.DatasetGroupPlacenta(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                "prostate": mouse.DatasetGroupProstate(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                "rib": mouse.DatasetGroupRib(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                "skin": mouse.DatasetGroupSkin(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                "ileum": mouse.DatasetGroupIleum(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                "spleen": mouse.DatasetGroupSpleen(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                "stomach": mouse.DatasetGroupStomach(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                "malegonad": mouse.DatasetGroupMalegonad(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                "thymus": mouse.DatasetGroupThymus(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                "tongue": mouse.DatasetGroupTongue(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                "trachea": mouse.DatasetGroupTrachea(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                "uterus": mouse.DatasetGroupUterus(data_path=data_path, cache_path=cache_path),
-            }
-            self.data_human = {
-                'adipose': human.DatasetGroupAdipose(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'adrenalgland': human.DatasetGroupAdrenalgland(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'artery': human.DatasetGroupArtery(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'bladder': human.DatasetGroupBladder(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'blood': human.DatasetGroupBlood(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'bone': human.DatasetGroupBone(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'brain': human.DatasetGroupBrain(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'calvaria': human.DatasetGroupCalvaria(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'cervix': human.DatasetGroupCervix(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'chorionicvillus': human.DatasetGroupChorionicvillus(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'colon': human.DatasetGroupColon(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'duodenum': human.DatasetGroupDuodenum(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'epityphlon': human.DatasetGroupEpityphlon(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'esophagus': human.DatasetGroupEsophagus(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'eye': human.DatasetGroupEye(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'fallopiantube': human.DatasetGroupFallopiantube(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'femalegonad': human.DatasetGroupFemalegonad(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'gallbladder': human.DatasetGroupGallbladder(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'heart': human.DatasetGroupHeart(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'hesc': human.DatasetGroupHesc(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'ileum': human.DatasetGroupIleum(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'jejunum': human.DatasetGroupJejunum(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'kidney': human.DatasetGroupKidney(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'liver': human.DatasetGroupLiver(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'lung': human.DatasetGroupLung(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'malegonad': human.DatasetGroupMalegonad(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'muscle': human.DatasetGroupMuscle(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'omentum': human.DatasetGroupOmentum(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'pancreas': human.DatasetGroupPancreas(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'placenta': human.DatasetGroupPlacenta(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'pleura': human.DatasetGroupPleura(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'prostate': human.DatasetGroupProstate(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'rectum': human.DatasetGroupRectum(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'rib': human.DatasetGroupRib(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'skin': human.DatasetGroupSkin(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'spinalcord': human.DatasetGroupSpinalcord(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'spleen': human.DatasetGroupSpleen(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'stomach': human.DatasetGroupStomach(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'thymus': human.DatasetGroupThymus(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'thyroid': human.DatasetGroupThyroid(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'trachea': human.DatasetGroupTrachea(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'ureter': human.DatasetGroupUreter(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-                'uterus': human.DatasetGroupUterus(data_path=data_path, meta_path=meta_path, cache_path=cache_path),
-            }
-
-        else:
-            self.data_human = None
-            self.data_mouse = None
-
-    def write_celltypes_tocsv_mouse(self, fn: str):
-        for x in self.data_mouse.keys():
-            ds = self.data_mouse[x]
-            self._write_celltypes_tocsv(fn, x, ds)
-
-    def write_celltypes_tocsv_human(self, fn: str):
-        for x in self.data_human.keys():
-            ds = self.data_human[x]
-            self._write_celltypes_tocsv(fn, x, ds)
-
-    def _write_celltypes_tocsv(self, fn: str, x: str, ds: DatasetGroup):
-        ds.load(annotated_only=True, remove_gene_version=False, match_to_reference=None)
-        if len(ds.adata_ls) > 0:
-            obs = ds.obs_concat(keys=["cell_ontology_class", "cell_ontology_id"])
-            obs.index = range(0, obs.shape[0])
-            strids = []
-            listids = []
-            for i in obs.index:
-                if type(obs.loc[i]['cell_ontology_class']) != list:
-                    strids.append(i)
-                else:
-                    listids.append(i)
-            remaining = []
-            for _, l in obs.iloc[listids].iterrows():
-                if type(l['cell_ontology_id']) == list:
-                    if not len(l['cell_ontology_class']) == len(l['cell_ontology_id']):
-                        raise ValueError(
-                            "Number of cell type labels and cell type ontologies for this cell do not match")
-                    for i in range(len(l['cell_ontology_class'])):
-                        remaining.append({
-                            "cell_ontology_class": l['cell_ontology_class'][i],
-                            "cell_ontology_id": l['cell_ontology_id'][i]
-                        })
-                else:
-                    for i in range(len(l['cell_ontology_class'])):
-                        remaining.append({
-                            "cell_ontology_class": l['cell_ontology_class'][i],
-                            "cell_ontology_id": None
-                        })
-            obs = obs.loc[strids]
-            for i in remaining:
-                obs = obs.append(i, ignore_index=True)
-            obs = obs.drop_duplicates()
-            obs = obs.sort_values(by="cell_ontology_class")
-            obs.index = range(0, obs.shape[0])
-            obs.to_csv(fn + x + ".csv")
-
-
-class TrainModel(TargetZoos):
-
-    estimator: Union[None, EstimatorKeras]
-    zoo: Union[None, ModelZoo]
-    model_dir: str
-    data: Union[DatasetGroup, DatasetSuperGroup, anndata.AnnData, str, None]
-
-    def __init__(self, data_path: str, meta_path: str):
+    def __init__(
+            self,
+            data: Union[str, anndata.AnnData, Universe, DistributedStoreSingleFeatureSpace],
+    ):
         # Check if handling backed anndata or base path to directory of raw files:
-        if data_path.split(".")[-1] == "h5ad":
-            self.data = anndata.read(data_path, backed='r')
+        if isinstance(data, str) and data.split(".")[-1] == "h5ad":
+            self.data = anndata.read(data, backed='r')
             if len(self.data.obs.columns) == 0:
-                fn_backed_obs = ".".join(data_path.split(".")[:-1]) + "_obs.csv"
+                fn_backed_obs = ".".join(data.split(".")[:-1]) + "_obs.csv"
                 self.data.obs = pd.read_csv(fn_backed_obs)
+        elif isinstance(data, anndata.AnnData):
+            self.data = data
+        elif isinstance(data, Universe):
+            self.data = data.adata
+        elif isinstance(data, DistributedStoreSingleFeatureSpace):
+            self.data = data
         else:
-            super(TrainModel, self).__init__(data_path=data_path, meta_path=meta_path)
-            self.data = None
+            raise ValueError(f"did not recongize data of type {type(data)}")
+        self.zoo = ModelZoo()
+        self._adata_ids = AdataIdsSfaira()
+
+    def load_into_memory(self):
+        """
+        Loads backed objects from DistributedStoreBase into single adata object in memory in .data slot.
+        :return:
+        """
+        if isinstance(self.data, DistributedStoreSingleFeatureSpace):
+            adata = None
+            for k, v in self.data.indices.items():
+                x = self.data.adata_by_key[k][v, :].to_memory()
+                x.obs["dataset_id"] = k
+                if adata is None:
+                    adata = x
+                else:
+                    adata = adata.concatenate(x)
+            self.data = adata
+
+    @property
+    @abc.abstractmethod
+    def topology_dict(self) -> dict:
+        pass
 
     @abc.abstractmethod
     def init_estim(self):
         pass
 
-    @property
-    def adata(self):
-        """
-        Get adata object depending on whether backed or a property of a container class.
-
-        :return:
-        """
-        if self.data is None:
-            raise ValueError("self.data not set yet")
-        elif isinstance(self.data, anndata.AnnData):
-            return self.data
-        elif isinstance(self.data, DatasetGroup) or isinstance(self.data, DatasetSuperGroup):
-            return self.data.adata
-        else:
-            raise ValueError("self.data type not recognized: %s " % type(self.data))
-
-    def mouse_target(self, organ: str):
-        self.set_data(data_group=self.data_mouse[organ])
-
-    def human_target(self, organ: str):
-        self.set_data(data_group=self.data_human[organ])
-
-    def set_data(
-            self,
-            data_group: Union[DatasetGroup, DatasetSuperGroup]
-    ):
-        """
-        Set input data group.
-        :return:
-        """
-        self.data = data_group
+    @abc.abstractmethod
+    def save_eval(self, fn: str, **kwargs):
+        pass
 
     @abc.abstractmethod
-    def _save_specific(
-            self,
-            fn: str
-    ):
+    def _save_specific(self, fn: str, **kwargs):
         pass
 
     def save(
@@ -235,19 +92,29 @@ class TrainModel(TargetZoos):
         if specific:
             self._save_specific(fn=fn)
 
+    def n_counts(self, idx):
+        return np.asarray(
+            self.estimator.data.X[np.sort(idx), :].sum(axis=1)[np.argsort(idx)]
+        ).flatten()
+
 
 class TrainModelEmbedding(TrainModel):
 
+    estimator: EstimatorKerasEmbedding
+
     def __init__(
             self,
-            data_path: str,
-            meta_path: str,
-            model_path: str
+            model_path: str,
+            data: Union[str, anndata.AnnData, Universe, DistributedStoreSingleFeatureSpace],
     ):
-        super(TrainModelEmbedding, self).__init__(data_path=data_path, meta_path=meta_path)
-        self.zoo = ModelZooEmbedding(model_lookuptable=None)
+        super(TrainModelEmbedding, self).__init__(data=data)
         self.estimator = None
         self.model_dir = model_path
+
+    @property
+    def topology_dict(self) -> dict:
+        topology_dict = self.zoo.topology_container.topology
+        return topology_dict
 
     def init_estim(
             self,
@@ -255,20 +122,15 @@ class TrainModelEmbedding(TrainModel):
     ):
         assert self.zoo.model_id is not None, "choose model in zoo first"
         self.estimator = EstimatorKerasEmbedding(
-            data=self.adata,
+            data=self.data,
             model_dir=self.model_dir,
             model_id=self.zoo.model_id,
-            organism=self.zoo.organism,
-            organ=self.zoo.organ,
-            model_type=self.zoo.model_type,
-            model_topology=self.zoo.model_topology
+            model_topology=self.zoo.topology_container
         )
         self.estimator.init_model(override_hyperpar=override_hyperpar)
+        print(f"TRAINER: initialised model with {self.estimator.topology_container.n_var} features.")
 
-    def save_eval(
-            self,
-            fn: str
-    ):
+    def save_eval(self, fn: str, **kwargs):
         evaluation_train = self.estimator.evaluate_any(idx=self.estimator.idx_train)
         evaluation_val = self.estimator.evaluate_any(idx=self.estimator.idx_eval)
         evaluation_test = self.estimator.evaluate_any(idx=self.estimator.idx_test)
@@ -282,10 +144,7 @@ class TrainModelEmbedding(TrainModel):
         with open(fn + '_evaluation.pickle', 'wb') as f:
             pickle.dump(obj=evaluation, file=f)
 
-    def _save_specific(
-            self,
-            fn: str
-    ):
+    def _save_specific(self, fn: str, **kwargs):
         """
         Save embedding prediction:
 
@@ -293,29 +152,36 @@ class TrainModelEmbedding(TrainModel):
         :return:
         """
         embedding = self.estimator.predict_embedding()
-        df_summary = self.estimator.obs_test[
-            ["dataset", "cell_ontology_class", "state_exact", "lab", "year", "subtissue", "assay_sc",
-             "assay_differentiation", "assay_type_differentiation", "cell_line", "sample_source"]
-        ]
-        df_summary["ncounts"] = np.asarray(
-            self.estimator.data.X[np.sort(self.estimator.idx_test), :].sum(axis=1)[np.argsort(self.estimator.idx_test)]
-        ).flatten()
+        df_summary = self.estimator.obs_test
+        df_summary = df_summary[[k for k in df_summary.columns if k in self._adata_ids.obs_keys]]
+        df_summary["ncounts"] = self.n_counts(idx=self.estimator.idx_test)
         np.save(file=fn + "_embedding", arr=embedding)
         df_summary.to_csv(fn + "_covar.csv")
+        with open(fn + "_topology.pickle", "wb") as f:
+            pickle.dump(obj=self.topology_dict, file=f)
 
 
 class TrainModelCelltype(TrainModel):
 
+    estimator: EstimatorKerasCelltype
+
     def __init__(
             self,
-            data_path: str,
-            meta_path: str,
-            model_path: str
+            model_path: str,
+            data: Union[str, anndata.AnnData, Universe, DistributedStoreSingleFeatureSpace],
+            fn_target_universe: str,
     ):
-        super(TrainModelCelltype, self).__init__(data_path=data_path, meta_path=meta_path)
-        self.zoo = ModelZooCelltype(model_lookuptable=None)
+        super(TrainModelCelltype, self).__init__(data=data)
         self.estimator = None
         self.model_dir = model_path
+        self.fn_target_universe = fn_target_universe
+
+    @property
+    def topology_dict(self) -> dict:
+        topology_dict = self.zoo.topology_container.topology
+        # Load target universe leaves into topology dict:
+        topology_dict["output"]["targets"] = self.estimator.celltype_universe.onto_cl.leaves
+        return topology_dict
 
     def init_estim(
             self,
@@ -323,20 +189,17 @@ class TrainModelCelltype(TrainModel):
     ):
         assert self.zoo.model_id is not None, "choose model in zoo first"
         self.estimator = EstimatorKerasCelltype(
-            data=self.adata,
+            data=self.data,
             model_dir=self.model_dir,
             model_id=self.zoo.model_id,
-            organism=self.zoo.organism,
-            organ=self.zoo.organ,
-            model_type=self.zoo.model_type,
-            model_topology=self.zoo.model_topology
+            model_topology=self.zoo.topology_container
         )
+        self.estimator.celltype_universe.load_target_universe(self.fn_target_universe)
         self.estimator.init_model(override_hyperpar=override_hyperpar)
+        print(f"TRAINER: initialised model with {self.estimator.topology_container.n_var} features and "
+              f"{self.estimator.ntypes} labels: \n{self.estimator.ontology_names}.")
 
-    def save_eval(
-            self,
-            fn: str
-    ):
+    def save_eval(self, fn: str, eval_weighted: bool = False, **kwargs):
         evaluation = {
             'train': self.estimator.evaluate_any(idx=self.estimator.idx_train, weighted=False),
             'val': self.estimator.evaluate_any(idx=self.estimator.idx_eval, weighted=False),
@@ -345,48 +208,39 @@ class TrainModelCelltype(TrainModel):
         }
         with open(fn + '_evaluation.pickle', 'wb') as f:
             pickle.dump(obj=evaluation, file=f)
-        evaluation_weighted = {
-            'train': self.estimator.evaluate_any(idx=self.estimator.idx_train, weighted=True),
-            'val': self.estimator.evaluate_any(idx=self.estimator.idx_eval, weighted=True),
-            'test': self.estimator.evaluate_any(idx=self.estimator.idx_test, weighted=True),
-            'all': self.estimator.evaluate_any(idx=None, weighted=True)
-        }
-        with open(fn + '_evaluation_weighted.pickle', 'wb') as f:
-            pickle.dump(obj=evaluation_weighted, file=f)
+        if eval_weighted:
+            evaluation_weighted = {
+                'train': self.estimator.evaluate_any(idx=self.estimator.idx_train, weighted=True),
+                'val': self.estimator.evaluate_any(idx=self.estimator.idx_eval, weighted=True),
+                'test': self.estimator.evaluate_any(idx=self.estimator.idx_test, weighted=True),
+                'all': self.estimator.evaluate_any(idx=None, weighted=True)
+            }
+            with open(fn + '_evaluation_weighted.pickle', 'wb') as f:
+                pickle.dump(obj=evaluation_weighted, file=f)
 
-    def _save_specific(
-            self,
-            fn: str
-    ):
+    def _save_specific(self, fn: str, **kwargs):
         """
         Save true and predicted labels on test set:
 
         :param fn:
         :return:
         """
+        obs = self.estimator.data.obs
         ytrue = self.estimator.ytrue()
         yhat = self.estimator.predict()
-        df_summary = self.estimator.obs_test[
-            ["dataset", "cell_ontology_class", "state_exact", "lab", "year", "subtissue", "assay_sc",
-             "assay_differentiation", "assay_type_differentiation", "cell_line", "sample_source"]
-        ]
-        df_summary["ncounts"] = np.asarray(self.estimator.data.X[self.estimator.idx_test, :].sum(axis=1)).flatten()
+        df_summary = self.estimator.obs_test
+        df_summary = df_summary[[k for k in df_summary.columns if k in self._adata_ids.obs_keys]]
+        df_summary["ncounts"] = self.n_counts(idx=self.estimator.idx_test)
         np.save(file=fn + "_ytrue", arr=ytrue)
         np.save(file=fn + "_yhat", arr=yhat)
         df_summary.to_csv(fn + "_covar.csv")
         with open(fn + '_ontology_names.pickle', 'wb') as f:
-            pickle.dump(obj=self.estimator.ids, file=f)
+            pickle.dump(obj=self.estimator.ontology_names, file=f)
+        with open(fn + '_ontology_ids.pickle', 'wb') as f:
+            pickle.dump(obj=self.estimator.ontology_ids, file=f)
+        with open(fn + "_topology.pickle", "wb") as f:
+            pickle.dump(obj=self.topology_dict, file=f)
 
-        cell_counts = self.data.obs_concat(keys=['cell_ontology_class'])['cell_ontology_class'].value_counts().to_dict()
-        cell_counts_leaf = cell_counts.copy()
-        for k in cell_counts.keys():
-            if k not in self.estimator.ids:
-                if k not in self.estimator.celltypes_version.ontology.node_ids:
-                    raise(ValueError(f"Celltype '{k}' not found in celltype universe"))
-                for leaf in self.estimator.celltypes_version.ontology.node_ids:
-                    if leaf not in cell_counts_leaf.keys():
-                        cell_counts_leaf[leaf] = 0
-                    cell_counts_leaf[leaf] += 1 / len(self.estimator.celltypes_version.ontology.node_ids)
-                del cell_counts_leaf[k]
+        cell_counts = obs['cell_ontology_class'].value_counts().to_dict()
         with open(fn + '_celltypes_valuecounts_wholedata.pickle', 'wb') as f:
-            pickle.dump(obj=[cell_counts, cell_counts_leaf], file=f)
+            pickle.dump(obj=[cell_counts], file=f)

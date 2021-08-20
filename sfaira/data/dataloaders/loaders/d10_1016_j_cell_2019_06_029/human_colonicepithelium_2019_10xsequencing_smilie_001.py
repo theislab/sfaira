@@ -13,18 +13,20 @@ class Dataset(DatasetBase):
         self.download_url_data = "https://covid19.cog.sanger.ac.uk/smillie19_epi.processed.h5ad"
         self.download_url_meta = None
 
+        # Note: They used used both 10x 3' v2 and 10x 3' v3.
+        self.assay_sc = "10x 3' transcription profiling"
         self.author = "Smilie"
-        self.doi = "10.1016/j.cell.2019.06.029"
-        self.healthy = True
+        self.disease = "healthy"
+        self.doi_journal = "10.1016/j.cell.2019.06.029"
         self.normalization = "raw"
         self.organ = "colonic epithelium"
         self.organism = "human"
-        self.assay_sc = "10X sequencing"
-        self.state_exact = "healthy"
-        self.year = 2019
-        self.var_symbol_col = "index"
-        self.cellontology_original_obs_key = "CellType"
         self.sample_source = "primary_tissue"
+        self.year = 2019
+
+        self.gene_id_symbols_var_key = "index"
+
+        self.cell_types_original_obs_key = "CellType"
 
         self.set_dataset_id(idx=1)
 

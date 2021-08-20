@@ -19,7 +19,7 @@ class Dataset(DatasetBase):
         ]
 
         self.author = "Han"
-        self.doi = "10.1038/s41586-020-2157-4"
+        self.doi_journal = "10.1038/s41586-020-2157-4"
         self.healthy = True
         self.normalization = "raw"
         self.organism = "human"
@@ -29,13 +29,13 @@ class Dataset(DatasetBase):
         self.sample_source = "primary_tissue"
 
         self.bio_sample_obs_key = "sample"
-        self.cellontology_original_obs_key = "celltype_specific"
+        self.cell_types_original_obs_key = "celltype_specific"
         self.development_stage_obs_key = "dev_stage"
         self.organ_obs_key = "organ"
-        self.sex_obs_key = "gender"
+        self.sex_obs_key = "sex"
         self.age_obs_key = "age"
 
-        self.var_symbol_col = "index"
+        self.gene_id_symbols_var_key = "index"
 
         self.set_dataset_id(idx=1)
 
@@ -148,11 +148,118 @@ def load(data_dir, **kwargs):
         'PeripheralBlood_1': 'blood',
         'Placenta_1': 'placenta',
     }
+    sample_dev_stage_dict = {
+        'AdultAdipose_1': 'human adult stage',
+        'AdultAdrenalGland_2': 'human adult stage',
+        'AdultAdrenalGland_3': 'human adult stage',
+        'AdultArtery_1': 'human adult stage',
+        'AdultAscendingColon_1': 'human adult stage',
+        'AdultBladder_1': 'human adult stage',
+        'AdultBladder_2': 'human adult stage',
+        'AdultCerebellum_1': 'human adult stage',
+        'AdultCervix_1': 'human adult stage',
+        'AdultColon_1': 'human adult stage',
+        'AdultDuodenum_1': 'human adult stage',
+        'AdultEpityphlon_1': 'human adult stage',
+        'AdultEsophagus_1': 'human adult stage',
+        'AdultEsophagus_2': 'human adult stage',
+        'AdultFallopiantube_1': 'human adult stage',
+        'AdultGallbladder_1': 'human adult stage',
+        'AdultGallbladder_2': 'human adult stage',
+        'AdultHeart_1': 'human adult stage',
+        'AdultHeart_2': 'human adult stage',
+        'AdultIleum_2': 'human adult stage',
+        'AdultJejunum_2': 'human adult stage',
+        'AdultKidney_2': 'human adult stage',
+        'AdultKidney_3': 'human adult stage',
+        'AdultKidney_4': 'human adult stage',
+        'AdultLiver_1': 'human adult stage',
+        'AdultLiver_2': 'human adult stage',
+        'AdultLiver_4': 'human adult stage',
+        'AdultLung_1': 'human adult stage',
+        'AdultLung_2': 'human adult stage',
+        'AdultLung_3': 'human adult stage',
+        'AdultMuscle_1': 'human adult stage',
+        'AdultOmentum_1': 'human adult stage',
+        'AdultOmentum_2': 'human adult stage',
+        'AdultOmentum_3': 'human adult stage',
+        'AdultPancreas_1': 'human adult stage',
+        'AdultPeripheralBlood_3': 'human adult stage',
+        'AdultPeripheralBlood_4': 'human adult stage',
+        'AdultPleura_1': 'human adult stage',
+        'AdultProstate_1': 'human adult stage',
+        'AdultRectum_1': 'human adult stage',
+        'AdultSigmoidColon_1': 'human adult stage',
+        'AdultSpleenParenchyma_1': 'human adult stage',
+        'AdultSpleen_1': 'human adult stage',
+        'AdultStomach_1': 'human adult stage',
+        'AdultStomach_2': 'human adult stage',
+        'AdultStomach_3': 'human adult stage',
+        'AdultTemporalLobe_1': 'human adult stage',
+        'AdultThyroid_1': 'human adult stage',
+        'AdultThyroid_2': 'human adult stage',
+        'AdultTrachea_2': 'human adult stage',
+        'AdultTransverseColon_2': 'human adult stage',
+        'AdultUreter_1': 'human adult stage',
+        'AdultUterus_1': 'human adult stage',
+        'BoneMarrow_1': 'human adult stage',
+        'BoneMarrow_2': 'human adult stage',
+        'ChorionicVillus_1': 'human adult stage',
+        'CordBloodCD34P_1': 'human adult stage',
+        'CordBloodCD34P_2': 'human adult stage',
+        'CordBlood_1': 'human adult stage',
+        'CordBlood_2': 'human adult stage',
+        'FetalAdrenalGland_2': 'fetal stage',
+        'FetalAdrenalGland_3': 'fetal stage',
+        'FetalAdrenalGland_4': 'fetal stage',
+        'FetalBrain_3': 'fetal stage',
+        'FetalBrain_4': 'fetal stage',
+        'FetalBrain_5': 'fetal stage',
+        'FetalBrain_6': 'fetal stage',
+        'FetalCalvaria_1': 'fetal stage',
+        'FetalEyes_1': 'fetal stage',
+        'FetalFemaleGonad_1': 'fetal stage',
+        'FetalFemaleGonad_2': 'fetal stage',
+        'FetalHeart_1': 'fetal stage',
+        'FetalHeart_2': 'fetal stage',
+        'FetalIntestine_1': 'fetal stage',
+        'FetalIntestine_2': 'fetal stage',
+        'FetalIntetsine_3': 'fetal stage',
+        'FetalIntestine_4': 'fetal stage',
+        'FetalIntestine_5': 'fetal stage',
+        'FetalKidney_3': 'fetal stage',
+        'FetalKidney_4': 'fetal stage',
+        'FetalKidney_5': 'fetal stage',
+        'FetalKidney_6': 'fetal stage',
+        'FetalLung_1': 'fetal stage',
+        'FetalLung_2': 'fetal stage',
+        'FetalMaleGonad_1': 'fetal stage',
+        'FetalMaleGonad_2': 'fetal stage',
+        'FetalMuscle_1': 'fetal stage',
+        'FetalPancreas_1': 'fetal stage',
+        'FetalPancreas_2': 'fetal stage',
+        'FetalPancreas_3': 'fetal stage',
+        'FetalRib_2': 'fetal stage',
+        'FetalRib_3': 'fetal stage',
+        'FetalSkin_2': 'fetal stage',
+        'FetalSkin_3': 'fetal stage',
+        'FetalSpinalCord_1': 'fetal stage',
+        'FetalStomach_1': 'fetal stage',
+        'FetalStomach_2': 'fetal stage',
+        'FetalThymus_1': 'fetal stage',
+        'FetalThymus_2': 'fetal stage',
+        'HESC_1': 'blastula stage',
+        'Liver_1': 'human adult stage',
+        'Liver_2': 'human adult stage',
+        'NeonatalAdrenalGland_1': 'newborn human stage',
+        'PeripheralBlood_1': 'human adult stage',
+        'Placenta_1': 'human adult stage',
+    }
     sex_dict = {
         'Male': "male",
         'Female': "female",
-        'nan': "nan",
-        'FeM=male': "nan",
+        'nan': "unknown",
+        'FeM=male': "unknown",
     }
 
     adata = anndata.read(os.path.join(data_dir, "HCL_Fig1_adata.h5ad"))
@@ -210,8 +317,15 @@ def load(data_dir, **kwargs):
     # tidy up the column names of the obs annotations
     adata.obs.columns = [
         "sample", "sub_tissue", "n_genes", "n_counts", "cluster_global", "dev_stage", "donor", "celltype_global",
-        "age", "celltype_specific", "cluster_specific", "gender", "assay_sc", "source"]
+        "age", "celltype_specific", "cluster_specific", "sex", "assay_sc", "source"]
+    # Remove new line characters from cell type:
+    adata.obs["celltype_specific"] = [
+        x.replace("\n", "").rstrip()
+        for x in adata.obs["celltype_specific"].values
+    ]
     adata.obs["organ"] = [sample_organ_dict[x] for x in adata.obs["sample"].values]
-    adata.obs["gender"] = [sex_dict[x] for x in adata.obs["gender"].values]
+    adata.obs["sex"] = [sex_dict[str(x)] for x in adata.obs["sex"].values]
+    # TODO are the more exact developmental stages in dev_stage?
+    adata.obs["dev_stage"] = [sample_dev_stage_dict[str(x)] for x in adata.obs["sample"].values]
 
     return adata

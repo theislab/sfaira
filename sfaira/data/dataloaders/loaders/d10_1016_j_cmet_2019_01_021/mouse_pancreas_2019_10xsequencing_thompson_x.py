@@ -19,6 +19,9 @@ SAMPLE_FNS = [
 
 
 class Dataset(DatasetBase):
+    """
+    TODO add disease
+    """
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -26,18 +29,18 @@ class Dataset(DatasetBase):
         self.download_url_meta = f"private,{self.sample_fn}_annotation.csv"
 
         self.author = "Thompson"
-        self.doi = "10.1016/j.cmet.2019.01.021"
-        self.healthy = False
+        self.doi_journal = "10.1016/j.cmet.2019.01.021"
         self.normalization = "raw"
         self.organ = "pancreas"
         self.organism = "mouse"
-        self.assay_sc = "10X sequencing"
+        self.assay_sc = "10x 3' v2"
         self.state_exact = "diabetic"
         self.year = 2019
         self.sample_source = "primary_tissue"
 
-        self.var_symbol_col = "index"
-        self.cellontology_original_obs_key = "celltypes"
+        self.gene_id_symbols_var_key = "names"
+        self.gene_id_ensembl_var_key = "ensembl"
+        self.cell_types_original_obs_key = "celltypes"
 
         self.set_dataset_id(idx=1)
 

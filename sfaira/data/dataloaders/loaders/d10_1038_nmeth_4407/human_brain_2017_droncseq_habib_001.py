@@ -13,19 +13,18 @@ class Dataset(DatasetBase):
         self.download_url_data = "https://covid19.cog.sanger.ac.uk/habib17.processed.h5ad"
         self.download_url_meta = None
 
+        self.assay_sc = "DroNc-seq"
         self.author = "Habib"
-        self.doi = "10.1038/nmeth.4407"
-        self.healthy = True
+        self.disease = "healthy"
+        self.doi_journal = "10.1038/nmeth.4407"
         self.normalization = "raw"
         self.organ = "brain"
         self.organism = "human"
-        self.assay_sc = "DroNc-seq"
-        self.state_exact = "healthy"
-        self.year = 2017
         self.sample_source = "primary_tissue"
+        self.year = 2017
 
-        self.var_symbol_col = "index"
-        self.cellontology_original_obs_key = "CellType"
+        self.gene_id_symbols_var_key = "index"
+        self.cell_types_original_obs_key = "CellType"
 
         self.set_dataset_id(idx=1)
 

@@ -1,3 +1,3 @@
 from . import metadata
-from . import genome_versions
-from . import topology_versions
+from . import genomes
+from . import topologies

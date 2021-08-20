@@ -16,22 +16,22 @@ class Dataset(DatasetBase):
         self.download_url_meta = \
             "https://www.brainimmuneatlas.org/data_files/toDownload/annot_fullAggr.csv"
 
+        self.assay_sc = "10x 3' v2"
         self.author = "Hove"
-        self.doi = "10.1038/s41593-019-0393-4"
-        self.healthy = True
+        self.disease = "healthy"
+        self.doi_journal = "10.1038/s41593-019-0393-4"
         self.normalization = "raw"
         self.organism = "mouse"
-        self.assay_sc = "10X sequencing"
+        self.sample_source = "primary_tissue"
         self.state_exact = "healthy"
         self.year = 2019
-        self.sample_source = "primary_tissue"
 
         self.bio_sample_obs_key = "sample"
-        self.cellontology_original_obs_key = "cluster"
+        self.cell_types_original_obs_key = "cluster"
         self.organ_obs_key = "organ"
 
-        self.var_ensembl_col = "ensembl"
-        self.var_symbol_col = "name"
+        self.gene_id_ensembl_var_key = "ensembl"
+        self.gene_id_symbols_var_key = "name"
 
         self.set_dataset_id(idx=1)
 

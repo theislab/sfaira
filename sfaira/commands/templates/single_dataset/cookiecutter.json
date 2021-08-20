@@ -5,6 +5,7 @@
     "id": "",
     "id_without_doi": "",
     "author": "",
+    "disease": "",
     "doi": "",
     "doi_sfaira_repr": "",
     "download_url_data": "",
@@ -12,9 +13,13 @@
     "normalization": "",
     "organ": "",
     "organism": "",
-    "assay": "",
+    "assay_sc": "",
     "year": "",
     "individual": "",
+    "sample_source": "",
     "state_exact": "",
-    "create_extra_description": ""
+    "primary_data": "",
+    "default_embedding": "",
+    "create_extra_description": "",
+    "cell_types_original_obs_key": ""
   }

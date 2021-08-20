@@ -7,7 +7,7 @@ from sfaira.data import DatasetBase
 
 class Dataset(DatasetBase):
     """
-    ToDo: revisit gamma cell missing in CO
+    TODO: move state exact to diesase
     """
 
     def __init__(self, **kwargs):
@@ -16,7 +16,7 @@ class Dataset(DatasetBase):
         self.download_url_meta = "https://www.ebi.ac.uk/arrayexpress/files/E-MTAB-5061/E-MTAB-5061.sdrf.txt"
 
         self.author = "Segerstolpe"
-        self.doi = "10.1016/j.cmet.2016.08.020"
+        self.doi_journal = "10.1016/j.cmet.2016.08.020"
         self.normalization = "raw"
         self.organ = "pancreas"
         self.organism = "human"
@@ -24,13 +24,10 @@ class Dataset(DatasetBase):
         self.year = 2016
         self.sample_source = "primary_tissue"
 
-        self.var_symbol_col = "index"
+        self.gene_id_symbols_var_key = "index"
 
-        self.cellontology_original_obs_key = "Characteristics[cell type]"
+        self.cell_types_original_obs_key = "Characteristics[cell type]"
         self.state_exact_obs_key = "Characteristics[disease]"
-        self.healthy_obs_key = "Characteristics[disease]"
-
-        self.healthy_state_healthy = "normal"
 
         self.set_dataset_id(idx=1)
 

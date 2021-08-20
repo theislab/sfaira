@@ -1,2 +1,1 @@
-from .obo_extension_human import ONTOLOGIY_EXTENSION_HUMAN
-from .obo_extension_mouse import ONTOLOGIY_EXTENSION_MOUSE
+from .obo_extension import ONTOLOGIY_EXTENSION

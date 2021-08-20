@@ -13,20 +13,21 @@ class Dataset(DatasetBase):
         self.download_url_data = "https://covid19.cog.sanger.ac.uk/james20.processed.h5ad"
         self.download_url_meta = None
 
+        self.assay_sc_obs_key = "assay"
         self.author = "James"
-        self.doi = "10.1038/s41590-020-0602-z"
-        self.healthy = True
+        self.disease = "healthy"
+        self.doi_journal = "10.1038/s41590-020-0602-z"
+        self.individual_obs_key = "donor"
         self.normalization = "raw"
         self.organ = "colon"
         self.organism = "human"
-        self.assay_sc = "10X sequencing"
+        self.sample_source = "primary_tissue"
         self.state_exact = "healthy"
         self.year = 2020
-        self.sample_source = "primary_tissue"
 
-        self.var_symbol_col = "index"
-        self.var_ensembl_col = "gene_ids"
-        self.cellontology_original_obs_key = "cell_type"
+        self.gene_id_symbols_var_key = "index"
+        self.gene_id_ensembl_var_key = "gene_ids"
+        self.cell_types_original_obs_key = "cell_type"
 
         self.set_dataset_id(idx=1)
 
@@ -36,5 +37,12 @@ def load(data_dir, **kwargs):
     adata = anndata.read(fn)
     adata.X = np.expm1(adata.X)
     adata.X = adata.X.multiply(scipy.sparse.csc_matrix(adata.obs["n_counts"].values[:, None])).multiply(1 / 10000)
-
+    # Assay maps are described here: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7212050/
+    adata.obs["assay"] = [{
+        '290b': "10x 3' transcription profiling",
+        '298c': "10x 3' transcription profiling",
+        '302c': "10x 3' transcription profiling",
+        '390c': "10x 5' transcription profiling",
+        '417c': "10x 5' transcription profiling",
+    }[x] for x in adata.obs["donor"].values]
     return adata

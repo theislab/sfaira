@@ -7,6 +7,10 @@ from sfaira.data import DatasetBase
 
 class Dataset(DatasetBase):
 
+    """
+    TODO transform field development to controlled field age
+    """
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.download_url_data = [
@@ -15,20 +19,20 @@ class Dataset(DatasetBase):
         ]
         self.download_url_meta = None
 
+        self.assay_sc = "10x 3' v2"
         self.author = "Stewart"
-        self.doi = "10.1126/science.aat5031"
-        self.healthy = True
+        self.disease = "healthy"
+        self.doi_journal = "10.1126/science.aat5031"
         self.normalization = "norm"
         self.organ = "kidney"
         self.organism = "human"
-        self.assay_sc = "10X sequencing"
+        self.sample_source = "primary_tissue"
         self.state_exact = "healthy"
         self.year = 2019
-        self.sample_source = "primary_tissue"
 
-        self.var_symbol_col = "index"
-        self.var_ensembl_col = "ID"
-        self.cellontology_original_obs_key = "celltype"
+        self.gene_id_symbols_var_key = "index"
+        self.gene_id_ensembl_var_key = "ID"
+        self.cell_types_original_obs_key = "celltype"
 
         self.set_dataset_id(idx=1)
 
@@ -40,6 +44,7 @@ def load(data_dir, **kwargs):
     ]
     adult = anndata.read(fn[0])
     fetal = anndata.read(fn[1])
+    # TODO this is is not a controlled field
     adult.obs["development"] = "adult"
     fetal.obs["development"] = "fetal"
     adata = adult.concatenate(fetal)

@@ -1,16 +1,19 @@
 import logging
 import os
 import sys
+import re
 
 import click
 import rich
 import rich.logging
 from rich import traceback
 from rich import print
+
+from sfaira.commands.annotate_dataloader import DataloaderAnnotater
 from sfaira.commands.test_dataloader import DataloaderTester
 
-from sfaira.commands.clean_dataloader import DataloaderCleaner
-from sfaira.commands.lint_dataloader import DataloaderLinter
+from sfaira.commands.validate_dataloader import DataloaderValidator
+from sfaira.commands.validate_h5ad import H5adValidator
 
 import sfaira
 from sfaira.commands.create_dataloader import DataloaderCreator
@@ -70,46 +73,135 @@ def sfaira_cli(ctx, verbose, log_file):
 
 
 @sfaira_cli.command()
-def create_dataloader() -> None:
+@click.option('--path-loader',
+              default="sfaira/data/dataloaders/loaders/",
+              type=click.Path(exists=True),
+              help='Relative path from the current directory to the desired location of the dataloader.'
+              )
+@click.option('--path-data',
+              default="sfaira/unit_tests/template_data/",
+              type=click.Path(exists=False),
+              help='Relative path from the current directory to the datafiles used by this dataloader.'
+              )
+@click.option('--doi', type=str, default=None, help="The doi of the paper you would like to create a dataloader for.")
+def create_dataloader(path_loader, doi, path_data) -> None:
     """
     Interactively create a new sfaira dataloader.
     """
-    dataloader_creator = DataloaderCreator()
-    dataloader_creator.create_dataloader()
+    if doi is None or re.match(r'\b10\.\d+/[\w.]+\b', doi):
+        dataloader_creator = DataloaderCreator(path_loader, doi)
+        dataloader_creator.create_dataloader()
+        dataloader_creator.create_datadir(path_data)
+    else:
+        print('[bold red]The supplied DOI is malformed!')  # noqa: W605
 
 
 @sfaira_cli.command()
-@click.argument('path', type=click.Path(exists=True))
-def clean_dataloader(path) -> None:
-    """
-    Clean a just written sfaira dataloader to adhere to sfaira's standards.
-
-    PATH to the dataloader script.
-    """
-    dataloader_cleaner = DataloaderCleaner(path)
-    dataloader_cleaner.clean_dataloader()
-
-
-@sfaira_cli.command()
-@click.argument('path', type=click.Path(exists=True))
-def lint_dataloader(path) -> None:
+@click.option('--path-loader',
+              default="sfaira/data/dataloaders/loaders/",
+              type=click.Path(exists=True),
+              help='Relative path from the current directory to the desired location of the dataloader.'
+              )
+@click.option('--doi', type=str, default=None, help="The doi of the paper that the dataloader refers to.")
+def validate_dataloader(path_loader, doi) -> None:
     """
     Verifies the dataloader against sfaira's requirements.
 
     PATH to the dataloader script.
     """
-    dataloader_linter = DataloaderLinter(path)
-    dataloader_linter.lint()
+    if doi is None or re.match(r'\b10\.\d+/[\w.]+\b', doi):
+        dataloader_validator = DataloaderValidator(path_loader, doi)
+        dataloader_validator.validate()
+    else:
+        print('[bold red]The supplied DOI is malformed!')  # noqa: W605
 
 
 @sfaira_cli.command()
-@click.argument('path', type=click.Path(exists=True))
-def test_dataloader(path) -> None:
+@click.option('--path-loader',
+              default="sfaira/data/dataloaders/loaders/",
+              type=click.Path(exists=True),
+              help='Relative path from the current directory to the location of the dataloader.'
+              )
+@click.option('--path-data',
+              default="sfaira/unit_tests/template_data/",
+              type=click.Path(exists=True),
+              help='Relative path from the current directory to the datafiles used by this dataloader.'
+              )
+@click.option('--doi', type=str, default=None, help="The doi of the paper that the dataloader refers to.")
+def annotate_dataloader(path_loader, path_data, doi) -> None:
     """
-    Runs a dataloader unit test.
+    Annotates a dataloader.
+
+    PATH is the absolute path of the root of your sfaira clone.
     """
-    dataloader_tester = DataloaderTester(path)
-    dataloader_tester.test_dataloader()
+    if doi is None or re.match(r'\b10\.\d+/[\w.]+\b', doi):
+        dataloader_validator = DataloaderValidator(path_loader, doi)
+        dataloader_validator.validate()
+        dataloader_annotater = DataloaderAnnotater()
+        dataloader_annotater.annotate(path_loader, path_data, dataloader_validator.doi)
+    else:
+        print('[bold red]The supplied DOI is malformed!')  # noqa: W605
+
+
+@sfaira_cli.command()
+@click.option('--path-loader',
+              default="sfaira/data/dataloaders/loaders/",
+              type=click.Path(exists=True),
+              help='Relative path from the current directory to the location of the dataloader.'
+              )
+@click.option('--path-data',
+              default="sfaira/unit_tests/template_data/",
+              type=click.Path(exists=True),
+              help='Relative path from the current directory to the datafiles used by this dataloader.'
+              )
+@click.option('--doi', type=str, default=None, help="The doi of the paper that the dataloader refers to.")
+def test_dataloader(path_loader, path_data, doi) -> None:
+    """Runs a dataloader integration test.
+
+    PATH is the absolute path of the root of your sfaira clone.
+    """
+    if doi is None or re.match(r'\b10\.\d+/[\w.]+\b', doi):
+        dataloader_tester = DataloaderTester(path_loader, path_data, doi)
+        dataloader_tester.test_dataloader()
+    else:
+        print('[bold red]The supplied DOI is malformed!')  # noqa: W605
+
+
+@sfaira_cli.command()
+@click.argument('doi', type=str)
+@click.argument('schema', type=str, default=None)
+@click.argument('path_out', type=click.Path(exists=True))
+@click.argument('path_data', type=click.Path(exists=True))
+@click.option('--path_cache', type=click.Path(exists=True), default=None)
+def export_h5ad(test_h5ad, schema) -> None:
+    """Creates a collection of streamlined h5ad object for a given DOI.
+
+    doi is the doi(s) to select for export. You can enumerate multiple dois by suppling a string of dois separated by
+        a comma.
+    schema is the schema type ("cellxgene",) to use for streamlining.
+    path_out is the absolute path to save output into. The h5ad files will be in a folder named after the DOI.
+    path_data is the absolute path to raw data library, ie one folder above the DOI named folder that contains the raw
+        files necessary for the selected data loader(s).
+    path_cache is the optional absolute path to cached data library maintained by sfaira. Using such a cache speeds
+        up loading in sequential runs but is not necessary.
+    """
+    h5ad_tester = H5adValidator(test_h5ad, schema)
+    h5ad_tester.test_schema()
+    h5ad_tester.test_numeric_data()
+
+
+@sfaira_cli.command()
+@click.argument('test-h5ad', type=click.Path(exists=True))
+@click.option('--schema', type=str, default=None)
+def test_h5ad(test_h5ad, schema) -> None:
+    """Runs a component test on a streamlined h5ad object.
+
+    test-h5ad is the absolute path of the .h5ad file to test.
+    schema is the schema type ("cellxgene",) to test.
+    """
+    h5ad_tester = H5adValidator(test_h5ad, schema)
+    h5ad_tester.test_schema()
+    h5ad_tester.test_numeric_data()
 
 
 if __name__ == "__main__":

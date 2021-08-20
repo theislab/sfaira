@@ -4,32 +4,42 @@ dataset_structure:
 {% for fn in cookiecutter.sample_fns.fns %}        - "{{ fn }}"
 {% endfor %}dataset_wise:
     author: "{{ cookiecutter.author }}"
-    doi: "{{ cookiecutter.doi }}"
+    default_embedding:
+{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}: "{{ cookiecutter.default_embedding }}"
+{% endfor %}    doi_preprint:
+    doi_journal: "{{ cookiecutter.doi }}"
     download_url_data:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
 {% endfor %}    download_url_meta:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
-{% endfor %}    normalization: "{{ cookiecutter.normalization }}"
+{% endfor %}    primary_data: {{ cookiecutter.primary_data }}
+    normalization: "{{ cookiecutter.normalization }}"
     year: "{{ cookiecutter.year }}"
 dataset_or_observation_wise:
-    age:
+    assay_sc:
+{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}: "{{ cookiecutter.assay_sc }}"
+{% endfor %}    assay_sc_obs_key:
+    assay_differentiation:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
-{% endfor %}    age_obs_key:
-    assay:
-{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}: "{{ cookiecutter.assay }}"
-{% endfor %}    assay_obs_key:
+{% endfor %}    assay_differentiation_obs_key:
+    assay_type_differentiation:
+{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
+{% endfor %}    assay_type_differentiation_obs_key:
     bio_sample:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
 {% endfor %}    bio_sample_obs_key:
+    cell_line:
+{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
+{% endfor %}    cell_line_obs_key:
     development_stage:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
 {% endfor %}    development_stage_obs_key:
+    disease:
+{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}: "{{ cookiecutter.disease }}"
+{% endfor %}    disease_obs_key:
     ethnicity:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
 {% endfor %}    ethnicity_obs_key:
-    healthy:
-{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
-{% endfor %}    healthy_obs_key:
     individual:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
 {% endfor %}    individual_obs_key:
@@ -39,6 +49,9 @@ dataset_or_observation_wise:
     organism:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}: "{{ cookiecutter.organism }}"
 {% endfor %}    organism_obs_key:
+    sample_source:
+{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}: "{{ cookiecutter.sample_source }}"
+{% endfor %}    sample_source_obs_key:
     sex:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
 {% endfor %}    sex_obs_key:
@@ -49,10 +62,9 @@ dataset_or_observation_wise:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
 {% endfor %}    tech_sample_obs_key:
 observation_wise:
-    cellontology_original_obs_key:
+    cell_types_original_obs_key: "{{ cookiecutter.cell_types_original_obs_key }}"
 feature_wise:
-    var_ensembl_col:
-    var_symbol_col:
-misc:
+    gene_id_ensembl_var_key:
+    gene_id_symbols_var_key:
 meta:
     version: "1.0"
