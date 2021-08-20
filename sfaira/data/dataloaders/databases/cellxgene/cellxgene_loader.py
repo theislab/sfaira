@@ -169,7 +169,6 @@ class Dataset(DatasetBase):
 
         self._unknown_celltype_identifiers = self._adata_ids_cellxgene.unknown_metadata_identifier
 
-
     @property
     def _collection_cache_dir(self):
         """
@@ -204,6 +203,10 @@ class Dataset(DatasetBase):
     @property
     def directory_formatted_doi(self) -> str:
         return self.collection_id
+
+    @property
+    def doi_cleaned_id(self):
+        return self.id
 
     def load(
             self,
