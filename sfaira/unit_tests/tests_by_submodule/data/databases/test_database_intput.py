@@ -52,7 +52,14 @@ def test_output_to_store(store: str, database: str, subset_args: List[str]):
     dsg.streamline_features(match_to_reference={"human": ASSEMBLY_HUMAN, "mouse": ASSEMBLY_MOUSE},
                             subset_genes_to_type="protein_coding")
     dsg.streamline_metadata(schema="sfaira", clean_obs=True, clean_uns=True, clean_var=True, clean_obs_names=True,
-                            keep_id_obs=True, keep_orginal_obs=False, keep_symbol_obs=False)
+                            keep_id_obs=True, keep_orginal_obs=False, keep_symbol_obs=True)
     dsg.write_distributed_store(dir_cache=DIR_DATABASE_STORE_DAO, store_format=store, dense=True)
     fn_store = os.path.join(DIR_DATABASE_STORE_DAO, subset_args[1])
-    _ = read_dao(store=fn_store)
+    adata = read_dao(store=fn_store)
+    ids = AdataIdsSfaira()
+    assert "CL:0000128" in adata.obs[ids.cell_type + ids.onto_id_suffix].values
+    assert "oligodendrocyte" in adata.obs[ids.cell_type].values
+    assert "HsapDv:0000087" in adata.obs[ids.development_stage + ids.onto_id_suffix].values
+    assert "human adult stage" in adata.obs[ids.development_stage].values
+    assert "UBERON:0000956" in adata.obs[ids.organ + ids.onto_id_suffix].values
+    assert "cerebral cortex" in adata.obs[ids.organ].values
