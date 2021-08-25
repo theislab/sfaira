@@ -15,7 +15,7 @@ from sfaira.unit_tests.directories import DIR_DATABASE_STORE_DAO, save_delete
 @pytest.mark.parametrize("match_to_reference", [{"human": ASSEMBLY_HUMAN, "mouse": ASSEMBLY_MOUSE}, ])
 @pytest.mark.parametrize("subset_genes_to_type", [None, "protein_coding", ])
 def test_streamline_features(database: str, subset_args: List[str], match_to_reference: dict,
-                                  subset_genes_to_type: str):
+                             subset_genes_to_type: str):
     dsg = prepare_dsg_database(database=database)
     dsg.subset(key=subset_args[0], values=subset_args[1])
     dsg.load()
