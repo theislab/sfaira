@@ -1133,7 +1133,7 @@ class DatasetBase(abc.ABC):
         :return:
         """
         ontology_map = attr + "_map"
-        if not hasattr(self, ontology_map):
+        if hasattr(self, ontology_map):
             ontology_map = getattr(self, ontology_map)
         else:
             ontology_map = None
@@ -1165,7 +1165,7 @@ class DatasetBase(abc.ABC):
             # This protection blocks progression in the unit test if not deactivated.
             self._value_protection(
                 attr=attr,
-                allowed=self.ontology_celltypes,
+                allowed=getattr(self.ontology_container_sfaira, attr),
                 attempted=[x for x in list(set(labels_mapped)) if x not in map_exceptions],
             )
             # Add cell type IDs into object:
@@ -1173,14 +1173,14 @@ class DatasetBase(abc.ABC):
             # TODO this could be changed in the future, this allows this function to be used both on cell type name
             #  mapping files with and without the ID in the third column.
             # This mapping blocks progression in the unit test if not deactivated.
-            results[adata_fields.cell_type] = labels_mapped
+            results[getattr(adata_fields, attr)] = labels_mapped
             self.__project_ontology_ids_obs(attr=attr, map_exceptions=map_exceptions, from_id=False,
                                             adata_ids=adata_fields)
         else:
-            results[adata_fields.cell_type] = labels_original
-            results[adata_fields.cell_type + adata_fields.onto_id_suffix] = \
+            results[getattr(adata_fields, attr)] = labels_original
+            results[getattr(adata_fields, attr) + adata_fields.onto_id_suffix] = \
                 [adata_fields.unknown_metadata_identifier] * self.adata.n_obs
-        results[adata_fields.cell_type + adata_fields.onto_original_suffix] = labels_original
+        results[getattr(adata_fields, attr) + adata_fields.onto_original_suffix] = labels_original
         if copy:
             return pd.DataFrame(results, index=self.adata.obs.index)
         else:
@@ -1971,19 +1971,11 @@ class DatasetBase(abc.ABC):
         self._year = x
 
     @property
-    def ontology_celltypes(self):
-        return self.ontology_container_sfaira.cell_type
-
-    @property
-    def ontology_organ(self):
-        return self.ontology_container_sfaira.organ
-
-    @property
     def celltypes_universe(self):
         if self._celltype_universe is None:
             self._celltype_universe = CelltypeUniverse(
-                cl=self.ontology_celltypes,
-                uberon=self.ontology_container_sfaira.organ,
+                cl=getattr(self.ontology_container_sfaira, "cell_type"),
+                uberon=getattr(self.ontology_container_sfaira, "organ"),
             )
         return self._celltype_universe
 

@@ -7,7 +7,7 @@ import pathlib
 from sfaira.versions.genomes import GenomeContainer
 
 from sfaira.unit_tests.directories import DIR_DATA_LOADERS_CACHE, DIR_DATA_LOADERS_STORE_DAO, \
-    DIR_DATA_LOADERS_STORE_H5AD
+    DIR_DATA_LOADERS_STORE_H5AD, save_delete
 from .consts import ASSEMBLY_HUMAN, ASSEMBLY_MOUSE
 from .loaders import DatasetSuperGroupMock
 
@@ -76,6 +76,10 @@ def prepare_store(store_format: str, rewrite: bool = False, rewrite_store: bool 
             anticipated_fn = os.path.join(dir_store_formatted, ds.doi_cleaned_id + ".h5ad")
         else:
             assert False
+        if rewrite_store and os.path.exists(anticipated_fn):
+            # Can't write if h5ad already exists.
+            # Delete store to writing if forced.
+            save_delete(anticipated_fn)
         # Only rewrite if necessary
         if rewrite_store or not os.path.exists(anticipated_fn):
             ds = _load_script(dsg=ds, rewrite=rewrite, match_to_reference=MATCH_TO_REFERENCE)

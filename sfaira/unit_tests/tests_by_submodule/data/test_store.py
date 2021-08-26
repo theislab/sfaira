@@ -79,7 +79,7 @@ def test_data(store_format: str):
     """
     # Run standard streamlining workflow on dsg and compare to object relayed via store.
     # Prepare dsg.
-    dsg = prepare_dsg(rewrite=False, load=True)
+    dsg = prepare_dsg(load=True)
     # Prepare store.
     # Rewriting store to avoid mismatch of randomly generated data in cache and store.
     store_path = prepare_store(store_format=store_format, rewrite=False, rewrite_store=True)
