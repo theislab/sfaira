@@ -71,9 +71,9 @@ def prepare_store(store_format: str, rewrite: bool = False, rewrite_store: bool 
         else:
             compression_kwargs = {}
         if store_format == "dao":
-            anticipated_fn = os.path.join(dir_store_formatted, k)
+            anticipated_fn = os.path.join(dir_store_formatted, ds.doi_cleaned_id)
         elif store_format == "h5ad":
-            anticipated_fn = os.path.join(dir_store_formatted, k + ".h5ad")
+            anticipated_fn = os.path.join(dir_store_formatted, ds.doi_cleaned_id + ".h5ad")
         else:
             assert False
         # Only rewrite if necessary

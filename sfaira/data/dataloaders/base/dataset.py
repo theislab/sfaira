@@ -753,6 +753,8 @@ class DatasetBase(abc.ABC):
                 val = getattr(self, k)
             elif hasattr(self, f"{k}_obs_key") and getattr(self, f"{k}_obs_key") is not None:
                 val = np.sort(np.unique(self.adata.obs[getattr(self, f"{k}_obs_key")].values)).tolist()
+            elif getattr(self._adata_ids, k) in self.adata.obs.columns:
+                val = np.sort(np.unique(self.adata.obs[getattr(self._adata_ids, k)].values)).tolist()
             else:
                 val = None
             while hasattr(val, '__len__') and not isinstance(val, str) and len(val) == 1:  # Unpack nested lists/tuples.
@@ -761,7 +763,7 @@ class DatasetBase(abc.ABC):
         if clean_uns:
             self.adata.uns = uns_new
         else:
-            self.adata.uns = {**self.adata.uns, **uns_new}
+            self.adata.uns.update(uns_new)
 
         # Prepare new .obs dataframe
         # Queried meta data may be:
@@ -1131,9 +1133,11 @@ class DatasetBase(abc.ABC):
         :return:
         """
         ontology_map = attr + "_map"
-        assert hasattr(self, ontology_map), f"did not find ontology map for {attr} which was only defined by free " \
-                                            f"annotation"
-        ontology_map = getattr(self, ontology_map)
+        if not hasattr(self, ontology_map):
+            ontology_map = getattr(self, ontology_map)
+        else:
+            ontology_map = None
+            print(f"WARNING: did not find ontology map for {attr} which was only defined by free annotation")
         adata_fields = self._adata_ids
         results = {}
         col_original = attr + adata_fields.onto_original_suffix

@@ -7,15 +7,19 @@ try:
     import tensorflow as tf
 except ImportError:
     tf = None
-from typing import Union
+from typing import List, Union
 import os
 import warnings
 from tqdm import tqdm
 
 from sfaira.consts import AdataIdsSfaira, OCS, AdataIds
 from sfaira.data.store.base import DistributedStoreBase
+from sfaira.data.store.generators import GeneratorSingle
+from sfaira.data.store.multi_store import DistributedStoresAnndata
 from sfaira.data.store.single_store import DistributedStoreSingleFeatureSpace
 from sfaira.models import BasicModelKeras
+from sfaira.models.celltype import BasicModelKerasCelltype
+from sfaira.models.embedding import BasicModelKerasEmbedding
 from sfaira.versions.metadata import CelltypeUniverse, OntologyCl, OntologyObo
 from sfaira.versions.topologies import TopologyContainer
 from .losses import LossLoglikelihoodNb, LossLoglikelihoodGaussian, LossCrossentropyAgg, KLLoss
@@ -54,29 +58,22 @@ def split_idx(data: DistributedStoreSingleFeatureSpace, test_split, val_split):
         for k, v in test_split.items():
             if isinstance(v, bool) or isinstance(v, int) or isinstance(v, list):
                 v = [v]
-            if isinstance(data, anndata.AnnData):
-                if k not in data.obs.columns:
-                    raise ValueError(f"Did not find column {k} used to define test set in self.data.")
-                in_test = np.logical_and(in_test, np.array([x in v for x in data.obs[k].values]))
-            elif isinstance(data, DistributedStoreSingleFeatureSpace):
-                idx = data.get_subset_idx(attr_key=k, values=v, excluded_values=None)
-                # Build continuous vector across all sliced data sets and establish which observations are kept
-                # in subset.
-                in_test_k = np.ones((data.n_obs,), dtype=int) == 0
-                counter = 0
-                for kk, vv in data.indices.items():
-                    if kk in idx.keys() and len(idx[kk]) > 0:
-                        in_test_k[np.where([x in idx[kk] for x in vv])[0] + counter] = True
-                    counter += len(vv)
-                in_test = np.logical_and(in_test, in_test_k)
-            else:
-                assert False
+            idx = data.get_subset_idx(attr_key=k, values=v, excluded_values=None)
+            # Build continuous vector across all sliced data sets and establish which observations are kept
+            # in subset.
+            in_test_k = np.ones((data.n_obs,), dtype=int) == 0
+            counter = 0
+            for kk, vv in data.indices.items():
+                if kk in idx.keys() and len(idx[kk]) > 0:
+                    in_test_k[np.where([x in idx[kk] for x in vv])[0] + counter] = True
+                counter += len(vv)
+            in_test = np.logical_and(in_test, in_test_k)
         idx_test = np.sort(np.where(in_test)[0])
     else:
         raise ValueError("type of test_split %s not recognized" % type(test_split))
     print(f"Found {len(idx_test)} out of {data.n_obs} cells that correspond to test data set")
-    assert len(idx_test) < data.n_obs, "test set covers full data set, apply a more restrictive test " \
-                                       "data definiton"
+    assert len(idx_test) < data.n_obs, f"test set covers full data set, apply a more restrictive test " \
+                                       f"data definiton ({len(idx_test)}, {data.n_obs})"
     idx_train_eval = np.array([x for x in all_idx if x not in idx_test])
     np.random.seed(1)
     idx_eval = np.sort(np.random.choice(
@@ -96,13 +93,77 @@ def split_idx(data: DistributedStoreSingleFeatureSpace, test_split, val_split):
     return idx_train, idx_eval, idx_test
 
 
+def process_tf_dataset(dataset, mode: str, batch_size: int, cache: bool, shuffle_buffer_size: int, prefetch)\
+        -> tf.data.Dataset:
+    if cache:
+        dataset = dataset.cache()
+    if mode in ['train', 'train_val']:
+        dataset = dataset.repeat()
+        if shuffle_buffer_size > 0:
+            # Only shuffle in train modes
+            dataset = dataset.shuffle(buffer_size=shuffle_buffer_size, seed=None, reshuffle_each_iteration=True)
+    dataset = dataset.batch(batch_size).prefetch(prefetch)
+    return dataset
+
+
+def get_optimizer(optimizer: str, lr: float):
+    if optimizer.lower() == "adam":
+        return tf.keras.optimizers.Adam(learning_rate=lr)
+    elif optimizer.lower() == "sgd":
+        return tf.keras.optimizers.SGD(learning_rate=lr)
+    elif optimizer.lower() == "rmsprop":
+        return tf.keras.optimizers.RMSprop(learning_rate=lr)
+    elif optimizer.lower() == "adagrad":
+        return tf.keras.optimizers.Adagrad(learning_rate=lr)
+    else:
+        assert False
+
+
+def assemble_cbs(patience, lr_schedule_factor, lr_schedule_patience, lr_schedule_min_lr, lr_verbose, log_dir,
+                 callbacks) -> List[tf.keras.callbacks.Callback]:
+    cbs = [tf.keras.callbacks.TerminateOnNaN()]
+    if patience is not None and patience > 0:
+        cbs.append(tf.keras.callbacks.EarlyStopping(
+            monitor='val_loss',
+            patience=patience,
+            restore_best_weights=True,
+            verbose=1
+        ))
+    if lr_schedule_factor is not None and lr_schedule_factor < 1.:
+        cbs.append(tf.keras.callbacks.ReduceLROnPlateau(
+            monitor='val_loss',
+            factor=lr_schedule_factor,
+            patience=lr_schedule_patience,
+            min_lr=lr_schedule_min_lr,
+            verbose=lr_verbose
+        ))
+    if log_dir is not None:
+        cbs.append(tf.keras.callbacks.TensorBoard(
+            log_dir=log_dir,
+            histogram_freq=0,
+            batch_size=32,
+            write_graph=False,
+            write_grads=False,
+            write_images=False,
+            embeddings_freq=0,
+            embeddings_layer_names=None,
+            embeddings_metadata=None,
+            embeddings_data=None,
+            update_freq='epoch'
+        ))
+    if callbacks is not None:
+        # callbacks needs to be a list
+        cbs += callbacks
+    return cbs
+
+
 class EstimatorKeras:
     """
     Estimator base class for keras models.
     """
-    data: Union[anndata.AnnData, DistributedStoreSingleFeatureSpace]
+    data: DistributedStoreSingleFeatureSpace
     model: Union[BasicModelKeras, None]
-    topology_container: Union[TopologyContainer, None]
+    topology_container: TopologyContainer
     model_id: Union[str, None]
     weights: Union[np.ndarray, None]
     model_dir: Union[str, None]
@@ -115,7 +176,7 @@ class EstimatorKeras:
 
     def __init__(
             self,
-            data: Union[anndata.AnnData, np.ndarray, DistributedStoreSingleFeatureSpace],
+            data: Union[anndata.AnnData, List[anndata.AnnData], DistributedStoreSingleFeatureSpace],
             model_dir: Union[str, None],
             model_class: str,
             model_id: Union[str, None],
@@ -124,12 +185,18 @@ class EstimatorKeras:
             cache_path: str = os.path.join('cache', ''),
             adata_ids: AdataIds = AdataIdsSfaira()
     ):
-        self.data = data
         self.model = None
         self.model_dir = model_dir
         self.model_id = model_id
         self.model_class = model_class
         self.topology_container = model_topology
+        if isinstance(data, anndata.AnnData):
+            data = DistributedStoresAnndata(adatas=data).stores[self.organism]
+        if isinstance(data, list) or isinstance(data, tuple):
+            for x in data:
+                assert isinstance(x, anndata.AnnData), f"found element in list that was not anndata but {type(x)}"
+            data = DistributedStoresAnndata(adatas=data).stores[self.organism]
+        self.data = data
         # Prepare store with genome container sub-setting:
         # This class is tailored for DistributedStoreSingleFeatureSpace but we test for the base class here in the
         # constructor so that genome_container can also be set in inheriting classes that may be centred around
@@ -152,7 +219,7 @@ class EstimatorKeras:
 
     @property
     def organism(self):
-        return self.topology_container.organism
+        return {"homo_sapiens": "human", "mus_musculus": "mouse"}[self.topology_container.organism]
 
     def load_pretrained_weights(self):
         """
@@ -242,19 +309,55 @@ class EstimatorKeras:
             raise ValueError("md5 of %s did not match expectation" % fn)
 
     @abc.abstractmethod
-    def _get_dataset(
+    def _get_generator(
             self,
             idx: Union[np.ndarray, None],
-            batch_size: Union[int, None],
             mode: str,
-            shuffle_buffer_size: int,
-            cache_full: bool,
             weighted: bool,
             retrieval_batch_size: int,
             randomized_batch_access: bool,
-            prefetch: Union[int, None],
-    ) -> tf.data.Dataset:
+    ) -> GeneratorSingle:
+
+        """
+        Yield a generator based on which a tf dataset can be built.
+
+        :param idx: Indices of data set to include in generator.
+        :param mode:
+        :param weighted:
+        :param retrieval_batch_size: Number of observations read from disk in each batched access.
+        :param randomized_batch_access: Whether to randomize batches during reading (in generator). Lifts necessity of
+            using a shuffle buffer on generator, however, batch composition stays unchanged over epochs unless there
+            is overhangs in retrieval_batch_size in the raw data files, which often happens and results in modest
+            changes in batch composition.
+        :return:
+        """
         pass
+
+    @abc.abstractmethod
+    def _tf_dataset_kwargs(self, mode: str):
+        pass
+
+    def get_one_time_tf_dataset(self, idx, mode, batch_size=None, cache=None, prefetch=None, shuffle_buffer_size=None,
+                                retrieval_batch_size=None, randomized_batch_access=None, weighted=None):
+        batch_size = 128 if prefetch is None else batch_size
+        cache = False if cache is None else cache
+        prefetch = 10 if prefetch is None else prefetch
+        shuffle_buffer_size = 0 if shuffle_buffer_size is None else shuffle_buffer_size
+        retrieval_batch_size = 128 if retrieval_batch_size is None else retrieval_batch_size
+        randomized_batch_access = False if randomized_batch_access is None else randomized_batch_access
+        weighted = False if weighted is None else weighted
+        tf_kwargs = {
+            "batch_size": batch_size,
+            "cache": cache,
+            "prefetch": prefetch,
+            "shuffle_buffer_size": min(shuffle_buffer_size, len(idx))
+        }
+        train_gen = self._get_generator(idx=idx, mode=mode, retrieval_batch_size=retrieval_batch_size,
+                                        randomized_batch_access=randomized_batch_access, weighted=weighted)
+        train_tf_dataset_kwargs = self._tf_dataset_kwargs(mode=mode)
+        train_dataset = train_gen.adaptor(generator_type="tensorflow", **train_tf_dataset_kwargs)
+        train_dataset = process_tf_dataset(dataset=train_dataset, mode=mode, **tf_kwargs)
+        return train_dataset
 
     def _get_class_dict(
             self,
@@ -269,52 +372,6 @@ class EstimatorKeras:
         for i, label in enumerate(labels):
             label_dict.update({label: float(i)})
         return label_dict
-
-    def _prepare_data_matrix(self, idx: Union[np.ndarray, None]) -> scipy.sparse.csr_matrix:
-        """
-        Subsets observations x features matrix in .data to observation indices (idx, the split) and features defined
-        by topology.
-
-        :param idx: Observation index split.
-        :return: Data matrix
-        """
-        # Check that AnnData is not backed. If backed, assume that these processing steps were done before.
-        if self.data.isbacked:
-            raise ValueError("tried running backed AnnData object through standard pipeline")
-
-        else:
-            # Convert data matrix to csr matrix
-            if isinstance(self.data.X, np.ndarray):
-                # Change NaN to zero. This occurs for example in concatenation of anndata instances.
-                if np.any(np.isnan(self.data.X)):
-                    self.data.X[np.isnan(self.data.X)] = 0
-                x = scipy.sparse.csr_matrix(self.data.X)
-            elif isinstance(self.data.X, scipy.sparse.spmatrix):
-                x = self.data.X.tocsr()
-            else:
-                raise ValueError("data type %s not recognized" % type(self.data.X))
-
-            # Subset cells by provided idx
-            if idx is not None:
-                x = x[idx, :]
-
-            # If the feature space is already mapped to the right reference, return the data matrix immediately
-            if self.data.n_vars != self.topology_container.n_var or \
-                    not np.all(self.data.var[self._adata_ids.feature_id] == self.topology_container.gc.ensembl):
-                # Compute indices of genes to keep
-                data_ids = self.data.var[self._adata_ids.feature_id].values.tolist()
-                target_ids = self.topology_container.gc.ensembl
-                idx_map = np.array([data_ids.index(z) for z in target_ids])
-                # Assert that each ID from target IDs appears exactly once in data IDs:
-                assert np.all([z in data_ids for z in target_ids]), "not all target feature IDs found in data"
-                assert np.all([np.sum(z == np.array(data_ids)) <= 1. for z in target_ids]), \
-                    "duplicated target feature IDs exist in data"
-                # Map feature space.
-                x = x[:, idx_map]
-                print(f"found {len(idx_map)} intersecting features between {x.shape[1]} features in input data set and"
-                      f" {self.topology_container.n_var} features in reference genome")
-            print(f"found {x.shape[0]} observations")
-            return x
 
     @abc.abstractmethod
     def _get_loss(self):
@@ -408,102 +465,41 @@ class EstimatorKeras:
         :param verbose:
         :return:
         """
-        # Set optimizer
-        if optimizer.lower() == "adam":
-            optim = tf.keras.optimizers.Adam(learning_rate=lr)
-        elif optimizer.lower() == "sgd":
-            optim = tf.keras.optimizers.SGD(learning_rate=lr)
-        elif optimizer.lower() == "rmsprop":
-            optim = tf.keras.optimizers.RMSprop(learning_rate=lr)
-        elif optimizer.lower() == "adagrad":
-            optim = tf.keras.optimizers.Adagrad(learning_rate=lr)
-        else:
-            assert False
         # Save training settings to allow model restoring.
-        self.train_hyperparam = {
-            "epochs": epochs,
-            "max_steps_per_epoch": max_steps_per_epoch,
-            "optimizer": optimizer,
-            "lr": lr,
-            "batch_size": batch_size,
-            "validation_split": validation_split,
-            "validation_batch_size": validation_batch_size,
-            "max_validation_steps": max_validation_steps,
-            "patience": patience,
-            "lr_schedule_min_lr": lr_schedule_min_lr,
-            "lr_schedule_factor": lr_schedule_factor,
-            "lr_schedule_patience": lr_schedule_patience,
-            "log_dir": log_dir,
-            "weighted": weighted
-        }
+        self.train_hyperparam = {"epochs": epochs, "max_steps_per_epoch": max_steps_per_epoch, "optimizer": optimizer,
+                                 "lr": lr, "batch_size": batch_size, "validation_split": validation_split,
+                                 "validation_batch_size": validation_batch_size,
+                                 "max_validation_steps": max_validation_steps, "patience": patience,
+                                 "lr_schedule_min_lr": lr_schedule_min_lr, "lr_schedule_factor": lr_schedule_factor,
+                                 "lr_schedule_patience": lr_schedule_patience, "log_dir": log_dir, "weighted": weighted}
 
         # Set callbacks.
-        cbs = [tf.keras.callbacks.TerminateOnNaN()]
-        if patience is not None and patience > 0:
-            cbs.append(tf.keras.callbacks.EarlyStopping(
-                monitor='val_loss',
-                patience=patience,
-                restore_best_weights=True,
-                verbose=verbose
-            ))
-        if lr_schedule_factor is not None and lr_schedule_factor < 1.:
-            cbs.append(tf.keras.callbacks.ReduceLROnPlateau(
-                monitor='val_loss',
-                factor=lr_schedule_factor,
-                patience=lr_schedule_patience,
-                min_lr=lr_schedule_min_lr,
-                verbose=verbose
-            ))
-        if log_dir is not None:
-            cbs.append(tf.keras.callbacks.TensorBoard(
-                log_dir=log_dir,
-                histogram_freq=0,
-                batch_size=32,
-                write_graph=False,
-                write_grads=False,
-                write_images=False,
-                embeddings_freq=0,
-                embeddings_layer_names=None,
-                embeddings_metadata=None,
-                embeddings_data=None,
-                update_freq='epoch'
-            ))
-
-        if callbacks is not None:
-            # callbacks needs to be a list
-            cbs += callbacks
+        cbs = assemble_cbs(patience=patience, lr_schedule_factor=lr_schedule_factor,
+                           lr_schedule_patience=lr_schedule_patience, lr_schedule_min_lr=lr_schedule_min_lr,
+                           lr_verbose=verbose, log_dir=log_dir, callbacks=callbacks)
 
         # Check randomisation settings:
         if shuffle_buffer_size is not None and shuffle_buffer_size > 0 and randomized_batch_access:
             raise ValueError("You are using shuffle_buffer_size and randomized_batch_access, this is likely not "
                              "intended.")
+        shuffle_buffer_size = shuffle_buffer_size if shuffle_buffer_size is not None else 0
         if cache_full and randomized_batch_access:
             raise ValueError("You are using cache_full and randomized_batch_access, this is likely not intended.")
         self.split_train_val_test(val_split=validation_split, test_split=test_split)
-        self._compile_models(optimizer=optim)
-        shuffle_buffer_size = shuffle_buffer_size if shuffle_buffer_size is not None else 0
-        train_dataset = self._get_dataset(
-            idx=self.idx_train,
-            batch_size=batch_size,
-            retrieval_batch_size=retrieval_batch_size,
-            mode='train',
-            shuffle_buffer_size=min(shuffle_buffer_size, len(self.idx_train)),
-            weighted=weighted,
-            cache_full=cache_full,
-            randomized_batch_access=randomized_batch_access,
-            prefetch=prefetch,
-        )
-        eval_dataset = self._get_dataset(
-            idx=self.idx_eval,
-            batch_size=validation_batch_size,
-            retrieval_batch_size=retrieval_batch_size,
-            mode='train_val',
-            shuffle_buffer_size=min(shuffle_buffer_size, len(self.idx_eval)),
-            weighted=weighted,
-            cache_full=cache_full,
-            randomized_batch_access=randomized_batch_access,
-            prefetch=prefetch,
-        )
+        self._compile_models(optimizer=get_optimizer(optimizer=optimizer, lr=lr))
+
+        tf_kwargs = {"batch_size": batch_size, "cache": cache_full, "prefetch": prefetch,
+                     "shuffle_buffer_size": min(shuffle_buffer_size, len(self.idx_train))}
+        train_gen = self._get_generator(idx=self.idx_train, mode='train', retrieval_batch_size=retrieval_batch_size,
+                                        randomized_batch_access=randomized_batch_access, weighted=weighted)
+        train_tf_dataset_kwargs = self._tf_dataset_kwargs(mode="train")
+        train_dataset = train_gen.adaptor(generator_type="tensorflow", **train_tf_dataset_kwargs)
+        train_dataset = process_tf_dataset(dataset=train_dataset, mode="train", **tf_kwargs)
+        val_gen = self._get_generator(idx=self.idx_train, mode='train', retrieval_batch_size=retrieval_batch_size,
+                                      randomized_batch_access=randomized_batch_access, weighted=weighted)
+        val_tf_dataset_kwargs = self._tf_dataset_kwargs(mode="train_val")
+        val_dataset = val_gen.adaptor(generator_type="tensorflow", **val_tf_dataset_kwargs)
+        val_dataset = process_tf_dataset(dataset=val_dataset, mode="train", **tf_kwargs)
 
         steps_per_epoch = min(max(len(self.idx_train) // batch_size, 1), max_steps_per_epoch)
         validation_steps = min(max(len(self.idx_eval) // validation_batch_size, 1), max_validation_steps)
@@ -513,7 +509,7 @@ class EstimatorKeras:
             epochs=epochs,
             steps_per_epoch=steps_per_epoch,
             callbacks=cbs,
-            validation_data=eval_dataset,
+            validation_data=val_dataset,
             validation_steps=validation_steps,
             verbose=verbose
         ).history
@@ -539,6 +535,8 @@ class EstimatorKerasEmbedding(EstimatorKeras):
     """
     Estimator class for the embedding model.
     """
+
+    model: Union[BasicModelKerasEmbedding, None]
 
     def __init__(
             self,
@@ -588,220 +586,50 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             override_hyperpar=override_hyperpar
         )
 
-    @staticmethod
-    def _get_output_dim(n_features, model_type, mode='train'):
+    def _tf_dataset_kwargs(self, mode: str):
+        # Determine model type [ae, vae(iaf, vamp)]
+        model_type = "vae" if self.model_type[:3] == "vae" else "ae"
         if mode == 'predict':  # Output shape is same for predict mode regardless of model type
             output_types = (tf.float32, tf.float32),
-            output_shapes = (n_features, ()),
+            output_shapes = (self.data.n_vars, ()),
         elif model_type == "vae":
             output_types = ((tf.float32, tf.float32), (tf.float32, tf.float32))
-            output_shapes = ((n_features, ()), (n_features, ()))
+            output_shapes = ((self.data.n_vars, ()), (self.data.n_vars, ()))
         else:
             output_types = ((tf.float32, tf.float32), tf.float32)
-            output_shapes = ((n_features, ()), n_features)
+            output_shapes = ((self.data.n_vars, ()), self.data.n_vars)
+        return {"output_types": output_types, "output_shapes": output_shapes}
 
-        return output_types, output_shapes
-
-    def _get_base_generator(
+    def _get_generator(
             self,
-            generator_helper,
             idx: Union[np.ndarray, None],
-            batch_size: int,
+            mode: str,
+            weighted: bool,
+            retrieval_batch_size: int,
             randomized_batch_access: bool,
     ):
-        """
-        Yield a basic generator based on which a tf dataset can be built.
-
-        The signature of this generator can be modified through generator_helper.
-
-        :param generator_helper: Python function that should take (x_sample,) as an input:
-
-            - x_sample is a gene expression vector of a cell
-        :param idx: Indicies of data set to include in generator.
-        :param batch_size: Number of observations read from disk in each batched access.
-        :param randomized_batch_access: Whether to randomize batches during reading (in generator). Lifts necessity of
-            using a shuffle buffer on generator, however, batch composition stays unchanged over epochs unless there
-            is overhangs in retrieval_batch_size in the raw data files, which often happens and results in modest
-            changes in batch composition.
-        :return:
-        """
         if idx is None:
             idx = np.arange(0, self.data.n_obs)
 
-        # Prepare data reading according to whether anndata is backed or not:
-        if self.using_store:
-            generator_raw, _ = self.data.generator(
-                idx=idx,
-                batch_size=batch_size,
-                obs_keys=[],
-                return_dense=True,
-                randomized_batch_access=randomized_batch_access,
-            )
-
-            def generator():
-                for z in generator_raw():
-                    x_sample = z[0]
-                    if isinstance(x_sample, scipy.sparse.csr_matrix):
-                        x_sample = x_sample.todense()
-                    x_sample = np.asarray(x_sample)
-                    for i in range(x_sample.shape[0]):
-                        yield generator_helper(x_sample=x_sample[i])
-
-            n_features = self.data.n_vars
-            n_samples = self.data.n_obs
-        else:
-            x = self.data.X if self.data.isbacked else self._prepare_data_matrix(idx=idx)
-            indices = idx if self.data.isbacked else range(x.shape[0])
-            n_obs = len(indices)
-            remainder = n_obs % batch_size
-            batch_starts_ends = [
-                (int(x * batch_size), int(x * batch_size) + batch_size)
-                for x in np.arange(0, n_obs // batch_size + int(remainder > 0))
-            ]
-
-            def generator():
-                is_sparse = isinstance(x[0, :], scipy.sparse.spmatrix)
-                for s, e in batch_starts_ends:
-                    x_sample = np.asarray(x[indices[s:e], :].todense()) if is_sparse \
-                        else x[indices[s:e], :]
-                    for i in range(x_sample.shape[0]):
-                        yield generator_helper(x_sample=x_sample[i])
-
-            n_features = x.shape[1]
-            n_samples = x.shape[0]
-
-        return generator, n_samples, n_features
-
-    def _get_dataset(
-            self,
-            idx: Union[np.ndarray, None],
-            batch_size: Union[int, None],
-            mode: str,
-            shuffle_buffer_size: int = int(1e7),
-            cache_full: bool = False,
-            weighted: bool = False,
-            retrieval_batch_size: int = 128,
-            randomized_batch_access: bool = False,
-            prefetch: Union[int, None] = 1,
-    ) -> tf.data.Dataset:
-        """
-
-        :param idx:
-        :param batch_size:
-        :param mode:
-        :param shuffle_buffer_size:
-        :param weighted: Whether to use weights. Not implemented for embedding models yet.
-        :param retrieval_batch_size: Number of observations read from disk in each batched access.
-        :param randomized_batch_access: Whether to randomize batches during reading (in generator). Lifts necessity of
-            using a shuffle buffer on generator, however, batch composition stays unchanged over epochs unless there
-            is overhangs in retrieval_batch_size in the raw data files, which often happens and results in modest
-            changes in batch composition.
-        :return:
-        """
-        # Determine model type [ae, vae(iaf, vamp)]
         model_type = "vae" if self.model_type[:3] == "vae" else "ae"
 
-        if mode in ['train', 'train_val', 'eval', 'predict']:
-            def generator_helper(x_sample):
-                sf_sample = prepare_sf(x=x_sample)[0]
-                if mode == 'predict':
-                    return (x_sample, sf_sample),
-                elif model_type == "vae":
-                    return (x_sample, sf_sample), (x_sample, sf_sample)
-                else:
-                    return (x_sample, sf_sample), x_sample
-
-            generator, n_samples, n_features = self._get_base_generator(
-                generator_helper=generator_helper,
-                idx=idx,
-                batch_size=retrieval_batch_size,
-                randomized_batch_access=randomized_batch_access,
-            )
-            output_types, output_shapes = self._get_output_dim(n_features=n_features, model_type=model_type, mode=mode)
-            dataset = tf.data.Dataset.from_generator(
-                generator=generator,
-                output_types=output_types,
-                output_shapes=output_shapes
-            )
-            if cache_full:
-                dataset = dataset.cache()
-            # Only shuffle in train modes
-            if mode in ['train', 'train_val']:
-                dataset = dataset.repeat()
-                if shuffle_buffer_size is not None and shuffle_buffer_size > 0:
-                    dataset = dataset.shuffle(
-                        buffer_size=min(n_samples, shuffle_buffer_size),
-                        seed=None,
-                        reshuffle_each_iteration=True)
-            if prefetch is None:
-                prefetch = tf.data.AUTOTUNE
-            dataset = dataset.batch(batch_size, drop_remainder=False).prefetch(prefetch)
-
-            return dataset
-
-        elif mode == 'gradient_method':  # TODO depreceate this code
-            # Prepare data reading according to whether anndata is backed or not:
-            cell_to_class = self._get_class_dict(obs_key=self._adata_ids.cell_type)
-            if self.using_store:
-                n_features = self.data.n_vars
-                generator_raw = self.data.generator(
-                    idx=idx,
-                    batch_size=1,
-                    obs_keys=[self._adata_ids.cell_type],
-                    return_dense=True,
-                )
-
-                def generator():
-                    for z in generator_raw():
-                        x_sample = z[0]
-                        if isinstance(x_sample, scipy.sparse.csr_matrix):
-                            x_sample = x_sample.todense()
-                        x_sample = np.asarray(x_sample).flatten()
-                        sf_sample = prepare_sf(x=x_sample)[0]
-                        y_sample = z[1][self._adata_ids.cell_type].values[0]
-                        yield (x_sample, sf_sample), (x_sample, cell_to_class[y_sample])
-
-            elif isinstance(self.data, anndata.AnnData) and self.data.isbacked:
-                if idx is None:
-                    idx = np.arange(0, self.data.n_obs)
-                n_features = self.data.X.shape[1]
-
-                def generator():
-                    sparse = isinstance(self.data.X[0, :], scipy.sparse.spmatrix)
-                    for i in idx:
-                        x_sample = self.data.X[i, :].toarray().flatten() if sparse else self.data.X[i, :].flatten()
-                        sf_sample = prepare_sf(x=x_sample)[0]
-                        y_sample = self.data.obs[self._adata_ids.cell_type + self._adata_ids.onto_id_suffix][i]
-                        yield (x_sample, sf_sample), (x_sample, cell_to_class[y_sample])
+        def map_fn(x_sample, obs_sample):
+            if isinstance(x_sample, scipy.sparse.csr_matrix):
+                x_sample = x_sample.todense()
+            x_sample = np.asarray(x_sample).flatten()
+            sf_sample = prepare_sf(x=x_sample).flatten()[0]
+            if mode == 'predict':
+                output = (x_sample, sf_sample),
+            elif model_type == "vae":
+                output = (x_sample, sf_sample), (x_sample, sf_sample),
             else:
-                if idx is None:
-                    idx = np.arange(0, self.data.n_obs)
-                x = self._prepare_data_matrix(idx=idx)
-                sf = prepare_sf(x=x)
-                y = self.data.obs[self._adata_ids.cell_type].values[idx]
-                # for gradients per celltype in compute_gradients_input()
-                n_features = x.shape[1]
+                output = (x_sample, sf_sample), x_sample
+            return output
 
-                def generator():
-                    for i in range(x.shape[0]):
-                        yield (x[i, :].toarray().flatten(), sf[i]), (x[i, :].toarray().flatten(), cell_to_class[y[i]])
-
-            output_types, output_shapes = self._get_output_dim(n_features, 'vae')
-            dataset = tf.data.Dataset.from_generator(
-                generator=generator,
-                output_types=output_types,
-                output_shapes=output_shapes
-            )
-            dataset = dataset.shuffle(
-                buffer_size=shuffle_buffer_size,
-                seed=None,
-                reshuffle_each_iteration=True
-            ).batch(batch_size, drop_remainder=False).prefetch(prefetch)
-
-            return dataset
-
-        else:
-            raise ValueError(f'Mode {mode} not recognised. Should be "train", "eval" or" predict"')
+        g = self.data.generator(idx=idx, retrival_batch_size=retrieval_batch_size, obs_keys=[], map_fn=map_fn,
+                                return_dense=True, randomized_batch_access=randomized_batch_access,
+                                random_access=False)
+        return g
 
     def _get_loss(self):
         if self.topology_container.topology["hyper_parameters"]["output_layer"] in [
@@ -854,13 +682,8 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         """
         idx = self._process_idx_for_eval(idx=idx)
         if idx is not None:
-            dataset = self._get_dataset(
-                idx=idx,
-                batch_size=batch_size,
-                mode='eval',
-                retrieval_batch_size=128,
-                shuffle_buffer_size=0,
-            )
+            dataset = self.get_one_time_tf_dataset(
+                idx=idx, batch_size=batch_size, mode='eval', retrieval_batch_size=128, shuffle_buffer_size=0)
             steps = min(max(len(idx) // batch_size, 1), max_steps)
             results = self.model.training_model.evaluate(x=dataset, steps=steps)
             return dict(zip(self.model.training_model.metrics_names, results))
@@ -892,54 +715,25 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         """
         idx = self._process_idx_for_eval(idx=self.idx_test)
         if idx is not None:
-            dataset = self._get_dataset(
-                idx=idx,
-                batch_size=batch_size,
-                mode='predict',
-                retrieval_batch_size=128,
-                shuffle_buffer_size=0,
-            )
+            dataset = self.get_one_time_tf_dataset(
+                idx=idx, batch_size=batch_size, mode='predict', retrieval_batch_size=128, shuffle_buffer_size=0)
             return self.model.predict_reconstructed(x=dataset)
         else:
             return np.array([])
 
-    def predict_embedding(self, batch_size: int = 128):
+    def predict_embedding(self, batch_size: int = 128, variational: bool = False):
         """
         return the prediction in the latent space (z_mean for variational models)
 
+        :params variational: Whether toreturn the prediction of z, z_mean, z_log_var in the variational latent space.
         :return:
         latent space
         """
         idx = self._process_idx_for_eval(idx=self.idx_test)
         if len(idx) > 0:
-            dataset = self._get_dataset(
-                idx=idx,
-                batch_size=batch_size,
-                mode='predict',
-                retrieval_batch_size=128,
-                shuffle_buffer_size=0,
-            )
-            return self.model.predict_embedding(x=dataset, variational=False)
-        else:
-            return np.array([])
-
-    def predict_embedding_variational(self, batch_size: int = 128, max_steps: int = np.inf):
-        """
-        return the prediction of z, z_mean, z_log_var in the variational latent space
-
-        :return:
-        sample of latent space, mean of latent space, variance of latent space
-        """
-        idx = self._process_idx_for_eval(idx=self.idx_test)
-        if len(idx) > 0:
-            dataset = self._get_dataset(
-                idx=idx,
-                batch_size=batch_size,
-                mode='predict',
-                retrieval_batch_size=128,
-                shuffle_buffer_size=0,
-            )
-            return self.model.predict_embedding(x=dataset, variational=True)
+            dataset = self.get_one_time_tf_dataset(
+                idx=idx, batch_size=batch_size, mode='predict', retrieval_batch_size=128, shuffle_buffer_size=0)
+            return self.model.predict_embedding(x=dataset, variational=variational)
         else:
             return np.array([])
 
@@ -950,6 +744,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             abs_gradients: bool = True,
             per_celltype: bool = False
     ):
+        # TODO may need to be adapted to new dataset / generator format
         if test_data:
             idx = self.idx_test
             if self.idx_test is None:
@@ -960,11 +755,8 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             idx = None
             n_obs = self.data.X.shape[0]
 
-        ds = self._get_dataset(
-            idx=idx,
-            batch_size=batch_size,
-            mode='gradient_method',  # to get a tf.GradientTape compatible data set
-        )
+        ds = self.get_one_time_tf_dataset(
+            idx=idx, batch_size=batch_size, mode='gradient_method', retrieval_batch_size=128, shuffle_buffer_size=0)
 
         if per_celltype:
             cell_to_id = self._get_class_dict(obs_key=self._adata_ids.cell_type)
@@ -1032,6 +824,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
     """
 
     celltype_universe: CelltypeUniverse
+    model: Union[BasicModelKerasCelltype, None]
 
     def __init__(
             self,
@@ -1058,20 +851,10 @@ class EstimatorKerasCelltype(EstimatorKeras):
         )
         if remove_unlabeled_cells:
             # Remove cells without type label from store:
-            if isinstance(self.data, DistributedStoreSingleFeatureSpace):
-                self.data.subset(attr_key="cell_type", excluded_values=[
-                    self._adata_ids.unknown_metadata_identifier,
-                    self._adata_ids.not_a_cell_celltype_identifier,
-                ])
-            elif isinstance(self.data, anndata.AnnData):
-                self.data = self.data[np.where([
-                    x not in [
-                        self._adata_ids.unknown_metadata_identifier,
-                        self._adata_ids.not_a_cell_celltype_identifier,
-                    ] for x in self.data.obs[self._adata_ids.cell_type].values
-                ])[0], :]
-            else:
-                assert False
+            self.data.subset(attr_key="cell_type", excluded_values=[
+                self._adata_ids.unknown_metadata_identifier,
+                self._adata_ids.not_a_cell_celltype_identifier,
+            ])
         assert "cl" in self.topology_container.output.keys(), self.topology_container.output.keys()
         assert "targets" in self.topology_container.output.keys(), self.topology_container.output.keys()
         self.max_class_weight = max_class_weight
@@ -1148,6 +931,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             idx: Union[np.ndarray, None],
     ):
         """
+        TODO depreceate, carry over weight code to _get_generator
         Build one hot encoded cell type output tensor and observation-wise weight matrix.
 
         :param lookup_ontology: list of ontology names to consider.
@@ -1171,170 +955,57 @@ class EstimatorKerasCelltype(EstimatorKeras):
         ).flatten()
         return weights, y
 
-    @staticmethod
-    def _get_output_dim(n_features, n_labels, mode):
+    def _tf_dataset_kwargs(self, mode):
         if mode == 'predict':
             output_types = (tf.float32,)
-            output_shapes = (tf.TensorShape([n_features]),)
+            output_shapes = (tf.TensorShape([self.data.n_vars]),)
         else:
             output_types = (tf.float32, tf.float32, tf.float32)
             output_shapes = (
-                (tf.TensorShape([n_features])),
-                tf.TensorShape([n_labels]),
+                (tf.TensorShape([self.data.n_vars])),
+                tf.TensorShape([self.ntypes]),
                 tf.TensorShape([])
             )
+        return {"output_types": output_types, "output_shapes": output_shapes}
 
-        return output_types, output_shapes
-
-    def _get_base_generator(
+    def _get_generator(
             self,
             idx: Union[np.ndarray, None],
-            yield_labels: bool,
+            mode: str,
             weighted: bool,
-            batch_size: int,
+            retrieval_batch_size: int,
             randomized_batch_access: bool,
-            **kwargs,
-    ):
-        """
-        Yield a basic generator based on which a tf dataset can be built.
-
-        The signature of this generator can be modified through generator_helper.
-
-        :param generator_helper: Python function that should take (x_sample, y_sample, w_sample) as an input:
-
-            - x_sample is a gene expression vector of a cell
-            - y_sample is a one-hot encoded label vector of a cell
-            - w_sample is a weight scalar of a cell
-        :param idx: Indicies of data set to include in generator.
-        :param yield_labels:
-        :param batch_size: Number of observations read from disk in each batched access.
-        :param randomized_batch_access: Whether to randomize batches during reading (in generator). Lifts necessity of
-            using a shuffle buffer on generator, however, batch composition stays unchanged over epochs unless there
-            is overhangs in retrieval_batch_size in the raw data files, which often happens and results in modest
-            changes in batch composition.
-        :return:
-        """
+    ) -> GeneratorSingle:
         if idx is None:
             idx = np.arange(0, self.data.n_obs)
 
         # Prepare data reading according to whether anndata is backed or not:
-        if self.using_store:
-            if weighted:
-                raise ValueError("using weights with store is not supported yet")
-            generator_raw, _ = self.data.generator(
-                idx=idx,
-                batch_size=batch_size,
-                obs_keys=[self._adata_ids.cell_type + self._adata_ids.onto_id_suffix],
-                return_dense=True,
-                randomized_batch_access=randomized_batch_access,
-            )
+        if weighted:
+            raise ValueError("using weights with store is not supported yet")
+        yield_labels = mode in ["train", "train_val", "eval", "test"]
+        if yield_labels:
+            onehot_encoder = self._one_hot_encoder()
+
+        def map_fn(x_sample, obs_sample):
+            if isinstance(x_sample, scipy.sparse.csr_matrix):
+                x_sample = x_sample.todense()
+            x_sample = np.asarray(x_sample).flatten()
             if yield_labels:
-                onehot_encoder = self._one_hot_encoder()
+                y_sample = onehot_encoder(obs_sample[self._adata_ids.cell_type + self._adata_ids.onto_id_suffix].values)
+                y_sample = y_sample.flatten()
+                if y_sample.sum() > 0:
+                    output = x_sample, y_sample, 1.
+                else:
+                    output = None
+            else:
+                output = x_sample,
+            return output
 
-            def generator():
-                for z in generator_raw():
-                    x_sample = z[0]
-                    if isinstance(x_sample, scipy.sparse.csr_matrix):
-                        x_sample = x_sample.todense()
-                    x_sample = np.asarray(x_sample)
-                    if yield_labels:
-                        y_sample = onehot_encoder(
-                            z[1][self._adata_ids.cell_type + self._adata_ids.onto_id_suffix].values)
-                        for i in range(x_sample.shape[0]):
-                            if y_sample[i].sum() > 0:
-                                yield x_sample[i], y_sample[i], 1.
-                    else:
-                        for i in range(x_sample.shape[0]):
-                            yield x_sample[i],
-            n_features = self.data.n_vars
-            n_samples = self.data.n_obs
-        else:
-            if yield_labels:
-                weights, y = self._get_celltype_out(idx=idx)
-                if not weighted:
-                    weights = np.ones_like(weights)
-            x = self.data.X if self.data.isbacked else self._prepare_data_matrix(idx=idx)
-            is_sparse = isinstance(x, scipy.sparse.spmatrix)
-            indices = idx if self.data.isbacked else range(x.shape[0])
-            n_obs = len(indices)
-            remainder = n_obs % batch_size
-            batch_starts_ends = [
-                (int(x * batch_size), int(x * batch_size) + batch_size)
-                for x in np.arange(0, n_obs // batch_size + int(remainder > 0))
-            ]
-
-            def generator():
-                for s, e in batch_starts_ends:
-                    x_sample = np.asarray(x[indices[s:e], :].todense()) if is_sparse else x[indices[s:e], :]
-                    if yield_labels:
-                        y_sample = y[indices[s:e], :]
-                        w_sample = weights[indices[s:e]]
-                        for i in range(x_sample.shape[0]):
-                            if y_sample[i].sum() > 0:
-                                yield x_sample[i], y_sample[i], w_sample[i]
-                    else:
-                        for i in range(x_sample.shape[0]):
-                            yield x_sample[i],
-
-            n_features = x.shape[1]
-            n_samples = x.shape[0]
-
-        n_labels = self.celltype_universe.onto_cl.n_leaves
-        return generator, n_samples, n_features, n_labels
-
-    def _get_dataset(
-            self,
-            idx: Union[np.ndarray, None],
-            batch_size: Union[int, None],
-            mode: str,
-            shuffle_buffer_size: int = int(1e7),
-            cache_full: bool = False,
-            weighted: bool = False,
-            retrieval_batch_size: int = 128,
-            randomized_batch_access: bool = False,
-            prefetch: Union[int, None] = 1,
-    ) -> tf.data.Dataset:
-        """
-
-        :param idx:
-        :param batch_size:
-        :param mode:
-        :param shuffle_buffer_size:
-        :param weighted: Whether to use weights.
-        :param retrieval_batch_size: Number of observations read from disk in each batched access.
-        :param randomized_batch_access: Whether to randomize batches during reading (in generator). Lifts necessity of
-            using a shuffle buffer on generator, however, batch composition stays unchanged over epochs unless there
-            is overhangs in retrieval_batch_size in the raw data files, which often happens and results in modest
-            changes in batch composition.
-        :return:
-        """
-        generator, n_samples, n_features, n_labels = self._get_base_generator(
-            idx=idx,
-            yield_labels=mode in ['train', 'train_val', 'eval'],
-            weighted=weighted,
-            batch_size=retrieval_batch_size,
-            randomized_batch_access=randomized_batch_access,
-        )
-        output_types, output_shapes = self._get_output_dim(n_features=n_features, n_labels=n_labels, mode=mode)
-        dataset = tf.data.Dataset.from_generator(
-            generator=generator,
-            output_types=output_types,
-            output_shapes=output_shapes
-        )
-        if cache_full:
-            dataset = dataset.cache()
-        if mode == 'train' or mode == 'train_val':
-            dataset = dataset.repeat()
-            if shuffle_buffer_size is not None and shuffle_buffer_size > 0:
-                dataset = dataset.shuffle(
-                    buffer_size=min(n_samples, shuffle_buffer_size),
-                    seed=None,
-                    reshuffle_each_iteration=True)
-        if prefetch is None:
-            prefetch = tf.data.AUTOTUNE
-        dataset = dataset.batch(batch_size, drop_remainder=False).prefetch(prefetch)
-
-        return dataset
+        g = self.data.generator(idx=idx, retrival_batch_size=retrieval_batch_size,
+                                obs_keys=[self._adata_ids.cell_type + self._adata_ids.onto_id_suffix], map_fn=map_fn,
+                                return_dense=True, randomized_batch_access=randomized_batch_access,
+                                random_access=False)
+        return g
 
     def _get_loss(self):
         return LossCrossentropyAgg()
@@ -1359,13 +1030,8 @@ class EstimatorKerasCelltype(EstimatorKeras):
         """
         idx = self._process_idx_for_eval(idx=self.idx_test)
         if len(idx) > 0:
-            dataset = self._get_dataset(
-                idx=idx,
-                batch_size=batch_size,
-                mode='predict',
-                retrieval_batch_size=128,
-                shuffle_buffer_size=0,
-            )
+            dataset = self.get_one_time_tf_dataset(
+                idx=idx, batch_size=batch_size, mode='predict', retrieval_batch_size=128)
             return self.model.training_model.predict(x=dataset)
         else:
             return np.array([])
@@ -1378,12 +1044,8 @@ class EstimatorKerasCelltype(EstimatorKeras):
         """
         idx = self._process_idx_for_eval(idx=self.idx_test)
         if len(idx) > 0:
-            dataset = self._get_dataset(
-                idx=self.idx_test,
-                batch_size=batch_size,
-                mode='eval',
-                shuffle_buffer_size=0,
-            )
+            dataset = self.get_one_time_tf_dataset(
+                idx=idx, batch_size=batch_size, mode='eval', retrieval_batch_size=128)
             y_true = []
             for _, y, _ in dataset.as_numpy_iterator():
                 y_true.append(y)
@@ -1406,14 +1068,8 @@ class EstimatorKerasCelltype(EstimatorKeras):
         """
         idx = self._process_idx_for_eval(idx=idx)
         if len(idx) > 0:
-            dataset = self._get_dataset(
-                idx=idx,
-                batch_size=batch_size,
-                mode='eval',
-                weighted=weighted,
-                retrieval_batch_size=128,
-                shuffle_buffer_size=0,
-            )
+            dataset = self.get_one_time_tf_dataset(
+                idx=idx, batch_size=batch_size, mode='eval', retrieval_batch_size=128, weighted=weighted)
             results = self.model.training_model.evaluate(x=dataset)
             return dict(zip(self.model.training_model.metrics_names, results))
         else:
@@ -1437,19 +1093,17 @@ class EstimatorKerasCelltype(EstimatorKeras):
             test_data: bool = False,
             abs_gradients: bool = True
     ):
-
+        # TODO may need to be adapted to new dataset / generator format
         if test_data:
             idx = self.idx_test
             n_obs = len(self.idx_test)
         else:
             idx = None
-            n_obs = self.data.X.shape[0]
+            n_obs = self.data.n_obs
 
-        ds = self._get_dataset(
-            idx=idx,
-            batch_size=64,
-            mode='train_val'  # to get a tf.GradientTape compatible data set
-        )
+        # to get a tf.GradientTape compatible data set
+        ds = self.get_one_time_tf_dataset(
+            idx=idx, batch_size=64, mode='train_val', retrieval_batch_size=64)
         grads_x = 0
         # Loop over sub-selected data set and sum gradients across all selected observations.
         model = tf.keras.Model(

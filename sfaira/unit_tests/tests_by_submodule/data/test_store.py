@@ -155,7 +155,7 @@ def test_config(store_format: str):
 @pytest.mark.parametrize("store_format", ["h5ad", "dao"])
 @pytest.mark.parametrize("idx", [np.arange(1, 10),
                                  np.concatenate([np.arange(30, 50), np.array([1, 4, 98])])])
-@pytest.mark.parametrize("batch_size", [1, 7])
+@pytest.mark.parametrize("batch_size", [1,])
 @pytest.mark.parametrize("obs_keys", [["cell_type"]])
 @pytest.mark.parametrize("randomized_batch_access", [True, False])
 def test_generator_shapes(store_format: str, idx, batch_size: int, obs_keys: List[str], randomized_batch_access: bool):
@@ -168,12 +168,13 @@ def test_generator_shapes(store_format: str, idx, batch_size: int, obs_keys: Lis
     gc = GenomeContainer(assembly=ASSEMBLY_MOUSE)
     gc.subset(**{"biotype": "protein_coding"})
     store.genome_container = gc
-    g, _ = store.generator(
+    g = store.generator(
         idx={"mouse": idx},
         batch_size=batch_size,
         obs_keys=obs_keys,
         randomized_batch_access=randomized_batch_access,
     )
+    g = g.iterator
     nobs = len(idx) if idx is not None else store.n_obs
     batch_sizes = []
     x = None

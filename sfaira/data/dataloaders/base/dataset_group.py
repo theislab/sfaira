@@ -42,6 +42,40 @@ def map_fn(inputs):
         return ds.id, e,
 
 
+def merge_uns_from_list(adata_ls):
+    """
+    Merge .uns from list of adata objects.
+
+    Merges values for innert join of keys across all objects. This will retain uns streamlining.
+    Keeps shared uns values for a given key across data sets as single value (not a list of 1 unique value).
+    Other values are represented as a list of all unique values found.
+    """
+    uns_keys = [list(x.uns.keys()) for x in adata_ls]
+    uns_keys_shared = set(uns_keys[0])
+    for x in uns_keys[1:]:
+        uns_keys_shared = uns_keys_shared.intersection(set(x))
+    uns_keys_shared = list(uns_keys_shared)
+    uns = {}
+    for k in uns_keys_shared:
+        uns_k = []
+        for y in adata_ls:
+            x = y.uns[k]
+            if isinstance(x, list):
+                pass
+            elif isinstance(x, tuple):
+                x = list(x)
+            elif isinstance(x, np.ndarray):
+                x = x.tolist()
+            else:
+                x = [x]
+            uns_k.extend(x)
+        uns_k = np.sort(np.unique(uns_k)).tolist()
+        if len(uns_k) == 1:
+            uns_k = uns_k[0]
+        uns[k] = uns_k
+    return uns
+
+
 load_doc = \
     """
     :param remove_gene_version: Remove gene version string from ENSEMBL ID so that different versions in different data sets are superimposed.
@@ -431,6 +465,7 @@ class DatasetGroup:
                     index_unique=None
                 )
             adata_concat.var = var_original
+            adata_concat.uns = merge_uns_from_list(adata_ls)
             adata_concat.uns[self._adata_ids.mapped_features] = match_ref_list[0]
 
         return adata_concat
@@ -1015,6 +1050,7 @@ class DatasetSuperGroup:
                     index_unique=None
                 )
             adata_concat.var = var_original
+            adata_concat.uns = merge_uns_from_list(adata_ls)
             adata_concat.uns[self._adata_ids.mapped_features] = match_ref_list[0]
 
         return adata_concat
