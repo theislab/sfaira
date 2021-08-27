@@ -8,7 +8,7 @@ from typing import List, Union, Tuple
 from sfaira.models.embedding.output_layers import NegBinOutput, NegBinSharedDispOutput, NegBinConstDispOutput, \
     GaussianOutput, GaussianSharedStdOutput, GaussianConstStdOutput
 from sfaira.versions.topologies import TopologyContainer
-from sfaira.models.base import BasicModelKeras
+from sfaira.models.embedding.base import BasicModelKerasEmbedding
 from sfaira.models.pp_layer import PreprocInput
 
 
@@ -140,7 +140,7 @@ class Decoder(tf.keras.layers.Layer):
         return x
 
 
-class ModelKerasVae(BasicModelKeras):
+class ModelKerasVae(BasicModelKerasEmbedding):
 
     def predict_reconstructed(self, x: np.ndarray):
         return np.split(self.training_model.predict(x)[0], indices_or_sections=2, axis=1)[0]

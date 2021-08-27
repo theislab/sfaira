@@ -72,17 +72,19 @@ class TestHelperEstimatorBase:
     tc: TopologyContainer
 
     def load_adata(self, organism="human", organ=None):
-        dsg = prepare_dsg()
+        dsg = prepare_dsg(load=True)
+        dsg.subset(key="doi_journal", values=["no_doi_mock1", "no_doi_mock3", "no_doi_mock3"])
         if organism is not None:
             dsg.subset(key="organism", values=organism)
         if organ is not None:
             dsg.subset(key="organ", values=organ)
         self.adata_ids = dsg.dataset_groups[0]._adata_ids
-        self.data = dsg.adata
+        self.data = dsg.adata_ls
 
     def load_store(self, organism="human", organ=None):
         store_path = prepare_store(store_format="dao")
         store = load_store(cache_path=store_path, store_format="dao")
+        store.subset(attr_key="doi_journal", values=["no_doi_mock1", "no_doi_mock3", "no_doi_mock3"])
         if organism is not None:
             store.subset(attr_key="organism", values=organism)
         if organ is not None:
@@ -93,6 +95,7 @@ class TestHelperEstimatorBase:
     def load_multistore(self):
         store_path = prepare_store(store_format="dao")
         store = load_store(cache_path=store_path, store_format="dao")
+        store.subset(attr_key="doi_journal", values=["no_doi_mock1", "no_doi_mock3", "no_doi_mock3"])
         self.adata_ids = store._adata_ids_sfaira
         self.data = store
 
@@ -138,7 +141,7 @@ class TestHelperEstimatorKeras(TestHelperEstimatorBase):
         )
 
     @abc.abstractmethod
-    def basic_estimator_test(self, test_split):
+    def basic_estimator_test(self):
         pass
 
     def load_estimator(self, model_type, data_type, feature_space, test_split, organism="human"):
@@ -154,7 +157,7 @@ class TestHelperEstimatorKeras(TestHelperEstimatorBase):
         self.load_estimator(model_type=model_type, data_type=data_type, feature_space=feature_space,
                             test_split=test_split)
         self.estimator_train(test_split=test_split, randomized_batch_access=False)
-        self.basic_estimator_test(test_split=test_split)
+        self.basic_estimator_test()
 
 
 class HelperEstimatorKerasEmbedding(TestHelperEstimatorKeras):
@@ -193,7 +196,7 @@ class HelperEstimatorKerasEmbedding(TestHelperEstimatorKeras):
         self.estimator.init_model()
         self.estimator.split_train_val_test(test_split=test_split, val_split=0.1)
 
-    def basic_estimator_test(self, test_split=0.1):
+    def basic_estimator_test(self):
         _ = self.estimator.evaluate()
         prediction_output = self.estimator.predict()
         prediction_embed = self.estimator.predict_embedding()
@@ -239,10 +242,10 @@ class TestHelperEstimatorKerasCelltype(TestHelperEstimatorKeras):
             model_dir=DIR_TEMP,
             cache_path=DIR_TEMP,
             model_id="testid",
-            model_topology=tc
+            model_topology=tc,
         )
         leaves = self.estimator.celltype_universe.onto_cl.get_effective_leaves(
-            x=[x for x in self.data.obs[self.adata_ids.cell_type].values
+            x=[x for x in self.estimator.data.obs[self.adata_ids.cell_type].values
                if x != self.adata_ids.unknown_metadata_identifier]
         )
         self.nleaves = len(leaves)
@@ -250,7 +253,7 @@ class TestHelperEstimatorKerasCelltype(TestHelperEstimatorKeras):
         self.estimator.init_model()
         self.estimator.split_train_val_test(test_split=test_split, val_split=0.1)
 
-    def basic_estimator_test(self, test_split=0.1):
+    def basic_estimator_test(self):
         _ = self.estimator.evaluate()
         prediction_output = self.estimator.predict()
         assert prediction_output.shape[1] == self.nleaves, prediction_output.shape
@@ -274,22 +277,25 @@ class HelperEstimatorKerasCelltypeCustomObo(TestHelperEstimatorKerasCelltype):
         return OntologyOboCustom(obo=os.path.join(os.path.dirname(__file__), "custom.obo"))
 
     def init_genome_custom(self, n_features) -> CustomFeatureContainer:
-        return CustomFeatureContainer(genome_tab=pd.DataFrame({
-            "gene_name": ["dim_" + str(i) for i in range(n_features)],
-            "gene_id": ["dim_" + str(i) for i in range(n_features)],
-            "gene_biotype": ["embedding" for _ in range(n_features)],
-        }))
+        return CustomFeatureContainer(
+            genome_tab=pd.DataFrame({
+                "gene_name": ["dim_" + str(i) for i in range(n_features)],
+                "gene_id": ["dim_" + str(i) for i in range(n_features)],
+                "gene_biotype": ["embedding" for _ in range(n_features)],
+            }),
+            organism="homo_sapiens",
+        )
 
     def load_adata(self, organism="human", organ=None):
-        dsg = prepare_dsg(load=False)
+        dsg = prepare_dsg(load=True)
+        dsg.subset(key="doi_journal", values=["no_doi_mock1", "no_doi_mock3", "no_doi_mock3"])
         if organism is not None:
             dsg.subset(key="organism", values=organism)
         if organ is not None:
             dsg.subset(key="organ", values=organ)
         self.adata_ids = dsg.dataset_groups[0]._adata_ids
         # Use mock data loading to generate base line object:
-        dsg.load()
-        self.data = dsg.datasets[list(dsg.datasets.keys())[0]].adata
+        self.data = dsg.adata
         # - Subset to target feature space size:
         self.data = self.data[:, :self.tc.gc.n_var].copy()
         # - Add in custom cell types:
@@ -330,10 +336,11 @@ class HelperEstimatorKerasCelltypeCustomObo(TestHelperEstimatorKerasCelltype):
             model_id="testid",
             model_topology=self.tc,
             celltype_ontology=obo,
+            remove_unlabeled_cells=False,  # TODO this should not be necessary but all cells are filtered otherwise
         )
         self.estimator.init_model()
         self.estimator_train(test_split=0.1, randomized_batch_access=False)
-        self.basic_estimator_test(test_split=0.1)
+        self.basic_estimator_test()
 
 # Test embedding models:
 
@@ -396,19 +403,20 @@ def test_dataset_size(batch_size: int, randomized_batch_access: bool):
                               organism="human")
     idx_train = test_estim.estimator.idx_train
     shuffle_buffer_size = None if randomized_batch_access else 2
-    ds_train = test_estim.estimator._get_dataset(idx=idx_train, batch_size=batch_size, mode='eval',
-                                                 shuffle_buffer_size=shuffle_buffer_size,
-                                                 retrieval_batch_size=retrieval_batch_size,
-                                                 randomized_batch_access=randomized_batch_access)
+    ds_train = test_estim.estimator.get_one_time_tf_dataset(
+        idx=idx_train, batch_size=batch_size, mode='eval', shuffle_buffer_size=shuffle_buffer_size,
+        retrieval_batch_size=retrieval_batch_size, randomized_batch_access=randomized_batch_access)
     x_train_shape = 0
     for x, _ in ds_train.as_numpy_iterator():
         x_train_shape += x[0].shape[0]
     # Define raw store generator on train data to compare and check that it has the same size as tf generator exposed
     # by estimator:
-    g_train, _ = test_estim.estimator.data.generator(idx=idx_train, batch_size=retrieval_batch_size,
-                                                     randomized_batch_access=randomized_batch_access)
+    g_train = test_estim.estimator.data.generator(idx=idx_train, retrival_batch_size=retrieval_batch_size,
+                                                  randomized_batch_access=randomized_batch_access)
     x_train2_shape = 0
-    for x, _ in g_train():
+    for x, _ in g_train.iterator():
+        if len(x.shape) == 1:
+            x = np.expand_dims(x, axis=0)
         x_train2_shape += x.shape[0]
     assert x_train_shape == x_train2_shape
     assert x_train_shape == len(idx_train)
@@ -429,8 +437,8 @@ def test_split_index_sets(data_type: str, randomized_batch_access: bool, test_sp
     test_estim = HelperEstimatorKerasEmbedding()
     # Need full feature space here because observations are not necessarily different in small model testing feature
     # space with only two genes:
-    test_estim.load_estimator(model_type="linear", data_type=data_type, test_split=test_split, feature_space="full",
-                              organism="human")
+    test_estim.load_estimator(model_type="linear", data_type=data_type, feature_space="full", organism="human",
+                              test_split=test_split)
     idx_train = test_estim.estimator.idx_train
     idx_eval = test_estim.estimator.idx_eval
     idx_test = test_estim.estimator.idx_test
@@ -439,10 +447,10 @@ def test_split_index_sets(data_type: str, randomized_batch_access: bool, test_sp
     assert len(idx_train) == len(np.unique(idx_train))
     assert len(idx_eval) == len(np.unique(idx_eval))
     assert len(idx_test) == len(np.unique(idx_test))
-    assert len(idx_train) + len(idx_eval) + len(idx_test) == test_estim.data.n_obs, \
-        (len(idx_train), len(idx_eval), len(idx_test), test_estim.data.n_obs)
+    assert len(idx_train) + len(idx_eval) + len(idx_test) == test_estim.estimator.data.n_obs, \
+        (len(idx_train), len(idx_eval), len(idx_test), test_estim.estimator.data.n_obs)
     if isinstance(test_estim.data, DistributedStoreSingleFeatureSpace):
-        assert np.sum([v.shape[0] for v in test_estim.data.adata_by_key.values()]) == test_estim.data.n_obs
+        assert np.sum([v.shape[0] for v in test_estim.data.indices.values()]) == test_estim.estimator.data.n_obs
     # 2) Assert that index assignments are exclusive to each split:
     assert len(set(idx_train).intersection(set(idx_eval))) == 0
     assert len(set(idx_train).intersection(set(idx_test))) == 0
@@ -452,7 +460,7 @@ def test_split_index_sets(data_type: str, randomized_batch_access: bool, test_sp
         # Prepare data set-wise index vectors that are numbered in the same way as global split index vectors.
         idx_raw = []
         counter = 0
-        for v in test_estim.data.indices.values():
+        for v in test_estim.estimator.data.indices.values():
             idx_raw.append(np.arange(counter, counter + len(v)))
             counter += len(v)
         if isinstance(test_split, float):
@@ -478,29 +486,24 @@ def test_split_index_sets(data_type: str, randomized_batch_access: bool, test_sp
                 for x in idx_raw
             ])[0]
             assert np.all(datasets_train == datasets_eval), (datasets_train, datasets_eval, datasets_test)
-            assert len(set(datasets_train).intersection(set(datasets_test))) == 0, \
-                (datasets_train, datasets_eval, datasets_test)
+            assert len(set(datasets_train).intersection(set(datasets_test))) == 0, (datasets_train, datasets_test)
     # 4) Assert that observations mapped to indices are actually unique based on expression vectors:
     # Build numpy arrays of expression input data sets from tensorflow data sets directly from estimator.
     # These data sets are the most processed transformation of the data and stand directly in concat with the model.
     shuffle_buffer_size = None if randomized_batch_access else 2
-    ds_train = test_estim.estimator._get_dataset(idx=idx_train, batch_size=1024, mode='eval',
-                                                 shuffle_buffer_size=shuffle_buffer_size,
-                                                 retrieval_batch_size=2048,
-                                                 randomized_batch_access=randomized_batch_access)
-    ds_eval = test_estim.estimator._get_dataset(idx=idx_eval, batch_size=1024, mode='eval',
-                                                shuffle_buffer_size=shuffle_buffer_size,
-                                                retrieval_batch_size=2048,
-                                                randomized_batch_access=randomized_batch_access)
-    ds_test = test_estim.estimator._get_dataset(idx=idx_test, batch_size=1024, mode='eval',
-                                                shuffle_buffer_size=shuffle_buffer_size,
-                                                retrieval_batch_size=2048,
-                                                randomized_batch_access=randomized_batch_access)
+    ds_train = test_estim.estimator.get_one_time_tf_dataset(
+        idx=idx_train, batch_size=1024, mode='eval', shuffle_buffer_size=shuffle_buffer_size,
+        retrieval_batch_size=2048, randomized_batch_access=randomized_batch_access)
+    ds_eval = test_estim.estimator.get_one_time_tf_dataset(
+        idx=idx_eval, batch_size=1024, mode='eval', shuffle_buffer_size=shuffle_buffer_size,
+        retrieval_batch_size=2048, randomized_batch_access=randomized_batch_access)
+    ds_test = test_estim.estimator.get_one_time_tf_dataset(
+        idx=idx_test, batch_size=1024, mode='eval', shuffle_buffer_size=shuffle_buffer_size,
+        retrieval_batch_size=2048, randomized_batch_access=randomized_batch_access)
     # Create two copies of test data set to make sure that re-instantiation of a subset does not cause issues.
-    ds_test2 = test_estim.estimator._get_dataset(idx=idx_test, batch_size=1024, mode='eval',
-                                                 shuffle_buffer_size=shuffle_buffer_size,
-                                                 retrieval_batch_size=2048,
-                                                 randomized_batch_access=randomized_batch_access)
+    ds_test2 = test_estim.estimator.get_one_time_tf_dataset(
+        idx=idx_test, batch_size=1024, mode='eval', shuffle_buffer_size=shuffle_buffer_size,
+        retrieval_batch_size=2048, randomized_batch_access=randomized_batch_access)
     x_train = []
     x_eval = []
     x_test = []
@@ -519,8 +522,8 @@ def test_split_index_sets(data_type: str, randomized_batch_access: bool, test_sp
         x_test2_shape += x[0].shape[0]
     assert x_test2_shape == x_test.shape[0]
     # Validate size of recovered numpy data sets:
-    assert x_train.shape[0] + x_eval.shape[0] + x_test.shape[0] == test_estim.data.n_obs
-    assert len(idx_train) + len(idx_eval) + len(idx_test) == test_estim.data.n_obs
+    assert x_train.shape[0] + x_eval.shape[0] + x_test.shape[0] == test_estim.estimator.data.n_obs
+    assert len(idx_train) + len(idx_eval) + len(idx_test) == test_estim.estimator.data.n_obs
     assert x_train.shape[0] == len(idx_train)
     assert x_eval.shape[0] == len(idx_eval)
     assert x_test.shape[0] == len(idx_test)

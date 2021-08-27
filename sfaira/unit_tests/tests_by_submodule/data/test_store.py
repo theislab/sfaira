@@ -79,7 +79,7 @@ def test_data(store_format: str):
     """
     # Run standard streamlining workflow on dsg and compare to object relayed via store.
     # Prepare dsg.
-    dsg = prepare_dsg(rewrite=False, load=True)
+    dsg = prepare_dsg(load=True)
     # Prepare store.
     # Rewriting store to avoid mismatch of randomly generated data in cache and store.
     store_path = prepare_store(store_format=store_format, rewrite=False, rewrite_store=True)
@@ -155,7 +155,7 @@ def test_config(store_format: str):
 @pytest.mark.parametrize("store_format", ["h5ad", "dao"])
 @pytest.mark.parametrize("idx", [np.arange(1, 10),
                                  np.concatenate([np.arange(30, 50), np.array([1, 4, 98])])])
-@pytest.mark.parametrize("batch_size", [1, 7])
+@pytest.mark.parametrize("batch_size", [1, ])
 @pytest.mark.parametrize("obs_keys", [["cell_type"]])
 @pytest.mark.parametrize("randomized_batch_access", [True, False])
 def test_generator_shapes(store_format: str, idx, batch_size: int, obs_keys: List[str], randomized_batch_access: bool):
@@ -168,12 +168,13 @@ def test_generator_shapes(store_format: str, idx, batch_size: int, obs_keys: Lis
     gc = GenomeContainer(assembly=ASSEMBLY_MOUSE)
     gc.subset(**{"biotype": "protein_coding"})
     store.genome_container = gc
-    g, _ = store.generator(
+    g = store.generator(
         idx={"mouse": idx},
         batch_size=batch_size,
         obs_keys=obs_keys,
         randomized_batch_access=randomized_batch_access,
     )
+    g = g.iterator
     nobs = len(idx) if idx is not None else store.n_obs
     batch_sizes = []
     x = None
@@ -182,6 +183,10 @@ def test_generator_shapes(store_format: str, idx, batch_size: int, obs_keys: Lis
     for i, z in enumerate(g()):
         counter += 1
         x_i, obs_i = z
+        if len(x_i.shape) == 1:
+            # x is flattened if batch size is 1:
+            assert batch_size == 1
+            x_i = np.expand_dims(x_i, axis=0)
         assert x_i.shape[0] == obs_i.shape[0]
         if i == 0:
             x = x_i

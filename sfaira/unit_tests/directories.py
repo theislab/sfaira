@@ -18,4 +18,7 @@ DIR_DATABASE_STORE_DAO = os.path.join(_DIR_DATA_DATABASES, "store_dao")
 
 def save_delete(fn):
     assert str(fn).startswith(DIR_TEMP), f"tried to delete outside of temp directory {fn}"
-    shutil.rmtree(fn)
+    if os.path.isdir(fn):
+        shutil.rmtree(fn)
+    else:
+        os.remove(fn)

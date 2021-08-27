@@ -7,13 +7,12 @@ import os
 import pandas as pd
 import pickle
 import scipy.sparse
-import sys
-import time
 from typing import Dict, List, Tuple, Union
 
 from sfaira.consts import AdataIdsSfaira, OCS
 from sfaira.data.dataloaders.base.utils import is_child, UNS_STRING_META_IN_OBS
 from sfaira.data.store.base import DistributedStoreBase
+from sfaira.data.store.generators import GeneratorAnndata, GeneratorDask, GeneratorSingle
 from sfaira.versions.genomes.genomes import GenomeContainer
 
 """
@@ -35,13 +34,15 @@ Note that in all cases, you can use standard anndata reading functions to load a
 """
 
 
-def _process_batch_size(x: int, idx: np.ndarray) -> int:
-    if x > len(idx):
-        batch_size_new = len(idx)
+def _process_batch_size(batch_size: int, retrival_batch_size: int, idx: np.ndarray) -> Tuple[int, int]:
+    if retrival_batch_size > len(idx):
+        retrival_batch_size_new = len(idx)
         print(f"WARNING: reducing retrieval batch size according to data availability in store "
-              f"from {x} to {batch_size_new}")
-        x = batch_size_new
-    return x
+              f"from {retrival_batch_size} to {retrival_batch_size_new}")
+        retrival_batch_size = retrival_batch_size_new
+    if batch_size != 1:
+        raise ValueError("batch size is only supported as 1")
+    return batch_size, retrival_batch_size
 
 
 class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
@@ -259,9 +260,11 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
         def get_idx(adata, obs, k, v, xv, dataset):
             # Use cell-wise annotation if data set-wide maps are ambiguous:
             # This can happen if the different cell-wise annotations are summarised as a union in .uns.
-            if getattr(self._adata_ids_sfaira, k) in adata.uns.keys() and \
-                    adata.uns[getattr(self._adata_ids_sfaira, k)] != UNS_STRING_META_IN_OBS and \
-                    getattr(self._adata_ids_sfaira, k) not in obs.columns:
+            read_from_uns = (getattr(self._adata_ids_sfaira, k) in adata.uns.keys() and
+                             adata.uns[getattr(self._adata_ids_sfaira, k)] != UNS_STRING_META_IN_OBS and
+                             getattr(self._adata_ids_sfaira, k) not in obs.columns)
+            read_from_obs = not read_from_uns and getattr(self._adata_ids_sfaira, k) in obs.columns
+            if read_from_uns:
                 values_found = adata.uns[getattr(self._adata_ids_sfaira, k)]
                 if isinstance(values_found, np.ndarray):
                     values_found = values_found.tolist()
@@ -272,14 +275,11 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
                 else:
                     # Replicate unique property along cell dimension.
                     values_found = [values_found[0] for _ in range(adata.n_obs)]
+            elif read_from_obs:
+                values_found = obs[getattr(self._adata_ids_sfaira, k)].values
             else:
-                values_found = None
-            if values_found is None:
-                if getattr(self._adata_ids_sfaira, k) in obs.columns:
-                    values_found = obs[getattr(self._adata_ids_sfaira, k)].values
-                else:
-                    values_found = []
-                    print(f"WARNING: did not find attribute {k} in data set {dataset}")
+                values_found = []
+                print(f"WARNING: did not find attribute {k} in data set {dataset}")
             values_found_unique = np.unique(values_found)
             try:
                 ontology = getattr(self.ontology_container, k)
@@ -346,7 +346,7 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
         """
         self.indices = self.get_subset_idx(attr_key=attr_key, values=values, excluded_values=excluded_values)
         if self.n_obs == 0 and verbose > 0:
-            print("WARNING: store is now empty.")
+            print(f"WARNING: store is now empty after subsetting {attr_key} for {values}, excluding {excluded_values}.")
 
     def write_config(self, fn: Union[str, os.PathLike]):
         """
@@ -409,20 +409,12 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
     def shape(self) -> Tuple[int, int]:
         return self.n_obs, self.n_vars
 
-    @abc.abstractmethod
-    def _generator(
-            self,
-            idx_gen: iter,
-            var_idx: Union[np.ndarray, None],
-            obs_keys: List[str],
-    ) -> iter:
-        pass
-
     def _index_curation_helper(
             self,
             idx: Union[np.ndarray, None],
             batch_size: int,
-    ) -> Tuple[Union[np.ndarray, None], Union[np.ndarray, None], int]:
+            retrival_batch_size: int,
+    ) -> Tuple[Union[np.ndarray, None], Union[np.ndarray, None], int, int]:
         """
         Process indices and batch size input for generator production.
 
@@ -453,26 +445,62 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
         if idx is None:
             idx = np.arange(0, self.n_obs)
         idx = self._validate_idx(idx)
-        batch_size = _process_batch_size(x=batch_size, idx=idx)
-        return idx, var_idx, batch_size
+        batch_size, retrival_batch_size = _process_batch_size(
+            batch_size=batch_size, retrival_batch_size=retrival_batch_size, idx=idx)
+        return idx, var_idx, batch_size, retrival_batch_size
+
+    @abc.abstractmethod
+    def _get_generator(
+            self,
+            batch_schedule,
+            obs_idx: np.ndarray,
+            var_idx: Union[np.ndarray, None],
+            map_fn,
+            obs_keys: List[str],
+            **kwargs
+    ) -> iter:
+        """
+        Yields an instance of GeneratorSingle which can emit an iterator over the data defined in the arguments here.
+
+        :param obs_idx: The observations to emit.
+        :param var_idx: The features to emit.
+        :param map_fn: Map functino to apply to output tuple of raw generator. Each draw i from the generator is then:
+            `yield map_fn(x[i, var_idx], obs[i, obs_keys])`
+        :param obs_keys: .obs columns to return in the generator. These have to be a subset of the columns available
+            in self.adata_by_key.
+        :return: GeneratorSingle instance.
+        """
+        pass
 
     def generator(
             self,
             idx: Union[np.ndarray, None] = None,
             batch_size: int = 1,
+            retrival_batch_size: int = 128,
+            map_fn=None,
             obs_keys: List[str] = [],
             return_dense: bool = True,
             randomized_batch_access: bool = False,
             random_access: bool = False,
+            batch_schedule: str = "base",
             **kwargs
-    ) -> Tuple[iter, int]:
+    ) -> GeneratorSingle:
         """
-        Yields an unbiased generator over observations in the contained data sets.
+        Yields an instance of a generator class over observations in the contained data sets.
+
+        Multiple such instances can be emitted by a single store class and point to data stored in this store class.
+        Effectively, these generators are heavily reduced pointers to the data in an instance of self.
+        A common use case is the instantiation of a training data generator and a validation data generator over a data
+        subset defined in this class.
 
         :param idx: Global idx to query from store. These is an array with indices corresponding to a contiuous index
             along all observations in self.adata_by_key, ordered along a hypothetical concatenation along the keys of
             self.adata_by_key. If None, all observations are selected.
-        :param batch_size: Number of observations read from disk in each batched access (generator invocation).
+        :param batch_size: Number of observations to yield in each access (generator invocation).
+        :param retrival_batch_size: Number of observations read from disk in each batched access (data-backend generator
+            invocation).
+        :param map_fn: Map functino to apply to output tuple of raw generator. Each draw i from the generator is then:
+            `yield map_fn(x[i, var_idx], obs[i, obs_keys])`
         :param obs_keys: .obs columns to return in the generator. These have to be a subset of the columns available
             in self.adata_by_key.
         :param return_dense: Whether to force return count data .X as dense batches. This allows more efficient feature
@@ -485,113 +513,26 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
         :param random_access: Whether to fully shuffle observations before batched access takes place. May
             slow down access compared randomized_batch_access and to no randomization.
             Do not use randomized_batch_access and random_access.
-        :return: Tuple of
-            - Generator function which yields batch_size at every invocation.
-                The generator returns a tuple of (.X, .obs).
-            - Number of batches in generator.
-        """
-        idx, var_idx, batch_size = self._index_curation_helper(idx=idx, batch_size=batch_size)
-        if randomized_batch_access and random_access:
-            raise ValueError("Do not use randomized_batch_access and random_access.")
-        n_obs = len(idx)
-        remainder = n_obs % batch_size
-        n_batches = int(n_obs // batch_size + int(remainder > 0))
-
-        def idx_gen():
-            """
-            Yields index objects for one epoch of all data.
-
-            These index objects are used by generators that have access to the data objects to build data batches.
-
-            :returns: Tuple of:
-                - Ordering of observations in epoch.
-                - Batch start and end indices for batch based on ordering defined in first output.
-            """
-            batch_starts_ends = [
-                (int(x * batch_size), int(np.minimum((x * batch_size) + batch_size, n_obs)))
-                for x in np.arange(0, n_batches)
-            ]
-            batch_range = np.arange(0, len(batch_starts_ends))
-            if randomized_batch_access:
-                np.random.shuffle(batch_range)
-            batch_starts_ends = [batch_starts_ends[i] for i in batch_range]
-            obs_idx = idx.copy()
-            if random_access:
-                np.random.shuffle(obs_idx)
-            yield obs_idx, batch_starts_ends
-
-        return self._generator(idx_gen=idx_gen(), var_idx=var_idx, obs_keys=obs_keys), n_batches
-
-    def generator_balanced(
-            self,
-            idx: Union[np.ndarray, None] = None,
-            balance_obs: Union[str, None] = None,
-            balance_damping: float = 0.,
-            batch_size: int = 1,
-            obs_keys: List[str] = [],
-            **kwargs
-    ) -> iter:
-        """
-        Yields a data set balanced generator.
-
-        Yields one random batch per dataset. Assumes that data sets are annotated in .obs.
-        Uses self.dataset_weights if this are given to sample data sets with different frequencies.
-        Can additionally also balance across one meta data annotation within each data set.
-
-        Assume you have a data set with two classes (A=80, B=20 cells) in a column named "cell_type".
-        The single batch for this data set produced by this generator in each epoch contains N cells.
-        If balance_obs is False, these N cells are the result of a draw without replacement from all 100 cells in this
-        dataset in which each cell receives the same weight / success probability of 1.0.
-        If balance_obs is True, these N cells are the result of a draw without replacement from all 100 cells in this
-        data set with individual success probabilities such that classes are balanced: 0.2 for A and 0.8 for B.
-
-        :param idx: Global idx to query from store. These is an array with indices corresponding to a contiuous index
-            along all observations in self.adata_by_key, ordered along a hypothetical concatenation along the keys of
-            self.adata_by_key. If None, all observations are selected.
-        :param balance_obs: .obs column key to balance samples from each data set over.
-            Note that each data set must contain this column in its .obs table.
-        :param balance_damping: Damping to apply to class weighting induced by balance_obs. The class-wise
-            wise sampling probabilities become `max(balance_damping, (1. - frequency))`
-        :param batch_size: Number of observations read from disk in each batched access (generator invocation).
-        :param obs_keys: .obs columns to return in the generator. These have to be a subset of the columns available
-            in self.adata_by_key.
+        :param batch_schedule: Re
+            - "base"
+            - "balanced": idx_generator_kwarg need to include:
+                - "balance_obs": .obs column key to balance samples from each data set over.
+                    Note that each data set must contain this column in its .obs table.
+                - "balance_damping": Damping to apply to class weighting induced by balance_obs. The class-wise
+                    wise sampling probabilities become `max(balance_damping, (1. - frequency))`
+            - function: This can be a function that satisfies the interface. It will also receive idx_generator_kwarg.
+        :param kwargs: kwargs for idx_generator chosen.
         :return: Generator function which yields batch_size at every invocation.
             The generator returns a tuple of (.X, .obs).
         """
-        idx, var_idx, batch_size = self._index_curation_helper(idx=idx, batch_size=batch_size)
-
-        def idx_gen():
-            batch_starts_ends = []
-            idx_proc = []
-            val_dataset = self.obs[self._adata_ids_sfaira.dataset].values
-            datasets = np.unique(val_dataset)
-            if self.dataset_weights is not None:
-                weights = np.array([self.dataset_weights[x] for x in datasets])
-                p = weights / np.sum(weights)
-                datasets = np.random.choice(a=datasets, replace=True, size=len(datasets), p=p)
-            if balance_obs is not None:
-                val_meta = self.obs[balance_obs].values
-            for x in datasets:
-                idx_x = np.where(val_dataset == x)[0]
-                n_obs = len(idx_x)
-                batch_size_o = int(np.minimum(batch_size, n_obs))
-                batch_starts_ends.append(np.array([(0, batch_size_o), ]))
-                if balance_obs is None:
-                    p = np.ones_like(idx_x) / len(idx_x)
-                else:
-                    if balance_obs not in self.obs.columns:
-                        raise ValueError(f"did not find column {balance_obs} in {self.organism}")
-                    val_meta_x = val_meta[idx_x]
-                    class_freq = dict([(y, np.mean(val_meta_x == y)) for y in np.unique(val_meta_x)])
-                    class_freq_x_by_obs = np.array([class_freq[y] for y in val_meta_x])
-                    damped_freq_coefficient = np.maximum(balance_damping, (1. - class_freq_x_by_obs))
-                    p = np.ones_like(idx_x) / len(idx_x) * damped_freq_coefficient
-                idx_x_sample = np.random.choice(a=idx_x, replace=False, size=batch_size_o, p=p)
-                idx_proc.append(idx_x_sample)
-            idx_proc = np.asarray(idx_proc)
-            yield idx_proc, batch_starts_ends
-
-        return self._generator(idx_gen=idx_gen(), var_idx=var_idx, obs_keys=obs_keys)
+        obs_idx, var_idx, batch_size, retrival_batch_size = self._index_curation_helper(
+            idx=idx, batch_size=batch_size, retrival_batch_size=retrival_batch_size)
+        batch_schedule_kwargs = {"randomized_batch_access": randomized_batch_access,
+                                 "random_access": random_access,
+                                 "retrival_batch_size": retrival_batch_size}
+        gen = self._get_generator(batch_schedule=batch_schedule, batch_size=batch_size, map_fn=map_fn, obs_idx=obs_idx,
+                                  obs_keys=obs_keys, var_idx=var_idx, **batch_schedule_kwargs, **kwargs)
+        return gen
 
     @property
     @abc.abstractmethod
@@ -658,27 +599,27 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
         :return: Slice of data array.
         """
         batch_size = min(len(idx), 128)
-        g, _ = self.generator(idx=idx, batch_size=batch_size, return_dense=True, random_access=False,
-                              randomized_batch_access=False, **kwargs)
+        g = self.generator(idx=idx, retrival_batch_size=batch_size, return_dense=True, random_access=False,
+                           randomized_batch_access=False, **kwargs)
         shape = (idx.shape[0], self.n_vars)
         if as_sparse:
             x = scipy.sparse.csr_matrix(np.zeros(shape))
         else:
             x = np.empty(shape)
         counter = 0
-        for x_batch, _ in g():
+        for x_batch, _ in g.iterator():
             batch_len = x_batch.shape[0]
             x[counter:(counter + batch_len), :] = x_batch
             counter += batch_len
         return x
 
 
-class DistributedStoreH5ad(DistributedStoreSingleFeatureSpace):
+class DistributedStoreAnndata(DistributedStoreSingleFeatureSpace):
 
     in_memory: bool
 
     def __init__(self, in_memory: bool, **kwargs):
-        super(DistributedStoreH5ad, self).__init__(**kwargs)
+        super(DistributedStoreAnndata, self).__init__(**kwargs)
         self._x_as_dask = False
         self.in_memory = in_memory
 
@@ -713,7 +654,7 @@ class DistributedStoreH5ad(DistributedStoreSingleFeatureSpace):
             assert np.all([isinstance(v.X, scipy.sparse.spmatrix) for v in self.adata_by_key.values()])
             return scipy.sparse.vstack([v.X for v in self.adata_by_key.values()])
         else:
-            raise NotImplementedError()
+            raise NotImplementedError("this operation is not efficient with backed objects")
 
     @property
     def obs(self) -> Union[pd.DataFrame]:
@@ -727,83 +668,11 @@ class DistributedStoreH5ad(DistributedStoreSingleFeatureSpace):
             for k, v in self.indices.items()
         ], axis=0, join="inner", ignore_index=False, copy=False)
 
-    def _generator(
-            self,
-            idx_gen: iter,
-            var_idx: np.ndarray,
-            obs_keys: List[str] = [],
-            return_dense: bool = False,
-    ) -> iter:
-        """
-        Yields data batches as defined by index sets emitted from index generator.
-
-        :param idx_gen: Generator that yield two elements in each draw:
-            - np.ndarray: The cells to emit.
-            - List[Tuple[int, int]: Batch start and end indices.
-        :param var_idx: The features to emit.
-        :param obs_keys: .obs columns to return in the generator. These have to be a subset of the columns available
-            in self.adata_by_key.
-        :return: Generator function which yields batch_size at every invocation.
-            The generator returns a tuple of (.X, .obs).
-        """
-        adata_sliced = self._adata_sliced
-        # Speed up access to single object by skipping index overlap operations:
-        single_object = len(adata_sliced.keys()) == 1
-        if not single_object:
-            idx_dict_global = dict([(k1, (v1, v2))
-                                    for (k1, v1), v2 in zip(self.indices_global.items(), self.indices.values())])
-
-        def generator():
-            for idx, batch_starts_ends in idx_gen:
-                for s, e in batch_starts_ends:
-                    idx_i = idx[s:e]
-                    # Match adata objects that overlap to batch:
-                    if single_object:
-                        idx_i_dict = dict([(k, np.sort(idx_i)) for k in adata_sliced.keys()])
-                    else:
-                        idx_i_set = set(idx_i)
-                        # Return data set-wise index if global index is in target set.
-                        idx_i_dict = dict([
-                            (k, np.sort([x2 for x1, x2 in zip(v1, v2) if x1 in idx_i_set]))
-                            for k, (v1, v2) in idx_dict_global.items()
-                        ])
-                    # Only retain non-empty.
-                    idx_i_dict = dict([(k, v) for k, v in idx_i_dict.items() if len(v) > 0])
-                    # I) Prepare data matrix.
-                    x = [
-                        adata_sliced[k].X[v, :]
-                        for k, v in idx_i_dict.items()
-                    ]
-                    # Move from ArrayView to numpy if backed and dense:
-                    x = [
-                        xx.toarray() if isinstance(xx, anndata._core.views.ArrayView) else xx
-                        for xx in x
-                    ]
-                    # Do dense conversion now so that col-wise indexing is not slow, often, dense conversion
-                    # would be done later anyway.
-                    if return_dense:
-                        x = [np.asarray(xx.todense()) if isinstance(xx, scipy.sparse.spmatrix) else xx for xx in x]
-                        is_dense = True
-                    else:
-                        is_dense = isinstance(x[0], np.ndarray)
-                    # Concatenate blocks in observation dimension:
-                    if len(x) > 1:
-                        if is_dense:
-                            x = np.concatenate(x, axis=0)
-                        else:
-                            x = scipy.sparse.vstack(x)
-                    else:
-                        x = x[0]
-                    if var_idx is not None:
-                        x = x[:, var_idx]
-                    # Prepare .obs.
-                    obs = pd.concat([
-                        adata_sliced[k].obs[obs_keys].iloc[v, :]
-                        for k, v in idx_i_dict.items()
-                    ], axis=0, join="inner", ignore_index=True, copy=False)
-                    yield x, obs
-
-        return generator
+    def _get_generator(self, return_dense: bool = False, **kwargs) -> iter:
+        idx_dict_global = dict([(k1, (v1, v2))
+                                for (k1, v1), v2 in zip(self.indices_global.items(), self.indices.values())])
+        return GeneratorAnndata(adata_dict=self._adata_sliced, idx_dict_global=idx_dict_global,
+                                return_dense=return_dense, **kwargs)
 
 
 class DistributedStoreDao(DistributedStoreSingleFeatureSpace):
@@ -885,50 +754,5 @@ class DistributedStoreDao(DistributedStoreSingleFeatureSpace):
             for k, v in self.indices.items()
         ], axis=0, join="inner", ignore_index=True, copy=False)
 
-    def _generator(
-            self,
-            idx_gen: iter,
-            var_idx: np.ndarray,
-            obs_keys: List[str] = [],
-    ) -> iter:
-        """
-        Yields data batches as defined by index sets emitted from index generator.
-
-        :param idx_gen: Generator that yield two elements in each draw:
-            - np.ndarray: The cells to emit.
-            - List[Tuple[int, int]: Batch start and end indices.
-        :param var_idx: The features to emit.
-        :param obs_keys: .obs columns to return in the generator. These have to be a subset of the columns available
-            in self.adata_by_key.
-        :return: Generator function which yields batch_size at every invocation.
-            The generator returns a tuple of (.X, .obs).
-        """
-        # Normalise cell indices such that each organism is indexed starting at zero:
-        # This is required below because each organism is represented as its own dask array.
-        # TODO this might take a lot of time as the dask array is built.
-        t0 = time.time()
-        x = self.X
-        print(f"init X: {time.time() - t0}")
-        t0 = time.time()
-        obs = self.obs[obs_keys]
-        # Redefine index so that .loc indexing can be used instead of .iloc indexing:
-        obs.index = np.arange(0, obs.shape[0])
-        print(f"init obs: {time.time() - t0}")
-
-        def generator():
-            # Can all data sets corresponding to one organism as a single array because they share the second dimension
-            # and dask keeps expression data and obs out of memory.
-            for idx, batch_starts_ends in idx_gen:
-                idx = np.sort(idx)
-                x_temp = x[idx, :]
-                obs_temp = obs.loc[obs.index[idx], :]  # TODO better than iloc?
-                for s, e in batch_starts_ends:
-                    x_i = x_temp[s:e, :]
-                    if var_idx is not None:
-                        x_i = x_i[:, var_idx]
-                    # Exploit fact that index of obs is just increasing list of integers, so we can use the .loc[]
-                    # indexing instead of .iloc[]:
-                    obs_i = obs_temp.loc[obs_temp.index[s:e], :]
-                    yield x_i, obs_i
-
-        return generator
+    def _get_generator(self, **kwargs) -> GeneratorDask:
+        return GeneratorDask(x=self.X, obs=self.obs, **kwargs)

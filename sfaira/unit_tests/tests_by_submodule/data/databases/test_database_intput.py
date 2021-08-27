@@ -7,7 +7,7 @@ from sfaira.data.store.io_dao import read_dao
 from sfaira.unit_tests.data_for_tests.databases.utils import prepare_dsg_database
 from sfaira.unit_tests.data_for_tests.databases.consts import CELLXGENE_DATASET_ID
 from sfaira.unit_tests.data_for_tests.loaders import ASSEMBLY_HUMAN, ASSEMBLY_MOUSE
-from sfaira.unit_tests.directories import DIR_DATABASE_STORE_DAO, save_delete
+from sfaira.unit_tests.directories import DIR_DATABASE_STORE_DAO
 
 
 @pytest.mark.parametrize("database", ["cellxgene", ])

@@ -29,12 +29,14 @@ class TrainModel:
                 self.data.obs = pd.read_csv(fn_backed_obs)
         elif isinstance(data, anndata.AnnData):
             self.data = data
+        elif isinstance(data, list) and isinstance(data[0], anndata.AnnData):
+            self.data = data
         elif isinstance(data, Universe):
             self.data = data.adata
         elif isinstance(data, DistributedStoreBase):
             self.data = data
         else:
-            raise ValueError(f"did not recongize data of type {type(data)}")
+            raise ValueError(f"did not recognize data of type {type(data)}")
         self.zoo = ModelZoo()
         self._adata_ids = AdataIdsSfaira()
 
