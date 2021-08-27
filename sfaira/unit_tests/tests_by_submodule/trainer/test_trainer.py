@@ -8,7 +8,7 @@ from sfaira.train import TrainModelCelltype, TrainModelEmbedding
 from sfaira.ui import ModelZoo
 from sfaira.versions.metadata import CelltypeUniverse, OntologyCl, OntologyUberon
 
-from sfaira.unit_tests.tests_by_submodule.estimators import TestHelperEstimatorBase, TARGETS
+from sfaira.unit_tests.tests_by_submodule.estimators import HelperEstimatorBase, TARGETS
 from sfaira.unit_tests import DIR_TEMP
 
 
@@ -26,7 +26,7 @@ def get_cu():
     return fn
 
 
-class HelperTrainerBase(TestHelperEstimatorBase):
+class HelperTrainerBase(HelperEstimatorBase):
 
     data: Union[anndata.AnnData, load_store]
     trainer: Union[TrainModelCelltype, TrainModelEmbedding]

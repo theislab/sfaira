@@ -65,7 +65,7 @@ TOPOLOGY_CELLTYPE_MODEL = {
 }
 
 
-class TestHelperEstimatorBase:
+class HelperEstimatorBase:
 
     adata_ids: AdataIdsSfaira
     data: Union[anndata.AnnData, DistributedStoreSingleFeatureSpace, DistributedStoreMultipleFeatureSpaceBase]
@@ -73,7 +73,7 @@ class TestHelperEstimatorBase:
 
     def load_adata(self, organism="human", organ=None):
         dsg = prepare_dsg(load=True)
-        dsg.subset(key="doi_journal", values=["no_doi_mock1", "no_doi_mock3", "no_doi_mock3"])
+        dsg.subset(key="doi_journal", values=["no_doi_mock1", "no_doi_mock2", "no_doi_mock3"])
         if organism is not None:
             dsg.subset(key="organism", values=organism)
         if organ is not None:
@@ -84,7 +84,7 @@ class TestHelperEstimatorBase:
     def load_store(self, organism="human", organ=None):
         store_path = prepare_store(store_format="dao")
         store = load_store(cache_path=store_path, store_format="dao")
-        store.subset(attr_key="doi_journal", values=["no_doi_mock1", "no_doi_mock3", "no_doi_mock3"])
+        store.subset(attr_key="doi_journal", values=["no_doi_mock1", "no_doi_mock2", "no_doi_mock3"])
         if organism is not None:
             store.subset(attr_key="organism", values=organism)
         if organ is not None:
@@ -95,12 +95,14 @@ class TestHelperEstimatorBase:
     def load_multistore(self):
         store_path = prepare_store(store_format="dao")
         store = load_store(cache_path=store_path, store_format="dao")
-        store.subset(attr_key="doi_journal", values=["no_doi_mock1", "no_doi_mock3", "no_doi_mock3"])
+        store.subset(attr_key="doi_journal", values=["no_doi_mock1", "no_doi_mock2", "no_doi_mock3"])
         self.adata_ids = store._adata_ids_sfaira
+        assert "mouse" in store.stores.keys(), store.stores.keys()
+        assert "human" in store.stores.keys(), store.stores.keys()
         self.data = store
 
 
-class TestHelperEstimatorKeras(TestHelperEstimatorBase):
+class HelperEstimatorKeras(HelperEstimatorBase):
 
     data: Union[anndata.AnnData, DistributedStoreSingleFeatureSpace]
     estimator: Union[EstimatorKeras]
@@ -160,7 +162,7 @@ class TestHelperEstimatorKeras(TestHelperEstimatorBase):
         self.basic_estimator_test()
 
 
-class HelperEstimatorKerasEmbedding(TestHelperEstimatorKeras):
+class HelperEstimatorKerasEmbedding(HelperEstimatorKeras):
 
     estimator: EstimatorKerasEmbedding
     model_type: str
@@ -215,7 +217,7 @@ class HelperEstimatorKerasEmbedding(TestHelperEstimatorKeras):
                 assert np.allclose(prediction_embed, new_prediction_embed, rtol=1e-6, atol=1e-6)
 
 
-class TestHelperEstimatorKerasCelltype(TestHelperEstimatorKeras):
+class TestHelperEstimatorKerasCelltype(HelperEstimatorKeras):
 
     estimator: EstimatorKerasCelltype
     nleaves: int

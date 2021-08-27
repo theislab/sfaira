@@ -247,6 +247,7 @@ class GeneratorDask(GeneratorSingle):
                 # Exploit fact that index of obs is just increasing list of integers, so we can use the .loc[]
                 # indexing instead of .iloc[]:
                 obs_i = obs_temp.loc[obs_temp.index[s:e], :]
+                # TODO place map_fn outside of for loop so that vectorisation in preprocessing can be used.
                 if self.batch_size == 1:
                     for x_ii, obs_ii in split_batch(x=x_i, obs=obs_i):
                         if self.map_fn is None:
