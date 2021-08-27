@@ -235,7 +235,6 @@ class GeneratorDask(GeneratorSingle):
     def iterator(self) -> iter:
         # Can all data sets corresponding to one organism as a single array because they share the second dimension
         # and dask keeps expression data and obs out of memory.
-        batch_size = 1
 
         def g():
             obs_idx, batch_bounds = self.schedule.design

@@ -260,9 +260,9 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
         def get_idx(adata, obs, k, v, xv, dataset):
             # Use cell-wise annotation if data set-wide maps are ambiguous:
             # This can happen if the different cell-wise annotations are summarised as a union in .uns.
-            read_from_uns = getattr(self._adata_ids_sfaira, k) in adata.uns.keys() and \
-                            adata.uns[getattr(self._adata_ids_sfaira, k)] != UNS_STRING_META_IN_OBS and \
-                            getattr(self._adata_ids_sfaira, k) not in obs.columns
+            read_from_uns = (getattr(self._adata_ids_sfaira, k) in adata.uns.keys() and
+                             adata.uns[getattr(self._adata_ids_sfaira, k)] != UNS_STRING_META_IN_OBS and
+                             getattr(self._adata_ids_sfaira, k) not in obs.columns)
             read_from_obs = not read_from_uns and getattr(self._adata_ids_sfaira, k) in obs.columns
             if read_from_uns:
                 values_found = adata.uns[getattr(self._adata_ids_sfaira, k)]
