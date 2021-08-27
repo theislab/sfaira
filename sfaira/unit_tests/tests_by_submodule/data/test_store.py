@@ -155,7 +155,7 @@ def test_config(store_format: str):
 @pytest.mark.parametrize("store_format", ["h5ad", "dao"])
 @pytest.mark.parametrize("idx", [np.arange(1, 10),
                                  np.concatenate([np.arange(30, 50), np.array([1, 4, 98])])])
-@pytest.mark.parametrize("batch_size", [1,])
+@pytest.mark.parametrize("batch_size", [1, ])
 @pytest.mark.parametrize("obs_keys", [["cell_type"]])
 @pytest.mark.parametrize("randomized_batch_access", [True, False])
 def test_generator_shapes(store_format: str, idx, batch_size: int, obs_keys: List[str], randomized_batch_access: bool):
@@ -183,6 +183,10 @@ def test_generator_shapes(store_format: str, idx, batch_size: int, obs_keys: Lis
     for i, z in enumerate(g()):
         counter += 1
         x_i, obs_i = z
+        if len(x_i.shape) == 1:
+            # x is flattened if batch size is 1:
+            assert batch_size == 1
+            x_i = np.expand_dims(x_i, axis=0)
         assert x_i.shape[0] == obs_i.shape[0]
         if i == 0:
             x = x_i

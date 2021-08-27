@@ -1,10 +1,12 @@
 import anndata
-import dask
+import dask.array
 import numpy as np
 import pandas as pd
 import scipy.sparse
 import time
 from typing import Dict, List, Tuple
+
+from sfaira.data.store.batch_schedule import BatchDesignBase, BATCH_SCHEDULE
 
 
 def split_batch(x, obs):
@@ -14,7 +16,7 @@ def split_batch(x, obs):
     Often, end-user consumption batches would be observation-wise, ie yield a first dimension of length 1.
     """
     for i in range(x.shape[0]):
-        yield x[[i], :], obs.iloc[[i], :]
+        yield x[i, :], obs.iloc[[i], :]
 
 
 class GeneratorBase:
@@ -67,30 +69,40 @@ class GeneratorBase:
 
 class GeneratorSingle(GeneratorBase):
 
-    batch_start_ends: List[Tuple[int, int]]
+    batch_size: int
     obs_idx: np.ndarray
     obs_keys: List[str]
     var_idx: np.ndarray
 
-    def __init__(self, obs_idx, batch_start_ends, var_idx, obs_keys, map_fn):
+    def __init__(self, batch_schedule, batch_size, map_fn, obs_idx, obs_keys, var_idx, **kwargs):
         """
-        :param obs_idx: np.ndarray: The cells to emit.
-        :parm batch_starts_ends: List[Tuple[int, int]: Batch start and end indices.
-        :param var_idx: The features to emit.
-        :param obs_keys: .obs columns to return in the generator. These have to be a subset of the columns available
-            in self.adata_by_key.
+
+        :param batch_schedule: str or class.
+            - "basic"
+            - "balanced"
+            - class: batch_schedule needs to be a class (not instance), subclassing BatchDesignBase.
+        :param batch_size: Emission batch size. Must be 1.
         :param map_fn: Map function to apply to output tuple of raw generator. Each draw i from the generator is then:
             `yield map_fn(x[i, var_idx], obs[i, obs_keys])`
+        :param obs_idx: np.ndarray: The cells to emit.
+        :param obs_keys: .obs columns to return in the generator. These have to be a subset of the columns available
+            in self.adata_by_key.
+        :param var_idx: The features to emit.
         """
-        self.obs_idx = obs_idx
-        self.batch_starts_ends = batch_start_ends
+        if not batch_size == 1:
+            raise ValueError(f"Only batch size==1 is supported, found {batch_size}.")
+        self.batch_size = batch_size
         self.map_fn = map_fn
+        self.obs_idx = obs_idx
         self.obs_keys = obs_keys
         self.var_idx = var_idx
+        if isinstance(batch_schedule, str):
+            batch_schedule = BATCH_SCHEDULE[batch_schedule]
+        self.schedule = batch_schedule(idx=obs_idx, **kwargs)
 
     @property
     def n_batches(self) -> int:
-        return len(self.batch_starts_ends)
+        return len(self.schedule.batch_bounds)
 
 
 class GeneratorAnndata(GeneratorSingle):
@@ -99,9 +111,8 @@ class GeneratorAnndata(GeneratorSingle):
     return_dense: bool
     single_object: bool
 
-    def __init__(self, adata_dict, idx_dict_global, return_dense, obs_idx, batch_start_ends, var_idx, obs_keys, map_fn):
-        super(GeneratorAnndata, self).__init__(obs_idx=obs_idx, batch_start_ends=batch_start_ends, var_idx=var_idx,
-                                               obs_keys=obs_keys, map_fn=map_fn)
+    def __init__(self, adata_dict, idx_dict_global, return_dense, **kwargs):
+        super(GeneratorAnndata, self).__init__(**kwargs)
         self.return_dense = return_dense
         self.single_object = len(adata_dict.keys()) == 1
         self.idx_dict_global = idx_dict_global
@@ -114,8 +125,9 @@ class GeneratorAnndata(GeneratorSingle):
         # Speed up access to single object by skipping index overlap operations:
 
         def g():
-            for s, e in self.batch_starts_ends:
-                idx_i = self.obs_idx[s:e]
+            obs_idx, batch_bounds = self.schedule.design
+            for s, e in batch_bounds:
+                idx_i = obs_idx[s:e]
                 # Match adata objects that overlap to batch:
                 if self.single_object:
                     idx_i_dict = dict([(k, np.sort(idx_i)) for k in self.adata_dict.keys()])
@@ -126,45 +138,77 @@ class GeneratorAnndata(GeneratorSingle):
                         (k, np.sort([x2 for x1, x2 in zip(v1, v2) if x1 in idx_i_set]))
                         for k, (v1, v2) in self.idx_dict_global.items()
                     ])
-                # Only retain non-empty.
-                idx_i_dict = dict([(k, v) for k, v in idx_i_dict.items() if len(v) > 0])
-                # I) Prepare data matrix.
-                x = [
-                    self.adata_dict[k].X[v, :]
-                    for k, v in idx_i_dict.items()
-                ]
-                # Move from ArrayView to numpy if backed and dense:
-                x = [
-                    xx.toarray() if isinstance(xx, anndata._core.views.ArrayView) else xx
-                    for xx in x
-                ]
-                # Do dense conversion now so that col-wise indexing is not slow, often, dense conversion
-                # would be done later anyway.
-                if self.return_dense:
-                    x = [np.asarray(xx.todense()) if isinstance(xx, scipy.sparse.spmatrix) else xx for xx in x]
-                    is_dense = True
+                    # Only retain non-empty.
+                    idx_i_dict = dict([(k, v) for k, v in idx_i_dict.items() if len(v) > 0])
+                if self.batch_size == 1:
+                    # Emit each data set separately and avoid concatenation into larger chunks for emission.
+                    for k, v in idx_i_dict.items():
+                        # I) Prepare data matrix.
+                        x = self.adata_dict[k].X[v, :]
+                        # Move from ArrayView to numpy if backed and dense:
+                        if isinstance(x, anndata._core.views.ArrayView):
+                            x = x.toarray()
+                        if isinstance(x, anndata._core.views.SparseCSRView) or \
+                                isinstance(x, anndata._core.views.SparseCSCView):
+                            x = x.toarray()
+                        # Do dense conversion now so that col-wise indexing is not slow, often, dense conversion
+                        # would be done later anyway.
+                        if self.return_dense:
+                            x = np.asarray(x.todense()) if isinstance(x, scipy.sparse.spmatrix) else x
+                        if self.var_idx is not None:
+                            x = x[:, self.var_idx]
+                        # Prepare .obs.
+                        obs = self.adata_dict[k].obs[self.obs_keys].iloc[v, :]
+                        for x_i, obs_i in split_batch(x=x, obs=obs):
+                            if self.map_fn is None:
+                                yield x_i, obs_i
+                            else:
+                                output = self.map_fn(x_i, obs_i)
+                                if output is not None:
+                                    yield output
                 else:
-                    is_dense = isinstance(x[0], np.ndarray)
-                # Concatenate blocks in observation dimension:
-                if len(x) > 1:
-                    if is_dense:
-                        x = np.concatenate(x, axis=0)
+                    # Concatenates slices first before returning. Note that this is likely slower than emitting by
+                    # observation in most scenarios.
+                    # I) Prepare data matrix.
+                    x = [
+                        self.adata_dict[k].X[v, :]
+                        for k, v in idx_i_dict.items()
+                    ]
+                    # Move from ArrayView to numpy if backed and dense:
+                    x = [
+                        xx.toarray()
+                        if (isinstance(xx, anndata._core.views.ArrayView) or
+                            isinstance(xx, anndata._core.views.SparseCSRView) or
+                            isinstance(xx, anndata._core.views.SparseCSCView))
+                        else xx
+                        for xx in x
+                    ]
+                    # Do dense conversion now so that col-wise indexing is not slow, often, dense conversion
+                    # would be done later anyway.
+                    if self.return_dense:
+                        x = [np.asarray(xx.todense()) if isinstance(xx, scipy.sparse.spmatrix) else xx for xx in x]
+                        is_dense = True
                     else:
-                        x = scipy.sparse.vstack(x)
-                else:
-                    x = x[0]
-                if self.var_idx is not None:
-                    x = x[:, self.var_idx]
-                # Prepare .obs.
-                obs = pd.concat([
-                    self.adata_dict[k].obs[self.obs_keys].iloc[v, :]
-                    for k, v in idx_i_dict.items()
-                ], axis=0, join="inner", ignore_index=True, copy=False)
-                for x_i, obs_i in split_batch(x=x, obs=obs):
+                        is_dense = isinstance(x[0], np.ndarray)
+                    # Concatenate blocks in observation dimension:
+                    if len(x) > 1:
+                        if is_dense:
+                            x = np.concatenate(x, axis=0)
+                        else:
+                            x = scipy.sparse.vstack(x)
+                    else:
+                        x = x[0]
+                    if self.var_idx is not None:
+                        x = x[:, self.var_idx]
+                    # Prepare .obs.
+                    obs = pd.concat([
+                        self.adata_dict[k].obs[self.obs_keys].iloc[v, :]
+                        for k, v in idx_i_dict.items()
+                    ], axis=0, join="inner", ignore_index=True, copy=False)
                     if self.map_fn is None:
-                        yield x_i, obs_i
+                        yield x, obs
                     else:
-                        output = self.map_fn(x_i, obs_i)
+                        output = self.map_fn(x, obs)
                         if output is not None:
                             yield output
 
@@ -176,38 +220,47 @@ class GeneratorDask(GeneratorSingle):
     x: dask.array
     obs: pd.DataFrame
 
-    def __init__(self, x, obs, obs_idx, batch_start_ends, var_idx, obs_keys, map_fn):
-        super(GeneratorDask, self).__init__(obs_idx=np.sort(obs_idx), batch_start_ends=batch_start_ends,
-                                            var_idx=var_idx, obs_keys=obs_keys, map_fn=map_fn)
+    def __init__(self, x, obs, **kwargs):
+        super(GeneratorDask, self).__init__(**kwargs)
         t0 = time.time()
         self.x = x
         print(f"init X: {time.time() - t0}")
         t0 = time.time()
         self.obs = obs[self.obs_keys]
         # Redefine index so that .loc indexing can be used instead of .iloc indexing:
-        obs.index = np.arange(0, obs.shape[0])
+        self.obs.index = np.arange(0, obs.shape[0])
         print(f"init obs: {time.time() - t0}")
 
     @property
     def iterator(self) -> iter:
         # Can all data sets corresponding to one organism as a single array because they share the second dimension
         # and dask keeps expression data and obs out of memory.
+        batch_size = 1
 
         def g():
-            x_temp = self.x[self.obs_idx, :]
-            obs_temp = self.obs.loc[self.obs.index[self.obs_idx], :]  # TODO better than iloc?
-            for s, e in self.batch_starts_ends:
+            obs_idx, batch_bounds = self.schedule.design
+            x_temp = self.x[obs_idx, :]
+            obs_temp = self.obs.loc[self.obs.index[obs_idx], :]  # TODO better than iloc?
+            for s, e in batch_bounds:
                 x_i = x_temp[s:e, :]
                 if self.var_idx is not None:
                     x_i = x_i[:, self.var_idx]
                 # Exploit fact that index of obs is just increasing list of integers, so we can use the .loc[]
                 # indexing instead of .iloc[]:
                 obs_i = obs_temp.loc[obs_temp.index[s:e], :]
-                for x_ii, obs_ii in split_batch(x=x_i, obs=obs_i):
+                if self.batch_size == 1:
+                    for x_ii, obs_ii in split_batch(x=x_i, obs=obs_i):
+                        if self.map_fn is None:
+                            yield x_ii, obs_ii
+                        else:
+                            output = self.map_fn(x_ii, obs_ii)
+                            if output is not None:
+                                yield output
+                else:
                     if self.map_fn is None:
-                        yield x_ii, obs_ii
+                        yield x_i, obs_i
                     else:
-                        output = self.map_fn(x_ii, obs_ii)
+                        output = self.map_fn(x_i, obs_i)
                         if output is not None:
                             yield output
 

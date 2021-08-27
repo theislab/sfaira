@@ -309,27 +309,9 @@ class EstimatorKeras:
             raise ValueError("md5 of %s did not match expectation" % fn)
 
     @abc.abstractmethod
-    def _get_generator(
-            self,
-            idx: Union[np.ndarray, None],
-            mode: str,
-            weighted: bool,
-            retrieval_batch_size: int,
-            randomized_batch_access: bool,
-    ) -> GeneratorSingle:
-
+    def _get_generator(self, **kwargs) -> GeneratorSingle:
         """
         Yield a generator based on which a tf dataset can be built.
-
-        :param idx: Indices of data set to include in generator.
-        :param mode:
-        :param weighted:
-        :param retrieval_batch_size: Number of observations read from disk in each batched access.
-        :param randomized_batch_access: Whether to randomize batches during reading (in generator). Lifts necessity of
-            using a shuffle buffer on generator, however, batch composition stays unchanged over epochs unless there
-            is overhangs in retrieval_batch_size in the raw data files, which often happens and results in modest
-            changes in batch composition.
-        :return:
         """
         pass
 
@@ -338,14 +320,13 @@ class EstimatorKeras:
         pass
 
     def get_one_time_tf_dataset(self, idx, mode, batch_size=None, cache=None, prefetch=None, shuffle_buffer_size=None,
-                                retrieval_batch_size=None, randomized_batch_access=None, weighted=None):
+                                retrieval_batch_size=None, randomized_batch_access=None, **kwargs):
         batch_size = 128 if prefetch is None else batch_size
         cache = False if cache is None else cache
         prefetch = 10 if prefetch is None else prefetch
         shuffle_buffer_size = 0 if shuffle_buffer_size is None else shuffle_buffer_size
         retrieval_batch_size = 128 if retrieval_batch_size is None else retrieval_batch_size
         randomized_batch_access = False if randomized_batch_access is None else randomized_batch_access
-        weighted = False if weighted is None else weighted
         tf_kwargs = {
             "batch_size": batch_size,
             "cache": cache,
@@ -353,7 +334,7 @@ class EstimatorKeras:
             "shuffle_buffer_size": min(shuffle_buffer_size, len(idx))
         }
         train_gen = self._get_generator(idx=idx, mode=mode, retrieval_batch_size=retrieval_batch_size,
-                                        randomized_batch_access=randomized_batch_access, weighted=weighted)
+                                        randomized_batch_access=randomized_batch_access, **kwargs)
         train_tf_dataset_kwargs = self._tf_dataset_kwargs(mode=mode)
         train_dataset = train_gen.adaptor(generator_type="tensorflow", **train_tf_dataset_kwargs)
         train_dataset = process_tf_dataset(dataset=train_dataset, mode=mode, **tf_kwargs)
@@ -604,18 +585,14 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             self,
             idx: Union[np.ndarray, None],
             mode: str,
-            weighted: bool,
             retrieval_batch_size: int,
             randomized_batch_access: bool,
+            **kwargs
     ):
-        if idx is None:
-            idx = np.arange(0, self.data.n_obs)
-
+        # Define constants used by map_fn in outer name space so that they are not created for each sample.
         model_type = "vae" if self.model_type[:3] == "vae" else "ae"
 
         def map_fn(x_sample, obs_sample):
-            if isinstance(x_sample, scipy.sparse.csr_matrix):
-                x_sample = x_sample.todense()
             x_sample = np.asarray(x_sample).flatten()
             sf_sample = prepare_sf(x=x_sample).flatten()[0]
             if mode == 'predict':
@@ -972,14 +949,12 @@ class EstimatorKerasCelltype(EstimatorKeras):
             self,
             idx: Union[np.ndarray, None],
             mode: str,
-            weighted: bool,
             retrieval_batch_size: int,
             randomized_batch_access: bool,
+            weighted: bool,
+            **kwargs
     ) -> GeneratorSingle:
-        if idx is None:
-            idx = np.arange(0, self.data.n_obs)
-
-        # Prepare data reading according to whether anndata is backed or not:
+        # Define constants used by map_fn in outer name space so that they are not created for each sample.
         if weighted:
             raise ValueError("using weights with store is not supported yet")
         yield_labels = mode in ["train", "train_val", "eval", "test"]
@@ -987,8 +962,6 @@ class EstimatorKerasCelltype(EstimatorKeras):
             onehot_encoder = self._one_hot_encoder()
 
         def map_fn(x_sample, obs_sample):
-            if isinstance(x_sample, scipy.sparse.csr_matrix):
-                x_sample = x_sample.todense()
             x_sample = np.asarray(x_sample).flatten()
             if yield_labels:
                 y_sample = onehot_encoder(obs_sample[self._adata_ids.cell_type + self._adata_ids.onto_id_suffix].values)
@@ -1031,7 +1004,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
         idx = self._process_idx_for_eval(idx=self.idx_test)
         if len(idx) > 0:
             dataset = self.get_one_time_tf_dataset(
-                idx=idx, batch_size=batch_size, mode='predict', retrieval_batch_size=128)
+                idx=idx, batch_size=batch_size, mode='predict', retrieval_batch_size=128, weighted=False)
             return self.model.training_model.predict(x=dataset)
         else:
             return np.array([])
@@ -1045,7 +1018,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
         idx = self._process_idx_for_eval(idx=self.idx_test)
         if len(idx) > 0:
             dataset = self.get_one_time_tf_dataset(
-                idx=idx, batch_size=batch_size, mode='eval', retrieval_batch_size=128)
+                idx=idx, batch_size=batch_size, mode='eval', retrieval_batch_size=128, weighted=False)
             y_true = []
             for _, y, _ in dataset.as_numpy_iterator():
                 y_true.append(y)

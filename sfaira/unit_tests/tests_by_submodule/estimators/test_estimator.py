@@ -415,6 +415,8 @@ def test_dataset_size(batch_size: int, randomized_batch_access: bool):
                                                   randomized_batch_access=randomized_batch_access)
     x_train2_shape = 0
     for x, _ in g_train.iterator():
+        if len(x.shape) == 1:
+            x = np.expand_dims(x, axis=0)
         x_train2_shape += x.shape[0]
     assert x_train_shape == x_train2_shape
     assert x_train_shape == len(idx_train)

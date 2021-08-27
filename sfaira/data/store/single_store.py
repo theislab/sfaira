@@ -12,7 +12,6 @@ from typing import Dict, List, Tuple, Union
 from sfaira.consts import AdataIdsSfaira, OCS
 from sfaira.data.dataloaders.base.utils import is_child, UNS_STRING_META_IN_OBS
 from sfaira.data.store.base import DistributedStoreBase
-from sfaira.data.store.batch_designers import BATCH_DESIGNS
 from sfaira.data.store.generators import GeneratorAnndata, GeneratorDask, GeneratorSingle
 from sfaira.versions.genomes.genomes import GenomeContainer
 
@@ -453,8 +452,8 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
     @abc.abstractmethod
     def _get_generator(
             self,
+            batch_schedule,
             obs_idx: np.ndarray,
-            batch_start_ends: List[Tuple[int, int]],
             var_idx: Union[np.ndarray, None],
             map_fn,
             obs_keys: List[str],
@@ -463,9 +462,7 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
         """
         Yields an instance of GeneratorSingle which can emit an iterator over the data defined in the arguments here.
 
-        :param obs_idx: Generator that yield two elements in each draw:
-            - np.ndarray: The cells to emit.
-            - List[Tuple[int, int]: Batch start and end indices.
+        :param obs_idx: The observations to emit.
         :param var_idx: The features to emit.
         :param map_fn: Map functino to apply to output tuple of raw generator. Each draw i from the generator is then:
             `yield map_fn(x[i, var_idx], obs[i, obs_keys])`
@@ -485,8 +482,7 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
             return_dense: bool = True,
             randomized_batch_access: bool = False,
             random_access: bool = False,
-            idx_generator: str = "base",
-            idx_generator_kwarg: dict = {},
+            batch_schedule: str = "base",
             **kwargs
     ) -> GeneratorSingle:
         """
@@ -517,7 +513,7 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
         :param random_access: Whether to fully shuffle observations before batched access takes place. May
             slow down access compared randomized_batch_access and to no randomization.
             Do not use randomized_batch_access and random_access.
-        :param idx_generator: Re
+        :param batch_schedule: Re
             - "base"
             - "balanced": idx_generator_kwarg need to include:
                 - "balance_obs": .obs column key to balance samples from each data set over.
@@ -525,21 +521,17 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
                 - "balance_damping": Damping to apply to class weighting induced by balance_obs. The class-wise
                     wise sampling probabilities become `max(balance_damping, (1. - frequency))`
             - function: This can be a function that satisfies the interface. It will also receive idx_generator_kwarg.
-        :param idx_generator_kwarg: kwargs for idx_generator chosen.
+        :param kwargs: kwargs for idx_generator chosen.
         :return: Generator function which yields batch_size at every invocation.
             The generator returns a tuple of (.X, .obs).
         """
-        idx, var_idx, batch_size, retrival_batch_size = self._index_curation_helper(
+        obs_idx, var_idx, batch_size, retrival_batch_size = self._index_curation_helper(
             idx=idx, batch_size=batch_size, retrival_batch_size=retrival_batch_size)
-        if randomized_batch_access and random_access:
-            raise ValueError("Do not use randomized_batch_access and random_access.")
-        if isinstance(idx_generator, str):
-            idx_generator = BATCH_DESIGNS[idx_generator]
-        obs_idx, batch_start_ends = idx_generator(idx=idx, batch_size=batch_size,
-                                                  randomized_batch_access=randomized_batch_access,
-                                                  random_access=random_access)
-        gen = self._get_generator(obs_idx=obs_idx, batch_start_ends=batch_start_ends, var_idx=var_idx,
-                                  obs_keys=obs_keys, map_fn=map_fn)
+        batch_schedule_kwargs = {"randomized_batch_access": randomized_batch_access,
+                                 "random_access": random_access,
+                                 "retrival_batch_size": retrival_batch_size}
+        gen = self._get_generator(batch_schedule=batch_schedule, batch_size=batch_size, map_fn=map_fn, obs_idx=obs_idx,
+                                  obs_keys=obs_keys, var_idx=var_idx, **batch_schedule_kwargs, **kwargs)
         return gen
 
     @property
