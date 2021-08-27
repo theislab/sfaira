@@ -24,7 +24,7 @@ class BatchDesignBase:
 
     def __init__(self, idx, retrival_batch_size: int, randomized_batch_access: bool, random_access: bool, **kwargs):
         self._batch_bounds = _get_batch_start_ends(idx=idx, batch_size=retrival_batch_size)
-        self._idx = idx
+        self._idx = np.sort(idx)  # Sorted indices improve accession efficiency in some cases.
         if randomized_batch_access and random_access:
             raise ValueError("Do not use randomized_batch_access and random_access.")
         self.randomized_batch_access = randomized_batch_access
