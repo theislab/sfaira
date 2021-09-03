@@ -96,16 +96,17 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
         """
         Validate global index vector.
         """
-        assert np.max(idx) < self.n_obs, f"maximum of supplied index vector {np.max(idx)} exceeds number of modelled " \
-                                         f"observations {self.n_obs}"
-        assert len(idx) == len(np.unique(idx)), f"there were {len(idx) - len(np.unique(idx))} repeated indices in idx"
-        if isinstance(idx, np.ndarray):
-            assert len(idx.shape) == 1, idx.shape
-            assert idx.dtype == np.int
-        else:
-            assert isinstance(idx, list)
-            assert isinstance(idx[0], int) or isinstance(idx[0], np.int)
-            idx = np.asarray(idx)
+        if len(idx) > 0:
+            assert np.max(idx) < self.n_obs, f"maximum of supplied index vector {np.max(idx)} exceeds number of " \
+                                             f"modelled observations {self.n_obs}"
+            assert len(idx) == len(np.unique(idx)), f"repeated indices in idx: {len(idx) - len(np.unique(idx))}"
+            if isinstance(idx, np.ndarray):
+                assert len(idx.shape) == 1, idx.shape
+                assert idx.dtype == np.int
+            else:
+                assert isinstance(idx, list)
+                assert isinstance(idx[0], int) or isinstance(idx[0], np.int)
+        idx = np.asarray(idx)
         return idx
 
     @property
