@@ -4,8 +4,8 @@ from typing import List, Tuple
 
 def _get_batch_start_ends(idx: np.ndarray, batch_size: int):
     n_obs = len(idx)
-    remainder = n_obs % batch_size
-    n_batches = int(n_obs // batch_size + int(remainder > 0))
+    remainder = n_obs % batch_size if n_obs > 0 else 0
+    n_batches = int(n_obs // batch_size + int(remainder > 0)) if n_obs > 0 else 0
     batch_starts_ends = [
         (int(x * batch_size), int(np.minimum((x * batch_size) + batch_size, n_obs)))
         for x in np.arange(0, n_batches)
