@@ -147,11 +147,11 @@ UBERON
 
 
 def test_uberon_loading():
-    _ = OntologyUberon()
+    _ = OntologyUberon(branch="2019-11-22")
 
 
 def test_uberon_subsetting():
-    ou = OntologyUberon()
+    ou = OntologyUberon(branch="2019-11-22")
     assert ou.is_a(query="lobe of lung", reference="lung")
     assert ou.is_a(query="lobe of lung", reference="lobe of lung")
     assert not ou.is_a(query="lung", reference="lobe of lung")

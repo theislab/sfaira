@@ -586,11 +586,12 @@ class OntologyUberon(OntologyExtendedObo):
 
     def __init__(
             self,
+            branch: str,
             recache: bool = False,
             **kwargs
     ):
         obofile = cached_load_obo(
-            url="http://purl.obolibrary.org/obo/uberon.obo",
+            url=f"https://svn.code.sf.net/p/obo/svn/uberon/releases/{branch}/ext.obo",
             ontology_cache_dir="uberon",
             ontology_cache_fn="uberon.obo",
             recache=recache,
