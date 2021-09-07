@@ -8,7 +8,7 @@ from typing import List, Union
 import warnings
 import time
 
-from sfaira.consts import AdataIdsSfaira, AdataIds
+from sfaira.consts import AdataIdsSfaira, AdataIds, OCS
 from sfaira.data import DatasetInteractive
 from sfaira.estimators import EstimatorKerasEmbedding, EstimatorKerasCelltype
 from sfaira.ui.model_zoo import ModelZoo
@@ -354,6 +354,11 @@ class UserInterface:
         :param obs_key_celltypes: .obs column name which contains cell type labels.
         :param class_maps: Cell type class maps.
         """
+        if self.zoo_embedding.model_organism is not None and self.zoo_celltype.model_organism is not None:
+            assert self.zoo_embedding.model_organism == self.zoo_celltype.model_organism, \
+                "Model ids set for embedding and celltype model need to correspond to the same organism"
+            assert self.zoo_embedding.model_organ == self.zoo_celltype.model_organ, \
+                "Model ids set for embedding and celltype model need to correspond to the same organ"
         if self.zoo_embedding.model_organism is not None:
             organism = self.zoo_embedding.model_organism
             organ = self.zoo_embedding.model_organ
@@ -365,6 +370,12 @@ class UserInterface:
 
         if gene_ens_col is None and gene_symbol_col is None:
             raise ValueError("Please provide either the gene_ens_col or the gene_symbol_col argument.")
+
+        # handle organ names with stripped spaces
+        if organ not in OCS.organ.node_names:
+            organ_dict = {i.replace(" ", ""): i for i in OCS.organ.node_names}
+            assert organ in organ_dict, f"Organ {organ} is not a valid nodename in the UBERON organ ontology"
+            organ = {i.replace(" ", ""): i for i in OCS.organ.node_names}[organ]
 
         self.data = DatasetInteractive(
             data=data,

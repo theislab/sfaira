@@ -16,7 +16,7 @@ class Dataset(DatasetBase):
         self.assay_sc = "DroNc-seq"
         self.author = "Habib"
         self.disease = "healthy"
-        self.doi = "10.1038/nmeth.4407"
+        self.doi_journal = "10.1038/nmeth.4407"
         self.normalization = "raw"
         self.organ = "brain"
         self.organism = "human"
@@ -24,7 +24,7 @@ class Dataset(DatasetBase):
         self.year = 2017
 
         self.gene_id_symbols_var_key = "index"
-        self.cell_types_original_obs_key = "CellType"
+        self.cell_type_obs_key = "CellType"
 
         self.set_dataset_id(idx=1)
 

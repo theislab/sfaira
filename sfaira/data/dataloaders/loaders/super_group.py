@@ -2,7 +2,7 @@ import pydoc
 import os
 from typing import List, Union
 from warnings import warn
-from sfaira.data import DatasetSuperGroup, DatasetGroupDirectoryOriented
+from sfaira.data.dataloaders.base.dataset_group import DatasetSuperGroup, DatasetGroupDirectoryOriented
 
 
 class DatasetSuperGroupLoaders(DatasetSuperGroup):
@@ -33,7 +33,7 @@ class DatasetSuperGroupLoaders(DatasetSuperGroup):
         for f in os.listdir(cwd):
             if os.path.isdir(os.path.join(cwd, f)):  # only directories
                 if f[:len(dir_prefix)] == dir_prefix and f not in dir_exclude:  # Narrow down to data set directories
-                    path_dsg = pydoc.locate(f"sfaira.data.dataloaders.loaders.{f}.FILE_PATH")
+                    path_dsg = str(pydoc.locate(f"sfaira.data.dataloaders.loaders.{f}.FILE_PATH"))
                     if path_dsg is not None:
                         dataset_groups.append(DatasetGroupDirectoryOriented(
                             file_base=path_dsg,

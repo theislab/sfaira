@@ -14,9 +14,9 @@ class Dataset(DatasetBase):
         self.download_url_data = "https://datashare.is.ed.ac.uk/bitstream/handle/10283/3433/tissue.rdata"
         self.download_url_meta = None
 
-        self.assay_sc = "10x technology"
+        self.assay_sc = "10x 3' v2"
         self.author = "Ramachandran"
-        self.doi = "10.1038/s41586-019-1631-3"
+        self.doi_journal = "10.1038/s41586-019-1631-3"
         self.normalization = "raw"
         self.organ = "liver"
         self.organism = "human"
@@ -25,7 +25,7 @@ class Dataset(DatasetBase):
 
         self.gene_id_symbols_var_key = "index"
 
-        self.cell_types_original_obs_key = "annotation_lineage"
+        self.cell_type_obs_key = "annotation_lineage"
         self.state_exact_obs_key = "condition"
 
         self.set_dataset_id(idx=1)

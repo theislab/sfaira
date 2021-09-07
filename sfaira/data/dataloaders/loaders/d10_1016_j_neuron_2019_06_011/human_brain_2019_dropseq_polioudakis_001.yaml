@@ -4,9 +4,9 @@ dataset_structure:
 dataset_wise:
     author:
         - "Polioudakis"
-    doi:
-        - "10.1016/j.neuron.2019.06.011"
-    download_url_data:
+    doi_journal: "10.1016/j.neuron.2019.06.011"
+    doi_preprint:
+    download_url_data: 
         - "manual,sc_dev_cortex_geschwind.zip,http://solo.bmap.ucla.edu/shiny/webapp"
     download_url_meta:
     normalization: "raw"
@@ -43,7 +43,7 @@ dataset_or_observation_wise:
     tech_sample:
     tech_sample_obs_key: "Index"
 observation_wise:
-    cell_types_original_obs_key: "celltype"
+    cell_type_obs_key: "celltype"
 feature_wise:
     gene_id_ensembl_var_key:
     gene_id_symbols_var_key: "index"

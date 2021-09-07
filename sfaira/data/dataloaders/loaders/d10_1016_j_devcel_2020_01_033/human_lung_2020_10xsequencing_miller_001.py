@@ -13,10 +13,10 @@ class Dataset(DatasetBase):
         self.download_url_data = "https://covid19.cog.sanger.ac.uk/miller20.processed.h5ad"
         self.download_url_meta = None
 
-        self.assay_sc = "10x technology"
+        self.assay_sc = "10x 3' v2"
         self.author = "Miller"
         self.disease = "healthy"
-        self.doi = "10.1016/j.devcel.2020.01.033"
+        self.doi_journal = "10.1016/j.devcel.2020.01.033"
         self.normalization = "raw"
         self.organ = "lung"
         self.organism = "human"
@@ -25,7 +25,7 @@ class Dataset(DatasetBase):
         self.year = 2020
 
         self.gene_id_symbols_var_key = "index"
-        self.cell_types_original_obs_key = "Cell_type"
+        self.cell_type_obs_key = "Cell_type"
 
         self.set_dataset_id(idx=1)
 

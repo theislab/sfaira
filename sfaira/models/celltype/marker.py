@@ -6,7 +6,7 @@ from typing import Union
 
 from sfaira.versions.metadata import CelltypeUniverse
 from sfaira.versions.topologies import TopologyContainer
-from sfaira.models.base import BasicModelKeras
+from sfaira.models.celltype.base import BasicModelKerasCelltype
 from sfaira.models.pp_layer import PreprocInput
 
 
@@ -40,7 +40,7 @@ class LearnedThresholdLayer(tf.keras.layers.Layer):
         return tf.nn.sigmoid(x)
 
 
-class CellTypeMarker(BasicModelKeras):
+class CellTypeMarker(BasicModelKerasCelltype):
     """
     Marker gene-based cell type classifier: Learns whether or not each gene exceeds requires threshold
     and learns cell type assignment as linear combination of these marker gene presence probabilities.

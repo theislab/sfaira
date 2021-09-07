@@ -76,18 +76,19 @@ class Dataset(DatasetBase):
                                  f"{self.sample_fn}"
         self.download_url_meta = None
 
-        self.cell_types_original_obs_key = "cell_ontology_class"
+        self.cell_type_obs_key = "cell_ontology_class"
         self.development_stage_obs_key = "development_stage"
         self.sex_obs_key = "sex"
         # ToDo: further anatomical information for subtissue in "subtissue"?
 
         self.author = "Pisco"
         self.disease = "healthy"
-        self.doi = "10.1101/661728"
+        self.doi_journal = "10.1038/s41586-020-2496-1"
+        self.doi_preprint = "10.1101/661728"
         self.normalization = "norm"
         self.organism = "mouse"
         self.organ = organ
-        self.assay_sc = "10x technology" if self.sample_fn.split("-")[3] == "droplet" else "Smart-seq2"
+        self.assay_sc = "10x 3' v2" if self.sample_fn.split("-")[3] == "droplet" else "Smart-seq2"
         self.year = 2019
         self.sample_source = "primary_tissue"
 
