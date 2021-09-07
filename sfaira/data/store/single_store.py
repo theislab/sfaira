@@ -408,8 +408,6 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
         # vectors.
         var_names = self._validate_feature_space_homogeneity()
         # Use feature space sub-selection based on assembly if provided, will use full feature space otherwise.
-        import time
-        t0 = time.time()
         if self.genome_container is not None:
             var_names_target = self.genome_container.ensembl
             # Check if index vector is just full ordered list of indices, in this case, sub-setting is unnecessary.

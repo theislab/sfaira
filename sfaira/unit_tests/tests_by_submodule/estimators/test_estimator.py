@@ -404,7 +404,6 @@ def test_dataset_size(batch_size: int, randomized_batch_access: bool):
     test_estim.load_estimator(model_type="linear", data_type="store", feature_space="reduced", test_split=0.2,
                               organism="human")
     idx_train = test_estim.estimator.idx_train
-    shuffle_buffer_size = None if randomized_batch_access else 2
     ds_train = test_estim.estimator.get_one_time_tf_dataset(idx=idx_train, batch_size=batch_size, mode='eval')
     x_train_shape = 0
     for x, _ in ds_train.as_numpy_iterator():
