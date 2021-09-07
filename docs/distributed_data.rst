@@ -1,6 +1,9 @@
+.. _distributed_data_rst:
+
 Distributed data
 ================
 
+For a high-level overview of data management in sfaira, read :ref:`data_life_cycle_rst` first.
 Sfaira supports usage of distributed data for model training and execution.
 The tools are summarized under `sfaira.data.store`.
 In contrast to using an instance of AnnData in memory, these tools can be used to use data sets that are saved
