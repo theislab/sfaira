@@ -7,7 +7,7 @@ import pathlib
 from sfaira.versions.genomes import GenomeContainer
 
 from sfaira.unit_tests.directories import DIR_DATA_LOADERS_CACHE, DIR_DATA_LOADERS_STORE_DAO, \
-    DIR_DATA_LOADERS_STORE_H5AD
+    DIR_DATA_LOADERS_STORE_H5AD, save_delete
 from .consts import ASSEMBLY_HUMAN, ASSEMBLY_MOUSE
 from .loaders import DatasetSuperGroupMock
 
@@ -23,9 +23,9 @@ def _create_adata(celltypes, ncells, ngenes, assembly) -> anndata.AnnData:
     genes = gc.ensembl[:ngenes]
     x = scipy.sparse.csc_matrix(np.random.randint(low=0, high=100, size=(ncells, ngenes)))
     var = pd.DataFrame(index=genes)
-    obs = pd.DataFrame({
-        "free_annotation": [celltypes[i] for i in np.random.choice(a=[0, 1], size=ncells, replace=True)]
-    }, index=["cell_" + str(i) for i in range(ncells)])
+    obs = pd.DataFrame({}, index=["cell_" + str(i) for i in range(ncells)])
+    if len(celltypes) > 0:
+        obs["free_annotation"] = [celltypes[i] for i in np.random.choice(len(celltypes), size=ncells, replace=True)]
     adata = anndata.AnnData(X=x, obs=obs, var=var)
     return adata
 
@@ -71,11 +71,15 @@ def prepare_store(store_format: str, rewrite: bool = False, rewrite_store: bool 
         else:
             compression_kwargs = {}
         if store_format == "dao":
-            anticipated_fn = os.path.join(dir_store_formatted, k)
+            anticipated_fn = os.path.join(dir_store_formatted, ds.doi_cleaned_id)
         elif store_format == "h5ad":
-            anticipated_fn = os.path.join(dir_store_formatted, k + ".h5ad")
+            anticipated_fn = os.path.join(dir_store_formatted, ds.doi_cleaned_id + ".h5ad")
         else:
             assert False
+        if rewrite_store and os.path.exists(anticipated_fn):
+            # Can't write if h5ad already exists.
+            # Delete store to writing if forced.
+            save_delete(anticipated_fn)
         # Only rewrite if necessary
         if rewrite_store or not os.path.exists(anticipated_fn):
             ds = _load_script(dsg=ds, rewrite=rewrite, match_to_reference=MATCH_TO_REFERENCE)

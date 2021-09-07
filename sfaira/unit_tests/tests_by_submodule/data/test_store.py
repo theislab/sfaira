@@ -13,21 +13,63 @@ from sfaira.versions.genomes.genomes import GenomeContainer
 from sfaira.unit_tests.data_for_tests.loaders import ASSEMBLY_MOUSE, prepare_dsg, prepare_store
 
 
+def _get_single_store(store_format: str):
+    store_path = prepare_store(store_format=store_format)
+    stores = load_store(cache_path=store_path, store_format=store_format)
+    stores.subset(attr_key="organism", values=["mouse"])
+    store = stores.stores["mouse"]
+    return store
+
+
 @pytest.mark.parametrize("store_format", ["h5ad", "dao"])
 def test_fatal(store_format: str):
     """
     Test if basic methods abort.
     """
     store_path = prepare_store(store_format=store_format)
-    store = load_store(cache_path=store_path, store_format=store_format)
-    store.subset(attr_key="organism", values=["mouse"])
-    _ = store.n_obs
-    _ = store.n_vars
-    _ = store.var_names
-    _ = store.shape
-    _ = store.obs
-    _ = store.stores["mouse"].indices
-    _ = store.genome_containers
+    stores = load_store(cache_path=store_path, store_format=store_format)
+    stores.subset(attr_key="organism", values=["mouse"])
+    store = stores.stores["mouse"]
+    # Test both single and multi-store:
+    for x in [store, stores]:
+        _ = x.n_obs
+        _ = x.n_vars
+        _ = x.var_names
+        _ = x.shape
+        _ = x.obs
+        _ = x.indices
+        _ = x.genome_container
+
+
+@pytest.mark.parametrize("store_format", ["h5ad", "dao"])
+@pytest.mark.parametrize("as_sparse", [True, False])
+def test_x_slice(store_format: str, as_sparse: bool):
+    """
+    Test if basic methods abort.
+    """
+    store = _get_single_store(store_format=store_format)
+    data = store.X_slice(idx=np.arange(0, 5), as_sparse=as_sparse)
+    assert data.shape[0] == 5
+    if as_sparse:
+        assert isinstance(data, scipy.sparse.csr_matrix)
+    else:
+        assert isinstance(data, np.ndarray)
+
+
+@pytest.mark.parametrize("store_format", ["h5ad", "dao"])
+@pytest.mark.parametrize("as_sparse", [True, False])
+def test_adata_slice(store_format: str, as_sparse: bool):
+    """
+    Test if basic methods abort.
+    """
+    store = _get_single_store(store_format=store_format)
+    data = store.adata_slice(idx=np.arange(0, 5), as_sparse=as_sparse)
+    assert data.shape[0] == 5
+    assert isinstance(data, anndata.AnnData)
+    if as_sparse:
+        assert isinstance(data.X, scipy.sparse.csr_matrix)
+    else:
+        assert isinstance(data.X, np.ndarray)
 
 
 @pytest.mark.parametrize("store_format", ["h5ad", "dao"])
@@ -37,7 +79,7 @@ def test_data(store_format: str):
     """
     # Run standard streamlining workflow on dsg and compare to object relayed via store.
     # Prepare dsg.
-    dsg = prepare_dsg(rewrite=False, load=True)
+    dsg = prepare_dsg(load=True)
     # Prepare store.
     # Rewriting store to avoid mismatch of randomly generated data in cache and store.
     store_path = prepare_store(store_format=store_format, rewrite=False, rewrite_store=True)
@@ -113,8 +155,8 @@ def test_config(store_format: str):
 @pytest.mark.parametrize("store_format", ["h5ad", "dao"])
 @pytest.mark.parametrize("idx", [np.arange(1, 10),
                                  np.concatenate([np.arange(30, 50), np.array([1, 4, 98])])])
-@pytest.mark.parametrize("batch_size", [1, 7])
-@pytest.mark.parametrize("obs_keys", [["cell_ontology_class"]])
+@pytest.mark.parametrize("batch_size", [1, ])
+@pytest.mark.parametrize("obs_keys", [["cell_type"]])
 @pytest.mark.parametrize("randomized_batch_access", [True, False])
 def test_generator_shapes(store_format: str, idx, batch_size: int, obs_keys: List[str], randomized_batch_access: bool):
     """
@@ -125,13 +167,14 @@ def test_generator_shapes(store_format: str, idx, batch_size: int, obs_keys: Lis
     store.subset(attr_key="organism", values=["mouse"])
     gc = GenomeContainer(assembly=ASSEMBLY_MOUSE)
     gc.subset(**{"biotype": "protein_coding"})
-    store.genome_containers = gc
-    g, _ = store.generator(
+    store.genome_container = gc
+    g = store.generator(
         idx={"mouse": idx},
         batch_size=batch_size,
         obs_keys=obs_keys,
         randomized_batch_access=randomized_batch_access,
     )
+    g = g.iterator
     nobs = len(idx) if idx is not None else store.n_obs
     batch_sizes = []
     x = None
@@ -140,6 +183,10 @@ def test_generator_shapes(store_format: str, idx, batch_size: int, obs_keys: Lis
     for i, z in enumerate(g()):
         counter += 1
         x_i, obs_i = z
+        if len(x_i.shape) == 1:
+            # x is flattened if batch size is 1:
+            assert batch_size == 1
+            x_i = np.expand_dims(x_i, axis=0)
         assert x_i.shape[0] == obs_i.shape[0]
         if i == 0:
             x = x_i

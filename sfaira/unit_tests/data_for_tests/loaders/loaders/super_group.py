@@ -51,7 +51,7 @@ class DatasetSuperGroupMock(DatasetSuperGroup):
                                     sample_fns=None,
                                     yaml_path=fn_yaml,
                                 )
-                                x.load_ontology_class_map(fn=os.path.join(path_module, file_module + ".tsv"))
+                                x.read_ontology_class_map(fn=os.path.join(path_module, file_module + ".tsv"))
                                 datasets.append(x)
                             else:
                                 warn(f"DatasetGroupDirectoryOriented was None for {f}")

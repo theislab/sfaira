@@ -40,7 +40,7 @@ class Dataset(DatasetBase):
 
         self.gene_id_symbols_var_key = "names"
         self.gene_id_ensembl_var_key = "ensembl"
-        self.cell_types_original_obs_key = "celltypes"
+        self.cell_type_obs_key = "celltypes"
 
         self.set_dataset_id(idx=1)
 

@@ -9,7 +9,7 @@ from typing import List, Union
 import uuid
 
 from sfaira.data.dataloaders.base import DatasetBase
-from sfaira.consts import AdataIdsCellxgene
+from sfaira.consts import AdataIdsCellxgene, AdataIdsCellxgeneHuman_v1_1_0, AdataIdsCellxgeneMouse_v1_1_0
 from sfaira.consts.directories import CACHE_DIR_DATABASES_CELLXGENE
 from sfaira.data.dataloaders.databases.cellxgene.rest_helpers import get_collection, get_data
 from sfaira.data.dataloaders.databases.cellxgene.rest_helpers import CELLXGENE_PRODUCTION_ENDPOINT, DOWNLOAD_DATASET
@@ -17,6 +17,63 @@ from sfaira.data.dataloaders.databases.cellxgene.rest_helpers import CELLXGENE_P
 
 def cellxgene_fn(dir, dataset_id):
     return os.path.join(dir, dataset_id + ".h5ad")
+
+
+def clean_cellxgene_meta_obs(k, val, adata_ids) -> Union[str, List[str]]:
+    """
+    :param k: Found meta data name.
+    :param val: Found meta data entry.
+    :returns: Cleaned meta data entry.
+    """
+    if k == "disease":
+        # TODO normal state label varies in disease annotation. This can be removed once streamlined.
+        val = ["healthy" if (v.lower() == "normal" or v.lower() == "healthy") else v for v in val]
+    elif k == "organ":
+        # Organ labels contain labels on tissue type also, such as 'UBERON:0001911 (cell culture)'.
+        val = [v.split(" ")[0] for v in val]
+    elif k == "organism":
+        organism_map = {
+            "Homo sapiens": "human",
+            "Mus musculus": "mouse",
+        }
+        val = [organism_map[v] if v in organism_map.keys() else v for v in val]
+    return val
+
+
+def clean_cellxgene_meta_uns(k, val, adata_ids) -> Union[str, List[str]]:
+    """
+    :param k: Found meta data name.
+    :param val: Found meta data entry.
+    :returns: Cleaned meta data entry.
+    """
+    x_clean = []
+    for v in val:
+        if k == "sex":
+            v = v[0]
+        else:
+            # Decide if labels are read from name or ontology ID:
+            if k == "disease" and (v["label"].lower() == "normal" or v["label"].lower() == "healthy"):
+                # TODO normal state label varies in disease annotation. This can be removed once streamlined.
+                v = "healthy"
+            elif k in ["assay_sc", "disease", "organ"] and \
+                    v["ontology_term_id"] != adata_ids.unknown_metadata_identifier:
+                v = v["ontology_term_id"]
+            else:
+                v = v["label"]
+            # Organ labels contain labels on tissue type also, such as 'UBERON:0001911 (cell culture)'.
+            if k == "organ":
+                v = v.split(" ")[0]
+            if k == "organism":
+                organism_map = {
+                    "Homo sapiens": "human",
+                    "Mus musculus": "mouse",
+                }
+                if v not in organism_map:
+                    raise ValueError(f"value {v} not recognized")
+                v = organism_map[v]
+        if v != adata_ids.unknown_metadata_identifier and v != adata_ids.invalid_metadata_identifier:
+            x_clean.append(v)
+    return x_clean
 
 
 class Dataset(DatasetBase):
@@ -52,26 +109,10 @@ class Dataset(DatasetBase):
             sample_fn=sample_fn,
             sample_fns=sample_fns,
         )
+        # General keys are defined in the shared IDs object. Further down, the species specific one is loaded to
+        # disambiguate species-dependent differences.
         self._adata_ids_cellxgene = AdataIdsCellxgene()
         self._collection = None
-
-        # The h5ad objects from cellxgene follow a particular structure and the following attributes are guaranteed to
-        # be in place. Note that these point at the anndata instance and will only be available for evaluation after
-        # download. See below for attributes that are lazily available
-        self.cellontology_class_obs_key = self._adata_ids_cellxgene.cellontology_class
-        self.cellontology_id_obs_key = self._adata_ids_cellxgene.cellontology_id
-        self.cellontology_original_obs_key = self._adata_ids_cellxgene.cell_types_original
-        self.development_stage_obs_key = self._adata_ids_cellxgene.development_stage
-        self.disease_obs_key = self._adata_ids_cellxgene.disease
-        self.ethnicity_obs_key = self._adata_ids_cellxgene.ethnicity
-        self.sex_obs_key = self._adata_ids_cellxgene.sex
-        self.organ_obs_key = self._adata_ids_cellxgene.organism
-        self.state_exact_obs_key = self._adata_ids_cellxgene.state_exact
-
-        self.gene_id_symbols_var_key = self._adata_ids_cellxgene.gene_id_symbols
-
-        self._unknown_celltype_identifiers = self._adata_ids_cellxgene.unknown_celltype_identifier
-
         self.collection_id = collection_id
         self.supplier = "cellxgene"
         doi = [x['link_url'] for x in self.collection["links"] if x['link_type'] == 'DOI']
@@ -94,34 +135,7 @@ class Dataset(DatasetBase):
             # Otherwise do not set property and resort to cell-wise labels.
             if isinstance(val, dict) or k == "sex":
                 val = [val]
-            v_clean = []
-            for v in val:
-                if k == "sex":
-                    v = v[0]
-                else:
-                    # Decide if labels are read from name or ontology ID:
-                    if k == "disease" and (v["label"].lower() == "normal" or v["label"].lower() == "healthy"):
-                        # TODO normal state label varies in disease annotation. This can be removed once streamlined.
-                        v = "healthy"
-                    elif k in ["assay_sc", "disease", "organ"] and \
-                            v["ontology_term_id"] != self._adata_ids_cellxgene.unknown_metadata_ontology_id_identifier:
-                        v = v["ontology_term_id"]
-                    else:
-                        v = v["label"]
-                    # Organ labels contain labels on tissue type also, such as 'UBERON:0001911 (cell culture)'.
-                    if k == "organ":
-                        v = v.split(" ")[0]
-                    if k == "organism":
-                        organism_map = {
-                            "Homo sapiens": "human",
-                            "Mus musculus": "mouse",
-                        }
-                        if v not in organism_map:
-                            raise ValueError(f"value {v} not recognized")
-                        v = organism_map[v]
-                if v != self._adata_ids_cellxgene.unknown_metadata_ontology_id_identifier and \
-                        v != self._adata_ids_cellxgene.invalid_metadata_identifier:
-                    v_clean.append(v)
+            v_clean = clean_cellxgene_meta_uns(k=k, val=val, adata_ids=self._adata_ids_cellxgene)
             try:
                 # Set as single element or list if multiple entries are given.
                 if len(v_clean) == 1:
@@ -131,8 +145,29 @@ class Dataset(DatasetBase):
             except ValueError as e:
                 if verbose > 0:
                     print(f"WARNING: {e} in {self.collection_id} and data set {self.id}")
+
+        if self.organism == "human":
+            self._adata_ids_cellxgene = AdataIdsCellxgeneHuman_v1_1_0()
+        elif self.organism == "mouse":
+            self._adata_ids_cellxgene = AdataIdsCellxgeneMouse_v1_1_0()
+        else:
+            assert False, self.organism
         # Add author information.  # TODO need to change this to contributor?
         setattr(self, "author", "cellxgene")
+        # The h5ad objects from cellxgene follow a particular structure and the following attributes are guaranteed to
+        # be in place. Note that these point at the anndata instance and will only be available for evaluation after
+        # download. See below for attributes that are lazily available
+        self.cell_type_obs_key = self._adata_ids_cellxgene.cell_type
+        self.development_stage_obs_key = self._adata_ids_cellxgene.development_stage
+        self.disease_obs_key = self._adata_ids_cellxgene.disease
+        self.ethnicity_obs_key = self._adata_ids_cellxgene.ethnicity
+        self.sex_obs_key = self._adata_ids_cellxgene.sex
+        self.organ_obs_key = self._adata_ids_cellxgene.organism
+        self.state_exact_obs_key = self._adata_ids_cellxgene.state_exact
+
+        self.gene_id_symbols_var_key = self._adata_ids_cellxgene.feature_symbol
+
+        self._unknown_celltype_identifiers = self._adata_ids_cellxgene.unknown_metadata_identifier
 
     @property
     def _collection_cache_dir(self):
@@ -169,6 +204,10 @@ class Dataset(DatasetBase):
     def directory_formatted_doi(self) -> str:
         return self.collection_id
 
+    @property
+    def doi_cleaned_id(self):
+        return self.id
+
     def load(
             self,
             remove_gene_version: bool = True,
@@ -186,6 +225,7 @@ class Dataset(DatasetBase):
             load_raw=True,
             allow_caching=False,
             set_metadata=set_metadata,
+            adata_ids=self._adata_ids_cellxgene,
             **kwargs
         )
 
@@ -234,7 +274,7 @@ class Dataset(DatasetBase):
         """ % (uuid_session, json.dumps(self._collection_dataset)), raw=True)
 
 
-def load(data_dir, sample_fn, **kwargs):
+def load(data_dir, sample_fn, adata_ids: AdataIdsCellxgene, **kwargs):
     """
     Generalised load function for cellxgene-provided data sets.
 
@@ -245,4 +285,8 @@ def load(data_dir, sample_fn, **kwargs):
     if adata.raw is not None:  # TODO still need this?
         adata.X = adata.raw.X
         del adata.raw
+    for k in adata_ids.ontology_constrained:
+        col_name = getattr(adata_ids, k)
+        if col_name in adata.obs.columns:
+            adata.obs[col_name] = clean_cellxgene_meta_obs(k=k, val=adata.obs[col_name].values, adata_ids=adata_ids)
     return adata

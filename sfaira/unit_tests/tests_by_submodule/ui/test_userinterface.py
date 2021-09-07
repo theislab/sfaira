@@ -6,7 +6,7 @@ from sfaira.ui import UserInterface
 from sfaira.unit_tests import DIR_TEMP
 
 
-class TestUi:
+class HelperUi:
     ui: Union[UserInterface]
     data: np.ndarray
 
@@ -27,7 +27,7 @@ class TestUi:
         """
         pass
 
-    def _test_basic(self):
+    def test_basic(self):
         """
         Test all relevant model methods.
 
@@ -36,3 +36,11 @@ class TestUi:
         """
         temp_fn = os.path.join(DIR_TEMP, "test_data")
         self.ui = UserInterface(custom_repo=temp_fn, sfaira_repo=False)
+
+
+def _test_for_fatal():
+    """
+    TODO need to simulate/add look up table as part of unit tests locally
+    """
+    ui = HelperUi()
+    ui.test_basic()

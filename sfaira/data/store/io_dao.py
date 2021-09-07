@@ -105,6 +105,7 @@ def read_dao(store: Union[str, Path], use_dask: bool = True, columns: Union[None
         - AnnData with .X as dask array.
         - obs table separately as dataframe
     """
+    assert not (obs_separate and x_separate), "either request obs_separate or x_separate, or neither, but not both"
     if use_dask:
         x = dask.array.from_zarr(url=path_x(store), component="X")
     else:
@@ -131,5 +132,7 @@ def read_dao(store: Union[str, Path], use_dask: bool = True, columns: Union[None
         adata.obs = obs
     if obs_separate:
         return adata, obs
-    if x_separate:
+    elif x_separate:
         return adata, x
+    else:
+        return adata

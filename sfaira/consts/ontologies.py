@@ -1,7 +1,7 @@
 from typing import Dict, Union
 
 from sfaira.versions.metadata import OntologyList, OntologyCl
-from sfaira.versions.metadata import OntologyCellosaurus, OntologyHsapdv, OntologyMondo, \
+from sfaira.versions.metadata import OntologyCellosaurus, OntologyHancestro, OntologyHsapdv, OntologyMondo, \
     OntologyMmusdv, OntologySinglecellLibraryConstruction, OntologyUberon
 
 DEFAULT_CL = "v2021-02-01"
@@ -17,8 +17,9 @@ class OntologyContainerSfaira:
 
     _assay_sc: Union[None, OntologySinglecellLibraryConstruction]
     _cell_line: Union[None, OntologyCellosaurus]
-    _cellontology_class: Union[None, OntologyCl]
+    _cell_type: Union[None, OntologyCl]
     _development_stage: Union[None, Dict[str, Union[OntologyHsapdv, OntologyMmusdv]]]
+    _ethnicity: Union[None, Dict[str, Union[OntologyHancestro, None]]]
     _organ: Union[None, OntologyUberon]
 
     def __init__(self):
@@ -29,8 +30,7 @@ class OntologyContainerSfaira:
         self.assay_type_differentiation = OntologyList(terms=["guided", "unguided"])
         self.bio_sample = None
         self._cell_line = None
-        self._cellontology_class = None
-        self.cell_types_original = None
+        self._cell_type = None
         self.collection_id = None
         self.default_embedding = None
         self._development_stage = None
@@ -39,10 +39,7 @@ class OntologyContainerSfaira:
         self.doi_main = None
         self.doi_journal = None
         self.doi_preprint = None
-        self.ethnicity = {
-            "human": None,
-            "mouse": None,
-        }
+        self._ethnicity = None
         self.id = None
         self.individual = None
         self.normalization = None
@@ -63,9 +60,19 @@ class OntologyContainerSfaira:
         elif attr == "cell_line":
             self._cell_line = OntologyCellosaurus(**kwargs)
         elif attr == "cellontology_class":
-            self._cellontology_class = OntologyCl(branch=DEFAULT_CL, **kwargs)
+            self._cell_type = OntologyCl(branch=DEFAULT_CL, **kwargs)
+        elif attr == "development_stage":
+            self._development_stage = {
+                "human": OntologyHsapdv(),
+                "mouse": OntologyMmusdv(),
+            }
         elif attr == "disease":
             self._disease = OntologyMondo(**kwargs)
+        elif attr == "ethnicity":
+            self._ethnicity = {
+                "human": OntologyHancestro(),
+                "mouse": None,
+            }
         elif attr == "organ":
             self._organ = OntologyUberon(**kwargs)
         return self._assay_sc
@@ -83,14 +90,14 @@ class OntologyContainerSfaira:
         return self._cell_line
 
     @property
-    def cellontology_class(self):
-        if self._cellontology_class is None:
-            self._cellontology_class = OntologyCl(branch=DEFAULT_CL)
-        return self._cellontology_class
+    def cell_type(self):
+        if self._cell_type is None:
+            self._cell_type = OntologyCl(branch=DEFAULT_CL)
+        return self._cell_type
 
-    @cellontology_class.setter
-    def cellontology_class(self, x: str):
-        self._cellontology_class = OntologyCl(branch=x)
+    @cell_type.setter
+    def cell_type(self, x: str):
+        self._cell_type = OntologyCl(branch=x)
 
     @property
     def development_stage(self):
@@ -106,6 +113,15 @@ class OntologyContainerSfaira:
         if self._disease is None:
             self._disease = OntologyMondo()
         return self._disease
+
+    @property
+    def ethnicity(self):
+        if self._ethnicity is None:
+            self._ethnicity = {
+                "human": OntologyHancestro(),
+                "mouse": None,
+            }
+        return self._ethnicity
 
     @property
     def organ(self):
