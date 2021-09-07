@@ -1,40 +1,33 @@
-Consuming data
-===============
+.. _data_life_cycle_rst:
 
-.. image:: https://raw.githubusercontent.com/theislab/sfaira/master/resources/images/data_zoo.png
-   :width: 600px
-   :align: center
+The data life cycle
+===================
 
-Build data repository locally
-------------------------------
+The life cycle of a single-cell count matrix often looks as follows:
 
-Build a repository structure
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    1. **Generation** from primary read data in a read alignment pipeline.
+    2. **Annotation** with cell types and sample meta data.
+    3. **Publication** of annotated data, often together with a manuscript.
+    4. **Curation** of this public data set for the purpose of a meta study. In a python workflow, this curation step could be a scanpy script based on data from step 3, for example.
+    5. **Usage** of data curated specifically for the use case at hand, for example for a targeted analysis or a training of a machine learning model.
 
-    1. Choose a directory to dedicate to the data base, called root in the following.
-    2. Run the sfaira download script (sfaira.data.utils.download_all). Alternatively, you can manually set up a data base by making subfolders for each study.
+where step 1-3 is often only performed once by the original authors of the data set,
+while step 4 and 5 are repeated multiple times in the community for different meta studies.
+Sfaira offers the following functionality groups that accelerate steps along this pipeline:
 
-Note that the automated download is a feature of sfaira but not the core purpose of the package:
-Sfaira allows you efficiently interact with such a local data repository.
-Some data sets cannot be automatically downloaded and need you manual intervention, which we report in the download script output.
+I) Data loaders
+~~~~~~~~~~~~~~~
+We maintain streamlined data loader code that improve **Curation** (step 4) and make this step sharable and iteratively improvable.
+Read more in our guide to data contribution :ref:`adding_data_rst`.
 
-Use 3rd party repositories
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-Some organization provide streamlined data objects that can be directly consumed by data zoos such as sfaira.
-One example for such an organization is the cellxgene_ data portal.
-Through these repositories, one can easily build or extend a collection of data sets that can be easily interfaced with sfaira.
-Data loaders for cellxgene structured data objects will be available soon!
-Contact us for support of any other repositories.
+II) Dataset, DatasetGroup, DatasetSuperGroup
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Using the data loaders from (I), we built an interface that can flexibly download, subset and curate data sets from the sfaira data zoo, thus improving **Usage** (step 5).
+This interface can yield adata instances to be used in a scanpy pipeline, for example.
+Read more in our guide to data consumption :ref:`consuming_data_rst`.
 
-.. _cellxgene: https://cellxgene.cziscience.com/
-
-Genome management
------------------
-
-We streamline feature spaces used by models by defining standardized gene sets that are used as model input.
-Per default, sfaira works with the protein coding genes of a genome assembly right now.
-A model topology version includes the genome it was trained for, which also defines the feature of this model as genes.
-As genome assemblies are updated, model topology version can be updated and models retrained to reflect these changes.
-Note that because protein coding genes do not change drastically between genome assemblies,
-sample can be carried over to assemblies they were not aligned against by matching gene identifiers.
-Sfaira automatically tries to overlap gene identifiers to the genome assembly selected through the current model.
+III) Stores
+~~~~~~~~~~~
+Using the streamlined data set collections from (II), we built a computationally efficient data interface for machine learning on such large distributed data set collection, thus improving **Usage** (step 5):
+Specifically, this interface is optimised for out-of-core observation-centric indexing in scenarios that are typical to machine learning on single-cell data.
+Read more in our guide to data stores :ref:`distributed_data_rst`.

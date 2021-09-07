@@ -1,6 +1,9 @@
+.. _adding_data_rst:
+
 Contributing data
 ==================
 
+For a high-level overview of data management in sfaira, read :ref:`data_life_cycle_rst` first.
 Adding datasets to sfaira is a great way to increase the visibility of your dataset and to make it available to a large audience.
 This process requires a couple of steps as outlined in the following sections.
 
