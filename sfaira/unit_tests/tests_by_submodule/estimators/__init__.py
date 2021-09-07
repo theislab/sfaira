@@ -1,1 +1,1 @@
-from .test_estimator import TARGETS, TestHelperEstimatorBase
+from .test_estimator import TARGETS, HelperEstimatorBase

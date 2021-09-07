@@ -76,7 +76,7 @@ class Dataset(DatasetBase):
                                  f"{self.sample_fn}"
         self.download_url_meta = None
 
-        self.cell_types_original_obs_key = "cell_ontology_class"
+        self.cell_type_obs_key = "cell_ontology_class"
         self.development_stage_obs_key = "development_stage"
         self.sex_obs_key = "sex"
         # ToDo: further anatomical information for subtissue in "subtissue"?

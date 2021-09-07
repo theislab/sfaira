@@ -27,7 +27,7 @@ class Dataset(DatasetBase):
         self.year = 2019
 
         self.bio_sample_obs_key = "sample"
-        self.cell_types_original_obs_key = "cluster"
+        self.cell_type_obs_key = "cluster"
         self.organ_obs_key = "organ"
 
         self.gene_id_ensembl_var_key = "ensembl"

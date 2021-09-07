@@ -3,7 +3,7 @@ dataset_structure:
     sample_fns:
 dataset_wise:
     author:
-        - "mock2"
+        - "mock3"
     default_embedding:
     doi_journal: "no_doi_mock3"
     doi_preprint:
@@ -44,7 +44,7 @@ dataset_or_observation_wise:
     tech_sample:
     tech_sample_obs_key:
 observation_wise:
-    cell_types_original_obs_key: "free_annotation"
+    cell_type_obs_key: "free_annotation"
 feature_wise:
     gene_id_ensembl_var_key: "index"
     gene_id_symbols_var_key:

@@ -911,7 +911,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         store.subset(attr_key="id", values=[k for k in store.indices.keys()
                                             if 'cell_ontology_class' in store.adata_by_key[k].obs.columns])
         store.subset(attr_key="cellontology_class", excluded_values=[
-            store._adata_ids_sfaira.unknown_celltype_identifier,
+            store._adata_ids_sfaira.unknown_metadata_identifier,
             store._adata_ids_sfaira.not_a_cell_celltype_identifier,
         ])
         cu = CelltypeUniverse(
@@ -1076,7 +1076,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         store.subset(attr_key="id", values=[k for k in store.indices.keys()
                                             if 'cell_ontology_id' in store.adata_by_key[k].obs.columns])
         store.subset(attr_key="cellontology_class", excluded_values=[
-            store._adata_ids_sfaira.unknown_celltype_identifier,
+            store._adata_ids_sfaira.unknown_metadata_identifier,
             store._adata_ids_sfaira.not_a_cell_celltype_identifier,
         ])
         cu = CelltypeUniverse(
@@ -1426,7 +1426,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                 store.subset(attr_key="id", values=[k for k in store.indices.keys()
                                                     if 'cell_ontology_id' in store.adata_by_key[k].obs.columns])
                 store.subset(attr_key="cellontology_class", excluded_values=[
-                    store._adata_ids_sfaira.unknown_celltype_identifier,
+                    store._adata_ids_sfaira.unknown_metadata_identifier,
                     store._adata_ids_sfaira.not_a_cell_celltype_identifier,
                 ])
                 adatas = store.adata_sliced

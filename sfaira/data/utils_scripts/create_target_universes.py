@@ -36,7 +36,7 @@ for f in os.listdir(config_path):
                         celltypes_found = celltypes_found.union(
                             set(store.adatas[k].obs[col_name_annot].values[idx].tolist())
                         )
-            celltypes_found = sorted(list(celltypes_found - {store._adata_ids_sfaira.unknown_celltype_identifier,
+            celltypes_found = sorted(list(celltypes_found - {store._adata_ids_sfaira.unknown_metadata_identifier,
                                                              store._adata_ids_sfaira.not_a_cell_celltype_identifier}))
             if len(celltypes_found) == 0:
                 print(f"WARNING: No cells found for {organism} {organ}, skipping.")

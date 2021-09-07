@@ -6,6 +6,7 @@ import pickle
 from typing import Union
 
 from sfaira.consts import AdataIdsSfaira
+from sfaira.data.store.base import DistributedStoreBase
 from sfaira.data import DistributedStoreSingleFeatureSpace, Universe
 from sfaira.estimators import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
 from sfaira.ui import ModelZoo
@@ -28,12 +29,14 @@ class TrainModel:
                 self.data.obs = pd.read_csv(fn_backed_obs)
         elif isinstance(data, anndata.AnnData):
             self.data = data
+        elif isinstance(data, list) and isinstance(data[0], anndata.AnnData):
+            self.data = data
         elif isinstance(data, Universe):
             self.data = data.adata
-        elif isinstance(data, DistributedStoreSingleFeatureSpace):
+        elif isinstance(data, DistributedStoreBase):
             self.data = data
         else:
-            raise ValueError(f"did not recongize data of type {type(data)}")
+            raise ValueError(f"did not recognize data of type {type(data)}")
         self.zoo = ModelZoo()
         self._adata_ids = AdataIdsSfaira()
 
@@ -241,6 +244,6 @@ class TrainModelCelltype(TrainModel):
         with open(fn + "_topology.pickle", "wb") as f:
             pickle.dump(obj=self.topology_dict, file=f)
 
-        cell_counts = obs['cell_ontology_class'].value_counts().to_dict()
+        cell_counts = obs['cell_type'].value_counts().to_dict()
         with open(fn + '_celltypes_valuecounts_wholedata.pickle', 'wb') as f:
             pickle.dump(obj=[cell_counts], file=f)

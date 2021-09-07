@@ -291,6 +291,7 @@ class CustomFeatureContainer(GenomeContainer):
     def __init__(
             self,
             genome_tab: pandas.DataFrame,
+            organism: str,
     ):
         """
 
@@ -306,3 +307,8 @@ class CustomFeatureContainer(GenomeContainer):
         assert KEY_ID in genome_tab.columns
         assert KEY_TYPE in genome_tab.columns
         self.genome_tab = genome_tab
+        self._organism = organism
+
+    @property
+    def organism(self):
+        return self._organism
