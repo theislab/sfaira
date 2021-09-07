@@ -1120,17 +1120,12 @@ class DatasetBase(abc.ABC):
             if self.cell_type_obs_key is not None:
                 warnings.warn(f"file {fn} does not exist but cell_type_obs_key {self.cell_type_obs_key} is given")
 
-    def project_free_to_ontology(self, attr: str, copy: bool = False):
+    def project_free_to_ontology(self, attr: str):
         """
         Project free text cell type names to ontology based on mapping table.
 
         ToDo: add ontology ID setting here.
         ToDo: only for cell type right now, extend to other meta data in the future.
-
-        :param copy: If True, a dataframe with the celltype annotation is returned, otherwise self.adata.obs is updated
-            inplace.
-
-        :return:
         """
         ontology_map = attr + "_map"
         if hasattr(self, ontology_map):
@@ -1173,19 +1168,17 @@ class DatasetBase(abc.ABC):
             # TODO this could be changed in the future, this allows this function to be used both on cell type name
             #  mapping files with and without the ID in the third column.
             # This mapping blocks progression in the unit test if not deactivated.
-            results[getattr(adata_fields, attr)] = labels_mapped
+            self.adata.obs[getattr(adata_fields, attr)] = labels_mapped
             self.__project_ontology_ids_obs(attr=attr, map_exceptions=map_exceptions, from_id=False,
                                             adata_ids=adata_fields)
         else:
-            results[getattr(adata_fields, attr)] = labels_original
-            results[getattr(adata_fields, attr) + adata_fields.onto_id_suffix] = \
+            # Assumes that the original labels are the correct ontology symbols, because of a lack of ontology,
+            # ontology IDs cannot be inferred.
+            # TODO is this necessary in the future?
+            self.adata.obs[getattr(adata_fields, attr)] = labels_original
+            self.adata.obs[getattr(adata_fields, attr) + adata_fields.onto_id_suffix] = \
                 [adata_fields.unknown_metadata_identifier] * self.adata.n_obs
-        results[getattr(adata_fields, attr) + adata_fields.onto_original_suffix] = labels_original
-        if copy:
-            return pd.DataFrame(results, index=self.adata.obs.index)
-        else:
-            for k, v in results.items():
-                self.adata.obs[k] = v
+        self.adata.obs[getattr(adata_fields, attr) + adata_fields.onto_original_suffix] = labels_original
 
     def __impute_ontology_cols_obs(
             self,
@@ -1238,7 +1231,7 @@ class DatasetBase(abc.ABC):
             # Original annotation (free text):
             original_present = col_original in self.adata.obs.columns
             if original_present and not symbol_present and not id_present:  # 1)
-                self.project_free_to_ontology(attr=attr, copy=False)
+                self.project_free_to_ontology(attr=attr)
             if symbol_present or id_present:  # 2)
                 if symbol_present and not id_present:  # 2a)
                     self.__project_ontology_ids_obs(attr=attr, from_id=False, adata_ids=adata_ids)
