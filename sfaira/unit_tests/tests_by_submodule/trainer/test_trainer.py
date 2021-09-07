@@ -19,7 +19,7 @@ def get_cu():
     # Create temporary cell type universe to give to trainer.
     fn = os.path.join(DIR_TEMP, "universe_temp.csv")
     cl = OntologyCl(branch="v2021-02-01")
-    uberon = OntologyUberon()
+    uberon = OntologyUberon(branch="2019-11-22")
     cu = CelltypeUniverse(cl=cl, uberon=uberon)
     cu.write_target_universe(fn=fn, x=TARGETS)
     del cu
