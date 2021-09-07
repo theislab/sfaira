@@ -162,7 +162,8 @@ def test_generator_shapes(store_format: str, idx, batch_size: int, obs_keys: Lis
     """
     Test generators queries do not throw errors and that output shapes are correct.
     """
-    store_path = prepare_store(store_format=store_format)
+    # Need to re-write because specific obs_keys are required:
+    store_path = prepare_store(store_format=store_format, rewrite_store=True)
     store = load_store(cache_path=store_path, store_format=store_format)
     store.subset(attr_key="organism", values=["mouse"])
     gc = GenomeContainer(assembly=ASSEMBLY_MOUSE)

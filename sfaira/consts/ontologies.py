@@ -5,6 +5,7 @@ from sfaira.versions.metadata import OntologyCellosaurus, OntologyHancestro, Ont
     OntologyMmusdv, OntologySinglecellLibraryConstruction, OntologyUberon
 
 DEFAULT_CL = "v2021-02-01"
+DEFAULT_UBERON = "2019-11-22"
 
 
 class OntologyContainerSfaira:
@@ -126,5 +127,5 @@ class OntologyContainerSfaira:
     @property
     def organ(self):
         if self._organ is None:
-            self._organ = OntologyUberon()
+            self._organ = OntologyUberon(branch=DEFAULT_UBERON)
         return self._organ
