@@ -8,7 +8,7 @@ from typing import List, Union, Tuple
 from sfaira.models.embedding.output_layers import NegBinOutput, NegBinSharedDispOutput, NegBinConstDispOutput, \
     GaussianOutput, GaussianSharedStdOutput, GaussianConstStdOutput
 from sfaira.versions.topologies import TopologyContainer
-from sfaira.models.base import BasicModelKeras
+from sfaira.models.embedding.base import BasicModelKerasEmbedding
 from sfaira.models.pp_layer import PreprocInput
 
 
@@ -113,7 +113,7 @@ class Decoder(tf.keras.layers.Layer):
         return x
 
 
-class ModelKerasAe(BasicModelKeras):
+class ModelKerasAe(BasicModelKerasEmbedding):
     """Combines the encoder and decoder into an end-to-end model for training."""
     # Note: Original DCA implementation uses l1_l2 regularisation also on last layer (nb) - missing here
     # Note: Original DCA implementation uses softplus function instead of exponential as dispersion activation
@@ -197,14 +197,6 @@ class ModelKerasAe(BasicModelKeras):
             outputs=output_decoder_expfamily_concat,
             name="autoencoder"
         )
-
-    def predict_reconstructed(self, x):
-        return np.split(self.training_model.predict(x), indices_or_sections=2, axis=1)[0]
-
-    def predict_embedding(self, x, variational=False):
-        if variational:
-            raise ValueError("Cannot predict variational embedding on AE model.topo")
-        return self.encoder_model.predict(x)
 
 
 class ModelAeVersioned(ModelKerasAe):

@@ -33,10 +33,10 @@ class Dataset(DatasetBase):
 
         self.download_url_meta = None
 
-        self.assay_sc = "10x technology"
+        self.assay_sc = "10x 3' v2"
         self.author = "Madissoon"
         self.disease = "healthy"
-        self.doi = "10.1186/s13059-019-1906-x"
+        self.doi_journal = "10.1186/s13059-019-1906-x"
         self.normalization = "raw"  # ToDo "madissoon19_lung.processed.h5ad" is close to integer but not quire (~1e-4)
         self.organ = "lung parenchyma" if self.sample_fn == "madissoon19_lung.processed.h5ad" else \
             "esophagus" if self.sample_fn == "oesophagus.cellxgene.h5ad" else "spleen"
@@ -45,7 +45,7 @@ class Dataset(DatasetBase):
         self.sample_source = "primary_tissue"
 
         self.gene_id_symbols_var_key = "index"
-        self.cell_types_original_obs_key = "Celltypes"
+        self.cell_type_obs_key = "Celltypes"
 
         self.set_dataset_id(idx=1)
 

@@ -45,8 +45,7 @@ for k, ds in universe.datasets.items():
             match_to_reference={"human": "Homo_sapiens.GRCh38.102", "mouse": "Mus_musculus.GRCm38.102"},
             subset_genes_to_type="protein_coding"
         )
-        ds.streamline_metadata(schema="sfaira", uns_to_obs=True, clean_obs=True, clean_var=True, clean_uns=True,
-                               clean_obs_names=True)
+        ds.streamline_metadata(schema="sfaira", clean_obs=True, clean_var=True, clean_uns=True, clean_obs_names=True)
         ds.write_distributed_store(dir_cache=path_store, store_format=store_type, compression_kwargs=compression_kwargs,
                                    **kwargs)
         ds.clear()

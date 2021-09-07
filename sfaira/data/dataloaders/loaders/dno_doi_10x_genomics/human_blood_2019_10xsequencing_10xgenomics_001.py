@@ -15,10 +15,10 @@ class Dataset(DatasetBase):
             "http://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_10k_v3/pbmc_10k_v3_filtered_feature_bc_matrix.h5"
         self.download_url_meta = None
 
-        self.assay_sc = "10x technology"
+        self.assay_sc = "10x 3' v3"
         self.author = "10x Genomics"
         self.disease = "healthy"
-        self.doi = "no_doi_10x_genomics"
+        self.doi_journal = "no_doi_10x_genomics"
         self.normalization = "raw"
         self.organ = "blood"
         self.organism = "human"

@@ -29,7 +29,7 @@ class Dataset(DatasetBase):
         self.download_url_meta = f"private,{self.sample_fn}_annotation.csv"
 
         self.author = "Thompson"
-        self.doi = "10.1016/j.cmet.2019.01.021"
+        self.doi_journal = "10.1016/j.cmet.2019.01.021"
         self.normalization = "raw"
         self.organ = "pancreas"
         self.organism = "mouse"
@@ -40,7 +40,7 @@ class Dataset(DatasetBase):
 
         self.gene_id_symbols_var_key = "names"
         self.gene_id_ensembl_var_key = "ensembl"
-        self.cell_types_original_obs_key = "celltypes"
+        self.cell_type_obs_key = "celltypes"
 
         self.set_dataset_id(idx=1)
 

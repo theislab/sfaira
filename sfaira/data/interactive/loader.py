@@ -39,7 +39,7 @@ class DatasetInteractive(DatasetBase):
         self.id = dataset_id
 
         self.author = "interactive_dataset"
-        self.doi = "interactive_dataset"
+        self.doi_journal = "interactive_dataset"
 
         self.download_url_data = "."
         self.download_url_meta = "."

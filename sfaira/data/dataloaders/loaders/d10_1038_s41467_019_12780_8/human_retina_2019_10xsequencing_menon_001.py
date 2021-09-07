@@ -11,10 +11,10 @@ class Dataset(DatasetBase):
         self.download_url_data = "https://covid19.cog.sanger.ac.uk/menon19.processed.h5ad"
         self.download_url_meta = None
 
-        self.assay_sc = "10x technology"
+        self.assay_sc = "10x 3' v3"
         self.author = "Menon"
         self.disease = "healthy"
-        self.doi = "10.1038/s41467-019-12780-8"
+        self.doi_journal = "10.1038/s41467-019-12780-8"
         self.normalization = "raw"
         self.organ = "retina"
         self.organism = "human"
@@ -22,7 +22,7 @@ class Dataset(DatasetBase):
         self.year = 2019
 
         self.gene_id_symbols_var_key = "index"
-        self.cell_types_original_obs_key = "CellType"
+        self.cell_type_obs_key = "CellType"
 
         self.set_dataset_id(idx=1)
 

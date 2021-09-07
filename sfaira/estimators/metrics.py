@@ -12,6 +12,15 @@ def custom_mse(y_true, y_pred, sample_weight=None):
     return se_red
 
 
+def custom_mean_squared_logp1_error(y_true, y_pred, sample_weight=None):
+    y_pred = tf.split(y_pred, num_or_size_splits=2, axis=1)[0]
+    y_true = tf.math.log(y_true + 1.)
+    y_pred = tf.math.log(y_pred + 1.)
+    se = tf.square(tf.subtract(y_true, y_pred))
+    se_red = tf.reduce_mean(se)
+    return se_red
+
+
 def custom_negll_nb(y_true, y_pred, sample_weight=None):
     x = y_true
     loc, scale = tf.split(y_pred, num_or_size_splits=2, axis=1)

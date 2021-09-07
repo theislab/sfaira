@@ -12,10 +12,10 @@ class Dataset(DatasetBase):
         self.download_url_data = "private,GSE115469.csv.gz"
         self.download_url_meta = "private,GSE115469_labels.txt"
 
-        self.assay_sc = "10x technology"
+        self.assay_sc = "10x 3' v2"
         self.author = "MacParland"
         self.disease = "healthy"
-        self.doi = "10.1038/s41467-018-06318-7"
+        self.doi_journal = "10.1038/s41467-018-06318-7"
         self.normalization = "raw"
         self.organ = "caudate lobe of liver"
         self.organism = "human"
@@ -23,7 +23,7 @@ class Dataset(DatasetBase):
         self.year = 2018
 
         self.gene_id_symbols_var_key = "index"
-        self.cell_types_original_obs_key = "celltype"
+        self.cell_type_obs_key = "celltype"
 
         self.set_dataset_id(idx=1)
 

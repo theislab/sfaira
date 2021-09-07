@@ -7,7 +7,7 @@ import pickle
 import requests
 from typing import Dict, List, Tuple, Union
 
-FILE_PATH = __file__
+from sfaira.consts.directories import CACHE_DIR_ONTOLOGIES
 
 """
 Ontology managament classes.
@@ -26,20 +26,15 @@ ToDo explain usage of ontology extension.
 """
 
 
-def get_base_ontology_cache() -> str:
-    folder = FILE_PATH.split(os.sep)[:-4]
-    folder.insert(1, os.sep)
-    return os.path.join(*folder, "cache", "ontologies")
-
-
-def cached_load_obo(url, ontology_cache_dir, ontology_cache_fn):
+def cached_load_obo(url, ontology_cache_dir, ontology_cache_fn, recache: bool = False):
     if os.name == "nt":  # if running on windows, do not download obo file, but rather pass url directly to obonet
+        # TODO add caching option.
         obofile = url
     else:
-        ontology_cache_dir = os.path.join(get_base_ontology_cache(), ontology_cache_dir)
+        ontology_cache_dir = os.path.join(CACHE_DIR_ONTOLOGIES, ontology_cache_dir)
         obofile = os.path.join(ontology_cache_dir, ontology_cache_fn)
         # Download if necessary:
-        if not os.path.isfile(obofile):
+        if not os.path.isfile(obofile) or recache:
             os.makedirs(name=ontology_cache_dir, exist_ok=True)
 
             def download_obo():
@@ -53,17 +48,18 @@ def cached_load_obo(url, ontology_cache_dir, ontology_cache_fn):
     return obofile
 
 
-def cached_load_ebi(ontology_cache_dir, ontology_cache_fn) -> (networkx.MultiDiGraph, os.PathLike):
+def cached_load_ebi(ontology_cache_dir, ontology_cache_fn, recache: bool = False) -> (networkx.MultiDiGraph, os.PathLike):
     """
     Load pickled graph object if available.
 
     :param ontology_cache_dir:
     :param ontology_cache_fn:
+    :param recache:
     :return:
     """
-    ontology_cache_dir = os.path.join(get_base_ontology_cache(), ontology_cache_dir)
+    ontology_cache_dir = os.path.join(CACHE_DIR_ONTOLOGIES, ontology_cache_dir)
     picklefile = os.path.join(ontology_cache_dir, ontology_cache_fn)
-    if os.path.isfile(picklefile):
+    if os.path.isfile(picklefile) and not recache:
         with open(picklefile, 'rb') as f:
             graph = pickle.load(f)
     else:
@@ -187,7 +183,10 @@ class OntologyHierarchical(Ontology, abc.ABC):
 
     @property
     def node_names(self) -> List[str]:
-        return [x["name"] for x in self.graph.nodes.values()]
+        try:
+            return [x["name"] for x in self.graph.nodes.values()]
+        except KeyError as e:
+            raise KeyError(f"KeyError '{e}' in {type(self)}")
 
     @property
     def node_ids(self) -> List[str]:
@@ -316,18 +315,18 @@ class OntologyHierarchical(Ontology, abc.ABC):
         """
         Map a given node to leave nodes.
 
-        :param node:
+        :param node: Node(s) to map as symbol(s) or ID(s).
         :param return_type:
 
             "ids": IDs of mapped leave nodes
             "idx": indicies in leave note list of mapped leave nodes
-        :param include_self: whether to include node itself
+        :param include_self: DEPRECEATED.
         :return:
         """
         node = self.convert_to_id(node)
         ancestors = self.get_ancestors(node)
-        if include_self:
-            ancestors = ancestors + [node]
+        # Add node itself to list of ancestors.
+        ancestors = ancestors + [node]
         if len(ancestors) > 0:
             ancestors = self.convert_to_id(ancestors)
         leaves = self.convert_to_id(self.leaves)
@@ -376,15 +375,25 @@ class OntologyEbi(OntologyHierarchical):
             additional_terms: dict,
             additional_edges: List[Tuple[str, str]],
             ontology_cache_fn: str,
+            recache: bool,
             **kwargs
     ):
+        # Note on base URL: EBI OLS points to different resources depending on the ontology used, this needs to be
+        # accounted for here.
+        if ontology == "hancestro":
+            base_url = f"https://www.ebi.ac.uk/ols/api/ontologies/{ontology}/terms/" \
+                       f"http%253A%252F%252Fpurl.obolibrary.org%252Fobo%252F"
+        elif ontology == "efo":
+            base_url = f"https://www.ebi.ac.uk/ols/api/ontologies/{ontology}/terms/" \
+                       f"http%253A%252F%252Fwww.ebi.ac.uk%252F{ontology}%252F"
+        else:
+            assert False
+
         def get_url_self(iri):
-            return f"https://www.ebi.ac.uk/ols/api/ontologies/{ontology}/terms/" \
-                   f"http%253A%252F%252Fwww.ebi.ac.uk%252F{ontology}%252F{iri}"
+            return f"{base_url}{iri}"
 
         def get_url_children(iri):
-            return f"https://www.ebi.ac.uk/ols/api/ontologies/{ontology}/terms/" \
-                   f"http%253A%252F%252Fwww.ebi.ac.uk%252F{ontology}%252F{iri}/children"
+            return f"{base_url}{iri}/children"
 
         def get_iri_from_node(x):
             return x["iri"].split("/")[-1]
@@ -416,7 +425,7 @@ class OntologyEbi(OntologyHierarchical):
             direct_children = []
             k_self = get_id_from_iri(iri)
             # Define root node if this is the first iteration, this node is otherwise not defined through values.
-            if k_self == "EFO:0010183":
+            if k_self == ":".join(root_term.split("_")):
                 terms_self = requests.get(get_url_self(iri=iri)).json()
                 nodes_new[k_self] = {
                     "name": terms_self["label"],
@@ -442,7 +451,8 @@ class OntologyEbi(OntologyHierarchical):
             edges_new.extend([(k_self, k_c) for k_c in direct_children])
             return nodes_new, edges_new
 
-        graph, picklefile = cached_load_ebi(ontology_cache_dir=ontology, ontology_cache_fn=ontology_cache_fn)
+        graph, picklefile = cached_load_ebi(ontology_cache_dir=ontology, ontology_cache_fn=ontology_cache_fn,
+                                            recache=recache)
         if graph is None:
             self.graph = networkx.MultiDiGraph()
             nodes, edges = recursive_search(iri=root_term)
@@ -588,12 +598,15 @@ class OntologyUberon(OntologyExtendedObo):
 
     def __init__(
             self,
+            branch: str,
+            recache: bool = False,
             **kwargs
     ):
         obofile = cached_load_obo(
-            url="http://purl.obolibrary.org/obo/uberon.obo",
+            url=f"https://svn.code.sf.net/p/obo/svn/uberon/releases/{branch}/ext.obo",
             ontology_cache_dir="uberon",
             ontology_cache_fn="uberon.obo",
+            recache=recache,
         )
         super().__init__(obo=obofile)
 
@@ -614,6 +627,7 @@ class OntologyUberon(OntologyExtendedObo):
         edge_types = [
             'aboral_to',
             'adjacent_to',
+            'ambiguous_for_taxon',
             'anastomoses_with',
             'anterior_to',
             'anteriorly_connected_to',
@@ -621,14 +635,18 @@ class OntologyUberon(OntologyExtendedObo):
             'attaches_to_part_of',
             'bounding_layer_of',
             'branching_part_of',
+            'capable_of',
+            'capable_of_part_of',
             'channel_for',
             'channels_from',
             'channels_into',
             'composed_primarily_of',
             'conduit_for',
+            'confers_advantage_in',
             'connected_to',
             'connects',
             'contains',
+            'contains_process',
             'continuous_with',
             'contributes_to_morphology_of',
             'deep_to',
@@ -643,6 +661,7 @@ class OntologyUberon(OntologyExtendedObo):
             'distalmost_part_of',
             'dorsal_to',
             'drains',
+            'dubious_for_taxon',
             'ends',
             'ends_with',
             'existence_ends_during',
@@ -654,6 +673,7 @@ class OntologyUberon(OntologyExtendedObo):
             'existence_starts_with',
             'extends_fibers_into',
             'filtered_through',
+            'functionally_related_to',
             'has_boundary',
             'has_component',
             'has_developmental_contribution_from',
@@ -665,6 +685,7 @@ class OntologyUberon(OntologyExtendedObo):
             'has_part',
             'has_potential_to_develop_into',
             'has_potential_to_developmentally_contribute_to',
+            'has_quality',
             'has_skeleton',
             'immediate_transformation_of',
             'immediately_anterior_to',
@@ -685,10 +706,12 @@ class OntologyUberon(OntologyExtendedObo):
             'in_proximal_side_of',
             'in_right_side_of',
             'in_superficial_part_of',
+            'in_taxon',
             'in_ventral_side_of',
             'indirectly_supplies',
             'innervated_by',
             'innervates',
+            'input_of',
             'intersects_midsagittal_plane_of',
             'is_a',  # term DAG -> include because it connect conceptual tissue groups
             'layer_part_of',
@@ -696,23 +719,34 @@ class OntologyUberon(OntologyExtendedObo):
             'location_of',
             'lumen_of',
             'luminal_space_of',
+            'negatively_regulates',
+            'never_in_taxon',
+            'occurs_in',
+            'only_in_taxon',
+            'output_of',
             'overlaps',
             'part_of',  # anatomic DAG -> include because it reflects the anatomic coarseness / hierarchy
+            'participates_in',
+            'positively_regulates',
             'postaxialmost_part_of',
             'posterior_to',
             'posteriorly_connected_to',
             'preaxialmost_part_of',
             'preceded_by',
             'precedes',
+            'present_in_taxon',
             'produced_by',
             'produces',
             'protects',
             'proximal_to',
             'proximally_connected_to',
             'proximalmost_part_of',
+            'regulates',
             'seeAlso',
             'serially_homologous_to',
             'sexually_homologous_to',
+            'simultaneous_with',
+            'site_of',
             'skeleton_of',
             'starts',
             'starts_with',
@@ -721,6 +755,7 @@ class OntologyUberon(OntologyExtendedObo):
             'supplies',
             'surrounded_by',
             'surrounds',
+            'synapsed_by',
             'transformation_of',
             'tributary_of',
             'trunk_part_of',
@@ -728,7 +763,8 @@ class OntologyUberon(OntologyExtendedObo):
         ]
         edges_to_delete = []
         for i, x in enumerate(self.graph.edges):
-            assert x[2] in edge_types, x
+            if x[2] not in edge_types:
+                print(f"NON-CRITICAL WARNING: uberon edge type {x[2]} not in reference list yet")
             if x[2] not in [
                 "develops_from",
                 'develops_from_part_of',
@@ -753,6 +789,7 @@ class OntologyCl(OntologyExtendedObo):
             self,
             branch: str,
             use_developmental_relationships: bool = False,
+            recache: bool = False,
             **kwargs
     ):
         """
@@ -767,6 +804,7 @@ class OntologyCl(OntologyExtendedObo):
             url=f"https://raw.github.com/obophenotype/cell-ontology/{branch}/cl.obo",
             ontology_cache_dir="cl",
             ontology_cache_fn=f"{branch}_cl.obo",
+            recache=recache,
         )
         super().__init__(obo=obofile)
 
@@ -804,7 +842,8 @@ class OntologyCl(OntologyExtendedObo):
         else:
             edges_allowed = ["is_a"]
         for i, x in enumerate(self.graph.edges):
-            assert x[2] in edge_types, x
+            if x[2] not in edge_types:
+                print(f"NON-CRITICAL WARNING: cl edge type {x[2]} not in reference list yet")
             if x[2] not in edges_allowed:
                 edges_to_delete.append((x[0], x[1]))
         for x in edges_to_delete:
@@ -833,12 +872,14 @@ class OntologyHsapdv(OntologyExtendedObo):
 
     def __init__(
             self,
+            recache: bool = False,
             **kwargs
     ):
         obofile = cached_load_obo(
             url="http://purl.obolibrary.org/obo/hsapdv.obo",
             ontology_cache_dir="hsapdv",
             ontology_cache_fn="hsapdv.obo",
+            recache=recache,
         )
         super().__init__(obo=obofile)
 
@@ -859,12 +900,14 @@ class OntologyMmusdv(OntologyExtendedObo):
 
     def __init__(
             self,
+            recache: bool = False,
             **kwargs
     ):
         obofile = cached_load_obo(
             url="http://purl.obolibrary.org/obo/mmusdv.obo",
             ontology_cache_dir="mmusdv",
             ontology_cache_fn="mmusdv.obo",
+            recache=recache,
         )
         super().__init__(obo=obofile)
 
@@ -885,12 +928,14 @@ class OntologyMondo(OntologyExtendedObo):
 
     def __init__(
             self,
+            recache: bool = False,
             **kwargs
     ):
         obofile = cached_load_obo(
             url="http://purl.obolibrary.org/obo/mondo.obo",
             ontology_cache_dir="mondo",
             ontology_cache_fn="mondo.obo",
+            recache=recache,
         )
         super().__init__(obo=obofile)
 
@@ -920,12 +965,14 @@ class OntologyCellosaurus(OntologyExtendedObo):
 
     def __init__(
             self,
+            recache: bool = False,
             **kwargs
     ):
         obofile = cached_load_obo(
             url="https://ftp.expasy.org/databases/cellosaurus/cellosaurus.obo",
             ontology_cache_dir="cellosaurus",
             ontology_cache_fn="cellosaurus.obo",
+            recache=recache,
         )
         super().__init__(obo=obofile)
 
@@ -943,19 +990,47 @@ class OntologyCellosaurus(OntologyExtendedObo):
         return ["synonym"]
 
 
+class OntologyHancestro(OntologyEbi):
+
+    """
+    TODO move this to .owl backend once available.
+    TODO root term: No term HANCESTRO_0001 ("Thing"?) accessible through EBI interface, because of that country-related
+        higher order terms are not available as they are parallel to HANCESTRO_0004. Maybe fix with .owl backend?
+    """
+
+    def __init__(self, recache: bool = False):
+        super().__init__(
+            ontology="hancestro",
+            root_term="HANCESTRO_0004",
+            additional_terms={},
+            additional_edges=[],
+            ontology_cache_fn="hancestro.pickle",
+            recache=recache,
+        )
+
+
 class OntologySinglecellLibraryConstruction(OntologyEbi):
 
-    def __init__(self):
+    """
+    TODO CITE set not in API yet, added two nodes and edges temporarily.
+    """
+
+    def __init__(self, recache: bool = False):
         super().__init__(
             ontology="efo",
             root_term="EFO_0010183",
             additional_terms={
                 "sci-plex": {"name": "sci-plex"},
                 "sci-RNA-seq": {"name": "sci-RNA-seq"},
+                "EFO:0009294": {"name": "CITE-seq"},  # TODO not in API yet
+                "EFO:0030008": {"name": "CITE-seq (cell surface protein profiling)"},  # TODO not in API yet
             },
             additional_edges=[
                 ("EFO:0010183", "sci-plex"),
                 ("EFO:0010183", "sci-RNA-seq"),
+                ("EFO:0010183", "EFO:0009294"),  # TODO not in API yet
+                ("EFO:0009294", "EFO:0030008"),  # TODO not in API yet
             ],
-            ontology_cache_fn="efo.pickle"
+            ontology_cache_fn="efo.pickle",
+            recache=recache,
         )

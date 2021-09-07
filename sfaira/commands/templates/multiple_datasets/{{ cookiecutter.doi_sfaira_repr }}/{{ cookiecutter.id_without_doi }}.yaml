@@ -6,7 +6,8 @@ dataset_structure:
     author: "{{ cookiecutter.author }}"
     default_embedding:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}: "{{ cookiecutter.default_embedding }}"
-{% endfor %}doi: "{{ cookiecutter.doi }}"
+{% endfor %}    doi_preprint:
+    doi_journal: "{{ cookiecutter.doi }}"
     download_url_data:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
 {% endfor %}    download_url_meta:
@@ -15,12 +16,21 @@ dataset_structure:
     normalization: "{{ cookiecutter.normalization }}"
     year: "{{ cookiecutter.year }}"
 dataset_or_observation_wise:
-    assay:
-{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}: "{{ cookiecutter.assay }}"
-{% endfor %}    assay_obs_key:
+    assay_sc:
+{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}: "{{ cookiecutter.assay_sc }}"
+{% endfor %}    assay_sc_obs_key:
+    assay_differentiation:
+{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
+{% endfor %}    assay_differentiation_obs_key:
+    assay_type_differentiation:
+{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
+{% endfor %}    assay_type_differentiation_obs_key:
     bio_sample:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
 {% endfor %}    bio_sample_obs_key:
+    cell_line:
+{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
+{% endfor %}    cell_line_obs_key:
     development_stage:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
 {% endfor %}    development_stage_obs_key:
@@ -39,6 +49,9 @@ dataset_or_observation_wise:
     organism:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}: "{{ cookiecutter.organism }}"
 {% endfor %}    organism_obs_key:
+    sample_source:
+{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}: "{{ cookiecutter.sample_source }}"
+{% endfor %}    sample_source_obs_key:
     sex:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
 {% endfor %}    sex_obs_key:
@@ -49,10 +62,9 @@ dataset_or_observation_wise:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
 {% endfor %}    tech_sample_obs_key:
 observation_wise:
-    cell_types_original_obs_key:
+    cell_types_original_obs_key: "{{ cookiecutter.cell_types_original_obs_key }}"
 feature_wise:
     gene_id_ensembl_var_key:
     gene_id_symbols_var_key:
-misc:
 meta:
     version: "1.0"

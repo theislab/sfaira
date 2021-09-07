@@ -911,7 +911,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         store.subset(attr_key="id", values=[k for k in store.indices.keys()
                                             if 'cell_ontology_class' in store.adata_by_key[k].obs.columns])
         store.subset(attr_key="cellontology_class", excluded_values=[
-            store._adata_ids_sfaira.unknown_celltype_identifier,
+            store._adata_ids_sfaira.unknown_metadata_identifier,
             store._adata_ids_sfaira.not_a_cell_celltype_identifier,
         ])
         cu = CelltypeUniverse(
@@ -1076,7 +1076,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         store.subset(attr_key="id", values=[k for k in store.indices.keys()
                                             if 'cell_ontology_id' in store.adata_by_key[k].obs.columns])
         store.subset(attr_key="cellontology_class", excluded_values=[
-            store._adata_ids_sfaira.unknown_celltype_identifier,
+            store._adata_ids_sfaira.unknown_metadata_identifier,
             store._adata_ids_sfaira.not_a_cell_celltype_identifier,
         ])
         cu = CelltypeUniverse(
@@ -1370,13 +1370,15 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
 
     def get_gradients_by_celltype(
             self,
-            organ: Union[str, None],
+            model_organ: str,
+            data_organ: str,
             organism: Union[str, None],
             genome: Union[str, None, dict],
             model_type: Union[str, List[str]],
             metric_select: str,
             data_source: str,
             datapath,
+            gene_type: str = "protein_coding",
             configpath: Union[None, str] = None,
             store_format: Union[None, str] = None,
             test_data=True,
@@ -1387,7 +1389,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         """
         Compute gradients across latent units with respect to input features for each cell type.
 
-        :param organ:
+        :param model_organ:
+        :param data_organ:
         :param organism:
         :param model_type:
         :param metric_select:
@@ -1403,7 +1406,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
             metric_select=metric_select,
             partition_select=partition_select,
             subset={
-                "organ": organ,
+                "organ": model_organ,
                 "model_type": model_type,
             }
         )
@@ -1423,7 +1426,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                 store.subset(attr_key="id", values=[k for k in store.indices.keys()
                                                     if 'cell_ontology_id' in store.adata_by_key[k].obs.columns])
                 store.subset(attr_key="cellontology_class", excluded_values=[
-                    store._adata_ids_sfaira.unknown_celltype_identifier,
+                    store._adata_ids_sfaira.unknown_metadata_identifier,
                     store._adata_ids_sfaira.not_a_cell_celltype_identifier,
                 ])
                 adatas = store.adata_sliced
@@ -1439,10 +1442,10 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                 u = Universe(data_path=datapath)
                 if organism is not None:
                     u.subset("organism", organism)
-                if organ is not None:
-                    u.subset("organ", organ)
+                if data_organ is not None:
+                    u.subset("organ", data_organ)
                 u.load(allow_caching=False)
-                u.streamline_features(match_to_reference=genome)
+                u.streamline_features(match_to_reference=genome, subset_genes_to_type=gene_type)
                 u.streamline_metadata()
                 adata = u.adata
             else:
@@ -1482,7 +1485,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
 
     def plot_gradient_distr(
             self,
-            organ: str,
+            model_organ: str,
+            data_organ: str,
             model_type: Union[str, List[str]],
             metric_select: str,
             datapath: str,
@@ -1492,6 +1496,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
             configpath: Union[None, str] = None,
             store_format: Union[None, str] = None,
             test_data=True,
+            gene_type: str = "protein_coding",
             partition_select: str = "val",
             normalize=True,
             remove_inactive=True,
@@ -1521,11 +1526,13 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         celltypes = {}
         for modelt in model_type:
             avg_grads[modelt], celltypes[modelt] = self.get_gradients_by_celltype(
-                organ=organ,
+                model_organ=model_organ,
+                data_organ=data_organ,
                 organism=organism,
                 model_type=modelt,
                 metric_select=metric_select,
                 genome=genome,
+                gene_type=gene_type,
                 data_source=data_source,
                 datapath=datapath,
                 configpath=configpath,
@@ -1584,7 +1591,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
 
     def plot_gradient_cor(
             self,
-            organ: str,
+            model_organ: str,
+            data_organ: str,
             model_type: Union[str, List[str]],
             metric_select: str,
             datapath: str,
@@ -1594,6 +1602,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
             configpath: Union[None, str] = None,
             store_format: Union[None, str] = None,
             test_data=True,
+            gene_type: str = "protein_coding",
             partition_select: str = "val",
             height_fig=7,
             width_fig=7,
@@ -1607,7 +1616,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         """
         Plot correlation heatmap of gradient vectors accumulated on input features between cell types or models.
 
-        :param organ:
+        :param model_organ:
+        :param data_organ:
         :param model_type:
         :param metric_select:
         :param datapath:
@@ -1641,11 +1651,13 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
         celltypes = {}
         for modelt in model_type:
             avg_grads[modelt], celltypes[modelt] = self.get_gradients_by_celltype(
-                organ=organ,
+                model_organ=model_organ,
+                data_organ=data_organ,
                 organism=organism,
                 model_type=modelt,
                 metric_select=metric_select,
                 genome=genome,
+                gene_type=gene_type,
                 data_source=data_source,
                 datapath=datapath,
                 configpath=configpath,

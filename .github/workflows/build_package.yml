@@ -31,7 +31,7 @@ jobs:
       - name: Import sfaira
         run: python -c "import sfaira"
 
-      # Verify that the package does adhere to PyPI's standards
+      # Verify that the package adheres to PyPI's standards
       - name: Install required twine packaging dependencies
         run: pip install setuptools wheel twine
 

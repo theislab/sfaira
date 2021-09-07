@@ -1,6 +1,6 @@
 from typing import Union
 
-from sfaira.versions.genomes import GenomeContainer
+from sfaira.versions.genomes.genomes import GenomeContainer
 
 
 class TopologyContainer:

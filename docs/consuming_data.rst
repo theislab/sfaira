@@ -1,9 +1,13 @@
-Consuming Data
+.. _consuming_data_rst:
+
+Consuming data
 ===============
 
 .. image:: https://raw.githubusercontent.com/theislab/sfaira/master/resources/images/data_zoo.png
    :width: 600px
    :align: center
+
+For a high-level overview of data management in sfaira, read :ref:`data_life_cycle_rst` first.
 
 Build data repository locally
 ------------------------------

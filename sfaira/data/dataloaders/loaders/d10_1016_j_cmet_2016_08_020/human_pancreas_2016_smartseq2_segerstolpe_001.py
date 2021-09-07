@@ -7,7 +7,6 @@ from sfaira.data import DatasetBase
 
 class Dataset(DatasetBase):
     """
-    ToDo: revisit gamma cell missing in CO
     TODO: move state exact to diesase
     """
 
@@ -17,7 +16,7 @@ class Dataset(DatasetBase):
         self.download_url_meta = "https://www.ebi.ac.uk/arrayexpress/files/E-MTAB-5061/E-MTAB-5061.sdrf.txt"
 
         self.author = "Segerstolpe"
-        self.doi = "10.1016/j.cmet.2016.08.020"
+        self.doi_journal = "10.1016/j.cmet.2016.08.020"
         self.normalization = "raw"
         self.organ = "pancreas"
         self.organism = "human"
@@ -27,7 +26,7 @@ class Dataset(DatasetBase):
 
         self.gene_id_symbols_var_key = "index"
 
-        self.cell_types_original_obs_key = "Characteristics[cell type]"
+        self.cell_type_obs_key = "Characteristics[cell type]"
         self.state_exact_obs_key = "Characteristics[disease]"
 
         self.set_dataset_id(idx=1)

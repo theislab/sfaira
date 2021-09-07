@@ -7,7 +7,7 @@ delta	pancreatic D cell	CL:0000173
 ductal	pancreatic ductal cell	CL:0002079
 endothelial	endothelial cell	CL:0000115
 epsilon	pancreatic epsilon cell	CL:0005019
-gamma	pancreatic endocrine cell	CL:0008024
+gamma	pancreatic PP cell	CL:0002275
 macrophage	macrophage	CL:0000235
 mast	mast cell	CL:0000097
 quiescent_stellate	pancreatic stellate cell	CL:0002410
