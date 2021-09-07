@@ -405,15 +405,13 @@ def test_dataset_size(batch_size: int, randomized_batch_access: bool):
                               organism="human")
     idx_train = test_estim.estimator.idx_train
     shuffle_buffer_size = None if randomized_batch_access else 2
-    ds_train = test_estim.estimator.get_one_time_tf_dataset(
-        idx=idx_train, batch_size=batch_size, mode='eval', shuffle_buffer_size=shuffle_buffer_size,
-        retrieval_batch_size=retrieval_batch_size, randomized_batch_access=randomized_batch_access)
+    ds_train = test_estim.estimator.get_one_time_tf_dataset(idx=idx_train, batch_size=batch_size, mode='eval')
     x_train_shape = 0
     for x, _ in ds_train.as_numpy_iterator():
         x_train_shape += x[0].shape[0]
     # Define raw store generator on train data to compare and check that it has the same size as tf generator exposed
     # by estimator:
-    g_train = test_estim.estimator.data.generator(idx=idx_train, retrival_batch_size=retrieval_batch_size,
+    g_train = test_estim.estimator.data.generator(idx=idx_train, retrieval_batch_size=retrieval_batch_size,
                                                   randomized_batch_access=randomized_batch_access)
     x_train2_shape = 0
     for x, _ in g_train.iterator():
@@ -425,9 +423,8 @@ def test_dataset_size(batch_size: int, randomized_batch_access: bool):
 
 
 @pytest.mark.parametrize("data_type", ["adata", "store"])
-@pytest.mark.parametrize("randomized_batch_access", [False, True])
 @pytest.mark.parametrize("test_split", [0.3, {"id": "human_lung_2021_10xtechnology_mock1_001_no_doi_mock1"}])
-def test_split_index_sets(data_type: str, randomized_batch_access: bool, test_split):
+def test_split_index_sets(data_type: str, test_split):
     """
     Test that train, val, test split index sets are correct:
 
@@ -492,20 +489,11 @@ def test_split_index_sets(data_type: str, randomized_batch_access: bool, test_sp
     # 4) Assert that observations mapped to indices are actually unique based on expression vectors:
     # Build numpy arrays of expression input data sets from tensorflow data sets directly from estimator.
     # These data sets are the most processed transformation of the data and stand directly in concat with the model.
-    shuffle_buffer_size = None if randomized_batch_access else 2
-    ds_train = test_estim.estimator.get_one_time_tf_dataset(
-        idx=idx_train, batch_size=1024, mode='eval', shuffle_buffer_size=shuffle_buffer_size,
-        retrieval_batch_size=2048, randomized_batch_access=randomized_batch_access)
-    ds_eval = test_estim.estimator.get_one_time_tf_dataset(
-        idx=idx_eval, batch_size=1024, mode='eval', shuffle_buffer_size=shuffle_buffer_size,
-        retrieval_batch_size=2048, randomized_batch_access=randomized_batch_access)
-    ds_test = test_estim.estimator.get_one_time_tf_dataset(
-        idx=idx_test, batch_size=1024, mode='eval', shuffle_buffer_size=shuffle_buffer_size,
-        retrieval_batch_size=2048, randomized_batch_access=randomized_batch_access)
+    ds_train = test_estim.estimator.get_one_time_tf_dataset(idx=idx_train, batch_size=1024, mode='eval')
+    ds_eval = test_estim.estimator.get_one_time_tf_dataset(idx=idx_eval, batch_size=1024, mode='eval')
+    ds_test = test_estim.estimator.get_one_time_tf_dataset(idx=idx_test, batch_size=1024, mode='eval')
     # Create two copies of test data set to make sure that re-instantiation of a subset does not cause issues.
-    ds_test2 = test_estim.estimator.get_one_time_tf_dataset(
-        idx=idx_test, batch_size=1024, mode='eval', shuffle_buffer_size=shuffle_buffer_size,
-        retrieval_batch_size=2048, randomized_batch_access=randomized_batch_access)
+    ds_test2 = test_estim.estimator.get_one_time_tf_dataset(idx=idx_test, batch_size=1024, mode='eval')
     x_train = []
     x_eval = []
     x_test = []

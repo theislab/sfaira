@@ -319,22 +319,17 @@ class EstimatorKeras:
     def _tf_dataset_kwargs(self, mode: str):
         pass
 
-    def get_one_time_tf_dataset(self, idx, mode, batch_size=None, cache=None, prefetch=None, shuffle_buffer_size=None,
-                                retrieval_batch_size=None, randomized_batch_access=None, **kwargs):
-        batch_size = 128 if prefetch is None else batch_size
-        cache = False if cache is None else cache
+    def get_one_time_tf_dataset(self, idx, mode, batch_size=None, prefetch=None):
+        batch_size = 128 if batch_size is None else batch_size
         prefetch = 10 if prefetch is None else prefetch
-        shuffle_buffer_size = 0 if shuffle_buffer_size is None else shuffle_buffer_size
-        retrieval_batch_size = 128 if retrieval_batch_size is None else retrieval_batch_size
-        randomized_batch_access = False if randomized_batch_access is None else randomized_batch_access
         tf_kwargs = {
             "batch_size": batch_size,
-            "cache": cache,
+            "cache": False,
             "prefetch": prefetch,
-            "shuffle_buffer_size": min(shuffle_buffer_size, len(idx))
+            "shuffle_buffer_size": 0,
         }
-        train_gen = self._get_generator(idx=idx, mode=mode, retrieval_batch_size=retrieval_batch_size,
-                                        randomized_batch_access=randomized_batch_access, **kwargs)
+        train_gen = self._get_generator(idx=idx, mode=mode, retrieval_batch_size=128,
+                                        randomized_batch_access=False)
         train_tf_dataset_kwargs = self._tf_dataset_kwargs(mode=mode)
         train_dataset = train_gen.adaptor(generator_type="tensorflow", **train_tf_dataset_kwargs)
         train_dataset = process_tf_dataset(dataset=train_dataset, mode=mode, **tf_kwargs)
@@ -603,7 +598,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 output = (x_sample, sf_sample), x_sample
             return output
 
-        g = self.data.generator(idx=idx, retrival_batch_size=retrieval_batch_size, obs_keys=[], map_fn=map_fn,
+        g = self.data.generator(idx=idx, retrieval_batch_size=retrieval_batch_size, obs_keys=[], map_fn=map_fn,
                                 return_dense=True, randomized_batch_access=randomized_batch_access,
                                 random_access=False)
         return g
@@ -659,8 +654,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         """
         idx = self._process_idx_for_eval(idx=idx)
         if idx is not None:
-            dataset = self.get_one_time_tf_dataset(
-                idx=idx, batch_size=batch_size, mode='eval', retrieval_batch_size=128, shuffle_buffer_size=0)
+            dataset = self.get_one_time_tf_dataset(idx=idx, batch_size=batch_size, mode='eval')
             steps = min(max(len(idx) // batch_size, 1), max_steps)
             results = self.model.training_model.evaluate(x=dataset, steps=steps)
             return dict(zip(self.model.training_model.metrics_names, results))
@@ -692,8 +686,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         """
         idx = self._process_idx_for_eval(idx=self.idx_test)
         if idx is not None:
-            dataset = self.get_one_time_tf_dataset(
-                idx=idx, batch_size=batch_size, mode='predict', retrieval_batch_size=128, shuffle_buffer_size=0)
+            dataset = self.get_one_time_tf_dataset(idx=idx, batch_size=batch_size, mode='predict')
             return self.model.predict_reconstructed(x=dataset)
         else:
             return np.array([])
@@ -708,8 +701,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         """
         idx = self._process_idx_for_eval(idx=self.idx_test)
         if len(idx) > 0:
-            dataset = self.get_one_time_tf_dataset(
-                idx=idx, batch_size=batch_size, mode='predict', retrieval_batch_size=128, shuffle_buffer_size=0)
+            dataset = self.get_one_time_tf_dataset(idx=idx, batch_size=batch_size, mode='predict')
             return self.model.predict_embedding(x=dataset, variational=variational)
         else:
             return np.array([])
@@ -732,8 +724,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             idx = None
             n_obs = self.data.X.shape[0]
 
-        ds = self.get_one_time_tf_dataset(
-            idx=idx, batch_size=batch_size, mode='gradient_method', retrieval_batch_size=128, shuffle_buffer_size=0)
+        ds = self.get_one_time_tf_dataset(idx=idx, batch_size=batch_size, mode='gradient_method')
 
         if per_celltype:
             cell_to_id = self._get_class_dict(obs_key=self._adata_ids.cell_type)
@@ -951,7 +942,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             mode: str,
             retrieval_batch_size: int,
             randomized_batch_access: bool,
-            weighted: bool,
+            weighted: bool = False,
             **kwargs
     ) -> GeneratorSingle:
         # Define constants used by map_fn in outer name space so that they are not created for each sample.
@@ -974,7 +965,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
                 output = x_sample,
             return output
 
-        g = self.data.generator(idx=idx, retrival_batch_size=retrieval_batch_size,
+        g = self.data.generator(idx=idx, retrieval_batch_size=retrieval_batch_size,
                                 obs_keys=[self._adata_ids.cell_type + self._adata_ids.onto_id_suffix], map_fn=map_fn,
                                 return_dense=True, randomized_batch_access=randomized_batch_access,
                                 random_access=False)
@@ -1003,8 +994,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
         """
         idx = self._process_idx_for_eval(idx=self.idx_test)
         if len(idx) > 0:
-            dataset = self.get_one_time_tf_dataset(
-                idx=idx, batch_size=batch_size, mode='predict', retrieval_batch_size=128, weighted=False)
+            dataset = self.get_one_time_tf_dataset(idx=idx, batch_size=batch_size, mode='predict')
             return self.model.training_model.predict(x=dataset)
         else:
             return np.array([])
@@ -1017,8 +1007,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
         """
         idx = self._process_idx_for_eval(idx=self.idx_test)
         if len(idx) > 0:
-            dataset = self.get_one_time_tf_dataset(
-                idx=idx, batch_size=batch_size, mode='eval', retrieval_batch_size=128, weighted=False)
+            dataset = self.get_one_time_tf_dataset(idx=idx, batch_size=batch_size, mode='eval')
             y_true = []
             for _, y, _ in dataset.as_numpy_iterator():
                 y_true.append(y)
@@ -1041,8 +1030,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
         """
         idx = self._process_idx_for_eval(idx=idx)
         if len(idx) > 0:
-            dataset = self.get_one_time_tf_dataset(
-                idx=idx, batch_size=batch_size, mode='eval', retrieval_batch_size=128, weighted=weighted)
+            dataset = self.get_one_time_tf_dataset(idx=idx, batch_size=batch_size, mode='eval')
             results = self.model.training_model.evaluate(x=dataset)
             return dict(zip(self.model.training_model.metrics_names, results))
         else:
@@ -1075,8 +1063,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             n_obs = self.data.n_obs
 
         # to get a tf.GradientTape compatible data set
-        ds = self.get_one_time_tf_dataset(
-            idx=idx, batch_size=64, mode='train_val', retrieval_batch_size=64)
+        ds = self.get_one_time_tf_dataset(idx=idx, batch_size=64, mode='train_val')
         grads_x = 0
         # Loop over sub-selected data set and sum gradients across all selected observations.
         model = tf.keras.Model(

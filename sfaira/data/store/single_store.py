@@ -34,12 +34,7 @@ Note that in all cases, you can use standard anndata reading functions to load a
 """
 
 
-def _process_batch_size(batch_size: int, retrival_batch_size: int, idx: np.ndarray) -> Tuple[int, int]:
-    if retrival_batch_size > len(idx):
-        retrival_batch_size_new = len(idx)
-        print(f"WARNING: reducing retrieval batch size according to data availability in store "
-              f"from {retrival_batch_size} to {retrival_batch_size_new}")
-        retrival_batch_size = retrival_batch_size_new
+def _process_batch_size(batch_size: int, retrival_batch_size: int) -> Tuple[int, int]:
     if batch_size != 1:
         raise ValueError("batch size is only supported as 1")
     return batch_size, retrival_batch_size
@@ -91,23 +86,6 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
         """
         idx_global = np.arange(0, np.sum([len(v) for v in self.indices.values()]))
         return idx_global
-
-    def _validate_idx(self, idx: Union[np.ndarray, list]) -> np.ndarray:
-        """
-        Validate global index vector.
-        """
-        if len(idx) > 0:
-            assert np.max(idx) < self.n_obs, f"maximum of supplied index vector {np.max(idx)} exceeds number of " \
-                                             f"modelled observations {self.n_obs}"
-            assert len(idx) == len(np.unique(idx)), f"repeated indices in idx: {len(idx) - len(np.unique(idx))}"
-            if isinstance(idx, np.ndarray):
-                assert len(idx.shape) == 1, idx.shape
-                assert idx.dtype == np.int
-            else:
-                assert isinstance(idx, list)
-                assert isinstance(idx[0], int) or isinstance(idx[0], np.int)
-        idx = np.asarray(idx)
-        return idx
 
     @property
     def organisms_by_key(self) -> Dict[str, str]:
@@ -412,43 +390,50 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
 
     def _index_curation_helper(
             self,
-            idx: Union[np.ndarray, None],
             batch_size: int,
             retrival_batch_size: int,
-    ) -> Tuple[Union[np.ndarray, None], Union[np.ndarray, None], int, int]:
+    ) -> Tuple[Union[np.ndarray, None], int, int]:
         """
         Process indices and batch size input for generator production.
 
-        Feature indicces are formatted based on previously loaded genome container.
+        Feature indices are formatted based on previously loaded genome container.
 
-        :param idx: Global idx to query from store. These is an array with indices corresponding to a contiuous index
-            along all observations in self.adata_by_key, ordered along a hypothetical concatenation along the keys of
-            self.adata_by_key. If None, all observations are seleccted.
         :param batch_size: Number of observations read from disk in each batched access (generator invocation).
         :return: Tuple:
-            - idx: Processed observation index vector for generator to access.
-            - var_idx Processed feature index vector for generator to access.
-            - batch_size Processed retrieval batch size for generator to access.
+            - var_idx: Processed feature index vector for generator to access.
+            - batch_size: Processed batch size for generator to access.
+            - retrival_batch_size: Processed retrieval batch size for generator to access.
         """
         # Make sure that features are ordered in the same way in each object so that generator yields consistent cell
         # vectors.
         var_names = self._validate_feature_space_homogeneity()
         # Use feature space sub-selection based on assembly if provided, will use full feature space otherwise.
+        import time
+        t0 = time.time()
         if self.genome_container is not None:
             var_names_target = self.genome_container.ensembl
-            var_idx = np.sort([var_names.index(x) for x in var_names_target])
             # Check if index vector is just full ordered list of indices, in this case, sub-setting is unnecessary.
-            if len(var_idx) == len(var_names) and np.all(var_idx == np.arange(0, len(var_names))):
+            if len(var_names_target) == len(var_names) and np.all(var_names_target == var_names):
                 var_idx = None
+            else:
+                # Check if variable names are continuous stretch in reference list, indexing this is much faster.
+                # Note: There is about 5 sec to be saved on a call because if len(var_names_target) calls to .index
+                #  on a list of length var_names are avoided.
+                #  One example in this would save about 5 sec would be selection of protein coding genes from a full
+                #  gene space in which protein coding genes grouped together (this is not the case in the standard
+                #  assembly).
+                idx_first = var_names.index(var_names_target[0])
+                idx_last = idx_first + len(var_names_target)
+                if idx_last <= len(var_names) and np.all(var_names_target == var_names[idx_first:idx_last]):
+                    var_idx = np.arange(idx_first, idx_last)
+                else:
+                    var_idx = np.sort([var_names.index(x) for x in var_names_target])
         else:
             var_idx = None
         # Select all cells if idx was None:
-        if idx is None:
-            idx = np.arange(0, self.n_obs)
-        idx = self._validate_idx(idx)
-        batch_size, retrival_batch_size = _process_batch_size(
-            batch_size=batch_size, retrival_batch_size=retrival_batch_size, idx=idx)
-        return idx, var_idx, batch_size, retrival_batch_size
+        batch_size, retrival_batch_size = _process_batch_size(batch_size=batch_size,
+                                                              retrival_batch_size=retrival_batch_size)
+        return var_idx, batch_size, retrival_batch_size
 
     @abc.abstractmethod
     def _get_generator(
@@ -477,7 +462,7 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
             self,
             idx: Union[np.ndarray, None] = None,
             batch_size: int = 1,
-            retrival_batch_size: int = 128,
+            retrieval_batch_size: int = 128,
             map_fn=None,
             obs_keys: List[str] = [],
             return_dense: bool = True,
@@ -498,7 +483,7 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
             along all observations in self.adata_by_key, ordered along a hypothetical concatenation along the keys of
             self.adata_by_key. If None, all observations are selected.
         :param batch_size: Number of observations to yield in each access (generator invocation).
-        :param retrival_batch_size: Number of observations read from disk in each batched access (data-backend generator
+        :param retrieval_batch_size: Number of observations read from disk in each batched access (data-backend generator
             invocation).
         :param map_fn: Map functino to apply to output tuple of raw generator. Each draw i from the generator is then:
             `yield map_fn(x[i, var_idx], obs[i, obs_keys])`
@@ -526,12 +511,12 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
         :return: Generator function which yields batch_size at every invocation.
             The generator returns a tuple of (.X, .obs).
         """
-        obs_idx, var_idx, batch_size, retrival_batch_size = self._index_curation_helper(
-            idx=idx, batch_size=batch_size, retrival_batch_size=retrival_batch_size)
+        var_idx, batch_size, retrieval_batch_size = self._index_curation_helper(
+            batch_size=batch_size, retrival_batch_size=retrieval_batch_size)
         batch_schedule_kwargs = {"randomized_batch_access": randomized_batch_access,
                                  "random_access": random_access,
-                                 "retrival_batch_size": retrival_batch_size}
-        gen = self._get_generator(batch_schedule=batch_schedule, batch_size=batch_size, map_fn=map_fn, obs_idx=obs_idx,
+                                 "retrieval_batch_size": retrieval_batch_size}
+        gen = self._get_generator(batch_schedule=batch_schedule, batch_size=batch_size, map_fn=map_fn, obs_idx=idx,
                                   obs_keys=obs_keys, var_idx=var_idx, **batch_schedule_kwargs, **kwargs)
         return gen
 
@@ -600,7 +585,7 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
         :return: Slice of data array.
         """
         batch_size = min(len(idx), 128)
-        g = self.generator(idx=idx, retrival_batch_size=batch_size, return_dense=True, random_access=False,
+        g = self.generator(idx=idx, retrieval_batch_size=batch_size, return_dense=True, random_access=False,
                            randomized_batch_access=False, **kwargs)
         shape = (idx.shape[0], self.n_vars)
         if as_sparse:

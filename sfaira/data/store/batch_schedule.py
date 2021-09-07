@@ -22,9 +22,9 @@ def _randomize_batch_start_ends(batch_starts_ends):
 
 class BatchDesignBase:
 
-    def __init__(self, idx, retrival_batch_size: int, randomized_batch_access: bool, random_access: bool, **kwargs):
-        self._batch_bounds = _get_batch_start_ends(idx=idx, batch_size=retrival_batch_size)
-        self._idx = np.sort(idx)  # Sorted indices improve accession efficiency in some cases.
+    def __init__(self, retrieval_batch_size: int, randomized_batch_access: bool, random_access: bool, **kwargs):
+        self.retrieval_batch_size = retrieval_batch_size
+        self._idx = None
         if randomized_batch_access and random_access:
             raise ValueError("Do not use randomized_batch_access and random_access.")
         self.randomized_batch_access = randomized_batch_access
@@ -40,9 +40,15 @@ class BatchDesignBase:
     @property
     def idx(self):
         """
-        Protects property from changing.
+        Protects property from uncontrolled changing.
+        Changes to _idx require changes to _batch_bounds.
         """
         return self._idx
+
+    @idx.setter
+    def idx(self, x):
+        self._batch_bounds = _get_batch_start_ends(idx=x, batch_size=self.retrieval_batch_size)
+        self._idx = np.sort(x)  # Sorted indices improve accession efficiency in some cases.
 
     @property
     def design(self) -> Tuple[np.ndarray, List[Tuple[int, int]]]:

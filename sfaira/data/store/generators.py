@@ -3,10 +3,9 @@ import dask.array
 import numpy as np
 import pandas as pd
 import scipy.sparse
-import time
-from typing import Dict, List, Tuple
+from typing import Dict, List, Union
 
-from sfaira.data.store.batch_schedule import BatchDesignBase, BATCH_SCHEDULE
+from sfaira.data.store.batch_schedule import BATCH_SCHEDULE
 
 
 def split_batch(x, obs):
@@ -44,6 +43,10 @@ class GeneratorBase:
         raise NotImplementedError()
 
     @property
+    def obs_idx(self):
+        raise NotImplementedError()
+
+    @property
     def n_batches(self) -> int:
         raise NotImplementedError()
 
@@ -70,7 +73,7 @@ class GeneratorBase:
 class GeneratorSingle(GeneratorBase):
 
     batch_size: int
-    obs_idx: np.ndarray
+    _obs_idx: Union[np.ndarray, None]
     obs_keys: List[str]
     var_idx: np.ndarray
 
@@ -89,16 +92,56 @@ class GeneratorSingle(GeneratorBase):
             in self.adata_by_key.
         :param var_idx: The features to emit.
         """
+        self._obs_idx = None
         if not batch_size == 1:
             raise ValueError(f"Only batch size==1 is supported, found {batch_size}.")
+        self.batch_schedule = batch_schedule
         self.batch_size = batch_size
         self.map_fn = map_fn
+        if isinstance(batch_schedule, str):
+            batch_schedule = BATCH_SCHEDULE[batch_schedule]
+        self.schedule = batch_schedule(**kwargs)
         self.obs_idx = obs_idx
         self.obs_keys = obs_keys
         self.var_idx = var_idx
-        if isinstance(batch_schedule, str):
-            batch_schedule = BATCH_SCHEDULE[batch_schedule]
-        self.schedule = batch_schedule(idx=obs_idx, **kwargs)
+
+    def _validate_idx(self, idx: Union[np.ndarray, list]) -> np.ndarray:
+        """
+        Validate global index vector.
+        """
+        if len(idx) > 0:
+            assert np.max(idx) < self.n_obs, f"maximum of supplied index vector {np.max(idx)} exceeds number of " \
+                                             f"modelled observations {self.n_obs}"
+            assert len(idx) == len(np.unique(idx)), f"repeated indices in idx: {len(idx) - len(np.unique(idx))}"
+            if isinstance(idx, np.ndarray):
+                assert len(idx.shape) == 1, idx.shape
+                assert idx.dtype == np.int
+            else:
+                assert isinstance(idx, list)
+                assert isinstance(idx[0], int) or isinstance(idx[0], np.int)
+        idx = np.asarray(idx)
+        return idx
+
+    @property
+    def obs_idx(self):
+        return self._obs_idx
+
+    @obs_idx.setter
+    def obs_idx(self, x):
+        """Allows emission of different iterator on same generator instance (using same dask array)."""
+        if x is None:
+            x = np.arange(0, self.n_obs)
+        else:
+            x = self._validate_idx(x)
+            x = np.sort(x)
+        # Only reset if they are actually different:
+        if self._obs_idx is not None and len(x) != len(self._obs_idx) or np.any(x != self._obs_idx):
+            self._obs_idx = x
+            self.schedule.idx = x
+
+    @property
+    def n_obs(self) -> int:
+        raise NotImplementedError()
 
     @property
     def n_batches(self) -> int:
@@ -107,18 +150,20 @@ class GeneratorSingle(GeneratorBase):
 
 class GeneratorAnndata(GeneratorSingle):
 
-    adata_dict: anndata._core.views.ArrayView
+    adata_dict: Dict[str, anndata._core.views.ArrayView]
     return_dense: bool
     single_object: bool
 
     def __init__(self, adata_dict, idx_dict_global, return_dense, **kwargs):
-        super(GeneratorAnndata, self).__init__(**kwargs)
         self.return_dense = return_dense
         self.single_object = len(adata_dict.keys()) == 1
         self.idx_dict_global = idx_dict_global
-        t0 = time.time()
         self.adata_dict = adata_dict
-        print(f"init adata: {time.time() - t0}")
+        super(GeneratorAnndata, self).__init__(**kwargs)
+
+    @property
+    def n_obs(self) -> int:
+        return int(np.sum([v.n_obs for v in self.adata_dict.values()]))
 
     @property
     def iterator(self) -> iter:
@@ -221,15 +266,15 @@ class GeneratorDask(GeneratorSingle):
     obs: pd.DataFrame
 
     def __init__(self, x, obs, **kwargs):
-        super(GeneratorDask, self).__init__(**kwargs)
-        t0 = time.time()
         self.x = x
-        print(f"init X: {time.time() - t0}")
-        t0 = time.time()
+        super(GeneratorDask, self).__init__(**kwargs)
         self.obs = obs[self.obs_keys]
         # Redefine index so that .loc indexing can be used instead of .iloc indexing:
         self.obs.index = np.arange(0, obs.shape[0])
-        print(f"init obs: {time.time() - t0}")
+
+    @property
+    def n_obs(self) -> int:
+        return self.x.shape[0]
 
     @property
     def iterator(self) -> iter:
@@ -275,9 +320,31 @@ class GeneratorMulti(GeneratorBase):
     def __init__(self, generators: Dict[str, GeneratorSingle], intercalated: bool = False):
         self.generators = generators
         self.intercalated = intercalated
-        # Define relative drawing frequencies from iterators for intercalation.
-        gen_lens = np.array([v.n_batches for v in self.generators.values()])
-        self.ratios = np.asarray(np.round(np.max(gen_lens) / np.asarray(gen_lens), 0), dtype="int64")
+        self._ratios = None
+
+    @property
+    def ratios(self):
+        """
+        Define relative drawing frequencies from iterators for intercalation.
+        """
+        if self._ratios is None:
+            gen_lens = np.array([v.n_batches for v in self.generators.values()])
+            self._ratios = np.asarray(np.round(np.max(gen_lens) / np.asarray(gen_lens), 0), dtype="int64")
+        return self._ratios
+
+    @property
+    def obs_idx(self):
+        return dict([(k, v.obs_idx) for k, v in self.generators.items()])
+
+    @obs_idx.setter
+    def obs_idx(self, x):
+        """Allows emission of different iterator on same generator instance (using same dask array)."""
+        if x is None:
+            x = dict([(k, None) for k in self.generators.keys()])
+        for k in self.generators.keys():
+            assert k in x.keys(), (x.keys(), self.generators.keys())
+            self.generators[k].obs_idx = x[k]
+        self._ratios = None  # Reset ratios.
 
     @property
     def iterator(self) -> iter:
