@@ -680,7 +680,7 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
             else:
                 raise ValueError(f"invalid package source {package_source} for {self._cwd}, {self.collection_id}")
         except IndexError as e:
-            raise IndexError(f"{e} for {self._cwd}")
+            raise IndexError(f"{e} for {self._cwd}, {self.collection_id}, {file_base}")
         loader_pydoc_path_sfaira = "sfaira.data.dataloaders.loaders."
         loader_pydoc_path_sfairae = "sfaira_extension.data.dataloaders.loaders."
         loader_pydoc_path = loader_pydoc_path_sfaira if package_source == "sfaira" else loader_pydoc_path_sfairae
