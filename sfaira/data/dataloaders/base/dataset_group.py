@@ -512,7 +512,7 @@ class DatasetGroup:
             # ToDo: think about whether this should be handled differently.
             warnings.warn("found more than one organism in group, this could cause problems with using a joined cell "
                           "type ontology. Using only the ontology of the first data set in the group.")
-        return self.datasets[self.ids[0]].ontology_celltypes
+        return self.datasets[self.ids[0]].ontology_container_sfaira.cell_type
 
     def project_celltypes_to_ontology(self, adata_fields: Union[AdataIds, None] = None, copy=False):
         """
