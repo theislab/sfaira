@@ -38,6 +38,7 @@ Latest additions
    api
    commandline_interface
    tutorials
+   data_life_cycle
    adding_datasets
    consuming_data
    distributed_data

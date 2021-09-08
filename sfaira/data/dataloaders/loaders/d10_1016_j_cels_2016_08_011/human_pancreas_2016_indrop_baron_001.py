@@ -25,7 +25,7 @@ class Dataset(DatasetBase):
         self.year = 2016
 
         self.gene_id_symbols_var_key = "index"
-        self.cell_types_original_obs_key = "CellType"
+        self.cell_type_obs_key = "CellType"
 
         self.set_dataset_id(idx=1)
 

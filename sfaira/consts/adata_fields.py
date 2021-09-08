@@ -12,9 +12,7 @@ class AdataIds:
     annotated: str
     assay_sc: str
     author: str
-    cell_types_original: str
-    cellontology_class: str
-    cellontology_id: str
+    cell_type: str
     development_stage: str
     disease: str
     doi_journal: str
@@ -24,24 +22,31 @@ class AdataIds:
     dataset: str
     dataset_group: str
     ethnicity: str
-    gene_id_ensembl: str
-    gene_id_index: str
-    gene_id_symbols: str
+    feature_id: str
+    feature_index: str
+    feature_symbol: str
+    feature_biotype: str
     id: str
     individual: str
     ncells: str
     normalization: str
     organ: str
     organism: str
+    primary_data: str
     sample_source: str
     sex: str
     state_exact: str
     tech_sample: str
     year: str
 
+    onto_id_suffix: str
+    onto_original_suffix: str
+
     load_raw: str
     mapped_features: str
     remove_gene_version: str
+
+    ontology_constrained: List[str]
 
     obs_keys: List[str]
     var_keys: List[str]
@@ -52,7 +57,7 @@ class AdataIds:
     classmap_target_key: str
     classmap_target_id_key: str
 
-    unknown_celltype_identifier: Union[str, None]
+    invalid_metadata_identifier: Union[str, None]
     not_a_cell_celltype_identifier: Union[str, None]
     unknown_metadata_identifier: Union[str, None]
 
@@ -77,6 +82,9 @@ class AdataIdsSfaira(AdataIds):
     cell_line: str
 
     def __init__(self):
+        self.onto_id_suffix = "_ontology_term_id"
+        self.onto_original_suffix = "_original"
+
         self.annotated = "annotated"
         self.assay_sc = "assay_sc"
         self.assay_differentiation = "assay_differentiation"
@@ -84,9 +92,7 @@ class AdataIdsSfaira(AdataIds):
         self.author = "author"
         self.bio_sample = "bio_sample"
         self.cell_line = "cell_line"
-        self.cell_types_original = "cell_types_original"
-        self.cellontology_class = "cell_ontology_class"
-        self.cellontology_id = "cell_ontology_id"
+        self.cell_type = "cell_type"
         self.default_embedding = "default_embedding"
         self.disease = "disease"
         self.doi_journal = "doi_journal"
@@ -95,9 +101,10 @@ class AdataIdsSfaira(AdataIds):
         self.dataset_group = "dataset_group"
         self.download_url_data = "download_url_data"
         self.download_url_meta = "download_url_meta"
-        self.gene_id_ensembl = "ensembl"
-        self.gene_id_index = self.gene_id_ensembl
-        self.gene_id_symbols = "names"
+        self.feature_id = "ensembl"
+        self.feature_index = self.feature_id
+        self.feature_symbol = "gene_symbol"
+        self.feature_biotype = "feature_biotype"
         self.id = "id"
         self.individual = "individual"
         self.ncells = "ncells"
@@ -123,22 +130,28 @@ class AdataIdsSfaira(AdataIds):
         self.classmap_target_key = "target"
         self.classmap_target_id_key = "target_id"
 
-        self.unknown_celltype_identifier = "UNKNOWN"
+        self.invalid_metadata_identifier = "na"
         self.not_a_cell_celltype_identifier = "NOT_A_CELL"
         self.unknown_metadata_identifier = "unknown"
-        self.unknown_metadata_ontology_id_identifier = "unknown"
 
         self.batch_keys = [self.bio_sample, self.individual, self.tech_sample]
 
+        self.ontology_constrained = [
+            "assay_sc",
+            "cell_line",
+            "cell_type",
+            "development_stage",
+            "disease",
+            "ethnicity",
+            "organ",
+        ]
         self.obs_keys = [
             "assay_sc",
             "assay_differentiation",
             "assay_type_differentiation",
             "bio_sample",
             "cell_line",
-            "cell_types_original",
-            "cellontology_class",
-            "cellontology_id",
+            "cell_type",
             "development_stage",
             "disease",
             "ethnicity",
@@ -152,8 +165,8 @@ class AdataIdsSfaira(AdataIds):
             "tech_sample",
         ]
         self.var_keys = [
-            "gene_id_ensembl",
-            "gene_id_symbols",
+            "feature_id",
+            "feature_symbol",
         ]
         self.uns_keys = [
             "annotated",
@@ -181,23 +194,23 @@ class AdataIdsCellxgene(AdataIds):
     accepted_file_names: List[str]
 
     def __init__(self):
+        self.onto_id_suffix = "_ontology_term_id"
+        self.onto_original_suffix = "_original"
+
         self.assay_sc = "assay"
         self.author = None
-        self.cell_types_original = "free_annotation"  # TODO "free_annotation" not always given
-        # TODO: -> This will break streamlining though if self.cell_types_original is the same value as self.cellontology_class!!
-        self.cellontology_class = "cell_type"
-        self.cellontology_id = "cell_type_ontology_term_id"
+        self.cell_type = "cell_type"
         self.default_embedding = "default_embedding"
         self.doi_journal = "publication_doi"
         self.doi_preprint = "preprint_doi"
         self.disease = "disease"
-        self.gene_id_symbols = "index"
-        self.gene_id_ensembl = None  # TODO not yet streamlined
-        self.gene_id_index = self.gene_id_symbols
+        self.feature_id = "ensembl"
+        self.feature_symbol = None
         self.id = "id"
         self.ncells = "ncells"
         self.organ = "tissue"
         self.organism = "organism"
+        self.primary_data = "is_primary_data"
         self.title = "title"
         self.year = "year"
 
@@ -211,19 +224,24 @@ class AdataIdsCellxgene(AdataIds):
         # selected element entries used for parsing:
         self.author_names = "names"
 
-        self.unknown_celltype_identifier = None
-        self.not_a_cell_celltype_identifier = self.unknown_celltype_identifier
-        self.unknown_metadata_identifier = "unknown"
         self.invalid_metadata_identifier = "na"
-        self.unknown_metadata_ontology_id_identifier = ""
+        self.not_a_cell_celltype_identifier = "CL:0000003"
+        self.unknown_metadata_identifier = "unknown"
 
         self.batch_keys = []
 
+        self.ontology_constrained = [
+            "assay_sc",
+            "cell_type",
+            "development_stage",
+            "disease",
+            "ethnicity",
+            "organ",
+        ]
+
         self.obs_keys = [
             "assay_sc",
-            "cell_types_original",
-            "cellontology_class",
-            "cellontology_id",
+            "cell_type",
             "development_stage",
             "disease",
             "ethnicity",
@@ -233,8 +251,8 @@ class AdataIdsCellxgene(AdataIds):
             "tech_sample",
         ]
         self.var_keys = [
-            "gene_id_ensembl",
-            "gene_id_symbols",
+            "feature_id",
+            "feature_symbol",
         ]
         self.uns_keys = [
             "doi_journal",
@@ -253,3 +271,43 @@ class AdataIdsCellxgene(AdataIds):
             "organism",
             "sex",
         ]
+
+    @property
+    def feature_index(self):
+        # Note this attribute is only filled in descendant classes.
+        return self.feature_symbol
+
+
+class AdataIdsCellxgeneHuman_v1_1_0(AdataIdsCellxgene):
+
+    def __init__(self):
+        super(AdataIdsCellxgeneHuman_v1_1_0, self).__init__()
+        self.feature_symbol = "hgnc_gene_symbol"
+
+
+class AdataIdsCellxgeneMouse_v1_1_0(AdataIdsCellxgene):
+
+    def __init__(self):
+        super(AdataIdsCellxgeneMouse_v1_1_0, self).__init__()
+        self.gene_id_symbols = "mgi_gene_symbol"
+
+
+class AdataIdsCellxgeneGeneral(AdataIdsCellxgene):
+
+    def __init__(self):
+        super(AdataIdsCellxgeneGeneral, self).__init__()
+        self.gene_id_symbols = "gene_symbol"
+
+
+class AdataIdsCellxgene_v2_0_0(AdataIdsCellxgene):
+
+    """
+    https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/2.0.0/corpora_schema.md
+    """
+
+    def __init__(self):
+        super(AdataIdsCellxgene_v2_0_0, self).__init__()
+        self.feature_symbol = "feature_name"
+        self.feature_id = "feature_id"
+        self.feature_biotype = "feature_biotype"
+        # feature_referencec

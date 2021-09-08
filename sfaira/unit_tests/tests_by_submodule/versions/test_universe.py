@@ -15,7 +15,7 @@ def test_universe_io():
     targets = ["stromal cell", "lymphocyte", "T-helper 1 cell", "T-helper 17 cell"]
     leaves_target = ["stromal cell", "T-helper 1 cell", "T-helper 17 cell"]
     cl = OntologyCl(branch="v2021-02-01")
-    uberon = OntologyUberon()
+    uberon = OntologyUberon(branch="2019-11-22")
     cu = CelltypeUniverse(cl=cl, uberon=uberon)
     cu.write_target_universe(fn=tmp_fn, x=targets)
     cu.load_target_universe(fn=tmp_fn)

@@ -1,18 +1,21 @@
-import abc
 import anndata
+import dask.dataframe
 import numpy as np
 import os
+import pandas as pd
 import pickle
 from typing import Dict, List, Tuple, Union
 
 from sfaira.consts import AdataIdsSfaira
+from sfaira.data.store.base import DistributedStoreBase
 from sfaira.data.store.single_store import DistributedStoreSingleFeatureSpace, \
-    DistributedStoreDao, DistributedStoreH5ad
+    DistributedStoreDao, DistributedStoreAnndata
+from sfaira.data.store.generators import GeneratorMulti
 from sfaira.data.store.io_dao import read_dao
 from sfaira.versions.genomes.genomes import GenomeContainer
 
 
-class DistributedStoreMultipleFeatureSpaceBase(abc.ABC):
+class DistributedStoreMultipleFeatureSpaceBase(DistributedStoreBase):
 
     """
     Umbrella class for a dictionary over multiple instances DistributedStoreSingleFeatureSpace.
@@ -38,11 +41,11 @@ class DistributedStoreMultipleFeatureSpaceBase(abc.ABC):
         raise NotImplementedError("cannot set this attribute, it s defined in constructor")
 
     @property
-    def genome_containers(self) -> Dict[str, Union[GenomeContainer, None]]:
+    def genome_container(self) -> Dict[str, Union[GenomeContainer, None]]:
         return dict([(k, v.genome_container) for k, v in self._stores.items()])
 
-    @genome_containers.setter
-    def genome_containers(self, x: Union[GenomeContainer, Dict[str, GenomeContainer]]):
+    @genome_container.setter
+    def genome_container(self, x: Union[GenomeContainer, Dict[str, GenomeContainer]]):
         if isinstance(x, GenomeContainer):
             # Transform into dictionary first.
             organisms = [k for k, v in self.stores.items()]
@@ -80,6 +83,14 @@ class DistributedStoreMultipleFeatureSpaceBase(abc.ABC):
         return dict([(kk, vv) for k, v in self.stores.items() for kk, vv in v.data_by_key.items()])
 
     @property
+    def obs_by_key(self) -> Dict[str, Union[pd.DataFrame, dask.dataframe.DataFrame]]:
+        """
+        Dictionary of all anndata instances for each selected data set in store, sub-setted by selected cells, for each
+        stores.
+        """
+        return dict([(k, v.obs) for k, v in self.adata_by_key.items()])
+
+    @property
     def var_names(self) -> Dict[str, List[str]]:
         """
         Dictionary of variable names by store.
@@ -94,7 +105,14 @@ class DistributedStoreMultipleFeatureSpaceBase(abc.ABC):
         return dict([(k, v.n_vars) for k, v in self.stores.items()])
 
     @property
-    def n_obs(self) -> Dict[str, int]:
+    def n_obs(self) -> int:
+        """
+        Dictionary of number of observations across stores.
+        """
+        return np.asarray(np.sum([v.n_obs for v in self.stores.values()]), dtype="int32")
+
+    @property
+    def n_obs_dict(self) -> Dict[str, int]:
         """
         Dictionary of number of observations by store.
         """
@@ -106,6 +124,13 @@ class DistributedStoreMultipleFeatureSpaceBase(abc.ABC):
         Dictionary of concatenated .obs tables by store, only including non-empty stores.
         """
         return dict([(k, v.obs) for k, v in self.stores.items()])
+
+    @property
+    def var(self):
+        """
+        Dictionaries of .var tables by store, only including non-empty stores.
+        """
+        return dict([(k, v.var) for k, v in self.stores.items()])
 
     @property
     def X(self):
@@ -134,7 +159,7 @@ class DistributedStoreMultipleFeatureSpaceBase(abc.ABC):
             - "assay_sc" points to self.assay_sc_obs_key
             - "assay_type_differentiation" points to self.assay_type_differentiation_obs_key
             - "cell_line" points to self.cell_line
-            - "cellontology_class" points to self.cellontology_class_obs_key
+            - "cell_type" points to self.cell_type_obs_key
             - "developmental_stage" points to self.developmental_stage_obs_key
             - "ethnicity" points to self.ethnicity_obs_key
             - "organ" points to self.organ_obs_key
@@ -175,15 +200,16 @@ class DistributedStoreMultipleFeatureSpaceBase(abc.ABC):
         with open(fn, 'rb') as f:
             indices = pickle.load(f)
         # Distribute indices to corresponding stores by matched keys.
-        keys_not_found = list(indices.keys())
+        keys_found = []
         for k, v in self.stores.items():
             indices_k = {}
-            for i, (kk, vv) in enumerate(indices.items()):
+            for kk, vv in indices.items():
                 if kk in v.adata_by_key.keys():
                     indices_k[kk] = vv
-                    del keys_not_found[i]
+                    keys_found.append(kk)
             self.stores[k].indices = indices_k
         # Make sure all declared data were assigned to stores:
+        keys_not_found = list(set(list(indices.keys())).difference(set(keys_found)))
         if len(keys_not_found) > 0:
             raise ValueError(f"did not find object(s) with name(s) in store: {keys_not_found}")
 
@@ -192,7 +218,7 @@ class DistributedStoreMultipleFeatureSpaceBase(abc.ABC):
             idx: Union[Dict[str, Union[np.ndarray, None]], None] = None,
             intercalated: bool = True,
             **kwargs
-    ) -> Tuple[iter, int]:
+    ) -> GeneratorMulti:
         """
         Emission of batches from unbiased generators of all stores.
 
@@ -201,41 +227,51 @@ class DistributedStoreMultipleFeatureSpaceBase(abc.ABC):
         :param idx:
         :param intercalated: Whether to do sequential or intercalated emission.
         :param kwargs: See parameters of DistributedStore*.generator().
+        :return: Generator function which yields batch_size at every invocation.
+            The generator returns a tuple of (.X, .obs).
         """
         if idx is None:
             idx = dict([(k, None) for k in self.stores.keys()])
         for k in self.stores.keys():
             assert k in idx.keys(), (idx.keys(), self.stores.keys())
-        generators = [
-            v.generator(idx=idx[k], **kwargs)
-            for k, v in self.stores.items()
-        ]
-        generator_fns = [x[0]() for x in generators]
-        generator_len = [x[1] for x in generators]
+        generators = dict([(k, v.generator(idx=idx[k], **kwargs)) for k, v in self.stores.items()])
+        return GeneratorMulti(generators=generators, intercalated=intercalated)
 
-        if intercalated:
-            # Define relative drawing frequencies from iterators for intercalation.
-            ratio = np.asarray(np.round(np.max(generator_len) / np.asarray(generator_len), 0), dtype="int64")
 
-            def generator():
-                # Document which generators are still yielding batches:
-                yielding = np.ones((ratio.shape[0],)) == 1.
-                while np.any(yielding):
-                    # Loop over one iterator length adjusted cycle of emissions.
-                    for i, (g, n) in enumerate(zip(generator_fns, ratio)):
-                        for _ in range(n):
-                            try:
-                                x = next(g)
-                                yield x
-                            except StopIteration:
-                                yielding[i] = False
-        else:
-            def generator():
-                for g in generator_fns:
-                    for x in g():
-                        yield x
+class DistributedStoresAnndata(DistributedStoreMultipleFeatureSpaceBase):
 
-        return generator, int(np.sum(generator_len))
+    def __init__(self, adatas: Union[anndata.AnnData, List[anndata.AnnData], Tuple[anndata.AnnData]]):
+        # Collect all data loaders from files in directory:
+        self._adata_ids_sfaira = AdataIdsSfaira()
+        adata_by_key = {}
+        indices = {}
+        if isinstance(adatas, anndata.AnnData):
+            adatas = [adatas]
+        for adata in adatas:
+            organism = adata.uns[self._adata_ids_sfaira.organism]
+            if isinstance(organism, list):
+                if len(organism) == 1:
+                    organism = organism[0]
+                    assert isinstance(organism, str), organism
+                else:
+                    raise ValueError(f"tried to register mixed organism data set ({organism})")
+            adata_id = adata.uns[self._adata_ids_sfaira.id]
+            # Make up a new merged ID for data set indexing if there is a list of IDs in .uns.
+            if isinstance(adata_id, list):
+                adata_id = "_".join(adata_id)
+            if organism not in adata_by_key.keys():
+                adata_by_key[organism] = {}
+                indices[organism] = {}
+            try:
+                adata_by_key[organism][adata_id] = adata
+                indices[organism][adata_id] = np.arange(0, adata.n_obs)
+            except TypeError as e:
+                raise TypeError(f"{e} for {organism} or {adata.uns[self._adata_ids_sfaira.id]}")
+        stores = dict([
+            (k, DistributedStoreAnndata(adata_by_key=adata_by_key[k], indices=indices[k], in_memory=True))
+            for k in adata_by_key.keys()
+        ])
+        super(DistributedStoresAnndata, self).__init__(stores=stores)
 
 
 class DistributedStoresDao(DistributedStoreMultipleFeatureSpaceBase):
@@ -267,9 +303,9 @@ class DistributedStoresDao(DistributedStoreMultipleFeatureSpaceBase):
                     adata_by_key[organism] = {}
                     x_by_key[organism] = {}
                     indices[organism] = {}
-                adata_by_key[organism][adata.uns["id"]] = adata
-                x_by_key[organism][adata.uns["id"]] = x
-                indices[organism][adata.uns["id"]] = np.arange(0, adata.n_obs)
+                adata_by_key[organism][adata.uns[self._adata_ids_sfaira.id]] = adata
+                x_by_key[organism][adata.uns[self._adata_ids_sfaira.id]] = x
+                indices[organism][adata.uns[self._adata_ids_sfaira.id]] = np.arange(0, adata.n_obs)
         self._x_by_key = x_by_key
         stores = dict([
             (k, DistributedStoreDao(adata_by_key=adata_by_key[k], x_by_key=x_by_key[k], indices=indices[k],
@@ -305,34 +341,10 @@ class DistributedStoresH5ad(DistributedStoreMultipleFeatureSpaceBase):
                 if organism not in adata_by_key.keys():
                     adata_by_key[organism] = {}
                     indices[organism] = {}
-                adata_by_key[organism][adata.uns["id"]] = adata
-                indices[organism][adata.uns["id"]] = np.arange(0, adata.n_obs)
+                adata_by_key[organism][adata.uns[self._adata_ids_sfaira.id]] = adata
+                indices[organism][adata.uns[self._adata_ids_sfaira.id]] = np.arange(0, adata.n_obs)
         stores = dict([
-            (k, DistributedStoreH5ad(adata_by_key=adata_by_key[k], indices=indices[k], in_memory=in_memory))
+            (k, DistributedStoreAnndata(adata_by_key=adata_by_key[k], indices=indices[k], in_memory=in_memory))
             for k in adata_by_key.keys()
         ])
         super(DistributedStoresH5ad, self).__init__(stores=stores)
-
-
-def load_store(cache_path: Union[str, os.PathLike], store_format: str = "dao",
-               columns: Union[None, List[str]] = None) -> Union[DistributedStoresH5ad, DistributedStoresDao]:
-    """
-    Instantiates a distributed store class.
-
-    :param cache_path: Store directory.
-    :param store_format: Format of store {"h5ad", "dao"}.
-
-        - "h5ad": Returns instance of DistributedStoreH5ad.
-        - "dao": Returns instance of DistributedStoreDoa (distributed access optimized).
-    :param columns: Which columns to read into the obs copy in the output, see pandas.read_parquet().
-        Only relevant if store_format is "dao".
-    :return: Instances of a distributed store class.
-    """
-    if store_format == "anndata":
-        return DistributedStoresH5ad(cache_path=cache_path, in_memory=True)
-    elif store_format == "dao":
-        return DistributedStoresDao(cache_path=cache_path, columns=columns)
-    elif store_format == "h5ad":
-        return DistributedStoresH5ad(cache_path=cache_path, in_memory=False)
-    else:
-        raise ValueError(f"Did not recognize store_format {store_format}.")

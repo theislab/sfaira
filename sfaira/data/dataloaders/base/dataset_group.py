@@ -42,6 +42,40 @@ def map_fn(inputs):
         return ds.id, e,
 
 
+def merge_uns_from_list(adata_ls):
+    """
+    Merge .uns from list of adata objects.
+
+    Merges values for innert join of keys across all objects. This will retain uns streamlining.
+    Keeps shared uns values for a given key across data sets as single value (not a list of 1 unique value).
+    Other values are represented as a list of all unique values found.
+    """
+    uns_keys = [list(x.uns.keys()) for x in adata_ls]
+    uns_keys_shared = set(uns_keys[0])
+    for x in uns_keys[1:]:
+        uns_keys_shared = uns_keys_shared.intersection(set(x))
+    uns_keys_shared = list(uns_keys_shared)
+    uns = {}
+    for k in uns_keys_shared:
+        uns_k = []
+        for y in adata_ls:
+            x = y.uns[k]
+            if isinstance(x, list):
+                pass
+            elif isinstance(x, tuple):
+                x = list(x)
+            elif isinstance(x, np.ndarray):
+                x = x.tolist()
+            else:
+                x = [x]
+            uns_k.extend(x)
+        uns_k = np.sort(np.unique(uns_k)).tolist()
+        if len(uns_k) == 1:
+            uns_k = uns_k[0]
+        uns[k] = uns_k
+    return uns
+
+
 load_doc = \
     """
     :param remove_gene_version: Remove gene version string from ENSEMBL ID so that different versions in different data sets are superimposed.
@@ -160,7 +194,10 @@ class DatasetGroup:
             clean_obs: bool = True,
             clean_var: bool = True,
             clean_uns: bool = True,
-            clean_obs_names: bool = True
+            clean_obs_names: bool = True,
+            keep_orginal_obs: bool = False,
+            keep_symbol_obs: bool = True,
+            keep_id_obs: bool = True,
     ):
         """
         Streamline the adata instance in each data set to output format.
@@ -173,6 +210,13 @@ class DatasetGroup:
         :param clean_var: Whether to delete non-streamlined fields in .var, .varm and .varp.
         :param clean_uns: Whether to delete non-streamlined fields in .uns.
         :param clean_obs_names: Whether to replace obs_names with a string comprised of dataset id and an increasing integer.
+        :param clean_obs_names: Whether to replace obs_names with a string comprised of dataset id and an increasing
+            integer.
+        :param keep_orginal_obs: For ontology-constrained .obs columns, whether to keep a column with original
+            annotation.
+        :param keep_symbol_obs: For ontology-constrained .obs columns, whether to keep a column with ontology symbol
+            annotation.
+        :param keep_id_obs: For ontology-constrained .obs columns, whether to keep a column with ontology ID annotation.
         :return:
         """
         for x in self.ids:
@@ -181,7 +225,10 @@ class DatasetGroup:
                 clean_obs=clean_obs,
                 clean_var=clean_var,
                 clean_uns=clean_uns,
-                clean_obs_names=clean_obs_names
+                clean_obs_names=clean_obs_names,
+                keep_orginal_obs=keep_orginal_obs,
+                keep_symbol_obs=keep_symbol_obs,
+                keep_id_obs=keep_id_obs,
             )
 
     def streamline_features(
@@ -312,7 +359,7 @@ class DatasetGroup:
         for k, v in self.datasets.items():
             if v.annotated:
                 labels_original = np.sort(np.unique(np.concatenate([
-                    v.adata.obs[v.cell_types_original_obs_key].values
+                    v.adata.obs[v.cell_type_original_obs_key].values
                 ])))
                 tab.append(v.celltypes_universe.prepare_celltype_map_tab(
                     source=labels_original,
@@ -418,6 +465,7 @@ class DatasetGroup:
                     index_unique=None
                 )
             adata_concat.var = var_original
+            adata_concat.uns = merge_uns_from_list(adata_ls)
             adata_concat.uns[self._adata_ids.mapped_features] = match_ref_list[0]
 
         return adata_concat
@@ -472,7 +520,7 @@ class DatasetGroup:
         :return:
         """
         for _, v in self.datasets.items():
-            v.project_celltypes_to_ontology(adata_fields=adata_fields, copy=copy)
+            v.project_free_to_ontology(adata_fields=adata_fields, copy=copy)
 
     def subset(self, key, values: Union[list, tuple, np.ndarray]):
         """
@@ -531,7 +579,7 @@ class DatasetGroup:
             - "assay_sc" points to self.assay_sc_obs_key
             - "assay_type_differentiation" points to self.assay_type_differentiation_obs_key
             - "cell_line" points to self.cell_line
-            - "cellontology_class" points to self.cellontology_class_obs_key
+            - "cell_type" points to self.cell_type_obs_key
             - "developmental_stage" points to self.developmental_stage_obs_key
             - "ethnicity" points to self.ethnicity_obs_key
             - "organ" points to self.organ_obs_key
@@ -622,8 +670,17 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
         # Collect all data loaders from files in directory:
         datasets = []
         self._cwd = os.path.dirname(file_base)
-        collection_id = str(self._cwd.split("/")[-1])
-        package_source = "sfaira" if str(self._cwd.split("/")[-5]) == "sfaira" else "sfairae"
+        try:
+            collection_id = str(self._cwd).split(os.sep)[-1]
+            package_source = str(self._cwd).split(os.sep)[-5]
+            if package_source == "sfaira":
+                pass
+            elif package_source == "sfaira_extension":
+                package_source = "sfairae"
+            else:
+                raise ValueError(f"invalid package source {package_source} for {self._cwd}")
+        except IndexError as e:
+            raise IndexError(f"{e} for {self._cwd}")
         loader_pydoc_path_sfaira = "sfaira.data.dataloaders.loaders."
         loader_pydoc_path_sfairae = "sfaira_extension.data.dataloaders.loaders."
         loader_pydoc_path = loader_pydoc_path_sfaira if package_source == "sfaira" else loader_pydoc_path_sfairae
@@ -698,7 +755,7 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                                 )
                         # Load cell type maps:
                         for x in datasets_f:
-                            x.load_ontology_class_map(fn=os.path.join(self._cwd, file_module + ".tsv"))
+                            x.read_ontology_class_map(fn=os.path.join(self._cwd, file_module + ".tsv"))
                         datasets.extend(datasets_f)
 
         keys = [x.id for x in datasets]
@@ -721,15 +778,15 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                     fn_map = os.path.join(self._cwd, file_module + ".tsv")
                     if os.path.exists(fn_map):
                         # Access reading and value protection mechanisms from first data set loaded in group.
-                        tab = list(self.datasets.values())[0]._read_class_map(fn=fn_map)
+                        tab = list(self.datasets.values())[0]._read_ontology_class_map(fn=fn_map)
                         # Checks that the assigned ontology class names appear in the ontology.
                         list(self.datasets.values())[0]._value_protection(
-                            attr="celltypes",
+                            attr="cell_type",
                             allowed=self.ontology_celltypes,
                             attempted=[
-                                x for x in np.unique(tab[self._adata_ids.classmap_target_key].values).tolist()
+                                x for x in np.unique(tab[self._adata_ids.classmap_target_key].values)
                                 if x not in [
-                                    self._adata_ids.unknown_celltype_identifier,
+                                    self._adata_ids.unknown_metadata_identifier,
                                     self._adata_ids.not_a_cell_celltype_identifier
                                 ]
                             ]
@@ -737,12 +794,14 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                         # Adds a third column with the corresponding ontology IDs into the file.
                         tab[self._adata_ids.classmap_target_id_key] = [
                             self.ontology_celltypes.convert_to_id(x)
-                            if x != self._adata_ids.unknown_celltype_identifier and
-                            x != self._adata_ids.not_a_cell_celltype_identifier
-                            else self._adata_ids.unknown_celltype_identifier
+                            if (x != self._adata_ids.unknown_metadata_identifier and
+                                x != self._adata_ids.not_a_cell_celltype_identifier)
+                            else self._adata_ids.unknown_metadata_identifier
                             for x in tab[self._adata_ids.classmap_target_key].values
                         ]
-                        list(self.datasets.values())[0]._write_class_map(fn=fn_map, tab=tab)
+                        # Get writing function from any (first) data set instance:
+                        k = list(self.datasets.keys())[0]
+                        self.datasets[k]._write_ontology_class_map(fn=fn_map, tab=tab)
 
 
 class DatasetSuperGroup:
@@ -991,6 +1050,7 @@ class DatasetSuperGroup:
                     index_unique=None
                 )
             adata_concat.var = var_original
+            adata_concat.uns = merge_uns_from_list(adata_ls)
             adata_concat.uns[self._adata_ids.mapped_features] = match_ref_list[0]
 
         return adata_concat
@@ -1100,7 +1160,7 @@ class DatasetSuperGroup:
             self._adata_ids.author,
             self._adata_ids.cell_line,
             self._adata_ids.dataset,
-            self._adata_ids.cellontology_class,
+            self._adata_ids.cell_type,
             self._adata_ids.development_stage,
             self._adata_ids.normalization,
             self._adata_ids.organ,
@@ -1166,6 +1226,9 @@ class DatasetSuperGroup:
             clean_var: bool = True,
             clean_uns: bool = True,
             clean_obs_names: bool = True,
+            keep_orginal_obs: bool = False,
+            keep_symbol_obs: bool = True,
+            keep_id_obs: bool = True,
     ):
         """
         Streamline the adata instance in each group and each data set to output format.
@@ -1178,6 +1241,13 @@ class DatasetSuperGroup:
         :param clean_var: Whether to delete non-streamlined fields in .var, .varm and .varp.
         :param clean_uns: Whether to delete non-streamlined fields in .uns.
         :param clean_obs_names: Whether to replace obs_names with a string comprised of dataset id and an increasing integer.
+        :param clean_obs_names: Whether to replace obs_names with a string comprised of dataset id and an increasing
+            integer.
+        :param keep_orginal_obs: For ontology-constrained .obs columns, whether to keep a column with original
+            annotation.
+        :param keep_symbol_obs: For ontology-constrained .obs columns, whether to keep a column with ontology symbol
+            annotation.
+        :param keep_id_obs: For ontology-constrained .obs columns, whether to keep a column with ontology ID annotation.
         :return:
         """
         for x in self.dataset_groups:
@@ -1187,7 +1257,10 @@ class DatasetSuperGroup:
                     clean_obs=clean_obs,
                     clean_var=clean_var,
                     clean_uns=clean_uns,
-                    clean_obs_names=clean_obs_names
+                    clean_obs_names=clean_obs_names,
+                    keep_orginal_obs=keep_orginal_obs,
+                    keep_symbol_obs=keep_symbol_obs,
+                    keep_id_obs=keep_id_obs,
                 )
 
     def subset(self, key, values):
@@ -1277,7 +1350,7 @@ class DatasetSuperGroup:
             - "assay_differentiation" points to self.assay_differentiation_obs_key
             - "assay_type_differentiation" points to self.assay_type_differentiation_obs_key
             - "cell_line" points to self.cell_line
-            - "cellontology_class" points to self.cellontology_class_obs_key
+            - "cell_type" points to self.cell_type_obs_key
             - "developmental_stage" points to self.developmental_stage_obs_key
             - "ethnicity" points to self.ethnicity_obs_key
             - "organ" points to self.organ_obs_key
@@ -1297,7 +1370,7 @@ class DatasetSuperGroup:
         :return:
         """
         for _, v in self.dataset_groups:
-            v.project_celltypes_to_ontology(adata_fields=adata_fields, copy=copy)
+            v.project_free_to_ontology(adata_fields=adata_fields, copy=copy)
 
     def write_config(self, fn: Union[str, os.PathLike]):
         """

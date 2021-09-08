@@ -183,7 +183,10 @@ class OntologyHierarchical(Ontology, abc.ABC):
 
     @property
     def node_names(self) -> List[str]:
-        return [x["name"] for x in self.graph.nodes.values()]
+        try:
+            return [x["name"] for x in self.graph.nodes.values()]
+        except KeyError as e:
+            raise KeyError(f"KeyError '{e}' in {type(self)}")
 
     @property
     def node_ids(self) -> List[str]:
@@ -375,13 +378,22 @@ class OntologyEbi(OntologyHierarchical):
             recache: bool,
             **kwargs
     ):
+        # Note on base URL: EBI OLS points to different resources depending on the ontology used, this needs to be
+        # accounted for here.
+        if ontology == "hancestro":
+            base_url = f"https://www.ebi.ac.uk/ols/api/ontologies/{ontology}/terms/" \
+                       f"http%253A%252F%252Fpurl.obolibrary.org%252Fobo%252F"
+        elif ontology == "efo":
+            base_url = f"https://www.ebi.ac.uk/ols/api/ontologies/{ontology}/terms/" \
+                       f"http%253A%252F%252Fwww.ebi.ac.uk%252F{ontology}%252F"
+        else:
+            assert False
+
         def get_url_self(iri):
-            return f"https://www.ebi.ac.uk/ols/api/ontologies/{ontology}/terms/" \
-                   f"http%253A%252F%252Fwww.ebi.ac.uk%252F{ontology}%252F{iri}"
+            return f"{base_url}{iri}"
 
         def get_url_children(iri):
-            return f"https://www.ebi.ac.uk/ols/api/ontologies/{ontology}/terms/" \
-                   f"http%253A%252F%252Fwww.ebi.ac.uk%252F{ontology}%252F{iri}/children"
+            return f"{base_url}{iri}/children"
 
         def get_iri_from_node(x):
             return x["iri"].split("/")[-1]
@@ -413,7 +425,7 @@ class OntologyEbi(OntologyHierarchical):
             direct_children = []
             k_self = get_id_from_iri(iri)
             # Define root node if this is the first iteration, this node is otherwise not defined through values.
-            if k_self == "EFO:0010183":
+            if k_self == ":".join(root_term.split("_")):
                 terms_self = requests.get(get_url_self(iri=iri)).json()
                 nodes_new[k_self] = {
                     "name": terms_self["label"],
@@ -586,11 +598,12 @@ class OntologyUberon(OntologyExtendedObo):
 
     def __init__(
             self,
+            branch: str,
             recache: bool = False,
             **kwargs
     ):
         obofile = cached_load_obo(
-            url="http://purl.obolibrary.org/obo/uberon.obo",
+            url=f"https://svn.code.sf.net/p/obo/svn/uberon/releases/{branch}/ext.obo",
             ontology_cache_dir="uberon",
             ontology_cache_fn="uberon.obo",
             recache=recache,
@@ -977,7 +990,30 @@ class OntologyCellosaurus(OntologyExtendedObo):
         return ["synonym"]
 
 
+class OntologyHancestro(OntologyEbi):
+
+    """
+    TODO move this to .owl backend once available.
+    TODO root term: No term HANCESTRO_0001 ("Thing"?) accessible through EBI interface, because of that country-related
+        higher order terms are not available as they are parallel to HANCESTRO_0004. Maybe fix with .owl backend?
+    """
+
+    def __init__(self, recache: bool = False):
+        super().__init__(
+            ontology="hancestro",
+            root_term="HANCESTRO_0004",
+            additional_terms={},
+            additional_edges=[],
+            ontology_cache_fn="hancestro.pickle",
+            recache=recache,
+        )
+
+
 class OntologySinglecellLibraryConstruction(OntologyEbi):
+
+    """
+    TODO CITE set not in API yet, added two nodes and edges temporarily.
+    """
 
     def __init__(self, recache: bool = False):
         super().__init__(
@@ -986,10 +1022,14 @@ class OntologySinglecellLibraryConstruction(OntologyEbi):
             additional_terms={
                 "sci-plex": {"name": "sci-plex"},
                 "sci-RNA-seq": {"name": "sci-RNA-seq"},
+                "EFO:0009294": {"name": "CITE-seq"},  # TODO not in API yet
+                "EFO:0030008": {"name": "CITE-seq (cell surface protein profiling)"},  # TODO not in API yet
             },
             additional_edges=[
                 ("EFO:0010183", "sci-plex"),
                 ("EFO:0010183", "sci-RNA-seq"),
+                ("EFO:0010183", "EFO:0009294"),  # TODO not in API yet
+                ("EFO:0009294", "EFO:0030008"),  # TODO not in API yet
             ],
             ontology_cache_fn="efo.pickle",
             recache=recache,

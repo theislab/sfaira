@@ -1,6 +1,6 @@
 import numpy as np
-from sfaira.versions.metadata import OntologyUberon, OntologyCl, OntologyMondo, OntologyMmusdv, OntologyHsapdv, \
-    OntologySinglecellLibraryConstruction
+from sfaira.versions.metadata import OntologyUberon, OntologyCl, OntologyHancestro, OntologyHsapdv, OntologyMondo, \
+    OntologyMmusdv, OntologySinglecellLibraryConstruction
 
 """
 OntologyCelltypes
@@ -11,7 +11,8 @@ def test_cl_loading():
     """
     Tests if ontology can be initialised.
     """
-    _ = OntologyCl(branch="v2021-02-01")
+    _ = OntologyCl(branch="v2021-02-01", recache=True)
+    _ = OntologyCl(branch="v2021-02-01", recache=False)
 
 
 def test_cl_is_a():
@@ -73,8 +74,11 @@ def test_cl_set_leaves():
 Hancestro
 """
 
-# def test_hancestro_loading():
-#    _ = OntologyHancestro()
+
+def test_hancestro_loading():
+    _ = OntologyHancestro(recache=True)
+    _ = OntologyHancestro(recache=False)
+
 
 """
 Hsapdv
@@ -82,7 +86,8 @@ Hsapdv
 
 
 def test_hsapdv_loading():
-    _ = OntologyHsapdv()
+    _ = OntologyHsapdv(recache=True)
+    _ = OntologyHsapdv(recache=False)
 
 
 """
@@ -91,7 +96,8 @@ MONDO
 
 
 def test_mondo_loading():
-    _ = OntologyMondo()
+    _ = OntologyMondo(recache=True)
+    _ = OntologyMondo(recache=False)
 
 
 """
@@ -100,7 +106,8 @@ Mmusdv
 
 
 def test_mmusdv_loading():
-    _ = OntologyMmusdv()
+    _ = OntologyMmusdv(recache=True)
+    _ = OntologyMmusdv(recache=False)
 
 
 """
@@ -112,7 +119,8 @@ def test_sclc_loading():
     """
     Tests if ontology can be initialised.
     """
-    _ = OntologySinglecellLibraryConstruction()
+    _ = OntologySinglecellLibraryConstruction(recache=True)
+    _ = OntologySinglecellLibraryConstruction(recache=False)
 
 
 def test_sclc_nodes():
@@ -147,11 +155,12 @@ UBERON
 
 
 def test_uberon_loading():
-    _ = OntologyUberon()
+    _ = OntologyUberon(branch="2019-11-22", recache=True)
+    _ = OntologyUberon(branch="2019-11-22", recache=False)
 
 
 def test_uberon_subsetting():
-    ou = OntologyUberon()
+    ou = OntologyUberon(branch="2019-11-22")
     assert ou.is_a(query="lobe of lung", reference="lung")
     assert ou.is_a(query="lobe of lung", reference="lobe of lung")
     assert not ou.is_a(query="lung", reference="lobe of lung")
