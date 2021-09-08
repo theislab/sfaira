@@ -1134,7 +1134,6 @@ class DatasetBase(abc.ABC):
             ontology_map = None
             print(f"WARNING: did not find ontology map for {attr} which was only defined by free annotation")
         adata_fields = self._adata_ids
-        results = {}
         col_original = attr + adata_fields.onto_original_suffix
         labels_original = self.adata.obs[col_original].values
         if ontology_map is not None:  # only if this was defined
