@@ -8,14 +8,24 @@ from typing import Dict, List, Union
 from sfaira.data.store.batch_schedule import BATCH_SCHEDULE
 
 
-def split_batch(x, obs):
+def split_batch(x):
     """
     Splits retrieval batch into consumption batches of length 1.
 
     Often, end-user consumption batches would be observation-wise, ie yield a first dimension of length 1.
+
+    :param x: Data tuple of length 1 or 2: (input,) or (input, output,), where both input and output are also
+         a tuple, but of batch-dimensioned tensors.
     """
-    for i in range(x.shape[0]):
-        yield x[i, :], obs.iloc[[i], :]
+    batch_dim = x[0][0].shape[0]
+    for i in range(batch_dim):
+        output = []
+        for y in x:
+            if isinstance(y, tuple):
+                output.append(tuple([z[i, :] for z in y]))
+            else:
+                output.append(y[i, :])
+        yield tuple(output)
 
 
 class GeneratorBase:
@@ -92,6 +102,7 @@ class GeneratorSingle(GeneratorBase):
             in self.adata_by_key.
         :param var_idx: The features to emit.
         """
+        self.var_idx = var_idx
         self._obs_idx = None
         if not batch_size == 1:
             raise ValueError(f"Only batch size==1 is supported, found {batch_size}.")
@@ -103,7 +114,6 @@ class GeneratorSingle(GeneratorBase):
         self.schedule = batch_schedule(**kwargs)
         self.obs_idx = obs_idx
         self.obs_keys = obs_keys
-        self.var_idx = var_idx
 
     def _validate_idx(self, idx: Union[np.ndarray, list]) -> np.ndarray:
         """
@@ -170,7 +180,7 @@ class GeneratorAnndata(GeneratorSingle):
         # Speed up access to single object by skipping index overlap operations:
 
         def g():
-            obs_idx, batch_bounds = self.schedule.design
+            _, obs_idx, batch_bounds = self.schedule.design
             for s, e in batch_bounds:
                 idx_i = obs_idx[s:e]
                 # Match adata objects that overlap to batch:
@@ -204,13 +214,9 @@ class GeneratorAnndata(GeneratorSingle):
                             x = x[:, self.var_idx]
                         # Prepare .obs.
                         obs = self.adata_dict[k].obs[self.obs_keys].iloc[v, :]
-                        for x_i, obs_i in split_batch(x=x, obs=obs):
-                            if self.map_fn is None:
-                                yield x_i, obs_i
-                            else:
-                                output = self.map_fn(x_i, obs_i)
-                                if output is not None:
-                                    yield output
+                        data_tuple = self.map_fn(x, obs)
+                        for data_tuple_i in split_batch(x=data_tuple):
+                            yield data_tuple_i
                 else:
                     # Concatenates slices first before returning. Note that this is likely slower than emitting by
                     # observation in most scenarios.
@@ -250,31 +256,61 @@ class GeneratorAnndata(GeneratorSingle):
                         self.adata_dict[k].obs[self.obs_keys].iloc[v, :]
                         for k, v in idx_i_dict.items()
                     ], axis=0, join="inner", ignore_index=True, copy=False)
-                    if self.map_fn is None:
-                        yield x, obs
-                    else:
-                        output = self.map_fn(x, obs)
-                        if output is not None:
-                            yield output
+                    data_tuple = self.map_fn(x, obs)
+                    yield data_tuple
 
         return g
 
 
 class GeneratorDask(GeneratorSingle):
 
+    """
+    In addition to the full data array, x, this class maintains a slice _x_slice which is indexed by the iterator.
+    Access to the slice can be optimised with dask and is therefore desirable.
+    """
+
     x: dask.array
+    _x_slice: dask.array
     obs: pd.DataFrame
 
-    def __init__(self, x, obs, **kwargs):
+    def __init__(self, x, obs, obs_keys, var_idx, **kwargs):
+        if var_idx is not None:
+            x = x[:, var_idx]
         self.x = x
-        super(GeneratorDask, self).__init__(**kwargs)
-        self.obs = obs[self.obs_keys]
+        self.obs = obs[obs_keys]
         # Redefine index so that .loc indexing can be used instead of .iloc indexing:
         self.obs.index = np.arange(0, obs.shape[0])
+        self._x_slice = None
+        self._obs_slice = None
+        super(GeneratorDask, self).__init__(obs_keys=obs_keys, var_idx=var_idx, **kwargs)
 
     @property
     def n_obs(self) -> int:
         return self.x.shape[0]
+
+    @property
+    def obs_idx(self):
+        return self._obs_idx
+
+    @obs_idx.setter
+    def obs_idx(self, x):
+        """
+        Allows emission of different iterator on same generator instance (using same dask array).
+        In addition to base method: allows for optimisation of dask array for batch draws.
+        """
+        if x is None:
+            x = np.arange(0, self.n_obs)
+        else:
+            x = self._validate_idx(x)
+            x = np.sort(x)
+        # Only reset if they are actually different:
+        if (self._obs_idx is not None and len(x) != len(self._obs_idx)) or np.any(x != self._obs_idx):
+            self._obs_idx = x
+            self.schedule.idx = x
+            self._x_slice = dask.optimize(self.x[self._obs_idx, :])[0]
+            self._obs_slice = self.obs.loc[self.obs.index[self._obs_idx], :]  # TODO better than iloc?
+            # Redefine index so that .loc indexing can be used instead of .iloc indexing:
+            self._obs_slice.index = np.arange(0, self._obs_slice.shape[0])
 
     @property
     def iterator(self) -> iter:
@@ -282,32 +318,20 @@ class GeneratorDask(GeneratorSingle):
         # and dask keeps expression data and obs out of memory.
 
         def g():
-            obs_idx, batch_bounds = self.schedule.design
-            x_temp = self.x[obs_idx, :]
-            obs_temp = self.obs.loc[self.obs.index[obs_idx], :]  # TODO better than iloc?
+            obs_idx_slice, _, batch_bounds = self.schedule.design
+            x_temp = self._x_slice
+            obs_temp = self._obs_slice
             for s, e in batch_bounds:
-                x_i = x_temp[s:e, :]
-                if self.var_idx is not None:
-                    x_i = x_i[:, self.var_idx]
+                x_i = x_temp[obs_idx_slice[s:e], :]
                 # Exploit fact that index of obs is just increasing list of integers, so we can use the .loc[]
                 # indexing instead of .iloc[]:
-                obs_i = obs_temp.loc[obs_temp.index[s:e], :]
-                # TODO place map_fn outside of for loop so that vectorisation in preprocessing can be used.
+                obs_i = obs_temp.loc[obs_temp.index[obs_idx_slice[s:e]], :]
+                data_tuple = self.map_fn(x_i, obs_i)
                 if self.batch_size == 1:
-                    for x_ii, obs_ii in split_batch(x=x_i, obs=obs_i):
-                        if self.map_fn is None:
-                            yield x_ii, obs_ii
-                        else:
-                            output = self.map_fn(x_ii, obs_ii)
-                            if output is not None:
-                                yield output
+                    for data_tuple_i in split_batch(x=data_tuple):
+                        yield data_tuple_i
                 else:
-                    if self.map_fn is None:
-                        yield x_i, obs_i
-                    else:
-                        output = self.map_fn(x_i, obs_i)
-                        if output is not None:
-                            yield output
+                    yield data_tuple
 
         return g
 

@@ -583,15 +583,20 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
         :return: Slice of data array.
         """
         batch_size = min(len(idx), 128)
+
+        def map_fn(x, obs):
+            return (x, ),
+
         g = self.generator(idx=idx, retrieval_batch_size=batch_size, return_dense=True, random_access=False,
-                           randomized_batch_access=False, **kwargs)
+                           randomized_batch_access=False, map_fn=map_fn, **kwargs)
         shape = (idx.shape[0], self.n_vars)
         if as_sparse:
             x = scipy.sparse.csr_matrix(np.zeros(shape))
         else:
             x = np.empty(shape)
         counter = 0
-        for x_batch, _ in g.iterator():
+        for x_batch, in g.iterator():
+            x_batch = x_batch[0]
             batch_len = x_batch.shape[0]
             x[counter:(counter + batch_len), :] = x_batch
             counter += batch_len
