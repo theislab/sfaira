@@ -194,7 +194,7 @@ class ModelKerasAe(BasicModelKerasEmbedding):
         )
         self.training_model = tf.keras.Model(
             inputs=[inputs_encoder, inputs_sf],
-            outputs=output_decoder_expfamily_concat,
+            outputs=[output_decoder_expfamily_concat],
             name="autoencoder"
         )
 

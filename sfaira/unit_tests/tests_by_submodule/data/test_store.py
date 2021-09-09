@@ -163,38 +163,34 @@ def test_generator_shapes(store_format: str, idx, batch_size: int, obs_keys: Lis
     Test generators queries do not throw errors and that output shapes are correct.
     """
     # Need to re-write because specific obs_keys are required:
-    store_path = prepare_store(store_format=store_format, rewrite_store=True)
+    store_path = prepare_store(store_format=store_format)
     store = load_store(cache_path=store_path, store_format=store_format)
     store.subset(attr_key="organism", values=["mouse"])
     gc = GenomeContainer(assembly=ASSEMBLY_MOUSE)
     gc.subset(**{"biotype": "protein_coding"})
     store.genome_container = gc
-    g = store.generator(
-        idx={"mouse": idx},
-        batch_size=batch_size,
-        obs_keys=obs_keys,
-        randomized_batch_access=randomized_batch_access,
-    )
+
+    def map_fn(x, obs):
+        return (x, ),
+
+    g = store.generator(idx={"mouse": idx}, batch_size=batch_size, map_fn=map_fn, obs_keys=obs_keys,
+                        randomized_batch_access=randomized_batch_access)
     g = g.iterator
     nobs = len(idx) if idx is not None else store.n_obs
     batch_sizes = []
     x = None
-    obs = None
     counter = 0
     for i, z in enumerate(g()):
         counter += 1
-        x_i, obs_i = z
+        x_i, = z[0]
         if len(x_i.shape) == 1:
             # x is flattened if batch size is 1:
             assert batch_size == 1
             x_i = np.expand_dims(x_i, axis=0)
-        assert x_i.shape[0] == obs_i.shape[0]
         if i == 0:
             x = x_i
-            obs = obs_i
         batch_sizes.append(x_i.shape[0])
     assert counter > 0
     assert x.shape[1] == store.n_vars["mouse"], (x.shape, store.n_vars["mouse"])
-    assert obs.shape[1] == len(obs_keys), (obs.shape, obs_keys)
     assert np.sum(batch_sizes) == nobs, (batch_sizes, nobs)
     assert x.shape[1] == gc.n_var, (x.shape, gc.n_var)

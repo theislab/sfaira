@@ -512,7 +512,7 @@ class DatasetGroup:
             # ToDo: think about whether this should be handled differently.
             warnings.warn("found more than one organism in group, this could cause problems with using a joined cell "
                           "type ontology. Using only the ontology of the first data set in the group.")
-        return self.datasets[self.ids[0]].ontology_celltypes
+        return self.datasets[self.ids[0]].ontology_container_sfaira.cell_type
 
     def project_celltypes_to_ontology(self, adata_fields: Union[AdataIds, None] = None, copy=False):
         """
@@ -678,7 +678,7 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
             elif package_source == "sfaira_extension":
                 package_source = "sfairae"
             else:
-                raise ValueError(f"invalid package source {package_source} for {self._cwd}, {self.collection_id}")
+                raise ValueError(f"invalid package source {package_source} for {self._cwd}")
         except IndexError as e:
             raise IndexError(f"{e} for {self._cwd}")
         loader_pydoc_path_sfaira = "sfaira.data.dataloaders.loaders."

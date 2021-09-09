@@ -69,7 +69,7 @@ class CellTypeMlp(BasicModelKerasCelltype):
                 kernel_constraint=kernel_constraint,
                 bias_constraint=bias_constraint
             )(x)
-        self.training_model = tf.keras.Model(inputs=inputs, outputs=x, name=name)
+        self.training_model = tf.keras.Model(inputs=[inputs, ], outputs=x, name=name)
 
 
 class CellTypeMlpVersioned(CellTypeMlp):
