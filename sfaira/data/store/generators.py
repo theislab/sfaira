@@ -8,14 +8,24 @@ from typing import Dict, List, Union
 from sfaira.data.store.batch_schedule import BATCH_SCHEDULE
 
 
-def split_batch(x, obs):
+def split_batch(x):
     """
     Splits retrieval batch into consumption batches of length 1.
 
     Often, end-user consumption batches would be observation-wise, ie yield a first dimension of length 1.
+
+    :param x: Data tuple of length 1 or 2: (input,) or (input, output,), where both input and output are also
+         a tuple, but of batch-dimensioned tensors.
     """
-    for i in range(x.shape[0]):
-        yield x[i, :], obs.iloc[[i], :]
+    batch_dim = x[0][0].shape[0]
+    for i in range(batch_dim):
+        output = []
+        for y in x:
+            if isinstance(y, tuple):
+                output.append(tuple([z[i, :] for z in y]))
+            else:
+                output.append(y[i, :])
+        yield tuple(output)
 
 
 class GeneratorBase:
@@ -204,13 +214,9 @@ class GeneratorAnndata(GeneratorSingle):
                             x = x[:, self.var_idx]
                         # Prepare .obs.
                         obs = self.adata_dict[k].obs[self.obs_keys].iloc[v, :]
-                        for x_i, obs_i in split_batch(x=x, obs=obs):
-                            if self.map_fn is None:
-                                yield x_i, obs_i
-                            else:
-                                output = self.map_fn(x_i, obs_i)
-                                if output is not None:
-                                    yield output
+                        data_tuple = self.map_fn(x, obs)
+                        for data_tuple_i in split_batch(x=data_tuple):
+                            yield data_tuple_i
                 else:
                     # Concatenates slices first before returning. Note that this is likely slower than emitting by
                     # observation in most scenarios.
@@ -250,12 +256,8 @@ class GeneratorAnndata(GeneratorSingle):
                         self.adata_dict[k].obs[self.obs_keys].iloc[v, :]
                         for k, v in idx_i_dict.items()
                     ], axis=0, join="inner", ignore_index=True, copy=False)
-                    if self.map_fn is None:
-                        yield x, obs
-                    else:
-                        output = self.map_fn(x, obs)
-                        if output is not None:
-                            yield output
+                    data_tuple = self.map_fn(x, obs)
+                    yield data_tuple
 
         return g
 
@@ -292,22 +294,12 @@ class GeneratorDask(GeneratorSingle):
                 # Exploit fact that index of obs is just increasing list of integers, so we can use the .loc[]
                 # indexing instead of .iloc[]:
                 obs_i = obs_temp.loc[obs_temp.index[s:e], :]
-                # TODO place map_fn outside of for loop so that vectorisation in preprocessing can be used.
+                data_tuple = self.map_fn(x_i, obs_i)
                 if self.batch_size == 1:
-                    for x_ii, obs_ii in split_batch(x=x_i, obs=obs_i):
-                        if self.map_fn is None:
-                            yield x_ii, obs_ii
-                        else:
-                            output = self.map_fn(x_ii, obs_ii)
-                            if output is not None:
-                                yield output
+                    for data_tuple_i in split_batch(x=data_tuple):
+                        yield data_tuple_i
                 else:
-                    if self.map_fn is None:
-                        yield x_i, obs_i
-                    else:
-                        output = self.map_fn(x_i, obs_i)
-                        if output is not None:
-                            yield output
+                    yield data_tuple
 
         return g
 

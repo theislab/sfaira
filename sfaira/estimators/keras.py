@@ -2,7 +2,6 @@ import abc
 import anndata
 import hashlib
 import numpy as np
-import scipy.sparse
 try:
     import tensorflow as tf
 except ImportError:
@@ -31,12 +30,7 @@ def prepare_sf(x):
     """
     Uses a minimal size factor of 1e-3 for total counts / 1e4
     """
-    if len(x.shape) == 2:
-        sf = np.asarray(x.sum(axis=1)).flatten()
-    elif len(x.shape) == 1:
-        sf = np.asarray(x.sum()).flatten()
-    else:
-        raise ValueError("x.shape > 2")
+    sf = np.asarray(x.sum(axis=1, keepdims=True))
     sf = np.log(np.maximum(sf / 1e4, 1e-3))
     return sf
 
@@ -565,15 +559,17 @@ class EstimatorKerasEmbedding(EstimatorKeras):
     def _tf_dataset_kwargs(self, mode: str):
         # Determine model type [ae, vae(iaf, vamp)]
         model_type = "vae" if self.model_type[:3] == "vae" else "ae"
+        output_types_x = (tf.float32, tf.float32)
+        output_shapes_x = (self.data.n_vars, 1)
         if mode == 'predict':  # Output shape is same for predict mode regardless of model type
-            output_types = (tf.float32, tf.float32),
-            output_shapes = (self.data.n_vars, ()),
+            output_types = output_types_x,
+            output_shapes = output_shapes_x,
         elif model_type == "vae":
-            output_types = ((tf.float32, tf.float32), (tf.float32, tf.float32))
-            output_shapes = ((self.data.n_vars, ()), (self.data.n_vars, ()))
+            output_types = (output_types_x, (tf.float32, tf.float32))
+            output_shapes = (output_shapes_x, (self.data.n_vars, 1))
         else:
-            output_types = ((tf.float32, tf.float32), tf.float32)
-            output_shapes = ((self.data.n_vars, ()), self.data.n_vars)
+            output_types = (output_types_x, (tf.float32, ))
+            output_shapes = (output_shapes_x, (self.data.n_vars, ))
         return {"output_types": output_types, "output_shapes": output_shapes}
 
     def _get_generator(
@@ -588,14 +584,15 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         model_type = "vae" if self.model_type[:3] == "vae" else "ae"
 
         def map_fn(x_sample, obs_sample):
-            x_sample = np.asarray(x_sample).flatten()
-            sf_sample = prepare_sf(x=x_sample).flatten()[0]
+            x_sample = np.asarray(x_sample)
+            sf_sample = prepare_sf(x=x_sample)
+            output_x = (x_sample, sf_sample)
             if mode == 'predict':
-                output = (x_sample, sf_sample),
+                output = output_x,
             elif model_type == "vae":
-                output = (x_sample, sf_sample), (x_sample, sf_sample),
+                output = output_x, (x_sample, sf_sample)
             else:
-                output = (x_sample, sf_sample), x_sample
+                output = output_x, (x_sample, )
             return output
 
         g = self.data.generator(idx=idx, retrieval_batch_size=retrieval_batch_size, obs_keys=[], map_fn=map_fn,
@@ -924,16 +921,14 @@ class EstimatorKerasCelltype(EstimatorKeras):
         return weights, y
 
     def _tf_dataset_kwargs(self, mode):
+        output_types_x = (tf.float32,)
+        output_shapes_x = (tf.TensorShape([self.data.n_vars]), )
         if mode == 'predict':
-            output_types = (tf.float32,)
-            output_shapes = (tf.TensorShape([self.data.n_vars]),)
+            output_types = (output_types_x, )
+            output_shapes = (output_shapes_x, )
         else:
-            output_types = (tf.float32, tf.float32, tf.float32)
-            output_shapes = (
-                (tf.TensorShape([self.data.n_vars])),
-                tf.TensorShape([self.ntypes]),
-                tf.TensorShape([])
-            )
+            output_types = (output_types_x, tf.float32)
+            output_shapes = (output_shapes_x, tf.TensorShape([self.ntypes]))
         return {"output_types": output_types, "output_shapes": output_shapes}
 
     def _get_generator(
@@ -953,16 +948,20 @@ class EstimatorKerasCelltype(EstimatorKeras):
             onehot_encoder = self._one_hot_encoder()
 
         def map_fn(x_sample, obs_sample):
-            x_sample = np.asarray(x_sample).flatten()
+            x_sample = np.asarray(x_sample)
+            output_x = (x_sample, )
             if yield_labels:
                 y_sample = onehot_encoder(obs_sample[self._adata_ids.cell_type + self._adata_ids.onto_id_suffix].values)
-                y_sample = y_sample.flatten()
-                if y_sample.sum() > 0:
-                    output = x_sample, y_sample, 1.
-                else:
-                    output = None
+                # Only yield observations with valid label:
+                idx_keep = y_sample.sum(axis=1) > 0.
+                if not np.all(idx_keep):
+                    idx_keep = np.where(idx_keep)[0]
+                    output_x = tuple([x[idx_keep, :] for x in output_x])
+                    y_sample = y_sample[idx_keep, :]
+                output_y = y_sample
+                output = output_x, output_y
             else:
-                output = x_sample,
+                output = output_x,
             return output
 
         g = self.data.generator(idx=idx, retrieval_batch_size=retrieval_batch_size,
@@ -1009,7 +1008,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
         if len(idx) > 0:
             dataset = self.get_one_time_tf_dataset(idx=idx, batch_size=batch_size, mode='eval')
             y_true = []
-            for _, y, _ in dataset.as_numpy_iterator():
+            for _, y in dataset.as_numpy_iterator():
                 y_true.append(y)
             y_true = np.concatenate(y_true, axis=0)
             return y_true

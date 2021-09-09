@@ -24,6 +24,7 @@ class BatchDesignBase:
 
     def __init__(self, retrieval_batch_size: int, randomized_batch_access: bool, random_access: bool, **kwargs):
         self.retrieval_batch_size = retrieval_batch_size
+        self._batch_bounds = None
         self._idx = None
         if randomized_batch_access and random_access:
             raise ValueError("Do not use randomized_batch_access and random_access.")

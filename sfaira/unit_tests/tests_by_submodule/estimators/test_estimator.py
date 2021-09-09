@@ -410,10 +410,15 @@ def test_dataset_size(batch_size: int, randomized_batch_access: bool):
         x_train_shape += x[0].shape[0]
     # Define raw store generator on train data to compare and check that it has the same size as tf generator exposed
     # by estimator:
+
+    def map_fn(x, obs):
+        return (x, ),
+
     g_train = test_estim.estimator.data.generator(idx=idx_train, retrieval_batch_size=retrieval_batch_size,
-                                                  randomized_batch_access=randomized_batch_access)
+                                                  randomized_batch_access=randomized_batch_access, map_fn=map_fn)
     x_train2_shape = 0
-    for x, _ in g_train.iterator():
+    for x, in g_train.iterator():
+        x = x[0]
         if len(x.shape) == 1:
             x = np.expand_dims(x, axis=0)
         x_train2_shape += x.shape[0]
