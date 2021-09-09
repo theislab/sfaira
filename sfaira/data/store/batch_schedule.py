@@ -52,7 +52,7 @@ class BatchDesignBase:
         self._idx = np.sort(x)  # Sorted indices improve accession efficiency in some cases.
 
     @property
-    def design(self) -> Tuple[np.ndarray, List[Tuple[int, int]]]:
+    def design(self) -> Tuple[np.ndarray, np.ndarray, List[Tuple[int, int]]]:
         """
         Yields index objects for one epoch of all data.
 
@@ -60,7 +60,8 @@ class BatchDesignBase:
         Randomization is performed anew with every call to this property.
 
         :returns: Tuple of:
-            - Ordering of observations in epoch.
+            - Indices of observations in epoch out of selected data set (ie indices of self.idx).
+            - Ordering of observations in epoch out of full data set.
             - Batch start and end indices for batch based on ordering defined in first output.
         """
         raise NotImplementedError()
@@ -69,14 +70,14 @@ class BatchDesignBase:
 class BatchDesignBasic(BatchDesignBase):
 
     @property
-    def design(self) -> Tuple[np.ndarray, List[Tuple[int, int]]]:
-        idx_proc = self.idx.copy()
+    def design(self) -> Tuple[np.ndarray, np.ndarray, List[Tuple[int, int]]]:
+        idx_proc = np.arange(0, len(self.idx))
         if self.random_access:
             np.random.shuffle(idx_proc)
         batch_bounds = self.batch_bounds.copy()
         if self.randomized_batch_access:
             batch_bounds = _randomize_batch_start_ends(batch_starts_ends=batch_bounds)
-        return idx_proc, batch_bounds
+        return idx_proc, self.idx[idx_proc], batch_bounds
 
 
 class BatchDesignBalanced(BatchDesignBase):
@@ -111,15 +112,15 @@ class BatchDesignBalanced(BatchDesignBase):
         self.p_obs = p_obs
 
     @property
-    def design(self) -> Tuple[np.ndarray, List[Tuple[int, int]]]:
+    def design(self) -> Tuple[np.ndarray, np.ndarray, List[Tuple[int, int]]]:
         # Re-sample index vector.
-        idx_proc = np.random.choice(a=self.idx, replace=True, size=len(self.idx), p=self.p_obs)
+        idx_proc = np.random.choice(a=np.arange(0, len(self.idx)), replace=True, size=len(self.idx), p=self.p_obs)
         if not self.random_access:  # Note: randomization is result from sampling above, need to revert if not desired.
             idx_proc = np.sort(idx_proc)
         batch_bounds = self.batch_bounds.copy()
         if self.randomized_batch_access:
             batch_bounds = _randomize_batch_start_ends(batch_starts_ends=batch_bounds)
-        return idx_proc, batch_bounds
+        return idx_proc, self.idx[idx_proc], batch_bounds
 
 
 BATCH_SCHEDULE = {
