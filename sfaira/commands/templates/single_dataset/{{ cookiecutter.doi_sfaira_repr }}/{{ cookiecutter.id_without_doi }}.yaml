@@ -11,7 +11,7 @@ dataset_wise:
     download_url_meta: "{{ cookiecutter.download_url_meta }}"
     primary_data: {{ cookiecutter.primary_data }}
     normalization: "{{ cookiecutter.normalization }}"
-    year: "{{ cookiecutter.year }}"
+    year: {{ cookiecutter.year }}
 dataset_or_observation_wise:
     assay_sc: "{{ cookiecutter.assay_sc }}"
     assay_sc_obs_key:

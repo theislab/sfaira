@@ -36,7 +36,7 @@ class TemplateAttributes:
     ethnicity: str = ''  # ethnicity of the sample
     sample_source: str = ''  # source of the sample
     state_exact: str = ''  # state of the sample
-    year: str = 2021  # year in which sample was acquired
+    year: int = 2021  # year in which sample was acquired
     number_of_datasets: str = 1  # Required to determine the file names
 
     cell_types_original_obs_key: str = ''  # Original cell type key in obs
@@ -167,7 +167,7 @@ class DataloaderCreator:
                                                                                   default='')
         self.template_attributes.year = sfaira_questionary(function='text',
                                                            question='Year:',
-                                                           default='2021')
+                                                           default=2021)
         first_author = author[0] if isinstance(author, list) else author
         try:
             first_author_lastname = first_author.split(',')[0]
@@ -176,7 +176,7 @@ class DataloaderCreator:
             first_author_lastname = first_author
         self.template_attributes.id_without_doi = f'{clean_id_str(self.template_attributes.organism)}_' \
                                                   f'{clean_id_str(self.template_attributes.organ)}_' \
-                                                  f'{clean_id_str(self.template_attributes.year)}_' \
+                                                  f'{clean_id_str(str(self.template_attributes.year))}_' \
                                                   f'{clean_id_str(self.template_attributes.assay_sc)}_' \
                                                   f'{clean_id_str(first_author_lastname)}_001'
         self.template_attributes.id = f'{self.template_attributes.id_without_doi}_' \

@@ -14,7 +14,7 @@ dataset_structure:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
 {% endfor %}    primary_data: {{ cookiecutter.primary_data }}
     normalization: "{{ cookiecutter.normalization }}"
-    year: "{{ cookiecutter.year }}"
+    year: {{ cookiecutter.year }}
 dataset_or_observation_wise:
     assay_sc:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}: "{{ cookiecutter.assay_sc }}"
