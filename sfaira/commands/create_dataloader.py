@@ -41,6 +41,9 @@ class TemplateAttributes:
 
     cell_types_original_obs_key: str = ''  # Original cell type key in obs
 
+    gene_id_ensembl_var_key: str = ''  # Gene id ensembl key in var
+    gene_id_symbols_var_key: str = ''  # Gene id symbols key in var
+
 
 class DataloaderCreator:
 
@@ -148,6 +151,20 @@ class DataloaderCreator:
             self.template_attributes.cell_types_original_obs_key = sfaira_questionary(function='text',
                                                                                       question='Cell type annotation obs key:',
                                                                                       default='')
+        is_gene_id_symbols = sfaira_questionary(function='confirm',
+                                                question='Does your dataset have gene ID symbols (gene names, e.g. TP53)?',
+                                                default='No')
+        if is_gene_id_symbols:
+            self.template_attributes.gene_id_symbols_var_key = sfaira_questionary(function='text',
+                                                                                  question='Gene id symbols var key:',
+                                                                                  default='index')
+        is_gene_id_ensembl = sfaira_questionary(function='confirm',
+                                                question='Does your dataset have Ensembl gene IDs (e.g. ENSG00000141510)?',
+                                                default='No')
+        if is_gene_id_ensembl:
+            self.template_attributes.gene_id_ensembl_var_key = sfaira_questionary(function='text',
+                                                                                  question='Gene id ensembl var key:',
+                                                                                  default='')
         self.template_attributes.year = sfaira_questionary(function='text',
                                                            question='Year:',
                                                            default='2021')

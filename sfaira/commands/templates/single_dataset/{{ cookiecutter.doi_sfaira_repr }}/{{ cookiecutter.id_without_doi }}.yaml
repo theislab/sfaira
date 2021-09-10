@@ -46,7 +46,7 @@ dataset_or_observation_wise:
 observation_wise:
     cell_types_original_obs_key: "{{ cookiecutter.cell_types_original_obs_key }}"
 feature_wise:
-    gene_id_ensembl_var_key:
-    gene_id_symbols_var_key:
+    gene_id_ensembl_var_key: "{{ cookiecutter.gene_id_ensembl_var_key }}"
+    gene_id_symbols_var_key: "{{ cookiecutter.gene_id_symbols_var_key }}"
 meta:
     version: "1.0"
