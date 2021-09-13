@@ -4,7 +4,7 @@ dataset_structure:
         - "GSE158769_exprs_raw.tsv.gz"
 dataset_wise:
     author: "Nathan, Aparna"
-    default_embedding: "NA"
+    default_embedding: "X_umap"
     doi_preprint:
     doi_journal: "10.1038/s41590-021-00933-1"
     download_url_data: "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE158769&format=file&file=GSE158769%5Fexprs%5Fraw%2Etsv%2Egz"
@@ -13,7 +13,7 @@ dataset_wise:
     normalization: "raw"
     year: 2021
 dataset_or_observation_wise:
-    assay_sc: "CITE-seq"
+    assay_sc: "CITE-seq (cell surface protein profiling)"
     assay_sc_obs_key:
     assay_differentiation:
     assay_differentiation_obs_key:
