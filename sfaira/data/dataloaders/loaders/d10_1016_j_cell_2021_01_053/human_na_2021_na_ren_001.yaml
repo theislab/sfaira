@@ -4,7 +4,7 @@ dataset_structure:
         - "COVID19_ALL.h5ad"
 dataset_wise:
     author: "Ren, Xianwen"
-    default_embedding: "NA"
+    default_embedding: "X_tsne"
     doi_preprint:
     doi_journal: "10.1016/j.cell.2021.01.053"
     download_url_data: "https://drive.google.com/file/d/1IwWcn4W-YKgNbz4DpNweM2cKxlx1hbM0/view"
