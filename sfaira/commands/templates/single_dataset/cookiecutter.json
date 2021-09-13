@@ -21,7 +21,7 @@
     "primary_data": "",
     "default_embedding": "",
     "create_extra_description": "",
-    "cell_types_original_obs_key": "",
+    "cell_type_obs_key": "",
     "gene_id_ensembl_var_key": "",
     "gene_id_symbols_var_key": ""
 }

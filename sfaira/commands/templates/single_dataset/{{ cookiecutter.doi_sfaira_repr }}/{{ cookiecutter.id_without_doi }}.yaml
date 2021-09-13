@@ -44,7 +44,7 @@ dataset_or_observation_wise:
     tech_sample:
     tech_sample_obs_key:
 observation_wise:
-    cell_types_original_obs_key: "{{ cookiecutter.cell_types_original_obs_key }}"
+    cell_type_obs_key: "{{ cookiecutter.cell_type_obs_key }}"
 feature_wise:
     gene_id_ensembl_var_key: "{{ cookiecutter.gene_id_ensembl_var_key }}"
     gene_id_symbols_var_key: "{{ cookiecutter.gene_id_symbols_var_key }}"

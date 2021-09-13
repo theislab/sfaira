@@ -39,7 +39,7 @@ class TemplateAttributes:
     year: int = 2021  # year in which sample was acquired
     number_of_datasets: str = 1  # Required to determine the file names
 
-    cell_types_original_obs_key: str = ''  # Original cell type key in obs
+    cell_type_obs_key: str = ''  # Original cell type key in obs
 
     gene_id_ensembl_var_key: str = ''  # Gene id ensembl key in var
     gene_id_symbols_var_key: str = ''  # Gene id symbols key in var
@@ -148,9 +148,9 @@ class DataloaderCreator:
                                                      question='Does your dataset have a cell type annotation?',
                                                      default='No')
         if is_cell_type_annotation:
-            self.template_attributes.cell_types_original_obs_key = sfaira_questionary(function='text',
-                                                                                      question='Cell type annotation obs key:',
-                                                                                      default='')
+            self.template_attributes.cell_type_obs_key = sfaira_questionary(function='text',
+                                                                            question='Cell type annotation obs key:',
+                                                                            default='')
         is_gene_id_symbols = sfaira_questionary(function='confirm',
                                                 question='Does your dataset have gene ID symbols (gene names, e.g. TP53)?',
                                                 default='No')

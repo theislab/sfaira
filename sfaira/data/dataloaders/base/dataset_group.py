@@ -107,10 +107,6 @@ class DatasetGroup:
         self.datasets = datasets
         self._collection_id = collection_id
 
-    @property
-    def _unknown_celltype_identifiers(self):
-        return np.unqiue(np.concatenate([v._unknown_celltype_identifiers for _, v in self.datasets.items()]))
-
     def load(
             self,
             annotated_only: bool = False,
@@ -359,14 +355,14 @@ class DatasetGroup:
         for k, v in self.datasets.items():
             if v.annotated:
                 labels_original = np.sort(np.unique(np.concatenate([
-                    v.adata.obs[v.cell_type_original_obs_key].values
+                    v.adata.obs[v.cell_type_obs_key].values
                 ])))
                 tab.append(v.celltypes_universe.prepare_celltype_map_tab(
                     source=labels_original,
                     match_only=False,
                     anatomical_constraint=v.organ,
                     include_synonyms=True,
-                    omit_list=v._unknown_celltype_identifiers,
+                    omit_list=[v._adata_ids.not_a_cell_celltype_identifier, v._adata_ids.unknown_metadata_identifier],
                     **kwargs
                 ))
         if len(tab) == 0:
