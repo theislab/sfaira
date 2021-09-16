@@ -121,12 +121,12 @@ class DataloaderCreator:
                                                                        question='Primary data:',
                                                                        default='Yes'))
         is_default_embedding = sfaira_questionary(function='confirm',
-                                                     question='Does your dataset have a default embedding?',
-                                                     default='No')   
+                                                  question='Does your dataset have a default embedding?',
+                                                  default='No')
         if is_default_embedding:                                                                                                                 
             self.template_attributes.default_embedding = str(sfaira_questionary(function='text',
-                                                                            question='Default embedding obsm key:',
-                                                                            default='X_umap'))
+                                                                                question='Default embedding obsm key:',
+                                                                                default='X_umap'))
         self.template_attributes.organism = sfaira_questionary(function='text',
                                                                question='Organism:',
                                                                default='NA')
