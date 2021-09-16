@@ -4,7 +4,7 @@ dataset_structure:
         - "{{ cookiecutter.sample_fns }}"
 dataset_wise:
     author: "{{ cookiecutter.author }}"
-    default_embedding: "{{ cookiecutter.default_embedding }}"
+    default_embedding: {% if cookiecutter.default_embedding %}"{{ cookiecutter.default_embedding }}"{% endif %}
     doi_preprint:
     doi_journal: "{{ cookiecutter.doi }}"
     download_url_data: "{{ cookiecutter.download_url_data }}"
@@ -44,9 +44,9 @@ dataset_or_observation_wise:
     tech_sample:
     tech_sample_obs_key:
 observation_wise:
-    cell_type_obs_key: "{{ cookiecutter.cell_type_obs_key }}"
+    cell_type_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.cell_type_obs_key }}"{% endif %}
 feature_wise:
-    gene_id_ensembl_var_key: "{{ cookiecutter.gene_id_ensembl_var_key }}"
-    gene_id_symbols_var_key: "{{ cookiecutter.gene_id_symbols_var_key }}"
+    gene_id_ensembl_var_key: {% if cookiecutter.gene_id_ensembl_var_key %}"{{ cookiecutter.gene_id_ensembl_var_key }}"{% endif %}
+    gene_id_symbols_var_key: {% if cookiecutter.gene_id_symbols_var_key %}"{{ cookiecutter.gene_id_symbols_var_key }}"{% endif %}
 meta:
     version: "1.0"
