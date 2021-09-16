@@ -123,7 +123,7 @@ class DataloaderCreator:
         is_default_embedding = sfaira_questionary(function='confirm',
                                                   question='Does your dataset have a default embedding?',
                                                   default='No')
-        if is_default_embedding:                                                                                                                 
+        if is_default_embedding:
             self.template_attributes.default_embedding = str(sfaira_questionary(function='text',
                                                                                 question='Default embedding obsm key:',
                                                                                 default='X_umap'))
