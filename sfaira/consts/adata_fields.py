@@ -310,4 +310,3 @@ class AdataIdsCellxgene_v2_0_0(AdataIdsCellxgene):
         self.feature_symbol = "feature_name"
         self.feature_id = "feature_id"
         self.feature_biotype = "feature_biotype"
-        # feature_referencec

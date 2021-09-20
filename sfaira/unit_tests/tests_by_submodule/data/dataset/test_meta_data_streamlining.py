@@ -1,4 +1,5 @@
-from cellxgene_schema.validate import validate_adata
+import anndata
+from cellxgene_schema import validate
 import pytest
 
 from sfaira.unit_tests.data_for_tests.loaders import ASSEMBLY_HUMAN, ASSEMBLY_MOUSE, prepare_dsg
@@ -29,7 +30,30 @@ def test_dsgs_streamline_metadata(out_format: str, clean_obs: bool, clean_var: b
                            keep_id_obs=keep_id_obs, keep_orginal_obs=keep_orginal_obs, keep_symbol_obs=keep_symbol_obs)
 
 
-@pytest.mark.parametrize("schema_version", ["1_1_0"])
+class ValidatorInMemory(validate.Validator):
+    """
+    Helper class to validate adata in memory and raise errors as in error stream rather than outstream.
+
+    The switch in log stream allows this test to be used as a unit test.
+    """
+
+    def validate_adata_inmemory(self, adata: anndata.AnnData):
+        self.errors = []
+        self.adata = adata
+        self._set_schema_def()
+        if not self.errors:
+            self._deep_check()
+        if self.warnings:
+            self.warnings = ["WARNING: " + i for i in self.warnings]
+        if self.errors:
+            self.errors = ["ERROR: " + i for i in self.errors]
+        if self.warnings or self.errors:
+            print(self.warnings[:20])
+            print(self.errors[:20])
+            assert False
+
+
+@pytest.mark.parametrize("schema_version", ["2_0_0"])
 @pytest.mark.parametrize("organism", ["human", "mouse"])
 def test_cellxgene_export(schema_version: str, organism: str):
     """
@@ -50,6 +74,7 @@ def test_cellxgene_export(schema_version: str, organism: str):
                            keep_id_obs=True, keep_orginal_obs=False, keep_symbol_obs=True)
     counter = 0
     for ds in ds.datasets.values():
-        validate_adata(adata=ds.adata, shallow=False)
+        val = ValidatorInMemory()
+        val.validate_adata_inmemory(adata=ds.adata)
         counter += 1
     assert counter > 0, "no data sets to test"

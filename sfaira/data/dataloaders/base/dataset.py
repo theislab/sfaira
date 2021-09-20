@@ -903,7 +903,8 @@ class DatasetBase(abc.ABC):
         self.streamlined_meta = True
         # Add additional hard-coded description changes for cellxgene schema:
         if schema.startswith("cellxgene"):
-            self.adata = cellxgene_export_adaptor(adata=self.adata, adata_ids=self._adata_ids, version=schema_version)
+            self.adata = cellxgene_export_adaptor(adata=self.adata, adata_ids=self._adata_ids, version=schema_version,
+                                                  obs_keys_batch=self.tech_sample_obs_key)
 
     def write_distributed_store(
             self,
