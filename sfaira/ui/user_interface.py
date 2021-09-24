@@ -59,16 +59,20 @@ class UserInterface:
         self.use_sfaira_repo = sfaira_repo
         self.cache_path = os.path.join(cache_path, '')
         self.adata_ids = AdataIdsSfaira()
+        self.sfaira_repo_url = "https://zenodo.org/record/4836517/files/"
 
         if sfaira_repo:  # check if public sfaira repository should be accessed
-            self.model_lookuptable = self._load_lookuptable("https://zenodo.org/record/4836517/files/")
+            self.model_lookuptable = self._load_lookuptable(self.sfaira_repo_url)
 
         if custom_repo:
             if isinstance(custom_repo, str):
                 custom_repo = [custom_repo]
 
             for repo in custom_repo:
-                if os.path.exists(repo) and not os.path.exists(os.path.join(repo, 'model_lookuptable.csv')):
+                if not os.path.exists(repo):
+                    raise OSError(f"provided repo directory does not exist, please create it first: {repo}")
+
+                if not os.path.exists(os.path.join(repo, 'model_lookuptable.csv')):
                     self.write_lookuptable(repo)
 
                 if hasattr(self, 'model_lookuptable'):
@@ -390,6 +394,12 @@ class UserInterface:
         self.data.streamline_features(
             match_to_reference=self.zoo_embedding.topology_container.gc.assembly,
             subset_genes_to_type=list(set(self.zoo_embedding.topology_container.gc.biotype))
+        )
+        # Transfer required metadata from the Dataset instance to the adata object
+        self.data.streamline_metadata(
+            clean_obs=False,
+            clean_var=False,
+            clean_uns=False,
         )
 
     def _load_topology_dict(self, model_weights_file) -> dict:
