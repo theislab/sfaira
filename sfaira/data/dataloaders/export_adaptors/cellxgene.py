@@ -1,5 +1,6 @@
 import anndata
 import numpy as np
+import pandas as pd
 import scipy.sparse
 from typing import Union
 
@@ -15,9 +16,7 @@ def cellxgene_export_adaptor(adata: anndata.AnnData, adata_ids: AdataIdsCellxgen
     """
     if version is None:
         version = DEFAULT_CELLXGENE_VERSION
-    if version == "1_1_0":
-        return cellxgene_export_adaptor_1_1_0(adata=adata, adata_ids=adata_ids, **kwargs)
-    elif version == "2_0_0":
+    if version == "2_0_0":
         return cellxgene_export_adaptor_2_0_0(adata=adata, adata_ids=adata_ids, **kwargs)
     else:
         raise ValueError(f"Did not recognise cellxgene schema version {version}")
@@ -83,18 +82,27 @@ def cellxgene_export_adaptor_1_1_0(adata: anndata.AnnData, adata_ids: AdataIdsCe
     return adata
 
 
-def cellxgene_export_adaptor_2_0_0(adata: anndata.AnnData, adata_ids: AdataIdsCellxgene, obs_keys_batch, **kwargs) \
-        -> anndata.AnnData:
+def cellxgene_export_adaptor_2_0_0(adata: anndata.AnnData, adata_ids: AdataIdsCellxgene, obs_keys_batch,
+                                   mask_portal_fields: bool = True, **kwargs) -> anndata.AnnData:
     """
     Cellxgene-schema 2.0.0.
 
     Documented here: https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/2.0.0/schema.md
     """
+    obs_keys_autofill = [getattr(adata_ids, x) for x in adata_ids.ontology_constrained]
+    uns_keys_autofill = []
+    var_keys_autofill = [adata_ids.feature_symbol, adata_ids.feature_reference]
+    raw_var_keys_remove = [adata_ids.feature_is_filtered]
+    x_is_raw = True
     # 1) Modify .uns
-    adata.uns["layer_descriptions"] = {"X": "raw"}
-    adata.uns["X_normalization"] = "none"
+    if x_is_raw:
+        adata.uns["layer_descriptions"] = {"X": "raw"}
+        adata.uns["X_normalization"] = "none"
+        adata.uns["X_approximate_distribution"] = "count"
+    else:
+        raise NotImplementedError()
     adata.uns["schema_version"] = "2.0.0"
-    adata.uns["contributors"] = {
+    adata.uns[adata_ids.author] = {
         "name": "sfaira",
         "email": "https://github.com/theislab/sfaira/issues",
         "institution": "sfaira",
@@ -138,7 +146,24 @@ def cellxgene_export_adaptor_2_0_0(adata: anndata.AnnData, adata_ids: AdataIdsCe
               f"The count matrix is rounded.")
         adata.X.data = np.rint(adata.X.data)
     # 4) Modify .var:
-    adata.var["feature_biotype"] = "gene"
-    adata.var["feature_reference"] = adata.uns[adata_ids.organism]
-    print(adata.obs.columns)
+    adata.var[adata_ids.feature_biotype] = "gene"
+    adata.var[adata_ids.feature_reference] = adata.uns[adata_ids.organism]
+    adata.var[adata_ids.feature_is_filtered] = False
+    # Modify ensembl ID writing:
+    #adata.var[adata_ids.feature_id] = ["G:".join(x.split("G")) for x in adata.var[adata_ids.feature_id]]
+    #adata.var.index = ["G:".join(x.split("G")) for x in adata.var.index]
+    # 5) Take out elements that are auto-filled by cellxgene upload interface:
+    if mask_portal_fields:
+        for k in obs_keys_autofill:
+            del adata.obs[k]
+        for k in uns_keys_autofill:
+            del adata.uns[k]
+        for k in var_keys_autofill:
+            del adata.var[k]
+    # 6) Modify .raw:
+    # Note that this depends on var cleaning in step 5.
+    if not x_is_raw:
+        var_raw = pd.DataFrame(dict([(k, v) for k, v in adata.var.items() if k not in raw_var_keys_remove]))
+        adata.raw = anndata.AnnData(adata.X, var=var_raw)
+    print(adata.var)
     return adata

@@ -97,7 +97,9 @@ class Ontology:
 
 class OntologyList(Ontology):
     """
-    Basic unordered ontology container
+    Basic unordered ontology container.
+
+    Node IDs and names are the same.
     """
     nodes: list
 
@@ -111,6 +113,20 @@ class OntologyList(Ontology):
     @property
     def node_names(self) -> List[str]:
         return self.nodes
+
+    def is_a_node_id(self, x: str) -> bool:
+        return x in self.node_names
+
+    def is_a_node_name(self, x: str) -> bool:
+        return x in self.node_names
+
+    @staticmethod
+    def convert_to_id(x: Union[str, List[str]]) -> Union[str, List[str]]:
+        return x
+
+    @staticmethod
+    def convert_to_name(x: Union[str, List[str]]) -> Union[str, List[str]]:
+        return x
 
     def map_node_suggestion(self, x: str, include_synonyms: bool = True, n_suggest: int = 10):
         """

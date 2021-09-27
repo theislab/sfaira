@@ -1,5 +1,6 @@
 import anndata
 from cellxgene_schema import validate
+import numpy as np
 import pytest
 
 from sfaira.unit_tests.data_for_tests.loaders import ASSEMBLY_HUMAN, ASSEMBLY_MOUSE, prepare_dsg

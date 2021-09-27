@@ -4,7 +4,7 @@ dataset_structure:
 dataset_wise:
     author:
         - "mock1"
-    default_embedding:
+    default_embedding: "X_umap"
     doi_journal: "no_doi_mock1"
     doi_preprint:
     download_url_data: ""

@@ -9,7 +9,7 @@ from typing import List, Union
 import uuid
 
 from sfaira.data.dataloaders.base import DatasetBase
-from sfaira.consts import AdataIdsCellxgene, AdataIdsCellxgeneHuman_v1_1_0, AdataIdsCellxgeneMouse_v1_1_0
+from sfaira.consts import AdataIdsCellxgene, AdataIdsCellxgene_v2_0_0
 from sfaira.consts.directories import CACHE_DIR_DATABASES_CELLXGENE
 from sfaira.data.dataloaders.databases.cellxgene.rest_helpers import get_collection, get_data
 from sfaira.data.dataloaders.databases.cellxgene.rest_helpers import CELLXGENE_PRODUCTION_ENDPOINT, DOWNLOAD_DATASET
@@ -147,9 +147,9 @@ class Dataset(DatasetBase):
                     print(f"WARNING: {e} in {self.collection_id} and data set {self.id}")
 
         if self.organism == "human":
-            self._adata_ids_cellxgene = AdataIdsCellxgeneHuman_v1_1_0()
+            self._adata_ids_cellxgene = AdataIdsCellxgene_v2_0_0()
         elif self.organism == "mouse":
-            self._adata_ids_cellxgene = AdataIdsCellxgeneMouse_v1_1_0()
+            self._adata_ids_cellxgene = AdataIdsCellxgene_v2_0_0()
         else:
             assert False, self.organism
         # Add author information.  # TODO need to change this to contributor?

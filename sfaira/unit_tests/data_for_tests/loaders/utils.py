@@ -26,7 +26,9 @@ def _create_adata(celltypes, ncells, ngenes, assembly) -> anndata.AnnData:
     obs = pd.DataFrame({}, index=["cell_" + str(i) for i in range(ncells)])
     if len(celltypes) > 0:
         obs["free_annotation"] = [celltypes[i] for i in np.random.choice(len(celltypes), size=ncells, replace=True)]
-    adata = anndata.AnnData(X=x, obs=obs, var=var)
+    # Create random embedding
+    obsm = {"X_umap": np.random.random(size=(ncells, 2))}
+    adata = anndata.AnnData(X=x, obs=obs, obsm=obsm, var=var)
     return adata
 
 

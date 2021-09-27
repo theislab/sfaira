@@ -20,8 +20,7 @@ import ssl
 
 from sfaira.versions.genomes import GenomeContainer
 from sfaira.versions.metadata import Ontology, OntologyHierarchical, CelltypeUniverse
-from sfaira.consts import AdataIds, AdataIdsCellxgeneGeneral, AdataIdsCellxgeneHuman_v1_1_0, AdataIdsCellxgeneMouse_v1_1_0, \
-    AdataIdsSfaira, META_DATA_FIELDS, OCS
+from sfaira.consts import AdataIds, AdataIdsCellxgene_v2_0_0, AdataIdsSfaira, META_DATA_FIELDS, OCS
 from sfaira.data.dataloaders.export_adaptors import cellxgene_export_adaptor
 from sfaira.data.store.io_dao import write_dao
 from sfaira.data.dataloaders.base.utils import is_child, get_directory_formatted_doi
@@ -681,12 +680,7 @@ class DatasetBase(abc.ABC):
         if schema.startswith("sfaira"):
             adata_target_ids = AdataIdsSfaira()
         elif schema.startswith("cellxgene"):
-            if self.organism == "human":
-                adata_target_ids = AdataIdsCellxgeneHuman_v1_1_0()
-            elif self.organism == "human":
-                adata_target_ids = AdataIdsCellxgeneHuman_v1_1_0()
-            else:
-                adata_target_ids = AdataIdsCellxgeneGeneral()
+            adata_target_ids = AdataIdsCellxgene_v2_0_0()
         else:
             raise ValueError(f"did not recognize schema {schema}")
 

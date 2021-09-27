@@ -23,9 +23,10 @@ class AdataIds:
     dataset_group: str
     ethnicity: str
     feature_id: str
-    feature_index: str
-    feature_symbol: str
     feature_biotype: str
+    feature_index: str
+    feature_reference: str
+    feature_symbol: str
     id: str
     individual: str
     ncells: str
@@ -198,14 +199,17 @@ class AdataIdsCellxgene(AdataIds):
         self.onto_original_suffix = "_original"
 
         self.assay_sc = "assay"
-        self.author = None
+        self.author = "contributor"
         self.cell_type = "cell_type"
         self.default_embedding = "default_embedding"
         self.doi_journal = "publication_doi"
         self.doi_preprint = "preprint_doi"
         self.disease = "disease"
-        self.feature_id = "ensembl"
-        self.feature_symbol = None
+        self.feature_biotype = "feature_biotype"
+        self.feature_id = "feature_id"
+        self.feature_is_filtered = "feature_is_filtered"
+        self.feature_reference = "feature_reference"
+        self.feature_symbol = "feature_name"
         self.id = "id"
         self.ncells = "ncells"
         self.organ = "tissue"
@@ -237,6 +241,8 @@ class AdataIdsCellxgene(AdataIds):
             "disease",
             "ethnicity",
             "organ",
+            "organism",
+            "sex",
         ]
 
         self.obs_keys = [
@@ -274,29 +280,7 @@ class AdataIdsCellxgene(AdataIds):
 
     @property
     def feature_index(self):
-        # Note this attribute is only filled in descendant classes.
-        return self.feature_symbol
-
-
-class AdataIdsCellxgeneHuman_v1_1_0(AdataIdsCellxgene):
-
-    def __init__(self):
-        super(AdataIdsCellxgeneHuman_v1_1_0, self).__init__()
-        self.feature_symbol = "hgnc_gene_symbol"
-
-
-class AdataIdsCellxgeneMouse_v1_1_0(AdataIdsCellxgene):
-
-    def __init__(self):
-        super(AdataIdsCellxgeneMouse_v1_1_0, self).__init__()
-        self.gene_id_symbols = "mgi_gene_symbol"
-
-
-class AdataIdsCellxgeneGeneral(AdataIdsCellxgene):
-
-    def __init__(self):
-        super(AdataIdsCellxgeneGeneral, self).__init__()
-        self.gene_id_symbols = "gene_symbol"
+        return self.feature_id
 
 
 class AdataIdsCellxgene_v2_0_0(AdataIdsCellxgene):
@@ -307,6 +291,3 @@ class AdataIdsCellxgene_v2_0_0(AdataIdsCellxgene):
 
     def __init__(self):
         super(AdataIdsCellxgene_v2_0_0, self).__init__()
-        self.feature_symbol = "feature_name"
-        self.feature_id = "feature_id"
-        self.feature_biotype = "feature_biotype"
