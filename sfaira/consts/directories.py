@@ -12,3 +12,5 @@ CACHE_DIR_DATABASES_CELLXGENE = os.path.join(CACHE_DIR_DATABASES, "cellxgene")
 CACHE_DIR_GENOMES = os.path.join(CACHE_DIR, "genomes")
 
 CACHE_DIR_ONTOLOGIES = os.path.join(CACHE_DIR, "ontologies")
+
+SFAIRA_REPO_URL = "https://zenodo.org/record/4836517/files/"

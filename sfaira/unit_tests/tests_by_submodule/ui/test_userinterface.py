@@ -7,7 +7,7 @@ import urllib.request
 from sfaira.ui import UserInterface
 from sfaira.unit_tests.data_for_tests.loaders.utils import prepare_dsg
 from sfaira.unit_tests import DIR_TEMP
-from sfaira.unit_tests.directories import SFAIRA_REPO_URL
+from sfaira.consts import SFAIRA_REPO_URL
 
 
 class HelperUi:

@@ -8,7 +8,7 @@ from typing import List, Union
 import warnings
 import time
 
-from sfaira.consts import AdataIdsSfaira, AdataIds, OCS
+from sfaira.consts import AdataIdsSfaira, AdataIds, OCS, SFAIRA_REPO_URL
 from sfaira.data import DatasetInteractive
 from sfaira.estimators import EstimatorKerasEmbedding, EstimatorKerasCelltype
 from sfaira.ui.model_zoo import ModelZoo
@@ -59,10 +59,9 @@ class UserInterface:
         self.use_sfaira_repo = sfaira_repo
         self.cache_path = os.path.join(cache_path, '')
         self.adata_ids = AdataIdsSfaira()
-        self.sfaira_repo_url = "https://zenodo.org/record/4836517/files/"
 
         if sfaira_repo:  # check if public sfaira repository should be accessed
-            self.model_lookuptable = self._load_lookuptable(self.sfaira_repo_url)
+            self.model_lookuptable = self._load_lookuptable(SFAIRA_REPO_URL)
 
         if custom_repo:
             if isinstance(custom_repo, str):

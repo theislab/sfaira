@@ -15,8 +15,6 @@ _DIR_DATA_DATABASES = os.path.join(DIR_TEMP, "databases")
 DIR_DATA_DATABASES_CACHE = os.path.join(_DIR_DATA_DATABASES, "cache")
 DIR_DATABASE_STORE_DAO = os.path.join(_DIR_DATA_DATABASES, "store_dao")
 
-SFAIRA_REPO_URL = "https://zenodo.org/record/4836517/files/"
-
 
 def save_delete(fn):
     assert str(fn).startswith(DIR_TEMP), f"tried to delete outside of temp directory {fn}"
