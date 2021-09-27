@@ -399,6 +399,7 @@ class UserInterface:
             clean_obs=False,
             clean_var=True,
             clean_uns=False,
+            clean_obs_names=False,
         )
 
     def _load_topology_dict(self, model_weights_file) -> dict:
