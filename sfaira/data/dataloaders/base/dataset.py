@@ -583,7 +583,7 @@ class DatasetBase(abc.ABC):
                 if y in subset_genes_to_type
             ]
             subset_ids_symbol = [
-                x.upper() for x, y in zip(self.genome_container.symbols, self.genome_container.biotype)
+                x for x, y in zip(self.genome_container.symbols, self.genome_container.biotype)
                 if y in subset_genes_to_type
             ]
 
