@@ -2,17 +2,6 @@ import numpy as np
 from typing import List, Tuple
 
 
-def _get_batch_start_ends(idx: np.ndarray, batch_size: int):
-    n_obs = len(idx)
-    remainder = n_obs % batch_size if n_obs > 0 else 0
-    n_batches = int(n_obs // batch_size + int(remainder > 0)) if n_obs > 0 else 0
-    batch_starts_ends = [
-        (int(x * batch_size), int(np.minimum((x * batch_size) + batch_size, n_obs)))
-        for x in np.arange(0, n_batches)
-    ]
-    return batch_starts_ends
-
-
 def _randomize_batch_start_ends(batch_starts_ends):
     batch_range = np.arange(0, len(batch_starts_ends))
     np.random.shuffle(batch_range)
@@ -31,6 +20,17 @@ class BatchDesignBase:
         self.randomized_batch_access = randomized_batch_access
         self.random_access = random_access
 
+    @staticmethod
+    def _get_batch_start_ends(idx: np.ndarray, batch_size: int):
+        n_obs = len(idx)
+        remainder = n_obs % batch_size if n_obs > 0 else 0
+        n_batches = int(n_obs // batch_size + int(remainder > 0)) if n_obs > 0 else 0
+        batch_starts_ends = [
+            (int(x * batch_size), int(np.minimum((x * batch_size) + batch_size, n_obs)))
+            for x in np.arange(0, n_batches)
+        ]
+        return batch_starts_ends
+
     @property
     def batch_bounds(self):
         """
@@ -48,7 +48,7 @@ class BatchDesignBase:
 
     @idx.setter
     def idx(self, x):
-        self._batch_bounds = _get_batch_start_ends(idx=x, batch_size=self.retrieval_batch_size)
+        self._batch_bounds = self._get_batch_start_ends(idx=x, batch_size=self.retrieval_batch_size)
         self._idx = np.sort(x)  # Sorted indices improve accession efficiency in some cases.
 
     @property
@@ -123,7 +123,66 @@ class BatchDesignBalanced(BatchDesignBase):
         return idx_proc, self.idx[idx_proc], batch_bounds
 
 
+class BatchDesignBlocks(BatchDesignBase):
+
+    """Yields meta data-defined blocks of observations in each iteration."""
+
+    def __init__(self, grouping, random_access: bool, **kwargs):
+        """
+        :param grouping: Group label for each entry in idx.
+        :param group_weights: Group weight for each unique group in grouping. Does not have to normalise to a probability
+            distribution but is normalised in this function. The outcome vector is always of length idx.
+        """
+        super(BatchDesignBlocks, self).__init__(random_access=random_access, **kwargs)
+        if not random_access:
+            print("WARNING: random_access==False is dangerous if you do not work with a large shuffle buffer "
+                  "downstream of the sfaira generator.")
+        # Create integer group assignment array.
+        self.groups = np.sort(np.unique(grouping))
+        self.grouping_int = np.zeros((grouping.shape[0],), dtype="int32") - 1
+        self.grouping_sizes = np.zeros((self.groups.shape[0],), dtype="int32")
+        for i, x in enumerate(self.groups):
+            idx = np.where(grouping == x)[0]
+            self.grouping_int[idx] = i
+            self.grouping_sizes[i] = len(idx)
+        assert np.all(self.grouping_int >= 0)
+
+    def _get_batch_start_ends(self, idx: np.ndarray, batch_size: int):
+        n_batches = len(self.groups)
+        batch_starts_ends = [
+            (int(x * batch_size),
+             int(x * batch_size + np.minimum(batch_size, self.grouping_sizes[x])))
+            for x in np.arange(0, n_batches)
+        ]
+        return batch_starts_ends
+
+    @property
+    def idx(self):
+        """
+        Protects property from uncontrolled changing.
+        Changes to _idx require changes to _batch_bounds.
+        """
+        return self._idx
+
+    @idx.setter
+    def idx(self, x):
+        x = x[np.argsort(self.grouping_int[x])]
+        self._batch_bounds = self._get_batch_start_ends(idx=x, batch_size=self.retrieval_batch_size)
+        self._idx = x
+
+    @property
+    def design(self) -> Tuple[np.ndarray, np.ndarray, List[Tuple[int, int]]]:
+        idx_proc = np.arange(0, len(self.idx))
+        batch_bounds = self.batch_bounds.copy()
+        if self.random_access:  # Note: randomization is result from sampling above, need to revert if not desired.
+            batch_bounds = np.asarray(batch_bounds)
+            np.random.shuffle(batch_bounds)
+            batch_bounds = batch_bounds.tolist()
+        return idx_proc, self.idx[idx_proc], batch_bounds
+
+
 BATCH_SCHEDULE = {
     "base": BatchDesignBasic,
     "balanced": BatchDesignBalanced,
+    "blocks": BatchDesignBlocks,
 }
