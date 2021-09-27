@@ -397,7 +397,7 @@ class UserInterface:
         # Transfer required metadata from the Dataset instance to the adata object
         self.data.streamline_metadata(
             clean_obs=False,
-            clean_var=False,
+            clean_var=True,
             clean_uns=False,
         )
 
