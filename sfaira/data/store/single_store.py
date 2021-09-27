@@ -35,8 +35,8 @@ Note that in all cases, you can use standard anndata reading functions to load a
 
 
 def _process_batch_size(batch_size: int, retrival_batch_size: int) -> Tuple[int, int]:
-    if batch_size != 1:
-        raise ValueError("batch size is only supported as 1")
+    if batch_size not in [0, 1]:
+        raise ValueError("batch size is only supported other than 0 or 1")
     return batch_size, retrival_batch_size
 
 
@@ -401,7 +401,7 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
         :param batch_size: Number of observations read from disk in each batched access (generator invocation).
         :return: Tuple:
             - var_idx: Processed feature index vector for generator to access.
-            - batch_size: Processed batch size for generator to access.
+            - batch_size: Processed batch size for generator to access. Choose as 0 to keep batch schedule batches.
             - retrival_batch_size: Processed retrieval batch size for generator to access.
         """
         # Make sure that features are ordered in the same way in each object so that generator yields consistent cell
