@@ -28,6 +28,7 @@ organ_map = {
 sex_map = {
     "F": "female",
     "M": "male",
+    "unknown": "unknown",
 }
 
 
