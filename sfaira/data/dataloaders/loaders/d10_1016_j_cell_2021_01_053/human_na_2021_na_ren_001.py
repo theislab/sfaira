@@ -29,6 +29,7 @@ sex_map = {
     "F": "female",
     "M": "male",
     "unknown": "unknown",
+    "nan": "unknown",
 }
 
 
