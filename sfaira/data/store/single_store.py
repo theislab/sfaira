@@ -103,7 +103,7 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
         """
         Organism of store.
         """
-        organisms = np.sort(np.unique(list(self.organisms_by_key.values())))
+        organisms = np.unique(list(self.organisms_by_key.values()))
         assert len(organisms) == 1, organisms
         return organisms[0]
 

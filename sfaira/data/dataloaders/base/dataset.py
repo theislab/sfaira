@@ -583,7 +583,7 @@ class DatasetBase(abc.ABC):
                 if y in subset_genes_to_type
             ]
             subset_ids_symbol = [
-                x.upper() for x, y in zip(self.genome_container.symbols, self.genome_container.biotype)
+                x for x, y in zip(self.genome_container.symbols, self.genome_container.biotype)
                 if y in subset_genes_to_type
             ]
 
@@ -752,9 +752,9 @@ class DatasetBase(abc.ABC):
             if hasattr(self, k) and getattr(self, k) is not None:
                 val = getattr(self, k)
             elif hasattr(self, f"{k}_obs_key") and getattr(self, f"{k}_obs_key") is not None:
-                val = np.sort(np.unique(self.adata.obs[getattr(self, f"{k}_obs_key")].values)).tolist()
+                val = np.sort(self.adata.obs[getattr(self, f"{k}_obs_key")].unique().astype(str)).tolist()
             elif getattr(self._adata_ids, k) in self.adata.obs.columns:
-                val = np.sort(np.unique(self.adata.obs[getattr(self._adata_ids, k)].values)).tolist()
+                val = np.sort(self.adata.obs[getattr(self._adata_ids, k)].unique().astype(str)).tolist()
             else:
                 val = None
             while hasattr(val, '__len__') and not isinstance(val, str) and len(val) == 1:  # Unpack nested lists/tuples.
@@ -1078,7 +1078,7 @@ class DatasetBase(abc.ABC):
         if not self.annotated:
             warnings.warn(f"attempted to write ontology class maps for data set {self.id} without annotation")
         else:
-            labels_original = np.sort(np.unique(self.adata.obs[self.cell_type_obs_key].values))
+            labels_original = np.unique(self.adata.obs[self.cell_type_obs_key].values)
             tab = self.celltypes_universe.prepare_celltype_map_tab(
                 source=labels_original,
                 match_only=False,
