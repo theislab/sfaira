@@ -42,24 +42,30 @@ class HelperTrainerBase(HelperEstimatorBase):
         else:
             self.load_store()
 
-    def test_init(self, cls, **kwargs):
+    def test_init(self, cls, estimator_kwargs: dict = {}, **kwargs):
         if not os.path.exists(DIR_TEMP):
             os.mkdir(DIR_TEMP)
         self.load_data(data_type="adata")
         self.trainer = cls(
-            data=self.data,
-            model_path=os.path.join(DIR_TEMP, "model"),
-            **kwargs
+            data=self.data, model_path=os.path.join(DIR_TEMP, "model"), **kwargs
         )
         self.trainer.zoo.model_id = self.model_id
-        self.trainer.init_estim(override_hyperpar={})
+        self.trainer.init_estim(override_hyperpar={}, **estimator_kwargs)
 
     def test_save(self):
         if not os.path.exists(DIR_TEMP):
             os.mkdir(DIR_TEMP)
-        self.trainer.estimator.train(epochs=1, max_steps_per_epoch=1, test_split=0.1, validation_split=0.1,
-                                     optimizer="adam", lr=0.005)
-        self.trainer.save(fn=os.path.join(DIR_TEMP, "trainer"), model=True, specific=True)
+        self.trainer.estimator.train(
+            epochs=1,
+            max_steps_per_epoch=1,
+            test_split=0.1,
+            validation_split=0.1,
+            optimizer="adam",
+            lr=0.005,
+        )
+        self.trainer.save(
+            fn=os.path.join(DIR_TEMP, "trainer"), model=True, specific=True
+        )
 
 
 def test_save_embedding():
