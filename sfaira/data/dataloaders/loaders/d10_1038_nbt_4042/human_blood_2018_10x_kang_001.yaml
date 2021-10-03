@@ -1,0 +1,52 @@
+dataset_structure:
+    dataset_index: 1
+    sample_fns:
+        - "kang_seurat.h5ad"
+dataset_wise:
+    author: "kang, Hyun Min"
+    default_embedding: 
+    doi_preprint:
+    doi_journal: "10.1038/nbt.4042"
+    download_url_data: "https://ftp.ncbi.nlm.nih.gov/geo/"
+    download_url_meta: "https://ftp.ncbi.nlm.nih.gov/geo/"
+    primary_data: True
+    normalization: "raw"
+    year: 2018
+dataset_or_observation_wise:
+    assay_sc:
+    assay_sc_obs_key:
+    assay_differentiation:
+    assay_differentiation_obs_key:
+    assay_type_differentiation:
+    assay_type_differentiation_obs_key:
+    bio_sample:
+    bio_sample_obs_key:
+    cell_line:
+    cell_line_obs_key:
+    development_stage:
+    development_stage_obs_key:
+    disease:
+    disease_obs_key:
+    ethnicity:
+    ethnicity_obs_key:
+    individual:
+    individual_obs_key:
+    organ: "blood"
+    organ_obs_key:
+    organism: "human"
+    organism_obs_key:
+    sample_source: "primary_tissue"
+    sample_source_obs_key:
+    sex:
+    sex_obs_key:
+    state_exact: "interferon beta"
+    state_exact_obs_key: "condition"
+    tech_sample:
+    tech_sample_obs_key:
+observation_wise:
+    cell_type_obs_key: "cell_type"
+feature_wise:
+    gene_id_ensembl_var_key: 
+    gene_id_symbols_var_key: "index"
+meta:
+    version: "1.0"
