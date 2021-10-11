@@ -69,7 +69,7 @@ def merge_uns_from_list(adata_ls):
             else:
                 x = [x]
             uns_k.extend(x)
-        uns_k = np.sort(np.unique(uns_k)).tolist()
+        uns_k = np.unique(uns_k).tolist()
         if len(uns_k) == 1:
             uns_k = uns_k[0]
         uns[k] = uns_k
@@ -354,9 +354,9 @@ class DatasetGroup:
         tab = []
         for k, v in self.datasets.items():
             if v.annotated:
-                labels_original = np.sort(np.unique(np.concatenate([
+                labels_original = np.unique(np.concatenate([
                     v.adata.obs[v.cell_type_obs_key].values
-                ])))
+                ]))
                 tab.append(v.celltypes_universe.prepare_celltype_map_tab(
                     source=labels_original,
                     match_only=False,
@@ -625,7 +625,7 @@ class DatasetGroup:
             if isinstance(vdoi, str):
                 vdoi = [vdoi]
             dois.extend(vdoi)
-        return np.sort(np.unique(dois)).tolist()
+        return np.unique(dois).tolist()
 
     @property
     def supplier(self) -> List[str]:
@@ -633,7 +633,7 @@ class DatasetGroup:
         Propagates supplier annotation from contained datasets.
         """
         supplier = [v.supplier for _, v in self.datasets.items()]
-        return np.sort(np.unique(supplier)).tolist()
+        return np.unique(supplier).tolist()
 
     def show_summary(self):
         for k, v in self.datasets.items():

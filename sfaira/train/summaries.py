@@ -143,11 +143,11 @@ class GridsearchContainer:
             for x in gs_ids
         ]
         run_ids = [
-            np.sort(np.unique([
+            np.unique([
                 x.split("_evaluation.pickle")[0]
                 for x in os.listdir(indir)
                 if "_evaluation.pickle" in x
-            ]))
+            ])
             for i, indir in enumerate(res_dirs)
         ]
         histories = {}
