@@ -1,6 +1,7 @@
 import anndata
 import numpy as np
 import pandas as pd
+import scanpy as sc
 import scipy.sparse
 from typing import Union
 
@@ -87,20 +88,20 @@ def cellxgene_export_adaptor_2_0_0(adata: anndata.AnnData, adata_ids: AdataIdsCe
     """
     Cellxgene-schema 2.0.0.
 
-    Documented here: https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/2.0.0/schema.md
+    Documented here: https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/2.0.3/schema.md
     """
     obs_keys_autofill = [getattr(adata_ids, x) for x in adata_ids.ontology_constrained]
     uns_keys_autofill = []
     var_keys_autofill = [adata_ids.feature_symbol, adata_ids.feature_reference]
     raw_var_keys_remove = [adata_ids.feature_is_filtered]
-    x_is_raw = True
+    x_as_raw = False
     # 1) Modify .uns
-    if x_is_raw:
-        adata.uns["layer_descriptions"] = {"X": "raw"}
+    if x_as_raw:
         adata.uns["X_normalization"] = "none"
         adata.uns["X_approximate_distribution"] = "count"
     else:
-        raise NotImplementedError()
+        adata.uns["X_normalization"] = "log_normalized"
+        adata.uns["X_approximate_distribution"] = "normal"
     adata.uns["schema_version"] = "2.0.0"
     adata.uns[adata_ids.author] = {
         "name": "sfaira",
@@ -111,15 +112,12 @@ def cellxgene_export_adaptor_2_0_0(adata: anndata.AnnData, adata_ids: AdataIdsCe
         adata.uns["batch_condition"] = obs_keys_batch.split("*")
     # TODO port this into organism ontology handling.
     # Infer organism from adata object.
-    organism = np.unique(adata.obs[adata_ids.organism].values)[0]
-    if organism == "mouse":
-        adata.uns["organism"] = "Mus musculus"
-        adata.uns["organism_ontology_term_id"] = "NCBITaxon:10090"
-    elif organism == "human":
-        adata.uns["organism"] = "Homo sapiens"
-        adata.uns["organism_ontology_term_id"] = "NCBITaxon:9606"
-    else:
-        raise ValueError(f"organism {organism} currently not supported by cellxgene schema")
+    organism_map = {"mouse": "Mus musculus", "human": "Homo sapiens"}
+    organism_id_map = {"mouse": "NCBITaxon:10090", "human": "NCBITaxon:9606"}
+    organism_id = organism_id_map[np.unique(adata.obs[adata_ids.organism].values)[0]]
+    adata.obs[adata_ids.organism] = [organism_map[x] for x in adata.obs[adata_ids.organism].values]
+    adata.obs[adata_ids.organism + adata_ids.onto_id_suffix] = \
+        [organism_id_map[x] for x in adata.obs[adata_ids.organism + adata_ids.onto_id_suffix].values]
     # 2) Modify .obs
     # Correct unknown cell type entries:
     adata.obs[adata_ids.cell_type] = [
@@ -135,7 +133,7 @@ def cellxgene_export_adaptor_2_0_0(adata: anndata.AnnData, adata_ids: AdataIdsCe
                      [getattr(adata_ids, x) + adata_ids.onto_id_suffix
                       for x in adata_ids.ontology_constrained]
     adata.obs = adata.obs[cellxgene_cols + [x for x in adata.obs.columns if x not in cellxgene_cols]]
-    # 3) Modify .X
+    # 3) Modify .X, assuming that .X is raw (TODO)
     # Check if .X is counts: The conversion are based on the assumption that .X is csr.
     assert isinstance(adata.X, scipy.sparse.csr_matrix), type(adata.X)
     count_values = np.unique(np.asarray(adata.X.todense()))
@@ -147,8 +145,9 @@ def cellxgene_export_adaptor_2_0_0(adata: anndata.AnnData, adata_ids: AdataIdsCe
         adata.X.data = np.rint(adata.X.data)
     # 4) Modify .var:
     adata.var[adata_ids.feature_biotype] = "gene"
-    adata.var[adata_ids.feature_reference] = adata.uns[adata_ids.organism]
+    adata.var[adata_ids.feature_reference] = organism_id
     adata.var[adata_ids.feature_is_filtered] = False
+    adata.var[adata_ids.feature_biotype] = pd.Categorical(adata.var[adata_ids.feature_biotype].values.tolist())
     # Modify ensembl ID writing:
     #adata.var[adata_ids.feature_id] = ["G:".join(x.split("G")) for x in adata.var[adata_ids.feature_id]]
     #adata.var.index = ["G:".join(x.split("G")) for x in adata.var.index]
@@ -160,10 +159,12 @@ def cellxgene_export_adaptor_2_0_0(adata: anndata.AnnData, adata_ids: AdataIdsCe
             del adata.uns[k]
         for k in var_keys_autofill:
             del adata.var[k]
-    # 6) Modify .raw:
+    # 6) Modify .raw, assuming that .X is raw: TODO below
     # Note that this depends on var cleaning in step 5.
-    if not x_is_raw:
+    if not x_as_raw:
         var_raw = pd.DataFrame(dict([(k, v) for k, v in adata.var.items() if k not in raw_var_keys_remove]))
         adata.raw = anndata.AnnData(adata.X, var=var_raw)
-    print(adata.var)
+        # Log-normalise values in .X TODO make optional
+        sc.pp.normalize_per_cell(adata)
+        sc.pp.log1p(adata)
     return adata

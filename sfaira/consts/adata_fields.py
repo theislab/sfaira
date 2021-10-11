@@ -40,6 +40,8 @@ class AdataIds:
     tech_sample: str
     year: str
 
+    feature_kwargs: dict
+
     onto_id_suffix: str
     onto_original_suffix: str
 
@@ -85,6 +87,13 @@ class AdataIdsSfaira(AdataIds):
     def __init__(self):
         self.onto_id_suffix = "_ontology_term_id"
         self.onto_original_suffix = "_original"
+
+        self.feature_kwargs = {
+            "match_to_reference": {
+                "human": "Homo_sapiens.GRCh38.104",
+                "mouse": "Mus_musculus.GRCm39.104"},
+            "remove_gene_version": True,
+            "subset_genes_to_type": None}
 
         self.annotated = "annotated"
         self.assay_sc = "assay_sc"
@@ -198,6 +207,10 @@ class AdataIdsCellxgene(AdataIds):
         self.onto_id_suffix = "_ontology_term_id"
         self.onto_original_suffix = "_original"
 
+        self.feature_kwargs = {
+            "remove_gene_version": True,
+            "subset_genes_to_type": None}
+
         self.assay_sc = "assay"
         self.author = "contributor"
         self.cell_type = "cell_type"
@@ -253,6 +266,7 @@ class AdataIdsCellxgene(AdataIds):
             "ethnicity",
             "organ",
             "organism",
+            "primary_data",
             "sex",
             "tech_sample",
         ]
@@ -291,3 +305,6 @@ class AdataIdsCellxgene_v2_0_0(AdataIdsCellxgene):
 
     def __init__(self):
         super(AdataIdsCellxgene_v2_0_0, self).__init__()
+        self.feature_kwargs["match_to_reference"] = {
+            "human": "Homo_sapiens.GRCh38.104",
+            "mouse": "Mus_musculus.GRCm39.104"}

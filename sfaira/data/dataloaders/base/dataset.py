@@ -510,9 +510,10 @@ class DatasetBase(abc.ABC):
 
     def streamline_features(
             self,
-            match_to_reference: Union[str, Dict[str, str], None],
+            match_to_reference: Union[str, Dict[str, str], None] = None,
             remove_gene_version: bool = True,
             subset_genes_to_type: Union[None, str, List[str]] = None,
+            schema: Union[str, None] = None,
     ):
         """
         Subset and sort genes to genes defined in an assembly or genes of a particular type, such as protein coding.
@@ -531,6 +532,18 @@ class DatasetBase(abc.ABC):
                 - "protein_coding": All protein coding genes in assembly.
         """
         self.__assert_loaded()
+        if schema is not None:
+            schema_version = schema.split(":")[-1] if ":" in schema else None
+            # Set schema as provided by the user
+            if schema.startswith("sfaira"):
+                adata_target_ids = AdataIdsSfaira()
+            elif schema.startswith("cellxgene"):
+                adata_target_ids = AdataIdsCellxgene_v2_0_0()
+            else:
+                raise ValueError(f"did not recognize schema {schema}")
+            match_to_reference = adata_target_ids.feature_kwargs["match_to_reference"]
+            remove_gene_version = adata_target_ids.feature_kwargs["remove_gene_version"]
+            subset_genes_to_type = adata_target_ids.feature_kwargs["subset_genes_to_type"]
 
         # Set genome container if mapping of gene labels is requested
         if isinstance(match_to_reference, dict):
