@@ -19,10 +19,8 @@ from sfaira.unit_tests.directories import DIR_TEMP
 
 CACHE_DIR_GENOMES = os.path.join(CACHE_DIR, "genomes")
 
-ASSEMBLY = {
-    "mouse": "Mus_musculus.GRCm38.102",
-    "human": "Homo_sapiens.GRCh38.102",
-}
+ADATA_IDS = AdataIdsSfaira()
+ASSEMBLY = ADATA_IDS.feature_kwargs["match_to_reference"]
 GENES = {
     "mouse": ["ENSMUSG00000000003", "ENSMUSG00000000028"],
     "human": ["ENSG00000000003", "ENSG00000000005"],

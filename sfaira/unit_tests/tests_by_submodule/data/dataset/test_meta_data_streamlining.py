@@ -24,7 +24,7 @@ def test_dsgs_streamline_metadata(out_format: str, clean_obs: bool, clean_var: b
         # Other data data sets do not have complete enough annotation
         ds.subset(key="doi_journal", values=["no_doi_mock1", "no_doi_mock3"])
     ds.load()
-    ds.streamline_features(remove_gene_version=False, match_to_reference=ASSEMBLY_MOUSE,
+    ds.streamline_features(remove_gene_version=False, match_to_reference=ASSEMBLY_HUMAN,
                            subset_genes_to_type=None)
     ds.streamline_metadata(schema=out_format, clean_obs=clean_obs, clean_var=clean_var,
                            clean_uns=clean_uns, clean_obs_names=clean_obs_names,

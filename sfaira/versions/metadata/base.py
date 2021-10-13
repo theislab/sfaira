@@ -922,10 +922,12 @@ class OntologyMmusdv(OntologyExtendedObo):
             recache: bool = False,
             **kwargs
     ):
+        # URL for releases:
+        # url=f"https://raw.githubusercontent.com/obophenotype/developmental-stage-ontologies/{branch}/src/mmusdv/mmusdv.obo"
         obofile = cached_load_file(
-            url=f"https://raw.githubusercontent.com/obophenotype/developmental-stage-ontologies/{branch}/src/mmusdv/mmusdv.obo",
+            url=f"http://ontologies.berkeleybop.org/mmusdv.obo",
             ontology_cache_dir="mmusdv",
-            ontology_cache_fn=f"mmusdv_{branch}.obo",
+            ontology_cache_fn=f"mmusdv.obo",
             recache=recache,
         )
         super().__init__(obo=obofile)

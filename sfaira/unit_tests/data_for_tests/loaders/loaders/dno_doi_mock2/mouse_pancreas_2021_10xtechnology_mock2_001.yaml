@@ -23,7 +23,7 @@ dataset_or_observation_wise:
     bio_sample_obs_key:
     cell_line:
     cell_line_obs_key:
-    development_stage: "2-week-old stage"
+    development_stage: "2 weeks"
     development_stage_obs_key:
     disease: "healthy"
     disease_obs_key:

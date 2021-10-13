@@ -32,6 +32,7 @@ def clean_cellxgene_meta_obs(k, val, adata_ids) -> Union[str, List[str]]:
         # Organ labels contain labels on tissue type also, such as 'UBERON:0001911 (cell culture)'.
         val = [v.split(" ")[0] for v in val]
     elif k == "organism":
+        # TODO deprecate map once same organism naming is used.
         organism_map = {
             "Homo sapiens": "human",
             "Mus musculus": "mouse",
@@ -64,13 +65,11 @@ def clean_cellxgene_meta_uns(k, val, adata_ids) -> Union[str, List[str]]:
             if k == "organ":
                 v = v.split(" ")[0]
             if k == "organism":
+                # TODO deprecate map once same organism naming is used.
                 organism_map = {
                     "Homo sapiens": "human",
-                    "Mus musculus": "mouse",
-                }
-                if v not in organism_map:
-                    raise ValueError(f"value {v} not recognized")
-                v = organism_map[v]
+                    "Mus musculus": "mouse"}
+                v = organism_map[v] if v in organism_map.keys() else v
         if v != adata_ids.unknown_metadata_identifier and v != adata_ids.invalid_metadata_identifier:
             x_clean.append(v)
     return x_clean
