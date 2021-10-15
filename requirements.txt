@@ -8,7 +8,7 @@ IPython
 loompy
 matplotlib
 networkx
-numba>=0.54.1  # dependency of scanpy that causes issues with numpy version if older
+numba
 numpy>=1.16.4
 obonet
 openpyxl
