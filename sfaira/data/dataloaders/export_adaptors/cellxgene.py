@@ -114,13 +114,20 @@ def cellxgene_export_adaptor_2_0_0(adata: anndata.AnnData, adata_ids: AdataIdsCe
     adata.obs[adata_ids.organism + adata_ids.onto_id_suffix] = \
         [organism_id_map[x] for x in adata.obs[adata_ids.organism + adata_ids.onto_id_suffix].values]
     # 2) Modify .obs
-    # Correct unknown cell type entries:
+    # a) Correct unknown cell type entries:
     adata.obs[adata_ids.cell_type] = [
         x if x not in [adata_ids.unknown_metadata_identifier, adata_ids.not_a_cell_celltype_identifier]
         else "native cell" for x in adata.obs[adata_ids.cell_type]]
     adata.obs[adata_ids.cell_type + adata_ids.onto_id_suffix] = [
         x if x not in [adata_ids.unknown_metadata_identifier, adata_ids.not_a_cell_celltype_identifier]
         else "CL:0000003" for x in adata.obs[adata_ids.cell_type + adata_ids.onto_id_suffix]]
+    # b) Correct unknown disease entries:
+    adata.obs[adata_ids.disease] = [
+        x if x not in [adata_ids.unknown_metadata_identifier] else "healthy"
+        for x in adata.obs[adata_ids.disease]]
+    adata.obs[adata_ids.disease + adata_ids.onto_id_suffix] = [
+        x if x not in [adata_ids.unknown_metadata_identifier] else "PATO:0000461"
+        for x in adata.obs[adata_ids.disease + adata_ids.onto_id_suffix]]
     # Reorder data frame to put ontology columns first:
     cellxgene_cols = [getattr(adata_ids, x) for x in adata_ids.ontology_constrained] + \
                      [getattr(adata_ids, x) for x in adata_ids.obs_keys
