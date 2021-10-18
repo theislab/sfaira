@@ -94,14 +94,9 @@ def cellxgene_export_adaptor_2_0_0(adata: anndata.AnnData, adata_ids: AdataIdsCe
     uns_keys_autofill = []
     var_keys_autofill = [adata_ids.feature_symbol, adata_ids.feature_reference]
     raw_var_keys_remove = [adata_ids.feature_is_filtered]
-    x_as_raw = False
     # 1) Modify .uns
-    if x_as_raw:
-        adata.uns["X_normalization"] = "none"
-        adata.uns["X_approximate_distribution"] = "count"
-    else:
-        adata.uns["X_normalization"] = "log_normalized"
-        adata.uns["X_approximate_distribution"] = "normal"
+    adata.uns["X_normalization"] = "log_normalized"
+    adata.uns["X_approximate_distribution"] = "normal"
     adata.uns["schema_version"] = "2.0.0"
     adata.uns[adata_ids.author] = {
         "name": "sfaira",
@@ -161,10 +156,31 @@ def cellxgene_export_adaptor_2_0_0(adata: anndata.AnnData, adata_ids: AdataIdsCe
             del adata.var[k]
     # 6) Modify .raw, assuming that .X is raw: TODO below
     # Note that this depends on var cleaning in step 5.
-    if not x_as_raw:
-        var_raw = pd.DataFrame(dict([(k, v) for k, v in adata.var.items() if k not in raw_var_keys_remove]))
-        adata.raw = anndata.AnnData(adata.X, var=var_raw)
-        # Log-normalise values in .X TODO make optional
-        sc.pp.normalize_per_cell(adata)
-        sc.pp.log1p(adata)
+    var_raw = pd.DataFrame(dict([(k, v) for k, v in adata.var.items() if k not in raw_var_keys_remove]))
+    adata.raw = anndata.AnnData(adata.X, var=var_raw)
+    # Log-normalise values in .X TODO make optional
+    sc.pp.normalize_per_cell(adata)
+    sc.pp.log1p(adata)
+    # 7) Check if default embedding is present, add in otherwise:
+    # First check if any pre-computed embedding is given.
+    # If that is not the case, compute a default UMAP.
+    # Define hierarchy of embeddings accepted as defaults, first one matched will be chosen:
+    default_embedding_names = ["X_umap", "X_tsne", "X_draw_graph_fa"]
+    if adata.uns[adata_ids.default_embedding] == adata_ids.unknown_metadata_identifier:
+        found_default = False
+        counter = 0
+        while not found_default and counter < len(default_embedding_names):
+            if default_embedding_names[counter] in adata.obsm.keys():
+                adata.uns[adata_ids.default_embedding] = default_embedding_names[counter]
+                found_default = True
+            counter += 1
+        if not found_default:
+            adata_embedding = adata.raw.copy()
+            sc.pp.normalize_per_cell(adata_embedding)
+            sc.pp.log1p(adata_embedding)
+            sc.pp.pca(adata_embedding)
+            sc.pp.neighbors(adata_embedding)
+            sc.tl.umap(adata_embedding)
+            adata.obsm["X_umap"] = adata_embedding.obsm["X_umap"]
+            adata.uns[adata_ids.default_embedding] = "X_umap"
     return adata
