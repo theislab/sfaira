@@ -73,14 +73,14 @@ def test_dsgs_load():
 @pytest.mark.parametrize("celltype", ["T cell"])
 def test_dsgs_subset_cell_wise(celltype: str):
     """
-    Tests if subsetting results only in datasets of the desired characteristics.
+    Tests if sub-setting results only in datasets of the desired characteristics.
     """
     organ = "lung"
     ds = prepare_dsg(load=False)
     ds.subset(key="organism", values=["human"])
     ds.subset(key="organ", values=[organ])
     ds.load()
-    ds.subset_cells(key="cellontology_class", values=celltype)
+    ds.subset_cells(key="cell_type", values=celltype)
     for x in ds.dataset_groups:
         for k, v in x.datasets.items():
             assert v.organism == "human", v.id

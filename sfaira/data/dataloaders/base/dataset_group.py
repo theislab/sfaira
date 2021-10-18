@@ -598,7 +598,7 @@ class DatasetGroup:
         """
         for x in self.ids:
             self.datasets[x].subset_cells(key=key, values=values)
-            if self.datasets[x].ncells == 0:  # No observations (cells) left.
+            if self.datasets[x].adata is None:  # No observations (cells) left.
                 del self.datasets[x]
 
     @property

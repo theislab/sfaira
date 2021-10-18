@@ -2172,7 +2172,7 @@ class DatasetBase(abc.ABC):
             return idx
 
         idx_keep = get_subset_idx(samplewise_key=key, cellwise_key=key + "_obs_key")
-        self.adata = self.adata[idx_keep, :].copy()  # if len(idx_keep) > 0 else None
+        self.adata = self.adata[idx_keep, :].copy() if len(idx_keep) > 0 else None
 
     def show_summary(self):
         print(f"{(self.supplier, self.organism, self.organ, self.assay_sc, self.disease)}")
