@@ -11,7 +11,7 @@ CD8+ IL17+	CD8-positive, alpha-beta thymocyte	CL:0000811
 CD8+ LP	CD8-positive, alpha-beta thymocyte	CL:0000811
 Cycling B	B cell	CL:0000236
 Cycling T	T cell	CL:0000084
-Cycling TA	transit amplifying cell of large intestine	CL:0009011
+Cycling TA	transit amplifying cell of colon	CL:0009011
 DC1	dendritic cell	CL:0000451
 DC2	dendritic cell	CL:0000451
 Enterocyte Progenitors	enterocyte	CL:0000584
@@ -29,10 +29,10 @@ MT-hi	T cell	CL:0000084
 Macrophages	macrophage	CL:0000235
 NKs	natural killer cell	CL:0000623
 Plasma	plasma cell	CL:0000786
-Secretory TA	transit amplifying cell of large intestine	CL:0009011
+Secretory TA	transit amplifying cell of colon	CL:0009011
 Stem	intestinal crypt stem cell	CL:0002250
-TA 1	transit amplifying cell of large intestine	CL:0009011
-TA 2	transit amplifying cell of large intestine	CL:0009011
+TA 1	transit amplifying cell of colon	CL:0009011
+TA 2	transit amplifying cell of colon	CL:0009011
 Tregs	regulatory T cell	CL:0000815
 Tuft	intestinal tuft cell	CL:0019032
 WNT2B+ Fos-lo 1	fibroblast	CL:0000057
