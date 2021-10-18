@@ -393,6 +393,10 @@ class DatasetGroup:
     def collection_id(self):
         return self._collection_id
 
+    @collection_id.setter
+    def collection_id(self, x: str):
+        self._collection_id = x
+
     @property
     def adata_ls(self):
         adata_ls = []
