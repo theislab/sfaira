@@ -181,7 +181,7 @@ def cellxgene_export_adaptor_2_0_0(adata: anndata.AnnData, adata_ids: AdataIdsCe
                 adata.uns[adata_ids.default_embedding] = default_embedding_names[counter]
                 found_default = True
             counter += 1
-        if not found_default:
+        if not found_default and adata.n_obs > 10:
             adata_embedding = adata.raw.to_adata().copy()
             sc.pp.normalize_per_cell(adata_embedding)
             sc.pp.log1p(adata_embedding)
