@@ -182,7 +182,7 @@ def cellxgene_export_adaptor_2_0_0(adata: anndata.AnnData, adata_ids: AdataIdsCe
                 found_default = True
             counter += 1
         if not found_default:
-            adata_embedding = adata.raw.copy()
+            adata_embedding = adata.raw.to_adata().copy()
             sc.pp.normalize_per_cell(adata_embedding)
             sc.pp.log1p(adata_embedding)
             sc.pp.pca(adata_embedding)
