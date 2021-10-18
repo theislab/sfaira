@@ -20,6 +20,7 @@ class Dataset(DatasetBase):
         self.sample_source = "primary_tissue"
         self.organ = "liver"
         self.organism = "human"
+        self.primary_data = True
         self.year = 2019
 
         self.gene_id_symbols_var_key = "index"

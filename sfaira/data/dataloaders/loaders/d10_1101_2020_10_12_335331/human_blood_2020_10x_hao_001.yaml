@@ -10,7 +10,7 @@ dataset_wise:
     download_url_data: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE164nnn/GSE164378/suppl/GSE164378_RAW.tar"
     download_url_meta: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE164nnn/GSE164378/suppl/GSE164378_sc.meta.data_3P.csv.gz"
     normalization: "raw"
-    primary_data:
+    primary_data: True
     year: 2020
 dataset_or_observation_wise:
     assay_sc: "CITE-seq (cell surface protein profiling)"

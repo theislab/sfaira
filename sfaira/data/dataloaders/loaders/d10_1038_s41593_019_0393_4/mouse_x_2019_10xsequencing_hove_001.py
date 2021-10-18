@@ -22,6 +22,7 @@ class Dataset(DatasetBase):
         self.doi_journal = "10.1038/s41593-019-0393-4"
         self.normalization = "raw"
         self.organism = "mouse"
+        self.primary_data = True
         self.sample_source = "primary_tissue"
         self.state_exact = "healthy"
         self.year = 2019

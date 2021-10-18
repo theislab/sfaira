@@ -1,9 +1,12 @@
+import os
+
 import anndata
 from cellxgene_schema import validate
 import numpy as np
 import pytest
 
 from sfaira.unit_tests.data_for_tests.loaders import ASSEMBLY_HUMAN, ASSEMBLY_MOUSE, prepare_dsg
+from sfaira.unit_tests.directories import DIR_TEMP
 
 
 @pytest.mark.parametrize("out_format", ["sfaira", "cellxgene"])
@@ -73,7 +76,15 @@ def test_cellxgene_export(schema_version: str, organism: str):
                            keep_id_obs=True, keep_orginal_obs=False, keep_symbol_obs=True)
     counter = 0
     for ds in ds.datasets.values():
+        # Validate in memory:
+        # This directly tests the raw object.
         val = ValidatorInMemory()
         val.validate_adata_inmemory(adata=ds.adata)
+        # Validate on disk:
+        # This guards against potential issues that arise from h5 formatting.
+        fn_temp = os.path.join(DIR_TEMP, "temp.h5ad")
+        val = ValidatorInMemory()
+        ds.adata.write_h5ad(filename=fn_temp)
+        val.validate_adata(h5ad_path=fn_temp)
         counter += 1
     assert counter > 0, "no data sets to test"
