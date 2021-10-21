@@ -14,6 +14,9 @@ This process requires a couple of steps as outlined in the following sections.
    Overview of contributing dataloaders to sfaira. First, ensure that your data is not yet available as a dataloader.
    Next, create a dataloader. Afterwards, validate/annotate it to finally test it. Finally, submit your dataloader to sfaira.
 
+Step-by-step guide through CLI
+------------------------------
+
 sfaira features an interactive way of creating, formatting and testing dataloaders through a command line interface (CLI).
 The common workflow using the CLI looks as follows:
 
