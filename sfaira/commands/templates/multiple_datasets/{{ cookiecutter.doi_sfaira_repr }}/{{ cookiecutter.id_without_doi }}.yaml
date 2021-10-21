@@ -5,7 +5,7 @@ dataset_structure:
 {% endfor %}dataset_wise:
     author: "{{ cookiecutter.author }}"
     default_embedding:
-{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}: "{{ cookiecutter.default_embedding }}"
+{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}: {% if cookiecutter.default_embedding %}"{{ cookiecutter.default_embedding }}"{% endif %}
 {% endfor %}    doi_preprint:
     doi_journal: "{{ cookiecutter.doi }}"
     download_url_data:
@@ -14,7 +14,7 @@ dataset_structure:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
 {% endfor %}    primary_data: {{ cookiecutter.primary_data }}
     normalization: "{{ cookiecutter.normalization }}"
-    year: "{{ cookiecutter.year }}"
+    year: {{ cookiecutter.year }}
 dataset_or_observation_wise:
     assay_sc:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}: "{{ cookiecutter.assay_sc }}"
@@ -62,9 +62,9 @@ dataset_or_observation_wise:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
 {% endfor %}    tech_sample_obs_key:
 observation_wise:
-    cell_types_original_obs_key: "{{ cookiecutter.cell_types_original_obs_key }}"
+    cell_type_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.cell_type_obs_key }}"{% endif %}
 feature_wise:
-    gene_id_ensembl_var_key:
-    gene_id_symbols_var_key:
+    gene_id_ensembl_var_key: {% if cookiecutter.gene_id_ensembl_var_key %}"{{ cookiecutter.gene_id_ensembl_var_key }}"{% endif %}
+    gene_id_symbols_var_key: {% if cookiecutter.gene_id_symbols_var_key %}"{{ cookiecutter.gene_id_symbols_var_key }}"{% endif %}
 meta:
     version: "1.0"

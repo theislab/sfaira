@@ -99,6 +99,9 @@ def test_dsgs_streamline_features(match_to_reference: str, remove_gene_version: 
     ds.load()
     ds.streamline_features(remove_gene_version=remove_gene_version, match_to_reference=match_to_reference,
                            subset_genes_to_type=subset_genes_to_type)
+    gc = ds.get_gc(match_to_reference["mouse"] if isinstance(match_to_reference, dict) else match_to_reference)
+    gc.subset(biotype=subset_genes_to_type)
+    assert ds.adata.var["gene_symbol"].tolist() == gc.symbols
 
 
 def test_dsg_load():

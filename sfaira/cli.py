@@ -15,7 +15,7 @@ from sfaira.commands.test_dataloader import DataloaderTester
 from sfaira.commands.validate_dataloader import DataloaderValidator
 from sfaira.commands.validate_h5ad import H5adValidator
 
-import sfaira
+from sfaira import __version__
 from sfaira.commands.create_dataloader import DataloaderCreator
 from sfaira.commands.upgrade import UpgradeCommand
 
@@ -43,7 +43,7 @@ def main():
 
 
 @click.group()
-@click.version_option(sfaira.__version__, message=click.style(f'sfaira Version: {sfaira.__version__}', fg='blue'))
+@click.version_option(__version__, message=click.style(f'sfaira Version: {__version__}', fg='blue'))
 @click.option('-v', '--verbose', is_flag=True, default=False, help='Enable verbose output (print debug statements).')
 @click.option("-l", "--log-file", help="Save a verbose log to a file.")
 @click.pass_context
