@@ -19,6 +19,7 @@ class Dataset(DatasetBase):
         self.normalization = "raw"
         self.organ = "lung"
         self.organism = "human"
+        self.primary_data = True
         self.sample_source = "primary_tissue"
         self.state_exact = "uninvolved areas of tumour resection material"
         self.year = 2019

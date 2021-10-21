@@ -2,10 +2,14 @@ from typing import Dict, Union
 
 from sfaira.versions.metadata import OntologyList, OntologyCl
 from sfaira.versions.metadata import OntologyCellosaurus, OntologyHancestro, OntologyHsapdv, OntologyMondo, \
-    OntologyMmusdv, OntologySinglecellLibraryConstruction, OntologyUberon
+    OntologyMmusdv, OntologyEfo, OntologySex, OntologyUberon
 
-DEFAULT_CL = "v2021-02-01"
-DEFAULT_UBERON = "2019-11-22"
+DEFAULT_CL = "v2021-08-10"
+DEFAULT_HSAPDV = "master"
+DEFAULT_MONDO = "v2021-08-11"
+DEFAULT_MMUSDV = "master"
+DEFAULT_PATO = "v2021-08-06"
+DEFAULT_UBERON = "v2021-07-27"
 
 
 class OntologyContainerSfaira:
@@ -16,12 +20,13 @@ class OntologyContainerSfaira:
     usage of ontology.
     """
 
-    _assay_sc: Union[None, OntologySinglecellLibraryConstruction]
+    _assay_sc: Union[None, OntologyEfo]
     _cell_line: Union[None, OntologyCellosaurus]
     _cell_type: Union[None, OntologyCl]
     _development_stage: Union[None, Dict[str, Union[OntologyHsapdv, OntologyMmusdv]]]
     _ethnicity: Union[None, Dict[str, Union[OntologyHancestro, None]]]
     _organ: Union[None, OntologyUberon]
+    _sex: Union[None, OntologySex]
 
     def __init__(self):
         self.annotated = OntologyList(terms=[True, False])
@@ -48,7 +53,7 @@ class OntologyContainerSfaira:
         self.organism = OntologyList(terms=["mouse", "human"])  # TODO introduce NCBItaxon here
         self.primary_data = OntologyList(terms=[True, False])
         self.sample_source = OntologyList(terms=["primary_tissue", "2d_culture", "3d_culture", "tumor"])
-        self.sex = OntologyList(terms=["female", "male", "mixed", "unknown", "other"])
+        self._sex = None
         self.supplier = OntologyList(terms=["cellxgene", "sfaira"])
         self.tech_sample = None
         self.title = None
@@ -57,15 +62,15 @@ class OntologyContainerSfaira:
     def reload_ontology(self, attr):
         kwargs = {"recache": True}
         if attr == "assay_sc":
-            self._assay_sc = OntologySinglecellLibraryConstruction(**kwargs)
+            self._assay_sc = OntologyEfo(**kwargs)
         elif attr == "cell_line":
             self._cell_line = OntologyCellosaurus(**kwargs)
         elif attr == "cellontology_class":
             self._cell_type = OntologyCl(branch=DEFAULT_CL, **kwargs)
         elif attr == "development_stage":
             self._development_stage = {
-                "human": OntologyHsapdv(),
-                "mouse": OntologyMmusdv(),
+                "human": OntologyHsapdv(**kwargs),
+                "mouse": OntologyMmusdv(**kwargs),
             }
         elif attr == "disease":
             self._disease = OntologyMondo(**kwargs)
@@ -76,12 +81,14 @@ class OntologyContainerSfaira:
             }
         elif attr == "organ":
             self._organ = OntologyUberon(**kwargs)
+        elif attr == "sex":
+            self._sex = OntologySex(**kwargs)
         return self._assay_sc
 
     @property
     def assay_sc(self):
         if self._assay_sc is None:
-            self._assay_sc = OntologySinglecellLibraryConstruction()
+            self._assay_sc = OntologyEfo()
         return self._assay_sc
 
     @property
@@ -104,15 +111,15 @@ class OntologyContainerSfaira:
     def development_stage(self):
         if self._development_stage is None:
             self._development_stage = {
-                "human": OntologyHsapdv(),
-                "mouse": OntologyMmusdv(),
+                "human": OntologyHsapdv(branch=DEFAULT_HSAPDV),
+                "mouse": OntologyMmusdv(branch=DEFAULT_MMUSDV),
             }
         return self._development_stage
 
     @property
     def disease(self):
         if self._disease is None:
-            self._disease = OntologyMondo()
+            self._disease = OntologyMondo(branch=DEFAULT_MONDO)
         return self._disease
 
     @property
@@ -129,3 +136,9 @@ class OntologyContainerSfaira:
         if self._organ is None:
             self._organ = OntologyUberon(branch=DEFAULT_UBERON)
         return self._organ
+
+    @property
+    def sex(self):
+        if self._sex is None:
+            self._sex = OntologySex(branch=DEFAULT_PATO)
+        return self._sex

@@ -229,9 +229,10 @@ class DatasetGroup:
 
     def streamline_features(
             self,
-            match_to_reference: Union[str, Dict[str, str], None],
+            match_to_reference: Union[str, Dict[str, str], None] = None,
             remove_gene_version: bool = True,
             subset_genes_to_type: Union[None, str, List[str]] = None,
+            schema: Union[str, None] = None,
     ):
         """
         Subset and sort genes to genes defined in an assembly or genes of a particular type, such as protein coding.
@@ -249,6 +250,7 @@ class DatasetGroup:
                 match_to_reference=match_to_reference,
                 remove_gene_version=remove_gene_version,
                 subset_genes_to_type=subset_genes_to_type,
+                schema=schema,
             )
 
     def collapse_counts(self):
@@ -386,6 +388,10 @@ class DatasetGroup:
     @property
     def collection_id(self):
         return self._collection_id
+
+    @collection_id.setter
+    def collection_id(self, x: str):
+        self._collection_id = x
 
     @property
     def adata_ls(self):
@@ -588,7 +594,7 @@ class DatasetGroup:
         """
         for x in self.ids:
             self.datasets[x].subset_cells(key=key, values=values)
-            if self.datasets[x].ncells == 0:  # No observations (cells) left.
+            if self.datasets[x].adata is None:  # No observations (cells) left.
                 del self.datasets[x]
 
     @property
@@ -944,9 +950,10 @@ class DatasetSuperGroup:
 
     def streamline_features(
             self,
-            match_to_reference: Union[str, Dict[str, str], None],
+            match_to_reference: Union[str, Dict[str, str], None] = None,
             remove_gene_version: bool = True,
             subset_genes_to_type: Union[None, str, List[str]] = None,
+            schema: Union[str, None] = None,
     ):
         """
         Subset and sort genes to genes defined in an assembly or genes of a particular type, such as protein coding.
@@ -964,6 +971,7 @@ class DatasetSuperGroup:
                 match_to_reference=match_to_reference,
                 remove_gene_version=remove_gene_version,
                 subset_genes_to_type=subset_genes_to_type,
+                schema=schema,
             )
 
     def collapse_counts(self):

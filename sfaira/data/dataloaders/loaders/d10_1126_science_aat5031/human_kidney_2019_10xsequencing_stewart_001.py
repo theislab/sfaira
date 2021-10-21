@@ -26,6 +26,7 @@ class Dataset(DatasetBase):
         self.normalization = "norm"
         self.organ = "kidney"
         self.organism = "human"
+        self.primary_data = True
         self.sample_source = "primary_tissue"
         self.state_exact = "healthy"
         self.year = 2019

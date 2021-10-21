@@ -15,6 +15,9 @@ where step 1-3 is often only performed once by the original authors of the data 
 while step 4 and 5 are repeated multiple times in the community for different meta studies.
 Sfaira offers the following functionality groups that accelerate steps along this pipeline:
 
+Sfaira tools across life cycle
+------------------------------
+
 I) Data loaders
 ~~~~~~~~~~~~~~~
 We maintain streamlined data loader code that improve **Curation** (step 4) and make this step sharable and iteratively improvable.
@@ -33,7 +36,7 @@ Specifically, this interface is optimised for out-of-core observation-centric in
 Read more in our guide to data stores :ref:`distributed_data_rst`.
 
 FAIR data
-=========
+---------
 
 FAIR_ data is a set of data management guidelines that are designed to improve data reuse and automated access
 (see also the original publication of FAIR_ for more details).

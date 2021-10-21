@@ -20,8 +20,7 @@ import ssl
 
 from sfaira.versions.genomes import GenomeContainer
 from sfaira.versions.metadata import Ontology, OntologyHierarchical, CelltypeUniverse
-from sfaira.consts import AdataIds, AdataIdsCellxgeneGeneral, AdataIdsCellxgeneHuman_v1_1_0, AdataIdsCellxgeneMouse_v1_1_0, \
-    AdataIdsSfaira, META_DATA_FIELDS, OCS
+from sfaira.consts import AdataIds, AdataIdsCellxgene_v2_0_0, AdataIdsSfaira, META_DATA_FIELDS, OCS
 from sfaira.data.dataloaders.export_adaptors import cellxgene_export_adaptor
 from sfaira.data.store.io_dao import write_dao
 from sfaira.data.dataloaders.base.utils import is_child, get_directory_formatted_doi
@@ -511,9 +510,10 @@ class DatasetBase(abc.ABC):
 
     def streamline_features(
             self,
-            match_to_reference: Union[str, Dict[str, str], None],
+            match_to_reference: Union[str, Dict[str, str], None] = None,
             remove_gene_version: bool = True,
             subset_genes_to_type: Union[None, str, List[str]] = None,
+            schema: Union[str, None] = None,
     ):
         """
         Subset and sort genes to genes defined in an assembly or genes of a particular type, such as protein coding.
@@ -532,6 +532,18 @@ class DatasetBase(abc.ABC):
                 - "protein_coding": All protein coding genes in assembly.
         """
         self.__assert_loaded()
+        if schema is not None:
+            # schema_version = schema.split(":")[-1] if ":" in schema else None
+            # Set schema as provided by the user
+            if schema.startswith("sfaira"):
+                adata_target_ids = AdataIdsSfaira()
+            elif schema.startswith("cellxgene"):
+                adata_target_ids = AdataIdsCellxgene_v2_0_0()
+            else:
+                raise ValueError(f"did not recognize schema {schema}")
+            match_to_reference = adata_target_ids.feature_kwargs["match_to_reference"]
+            remove_gene_version = adata_target_ids.feature_kwargs["remove_gene_version"]
+            subset_genes_to_type = adata_target_ids.feature_kwargs["subset_genes_to_type"]
 
         # Set genome container if mapping of gene labels is requested
         if isinstance(match_to_reference, dict):
@@ -681,12 +693,7 @@ class DatasetBase(abc.ABC):
         if schema.startswith("sfaira"):
             adata_target_ids = AdataIdsSfaira()
         elif schema.startswith("cellxgene"):
-            if self.organism == "human":
-                adata_target_ids = AdataIdsCellxgeneHuman_v1_1_0()
-            elif self.organism == "human":
-                adata_target_ids = AdataIdsCellxgeneHuman_v1_1_0()
-            else:
-                adata_target_ids = AdataIdsCellxgeneGeneral()
+            adata_target_ids = AdataIdsCellxgene_v2_0_0()
         else:
             raise ValueError(f"did not recognize schema {schema}")
 
@@ -903,7 +910,8 @@ class DatasetBase(abc.ABC):
         self.streamlined_meta = True
         # Add additional hard-coded description changes for cellxgene schema:
         if schema.startswith("cellxgene"):
-            self.adata = cellxgene_export_adaptor(adata=self.adata, adata_ids=self._adata_ids, version=schema_version)
+            self.adata = cellxgene_export_adaptor(adata=self.adata, adata_ids=self._adata_ids, version=schema_version,
+                                                  obs_keys_batch=self.tech_sample_obs_key)
 
     def write_distributed_store(
             self,
@@ -1132,7 +1140,6 @@ class DatasetBase(abc.ABC):
             ontology_map = getattr(self, ontology_map)
         else:
             ontology_map = None
-            print(f"WARNING: did not find ontology map for {attr} which was only defined by free annotation")
         adata_fields = self._adata_ids
         col_original = attr + adata_fields.onto_original_suffix
         labels_original = self.adata.obs[col_original].values
@@ -2165,7 +2172,7 @@ class DatasetBase(abc.ABC):
             return idx
 
         idx_keep = get_subset_idx(samplewise_key=key, cellwise_key=key + "_obs_key")
-        self.adata = self.adata[idx_keep, :].copy()  # if len(idx_keep) > 0 else None
+        self.adata = self.adata[idx_keep, :].copy() if len(idx_keep) > 0 else None
 
     def show_summary(self):
         print(f"{(self.supplier, self.organism, self.organ, self.assay_sc, self.disease)}")

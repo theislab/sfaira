@@ -12,6 +12,7 @@ dataset_wise:
         - "https://www.ebi.ac.uk/arrayexpress/files/E-MTAB-7552/E-MTAB-7552.processed.1.zip"
         - "https://www.ebi.ac.uk/arrayexpress/files/E-MTAB-7552/E-MTAB-7552.processed.7.zip"
     normalization: "raw"
+    primary_data: True
     year: 2019
 dataset_or_observation_wise:
     assay_sc: "10x 3' v2"

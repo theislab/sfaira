@@ -24,6 +24,7 @@ class Dataset(DatasetBase):
         self.normalization = "scaled"
         self.organ = "bronchus" if self.sample_fn == "vieira19_Bronchi_anonymised.processed.h5ad" else "lung parenchyma"
         self.organism = "human"
+        self.primary_data = True
         self.sample_source = "primary_tissue"
         self.year = 2019
 

@@ -303,6 +303,7 @@ class Dataset(DatasetBase):
         self.disease = "healthy"
         self.doi_journal = "10.1016/j.cell.2018.02.001"
         self.normalization = "raw"
+        self.primary_data = True
         self.organism = "mouse"
         self.assay_sc = "microwell-seq"
         self.year = 2018

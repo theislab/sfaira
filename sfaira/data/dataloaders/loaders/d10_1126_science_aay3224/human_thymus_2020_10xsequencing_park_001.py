@@ -27,6 +27,7 @@ class Dataset(DatasetBase):
         self.normalization = "norm"
         self.organ = "thymus"
         self.organism = "human"
+        self.primary_data = True
         self.sample_source = "primary_tissue"
         self.sex_obs_key = "Gender"
         self.tech_sample_obs_key = "Sample"

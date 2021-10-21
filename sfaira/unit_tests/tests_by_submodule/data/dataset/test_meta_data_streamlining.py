@@ -1,7 +1,12 @@
-from cellxgene_schema.validate import validate_adata
+import os
+
+import anndata
+from cellxgene_schema import validate
+import numpy as np
 import pytest
 
 from sfaira.unit_tests.data_for_tests.loaders import ASSEMBLY_HUMAN, ASSEMBLY_MOUSE, prepare_dsg
+from sfaira.unit_tests.directories import DIR_TEMP
 
 
 @pytest.mark.parametrize("out_format", ["sfaira", "cellxgene"])
@@ -22,14 +27,37 @@ def test_dsgs_streamline_metadata(out_format: str, clean_obs: bool, clean_var: b
         # Other data data sets do not have complete enough annotation
         ds.subset(key="doi_journal", values=["no_doi_mock1", "no_doi_mock3"])
     ds.load()
-    ds.streamline_features(remove_gene_version=False, match_to_reference=ASSEMBLY_MOUSE,
+    ds.streamline_features(remove_gene_version=False, match_to_reference=ASSEMBLY_HUMAN,
                            subset_genes_to_type=None)
     ds.streamline_metadata(schema=out_format, clean_obs=clean_obs, clean_var=clean_var,
                            clean_uns=clean_uns, clean_obs_names=clean_obs_names,
                            keep_id_obs=keep_id_obs, keep_orginal_obs=keep_orginal_obs, keep_symbol_obs=keep_symbol_obs)
 
 
-@pytest.mark.parametrize("schema_version", ["1_1_0"])
+class ValidatorInMemory(validate.Validator):
+    """
+    Helper class to validate adata in memory and raise errors as in error stream rather than outstream.
+
+    The switch in log stream allows this test to be used as a unit test.
+    """
+
+    def validate_adata_inmemory(self, adata: anndata.AnnData):
+        self.errors = []
+        self.adata = adata
+        self._set_schema_def()
+        if not self.errors:
+            self._deep_check()
+        if self.warnings:
+            self.warnings = ["WARNING: " + i for i in self.warnings]
+        if self.errors:
+            self.errors = ["ERROR: " + i for i in self.errors]
+        if self.warnings or self.errors:
+            print(self.warnings[:20])
+            print(self.errors[:20])
+            assert False
+
+
+@pytest.mark.parametrize("schema_version", ["2_0_0"])
 @pytest.mark.parametrize("organism", ["human", "mouse"])
 def test_cellxgene_export(schema_version: str, organism: str):
     """
@@ -42,14 +70,21 @@ def test_cellxgene_export(schema_version: str, organism: str):
     else:
         ds.subset(key="doi_journal", values=["no_doi_mock2"])
     ds.load()
-    ds.streamline_features(remove_gene_version=False,
-                           match_to_reference={"human": ASSEMBLY_HUMAN, "mouse": ASSEMBLY_MOUSE},
-                           subset_genes_to_type=None)
+    ds.streamline_features(schema="cellxgene:" + schema_version)
     ds.streamline_metadata(schema="cellxgene:" + schema_version, clean_obs=False, clean_var=True,
                            clean_uns=True, clean_obs_names=False,
                            keep_id_obs=True, keep_orginal_obs=False, keep_symbol_obs=True)
     counter = 0
     for ds in ds.datasets.values():
-        validate_adata(adata=ds.adata, shallow=False)
+        # Validate in memory:
+        # This directly tests the raw object.
+        val = ValidatorInMemory()
+        val.validate_adata_inmemory(adata=ds.adata)
+        # Validate on disk:
+        # This guards against potential issues that arise from h5 formatting.
+        fn_temp = os.path.join(DIR_TEMP, "temp.h5ad")
+        val = ValidatorInMemory()
+        ds.adata.write_h5ad(filename=fn_temp)
+        val.validate_adata(h5ad_path=fn_temp)
         counter += 1
     assert counter > 0, "no data sets to test"

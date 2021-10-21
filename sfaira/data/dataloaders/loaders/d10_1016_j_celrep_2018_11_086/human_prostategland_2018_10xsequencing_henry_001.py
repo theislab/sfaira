@@ -27,6 +27,7 @@ class Dataset(DatasetBase):
         self.state_exact = "healthy"
         self.organ = "prostate gland"
         self.organism = "human"
+        self.primary_data = True
         self.year = 2018
 
         self.gene_id_symbols_var_key = "index"
