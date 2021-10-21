@@ -39,7 +39,7 @@ def _load_script(dsg, rewrite: bool, match_to_reference):
     return dsg
 
 
-def prepare_dsg(rewrite: bool = False, load: bool = True) -> DatasetSuperGroupMock:
+def prepare_dsg(rewrite: bool = False, load: bool = True, match_to_reference=None) -> DatasetSuperGroupMock:
     """
     Prepares data set super group of mock data and returns instance.
 
@@ -49,12 +49,15 @@ def prepare_dsg(rewrite: bool = False, load: bool = True) -> DatasetSuperGroupMo
     if not os.path.exists(DIR_DATA_LOADERS_CACHE):
         pathlib.Path(DIR_DATA_LOADERS_CACHE).mkdir(parents=True, exist_ok=True)
     dsg = DatasetSuperGroupMock()
+    if match_to_reference is None:
+        match_to_reference = MATCH_TO_REFERENCE
     if load:
-        dsg = _load_script(dsg=dsg, rewrite=rewrite, match_to_reference=MATCH_TO_REFERENCE)
+        dsg = _load_script(dsg=dsg, rewrite=rewrite, match_to_reference=match_to_reference)
     return dsg
 
 
-def prepare_store(store_format: str, rewrite: bool = False, rewrite_store: bool = False) -> str:
+def prepare_store(store_format: str, rewrite: bool = False, rewrite_store: bool = False,
+                  match_to_reference=None) -> str:
     """
     Prepares mock data store and returns path to store.
 
@@ -66,7 +69,7 @@ def prepare_store(store_format: str, rewrite: bool = False, rewrite_store: bool 
     }[store_format]
     if not os.path.exists(dir_store_formatted):
         pathlib.Path(dir_store_formatted).mkdir(parents=True, exist_ok=True)
-    dsg = prepare_dsg(rewrite=rewrite, load=False)
+    dsg = prepare_dsg(rewrite=rewrite, load=False, match_to_reference=match_to_reference)
     for k, ds in dsg.datasets.items():
         if store_format == "dao":
             compression_kwargs = {"compressor": "default", "overwrite": True, "order": "C"}

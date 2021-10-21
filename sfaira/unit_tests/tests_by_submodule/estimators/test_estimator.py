@@ -69,8 +69,8 @@ class HelperEstimatorBase:
     data: Union[anndata.AnnData, DistributedStoreSingleFeatureSpace, DistributedStoreMultipleFeatureSpaceBase]
     tc: TopologyContainer
 
-    def load_adata(self, organism="human", organ=None):
-        dsg = prepare_dsg(load=True)
+    def load_adata(self, organism="human", organ=None, match_to_reference=None):
+        dsg = prepare_dsg(load=True, match_to_reference=match_to_reference)
         dsg.subset(key="doi_journal", values=["no_doi_mock1", "no_doi_mock2", "no_doi_mock3"])
         if organism is not None:
             dsg.subset(key="organism", values=organism)
@@ -79,8 +79,8 @@ class HelperEstimatorBase:
         self.adata_ids = dsg.dataset_groups[0]._adata_ids
         self.data = dsg.adata_ls
 
-    def load_store(self, organism="human", organ=None):
-        store_path = prepare_store(store_format="dao")
+    def load_store(self, organism="human", organ=None, match_to_reference=None):
+        store_path = prepare_store(store_format="dao", match_to_reference=match_to_reference)
         store = load_store(cache_path=store_path, store_format="dao")
         store.subset(attr_key="doi_journal", values=["no_doi_mock1", "no_doi_mock2", "no_doi_mock3"])
         if organism is not None:

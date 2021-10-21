@@ -37,11 +37,17 @@ class HelperTrainerBase(HelperEstimatorBase):
         self.tc = zoo.topology_container
 
     def load_data(self, data_type):
+        """
+        Builds training data according to reference used in model definition.
+
+        :param data_type:
+        :return:
+        """
         np.random.seed(1)
         if data_type == "adata":
-            self.load_adata()
+            self.load_adata(organism="human", match_to_reference=self.tc.gc.assembly)
         else:
-            self.load_store()
+            self.load_store(organism="human", match_to_reference=self.tc.gc.assembly)
 
     def test_init(self, cls, **kwargs):
         if not os.path.exists(DIR_TEMP):
