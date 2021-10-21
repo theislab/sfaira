@@ -44,9 +44,9 @@ def cached_load_file(url, ontology_cache_dir, ontology_cache_fn, recache: bool =
                 if not os.path.exists(ontology_cache_dir):
                     os.makedirs(ontology_cache_dir)
                 r = requests.get(url, allow_redirects=True)
-                #if url.startswith("https://raw.githubusercontent.com"):
-                #    open(obofile, 'wb').write(r.text)
-                #else:
+                # if url.startswith("https://raw.githubusercontent.com"):
+                #     open(obofile, 'wb').write(r.text)
+                # else:
                 open(obofile, 'wb').write(r.content)
 
             download_file()
@@ -529,8 +529,8 @@ class OntologyOwl(OntologyHierarchical, abc.ABC):
             owl: str,
             **kwargs
     ):
-        #self.onto_owl = owlready2.get_ontology(owl)
-        #self.onto_owl.load()
+        # self.onto_owl = owlready2.get_ontology(owl)
+        # self.onto_owl.load()
         self.graph = None
 
 
@@ -925,9 +925,9 @@ class OntologyMmusdv(OntologyExtendedObo):
         # URL for releases:
         # url=f"https://raw.githubusercontent.com/obophenotype/developmental-stage-ontologies/{branch}/src/mmusdv/mmusdv.obo"
         obofile = cached_load_file(
-            url=f"http://ontologies.berkeleybop.org/mmusdv.obo",
+            url="http://ontologies.berkeleybop.org/mmusdv.obo",
             ontology_cache_dir="mmusdv",
-            ontology_cache_fn=f"mmusdv.obo",
+            ontology_cache_fn="mmusdv.obo",
             recache=recache,
         )
         super().__init__(obo=obofile)

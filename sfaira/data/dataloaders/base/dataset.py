@@ -533,7 +533,7 @@ class DatasetBase(abc.ABC):
         """
         self.__assert_loaded()
         if schema is not None:
-            schema_version = schema.split(":")[-1] if ":" in schema else None
+            # schema_version = schema.split(":")[-1] if ":" in schema else None
             # Set schema as provided by the user
             if schema.startswith("sfaira"):
                 adata_target_ids = AdataIdsSfaira()

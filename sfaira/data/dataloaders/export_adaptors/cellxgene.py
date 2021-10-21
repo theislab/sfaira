@@ -151,8 +151,8 @@ def cellxgene_export_adaptor_2_0_0(adata: anndata.AnnData, adata_ids: AdataIdsCe
     adata.var[adata_ids.feature_is_filtered] = False
     adata.var[adata_ids.feature_biotype] = pd.Categorical(adata.var[adata_ids.feature_biotype].values.tolist())
     # Modify ensembl ID writing:
-    #adata.var[adata_ids.feature_id] = ["G:".join(x.split("G")) for x in adata.var[adata_ids.feature_id]]
-    #adata.var.index = ["G:".join(x.split("G")) for x in adata.var.index]
+    # adata.var[adata_ids.feature_id] = ["G:".join(x.split("G")) for x in adata.var[adata_ids.feature_id]]
+    # adata.var.index = ["G:".join(x.split("G")) for x in adata.var.index]
     # 5) Take out elements that are auto-filled by cellxgene upload interface:
     if mask_portal_fields:
         for k in obs_keys_autofill:
