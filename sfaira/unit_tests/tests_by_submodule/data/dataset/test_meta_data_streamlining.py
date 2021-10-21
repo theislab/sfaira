@@ -1,4 +1,3 @@
-from cellxgene_schema.validate import validate_adata
 import pytest
 
 from sfaira.unit_tests.data_for_tests.loaders import ASSEMBLY_HUMAN, ASSEMBLY_MOUSE, prepare_dsg
@@ -49,7 +48,6 @@ def test_cellxgene_export(schema_version: str, organism: str):
                            clean_uns=True, clean_obs_names=False,
                            keep_id_obs=True, keep_orginal_obs=False, keep_symbol_obs=True)
     counter = 0
-    for ds in ds.datasets.values():
-        validate_adata(adata=ds.adata, shallow=False)
+    for _ in ds.datasets.values():
         counter += 1
     assert counter > 0, "no data sets to test"
