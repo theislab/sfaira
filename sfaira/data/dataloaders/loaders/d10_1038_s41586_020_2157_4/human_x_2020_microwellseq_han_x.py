@@ -32,6 +32,7 @@ class Dataset(DatasetBase):
         self.cell_type_obs_key = "celltype_specific"
         self.development_stage_obs_key = "dev_stage"
         self.organ_obs_key = "organ"
+        self.primary_data = True
         self.sex_obs_key = "sex"
         self.age_obs_key = "age"
 

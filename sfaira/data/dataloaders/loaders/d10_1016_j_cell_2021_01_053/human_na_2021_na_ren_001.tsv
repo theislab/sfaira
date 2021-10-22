@@ -1,0 +1,13 @@
+source	target	target_id
+B	B cell	CL:0000236
+CD4	CD4-positive, alpha-beta T cell	CL:0000624
+CD8	CD8-positive, alpha-beta T cell	CL:0000625
+DC	dendritic cell	CL:0000451
+Epi	epithelial cell	CL:0000066
+Macro	macrophage	CL:0000235
+Mast	mast cell	CL:0000097
+Mega	megakaryocyte	CL:0000556
+Mono	monocyte	CL:0000576
+NK	pro-NK cell	CL:0000825
+Neu	neutrophil	CL:0000775
+Plasma	plasma cell	CL:0000786

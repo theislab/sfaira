@@ -36,10 +36,13 @@ class TemplateAttributes:
     ethnicity: str = ''  # ethnicity of the sample
     sample_source: str = ''  # source of the sample
     state_exact: str = ''  # state of the sample
-    year: str = 2021  # year in which sample was acquired
+    year: int = 2021  # year in which sample was acquired
     number_of_datasets: str = 1  # Required to determine the file names
 
-    cell_types_original_obs_key: str = ''  # Original cell type key in obs
+    cell_type_obs_key: str = ''  # Original cell type key in obs
+
+    gene_id_ensembl_var_key: str = ''  # Gene id ensembl key in var
+    gene_id_symbols_var_key: str = ''  # Gene id symbols key in var
 
 
 class DataloaderCreator:
@@ -117,9 +120,13 @@ class DataloaderCreator:
         self.template_attributes.primary_data = str(sfaira_questionary(function='confirm',
                                                                        question='Primary data:',
                                                                        default='Yes'))
-        self.template_attributes.default_embedding = sfaira_questionary(function='text',
-                                                                        question='Default embedding:',
-                                                                        default='NA')
+        is_default_embedding = sfaira_questionary(function='confirm',
+                                                  question='Does your dataset have a default embedding?',
+                                                  default='No')
+        if is_default_embedding:
+            self.template_attributes.default_embedding = str(sfaira_questionary(function='text',
+                                                                                question='Default embedding obsm key:',
+                                                                                default='X_umap'))
         self.template_attributes.organism = sfaira_questionary(function='text',
                                                                question='Organism:',
                                                                default='NA')
@@ -145,12 +152,26 @@ class DataloaderCreator:
                                                      question='Does your dataset have a cell type annotation?',
                                                      default='No')
         if is_cell_type_annotation:
-            self.template_attributes.cell_types_original_obs_key = sfaira_questionary(function='text',
-                                                                                      question='Cell type annotation obs key:',
-                                                                                      default='')
+            self.template_attributes.cell_type_obs_key = sfaira_questionary(function='text',
+                                                                            question='Cell type annotation obs key:',
+                                                                            default='')
+        is_gene_id_symbols = sfaira_questionary(function='confirm',
+                                                question='Does your dataset have gene ID symbols (gene names, e.g. TP53)?',
+                                                default='No')
+        if is_gene_id_symbols:
+            self.template_attributes.gene_id_symbols_var_key = sfaira_questionary(function='text',
+                                                                                  question='Gene id symbols var key:',
+                                                                                  default='index')
+        is_gene_id_ensembl = sfaira_questionary(function='confirm',
+                                                question='Does your dataset have Ensembl gene IDs (e.g. ENSG00000141510)?',
+                                                default='No')
+        if is_gene_id_ensembl:
+            self.template_attributes.gene_id_ensembl_var_key = sfaira_questionary(function='text',
+                                                                                  question='Gene id ensembl var key:',
+                                                                                  default='')
         self.template_attributes.year = sfaira_questionary(function='text',
                                                            question='Year:',
-                                                           default='2021')
+                                                           default=2021)
         first_author = author[0] if isinstance(author, list) else author
         try:
             first_author_lastname = first_author.split(',')[0]
@@ -159,7 +180,7 @@ class DataloaderCreator:
             first_author_lastname = first_author
         self.template_attributes.id_without_doi = f'{clean_id_str(self.template_attributes.organism)}_' \
                                                   f'{clean_id_str(self.template_attributes.organ)}_' \
-                                                  f'{clean_id_str(self.template_attributes.year)}_' \
+                                                  f'{clean_id_str(str(self.template_attributes.year))}_' \
                                                   f'{clean_id_str(self.template_attributes.assay_sc)}_' \
                                                   f'{clean_id_str(first_author_lastname)}_001'
         self.template_attributes.id = f'{self.template_attributes.id_without_doi}_' \

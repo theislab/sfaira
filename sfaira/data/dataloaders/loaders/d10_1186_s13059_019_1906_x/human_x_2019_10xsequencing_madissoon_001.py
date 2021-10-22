@@ -41,6 +41,7 @@ class Dataset(DatasetBase):
         self.organ = "lung parenchyma" if self.sample_fn == "madissoon19_lung.processed.h5ad" else \
             "esophagus" if self.sample_fn == "oesophagus.cellxgene.h5ad" else "spleen"
         self.organism = "human"
+        self.primary_data = True
         self.year = 2019
         self.sample_source = "primary_tissue"
 

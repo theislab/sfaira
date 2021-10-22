@@ -25,11 +25,7 @@ for doi in dois.split(","):
         allow_caching=True,
     )
     if schema == "cellxgene":
-        ds.streamline_features(
-            match_to_reference={"human": "Homo_sapiens.GRCh38.102", "mouse": "Mus_musculus.GRCm38.102"},
-            remove_gene_version=True,
-            subset_genes_to_type=None
-        )
+        ds.streamline_features(schema="cellxgene:" + "2.0.0")
         ds.streamline_metadata(
             schema=schema.lower(),
             clean_obs=False,

@@ -19,7 +19,7 @@ for k, v in universe.datasets.items():
         allow_caching=True,
     )
     for col in v.adata.obs.columns:
-        val = np.sort(np.unique(v.adata.obs[col].values))
+        val = np.sort(v.adata.obs[col].unique())
         if len(val) > 20:
             val = val[:20]
         print(f"{k}: {col}: {val}")

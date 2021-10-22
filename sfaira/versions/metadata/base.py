@@ -3,9 +3,11 @@ import networkx
 import numpy as np
 import obonet
 import os
+import owlready2
 import pickle
 import requests
 from typing import Dict, List, Tuple, Union
+
 
 from sfaira.consts.directories import CACHE_DIR_ONTOLOGIES
 
@@ -26,7 +28,7 @@ ToDo explain usage of ontology extension.
 """
 
 
-def cached_load_obo(url, ontology_cache_dir, ontology_cache_fn, recache: bool = False):
+def cached_load_file(url, ontology_cache_dir, ontology_cache_fn, recache: bool = False):
     if os.name == "nt":  # if running on windows, do not download obo file, but rather pass url directly to obonet
         # TODO add caching option.
         obofile = url
@@ -37,14 +39,17 @@ def cached_load_obo(url, ontology_cache_dir, ontology_cache_fn, recache: bool = 
         if not os.path.isfile(obofile) or recache:
             os.makedirs(name=ontology_cache_dir, exist_ok=True)
 
-            def download_obo():
+            def download_file():
                 print(f"Downloading: {ontology_cache_fn}")
                 if not os.path.exists(ontology_cache_dir):
                     os.makedirs(ontology_cache_dir)
                 r = requests.get(url, allow_redirects=True)
+                # if url.startswith("https://raw.githubusercontent.com"):
+                #     open(obofile, 'wb').write(r.text)
+                # else:
                 open(obofile, 'wb').write(r.content)
 
-            download_obo()
+            download_file()
     return obofile
 
 
@@ -97,7 +102,9 @@ class Ontology:
 
 class OntologyList(Ontology):
     """
-    Basic unordered ontology container
+    Basic unordered ontology container.
+
+    Node IDs and names are the same.
     """
     nodes: list
 
@@ -111,6 +118,20 @@ class OntologyList(Ontology):
     @property
     def node_names(self) -> List[str]:
         return self.nodes
+
+    def is_a_node_id(self, x: str) -> bool:
+        return x in self.node_names
+
+    def is_a_node_name(self, x: str) -> bool:
+        return x in self.node_names
+
+    @staticmethod
+    def convert_to_id(x: Union[str, List[str]]) -> Union[str, List[str]]:
+        return x
+
+    @staticmethod
+    def convert_to_name(x: Union[str, List[str]]) -> Union[str, List[str]]:
+        return x
 
     def map_node_suggestion(self, x: str, include_synonyms: bool = True, n_suggest: int = 10):
         """
@@ -499,22 +520,18 @@ class OntologyEbi(OntologyHierarchical):
         return ["synonyms"]
 
 
-# class OntologyOwl(OntologyHierarchical):
-#
-#    onto: owlready2.Ontology
-#
-#    def __init__(
-#            self,
-#            owl: str,
-#            **kwargs
-#    ):
-#        self.onto = owlready2.get_ontology(owl)
-#        self.onto.load()
-#        # ToDo build support here
-#
-#    @property
-#    def node_names(self):
-#        pass
+class OntologyOwl(OntologyHierarchical, abc.ABC):
+
+    onto_owl = owlready2.Ontology
+
+    def __init__(
+            self,
+            owl: str,
+            **kwargs
+    ):
+        # self.onto_owl = owlready2.get_ontology(owl)
+        # self.onto_owl.load()
+        self.graph = None
 
 
 class OntologyObo(OntologyHierarchical, abc.ABC):
@@ -524,7 +541,7 @@ class OntologyObo(OntologyHierarchical, abc.ABC):
             obo: str,
             **kwargs
     ):
-        self.graph = obonet.read_obo(obo)
+        self.graph = obonet.read_obo(obo, ignore_obsolete=True)
 
     def map_node_suggestion(self, x: str, include_synonyms: bool = True, n_suggest: int = 10):
         """
@@ -602,10 +619,10 @@ class OntologyUberon(OntologyExtendedObo):
             recache: bool = False,
             **kwargs
     ):
-        obofile = cached_load_obo(
-            url=f"https://svn.code.sf.net/p/obo/svn/uberon/releases/{branch}/ext.obo",
+        obofile = cached_load_file(
+            url=f"https://raw.githubusercontent.com/obophenotype/uberon/{branch}/composite-vertebrate-basic.obo",
             ontology_cache_dir="uberon",
-            ontology_cache_fn="uberon.obo",
+            ontology_cache_fn=f"uberon_{branch}.obo",
             recache=recache,
         )
         super().__init__(obo=obofile)
@@ -800,10 +817,10 @@ class OntologyCl(OntologyExtendedObo):
         :param use_developmental_relationships: Whether to keep developmental relationships.
         :param kwargs:
         """
-        obofile = cached_load_obo(
+        obofile = cached_load_file(
             url=f"https://raw.github.com/obophenotype/cell-ontology/{branch}/cl.obo",
             ontology_cache_dir="cl",
-            ontology_cache_fn=f"{branch}_cl.obo",
+            ontology_cache_fn=f"cl_{branch}.obo",
             recache=recache,
         )
         super().__init__(obo=obofile)
@@ -872,13 +889,14 @@ class OntologyHsapdv(OntologyExtendedObo):
 
     def __init__(
             self,
+            branch: str,
             recache: bool = False,
             **kwargs
     ):
-        obofile = cached_load_obo(
-            url="http://purl.obolibrary.org/obo/hsapdv.obo",
+        obofile = cached_load_file(
+            url=f"https://raw.githubusercontent.com/obophenotype/developmental-stage-ontologies/{branch}/src/hsapdv/hsapdv.obo",
             ontology_cache_dir="hsapdv",
-            ontology_cache_fn="hsapdv.obo",
+            ontology_cache_fn=f"hsapdv_{branch}.obo",
             recache=recache,
         )
         super().__init__(obo=obofile)
@@ -900,11 +918,14 @@ class OntologyMmusdv(OntologyExtendedObo):
 
     def __init__(
             self,
+            branch: str,
             recache: bool = False,
             **kwargs
     ):
-        obofile = cached_load_obo(
-            url="http://purl.obolibrary.org/obo/mmusdv.obo",
+        # URL for releases:
+        # url=f"https://raw.githubusercontent.com/obophenotype/developmental-stage-ontologies/{branch}/src/mmusdv/mmusdv.obo"
+        obofile = cached_load_file(
+            url="http://ontologies.berkeleybop.org/mmusdv.obo",
             ontology_cache_dir="mmusdv",
             ontology_cache_fn="mmusdv.obo",
             recache=recache,
@@ -928,13 +949,15 @@ class OntologyMondo(OntologyExtendedObo):
 
     def __init__(
             self,
+            branch: str,
             recache: bool = False,
             **kwargs
     ):
-        obofile = cached_load_obo(
-            url="http://purl.obolibrary.org/obo/mondo.obo",
+        # Latest release also available from url="http://purl.obolibrary.org/obo/mondo.obo".
+        obofile = cached_load_file(
+            url=f"https://raw.githubusercontent.com/monarch-initiative/mondo/{branch}/mondo-lastbuild.obo",
             ontology_cache_dir="mondo",
-            ontology_cache_fn="mondo.obo",
+            ontology_cache_fn=f"mondo_{branch}.obo",
             recache=recache,
         )
         super().__init__(obo=obofile)
@@ -968,7 +991,7 @@ class OntologyCellosaurus(OntologyExtendedObo):
             recache: bool = False,
             **kwargs
     ):
-        obofile = cached_load_obo(
+        obofile = cached_load_file(
             url="https://ftp.expasy.org/databases/cellosaurus/cellosaurus.obo",
             ontology_cache_dir="cellosaurus",
             ontology_cache_fn="cellosaurus.obo",
@@ -1009,28 +1032,68 @@ class OntologyHancestro(OntologyEbi):
         )
 
 
-class OntologySinglecellLibraryConstruction(OntologyEbi):
+class OntologyEfo(OntologyExtendedObo):
 
-    """
-    TODO CITE set not in API yet, added two nodes and edges temporarily.
-    """
-
-    def __init__(self, recache: bool = False):
-        super().__init__(
-            ontology="efo",
-            root_term="EFO_0010183",
-            additional_terms={
-                "sci-plex": {"name": "sci-plex"},
-                "sci-RNA-seq": {"name": "sci-RNA-seq"},
-                "EFO:0009294": {"name": "CITE-seq"},  # TODO not in API yet
-                "EFO:0030008": {"name": "CITE-seq (cell surface protein profiling)"},  # TODO not in API yet
-            },
-            additional_edges=[
-                ("EFO:0010183", "sci-plex"),
-                ("EFO:0010183", "sci-RNA-seq"),
-                ("EFO:0010183", "EFO:0009294"),  # TODO not in API yet
-                ("EFO:0009294", "EFO:0030008"),  # TODO not in API yet
-            ],
-            ontology_cache_fn="efo.pickle",
+    def __init__(
+            self,
+            recache: bool = False,
+            **kwargs
+    ):
+        obofile = cached_load_file(
+            url="https://www.ebi.ac.uk/efo/efo.obo",
+            ontology_cache_dir="efo",
+            ontology_cache_fn="efo.obo",
             recache=recache,
         )
+        super().__init__(obo=obofile)
+
+        # Clean up nodes:
+        nodes_to_delete = []
+        for k, v in self.graph.nodes.items():
+            if "name" not in v.keys():
+                nodes_to_delete.append(k)
+        for k in nodes_to_delete:
+            self.graph.remove_node(k)
+
+    @property
+    def synonym_node_properties(self) -> List[str]:
+        return ["synonym"]
+
+
+class OntologySex(OntologyExtendedObo):
+
+    """
+    Sex is defined based on a subset of the PATO ontology.
+    """
+
+    def __init__(
+            self,
+            branch: str,
+            recache: bool = False,
+            **kwargs
+    ):
+        obofile = cached_load_file(
+            url=f"https://raw.githubusercontent.com/pato-ontology/pato/{branch}/pato-base.obo",
+            ontology_cache_dir="pato",
+            ontology_cache_fn=f"pato_{branch}.obo",
+            recache=recache,
+        )
+        super().__init__(obo=obofile)
+        nodes_to_delete = []
+        # Subset ontology: see also:
+        # https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/2.0.0/schema.md#sex_ontology_term_id
+        targets = self.get_ancestors("PATO:0001894")
+        for k, v in self.graph.nodes.items():
+            if k not in targets:
+                nodes_to_delete.append(k)
+        # Clean up nodes:
+        for k, v in self.graph.nodes.items():
+            if "name" not in v.keys():
+                nodes_to_delete.append(k)
+        nodes_to_delete = np.unique(nodes_to_delete)
+        for k in nodes_to_delete:
+            self.graph.remove_node(k)
+
+    @property
+    def synonym_node_properties(self) -> List[str]:
+        return ["synonym"]

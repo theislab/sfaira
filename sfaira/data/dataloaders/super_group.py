@@ -17,6 +17,7 @@ class Universe(DatasetSuperGroup):
             data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
+            exclude_databases: bool = True,
     ):
         """
         Nested super group of data loaders, unifying data set wise data loader SuperGroup and the database
@@ -26,8 +27,6 @@ class Universe(DatasetSuperGroup):
         :param meta_path:
         :param cache_path:
         """
-        # TODO development flag excluding data bases from universes until this interface is finished.
-        exclude_databases = True
         dsgs = [
             DatasetSuperGroupLoaders(
                 data_path=data_path,
