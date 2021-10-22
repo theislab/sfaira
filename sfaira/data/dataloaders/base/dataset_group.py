@@ -69,7 +69,7 @@ def merge_uns_from_list(adata_ls):
             else:
                 x = [x]
             uns_k.extend(x)
-        uns_k = np.sort(np.unique(uns_k)).tolist()
+        uns_k = np.unique(uns_k).tolist()
         if len(uns_k) == 1:
             uns_k = uns_k[0]
         uns[k] = uns_k
@@ -106,10 +106,6 @@ class DatasetGroup:
         self._adata_ids = AdataIdsSfaira()
         self.datasets = datasets
         self._collection_id = collection_id
-
-    @property
-    def _unknown_celltype_identifiers(self):
-        return np.unqiue(np.concatenate([v._unknown_celltype_identifiers for _, v in self.datasets.items()]))
 
     def load(
             self,
@@ -233,9 +229,10 @@ class DatasetGroup:
 
     def streamline_features(
             self,
-            match_to_reference: Union[str, Dict[str, str], None],
+            match_to_reference: Union[str, Dict[str, str], None] = None,
             remove_gene_version: bool = True,
             subset_genes_to_type: Union[None, str, List[str]] = None,
+            schema: Union[str, None] = None,
     ):
         """
         Subset and sort genes to genes defined in an assembly or genes of a particular type, such as protein coding.
@@ -253,6 +250,7 @@ class DatasetGroup:
                 match_to_reference=match_to_reference,
                 remove_gene_version=remove_gene_version,
                 subset_genes_to_type=subset_genes_to_type,
+                schema=schema,
             )
 
     def collapse_counts(self):
@@ -358,15 +356,15 @@ class DatasetGroup:
         tab = []
         for k, v in self.datasets.items():
             if v.annotated:
-                labels_original = np.sort(np.unique(np.concatenate([
-                    v.adata.obs[v.cell_type_original_obs_key].values
-                ])))
+                labels_original = np.unique(np.concatenate([
+                    v.adata.obs[v.cell_type_obs_key].values
+                ]))
                 tab.append(v.celltypes_universe.prepare_celltype_map_tab(
                     source=labels_original,
                     match_only=False,
                     anatomical_constraint=v.organ,
                     include_synonyms=True,
-                    omit_list=v._unknown_celltype_identifiers,
+                    omit_list=[v._adata_ids.not_a_cell_celltype_identifier, v._adata_ids.unknown_metadata_identifier],
                     **kwargs
                 ))
         if len(tab) == 0:
@@ -390,6 +388,10 @@ class DatasetGroup:
     @property
     def collection_id(self):
         return self._collection_id
+
+    @collection_id.setter
+    def collection_id(self, x: str):
+        self._collection_id = x
 
     @property
     def adata_ls(self):
@@ -592,7 +594,7 @@ class DatasetGroup:
         """
         for x in self.ids:
             self.datasets[x].subset_cells(key=key, values=values)
-            if self.datasets[x].ncells == 0:  # No observations (cells) left.
+            if self.datasets[x].adata is None:  # No observations (cells) left.
                 del self.datasets[x]
 
     @property
@@ -629,7 +631,7 @@ class DatasetGroup:
             if isinstance(vdoi, str):
                 vdoi = [vdoi]
             dois.extend(vdoi)
-        return np.sort(np.unique(dois)).tolist()
+        return np.unique(dois).tolist()
 
     @property
     def supplier(self) -> List[str]:
@@ -637,7 +639,7 @@ class DatasetGroup:
         Propagates supplier annotation from contained datasets.
         """
         supplier = [v.supplier for _, v in self.datasets.items()]
-        return np.sort(np.unique(supplier)).tolist()
+        return np.unique(supplier).tolist()
 
     def show_summary(self):
         for k, v in self.datasets.items():
@@ -948,9 +950,10 @@ class DatasetSuperGroup:
 
     def streamline_features(
             self,
-            match_to_reference: Union[str, Dict[str, str], None],
+            match_to_reference: Union[str, Dict[str, str], None] = None,
             remove_gene_version: bool = True,
             subset_genes_to_type: Union[None, str, List[str]] = None,
+            schema: Union[str, None] = None,
     ):
         """
         Subset and sort genes to genes defined in an assembly or genes of a particular type, such as protein coding.
@@ -968,6 +971,7 @@ class DatasetSuperGroup:
                 match_to_reference=match_to_reference,
                 remove_gene_version=remove_gene_version,
                 subset_genes_to_type=subset_genes_to_type,
+                schema=schema,
             )
 
     def collapse_counts(self):

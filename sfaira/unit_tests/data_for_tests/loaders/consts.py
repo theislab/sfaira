@@ -1,5 +1,5 @@
-ASSEMBLY_HUMAN = "Homo_sapiens.GRCh38.102"
-ASSEMBLY_MOUSE = "Mus_musculus.GRCm38.102"
+ASSEMBLY_HUMAN = "Homo_sapiens.GRCh38.104"
+ASSEMBLY_MOUSE = "Mus_musculus.GRCm39.104"
 
 CELLTYPES = ["adventitial cell", "endothelial cell", "acinar cell", "pancreatic PP cell", "type B pancreatic cell"]
-CL_VERSION = "v2021-02-01_cl"
+CL_VERSION = "v2021-08-10"

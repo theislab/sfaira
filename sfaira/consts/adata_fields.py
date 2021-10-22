@@ -23,9 +23,10 @@ class AdataIds:
     dataset_group: str
     ethnicity: str
     feature_id: str
-    feature_index: str
-    feature_symbol: str
     feature_biotype: str
+    feature_index: str
+    feature_reference: str
+    feature_symbol: str
     id: str
     individual: str
     ncells: str
@@ -38,6 +39,8 @@ class AdataIds:
     state_exact: str
     tech_sample: str
     year: str
+
+    feature_kwargs: dict
 
     onto_id_suffix: str
     onto_original_suffix: str
@@ -84,6 +87,13 @@ class AdataIdsSfaira(AdataIds):
     def __init__(self):
         self.onto_id_suffix = "_ontology_term_id"
         self.onto_original_suffix = "_original"
+
+        self.feature_kwargs = {
+            "match_to_reference": {
+                "human": "Homo_sapiens.GRCh38.104",
+                "mouse": "Mus_musculus.GRCm39.104"},
+            "remove_gene_version": True,
+            "subset_genes_to_type": None}
 
         self.annotated = "annotated"
         self.assay_sc = "assay_sc"
@@ -197,15 +207,22 @@ class AdataIdsCellxgene(AdataIds):
         self.onto_id_suffix = "_ontology_term_id"
         self.onto_original_suffix = "_original"
 
+        self.feature_kwargs = {
+            "remove_gene_version": True,
+            "subset_genes_to_type": None}
+
         self.assay_sc = "assay"
-        self.author = None
+        self.author = "contributor"
         self.cell_type = "cell_type"
         self.default_embedding = "default_embedding"
         self.doi_journal = "publication_doi"
         self.doi_preprint = "preprint_doi"
         self.disease = "disease"
-        self.feature_id = "ensembl"
-        self.feature_symbol = None
+        self.feature_biotype = "feature_biotype"
+        self.feature_id = "feature_id"
+        self.feature_is_filtered = "feature_is_filtered"
+        self.feature_reference = "feature_reference"
+        self.feature_symbol = "feature_name"
         self.id = "id"
         self.ncells = "ncells"
         self.organ = "tissue"
@@ -237,6 +254,8 @@ class AdataIdsCellxgene(AdataIds):
             "disease",
             "ethnicity",
             "organ",
+            "organism",
+            "sex",
         ]
 
         self.obs_keys = [
@@ -247,6 +266,7 @@ class AdataIdsCellxgene(AdataIds):
             "ethnicity",
             "organ",
             "organism",
+            "primary_data",
             "sex",
             "tech_sample",
         ]
@@ -274,29 +294,7 @@ class AdataIdsCellxgene(AdataIds):
 
     @property
     def feature_index(self):
-        # Note this attribute is only filled in descendant classes.
-        return self.feature_symbol
-
-
-class AdataIdsCellxgeneHuman_v1_1_0(AdataIdsCellxgene):
-
-    def __init__(self):
-        super(AdataIdsCellxgeneHuman_v1_1_0, self).__init__()
-        self.feature_symbol = "hgnc_gene_symbol"
-
-
-class AdataIdsCellxgeneMouse_v1_1_0(AdataIdsCellxgene):
-
-    def __init__(self):
-        super(AdataIdsCellxgeneMouse_v1_1_0, self).__init__()
-        self.gene_id_symbols = "mgi_gene_symbol"
-
-
-class AdataIdsCellxgeneGeneral(AdataIdsCellxgene):
-
-    def __init__(self):
-        super(AdataIdsCellxgeneGeneral, self).__init__()
-        self.gene_id_symbols = "gene_symbol"
+        return self.feature_id
 
 
 class AdataIdsCellxgene_v2_0_0(AdataIdsCellxgene):
@@ -307,7 +305,6 @@ class AdataIdsCellxgene_v2_0_0(AdataIdsCellxgene):
 
     def __init__(self):
         super(AdataIdsCellxgene_v2_0_0, self).__init__()
-        self.feature_symbol = "feature_name"
-        self.feature_id = "feature_id"
-        self.feature_biotype = "feature_biotype"
-        # feature_referencec
+        self.feature_kwargs["match_to_reference"] = {
+            "human": "Homo_sapiens.GRCh38.104",
+            "mouse": "Mus_musculus.GRCm39.104"}

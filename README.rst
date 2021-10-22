@@ -25,11 +25,11 @@
 sfaira - data and model repository for single-cell data
 =======================================================
 
-.. image:: https://github.com/theislab/sfaira/blob/master/resources/images/concept.png
-   :width: 1000px
+.. image:: https://github.com/theislab/sfaira/blob/main/resources/images/concept.png
+   :width: 400px
    :align: center
 
-sfaira_ is a model and a data repository in a single python package (preprint_).
+sfaira_ is a model and a data repository in a single python package (`full paper`_).
 We provide an interactive overview of the current state of the zoos on sfaira-portal_.
 
 Its data zoo gives users access to streamlined data loaders that allow reproducible use of published and private data sets for model training and exploration.
@@ -40,7 +40,7 @@ sfaira integrates into scanpy_ workflows.
 
 .. _scanpy: https://github.com/theislab/scanpy
 .. _sfaira: https://sfaira.readthedocs.io
-.. _preprint: https://www.biorxiv.org/content/10.1101/2020.12.16.419036v1
+.. _full paper: https://genomebiology.biomedcentral.com/articles/10.1186/s13059-021-02452-6
 .. _DCA: https://github.com/theislab/dca
 .. _scArches: https://github.com/theislab/scarches
 .. _sfaira-portal: https://theislab.github.io/sfaira-portal/

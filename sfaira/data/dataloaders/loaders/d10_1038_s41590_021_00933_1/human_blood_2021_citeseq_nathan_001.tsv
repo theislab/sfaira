@@ -1,0 +1,31 @@
+source	target	target_id
+CD4+ CCR4+	CD4-positive, alpha-beta memory T cell	CL:0000897
+CD4+ CCR4+ central	central memory CD4-positive, alpha-beta T cell	CL:0000904
+CD4+ CCR4+ICOS+ central	central memory CD4-positive, alpha-beta T cell	CL:0000904
+CD4+ CCR5+ cytotoxic	CD4-positive, alpha-beta cytotoxic T cell	CL:0000934
+CD4+ CD161+ Th1	T-helper 1 cell	CL:0000545
+CD4+ CD161+ Th2	T-helper 2 cell	CL:0000546
+CD4+ CD161+ cytotoxic	CD4-positive, alpha-beta cytotoxic T cell	CL:0000934
+CD4+ CD27+	CD4-positive, alpha-beta memory T cell	CL:0000897
+CD4+ CD27+CD161+	CD4-positive, alpha-beta memory T cell	CL:0000897
+CD4+ CD38+ICOS+ central	central memory CD4-positive, alpha-beta T cell	CL:0000904
+CD4+ HLA-DR+	CD4-positive, alpha-beta memory T cell	CL:0000897
+CD4+ RORC+ Treg	memory regulatory T cell	CL:0002678
+CD4+ Th1	T-helper 1 cell	CL:0000545
+CD4+ Th17	T-helper 17 cell	CL:0000899
+CD4+ Th17/1	CD4-positive helper T cell	CL:0000492
+CD4+ Th2	T-helper 2 cell	CL:0000546
+CD4+ Treg	memory regulatory T cell	CL:0002678
+CD4+ activated	activated CD4-positive, alpha-beta T cell	CL:0000896
+CD4+ central	central memory CD4-positive, alpha-beta T cell	CL:0000904
+CD4+ cytotoxic	CD4-positive, alpha-beta cytotoxic T cell	CL:0000934
+CD4+ lncRNA	CD4-positive, alpha-beta memory T cell	CL:0000897
+CD4/8+ PD-1+TIGIT+	memory T cell	CL:0000813
+CD8+ CXCR3+	CD8-positive, CXCR3-positive, alpha-beta regulatory T cell	CL:0001041
+CD8+ GZMB+	effector CD8-positive, alpha-beta T cell	CL:0001050
+CD8+ GZMK+	effector CD8-positive, alpha-beta T cell	CL:0001050
+CD8+ activated	activated CD8-positive, alpha-beta T cell	CL:0000906
+CD8+ central	central memory CD8-positive, alpha-beta T cell	CL:0000907
+Vd1	gamma-delta T cell	CL:0000798
+Vd2	gamma-delta T cell	CL:0000798
+unknown	UNKNOWN	UNKNOWN

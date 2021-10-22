@@ -3,6 +3,7 @@ import numpy as np
 import os
 from typing import Union
 
+from sfaira.consts.ontologies import DEFAULT_UBERON, DEFAULT_CL
 from sfaira.data import load_store
 from sfaira.train import TrainModelCelltype, TrainModelEmbedding
 from sfaira.ui import ModelZoo
@@ -18,8 +19,8 @@ def get_cu():
     """
     # Create temporary cell type universe to give to trainer.
     fn = os.path.join(DIR_TEMP, "universe_temp.csv")
-    cl = OntologyCl(branch="v2021-02-01")
-    uberon = OntologyUberon(branch="2019-11-22")
+    cl = OntologyCl(branch=DEFAULT_CL)
+    uberon = OntologyUberon(branch=DEFAULT_UBERON)
     cu = CelltypeUniverse(cl=cl, uberon=uberon)
     cu.write_target_universe(fn=fn, x=TARGETS)
     del cu
@@ -36,11 +37,17 @@ class HelperTrainerBase(HelperEstimatorBase):
         self.tc = zoo.topology_container
 
     def load_data(self, data_type):
+        """
+        Builds training data according to reference used in model definition.
+
+        :param data_type:
+        :return:
+        """
         np.random.seed(1)
         if data_type == "adata":
-            self.load_adata()
+            self.load_adata(organism="human", match_to_reference=self.tc.gc.assembly)
         else:
-            self.load_store()
+            self.load_store(organism="human", match_to_reference=self.tc.gc.assembly)
 
     def test_init(self, cls, **kwargs):
         if not os.path.exists(DIR_TEMP):

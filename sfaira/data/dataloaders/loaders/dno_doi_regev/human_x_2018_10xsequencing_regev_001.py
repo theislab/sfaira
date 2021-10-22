@@ -24,6 +24,7 @@ class Dataset(DatasetBase):
         self.normalization = "raw"
         self.organ_obs_key = "derived_organ_parts_label"
         self.organism = "human"
+        self.primary_data = True
         self.sample_source = "primary_tissue"
         self.year = 2018
 

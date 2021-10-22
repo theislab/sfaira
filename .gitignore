@@ -8,6 +8,7 @@ docs/api/
 sfaira/unit_tests/data_for_testing/mock_data/store*
 **cache
 **temp
+sfaira/unit_tests/template_data/*
 
 # General patterns:
 git abuild

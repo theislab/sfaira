@@ -78,7 +78,7 @@ class DataloaderValidator:
                       'dataset_or_observation_wise:organism',
                       'dataset_or_observation_wise:sample_source',
                       ['feature_wise:gene_id_ensembl_var_key',
-                       'feature_wise:gene_id_symbol_var_key']]
+                       'feature_wise:gene_id_symbols_var_key']]
 
         # TODO This is some spaghetti which could be more performant with set look ups.
         flattened_dict = flatten(self.content, reducer=make_reducer(delimiter=':'))
