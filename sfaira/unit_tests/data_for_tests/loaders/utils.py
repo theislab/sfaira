@@ -39,55 +39,58 @@ def _load_script(dsg, rewrite: bool, match_to_reference):
     return dsg
 
 
-def prepare_dsg(rewrite: bool = False, load: bool = True, match_to_reference=None) -> DatasetSuperGroupMock:
-    """
-    Prepares data set super group of mock data and returns instance.
+class PrepareData:
+    CLS_DSG = DatasetSuperGroupMock
 
-    Use this do testing involving a data set group.
-    """
-    # Make sure cache exists:
-    if not os.path.exists(DIR_DATA_LOADERS_CACHE):
-        pathlib.Path(DIR_DATA_LOADERS_CACHE).mkdir(parents=True, exist_ok=True)
-    dsg = DatasetSuperGroupMock()
-    if match_to_reference is None:
-        match_to_reference = MATCH_TO_REFERENCE
-    if load:
-        dsg = _load_script(dsg=dsg, rewrite=rewrite, match_to_reference=match_to_reference)
-    return dsg
+    def prepare_dsg(self, rewrite: bool = False, load: bool = True, match_to_reference=None):
+        """
+        Prepares data set super group of mock data and returns instance.
 
+        Use this do testing involving a data set group.
+        """
+        # Make sure cache exists:
+        if not os.path.exists(DIR_DATA_LOADERS_CACHE):
+            pathlib.Path(DIR_DATA_LOADERS_CACHE).mkdir(parents=True, exist_ok=True)
+        dsg = self.CLS_DSG()
+        if match_to_reference is None:
+            match_to_reference = MATCH_TO_REFERENCE
+        if load:
+            dsg = _load_script(dsg=dsg, rewrite=rewrite, match_to_reference=match_to_reference)
+        return dsg
 
-def prepare_store(store_format: str, rewrite: bool = False, rewrite_store: bool = False,
-                  match_to_reference=None) -> str:
-    """
-    Prepares mock data store and returns path to store.
+    def prepare_store(self, store_format: str, rewrite: bool = False, rewrite_store: bool = False,
+                      match_to_reference=None) -> str:
+        """
+        Prepares mock data store and returns path to store.
 
-    Use this do testing involving a data set store.
-    """
-    dir_store_formatted = {
-        "dao": DIR_DATA_LOADERS_STORE_DAO,
-        "h5ad": DIR_DATA_LOADERS_STORE_H5AD,
-    }[store_format]
-    if not os.path.exists(dir_store_formatted):
-        pathlib.Path(dir_store_formatted).mkdir(parents=True, exist_ok=True)
-    dsg = prepare_dsg(rewrite=rewrite, load=False, match_to_reference=match_to_reference)
-    for k, ds in dsg.datasets.items():
-        if store_format == "dao":
-            compression_kwargs = {"compressor": "default", "overwrite": True, "order": "C"}
-        else:
-            compression_kwargs = {}
-        if store_format == "dao":
-            anticipated_fn = os.path.join(dir_store_formatted, ds.doi_cleaned_id)
-        elif store_format == "h5ad":
-            anticipated_fn = os.path.join(dir_store_formatted, ds.doi_cleaned_id + ".h5ad")
-        else:
-            assert False
-        if rewrite_store and os.path.exists(anticipated_fn):
-            # Can't write if h5ad already exists.
-            # Delete store to writing if forced.
-            save_delete(anticipated_fn)
-        # Only rewrite if necessary
-        if rewrite_store or not os.path.exists(anticipated_fn):
-            ds = _load_script(dsg=ds, rewrite=rewrite, match_to_reference=MATCH_TO_REFERENCE)
-            ds.write_distributed_store(dir_cache=dir_store_formatted, store_format=store_format, dense=True,
-                                       chunks=128, compression_kwargs=compression_kwargs)
-    return dir_store_formatted
+        Use this do testing involving a data set store.
+        """
+        dir_store_formatted = {
+            "dao": DIR_DATA_LOADERS_STORE_DAO,
+            "h5ad": DIR_DATA_LOADERS_STORE_H5AD,
+        }[store_format]
+        if not os.path.exists(dir_store_formatted):
+            pathlib.Path(dir_store_formatted).mkdir(parents=True, exist_ok=True)
+        dsg = self.prepare_dsg(rewrite=rewrite, load=False, match_to_reference=match_to_reference)
+        for k, ds in dsg.datasets.items():
+            print(k)
+            if store_format == "dao":
+                compression_kwargs = {"compressor": "default", "overwrite": True, "order": "C"}
+            else:
+                compression_kwargs = {}
+            if store_format == "dao":
+                anticipated_fn = os.path.join(dir_store_formatted, ds.doi_cleaned_id)
+            elif store_format == "h5ad":
+                anticipated_fn = os.path.join(dir_store_formatted, ds.doi_cleaned_id + ".h5ad")
+            else:
+                assert False
+            if rewrite_store and os.path.exists(anticipated_fn):
+                # Can't write if h5ad already exists.
+                # Delete store to writing if forced.
+                save_delete(anticipated_fn)
+            # Only rewrite if necessary
+            if rewrite_store or not os.path.exists(anticipated_fn):
+                ds = _load_script(dsg=ds, rewrite=rewrite, match_to_reference=MATCH_TO_REFERENCE)
+                ds.write_distributed_store(dir_cache=dir_store_formatted, store_format=store_format, dense=True,
+                                           chunks=128, compression_kwargs=compression_kwargs)
+        return dir_store_formatted

@@ -793,8 +793,7 @@ class DatasetBase(abc.ABC):
         #   *  original labels: "attr" + self._adata_ids.onto_original_suffix
         obs_new = pd.DataFrame(index=self.adata.obs.index)
         for k in [x for x in adata_target_ids.obs_keys]:
-            if k in experiment_batch_labels and getattr(self, f"{k}_obs_key") is not None and \
-                    "*" in getattr(self, f"{k}_obs_key"):
+            if k in experiment_batch_labels and getattr(self, f"{k}_obs_key") is not None:
                 # Handle batch-annotation columns which can be provided as a combination of columns separated by an
                 # asterisk.
                 # The queried meta data are always:

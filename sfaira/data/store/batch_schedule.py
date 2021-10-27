@@ -138,22 +138,32 @@ class BatchDesignBlocks(BatchDesignBase):
             print("WARNING: random_access==False is dangerous if you do not work with a large shuffle buffer "
                   "downstream of the sfaira generator.")
         # Create integer group assignment array.
-        self.groups = np.sort(np.unique(grouping))
-        self.grouping_int = np.zeros((grouping.shape[0],), dtype="int32") - 1
-        self.grouping_sizes = np.zeros((self.groups.shape[0],), dtype="int32")
-        for i, x in enumerate(self.groups):
-            idx = np.where(grouping == x)[0]
-            self.grouping_int[idx] = i
-            self.grouping_sizes[i] = len(idx)
-        assert np.all(self.grouping_int >= 0)
+        self.grouping = grouping
+
+    @property
+    def grouping(self):
+        return self._grouping[self.idx]
+
+    @grouping.setter
+    def grouping(self, x):
+        self._grouping = x
+        # Reset:
+        self._groups = None
+        self.grouping_sizes = None
+        self.idx_sorted = None
+
+    @property
+    def groups(self):
+        if self._groups is None:
+            self._groups = np.unique(self.grouping)
+        return self._groups
 
     def _get_batch_start_ends(self, idx: np.ndarray, batch_size: int):
         n_batches = len(self.groups)
-        batch_starts_ends = [
-            (int(x * batch_size),
-             int(x * batch_size + np.minimum(batch_size, self.grouping_sizes[x])))
-            for x in np.arange(0, n_batches)
-        ]
+        batch_starts_ends = []
+        for x in np.arange(0, n_batches):
+            s = 0 if x == 0 else batch_starts_ends[-1][1]
+            batch_starts_ends.append((s, int(s + self.grouping_sizes[x])))
         return batch_starts_ends
 
     @property
@@ -166,13 +176,22 @@ class BatchDesignBlocks(BatchDesignBase):
 
     @idx.setter
     def idx(self, x):
-        x = x[np.argsort(self.grouping_int[x])]
-        self._batch_bounds = self._get_batch_start_ends(idx=x, batch_size=self.retrieval_batch_size)
         self._idx = x
+        # Reset:
+        self._groups = None
+        grouping_sizes = np.zeros((self.groups.shape[0],), dtype="int32")
+        idx_sorted = []
+        for i, x in enumerate(self.groups):
+            idx = np.where(self.grouping == x)[0]
+            grouping_sizes[i] = len(idx)
+            idx_sorted.append(idx)
+        self.grouping_sizes = grouping_sizes
+        self.idx_sorted = np.concatenate(idx_sorted)
+        self._batch_bounds = self._get_batch_start_ends(idx=x, batch_size=self.retrieval_batch_size)
 
     @property
     def design(self) -> Tuple[np.ndarray, np.ndarray, List[Tuple[int, int]]]:
-        idx_proc = np.arange(0, len(self.idx))
+        idx_proc = self.idx_sorted.copy()
         batch_bounds = self.batch_bounds.copy()
         if self.random_access:  # Note: randomization is result from sampling above, need to revert if not desired.
             batch_bounds = np.asarray(batch_bounds)

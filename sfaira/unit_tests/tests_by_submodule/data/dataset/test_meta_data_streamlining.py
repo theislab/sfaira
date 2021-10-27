@@ -2,10 +2,9 @@ import os
 
 import anndata
 from cellxgene_schema import validate
-import numpy as np
 import pytest
 
-from sfaira.unit_tests.data_for_tests.loaders import ASSEMBLY_HUMAN, ASSEMBLY_MOUSE, prepare_dsg
+from sfaira.unit_tests.data_for_tests.loaders import ASSEMBLY_HUMAN, PrepareData
 from sfaira.unit_tests.directories import DIR_TEMP
 
 
@@ -20,7 +19,7 @@ from sfaira.unit_tests.directories import DIR_TEMP
 def test_dsgs_streamline_metadata(out_format: str, clean_obs: bool, clean_var: bool, clean_uns: bool,
                                   clean_obs_names: bool, keep_id_obs: bool, keep_orginal_obs: bool,
                                   keep_symbol_obs: bool):
-    ds = prepare_dsg(load=False)
+    ds = PrepareData().prepare_dsg(load=False)
     ds.subset(key="organism", values=["human"])
     ds.subset(key="organ", values=["lung"])
     if out_format == "cellxgene":

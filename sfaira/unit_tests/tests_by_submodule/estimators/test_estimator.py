@@ -14,7 +14,7 @@ from sfaira.versions.metadata import OntologyOboCustom
 from sfaira.versions.topologies import TopologyContainer
 
 from sfaira.unit_tests.data_for_tests.loaders.consts import CELLTYPES, CL_VERSION
-from sfaira.unit_tests.data_for_tests.loaders.utils import prepare_dsg, prepare_store
+from sfaira.unit_tests.data_for_tests.loaders.utils import PrepareData
 from sfaira.unit_tests.directories import DIR_TEMP
 
 CACHE_DIR_GENOMES = os.path.join(CACHE_DIR, "genomes")
@@ -70,7 +70,8 @@ class HelperEstimatorBase:
     tc: TopologyContainer
 
     def load_adata(self, organism="human", organ=None, match_to_reference=None):
-        dsg = prepare_dsg(load=True, match_to_reference=match_to_reference)
+        data = PrepareData()
+        dsg = data.prepare_dsg(load=True, match_to_reference=match_to_reference)
         dsg.subset(key="doi_journal", values=["no_doi_mock1", "no_doi_mock2", "no_doi_mock3"])
         if organism is not None:
             dsg.subset(key="organism", values=organism)
@@ -80,7 +81,8 @@ class HelperEstimatorBase:
         self.data = dsg.adata_ls
 
     def load_store(self, organism="human", organ=None, match_to_reference=None):
-        store_path = prepare_store(store_format="dao", match_to_reference=match_to_reference)
+        data = PrepareData()
+        store_path = data.prepare_store(store_format="dao", match_to_reference=match_to_reference)
         store = load_store(cache_path=store_path, store_format="dao")
         store.subset(attr_key="doi_journal", values=["no_doi_mock1", "no_doi_mock2", "no_doi_mock3"])
         if organism is not None:
@@ -91,7 +93,8 @@ class HelperEstimatorBase:
         self.data = store.stores[organism]
 
     def load_multistore(self):
-        store_path = prepare_store(store_format="dao")
+        data = PrepareData()
+        store_path = data.prepare_store(store_format="dao")
         store = load_store(cache_path=store_path, store_format="dao")
         store.subset(attr_key="doi_journal", values=["no_doi_mock1", "no_doi_mock2", "no_doi_mock3"])
         self.adata_ids = store._adata_ids_sfaira
@@ -287,7 +290,8 @@ class HelperEstimatorKerasCelltypeCustomObo(TestHelperEstimatorKerasCelltype):
         )
 
     def load_adata(self, organism="human", organ=None):
-        dsg = prepare_dsg(load=True)
+        data = PrepareData()
+        dsg = data.prepare_dsg(load=True)
         dsg.subset(key="doi_journal", values=["no_doi_mock1", "no_doi_mock3", "no_doi_mock3"])
         if organism is not None:
             dsg.subset(key="organism", values=organism)

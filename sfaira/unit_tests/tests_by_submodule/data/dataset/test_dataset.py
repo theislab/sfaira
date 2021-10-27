@@ -5,7 +5,7 @@ import pytest
 from sfaira.data import DatasetSuperGroup
 from sfaira.data import Universe
 
-from sfaira.unit_tests.data_for_tests.loaders import ASSEMBLY_HUMAN, prepare_dsg
+from sfaira.unit_tests.data_for_tests.loaders import ASSEMBLY_HUMAN, PrepareData
 from sfaira.unit_tests.directories import DIR_TEMP, DIR_DATA_LOADERS_CACHE
 
 
@@ -33,7 +33,7 @@ def test_dsgs_subset_dataset_wise(organ: str):
     """
     Tests if subsetting results only in datasets of the desired characteristics.
     """
-    ds = prepare_dsg(load=False)
+    ds = PrepareData().prepare_dsg(load=False)
     ds.subset(key="organism", values=["human"])
     ds.subset(key="organ", values=[organ])
     ds.load()
@@ -45,18 +45,18 @@ def test_dsgs_subset_dataset_wise(organ: str):
 
 def test_dsgs_config_write_load():
     fn = os.path.join(DIR_TEMP, "config.csv")
-    ds = prepare_dsg(load=False)
+    ds = PrepareData().prepare_dsg(load=False)
     ds.subset(key="organism", values=["human"])
     ds.subset(key="organ", values=["lung"])
     ds.load()
     ds.write_config(fn=fn)
-    ds2 = prepare_dsg()
+    ds2 = PrepareData().prepare_dsg()
     ds2.load_config(fn=fn)
     assert np.all(ds.ids == ds2.ids)
 
 
 def test_dsgs_adata():
-    ds = prepare_dsg(load=False)
+    ds = PrepareData().prepare_dsg(load=False)
     ds.subset(key="organism", values=["human"])
     ds.subset(key="organ", values=["lung"])
     ds.load()
@@ -64,7 +64,7 @@ def test_dsgs_adata():
 
 
 def test_dsgs_load():
-    ds = prepare_dsg(load=False)
+    ds = PrepareData().prepare_dsg(load=False)
     ds.subset(key="organism", values=["human"])
     ds.subset(key="organ", values=["lung"])
     ds.load()
@@ -76,7 +76,7 @@ def test_dsgs_subset_cell_wise(celltype: str):
     Tests if sub-setting results only in datasets of the desired characteristics.
     """
     organ = "lung"
-    ds = prepare_dsg(load=False)
+    ds = PrepareData().prepare_dsg(load=False)
     ds.subset(key="organism", values=["human"])
     ds.subset(key="organ", values=[organ])
     ds.load()
@@ -93,7 +93,7 @@ def test_dsgs_subset_cell_wise(celltype: str):
 @pytest.mark.parametrize("remove_gene_version", [False, True])
 @pytest.mark.parametrize("subset_genes_to_type", [None, "protein_coding"])
 def test_dsgs_streamline_features(match_to_reference: str, remove_gene_version: bool, subset_genes_to_type: str):
-    ds = prepare_dsg(load=False)
+    ds = PrepareData().prepare_dsg(load=False)
     ds.subset(key="organism", values=["human"])
     ds.subset(key="organ", values=["lung"])
     ds.load()
@@ -106,7 +106,7 @@ def test_dsgs_streamline_features(match_to_reference: str, remove_gene_version: 
 
 
 def test_dsg_load():
-    ds = prepare_dsg(load=False)
+    ds = PrepareData().prepare_dsg(load=False)
     ds.subset(key="organism", values=["human"])
     ds.subset(key="organ", values=["lung"])
     ds = DatasetSuperGroup(dataset_groups=[ds])
@@ -114,7 +114,7 @@ def test_dsg_load():
 
 
 def test_dsg_adata():
-    ds = prepare_dsg(load=False)
+    ds = PrepareData().prepare_dsg(load=False)
     ds.subset(key="organism", values=["human"])
     ds.subset(key="organ", values=["lung"])
     ds = DatasetSuperGroup(dataset_groups=[ds])

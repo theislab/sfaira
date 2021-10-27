@@ -1,3 +1,5 @@
+import abc
+
 import anndata
 import numpy as np
 import os
@@ -27,7 +29,7 @@ def get_cu():
     return fn
 
 
-class HelperTrainerBase(HelperEstimatorBase):
+class HelperTrainerBase:
 
     data: Union[anndata.AnnData, load_store]
     trainer: Union[TrainModelCelltype, TrainModelEmbedding]
@@ -35,6 +37,20 @@ class HelperTrainerBase(HelperEstimatorBase):
     def __init__(self, zoo: ModelZoo):
         self.model_id = zoo.model_id
         self.tc = zoo.topology_container
+
+    @abc.abstractmethod
+    def load_adata(self, **kwargs):
+        """
+        This is inherited from estimator test helper.
+        """
+        pass
+
+    @abc.abstractmethod
+    def load_store(self, **kwargs):
+        """
+        This is inherited from estimator test helper.
+        """
+        pass
 
     def load_data(self, data_type):
         """
@@ -75,11 +91,15 @@ class HelperTrainerBase(HelperEstimatorBase):
         )
 
 
+class HelperTrainer(HelperEstimatorBase, HelperTrainerBase):
+    pass
+
+
 def test_save_embedding():
     model_id = "embedding_human-lung-linear-0.1-0.1_mylab"
     zoo = ModelZoo()
     zoo.model_id = model_id
-    test_trainer = HelperTrainerBase(zoo=zoo)
+    test_trainer = HelperTrainer(zoo=zoo)
     test_trainer.test_init(cls=TrainModelEmbedding)
     test_trainer.test_save()
 
@@ -89,6 +109,6 @@ def test_save_celltypes():
     model_id = "celltype_human-lung-mlp-0.0.1-0.1_mylab"
     zoo = ModelZoo()
     zoo.model_id = model_id
-    test_trainer = HelperTrainerBase(zoo=zoo)
+    test_trainer = HelperTrainer(zoo=zoo)
     test_trainer.test_init(cls=TrainModelCelltype, fn_target_universe=tmp_fn)
     test_trainer.test_save()
