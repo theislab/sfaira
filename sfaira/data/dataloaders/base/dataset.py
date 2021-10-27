@@ -78,11 +78,11 @@ class DatasetBase(abc.ABC):
     _bio_sample: Union[None, str]
     _year: Union[None, int]
 
+    _bio_sample_obs_key: Union[None, str]
+    _tech_sample_obs_key: Union[None, str]
     assay_sc_obs_key: Union[None, str]
     assay_differentiation_obs_key: Union[None, str]
     assay_type_differentiation_obs_key: Union[None, str]
-    assay_cell_line_obs_key: Union[None, str]
-    bio_sample_obs_key: Union[None, str]
     cell_type_obs_key: Union[None, str]
     development_stage_obs_key: Union[None, str]
     disease_obs_key: Union[None, str]
@@ -93,7 +93,6 @@ class DatasetBase(abc.ABC):
     sample_source_obs_key: Union[None, str]
     sex_obs_key: Union[None, str]
     state_exact_obs_key: Union[None, str]
-    tech_sample_obs_key: Union[None, str]
 
     gene_id_symbols_var_key: Union[None, str]
     gene_id_ensembl_var_key: Union[None, str]
@@ -811,8 +810,9 @@ class DatasetBase(abc.ABC):
                         # in .obs set.
                         print(f"WARNING: attribute {batch_col} of data set {self.id} was not found in columns.")
                 # Build a combination label out of all columns used to describe this group.
+                # Add data set label into this label so that these groups are unique across data sets.
                 val = [
-                    "_".join([str(xxx) for xxx in xx])
+                    self.doi_cleaned_id + "_".join([str(xxx) for xxx in xx])
                     for xx in zip(*[self.adata.obs[batch_col].values.tolist() for batch_col in batch_cols])
                 ]
             else:
@@ -1491,19 +1491,53 @@ class DatasetBase(abc.ABC):
 
     @property
     def bio_sample(self) -> Union[None, str]:
-        if self._bio_sample is not None:
+        if self._bio_sample is not None and self._bio_sample != self._adata_ids.unknown_metadata_identifier:
             return self._bio_sample
         else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.bio_sample in self.meta.columns:
-                return self.meta[self._adata_ids.bio_sample]
-            else:
-                return None
+            # Define biological sample automatically.
+            bio_sample = "*".join([x for x in [
+                self.assay_sc,
+                self.assay_differentiation,
+                self.assay_type_differentiation,
+                self.development_stage,
+                self.disease,
+                self.ethnicity,
+                self.individual,
+                self.organ,
+                self.organism,
+                self.sex,
+            ] if x is not None])
+            return bio_sample if bio_sample != "" else None
 
     @bio_sample.setter
     def bio_sample(self, x: str):
         self._bio_sample = x
+
+    @property
+    def bio_sample_obs_key(self) -> Union[None, str]:
+        if self._bio_sample_obs_key is not None and \
+                self._bio_sample_obs_key != self._adata_ids.unknown_metadata_identifier:
+            return self._bio_sample_obs_key
+        else:
+            # Define biological sample automatically.
+            bio_sample_obs_key = "*".join([x for x in [
+                self.assay_sc_obs_key,
+                self.assay_differentiation_obs_key,
+                self.assay_type_differentiation_obs_key,
+                self.development_stage_obs_key,
+                self.disease_obs_key,
+                self.ethnicity_obs_key,
+                self.individual_obs_key,
+                self.organ_obs_key,
+                self.organism_obs_key,
+                self.sex_obs_key,
+                self.state_exact_obs_key,
+            ] if x is not None])
+            return bio_sample_obs_key if bio_sample_obs_key != "" else None
+
+    @bio_sample_obs_key.setter
+    def bio_sample_obs_key(self, x: str):
+        self._bio_sample_obs_key = x
 
     @property
     def cell_line(self) -> Union[None, str]:
@@ -1938,19 +1972,28 @@ class DatasetBase(abc.ABC):
 
     @property
     def tech_sample(self) -> Union[None, str]:
-        if self._tech_sample is not None:
+        if self._tech_sample is not None and self._tech_sample != self._adata_ids.unknown_metadata_identifier:
             return self._tech_sample
         else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.tech_sample in self.meta.columns:
-                return self.meta[self._adata_ids.tech_sample]
-            else:
-                return None
+            # Define technical batch automatically as biological sample.
+            return self.bio_sample
 
     @tech_sample.setter
     def tech_sample(self, x: str):
         self._tech_sample = x
+
+    @property
+    def tech_sample_obs_key(self) -> Union[None, str]:
+        if self._tech_sample_obs_key is not None and \
+                self._tech_sample_obs_key != self._adata_ids.unknown_metadata_identifier:
+            return self._tech_sample_obs_key
+        else:
+            # Define technical batch automatically as biological sample.
+            return self.bio_sample_obs_key
+
+    @tech_sample_obs_key.setter
+    def tech_sample_obs_key(self, x: str):
+        self._tech_sample_obs_key = x
 
     @property
     def year(self) -> Union[None, int]:
