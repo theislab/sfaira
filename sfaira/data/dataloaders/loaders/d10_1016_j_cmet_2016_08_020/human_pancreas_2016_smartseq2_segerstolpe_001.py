@@ -15,14 +15,15 @@ class Dataset(DatasetBase):
         self.download_url_data = "https://www.ebi.ac.uk/arrayexpress/files/E-MTAB-5061/E-MTAB-5061.processed.1.zip"
         self.download_url_meta = "https://www.ebi.ac.uk/arrayexpress/files/E-MTAB-5061/E-MTAB-5061.sdrf.txt"
 
+        self.assay_sc = "Smart-seq2"
         self.author = "Segerstolpe"
         self.doi_journal = "10.1016/j.cmet.2016.08.020"
         self.normalization = "raw"
         self.organ = "pancreas"
         self.organism = "human"
-        self.assay_sc = "Smart-seq2"
-        self.year = 2016
+        self.primary_data = True
         self.sample_source = "primary_tissue"
+        self.year = 2016
 
         self.gene_id_symbols_var_key = "index"
 

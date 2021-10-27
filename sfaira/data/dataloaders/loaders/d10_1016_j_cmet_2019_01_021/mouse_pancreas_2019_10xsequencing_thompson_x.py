@@ -28,15 +28,16 @@ class Dataset(DatasetBase):
         self.download_url_data = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE117nnn/GSE117770/suppl/GSE117770_RAW.tar"
         self.download_url_meta = f"private,{self.sample_fn}_annotation.csv"
 
+        self.assay_sc = "10x 3' v2"
         self.author = "Thompson"
         self.doi_journal = "10.1016/j.cmet.2019.01.021"
         self.normalization = "raw"
         self.organ = "pancreas"
         self.organism = "mouse"
-        self.assay_sc = "10x 3' v2"
+        self.primary_data = True
+        self.sample_source = "primary_tissue"
         self.state_exact = "diabetic"
         self.year = 2019
-        self.sample_source = "primary_tissue"
 
         self.gene_id_symbols_var_key = "names"
         self.gene_id_ensembl_var_key = "ensembl"

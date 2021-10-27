@@ -36,12 +36,14 @@ class DatasetSuperGroupLoaders(DatasetSuperGroup):
                     path_dsg = str(pydoc.locate(f"sfaira.data.dataloaders.loaders.{f}.FILE_PATH"))
                     if path_dsg is not None:
                         try:
-                            dataset_groups.append(DatasetGroupDirectoryOriented(
+                            dsg = DatasetGroupDirectoryOriented(
                                 file_base=path_dsg,
                                 data_path=data_path,
                                 meta_path=meta_path,
                                 cache_path=cache_path
-                            ))
+                            )
+                            dsg.collection_id = f
+                            dataset_groups.append(dsg)
                         except IndexError as e:
                             raise IndexError(f"{e} for '{cwd}', '{f}', '{path_dsg}'")
                     else:

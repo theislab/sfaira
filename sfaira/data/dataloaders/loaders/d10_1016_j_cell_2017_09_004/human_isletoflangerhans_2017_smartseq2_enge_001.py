@@ -24,6 +24,7 @@ class Dataset(DatasetBase):
         self.assay_sc = "Smart-seq2"
         self.organ = "islet of Langerhans"
         self.organism = "human"
+        self.primary_data = True
         self.year = 2017
         self.gene_id_symbols_var_key = "index"
         self.cell_types_obs_key = "celltype"

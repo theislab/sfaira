@@ -9,7 +9,7 @@ from typing import List, Union
 import uuid
 
 from sfaira.data.dataloaders.base import DatasetBase
-from sfaira.consts import AdataIdsCellxgene, AdataIdsCellxgeneHuman_v1_1_0, AdataIdsCellxgeneMouse_v1_1_0
+from sfaira.consts import AdataIdsCellxgene, AdataIdsCellxgene_v2_0_0
 from sfaira.consts.directories import CACHE_DIR_DATABASES_CELLXGENE
 from sfaira.data.dataloaders.databases.cellxgene.rest_helpers import get_collection, get_data
 from sfaira.data.dataloaders.databases.cellxgene.rest_helpers import CELLXGENE_PRODUCTION_ENDPOINT, DOWNLOAD_DATASET
@@ -32,6 +32,7 @@ def clean_cellxgene_meta_obs(k, val, adata_ids) -> Union[str, List[str]]:
         # Organ labels contain labels on tissue type also, such as 'UBERON:0001911 (cell culture)'.
         val = [v.split(" ")[0] for v in val]
     elif k == "organism":
+        # TODO deprecate map once same organism naming is used.
         organism_map = {
             "Homo sapiens": "human",
             "Mus musculus": "mouse",
@@ -64,13 +65,11 @@ def clean_cellxgene_meta_uns(k, val, adata_ids) -> Union[str, List[str]]:
             if k == "organ":
                 v = v.split(" ")[0]
             if k == "organism":
+                # TODO deprecate map once same organism naming is used.
                 organism_map = {
                     "Homo sapiens": "human",
-                    "Mus musculus": "mouse",
-                }
-                if v not in organism_map:
-                    raise ValueError(f"value {v} not recognized")
-                v = organism_map[v]
+                    "Mus musculus": "mouse"}
+                v = organism_map[v] if v in organism_map.keys() else v
         if v != adata_ids.unknown_metadata_identifier and v != adata_ids.invalid_metadata_identifier:
             x_clean.append(v)
     return x_clean
@@ -147,9 +146,9 @@ class Dataset(DatasetBase):
                     print(f"WARNING: {e} in {self.collection_id} and data set {self.id}")
 
         if self.organism == "human":
-            self._adata_ids_cellxgene = AdataIdsCellxgeneHuman_v1_1_0()
+            self._adata_ids_cellxgene = AdataIdsCellxgene_v2_0_0()
         elif self.organism == "mouse":
-            self._adata_ids_cellxgene = AdataIdsCellxgeneMouse_v1_1_0()
+            self._adata_ids_cellxgene = AdataIdsCellxgene_v2_0_0()
         else:
             assert False, self.organism
         # Add author information.  # TODO need to change this to contributor?

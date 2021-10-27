@@ -16,7 +16,7 @@ dataset_wise:
         HC: "private,hc_meta_data_stromal_with_donor.txt"
         UC: "private,uc_meta_data_stromal_with_donor.txt"
     normalization: "norm"
-    primary_data:
+    primary_data: True
     year: 2019
 dataset_or_observation_wise:
     assay_sc: "10x 3' v2"

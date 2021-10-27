@@ -4,13 +4,13 @@ dataset_structure:
 dataset_wise:
     author:
         - "mock2"
-    default_embedding:
+    default_embedding: "X_umap"
     doi_journal: "no_doi_mock2"
     doi_preprint:
     download_url_data: ""
     download_url_meta: ""
     normalization: "raw"
-    primary_data:
+    primary_data: True
     year: 2021
 dataset_or_observation_wise:
     assay_sc: "10x technology"
