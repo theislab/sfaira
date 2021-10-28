@@ -63,7 +63,7 @@ def test_cellxgene_export(schema_version: str, organism: str):
 
     This test can be extended by future versions.
     """
-    ds = prepare_dsg(load=False)
+    ds = PrepareData().prepare_dsg(load=False)
     if organism == "human":
         ds.subset(key="doi_journal", values=["no_doi_mock1"])
     else:

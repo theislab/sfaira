@@ -5,7 +5,7 @@ import pandas as pd
 import urllib.request
 
 from sfaira.ui import UserInterface
-from sfaira.unit_tests.data_for_tests.loaders.utils import prepare_dsg
+from sfaira.unit_tests.data_for_tests.loaders.utils import PrepareData
 from sfaira.unit_tests import DIR_TEMP
 from sfaira.consts import SFAIRA_REPO_URL
 
@@ -40,7 +40,7 @@ class HelperUi:
 
         :return:
         """
-        dsg = prepare_dsg(rewrite=True, load=False)
+        dsg = PrepareData().prepare_dsg(rewrite=True, load=False)
         dsg.subset(key="id", values=["human_lung_2021_None_mock4_001_no_doi_mock4"])
         dsg.load()
         return dsg.adata
