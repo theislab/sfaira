@@ -39,7 +39,6 @@ load_doc = \
 
 class DatasetBase(abc.ABC):
     adata: Union[None, anndata.AnnData]
-    class_maps: dict
     _meta: Union[None, pandas.DataFrame]
     data_dir_base: Union[None, str]
     meta_path: Union[None, str]
@@ -203,8 +202,6 @@ class DatasetBase(abc.ABC):
 
         self.gene_id_symbols_var_key = None
         self.gene_id_ensembl_var_key = None
-
-        self.class_maps = {"0": {}}
 
         self._celltype_universe = None
         self._ontology_class_map = None

@@ -2,7 +2,8 @@ import numpy as np
 import os
 import pytest
 
-from sfaira.data import DatasetSuperGroup
+from sfaira.consts import AdataIdsSfaira
+from sfaira.data import DatasetSuperGroup, DatasetInteractive
 from sfaira.data import Universe
 
 from sfaira.unit_tests.data_for_tests.loaders import ASSEMBLY_HUMAN, PrepareData
@@ -119,3 +120,28 @@ def test_dsg_adata():
     ds.subset(key="organ", values=["lung"])
     ds = DatasetSuperGroup(dataset_groups=[ds])
     _ = ds.adata
+
+
+def test_ds_interactive():
+    adata_ids = AdataIdsSfaira()
+    # Prepare object:
+    ds = PrepareData().prepare_dsg(load=False)
+    ds.subset(key="doi_journal", values=["no_doi_mock1"])
+    ds.load()
+    adata = ds.adata_ls[0]
+    di = DatasetInteractive(data=adata, gene_ens_col="index")
+    di.organism = "human"
+    di.organ = "lung"
+    di.cell_type_obs_key = "free_annotation"
+    # Test that adata is accessible in non-streamlined object:
+    _ = di.adata
+    # Test streamlining:
+    di.streamline_features(match_to_reference=ASSEMBLY_HUMAN)
+    di.streamline_metadata(schema="sfaira")
+    # Test entries in streamlined object:
+    adata_di = di.adata
+    assert adata_ids.cell_type in adata_di.obs.columns
+    assert adata_ids.cell_type + adata_ids.onto_id_suffix in adata_di.obs.columns
+    assert adata_ids.organ in adata_di.uns.keys()
+    assert np.all(adata_di.obs[adata_ids.cell_type].values == adata.obs["free_annotation"].values)
+    assert adata_di.uns[adata_ids.organ] == "lung"
