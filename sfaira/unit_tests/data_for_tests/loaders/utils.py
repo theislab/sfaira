@@ -4,6 +4,8 @@ import numpy as np
 import os
 import pandas as pd
 import pathlib
+
+from sfaira.data.store.multi_store import DistributedStoresAnndata
 from sfaira.versions.genomes import GenomeContainer
 
 from sfaira.unit_tests.directories import DIR_DATA_LOADERS_CACHE, DIR_DATA_LOADERS_STORE_DAO, \
@@ -58,8 +60,13 @@ class PrepareData:
             dsg = _load_script(dsg=dsg, rewrite=rewrite, match_to_reference=match_to_reference)
         return dsg
 
+    def prepare_store_anndata(self, match_to_reference=None) -> DistributedStoresAnndata:
+        dsg = self.prepare_dsg(load=True, match_to_reference=match_to_reference)
+        store = DistributedStoresAnndata(adatas=dsg.adata_ls)
+        return store
+
     def prepare_store(self, store_format: str, rewrite: bool = False, rewrite_store: bool = False,
-                      match_to_reference=None) -> str:
+                  match_to_reference=None) -> str:
         """
         Prepares mock data store and returns path to store.
 

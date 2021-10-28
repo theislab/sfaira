@@ -22,13 +22,16 @@ def _get_single_store(store_format: str):
     return store
 
 
-@pytest.mark.parametrize("store_format", ["h5ad", "dao"])
+@pytest.mark.parametrize("store_format", ["h5ad", "dao", "anndata"])
 def test_fatal(store_format: str):
     """
-    Test if basic methods abort.
+    Test if basic methods of stores abort.
     """
-    store_path = PrepareData().prepare_store(store_format=store_format)
-    stores = load_store(cache_path=store_path, store_format=store_format)
+    if store_format == "anndata":
+        stores = PrepareData().prepare_store_anndata()
+    else:
+        store_path = PrepareData().prepare_store(store_format=store_format)
+        stores = load_store(cache_path=store_path, store_format=store_format)
     stores.subset(attr_key="organism", values=["mouse"])
     store = stores.stores["mouse"]
     # Test both single and multi-store:
