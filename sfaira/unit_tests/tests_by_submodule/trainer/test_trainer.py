@@ -38,14 +38,12 @@ class HelperTrainerBase:
         self.model_id = zoo.model_id
         self.tc = zoo.topology_container
 
-    @abc.abstractmethod
     def load_adata(self, **kwargs):
         """
         This is inherited from estimator test helper.
         """
         pass
 
-    @abc.abstractmethod
     def load_store(self, **kwargs):
         """
         This is inherited from estimator test helper.
