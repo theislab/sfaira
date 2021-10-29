@@ -21,7 +21,7 @@ def _create_adata(celltypes, ncells, ngenes, assembly) -> anndata.AnnData:
     Usesd by mock data loaders.
     """
     gc = GenomeContainer(assembly=assembly)
-    gc.subset(biotype="protein_coding")
+    gc.set(biotype="protein_coding")
     genes = gc.ensembl[:ngenes]
     x = scipy.sparse.csc_matrix(np.random.randint(low=0, high=100, size=(ncells, ngenes)))
     var = pd.DataFrame(index=genes)

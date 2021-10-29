@@ -119,6 +119,35 @@ class OntologyList(Ontology):
     def node_names(self) -> List[str]:
         return self.nodes
 
+    @property
+    def node_ids(self) -> List[str]:
+        return self.nodes
+
+    @property
+    def leaves(self) -> List[str]:
+        return self.nodes
+
+    @property
+    def n_leaves(self) -> int:
+        return len(self.nodes)
+
+    def prepare_maps_to_leaves(
+            self,
+            include_self: bool = True
+    ) -> Dict[str, np.ndarray]:
+        """
+        Precomputes all maps of nodes to their leave nodes.
+
+        Note that for a list ontology, this maps each node to itself.
+
+        :param include_self: whether to include node itself
+        :return: Dictionary of index vectors of leave node matches for each node (key).
+        """
+        if include_self:
+            return dict([(x, np.array([self.leaves.index(x)])) for x in self.leaves])
+        else:
+            return dict([(x, np.array([])) for x in self.leaves])
+
     def is_a_node_id(self, x: str) -> bool:
         return x in self.node_names
 
@@ -166,6 +195,9 @@ class OntologyList(Ontology):
         :return: If query node is reference node or an ancestor thereof.
         """
         return query == reference
+
+    def get_ancestors(self, node: str) -> List[str]:
+        return []
 
 
 class OntologyHierarchical(Ontology, abc.ABC):

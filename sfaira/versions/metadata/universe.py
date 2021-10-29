@@ -2,8 +2,7 @@ import numpy as np
 import pandas as pd
 from typing import Dict, List, Tuple, Union
 
-from sfaira.versions.metadata import OntologyCl, OntologyUberon
-from sfaira.versions.metadata.extensions import ONTOLOGIY_EXTENSION
+from sfaira.versions.metadata import OntologyCl, OntologyList, OntologyUberon
 
 TARGET_UNIVERSE_KEY_NAME = "name"
 TARGET_UNIVERSE_KEY_ID = "id"
@@ -20,14 +19,10 @@ class CelltypeUniverse:
     onto_uberon: OntologyUberon
     _target_universe: Union[List[str], None]
 
-    def __init__(self, cl: OntologyCl, uberon: OntologyUberon, **kwargs):
+    def __init__(self, cl: Union[OntologyCl, OntologyList], uberon: OntologyUberon, **kwargs):
         self.onto_cl = cl
         self.onto_uberon = uberon
         self._target_universe = None
-        self._set_extension()
-
-    def _set_extension(self):
-        self.onto_cl.add_extension(ONTOLOGIY_EXTENSION)
 
     def __validate_target_universe_table(self, tab: pd.DataFrame):
         assert len(tab.columns) == 2

@@ -32,7 +32,7 @@ def test_gc_subsetting(subset: Tuple[dict, int]):
     Tests if genome container is subsetted correctly.
     """
     gc = GenomeContainer(assembly="Mus_musculus.GRCm38.102")
-    gc.subset(**subset[0])
+    gc.set(**subset[0])
     assert gc.n_var == subset[1]
     assert len(gc.ensembl) == subset[1]
     assert len(gc.symbols) == subset[1]

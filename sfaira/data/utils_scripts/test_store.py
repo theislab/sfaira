@@ -56,7 +56,7 @@ def time_gen(_store, store_format, kwargs) -> List[float]:
         del kwargs["random_access"]
     if kwargs["var_subset"]:
         gc = sfaira.versions.genomes.genomes.GenomeContainer(assembly="Homo_sapiens.GRCh38.102")
-        gc.subset(symbols=["VTA1", "MLXIPL", "BAZ1B", "RANBP9", "PPARGC1A", "DDX25", "CRYAB"])
+        gc.set(symbols=["VTA1", "MLXIPL", "BAZ1B", "RANBP9", "PPARGC1A", "DDX25", "CRYAB"])
         _store.genome_container = gc
     del kwargs["var_subset"]
     _gen, _ = _store.iterator(**kwargs)

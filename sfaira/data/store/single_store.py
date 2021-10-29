@@ -13,7 +13,7 @@ from sfaira.consts import AdataIdsSfaira, OCS
 from sfaira.data.dataloaders.base.utils import is_child, UNS_STRING_META_IN_OBS
 from sfaira.data.store.base import DistributedStoreBase
 from sfaira.data.store.generators import GeneratorAnndata, GeneratorDask, GeneratorSingle
-from sfaira.versions.genomes.genomes import GenomeContainer
+from sfaira.versions.genomes.genomes import GenomeContainer, ReactiveFeatureContainer
 
 """
 Distributed stores are array-like classes that sit on groups of on disk representations of anndata instances files.
@@ -190,12 +190,17 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
         return self._genome_container
 
     @genome_container.setter
-    def genome_container(self, x: Union[GenomeContainer]):
-        var_names = self._validate_feature_space_homogeneity()
-        # Validate genome container choice:
-        # Make sure that all var names defined in genome container are also contained in loaded data sets.
-        assert np.all([y in var_names for y in x.ensembl]), \
-            "did not find variable names from genome container in store"
+    def genome_container(self, x: Union[GenomeContainer, None]):
+        if x is not None:
+            var_names = self._validate_feature_space_homogeneity()
+            if isinstance(x, ReactiveFeatureContainer):
+                # Load stores feature names into container.
+                x.symbols = var_names
+            else:
+                # Validate genome container choice:
+                # Make sure that all var names defined in genome container are also contained in loaded data sets.
+                assert np.all([y in var_names for y in x.ensembl]), \
+                    "did not find variable names from genome container in store"
         self._genome_container = x
 
     @property
@@ -410,8 +415,11 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
         # Use feature space sub-selection based on assembly if provided, will use full feature space otherwise.
         if self.genome_container is not None:
             var_names_target = self.genome_container.ensembl
-            # Check if index vector is just full ordered list of indices, in this case, sub-setting is unnecessary.
-            if len(var_names_target) == len(var_names) and np.all(var_names_target == var_names):
+            if var_names_target is None:
+                # Check if genome container does not constrain features.
+                var_idx = None
+            elif len(var_names_target) == len(var_names) and np.all(var_names_target == var_names):
+                # Check if index vector is just full ordered list of indices, in this case, sub-setting is unnecessary.
                 var_idx = None
             else:
                 # Check if variable names are continuous stretch in reference list, indexing this is much faster.

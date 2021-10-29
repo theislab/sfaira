@@ -1,6 +1,6 @@
 from typing import Union
 
-from sfaira.versions.genomes.genomes import GenomeContainer
+from sfaira.versions.genomes.genomes import GenomeContainer, ReactiveFeatureContainer
 
 
 class TopologyContainer:
@@ -17,11 +17,14 @@ class TopologyContainer:
     ):
         self.topology = topology
         if custom_genome_constainer is None:
-            self.gc = GenomeContainer(assembly=self.topology["input"]["genome"])
+            if self.topology["input"]["genome"] is not None:
+                self.gc = GenomeContainer(assembly=self.topology["input"]["genome"])
+            else:
+                self.gc = ReactiveFeatureContainer()
         else:
             assert isinstance(custom_genome_constainer, GenomeContainer)
             self.gc = custom_genome_constainer
-        self.gc.subset(**dict([tuple(self.topology["input"]["genes"])]))
+        self.gc.set(**dict([tuple(self.topology["input"]["genes"])]))
         self.topology_id = topology_id
 
     @property

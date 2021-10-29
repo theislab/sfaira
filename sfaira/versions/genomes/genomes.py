@@ -1,7 +1,7 @@
 """
-Functionalities to interact with gene sets defined in an assembly and gene-annotation (such as protein-coding).
+Functionalities to interact with feature sets defined in an assembly or interactively by user.
 """
-
+import abc
 import gzip
 import numpy as np
 import os
@@ -88,7 +88,37 @@ class GtfInterface:
         return pandas.read_csv(self.cache_fn)
 
 
-class GenomeContainer:
+class GenomeContainerBase:
+    """
+    Base container class for a gene annotation.
+    """
+
+    @abc.abstractmethod
+    def organism(self):
+        pass
+
+    @abc.abstractmethod
+    def set(self, **kwargs):
+        pass
+
+    @abc.abstractmethod
+    def symbols(self) -> List[str]:
+        pass
+
+    @abc.abstractmethod
+    def ensembl(self) -> List[str]:
+        pass
+
+    @abc.abstractmethod
+    def biotype(self) -> List[str]:
+        pass
+
+    @abc.abstractmethod
+    def n_var(self):
+        pass
+
+
+class GenomeContainer(GenomeContainerBase):
     """
     Container class for a genome annotation for a specific release.
 
@@ -126,7 +156,7 @@ class GenomeContainer:
     def load_genome(self):
         self.genome_tab = self.gtfi.cache
 
-    def subset(
+    def set(
             self,
             biotype: Union[None, str, List[str]] = None,
             symbols: Union[None, str, List[str]] = None,
@@ -312,3 +342,53 @@ class CustomFeatureContainer(GenomeContainer):
     @property
     def organism(self):
         return self._organism
+
+
+class ReactiveFeatureContainer(GenomeContainerBase):
+
+    """
+    Container class for features that can reactively loaded based on features present in data.
+
+    The symbols are added by the store that uses this container.
+    """
+
+    def __init__(self, **kwargs):
+        self._symbols = None
+
+    @property
+    def organism(self):
+        return None
+
+    def set(
+            self,
+            symbols: Union[None, str, List[str]] = None,
+    ):
+        """
+        Set feature space to identifiers (symbol or ensemble ID).
+
+        Note that there is no background (assembly) feature space to subset in this class.
+
+        :param symbols: Gene symbol(s) of gene(s) to subset genome to. Elements have to appear in genome.
+            Separate in string via "," if choosing multiple or supply as list of string.
+        """
+        self._symbols = symbols
+
+    @property
+    def symbols(self) -> List[str]:
+        return self._symbols
+
+    @symbols.setter
+    def symbols(self, x):
+        self._symbols = x
+
+    @property
+    def ensembl(self) -> List[str]:
+        return self._symbols
+
+    @property
+    def biotype(self) -> List[str]:
+        return ["custom" for x in self._symbols]
+
+    @property
+    def n_var(self) -> int:
+        return len(self.symbols) if self.symbols is not None else None

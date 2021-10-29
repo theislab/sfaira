@@ -247,8 +247,15 @@ class DistributedStoresAnndata(DistributedStoreMultipleFeatureSpaceBase):
         indices = {}
         if isinstance(adatas, anndata.AnnData):
             adatas = [adatas]
-        for adata in adatas:
-            organism = adata.uns[self._adata_ids_sfaira.organism]
+        for i, adata in enumerate(adatas):
+            # Check if adata has a unique ID, if not, add one:
+            if self._adata_ids_sfaira.id not in adata.uns.keys():
+                adata.uns[self._adata_ids_sfaira.id] = f"adata_{i}"
+            if self._adata_ids_sfaira.organism in adata.uns.keys():
+                organism = adata.uns[self._adata_ids_sfaira.organism]
+            else:
+                # Declare as unknown organism and genome and make a group of its own:
+                organism = adata.uns[self._adata_ids_sfaira.id]
             if isinstance(organism, list):
                 if len(organism) == 1:
                     organism = organism[0]

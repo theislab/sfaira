@@ -173,7 +173,7 @@ def test_generator_basic_data(store_format: str, idx, batch_size: int, obs_keys:
     store = load_store(cache_path=store_path, store_format=store_format)
     store.subset(attr_key="organism", values=["mouse"])
     gc = GenomeContainer(assembly=ASSEMBLY_MOUSE)
-    gc.subset(**{"biotype": "protein_coding"})
+    gc.set(**{"biotype": "protein_coding"})
     store.genome_container = gc
 
     def map_fn(x, obs):
@@ -216,7 +216,7 @@ def test_generator_blocked_data(store_format: str, idx, randomized_batch_access:
     store = load_store(cache_path=store_path, store_format=store_format)
     store.subset(attr_key="organism", values=["human"])
     gc = GenomeContainer(assembly=ASSEMBLY_HUMAN)
-    gc.subset(**{"biotype": "protein_coding"})
+    gc.set(**{"biotype": "protein_coding"})
     store.genome_container = gc
 
     def map_fn(x, obs):
