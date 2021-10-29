@@ -66,7 +66,7 @@ class PrepareData:
         return store
 
     def prepare_store(self, store_format: str, rewrite: bool = False, rewrite_store: bool = False,
-                  match_to_reference=None) -> str:
+                      match_to_reference=None) -> str:
         """
         Prepares mock data store and returns path to store.
 
