@@ -14,7 +14,7 @@ from .consts import RELEASE_HUMAN, RELEASE_MOUSE
 from .loaders import DatasetSuperGroupMock
 
 MATCH_TO_RELEASE = {"Homo sapiens": RELEASE_HUMAN,
-                    "Mus musculus": RELEASE_MOUSE,}
+                    "Mus musculus": RELEASE_MOUSE}
 
 
 def _create_adata(celltypes, ncells, ngenes, assembly) -> anndata.AnnData:

@@ -432,12 +432,13 @@ class UserInterface:
         assert self.zoo_embedding.model_id is not None, "choose embedding model first"
         if self.zoo_celltype.topology_container.gc.release is not None:
             assert self.zoo_embedding.topology_container.gc.release == \
-                   self.zoo_celltype.topology_container.gc.release, f"genome assemblies defined in the topology " \
-                                                                     f"containers if the embedding and the celltype " \
-                                                                     f"prediction model are not equivalent " \
-                                                                     f"({self.zoo_embedding.topology_container.gc.release} " \
-                                                                     f"and {self.zoo_celltype.topology_container.gc.release} " \
-                                                                     f"respectively, aborting.)"
+                self.zoo_celltype.topology_container.gc.release, \
+                "genome assemblies defined in the topology " \
+                "containers if the embedding and the celltype " \
+                "prediction model are not equivalent " \
+                f"({self.zoo_embedding.topology_container.gc.release} " \
+                f"and {self.zoo_celltype.topology_container.gc.release} " \
+                f"respectively, aborting.)"
         model_weights_file = self.model_lookuptable["model_file_path"].loc[self.model_lookuptable["model_id"] ==
                                                                            self.zoo_embedding.model_id].iloc[0]
         md5 = self.model_lookuptable["md5"].loc[self.model_lookuptable["model_id"] ==
@@ -469,12 +470,13 @@ class UserInterface:
         assert self.zoo_celltype.model_id is not None, "choose cell type model first"
         if self.zoo_embedding.topology_container.gc.release is not None:
             assert self.zoo_embedding.topology_container.gc.release == \
-                   self.zoo_celltype.topology_container.gc.release, f"genome assemblies defined in the topology " \
-                                                                     f"containers if the embedding and the celltype " \
-                                                                     f"prediction model are not equivalent " \
-                                                                     f"({self.zoo_embedding.topology_container.gc.release} " \
-                                                                     f"and {self.zoo_celltype.topology_container.gc.release} " \
-                                                                     f"respectively, aborting.)"
+                self.zoo_celltype.topology_container.gc.release, \
+                "genome assemblies defined in the topology " \
+                "containers if the embedding and the celltype " \
+                "prediction model are not equivalent " \
+                f"({self.zoo_embedding.topology_container.gc.release} " \
+                f"and {self.zoo_celltype.topology_container.gc.release} " \
+                f"respectively, aborting.)"
         model_weights_file = self.model_lookuptable["model_file_path"].loc[self.model_lookuptable["model_id"] ==
                                                                            self.zoo_celltype.model_id].iloc[0]
         md5 = self.model_lookuptable["md5"].loc[self.model_lookuptable["model_id"] ==

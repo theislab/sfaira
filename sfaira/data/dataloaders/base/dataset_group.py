@@ -240,10 +240,12 @@ class DatasetGroup:
             ensbeml are usually named as Organism.Assembly.Release, this is the Release string. Can be:
                 - str: Provide the name of the release.
                 - dict: Mapping of organism to name of the release (see str format). Chooses release for each
-                    data set based on organism annotation.:param remove_gene_version: Whether to remove the version number after the colon sometimes found in ensembl gene ids.
-        :param subset_genes_to_type: Type(s) to subset to. Can be a single type or a list of types or None. Types can be:
-            - None: All genes in assembly.
-            - "protein_coding": All protein coding genes in assembly.
+                    data set based on organism annotation.:param remove_gene_version: Whether to remove the version
+                    number after the colon sometimes found in ensembl gene ids.
+        :param subset_genes_to_type: Type(s) to subset to. Can be a single type or a list of types or None.
+            Types can be:
+                - None: All genes in assembly.
+                - "protein_coding": All protein coding genes in assembly.
         """
         for x in self.ids:
             self.datasets[x].streamline_features(
@@ -415,21 +417,24 @@ class DatasetGroup:
             adata_concat = adata_ls[0]
             adata_concat.obs[self._adata_ids.dataset] = ds_id
         else:
-            # Check that all individual adata objects in linked Dataset instances have identicall streamlined features and metadata
+            # Check that all individual adata objects in linked Dataset instances have identicall streamlined features
+            # and metadata
             match_ref_list = []
             rm_gene_ver_list = []
             gene_type_list = []
             for d_id in self.ids:
                 if self.datasets[d_id].adata is not None:
-                    assert self.datasets[d_id].mapped_features, f"Dataset {d_id} does not seem to have a streamlined " \
-                                                                f"featurespace. To obtain an adata object from this " \
-                                                                f"DatasetGroup, all contained Datasets need to have a " \
-                                                                f"streamlined featurespace. Run .streamline_features()" \
-                                                                f" first."
-                    assert self.datasets[d_id].streamlined_meta, f"Dataset {d_id} does not seem to have streamlined " \
-                                                                 f"metadata. To obtain an adata object from this " \
-                                                                 f"DatasetGroup, all contained Datasets need to have " \
-                                                                 f"streamlined metadata. Run .streamline_metadata() first."
+                    assert self.datasets[d_id].mapped_features, \
+                        f"Dataset {d_id} does not seem to have a streamlined " \
+                        f"featurespace. To obtain an adata object from this " \
+                        f"DatasetGroup, all contained Datasets need to have a " \
+                        f"streamlined featurespace. Run .streamline_features()" \
+                        f" first."
+                    assert self.datasets[d_id].streamlined_meta, \
+                        f"Dataset {d_id} does not seem to have streamlined " \
+                        f"metadata. To obtain an adata object from this " \
+                        f"DatasetGroup, all contained Datasets need to have " \
+                        f"streamlined metadata. Run .streamline_metadata() first."
                     match_ref_list.append(self.datasets[d_id].mapped_features)
                     rm_gene_ver_list.append(self.datasets[d_id].remove_gene_version)
                     gene_type_list.append(self.datasets[d_id].subset_gene_type)
@@ -438,8 +443,9 @@ class DatasetGroup:
                 "'match_to_reference' of method .streamline_features())." \
                 "This is however a prerequisite for creating a combined adata object."
             assert len(set(rm_gene_ver_list)) == 1, \
-                "Not all datasets in this group have had their gene version removed (argument 'remove_gene_version' of " \
-                "method .streamline_features()). This is however a prerequisite for creating a combined adata object."
+                "Not all datasets in this group have had their gene version removed (argument 'remove_gene_version' " \
+                "of method .streamline_features()). This is however a prerequisite for creating a combined adata " \
+                "object."
             assert len(set(gene_type_list)) == 1, \
                 "Not all datasets in this group had their featurespace subsetted to the same gene type (argument " \
                 "'subset_gene_type' of method .streamline_features()). This is however a prerequisite for creating a " \
@@ -951,13 +957,15 @@ class DatasetSuperGroup:
         Subset and sort genes to genes defined in an assembly or genes of a particular type, such as protein coding.
 
         :param match_to_release: Which genome annotation release to map the feature space to. Note that assemblies from
-            ensbeml are usually named as Organism.Assembly.Release, this is the Release string. Can be:
+            ensembl are usually named as Organism.Assembly.Release, this is the Release string. Can be:
                 - str: Provide the name of the release.
                 - dict: Mapping of organism to name of the release (see str format). Chooses release for each
-                    data set based on organism annotation.:param remove_gene_version: Whether to remove the version number after the colon sometimes found in ensembl gene ids.
-        :param subset_genes_to_type: Type(s) to subset to. Can be a single type or a list of types or None. Types can be:
-            - None: All genes in assembly.
-            - "protein_coding": All protein coding genes in assembly.
+                    data set based on organism annotation.:param remove_gene_version: Whether to remove the version
+                    number after the colon sometimes found in ensembl gene ids.
+        :param subset_genes_to_type: Type(s) to subset to. Can be a single type or a list of types or None.
+            Types can be:
+                - None: All genes in assembly.
+                - "protein_coding": All protein coding genes in assembly.
         """
         for x in self.dataset_groups:
             x.streamline_features(
