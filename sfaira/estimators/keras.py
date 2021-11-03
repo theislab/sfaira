@@ -213,7 +213,7 @@ class EstimatorKeras:
 
     @property
     def organism(self):
-        return {"homo_sapiens": "human", "mus_musculus": "mouse"}[self.topology_container.organism]
+        return self.topology_container.organism
 
     def load_pretrained_weights(self):
         """

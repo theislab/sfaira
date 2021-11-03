@@ -954,7 +954,7 @@ class OntologyMmusdv(OntologyExtendedObo):
             recache: bool = False,
             **kwargs
     ):
-        # URL for releases:
+        # URL for releases, not used here yet because versioning with respect to releases below is not consistent yet.
         # url=f"https://raw.githubusercontent.com/obophenotype/developmental-stage-ontologies/{branch}/src/mmusdv/mmusdv.obo"
         obofile = cached_load_file(
             url="http://ontologies.berkeleybop.org/mmusdv.obo",
@@ -1062,6 +1062,42 @@ class OntologyHancestro(OntologyEbi):
             ontology_cache_fn="hancestro.pickle",
             recache=recache,
         )
+
+
+class OntologyTaxon(OntologyExtendedObo):
+
+    """
+    Note on ontology: The same repo also contains ncbitaxon.obs, the full ontology which is ~500MB large and
+    takes multiple minutes to load. We are using a reduced version, taxslim, here.
+
+    See also https://github.com/obophenotype/ncbitaxon/releases/download/{branch}/ncbitaxon.obo.
+    """
+
+    def __init__(
+            self,
+            branch: str,
+            recache: bool = False,
+            **kwargs
+    ):
+        obofile = cached_load_file(
+            url=f"https://github.com/obophenotype/ncbitaxon/releases/download/{branch}/taxslim.obo",
+            ontology_cache_dir="ncbitaxon",
+            ontology_cache_fn=f"ncbitaxon_{branch}.obo",
+            recache=recache,
+        )
+        super().__init__(obo=obofile)
+
+        # Clean up nodes:
+        nodes_to_delete = []
+        for k, v in self.graph.nodes.items():
+            if "name" not in v.keys():
+                nodes_to_delete.append(k)
+        for k in nodes_to_delete:
+            self.graph.remove_node(k)
+
+    @property
+    def synonym_node_properties(self) -> List[str]:
+        return ["synonym"]
 
 
 class OntologyEfo(OntologyExtendedObo):

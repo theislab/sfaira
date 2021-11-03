@@ -21,7 +21,7 @@ class Dataset(DatasetBase):
         self.doi_journal = "no_doi_10x_genomics"
         self.normalization = "raw"
         self.organ = "blood"
-        self.organism = "human"
+        self.organism = "Homo sapiens"
         self.primary_data = True
         self.sample_source = "primary_tissue"
         self.year = 2019

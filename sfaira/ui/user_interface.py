@@ -388,7 +388,7 @@ class UserInterface:
         self.data.cell_type_obs_key = obs_key_celltypes
         # Align to correct featurespace
         self.data.streamline_features(
-            match_to_reference=self.zoo_embedding.topology_container.gc.assembly,
+            match_to_release=self.zoo_embedding.topology_container.gc.release,
             subset_genes_to_type=list(set(self.zoo_embedding.topology_container.gc.biotype))
         )
         # Transfer required metadata from the Dataset instance to the adata object
@@ -430,13 +430,13 @@ class UserInterface:
         :return: Model ID loaded.
         """
         assert self.zoo_embedding.model_id is not None, "choose embedding model first"
-        if self.zoo_celltype.topology_container.gc.assembly is not None:
-            assert self.zoo_embedding.topology_container.gc.assembly == \
-                   self.zoo_celltype.topology_container.gc.assembly, f"genome assemblies defined in the topology " \
+        if self.zoo_celltype.topology_container.gc.release is not None:
+            assert self.zoo_embedding.topology_container.gc.release == \
+                   self.zoo_celltype.topology_container.gc.release, f"genome assemblies defined in the topology " \
                                                                      f"containers if the embedding and the celltype " \
                                                                      f"prediction model are not equivalent " \
-                                                                     f"({self.zoo_embedding.topology_container.gc.assembly} " \
-                                                                     f"and {self.zoo_celltype.topology_container.gc.assembly} " \
+                                                                     f"({self.zoo_embedding.topology_container.gc.release} " \
+                                                                     f"and {self.zoo_celltype.topology_container.gc.release} " \
                                                                      f"respectively, aborting.)"
         model_weights_file = self.model_lookuptable["model_file_path"].loc[self.model_lookuptable["model_id"] ==
                                                                            self.zoo_embedding.model_id].iloc[0]
@@ -467,13 +467,13 @@ class UserInterface:
         :return: Model ID loaded.
         """
         assert self.zoo_celltype.model_id is not None, "choose cell type model first"
-        if self.zoo_embedding.topology_container.gc.assembly is not None:
-            assert self.zoo_embedding.topology_container.gc.assembly == \
-                   self.zoo_celltype.topology_container.gc.assembly, f"genome assemblies defined in the topology " \
+        if self.zoo_embedding.topology_container.gc.release is not None:
+            assert self.zoo_embedding.topology_container.gc.release == \
+                   self.zoo_celltype.topology_container.gc.release, f"genome assemblies defined in the topology " \
                                                                      f"containers if the embedding and the celltype " \
                                                                      f"prediction model are not equivalent " \
-                                                                     f"({self.zoo_embedding.topology_container.gc.assembly} " \
-                                                                     f"and {self.zoo_celltype.topology_container.gc.assembly} " \
+                                                                     f"({self.zoo_embedding.topology_container.gc.release} " \
+                                                                     f"and {self.zoo_celltype.topology_container.gc.release} " \
                                                                      f"respectively, aborting.)"
         model_weights_file = self.model_lookuptable["model_file_path"].loc[self.model_lookuptable["model_id"] ==
                                                                            self.zoo_celltype.model_id].iloc[0]

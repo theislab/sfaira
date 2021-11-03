@@ -2,13 +2,14 @@ from typing import Dict, Union
 
 from sfaira.versions.metadata import OntologyList, OntologyCl
 from sfaira.versions.metadata import OntologyCellosaurus, OntologyHancestro, OntologyHsapdv, OntologyMondo, \
-    OntologyMmusdv, OntologyEfo, OntologySex, OntologyUberon
+    OntologyMmusdv, OntologyEfo, OntologySex, OntologyTaxon, OntologyUberon
 
 DEFAULT_CL = "v2021-08-10"
 DEFAULT_HSAPDV = "master"
 DEFAULT_MONDO = "v2021-08-11"
 DEFAULT_MMUSDV = "master"
 DEFAULT_PATO = "v2021-08-06"
+DEFAULT_NCBITAXON = "v2021-06-10"
 DEFAULT_UBERON = "v2021-07-27"
 
 
@@ -26,6 +27,7 @@ class OntologyContainerSfaira:
     _development_stage: Union[None, Dict[str, Union[OntologyHsapdv, OntologyMmusdv]]]
     _ethnicity: Union[None, Dict[str, Union[OntologyHancestro, None]]]
     _organ: Union[None, OntologyUberon]
+    _organism: Union[None, OntologyTaxon]
     _sex: Union[None, OntologySex]
 
     def __init__(self):
@@ -50,7 +52,7 @@ class OntologyContainerSfaira:
         self.individual = None
         self.normalization = None
         self._organ = None
-        self.organism = OntologyList(terms=["mouse", "human"])  # TODO introduce NCBItaxon here
+        self._organism = None
         self.primary_data = OntologyList(terms=[True, False])
         self.sample_source = OntologyList(terms=["primary_tissue", "2d_culture", "3d_culture", "tumor"])
         self._sex = None
@@ -69,18 +71,20 @@ class OntologyContainerSfaira:
             self._cell_type = OntologyCl(branch=DEFAULT_CL, **kwargs)
         elif attr == "development_stage":
             self._development_stage = {
-                "human": OntologyHsapdv(**kwargs),
-                "mouse": OntologyMmusdv(**kwargs),
+                "homosapiens": OntologyHsapdv(**kwargs),
+                "musmusculus": OntologyMmusdv(**kwargs),
             }
         elif attr == "disease":
             self._disease = OntologyMondo(**kwargs)
         elif attr == "ethnicity":
             self._ethnicity = {
-                "human": OntologyHancestro(),
-                "mouse": None,
+                "homosapiens": OntologyHancestro(),
+                "musmusculus": None,
             }
         elif attr == "organ":
             self._organ = OntologyUberon(**kwargs)
+        elif attr == "organism":
+            self._organism = OntologyTaxon(**kwargs)
         elif attr == "sex":
             self._sex = OntologySex(**kwargs)
         return self._assay_sc
@@ -111,8 +115,8 @@ class OntologyContainerSfaira:
     def development_stage(self):
         if self._development_stage is None:
             self._development_stage = {
-                "human": OntologyHsapdv(branch=DEFAULT_HSAPDV),
-                "mouse": OntologyMmusdv(branch=DEFAULT_MMUSDV),
+                "Homo sapiens": OntologyHsapdv(branch=DEFAULT_HSAPDV),
+                "Mus musculus": OntologyMmusdv(branch=DEFAULT_MMUSDV),
             }
         return self._development_stage
 
@@ -126,8 +130,8 @@ class OntologyContainerSfaira:
     def ethnicity(self):
         if self._ethnicity is None:
             self._ethnicity = {
-                "human": OntologyHancestro(),
-                "mouse": None,
+                "Homo sapiens": OntologyHancestro(),
+                "Mus musculus": None,
             }
         return self._ethnicity
 
@@ -136,6 +140,12 @@ class OntologyContainerSfaira:
         if self._organ is None:
             self._organ = OntologyUberon(branch=DEFAULT_UBERON)
         return self._organ
+
+    @property
+    def organism(self):
+        if self._organism is None:
+            self._organism = OntologyTaxon(branch=DEFAULT_NCBITAXON)
+        return self._organism
 
     @property
     def sex(self):

@@ -1,8 +1,8 @@
 import numpy as np
 from sfaira.consts.ontologies import DEFAULT_CL, DEFAULT_HSAPDV, DEFAULT_MONDO, DEFAULT_MMUSDV, DEFAULT_PATO, \
-    DEFAULT_UBERON
+    DEFAULT_NCBITAXON, DEFAULT_UBERON
 from sfaira.versions.metadata import OntologyUberon, OntologyCl, OntologyHancestro, OntologyHsapdv, OntologyMondo, \
-    OntologyMmusdv, OntologyEfo, OntologySex
+    OntologyMmusdv, OntologyEfo, OntologyTaxon, OntologySex
 
 """
 OntologyCelltypes
@@ -149,6 +149,16 @@ Mmusdv
 def test_mmusdv_loading():
     _ = OntologyMmusdv(branch=DEFAULT_MMUSDV, recache=True)
     _ = OntologyMmusdv(branch=DEFAULT_MMUSDV, recache=False)
+
+
+"""
+NCBI Taxon
+"""
+
+
+def test_taxon_loading():
+    _ = OntologyTaxon(branch=DEFAULT_NCBITAXON, recache=True)
+    _ = OntologyTaxon(branch=DEFAULT_NCBITAXON, recache=False)
 
 
 """

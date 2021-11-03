@@ -41,7 +41,7 @@ class HelperUi:
         :return:
         """
         dsg = PrepareData().prepare_dsg(rewrite=True, load=False)
-        dsg.subset(key="id", values=["human_lung_2021_None_mock4_001_no_doi_mock4"])
+        dsg.subset(key="id", values=["homosapiens_lung_2021_None_mock4_001_no_doi_mock4"])
         dsg.load()
         return dsg.adata
 

@@ -26,7 +26,7 @@ def test_a_dsgs_download(database: str, subset_args: List[str]):
 
 
 @pytest.mark.parametrize("database", ["cellxgene", ])
-@pytest.mark.parametrize("subset_args", [["id", CELLXGENE_DATASET_ID], ["organism", "human"], ])
+@pytest.mark.parametrize("subset_args", [["id", CELLXGENE_DATASET_ID], ["organism", "homosapiens"], ])
 def test_dsgs_subset(database: str, subset_args: List[str]):
     """
     Tests if subsetting results only in datasets of the desired characteristics.

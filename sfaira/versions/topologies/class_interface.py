@@ -18,7 +18,10 @@ class TopologyContainer:
         self.topology = topology
         if custom_genome_constainer is None:
             if self.topology["input"]["genome"] is not None:
-                self.gc = GenomeContainer(assembly=self.topology["input"]["genome"])
+                self.gc = GenomeContainer(
+                    organism=" ".join(self.topology["input"]["genome"].split(".")[0].split("_")),
+                    release=self.topology["input"]["genome"].split(".")[-1],
+                )
             else:
                 self.gc = ReactiveFeatureContainer()
         else:
