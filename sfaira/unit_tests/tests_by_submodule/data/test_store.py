@@ -11,14 +11,14 @@ from sfaira.consts import AdataIdsSfaira
 from sfaira.data import load_store
 from sfaira.versions.genomes.genomes import GenomeContainer
 
-from sfaira.unit_tests.data_for_tests.loaders import ASSEMBLY_MOUSE, ASSEMBLY_HUMAN, PrepareData
+from sfaira.unit_tests.data_for_tests.loaders import RELEASE_MOUSE, RELEASE_HUMAN, PrepareData
 
 
 def _get_single_store(store_format: str):
     store_path = PrepareData().prepare_store(store_format=store_format)
     stores = load_store(cache_path=store_path, store_format=store_format)
-    stores.subset(attr_key="organism", values=["mouse"])
-    store = stores.stores["mouse"]
+    stores.subset(attr_key="organism", values=["Mus musculus"])
+    store = stores.stores["Mus musculus"]
     return store
 
 
@@ -32,8 +32,8 @@ def test_fatal(store_format: str):
     else:
         store_path = PrepareData().prepare_store(store_format=store_format)
         stores = load_store(cache_path=store_path, store_format=store_format)
-    stores.subset(attr_key="organism", values=["mouse"])
-    store = stores.stores["mouse"]
+    stores.subset(attr_key="organism", values=["Mus musculus"])
+    store = stores.stores["Mus musculus"]
     # Test both single and multi-store:
     for x in [store, stores]:
         _ = x.n_obs
@@ -84,7 +84,7 @@ def test_config(store_format: str):
     store_path = PrepareData().prepare_store(store_format=store_format)
     config_path = os.path.join(store_path, "config_lung")
     store = load_store(cache_path=store_path, store_format=store_format)
-    store.subset(attr_key="organism", values=["mouse"])
+    store.subset(attr_key="organism", values=["Mus musculus"])
     store.subset(attr_key="assay_sc", values=["10x technology"])
     store.write_config(fn=config_path)
     store2 = load_store(cache_path=store_path, store_format=store_format)
@@ -171,15 +171,15 @@ def test_generator_basic_data(store_format: str, idx, batch_size: int, obs_keys:
     # Need to re-write because specific obs_keys are required:
     store_path = PrepareData().prepare_store(store_format=store_format)
     store = load_store(cache_path=store_path, store_format=store_format)
-    store.subset(attr_key="organism", values=["mouse"])
-    gc = GenomeContainer(assembly=ASSEMBLY_MOUSE)
+    store.subset(attr_key="organism", values=["Mus musculus"])
+    gc = GenomeContainer(release=RELEASE_MOUSE, organism="Mus musculus")
     gc.set(**{"biotype": "protein_coding"})
     store.genome_container = gc
 
     def map_fn(x, obs):
         return (x, ),
 
-    g = store.generator(idx={"mouse": idx}, batch_size=batch_size, map_fn=map_fn, obs_keys=obs_keys,
+    g = store.generator(idx={"Mus musculus": idx}, batch_size=batch_size, map_fn=map_fn, obs_keys=obs_keys,
                         randomized_batch_access=randomized_batch_access)
     g = g.iterator
     nobs = len(idx) if idx is not None else store.n_obs
@@ -197,7 +197,7 @@ def test_generator_basic_data(store_format: str, idx, batch_size: int, obs_keys:
             x = x_i
         batch_sizes.append(x_i.shape[0])
     assert counter > 0
-    assert x.shape[1] == store.n_vars["mouse"], (x.shape, store.n_vars["mouse"])
+    assert x.shape[1] == store.n_vars["Mus musculus"], (x.shape, store.n_vars["Mus musculus"])
     assert np.sum(batch_sizes) == nobs, (batch_sizes, nobs)
     assert x.shape[1] == gc.n_var, (x.shape, gc.n_var)
 
@@ -214,16 +214,16 @@ def test_generator_blocked_data(store_format: str, idx, randomized_batch_access:
     # Need to re-write because specific obs_keys are required:
     store_path = PrepareData().prepare_store(store_format=store_format)
     store = load_store(cache_path=store_path, store_format=store_format)
-    store.subset(attr_key="organism", values=["human"])
-    gc = GenomeContainer(assembly=ASSEMBLY_HUMAN)
+    store.subset(attr_key="organism", values=["Homo sapiens"])
+    gc = GenomeContainer(release=RELEASE_HUMAN, organism="Homo sapiens")
     gc.set(**{"biotype": "protein_coding"})
     store.genome_container = gc
 
     def map_fn(x, obs):
         return (obs, ),
 
-    block_vals = store.obs["human"][block_col].values
-    g = store.generator(idx={"human": idx}, batch_size=0, map_fn=map_fn, obs_keys=obs_keys,
+    block_vals = store.obs["Homo sapiens"][block_col].values
+    g = store.generator(idx={"Homo sapiens": idx}, batch_size=0, map_fn=map_fn, obs_keys=obs_keys,
                         randomized_batch_access=randomized_batch_access,
                         batch_schedule="blocks", grouping=block_vals)
     g = g.iterator

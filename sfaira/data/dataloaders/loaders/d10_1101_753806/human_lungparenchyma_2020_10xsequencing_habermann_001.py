@@ -33,7 +33,7 @@ class Dataset(DatasetBase):
         self.doi_preprint = "10.1101/753806"
         self.normalization = "raw"
         self.organ = "lung parenchyma"
-        self.organism = "human"
+        self.organism = "Homo sapiens"
         self.primary_data = True
         self.assay_sc_obs_key = "Chemistry"
         self.year = 2020

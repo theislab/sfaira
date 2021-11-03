@@ -18,7 +18,7 @@ class Dataset(DatasetBase):
         self.doi_journal = "10.1073/pnas.1914143116"
         self.normalization = "norm"
         self.organ = "retina"
-        self.organism = "human"
+        self.organism = "Homo sapiens"
         self.primary_data = True
         self.sample_source = "primary_tissue"
         self.year = 2019

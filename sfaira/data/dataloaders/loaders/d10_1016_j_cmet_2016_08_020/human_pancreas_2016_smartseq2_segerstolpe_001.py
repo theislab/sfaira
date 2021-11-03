@@ -20,7 +20,7 @@ class Dataset(DatasetBase):
         self.doi_journal = "10.1016/j.cmet.2016.08.020"
         self.normalization = "raw"
         self.organ = "pancreas"
-        self.organism = "human"
+        self.organism = "Homo sapiens"
         self.primary_data = True
         self.sample_source = "primary_tissue"
         self.year = 2016

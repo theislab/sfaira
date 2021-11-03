@@ -506,7 +506,7 @@ class DatasetBase(abc.ABC):
 
     def streamline_features(
             self,
-            match_to_reference: Union[str, Dict[str, str], None] = None,
+            match_to_release: Union[str, Dict[str, str], None] = None,
             remove_gene_version: bool = True,
             subset_genes_to_type: Union[None, str, List[str]] = None,
             schema: Union[str, None] = None,
@@ -516,9 +516,10 @@ class DatasetBase(abc.ABC):
         This also adds missing ensid or gene symbol columns if match_to_reference is not set to False and removes all
         adata.var columns that are not defined as gene_id_ensembl_var_key or gene_id_symbol_var_key in the dataloader.
 
-        :param match_to_reference: Which annotation to map the feature space to. Can be:
-                - str: Provide the name of the annotation in the format Organism.Assembly.Release
-                - dict: Mapping of organism to name of the annotation (see str format). Chooses annotation for each
+        :param match_to_release: Which genome annotation release to map the feature space to. Note that assemblies from
+            ensbeml are usually named as Organism.Assembly.Release, this is the Release string. Can be:
+                - str: Provide the name of the release.
+                - dict: Mapping of organism to name of the release (see str format). Chooses release for each
                     data set based on organism annotation.
         :param remove_gene_version: Whether to remove the version number after the colon sometimes found in ensembl
             gene ids.
@@ -537,20 +538,20 @@ class DatasetBase(abc.ABC):
                 adata_target_ids = AdataIdsCellxgene_v2_0_0()
             else:
                 raise ValueError(f"did not recognize schema {schema}")
-            match_to_reference = adata_target_ids.feature_kwargs["match_to_reference"]
+            match_to_release = adata_target_ids.feature_kwargs["match_to_release"]
             remove_gene_version = adata_target_ids.feature_kwargs["remove_gene_version"]
             subset_genes_to_type = adata_target_ids.feature_kwargs["subset_genes_to_type"]
 
         # Set genome container if mapping of gene labels is requested
-        if isinstance(match_to_reference, dict):
-            match_to_reference = match_to_reference[self.organism]
-        self._set_genome(assembly=match_to_reference)
-        self.mapped_features = self.genome_container.assembly
+        if isinstance(match_to_release, dict):
+            match_to_release = match_to_release[self.organism]
+        self._set_genome(organism=self.organism, release=match_to_release)
+        self.mapped_features = self.genome_container.release
 
         self.remove_gene_version = remove_gene_version
         self.subset_gene_type = subset_genes_to_type
         # Streamline feature space:
-        self._add_missing_featurenames(match_to_reference=match_to_reference)
+        self._add_missing_featurenames(match_to_reference=match_to_release)
         for key in [self.gene_id_ensembl_var_key, self.gene_id_symbols_var_key]:
             # Make features unique (to avoid na-matches in converted columns to be collapsed by
             # _collapse_ensembl_gene_id_versions() below.
@@ -636,7 +637,7 @@ class DatasetBase(abc.ABC):
             var=var_new,
             uns=self.adata.uns
         )
-        self.adata.uns[self._adata_ids.mapped_features] = match_to_reference
+        self.adata.uns[self._adata_ids.mapped_features] = match_to_release
 
     def streamline_metadata(
             self,
@@ -965,89 +966,25 @@ class DatasetBase(abc.ABC):
         else:
             raise ValueError()
 
-    def write_backed(
-            self,
-            adata_backed: anndata.AnnData,
-            genome: str,
-            idx: np.ndarray,
-            load_raw: bool = False,
-            allow_caching: bool = True
-    ):
-        """
-        Loads data set into slice of backed anndata object.
-
-        Note: scatter updates to backed sparse arrays are not yet supported by anndata. Accordingly, we need to work
-        around below using .append() of the backed matrix.
-
-        :param adata_backed:
-        :param genome: Genome name to use as refernce.
-        :param idx: Indices in adata_backed to write observations to. This can be used to immediately create a
-            shuffled object.
-        :param load_raw: See .load().
-        :param allow_caching: See .load().
-        :return: New row index for next element to be written into backed anndata.
-        """
-        self.load(load_raw=load_raw, allow_caching=allow_caching)
-        # Check if writing to sparse or dense matrix:
-        if isinstance(adata_backed.X, np.ndarray) or \
-                isinstance(adata_backed.X, h5py._hl.dataset.Dataset):  # backed dense
-            if isinstance(self.adata.X, scipy.sparse.csr_matrix) or \
-                    isinstance(self.adata.X, scipy.sparse.csc_matrix) or \
-                    isinstance(self.adata.X, scipy.sparse.lil_matrix):
-                # map to dense array
-                x_new = self.adata.X.toarray()
-            else:
-                x_new = self.adata.X
-
-            adata_backed.X[np.sort(idx), :] = x_new[np.argsort(idx), :]
-            for k in adata_backed.obs.columns:
-                if k == self._adata_ids.dataset:
-                    adata_backed.obs.loc[np.sort(idx), self._adata_ids.dataset] = [
-                        self.id for _ in range(len(idx))]
-                elif k in self.adata.obs.columns:
-                    adata_backed.obs.loc[np.sort(idx), k] = self.adata.obs[k].values[np.argsort(idx)]
-                elif k in list(self.adata.uns.keys()):
-                    adata_backed.obs.loc[np.sort(idx), k] = [self.adata.uns[k] for i in range(len(idx))]
-                else:
-                    # Need to fill this instead of throwing an exception as this condition can trigger for one element
-                    # within a loop over multiple data sets (ie in data set human).
-                    adata_backed.obs.loc[idx, k] = ["key_not_found" for i in range(len(idx))]
-        elif isinstance(adata_backed.X, anndata._core.sparse_dataset.SparseDataset):  # backed sparse
-            # cannot scatter update on backed sparse yet! assert that updated block is meant to be appended:
-            assert np.all(idx == np.arange(adata_backed.shape[0], adata_backed.shape[0] + len(idx)))
-            if not isinstance(self.adata.X, scipy.sparse.csr_matrix):
-                x_new = self.adata.X.tocsr()
-            else:
-                x_new = self.adata.X
-            adata_backed.X.append(x_new[np.argsort(idx)])
-            adata_backed._n_obs = adata_backed.X.shape[0]  # not automatically updated after append
-            adata_backed.obs = adata_backed.obs.append(  # .obs was not broadcasted to the right shape!
-                pandas.DataFrame(dict([
-                    (k, [self.id for i in range(len(idx))]) if k == self._adata_ids.dataset
-                    else (k, self.adata.obs[k].values[np.argsort(idx)]) if k in self.adata.obs.columns
-                    else (k, [self.adata.uns[k] for _ in range(len(idx))]) if k in list(self.adata.uns.keys())
-                    else (k, ["key_not_found" for _ in range(len(idx))])
-                    for k in adata_backed.obs.columns
-                ]))
-            )
-            self.clear()
-        else:
-            raise ValueError(f"Did not recognize backed AnnData.X format {type(adata_backed.X)}")
-
-    def _set_genome(self, assembly: Union[str, None]):
-        self.genome_container = GenomeContainer(
-            assembly=assembly,
-        )
+    def _set_genome(self, organism: str, release: str):
+        self.genome_container = GenomeContainer(organism=organism, release=release)
 
     @property
     def doi_cleaned_id(self):
         return "_".join(self.id.split("_")[:-1])
 
-    def get_ontology(self, k) -> OntologyHierarchical:
+    def get_ontology(self, k) -> Union[OntologyHierarchical, None]:
         x = getattr(self.ontology_container_sfaira, k) if hasattr(self.ontology_container_sfaira, k) else None
-        if isinstance(x, dict):
-            assert isinstance(self.organism, str)
-            x = x[self.organism]
+        if x is not None and isinstance(x, dict):
+            assert isinstance(self.organism, str), self.organism
+            # Check if organism-specific option is available, otherwise choose generic option:
+            if self.organism in x.keys():
+                k = self.organism
+            else:
+                k = self.ontology_container_sfaira.key_other
+                assert k in x.keys(), x.keys()  # Sanity check on dictionary keys.
+            x = x[k]
+            assert x is None or isinstance(x, Ontology), x  # Sanity check on dictionary element.
         return x
 
     @property
@@ -1162,7 +1099,7 @@ class DatasetBase(abc.ABC):
             # This protection blocks progression in the unit test if not deactivated.
             self._value_protection(
                 attr=attr,
-                allowed=getattr(self.ontology_container_sfaira, attr),
+                allowed=self.get_ontology(k=attr),
                 attempted=[x for x in list(set(labels_mapped)) if x not in map_exceptions],
             )
             # Add cell type IDs into object:
@@ -1446,7 +1383,7 @@ class DatasetBase(abc.ABC):
 
     @assay_sc.setter
     def assay_sc(self, x: str):
-        x = self._value_protection(attr="assay_sc", allowed=self.ontology_container_sfaira.assay_sc, attempted=x)
+        x = self._value_protection(attr="assay_sc", allowed=self.get_ontology(k="assay_sc"), attempted=x)
         self._assay_sc = x
 
     @property
@@ -1464,7 +1401,7 @@ class DatasetBase(abc.ABC):
     @assay_differentiation.setter
     def assay_differentiation(self, x: str):
         x = self._value_protection(attr="assay_differentiation",
-                                   allowed=self.ontology_container_sfaira.assay_differentiation, attempted=x)
+                                   allowed=self.get_ontology(k="assay_differentiation"), attempted=x)
         self._assay_differentiation = x
 
     @property
@@ -1482,7 +1419,7 @@ class DatasetBase(abc.ABC):
     @assay_type_differentiation.setter
     def assay_type_differentiation(self, x: str):
         x = self._value_protection(attr="assay_type_differentiation",
-                                   allowed=self.ontology_container_sfaira.assay_type_differentiation, attempted=x)
+                                   allowed=self.get_ontology(k="assay_type_differentiation"), attempted=x)
         self._assay_type_differentiation = x
 
     @property
@@ -1603,7 +1540,7 @@ class DatasetBase(abc.ABC):
 
     @default_embedding.setter
     def default_embedding(self, x: str):
-        x = self._value_protection(attr="default_embedding", allowed=self.ontology_container_sfaira.default_embedding,
+        x = self._value_protection(attr="default_embedding", allowed=self.get_ontology(k="default_embedding"),
                                    attempted=x)
         self._default_embedding = x
 
@@ -1622,7 +1559,7 @@ class DatasetBase(abc.ABC):
     @development_stage.setter
     def development_stage(self, x: str):
         x = self._value_protection(attr="development_stage",
-                                   allowed=self.ontology_container_sfaira.development_stage[self.organism],
+                                   allowed=self.get_ontology(k="development_stage"),
                                    attempted=x)
         self._development_stage = x
 
@@ -1640,7 +1577,7 @@ class DatasetBase(abc.ABC):
 
     @disease.setter
     def disease(self, x: str):
-        x = self._value_protection(attr="disease", allowed=self.ontology_container_sfaira.disease,
+        x = self._value_protection(attr="disease", allowed=self.get_ontology(k="disease"),
                                    attempted=x)
         self._disease = x
 
@@ -1763,7 +1700,7 @@ class DatasetBase(abc.ABC):
 
     @ethnicity.setter
     def ethnicity(self, x: str):
-        x = self._value_protection(attr="ethnicity", allowed=self.ontology_container_sfaira.ethnicity[self.organism],
+        x = self._value_protection(attr="ethnicity", allowed=self.get_ontology(k="ethnicity"),
                                    attempted=x)
         self._ethnicity = x
 
@@ -1849,7 +1786,7 @@ class DatasetBase(abc.ABC):
 
     @normalization.setter
     def normalization(self, x: str):
-        x = self._value_protection(attr="normalization", allowed=self.ontology_container_sfaira.normalization,
+        x = self._value_protection(attr="normalization", allowed=self.get_ontology(k="normalization"),
                                    attempted=x)
         self._normalization = x
 
@@ -1867,7 +1804,7 @@ class DatasetBase(abc.ABC):
 
     @primary_data.setter
     def primary_data(self, x: bool):
-        x = self._value_protection(attr="primary_data", allowed=self.ontology_container_sfaira.primary_data,
+        x = self._value_protection(attr="primary_data", allowed=self.get_ontology(k="primary_data"),
                                    attempted=x)
         self._primary_data = x
 
@@ -1885,7 +1822,7 @@ class DatasetBase(abc.ABC):
 
     @organ.setter
     def organ(self, x: str):
-        x = self._value_protection(attr="organ", allowed=self.ontology_container_sfaira.organ, attempted=x)
+        x = self._value_protection(attr="organ", allowed=self.get_ontology(k="organ"), attempted=x)
         self._organ = x
 
     @property
@@ -1902,7 +1839,7 @@ class DatasetBase(abc.ABC):
 
     @organism.setter
     def organism(self, x: str):
-        x = self._value_protection(attr="organism", allowed=self.ontology_container_sfaira.organism, attempted=x)
+        x = self._value_protection(attr="organism", allowed=self.get_ontology(k="organism"), attempted=x)
         # Update ontology container so that correct ontologies are queried:
         self.ontology_container_sfaira.organism_cache = x
         self._organism = x
@@ -1921,7 +1858,7 @@ class DatasetBase(abc.ABC):
 
     @sample_source.setter
     def sample_source(self, x: str):
-        x = self._value_protection(attr="sample_source", allowed=self.ontology_container_sfaira.sample_source,
+        x = self._value_protection(attr="sample_source", allowed=self.get_ontology(k="sample_source"),
                                    attempted=x)
         self._sample_source = x
 
@@ -1939,7 +1876,7 @@ class DatasetBase(abc.ABC):
 
     @sex.setter
     def sex(self, x: str):
-        x = self._value_protection(attr="sex", allowed=self.ontology_container_sfaira.sex, attempted=x)
+        x = self._value_protection(attr="sex", allowed=self.get_ontology(k="sex"), attempted=x)
         self._sex = x
 
     @property
@@ -2005,7 +1942,7 @@ class DatasetBase(abc.ABC):
 
     @year.setter
     def year(self, x: int):
-        x = self._value_protection(attr="year", allowed=self.ontology_container_sfaira.year, attempted=x)
+        x = self._value_protection(attr="year", allowed=self.get_ontology(k="year"), attempted=x)
         self._year = x
 
     @property
