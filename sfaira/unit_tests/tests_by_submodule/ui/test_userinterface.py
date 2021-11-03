@@ -59,10 +59,10 @@ class HelperUi:
 
         :return:
         """
-        self.ui = UserInterface(custom_repo=None, sfaira_repo=True)
+        self.ui = UserInterface(custom_repo=None, sfaira_repo=True, cache_path=self.temp_fn)
 
     def test_data_and_model_loading(self):
-        self.ui = UserInterface(custom_repo=None, sfaira_repo=True)
+        self.ui = UserInterface(custom_repo=None, sfaira_repo=True, cache_path=self.temp_fn)
         self.ui.zoo_embedding.model_id = 'embedding_human-blood-ae-0.2-0.1_theislab'
         self.ui.zoo_celltype.model_id = 'celltype_human-blood-mlp-0.1.3-0.1_theislab'
         test_data = self._get_adata()

@@ -341,7 +341,6 @@ class UserInterface:
             gene_symbol_col: Union[str, None] = None,
             gene_ens_col: Union[str, None] = None,
             obs_key_celltypes: Union[str, None] = None,
-            class_maps: dict = {},
     ):
         """
         Loads the provided AnnData object into sfaira.
@@ -355,7 +354,6 @@ class UserInterface:
         :param gene_symbol_col: Var column name (or 'index') which contains gene symbols
         :param gene_ens_col: ar column name (or 'index') which contains ensembl ids
         :param obs_key_celltypes: .obs column name which contains cell type labels.
-        :param class_maps: Cell type class maps.
         """
         if self.zoo_embedding.model_organism is not None and self.zoo_celltype.model_organism is not None:
             assert self.zoo_embedding.model_organism == self.zoo_celltype.model_organism, \
@@ -382,13 +380,12 @@ class UserInterface:
 
         self.data = DatasetInteractive(
             data=data,
-            organism=organism,
-            organ=organ,
             gene_symbol_col=gene_symbol_col,
             gene_ens_col=gene_ens_col,
-            obs_key_celltypes=obs_key_celltypes,
-            class_maps=class_maps,
         )
+        self.data.organism = organism
+        self.data.organ = organ
+        self.data.cell_type_obs_key = obs_key_celltypes
         # Align to correct featurespace
         self.data.streamline_features(
             match_to_reference=self.zoo_embedding.topology_container.gc.assembly,
