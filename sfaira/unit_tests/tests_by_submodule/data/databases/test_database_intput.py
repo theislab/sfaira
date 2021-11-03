@@ -38,10 +38,8 @@ def test_streamline_metadata(database: str, format: str):
     ids = AdataIdsSfaira()
     assert "CL:0000128" in adata.obs[ids.cell_type + ids.onto_id_suffix].values
     assert "oligodendrocyte" in adata.obs[ids.cell_type].values
-    assert "HsapDv:0000087" in adata.obs[ids.development_stage + ids.onto_id_suffix].values
-    assert "homosapiens adult stage" in adata.obs[ids.development_stage].values
-    assert "UBERON:0000956" in adata.obs[ids.organ + ids.onto_id_suffix].values
-    assert "cerebral cortex" in adata.obs[ids.organ].values
+    assert "MmusDv:0000061" in adata.obs[ids.development_stage + ids.onto_id_suffix].values
+    assert "early adult stage" in adata.obs[ids.development_stage].values
 
 
 @pytest.mark.parametrize("store", ["dao", ])
@@ -62,7 +60,5 @@ def test_output_to_store(store: str, database: str):
     ids = AdataIdsSfaira()
     assert "CL:0000128" in adata.obs[ids.cell_type + ids.onto_id_suffix].values
     assert "oligodendrocyte" in adata.obs[ids.cell_type].values
-    assert "HsapDv:0000087" in adata.obs[ids.development_stage + ids.onto_id_suffix].values
-    assert "homosapiens adult stage" in adata.obs[ids.development_stage].values
-    assert "UBERON:0000956" in adata.obs[ids.organ + ids.onto_id_suffix].values
-    assert "cerebral cortex" in adata.obs[ids.organ].values
+    assert "MmusDv:0000061" in adata.obs[ids.development_stage + ids.onto_id_suffix].values
+    assert "early adult stage" in adata.obs[ids.development_stage].values

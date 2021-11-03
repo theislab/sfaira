@@ -33,6 +33,8 @@ class OntologyContainerSfaira:
     _sex: Union[None, OntologySex]
 
     def __init__(self):
+        self.key_other = OTHER_ORGANISM_KEY
+
         self.annotated = OntologyList(terms=[True, False])
         self.author = None
         self.assay_differentiation = None
@@ -81,14 +83,14 @@ class OntologyContainerSfaira:
             self._development_stage = {
                 "homosapiens": OntologyHsapdv(**kwargs),
                 "musmusculus": OntologyMmusdv(**kwargs),
-                OTHER_ORGANISM_KEY: OntologyUberonLifecyclestage(branch=DEFAULT_UBERON, **kwargs),
+                self.key_other: OntologyUberonLifecyclestage(branch=DEFAULT_UBERON, **kwargs),
             }
         elif attr == "disease":
             self._disease = OntologyMondo(**kwargs)
         elif attr == "ethnicity":
             self._ethnicity = {
                 "homosapiens": OntologyHancestro(),
-                OTHER_ORGANISM_KEY: None,
+                self.key_other: None,
             }
         elif attr == "organ":
             self._organ = OntologyUberon(**kwargs)
@@ -126,7 +128,7 @@ class OntologyContainerSfaira:
             self._development_stage = {
                 "Homo sapiens": OntologyHsapdv(branch=DEFAULT_HSAPDV),
                 "Mus musculus": OntologyMmusdv(branch=DEFAULT_MMUSDV),
-                OTHER_ORGANISM_KEY: OntologyUberonLifecyclestage(branch=DEFAULT_UBERON),
+                self.key_other: OntologyUberonLifecyclestage(branch=DEFAULT_UBERON),
             }
         return self._development_stage
 
@@ -141,7 +143,7 @@ class OntologyContainerSfaira:
         if self._ethnicity is None:  # Lazy loading after class instantiation.
             self._ethnicity = {
                 "Homo sapiens": OntologyHancestro(),
-                OTHER_ORGANISM_KEY: None,
+                self.key_other: None,
             }
         return self._ethnicity
 

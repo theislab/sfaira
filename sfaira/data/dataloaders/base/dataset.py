@@ -20,7 +20,7 @@ import ssl
 
 from sfaira.versions.genomes import GenomeContainer
 from sfaira.versions.metadata import Ontology, OntologyHierarchical, CelltypeUniverse
-from sfaira.consts import AdataIds, AdataIdsCellxgene_v2_0_0, AdataIdsSfaira, META_DATA_FIELDS, OCS, OTHER_ORGANISM_KEY
+from sfaira.consts import AdataIds, AdataIdsCellxgene_v2_0_0, AdataIdsSfaira, META_DATA_FIELDS, OCS
 from sfaira.data.dataloaders.export_adaptors import cellxgene_export_adaptor
 from sfaira.data.store.io_dao import write_dao
 from sfaira.data.dataloaders.base.utils import is_child, get_directory_formatted_doi
@@ -973,11 +973,18 @@ class DatasetBase(abc.ABC):
     def doi_cleaned_id(self):
         return "_".join(self.id.split("_")[:-1])
 
-    def get_ontology(self, k) -> OntologyHierarchical:
+    def get_ontology(self, k) -> Union[OntologyHierarchical, None]:
         x = getattr(self.ontology_container_sfaira, k) if hasattr(self.ontology_container_sfaira, k) else None
-        if isinstance(x, dict):
-            assert isinstance(self.organism, str)
-            x = x[self.organism]
+        if x is not None and isinstance(x, dict):
+            assert isinstance(self.organism, str), self.organism
+            # Check if organism-specific option is available, otherwise choose generic option:
+            if self.organism in x.keys():
+                k = self.organism
+            else:
+                k = self.ontology_container_sfaira.key_other
+                assert k in x.keys(), x.keys()  # Sanity check on dictionary keys.
+            x = x[k]
+            assert x is None or isinstance(x, Ontology), x  # Sanity check on dictionary element.
         return x
 
     @property
@@ -1092,7 +1099,7 @@ class DatasetBase(abc.ABC):
             # This protection blocks progression in the unit test if not deactivated.
             self._value_protection(
                 attr=attr,
-                allowed=getattr(self.ontology_container_sfaira, attr),
+                allowed=self.get_ontology(k=attr),
                 attempted=[x for x in list(set(labels_mapped)) if x not in map_exceptions],
             )
             # Add cell type IDs into object:
@@ -1376,7 +1383,7 @@ class DatasetBase(abc.ABC):
 
     @assay_sc.setter
     def assay_sc(self, x: str):
-        x = self._value_protection(attr="assay_sc", allowed=self.ontology_container_sfaira.assay_sc, attempted=x)
+        x = self._value_protection(attr="assay_sc", allowed=self.get_ontology(k="assay_sc"), attempted=x)
         self._assay_sc = x
 
     @property
@@ -1394,7 +1401,7 @@ class DatasetBase(abc.ABC):
     @assay_differentiation.setter
     def assay_differentiation(self, x: str):
         x = self._value_protection(attr="assay_differentiation",
-                                   allowed=self.ontology_container_sfaira.assay_differentiation, attempted=x)
+                                   allowed=self.get_ontology(k="assay_differentiation"), attempted=x)
         self._assay_differentiation = x
 
     @property
@@ -1412,7 +1419,7 @@ class DatasetBase(abc.ABC):
     @assay_type_differentiation.setter
     def assay_type_differentiation(self, x: str):
         x = self._value_protection(attr="assay_type_differentiation",
-                                   allowed=self.ontology_container_sfaira.assay_type_differentiation, attempted=x)
+                                   allowed=self.get_ontology(k="assay_type_differentiation"), attempted=x)
         self._assay_type_differentiation = x
 
     @property
@@ -1533,7 +1540,7 @@ class DatasetBase(abc.ABC):
 
     @default_embedding.setter
     def default_embedding(self, x: str):
-        x = self._value_protection(attr="default_embedding", allowed=self.ontology_container_sfaira.default_embedding,
+        x = self._value_protection(attr="default_embedding", allowed=self.get_ontology(k="default_embedding"),
                                    attempted=x)
         self._default_embedding = x
 
@@ -1552,7 +1559,7 @@ class DatasetBase(abc.ABC):
     @development_stage.setter
     def development_stage(self, x: str):
         x = self._value_protection(attr="development_stage",
-                                   allowed=self.ontology_container_sfaira.development_stage,
+                                   allowed=self.get_ontology(k="development_stage"),
                                    attempted=x)
         self._development_stage = x
 
@@ -1570,7 +1577,7 @@ class DatasetBase(abc.ABC):
 
     @disease.setter
     def disease(self, x: str):
-        x = self._value_protection(attr="disease", allowed=self.ontology_container_sfaira.disease,
+        x = self._value_protection(attr="disease", allowed=self.get_ontology(k="disease"),
                                    attempted=x)
         self._disease = x
 
@@ -1693,7 +1700,7 @@ class DatasetBase(abc.ABC):
 
     @ethnicity.setter
     def ethnicity(self, x: str):
-        x = self._value_protection(attr="ethnicity", allowed=self.ontology_container_sfaira.ethnicity,
+        x = self._value_protection(attr="ethnicity", allowed=self.get_ontology(k="ethnicity"),
                                    attempted=x)
         self._ethnicity = x
 
@@ -1779,7 +1786,7 @@ class DatasetBase(abc.ABC):
 
     @normalization.setter
     def normalization(self, x: str):
-        x = self._value_protection(attr="normalization", allowed=self.ontology_container_sfaira.normalization,
+        x = self._value_protection(attr="normalization", allowed=self.get_ontology(k="normalization"),
                                    attempted=x)
         self._normalization = x
 
@@ -1797,7 +1804,7 @@ class DatasetBase(abc.ABC):
 
     @primary_data.setter
     def primary_data(self, x: bool):
-        x = self._value_protection(attr="primary_data", allowed=self.ontology_container_sfaira.primary_data,
+        x = self._value_protection(attr="primary_data", allowed=self.get_ontology(k="primary_data"),
                                    attempted=x)
         self._primary_data = x
 
@@ -1815,7 +1822,7 @@ class DatasetBase(abc.ABC):
 
     @organ.setter
     def organ(self, x: str):
-        x = self._value_protection(attr="organ", allowed=self.ontology_container_sfaira.organ, attempted=x)
+        x = self._value_protection(attr="organ", allowed=self.get_ontology(k="organ"), attempted=x)
         self._organ = x
 
     @property
@@ -1832,7 +1839,7 @@ class DatasetBase(abc.ABC):
 
     @organism.setter
     def organism(self, x: str):
-        x = self._value_protection(attr="organism", allowed=self.ontology_container_sfaira.organism, attempted=x)
+        x = self._value_protection(attr="organism", allowed=self.get_ontology(k="organism"), attempted=x)
         # Update ontology container so that correct ontologies are queried:
         self.ontology_container_sfaira.organism_cache = x
         self._organism = x
@@ -1851,7 +1858,7 @@ class DatasetBase(abc.ABC):
 
     @sample_source.setter
     def sample_source(self, x: str):
-        x = self._value_protection(attr="sample_source", allowed=self.ontology_container_sfaira.sample_source,
+        x = self._value_protection(attr="sample_source", allowed=self.get_ontology(k="sample_source"),
                                    attempted=x)
         self._sample_source = x
 
@@ -1869,7 +1876,7 @@ class DatasetBase(abc.ABC):
 
     @sex.setter
     def sex(self, x: str):
-        x = self._value_protection(attr="sex", allowed=self.ontology_container_sfaira.sex, attempted=x)
+        x = self._value_protection(attr="sex", allowed=self.get_ontology(k="sex"), attempted=x)
         self._sex = x
 
     @property
@@ -1935,7 +1942,7 @@ class DatasetBase(abc.ABC):
 
     @year.setter
     def year(self, x: int):
-        x = self._value_protection(attr="year", allowed=self.ontology_container_sfaira.year, attempted=x)
+        x = self._value_protection(attr="year", allowed=self.get_ontology(k="year"), attempted=x)
         self._year = x
 
     @property
@@ -2031,7 +2038,7 @@ class DatasetBase(abc.ABC):
     def _value_protection(
             self,
             attr: str,
-            allowed: Union[Ontology, Dict[str, Ontology], None],
+            allowed: Union[Ontology, None],
             attempted
     ):
         """
@@ -2056,14 +2063,6 @@ class DatasetBase(abc.ABC):
         else:
             attempted_ls = attempted
         attempted_clean = []
-        if isinstance(allowed, dict):
-            # Check if organism-specific option is available, otherwise choose generic option:
-            if self.organism in allowed.keys():
-                allowed = allowed[self.organism]
-            else:
-                assert OTHER_ORGANISM_KEY in allowed.keys(), allowed.keys()  # Sanity check on dictionary keys.
-                allowed = allowed[OTHER_ORGANISM_KEY]
-            assert allowed is None or isinstance(allowed, Ontology), allowed  # Sanity check on dictionary element.
         for x in attempted_ls:
             if allowed is None:
                 attempted_clean.append(x)
