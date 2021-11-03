@@ -409,6 +409,10 @@ class OntologyHierarchical(Ontology, abc.ABC):
         print(f"time for precomputing ancestors: {time.time()-t0}")
         return maps
 
+    def reset_root(self, root: str):
+        new_nodes = [self.convert_to_id(x=root)] + self.get_ancestors(node=root)
+        self.graph = self.graph.subgraph(nodes=new_nodes)
+
     @abc.abstractmethod
     def synonym_node_properties(self) -> List[str]:
         pass
@@ -830,6 +834,23 @@ class OntologyUberon(OntologyExtendedObo):
     @property
     def synonym_node_properties(self) -> List[str]:
         return ["synonym", "latin term", "has relational adjective"]
+
+
+class OntologyUberonLifecyclestage(OntologyUberon):
+
+    """
+    Subset of UBERON for generic life cycle stages that can be used for organism not covered by specific developmental
+    ontologies.
+    """
+
+    def __init__(
+            self,
+            branch: str,
+            recache: bool = False,
+            **kwargs
+    ):
+        super().__init__(branch=branch, recache=recache, **kwargs)
+        self.reset_root(root="UBERON:0000105")
 
 
 class OntologyCl(OntologyExtendedObo):

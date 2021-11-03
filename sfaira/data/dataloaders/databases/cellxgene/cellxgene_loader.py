@@ -110,7 +110,6 @@ class Dataset(DatasetBase):
             # Set as single element or list if multiple entries are given.
             if len(v_clean) > 1:
                 v_clean = v_clean[0]
-            print((k, v_clean))
             try:
                 setattr(self, k, v_clean)
             except ValueError as e:

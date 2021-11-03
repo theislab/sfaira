@@ -2,7 +2,9 @@ from typing import Dict, Union
 
 from sfaira.versions.metadata import OntologyList, OntologyCl
 from sfaira.versions.metadata import OntologyCellosaurus, OntologyHancestro, OntologyHsapdv, OntologyMondo, \
-    OntologyMmusdv, OntologyEfo, OntologySex, OntologyTaxon, OntologyUberon
+    OntologyMmusdv, OntologyEfo, OntologySex, OntologyTaxon, OntologyUberon, OntologyUberonLifecyclestage
+
+OTHER_ORGANISM_KEY = "other"
 
 DEFAULT_CL = "v2021-08-10"
 DEFAULT_HSAPDV = "master"
@@ -62,6 +64,12 @@ class OntologyContainerSfaira:
         self.year = OntologyList(terms=list(range(2000, 3000)))
 
     def reload_ontology(self, attr):
+        """
+        Complex alternative to attribute-wise setters.
+
+        :param attr:
+        :return:
+        """
         kwargs = {"recache": True}
         if attr == "assay_sc":
             self._assay_sc = OntologyEfo(**kwargs)
@@ -73,13 +81,14 @@ class OntologyContainerSfaira:
             self._development_stage = {
                 "homosapiens": OntologyHsapdv(**kwargs),
                 "musmusculus": OntologyMmusdv(**kwargs),
+                OTHER_ORGANISM_KEY: OntologyUberonLifecyclestage(branch=DEFAULT_UBERON, **kwargs),
             }
         elif attr == "disease":
             self._disease = OntologyMondo(**kwargs)
         elif attr == "ethnicity":
             self._ethnicity = {
                 "homosapiens": OntologyHancestro(),
-                "musmusculus": None,
+                OTHER_ORGANISM_KEY: None,
             }
         elif attr == "organ":
             self._organ = OntologyUberon(**kwargs)
@@ -91,19 +100,19 @@ class OntologyContainerSfaira:
 
     @property
     def assay_sc(self):
-        if self._assay_sc is None:
+        if self._assay_sc is None:  # Lazy loading after class instantiation.
             self._assay_sc = OntologyEfo()
         return self._assay_sc
 
     @property
     def cell_line(self):
-        if self._cell_line is None:
+        if self._cell_line is None:  # Lazy loading after class instantiation.
             self._cell_line = OntologyCellosaurus()
         return self._cell_line
 
     @property
     def cell_type(self):
-        if self._cell_type is None:
+        if self._cell_type is None:  # Lazy loading after class instantiation.
             self._cell_type = OntologyCl(branch=DEFAULT_CL)
         return self._cell_type
 
@@ -113,42 +122,43 @@ class OntologyContainerSfaira:
 
     @property
     def development_stage(self):
-        if self._development_stage is None:
+        if self._development_stage is None:  # Lazy loading after class instantiation.
             self._development_stage = {
                 "Homo sapiens": OntologyHsapdv(branch=DEFAULT_HSAPDV),
                 "Mus musculus": OntologyMmusdv(branch=DEFAULT_MMUSDV),
+                OTHER_ORGANISM_KEY: OntologyUberonLifecyclestage(branch=DEFAULT_UBERON),
             }
         return self._development_stage
 
     @property
     def disease(self):
-        if self._disease is None:
+        if self._disease is None:  # Lazy loading after class instantiation.
             self._disease = OntologyMondo(branch=DEFAULT_MONDO)
         return self._disease
 
     @property
     def ethnicity(self):
-        if self._ethnicity is None:
+        if self._ethnicity is None:  # Lazy loading after class instantiation.
             self._ethnicity = {
                 "Homo sapiens": OntologyHancestro(),
-                "Mus musculus": None,
+                OTHER_ORGANISM_KEY: None,
             }
         return self._ethnicity
 
     @property
     def organ(self):
-        if self._organ is None:
+        if self._organ is None:  # Lazy loading after class instantiation.
             self._organ = OntologyUberon(branch=DEFAULT_UBERON)
         return self._organ
 
     @property
     def organism(self):
-        if self._organism is None:
+        if self._organism is None:  # Lazy loading after class instantiation.
             self._organism = OntologyTaxon(branch=DEFAULT_NCBITAXON)
         return self._organism
 
     @property
     def sex(self):
-        if self._sex is None:
+        if self._sex is None:  # Lazy loading after class instantiation.
             self._sex = OntologySex(branch=DEFAULT_PATO)
         return self._sex

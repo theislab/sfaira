@@ -20,7 +20,7 @@ import ssl
 
 from sfaira.versions.genomes import GenomeContainer
 from sfaira.versions.metadata import Ontology, OntologyHierarchical, CelltypeUniverse
-from sfaira.consts import AdataIds, AdataIdsCellxgene_v2_0_0, AdataIdsSfaira, META_DATA_FIELDS, OCS
+from sfaira.consts import AdataIds, AdataIdsCellxgene_v2_0_0, AdataIdsSfaira, META_DATA_FIELDS, OCS, OTHER_ORGANISM_KEY
 from sfaira.data.dataloaders.export_adaptors import cellxgene_export_adaptor
 from sfaira.data.store.io_dao import write_dao
 from sfaira.data.dataloaders.base.utils import is_child, get_directory_formatted_doi
@@ -1552,7 +1552,7 @@ class DatasetBase(abc.ABC):
     @development_stage.setter
     def development_stage(self, x: str):
         x = self._value_protection(attr="development_stage",
-                                   allowed=self.ontology_container_sfaira.development_stage[self.organism],
+                                   allowed=self.ontology_container_sfaira.development_stage,
                                    attempted=x)
         self._development_stage = x
 
@@ -1693,7 +1693,7 @@ class DatasetBase(abc.ABC):
 
     @ethnicity.setter
     def ethnicity(self, x: str):
-        x = self._value_protection(attr="ethnicity", allowed=self.ontology_container_sfaira.ethnicity[self.organism],
+        x = self._value_protection(attr="ethnicity", allowed=self.ontology_container_sfaira.ethnicity,
                                    attempted=x)
         self._ethnicity = x
 
@@ -2031,7 +2031,7 @@ class DatasetBase(abc.ABC):
     def _value_protection(
             self,
             attr: str,
-            allowed: Union[Ontology, None],
+            allowed: Union[Ontology, Dict[str, Ontology], None],
             attempted
     ):
         """
@@ -2056,6 +2056,14 @@ class DatasetBase(abc.ABC):
         else:
             attempted_ls = attempted
         attempted_clean = []
+        if isinstance(allowed, dict):
+            # Check if organism-specific option is available, otherwise choose generic option:
+            if self.organism in allowed.keys():
+                allowed = allowed[self.organism]
+            else:
+                assert OTHER_ORGANISM_KEY in allowed.keys(), allowed.keys()  # Sanity check on dictionary keys.
+                allowed = allowed[OTHER_ORGANISM_KEY]
+            assert allowed is None or isinstance(allowed, Ontology), allowed  # Sanity check on dictionary element.
         for x in attempted_ls:
             if allowed is None:
                 attempted_clean.append(x)

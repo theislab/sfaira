@@ -2,7 +2,7 @@ import numpy as np
 from sfaira.consts.ontologies import DEFAULT_CL, DEFAULT_HSAPDV, DEFAULT_MONDO, DEFAULT_MMUSDV, DEFAULT_PATO, \
     DEFAULT_NCBITAXON, DEFAULT_UBERON
 from sfaira.versions.metadata import OntologyUberon, OntologyCl, OntologyHancestro, OntologyHsapdv, OntologyMondo, \
-    OntologyMmusdv, OntologyEfo, OntologyTaxon, OntologySex
+    OntologyMmusdv, OntologyEfo, OntologyTaxon, OntologySex, OntologyUberonLifecyclestage
 
 """
 OntologyCelltypes
@@ -27,7 +27,7 @@ def test_cl_is_a():
     assert not oc.is_a(query="lymphocyte", reference="T cell")
 
 
-def test_cl_effective_leaves():
+def test_effective_leaves():
     """
     Tests if node sets can be mapped to effective leaf sets via `OntologyCelltypes.get_effective_leaves()`
     """
@@ -40,7 +40,7 @@ def test_cl_effective_leaves():
     assert set(x) == {"stromal cell", "T-helper 1 cell", "T-helper 17 cell"}, x
 
 
-def test_cl_map_leaves():
+def test_map_leaves():
     """
     Tests if nodes can be mapped to leave nodes in ontology.
     """
@@ -51,7 +51,7 @@ def test_cl_map_leaves():
     assert np.all(leaf_map_2 == np.sort([oc.convert_to_name(oc.leaves).index(x) for x in list(leaf_map_1)]))
 
 
-def test_cl_set_leaves():
+def test_set_leaves():
     """
     Tests if ontology behaves correctly if leaf nodes were reset.
     """
@@ -70,6 +70,17 @@ def test_cl_set_leaves():
     assert np.all(leaf_map_2 == np.sort([oc.convert_to_name(oc.leaves).index(x) for x in list(leaf_map_1)]))
     assert set(leaf_map_3) == {"T-helper 1 cell"}
     assert np.all(leaf_map_4 == np.sort([oc.convert_to_name(oc.leaves).index(x) for x in list(leaf_map_3)]))
+
+
+def test_reset_root():
+    """
+    Tests if root can be reset correctly.
+    """
+    oc = OntologyCl(branch=DEFAULT_CL, use_developmental_relationships=False)
+    oc.reset_root(root="T cell")
+    assert "T-helper 1 cell" in oc.node_names
+    assert "T cell" in oc.node_names
+    assert "lymphocyte" not in oc.node_names
 
 
 """
@@ -179,6 +190,10 @@ UBERON
 def test_uberon_loading():
     _ = OntologyUberon(branch=DEFAULT_UBERON, recache=True)
     _ = OntologyUberon(branch=DEFAULT_UBERON, recache=False)
+
+
+def test_uberon_lcs_loading():
+    _ = OntologyUberonLifecyclestage(branch=DEFAULT_UBERON, recache=False)
 
 
 def test_uberon_subsetting():
