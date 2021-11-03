@@ -86,7 +86,7 @@ class Dataset(DatasetBase):
         self.doi_journal = "10.1038/s41586-020-2496-1"
         self.doi_preprint = "10.1101/661728"
         self.normalization = "norm"
-        self.organism = "mouse"
+        self.organism = "Mus musculus"
         self.organ = organ
         self.primary_data = True
         self.assay_sc = "10x 3' v2" if self.sample_fn.split("-")[3] == "droplet" else "Smart-seq2"

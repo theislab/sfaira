@@ -40,7 +40,7 @@ class Dataset(DatasetBase):
         self.normalization = "raw"  # ToDo "madissoon19_lung.processed.h5ad" is close to integer but not quire (~1e-4)
         self.organ = "lung parenchyma" if self.sample_fn == "madissoon19_lung.processed.h5ad" else \
             "esophagus" if self.sample_fn == "oesophagus.cellxgene.h5ad" else "spleen"
-        self.organism = "human"
+        self.organism = "Homo sapiens"
         self.primary_data = True
         self.year = 2019
         self.sample_source = "primary_tissue"

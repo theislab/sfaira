@@ -52,10 +52,10 @@ def cellxgene_export_adaptor_1_1_0(adata: anndata.AnnData, adata_ids: AdataIdsCe
     # TODO port this into organism ontology handling.
     # Infer organism from adata object.
     organism = np.unique(adata.obs[adata_ids.organism].values)[0]
-    if organism == "mouse":
+    if organism == "musmusculus":
         adata.uns["organism"] = "Mus musculus"
         adata.uns["organism_ontology_term_id"] = "NCBITaxon:10090"
-    elif organism == "human":
+    elif organism == "homosapiens":
         adata.uns["organism"] = "Homo sapiens"
         adata.uns["organism_ontology_term_id"] = "NCBITaxon:9606"
     else:
@@ -105,14 +105,6 @@ def cellxgene_export_adaptor_2_0_0(adata: anndata.AnnData, adata_ids: AdataIdsCe
     }
     if obs_keys_batch is not None:
         adata.uns["batch_condition"] = obs_keys_batch.split("*")
-    # TODO port this into organism ontology handling.
-    # Infer organism from adata object.
-    organism_map = {"mouse": "Mus musculus", "human": "Homo sapiens"}
-    organism_id_map = {"mouse": "NCBITaxon:10090", "human": "NCBITaxon:9606"}
-    organism_id = organism_id_map[np.unique(adata.obs[adata_ids.organism].values)[0]]
-    adata.obs[adata_ids.organism] = [organism_map[x] for x in adata.obs[adata_ids.organism].values]
-    adata.obs[adata_ids.organism + adata_ids.onto_id_suffix] = \
-        [organism_id_map[x] for x in adata.obs[adata_ids.organism + adata_ids.onto_id_suffix].values]
     # 2) Modify .obs
     # a) Correct unknown cell type entries:
     adata.obs[adata_ids.cell_type] = [
@@ -147,7 +139,7 @@ def cellxgene_export_adaptor_2_0_0(adata: anndata.AnnData, adata_ids: AdataIdsCe
         adata.X.data = np.rint(adata.X.data)
     # 4) Modify .var:
     adata.var[adata_ids.feature_biotype] = "gene"
-    adata.var[adata_ids.feature_reference] = organism_id
+    adata.var[adata_ids.feature_reference] = adata.obs[adata_ids.organism + adata_ids.onto_id_suffix].values[0]
     adata.var[adata_ids.feature_is_filtered] = False
     adata.var[adata_ids.feature_biotype] = pd.Categorical(adata.var[adata_ids.feature_biotype].values.tolist())
     # Modify ensembl ID writing:

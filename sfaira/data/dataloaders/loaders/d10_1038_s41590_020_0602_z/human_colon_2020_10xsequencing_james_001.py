@@ -20,7 +20,7 @@ class Dataset(DatasetBase):
         self.individual_obs_key = "donor"
         self.normalization = "raw"
         self.organ = "colon"
-        self.organism = "human"
+        self.organism = "Homo sapiens"
         self.primary_data = True
         self.sample_source = "primary_tissue"
         self.state_exact = "healthy"

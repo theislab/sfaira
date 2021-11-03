@@ -1445,7 +1445,7 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                 if data_organ is not None:
                     u.subset("organ", data_organ)
                 u.load(allow_caching=False)
-                u.streamline_features(match_to_reference=genome, subset_genes_to_type=gene_type)
+                u.streamline_features(match_to_release=genome, subset_genes_to_type=gene_type)
                 u.streamline_metadata()
                 adata = u.adata
             else:

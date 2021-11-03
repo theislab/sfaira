@@ -59,16 +59,18 @@ class HelperTrainerBase:
         """
         np.random.seed(1)
         if data_type == "adata":
-            self.load_adata(organism="human", match_to_reference=self.tc.gc.assembly)
+            self.load_adata(organism="Homo sapiens", match_to_reference=self.tc.gc.release)
         else:
-            self.load_store(organism="human", match_to_reference=self.tc.gc.assembly)
+            self.load_store(organism="Homo sapiens", match_to_reference=self.tc.gc.release)
 
     def test_init(self, cls, estimator_kwargs: dict = {}, **kwargs):
         if not os.path.exists(DIR_TEMP):
             os.mkdir(DIR_TEMP)
         self.load_data(data_type="adata")
         self.trainer = cls(
-            data=self.data, model_path=os.path.join(DIR_TEMP, "model"), **kwargs
+            data=self.data,
+            model_path=os.path.join(DIR_TEMP, "model"),
+            **kwargs
         )
         self.trainer.zoo.model_id = self.model_id
         self.trainer.init_estim(override_hyperpar={}, **estimator_kwargs)
@@ -94,7 +96,7 @@ class HelperTrainer(HelperEstimatorBase, HelperTrainerBase):
 
 
 def test_save_embedding():
-    model_id = "embedding_human-lung-linear-0.1-0.1_mylab"
+    model_id = "embedding_homosapiens-lung-linear-0.1-0.1_mylab"
     zoo = ModelZoo()
     zoo.model_id = model_id
     test_trainer = HelperTrainer(zoo=zoo)
@@ -104,7 +106,7 @@ def test_save_embedding():
 
 def test_save_celltypes():
     tmp_fn = get_cu()
-    model_id = "celltype_human-lung-mlp-0.0.1-0.1_mylab"
+    model_id = "celltype_homosapiens-lung-mlp-0.0.1-0.1_mylab"
     zoo = ModelZoo()
     zoo.model_id = model_id
     test_trainer = HelperTrainer(zoo=zoo)
