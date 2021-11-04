@@ -90,7 +90,10 @@ class GtfInterface:
                              f"check if assembly name '{self.assembly}' corresponds to an actual assembly.")
         with gzip.open(temp_file) as f:
             tab = pandas.read_csv(f, sep="\t", comment="#", header=None)
-        os.remove(temp_file)  # Delete temporary file .gtf.gz.
+        # Delete temporary file .gtf.gz if it still exists (some times already deleted by parallel process in grid
+        # search).
+        if os.path.exists(temp_file):
+            os.remove(temp_file)
         tab = tab.loc[tab[KEY_GTF_REGION_TYPE].values == VALUE_GTF_GENE, :]
         conversion_tab = pandas.DataFrame({
             KEY_ID: [
