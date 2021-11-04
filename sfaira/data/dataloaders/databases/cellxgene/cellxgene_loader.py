@@ -127,7 +127,7 @@ class Dataset(DatasetBase):
         self.disease_obs_key = self._adata_ids_cellxgene.disease
         self.ethnicity_obs_key = self._adata_ids_cellxgene.ethnicity
         self.sex_obs_key = self._adata_ids_cellxgene.sex
-        self.organ_obs_key = self._adata_ids_cellxgene.organism
+        self.organ_obs_key = self._adata_ids_cellxgene.organ
         self.state_exact_obs_key = self._adata_ids_cellxgene.state_exact
 
         self.gene_id_symbols_var_key = self._adata_ids_cellxgene.feature_symbol

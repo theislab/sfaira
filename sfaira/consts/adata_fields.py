@@ -117,7 +117,7 @@ class AdataIdsSfaira(AdataIds):
         self.individual = "individual"
         self.ncells = "ncells"
         self.normalization = "normalization"
-        self.organ = "organ"
+        self.organ = "tissue"
         self.organism = "organism"
         self.primary_data = "primary_data"
         self.sample_source = "sample_source"

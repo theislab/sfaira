@@ -40,7 +40,7 @@ def test_cellxgene_export(schema_version: str, organism: str):
     This test can be extended by future versions.
     """
     from cellxgene_schema import validate
-    
+
     class ValidatorInMemory(validate.Validator):
         """
         Helper class to validate adata in memory and raise errors as in error stream rather than outstream.
