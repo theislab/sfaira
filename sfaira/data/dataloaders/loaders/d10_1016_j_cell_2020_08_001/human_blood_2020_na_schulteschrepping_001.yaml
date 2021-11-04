@@ -1,0 +1,159 @@
+dataset_structure:
+    dataset_index: 1
+    sample_fns:
+        - "Schulte-Schrepping_2020_COVID19_10x_Neutrophils_processed_cellXgene.h5ad"
+        - "Schulte-Schrepping_2020_COVID19_10x_PBMC_processed_cellXgene.h5ad"
+        - "Schulte-Schrepping_2020_COVID19_Rhapsody_freshPBMC-WB_processed_cellXgene.h5ad"
+        - "Schulte-Schrepping_2020_COVID19_Rhapsody_Monocytes_processed_cellXgene."
+        - "Schulte-Schrepping_2020_COVID19_Rhapsody_Neutrophils_processed_cellXgene.h5ad"
+        - "Schulte-Schrepping_2020_COVID19_Rhapsody_PBMC_processed_cellXgene.h5ad"
+dataset_wise:
+    author: "Schulte-Schrepping, Jonas"
+    default_embedding:
+        Schulte-Schrepping_2020_COVID19_10x_Neutrophils_processed_cellXgene.h5ad: "X_umap" 
+        Schulte-Schrepping_2020_COVID19_10x_PBMC_processed_cellXgene.h5ad: "X_umap"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_freshPBMC-WB_processed_cellXgene.h5ad: "X_umap"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Monocytes_processed_cellXgene.h5ad: "X_umap"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Neutrophils_processed_cellXgene.h5ad: "X_umap"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_PBMC_processed_cellXgene.h5ad: "X_umap"
+    doi_preprint:
+    doi_journal: "10.1016/j.cell.2020.08.001"
+    download_url_data:
+        Schulte-Schrepping_2020_COVID19_10x_Neutrophils_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_10x_PBMC_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_freshPBMC-WB_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Monocytes_processed_cellXgene.:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Neutrophils_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_PBMC_processed_cellXgene.h5ad:
+
+    primary_data: True
+    normalization: "scaled"
+    year: 2020
+dataset_or_observation_wise:
+    assay_sc:
+        Schulte-Schrepping_2020_COVID19_10x_Neutrophils_processed_cellXgene.h5ad: "NA"
+        Schulte-Schrepping_2020_COVID19_10x_PBMC_processed_cellXgene.h5ad: "NA"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_freshPBMC-WB_processed_cellXgene.h5ad: "NA"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Monocytes_processed_cellXgene.: "NA"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Neutrophils_processed_cellXgene.h5ad: "NA"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_PBMC_processed_cellXgene.h5ad: "NA"
+    assay_sc_obs_key:
+    assay_differentiation:
+        Schulte-Schrepping_2020_COVID19_10x_Neutrophils_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_10x_PBMC_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_freshPBMC-WB_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Monocytes_processed_cellXgene.:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Neutrophils_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_PBMC_processed_cellXgene.h5ad:
+    assay_differentiation_obs_key:
+    assay_type_differentiation:
+        Schulte-Schrepping_2020_COVID19_10x_Neutrophils_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_10x_PBMC_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_freshPBMC-WB_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Monocytes_processed_cellXgene.:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Neutrophils_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_PBMC_processed_cellXgene.h5ad:
+    assay_type_differentiation_obs_key:
+    bio_sample:
+        Schulte-Schrepping_2020_COVID19_10x_Neutrophils_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_10x_PBMC_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_freshPBMC-WB_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Monocytes_processed_cellXgene.:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Neutrophils_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_PBMC_processed_cellXgene.h5ad:
+    bio_sample_obs_key:
+    cell_line:
+        Schulte-Schrepping_2020_COVID19_10x_Neutrophils_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_10x_PBMC_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_freshPBMC-WB_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Monocytes_processed_cellXgene.:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Neutrophils_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_PBMC_processed_cellXgene.h5ad:
+    cell_line_obs_key:
+    development_stage:
+        Schulte-Schrepping_2020_COVID19_10x_Neutrophils_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_10x_PBMC_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_freshPBMC-WB_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Monocytes_processed_cellXgene.:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Neutrophils_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_PBMC_processed_cellXgene.h5ad:
+    development_stage_obs_key:
+    disease:
+        Schulte-Schrepping_2020_COVID19_10x_Neutrophils_processed_cellXgene.h5ad: "covid-19"
+        Schulte-Schrepping_2020_COVID19_10x_PBMC_processed_cellXgene.h5ad: "covid-19"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_freshPBMC-WB_processed_cellXgene.h5ad: "covid-19"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Monocytes_processed_cellXgene.: "covid-19"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Neutrophils_processed_cellXgene.h5ad: "covid-19"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_PBMC_processed_cellXgene.h5ad: "covid-19"
+    disease_obs_key:
+    ethnicity:
+        Schulte-Schrepping_2020_COVID19_10x_Neutrophils_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_10x_PBMC_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_freshPBMC-WB_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Monocytes_processed_cellXgene.:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Neutrophils_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_PBMC_processed_cellXgene.h5ad:
+    ethnicity_obs_key:
+    individual:
+        Schulte-Schrepping_2020_COVID19_10x_Neutrophils_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_10x_PBMC_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_freshPBMC-WB_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Monocytes_processed_cellXgene.:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Neutrophils_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_PBMC_processed_cellXgene.h5ad:
+    individual_obs_key:
+    organ:
+        Schulte-Schrepping_2020_COVID19_10x_Neutrophils_processed_cellXgene.h5ad: "blood"
+        Schulte-Schrepping_2020_COVID19_10x_PBMC_processed_cellXgene.h5ad: "blood"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_freshPBMC-WB_processed_cellXgene.h5ad: "blood"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Monocytes_processed_cellXgene.: "blood"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Neutrophils_processed_cellXgene.h5ad: "blood"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_PBMC_processed_cellXgene.h5ad: "blood"
+    organ_obs_key:
+    organism:
+        Schulte-Schrepping_2020_COVID19_10x_Neutrophils_processed_cellXgene.h5ad: "human"
+        Schulte-Schrepping_2020_COVID19_10x_PBMC_processed_cellXgene.h5ad: "human"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_freshPBMC-WB_processed_cellXgene.h5ad: "human"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Monocytes_processed_cellXgene.: "human"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Neutrophils_processed_cellXgene.h5ad: "human"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_PBMC_processed_cellXgene.h5ad: "human"
+    organism_obs_key:
+    sample_source:
+        Schulte-Schrepping_2020_COVID19_10x_Neutrophils_processed_cellXgene.h5ad: "primary tissue"
+        Schulte-Schrepping_2020_COVID19_10x_PBMC_processed_cellXgene.h5ad: "primary tissue"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_freshPBMC-WB_processed_cellXgene.h5ad: "primary tissue"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Monocytes_processed_cellXgene.: "primary tissue"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Neutrophils_processed_cellXgene.h5ad: "primary tissue"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_PBMC_processed_cellXgene.h5ad: "primary tissue"
+    sample_source_obs_key:
+    sex:
+        Schulte-Schrepping_2020_COVID19_10x_Neutrophils_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_10x_PBMC_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_freshPBMC-WB_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Monocytes_processed_cellXgene.:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Neutrophils_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_PBMC_processed_cellXgene.h5ad:
+    sex_obs_key:
+    state_exact:
+        Schulte-Schrepping_2020_COVID19_10x_Neutrophils_processed_cellXgene.h5ad: "All datasets contains healthy and diseased samples."
+        Schulte-Schrepping_2020_COVID19_10x_PBMC_processed_cellXgene.h5ad: "All datasets contains healthy and diseased samples."
+        Schulte-Schrepping_2020_COVID19_Rhapsody_freshPBMC-WB_processed_cellXgene.h5ad: "All datasets contains healthy and diseased samples."
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Monocytes_processed_cellXgene.: "All datasets contains healthy and diseased samples."
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Neutrophils_processed_cellXgene.h5ad: "All datasets contains healthy and diseased samples."
+        Schulte-Schrepping_2020_COVID19_Rhapsody_PBMC_processed_cellXgene.h5ad: "All datasets contains healthy and diseased samples."
+    state_exact_obs_key:
+    tech_sample:
+        Schulte-Schrepping_2020_COVID19_10x_Neutrophils_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_10x_PBMC_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_freshPBMC-WB_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Monocytes_processed_cellXgene.:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Neutrophils_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_PBMC_processed_cellXgene.h5ad:
+    tech_sample_obs_key:
+observation_wise:
+    cell_type_obs_key: "cluster_labels_res.0.4"
+feature_wise:
+    gene_id_ensembl_var_key: 
+    gene_id_symbols_var_key: "index"
+meta:
+    version: "1.0"
