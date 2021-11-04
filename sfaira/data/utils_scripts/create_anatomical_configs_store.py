@@ -15,7 +15,7 @@ config_path = str(sys.argv[2])
 
 
 configs_to_write = {
-    "homosapiens": [
+    "Homo sapiens": [
         "adipose tissue",
         "adrenal gland",
         "artery",
@@ -52,7 +52,7 @@ configs_to_write = {
         "uterus",
         "vault of skull",
     ],
-    "musmusculus": [
+    "Mus musculus": [
         "adipose tissue",
         "blood",
         "bone marrow",

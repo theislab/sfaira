@@ -42,7 +42,7 @@ for k, ds in universe.datasets.items():
         )
         ds.streamline_features(
             remove_gene_version=True,
-            match_to_release={"homosapiens": "Homo_sapiens.GRCh38.102", "musmusculus": "Mus_musculus.GRCm38.102"},
+            match_to_release={"Homo sapiens": "104", "Mus musculus": "104"},
             subset_genes_to_type="protein_coding"
         )
         ds.streamline_metadata(schema="sfaira", clean_obs=True, clean_var=True, clean_uns=True, clean_obs_names=True)
