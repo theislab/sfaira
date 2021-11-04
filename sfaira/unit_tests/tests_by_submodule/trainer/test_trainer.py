@@ -3,6 +3,7 @@ import abc
 import anndata
 import numpy as np
 import os
+import pathlib
 from typing import Union
 
 from sfaira.consts.ontologies import DEFAULT_UBERON, DEFAULT_CL
@@ -20,6 +21,8 @@ def get_cu():
     Get file name of a target universe for loading by trainer.
     """
     # Create temporary cell type universe to give to trainer.
+    if not os.path.exists(DIR_TEMP):
+        pathlib.Path(DIR_TEMP).mkdir(parents=True, exist_ok=True)
     fn = os.path.join(DIR_TEMP, "universe_temp.csv")
     cl = OntologyCl(branch=DEFAULT_CL)
     uberon = OntologyUberon(branch=DEFAULT_UBERON)
