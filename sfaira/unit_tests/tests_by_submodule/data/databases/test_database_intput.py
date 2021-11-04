@@ -40,6 +40,8 @@ def test_streamline_metadata(database: str, format: str):
     assert "oligodendrocyte" in adata.obs[ids.cell_type].values
     assert "MmusDv:0000061" in adata.obs[ids.development_stage + ids.onto_id_suffix].values
     assert "early adult stage" in adata.obs[ids.development_stage].values
+    assert "UBERON:0002436" in adata.obs[ids.organ + ids.onto_id_suffix].values
+    assert "primary visual cortex" in adata.obs[ids.organ].values
 
 
 @pytest.mark.parametrize("store", ["dao", ])
