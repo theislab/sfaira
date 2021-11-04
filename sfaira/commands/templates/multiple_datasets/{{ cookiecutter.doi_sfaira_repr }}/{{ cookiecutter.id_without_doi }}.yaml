@@ -10,9 +10,8 @@ dataset_structure:
     doi_journal: "{{ cookiecutter.doi }}"
     download_url_data:
 {% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
-{% endfor %}    download_url_meta:
-{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
-{% endfor %}    primary_data: {{ cookiecutter.primary_data }}
+{% endfor %}
+    primary_data: {{ cookiecutter.primary_data }}
     normalization: "{{ cookiecutter.normalization }}"
     year: {{ cookiecutter.year }}
 dataset_or_observation_wise:
