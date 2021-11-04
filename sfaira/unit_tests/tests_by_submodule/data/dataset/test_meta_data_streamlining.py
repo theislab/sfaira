@@ -1,7 +1,6 @@
 import os
 
 import anndata
-from cellxgene_schema import validate
 import pytest
 
 from sfaira.unit_tests.data_for_tests.loaders import RELEASE_HUMAN, PrepareData
@@ -33,29 +32,6 @@ def test_dsgs_streamline_metadata(out_format: str, clean_obs: bool, clean_var: b
                            keep_id_obs=keep_id_obs, keep_orginal_obs=keep_orginal_obs, keep_symbol_obs=keep_symbol_obs)
 
 
-class ValidatorInMemory(validate.Validator):
-    """
-    Helper class to validate adata in memory and raise errors as in error stream rather than outstream.
-
-    The switch in log stream allows this test to be used as a unit test.
-    """
-
-    def validate_adata_inmemory(self, adata: anndata.AnnData):
-        self.errors = []
-        self.adata = adata
-        self._set_schema_def()
-        if not self.errors:
-            self._deep_check()
-        if self.warnings:
-            self.warnings = ["WARNING: " + i for i in self.warnings]
-        if self.errors:
-            self.errors = ["ERROR: " + i for i in self.errors]
-        if self.warnings or self.errors:
-            print(self.warnings[:20])
-            print(self.errors[:20])
-            assert False
-
-
 @pytest.mark.parametrize("schema_version", ["2_0_0"])
 @pytest.mark.parametrize("organism", ["Homo sapiens", "Mus musculus"])
 def test_cellxgene_export(schema_version: str, organism: str):
@@ -63,6 +39,30 @@ def test_cellxgene_export(schema_version: str, organism: str):
 
     This test can be extended by future versions.
     """
+    from cellxgene_schema import validate
+    
+    class ValidatorInMemory(validate.Validator):
+        """
+        Helper class to validate adata in memory and raise errors as in error stream rather than outstream.
+
+        The switch in log stream allows this test to be used as a unit test.
+        """
+
+        def validate_adata_inmemory(self, adata: anndata.AnnData):
+            self.errors = []
+            self.adata = adata
+            self._set_schema_def()
+            if not self.errors:
+                self._deep_check()
+            if self.warnings:
+                self.warnings = ["WARNING: " + i for i in self.warnings]
+            if self.errors:
+                self.errors = ["ERROR: " + i for i in self.errors]
+            if self.warnings or self.errors:
+                print(self.warnings[:20])
+                print(self.errors[:20])
+                assert False
+
     ds = PrepareData().prepare_dsg(load=False)
     if organism == "Homo sapiens":
         ds.subset(key="doi_journal", values=["no_doi_mock1"])
