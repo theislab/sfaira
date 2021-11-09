@@ -756,9 +756,9 @@ class DatasetBase(abc.ABC):
             if hasattr(self, k) and getattr(self, k) is not None:
                 val = getattr(self, k)
             elif hasattr(self, f"{k}_obs_key") and getattr(self, f"{k}_obs_key") is not None:
-                val = np.sort(self.adata.obs[getattr(self, f"{k}_obs_key")].unique().astype(str)).tolist()
+                val = self.adata.obs[getattr(self, f"{k}_obs_key")].unique().astype(str).tolist()
             elif getattr(self._adata_ids, k) in self.adata.obs.columns:
-                val = np.sort(self.adata.obs[getattr(self._adata_ids, k)].unique().astype(str)).tolist()
+                val = self.adata.obs[getattr(self._adata_ids, k)].unique().astype(str).tolist()
             else:
                 val = None
             while hasattr(val, '__len__') and not isinstance(val, str) and len(val) == 1:  # Unpack nested lists/tuples.
