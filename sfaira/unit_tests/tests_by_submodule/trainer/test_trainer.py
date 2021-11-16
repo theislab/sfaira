@@ -1,6 +1,9 @@
+import abc
+
 import anndata
 import numpy as np
 import os
+import pathlib
 from typing import Union
 
 from sfaira.consts.ontologies import DEFAULT_UBERON, DEFAULT_CL
@@ -18,6 +21,8 @@ def get_cu():
     Get file name of a target universe for loading by trainer.
     """
     # Create temporary cell type universe to give to trainer.
+    if not os.path.exists(DIR_TEMP):
+        pathlib.Path(DIR_TEMP).mkdir(parents=True, exist_ok=True)
     fn = os.path.join(DIR_TEMP, "universe_temp.csv")
     cl = OntologyCl(branch=DEFAULT_CL)
     uberon = OntologyUberon(branch=DEFAULT_UBERON)
@@ -27,7 +32,7 @@ def get_cu():
     return fn
 
 
-class HelperTrainerBase(HelperEstimatorBase):
+class HelperTrainerBase:
 
     data: Union[anndata.AnnData, load_store]
     trainer: Union[TrainModelCelltype, TrainModelEmbedding]
@@ -35,6 +40,18 @@ class HelperTrainerBase(HelperEstimatorBase):
     def __init__(self, zoo: ModelZoo):
         self.model_id = zoo.model_id
         self.tc = zoo.topology_container
+
+    def load_adata(self, **kwargs):
+        """
+        This is inherited from estimator test helper.
+        """
+        pass
+
+    def load_store(self, **kwargs):
+        """
+        This is inherited from estimator test helper.
+        """
+        pass
 
     def load_data(self, data_type):
         """
@@ -45,11 +62,11 @@ class HelperTrainerBase(HelperEstimatorBase):
         """
         np.random.seed(1)
         if data_type == "adata":
-            self.load_adata(organism="human", match_to_reference=self.tc.gc.assembly)
+            self.load_adata(organism="Homo sapiens", match_to_reference=self.tc.gc.release)
         else:
-            self.load_store(organism="human", match_to_reference=self.tc.gc.assembly)
+            self.load_store(organism="Homo sapiens", match_to_reference=self.tc.gc.release)
 
-    def test_init(self, cls, **kwargs):
+    def test_init(self, cls, estimator_kwargs: dict = {}, **kwargs):
         if not os.path.exists(DIR_TEMP):
             os.mkdir(DIR_TEMP)
         self.load_data(data_type="adata")
@@ -59,30 +76,42 @@ class HelperTrainerBase(HelperEstimatorBase):
             **kwargs
         )
         self.trainer.zoo.model_id = self.model_id
-        self.trainer.init_estim(override_hyperpar={})
+        self.trainer.init_estim(override_hyperpar={}, **estimator_kwargs)
 
     def test_save(self):
         if not os.path.exists(DIR_TEMP):
             os.mkdir(DIR_TEMP)
-        self.trainer.estimator.train(epochs=1, max_steps_per_epoch=1, test_split=0.1, validation_split=0.1,
-                                     optimizer="adam", lr=0.005)
-        self.trainer.save(fn=os.path.join(DIR_TEMP, "trainer"), model=True, specific=True)
+        self.trainer.estimator.train(
+            epochs=1,
+            max_steps_per_epoch=1,
+            test_split=0.1,
+            validation_split=0.1,
+            optimizer="adam",
+            lr=0.005,
+        )
+        self.trainer.save(
+            fn=os.path.join(DIR_TEMP, "trainer"), model=True, specific=True
+        )
+
+
+class HelperTrainer(HelperEstimatorBase, HelperTrainerBase):
+    pass
 
 
 def test_save_embedding():
-    model_id = "embedding_human-lung-linear-0.1-0.1_mylab"
+    model_id = "embedding_homosapiens-lung-linear-0.1-0.1_mylab"
     zoo = ModelZoo()
     zoo.model_id = model_id
-    test_trainer = HelperTrainerBase(zoo=zoo)
+    test_trainer = HelperTrainer(zoo=zoo)
     test_trainer.test_init(cls=TrainModelEmbedding)
     test_trainer.test_save()
 
 
 def test_save_celltypes():
     tmp_fn = get_cu()
-    model_id = "celltype_human-lung-mlp-0.0.1-0.1_mylab"
+    model_id = "celltype_homosapiens-lung-mlp-0.0.1-0.1_mylab"
     zoo = ModelZoo()
     zoo.model_id = model_id
-    test_trainer = HelperTrainerBase(zoo=zoo)
+    test_trainer = HelperTrainer(zoo=zoo)
     test_trainer.test_init(cls=TrainModelCelltype, fn_target_universe=tmp_fn)
     test_trainer.test_save()

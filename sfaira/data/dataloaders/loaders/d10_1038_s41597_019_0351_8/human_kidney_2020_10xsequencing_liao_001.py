@@ -20,7 +20,7 @@ class Dataset(DatasetBase):
         self.disease = "healthy"
         self.normalization = "raw"
         self.organ = "kidney"
-        self.organism = "human"
+        self.organism = "Homo sapiens"
         self.primary_data = True
         self.sample_source = "primary_tissue"
         self.year = 2020

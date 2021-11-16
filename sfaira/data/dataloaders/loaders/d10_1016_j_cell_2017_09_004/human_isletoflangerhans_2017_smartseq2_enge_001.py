@@ -23,7 +23,7 @@ class Dataset(DatasetBase):
         self.normalization = "raw"
         self.assay_sc = "Smart-seq2"
         self.organ = "islet of Langerhans"
-        self.organism = "human"
+        self.organism = "Homo sapiens"
         self.primary_data = True
         self.year = 2017
         self.gene_id_symbols_var_key = "index"

@@ -13,17 +13,20 @@ from sfaira.versions.genomes.genomes import CustomFeatureContainer
 from sfaira.versions.metadata import OntologyOboCustom
 from sfaira.versions.topologies import TopologyContainer
 
-from sfaira.unit_tests.data_for_tests.loaders.consts import CELLTYPES, CL_VERSION
-from sfaira.unit_tests.data_for_tests.loaders.utils import prepare_dsg, prepare_store
+from sfaira.unit_tests.data_for_tests.loaders.consts import CELLTYPES, CL_VERSION, ASSEMBLY_HUMAN, ASSEMBLY_MOUSE
+from sfaira.unit_tests.data_for_tests.loaders.utils import PrepareData
 from sfaira.unit_tests.directories import DIR_TEMP
 
 CACHE_DIR_GENOMES = os.path.join(CACHE_DIR, "genomes")
 
 ADATA_IDS = AdataIdsSfaira()
-ASSEMBLY = ADATA_IDS.feature_kwargs["match_to_reference"]
+ASSEMBLY = {
+    "Homo sapiens": ASSEMBLY_HUMAN,
+    "Mus musculus": ASSEMBLY_MOUSE,
+}
 GENES = {
-    "mouse": ["ENSMUSG00000000003", "ENSMUSG00000000028"],
-    "human": ["ENSG00000000003", "ENSG00000000005"],
+    "Homo sapiens": ["ENSG00000000003", "ENSG00000000005"],
+    "Mus musculus": ["ENSMUSG00000000003", "ENSMUSG00000000028"],
 }
 TARGETS = CELLTYPES
 TARGET_UNIVERSE = CELLTYPES
@@ -69,8 +72,9 @@ class HelperEstimatorBase:
     data: Union[anndata.AnnData, DistributedStoreSingleFeatureSpace, DistributedStoreMultipleFeatureSpaceBase]
     tc: TopologyContainer
 
-    def load_adata(self, organism="human", organ=None, match_to_reference=None):
-        dsg = prepare_dsg(load=True, match_to_reference=match_to_reference)
+    def load_adata(self, organism="Homo sapiens", organ=None, match_to_reference=None):
+        data = PrepareData()
+        dsg = data.prepare_dsg(load=True, match_to_release=match_to_reference)
         dsg.subset(key="doi_journal", values=["no_doi_mock1", "no_doi_mock2", "no_doi_mock3"])
         if organism is not None:
             dsg.subset(key="organism", values=organism)
@@ -79,8 +83,9 @@ class HelperEstimatorBase:
         self.adata_ids = dsg.dataset_groups[0]._adata_ids
         self.data = dsg.adata_ls
 
-    def load_store(self, organism="human", organ=None, match_to_reference=None):
-        store_path = prepare_store(store_format="dao", match_to_reference=match_to_reference)
+    def load_store(self, organism="Homo sapiens", organ=None, match_to_reference=None):
+        data = PrepareData()
+        store_path = data.prepare_store(store_format="dao", match_to_reference=match_to_reference)
         store = load_store(cache_path=store_path, store_format="dao")
         store.subset(attr_key="doi_journal", values=["no_doi_mock1", "no_doi_mock2", "no_doi_mock3"])
         if organism is not None:
@@ -91,12 +96,13 @@ class HelperEstimatorBase:
         self.data = store.stores[organism]
 
     def load_multistore(self):
-        store_path = prepare_store(store_format="dao")
+        data = PrepareData()
+        store_path = data.prepare_store(store_format="dao")
         store = load_store(cache_path=store_path, store_format="dao")
         store.subset(attr_key="doi_journal", values=["no_doi_mock1", "no_doi_mock2", "no_doi_mock3"])
         self.adata_ids = store._adata_ids_sfaira
-        assert "mouse" in store.stores.keys(), store.stores.keys()
-        assert "human" in store.stores.keys(), store.stores.keys()
+        assert "Mus musculus" in store.stores.keys(), store.stores.keys()
+        assert "Homo sapiens" in store.stores.keys(), store.stores.keys()
         self.data = store
 
 
@@ -144,7 +150,7 @@ class HelperEstimatorKeras(HelperEstimatorBase):
     def basic_estimator_test(self):
         pass
 
-    def load_estimator(self, model_type, data_type, feature_space, test_split, organism="human"):
+    def load_estimator(self, model_type, data_type, feature_space, test_split, organism="Homo sapiens"):
         self.init_topology(model_type=model_type, feature_space=feature_space, organism=organism)
         np.random.seed(1)
         if data_type == "adata":
@@ -171,7 +177,8 @@ class HelperEstimatorKerasEmbedding(HelperEstimatorKeras):
         if feature_space == "full":
             # Read 500 genes (not full protein coding) to compromise between being able to distinguish observations
             # and reducing run time of unit tests.
-            tab = pd.read_csv(os.path.join(CACHE_DIR_GENOMES, ASSEMBLY[organism] + ".csv"))
+            tab = pd.read_csv(os.path.join(CACHE_DIR_GENOMES, "_".join(organism.split(" ")).lower(),
+                                           ASSEMBLY[organism] + ".csv"))
             genes_full = tab.loc[tab["gene_biotype"].values == "protein_coding", "gene_id"].values[:500].tolist()
             topology["input"]["genes"] = ["ensg", genes_full]
         else:
@@ -283,11 +290,12 @@ class HelperEstimatorKerasCelltypeCustomObo(TestHelperEstimatorKerasCelltype):
                 "gene_id": ["dim_" + str(i) for i in range(n_features)],
                 "gene_biotype": ["embedding" for _ in range(n_features)],
             }),
-            organism="homo_sapiens",
+            organism="Homo sapiens",
         )
 
-    def load_adata(self, organism="human", organ=None):
-        dsg = prepare_dsg(load=True)
+    def load_adata(self, organism="Homo sapiens", organ=None):
+        data = PrepareData()
+        dsg = data.prepare_dsg(load=True)
         dsg.subset(key="doi_journal", values=["no_doi_mock1", "no_doi_mock3", "no_doi_mock3"])
         if organism is not None:
             dsg.subset(key="organism", values=organism)
@@ -400,7 +408,7 @@ def test_dataset_size(batch_size: int, randomized_batch_access: bool):
     # Need full feature space here because observations are not necessarily different in small model testing feature
     # space with only two genes:
     test_estim.load_estimator(model_type="linear", data_type="store", feature_space="reduced", test_split=0.2,
-                              organism="human")
+                              organism="Homo sapiens")
     idx_train = test_estim.estimator.idx_train
     ds_train = test_estim.estimator.get_one_time_tf_dataset(idx=idx_train, batch_size=batch_size, mode='eval')
     x_train_shape = 0
@@ -425,7 +433,7 @@ def test_dataset_size(batch_size: int, randomized_batch_access: bool):
 
 
 @pytest.mark.parametrize("data_type", ["adata", "store"])
-@pytest.mark.parametrize("test_split", [0.3, {"id": "human_lung_2021_10xtechnology_mock1_001_no_doi_mock1"}])
+@pytest.mark.parametrize("test_split", [0.3, {"id": "homosapiens_lung_2021_10xtechnology_mock1_001_no_doi_mock1"}])
 def test_split_index_sets(data_type: str, test_split):
     """
     Test that train, val, test split index sets are correct:
@@ -438,8 +446,8 @@ def test_split_index_sets(data_type: str, test_split):
     test_estim = HelperEstimatorKerasEmbedding()
     # Need full feature space here because observations are not necessarily different in small model testing feature
     # space with only two genes:
-    test_estim.load_estimator(model_type="linear", data_type=data_type, feature_space="full", organism="human",
-                              test_split=test_split)
+    test_estim.load_estimator(model_type="linear", data_type=data_type, feature_space="full",
+                              organism="Homo sapiens", test_split=test_split)
     idx_train = test_estim.estimator.idx_train
     idx_eval = test_estim.estimator.idx_eval
     idx_test = test_estim.estimator.idx_test

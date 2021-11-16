@@ -119,6 +119,35 @@ class OntologyList(Ontology):
     def node_names(self) -> List[str]:
         return self.nodes
 
+    @property
+    def node_ids(self) -> List[str]:
+        return self.nodes
+
+    @property
+    def leaves(self) -> List[str]:
+        return self.nodes
+
+    @property
+    def n_leaves(self) -> int:
+        return len(self.nodes)
+
+    def prepare_maps_to_leaves(
+            self,
+            include_self: bool = True
+    ) -> Dict[str, np.ndarray]:
+        """
+        Precomputes all maps of nodes to their leave nodes.
+
+        Note that for a list ontology, this maps each node to itself.
+
+        :param include_self: whether to include node itself
+        :return: Dictionary of index vectors of leave node matches for each node (key).
+        """
+        if include_self:
+            return dict([(x, np.array([self.leaves.index(x)])) for x in self.leaves])
+        else:
+            return dict([(x, np.array([])) for x in self.leaves])
+
     def is_a_node_id(self, x: str) -> bool:
         return x in self.node_names
 
@@ -166,6 +195,9 @@ class OntologyList(Ontology):
         :return: If query node is reference node or an ancestor thereof.
         """
         return query == reference
+
+    def get_ancestors(self, node: str) -> List[str]:
+        return []
 
 
 class OntologyHierarchical(Ontology, abc.ABC):
@@ -376,6 +408,10 @@ class OntologyHierarchical(Ontology, abc.ABC):
             maps[x] = self.map_to_leaves(node=x, return_type="idx", include_self=include_self)
         print(f"time for precomputing ancestors: {time.time()-t0}")
         return maps
+
+    def reset_root(self, root: str):
+        new_nodes = [self.convert_to_id(x=root)] + self.get_ancestors(node=root)
+        self.graph = self.graph.subgraph(nodes=new_nodes)
 
     @abc.abstractmethod
     def synonym_node_properties(self) -> List[str]:
@@ -800,6 +836,23 @@ class OntologyUberon(OntologyExtendedObo):
         return ["synonym", "latin term", "has relational adjective"]
 
 
+class OntologyUberonLifecyclestage(OntologyUberon):
+
+    """
+    Subset of UBERON for generic life cycle stages that can be used for organism not covered by specific developmental
+    ontologies.
+    """
+
+    def __init__(
+            self,
+            branch: str,
+            recache: bool = False,
+            **kwargs
+    ):
+        super().__init__(branch=branch, recache=recache, **kwargs)
+        self.reset_root(root="UBERON:0000105")
+
+
 class OntologyCl(OntologyExtendedObo):
 
     def __init__(
@@ -922,7 +975,7 @@ class OntologyMmusdv(OntologyExtendedObo):
             recache: bool = False,
             **kwargs
     ):
-        # URL for releases:
+        # URL for releases, not used here yet because versioning with respect to releases below is not consistent yet.
         # url=f"https://raw.githubusercontent.com/obophenotype/developmental-stage-ontologies/{branch}/src/mmusdv/mmusdv.obo"
         obofile = cached_load_file(
             url="http://ontologies.berkeleybop.org/mmusdv.obo",
@@ -1030,6 +1083,42 @@ class OntologyHancestro(OntologyEbi):
             ontology_cache_fn="hancestro.pickle",
             recache=recache,
         )
+
+
+class OntologyTaxon(OntologyExtendedObo):
+
+    """
+    Note on ontology: The same repo also contains ncbitaxon.obs, the full ontology which is ~500MB large and
+    takes multiple minutes to load. We are using a reduced version, taxslim, here.
+
+    See also https://github.com/obophenotype/ncbitaxon/releases/download/{branch}/ncbitaxon.obo.
+    """
+
+    def __init__(
+            self,
+            branch: str,
+            recache: bool = False,
+            **kwargs
+    ):
+        obofile = cached_load_file(
+            url=f"https://github.com/obophenotype/ncbitaxon/releases/download/{branch}/taxslim.obo",
+            ontology_cache_dir="ncbitaxon",
+            ontology_cache_fn=f"ncbitaxon_{branch}.obo",
+            recache=recache,
+        )
+        super().__init__(obo=obofile)
+
+        # Clean up nodes:
+        nodes_to_delete = []
+        for k, v in self.graph.nodes.items():
+            if "name" not in v.keys():
+                nodes_to_delete.append(k)
+        for k in nodes_to_delete:
+            self.graph.remove_node(k)
+
+    @property
+    def synonym_node_properties(self) -> List[str]:
+        return ["synonym"]
 
 
 class OntologyEfo(OntologyExtendedObo):

@@ -229,25 +229,27 @@ class DatasetGroup:
 
     def streamline_features(
             self,
-            match_to_reference: Union[str, Dict[str, str], None] = None,
+            match_to_release: Union[str, Dict[str, str], None] = None,
             remove_gene_version: bool = True,
             subset_genes_to_type: Union[None, str, List[str]] = None,
             schema: Union[str, None] = None,
     ):
         """
         Subset and sort genes to genes defined in an assembly or genes of a particular type, such as protein coding.
-        :param match_to_reference: Which annotation to map the feature space to. Can be:
-            - str: Provide the name of the annotation in the format Organism.Assembly.Release
-            - dict: Mapping of organism to name of the annotation (see str format). Chooses annotation for each data set
-                based on organism annotation.
-        :param remove_gene_version: Whether to remove the version number after the colon sometimes found in ensembl gene ids.
-        :param subset_genes_to_type: Type(s) to subset to. Can be a single type or a list of types or None. Types can be:
-            - None: All genes in assembly.
-            - "protein_coding": All protein coding genes in assembly.
+        :param match_to_release: Which genome annotation release to map the feature space to. Note that assemblies from
+            ensbeml are usually named as Organism.Assembly.Release, this is the Release string. Can be:
+                - str: Provide the name of the release.
+                - dict: Mapping of organism to name of the release (see str format). Chooses release for each
+                    data set based on organism annotation.:param remove_gene_version: Whether to remove the version
+                    number after the colon sometimes found in ensembl gene ids.
+        :param subset_genes_to_type: Type(s) to subset to. Can be a single type or a list of types or None.
+            Types can be:
+                - None: All genes in assembly.
+                - "protein_coding": All protein coding genes in assembly.
         """
         for x in self.ids:
             self.datasets[x].streamline_features(
-                match_to_reference=match_to_reference,
+                match_to_release=match_to_release,
                 remove_gene_version=remove_gene_version,
                 subset_genes_to_type=subset_genes_to_type,
                 schema=schema,
@@ -415,21 +417,24 @@ class DatasetGroup:
             adata_concat = adata_ls[0]
             adata_concat.obs[self._adata_ids.dataset] = ds_id
         else:
-            # Check that all individual adata objects in linked Dataset instances have identicall streamlined features and metadata
+            # Check that all individual adata objects in linked Dataset instances have identicall streamlined features
+            # and metadata
             match_ref_list = []
             rm_gene_ver_list = []
             gene_type_list = []
             for d_id in self.ids:
                 if self.datasets[d_id].adata is not None:
-                    assert self.datasets[d_id].mapped_features, f"Dataset {d_id} does not seem to have a streamlined " \
-                                                                f"featurespace. To obtain an adata object from this " \
-                                                                f"DatasetGroup, all contained Datasets need to have a " \
-                                                                f"streamlined featurespace. Run .streamline_features()" \
-                                                                f" first."
-                    assert self.datasets[d_id].streamlined_meta, f"Dataset {d_id} does not seem to have streamlined " \
-                                                                 f"metadata. To obtain an adata object from this " \
-                                                                 f"DatasetGroup, all contained Datasets need to have " \
-                                                                 f"streamlined metadata. Run .streamline_metadata() first."
+                    assert self.datasets[d_id].mapped_features, \
+                        f"Dataset {d_id} does not seem to have a streamlined " \
+                        f"featurespace. To obtain an adata object from this " \
+                        f"DatasetGroup, all contained Datasets need to have a " \
+                        f"streamlined featurespace. Run .streamline_features()" \
+                        f" first."
+                    assert self.datasets[d_id].streamlined_meta, \
+                        f"Dataset {d_id} does not seem to have streamlined " \
+                        f"metadata. To obtain an adata object from this " \
+                        f"DatasetGroup, all contained Datasets need to have " \
+                        f"streamlined metadata. Run .streamline_metadata() first."
                     match_ref_list.append(self.datasets[d_id].mapped_features)
                     rm_gene_ver_list.append(self.datasets[d_id].remove_gene_version)
                     gene_type_list.append(self.datasets[d_id].subset_gene_type)
@@ -438,8 +443,9 @@ class DatasetGroup:
                 "'match_to_reference' of method .streamline_features())." \
                 "This is however a prerequisite for creating a combined adata object."
             assert len(set(rm_gene_ver_list)) == 1, \
-                "Not all datasets in this group have had their gene version removed (argument 'remove_gene_version' of " \
-                "method .streamline_features()). This is however a prerequisite for creating a combined adata object."
+                "Not all datasets in this group have had their gene version removed (argument 'remove_gene_version' " \
+                "of method .streamline_features()). This is however a prerequisite for creating a combined adata " \
+                "object."
             assert len(set(gene_type_list)) == 1, \
                 "Not all datasets in this group had their featurespace subsetted to the same gene type (argument " \
                 "'subset_gene_type' of method .streamline_features()). This is however a prerequisite for creating a " \
@@ -861,16 +867,8 @@ class DatasetSuperGroup:
             ids.extend(x.ids)
         return ids
 
-    def get_gc(
-            self,
-            genome: str = None
-    ):
-        if genome.lower().startswith("homo_sapiens") or genome.lower().startswith("mus_musculus"):
-            g = GenomeContainer(
-                assembly=genome
-            )
-        else:
-            raise ValueError(f"Genome {genome} not recognised. Needs to start with 'Mus_Musculus' or 'Homo_Sapiens'.")
+    def get_gc(self, genome: str = None):
+        g = GenomeContainer(release=genome)
         return g
 
     def ncells_bydataset(self, annotated_only: bool = False):
@@ -930,7 +928,7 @@ class DatasetSuperGroup:
             **kwargs
     ):
         """
-        Loads data set human into anndata object.
+        Loads data set homosapiens into anndata object.
 
         :param annotated_only:
         :param load_raw: See .load().
@@ -950,25 +948,28 @@ class DatasetSuperGroup:
 
     def streamline_features(
             self,
-            match_to_reference: Union[str, Dict[str, str], None] = None,
+            match_to_release: Union[str, Dict[str, str], None] = None,
             remove_gene_version: bool = True,
             subset_genes_to_type: Union[None, str, List[str]] = None,
             schema: Union[str, None] = None,
     ):
         """
         Subset and sort genes to genes defined in an assembly or genes of a particular type, such as protein coding.
-        :param match_to_reference: Which annotation to map the feature space to. Can be:
-            - str: Provide the name of the annotation in the format Organism.Assembly.Release
-            - dict: Mapping of organism to name of the annotation (see str format). Chooses annotation for each data set
-                based on organism annotation.
-        :param remove_gene_version: Whether to remove the version number after the colon sometimes found in ensembl gene ids.
-        :param subset_genes_to_type: Type(s) to subset to. Can be a single type or a list of types or None. Types can be:
-            - None: All genes in assembly.
-            - "protein_coding": All protein coding genes in assembly.
+
+        :param match_to_release: Which genome annotation release to map the feature space to. Note that assemblies from
+            ensembl are usually named as Organism.Assembly.Release, this is the Release string. Can be:
+                - str: Provide the name of the release.
+                - dict: Mapping of organism to name of the release (see str format). Chooses release for each
+                    data set based on organism annotation.:param remove_gene_version: Whether to remove the version
+                    number after the colon sometimes found in ensembl gene ids.
+        :param subset_genes_to_type: Type(s) to subset to. Can be a single type or a list of types or None.
+            Types can be:
+                - None: All genes in assembly.
+                - "protein_coding": All protein coding genes in assembly.
         """
         for x in self.dataset_groups:
             x.streamline_features(
-                match_to_reference=match_to_reference,
+                match_to_release=match_to_release,
                 remove_gene_version=remove_gene_version,
                 subset_genes_to_type=subset_genes_to_type,
                 schema=schema,
@@ -1099,129 +1100,6 @@ class DatasetSuperGroup:
         for x in self.dataset_groups:
             x.write_distributed_store(dir_cache=dir_cache, store_format=store_format, dense=dense,
                                       compression_kwargs=compression_kwargs, chunks=chunks)
-
-    def write_backed(
-            self,
-            fn_backed: PathLike,
-            genome: str,
-            shuffled: bool = False,
-            as_dense: bool = False,
-            annotated_only: bool = False,
-            load_raw: bool = False,
-            allow_caching: bool = True,
-    ):
-        """
-        Loads data set human into backed anndata object.
-
-        TODO replace streamlining in here by required call to .streamline() before.
-
-        Example usage:
-
-            ds = DatasetSuperGroup([...])
-            ds.write_backed(
-                fn_backed="...",
-                target_genome="...",
-                annotated_only=False
-            )
-            adata_backed = anndata.read(ds.fn_backed, backed='r')
-            adata_slice = ad_full[idx]
-
-        :param fn_backed: File name to save backed anndata to temporarily.
-        :param genome: ID of target genomes.
-        :param shuffled: Whether to shuffle data when writing to backed.
-        :param as_dense: Whether to load into dense count matrix.
-        :param annotated_only:
-        :param load_raw: See .load().
-        :param allow_caching: See .load().
-        """
-        if shuffled and not as_dense:
-            raise ValueError("cannot write backed shuffled and sparse")
-        scatter_update = shuffled or as_dense
-        self.fn_backed = fn_backed
-        n_cells = self.ncells(annotated_only=annotated_only)
-        gc = self.get_gc(genome=genome)
-        n_genes = gc.n_var
-        if scatter_update:
-            self.adata = anndata.AnnData(
-                scipy.sparse.csr_matrix((n_cells, n_genes), dtype=np.float32)
-            )  # creates an empty anndata object with correct dimensions that can be filled with cells from data sets
-        else:
-            self.adata = anndata.AnnData(
-                scipy.sparse.csr_matrix((0, n_genes), dtype=np.float32)
-            )
-        self.adata.filename = fn_backed  # setting this attribute switches this anndata to a backed object
-        # Note that setting .filename automatically redefines .X as dense, so we have to redefine it as sparse:
-        if not as_dense:
-            X = scipy.sparse.csr_matrix(self.adata.X)  # redefines this backed anndata as sparse
-            X.indices = X.indices.astype(np.int64)
-            X.indptr = X.indptr.astype(np.int64)
-            self.adata.X = X
-        keys = [
-            self._adata_ids.annotated,
-            self._adata_ids.assay_sc,
-            self._adata_ids.assay_differentiation,
-            self._adata_ids.assay_type_differentiation,
-            self._adata_ids.author,
-            self._adata_ids.cell_line,
-            self._adata_ids.dataset,
-            self._adata_ids.cell_type,
-            self._adata_ids.development_stage,
-            self._adata_ids.normalization,
-            self._adata_ids.organ,
-            self._adata_ids.bio_sample,
-            self._adata_ids.state_exact,
-            self._adata_ids.year,
-        ]
-        if scatter_update:
-            self.adata.obs = pandas.DataFrame({
-                k: ["nan" for _ in range(n_cells)] for k in keys
-            })
-        else:
-            for k in keys:
-                self.adata.obs[k] = []
-        # Define index vectors to write to:
-        idx_vector = np.arange(0, n_cells)
-        if shuffled:
-            np.random.shuffle(idx_vector)
-        idx_ls = []
-        row = 0
-        ncells = self.ncells_bydataset(annotated_only=annotated_only)
-        if np.all([len(x) == 0 for x in ncells]):
-            raise ValueError("no datasets found")
-        for x in ncells:
-            temp_ls = []
-            for y in x:
-                temp_ls.append(idx_vector[row:(row + y)])
-                row += y
-            idx_ls.append(temp_ls)
-        print("checking expected and received data set sizes, rerun meta data generation if mismatch is found:")
-        print(self.ncells_bydataset(annotated_only=annotated_only))
-        print([[len(x) for x in xx] for xx in idx_ls])
-        for i, x in enumerate(self.dataset_groups):
-            x.write_backed(
-                adata_backed=self.adata,
-                genome=genome,
-                idx=idx_ls[i],
-                annotated_only=annotated_only,
-                load_raw=load_raw,
-                allow_caching=allow_caching,
-            )
-        # If the sparse non-shuffled approach is used, make sure that self.adata.obs.index is unique() before saving
-        if not scatter_update:
-            self.adata.obs.index = pd.RangeIndex(0, len(self.adata.obs.index))
-        # Explicitly write backed file to disk again to make sure that obs are included and that n_obs is set correctly
-        self.adata.write()
-        # Saving obs separately below is therefore no longer required (hence commented out)
-        # fn_backed_obs = ".".join(self.fn_backed.split(".")[:-1]) + "_obs.csv"
-        # self.adata.obs.to_csv(fn_backed_obs)
-
-    def delete_backed(self):
-        del self.adata
-        self.adata = None
-        os.remove(str(self.fn_backed))
-
-    def load_cached_backed(self, fn: PathLike):
-        self.adata = anndata.read(fn, backed='r')
 
     def streamline_metadata(
             self,

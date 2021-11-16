@@ -17,6 +17,6 @@ def load(data_dir, sample_fn, **kwargs):
     adata.obs = obs
     s_dict = {"F": "female", "M": "male"}
     adata.obs['Sex'] = [s_dict[i] for i in adata.obs['Sex']]
-    adata.obs['Age'] = [str(x) + "-year-old human stage" for x in adata.obs['Age'].values]
+    adata.obs['Age'] = [str(x) + "-year-old homosapiens stage" for x in adata.obs['Age'].values]
 
     return adata
