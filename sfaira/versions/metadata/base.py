@@ -347,7 +347,7 @@ class OntologyHierarchical(Ontology, abc.ABC):
         node = self.convert_to_id(node)
         return list(networkx.descendants(self.graph, node))
 
-    def is_a(self, query: str, reference: str, convert_to_id = True) -> bool:
+    def is_a(self, query: str, reference: str, convert_to_id=True) -> bool:
         """
         Checks if query node is reference node or an ancestor thereof.
 
