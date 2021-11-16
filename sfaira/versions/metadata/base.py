@@ -303,10 +303,10 @@ class OntologyHierarchical(Ontology, abc.ABC):
         This clips nodes that are not upstream of defined leaves.
         :param x: New set of leaves nodes, identified as IDs.
         """
-        x = self.convert_to_id(x=x)
+        x = self.convert_to_id(x)
         nodes_to_remove = []
-        for y in self.graph.nodes():
-            if not np.any([self.is_a(query=z, reference=y) for z in x]):
+        for y in self.convert_to_id(list(self.graph.nodes())):
+            if not self.is_a(query=x, reference=y, convert_to_id=False):
                 nodes_to_remove.append(y)
         self.graph.remove_nodes_from(nodes_to_remove)
 
@@ -347,17 +347,20 @@ class OntologyHierarchical(Ontology, abc.ABC):
         node = self.convert_to_id(node)
         return list(networkx.descendants(self.graph, node))
 
-    def is_a(self, query: str, reference: str) -> bool:
+    def is_a(self, query: str, reference: str, convert_to_id = True) -> bool:
         """
         Checks if query node is reference node or an ancestor thereof.
 
         :param query: Query node name. Node ID or name.
         :param reference: Reference node name. Node ID or name.
+        :param convert_to_id: If True -> apply self.convert_to_id to query and reference input
         :return: If query node is reference node or an ancestor thereof.
         """
-        query = self.convert_to_id(query)
-        reference = self.convert_to_id(reference)
-        return query in self.get_ancestors(node=reference) or query == reference
+        if convert_to_id:
+            query = self.convert_to_id(query)
+            reference = self.convert_to_id(reference)
+        ancestors = self.get_ancestors(node=reference)
+        return np.any(query in ancestors) or (reference in query)
 
     def map_to_leaves(
             self,
