@@ -359,6 +359,10 @@ class OntologyHierarchical(Ontology, abc.ABC):
         if convert_to_id:
             query = self.convert_to_id(query)
             reference = self.convert_to_id(reference)
+        else:
+            if isinstance(query, str):
+                query = [query]
+
         ancestors = self.get_ancestors(node=reference)
         return np.any(query in ancestors) or (reference in query)
 
