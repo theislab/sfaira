@@ -522,6 +522,7 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
         batch_schedule_kwargs = {"randomized_batch_access": randomized_batch_access,
                                  "random_access": random_access,
                                  "retrieval_batch_size": retrieval_batch_size}
+        kwargs['return_dense'] = return_dense
         gen = self._get_generator(batch_schedule=batch_schedule, batch_size=batch_size, map_fn=map_fn, obs_idx=idx,
                                   obs_keys=obs_keys, var_idx=var_idx, **batch_schedule_kwargs, **kwargs)
         return gen
