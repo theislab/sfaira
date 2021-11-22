@@ -6,6 +6,7 @@ import os
 import owlready2
 import pickle
 import requests
+from functools import lru_cache
 from typing import Dict, List, Tuple, Union
 
 
@@ -204,7 +205,17 @@ class OntologyHierarchical(Ontology, abc.ABC):
     """
     Basic ordered ontology container
     """
-    graph: networkx.MultiDiGraph
+    _graph: networkx.MultiDiGraph
+
+    @property
+    def graph(self) -> networkx.MultiDiGraph:
+        return self._graph
+
+    @graph.setter
+    def graph(self, graph: networkx.MultiDiGraph):
+        self._graph = graph
+        self.get_ancestors.cache_clear()
+        self.get_descendants.cache_clear()
 
     def _check_graph(self):
         if not networkx.is_directed_acyclic_graph(self.graph):
@@ -291,6 +302,10 @@ class OntologyHierarchical(Ontology, abc.ABC):
         else:
             return x
 
+    @lru_cache(maxsize=None)
+    def __convert_to_id_cached(self, x: str) -> str:
+        return self.convert_to_id(x)
+
     @property
     def leaves(self) -> List[str]:
         return [x for x in self.graph.nodes() if self.graph.in_degree(x) == 0]
@@ -305,8 +320,8 @@ class OntologyHierarchical(Ontology, abc.ABC):
         """
         x = self.convert_to_id(x)
         nodes_to_remove = []
-        for y in self.convert_to_id(list(self.graph.nodes())):
-            if not self.is_a(query=x, reference=y, convert_to_id=False):
+        for y in self.graph.nodes():
+            if not np.any([self.is_a(query=z, reference=y, convert_to_id=False) for z in x]):
                 nodes_to_remove.append(y)
         self.graph.remove_nodes_from(nodes_to_remove)
 
@@ -331,40 +346,37 @@ class OntologyHierarchical(Ontology, abc.ABC):
         assert isinstance(x, list), "supply either list or str to get_effective_leaves"
         if len(x) == 0:
             raise ValueError("x was empty list, get_effective_leaves cannot be called on empty list")
-        x = np.unique(x).tolist()
+        x = list(np.unique(x))
         x = self.convert_to_id(x=x)
         leaves = []
         for y in x:
-            if not np.any([self.is_a(query=z, reference=y) for z in list(set(x) - {y})]):
+            if not np.any([self.is_a(query=z, reference=y, convert_to_id=False) for z in list(set(x) - {y})]):
                 leaves.append(y)
         return leaves
 
+    @lru_cache(maxsize=None)
     def get_ancestors(self, node: str) -> List[str]:
-        node = self.convert_to_id(node)
+        node = self.__convert_to_id_cached(node)
         return list(networkx.ancestors(self.graph, node))
 
+    @lru_cache(maxsize=None)
     def get_descendants(self, node: str) -> List[str]:
-        node = self.convert_to_id(node)
+        node = self.__convert_to_id_cached(node)
         return list(networkx.descendants(self.graph, node))
 
-    def is_a(self, query: str, reference: str, convert_to_id=True) -> bool:
+    def is_a(self, query: str, reference: str, convert_to_id: bool = True) -> bool:
         """
         Checks if query node is reference node or an ancestor thereof.
 
         :param query: Query node name. Node ID or name.
         :param reference: Reference node name. Node ID or name.
-        :param convert_to_id: If True -> apply self.convert_to_id to query and reference input
+        :param convert_to_id: Whether to call self.convert_to_id on `query` and `reference` input arguments
         :return: If query node is reference node or an ancestor thereof.
         """
         if convert_to_id:
-            query = self.convert_to_id(query)
-            reference = self.convert_to_id(reference)
-        else:
-            if isinstance(query, str):
-                query = [query]
-
-        ancestors = self.get_ancestors(node=reference)
-        return np.any(query in ancestors) or (reference in query)
+            query = self.__convert_to_id_cached(query)
+            reference = self.__convert_to_id_cached(reference)
+        return query in self.get_ancestors(node=reference) or query == reference
 
     def map_to_leaves(
             self,
@@ -383,13 +395,11 @@ class OntologyHierarchical(Ontology, abc.ABC):
         :param include_self: DEPRECEATED.
         :return:
         """
-        node = self.convert_to_id(node)
+        node = self.__convert_to_id_cached(node)
         ancestors = self.get_ancestors(node)
         # Add node itself to list of ancestors.
         ancestors = ancestors + [node]
-        if len(ancestors) > 0:
-            ancestors = self.convert_to_id(ancestors)
-        leaves = self.convert_to_id(self.leaves)
+        leaves = self.leaves
         if return_type == "ids":
             return [x for x in leaves if x in ancestors]
         elif return_type == "idx":
