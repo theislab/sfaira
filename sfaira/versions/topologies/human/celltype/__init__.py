@@ -1,2 +1,0 @@
-from sfaira.versions.topologies.human.celltype.celltypemarker import CELLTYPEMARKER_TOPOLOGIES
-from sfaira.versions.topologies.human.celltype.celltypemlp import CELLTYPEMLP_TOPOLOGIES

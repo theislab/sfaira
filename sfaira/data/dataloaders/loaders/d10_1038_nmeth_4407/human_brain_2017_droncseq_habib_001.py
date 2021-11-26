@@ -19,7 +19,7 @@ class Dataset(DatasetBase):
         self.doi_journal = "10.1038/nmeth.4407"
         self.normalization = "raw"
         self.organ = "brain"
-        self.organism = "human"
+        self.organism = "Homo sapiens"
         self.primary_data = True
         self.sample_source = "primary_tissue"
         self.year = 2017
