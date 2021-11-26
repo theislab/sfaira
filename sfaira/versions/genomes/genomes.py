@@ -12,7 +12,7 @@ import pathlib
 import urllib.error
 import urllib.request
 
-from sfaira.consts.directories import CACHE_DIR_GENOMES
+from sfaira import settings
 
 KEY_SYMBOL = "gene_name"
 KEY_ID = "gene_id"
@@ -37,9 +37,9 @@ class GtfInterface:
     @property
     def cache_dir(self):
         """
-        The cache dir is in a cache directory in the sfaira installation that is excempt from git versioning.
+        The cache dir is in a cache directory in the homedirectory of the user by default and can be user modified.
         """
-        cache_dir_path = os.path.join(CACHE_DIR_GENOMES, self.ensembl_organism)
+        cache_dir_path = os.path.join(settings.cachedir_genomes, self.ensembl_organism)
         cache_dir_path = pathlib.Path(cache_dir_path)
         cache_dir_path.mkdir(parents=True, exist_ok=True)
         return cache_dir_path
