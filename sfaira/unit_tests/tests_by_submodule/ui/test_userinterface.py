@@ -10,7 +10,6 @@ from sfaira.unit_tests.data_for_tests.loaders.utils import PrepareData
 from sfaira.unit_tests import DIR_TEMP
 
 
-
 class HelperUi:
     ui: Union[UserInterface]
     data: np.ndarray
