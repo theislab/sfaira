@@ -8,9 +8,9 @@ import requests
 from typing import List, Union
 import uuid
 
+from sfaira import settings
 from sfaira.data.dataloaders.base import DatasetBase
 from sfaira.consts import AdataIdsCellxgene, AdataIdsCellxgene_v2_0_0
-from sfaira.consts.directories import CACHE_DIR_DATABASES_CELLXGENE
 from sfaira.data.dataloaders.databases.cellxgene.rest_helpers import get_collection, get_data
 from sfaira.data.dataloaders.databases.cellxgene.rest_helpers import CELLXGENE_PRODUCTION_ENDPOINT, DOWNLOAD_DATASET
 
@@ -137,11 +137,9 @@ class Dataset(DatasetBase):
     @property
     def _collection_cache_dir(self):
         """
-        The cache dir is in a cache directory in the sfaira installation that is excempt from git versioning.
+        The cache dir is in a cache directory in the homedirectory of the user by default and can be user modified.
         """
-        cache_dir_path = pathlib.Path(CACHE_DIR_DATABASES_CELLXGENE)
-        cache_dir_path.mkdir(parents=True, exist_ok=True)
-        return CACHE_DIR_DATABASES_CELLXGENE
+        return settings.cachedir_databases_cellxgene
 
     @property
     def _collection_cache_fn(self):

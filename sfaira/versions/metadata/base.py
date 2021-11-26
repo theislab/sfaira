@@ -9,7 +9,7 @@ import requests
 from typing import Dict, List, Tuple, Union
 
 
-from sfaira.consts.directories import CACHE_DIR_ONTOLOGIES
+from sfaira import settings
 
 """
 Ontology managament classes.
@@ -33,7 +33,7 @@ def cached_load_file(url, ontology_cache_dir, ontology_cache_fn, recache: bool =
         # TODO add caching option.
         obofile = url
     else:
-        ontology_cache_dir = os.path.join(CACHE_DIR_ONTOLOGIES, ontology_cache_dir)
+        ontology_cache_dir = os.path.join(settings.cachedir_ontologies, ontology_cache_dir)
         obofile = os.path.join(ontology_cache_dir, ontology_cache_fn)
         # Download if necessary:
         if not os.path.isfile(obofile) or recache:
@@ -62,7 +62,7 @@ def cached_load_ebi(ontology_cache_dir, ontology_cache_fn, recache: bool = False
     :param recache:
     :return:
     """
-    ontology_cache_dir = os.path.join(CACHE_DIR_ONTOLOGIES, ontology_cache_dir)
+    ontology_cache_dir = os.path.join(settings.cachedir_ontologies, ontology_cache_dir)
     picklefile = os.path.join(ontology_cache_dir, ontology_cache_fn)
     if os.path.isfile(picklefile) and not recache:
         with open(picklefile, 'rb') as f:

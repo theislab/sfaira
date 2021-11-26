@@ -6,7 +6,8 @@ import pandas as pd
 import pytest
 from typing import Union
 
-from sfaira.consts import AdataIdsSfaira, CACHE_DIR
+from sfaira import settings
+from sfaira.consts import AdataIdsSfaira
 from sfaira.data import DistributedStoreSingleFeatureSpace, DistributedStoreMultipleFeatureSpaceBase, load_store
 from sfaira.estimators import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
 from sfaira.versions.genomes.genomes import CustomFeatureContainer
@@ -16,8 +17,6 @@ from sfaira.versions.topologies import TopologyContainer
 from sfaira.unit_tests.data_for_tests.loaders.consts import CELLTYPES, CL_VERSION, ASSEMBLY_HUMAN, ASSEMBLY_MOUSE
 from sfaira.unit_tests.data_for_tests.loaders.utils import PrepareData
 from sfaira.unit_tests.directories import DIR_TEMP
-
-CACHE_DIR_GENOMES = os.path.join(CACHE_DIR, "genomes")
 
 ADATA_IDS = AdataIdsSfaira()
 ASSEMBLY = {
@@ -177,7 +176,7 @@ class HelperEstimatorKerasEmbedding(HelperEstimatorKeras):
         if feature_space == "full":
             # Read 500 genes (not full protein coding) to compromise between being able to distinguish observations
             # and reducing run time of unit tests.
-            tab = pd.read_csv(os.path.join(CACHE_DIR_GENOMES, "_".join(organism.split(" ")).lower(),
+            tab = pd.read_csv(os.path.join(settings.cachedir_genomes, "_".join(organism.split(" ")).lower(),
                                            ASSEMBLY[organism] + ".csv"))
             genes_full = tab.loc[tab["gene_biotype"].values == "protein_coding", "gene_id"].values[:500].tolist()
             topology["input"]["genes"] = ["ensg", genes_full]
