@@ -67,6 +67,7 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
     _indices: Dict[str, np.ndarray]
     _obs_by_key: Union[None, Dict[str, dask.dataframe.DataFrame]]
     data_source: str
+    _dataset_weights: Dict[str, float]
 
     def __init__(self, adata_by_key: Dict[str, anndata.AnnData], indices: Dict[str, np.ndarray],
                  obs_by_key: Union[None, Dict[str, dask.dataframe.DataFrame]] = None, data_source: str = "X"):
@@ -241,11 +242,11 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
         assert (values is None or excluded_values is not None) or (values is not None or excluded_values is None), \
             "supply either values or excluded_values"
 
-        def get_idx(adata, obs, k, v, xv, dataset):
+        def get_idx(adata, obs, k, v, xv, dataset) -> np.ndarray:
             # Use cell-wise annotation if data set-wide maps are ambiguous:
             # This can happen if the different cell-wise annotations are summarised as a union in .uns.
             read_from_uns = (getattr(self._adata_ids_sfaira, k) in adata.uns.keys() and
-                             adata.uns[getattr(self._adata_ids_sfaira, k)] != UNS_STRING_META_IN_OBS and
+                             np.all(adata.uns[getattr(self._adata_ids_sfaira, k)] != UNS_STRING_META_IN_OBS) and
                              getattr(self._adata_ids_sfaira, k) not in obs.columns)
             read_from_obs = not read_from_uns and getattr(self._adata_ids_sfaira, k) in obs.columns
             if read_from_uns:
@@ -260,31 +261,32 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
                     # Replicate unique property along cell dimension.
                     values_found = [values_found[0] for _ in range(adata.n_obs)]
             elif read_from_obs:
-                values_found = obs[getattr(self._adata_ids_sfaira, k)].values
+                values_found = obs[getattr(self._adata_ids_sfaira, k)].to_numpy()
             else:
                 values_found = []
                 print(f"WARNING: did not find attribute {k} in data set {dataset}")
-            values_found_unique = np.unique(values_found)
+
             try:
                 ontology = getattr(self.ontology_container, k)
             except AttributeError:
                 raise ValueError(f"{k} not a valid property of ontology_container object")
-            # Test only unique elements found in ontology to save time.
+
             if v is not None:
-                values_found_unique_matched = [
-                    x for x in values_found_unique if np.any([
-                        is_child(query=x, ontology=ontology, ontology_parent=y)
-                        for y in v
-                    ])
-                ]
+                v_xv_selector = v
             else:
-                values_found_unique_matched = [
-                    x for x in values_found_unique if np.all([
-                        not is_child(query=x, ontology=ontology, ontology_parent=y)
-                        for y in xv
-                    ])
-                ]
-            idx = np.where([x in values_found_unique_matched for x in values_found])[0]
+                v_xv_selector = xv
+            values_found_unique_matched = []
+            for x in pd.unique(values_found):
+                # dont do checking for 'unknown' placeholders
+                if any([
+                    x == self._adata_ids_sfaira.unknown_metadata_identifier,
+                    x == self._adata_ids_sfaira.not_a_cell_celltype_identifier
+                ]):
+                    values_found_unique_matched.append(x)
+                elif np.all([is_child(query=x, ontology=ontology, ontology_parent=y) for y in v_xv_selector]):
+                    values_found_unique_matched.append(x)
+
+            idx = np.where(np.isin(values_found, values_found_unique_matched))[0]
             return idx
 
         indices = {}
@@ -298,10 +300,10 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
             # Cannot index on view here as indexing on view of views of backed anndata objects is not yet supported.
             idx_subset = get_idx(adata=adata_k, obs=obs_k, k=attr_key, v=values, xv=excluded_values, dataset=key)
             # Keep intersection of old and new hits.
-            idx_new = np.sort(list(set(np.asarray(idx_old).tolist()).intersection(
-                set(np.asarray(idx_subset).tolist()))))
+            idx_new = np.intersect1d(idx_old, idx_subset)
             if len(idx_new) > 0:
                 indices[key] = np.asarray(idx_new, dtype="int32")
+
         return indices
 
     def subset(self, attr_key, values: Union[str, List[str], None] = None,
@@ -327,6 +329,7 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
             - "state_exact" points to self.state_exact_obs_key
         :param values: Classes to overlap to. Supply either values or excluded_values.
         :param excluded_values: Classes to exclude from match list. Supply either values or excluded_values.
+        :param verbose: If >1 print warning message if store is empty after subsetting
         """
         self.indices = self.get_subset_idx(attr_key=attr_key, values=values, excluded_values=excluded_values)
         if self.n_obs == 0 and verbose > 0:
@@ -470,7 +473,7 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
             batch_size: int = 1,
             retrieval_batch_size: int = 128,
             map_fn=None,
-            obs_keys: List[str] = [],
+            obs_keys: List[str] = None,
             return_dense: bool = True,
             randomized_batch_access: bool = False,
             random_access: bool = False,
@@ -489,8 +492,8 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
             along all observations in self.adata_by_key, ordered along a hypothetical concatenation along the keys of
             self.adata_by_key. If None, all observations are selected.
         :param batch_size: Number of observations to yield in each access (generator invocation).
-        :param retrieval_batch_size: Number of observations read from disk in each batched access (data-backend generator
-            invocation).
+        :param retrieval_batch_size: Number of observations read from disk in each batched access (data-backend
+            generator invocation).
         :param map_fn: Map functino to apply to output tuple of raw generator. Each draw i from the generator is then:
             `yield map_fn(x[i, var_idx], obs[i, obs_keys])`
         :param obs_keys: .obs columns to return in the generator. These have to be a subset of the columns available
@@ -517,6 +520,8 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
         :return: Generator function which yields batch_size at every invocation.
             The generator returns a tuple of (.X, .obs).
         """
+        if obs_keys is None:
+            obs_keys = []
         var_idx, batch_size, retrieval_batch_size = self._index_curation_helper(
             batch_size=batch_size, retrival_batch_size=retrieval_batch_size)
         batch_schedule_kwargs = {"randomized_batch_access": randomized_batch_access,
@@ -593,8 +598,8 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
         """
         batch_size = min(len(idx), 128)
 
-        def map_fn(x, obs):
-            return (x, ),
+        def map_fn(x_, obs):
+            return (x_, ),
 
         g = self.generator(idx=idx, retrieval_batch_size=batch_size, return_dense=True, random_access=False,
                            randomized_batch_access=False, map_fn=map_fn, **kwargs)
