@@ -5,13 +5,15 @@ Settings class which for example holds paths to cache directories used throughou
 import os
 
 
+SFAIRA_REPO_URL = "https://zenodo.org/record/4836517/files/"
+
 class SfairaConfig:
     """\
     Config manager for sfaira.
     """
 
     def __init__(self):
-        self.sfaira_repo_url = "https://zenodo.org/record/4836517/files/"
+        self.sfaira_repo_url = SFAIRA_REPO_URL
         self._cachedir_base = os.path.join(os.path.expanduser("~"), ".cache", "sfaira")
         self._cachedir_databases = os.path.join(self._cachedir_base, "dataset_meta")
         self._cachedir_databases_cellxgene = os.path.join(self._cachedir_databases, "cellxgene")
@@ -27,6 +29,8 @@ class SfairaConfig:
     def cachedir_base(self, cachedir_base):
         if not isinstance(cachedir_base, str):
             raise ValueError(f"cachedir_base needs to be provided as a string, was {type(cachedir_base)}")
+        if cachedir_base == "repo":
+            cachedir_base = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "cache")
         self._cachedir_base = cachedir_base
 
     @property
