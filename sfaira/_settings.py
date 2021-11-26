@@ -7,6 +7,7 @@ import os
 
 SFAIRA_REPO_URL = "https://zenodo.org/record/4836517/files/"
 
+
 class SfairaConfig:
     """\
     Config manager for sfaira.
