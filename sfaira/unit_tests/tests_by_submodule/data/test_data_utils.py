@@ -22,7 +22,7 @@ def test_map_celltype_to_ontology(
     perfectly_matched_query = ["type B pancreatic cell" == x for x in trial_cell_type_labels]
     matches = map_celltype_to_ontology(
         queries=trial_cell_type_labels,
-        organism="human",
+        organism="Homo sapiens",
         include_synonyms=True,
         anatomical_constraint=anatomical_constraint,
         choices_for_perfect_match=choices_for_perfect_match,

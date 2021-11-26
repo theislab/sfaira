@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """A Data and Model Zoo for Single-Cell Genomics."""
 
+from ._settings import settings
 import sfaira.consts
 import sfaira.data
 import sfaira.genomes
@@ -22,7 +23,7 @@ __author__ = ', '.join([
     "Lukas Heumos"
 ])
 __email__ = ', '.join([
-    "leander.dony@helmholtz-muenchen.de",
-    "david.fischer@helmholtz-muenchen.de",
-    "lukas.heumos@helmholtz-muenchen.de"
+    "leander.dony@helmholtz-munich.de",
+    "david.fischer@helmholtz-munich.de",
+    "lukas.heumos@helmholtz-munich.de"
 ])

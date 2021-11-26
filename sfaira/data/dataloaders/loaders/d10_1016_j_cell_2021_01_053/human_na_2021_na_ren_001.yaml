@@ -8,7 +8,7 @@ dataset_wise:
     doi_preprint:
     doi_journal: "10.1016/j.cell.2021.01.053"
     download_url_data: "https://drive.google.com/file/d/1IwWcn4W-YKgNbz4DpNweM2cKxlx1hbM0/view"
-    download_url_meta: "None"
+    download_url_meta:
     primary_data: True
     normalization: "raw"
     year: 2021
@@ -33,7 +33,7 @@ dataset_or_observation_wise:
     individual_obs_key: "PatientID"
     organ: 
     organ_obs_key: "organ"
-    organism: "human"
+    organism: "Homo sapiens"
     organism_obs_key:
     sample_source: "primary_tissue"
     sample_source_obs_key:

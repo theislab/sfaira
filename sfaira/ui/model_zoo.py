@@ -171,7 +171,12 @@ class ModelZoo:
     def model_organism(self):
         # TODO: this relies on theislab model_name formatting
         assert self.model_id is not None, "set model_id first"
-        return self.model_id.split('_')[1].split("-")[0]
+        return {
+            "homosapiens": "Homo sapiens",
+            "musmusculus": "Mus musculus",
+            "human": "Homo sapiens",  # necessary for old sfaira model uploads
+            "mouse": "Mus musculus",  # necessary for old sfaira model uploads
+        }[self.model_id.split('_')[1].split("-")[0]]
 
     @property
     def model_organ(self):

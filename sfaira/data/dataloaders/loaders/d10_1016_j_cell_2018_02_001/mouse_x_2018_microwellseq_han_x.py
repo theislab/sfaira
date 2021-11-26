@@ -35,7 +35,7 @@ SAMPLE_FNS = [
     "FetalMaleGonad_dge.txt.gz",
     "FetalPancreas_dge.txt.gz",
     "FetalStomach_dge.txt.gz",
-    # "human-293T_dge.txt.gz",  # ToDo: sort out meta data for these
+    # "homosapiens-293T_dge.txt.gz",  # ToDo: sort out meta data for these
     "Kidney1_dge.txt.gz",
     "Kidney2_dge.txt.gz",
     "Liver1_dge.txt.gz",
@@ -59,7 +59,7 @@ SAMPLE_FNS = [
     # "mES.CJ7_dge.txt.gz",  # TODO: sort out meta data for these
     "MesenchymalStemCells_dge.txt.gz",
     "MesenchymalStemCellsPrimary_dge.txt.gz",
-    # "mouse-3T3_dge.txt.gz",  # TODO: sort out meta data for these
+    # "musmusculus-3T3_dge.txt.gz",  # TODO: sort out meta data for these
     "Muscle_dge.txt.gz",
     "NeonatalCalvaria1_dge.txt.gz",
     "NeonatalCalvaria2_dge.txt.gz",
@@ -134,7 +134,7 @@ class Dataset(DatasetBase):
             "FetalMaleGonad_dge.txt.gz": "testis",
             "FetalPancreas_dge.txt.gz": "pancreas",
             "FetalStomach_dge.txt.gz": "stomach",
-            "human-293T_dge.txt.gz": None,
+            "homosapiens-293T_dge.txt.gz": None,
             "Kidney1_dge.txt.gz": "kidney",
             "Kidney2_dge.txt.gz": "kidney",
             "Liver1_dge.txt.gz": "liver",
@@ -158,7 +158,7 @@ class Dataset(DatasetBase):
             "mES.CJ7_dge.txt.gz": "blastocyst",
             "MesenchymalStemCells_dge.txt.gz": "mesenchyme",
             "MesenchymalStemCellsPrimary_dge.txt.gz": "mesenchyme",
-            "mouse-3T3_dge.txt.gz": None,
+            "musmusculus-3T3_dge.txt.gz": None,
             "Muscle_dge.txt.gz": "skeletal muscle organ",
             "NeonatalCalvaria1_dge.txt.gz": "vault of skull",
             "NeonatalCalvaria2_dge.txt.gz": "vault of skull",
@@ -227,7 +227,7 @@ class Dataset(DatasetBase):
             "FetalMaleGonad_dge.txt.gz": "fetal",
             "FetalPancreas_dge.txt.gz": "fetal",
             "FetalStomach_dge.txt.gz": "fetal",
-            "human-293T_dge.txt.gz": None,
+            "homosapiens-293T_dge.txt.gz": None,
             "Kidney1_dge.txt.gz": "adult",
             "Kidney2_dge.txt.gz": "adult",
             "Liver1_dge.txt.gz": "adult",
@@ -251,7 +251,7 @@ class Dataset(DatasetBase):
             "mES.CJ7_dge.txt.gz": "embryonic",
             "MesenchymalStemCells_dge.txt.gz": "embryonic",
             "MesenchymalStemCellsPrimary_dge.txt.gz": "embryonic",
-            "mouse-3T3_dge.txt.gz": None,
+            "musmusculus-3T3_dge.txt.gz": None,
             "Muscle_dge.txt.gz": "adult",
             "NeonatalCalvaria1_dge.txt.gz": "neonatal",
             "NeonatalCalvaria2_dge.txt.gz": "neonatal",
@@ -304,7 +304,7 @@ class Dataset(DatasetBase):
         self.doi_journal = "10.1016/j.cell.2018.02.001"
         self.normalization = "raw"
         self.primary_data = True
-        self.organism = "mouse"
+        self.organism = "Mus musculus"
         self.assay_sc = "microwell-seq"
         self.year = 2018
         self.sample_source = "primary_tissue"
