@@ -350,8 +350,8 @@ class DatasetBase(abc.ABC):
         print(f"Downloading from synapse: {fn}")
         syn = synapseclient.Synapse()
         syn.login(kwargs['synapse_user'], kwargs['synapse_pw'])
-        dataset = syn.get(entity=synapse_entity)
-        shutil.move(dataset.data_dir_base, os.path.join(self.data_dir, fn))
+        syn.get(entity=synapse_entity, downloadLocation=os.path.join(self.data_dir, fn))
+        syn.logout()
 
     @property
     def cache_fn(self):
