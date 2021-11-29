@@ -271,19 +271,17 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
             except AttributeError:
                 raise ValueError(f"{k} not a valid property of ontology_container object")
 
-            if v is not None:
-                v_xv_selector = v
-            else:
-                v_xv_selector = xv
             values_found_unique_matched = []
             for x in pd.unique(values_found):
-                # dont do checking for 'unknown' placeholders
+                # don't do checking for 'unknown' placeholders
                 if any([
                     x == self._adata_ids_sfaira.unknown_metadata_identifier,
                     x == self._adata_ids_sfaira.not_a_cell_celltype_identifier
                 ]):
                     values_found_unique_matched.append(x)
-                elif np.all([is_child(query=x, ontology=ontology, ontology_parent=y) for y in v_xv_selector]):
+                elif v is not None and np.any([is_child(query=x, ontology=ontology, ontology_parent=y) for y in v]):
+                    values_found_unique_matched.append(x)
+                elif xv is not None and np.all([not is_child(query=x, ontology=ontology, ontology_parent=y) for y in xv]):
                     values_found_unique_matched.append(x)
 
             idx = np.where(np.isin(values_found, values_found_unique_matched))[0]
