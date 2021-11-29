@@ -42,6 +42,7 @@ setup(
         'Programming Language :: Python :: 3.8',
     ],
     packages=find_packages(include=['sfaira', 'sfaira.*']),
+    include_package_data=True,
     package_data={'': templates},
     entry_points={
         'console_scripts': [
