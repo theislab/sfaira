@@ -129,13 +129,13 @@ class DataloaderCreator:
                                                                                 default='X_umap'))
         self.template_attributes.organism = sfaira_questionary(function='text',
                                                                question='Organism:',
-                                                               default='NA')
+                                                               default='')
         self.template_attributes.organ = sfaira_questionary(function='text',
                                                             question='Organ:',
-                                                            default='NA')
+                                                            default='')
         self.template_attributes.assay_sc = sfaira_questionary(function='text',
                                                                question='Assay:',
-                                                               default='NA')
+                                                               default='')
         self.template_attributes.normalization = sfaira_questionary(function='text',
                                                                     question='Normalization:',
                                                                     default='raw')
@@ -147,7 +147,7 @@ class DataloaderCreator:
                                                                   default='healthy')
         self.template_attributes.sample_source = sfaira_questionary(function='text',
                                                                     question='Sample source:',
-                                                                    default='NA')
+                                                                    default='')
         is_cell_type_annotation = sfaira_questionary(function='confirm',
                                                      question='Does your dataset have a cell type annotation?',
                                                      default='No')
