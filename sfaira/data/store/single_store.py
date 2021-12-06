@@ -272,16 +272,30 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
                 raise ValueError(f"{k} not a valid property of ontology_container object")
 
             values_found_unique_matched = []
+
+            unknown_identifiers = [
+                self._adata_ids_sfaira.unknown_metadata_identifier,
+                self._adata_ids_sfaira.not_a_cell_celltype_identifier
+            ]
+            if v:
+                for unknown_ident in unknown_identifiers:
+                    if unknown_ident in v:
+                        v.remove(unknown_ident)
+                        values_found_unique_matched.append(unknown_ident)
+            elif xv:
+                for unknown_ident in unknown_identifiers:
+                    if unknown_ident in xv:
+                        xv.remove(unknown_ident)
+                        values_found_unique_matched.append(unknown_ident)
+
             for x in pd.unique(values_found):
-                # don't do checking for 'unknown' placeholders
-                if any([
-                    x == self._adata_ids_sfaira.unknown_metadata_identifier,
-                    x == self._adata_ids_sfaira.not_a_cell_celltype_identifier
-                ]):
-                    values_found_unique_matched.append(x)
+                if x in unknown_identifiers:
+                    pass
                 elif v is not None and np.any([is_child(query=x, ontology=ontology, ontology_parent=y) for y in v]):
                     values_found_unique_matched.append(x)
-                elif xv is not None and np.all([not is_child(query=x, ontology=ontology, ontology_parent=y) for y in xv]):
+                elif xv is not None and np.all([
+                    not is_child(query=x, ontology=ontology, ontology_parent=y) for y in xv
+                ]):
                     values_found_unique_matched.append(x)
 
             idx = np.where(np.isin(values_found, values_found_unique_matched))[0]
@@ -652,8 +666,8 @@ class DistributedStoreAnndata(DistributedStoreSingleFeatureSpace):
     @property
     def X(self):
         if self.in_memory:
-            assert np.all([isinstance(v.X, scipy.sparse.spmatrix) for v in self.adata_by_key.values()])
-            return scipy.sparse.vstack([v.X for v in self.adata_by_key.values()])
+            assert np.all([isinstance(v.X, scipy.sparse.spmatrix) for v in self._adata_sliced.values()])
+            return scipy.sparse.vstack([v.X for v in self._adata_sliced.values()])
         else:
             raise NotImplementedError("this operation is not efficient with backed objects")
 
