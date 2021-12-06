@@ -167,7 +167,7 @@ for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, comp
             idx = np.random.choice(
                 np.arange(idx_dataset_start[0], np.maximum(idx_dataset_end[0], idx_dataset_start[0] + N_DRAWS)),
                 size=N_DRAWS, replace=False
-            ),
+            )
         else:
             idx = np.random.choice(
                 np.arange(
@@ -175,7 +175,7 @@ for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, comp
                     np.maximum(idx_dataset_end[0], idx_dataset_start[0] + (N_DRAWS * RETRIEVAL_BATCH_SIZE))
                 ),
                 size=(N_DRAWS * RETRIEVAL_BATCH_SIZE), replace=False
-            ),
+            )
 
         kwargs = {
             "idx": idx,
