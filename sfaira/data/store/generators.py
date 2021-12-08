@@ -76,19 +76,14 @@ class GeneratorBase:
             import tensorflow as tf
 
             g = tf.data.Dataset.from_generator(generator=self.iterator, **kwargs)
-        elif generator_type == "torch":
+        elif generator_type.startswith("torch"):
             import torch
-
-            class SfairaIterableDataset(torch.utils.data.IterableDataset):
-
-                def __init__(self, iterator_fun, **kwargs):
-                    super(SfairaIterableDataset, self).__init__(**kwargs)
-                    self.iterator_fun = iterator_fun
-
-                def __iter__(self):
-                    return self.iterator_fun()
+            # Only import this module if torch is used to avoid strict torch dependency:
+            from .torch_dataset import SfairaIterableDataset
 
             g = SfairaIterableDataset(iterator_fun=self.iterator)
+            if generator_type == "torch_loader":
+                g = torch.utils.data.DataLoader(g, **kwargs)
         else:
             raise ValueError(f"{generator_type} not recognized")
         return g
