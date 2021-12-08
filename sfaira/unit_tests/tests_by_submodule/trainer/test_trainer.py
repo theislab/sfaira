@@ -37,11 +37,11 @@ class HelperTrainerBase:
     data: Union[anndata.AnnData, load_store]
     trainer: Union[TrainModelCelltype, TrainModelEmbedding]
     dir_temp = DIR_TEMP
-    model_name = "example_cv0"
 
     def __init__(self, zoo: ModelZoo):
         self.model_id = zoo.model_id
         self.tc = zoo.topology_container
+        self.run_id = self.model_id + "_cv0"
 
     def load_adata(self, **kwargs):
         """
@@ -92,7 +92,7 @@ class HelperTrainerBase:
             lr=0.005,
         )
         self.trainer.save(
-            fn=os.path.join(self.dir_temp, self.model_name), model=True, specific=True
+            fn=os.path.join(self.dir_temp, self.run_id), model=True, specific=True
         )
 
 
