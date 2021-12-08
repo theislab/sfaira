@@ -71,19 +71,24 @@ class GeneratorBase:
         :returns: Modified iteratable (see generator_type).
         """
         if generator_type == "python":
-            g = self.iterator
+            g = self.iterator()
         elif generator_type == "tensorflow":
             import tensorflow as tf
+
             g = tf.data.Dataset.from_generator(generator=self.iterator, **kwargs)
         elif generator_type == "torch":
             import torch
 
             class SfairaIterableDataset(torch.utils.data.IterableDataset):
 
-                def __iter__(self):
-                    return self.iterator
+                def __init__(self, iterator_fun, **kwargs):
+                    super(SfairaIterableDataset, self).__init__(**kwargs)
+                    self.iterator_fun = iterator_fun
 
-            g = SfairaIterableDataset()
+                def __iter__(self):
+                    return self.iterator_fun()
+
+            g = SfairaIterableDataset(iterator_fun=self.iterator)
         else:
             raise ValueError(f"{generator_type} not recognized")
         return g

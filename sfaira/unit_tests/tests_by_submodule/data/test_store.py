@@ -244,3 +244,41 @@ def test_generator_blocked_data(store_format: str, idx, randomized_batch_access:
         assert np.sum(batch_sizes) == store.n_obs
     else:
         assert np.sum(batch_sizes) == len(idx)
+
+
+@pytest.mark.parametrize("adaptor", ["python", "tensorflow", "torch"])
+def test_adaptors(adaptor: str):
+    """
+    Test if framewor-specific generator adpators yield batches.
+    """
+    store = _get_single_store(store_format="dao")
+
+    def map_fn(x, obs):
+        """
+
+        Note: Need to convert to numpy in output because torch does not accept dask.
+        """
+        return (np.asarray(x[:, :2]),),
+
+    g = store.generator(idx=np.arange(0, 10), map_fn=map_fn, retrieval_batch_size=2, batch_size=1)
+    if adaptor == "python":
+        kwargs = {}
+    elif adaptor == "tensorflow":
+        import tensorflow as tf
+
+        kwargs = {"output_signature": (
+            tf.TensorSpec(shape=(2,), dtype=tf.float32),
+        )}
+    elif adaptor == "torch":
+        kwargs = {}
+    else:
+        assert False
+    it = g.adaptor(generator_type=adaptor, **kwargs)
+    if adaptor == "tensorflow":
+        it = iter(it.range(2))
+    if adaptor == "torch":
+        import torch
+
+        it = list(torch.utils.data.DataLoader(it))
+        it = iter(it)
+    _ = next(it)
