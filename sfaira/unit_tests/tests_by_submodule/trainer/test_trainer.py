@@ -36,10 +36,12 @@ class HelperTrainerBase:
 
     data: Union[anndata.AnnData, load_store]
     trainer: Union[TrainModelCelltype, TrainModelEmbedding]
+    dir_temp = DIR_TEMP
 
     def __init__(self, zoo: ModelZoo):
         self.model_id = zoo.model_id
         self.tc = zoo.topology_container
+        self.run_id = self.model_id + "_cv0"
 
     def load_adata(self, **kwargs):
         """
@@ -67,20 +69,20 @@ class HelperTrainerBase:
             self.load_store(organism="Homo sapiens", match_to_reference=self.tc.gc.release)
 
     def test_init(self, cls, estimator_kwargs: dict = {}, **kwargs):
-        if not os.path.exists(DIR_TEMP):
-            os.mkdir(DIR_TEMP)
+        if not os.path.exists(self.dir_temp):
+            pathlib.Path(self.dir_temp).mkdir(parents=True, exist_ok=True)
         self.load_data(data_type="adata")
         self.trainer = cls(
             data=self.data,
-            model_path=os.path.join(DIR_TEMP, "model"),
+            model_path=os.path.join(self.dir_temp, "model"),
             **kwargs
         )
         self.trainer.zoo.model_id = self.model_id
         self.trainer.init_estim(override_hyperpar={}, **estimator_kwargs)
 
     def test_save(self):
-        if not os.path.exists(DIR_TEMP):
-            os.mkdir(DIR_TEMP)
+        if not os.path.exists(self.dir_temp):
+            pathlib.Path(self.dir_temp).mkdir(parents=True, exist_ok=True)
         self.trainer.estimator.train(
             epochs=1,
             max_steps_per_epoch=1,
@@ -90,7 +92,7 @@ class HelperTrainerBase:
             lr=0.005,
         )
         self.trainer.save(
-            fn=os.path.join(DIR_TEMP, "trainer"), model=True, specific=True
+            fn=os.path.join(self.dir_temp, self.run_id), model=True, specific=True
         )
 
 
