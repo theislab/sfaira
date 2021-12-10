@@ -60,7 +60,7 @@ class GeneratorBase:
 
     @property
     def n_batches(self) -> int:
-        raise self.schedule.n_batches
+        return self.schedule.n_batches
 
     def adaptor(self, generator_type: str, **kwargs):
         """

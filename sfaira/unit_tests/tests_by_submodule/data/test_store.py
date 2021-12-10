@@ -249,7 +249,7 @@ def test_generator_blocked_data(store_format: str, idx, randomized_batch_access:
 @pytest.mark.parametrize("adaptor", ["python", "tensorflow", "torch"])
 def test_adaptors(adaptor: str):
     """
-    Test if framewor-specific generator adpators yield batches.
+    Test if framework-specific generator adpators yield batches.
     """
     store = _get_single_store(store_format="dao")
 

@@ -39,7 +39,7 @@ class BatchDesignBase:
         return self._batch_bounds
 
     @property
-    def n_batches(self):
+    def n_batches(self) -> int:
         return len(self.batch_bounds)
 
     @property
