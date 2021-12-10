@@ -8,9 +8,9 @@ import requests
 from typing import List, Union
 import uuid
 
+from sfaira import settings
 from sfaira.data.dataloaders.base import DatasetBase
 from sfaira.consts import AdataIdsCellxgene, AdataIdsCellxgene_v2_0_0
-from sfaira.consts.directories import CACHE_DIR_DATABASES_CELLXGENE
 from sfaira.data.dataloaders.databases.cellxgene.rest_helpers import get_collection, get_data
 from sfaira.data.dataloaders.databases.cellxgene.rest_helpers import CELLXGENE_PRODUCTION_ENDPOINT, DOWNLOAD_DATASET
 
@@ -25,19 +25,9 @@ def clean_cellxgene_meta_obs(k, val, adata_ids) -> Union[str, List[str]]:
     :param val: Found meta data entry.
     :returns: Cleaned meta data entry.
     """
-    if k == "disease":
-        # TODO normal state label varies in disease annotation. This can be removed once streamlined.
-        val = ["healthy" if (v.lower() == "normal" or v.lower() == "healthy") else v for v in val]
-    elif k == "organ":
+    if k == adata_ids.organ:
         # Organ labels contain labels on tissue type also, such as 'UBERON:0001911 (cell culture)'.
         val = [v.split(" ")[0] for v in val]
-    elif k == "organism":
-        # TODO deprecate map once same organism naming is used.
-        organism_map = {
-            "Homo sapiens": "human",
-            "Mus musculus": "mouse",
-        }
-        val = [organism_map[v] if v in organism_map.keys() else v for v in val]
     return val
 
 
@@ -49,27 +39,11 @@ def clean_cellxgene_meta_uns(k, val, adata_ids) -> Union[str, List[str]]:
     """
     x_clean = []
     for v in val:
-        if k == "sex":
-            v = v[0]
-        else:
-            # Decide if labels are read from name or ontology ID:
-            if k == "disease" and (v["label"].lower() == "normal" or v["label"].lower() == "healthy"):
-                # TODO normal state label varies in disease annotation. This can be removed once streamlined.
-                v = "healthy"
-            elif k in ["assay_sc", "disease", "organ"] and \
-                    v["ontology_term_id"] != adata_ids.unknown_metadata_identifier:
-                v = v["ontology_term_id"]
-            else:
-                v = v["label"]
-            # Organ labels contain labels on tissue type also, such as 'UBERON:0001911 (cell culture)'.
-            if k == "organ":
-                v = v.split(" ")[0]
-            if k == "organism":
-                # TODO deprecate map once same organism naming is used.
-                organism_map = {
-                    "Homo sapiens": "human",
-                    "Mus musculus": "mouse"}
-                v = organism_map[v] if v in organism_map.keys() else v
+        # Decide if labels are read from name or ontology ID:
+        v = v[adata_ids.onto_id_suffix[1:]]
+        # Organ labels contain labels on tissue type also, such as 'UBERON:0001911 (cell culture)'.
+        if k == adata_ids.organ:
+            v = v.split(" ")[0]
         if v != adata_ids.unknown_metadata_identifier and v != adata_ids.invalid_metadata_identifier:
             x_clean.append(v)
     return x_clean
@@ -132,27 +106,19 @@ class Dataset(DatasetBase):
             val = self._collection_dataset[getattr(self._adata_ids_cellxgene, k)]
             # Unique label if list is length 1:
             # Otherwise do not set property and resort to cell-wise labels.
-            if isinstance(val, dict) or k == "sex":
-                val = [val]
             v_clean = clean_cellxgene_meta_uns(k=k, val=val, adata_ids=self._adata_ids_cellxgene)
+            # Set as single element or list if multiple entries are given.
+            if len(v_clean) > 1:
+                v_clean = v_clean[0]
             try:
-                # Set as single element or list if multiple entries are given.
-                if len(v_clean) == 1:
-                    setattr(self, k, v_clean[0])
-                else:
-                    setattr(self, k, v_clean)
+                setattr(self, k, v_clean)
             except ValueError as e:
                 if verbose > 0:
                     print(f"WARNING: {e} in {self.collection_id} and data set {self.id}")
 
-        if self.organism == "human":
-            self._adata_ids_cellxgene = AdataIdsCellxgene_v2_0_0()
-        elif self.organism == "mouse":
-            self._adata_ids_cellxgene = AdataIdsCellxgene_v2_0_0()
-        else:
-            assert False, self.organism
+        self._adata_ids_cellxgene = AdataIdsCellxgene_v2_0_0()
         # Add author information.  # TODO need to change this to contributor?
-        setattr(self, "author", "cellxgene")
+        self.author = "cellxgene"
         # The h5ad objects from cellxgene follow a particular structure and the following attributes are guaranteed to
         # be in place. Note that these point at the anndata instance and will only be available for evaluation after
         # download. See below for attributes that are lazily available
@@ -161,7 +127,7 @@ class Dataset(DatasetBase):
         self.disease_obs_key = self._adata_ids_cellxgene.disease
         self.ethnicity_obs_key = self._adata_ids_cellxgene.ethnicity
         self.sex_obs_key = self._adata_ids_cellxgene.sex
-        self.organ_obs_key = self._adata_ids_cellxgene.organism
+        self.organ_obs_key = self._adata_ids_cellxgene.organ
         self.state_exact_obs_key = self._adata_ids_cellxgene.state_exact
 
         self.gene_id_symbols_var_key = self._adata_ids_cellxgene.feature_symbol
@@ -171,11 +137,9 @@ class Dataset(DatasetBase):
     @property
     def _collection_cache_dir(self):
         """
-        The cache dir is in a cache directory in the sfaira installation that is excempt from git versioning.
+        The cache dir is in a cache directory in the homedirectory of the user by default and can be user modified.
         """
-        cache_dir_path = pathlib.Path(CACHE_DIR_DATABASES_CELLXGENE)
-        cache_dir_path.mkdir(parents=True, exist_ok=True)
-        return CACHE_DIR_DATABASES_CELLXGENE
+        return settings.cachedir_databases_cellxgene
 
     @property
     def _collection_cache_fn(self):

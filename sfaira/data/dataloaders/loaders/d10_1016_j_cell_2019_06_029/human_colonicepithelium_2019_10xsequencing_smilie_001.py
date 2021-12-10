@@ -20,7 +20,7 @@ class Dataset(DatasetBase):
         self.doi_journal = "10.1016/j.cell.2019.06.029"
         self.normalization = "raw"
         self.organ = "colonic epithelium"
-        self.organism = "human"
+        self.organism = "Homo sapiens"
         self.primary_data = True
         self.sample_source = "primary_tissue"
         self.year = 2019

@@ -2,7 +2,7 @@ import os
 import shutil
 from typing import Union
 
-from sfaira.consts.directories import CACHE_DIR, CACHE_DIR_DATABASES, CACHE_DIR_GENOMES, CACHE_DIR_ONTOLOGIES
+from sfaira import settings
 
 
 def clean_cache(cache: Union[None, str] = None):
@@ -13,10 +13,10 @@ def clean_cache(cache: Union[None, str] = None):
     """
     if cache is not None:
         cache_dir_dict = {
-            "all": CACHE_DIR,
-            "dataset_meta": CACHE_DIR_DATABASES,
-            "genomes": CACHE_DIR_GENOMES,
-            "ontologies": CACHE_DIR_ONTOLOGIES,
+            "all": settings.cachedir_base,
+            "dataset_meta": settings.cachedir_databases,
+            "genomes": settings.cachedir_genomes,
+            "ontologies": settings.cachedir_ontologies,
         }
         if cache not in cache_dir_dict.keys():
             raise ValueError(f"Did not find cache directory input {cache} in support list: "

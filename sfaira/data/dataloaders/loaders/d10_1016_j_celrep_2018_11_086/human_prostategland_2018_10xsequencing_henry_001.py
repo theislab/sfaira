@@ -26,7 +26,7 @@ class Dataset(DatasetBase):
         self.sample_source = "primary_tissue"
         self.state_exact = "healthy"
         self.organ = "prostate gland"
-        self.organism = "human"
+        self.organism = "Homo sapiens"
         self.primary_data = True
         self.year = 2018
 

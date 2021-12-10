@@ -101,11 +101,10 @@ class GeneratorSingle(GeneratorBase):
         :param obs_keys: .obs columns to return in the generator. These have to be a subset of the columns available
             in self.adata_by_key.
         :param var_idx: The features to emit.
+        :parm split_to_obs: Whether to split tensors to observation-wise slices at the emission stage of the generator.
         """
         self.var_idx = var_idx
         self._obs_idx = None
-        if not batch_size == 1:
-            raise ValueError(f"Only batch size==1 is supported, found {batch_size}.")
         self.batch_schedule = batch_schedule
         self.batch_size = batch_size
         self.map_fn = map_fn

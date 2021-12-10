@@ -33,7 +33,7 @@ dataset_or_observation_wise:
     individual_obs_key:
     organ: "blood"
     organ_obs_key:
-    organism: "human"
+    organism: "Homo sapiens"
     organism_obs_key:
     sample_source: "primary_tissue"
     sample_source_obs_key:
