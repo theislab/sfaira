@@ -21,10 +21,10 @@ dataset_or_observation_wise:
     assay_sc:
         Schulte-Schrepping_2020_COVID19_10x_Neutrophils_processed_cellXgene.h5ad: "10x 3' v3"
         Schulte-Schrepping_2020_COVID19_10x_PBMC_processed_cellXgene.h5ad: "10x 3' v3"
-        Schulte-Schrepping_2020_COVID19_Rhapsody_freshPBMC-WB_processed_cellXgene.h5ad:
-        Schulte-Schrepping_2020_COVID19_Rhapsody_Monocytes_processed_cellXgene.:
-        Schulte-Schrepping_2020_COVID19_Rhapsody_Neutrophils_processed_cellXgene.h5ad:
-        Schulte-Schrepping_2020_COVID19_Rhapsody_PBMC_processed_cellXgene.h5ad:
+        Schulte-Schrepping_2020_COVID19_Rhapsody_freshPBMC-WB_processed_cellXgene.h5ad: "single cell library construction"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Monocytes_processed_cellXgene.h5ad: "single cell library construction"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Neutrophils_processed_cellXgene.h5ad: "single cell library construction"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_PBMC_processed_cellXgene.h5ad: "single cell library construction"
     assay_sc_obs_key:
     assay_differentiation:
     assay_differentiation_obs_key:
