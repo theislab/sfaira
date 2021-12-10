@@ -12,7 +12,7 @@ CD14_Monocytes_2	CD14-positive monocyte
 CD14_Monocytes_3	CD14-positive monocyte
 CD163+ Monocytes (Sample ID1_d7)	monocyte
 CD16_Monocytes	monocyte
-CD34+ GATA2+ cells	UNKNOWN
+CD34+ GATA2+ cells	unknown
 CD4+ T cells	CD4-positive, alpha-beta T cell
 CD4+ T cells_1	CD4-positive, alpha-beta T cell
 CD4+ T cells_2	CD4-positive, alpha-beta T cell
@@ -38,7 +38,7 @@ Immature Neutrophils_1	immature neutrophil
 Immature Neutrophils_2	immature neutrophil
 Megakaryocyte	megakaryocyte
 Megakaryocytes	megakaryocyte
-Mixed_cells	UNKNOWN
+Mixed_cells	unknown
 Monocytes	monocyte
 NK	natural killer cell
 NK cells	natural killer cell
@@ -51,13 +51,13 @@ Neutrophils_4	neutrophil
 Non-classical Monocytes	non-classical monocyte
 Plasmablast	plasmablast
 Plasmablasts	plasmablast
-Progenitors	UNKNOWN
-Prol. cells	UNKNOWN
+Progenitors	unknown
+Prol. cells	unknown
 mDC	myeloid dendritic cell
 mDCs	myeloid dendritic cell
-mixed	UNKNOWN
-mixed_1	UNKNOWN
-mixed_2	UNKNOWN
+mixed	unknown
+mixed_1	unknown
+mixed_2	unknown
 pDC	plasmacytoid dendritic cell
 pDCs	plasmacytoid dendritic cell
-undefined	UNKNOWN
+undefined	unknown
