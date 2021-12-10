@@ -48,8 +48,8 @@ dataset_or_observation_wise:
     organism_obs_key:
     sample_source: "primary_tissue"
     sample_source_obs_key:
-    sex: "sex"
-    sex_obs_key:
+    sex:
+    sex_obs_key: "sex"
     state_exact:
     state_exact_obs_key: "comorbidities"
     tech_sample:
