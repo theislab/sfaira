@@ -4,7 +4,7 @@ dataset_structure:
         - "Schulte-Schrepping_2020_COVID19_10x_Neutrophils_processed_cellXgene.h5ad"
         - "Schulte-Schrepping_2020_COVID19_10x_PBMC_processed_cellXgene.h5ad"
         - "Schulte-Schrepping_2020_COVID19_Rhapsody_freshPBMC-WB_processed_cellXgene.h5ad"
-        - "Schulte-Schrepping_2020_COVID19_Rhapsody_Monocytes_processed_cellXgene."
+        - "Schulte-Schrepping_2020_COVID19_Rhapsody_Monocytes_processed_cellXgene.h5ad"
         - "Schulte-Schrepping_2020_COVID19_Rhapsody_Neutrophils_processed_cellXgene.h5ad"
         - "Schulte-Schrepping_2020_COVID19_Rhapsody_PBMC_processed_cellXgene.h5ad"
 dataset_wise:
