@@ -5,7 +5,7 @@ import pandas as pd
 import scipy.sparse
 from typing import Dict, List, Union
 
-from sfaira.data.store.batch_schedule import BATCH_SCHEDULE
+from sfaira.data.store.batch_schedule import BATCH_SCHEDULE, BatchDesignBase
 
 
 def split_batch(x):
@@ -48,6 +48,8 @@ class GeneratorBase:
     which have their own classes below.
     """
 
+    schedule: BatchDesignBase
+
     @property
     def iterator(self) -> iter:
         raise NotImplementedError()
@@ -58,7 +60,7 @@ class GeneratorBase:
 
     @property
     def n_batches(self) -> int:
-        raise NotImplementedError()
+        raise self.schedule.n_batches
 
     def adaptor(self, generator_type: str, **kwargs):
         """
@@ -160,10 +162,6 @@ class GeneratorSingle(GeneratorBase):
     @property
     def n_obs(self) -> int:
         raise NotImplementedError()
-
-    @property
-    def n_batches(self) -> int:
-        return len(self.schedule.batch_bounds)
 
 
 class GeneratorAnndata(GeneratorSingle):
@@ -346,10 +344,21 @@ class GeneratorDask(GeneratorSingle):
 
 class GeneratorMulti(GeneratorBase):
 
+    """
+    Generator that wraps multiple other generators.
+    """
+
     generators: Dict[str, GeneratorSingle]
     intercalated: bool
 
     def __init__(self, generators: Dict[str, GeneratorSingle], intercalated: bool = False):
+        """
+
+        :param generators: The generators to combine.
+        :param intercalated: Whether to intercalate batches from both generators. Intercalates at frequency such that
+            all generators terminate roughly at the same time.
+            time.
+        """
         self.generators = generators
         self.intercalated = intercalated
         self._ratios = None
@@ -358,10 +367,12 @@ class GeneratorMulti(GeneratorBase):
     def ratios(self):
         """
         Define relative drawing frequencies from iterators for intercalation.
+
+        Note that these can be float and will be randomly rounded during intercalation.
         """
         if self._ratios is None:
             gen_lens = np.array([v.n_batches for v in self.generators.values()])
-            self._ratios = np.asarray(np.round(np.max(gen_lens) / np.asarray(gen_lens), 0), dtype="int64")
+            self._ratios = np.max(gen_lens) / np.asarray(gen_lens)
         return self._ratios
 
     @property
@@ -389,7 +400,8 @@ class GeneratorMulti(GeneratorBase):
                 while np.any(yielding):
                     # Loop over one iterator length adjusted cycle of emissions.
                     for i, (g, n) in enumerate(zip(iterators, self.ratios)):
-                        for _ in range(n):
+                        n_rounded = int(n) + np.random.binomial(n=1, p=n - int(n))
+                        for _ in range(n_rounded):
                             try:
                                 x = next(g)
                                 yield x

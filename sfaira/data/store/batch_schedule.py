@@ -39,6 +39,10 @@ class BatchDesignBase:
         return self._batch_bounds
 
     @property
+    def n_batches(self):
+        return len(self.batch_bounds())
+
+    @property
     def idx(self):
         """
         Protects property from uncontrolled changing.
