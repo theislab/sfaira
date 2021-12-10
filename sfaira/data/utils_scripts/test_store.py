@@ -12,11 +12,11 @@ from sfaira.data.store import DistributedStoreSingleFeatureSpace
 # Set global variables.
 print(f'sys.argv: {sys.argv}')
 
-N_DRAWS = 100
-BATCH_SIZE = 0
-OBS_KEYS = ['cell_type', 'cell_line', 'organism', 'organ']
-RETRIEVAL_BATCH_SIZE = 128
-DAO_CHUNKSIZE = 128  # this is only relevant for DAO store
+N_DRAWS = 100_000
+BATCH_SIZE = 1  # must be 0 or 1
+OBS_KEYS = ['cell_type', 'cell_line', 'organism', 'organ']  # list of obs_keys to retrieve
+RETRIEVAL_BATCH_SIZE = 4096  # number of samples to retrieve at once
+DAO_CHUNKSIZE = 128  # this has to match the chunksize of the dao storage
 
 path_store_h5ad = str(sys.argv[1])
 path_store_dao = str(sys.argv[2])
@@ -33,21 +33,10 @@ if path_store_h5ad.lower() != 'none':
     kwargs.append({"dense": False})
     compression_kwargs.append({})
 
-time_measurements_initiate = {store: [] for store in store_type}
-memory_measurements_initiate = {store: [] for store in store_type}
+time_measurements_initiate = {'storage_format': [], 'instantiation_time': [], 'run': []}
+memory_measurements_initiate = {'storage_format': [], 'memory_usage': [], 'run': []}
 time_measurements = {
-    "load_sequential_from_one_dataset": {},
-    "load_sequential_from_many_datasets": {},
-    "load_random_from_one_dataset": {},
-    "load_random_from_many_datasets": {},
-    "load_sequential_from_one_dataset_todense": {},
-    "load_sequential_from_many_datasets_todense": {},
-    "load_random_from_one_dataset_todense": {},
-    "load_random_from_many_datasets_todense": {},
-    "load_sequential_from_one_dataset_todense_varsubet": {},
-    "load_sequential_from_many_datasets_todense_varsubet": {},
-    "load_random_from_one_dataset_todense_varsubet": {},
-    "load_random_from_many_datasets_todense_varsubet": {}
+    'scenario': [], 'storage_format': [], 'data_access_type': [], 'varsubset': [], 'avg_time_per_sample': []
 }
 
 
@@ -60,7 +49,10 @@ def map_fn(x_sample, obs_sample):
     return x, y
 
 
-def time_gen(_store: DistributedStoreSingleFeatureSpace, store_format: str, kwargs_generator) -> List[float]:
+def time_gen(_store: DistributedStoreSingleFeatureSpace, 
+             store_format: str, 
+             kwargs_generator,
+             num_draws: int) -> List[float]:
     """
     Take samples from generator and measure time taken to generate each sample.
     """
@@ -77,12 +69,33 @@ def time_gen(_store: DistributedStoreSingleFeatureSpace, store_format: str, kwar
         .iterator()
     )
     _measurements = []
-    for _ in range(N_DRAWS):
+    for _ in range(num_draws):
         _t0 = time.perf_counter()
         _ = next(_gen)
         _measurements.append(time.perf_counter() - _t0)
 
     return _measurements
+
+
+def create_generator_kwargs(index: np.ndarray,
+                            var_subset: bool,
+                            random_batch_access: bool,
+                            random_access: bool):
+
+    if random_access and random_batch_access:
+        raise ValueError('You cannot select "random_access" and "random_batch_access" at the same time')
+
+    return {
+        "idx": index,
+        "batch_size": BATCH_SIZE,
+        "retrieval_batch_size": RETRIEVAL_BATCH_SIZE,
+        "map_fn": map_fn,
+        "obs_keys": OBS_KEYS,
+        "randomized_batch_access": random_batch_access,
+        "random_access": random_access,
+        "var_subset": var_subset,
+        "return_dense": True
+    }
 
 
 def get_idx_dataset_start(_store: DistributedStoreSingleFeatureSpace, k_target):
@@ -96,9 +109,7 @@ def get_idx_dataset_start(_store: DistributedStoreSingleFeatureSpace, k_target):
 
 
 # Define data objects to be comparable:
-store = sfaira.data.load_store(cache_path=path_store_dao, store_format="dao")
-store.subset(attr_key="organism", values="Homo sapiens")
-store = store.stores["Homo sapiens"]
+store = sfaira.data.load_store(cache_path=path_store_dao, store_format="dao").stores['Homo sapiens']
 k_datasets_dao = list(store.indices.keys())
 k_datasets_dao = np.asarray(k_datasets_dao)[np.argsort([len(v) for v in store.indices.values()])].tolist()
 if path_store_h5ad.lower() != 'none':
@@ -119,214 +130,110 @@ for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, comp
     print(f'Benchmarking {store_type_i} storage')
 
     print('Benchmarking storage instantiation')
-    for _ in range(3):
+    for i in range(3):
         t0 = time.perf_counter()
         store = sfaira.data.load_store(cache_path=path_store, store_format=store_type_i)
         # Include initialisation of generator in timing to time overhead generated here.
         _ = store.generator(map_fn=map_fn, obs_keys=OBS_KEYS).iterator()
-        time_measurements_initiate[store_type_i].append(time.perf_counter() - t0)
-        memory_measurements_initiate[store_type_i].append(np.sum(list(store.adata_memory_footprint.values())))
+        time_measurements_initiate['instantiation_time'].append(time.perf_counter() - t0)
+        time_measurements_initiate['storage_format'].append(store_type_i)
+        time_measurements_initiate['run'].append(i)
+        memory_measurements_initiate['memory_usage'].append(np.sum(list(store.adata_memory_footprint.values())))
+        memory_measurements_initiate['storage_format'].append(store_type_i)
+        memory_measurements_initiate['run'].append(i)
 
     # Prepare benchmark
-    store = sfaira.data.load_store(cache_path=path_store, store_format=store_type_i)
-    store.subset(attr_key="organism", values="Homo sapiens")
-    store = store.stores["Homo sapiens"]
+    store = sfaira.data.load_store(cache_path=path_store, store_format=store_type_i).stores['Homo sapiens']
     idx_dataset_start = get_idx_dataset_start(_store=store, k_target=k_datasets)
     idx_dataset_end = [i + len(store.indices[x]) for i, x in zip(idx_dataset_start, k_datasets)]
+    if BATCH_SIZE == 1:
+        draws_per_dataset = int(N_DRAWS / n_datasets)
+        n_draws = int(N_DRAWS)
+    else:
+        draws_per_dataset = int(N_DRAWS * RETRIEVAL_BATCH_SIZE / n_datasets)
+        n_draws = int(N_DRAWS * RETRIEVAL_BATCH_SIZE)
 
-    # Measure load_sequential_from_one_datasethttps://www.tensorflow.org/guide/data_performance_analysis?hl=en time.
-    scenario = "load_sequential_from_one_dataset"
-    print(f'Benchmarking scenario: {scenario}')
-    for dense, varsubset in [(False, False), (True, False), (True, True)]:
-        suffix = "_todense_varsubet" if dense and varsubset else "_todense" if dense and not varsubset else ""
-        if BATCH_SIZE == 1:
-            idx = np.arange(idx_dataset_start[0], idx_dataset_start[0] + N_DRAWS)
-        else:
-            idx = np.arange(idx_dataset_start[0], idx_dataset_start[0] + (N_DRAWS * RETRIEVAL_BATCH_SIZE))
-        kwargs = {
-            "idx": idx,
-            "batch_size": BATCH_SIZE,
-            "retrieval_batch_size": RETRIEVAL_BATCH_SIZE,
-            "map_fn": map_fn,
-            "obs_keys": OBS_KEYS,
-            "return_dense": dense,
-            "randomized_batch_access": False,
-            "random_access": False,
-            "var_subset": varsubset,
-        }
-        time_measurements[scenario + suffix][store_type_i] = time_gen(
-            _store=store, store_format=store_type_i, kwargs_generator=kwargs
-        )
+    for scenario in ['load_sequential', 'load_random']:
+        print(f'Benchmarking scenario: {scenario}')
 
-    # Measure load_random_from_one_dataset time.
-    scenario = "load_random_from_one_dataset"
-    print(f'Benchmarking scenario: {scenario}')
-    for dense, varsubset in [(False, False), (True, False), (True, True)]:
-        suffix = "_todense_varsubet" if dense and varsubset else "_todense" if dense and not varsubset else ""
-        if BATCH_SIZE == 1:
+        if scenario == 'load_sequential':
+            idx = np.concatenate(
+                [np.arange(s, np.minimum(s + draws_per_dataset, e, dtype=int))
+                 for s, e in zip(idx_dataset_start, idx_dataset_end)]
+            )
+        elif scenario == 'load_random':
+            idxs_per_dataset = [np.arange(s, np.minimum(s + draws_per_dataset, e), dtype=int)
+                                for s, e in zip(idx_dataset_start, idx_dataset_end)]
+            concatenated_idxs = np.concatenate(idxs_per_dataset)
             idx = np.random.choice(
-                np.arange(idx_dataset_start[0], np.maximum(idx_dataset_end[0], idx_dataset_start[0] + N_DRAWS)),
-                size=N_DRAWS, replace=False
+                concatenated_idxs, size=min(n_draws, len(concatenated_idxs)), replace=False
             )
         else:
-            idx = np.random.choice(
-                np.arange(
-                    idx_dataset_start[0],
-                    np.maximum(idx_dataset_end[0], idx_dataset_start[0] + (N_DRAWS * RETRIEVAL_BATCH_SIZE))
-                ),
-                size=(N_DRAWS * RETRIEVAL_BATCH_SIZE), replace=False
-            )
+            raise ValueError(f'scenario={scenario} is not defined')
 
-        kwargs = {
-            "idx": idx,
-            "batch_size": BATCH_SIZE,
-            "retrieval_batch_size": RETRIEVAL_BATCH_SIZE,
-            "map_fn": map_fn,
-            "obs_keys": OBS_KEYS,
-            "return_dense": dense,
-            "randomized_batch_access": False,
-            "random_access": False,
-            "var_subset": varsubset,
-        }
-        time_measurements[scenario + suffix][store_type_i] = time_gen(
-            _store=store, store_format=store_type_i, kwargs_generator=kwargs
-        )
+        for data_access_type in ['sequential', 'random-batch-access', 'random-access']:
+            for varsubset in [False, True]:
 
-    # Measure load_sequential_from_many_datasets time.
-    scenario = "load_sequential_from_many_datasets"
-    print(f'Benchmarking scenario: {scenario}')
-    for dense, varsubset in [(False, False), (True, False), (True, True)]:
-        suffix = "_todense_varsubet" if dense and varsubset else "_todense" if dense and not varsubset else ""
-        if BATCH_SIZE == 1:
-            idx = np.concatenate([np.arange(s, s + N_DRAWS) for s in idx_dataset_start])
-        else:
-            idx = np.concatenate([np.arange(s, s + (N_DRAWS * RETRIEVAL_BATCH_SIZE)) for s in idx_dataset_start])
-        kwargs = {
-            "idx": idx,
-            "batch_size": BATCH_SIZE,
-            "retrieval_batch_size": RETRIEVAL_BATCH_SIZE,
-            "map_fn": map_fn,
-            "obs_keys": OBS_KEYS,
-            "return_dense": dense,
-            "randomized_batch_access": False,
-            "random_access": False,
-            "var_subset": varsubset,
-        }
-        time_measurements[scenario + suffix][store_type_i] = time_gen(
-            _store=store, store_format=store_type_i, kwargs_generator=kwargs
-        )
+                time_measurements['scenario'].append(scenario)
+                time_measurements['storage_format'].append(store_type_i)
+                time_measurements['data_access_type'].append(data_access_type)
+                time_measurements['varsubset'].append(varsubset)
+                if data_access_type == 'sequential':
+                    random_batch_access_ = False
+                    random_access_ = False
+                elif data_access_type == 'random-batch-access':
+                    random_batch_access_ = True
+                    random_access_ = False
+                elif data_access_type == 'random-access':
+                    random_batch_access_ = False
+                    random_access_ = True
+                else:
+                    raise ValueError(f'data_access_type={data_access_type} is not supported')
+                kwargs = create_generator_kwargs(idx, varsubset, random_batch_access_, random_access_)
+                measurements = time_gen(store, store_type_i, kwargs, num_draws=min(n_draws, len(idx)))
+                time_measurements['avg_time_per_sample'].append(np.mean(measurements))
 
-    # Measure load_random_from_many_datasets time.
-    scenario = "load_random_from_many_datasets"
-    print(f'Benchmarking scenario: {scenario}')
-    for dense, varsubset in [(False, False), (True, False), (True, True)]:
-        suffix = "_todense_varsubet" if dense and varsubset else "_todense" if dense and not varsubset else ""
-        if BATCH_SIZE == 1:
-            idx = np.concatenate([
-                np.random.choice(np.arange(s, np.maximum(e, s + N_DRAWS)), size=N_DRAWS, replace=False)
-                for s, e in zip(idx_dataset_start, idx_dataset_end)
-            ])
-        else:
-            idx = np.concatenate([
-                np.random.choice(
-                    np.arange(s, np.maximum(e, s + (N_DRAWS * RETRIEVAL_BATCH_SIZE))),
-                    size=N_DRAWS * RETRIEVAL_BATCH_SIZE, replace=False
-                )
-                for s, e in zip(idx_dataset_start, idx_dataset_end)
-            ])
-        kwargs = {
-            "idx": np.concatenate([
-                np.random.choice(np.arange(s, np.maximum(e, s + N_DRAWS)), size=N_DRAWS, replace=False)
-                for s, e in zip(idx_dataset_start, idx_dataset_end)
-            ]),
-            "batch_size": BATCH_SIZE,
-            "retrieval_batch_size": RETRIEVAL_BATCH_SIZE,
-            "map_fn": map_fn,
-            "obs_keys": OBS_KEYS,
-            "return_dense": dense,
-            "randomized_batch_access": False,
-            "random_access": False,
-            "var_subset": varsubset,
-        }
-        time_measurements[scenario + suffix][store_type_i] = time_gen(
-            _store=store, store_format=store_type_i, kwargs_generator=kwargs
-        )
+    print()
 
+
+# prepare results
+instatiation_time_df = pd.DataFrame(time_measurements_initiate)
+memory_usage_df = pd.DataFrame(memory_measurements_initiate)
+res_df = pd.DataFrame(time_measurements).assign(
+    access_type=lambda xx: xx.scenario + xx.data_access_type,
+    avg_time_per_sample=lambda xx: xx.avg_time_per_sample * 10**3
+)
+
+# save results to csv
+res_df.to_csv(os.path.join(path_out, 'data_store_benchmark.csv'))
 
 # create figures
-ncols = 2
-fig, axs = plt.subplots(nrows=3, ncols=2, figsize=(14, 12))
-for i, x in enumerate([
-    [
-        "initialisation time",
-    ],
-    [
-        "initialisation memory",
-    ],
-    [
-        "load_sequential_from_one_dataset",
-        "load_sequential_from_one_dataset_todense",
-        "load_sequential_from_one_dataset_todense_varsubet",
-    ],
-    [
-        "load_sequential_from_many_datasets",
-        "load_sequential_from_many_datasets_todense",
-        "load_sequential_from_many_datasets_todense_varsubet",
-    ],
-    [
-        "load_random_from_one_dataset",
-        "load_random_from_one_dataset_todense",
-        "load_random_from_one_dataset_todense_varsubet",
-    ],
-    [
-        "load_random_from_many_datasets",
-        "load_random_from_many_datasets_todense",
-        "load_random_from_many_datasets_todense_varsubet",
-    ],
-]):
-    if i == 0 or i == 1:
-        if i == 0:
-            measurements_initiate = time_measurements_initiate
-            ylabel = "log10 time sec"
-            log = True
-        else:
-            measurements_initiate = memory_measurements_initiate
-            ylabel = "memory MB"
-            log = False
-        df_sb = pd.concat([
-            pd.DataFrame({
-                ylabel: np.log(measurements_initiate[m]) / np.log(10) if log else measurements_initiate[m],
-                "store": m,
-                "draw": range(len(measurements_initiate[m])),
-            })
-            for m in measurements_initiate.keys()
-        ], axis=0)
-        sb.boxplot(
-            data=df_sb,
-            x="store", y=ylabel,
-            ax=axs[i // ncols, i % ncols]
-        )
-        axs[i // ncols, i % ncols].set_title(x)
-    elif len(x) > 0:
-        df_sb = pd.concat([
-            pd.concat([
-                pd.DataFrame({
-                    "log10 time sec": np.log(time_measurements[m][n]) / np.log(10),
-                    "scenario": " ".join(m.split("_")[4:]),
-                    "store": n,
-                    "draw": range(len(time_measurements[m][n])),
-                })
-                for n in time_measurements[m].keys()
-            ], axis=0)
-            for m in x
-        ], axis=0)
-        # Could collapse draws to mean and put batch size on x.
-        sb.lineplot(
-            data=df_sb,
-            x="draw", y="log10 time sec", hue="scenario", style="store",
-            ax=axs[i // ncols, i % ncols]
-        )
-        axs[i // ncols, i % ncols].set_title(x[0])
+fig, axs = plt.subplots(nrows=2, ncols=2, figsize=(12, 12))
+
+axs[0, 0].set_title('Storage instantiation time')
+sb.boxplot(
+    x='storage_format', y='instantiation_time', log=True, ylabel='time [s]', data=instatiation_time_df, ax=axs[0, 0]
+)
+axs[0, 1].set_title('Storage memory footprint')
+sb.boxplot(x='storage_format', y='memory_usage', ylabel='memory [MB]', data=memory_usage_df, ax=axs[0, 1])
+axs[1, 0].set_title('Avg. time per sample [ms] | varsubset=False')
+sb.boxplot(
+    x='storage_format',
+    y='avg_time_per_sample',
+    hue='access_type',
+    ylabel='avg. time [ms]',
+    data=res_df[res_df.varsubset == False],
+    ax=axs[1, 0]
+)
+axs[1, 1].set_title('Avg. time per sample [ms] | varsubset=True')
+sb.boxplot(
+    x='storage_format',
+    y='avg_time_per_sample',
+    hue='access_type',
+    ylabel='avg. time [ms]',
+    data=res_df[res_df.varsubset == True],
+    ax=axs[1, 0]
+)
 
 plt.tight_layout()
 plt.savefig(os.path.join(path_out, "data_store_benchmark.pdf"))
