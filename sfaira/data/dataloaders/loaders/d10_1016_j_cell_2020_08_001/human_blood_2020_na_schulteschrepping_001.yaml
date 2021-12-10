@@ -46,7 +46,7 @@ dataset_or_observation_wise:
     organ_obs_key:
     organism: "Homo sapiens"
     organism_obs_key:
-    sample_source: "primary tissue"
+    sample_source: "primary_tissue"
     sample_source_obs_key:
     sex: "sex"
     sex_obs_key:
