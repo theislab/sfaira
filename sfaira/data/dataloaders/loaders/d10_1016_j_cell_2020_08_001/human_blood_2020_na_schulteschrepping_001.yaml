@@ -55,7 +55,13 @@ dataset_or_observation_wise:
     tech_sample:
     tech_sample_obs_key: "sampleID"
 observation_wise:
-    cell_type_obs_key: "cluster_labels_res.0.4"
+    cell_type_obs_key:
+        Schulte-Schrepping_2020_COVID19_10x_Neutrophils_processed_cellXgene.h5ad: "monaco.labels"
+        Schulte-Schrepping_2020_COVID19_10x_PBMC_processed_cellXgene.h5ad: "cluster_labels_res.0.4"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_freshPBMC-WB_processed_cellXgene.h5ad: "cluster_labels_res.0.8"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Monocytes_processed_cellXgene.h5ad: "monaco.labels"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Neutrophils_processed_cellXgene.h5ad: "monaco.labels"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_PBMC_processed_cellXgene.h5ad: "cluster_labels_res.0.4"
 feature_wise:
     gene_id_ensembl_var_key: 
     gene_id_symbols_var_key: "index"
