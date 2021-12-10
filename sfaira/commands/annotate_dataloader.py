@@ -1,13 +1,13 @@
 import os
 import pydoc
 import shutil
-import re
 from typing import Union
 
 from sfaira.data import DatasetGroupDirectoryOriented, DatasetGroup, DatasetBase
 from sfaira.data.utils import read_yaml
 from sfaira.consts.utils import clean_doi
 from sfaira.commands.questionary import sfaira_questionary
+from sfaira.commands.utils import doi_lint
 
 try:
     import sfaira_extension as sfairae
@@ -43,7 +43,7 @@ class DataloaderAnnotater:
             doi = sfaira_questionary(function='text',
                                      question='DOI:',
                                      default='10.1000/j.journal.2021.01.001')
-            while not re.match(r'\b10\.\d+/[\w.]+\b', doi):
+            while not doi_lint(doi):
                 print('[bold red]The entered DOI is malformed!')  # noqa: W605
                 doi = sfaira_questionary(function='text',
                                          question='DOI:',
