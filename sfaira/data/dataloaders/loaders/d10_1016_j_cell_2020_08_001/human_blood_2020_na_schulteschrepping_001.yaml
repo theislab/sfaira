@@ -12,7 +12,7 @@ dataset_wise:
     default_embedding: "X_umap"
     doi_preprint:
     doi_journal: "10.1016/j.cell.2020.08.001"
-    download_url_data:
+    download_url_data: "https://beta.fastgenomics.org/p/schulte-schrepping_covid19"
     download_url_meta:
     primary_data: True
     normalization: "scaled"
