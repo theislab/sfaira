@@ -8,6 +8,7 @@ dataset_wise:
     doi_preprint:
     doi_journal: "{{ cookiecutter.doi }}"
     download_url_data: "{{ cookiecutter.download_url_data }}"
+    download_url_meta: "{{ cookiecutter.download_url_meta }}"
     primary_data: {{ cookiecutter.primary_data }}
     normalization: "{{ cookiecutter.normalization }}"
     year: {{ cookiecutter.year }}
