@@ -23,7 +23,7 @@ dataset_or_observation_wise:
     assay_type_differentiation:
     assay_type_differentiation_obs_key:
     bio_sample:
-    bio_sample_obs_key: "batch"
+    bio_sample_obs_key:
     cell_line:
     cell_line_obs_key:
     development_stage:
@@ -33,7 +33,7 @@ dataset_or_observation_wise:
     ethnicity:
     ethnicity_obs_key:
     individual:
-    individual_obs_key:
+    individual_obs_key: "donor"
     organ: "blood"
     organ_obs_key:
     organism: "Homo sapiens"
@@ -45,7 +45,7 @@ dataset_or_observation_wise:
     state_exact:
     state_exact_obs_key:
     tech_sample:
-    tech_sample_obs_key:
+    tech_sample_obs_key: "site*donor"
 observation_wise:
     cell_type_obs_key: "cell_type"
 feature_wise:
