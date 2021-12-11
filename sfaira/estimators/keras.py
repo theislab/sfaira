@@ -50,8 +50,14 @@ def split_idx(data: DistributedStoreSingleFeatureSpace, test_split, val_split):
     elif isinstance(test_split, dict):
         in_test = np.ones((data.n_obs,), dtype=int) == 1
         for k, v in test_split.items():
-            if isinstance(v, bool) or isinstance(v, int) or isinstance(v, list):
+            if isinstance(v, bool) or isinstance(v, int) or isinstance(v, str):
                 v = [v]
+            elif isinstance(v, tuple):
+                v = list(v)
+            if not isinstance(v, list):
+                raise ValueError(f"conversion of v {v} to list failed")
+            if np.any([isinstance(vi, list) or isinstance(vi, tuple) or isinstance(vi, np.ndarray) for vi in v]):
+                raise ValueError(f"found nested list v {v}, only use bool, scalar or string elements in v.")
             idx = data.get_subset_idx(attr_key=k, values=v, excluded_values=None)
             # Build continuous vector across all sliced data sets and establish which observations are kept
             # in subset.
