@@ -54,6 +54,8 @@ def split_idx(data: DistributedStoreSingleFeatureSpace, test_split, val_split):
                 v = [v]
             elif isinstance(v, tuple):
                 v = list(v)
+            elif isinstance(v, np.ndarray):
+                v = v.tolist()
             if not isinstance(v, list):
                 raise ValueError(f"conversion of v {v} to list failed")
             if np.any([isinstance(vi, list) or isinstance(vi, tuple) or isinstance(vi, np.ndarray) for vi in v]):
