@@ -40,11 +40,11 @@ time_measurements = {
 }
 
 
-def map_fn(x_sample, obs_sample):
+def _map_fn(x_sample, obs_sample):
     gene_expression = np.asarray(x_sample)
     obs = tuple(obs_sample[obs_key].to_numpy().reshape((-1, 1)) for obs_key in OBS_KEYS)
-    x = (gene_expression, )
-    y = (gene_expression, ) + obs
+    x = (gene_expression,)
+    y = (gene_expression,) + obs
 
     return x, y
 
@@ -89,7 +89,7 @@ def create_generator_kwargs(index: np.ndarray,
         "idx": index,
         "batch_size": BATCH_SIZE,
         "retrieval_batch_size": RETRIEVAL_BATCH_SIZE,
-        "map_fn": map_fn,
+        "map_fn": _map_fn,
         "obs_keys": OBS_KEYS,
         "randomized_batch_access": random_batch_access,
         "random_access": random_access,
@@ -134,7 +134,7 @@ for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, comp
         t0 = time.perf_counter()
         store = sfaira.data.load_store(cache_path=path_store, store_format=store_type_i)
         # Include initialisation of generator in timing to time overhead generated here.
-        _ = store.generator(map_fn=map_fn, obs_keys=OBS_KEYS).iterator()
+        _ = store.generator(map_fn=_map_fn, obs_keys=OBS_KEYS).iterator()
         time_measurements_initiate['instantiation_time'].append(time.perf_counter() - t0)
         time_measurements_initiate['storage_format'].append(store_type_i)
         time_measurements_initiate['run'].append(i)
@@ -153,15 +153,15 @@ for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, comp
         draws_per_dataset = int(N_DRAWS * RETRIEVAL_BATCH_SIZE / n_datasets)
         n_draws = int(N_DRAWS * RETRIEVAL_BATCH_SIZE)
 
-    for scenario in ['load_sequential', 'load_random']:
+    for scenario in ['seq_idx', 'random_idx']:
         print(f'Benchmarking scenario: {scenario}')
 
-        if scenario == 'load_sequential':
+        if scenario == 'seq_idx':
             idx = np.concatenate(
                 [np.arange(s, np.minimum(s + draws_per_dataset, e, dtype=int))
                  for s, e in zip(idx_dataset_start, idx_dataset_end)]
             )
-        elif scenario == 'load_random':
+        elif scenario == 'random_idx':
             idxs_per_dataset = [np.arange(s, np.minimum(s + draws_per_dataset, e), dtype=int)
                                 for s, e in zip(idx_dataset_start, idx_dataset_end)]
             concatenated_idxs = np.concatenate(idxs_per_dataset)
@@ -200,7 +200,7 @@ for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, comp
 instatiation_time_df = pd.DataFrame(time_measurements_initiate)
 memory_usage_df = pd.DataFrame(memory_measurements_initiate)
 res_df = pd.DataFrame(time_measurements).assign(
-    access_type=lambda xx: xx.scenario + xx.data_access_type,
+    access_type=lambda xx: xx.scenario + '_' + xx.data_access_type,
     avg_time_per_sample=lambda xx: xx.avg_time_per_sample * 10**3
 )
 
@@ -211,29 +211,37 @@ res_df.to_csv(os.path.join(path_out, 'data_store_benchmark.csv'))
 fig, axs = plt.subplots(nrows=2, ncols=2, figsize=(12, 12))
 
 axs[0, 0].set_title('Storage instantiation time')
-sb.boxplot(
-    x='storage_format', y='instantiation_time', log=True, ylabel='time [s]', data=instatiation_time_df, ax=axs[0, 0]
+sb.barplot(
+    x='storage_format', y='instantiation_time', data=instatiation_time_df, ax=axs[0, 0]
 )
+axs[0, 0].set_ylabel('time [s]')
+axs[0, 0].set_yscale('log')
+
 axs[0, 1].set_title('Storage memory footprint')
-sb.boxplot(x='storage_format', y='memory_usage', ylabel='memory [MB]', data=memory_usage_df, ax=axs[0, 1])
+sb.barplot(x='storage_format', y='memory_usage', data=memory_usage_df, ax=axs[0, 1])
+axs[0, 1].set_ylabel('memory usage [MB]')
+
 axs[1, 0].set_title('Avg. time per sample [ms] | varsubset=False')
-sb.boxplot(
+sb.barplot(
     x='storage_format',
     y='avg_time_per_sample',
     hue='access_type',
-    ylabel='avg. time [ms]',
     data=res_df[res_df.varsubset == False],
     ax=axs[1, 0]
 )
+axs[1, 0].set_ylabel('avg. time [ms]')
+axs[1, 0].set_yscale('log')
+
 axs[1, 1].set_title('Avg. time per sample [ms] | varsubset=True')
-sb.boxplot(
+sb.barplot(
     x='storage_format',
     y='avg_time_per_sample',
     hue='access_type',
-    ylabel='avg. time [ms]',
     data=res_df[res_df.varsubset == True],
-    ax=axs[1, 0]
+    ax=axs[1, 1]
 )
+axs[1, 1].set_ylabel('avg. time [ms]')
+axs[1, 1].set_yscale('log')
 
 plt.tight_layout()
 plt.savefig(os.path.join(path_out, "data_store_benchmark.pdf"))
