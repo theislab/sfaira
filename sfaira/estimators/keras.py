@@ -265,7 +265,8 @@ class EstimatorKeras:
             else:
                 raise ValueError('the weightsfile could not be found')
 
-        self._assert_md5_sum(fn, self.md5)
+        if self.md5 is not None:
+            self._assert_md5_sum(fn, self.md5)
         if fn.endswith(".data-00000-of-00001"):
             self.model.training_model.load_weights(".".join(fn.split(".")[:-1]))
         else:
