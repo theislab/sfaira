@@ -1,0 +1,63 @@
+source	target	target_id
+Activated T cells	mature alpha-beta T cell	CL:0000791
+B cells	B cell	CL:0000236
+B cells_1	B cell	CL:0000236
+B cells_2	B cell	CL:0000236
+B cells_3	B cell	CL:0000236
+B_cells_1	B cell	CL:0000236
+B_cells_2	B cell	CL:0000236
+Basophils	basophil	CL:0000767
+CD14_Monocytes_1	CD14-positive monocyte	CL:0001054
+CD14_Monocytes_2	CD14-positive monocyte	CL:0001054
+CD14_Monocytes_3	CD14-positive monocyte	CL:0001054
+CD163+ Monocytes (Sample ID1_d7)	monocyte	CL:0000576
+CD16_Monocytes	monocyte	CL:0000576
+CD34+ GATA2+ cells	unknown	unknown
+CD4+ T cells	CD4-positive, alpha-beta T cell	CL:0000624
+CD4+ T cells_1	CD4-positive, alpha-beta T cell	CL:0000624
+CD4+ T cells_2	CD4-positive, alpha-beta T cell	CL:0000624
+CD4+ T cells_3	CD4-positive, alpha-beta T cell	CL:0000624
+CD4_T_cells_1	CD4-positive, alpha-beta T cell	CL:0000624
+CD4_T_cells_2	CD4-positive, alpha-beta T cell	CL:0000624
+CD4_T_cells_3	CD4-positive, alpha-beta T cell	CL:0000624
+CD8+ T cells	CD8-positive, alpha-beta T cell	CL:0000625
+CD8+ T cells_1	CD8-positive, alpha-beta T cell	CL:0000625
+CD8+ T cells_2	CD8-positive, alpha-beta T cell	CL:0000625
+CD8+ T cells_3	CD8-positive, alpha-beta T cell	CL:0000625
+CD8_T_cells	CD8-positive, alpha-beta T cell	CL:0000625
+Classical Monocytes	classical monocyte	CL:0000860
+Dendritic cells	dendritic cell	CL:0000451
+Eosinophils	eosinophil	CL:0000771
+HLA-DR+ CD83+ Monocytes	monocyte	CL:0000576
+HLA-DR- S100A+ Monocytes	monocyte	CL:0000576
+HLA-DRhi CD83hi Monocytes	monocyte	CL:0000576
+HLA-DRlo CD163hi Monocytes	monocyte	CL:0000576
+HLA-DRlo S100Ahi Monocytes	monocyte	CL:0000576
+Immature Neutrophils	immature neutrophil	CL:0000776
+Immature Neutrophils_1	immature neutrophil	CL:0000776
+Immature Neutrophils_2	immature neutrophil	CL:0000776
+Megakaryocyte	megakaryocyte	CL:0000556
+Megakaryocytes	megakaryocyte	CL:0000556
+Mixed_cells	unknown	unknown
+Monocytes	monocyte	CL:0000576
+NK	natural killer cell	CL:0000623
+NK cells	natural killer cell	CL:0000623
+NK_cells	natural killer cell	CL:0000623
+Neutrophils	neutrophil	CL:0000775
+Neutrophils_1	neutrophil	CL:0000775
+Neutrophils_2	neutrophil	CL:0000775
+Neutrophils_3	neutrophil	CL:0000775
+Neutrophils_4	neutrophil	CL:0000775
+Non-classical Monocytes	non-classical monocyte	CL:0000875
+Plasmablast	plasmablast	CL:0000980
+Plasmablasts	plasmablast	CL:0000980
+Progenitors	unknown	unknown
+Prol. cells	unknown	unknown
+mDC	myeloid dendritic cell	CL:0000782
+mDCs	myeloid dendritic cell	CL:0000782
+mixed	unknown	unknown
+mixed_1	unknown	unknown
+mixed_2	unknown	unknown
+pDC	plasmacytoid dendritic cell	CL:0000784
+pDCs	plasmacytoid dendritic cell	CL:0000784
+undefined	unknown	unknown
