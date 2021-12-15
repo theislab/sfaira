@@ -1,37 +1,33 @@
+"""Script to benchmark performance of sfaira data generators."""
+
+import os
+import sys
+import time
+import warnings
+from typing import Dict, List
+
 import matplotlib.pyplot as plt
 import numpy as np
-import os
 import pandas as pd
 import seaborn as sb
 import sfaira
-import sys
-import time
-from typing import List
-from sfaira.data.store import DistributedStoreSingleFeatureSpace
 
 # Set global variables.
 print(f'sys.argv: {sys.argv}')
 
-N_DRAWS = 100_000
+N_DRAWS = 320_000
+LEN_IDX = 5_000_000
 BATCH_SIZE = 1  # must be 0 or 1
 OBS_KEYS = ['cell_type', 'cell_line', 'organism', 'organ']  # list of obs_keys to retrieve
-RETRIEVAL_BATCH_SIZE = 4096  # number of samples to retrieve at once
-DAO_CHUNKSIZE = 128  # this has to match the chunksize of the dao storage
+RETRIEVAL_BATCH_SIZE = 65536  # number of samples to retrieve at once
 
 path_store_h5ad = str(sys.argv[1])
 path_store_dao = str(sys.argv[2])
 path_out = str(sys.argv[3])
 
-store_type = []
-kwargs = []
-compression_kwargs = []
-store_type.append("dao")
-kwargs.append({"dense": True, "chunks": DAO_CHUNKSIZE})
-compression_kwargs.append({"compressor": "default", "overwrite": True, "order": "C"})
+store_type = ['dao']
 if path_store_h5ad.lower() != 'none':
     store_type.append("h5ad")
-    kwargs.append({"dense": False})
-    compression_kwargs.append({})
 
 time_measurements_initiate = {'storage_format': [], 'instantiation_time': [], 'run': []}
 memory_measurements_initiate = {'storage_format': [], 'memory_usage': [], 'run': []}
@@ -49,13 +45,10 @@ def _map_fn(x_sample, obs_sample):
     return x, y
 
 
-def time_gen(_store: DistributedStoreSingleFeatureSpace, 
-             store_format: str, 
-             kwargs_generator,
-             num_draws: int) -> List[float]:
-    """
-    Take samples from generator and measure time taken to generate each sample.
-    """
+def _time_gen(_store: sfaira.data.store.DistributedStoreSingleFeatureSpace,
+              store_format: str,
+              kwargs_generator: Dict[str, any],
+              num_draws: int) -> List[float]:
     if store_format == "h5ad":
         del kwargs_generator["random_access"]
     if kwargs_generator["var_subset"]:
@@ -77,10 +70,10 @@ def time_gen(_store: DistributedStoreSingleFeatureSpace,
     return _measurements
 
 
-def create_generator_kwargs(index: np.ndarray,
-                            var_subset: bool,
-                            random_batch_access: bool,
-                            random_access: bool):
+def _create_generator_kwargs(index: np.ndarray,
+                             var_subset: bool,
+                             random_batch_access: bool,
+                             random_access: bool):
 
     if random_access and random_batch_access:
         raise ValueError('You cannot select "random_access" and "random_batch_access" at the same time')
@@ -98,36 +91,32 @@ def create_generator_kwargs(index: np.ndarray,
     }
 
 
-def get_idx_dataset_start(_store: DistributedStoreSingleFeatureSpace, k_target):
-    idx_ = {}
-    counter = 0
-    for k, v in _store.indices.items():
-        if k in k_target:
-            idx_[k] = counter
-        counter += len(v)
-    return [idx_[k] for k in k_target]
-
-
-# Define data objects to be comparable:
-store = sfaira.data.load_store(cache_path=path_store_dao, store_format="dao").stores['Homo sapiens']
-k_datasets_dao = list(store.indices.keys())
-k_datasets_dao = np.asarray(k_datasets_dao)[np.argsort([len(v) for v in store.indices.values()])].tolist()
+# check if data sets contain the same datasets
 if path_store_h5ad.lower() != 'none':
-    store = sfaira.data.load_store(cache_path=path_store_h5ad, store_format="h5ad")
-    store.subset(attr_key="organism", values="Homo sapiens")
-    store = store.stores["Homo sapiens"]
-    k_datasets_h5ad = list(store.indices.keys())
-    # Only retain intersection of data sets while keeping order.
-    k_datasets = [x for x in k_datasets_dao if x in k_datasets_h5ad]
-else:
-    k_datasets = k_datasets_dao
-n_datasets = len(k_datasets)
+    store = sfaira.data.load_store(cache_path=path_store_dao, store_format="dao").stores['Homo sapiens']
+    data_set_lengths_dao = {dataset: len(idx_arr) for dataset, idx_arr in store.indices.items()}
+    store = sfaira.data.load_store(cache_path=path_store_h5ad, store_format="h5ad").stores['Homo sapiens']
+    data_set_lengths_h5ad = {dataset: len(idx_arr) for dataset, idx_arr in store.indices.items()}
+
+    for dataset in set(list(data_set_lengths_dao.keys()) + list(data_set_lengths_h5ad.keys())):
+        if dataset not in data_set_lengths_dao:
+            warnings.warn(f'{dataset} dataset missing in dao storage')
+            continue
+        if dataset not in data_set_lengths_h5ad:
+            warnings.warn(f'{dataset} dataset missing in h5ad storage')
+            continue
+        n_cells_dao = data_set_lengths_dao[dataset]
+        n_cells_h5ad = data_set_lengths_h5ad[dataset]
+        if n_cells_dao != n_cells_h5ad:
+            warnings.warn(
+                f'{dataset} dataset has different lengths in dao (n={n_cells_dao} cells) storage '
+                f'and h5ad storage (n={n_cells_h5ad} cells)'
+            )
 
 
-print(f"Running benchmark on {n_datasets} data sets.")
-for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, compression_kwargs):
-    path_store = path_store_h5ad if store_type_i == "h5ad" else path_store_dao
+for store_type_i in store_type:
     print(f'Benchmarking {store_type_i} storage')
+    path_store = path_store_h5ad if store_type_i == "h5ad" else path_store_dao
 
     print('Benchmarking storage instantiation')
     for i in range(3):
@@ -144,30 +133,19 @@ for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, comp
 
     # Prepare benchmark
     store = sfaira.data.load_store(cache_path=path_store, store_format=store_type_i).stores['Homo sapiens']
-    idx_dataset_start = get_idx_dataset_start(_store=store, k_target=k_datasets)
-    idx_dataset_end = [i + len(store.indices[x]) for i, x in zip(idx_dataset_start, k_datasets)]
     if BATCH_SIZE == 1:
-        draws_per_dataset = int(N_DRAWS / n_datasets)
         n_draws = int(N_DRAWS)
     else:
-        draws_per_dataset = int(N_DRAWS * RETRIEVAL_BATCH_SIZE / n_datasets)
         n_draws = int(N_DRAWS * RETRIEVAL_BATCH_SIZE)
 
     for scenario in ['seq_idx', 'random_idx']:
         print(f'Benchmarking scenario: {scenario}')
 
         if scenario == 'seq_idx':
-            idx = np.concatenate(
-                [np.arange(s, np.minimum(s + draws_per_dataset, e, dtype=int))
-                 for s, e in zip(idx_dataset_start, idx_dataset_end)]
-            )
+            idx = np.arange(0, min(LEN_IDX, store.n_obs), dtype=int)
         elif scenario == 'random_idx':
-            idxs_per_dataset = [np.arange(s, np.minimum(s + draws_per_dataset, e), dtype=int)
-                                for s, e in zip(idx_dataset_start, idx_dataset_end)]
-            concatenated_idxs = np.concatenate(idxs_per_dataset)
-            idx = np.random.choice(
-                concatenated_idxs, size=min(n_draws, len(concatenated_idxs)), replace=False
-            )
+            idx = np.arange(0, min(LEN_IDX, store.n_obs), dtype=int)
+            np.random.shuffle(idx)
         else:
             raise ValueError(f'scenario={scenario} is not defined')
 
@@ -189,26 +167,23 @@ for store_type_i, kwargs_i, compression_kwargs_i in zip(store_type, kwargs, comp
                     random_access_ = True
                 else:
                     raise ValueError(f'data_access_type={data_access_type} is not supported')
-                kwargs = create_generator_kwargs(idx, varsubset, random_batch_access_, random_access_)
-                measurements = time_gen(store, store_type_i, kwargs, num_draws=min(n_draws, len(idx)))
+                kwargs = _create_generator_kwargs(idx, varsubset, random_batch_access_, random_access_)
+                measurements = _time_gen(store, store_type_i, kwargs, num_draws=min(n_draws, len(idx)))
                 time_measurements['avg_time_per_sample'].append(np.mean(measurements))
-
-    print()
 
 
 # prepare results
 instatiation_time_df = pd.DataFrame(time_measurements_initiate)
 memory_usage_df = pd.DataFrame(memory_measurements_initiate)
-res_df = pd.DataFrame(time_measurements).assign(
-    access_type=lambda xx: xx.scenario + '_' + xx.data_access_type,
-    avg_time_per_sample=lambda xx: xx.avg_time_per_sample * 10**3
-)
+res_df = pd.DataFrame(time_measurements).assign(avg_time_per_sample=lambda xx: xx.avg_time_per_sample * 10**6)
 
 # save results to csv
 res_df.to_csv(os.path.join(path_out, 'data_store_benchmark.csv'))
+instatiation_time_df.to_csv(os.path.join(path_out, 'instantiation_time_benchmark.csv'))
+memory_usage_df.to_csv(os.path.join(path_out, 'memory_usage_benchmark.csv'))
 
 # create figures
-fig, axs = plt.subplots(nrows=2, ncols=2, figsize=(12, 12))
+fig, axs = plt.subplots(nrows=3, ncols=2, figsize=(12, 12))
 
 axs[0, 0].set_title('Storage instantiation time')
 sb.barplot(
@@ -221,27 +196,58 @@ axs[0, 1].set_title('Storage memory footprint')
 sb.barplot(x='storage_format', y='memory_usage', data=memory_usage_df, ax=axs[0, 1])
 axs[0, 1].set_ylabel('memory usage [MB]')
 
-axs[1, 0].set_title('Avg. time per sample [ms] | varsubset=False')
+axs[1, 0].set_title('Avg. time per sample [μs] | seq_idx & varsubset=False')
 sb.barplot(
     x='storage_format',
     y='avg_time_per_sample',
-    hue='access_type',
-    data=res_df[res_df.varsubset == False],
+    hue='data_access_type',
+    data=res_df[res_df.varsubset.eq(False) & res_df.scenario.eq('seq_idx')],
     ax=axs[1, 0]
 )
-axs[1, 0].set_ylabel('avg. time [ms]')
+axs[1, 0].set_ylabel('avg. time [μs]')
 axs[1, 0].set_yscale('log')
 
-axs[1, 1].set_title('Avg. time per sample [ms] | varsubset=True')
+axs[1, 1].set_title('Avg. time per sample [μs] | seq_idx & varsubset=True')
 sb.barplot(
     x='storage_format',
     y='avg_time_per_sample',
-    hue='access_type',
-    data=res_df[res_df.varsubset == True],
+    hue='data_access_type',
+    data=res_df[res_df.varsubset.eq(True) & res_df.scenario.eq('seq_idx')],
     ax=axs[1, 1]
 )
-axs[1, 1].set_ylabel('avg. time [ms]')
+axs[1, 1].set_ylabel('avg. time [μs]')
 axs[1, 1].set_yscale('log')
 
+axs[2, 0].set_title('Avg. time per sample [μs] | random_idx & varsubset=False')
+sb.barplot(
+    x='storage_format',
+    y='avg_time_per_sample',
+    hue='data_access_type',
+    data=res_df[res_df.varsubset.eq(False) & res_df.scenario.eq('random_idx')],
+    ax=axs[2, 0]
+)
+axs[2, 0].set_ylabel('avg. time [μs]')
+axs[2, 0].set_yscale('log')
+
+axs[2, 1].set_title('Avg. time per sample [μs] | random_idx & varsubset=True')
+sb.barplot(
+    x='storage_format',
+    y='avg_time_per_sample',
+    hue='data_access_type',
+    data=res_df[res_df.varsubset.eq(True) & res_df.scenario.eq('random_idx')],
+    ax=axs[2, 1]
+)
+axs[2, 1].set_ylabel('avg. time [μs]')
+axs[2, 1].set_yscale('log')
+
+# set y-scale to same range
+y_lims = []
+for i in range(1, 3):
+    for j in range(0, 2):
+        y_lims.append(axs[i, j].get_ylim()[1])
+for i in range(1, 3):
+    for j in range(0, 2):
+        axs[i, j].set_ylim(1, max(y_lims))
+
 plt.tight_layout()
-plt.savefig(os.path.join(path_out, "data_store_benchmark.pdf"))
+plt.savefig(os.path.join(path_out, 'data_store_benchmark.pdf'))
