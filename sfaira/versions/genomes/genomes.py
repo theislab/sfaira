@@ -56,8 +56,8 @@ class GtfInterface:
         def file_filter(fns) -> List[str]:
             # Filter assembly files starting with organism name:
             y = [x for x in fns if x.split(".")[0].lower() == self.ensembl_organism]
-            # Filter target assembly:
-            y = [x for x in y if len(x.split(".")) == 5]
+            # Filter target release:
+            y = [x for x in y if x.split(".")[-2] == self.release]
             return y
 
         # Check first in local files and then query ensembl if no match is found:
@@ -75,8 +75,11 @@ class GtfInterface:
             target_file = [x for x in target_file if x.split(".")[0].lower() == self.ensembl_organism]
             # Filter target assembly:
             target_file = [x for x in target_file if len(x.split(".")) == 5]
-        assert len(target_file) == 1, target_file  # There should only be one file left if filters work correctly.
-        assembly = target_file[0].split(".gtf.gz")[0]
+            assert len(target_file) == 1, target_file  # There should only be one file left if filters work correctly.
+            assembly = target_file[0].split(".gtf.gz")[0]
+        else:
+            assert len(target_file) == 1, target_file  # There should only be one file left if filters work correctly.
+            assembly = target_file[0].split(".csv")[0]
         return assembly
 
     @property
