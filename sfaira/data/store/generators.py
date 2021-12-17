@@ -68,8 +68,15 @@ class GeneratorBase:
 
         :param generator_type: Type of output iteratable.
             - python base generator (no change to `.generator`)
-            - tensorflow dataset
-            - pytorch dataset
+            - tensorflow dataset: This dataset is defined on a python iterator.
+            - pytorch: We distinguish torch.data.Dataset and torch.data.DataLoader ontop of either.
+                The Dataset vs DataLoader distinction is made by the "" suffix for Dataset or "-loader" suffix for +
+                dataloader. The distinction between Dataset and IteratableDataset defines if the object is defined
+                directly on a dask array or based on a python iterator on a dask array. Note that the python iterator
+                can implement favorable remote access schemata but the torch.data.Dataset generally causes less trouble
+                in out-of-the-box usage.
+                    - torch.data.Dataset: "torch" prefix, ie "torch" or "torch-loader"
+                    - torch.data.IteratableDataset: "torch-iter" prefix, ie "torch-iter" or "torch-iter-loader"
         :returns: Modified iteratable (see generator_type).
         """
         if generator_type == "python":
@@ -78,13 +85,21 @@ class GeneratorBase:
             import tensorflow as tf
 
             g = tf.data.Dataset.from_generator(generator=self.iterator, **kwargs)
-        elif generator_type.startswith("torch"):
+        elif generator_type in ["torch", "torch-loader"]:
+            import torch
+            # Only import this module if torch is used to avoid strict torch dependency:
+            from .torch_dataset import SfairaDataset
+
+            g = SfairaDataset(map_fn=self.map_fn, obs=self._obs_slice, x=self._x_slice, **kwargs)
+            if generator_type == "torch-loader":
+                g = torch.utils.data.DataLoader(g, **kwargs)
+        elif generator_type in ["torch-iter", "torch-iter-loader"]:
             import torch
             # Only import this module if torch is used to avoid strict torch dependency:
             from .torch_dataset import SfairaIterableDataset
 
             g = SfairaIterableDataset(iterator_fun=self.iterator)
-            if generator_type == "torch_loader":
+            if generator_type == "torch-iter-loader":
                 g = torch.utils.data.DataLoader(g, **kwargs)
         else:
             raise ValueError(f"{generator_type} not recognized")

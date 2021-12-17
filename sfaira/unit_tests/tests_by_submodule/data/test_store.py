@@ -5,6 +5,7 @@ import numpy as np
 import os
 import pytest
 import scipy.sparse
+import sparse
 from typing import List
 
 from sfaira.consts import AdataIdsSfaira
@@ -246,7 +247,8 @@ def test_generator_blocked_data(store_format: str, idx, randomized_batch_access:
         assert np.sum(batch_sizes) == len(idx)
 
 
-@pytest.mark.parametrize("adaptor", ["python", "tensorflow", "torch"])
+@pytest.mark.parametrize("adaptor", ["python", "tensorflow", "torch", "torch-loader", "torch-iter",
+                                     "torch-iter-loader"])
 def test_adaptors(adaptor: str):
     """
     Test if framework-specific generator adpators yield batches.
@@ -255,7 +257,6 @@ def test_adaptors(adaptor: str):
 
     def map_fn(x, obs):
         """
-
         Note: Need to convert to numpy in output because torch does not accept dask.
         """
         return (np.asarray(x[:, :2]),),
@@ -269,16 +270,18 @@ def test_adaptors(adaptor: str):
         kwargs = {"output_signature": (
             tf.TensorSpec(shape=(2,), dtype=tf.float32),
         )}
-    elif adaptor == "torch":
+    elif adaptor in ["torch", "torch-loader", "torch-iter-loader", "torch-iter"]:
         kwargs = {}
     else:
         assert False
     it = g.adaptor(generator_type=adaptor, **kwargs)
     if adaptor == "tensorflow":
         it = iter(it.range(2))
-    if adaptor == "torch":
+    if adaptor in ["torch", "torch-iter"]:
         import torch
-
         it = list(torch.utils.data.DataLoader(it))
         it = iter(it)
+    if adaptor in ["torch-loader", "torch-iter-loader"]:
+        import torch
+        it = iter(list(it))
     _ = next(it)
