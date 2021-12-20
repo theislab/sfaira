@@ -743,13 +743,16 @@ class DistributedStoreDao(DistributedStoreSingleFeatureSpace):
         """
         if self._x is None:
             if self.data_source == "X":
-                # TODO avoiding anndata .X here
-                # assert np.all([isinstance(self._adata_by_key[k].X, dask.array.Array) for k in self.indices.keys()])
                 assert np.all([isinstance(self._x_by_key[k], dask.array.Array) for k in self.indices.keys()])
-                self._x = dask.optimize(dask.array.vstack([
-                    self._x_by_key[k][v, :]
-                    for k, v in self.indices.items()
-                ]))[0]
+                arrs_to_concat = []
+                for k, v in self.indices.items():
+                    if self._x_by_key[k].shape[0] == len(v):
+                        arrs_to_concat.append(self._x_by_key[k])
+                    elif len(v) == 0:
+                        continue
+                    else:
+                        arrs_to_concat.append(self._x_by_key[k][v, :])
+                self._x = dask.optimize(dask.array.vstack(arrs_to_concat))[0]
             else:
                 raise ValueError(f"Did not recognise data_source={self.data_source}.")
         return self._x
