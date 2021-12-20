@@ -1,3 +1,5 @@
+import abc
+
 import anndata
 import dask.array
 import numpy as np
@@ -62,7 +64,7 @@ class GeneratorBase:
     def n_batches(self) -> int:
         return self.schedule.n_batches
 
-    def adaptor(self, generator_type: str, **kwargs):
+    def adaptor(self, generator_type: str, dataset_kwargs: dict = {}, **kwargs):
         """
         The adaptor turns a python base generator into a different iteratable object, defined by generator_type.
 
@@ -77,6 +79,7 @@ class GeneratorBase:
                 in out-of-the-box usage.
                     - torch.data.Dataset: "torch" prefix, ie "torch" or "torch-loader"
                     - torch.data.IteratableDataset: "torch-iter" prefix, ie "torch-iter" or "torch-iter-loader"
+        :param dataset_kwargs:
         :returns: Modified iteratable (see generator_type).
         """
         if generator_type == "python":
@@ -90,7 +93,7 @@ class GeneratorBase:
             # Only import this module if torch is used to avoid strict torch dependency:
             from .torch_dataset import SfairaDataset
 
-            g = SfairaDataset(map_fn=self.map_fn, obs=self._obs_slice, x=self._x_slice, **kwargs)
+            g = SfairaDataset(map_fn=self.map_fn, obs=self.obs, x=self.x, **dataset_kwargs)
             if generator_type == "torch-loader":
                 g = torch.utils.data.DataLoader(g, **kwargs)
         elif generator_type in ["torch-iter", "torch-iter-loader"]:
@@ -104,6 +107,14 @@ class GeneratorBase:
         else:
             raise ValueError(f"{generator_type} not recognized")
         return g
+
+    @property
+    def x(self):
+        pass
+
+    @property
+    def obs(self):
+        pass
 
 
 class GeneratorSingle(GeneratorBase):
@@ -282,6 +293,31 @@ class GeneratorAnndata(GeneratorSingle):
 
         return g
 
+    @property
+    def obs_idx_dict(self):
+        return dict([(k, v2) for k, (_, v2) in self.idx_dict_global.items()])
+
+    @property
+    def x(self):
+        # Assumes that .X are scipy.sparse.csr or coo
+        if self.var_idx is None:
+            return scipy.sparse.vstack([
+                self.adata_dict[k].X[v, :].copy()
+                for k, v in self.obs_idx_dict.items()
+            ])
+        else:
+            return scipy.sparse.vstack([
+                self.adata_dict[k].X[v, :][:, self.var_idx].copy()
+                for k, v in self.obs_idx_dict.items()
+            ])
+
+    @property
+    def obs(self):
+        return pd.concat([
+            self.adata_dict[k].obs[self.obs_keys].iloc[v, :]
+            for k, v in self.obs_idx_dict.items()
+        ], axis=0, join="inner", ignore_index=True, copy=False)
+
 
 class GeneratorDask(GeneratorSingle):
 
@@ -290,24 +326,25 @@ class GeneratorDask(GeneratorSingle):
     Access to the slice can be optimised with dask and is therefore desirable.
     """
 
-    x: dask.array
-    _x_slice: dask.array
-    obs: pd.DataFrame
+    _x: dask.array.Array
+    _x_slice: Union[dask.array.Array, None]
+    _obs: pd.DataFrame
+    _obs_slice: Union[pd.DataFrame, None]
 
     def __init__(self, x, obs, obs_keys, var_idx, **kwargs):
         if var_idx is not None:
             x = x[:, var_idx]
-        self.x = x
-        self.obs = obs[obs_keys]
+        self._x = x
+        self._obs = obs[obs_keys]
         # Redefine index so that .loc indexing can be used instead of .iloc indexing:
-        self.obs.index = np.arange(0, obs.shape[0])
+        self._obs.index = np.arange(0, obs.shape[0])
         self._x_slice = None
         self._obs_slice = None
         super(GeneratorDask, self).__init__(obs_keys=obs_keys, var_idx=var_idx, **kwargs)
 
     @property
     def n_obs(self) -> int:
-        return self.x.shape[0]
+        return self._x.shape[0]
 
     @property
     def obs_idx(self):
@@ -328,8 +365,8 @@ class GeneratorDask(GeneratorSingle):
         if (self._obs_idx is not None and len(x) != len(self._obs_idx)) or np.any(x != self._obs_idx):
             self._obs_idx = x
             self.schedule.idx = x
-            self._x_slice = dask.optimize(self.x[self._obs_idx, :])[0]
-            self._obs_slice = self.obs.loc[self.obs.index[self._obs_idx], :]  # TODO better than iloc?
+            self._x_slice = dask.optimize(self._x[self._obs_idx, :])[0]
+            self._obs_slice = self._obs.loc[self._obs.index[self._obs_idx], :]  # TODO better than iloc?
             # Redefine index so that .loc indexing can be used instead of .iloc indexing:
             self._obs_slice.index = np.arange(0, self._obs_slice.shape[0])
 
@@ -355,6 +392,14 @@ class GeneratorDask(GeneratorSingle):
                     yield data_tuple
 
         return g
+
+    @property
+    def x(self):
+        return self._x_slice
+
+    @property
+    def obs(self):
+        return self._obs_slice
 
 
 class GeneratorMulti(GeneratorBase):
@@ -433,3 +478,11 @@ class GeneratorMulti(GeneratorBase):
     @property
     def n_batches(self) -> int:
         return np.sum([v.n_batches for v in self.generators.values()])
+
+    @property
+    def x(self):
+        return dict([(k, v.x) for k, v in self.generators])
+
+    @property
+    def obs(self):
+        return dict([(k, v.obs) for k, v in self.generators])

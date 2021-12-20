@@ -26,16 +26,18 @@ class SfairaDataset(torch.utils.data.Dataset):
             a zarr array.
         :param kwargs:
         """
-        super(SfairaDataset, self).__init__(**kwargs)
+        super(SfairaDataset, self).__init__()
         self.map_fn = map_fn
         self.obs = obs
         if dask_to_memory and isinstance(x, dask.array.Array):
             x = x.map_blocks(sparse.COO).compute()
             self._using_sparse = True
+        elif isinstance(x, scipy.sparse.spmatrix) or isinstance(x, sparse.spmatrix):
+            self._using_sparse = True
         else:
             self._using_sparse = False
         self.x = x
-        assert self.x.shape[0] == self.obs.shape[0]
+        assert self.x.shape[0] == self.obs.shape[0], (self.x.shape, self.obs.shape)
         self._len = self.x.shape[0]
 
     def __len__(self):
@@ -44,13 +46,16 @@ class SfairaDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
             idx = idx.tolist()
-        if isinstance(idx, int):  # Make sure that array is 2D for map_fn.
-            idx = [idx]
         x = self.x[idx, :]
         if self._using_sparse:
             x = x.todense()
         obs = self.obs.iloc[idx, :]
         xy = self.map_fn(x, obs)
+        # Flatten batch dim for torch.Dataset [not necessary for IteratableDataset]
+        # TODO this might be inefficient, might need different solution.
+        if xy[0][0].shape[0] == 1 and len(xy[0][0].shape) >= 2:
+            xy = tuple(tuple(zz.squeeze(axis=0) for zz in z) for z in xy)
+        xy = tuple(tuple(torch.from_numpy(zz) for zz in z) for z in xy)
         return xy
 
 
