@@ -431,8 +431,11 @@ class GeneratorMulti(GeneratorBase):
         Note that these can be float and will be randomly rounded during intercalation.
         """
         if self._ratios is None:
-            gen_lens = np.array([v.n_batches for v in self.generators.values()])
-            self._ratios = np.max(gen_lens) / np.asarray(gen_lens)
+            gen_lens = np.array([v.n_batches for v in self.generators.values()])  # eg. [10, 15, 20]
+            # Compute ratios of sampling so that one batch is drawn from the smallest generator per intercalation cycle.
+            # See also self.iterator.
+            freq = gen_lens / np.min(gen_lens)  # eg. [1.0, 1.5, 2.0]
+            self._ratios = freq
         return self._ratios
 
     @property
@@ -453,17 +456,20 @@ class GeneratorMulti(GeneratorBase):
     def iterator(self) -> iter:
 
         if self.intercalated:
+            ratios = self.ratios.copy()
+            print(f"GENERATOR: intercalating generators at ratios {ratios}")
+
             def g():
                 # Document which generators are still yielding batches:
-                yielding = np.ones((self.ratios.shape[0],)) == 1.
+                yielding = np.ones((ratios.shape[0],)) == 1.
                 iterators = [v.iterator() for v in self.generators.values()]
                 while np.any(yielding):
                     # Loop over one iterator length adjusted cycle of emissions.
-                    for i, (g, n) in enumerate(zip(iterators, self.ratios)):
+                    for i, (gi, n) in enumerate(zip(iterators, ratios)):
                         n_rounded = int(n) + np.random.binomial(n=1, p=n - int(n))
                         for _ in range(n_rounded):
                             try:
-                                x = next(g)
+                                x = next(gi)
                                 yield x
                             except StopIteration:
                                 yielding[i] = False
