@@ -285,11 +285,15 @@ class DistributedStoresDao(DistributedStoreMultipleFeatureSpaceBase):
 
     _dataset_weights: Union[None, Dict[str, float]]
 
-    def __init__(self, cache_path: Union[str, os.PathLike], columns: Union[None, List[str]] = None):
+    def __init__(self, 
+                 cache_path: Union[str, os.PathLike], 
+                 columns: Union[None, List[str]] = None,
+                 persist_to_memory: bool = False):
         """
 
         :param cache_path: Store directory.
         :param columns: Which columns to read into the obs copy in the output, see pandas.read_parquet().
+        :param persist_to_memory: Whether to persist the data into memory (in sparse format)
         """
         # Collect all data loaders from files in directory:
         self._adata_ids_sfaira = AdataIdsSfaira()
@@ -316,7 +320,7 @@ class DistributedStoresDao(DistributedStoreMultipleFeatureSpaceBase):
         self._x_by_key = x_by_key
         stores = dict([
             (k, DistributedStoreDao(adata_by_key=adata_by_key[k], x_by_key=x_by_key[k], indices=indices[k],
-                                    obs_by_key=None))
+                                    obs_by_key=None, persist_to_memory=persist_to_memory))
             for k in adata_by_key.keys()
         ])
         super(DistributedStoresDao, self).__init__(stores=stores)
