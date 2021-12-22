@@ -3,6 +3,7 @@ import anndata
 import dask.array
 import dask.dataframe
 import numpy as np
+import sparse
 import os
 import pandas as pd
 import pickle
@@ -696,11 +697,12 @@ class DistributedStoreDao(DistributedStoreSingleFeatureSpace):
     _x: Union[None, dask.array.Array]
     _x_by_key: Union[None, dask.array.Array]
 
-    def __init__(self, x_by_key, **kwargs):
+    def __init__(self, x_by_key, persist_to_memory=False, **kwargs):
         super(DistributedStoreDao, self).__init__(**kwargs)
         self._x = None
         self._x_as_dask = True
         self._x_by_key = x_by_key
+        self._persist_to_memory = persist_to_memory
 
     @property
     def indices(self) -> Dict[str, np.ndarray]:
@@ -753,8 +755,12 @@ class DistributedStoreDao(DistributedStoreSingleFeatureSpace):
                     else:
                         arrs_to_concat.append(self._x_by_key[k][v, :])
                 self._x = dask.optimize(dask.array.vstack(arrs_to_concat))[0]
+
+                if self._persist_to_memory:
+                    self._x = self._x.map_blocks(sparse.COO).persist()
             else:
                 raise ValueError(f"Did not recognise data_source={self.data_source}.")
+
         return self._x
 
     def persist_X_to_memory(self):

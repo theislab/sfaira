@@ -5,8 +5,10 @@ from sfaira.data.store.multi_store import DistributedStoresDao, DistributedStore
     DistributedStoreMultipleFeatureSpaceBase
 
 
-def load_store(cache_path: Union[str, os.PathLike], store_format: str = "dao",
-               columns: Union[None, List[str]] = None) -> DistributedStoreMultipleFeatureSpaceBase:
+def load_store(cache_path: Union[str, os.PathLike], 
+               store_format: str = "dao",
+               columns: Union[None, List[str]] = None,
+               persist_data_to_memory: bool = False) -> DistributedStoreMultipleFeatureSpaceBase:
     """
     Instantiates a distributed store class.
 
@@ -22,12 +24,14 @@ def load_store(cache_path: Union[str, os.PathLike], store_format: str = "dao",
             "h5ad".
     :param columns: Which columns to read into the obs copy in the output, see pandas.read_parquet().
         Only relevant if store_format is "dao".
+    :param persist_data_to_memory: Whether to persist data into memory (in sparse format)
+        Only relevant if store_format is "dao"
     :return: Instances of a distributed store class.
     """
     if store_format == "h5ad":
         return DistributedStoresH5ad(cache_path=cache_path, in_memory=True)
     elif store_format == "dao":
-        return DistributedStoresDao(cache_path=cache_path, columns=columns)
+        return DistributedStoresDao(cache_path=cache_path, columns=columns, persist_to_memory=persist_data_to_memory)
     elif store_format == "h5ad_backed":
         return DistributedStoresH5ad(cache_path=cache_path, in_memory=False)
     else:
