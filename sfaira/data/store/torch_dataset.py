@@ -46,6 +46,8 @@ class SfairaDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
             idx = idx.tolist()
+        if isinstance(idx, int):
+            idx = [idx]
         x = self.x[idx, :]
         if self._using_sparse:
             x = x.todense()
