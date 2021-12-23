@@ -1,5 +1,8 @@
-import numpy as np
+from random import shuffle
 from typing import List, Tuple
+
+import numpy as np
+import pandas as pd
 
 
 def _randomize_batch_start_ends(batch_starts_ends):
@@ -11,32 +14,34 @@ def _randomize_batch_start_ends(batch_starts_ends):
 
 class BatchDesignBase:
 
-    def __init__(self, retrieval_batch_size: int, randomized_batch_access: bool, random_access: bool, **kwargs):
+    def __init__(self,
+                 retrieval_batch_size: int,
+                 randomized_batch_access: bool,
+                 random_access: bool,
+                 **kwargs):
         self.retrieval_batch_size = retrieval_batch_size
-        self._batch_bounds = None
+        self._batches = None
         self._idx = None
+        self._batch_size = None
         if randomized_batch_access and random_access:
             raise ValueError("Do not use randomized_batch_access and random_access.")
         self.randomized_batch_access = randomized_batch_access
         self.random_access = random_access
 
-    @staticmethod
-    def _get_batch_start_ends(idx: np.ndarray, batch_size: int):
-        n_obs = len(idx)
-        remainder = n_obs % batch_size if n_obs > 0 else 0
-        n_batches = int(n_obs // batch_size + int(remainder > 0)) if n_obs > 0 else 0
-        batch_starts_ends = [
-            (int(x * batch_size), int(np.minimum((x * batch_size) + batch_size, n_obs)))
-            for x in np.arange(0, n_batches)
-        ]
-        return batch_starts_ends
-
     @property
-    def batch_bounds(self):
+    def batchsize(self):
         """
-        Protects property from changing.
+        Batch size of the yieleded batches.
         """
-        return self._batch_bounds
+        return self._batch_size
+
+    @batchsize.setter
+    def batchsize(self, batch_size: int):
+        if self.retrieval_batch_size % batch_size != 0:
+            raise ValueError(
+                f'retrieval_batch_size (={self.retrieval_batch_size}) has to be devidable by batchsize (={batch_size})'
+            )
+        self._batch_size = batch_size
 
     @property
     def idx(self):
@@ -48,8 +53,7 @@ class BatchDesignBase:
 
     @idx.setter
     def idx(self, x):
-        self._batch_bounds = self._get_batch_start_ends(idx=x, batch_size=self.retrieval_batch_size)
-        self._idx = np.sort(x)  # Sorted indices improve accession efficiency in some cases.
+        self._idx = np.sort(x)  # idx has to be sorted for logic in subclasses
 
     @property
     def design(self) -> Tuple[np.ndarray, np.ndarray, List[Tuple[int, int]]]:
@@ -71,13 +75,22 @@ class BatchDesignBasic(BatchDesignBase):
 
     @property
     def design(self) -> Tuple[np.ndarray, np.ndarray, List[Tuple[int, int]]]:
-        idx_proc = np.arange(0, len(self.idx))
         if self.random_access:
-            np.random.shuffle(idx_proc)
-        batch_bounds = self.batch_bounds.copy()
+            # shuffle idx for random access
+            idx = np.random.permutation(self.idx)
+        else:
+            idx = self.idx
+        if self.batchsize is None:
+            batches = np.array_split(idx, len(idx)//self.retrieval_batch_size)
+        else:
+            batches = np.array_split(idx, len(idx)//self.batchsize)
         if self.randomized_batch_access:
-            batch_bounds = _randomize_batch_start_ends(batch_starts_ends=batch_bounds)
-        return idx_proc, self.idx[idx_proc], batch_bounds
+            shuffle(batches)
+        if self.batchsize is not None:
+            # accumulate smaller batches to the size of retrieval_batch_size
+            batches = np.array_split(np.concatenate(batches), len(idx)//self.retrieval_batch_size)
+
+        return batches
 
 
 class BatchDesignBalanced(BatchDesignBase):
@@ -92,7 +105,8 @@ class BatchDesignBalanced(BatchDesignBase):
         super(BatchDesignBalanced, self).__init__(randomized_batch_access=randomized_batch_access,
                                                   random_access=random_access, **kwargs)
         if randomized_batch_access:
-            print("WARNING: randomized_batch_access==True is not a meaningful setting for BatchDesignBalanced.")
+            print("WARNING: randomized_batch_access==True is not a meaningful setting for BatchDesignBalanced. "
+                  "Setting will be ignored!")
         if not random_access:
             print("WARNING: random_access==False is dangerous if you do not work with a large shuffle buffer "
                   "downstream of the sfaira generator.")
@@ -114,13 +128,13 @@ class BatchDesignBalanced(BatchDesignBase):
     @property
     def design(self) -> Tuple[np.ndarray, np.ndarray, List[Tuple[int, int]]]:
         # Re-sample index vector.
-        idx_proc = np.random.choice(a=np.arange(0, len(self.idx)), replace=True, size=len(self.idx), p=self.p_obs)
+        idx = np.random.choice(a=np.arange(0, self.idx), replace=True, size=len(self.idx), p=self.p_obs)
         if not self.random_access:  # Note: randomization is result from sampling above, need to revert if not desired.
-            idx_proc = np.sort(idx_proc)
-        batch_bounds = self.batch_bounds.copy()
-        if self.randomized_batch_access:
-            batch_bounds = _randomize_batch_start_ends(batch_starts_ends=batch_bounds)
-        return idx_proc, self.idx[idx_proc], batch_bounds
+            idx = np.sort(idx)
+
+        batches = np.array_split(idx, len(idx) // self.retrieval_batch_size)
+        
+        return batches
 
 
 class BatchDesignBlocks(BatchDesignBase):
@@ -158,14 +172,6 @@ class BatchDesignBlocks(BatchDesignBase):
             self._groups = np.unique(self.grouping)
         return self._groups
 
-    def _get_batch_start_ends(self, idx: np.ndarray, batch_size: int):
-        n_batches = len(self.groups)
-        batch_starts_ends = []
-        for x in np.arange(0, n_batches):
-            s = 0 if x == 0 else batch_starts_ends[-1][1]
-            batch_starts_ends.append((s, int(s + self.grouping_sizes[x])))
-        return batch_starts_ends
-
     @property
     def idx(self):
         """
@@ -186,18 +192,19 @@ class BatchDesignBlocks(BatchDesignBase):
             grouping_sizes[i] = len(idx)
             idx_sorted.append(idx)
         self.grouping_sizes = grouping_sizes
-        self.idx_sorted = np.concatenate(idx_sorted)
-        self._batch_bounds = self._get_batch_start_ends(idx=x, batch_size=self.retrieval_batch_size)
+        self.idx_sorted = idx_sorted
 
     @property
     def design(self) -> Tuple[np.ndarray, np.ndarray, List[Tuple[int, int]]]:
-        idx_proc = self.idx_sorted.copy()
-        batch_bounds = self.batch_bounds.copy()
-        if self.random_access:  # Note: randomization is result from sampling above, need to revert if not desired.
-            batch_bounds = np.asarray(batch_bounds)
-            np.random.shuffle(batch_bounds)
-            batch_bounds = batch_bounds.tolist()
-        return idx_proc, self.idx[idx_proc], batch_bounds
+        idx_sorted = self.idx_sorted
+        batches = []
+        for idxs_group in idx_sorted:
+            if self.random_access:
+                # shuffle subgroups if random_access
+                idxs_group = np.random.permutation(idx_sorted)
+            batches += np.array_split(idxs_group, len(idxs_group)//self.retrieval_batch_size)
+        
+        return batches
 
 
 BATCH_SCHEDULE = {
