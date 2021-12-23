@@ -5,13 +5,6 @@ import numpy as np
 import pandas as pd
 
 
-def _randomize_batch_start_ends(batch_starts_ends):
-    batch_range = np.arange(0, len(batch_starts_ends))
-    np.random.shuffle(batch_range)
-    batch_starts_ends = [batch_starts_ends[i] for i in batch_range]
-    return batch_starts_ends
-
-
 class BatchDesignBase:
 
     def __init__(self,
