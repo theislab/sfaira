@@ -1,4 +1,4 @@
-from statistics import multimode
+from collections import Counter
 from typing import Dict, List, Union
 
 import anndata
@@ -155,7 +155,7 @@ class GeneratorSingle(GeneratorBase):
 
     @property
     def n_batches(self) -> int:
-        return len(self.schedule.batch_bounds)
+        return len(self.schedule.design)
 
 
 class GeneratorAnndata(GeneratorSingle):
@@ -182,7 +182,7 @@ class GeneratorAnndata(GeneratorSingle):
         def g():
             batches = self.schedule.design
             for batch_idx in batches:
-                idx_i = obs_idx[batch_idx]
+                idx_i = batch_idx
                 # Match adata objects that overlap to batch:
                 if self.single_object:
                     idx_i_dict = dict([(k, np.sort(idx_i)) for k in self.adata_dict.keys()])
@@ -264,17 +264,11 @@ class GeneratorAnndata(GeneratorSingle):
 
 class GeneratorDask(GeneratorSingle):
 
-    """
-    In addition to the full data array, x, this class maintains a slice _x_slice which is indexed by the iterator.
-    Access to the slice can be optimised with dask and is therefore desirable.
-    """
-
     x: dask.array
     _x_slice: dask.array
     obs: pd.DataFrame
 
     def __init__(self, x, obs, obs_keys, var_idx, **kwargs):
-        assert x.shape[0] == obs.shape[0]
         if var_idx is not None:
             x = x[:, var_idx]
         self.x = x
@@ -294,7 +288,7 @@ class GeneratorDask(GeneratorSingle):
 
         def g():
             # use most common chunksize as batchsize for batch_schedule
-            self.schedule.batchsize = multimode(self.x.chunks[0])[0]
+            self.schedule.batchsize = Counter(self.x.chunks[0]).most_common(1)[0][0]
             batches = self.schedule.design
             x_temp = self.x
             obs_temp = self.obs

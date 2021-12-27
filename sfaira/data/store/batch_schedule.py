@@ -22,7 +22,7 @@ class BatchDesignBase:
         self.random_access = random_access
 
     @property
-    def batchsize(self):
+    def batchsize(self) -> int:
         """
         Batch size of the yieleded batches.
         """
@@ -30,10 +30,8 @@ class BatchDesignBase:
 
     @batchsize.setter
     def batchsize(self, batch_size: int):
-        if self.retrieval_batch_size % batch_size != 0:
-            raise ValueError(
-                f'retrieval_batch_size (={self.retrieval_batch_size}) has to be devidable by batchsize (={batch_size})'
-            )
+        if not isinstance(batch_size, int):
+            raise ValueError('batchsize has to be of type int')
         self._batch_size = batch_size
 
     @property
@@ -49,17 +47,15 @@ class BatchDesignBase:
         self._idx = np.sort(x)  # idx has to be sorted for logic in subclasses
 
     @property
-    def design(self) -> Tuple[np.ndarray, np.ndarray, List[Tuple[int, int]]]:
+    def design(self) -> List[np.array]:
         """
         Yields index objects for one epoch of all data.
 
         These index objects are used by generators that have access to the data objects to build data batches.
         Randomization is performed anew with every call to this property.
 
-        :returns: Tuple of:
-            - Indices of observations in epoch out of selected data set (ie indices of self.idx).
-            - Ordering of observations in epoch out of full data set.
-            - Batch start and end indices for batch based on ordering defined in first output.
+        :returns: List[np.array]
+            List of indicies per batch
         """
         raise NotImplementedError()
 
@@ -67,21 +63,21 @@ class BatchDesignBase:
 class BatchDesignBasic(BatchDesignBase):
 
     @property
-    def design(self) -> Tuple[np.ndarray, np.ndarray, List[Tuple[int, int]]]:
+    def design(self) -> List[np.ndarray]:
         if self.random_access:
             # shuffle idx for random access
             idx = np.random.permutation(self.idx)
         else:
             idx = self.idx
         if self.batchsize is None:
-            batches = np.array_split(idx, len(idx)//self.retrieval_batch_size)
+            batches = np.array_split(idx, max(len(idx) // self.retrieval_batch_size, 1))
         else:
-            batches = np.array_split(idx, len(idx)//self.batchsize)
+            batches = np.array_split(idx, max(len(idx) // self.batchsize, 1))
         if self.randomized_batch_access:
             shuffle(batches)
         if self.batchsize is not None:
             # accumulate smaller batches to the size of retrieval_batch_size
-            batches = np.array_split(np.concatenate(batches), len(idx)//self.retrieval_batch_size)
+            batches = np.array_split(np.concatenate(batches), max(len(idx) // self.retrieval_batch_size, 1))
 
         return batches
 
@@ -91,6 +87,7 @@ class BatchDesignBalanced(BatchDesignBase):
     def __init__(self, grouping, group_weights: dict, randomized_batch_access: bool, random_access: bool,
                  **kwargs):
         """
+        
         :param grouping: Group label for each entry in idx.
         :param group_weights: Group weight for each unique group in grouping. Does not have to normalise to a probability
             distribution but is normalised in this function. The outcome vector is always of length idx.
@@ -119,23 +116,22 @@ class BatchDesignBalanced(BatchDesignBase):
         self.p_obs = p_obs
 
     @property
-    def design(self) -> Tuple[np.ndarray, np.ndarray, List[Tuple[int, int]]]:
+    def design(self) -> List[np.ndarray]:
         # Re-sample index vector.
         idx = np.random.choice(a=np.arange(0, self.idx), replace=True, size=len(self.idx), p=self.p_obs)
         if not self.random_access:  # Note: randomization is result from sampling above, need to revert if not desired.
             idx = np.sort(idx)
-
-        batches = np.array_split(idx, len(idx) // self.retrieval_batch_size)
+        batches = np.array_split(idx, max(len(idx) // self.retrieval_batch_size, 1))
         
         return batches
 
 
 class BatchDesignBlocks(BatchDesignBase):
-
     """Yields meta data-defined blocks of observations in each iteration."""
 
     def __init__(self, grouping, random_access: bool, **kwargs):
         """
+        
         :param grouping: Group label for each entry in idx.
         :param group_weights: Group weight for each unique group in grouping. Does not have to normalise to a probability
             distribution but is normalised in this function. The outcome vector is always of length idx.
@@ -149,14 +145,13 @@ class BatchDesignBlocks(BatchDesignBase):
 
     @property
     def grouping(self):
-        return self._grouping[self.idx]
+        return self._grouping
 
     @grouping.setter
     def grouping(self, x):
         self._grouping = x
         # Reset:
         self._groups = None
-        self.grouping_sizes = None
         self.idx_sorted = None
 
     @property
@@ -169,7 +164,7 @@ class BatchDesignBlocks(BatchDesignBase):
     def idx(self):
         """
         Protects property from uncontrolled changing.
-        Changes to _idx require changes to _batch_bounds.
+        Changes to _idx require changes to batch splitting.
         """
         return self._idx
 
@@ -178,25 +173,27 @@ class BatchDesignBlocks(BatchDesignBase):
         self._idx = x
         # Reset:
         self._groups = None
-        grouping_sizes = np.zeros((self.groups.shape[0],), dtype="int32")
         idx_sorted = []
-        for i, x in enumerate(self.groups):
-            idx = np.where(self.grouping == x)[0]
-            grouping_sizes[i] = len(idx)
+        for group in self.groups:
+            # subselect by group and only keep indicies which are in the supplied index range
+            idx = np.intersect1d(np.where(self.grouping == group)[0], x)
             idx_sorted.append(idx)
-        self.grouping_sizes = grouping_sizes
         self.idx_sorted = idx_sorted
 
     @property
-    def design(self) -> Tuple[np.ndarray, np.ndarray, List[Tuple[int, int]]]:
+    def design(self) -> List[np.ndarray]:
         idx_sorted = self.idx_sorted
         batches = []
         for idxs_group in idx_sorted:
-            if self.random_access:
-                # shuffle subgroups if random_access
-                idxs_group = np.random.permutation(idx_sorted)
-            batches += np.array_split(idxs_group, len(idxs_group)//self.retrieval_batch_size)
-        
+            if len(idxs_group) > 0:
+                if self.random_access:
+                    # shuffle subgroups if random_access
+                    idxs_group = np.random.permutation(idx_sorted)
+                batches += np.array_split(idxs_group, max(len(idxs_group) // self.retrieval_batch_size, 1))
+        if self.random_access:
+            # shuffle batches
+            shuffle(batches)
+
         return batches
 
 
