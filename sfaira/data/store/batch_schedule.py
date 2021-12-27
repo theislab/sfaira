@@ -1,8 +1,7 @@
 from random import shuffle
-from typing import List, Tuple
+from typing import List
 
 import numpy as np
-import pandas as pd
 
 
 class BatchDesignBase:
@@ -96,7 +95,7 @@ class BatchDesignBalanced(BatchDesignBase):
                                                   random_access=random_access, **kwargs)
         if randomized_batch_access:
             print("WARNING: randomized_batch_access==True is not a meaningful setting for BatchDesignBalanced. "
-                  "Setting will be ignored!")
+                  "Setting will be ignored!p")
         if not random_access:
             print("WARNING: random_access==False is dangerous if you do not work with a large shuffle buffer "
                   "downstream of the sfaira generator.")
