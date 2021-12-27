@@ -102,7 +102,7 @@ class BatchDesignBalanced(BatchDesignBase):
                   "downstream of the sfaira generator.")
         # Create integer group assignment array.
         groups = np.sort(list(group_weights.keys()))
-        grouping_int = np.zeros((grouping.shape[0],), dtype="int32") - 1
+        grouping_int = np.zeros((grouping.shape[0], ), dtype="int32") - 1
         for i, x in enumerate(groups):
             grouping_int[np.where(grouping == x)[0]] = i
         assert np.all(grouping_int >= 0)
@@ -117,8 +117,11 @@ class BatchDesignBalanced(BatchDesignBase):
 
     @property
     def design(self) -> List[np.ndarray]:
+        # select relevant probabilities and renormalize to prob vector
+        p_obs = self.p_obs[self.idx]
+        p_obs = p_obs / np.sum(p_obs)
         # Re-sample index vector.
-        idx = np.random.choice(a=np.arange(0, self.idx), replace=True, size=len(self.idx), p=self.p_obs)
+        idx = np.random.choice(a=self.idx, replace=True, size=len(self.idx), p=p_obs)
         if not self.random_access:  # Note: randomization is result from sampling above, need to revert if not desired.
             idx = np.sort(idx)
         batches = np.array_split(idx, max(len(idx) // self.retrieval_batch_size, 1))
