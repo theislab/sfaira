@@ -332,7 +332,10 @@ class DistributedStoresDao(DistributedStoreMultipleFeatureSpaceBase):
 
 class DistributedStoresH5ad(DistributedStoreMultipleFeatureSpaceBase):
 
-    def __init__(self, cache_path: Union[str, os.PathLike], in_memory: bool = False):
+    def __init__(
+            self,
+            cache_path: Union[str, os.PathLike, List[str], List[os.PathLike]],
+            in_memory: bool = False):
         # Collect all data loaders from files in directory:
         self._adata_ids_sfaira = AdataIdsSfaira()
         adata_by_key = {}
