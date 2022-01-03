@@ -363,7 +363,7 @@ class DatasetGroup:
             if len(organism) == 1:
                 organism = organism[0]
             else:
-                raise ValueError(f"write_ontology_class_maps for mixed organisms not yet supported.")
+                raise ValueError(f"write_ontology_class_maps() for mixed organisms not yet supported {organism}.")
             fn_x = fn + "_" + x + ".tsv"
             labels_original = []
             organs = []
