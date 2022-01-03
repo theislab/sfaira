@@ -68,14 +68,14 @@ def split_idx(data: DistributedStoreSingleFeatureSpace, test_split, val_split):
     print(f"Found {len(idx_test)} out of {data.n_obs} cells that correspond to test data set")
     assert len(idx_test) < data.n_obs, f"test set covers full data set, apply a more restrictive test " \
                                        f"data definiton ({len(idx_test)}, {data.n_obs})"
-    idx_train_eval = np.array([x for x in all_idx if x not in idx_test])
+    idx_train_eval = all_idx[~np.isin(all_idx, idx_test)]
     np.random.seed(1)
     idx_eval = np.sort(np.random.choice(
         a=idx_train_eval,
         size=round(len(idx_train_eval) * val_split),
         replace=False
     ))
-    idx_train = np.sort([x for x in idx_train_eval if x not in idx_eval])
+    idx_train = np.sort(idx_train_eval[~np.isin(idx_train_eval, idx_eval)])
 
     # Check that none of the train, test, eval partitions are empty
     if not len(idx_test):
@@ -213,7 +213,7 @@ class EstimatorKeras:
 
     @property
     def organism(self):
-        return {"homo_sapiens": "human", "mus_musculus": "mouse"}[self.topology_container.organism]
+        return self.topology_container.organism
 
     def load_pretrained_weights(self):
         """
@@ -265,7 +265,8 @@ class EstimatorKeras:
             else:
                 raise ValueError('the weightsfile could not be found')
 
-        self._assert_md5_sum(fn, self.md5)
+        if self.md5 is not None:
+            self._assert_md5_sum(fn, self.md5)
         if fn.endswith(".data-00000-of-00001"):
             self.model.training_model.load_weights(".".join(fn.split(".")[:-1]))
         else:

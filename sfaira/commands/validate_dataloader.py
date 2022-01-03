@@ -1,6 +1,5 @@
 import logging
 import os
-import re
 
 import rich
 import yaml
@@ -11,6 +10,7 @@ from rich.progress import Progress, BarColumn
 
 from sfaira.consts.utils import clean_doi
 from sfaira.commands.questionary import sfaira_questionary
+from sfaira.commands.utils import doi_lint
 
 log = logging.getLogger(__name__)
 
@@ -22,14 +22,15 @@ class DataloaderValidator:
             doi = sfaira_questionary(function='text',
                                      question='DOI:',
                                      default='10.1000/j.journal.2021.01.001')
-            while not re.match(r'\b10\.\d+/[\w.]+\b', doi):
+            while not doi_lint(doi):
                 print('[bold red]The entered DOI is malformed!')  # noqa: W605
                 doi = sfaira_questionary(function='text',
                                          question='DOI:',
                                          default='10.1000/j.journal.2021.01.001')
         self.doi = doi
 
-        loader_filename = [i for i in os.listdir(os.path.join(path_loader, clean_doi(doi))) if str(i).endswith(".yaml")][0]
+        loader_filename = [i for i in os.listdir(os.path.join(path_loader, clean_doi(doi)))
+                           if str(i).endswith(".yaml")][0]
         self.path_loader: str = os.path.join(path_loader, clean_doi(doi), loader_filename)
         self.content: dict = {}
         self.passed: dict = {}
@@ -65,18 +66,14 @@ class DataloaderValidator:
         """
         passed_required_attributes = True
 
-        attributes = ['dataset_structure:sample_fns',
-                      'dataset_wise:author',
+        attributes = ['dataset_wise:author',
                       ['dataset_wise:doi_preprint',
                        'dataset_wise:doi_journal'],
                       'dataset_wise:download_url_data',
-                      'dataset_wise:download_url_meta',
                       'dataset_wise:normalization',
                       'dataset_wise:year',
                       'dataset_or_observation_wise:assay_sc',
-                      'dataset_or_observation_wise:organ',
                       'dataset_or_observation_wise:organism',
-                      'dataset_or_observation_wise:sample_source',
                       ['feature_wise:gene_id_ensembl_var_key',
                        'feature_wise:gene_id_symbols_var_key']]
 
@@ -112,7 +109,8 @@ class DataloaderValidator:
         console.rule("[bold green] LINT RESULTS")
         console.print()
         console.print(
-            f'     [bold green][[\u2714]] {len(self.passed):>4} tests passed\n     [bold yellow][[!]] {len(self.warned):>4} tests had warnings\n'
+            f'     [bold green][[\u2714]] {len(self.passed):>4} tests passed\n'
+            f'     [bold yellow][[!]] {len(self.warned):>4} tests had warnings\n'
             f'     [bold red][[\u2717]] {len(self.failed):>4} tests failed',
             overflow="ellipsis",
             highlight=False,

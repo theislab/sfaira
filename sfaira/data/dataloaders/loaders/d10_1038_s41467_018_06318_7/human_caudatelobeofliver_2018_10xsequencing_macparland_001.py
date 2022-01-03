@@ -18,7 +18,7 @@ class Dataset(DatasetBase):
         self.doi_journal = "10.1038/s41467-018-06318-7"
         self.normalization = "raw"
         self.organ = "caudate lobe of liver"
-        self.organism = "human"
+        self.organism = "Homo sapiens"
         self.primary_data = True
         self.sample_source = "primary_tissue"
         self.year = 2018

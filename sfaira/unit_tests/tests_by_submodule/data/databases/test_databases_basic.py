@@ -9,14 +9,16 @@ from sfaira.unit_tests.data_for_tests.databases.consts import CELLXGENE_DATASET_
 
 
 # Execute this one first so that data sets are only downloaded once. Named test_a for this reason.
-@pytest.mark.parametrize("database", ["cellxgene", ])
-@pytest.mark.parametrize("subset_args", [None, ["id", CELLXGENE_DATASET_ID], ])
-def test_a_dsgs_download(database: str, subset_args: List[str]):
+@pytest.mark.parametrize("database", [
+    ("cellxgene", ["id", CELLXGENE_DATASET_ID]),
+])
+def test_a_dsgs_download(database: str):
     """
     Tests if downloading of data base entries works.
 
     Warning, deletes entire database unit test cache.
     """
+    database, subset_args = database
     if os.path.exists(DIR_DATA_DATABASES_CACHE):
         shutil.rmtree(DIR_DATA_DATABASES_CACHE)
     dsg = prepare_dsg_database(database=database, download=False)
@@ -25,11 +27,14 @@ def test_a_dsgs_download(database: str, subset_args: List[str]):
     dsg.download()
 
 
-@pytest.mark.parametrize("database", ["cellxgene", ])
-@pytest.mark.parametrize("subset_args", [["id", CELLXGENE_DATASET_ID], ["organism", "human"], ])
-def test_dsgs_subset(database: str, subset_args: List[str]):
+@pytest.mark.parametrize("database", [
+    ("cellxgene", ["id", CELLXGENE_DATASET_ID]),
+    ("cellxgene", ["organism", "Homo sapiens"]),
+])
+def test_dsgs_subset(database: str):
     """
     Tests if subsetting results only in datasets of the desired characteristics.
     """
+    database, subset_args = database
     dsg = prepare_dsg_database(database=database)
     dsg.subset(key=subset_args[0], values=subset_args[1])

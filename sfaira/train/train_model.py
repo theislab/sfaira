@@ -128,7 +128,8 @@ class TrainModelEmbedding(TrainModel):
             data=self.data,
             model_dir=self.model_dir,
             model_id=self.zoo.model_id,
-            model_topology=self.zoo.topology_container
+            model_topology=self.zoo.topology_container,
+            cache_path=self.model_dir,
         )
         self.estimator.init_model(override_hyperpar=override_hyperpar)
         print(f"TRAINER: initialised model with {self.estimator.topology_container.n_var} features.")
@@ -195,7 +196,8 @@ class TrainModelCelltype(TrainModel):
             data=self.data,
             model_dir=self.model_dir,
             model_id=self.zoo.model_id,
-            model_topology=self.zoo.topology_container
+            model_topology=self.zoo.topology_container,
+            cache_path=self.model_dir,
         )
         self.estimator.celltype_universe.load_target_universe(self.fn_target_universe)
         self.estimator.init_model(override_hyperpar=override_hyperpar)
