@@ -375,7 +375,7 @@ class DatasetGroup:
                     organs.append(v.organ)
             if len(labels_original) == 0:
                 warnings.warn(f"Attempted to write ontology class-maps for meta data {x} without corresponding "
-                              f"annotation in any data set.")
+                              "annotation in any data set.")
             else:
                 labels_original = np.concatenate(labels_original)
                 # Only use anatomic constraint if all data sets are from same organ.

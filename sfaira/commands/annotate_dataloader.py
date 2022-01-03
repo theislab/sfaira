@@ -205,4 +205,4 @@ class DataloaderAnnotater:
                         n_suggest=4,
                     )
                     tsvs_written.append(fn_tsv)
-        print(f"Completed annotation. Wrote .tsv files for loaders:\n" + "\n".join(tsvs_written))
+        print("Completed annotation. Wrote .tsv files for loaders:\n" + "\n".join(tsvs_written))
