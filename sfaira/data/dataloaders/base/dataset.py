@@ -3,7 +3,6 @@ from __future__ import annotations
 import abc
 import anndata
 from anndata.utils import make_index_unique
-import h5py
 import numpy as np
 import pandas as pd
 import os
@@ -21,11 +20,13 @@ import ssl
 from sfaira.versions.genomes import GenomeContainer
 from sfaira.versions.metadata import Ontology, OntologyHierarchical, CelltypeUniverse
 from sfaira.consts import AdataIds, AdataIdsCellxgene_v2_0_0, AdataIdsSfaira, META_DATA_FIELDS, OCS
+from sfaira.data.dataloaders.base.utils import identify_tsv
 from sfaira.data.dataloaders.export_adaptors import cellxgene_export_adaptor
 from sfaira.data.store.io_dao import write_dao
 from sfaira.data.dataloaders.base.utils import is_child, get_directory_formatted_doi
 from sfaira.data.utils import collapse_matrix, read_yaml
 from sfaira.consts.utils import clean_id_str
+from sfaira.versions.metadata.maps import prepare_ontology_map_tab
 
 
 load_doc = \
@@ -97,7 +98,7 @@ class DatasetBase(abc.ABC):
     gene_id_ensembl_var_key: Union[None, str]
 
     _celltype_universe: Union[None, CelltypeUniverse]
-    _ontology_class_map: Union[None, dict]
+    _ontology_class_maps: Union[dict]
 
     load_raw: Union[None, bool]
     mapped_features: Union[None, str, bool]
@@ -204,7 +205,7 @@ class DatasetBase(abc.ABC):
         self.gene_id_ensembl_var_key = None
 
         self._celltype_universe = None
-        self._ontology_class_map = None
+        self._ontology_class_maps = dict([(k, None) for k in self._adata_ids.ontology_constrained])
 
         self.load_raw = None
         self.mapped_features = None
@@ -987,11 +988,6 @@ class DatasetBase(abc.ABC):
             assert x is None or isinstance(x, Ontology), x  # Sanity check on dictionary element.
         return x
 
-    @property
-    def fn_ontology_class_map_tsv(self):
-        """Standardised file name under which cell type conversion tables are saved."""
-        return self.doi_cleaned_id + ".tsv"
-
     def _write_ontology_class_map(self, fn, tab: pd.DataFrame):
         """
         Write class map to file.
@@ -1003,33 +999,46 @@ class DatasetBase(abc.ABC):
         """
         tab.to_csv(fn, index=False, sep="\t")
 
-    def write_ontology_class_map(
+    def write_ontology_class_maps(
             self,
             fn,
+            attrs: List[str],
             protected_writing: bool = True,
             **kwargs
     ):
         """
-        Load class maps of free text cell types to ontology classes.
+        Load class maps of ontology-controlled field to ontology classes.
+
+        TODO: deprecate and only keep DatasetGroup writing?
 
         :param fn: File name of tsv to write class maps to.
+        :param attrs: Attributes to create a tsv for. Must correspond to *_obs_key in yaml.
         :param protected_writing: Only write if file was not already found.
         :return:
         """
-        if not self.annotated:
-            warnings.warn(f"attempted to write ontology class maps for data set {self.id} without annotation")
-        else:
-            labels_original = np.unique(self.adata.obs[self.cell_type_obs_key].values)
-            tab = self.celltypes_universe.prepare_celltype_map_tab(
-                source=labels_original,
-                match_only=False,
-                anatomical_constraint=self.organ,
-                include_synonyms=True,
-                omit_list=[self._adata_ids.unknown_metadata_identifier],
-                **kwargs
-            )
-            if not os.path.exists(fn) or not protected_writing:
-                self._write_ontology_class_map(fn=fn, tab=tab)
+        for x in attrs:
+            k = getattr(self, x + "_obs_key")
+            if k is None:
+                warnings.warn(f"attempted to write ontology class maps for data set {self.id} without annotation of "
+                              f"meta data {x}")
+            elif k not in self.adata.obs.columns:
+                warnings.warn(f"attempted to write ontology class maps for data set {self.id} but did not find column "
+                              f"{k} in .obs which should correspond to {x}")
+            else:
+                fn_x = fn + "_" + x + ".tsv"
+                labels_original = np.unique(self.adata.obs[k].values)
+                tab = prepare_ontology_map_tab(
+                    source=labels_original,
+                    onto=x,
+                    organism=self.organism,
+                    match_only=False,
+                    anatomical_constraint=self.organ,
+                    include_synonyms=True,
+                    omit_list=[self._adata_ids.unknown_metadata_identifier],
+                    **kwargs
+                )
+                if not os.path.exists(fn_x) or not protected_writing:
+                    self._write_ontology_class_map(fn=fn_x, tab=tab)
 
     def _read_ontology_class_map(self, fn) -> pd.DataFrame:
         """
@@ -1048,31 +1057,28 @@ class DatasetBase(abc.ABC):
             raise pandas.errors.ParserError(e)
         return tab
 
-    def read_ontology_class_map(self, fn):
+    def read_ontology_class_maps(self, fns: List[str]):
         """
-        Load class maps of free text cell types to ontology classes.
+        Load class maps of free text class labels to ontology classes.
 
-        :param fn: File name of csv to load class maps from.
+        :param fns: File names of tsv to load class maps from.
         :return:
         """
-        if os.path.exists(fn):
-            self.cell_type_map = self._read_ontology_class_map(fn=fn)
-        else:
-            if self.cell_type_obs_key is not None:
-                warnings.warn(f"file {fn} does not exist but cell_type_obs_key {self.cell_type_obs_key} is given")
+        assert isinstance(fns, list)
+        ontology_class_maps = {}
+        for fn in fns:
+            k = identify_tsv(fn=fn, ontology_names=self._adata_ids.ontology_constrained)
+            if os.path.exists(fn):
+                ontology_class_maps[k] = self._read_ontology_class_map(fn=fn)
+        self.ontology_class_maps = ontology_class_maps
 
     def project_free_to_ontology(self, attr: str):
         """
         Project free text cell type names to ontology based on mapping table.
 
         ToDo: add ontology ID setting here.
-        ToDo: only for cell type right now, extend to other meta data in the future.
         """
-        ontology_map = attr + "_map"
-        if hasattr(self, ontology_map):
-            ontology_map = getattr(self, ontology_map)
-        else:
-            ontology_map = None
+        ontology_map = self.ontology_class_maps[attr]
         adata_fields = self._adata_ids
         col_original = attr + adata_fields.onto_original_suffix
         labels_original = self.adata.obs[col_original].values
@@ -1193,7 +1199,6 @@ class DatasetBase(abc.ABC):
         """
         Project ontology names to IDs for a given ontology in .obs entries.
 
-        :param ontology: ontology to use when converting to IDs
         :param attr: name of obs_column containing names to convert or python list containing these values
         :param map_exceptions: list of values that should not be mapped.
             Defaults to unknown meta data identifier defined in ID object if None.
@@ -1955,27 +1960,30 @@ class DatasetBase(abc.ABC):
         return self._celltype_universe
 
     @property
-    def cell_type_map(self) -> dict:
-        return self._ontology_class_map
+    def ontology_class_maps(self) -> Dict[str, pd.DataFrame]:
+        return self._ontology_class_maps
 
-    @cell_type_map.setter
-    def cell_type_map(self, x: pd.DataFrame):
-        assert x.shape[1] in [2, 3], f"{x.shape} in {self.id}"
-        assert x.columns[0] == self._adata_ids.classmap_source_key
-        assert x.columns[1] == self._adata_ids.classmap_target_key
-        # Check for weird entries:
-        # nan arises if columns was empty in that row.
-        nan_vals = np.where([
-            False if isinstance(x, str) else (np.isnan(x) or x is None)
-            for x in x[self._adata_ids.classmap_target_key].values.tolist()
-        ])[0]
-        assert len(nan_vals) == 0, \
-            f"Found nan target values in {self.id} for {x[self._adata_ids.classmap_target_key].values[nan_vals]}"
-        # Transform data frame into a mapping dictionary:
-        self._ontology_class_map = dict(list(zip(
-            x[self._adata_ids.classmap_source_key].values.tolist(),
-            x[self._adata_ids.classmap_target_key].values.tolist()
-        )))
+    @ontology_class_maps.setter
+    def ontology_class_maps(self, x: Dict[str, pd.DataFrame]):
+        for k, v in x.items():
+            assert v.shape[1] in [2, 3], f"{v.shape} in {self.id}"
+            assert v.columns[0] == self._adata_ids.classmap_source_key
+            assert v.columns[1] == self._adata_ids.classmap_target_key
+            # Check for weird entries:
+            # nan arises if columns was empty in that row.
+            nan_vals = np.where([
+                False if isinstance(x, str) else (np.isnan(x) or x is None)
+                for x in v[self._adata_ids.classmap_target_key].values.tolist()
+            ])[0]
+            assert len(nan_vals) == 0, \
+                f"Found nan target values in {self.id} for {x[self._adata_ids.classmap_target_key].values[nan_vals]}," \
+                f" check if all entries in cell type .tsv file are non-empty, for example." \
+                f"This bug may arise if a tab separator of columns is missing in one or multiple rows, for example."
+            # Transform data frame into a mapping dictionary:
+            self._ontology_class_maps[k] = dict(list(zip(
+                v[self._adata_ids.classmap_source_key].values.tolist(),
+                v[self._adata_ids.classmap_target_key].values.tolist()
+            )))
 
     def __crossref_query(self, k):
         """
