@@ -89,9 +89,7 @@ class AdataIdsSfaira(AdataIds):
         self.onto_original_suffix = "_original"
 
         self.feature_kwargs = {
-            "match_to_reference": {
-                "human": "Homo_sapiens.GRCh38.104",
-                "mouse": "Mus_musculus.GRCm39.104"},
+            "match_to_release": "104",
             "remove_gene_version": True,
             "subset_genes_to_type": None}
 
@@ -154,6 +152,8 @@ class AdataIdsSfaira(AdataIds):
             "disease",
             "ethnicity",
             "organ",
+            "organism",
+            "sex",
         ]
         self.obs_keys = [
             "assay_sc",
@@ -305,6 +305,4 @@ class AdataIdsCellxgene_v2_0_0(AdataIdsCellxgene):
 
     def __init__(self):
         super(AdataIdsCellxgene_v2_0_0, self).__init__()
-        self.feature_kwargs["match_to_reference"] = {
-            "human": "Homo_sapiens.GRCh38.104",
-            "mouse": "Mus_musculus.GRCm39.104"}
+        self.feature_kwargs["match_to_release"] = "104"

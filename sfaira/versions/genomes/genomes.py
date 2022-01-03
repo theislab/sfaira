@@ -1,7 +1,8 @@
 """
-Functionalities to interact with gene sets defined in an assembly and gene-annotation (such as protein-coding).
+Functionalities to interact with feature sets defined in an assembly or interactively by user.
 """
-
+import abc
+import ftplib
 import gzip
 import numpy as np
 import os
@@ -11,7 +12,7 @@ import pathlib
 import urllib.error
 import urllib.request
 
-from sfaira.consts.directories import CACHE_DIR_GENOMES
+from sfaira import settings
 
 KEY_SYMBOL = "gene_name"
 KEY_ID = "gene_id"
@@ -26,33 +27,56 @@ IDX_GTF_REGION_DETAIL_FIELD_TYPE = 4
 
 class GtfInterface:
 
-    def __init__(self, assembly: str):
-        self.assembly = assembly
+    release: str
+    organism: str
+
+    def __init__(self, release: str, organism: str):
+        self.release = release
+        self.organism = organism
 
     @property
     def cache_dir(self):
         """
-        The cache dir is in a cache directory in the sfaira installation that is excempt from git versioning.
+        The cache dir is in a cache directory in the homedirectory of the user by default and can be user modified.
         """
-        cache_dir_path = pathlib.Path(CACHE_DIR_GENOMES)
+        cache_dir_path = os.path.join(settings.cachedir_genomes, self.ensembl_organism)
+        cache_dir_path = pathlib.Path(cache_dir_path)
         cache_dir_path.mkdir(parents=True, exist_ok=True)
-        return CACHE_DIR_GENOMES
+        return cache_dir_path
 
     @property
     def cache_fn(self):
         return os.path.join(self.cache_dir, self.assembly + ".csv")
 
     @property
-    def release(self) -> str:
-        return self.assembly.split(".")[-1]
+    def assembly(self) -> str:
+        # Get variable middle string of assembly name by looking files up on ftp server:
+        ftp = ftplib.FTP("ftp.ensembl.org")
+        ftp.login()
+        ftp.cwd(self.url_ensembl_dir)
+        data = []
+        ftp.dir(data.append)
+        ftp.quit()
+        target_file = [line.split(' ')[-1] for line in data]
+        # Filter assembly files starting with organism name:
+        target_file = [x for x in target_file if x.split(".")[0].lower() == self.ensembl_organism]
+        # Filter target assembly:
+        target_file = [x for x in target_file if len(x.split(".")) == 5]
+        assert len(target_file) == 1, target_file  # There should only be one file left if filters work correctly.
+        assembly = target_file[0].split(".gtf.gz")[0]
+        return assembly
 
     @property
-    def organism(self) -> str:
-        return self.assembly.split(".")[0].lower()
+    def ensembl_organism(self):
+        return "_".join([x.lower() for x in self.organism.split(" ")])
 
     @property
-    def url_ensembl_ftp(self):
-        return f"ftp://ftp.ensembl.org/pub/release-{self.release}/gtf/{self.organism}/{self.assembly}.gtf.gz"
+    def url_ensembl_dir(self):
+        return f"pub/release-{self.release}/gtf/{self.ensembl_organism}"
+
+    @property
+    def url_ensembl_gtf(self):
+        return f"ftp://ftp.ensembl.org/{self.url_ensembl_dir}/{self.assembly}.gtf.gz"
 
     def download_gtf_ensembl(self):
         """
@@ -60,13 +84,16 @@ class GtfInterface:
         """
         temp_file = os.path.join(self.cache_dir, self.assembly + ".gtf.gz")
         try:
-            _ = urllib.request.urlretrieve(url=self.url_ensembl_ftp, filename=temp_file)
+            _ = urllib.request.urlretrieve(url=self.url_ensembl_gtf, filename=temp_file)
         except urllib.error.URLError as e:
-            raise ValueError(f"Could not download gtf from {self.url_ensembl_ftp} with urllib.error.URLError: {e}, "
+            raise ValueError(f"Could not download gtf from {self.url_ensembl_gtf} with urllib.error.URLError: {e}, "
                              f"check if assembly name '{self.assembly}' corresponds to an actual assembly.")
         with gzip.open(temp_file) as f:
             tab = pandas.read_csv(f, sep="\t", comment="#", header=None)
-        os.remove(temp_file)  # Delete temporary file .gtf.gz.
+        # Delete temporary file .gtf.gz if it still exists (some times already deleted by parallel process in grid
+        # search).
+        if os.path.exists(temp_file):
+            os.remove(temp_file)
         tab = tab.loc[tab[KEY_GTF_REGION_TYPE].values == VALUE_GTF_GENE, :]
         conversion_tab = pandas.DataFrame({
             KEY_ID: [
@@ -88,7 +115,37 @@ class GtfInterface:
         return pandas.read_csv(self.cache_fn)
 
 
-class GenomeContainer:
+class GenomeContainerBase:
+    """
+    Base container class for a gene annotation.
+    """
+
+    @abc.abstractmethod
+    def organism(self):
+        pass
+
+    @abc.abstractmethod
+    def set(self, **kwargs):
+        pass
+
+    @abc.abstractmethod
+    def symbols(self) -> List[str]:
+        pass
+
+    @abc.abstractmethod
+    def ensembl(self) -> List[str]:
+        pass
+
+    @abc.abstractmethod
+    def biotype(self) -> List[str]:
+        pass
+
+    @abc.abstractmethod
+    def n_var(self):
+        pass
+
+
+class GenomeContainer(GenomeContainerBase):
     """
     Container class for a genome annotation for a specific release.
 
@@ -97,11 +154,13 @@ class GenomeContainer:
     """
 
     genome_tab: pandas.DataFrame
-    assembly: str
+    organism: str
+    release: str
 
     def __init__(
             self,
-            assembly: str = None,
+            organism: str = None,
+            release: str = None,
     ):
         """
         Are you not sure which assembly to use?
@@ -111,22 +170,21 @@ class GenomeContainer:
             - You could use one used by a specific aligner, the assemblies used by 10x cellranger are described here
                 for example: https://support.10xgenomics.com/single-cell-gene-expression/software/release-notes/build
 
-        :param assembly: The full name of the genome assembly, e.g. Homo_sapiens.GRCh38.102.
+        :param release: The full name of the genome assembly, e.g. Homo_sapiens.GRCh38.102.
         """
-        if not isinstance(assembly, str):
-            raise ValueError(f"supplied assembly {assembly} was not a string")
-        self.assembly = assembly
-        self.gtfi = GtfInterface(assembly=self.assembly)
+        if not isinstance(organism, str):
+            raise ValueError(f"supplied organism {organism} was not a string")
+        if not isinstance(release, str):
+            raise ValueError(f"supplied release {release} was not a string")
+        self.organism = organism
+        self.release = release
+        self.gtfi = GtfInterface(organism=self.organism, release=self.release)
         self.load_genome()
-
-    @property
-    def organism(self):
-        return self.gtfi.organism
 
     def load_genome(self):
         self.genome_tab = self.gtfi.cache
 
-    def subset(
+    def set(
             self,
             biotype: Union[None, str, List[str]] = None,
             symbols: Union[None, str, List[str]] = None,
@@ -312,3 +370,53 @@ class CustomFeatureContainer(GenomeContainer):
     @property
     def organism(self):
         return self._organism
+
+
+class ReactiveFeatureContainer(GenomeContainerBase):
+
+    """
+    Container class for features that can reactively loaded based on features present in data.
+
+    The symbols are added by the store that uses this container.
+    """
+
+    def __init__(self, **kwargs):
+        self._symbols = None
+
+    @property
+    def organism(self):
+        return None
+
+    def set(
+            self,
+            symbols: Union[None, str, List[str]] = None,
+    ):
+        """
+        Set feature space to identifiers (symbol or ensemble ID).
+
+        Note that there is no background (assembly) feature space to subset in this class.
+
+        :param symbols: Gene symbol(s) of gene(s) to subset genome to. Elements have to appear in genome.
+            Separate in string via "," if choosing multiple or supply as list of string.
+        """
+        self._symbols = symbols
+
+    @property
+    def symbols(self) -> List[str]:
+        return self._symbols
+
+    @symbols.setter
+    def symbols(self, x):
+        self._symbols = x
+
+    @property
+    def ensembl(self) -> List[str]:
+        return self._symbols
+
+    @property
+    def biotype(self) -> List[str]:
+        return ["custom" for x in self._symbols]
+
+    @property
+    def n_var(self) -> int:
+        return len(self.symbols) if self.symbols is not None else None

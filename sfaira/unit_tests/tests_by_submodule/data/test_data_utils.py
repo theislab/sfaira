@@ -5,7 +5,7 @@ import pytest
 import scipy.sparse
 from typing import Union
 
-from sfaira.data.utils import map_celltype_to_ontology, collapse_matrix
+from sfaira.data.utils import map_freetext_to_ontology, collapse_matrix
 
 
 @pytest.mark.parametrize("trial_cell_type_labels",
@@ -20,9 +20,9 @@ def test_map_celltype_to_ontology(
     trial_cell_type_labels = [trial_cell_type_labels] if isinstance(trial_cell_type_labels, str) \
         else trial_cell_type_labels
     perfectly_matched_query = ["type B pancreatic cell" == x for x in trial_cell_type_labels]
-    matches = map_celltype_to_ontology(
+    matches = map_freetext_to_ontology(
         queries=trial_cell_type_labels,
-        organism="human",
+        onto="cell_type",
         include_synonyms=True,
         anatomical_constraint=anatomical_constraint,
         choices_for_perfect_match=choices_for_perfect_match,

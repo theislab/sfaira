@@ -6,8 +6,8 @@ import zipfile
 
 def load(data_dir, **kwargs):
     age_dict = {
-        17: "17th week post-fertilization human stage",
-        18: "18th week post-fertilization human stage",
+        17: "17th week post-fertilization homosapiens stage",
+        18: "18th week post-fertilization homosapiens stage",
     }
     ct_dict = {
         "End": "Endothelial",
