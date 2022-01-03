@@ -18,15 +18,15 @@ def synonym_string_processing(y):
 def _prepare_celltype_map_fuzzy(
         source,
         onto,
-        onto_uberon=None,
-        anatomical_constraint: Union[str, None] = None,
-        choices_for_perfect_match: bool = True,
-        include_synonyms: bool = True,
-        match_only: bool = False,
-        n_suggest: int = 4,
-        omit_list: list = [],
-        omit_target_list: list = ["cell"],
-        threshold_for_partial_matching: float = 90.,
+        onto_uberon,
+        anatomical_constraint: Union[str, None],
+        choices_for_perfect_match: bool,
+        include_synonyms: bool,
+        match_only: bool,
+        n_suggest: int,
+        omit_list: list,
+        omit_target_list: list,
+        threshold_for_partial_matching: float,
 ) -> Tuple[
     List[Dict[str, Union[List[str], str]]],
     List[bool]
@@ -272,13 +272,13 @@ def _prepare_celltype_map_fuzzy(
 def _prepare_ontology_map_fuzzy(
         source,
         onto,
-        choices_for_perfect_match: bool = True,
-        include_synonyms: bool = True,
-        match_only: bool = False,
-        n_suggest: int = 4,
-        omit_list: list = [],
-        omit_target_list: list = [],
-        threshold_for_partial_matching: float = 90.,
+        choices_for_perfect_match: bool,
+        include_synonyms: bool,
+        match_only: bool,
+        n_suggest: int,
+        omit_list: list,
+        omit_target_list: list,
+        threshold_for_partial_matching: float,
 ) -> Tuple[
     List[Dict[str, Union[List[str], str]]],
     List[bool]
@@ -415,12 +415,13 @@ def prepare_ontology_map(
         source,
         onto: str,
         anatomical_constraint: Union[str, None] = None,
-        choices_for_perfect_match: bool = True,
+        choices_for_perfect_match: bool = False,
         include_synonyms: bool = True,
         match_only: bool = False,
         n_suggest: int = 4,
         omit_list: list = [],
         omit_target_list: list = [],
+        organism: Union[None, str] = None,
         threshold_for_partial_matching: float = 90.,
 ) -> Tuple[
     List[Dict[str, Union[List[str], str]]],
@@ -440,6 +441,8 @@ def prepare_ontology_map(
     :param n_suggest: Number of cell types to suggest per search strategy.
     :param omit_list: Free text node labels to omit in map.
     :param omit_target_list: Ontology nodes to not match to.
+    :param organism: Organism of data. This is used to disambiguate the ontology in some cases, e.g. when selecting
+        an ontology for the meta data item "developmental stage" for either mouse or human.
     :param threshold_for_partial_matching: Maximum fuzzy match score below which lenient matching (ratio) is
         extended through partial_ratio.
     :return: Tuple
@@ -451,6 +454,12 @@ def prepare_ontology_map(
     """
     try:
         onto_cls = getattr(OCS, onto)
+        if isinstance(onto_cls, dict):
+            try:
+                onto_cls = onto_cls[organism]
+            except AttributeError as e:
+                raise AttributeError(f"did not find requested organism {organism} in ontology {onto}, "
+                                     f"choose from {onto_cls.keys()}.\n{e}")
     except AttributeError as e:
         raise AttributeError(f"did not find requested ontology {onto}, check spelling.\n{e}")
 

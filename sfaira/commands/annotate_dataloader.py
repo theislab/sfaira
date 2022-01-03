@@ -193,9 +193,9 @@ class DataloaderAnnotater:
                     # TODO any errors not to be caught here?
                     doi_sfaira_repr = f'd{doi.translate({ord(c): "_" for c in r"!@#$%^&*()[]/{};:,.<>?|`~-=_+"})}'
                     fn_tsv = os.path.join(path, doi_sfaira_repr, f"{file_module}")
-                    # Define tsvs to write:
+                    # Define .tsvs to write:
                     attrs = [
-                        k for k in dsg_f._adata_ids.obs_keys
+                        k for k in dsg_f._adata_ids.ontology_constrained
                         if np.any([getattr(v, k + "_obs_key") is not None for v in dsg_f.datasets.values()])
                     ]
                     dsg_f.write_ontology_class_maps(
@@ -205,4 +205,4 @@ class DataloaderAnnotater:
                         n_suggest=4,
                     )
                     tsvs_written.append(fn_tsv)
-        print(f"Completed annotation. Wrote {len(tsvs_written)} files:\n" + "\n".join(tsvs_written))
+        print(f"Completed annotation. Wrote .tsv files for loaders:\n" + "\n".join(tsvs_written))

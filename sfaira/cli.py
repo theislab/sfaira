@@ -1,7 +1,6 @@
 import logging
 import os
 import sys
-import re
 
 import click
 import rich
@@ -10,6 +9,7 @@ from rich import traceback
 from rich import print
 
 from sfaira.commands.annotate_dataloader import DataloaderAnnotater
+from sfaira.commands.cache_control import CacheControl
 from sfaira.commands.utils import doi_lint
 from sfaira.commands.validate_dataloader import DataloaderValidator
 from sfaira.commands.validate_h5ad import H5adValidator
@@ -70,6 +70,20 @@ def sfaira_cli(ctx, verbose, log_file):
         log_fh.setLevel(logging.DEBUG)
         log_fh.setFormatter(logging.Formatter("[%(asctime)s] %(name)-20s [%(levelname)-7s]  %(message)s"))
         log.addHandler(log_fh)
+
+
+@sfaira_cli.command()
+def cache_clear() -> None:
+    """Clears sfaira cache, including ontology and genome cache."""
+    ctrl = CacheControl()
+    ctrl.clear()
+
+
+@sfaira_cli.command()
+def cache_reload() -> None:
+    """Downloads new ontology versions into cache."""
+    ctrl = CacheControl()
+    ctrl.reload()
 
 
 @sfaira_cli.command()

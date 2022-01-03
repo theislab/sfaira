@@ -1009,6 +1009,8 @@ class DatasetBase(abc.ABC):
         """
         Load class maps of ontology-controlled field to ontology classes.
 
+        TODO: deprecate and only keep DatasetGroup writing?
+
         :param fn: File name of tsv to write class maps to.
         :param attrs: Attributes to create a tsv for. Must correspond to *_obs_key in yaml.
         :param protected_writing: Only write if file was not already found.
@@ -1028,6 +1030,7 @@ class DatasetBase(abc.ABC):
                 tab = prepare_ontology_map_tab(
                     source=labels_original,
                     onto=x,
+                    organism=self.organism,
                     match_only=False,
                     anatomical_constraint=self.organ,
                     include_synonyms=True,
@@ -1065,7 +1068,8 @@ class DatasetBase(abc.ABC):
         ontology_class_maps = {}
         for fn in fns:
             k = identify_tsv(fn=fn, ontology_names=self._adata_ids.ontology_constrained)
-            ontology_class_maps[k] = self._read_ontology_class_map(fn=fn)
+            if os.path.exists(fn):
+                ontology_class_maps[k] = self._read_ontology_class_map(fn=fn)
         self.ontology_class_maps = ontology_class_maps
 
     def project_free_to_ontology(self, attr: str):
@@ -1977,8 +1981,8 @@ class DatasetBase(abc.ABC):
                 f"This bug may arise if a tab separator of columns is missing in one or multiple rows, for example."
             # Transform data frame into a mapping dictionary:
             self._ontology_class_maps[k] = dict(list(zip(
-                x[self._adata_ids.classmap_source_key].values.tolist(),
-                x[self._adata_ids.classmap_target_key].values.tolist()
+                v[self._adata_ids.classmap_source_key].values.tolist(),
+                v[self._adata_ids.classmap_target_key].values.tolist()
             )))
 
     def __crossref_query(self, k):

@@ -51,11 +51,9 @@ def identify_tsv(fn: str, ontology_names: List[str]) -> str:
     TODO: This could be deprecated in the future if these data loaders are updated.
     2. In versions >=1.1, the suffix of the tsv is the ontology.
     """
-    y = [x for x in ontology_names if x in fn]
+    y = [x for x in ontology_names if fn.split(".tsv")[0].endswith(x)]
     if len(y) == 0:  # <v1.1
         y = "cell_type"
-    elif len(y) == 1:  # >=v1.1
+    else:  # >=v1.1
         y = y[0]
-    else:
-        raise ValueError(f"critical bug in identifying ontology of file {fn}: {y}")
     return y
