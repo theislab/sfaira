@@ -23,6 +23,8 @@ dataset_or_observation_wise:
     bio_sample_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.bio_sample_obs_key }}"{% endif %}
     cell_line:
     cell_line_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.cell_line_obs_key }}"{% endif %}
+    cell_type:
+    cell_type_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.cell_type_obs_key }}"{% endif %}
     development_stage:
     development_stage_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.development_stage_obs_key }}"{% endif %}
     disease:
@@ -43,10 +45,8 @@ dataset_or_observation_wise:
     state_exact_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.state_exact_obs_key }}"{% endif %}
     tech_sample:
     tech_sample_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.tech_sample_obs_key }}"{% endif %}
-observation_wise:
-    cell_type_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.cell_type_obs_key }}"{% endif %}
 feature_wise:
     gene_id_ensembl_var_key: {% if cookiecutter.gene_id_ensembl_var_key %}"{{ cookiecutter.gene_id_ensembl_var_key }}"{% endif %}
     gene_id_symbols_var_key: {% if cookiecutter.gene_id_symbols_var_key %}"{{ cookiecutter.gene_id_symbols_var_key }}"{% endif %}
 meta:
-    version: "1.0"
+    version: "1.1"
