@@ -18,7 +18,7 @@ class Dataset(DatasetBase):
         self.doi_journal = "10.1038/s41591-019-0468-5"
         self.normalization = "raw"
         self.organ = "lung"
-        self.organism = "human"
+        self.organism = "Homo sapiens"
         self.primary_data = True
         self.sample_source = "primary_tissue"
         self.state_exact = "uninvolved areas of tumour resection material"

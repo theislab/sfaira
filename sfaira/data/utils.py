@@ -15,7 +15,7 @@ def map_celltype_to_ontology(
         anatomical_constraint: Union[str, None] = None,
         omit_target_list: list = ["cell"],
         n_suggest: int = 4,
-        choices_for_perfect_match: bool = True,
+        choices_for_perfect_match: bool = False,
         keep_strategy: bool = False,
         always_return_dict: bool = False,
         threshold_for_partial_matching: float = 90.,

@@ -6,10 +6,11 @@ import os
 import owlready2
 import pickle
 import requests
+from functools import lru_cache
 from typing import Dict, List, Tuple, Union
 
 
-from sfaira.consts.directories import CACHE_DIR_ONTOLOGIES
+from sfaira import settings
 
 """
 Ontology managament classes.
@@ -33,7 +34,7 @@ def cached_load_file(url, ontology_cache_dir, ontology_cache_fn, recache: bool =
         # TODO add caching option.
         obofile = url
     else:
-        ontology_cache_dir = os.path.join(CACHE_DIR_ONTOLOGIES, ontology_cache_dir)
+        ontology_cache_dir = os.path.join(settings.cachedir_ontologies, ontology_cache_dir)
         obofile = os.path.join(ontology_cache_dir, ontology_cache_fn)
         # Download if necessary:
         if not os.path.isfile(obofile) or recache:
@@ -62,7 +63,7 @@ def cached_load_ebi(ontology_cache_dir, ontology_cache_fn, recache: bool = False
     :param recache:
     :return:
     """
-    ontology_cache_dir = os.path.join(CACHE_DIR_ONTOLOGIES, ontology_cache_dir)
+    ontology_cache_dir = os.path.join(settings.cachedir_ontologies, ontology_cache_dir)
     picklefile = os.path.join(ontology_cache_dir, ontology_cache_fn)
     if os.path.isfile(picklefile) and not recache:
         with open(picklefile, 'rb') as f:
@@ -119,6 +120,35 @@ class OntologyList(Ontology):
     def node_names(self) -> List[str]:
         return self.nodes
 
+    @property
+    def node_ids(self) -> List[str]:
+        return self.nodes
+
+    @property
+    def leaves(self) -> List[str]:
+        return self.nodes
+
+    @property
+    def n_leaves(self) -> int:
+        return len(self.nodes)
+
+    def prepare_maps_to_leaves(
+            self,
+            include_self: bool = True
+    ) -> Dict[str, np.ndarray]:
+        """
+        Precomputes all maps of nodes to their leave nodes.
+
+        Note that for a list ontology, this maps each node to itself.
+
+        :param include_self: whether to include node itself
+        :return: Dictionary of index vectors of leave node matches for each node (key).
+        """
+        if include_self:
+            return dict([(x, np.array([self.leaves.index(x)])) for x in self.leaves])
+        else:
+            return dict([(x, np.array([])) for x in self.leaves])
+
     def is_a_node_id(self, x: str) -> bool:
         return x in self.node_names
 
@@ -167,12 +197,25 @@ class OntologyList(Ontology):
         """
         return query == reference
 
+    def get_ancestors(self, node: str) -> List[str]:
+        return []
+
 
 class OntologyHierarchical(Ontology, abc.ABC):
     """
     Basic ordered ontology container
     """
-    graph: networkx.MultiDiGraph
+    _graph: networkx.MultiDiGraph
+
+    @property
+    def graph(self) -> networkx.MultiDiGraph:
+        return self._graph
+
+    @graph.setter
+    def graph(self, graph: networkx.MultiDiGraph):
+        self._graph = graph
+        self.get_ancestors.cache_clear()
+        self.get_descendants.cache_clear()
 
     def _check_graph(self):
         if not networkx.is_directed_acyclic_graph(self.graph):
@@ -259,6 +302,10 @@ class OntologyHierarchical(Ontology, abc.ABC):
         else:
             return x
 
+    @lru_cache(maxsize=None)
+    def __convert_to_id_cached(self, x: str) -> str:
+        return self.convert_to_id(x)
+
     @property
     def leaves(self) -> List[str]:
         return [x for x in self.graph.nodes() if self.graph.in_degree(x) == 0]
@@ -271,10 +318,10 @@ class OntologyHierarchical(Ontology, abc.ABC):
         This clips nodes that are not upstream of defined leaves.
         :param x: New set of leaves nodes, identified as IDs.
         """
-        x = self.convert_to_id(x=x)
+        x = self.convert_to_id(x)
         nodes_to_remove = []
         for y in self.graph.nodes():
-            if not np.any([self.is_a(query=z, reference=y) for z in x]):
+            if not np.any([self.is_a(query=z, reference=y, convert_to_id=False) for z in x]):
                 nodes_to_remove.append(y)
         self.graph.remove_nodes_from(nodes_to_remove)
 
@@ -299,32 +346,36 @@ class OntologyHierarchical(Ontology, abc.ABC):
         assert isinstance(x, list), "supply either list or str to get_effective_leaves"
         if len(x) == 0:
             raise ValueError("x was empty list, get_effective_leaves cannot be called on empty list")
-        x = np.unique(x).tolist()
+        x = list(np.unique(x))
         x = self.convert_to_id(x=x)
         leaves = []
         for y in x:
-            if not np.any([self.is_a(query=z, reference=y) for z in list(set(x) - {y})]):
+            if not np.any([self.is_a(query=z, reference=y, convert_to_id=False) for z in list(set(x) - {y})]):
                 leaves.append(y)
         return leaves
 
+    @lru_cache(maxsize=None)
     def get_ancestors(self, node: str) -> List[str]:
-        node = self.convert_to_id(node)
+        node = self.__convert_to_id_cached(node)
         return list(networkx.ancestors(self.graph, node))
 
+    @lru_cache(maxsize=None)
     def get_descendants(self, node: str) -> List[str]:
-        node = self.convert_to_id(node)
+        node = self.__convert_to_id_cached(node)
         return list(networkx.descendants(self.graph, node))
 
-    def is_a(self, query: str, reference: str) -> bool:
+    def is_a(self, query: str, reference: str, convert_to_id: bool = True) -> bool:
         """
         Checks if query node is reference node or an ancestor thereof.
 
         :param query: Query node name. Node ID or name.
         :param reference: Reference node name. Node ID or name.
+        :param convert_to_id: Whether to call self.convert_to_id on `query` and `reference` input arguments
         :return: If query node is reference node or an ancestor thereof.
         """
-        query = self.convert_to_id(query)
-        reference = self.convert_to_id(reference)
+        if convert_to_id:
+            query = self.__convert_to_id_cached(query)
+            reference = self.__convert_to_id_cached(reference)
         return query in self.get_ancestors(node=reference) or query == reference
 
     def map_to_leaves(
@@ -344,13 +395,11 @@ class OntologyHierarchical(Ontology, abc.ABC):
         :param include_self: DEPRECEATED.
         :return:
         """
-        node = self.convert_to_id(node)
+        node = self.__convert_to_id_cached(node)
         ancestors = self.get_ancestors(node)
         # Add node itself to list of ancestors.
         ancestors = ancestors + [node]
-        if len(ancestors) > 0:
-            ancestors = self.convert_to_id(ancestors)
-        leaves = self.convert_to_id(self.leaves)
+        leaves = self.leaves
         if return_type == "ids":
             return [x for x in leaves if x in ancestors]
         elif return_type == "idx":
@@ -376,6 +425,10 @@ class OntologyHierarchical(Ontology, abc.ABC):
             maps[x] = self.map_to_leaves(node=x, return_type="idx", include_self=include_self)
         print(f"time for precomputing ancestors: {time.time()-t0}")
         return maps
+
+    def reset_root(self, root: str):
+        new_nodes = [self.convert_to_id(x=root)] + self.get_ancestors(node=root)
+        self.graph = self.graph.subgraph(nodes=new_nodes)
 
     @abc.abstractmethod
     def synonym_node_properties(self) -> List[str]:
@@ -800,6 +853,23 @@ class OntologyUberon(OntologyExtendedObo):
         return ["synonym", "latin term", "has relational adjective"]
 
 
+class OntologyUberonLifecyclestage(OntologyUberon):
+
+    """
+    Subset of UBERON for generic life cycle stages that can be used for organism not covered by specific developmental
+    ontologies.
+    """
+
+    def __init__(
+            self,
+            branch: str,
+            recache: bool = False,
+            **kwargs
+    ):
+        super().__init__(branch=branch, recache=recache, **kwargs)
+        self.reset_root(root="UBERON:0000105")
+
+
 class OntologyCl(OntologyExtendedObo):
 
     def __init__(
@@ -922,7 +992,7 @@ class OntologyMmusdv(OntologyExtendedObo):
             recache: bool = False,
             **kwargs
     ):
-        # URL for releases:
+        # URL for releases, not used here yet because versioning with respect to releases below is not consistent yet.
         # url=f"https://raw.githubusercontent.com/obophenotype/developmental-stage-ontologies/{branch}/src/mmusdv/mmusdv.obo"
         obofile = cached_load_file(
             url="http://ontologies.berkeleybop.org/mmusdv.obo",
@@ -1030,6 +1100,42 @@ class OntologyHancestro(OntologyEbi):
             ontology_cache_fn="hancestro.pickle",
             recache=recache,
         )
+
+
+class OntologyTaxon(OntologyExtendedObo):
+
+    """
+    Note on ontology: The same repo also contains ncbitaxon.obs, the full ontology which is ~500MB large and
+    takes multiple minutes to load. We are using a reduced version, taxslim, here.
+
+    See also https://github.com/obophenotype/ncbitaxon/releases/download/{branch}/ncbitaxon.obo.
+    """
+
+    def __init__(
+            self,
+            branch: str,
+            recache: bool = False,
+            **kwargs
+    ):
+        obofile = cached_load_file(
+            url=f"https://github.com/obophenotype/ncbitaxon/releases/download/{branch}/taxslim.obo",
+            ontology_cache_dir="ncbitaxon",
+            ontology_cache_fn=f"ncbitaxon_{branch}.obo",
+            recache=recache,
+        )
+        super().__init__(obo=obofile)
+
+        # Clean up nodes:
+        nodes_to_delete = []
+        for k, v in self.graph.nodes.items():
+            if "name" not in v.keys():
+                nodes_to_delete.append(k)
+        for k in nodes_to_delete:
+            self.graph.remove_node(k)
+
+    @property
+    def synonym_node_properties(self) -> List[str]:
+        return ["synonym"]
 
 
 class OntologyEfo(OntologyExtendedObo):

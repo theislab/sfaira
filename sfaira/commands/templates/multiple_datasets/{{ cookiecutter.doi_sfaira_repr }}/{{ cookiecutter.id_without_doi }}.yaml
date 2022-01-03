@@ -4,63 +4,45 @@ dataset_structure:
 {% for fn in cookiecutter.sample_fns.fns %}        - "{{ fn }}"
 {% endfor %}dataset_wise:
     author: "{{ cookiecutter.author }}"
-    default_embedding:
-{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}: {% if cookiecutter.default_embedding %}"{{ cookiecutter.default_embedding }}"{% endif %}
-{% endfor %}    doi_preprint:
+    default_embedding: {% if cookiecutter.default_embedding %}"{{ cookiecutter.default_embedding }}"{% endif %}
+    doi_preprint:
     doi_journal: "{{ cookiecutter.doi }}"
     download_url_data:
-{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
-{% endfor %}    download_url_meta:
-{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
-{% endfor %}    primary_data: {{ cookiecutter.primary_data }}
+    download_url_meta:
+    primary_data: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.primary_data }}"{% endif %}
     normalization: "{{ cookiecutter.normalization }}"
-    year: {{ cookiecutter.year }}
+    year: "{{ cookiecutter.year }}"
 dataset_or_observation_wise:
     assay_sc:
-{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}: "{{ cookiecutter.assay_sc }}"
-{% endfor %}    assay_sc_obs_key:
+    assay_sc_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.assay_sc_obs_key }}"{% endif %}
     assay_differentiation:
-{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
-{% endfor %}    assay_differentiation_obs_key:
+    assay_differentiation_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.assay_differentiation_obs_key }}"{% endif %}
     assay_type_differentiation:
-{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
-{% endfor %}    assay_type_differentiation_obs_key:
+    assay_type_differentiation_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.assay_type_differentiation_obs_key }}"{% endif %}
     bio_sample:
-{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
-{% endfor %}    bio_sample_obs_key:
+    bio_sample_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.bio_sample_obs_key }}"{% endif %}
     cell_line:
-{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
-{% endfor %}    cell_line_obs_key:
+    cell_line_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.cell_line_obs_key }}"{% endif %}
     development_stage:
-{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
-{% endfor %}    development_stage_obs_key:
+    development_stage_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.development_stage_obs_key }}"{% endif %}
     disease:
-{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}: "{{ cookiecutter.disease }}"
-{% endfor %}    disease_obs_key:
+    disease_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.disease_obs_key }}"{% endif %}
     ethnicity:
-{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
-{% endfor %}    ethnicity_obs_key:
+    ethnicity_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.ethnicity_obs_key }}"{% endif %}
     individual:
-{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
-{% endfor %}    individual_obs_key:
+    individual_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.individual_obs_key }}"{% endif %}
     organ:
-{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}: "{{ cookiecutter.organ }}"
-{% endfor %}    organ_obs_key:
+    organ_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.organ_obs_key }}"{% endif %}
     organism:
-{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}: "{{ cookiecutter.organism }}"
-{% endfor %}    organism_obs_key:
+    organism_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.organism_obs_key }}"{% endif %}
     sample_source:
-{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}: "{{ cookiecutter.sample_source }}"
-{% endfor %}    sample_source_obs_key:
+    sample_source_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.sample_source_obs_key }}"{% endif %}
     sex:
-{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
-{% endfor %}    sex_obs_key:
+    sex_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.sex_obs_key }}"{% endif %}
     state_exact:
-{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}: "{{ cookiecutter.state_exact }}"
-{% endfor %}    state_exact_obs_key:
+    state_exact_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.state_exact_obs_key }}"{% endif %}
     tech_sample:
-{% for fn in cookiecutter.sample_fns.fns %}        {{ fn }}:
-{% endfor %}    tech_sample_obs_key:
+    tech_sample_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.tech_sample_obs_key }}"{% endif %}
 observation_wise:
     cell_type_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.cell_type_obs_key }}"{% endif %}
 feature_wise:

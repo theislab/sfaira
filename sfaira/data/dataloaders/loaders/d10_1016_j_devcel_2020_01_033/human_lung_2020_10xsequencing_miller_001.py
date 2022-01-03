@@ -19,7 +19,7 @@ class Dataset(DatasetBase):
         self.doi_journal = "10.1016/j.devcel.2020.01.033"
         self.normalization = "raw"
         self.organ = "lung"
-        self.organism = "human"
+        self.organism = "Homo sapiens"
         self.primary_data = True
         self.sample_source = "primary_tissue"
         self.state_exact = "healthy"

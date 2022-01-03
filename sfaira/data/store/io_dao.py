@@ -77,7 +77,8 @@ def write_dao(store: Union[str, Path], adata: anndata.AnnData, chunks: Union[boo
         raise ValueError(f"did not recognise array format {type(adata.X)}")
     # Write .uns into pickle:
     with open(path_uns(store), "wb") as f:
-        pickle.dump(obj=adata.uns, file=f)
+        # convert to dict to get rid of anndata OverloadedDict
+        pickle.dump(obj=dict(adata.uns), file=f)
     # Write .obs and .var as a separate file as this can be easily interfaced with DataFrames.
     adata.obs.to_parquet(path=path_obs(store), engine='pyarrow', compression='snappy', index=None)
     adata.var.to_parquet(path=path_var(store), engine='pyarrow', compression='snappy', index=None)

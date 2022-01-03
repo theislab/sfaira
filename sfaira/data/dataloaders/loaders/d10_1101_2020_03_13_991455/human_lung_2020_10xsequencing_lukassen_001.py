@@ -25,7 +25,7 @@ class Dataset(DatasetBase):
         self.doi_preprint = "10.1101/2020.03.13.991455"
         self.normalization = "raw"
         self.organ = "lung"
-        self.organism = "human"
+        self.organism = "Homo sapiens"
         self.primary_data = True
         self.sample_source = "primary_tissue"
         self.year = 2020

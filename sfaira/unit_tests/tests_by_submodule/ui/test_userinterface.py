@@ -4,10 +4,10 @@ from typing import Union
 import pandas as pd
 import urllib.request
 
+from sfaira import settings
 from sfaira.ui import UserInterface
-from sfaira.unit_tests.data_for_tests.loaders.utils import prepare_dsg
+from sfaira.unit_tests.data_for_tests.loaders.utils import PrepareData
 from sfaira.unit_tests import DIR_TEMP
-from sfaira.consts import SFAIRA_REPO_URL
 
 
 class HelperUi:
@@ -29,7 +29,11 @@ class HelperUi:
         if not os.path.exists(self.temp_fn):
             os.makedirs(self.temp_fn)
         # download an example weight from sfaira repo
-        lookuptable = pd.read_csv(os.path.join(SFAIRA_REPO_URL, 'model_lookuptable.csv'), header=0, index_col=0)
+        lookuptable = pd.read_csv(
+            os.path.join(settings.sfaira_repo_url, 'model_lookuptable.csv'),
+            header=0,
+            index_col=0
+        )
         url = lookuptable.loc[0, "model_file_path"]
         if os.path.basename(url) not in os.listdir(self.temp_fn):
             urllib.request.urlretrieve(url, os.path.join(self.temp_fn, os.path.basename(url)))
@@ -40,8 +44,8 @@ class HelperUi:
 
         :return:
         """
-        dsg = prepare_dsg(rewrite=True, load=False)
-        dsg.subset(key="id", values=["human_lung_2021_None_mock4_001_no_doi_mock4"])
+        dsg = PrepareData().prepare_dsg(rewrite=True, load=False)
+        dsg.subset(key="id", values=["homosapiens_lung_2021_None_mock4_001_no_doi_mock4"])
         dsg.load()
         return dsg.adata
 
@@ -59,10 +63,10 @@ class HelperUi:
 
         :return:
         """
-        self.ui = UserInterface(custom_repo=None, sfaira_repo=True)
+        self.ui = UserInterface(custom_repo=None, sfaira_repo=True, cache_path=self.temp_fn)
 
     def test_data_and_model_loading(self):
-        self.ui = UserInterface(custom_repo=None, sfaira_repo=True)
+        self.ui = UserInterface(custom_repo=None, sfaira_repo=True, cache_path=self.temp_fn)
         self.ui.zoo_embedding.model_id = 'embedding_human-blood-ae-0.2-0.1_theislab'
         self.ui.zoo_celltype.model_id = 'celltype_human-blood-mlp-0.1.3-0.1_theislab'
         test_data = self._get_adata()
