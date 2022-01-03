@@ -22,6 +22,8 @@ dataset_or_observation_wise:
     bio_sample_obs_key: "tissue-individual-prep"
     cell_line:
     cell_line_obs_key:
+    cell_type:
+    cell_type_obs_key: "Granular cell type"
     development_stage:
     development_stage_obs_key: "Age_bin"
     disease: "healthy"
@@ -42,10 +44,8 @@ dataset_or_observation_wise:
     state_exact_obs_key:
     tech_sample:
     tech_sample_obs_key: "batch"
-observation_wise:
-    cell_type_obs_key: "Granular cell type"
 feature_wise:
     gene_id_ensembl_var_key: "gene_ids"
     gene_id_symbols_var_key: "index"
 meta:
-    version: "1.0"
+    version: "1.1"
