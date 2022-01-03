@@ -1970,7 +1970,9 @@ class DatasetBase(abc.ABC):
             for x in x[self._adata_ids.classmap_target_key].values.tolist()
         ])[0]
         assert len(nan_vals) == 0, \
-            f"Found nan target values in {self.id} for {x[self._adata_ids.classmap_target_key].values[nan_vals]}"
+            f"Found nan target values in {self.id} for {x[self._adata_ids.classmap_target_key].values[nan_vals]}, " \
+            f"check if all entries in cell type .tsv file are non-empty, for example." \
+            f"This bug may arise if a tab separator of columns is missing in one or multiple rows, for example."
         # Transform data frame into a mapping dictionary:
         self._ontology_class_map = dict(list(zip(
             x[self._adata_ids.classmap_source_key].values.tolist(),
