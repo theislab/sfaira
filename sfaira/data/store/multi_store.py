@@ -285,7 +285,9 @@ class DistributedStoresDao(DistributedStoreMultipleFeatureSpaceBase):
 
     _dataset_weights: Union[None, Dict[str, float]]
 
-    def __init__(self, cache_path: Union[str, os.PathLike], columns: Union[None, List[str]] = None):
+    def __init__(self,
+                 cache_path: Union[str, os.PathLike, List[str], List[os.PathLike]],
+                 columns: Union[None, List[str]] = None):
         """
 
         :param cache_path: Store directory.
@@ -296,29 +298,35 @@ class DistributedStoresDao(DistributedStoreMultipleFeatureSpaceBase):
         adata_by_key = {}
         x_by_key = {}
         indices = {}
-        for f in np.sort(os.listdir(cache_path)):
-            adata = None
-            x = None
-            trial_path = os.path.join(cache_path, f)
-            if os.path.isdir(trial_path):
-                # zarr-backed anndata are saved as directories with the elements of the array group as further sub
-                # directories, e.g. a directory called "X", and a file ".zgroup" which identifies the zarr group.
-                adata, x = read_dao(trial_path, use_dask=True, columns=columns, obs_separate=False, x_separate=True)
-            if adata is not None:
-                organism = adata.uns[self._adata_ids_sfaira.organism]
-                if organism not in adata_by_key.keys():
-                    adata_by_key[organism] = {}
-                    x_by_key[organism] = {}
-                    indices[organism] = {}
-                adata_by_key[organism][adata.uns[self._adata_ids_sfaira.id]] = adata
-                x_by_key[organism][adata.uns[self._adata_ids_sfaira.id]] = x
-                indices[organism][adata.uns[self._adata_ids_sfaira.id]] = np.arange(0, adata.n_obs)
-        self._x_by_key = x_by_key
+        if not isinstance(cache_path, list) or isinstance(cache_path, tuple) or isinstance(cache_path, np.ndarray):
+            cache_path = [cache_path]
+        for cache_path_i in cache_path:
+            for f in np.sort(os.listdir(cache_path_i)):
+                adata = None
+                x = None
+                trial_path = os.path.join(cache_path_i, f)
+                if os.path.isdir(trial_path):
+                    # zarr-backed anndata are saved as directories with the elements of the array group as further sub
+                    # directories, e.g. a directory called "X", and a file ".zgroup" which identifies the zarr group.
+                    adata, x = read_dao(trial_path, use_dask=True, columns=columns, obs_separate=False, x_separate=True)
+                if adata is not None:
+                    organism = adata.uns[self._adata_ids_sfaira.organism]
+                    if organism not in adata_by_key.keys():
+                        adata_by_key[organism] = {}
+                        x_by_key[organism] = {}
+                        indices[organism] = {}
+                    if adata.uns[self._adata_ids_sfaira.id] in adata_by_key[organism].keys():
+                        print(f"WARNING: overwriting store entry in {adata.uns[self._adata_ids_sfaira.id]} in store "
+                              f"{cache_path_i}.")
+                    adata_by_key[organism][adata.uns[self._adata_ids_sfaira.id]] = adata
+                    x_by_key[organism][adata.uns[self._adata_ids_sfaira.id]] = x
+                    indices[organism][adata.uns[self._adata_ids_sfaira.id]] = np.arange(0, adata.n_obs)
         stores = dict([
             (k, DistributedStoreDao(adata_by_key=adata_by_key[k], x_by_key=x_by_key[k], indices=indices[k],
                                     obs_by_key=None))
             for k in adata_by_key.keys()
         ])
+        self._x_by_key = x_by_key
         super(DistributedStoresDao, self).__init__(stores=stores)
 
 
@@ -329,27 +337,33 @@ class DistributedStoresH5ad(DistributedStoreMultipleFeatureSpaceBase):
         self._adata_ids_sfaira = AdataIdsSfaira()
         adata_by_key = {}
         indices = {}
-        for f in np.sort(os.listdir(cache_path)):
-            adata = None
-            trial_path = os.path.join(cache_path, f)
-            if os.path.isfile(trial_path):
-                # Narrow down to supported file types:
-                if f.split(".")[-1] == "h5ad":
-                    try:
-                        adata = anndata.read_h5ad(
-                            filename=trial_path,
-                            backed="r" if in_memory else None,
-                        )
-                    except OSError as e:
-                        adata = None
-                        print(f"WARNING: for data set {f}: {e}")
-            if adata is not None:
-                organism = adata.uns[self._adata_ids_sfaira.organism]
-                if organism not in adata_by_key.keys():
-                    adata_by_key[organism] = {}
-                    indices[organism] = {}
-                adata_by_key[organism][adata.uns[self._adata_ids_sfaira.id]] = adata
-                indices[organism][adata.uns[self._adata_ids_sfaira.id]] = np.arange(0, adata.n_obs)
+        if not isinstance(cache_path, list) or isinstance(cache_path, tuple) or isinstance(cache_path, np.ndarray):
+            cache_path = [cache_path]
+        for cache_path_i in cache_path:
+            for f in np.sort(os.listdir(cache_path_i)):
+                adata = None
+                trial_path = os.path.join(cache_path_i, f)
+                if os.path.isfile(trial_path):
+                    # Narrow down to supported file types:
+                    if f.split(".")[-1] == "h5ad":
+                        try:
+                            adata = anndata.read_h5ad(
+                                filename=trial_path,
+                                backed="r" if in_memory else None,
+                            )
+                        except OSError as e:
+                            adata = None
+                            print(f"WARNING: for data set {f}: {e}")
+                if adata is not None:
+                    organism = adata.uns[self._adata_ids_sfaira.organism]
+                    if organism not in adata_by_key.keys():
+                        adata_by_key[organism] = {}
+                        indices[organism] = {}
+                    if adata.uns[self._adata_ids_sfaira.id] in adata_by_key[organism].keys():
+                        print(f"WARNING: overwriting store entry in {adata.uns[self._adata_ids_sfaira.id]} in store "
+                              f"{cache_path_i}.")
+                    adata_by_key[organism][adata.uns[self._adata_ids_sfaira.id]] = adata
+                    indices[organism][adata.uns[self._adata_ids_sfaira.id]] = np.arange(0, adata.n_obs)
         stores = dict([
             (k, DistributedStoreAnndata(adata_by_key=adata_by_key[k], indices=indices[k], in_memory=in_memory))
             for k in adata_by_key.keys()
