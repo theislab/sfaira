@@ -1,7 +1,7 @@
 from typing import Dict, Union
 
-from sfaira.versions.metadata import OntologyList, OntologyCl
-from sfaira.versions.metadata import OntologyCellosaurus, OntologyHancestro, OntologyHsapdv, OntologyMondo, \
+from sfaira.versions.metadata.base import OntologyList, OntologyCl
+from sfaira.versions.metadata.base import OntologyCellosaurus, OntologyHancestro, OntologyHsapdv, OntologyMondo, \
     OntologyMmusdv, OntologyEfo, OntologySex, OntologyTaxon, OntologyUberon, OntologyUberonLifecyclestage
 
 OTHER_ORGANISM_KEY = "other"

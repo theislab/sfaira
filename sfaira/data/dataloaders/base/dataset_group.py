@@ -13,7 +13,7 @@ from typing import Dict, List, Union
 import warnings
 
 from sfaira.data.dataloaders.base.dataset import DatasetBase
-from sfaira.data.dataloaders.base.utils import is_child
+from sfaira.data.dataloaders.base.utils import identify_tsv, is_child
 from sfaira.versions.genomes.genomes import GenomeContainer
 from sfaira.consts import AdataIds, AdataIdsSfaira
 from sfaira.data.utils import read_yaml
@@ -343,7 +343,7 @@ class DatasetGroup:
             except FileNotFoundError:
                 del self.datasets[x]
 
-    def write_ontology_class_map(
+    def write_ontology_class_maps(
             self,
             fn,
             protected_writing: bool = True,
@@ -514,12 +514,15 @@ class DatasetGroup:
         return np.sum(cells)
 
     @property
+    def ontology_container_sfaira(self):
+        return self.datasets[self.ids[0]].ontology_container_sfaira
+
+    @property
     def ontology_celltypes(self):
-        organism = np.unique([v.organism for _, v in self.datasets.items()])
-        if len(organism) > 1:
-            # ToDo: think about whether this should be handled differently.
-            warnings.warn("found more than one organism in group, this could cause problems with using a joined cell "
-                          "type ontology. Using only the ontology of the first data set in the group.")
+        """
+        # TODO: use might be replaced by ontology_container_sfaira in the future.
+        """
+        print("deprecation warning for ontology_celltypes()")
         return self.datasets[self.ids[0]].ontology_container_sfaira.cell_type
 
     def project_celltypes_to_ontology(self, adata_fields: Union[AdataIds, None] = None, copy=False):
@@ -692,86 +695,86 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
         loader_pydoc_path_sfaira = "sfaira.data.dataloaders.loaders."
         loader_pydoc_path_sfairae = "sfaira_extension.data.dataloaders.loaders."
         loader_pydoc_path = loader_pydoc_path_sfaira if package_source == "sfaira" else loader_pydoc_path_sfairae
-        if "group.py" in os.listdir(self._cwd):
-            DatasetGroupFound = pydoc.locate(loader_pydoc_path + collection_id + ".group.DatasetGroup")
-            dsg = DatasetGroupFound(data_path=data_path, meta_path=meta_path, cache_path=cache_path)
-            datasets.extend(list(dsg.datasets.values))
-        else:
-            for f in os.listdir(self._cwd):
-                if os.path.isfile(os.path.join(self._cwd, f)):  # only files
-                    # Narrow down to data set files:
-                    if f.split(".")[-1] == "py" and f.split(".")[0] not in ["__init__", "base", "group"]:
-                        datasets_f = []
-                        file_module = ".".join(f.split(".")[:-1])
-                        DatasetFound = pydoc.locate(loader_pydoc_path + collection_id + "." + file_module + ".Dataset")
-                        # Load objects from name space:
-                        # - load(): Loading function that return anndata instance.
-                        # - SAMPLE_FNS: File name list for DatasetBaseGroupLoadingManyFiles
-                        load_func = pydoc.locate(loader_pydoc_path + collection_id + "." + file_module + ".load")
-                        load_func_annotation = \
-                            pydoc.locate(loader_pydoc_path + collection_id + "." + file_module + ".LOAD_ANNOTATION")
-                        # Also check sfaira_extension for additional load_func_annotation:
-                        if package_source != "sfairae":
-                            load_func_annotation_sfairae = pydoc.locate(loader_pydoc_path_sfairae + collection_id +
-                                                                        "." + file_module + ".LOAD_ANNOTATION")
-                            # LOAD_ANNOTATION is a dictionary so we can use update to extend it.
-                            if load_func_annotation_sfairae is not None and load_func_annotation is not None:
-                                load_func_annotation.update(load_func_annotation_sfairae)
-                            elif load_func_annotation_sfairae is not None and load_func_annotation is None:
-                                load_func_annotation = load_func_annotation_sfairae
-                        sample_fns = pydoc.locate(loader_pydoc_path + collection_id + "." + file_module +
-                                                  ".SAMPLE_FNS")
-                        fn_yaml = os.path.join(self._cwd, file_module + ".yaml")
-                        fn_yaml = fn_yaml if os.path.exists(fn_yaml) else None
-                        # Check for sample_fns in yaml:
-                        if fn_yaml is not None:
-                            assert os.path.exists(fn_yaml), f"did not find yaml {fn_yaml}"
-                            yaml_vals = read_yaml(fn=fn_yaml)
-                            if sample_fns is None and yaml_vals["meta"]["sample_fns"] is not None:
-                                sample_fns = yaml_vals["meta"]["sample_fns"]
-                        if sample_fns is None:
-                            sample_fns = [None]
-                        # Here we distinguish between class that are already defined and those that are not.
-                        # The latter case arises if meta data are defined in YAMLs and _load is given as a function.
-                        if DatasetFound is None:
-                            for x in sample_fns:
-                                datasets_f.append(
-                                    DatasetBase(
-                                        data_path=data_path,
-                                        meta_path=meta_path,
-                                        cache_path=cache_path,
-                                        load_func=load_func,
-                                        dict_load_func_annotation=load_func_annotation,
-                                        sample_fn=x,
-                                        sample_fns=sample_fns if sample_fns != [None] else None,
-                                        yaml_path=fn_yaml,
-                                    )
-                                )
-                        else:
-                            for x in sample_fns:
-                                datasets_f.append(
-                                    DatasetFound(
-                                        data_path=data_path,
-                                        meta_path=meta_path,
-                                        cache_path=cache_path,
-                                        load_func=load_func,
-                                        load_func_annotation=load_func_annotation,
-                                        sample_fn=x,
-                                        sample_fns=sample_fns if sample_fns != [None] else None,
-                                        yaml_path=fn_yaml,
-                                    )
-                                )
-                        # Load cell type maps:
-                        for x in datasets_f:
-                            x.read_ontology_class_map(fn=os.path.join(self._cwd, file_module + ".tsv"))
-                        datasets.extend(datasets_f)
+
+        # List all files:
+        fns = [x for x in os.listdir(self._cwd) if os.path.isfile(os.path.join(self._cwd, x))]
+        # Data loader files:
+        fns_loader = [x for x in fns
+                      if x.split(".")[-1] == "py" and x.split(".")[0] not in ["__init__", "base", "group"]]
+        # Ontology class maps .tsvs:
+        fns_tsv = [os.path.join(self._cwd, x) for x in fns if x.split(".")[-1] == "tsv"]
+        for f in fns_loader:
+            datasets_f = []
+            file_module = ".".join(f.split(".")[:-1])
+            DatasetFound = pydoc.locate(loader_pydoc_path + collection_id + "." + file_module + ".Dataset")
+            # Load objects from name space:
+            # - load(): Loading function that return anndata instance.
+            # - SAMPLE_FNS: File name list for DatasetBaseGroupLoadingManyFiles
+            load_func = pydoc.locate(loader_pydoc_path + collection_id + "." + file_module + ".load")
+            load_func_annotation = \
+                pydoc.locate(loader_pydoc_path + collection_id + "." + file_module + ".LOAD_ANNOTATION")
+            # Also check sfaira_extension for additional load_func_annotation:
+            if package_source != "sfairae":
+                load_func_annotation_sfairae = pydoc.locate(loader_pydoc_path_sfairae + collection_id +
+                                                            "." + file_module + ".LOAD_ANNOTATION")
+                # LOAD_ANNOTATION is a dictionary so we can use update to extend it.
+                if load_func_annotation_sfairae is not None and load_func_annotation is not None:
+                    load_func_annotation.update(load_func_annotation_sfairae)
+                elif load_func_annotation_sfairae is not None and load_func_annotation is None:
+                    load_func_annotation = load_func_annotation_sfairae
+            sample_fns = pydoc.locate(loader_pydoc_path + collection_id + "." + file_module +
+                                      ".SAMPLE_FNS")
+            fn_yaml = os.path.join(self._cwd, file_module + ".yaml")
+            fn_yaml = fn_yaml if os.path.exists(fn_yaml) else None
+            # Check for sample_fns in yaml:
+            if fn_yaml is not None:
+                assert os.path.exists(fn_yaml), f"did not find yaml {fn_yaml}"
+                yaml_vals = read_yaml(fn=fn_yaml)
+                if sample_fns is None and yaml_vals["meta"]["sample_fns"] is not None:
+                    sample_fns = yaml_vals["meta"]["sample_fns"]
+            if sample_fns is None:
+                sample_fns = [None]
+            # Here we distinguish between class that are already defined and those that are not.
+            # The latter case arises if meta data are defined in YAMLs and _load is given as a function.
+            if DatasetFound is None:
+                for x in sample_fns:
+                    datasets_f.append(
+                        DatasetBase(
+                            data_path=data_path,
+                            meta_path=meta_path,
+                            cache_path=cache_path,
+                            load_func=load_func,
+                            dict_load_func_annotation=load_func_annotation,
+                            sample_fn=x,
+                            sample_fns=sample_fns if sample_fns != [None] else None,
+                            yaml_path=fn_yaml,
+                        )
+                    )
+            else:
+                for x in sample_fns:
+                    datasets_f.append(
+                        DatasetFound(
+                            data_path=data_path,
+                            meta_path=meta_path,
+                            cache_path=cache_path,
+                            load_func=load_func,
+                            load_func_annotation=load_func_annotation,
+                            sample_fn=x,
+                            sample_fns=sample_fns if sample_fns != [None] else None,
+                            yaml_path=fn_yaml,
+                        )
+                    )
+            # Load ontology label maps:
+            for x in datasets_f:
+                x.read_ontology_class_maps(fns=fns_tsv)
+            datasets.extend(datasets_f)
 
         keys = [x.id for x in datasets]
         super().__init__(datasets=dict(zip(keys, datasets)), collection_id=collection_id)
 
-    def clean_ontology_class_map(self):
+    def clean_ontology_class_maps(self):
         """
-        Finalises processed class maps of free text cell types to ontology classes.
+        Finalises processed class maps of free text labels to ontology classes.
 
         Checks that the assigned ontology class names appear in the ontology.
         Adds a third column with the corresponding ontology IDs into the file.
@@ -782,15 +785,17 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
             if os.path.isfile(os.path.join(self._cwd, f)):  # only files
                 # Narrow down to data set files:
                 if f.split(".")[-1] == "py" and f.split(".")[0] not in ["__init__", "base", "group"]:
-                    file_module = ".".join(f.split(".")[:-1])
-                    fn_map = os.path.join(self._cwd, file_module + ".tsv")
+                    fn = ".".join(f.split(".")[:-1])
+                    fn_map = os.path.join(self._cwd, fn + ".tsv")
+                    attr = identify_tsv(fn=fn, ontology_names=self._adata_ids.ontology_constrained)
                     if os.path.exists(fn_map):
+                        onto = getattr(self.ontology_container_sfaira, attr)
                         # Access reading and value protection mechanisms from first data set loaded in group.
                         tab = list(self.datasets.values())[0]._read_ontology_class_map(fn=fn_map)
                         # Checks that the assigned ontology class names appear in the ontology.
                         list(self.datasets.values())[0]._value_protection(
-                            attr="cell_type",
-                            allowed=self.ontology_celltypes,
+                            attr=attr,
+                            allowed=onto,
                             attempted=[
                                 x for x in np.unique(tab[self._adata_ids.classmap_target_key].values)
                                 if x not in [
@@ -801,7 +806,7 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                         )
                         # Adds a third column with the corresponding ontology IDs into the file.
                         tab[self._adata_ids.classmap_target_id_key] = [
-                            self.ontology_celltypes.convert_to_id(x)
+                            onto.convert_to_id(x)
                             if (x != self._adata_ids.unknown_metadata_identifier and
                                 x != self._adata_ids.not_a_cell_celltype_identifier)
                             else self._adata_ids.unknown_metadata_identifier
