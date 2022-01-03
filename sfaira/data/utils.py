@@ -1,23 +1,21 @@
 import anndata
 import numpy as np
-import scipy.sparse
 import yaml
 from typing import Dict, List, Union
 
-from sfaira.consts import OntologyContainerSfaira
-from sfaira.versions.metadata import CelltypeUniverse
+from sfaira.versions.metadata.maps import prepare_ontology_map
 
 
-def map_celltype_to_ontology(
+def map_freetext_to_ontology(
         queries: Union[str, List[str]],
-        organism: str,
-        include_synonyms: bool = True,
-        anatomical_constraint: Union[str, None] = None,
-        omit_target_list: list = ["cell"],
-        n_suggest: int = 4,
-        choices_for_perfect_match: bool = False,
-        keep_strategy: bool = False,
+        onto: str,
         always_return_dict: bool = False,
+        anatomical_constraint: Union[str, None] = None,
+        choices_for_perfect_match: bool = False,
+        include_synonyms: bool = True,
+        keep_strategy: bool = False,
+        n_suggest: int = 4,
+        omit_target_list: list = [],
         threshold_for_partial_matching: float = 90.,
         **kwargs
 ) -> Union[List[str], Dict[str, List[str]], str]:
@@ -28,18 +26,18 @@ def map_celltype_to_ontology(
 
     :param queries: Free text node label which is to be matched to ontology nodes.
         Can also be a list of strings to query.
-    :param organism: Organism, defines ontology extension used.
-    :param include_synonyms: Whether to include synonyms of nodes in string search.
+    :param onto: Name of ontology to map to.
+    :param always_return_dict: Also return a dictionary over queries if only one query was given.
     :param anatomical_constraint: Whether to require suggestions to be within a target anatomy defined within UBERON.
-    :param omit_target_list: Ontology nodes to not match to.
-    :param n_suggest: Number of cell types to suggest per search strategy.
     :param choices_for_perfect_match: Whether to give additional matches if a perfect match was found. Note that there
         are cases in which an apparent perfect match corresponds to a general term which could be specified knowing the
         anatomic location of the sample. If this is False and a perfect match is found, only this perfect match is
         returned as a string, rather than as a list.
+    :param include_synonyms: Whether to include synonyms of nodes in string search.
     :param keep_strategy: Whether to keep search results structured by search strategy.
         For details, see also sfaira.versions.metadata.CelltypeUniverse.prepare_celltype_map_fuzzy()
-    :param always_return_dict: Also return a dictionary over queries if only one query was given.
+    :param n_suggest: Number of cell types to suggest per search strategy.
+    :param omit_target_list: Ontology nodes to not match to.
     :param threshold_for_partial_matching: Maximum fuzzy match score below which lenient matching (ratio) is
         extended through partial_ratio.
     :param kwargs: Additional parameters to CelltypeUniverse.
@@ -50,16 +48,10 @@ def map_celltype_to_ontology(
     """
     if isinstance(queries, str):
         queries = [queries]
-    oc = OntologyContainerSfaira()
-    cu = CelltypeUniverse(
-        cl=oc.cell_type,
-        uberon=oc.organ,
-        organism=organism,
-        **kwargs
-    )
     matches_to_return = {}
-    matches = cu.prepare_celltype_map_fuzzy(
+    matches = prepare_ontology_map(
         source=queries,
+        onto=onto,
         match_only=False,
         include_synonyms=include_synonyms,
         anatomical_constraint=anatomical_constraint,

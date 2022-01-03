@@ -1,0 +1,75 @@
+source	target	target_id
+Adipocyte	fat cell	CL:0000136
+Endothelial cell (cardiac microvascular)	cardiac endothelial cell	CL:0010008
+Endothelial cell (lymphatic)	endothelial cell of lymphatic vessel	CL:0002138
+Endothelial cell (vascular) I	endothelial cell of vascular tree	CL:0002139
+Endothelial cell (vascular) II	endothelial cell of vascular tree	CL:0002139
+Endothelial cell (vascular) III	endothelial cell of vascular tree	CL:0002139
+Epithelial cell (Hillock)	epithelial cell	CL:0000066
+Epithelial cell (alveolar type I)	epithelial cell of alveolus of lung	CL:0010003
+Epithelial cell (alveolar type II)	epithelial cell of alveolus of lung	CL:0010003
+Epithelial cell (basal I)	basal cell	CL:0000646
+Epithelial cell (basal II)	basal cell	CL:0000646
+Epithelial cell (basal keratinocyte)	keratinocyte	CL:0000312
+Epithelial cell (basal)	basal cell	CL:0000646
+Epithelial cell (ciliated)	ciliated epithelial cell	CL:0000067
+Epithelial cell (club)	club cell	CL:0000158
+Epithelial cell (cornified keratinocyte)	keratinocyte	CL:0000312
+Epithelial cell (luminal I)	epithelial cell	CL:0000066
+Epithelial cell (luminal II)	epithelial cell	CL:0000066
+Epithelial cell (luminal)	epithelial cell	CL:0000066
+Epithelial cell (mature keratinocyte)	keratinocyte	CL:0000312
+Epithelial cell (squamous)	epithelial cell	CL:0000066
+Epithelial cell (suprabasal keratinocyte)	keratinocyte	CL:0000312
+Epithelial cell (suprabasal)	epithelial cell	CL:0000066
+Fibroblast	fibroblast	CL:0000057
+Fibroblast I	fibroblast	CL:0000057
+Fibroblast II	fibroblast	CL:0000057
+Fibroblast III	fibroblast	CL:0000057
+ICCs	interstitial cell of Cajal	CL:0002088
+Immune (B cell)	B cell	CL:0000236
+Immune (DC)	dendritic cell	CL:0000451
+Immune (DC/macrophage)	myeloid leukocyte	CL:0000766
+Immune (LAMs)	macrophage	CL:0000235
+Immune (Langerhans)	Langerhans cell	CL:0000453
+Immune (NK cell)	natural killer cell	CL:0000623
+Immune (T cell)	T cell	CL:0000084
+Immune (alveolar macrophage activated)	alveolar macrophage	CL:0000583
+Immune (alveolar macrophage)	alveolar macrophage	CL:0000583
+Immune (macrophage I)	macrophage	CL:0000235
+Immune (macrophage II)	macrophage	CL:0000235
+Immune (macrophage III)	macrophage	CL:0000235
+Immune (macrophage activated)	macrophage	CL:0000235
+Immune (macrophage)	macrophage	CL:0000235
+Immune (mast cell)	mast cell	CL:0000097
+Immune (mmDC)	myeloid dendritic cell	CL:0000782
+Immune (neutrophil)	neutrophil	CL:0000775
+Melanocyte	melanocyte	CL:0000148
+Mucous cell I	mucus secreting cell	CL:0000319
+Mucous cell II	mucus secreting cell	CL:0000319
+Myocyte (NMJ-rich)	muscle cell	CL:0000187
+Myocyte (cardiac)	cardiac muscle cell	CL:0000746
+Myocyte (cardiac, cytoplasmic)	cardiac muscle cell	CL:0000746
+Myocyte (fast-twitch)	fast muscle cell	CL:0000190
+Myocyte (fast-twitch, cytoplasmic)	fast muscle cell	CL:0000190
+Myocyte (sk. muscle)	cell of skeletal muscle	CL:0000188
+Myocyte (slow-twitch, cytoplasmic)	slow muscle cell	CL:0000189
+Myocyte (smooth muscle TAGLN lo)	smooth muscle cell	CL:0000192
+Myocyte (smooth muscle)	smooth muscle cell	CL:0000192
+Myoepithelial (basal)	myoepithelial cell	CL:0000185
+Myofibroblast	myofibroblast cell	CL:0000186
+Neuroendocrine	neuroendocrine cell	CL:0000165
+Neuronal	neuron	CL:0000540
+Pericyte/SMC	pericyte cell	CL:0000669
+Pericyte/SMC I	pericyte cell	CL:0000669
+Pericyte/SMC II	pericyte cell	CL:0000669
+Satellite cell	skeletal muscle satellite cell	CL:0000594
+Schwann cell	Schwann cell	CL:0002573
+Schwann cell I	Schwann cell	CL:0002573
+Schwann cell II	Schwann cell	CL:0002573
+Sebaceous gland cell (CYP4F3+)	sebaceous gland cell	CL:2000021
+Sebaceous gland cell (KRT79 hi)	sebaceous gland cell	CL:2000021
+Sebaceous gland cell (SEC14L6+)	sebaceous gland cell	CL:2000021
+Sweat gland cell	epithelial cell of sweat gland	CL:1000448
+Unknown (ATP1B3-GJB6)	unknown	unknown
+Unknown (SFN-GJA1)	unknown	unknown
