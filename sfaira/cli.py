@@ -100,16 +100,14 @@ def create_dataloader(path_data, path_loader) -> None:
     Interactively create a new sfaira dataloader.
     """
     dataloader_creator = DataloaderCreator(path_loader)
-    dataloader_creator.create_dataloader()
-    dataloader_creator.create_datadir(path_data)
+    dataloader_creator.create_dataloader(path_data)
 
 
 @sfaira_cli.command()
 @click.option('--path-loader',
               default="sfaira/data/dataloaders/loaders/",
               type=click.Path(exists=True),
-              help='Relative path from the current directory to the desired location of the dataloader.'
-              )
+              help='Relative path from the current directory to the desired location of the dataloader.')
 @click.option('--doi', type=str, default=None, help="The doi of the paper that the dataloader refers to.")
 def validate_dataloader(path_loader, doi) -> None:
     """

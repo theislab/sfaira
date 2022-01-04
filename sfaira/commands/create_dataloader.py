@@ -67,7 +67,7 @@ class DataloaderCreator:
         Finally creates the specific cookiecutter dataloader template.
         """
         self._prompt_dataloader_template()
-        self._prompt_dataloader_configuration()
+        self._prompt_dataloader_configuration(path_data)
         self._create_dataloader_template()
 
     def _prompt_dataloader_template(self) -> None:
@@ -84,7 +84,7 @@ class DataloaderCreator:
         else:
             self.template_attributes.dataloader_type = 'multiple_datasets'
 
-    def _prompt_dataloader_configuration(self):
+    def _prompt_dataloader_configuration(self, path_data):
         """
         Prompts the user for all required attributes for a dataloader such as DOI, author, etc.
         """
@@ -262,17 +262,17 @@ class DataloaderCreator:
 
         print('[bold orange]Sfaira butler: "Up next:"')
         self.action_counter = 1
-        if requires_annotate:
-            print(f'[bold orange]{self.action_counter}) You will have to run \'sfaira annotate-dataloader\' '
-                  'after the template has been created and filled.')
-            self.action_counter += 1
-        else:
-            print('[bold orange]You can skip \'sfaira annotate-dataloader\'.')
         path_loader = os.path.join(self.out_path, self.template_attributes.doi_sfaira_repr)
         print(f'[bold orange]{self.action_counter}) Proceed to modify the .yaml and .py files in {path_loader}')
         self.action_counter += 1
-        print(f'[bold orange]{self.action_counter}) Proceed to run \'sfaira test-dataloader\'')
-        self.action_counter += 1
+        self.create_datadir(path_data=path_data)
+        if requires_annotate:
+            print(f'[bold orange]{self.action_counter}) You will have to run \'sfaira annotate-dataloader\'.')
+            self.action_counter += 1
+        else:
+            print(f'[bold orange]{self.action_counter}) Proceed to run \'sfaira test-dataloader\', you do not need to '
+                  f'run \'sfaira annotate-dataloader\'.')
+            self.action_counter += 1
 
     def _template_attributes_to_dict(self) -> dict:
         """
