@@ -87,27 +87,21 @@ def cache_reload() -> None:
 
 
 @sfaira_cli.command()
+@click.option('--path-data',
+              default="./",
+              type=click.Path(exists=False),
+              help='Absolute path of the desired location of the raw data directory.')
 @click.option('--path-loader',
               default="sfaira/data/dataloaders/loaders/",
               type=click.Path(exists=True),
-              help='Relative path from the current directory to the desired location of the dataloader.'
-              )
-@click.option('--path-data',
-              default="sfaira/unit_tests/template_data/",
-              type=click.Path(exists=False),
-              help='Relative path from the current directory to the datafiles used by this dataloader.'
-              )
-@click.option('--doi', type=str, default=None, help="The doi of the paper you would like to create a dataloader for.")
-def create_dataloader(path_loader, doi: str, path_data) -> None:
+              help='Relative path from the current directory to the desired location of the dataloader.')
+def create_dataloader(path_data, path_loader) -> None:
     """
     Interactively create a new sfaira dataloader.
     """
-    if doi is None or doi_lint(doi):
-        dataloader_creator = DataloaderCreator(path_loader, doi)
-        dataloader_creator.create_dataloader()
-        dataloader_creator.create_datadir(path_data)
-    else:
-        print('[bold red]The supplied DOI is malformed!')  # noqa: W605
+    dataloader_creator = DataloaderCreator(path_loader)
+    dataloader_creator.create_dataloader()
+    dataloader_creator.create_datadir(path_data)
 
 
 @sfaira_cli.command()
@@ -120,8 +114,6 @@ def create_dataloader(path_loader, doi: str, path_data) -> None:
 def validate_dataloader(path_loader, doi) -> None:
     """
     Verifies the dataloader against sfaira's requirements.
-
-    PATH to the dataloader script.
     """
     if doi is None or doi_lint(doi):
         dataloader_validator = DataloaderValidator(path_loader, doi)
@@ -134,19 +126,15 @@ def validate_dataloader(path_loader, doi) -> None:
 @click.option('--path-loader',
               default="sfaira/data/dataloaders/loaders/",
               type=click.Path(exists=True),
-              help='Relative path from the current directory to the location of the dataloader.'
-              )
+              help='Relative path from the current directory to the location of the dataloader.')
 @click.option('--path-data',
-              default="sfaira/unit_tests/template_data/",
+              default="./",
               type=click.Path(exists=True),
-              help='Relative path from the current directory to the datafiles used by this dataloader.'
-              )
+              help='Absolute path of the location of the raw data directory.')
 @click.option('--doi', type=str, default=None, help="The doi of the paper that the dataloader refers to.")
 def annotate_dataloader(path_loader, path_data, doi) -> None:
     """
     Annotates a dataloader.
-
-    PATH is the absolute path of the root of your sfaira clone.
     """
     if doi is None or doi_lint(doi):
         dataloader_validator = DataloaderValidator(path_loader, doi)
@@ -161,20 +149,19 @@ def annotate_dataloader(path_loader, path_data, doi) -> None:
 @click.option('--path-loader',
               default="sfaira/data/dataloaders/loaders/",
               type=click.Path(exists=True),
-              help='Relative path from the current directory to the location of the dataloader.'
-              )
+              help='Relative path from the current directory to the location of the dataloader.')
 @click.option('--path-data',
-              default="sfaira/unit_tests/template_data/",
+              default="./",
               type=click.Path(exists=True),
-              help='Relative path from the current directory to the datafiles used by this dataloader.'
-              )
+              help='Absolute path of the location of the raw data directory.')
 @click.option('--doi', type=str, default=None, help="The doi of the paper that the dataloader refers to.")
 def test_dataloader(path_loader, path_data, doi) -> None:
-    """Runs a dataloader integration test.
-
-    PATH is the absolute path of the root of your sfaira clone.
+    """
+    Runs a dataloader integration test.
     """
     if doi is None or doi_lint(doi):
+        dataloader_validator = DataloaderValidator(path_loader, doi)
+        dataloader_validator.validate()
         dataloader_tester = DataloaderTester(path_loader, path_data, doi)
         dataloader_tester.test_dataloader()
     else:
@@ -182,11 +169,20 @@ def test_dataloader(path_loader, path_data, doi) -> None:
 
 
 @sfaira_cli.command()
-@click.argument('doi', type=str)
-@click.argument('schema', type=str, default=None)
-@click.argument('path_out', type=click.Path(exists=True))
-@click.argument('path_data', type=click.Path(exists=True))
-@click.option('--path_cache', type=click.Path(exists=True), default=None)
+@click.argument('--doi', type=str, default=None, help="DOI of data sets to export")
+@click.argument('--schema', type=str, default=None, help="Schema to streamline to, e.g. 'cellxgene'")
+@click.argument('--path_out',
+                type=click.Path(exists=True),
+                help='Absolute path of the location of the streamlined output h5ads.')
+@click.argument('--path-data',
+                default="./",
+                type=click.Path(exists=True),
+                help='Absolute path of the location of the raw data directory.')
+@click.option('--path_cache',
+              type=click.Path(exists=True),
+              default=None,
+              help='The optional absolute path to cached data library maintained by sfaira. Using such a cache speeds '
+                   'up loading in sequential runs but is not necessary.')
 def export_h5ad(test_h5ad, schema) -> None:
     """Creates a collection of streamlined h5ad object for a given DOI.
 
@@ -205,7 +201,7 @@ def export_h5ad(test_h5ad, schema) -> None:
 
 
 @sfaira_cli.command()
-@click.argument('test-h5ad', type=click.Path(exists=True))
+@click.argument('--test-h5ad', type=click.Path(exists=True))
 @click.option('--schema', type=str, default=None)
 def test_h5ad(test_h5ad, schema) -> None:
     """Runs a component test on a streamlined h5ad object.

@@ -5,46 +5,46 @@ dataset_structure:
 {% endfor %}dataset_wise:
     author: "{{ cookiecutter.author }}"
     default_embedding: {% if cookiecutter.default_embedding %}"{{ cookiecutter.default_embedding }}"{% endif %}
-    doi_preprint:
-    doi_journal: "{{ cookiecutter.doi }}"
-    download_url_data:
-    download_url_meta:
-    primary_data: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.primary_data }}"{% endif %}
+    doi_preprint: {% if cookiecutter.doi_preprint %}"{{ cookiecutter.doi_preprint }}"{% endif %}
+    doi_journal: {% if cookiecutter.doi_journal %}"{{ cookiecutter.doi_journal }}"{% endif %}
+    download_url_data: "{{ cookiecutter.download_url_data }}"
+    download_url_meta: {% if cookiecutter.download_url_meta %}"{{ cookiecutter.download_url_meta }}"{% endif %}
+    primary_data: {{ cookiecutter.primary_data }}
     normalization: "{{ cookiecutter.normalization }}"
     year: "{{ cookiecutter.year }}"
 dataset_or_observation_wise:
-    assay_sc:
-    assay_sc_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.assay_sc_obs_key }}"{% endif %}
-    assay_differentiation:
-    assay_differentiation_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.assay_differentiation_obs_key }}"{% endif %}
-    assay_type_differentiation:
-    assay_type_differentiation_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.assay_type_differentiation_obs_key }}"{% endif %}
+    assay_sc: {% if cookiecutter.assay_sc %}"{{ cookiecutter.assay_sc }}"{% endif %}
+    assay_sc_obs_key: {% if cookiecutter.assay_sc_obs_key %}"{{ cookiecutter.assay_sc_obs_key }}"{% endif %}
+    assay_differentiation: {% if cookiecutter.assay_differentiation %}"{{ cookiecutter.assay_differentiation }}"{% endif %}
+    assay_differentiation_obs_key: {% if cookiecutter.assay_differentiation_obs_key %}"{{ cookiecutter.assay_differentiation_obs_key }}"{% endif %}
+    assay_type_differentiation: {% if cookiecutter.assay_type_differentiation %}"{{ cookiecutter.assay_type_differentiation }}"{% endif %}
+    assay_type_differentiation_obs_key: {% if cookiecutter.assay_type_differentiation_obs_key %}"{{ cookiecutter.assay_type_differentiation_obs_key }}"{% endif %}
     bio_sample:
-    bio_sample_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.bio_sample_obs_key }}"{% endif %}
-    cell_line:
-    cell_line_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.cell_line_obs_key }}"{% endif %}
-    cell_type:
+    bio_sample_obs_key: {% if cookiecutter.bio_sample_obs_key %}"{{ cookiecutter.bio_sample_obs_key }}"{% endif %}
+    cell_line: {% if cookiecutter.cell_line %}"{{ cookiecutter.cell_line }}"{% endif %}
+    cell_line_obs_key: {% if cookiecutter.cell_line_obs_key %}"{{ cookiecutter.cell_line_obs_key }}"{% endif %}
+    cell_type: {% if cookiecutter.cell_type %}"{{ cookiecutter.cell_type }}"{% endif %}
     cell_type_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.cell_type_obs_key }}"{% endif %}
-    development_stage:
-    development_stage_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.development_stage_obs_key }}"{% endif %}
-    disease:
-    disease_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.disease_obs_key }}"{% endif %}
-    ethnicity:
-    ethnicity_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.ethnicity_obs_key }}"{% endif %}
+    development_stage: {% if cookiecutter.development_stage %}"{{ cookiecutter.development_stage }}"{% endif %}
+    development_stage_obs_key: {% if cookiecutter.development_stage_obs_key %}"{{ cookiecutter.development_stage_obs_key }}"{% endif %}
+    disease: {% if cookiecutter.disease %}"{{ cookiecutter.disease }}"{% endif %}
+    disease_obs_key: {% if cookiecutter.disease_obs_key %}"{{ cookiecutter.disease_obs_key }}"{% endif %}
+    ethnicity: {% if cookiecutter.ethnicity %}"{{ cookiecutter.ethnicity }}"{% endif %}
+    ethnicity_obs_key: {% if cookiecutter.ethnicity_obs_key %}"{{ cookiecutter.ethnicity_obs_key }}"{% endif %}
     individual:
-    individual_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.individual_obs_key }}"{% endif %}
-    organ:
-    organ_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.organ_obs_key }}"{% endif %}
-    organism:
-    organism_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.organism_obs_key }}"{% endif %}
-    sample_source:
-    sample_source_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.sample_source_obs_key }}"{% endif %}
-    sex:
-    sex_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.sex_obs_key }}"{% endif %}
+    individual_obs_key: {% if cookiecutter.individual_obs_key %}"{{ cookiecutter.individual_obs_key }}"{% endif %}
+    organ: {% if cookiecutter.organ %}"{{ cookiecutter.organ }}"{% endif %}
+    organ_obs_key: {% if cookiecutter.organ_obs_key %}"{{ cookiecutter.organ_obs_key }}"{% endif %}
+    organism: {% if cookiecutter.organism %}"{{ cookiecutter.organism }}"{% endif %}
+    organism_obs_key: {% if cookiecutter.organism_obs_key %}"{{ cookiecutter.organism_obs_key }}"{% endif %}
+    sample_source: {% if cookiecutter.sample_source %}"{{ cookiecutter.sample_source }}"{% endif %}
+    sample_source_obs_key: {% if cookiecutter.sample_source_obs_key %}"{{ cookiecutter.sample_source_obs_key }}"{% endif %}
+    sex: {% if cookiecutter.sex %}"{{ cookiecutter.sex }}"{% endif %}
+    sex_obs_key: {% if cookiecutter.sex_obs_key %}"{{ cookiecutter.sex_obs_key }}"{% endif %}
     state_exact:
-    state_exact_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.state_exact_obs_key }}"{% endif %}
+    state_exact_obs_key: {% if cookiecutter.state_exact_obs_key %}"{{ cookiecutter.state_exact_obs_key }}"{% endif %}
     tech_sample:
-    tech_sample_obs_key: {% if cookiecutter.cell_type_obs_key %}"{{ cookiecutter.tech_sample_obs_key }}"{% endif %}
+    tech_sample_obs_key: {% if cookiecutter.tech_sample_obs_key %}"{{ cookiecutter.tech_sample_obs_key }}"{% endif %}
 feature_wise:
     gene_id_ensembl_var_key: {% if cookiecutter.gene_id_ensembl_var_key %}"{{ cookiecutter.gene_id_ensembl_var_key }}"{% endif %}
     gene_id_symbols_var_key: {% if cookiecutter.gene_id_symbols_var_key %}"{{ cookiecutter.gene_id_symbols_var_key }}"{% endif %}
