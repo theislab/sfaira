@@ -206,5 +206,5 @@ class DataloaderAnnotater:
                     )
                     tsvs_written.append(fn_tsv)
         print("[bold blue]Completed annotation. Wrote .tsv files for loaders:\n" + "\n".join(tsvs_written))
-        print(f'[bold orange]1) Proceed to finish .yaml file if not already done and then to '
-              f'\'sfaira test-dataloader\'.')
+        print('[bold orange]1) Proceed to finish .yaml file if not already done and then to '
+              '\'sfaira test-dataloader\'.')
