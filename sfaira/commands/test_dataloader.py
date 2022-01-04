@@ -98,4 +98,5 @@ class DataloaderTester:
         )
         shutil.rmtree(cache_path, ignore_errors=True)
         print("[bold blue]Completed testing of data loader, the data loader is now ready for use.")
+        print('[bold orange]Sfaira butler: "You are done!"')
         print('[bold orange]Proceed to use and/or upload the data loader.')

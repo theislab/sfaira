@@ -260,15 +260,18 @@ class DataloaderCreator:
             question='Key of gene id ensembl field in .var:',
             default='')
 
+        print('[bold orange]Sfaira butler: "Up next:"')
         self.action_counter = 1
         if requires_annotate:
             print(f'[bold orange]{self.action_counter}) You will have to run \'sfaira annotate-dataloader\' '
                   'after the template has been created and filled.')
             self.action_counter += 1
         else:
-            print('[bold blue]You can skip \'sfaira annotate-dataloader\'.')
+            print('[bold orange]You can skip \'sfaira annotate-dataloader\'.')
         path_loader = os.path.join(self.out_path, self.template_attributes.doi_sfaira_repr)
         print(f'[bold orange]{self.action_counter}) Proceed to modify the .yaml and .py files in {path_loader}')
+        self.action_counter += 1
+        print(f'[bold orange]{self.action_counter}) Proceed to run \'sfaira test-dataloader\'')
         self.action_counter += 1
 
     def _template_attributes_to_dict(self) -> dict:

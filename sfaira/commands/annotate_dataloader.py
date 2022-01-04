@@ -205,6 +205,20 @@ class DataloaderAnnotater:
                         n_suggest=4,
                     )
                     tsvs_written.append(fn_tsv)
-        print("[bold blue]Completed annotation. Wrote .tsv files for loaders:\n" + "\n".join(tsvs_written))
-        print('[bold orange]1) Proceed to finish .yaml file if not already done and then to '
-              '\'sfaira test-dataloader\'.')
+        print("[bold blue]Completed annotation.")
+        print('[bold orange]Sfaira butler: "Up next:"')
+        self.action_counter = 1
+        tsv_file_overview = "\n".join(tsvs_written)
+        print(f'[bold orange]{self.action_counter}) Proceed to chose ontology symbols for each free text label in the'
+              f'tsv files:\n{tsv_file_overview}\n'
+              'Each tsv has two columns: free text labels found in the data on the left and suggestions on the right.'
+              'Each suggested symbol lies between two : characters.\n'
+              ': is a separator between suggested symbols and :|||: between symbol groups that were found via different'
+              'search strategies.\n'
+              'Take care to not remove the \\t separators in the table.\n'
+              'Note that ontology IDs are later automatically added to this table.')
+        self.action_counter += 1
+        print(f'[bold orange]{self.action_counter}) Then proceed to finish .yaml file if not already done.')
+        self.action_counter += 1
+        print(f'[bold orange]{self.action_counter}) Proceed to run \'sfaira test-dataloader\'')
+        self.action_counter += 1
