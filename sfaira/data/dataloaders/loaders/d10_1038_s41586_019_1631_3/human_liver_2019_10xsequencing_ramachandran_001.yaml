@@ -24,7 +24,7 @@ dataset_or_observation_wise:
     cell_line:
     cell_line_obs_key:
     cell_type:
-    cell_type_obs_key: "cell_type"
+    cell_type_obs_key: "annotation_lineage"
     development_stage:
     development_stage_obs_key:
     disease:
