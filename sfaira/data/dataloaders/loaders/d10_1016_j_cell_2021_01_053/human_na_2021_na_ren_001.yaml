@@ -1,14 +1,17 @@
 dataset_structure:
     dataset_index: 1
     sample_fns:
-        - "COVID19_ALL.h5ad"
+        - "SE158055_covid19_counts.mtx.gz"
 dataset_wise:
     author: "Ren, Xianwen"
-    default_embedding: "X_tsne"
+    default_embedding: 
     doi_preprint:
     doi_journal: "10.1016/j.cell.2021.01.053"
-    download_url_data: "https://drive.google.com/file/d/1IwWcn4W-YKgNbz4DpNweM2cKxlx1hbM0/view"
-    download_url_meta:
+    download_url_data: ["https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE158055&format=file&file=GSE158055%5Fcovid19%5Fcounts%2Emtx%2Egz",
+                        "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE158055&format=file&file=GSE158055%5Fcovid19%5Fbarcodes%2Etsv%2Egz",
+                        "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE158055&format=file&file=GSE158055%5Fcovid19%5Ffeatures%2Etsv%2Egz"]
+    download_url_meta: ["https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE158055&format=file&file=GSE158055%5Fcell%5Fannotation%2Ecsv%2Egz",
+                        "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE158055&format=file&file=GSE158055%5Fsample%5Fmetadata%2Exlsx"]
     primary_data: True
     normalization: "raw"
     year: 2021
