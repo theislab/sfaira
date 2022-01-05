@@ -167,12 +167,12 @@ def test_dataloader(path_loader, path_data, doi) -> None:
 
 
 @sfaira_cli.command()
-@click.argument('--doi', type=str, default=None, help="DOI of data sets to export")
-@click.argument('--schema', type=str, default=None, help="Schema to streamline to, e.g. 'cellxgene'")
-@click.argument('--path_out',
-                type=click.Path(exists=True),
-                help='Absolute path of the location of the streamlined output h5ads.')
-@click.argument('--path-data',
+@click.option('--doi', type=str, default=None, help="DOI of data sets to export")
+@click.option('--schema', type=str, default=None, help="Schema to streamline to, e.g. 'cellxgene'")
+@click.option('--path_out',
+              type=click.Path(exists=True),
+              help='Absolute path of the location of the streamlined output h5ads.')
+@click.option('--path-data',
                 default="./",
                 type=click.Path(exists=True),
                 help='Absolute path of the location of the raw data directory.')
@@ -181,25 +181,13 @@ def test_dataloader(path_loader, path_data, doi) -> None:
               default=None,
               help='The optional absolute path to cached data library maintained by sfaira. Using such a cache speeds '
                    'up loading in sequential runs but is not necessary.')
-def export_h5ad(test_h5ad, schema) -> None:
-    """Creates a collection of streamlined h5ad object for a given DOI.
-
-    doi is the doi(s) to select for export. You can enumerate multiple dois by suppling a string of dois separated by
-        a comma.
-    schema is the schema type ("cellxgene",) to use for streamlining.
-    path_out is the absolute path to save output into. The h5ad files will be in a folder named after the DOI.
-    path_data is the absolute path to raw data library, ie one folder above the DOI named folder that contains the raw
-        files necessary for the selected data loader(s).
-    path_cache is the optional absolute path to cached data library maintained by sfaira. Using such a cache speeds
-        up loading in sequential runs but is not necessary.
-    """
-    h5ad_tester = H5adValidator(test_h5ad, schema)
-    h5ad_tester.test_schema()
-    h5ad_tester.test_numeric_data()
+def export_h5ad(doi, schema, path_out, path_data, path_cache) -> None:
+    """Creates a collection of streamlined h5ad object for a given DOI."""
+    raise NotImplementedError()
 
 
 @sfaira_cli.command()
-@click.argument('--test-h5ad', type=click.Path(exists=True))
+@click.option('--test-h5ad', type=click.Path(exists=True))
 @click.option('--schema', type=str, default=None)
 def test_h5ad(test_h5ad, schema) -> None:
     """Runs a component test on a streamlined h5ad object.
