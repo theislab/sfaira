@@ -633,7 +633,10 @@ class DistributedStoreAnndata(DistributedStoreSingleFeatureSpace):
 
     in_memory: bool
 
-    def __init__(self, in_memory: bool, **kwargs):
+    def __init__(self, in_memory: bool = True, **kwargs):
+        if "indices" not in kwargs.keys():  # Select all cells if no selection performed via indices.
+            assert "adata_by_key" in kwargs.keys(), "supply adata_by_key in constructor call to DistributedStoreAnndata"
+            kwargs["indices"] = dict([(k, np.arange(0, v.n_obs)) for k, v in kwargs["adata_by_key"].items()])
         super(DistributedStoreAnndata, self).__init__(**kwargs)
         self._x_as_dask = False
         self.in_memory = in_memory
