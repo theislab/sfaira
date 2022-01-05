@@ -26,51 +26,51 @@ dataset_structure:
         - "GSM4579913_ac23_bc_matrix.tar.gz"
         - "GSM4579914_ac24_bc_matrix.tar.gz" 
     
- dataset_wise:
-     author: "Deng"
-     default_embedding: 
-     doi_preprint: 
-     doi_journal: "10.1038/s41591-020-1061-7"
-     download_url_data: "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE151511&format=file"
-     download_url_meta: "https://static-content.springer.com/esm/art%3A10.1038%2Fs41591-020-1061-7/MediaObjects/41591_2020_1061_MOESM3_ESM.xlsx"
-     primary_data: True
-     normalization: "raw"
-     year: 2020
- dataset_or_observation_wise:
-     assay_sc: "10x 5' transcription profiling"
-     assay_sc_obs_key:
-     assay_differentiation:
-     assay_differentiation_obs_key: 
-     assay_type_differentiation:
-     assay_type_differentiation_obs_key:
-     bio_sample:
-     bio_sample_obs_key: 
-     cell_line:
-     cell_line_obs_key:
-     cell_type:
-     cell_type_obs_key: 
-     development_stage: 
-     development_stage_obs_key: "Age"
-     disease: 
-     disease_obs_key: "Histology"
-     ethnicity:
-     ethnicity_obs_key:
-     individual:
-     individual_obs_key: 
-     organ: "blood"
-     organ_obs_key: 
-     organism: "Homo sapiens"
-     organism_obs_key:
-     sample_source: "primary_tissue"
-     sample_source_obs_key:
-     sex:
-     sex_obs_key: "Gender"
-     state_exact: "CAR T cells"
-     state_exact_obs_key:
-     tech_sample:
-     tech_sample_obs_key: "Sample ID"
- feature_wise:
-     gene_id_ensembl_var_key: 
-     gene_id_symbols_var_key: "index"
- meta:
-     version: "1.1"
+dataset_wise:
+    author: "Deng"
+    default_embedding: 
+    doi_preprint: 
+    doi_journal: "10.1038/s41591-020-1061-7"
+    download_url_data: "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE151511&format=file"
+    download_url_meta: "https://static-content.springer.com/esm/art%3A10.1038%2Fs41591-020-1061-7/MediaObjects/41591_2020_1061_MOESM3_ESM.xlsx"
+    primary_data: True
+    normalization: "raw"
+    year: 2020
+dataset_or_observation_wise:
+    assay_sc: "10x 5' transcription profiling"
+    assay_sc_obs_key:
+    assay_differentiation:
+    assay_differentiation_obs_key: 
+    assay_type_differentiation:
+    assay_type_differentiation_obs_key:
+    bio_sample:
+    bio_sample_obs_key: 
+    cell_line:
+    cell_line_obs_key:
+    cell_type:
+    cell_type_obs_key: 
+    development_stage: 
+    development_stage_obs_key: "Age"
+    disease: 
+    disease_obs_key: "Histology"
+    ethnicity:
+    ethnicity_obs_key:
+    individual:
+    individual_obs_key: 
+    organ: "blood"
+    organ_obs_key: 
+    organism: "Homo sapiens"
+    organism_obs_key:
+    sample_source: "primary_tissue"
+    sample_source_obs_key:
+    sex:
+    sex_obs_key: "Gender"
+    state_exact: "CAR T cells"
+    state_exact_obs_key:
+    tech_sample:
+    tech_sample_obs_key: "Sample ID"
+feature_wise:
+    gene_id_ensembl_var_key: "ensembl"
+    gene_id_symbols_var_key: "names"
+meta:
+    version: "1.1"
