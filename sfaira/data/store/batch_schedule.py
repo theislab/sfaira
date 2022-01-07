@@ -71,7 +71,26 @@ class BatchDesignBase:
         raise NotImplementedError()
 
 
+class BatchDesignFull(BatchDesignBase):
+
+    """Emits full dataset as a single batch in each query."""
+
+    @staticmethod
+    def _get_batch_start_ends(idx: np.ndarray, batch_size: int):
+        n_obs = len(idx)
+        batch_starts_ends = [(0, n_obs)]
+        return batch_starts_ends
+
+    @property
+    def design(self) -> Tuple[np.ndarray, np.ndarray, List[Tuple[int, int]]]:
+        idx_proc = np.arange(0, len(self.idx))
+        batch_bounds = self.batch_bounds.copy()
+        return idx_proc, self.idx, batch_bounds
+
+
 class BatchDesignBasic(BatchDesignBase):
+
+    """Standard batched access to data."""
 
     @property
     def design(self) -> Tuple[np.ndarray, np.ndarray, List[Tuple[int, int]]]:
@@ -208,4 +227,5 @@ BATCH_SCHEDULE = {
     "base": BatchDesignBasic,
     "balanced": BatchDesignBalanced,
     "blocks": BatchDesignBlocks,
+    "full": BatchDesignFull,
 }
