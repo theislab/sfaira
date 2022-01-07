@@ -93,7 +93,7 @@ class GeneratorBase:
             # Only import this module if torch is used to avoid strict torch dependency:
             from .torch_dataset import SfairaDataset
 
-            g = SfairaDataset(map_fn=self.map_fn, obs=self.obs, x=self.x, **dataset_kwargs)
+            g = SfairaDataset(map_fn=self.map_fn, obs=self.obs.iloc[self.obs_idx, :], x=self.x[self.obs_idx, :], **dataset_kwargs)
             if generator_type == "torch-loader":
                 g = torch.utils.data.DataLoader(g, **kwargs)
         elif generator_type in ["torch-iter", "torch-iter-loader"]:
