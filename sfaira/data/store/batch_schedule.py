@@ -86,7 +86,7 @@ class BatchDesignBalanced(BatchDesignBase):
     def __init__(self, grouping, group_weights: dict, randomized_batch_access: bool, random_access: bool,
                  **kwargs):
         """
-        
+
         :param grouping: Group label for each entry in idx.
         :param group_weights: Group weight for each unique group in grouping. Does not have to normalise to a probability
             distribution but is normalised in this function. The outcome vector is always of length idx.
@@ -124,7 +124,7 @@ class BatchDesignBalanced(BatchDesignBase):
         if not self.random_access:  # Note: randomization is result from sampling above, need to revert if not desired.
             idx = np.sort(idx)
         batches = np.array_split(idx, max(len(idx) // self.retrieval_batch_size, 1))
-        
+
         return batches
 
 
@@ -133,7 +133,7 @@ class BatchDesignBlocks(BatchDesignBase):
 
     def __init__(self, grouping, random_access: bool, **kwargs):
         """
-        
+
         :param grouping: Group label for each entry in idx.
         :param group_weights: Group weight for each unique group in grouping. Does not have to normalise to a probability
             distribution but is normalised in this function. The outcome vector is always of length idx.
