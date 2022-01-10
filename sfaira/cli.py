@@ -1,7 +1,6 @@
 import logging
 import os
 import sys
-import re
 
 import click
 import rich
@@ -10,10 +9,11 @@ from rich import traceback
 from rich import print
 
 from sfaira.commands.annotate_dataloader import DataloaderAnnotater
-from sfaira.commands.test_dataloader import DataloaderTester
-
+from sfaira.commands.cache_control import CacheControl
+from sfaira.commands.utils import doi_lint
 from sfaira.commands.validate_dataloader import DataloaderValidator
 from sfaira.commands.validate_h5ad import H5adValidator
+from sfaira.commands.test_dataloader import DataloaderTester
 
 from sfaira import __version__
 from sfaira.commands.create_dataloader import DataloaderCreator
@@ -73,6 +73,20 @@ def sfaira_cli(ctx, verbose, log_file):
 
 
 @sfaira_cli.command()
+def cache_clear() -> None:
+    """Clears sfaira cache, including ontology and genome cache."""
+    ctrl = CacheControl()
+    ctrl.clear()
+
+
+@sfaira_cli.command()
+def cache_reload() -> None:
+    """Downloads new ontology versions into cache."""
+    ctrl = CacheControl()
+    ctrl.reload()
+
+
+@sfaira_cli.command()
 @click.option('--path-loader',
               default="sfaira/data/dataloaders/loaders/",
               type=click.Path(exists=True),
@@ -84,11 +98,11 @@ def sfaira_cli(ctx, verbose, log_file):
               help='Relative path from the current directory to the datafiles used by this dataloader.'
               )
 @click.option('--doi', type=str, default=None, help="The doi of the paper you would like to create a dataloader for.")
-def create_dataloader(path_loader, doi, path_data) -> None:
+def create_dataloader(path_loader, doi: str, path_data) -> None:
     """
     Interactively create a new sfaira dataloader.
     """
-    if doi is None or re.match(r'\b10\.\d+/[\w.]+\b', doi):
+    if doi is None or doi_lint(doi):
         dataloader_creator = DataloaderCreator(path_loader, doi)
         dataloader_creator.create_dataloader()
         dataloader_creator.create_datadir(path_data)
@@ -109,7 +123,7 @@ def validate_dataloader(path_loader, doi) -> None:
 
     PATH to the dataloader script.
     """
-    if doi is None or re.match(r'\b10\.\d+/[\w.]+\b', doi):
+    if doi is None or doi_lint(doi):
         dataloader_validator = DataloaderValidator(path_loader, doi)
         dataloader_validator.validate()
     else:
@@ -134,7 +148,7 @@ def annotate_dataloader(path_loader, path_data, doi) -> None:
 
     PATH is the absolute path of the root of your sfaira clone.
     """
-    if doi is None or re.match(r'\b10\.\d+/[\w.]+\b', doi):
+    if doi is None or doi_lint(doi):
         dataloader_validator = DataloaderValidator(path_loader, doi)
         dataloader_validator.validate()
         dataloader_annotater = DataloaderAnnotater()
@@ -160,7 +174,7 @@ def test_dataloader(path_loader, path_data, doi) -> None:
 
     PATH is the absolute path of the root of your sfaira clone.
     """
-    if doi is None or re.match(r'\b10\.\d+/[\w.]+\b', doi):
+    if doi is None or doi_lint(doi):
         dataloader_tester = DataloaderTester(path_loader, path_data, doi)
         dataloader_tester.test_dataloader()
     else:

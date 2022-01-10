@@ -1,0 +1,51 @@
+source	target	target_id
+B1 B	B cell	CL:0000236
+B1 B IGKC+	B cell	CL:0000236
+B1 B IGKC-	B cell	CL:0000236
+CD14+ Mono	monocyte	CL:0000576
+CD16+ Mono	monocyte	CL:0000576
+CD4+ T CD314+ CD45RA+	CD4-positive, alpha-beta T cell	CL:0000624
+CD4+ T activated	activated CD4-positive, alpha-beta T cell	CL:0000896
+CD4+ T activated integrinB7+	activated CD4-positive, alpha-beta T cell	CL:0000896
+CD4+ T naive	CD4-positive, alpha-beta T cell	CL:0000624
+CD8+ T	CD8-positive, alpha-beta T cell	CL:0000625
+CD8+ T CD49f+	CD8-positive, alpha-beta T cell	CL:0000625
+CD8+ T CD57+ CD45RA+	CD8-positive, alpha-beta T cell	CL:0000625
+CD8+ T CD57+ CD45RO+	CD8-positive, alpha-beta T cell	CL:0000625
+CD8+ T CD69+ CD45RA+	CD8-positive, alpha-beta T cell	CL:0000625
+CD8+ T CD69+ CD45RO+	CD8-positive, alpha-beta T cell	CL:0000625
+CD8+ T TIGIT+ CD45RA+	CD8-positive, alpha-beta T cell	CL:0000625
+CD8+ T TIGIT+ CD45RO+	CD8-positive, alpha-beta T cell	CL:0000625
+CD8+ T naive	CD8-positive, alpha-beta T cell	CL:0000625
+CD8+ T naive CD127+ CD26- CD101-	CD8-positive, alpha-beta T cell	CL:0000625
+Erythroblast	erythroblast	CL:0000765
+G/M prog	granulocyte monocyte progenitor cell	CL:0000557
+HSC	hematopoietic stem cell	CL:0000037
+ID2-hi myeloid prog	common myeloid progenitor	CL:0000049
+ILC	lymphocyte	CL:0000542
+ILC1	lymphocyte	CL:0000542
+Lymph prog	early lymphoid progenitor	CL:0000936
+MAIT	mucosal invariant T cell	CL:0000940
+MK/E prog	megakaryocyte-erythroid progenitor cell	CL:0000050
+NK	natural killer cell	CL:0000623
+NK CD158e1+	natural killer cell	CL:0000623
+Naive CD20+ B	naive B cell	CL:0000788
+Naive CD20+ B IGKC+	naive B cell	CL:0000788
+Naive CD20+ B IGKC-	naive B cell	CL:0000788
+Normoblast	erythroblast	CL:0000765
+Plasma cell	plasma cell	CL:0000786
+Plasma cell IGKC+	plasma cell	CL:0000786
+Plasma cell IGKC-	plasma cell	CL:0000786
+Plasmablast IGKC+	plasmablast	CL:0000980
+Plasmablast IGKC-	plasmablast	CL:0000980
+Proerythroblast	proerythroblast	CL:0000547
+Reticulocyte	reticulocyte	CL:0000558
+T prog cycling	T cell	CL:0000084
+T reg	regulatory T cell	CL:0000815
+Transitional B	transitional stage B cell	CL:0000818
+cDC1	conventional dendritic cell	CL:0000990
+cDC2	conventional dendritic cell	CL:0000990
+dnT	double negative thymocyte	CL:0002489
+gdT	gamma-delta T cell	CL:0000798
+gdT	gamma-delta T cell	CL:0000798
+pDC	plasmacytoid dendritic cell	CL:0000784

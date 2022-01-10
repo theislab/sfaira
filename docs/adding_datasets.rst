@@ -14,8 +14,8 @@ This process requires a couple of steps as outlined in the following sections.
    Overview of contributing dataloaders to sfaira. First, ensure that your data is not yet available as a dataloader.
    Next, create a dataloader. Afterwards, validate/annotate it to finally test it. Finally, submit your dataloader to sfaira.
 
-Step-by-step guide through CLI
-------------------------------
+Preparation
+-----------
 
 sfaira features an interactive way of creating, formatting and testing dataloaders through a command line interface (CLI).
 The common workflow using the CLI looks as follows:
@@ -46,7 +46,26 @@ The common workflow using the CLI looks as follows:
     pip install -e .  # install
 ..
 
-3. Create a new dataloader.
+3. Download data into local directory.
+    You will need to set a path in which the data files can be accessed by sfaira, in the following referred to as
+    `<path_data>/--DOI-folder--/`.
+    For now, you do not know `--DOI-folder--` yet and can call it temp.
+    You will then need to rename this folder `<path_data>/temp/` into `<path_data>/--DOI-folder--/` later when sfaira
+    gave you the name for this data set (after I.1).
+    Identify the raw data files and copy them into the datafolder `<path_data>/--DOI-folder--/`.
+    Note that this should be the exact files that are downloadable from the download URL you provided in the dataloader.
+    Do not decompress these files if these files are archives such as zip, tar or gz.
+    After finishing loader contribution, you can delete this data again without any consequences for your loader.
+
+
+Create a new data loader
+------------------------
+
+Phase I: Create a basic loader
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+1. Create template files
+
     When creating a dataloader with ``sfaira create-dataloader`` dataloader specific attributes such as organ, organism
     and many more are prompted for.
     We provide a description of all meta data items at the bottom of this page.
@@ -56,12 +75,12 @@ The common workflow using the CLI looks as follows:
 
     # make sure you are in the top-level sfaira directory from step 1
     git checkout -b YOUR_BRANCH_NAME  # create a new branch for your data loader.
-    sfaira create-dataloader [--doi] [--path_loader] [--path_data]
+    sfaira create-dataloader [--doi] [--path-loader] [--path-data]
 
 If `--doi` is not provided in the command above, the user will be prompted to enter it in the creation process.
 If `--path-loader` is not provided the following default location will be used: `./sfaira/data/dataloaders/loaders/`.
 If `--path-data` is not provided, the empty folder for the data files will be created in the following default location: `./sfaira/unit_tests/template_data/`.
-The created files are created in the sfaira installation under `<path_loader>/--DOI-folder--`,
+The created files are created in the sfaira installation under `<path-loader>/--DOI-folder--`,
 where the DOI-specific folder starts with `d` and is followed by the DOI in which all special characters are replaced
 by `_`, below referred to as `--DOI-folder--`:
 
@@ -75,25 +94,24 @@ by `_`, below referred to as `--DOI-folder--`:
     ├── <path_data>/--DOI-folder--
 ..
 
-4. Correct yaml file.
+2. Correct yaml file.
     Correct errors in `<path_loader>/--DOI-folder--/NA_NA_2021_NA_Einstein_001.yaml` file and add
     further attributes you may have forgotten in step 2.
+    See :ref:`_sec-example_loader` for an example yaml file after this step.
+    See :ref:`_sec-multiple-files` for short-cuts if you have multiple data sets.
     This step is optional.
 
-5. Make downloaded data available to sfaira data loader testing.
-    Identify the raw data files as indicated in the dataloader classes and copy them into the datafolder created by
-    the previous command (`<path_data>/--DOI-folder--/`).
-    Note that this should be the exact files that are downloadable from the download URL you provided in the dataloader.
-    Do not decompress these files if these files are archives such as zip, tar or gz.
-    Instead, navigate the archives directly in the load function (step 5).
-    Copy the data into `<path_data>/--DOI-folder--/`.
-    This folder is masked from git and only serves for temporarily using this data for loader testing.
-    After finishing loader contribution, you can delete this data again without any consequences for your loader.
+3. Rename data folder.
+    Rename the data folder `<path_data>/temp/` into `<path_data>/--DOI-folder--/` if not done already.
 
-6. Write load function.
+4. Write load function.
     Complete the load function in `<path_loader>/--DOI-folder--/NA_NA_2021_NA_Einstein_001.py`.
+    See :ref:`_sec-example_loader` for an example load function after this step.
 
-7. Create cell type annotation if your data set is annotated.
+Phase II: Annotate data loader
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+1. Create cell type annotation if your data set is annotated.
     This function will run fuzzy string matching between the annotations in the metadata column you provided in the
     `cell_types_original_obs_key` attribute of the yaml file and the Cell Ontology Database.
     Note that this will abort with error if there are bugs in your data loader.
@@ -104,25 +122,24 @@ by `_`, below referred to as `--DOI-folder--`:
     sfaira annotate-dataloader [--doi] [--path_loader] [--path_data]
 ..
 
-8. Clean up the automated cell type maps.
-        Sfaira creates suggestions for cell type mapping in a `.tsv` file in the directory in which your data loaders is
-        located if you indicated that annotation is present by filling `cell_types_original_obs_key`.
-        This file is: `<path_loader>/--DOI-folder--/NA_NA_2021_NA_Einstein_001.tsv`.
-        This file contains two columns with one row for each unique cell type label.
-        The free text identifiers in the first column "source",
-        and the corresponding ontology term in the second column "target".
-        After running the `annotate-dataloader` function, you can find a number of suggestions for matching the existing
-        celltype labels to cell labels from the cell ontology. It is now up to you to pick the best match from the
-        suggestions and delete all others from the line in the `.tsv` file. In certain cases the string matching might
-        not give the desired result. In such a case you can manually search the Cell Ontology database for the best
-        match via the OLS_ web-interface.
-        Note that you do not have to include the non-human-readable `target_id` here as they are added later in a fully
-        automated fashion.
+2. Clean up the automated cell type maps.
+    Sfaira creates suggestions for cell type mapping in a `.tsv` file in the directory in which your data loaders is
+    located if you indicated that annotation is present by filling `cell_types_original_obs_key`.
+    This file is: `<path_loader>/--DOI-folder--/NA_NA_2021_NA_Einstein_001.tsv`.
+    This file contains two columns with one row for each unique cell type label.
+    The free text identifiers in the first column "source",
+    and the corresponding ontology term in the second column "target".
+    After running the `annotate-dataloader` function, you can find a number of suggestions for matching the existing
+    celltype labels to cell labels from the cell ontology. It is now up to you to pick the best match from the
+    suggestions and delete all others from the line in the `.tsv` file. In certain cases the string matching might
+    not give the desired result. In such a case you can manually search the Cell Ontology database for the best
+    match via the OLS_ web-interface.
+    Note that you do not have to include the non-human-readable `target_id` here as they are added later in a fully
+    automated fashion.
 
-.. _OLS:https://www.ebi.ac.uk/ols/ontologies/cl
-
-9. Test data loader.
-        Note that this will abort with error if there are bugs in your data loader.
+3. Clean and test data loader.
+    This command will test data loading and will clean the cell type maps from II.2.
+    Note that this will abort with error if there are bugs in your data loader.
 
 .. code-block::
 
@@ -130,13 +147,18 @@ by `_`, below referred to as `--DOI-folder--`:
     sfaira test-dataloader [--doi] [--path_loader] [--path_data]
 ..
 
-10. Make loader public.
-        You can contribute the data loader to public sfaira as code through a pull request.
-        Note that you can also just keep the data loader in your local installation or keep it in sfaira_extensions
-        if you do not want to make it public.
-        Note that we do not manage data upload!
-        During publication, you would upload this data set to a server like GEO and the data loader contributed to
-        sfaira would use this download link.
+.. _OLS:https://www.ebi.ac.uk/ols/ontologies/cl
+
+Phase III: Finish data loader
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+2. Make loader public.
+    You can contribute the data loader to public sfaira as code through a pull request.
+    Note that you can also just keep the data loader in your local installation or keep it in sfaira_extensions
+    if you do not want to make it public.
+    Note that we do not manage data upload!
+    During publication, you would upload this data set to a server like GEO and the data loader contributed to
+    sfaira would use this download link.
 
 .. code-block::
 
@@ -166,7 +188,7 @@ All data loaders corresponding to data sets of one study are grouped into this d
 Next, each data set is represented by one data loader python file in this directory.
 See below for more complex set ups with repetitive data loader code.
 
-
+.. _sec-example-loader:
 The data loader python file
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -317,6 +339,7 @@ in which local data and cell type annotation can be managed separately but still
 The data loaders and cell type annotation formats between sfaira and sfaira_extensions are identical and can be easily
 copied over.
 
+.. _sec-multiple-files:
 Loading multiple files of similar structure
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -648,116 +671,3 @@ The meta data on the meta data file do not have to modified by you are automatic
 
 - version: [string]
     Version identifier of meta data scheme.
-
-The class-based data loader python file
-----------------------------------------
-As an alternative to the preferred yaml-based dataloaders, users can provide a dataloader class together with the load function.
-In this scenario, meta data is described in a constructor of a class in the same python file as the loading function.
-
-1. A constructor of the following form that contains all the relevant metadata that is available before the actual dataset is loaded to memory.
-
-.. code-block:: python
-
-    def __init__(
-            self,
-            path: Union[str, None] = None,
-            meta_path: Union[str, None] = None,
-            cache_path: Union[str, None] = None,
-            **kwargs
-    ):
-        super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-        # Data set meta data: You do not have to include all of these and can simply skip lines corresponding
-        # to attritbutes that you do not have access to. These are meta data on a sample level.
-        # The meta data attributes labeled with (*) may als be supplied per cell, see below,
-        # in this case, if you supply a .obs_key* attribute, you ccan leave out the sample-wise attribute.
-
-        self.id = x  # unique identifier of data set (Organism_Organ_Year_AssaySc_NumberOfDataset_FirstAuthorLastname_doi).
-
-        self.author = x  # author (list) who sampled / created the data set
-        self.doi = x  # doi of data set accompanying manuscript
-
-        self.download_url_data = x  # download website(s) of data files
-        self.download_url_meta = x  # download website(s) of meta data files
-
-        self.assay_sc = x  # (*, optional) protocol used to sample data (e.g. smart-seq2)
-        self.assay_differentiation = x  # (*, optional) protocol used to differentiate the cell line (e.g. Lancaster, 2014)
-        self.assay_type_differentiation = x  # (*, optional) type of protocol used to differentiate the cell line (guided/unguided)
-        self.cell_line = x # (*, optional) cell line used (for cell culture samples)
-        self.dev_stage = x  # (*, optional) developmental stage of organism
-        self.ethnicity = x  # (*, optional) ethnicity of sample
-        self.healthy = x  # (*, optional) whether sample represents a healthy organism
-        self.normalisation = x  # (optional) normalisation applied to raw data loaded (ideally counts, "raw")
-        self.organ = x  # (*, optional) organ (anatomical structure)
-        self.organism = x  # (*) species / organism
-        self.sample_source = x  # (*) whether the sample came from primary tissue or cell culture
-        self.sex = x  # (*, optional) sex
-        self.state_exact = x  # (*, optional) exact disease, treatment or perturbation state of sample
-        self.year = x  # year in which sample was acquired
-
-        # The following meta data may instead also be supplied on a cell level if an appropriate column is present in the
-        # anndata instance (specifically in .obs) after loading.
-        # You need to make sure this is loaded in the loading script)!
-        # See above for a description what these meta data attributes mean.
-        # Again, if these attributes are note available, you can simply leave this out.
-        self.obs_key_assay_sc = x  # (optional, see above, do not provide if .assay_sc is provided)
-        self.obs_key_assay_differentiation = x  # (optional, see above, do not provide if .age is assay_differentiation)
-        self.obs_key_assay_type_differentiation = x  # (optional, see above, do not provide if .assay_type_differentiation is provided)
-        self.obs_key_cell_line = x # (optional, see above, do not provide if .cell_line is provided)
-        self.obs_key_dev_stage = x  # (optional, see above, do not provide if .dev_stage is provided)
-        self.obs_key_ethnicity = x  # (optional, see above, do not provide if .ethnicity is provided)
-        self.obs_key_healthy = x  # (optional, see above, do not provide if .healthy is provided)
-        self.obs_key_organ = x  # (optional, see above, do not provide if .organ is provided)
-        self.obs_key_organism = x  # (optional, see above, do not provide if .organism is provided)
-        self.obs_key_sample_source = x  # (optional, see above, do not provide if .sample_source is provided)
-        self.obs_key_sex = x  # (optional, see above, do not provide if .sex is provided)
-        self.obs_key_state_exact = x  # (optional, see above, do not provide if .state_exact is provided)
-        # Additionally, cell type annotation is ALWAYS provided per cell in .obs, this annotation is optional though.
-        # name of column which contain streamlined cell ontology cell type classes:
-        self.obs_key_cell_types_original = x  # (optional)
-        # This cell type annotation is free text but is mapped to an ontology via a .tsv file with the same name and
-        # directory as the python file of this data loader (see below).
-
-
-2. A function called to load the data set into memory:
-It is important to set an automated path indicating the location of the raw files here.
-Our recommendation for this directory set-up is that you define a directory folder in your directory structure
-in which all of these raw files will be (self.path) and then add a sub-directory named as
-`self.directory_formatted_doi` (ie. the doi with all special characters replaced by "_" and place the raw files
-directly into this sub directory.
-
-.. code-block:: python
-
-    def load(data_dir, fn=None) -> anndata.AnnData:
-        fn = os.path.join(data_dir, "my.h5ad")
-        adata = anndata.read(fn)  # loading instruction into adata, use other ones if the data is not h5ad
-        return adata
-
-In summary, a python file for a mouse lung data set could look like this:
-
-.. code-block:: python
-
-    class MyDataset(DatasetBase)
-        def __init__(
-                self,
-                path: Union[str, None] = None,
-                meta_path: Union[str, None] = None,
-                cache_path: Union[str, None] = None,
-                **kwargs
-        ):
-            super().__init__(path=path, meta_path=meta_path, cache_path=cache_path, **kwargs)
-            self.author = "me"
-            self.doi = ["my preprint", "my peer-reviewed publication"]
-            self.download_url_data = "my GEO upload"
-            self.normalisation = "raw"  # because I uploaded raw counts, which is good practice!
-            self.organ = "lung"
-            self.organism = "mouse"
-            self.assay_sc = "smart-seq2"
-            self.year = "2020"
-            self.sample_source = "primary_tissue"
-
-            self.obs_key_cell_types_original = "louvain_named"  # i save my cell type names in here
-
-    def load(data_dir, fn=None) -> anndata.AnnData:
-        fn = os.path.join(data_dir, "my.h5ad")
-        adata = anndata.read(fn)
-        return adata

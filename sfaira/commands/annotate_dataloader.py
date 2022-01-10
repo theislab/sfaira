@@ -1,13 +1,14 @@
+import numpy as np
 import os
 import pydoc
 import shutil
-import re
 from typing import Union
 
 from sfaira.data import DatasetGroupDirectoryOriented, DatasetGroup, DatasetBase
 from sfaira.data.utils import read_yaml
 from sfaira.consts.utils import clean_doi
 from sfaira.commands.questionary import sfaira_questionary
+from sfaira.commands.utils import doi_lint
 
 try:
     import sfaira_extension as sfairae
@@ -43,7 +44,7 @@ class DataloaderAnnotater:
             doi = sfaira_questionary(function='text',
                                      question='DOI:',
                                      default='10.1000/j.journal.2021.01.001')
-            while not re.match(r'\b10\.\d+/[\w.]+\b', doi):
+            while not doi_lint(doi):
                 print('[bold red]The entered DOI is malformed!')  # noqa: W605
                 doi = sfaira_questionary(function='text',
                                          question='DOI:',
@@ -191,11 +192,17 @@ class DataloaderAnnotater:
                     # III) Write this directly into the sfaira clone so that it can be committed via git.
                     # TODO any errors not to be caught here?
                     doi_sfaira_repr = f'd{doi.translate({ord(c): "_" for c in r"!@#$%^&*()[]/{};:,.<>?|`~-=_+"})}'
-                    fn_tsv = os.path.join(path, doi_sfaira_repr, f"{file_module}.tsv")
-                    dsg_f.write_ontology_class_map(
+                    fn_tsv = os.path.join(path, doi_sfaira_repr, f"{file_module}")
+                    # Define .tsvs to write:
+                    attrs = [
+                        k for k in dsg_f._adata_ids.ontology_constrained
+                        if np.any([getattr(v, k + "_obs_key") is not None for v in dsg_f.datasets.values()])
+                    ]
+                    dsg_f.write_ontology_class_maps(
                         fn=fn_tsv,
+                        attrs=attrs,
                         protected_writing=True,
                         n_suggest=4,
                     )
                     tsvs_written.append(fn_tsv)
-        print(f"Completed annotation. Wrote {len(tsvs_written)} files:\n" + "\n".join(tsvs_written))
+        print("Completed annotation. Wrote .tsv files for loaders:\n" + "\n".join(tsvs_written))
