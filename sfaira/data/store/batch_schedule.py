@@ -191,9 +191,9 @@ class BatchDesignBlocks(BatchDesignBase):
                 if self.random_access:
                     # shuffle subgroups if random_access
                     idxs_group = np.random.permutation(idx_sorted)
-                batches += np.array_split(idxs_group, max(len(idxs_group) // self.retrieval_batch_size, 1))
+                batches.append(idxs_group)
         if self.random_access:
-            # shuffle batches
+            # shuffle blocks
             shuffle(batches)
 
         return batches
