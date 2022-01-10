@@ -1,5 +1,5 @@
 from random import shuffle
-from typing import List
+from typing import List, Tuple
 
 import numpy as np
 
