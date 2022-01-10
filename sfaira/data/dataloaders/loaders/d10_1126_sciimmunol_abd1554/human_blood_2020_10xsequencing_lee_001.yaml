@@ -1,0 +1,55 @@
+dataset_structure:
+     dataset_index: 1
+     sample_fns:
+        - "GSE149689_matrix.mtx.gz"
+    
+dataset_wise:
+    author: "Lee"
+    default_embedding: 
+    doi_preprint: 
+    doi_journal: "10.1126/sciimmunol.abd1554"
+    download_url_data: ["https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE149689&format=file&file=GSE149689%5Fbarcodes%2Etsv%2Egz",
+                        "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE149689&format=file&file=GSE149689%5Ffeatures%2Etsv%2Egz",
+                        "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE149689&format=file&file=GSE149689%5Fmatrix%2Emtx%2Egz"]
+    download_url_meta: ["https://www.science.org/doi/suppl/10.1126/sciimmunol.abd1554/suppl_file/table_s1.xlsx"]
+    primary_data: True
+    normalization: "raw"
+    year: 2020
+dataset_or_observation_wise:
+    assay_sc: "10x 3' v3"
+    assay_sc_obs_key:
+    assay_differentiation:
+    assay_differentiation_obs_key: 
+    assay_type_differentiation:
+    assay_type_differentiation_obs_key:
+    bio_sample:
+    bio_sample_obs_key: 
+    cell_line:
+    cell_line_obs_key:
+    cell_type:
+    cell_type_obs_key: 
+    development_stage: 
+    development_stage_obs_key: "Age"
+    disease: 
+    disease_obs_key: "Disease group"
+    ethnicity:
+    ethnicity_obs_key:
+    individual:
+    individual_obs_key: "Patient ID"
+    organ: "blood"
+    organ_obs_key: 
+    organism: "Homo sapiens"
+    organism_obs_key:
+    sample_source: "primary_tissue"
+    sample_source_obs_key:
+    sex:
+    sex_obs_key: "Sex"
+    state_exact: 
+    state_exact_obs_key: "severeness"
+    tech_sample:
+    tech_sample_obs_key: "Experimental  batch"
+feature_wise:
+    gene_id_ensembl_var_key: "index"
+    gene_id_symbols_var_key: "names"
+meta:
+    version: "1.1"
