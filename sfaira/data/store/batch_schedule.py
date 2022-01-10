@@ -1,5 +1,5 @@
 from random import shuffle
-from typing import List, Tuple
+from typing import List
 
 import numpy as np
 
@@ -35,7 +35,7 @@ class BatchDesignBase:
 
     @property
     def n_batches(self) -> int:
-        return len(self.batch_bounds)
+        return len(self.design)
 
     @property
     def idx(self):
@@ -58,7 +58,7 @@ class BatchDesignBase:
         Randomization is performed anew with every call to this property.
 
         :returns: List[np.array]
-            List of indicies per batch
+            List of indices per batch
         """
         raise NotImplementedError()
 
@@ -74,10 +74,12 @@ class BatchDesignFull(BatchDesignBase):
         return batch_starts_ends
 
     @property
-    def design(self) -> Tuple[np.ndarray, np.ndarray, List[Tuple[int, int]]]:
-        idx_proc = np.arange(0, len(self.idx))
-        batch_bounds = self.batch_bounds.copy()
-        return idx_proc, self.idx, batch_bounds
+    def design(self) -> List[np.ndarray]:
+        idx = np.arange(0, len(self.idx))
+        if self.random_access:
+            # shuffle idx for random access
+            idx = np.random.permutation(idx)
+        return [idx]
 
 
 class BatchDesignBasic(BatchDesignBase):
