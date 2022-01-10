@@ -1,10 +1,11 @@
+from collections import Counter
+from typing import Dict, List, Union
+
 import anndata
 import dask.array
 import numpy as np
 import pandas as pd
 import scipy.sparse
-from typing import Dict, List, Union
-
 from sfaira.data.store.batch_schedule import BATCH_SCHEDULE
 
 
@@ -144,7 +145,7 @@ class GeneratorSingle(GeneratorBase):
             x = self._validate_idx(x)
             x = np.sort(x)
         # Only reset if they are actually different:
-        if self._obs_idx is not None and len(x) != len(self._obs_idx) or np.any(x != self._obs_idx):
+        if (self._obs_idx is not None and len(x) != len(self._obs_idx)) or np.any(x != self._obs_idx):
             self._obs_idx = x
             self.schedule.idx = x
 
@@ -154,7 +155,7 @@ class GeneratorSingle(GeneratorBase):
 
     @property
     def n_batches(self) -> int:
-        return len(self.schedule.batch_bounds)
+        return len(self.schedule.design)
 
 
 class GeneratorAnndata(GeneratorSingle):
@@ -179,9 +180,9 @@ class GeneratorAnndata(GeneratorSingle):
         # Speed up access to single object by skipping index overlap operations:
 
         def g():
-            _, obs_idx, batch_bounds = self.schedule.design
-            for s, e in batch_bounds:
-                idx_i = obs_idx[s:e]
+            batches = self.schedule.design
+            for batch_idx in batches:
+                idx_i = batch_idx
                 # Match adata objects that overlap to batch:
                 if self.single_object:
                     idx_i_dict = dict([(k, np.sort(idx_i)) for k in self.adata_dict.keys()])
@@ -263,11 +264,6 @@ class GeneratorAnndata(GeneratorSingle):
 
 class GeneratorDask(GeneratorSingle):
 
-    """
-    In addition to the full data array, x, this class maintains a slice _x_slice which is indexed by the iterator.
-    Access to the slice can be optimised with dask and is therefore desirable.
-    """
-
     x: dask.array
     _x_slice: dask.array
     obs: pd.DataFrame
@@ -279,8 +275,6 @@ class GeneratorDask(GeneratorSingle):
         self.obs = obs[obs_keys]
         # Redefine index so that .loc indexing can be used instead of .iloc indexing:
         self.obs.index = np.arange(0, obs.shape[0])
-        self._x_slice = None
-        self._obs_slice = None
         super(GeneratorDask, self).__init__(obs_keys=obs_keys, var_idx=var_idx, **kwargs)
 
     @property
@@ -288,43 +282,21 @@ class GeneratorDask(GeneratorSingle):
         return self.x.shape[0]
 
     @property
-    def obs_idx(self):
-        return self._obs_idx
-
-    @obs_idx.setter
-    def obs_idx(self, x):
-        """
-        Allows emission of different iterator on same generator instance (using same dask array).
-        In addition to base method: allows for optimisation of dask array for batch draws.
-        """
-        if x is None:
-            x = np.arange(0, self.n_obs)
-        else:
-            x = self._validate_idx(x)
-            x = np.sort(x)
-        # Only reset if they are actually different:
-        if (self._obs_idx is not None and len(x) != len(self._obs_idx)) or np.any(x != self._obs_idx):
-            self._obs_idx = x
-            self.schedule.idx = x
-            self._x_slice = dask.optimize(self.x[self._obs_idx, :])[0]
-            self._obs_slice = self.obs.loc[self.obs.index[self._obs_idx], :]  # TODO better than iloc?
-            # Redefine index so that .loc indexing can be used instead of .iloc indexing:
-            self._obs_slice.index = np.arange(0, self._obs_slice.shape[0])
-
-    @property
     def iterator(self) -> iter:
         # Can all data sets corresponding to one organism as a single array because they share the second dimension
         # and dask keeps expression data and obs out of memory.
 
         def g():
-            obs_idx_slice, _, batch_bounds = self.schedule.design
-            x_temp = self._x_slice
-            obs_temp = self._obs_slice
-            for s, e in batch_bounds:
-                x_i = x_temp[obs_idx_slice[s:e], :]
+            # use most common chunksize as batchsize for batch_schedule
+            self.schedule.batchsize = Counter(self.x.chunks[0]).most_common(1)[0][0]
+            batches = self.schedule.design
+            x_temp = self.x
+            obs_temp = self.obs
+            for batch_idxs in batches:
+                x_i = x_temp[batch_idxs, :]
                 # Exploit fact that index of obs is just increasing list of integers, so we can use the .loc[]
                 # indexing instead of .iloc[]:
-                obs_i = obs_temp.loc[obs_temp.index[obs_idx_slice[s:e]], :]
+                obs_i = obs_temp.loc[obs_temp.index[batch_idxs], :]
                 data_tuple = self.map_fn(x_i, obs_i)
                 if self.batch_size == 1:
                     for data_tuple_i in split_batch(x=data_tuple):
