@@ -756,7 +756,7 @@ class DistributedStoreDao(DistributedStoreSingleFeatureSpace):
             else:
                 raise ValueError(f"Did not recognise data_source={self.data_source}.")
         return self._x
-    
+
     def persist_X_to_memory(self):
         """
         Persist underlying dask array into memory in sparse.COO format.
@@ -764,7 +764,7 @@ class DistributedStoreDao(DistributedStoreSingleFeatureSpace):
         # create dask array if it does not exsist yet
         if self._x is None:
             _ = self.X
-        
+
         self._x = self._x.map_blocks(scipy.sparse.csr_matrix).persist()
 
     @property
