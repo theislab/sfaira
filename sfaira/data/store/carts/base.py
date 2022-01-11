@@ -38,6 +38,9 @@ class CartBase:
         :param generator_type: Type of output iteratable.
             - python base generator (no change to `.generator`)
             - tensorflow dataset: This dataset is defined on a python iterator.
+                Important:
+                    This only returns the tf.data.Dataset.from_generator(). You need to define the input pipeline
+                    (e.g. .batch(), .prefetch()) on top of this data set.
             - pytorch: We distinguish torch.data.Dataset and torch.data.DataLoader ontop of either.
                 The Dataset vs DataLoader distinction is made by the "" suffix for Dataset or "-loader" suffix for +
                 dataloader. The distinction between Dataset and IteratableDataset defines if the object is defined
@@ -46,6 +49,9 @@ class CartBase:
                 in out-of-the-box usage.
                     - torch.data.Dataset: "torch" prefix, ie "torch" or "torch-loader"
                     - torch.data.IteratableDataset: "torch-iter" prefix, ie "torch-iter" or "torch-iter-loader"
+                Important:
+                    For model training in pytorch you need the "-loader" prefix. You can specify the arguments passed
+                    to torch.utils.data.DataLoader by the dataset_kwargs dictionary.
         :param dataset_kwargs:
         :returns: Modified iteratable (see generator_type).
         """
@@ -119,6 +125,12 @@ class CartBase:
     def obs(self):
         """
         Selected meta data matrix (cells x meta data) that is emitted in batches by .iterator().
+        """
+        raise NotImplementedError()
+
+    def move_to_memory(self):
+        """
+        Load underlying array into memory in sparse.COO format.
         """
         raise NotImplementedError()
 

@@ -14,7 +14,6 @@ class SfairaDataset(torch.utils.data.Dataset):
             map_fn,
             x: Union[np.ndarray, scipy.sparse.spmatrix, dask.array.Array],
             obs: pd.DataFrame,
-            dask_to_memory: bool = True,
             **kwargs):
         """
 
@@ -29,10 +28,7 @@ class SfairaDataset(torch.utils.data.Dataset):
         super(SfairaDataset, self).__init__()
         self.map_fn = map_fn
         self.obs = obs
-        if dask_to_memory and isinstance(x, dask.array.Array):
-            x = x.map_blocks(sparse.COO).compute()
-            self._using_sparse = True
-        elif isinstance(x, scipy.sparse.spmatrix) or isinstance(x, sparse.spmatrix):
+        if isinstance(x, scipy.sparse.spmatrix) or isinstance(x, sparse.spmatrix):
             self._using_sparse = True
         else:
             self._using_sparse = False
@@ -46,9 +42,11 @@ class SfairaDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
             idx = idx.tolist()
+        if isinstance(idx, int):
+            idx = [idx]
         x = self.x[idx, :]
         if self._using_sparse:
-            x = x.todense()
+            x = x.toarray()
         obs = self.obs.iloc[idx, :]
         xy = self.map_fn(x, obs)
         # Flatten batch dim for torch.Dataset [not necessary for IteratableDataset]

@@ -6,10 +6,6 @@ import scipy.sparse
 from typing import List
 
 from sfaira.consts import AdataIdsSfaira
-from sfaira.data import load_store
-from sfaira.versions.genomes.genomes import GenomeContainer
-
-from sfaira.unit_tests.data_for_tests.loaders import RELEASE_HUMAN, PrepareData
 from sfaira.unit_tests.tests_by_submodule.data.store.utils import _get_cart
 
 
@@ -21,12 +17,15 @@ def test_properties(store_format: str, feature_space: str):
     kwargs = {"idx": {"Mus musculus": idx}, "obs_keys": ["cell_type"], "randomized_batch_access": False,
               "return_dense": False}
     cart = _get_cart(store_format=store_format, feature_space=feature_space, **kwargs)
+
     # Meta data:
     assert cart.n_obs > len(idx)
     assert cart.n_obs_selected == len(idx)
     obs_idx = cart.obs_idx
     if feature_space != "single":
         obs_idx = obs_idx["Mus musculus"]
+    if store_format == "dao":
+        cart.move_to_memory()
     assert np.all(obs_idx == idx)
     # Data arrays:
     arr = [

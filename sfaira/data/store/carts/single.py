@@ -407,36 +407,15 @@ class CartDask(CartSingle):
 
         Note: to obtain the dask array instead of a csr matrix, use `self.x_dask`
         """
-        # Define a temporary map function that only yields the data matrix.
-        map_fn = self.map_fn
-
-        def map_fn_temp(x_, obs_):
-            return (np.asarray(x_), ),
-
-        self.map_fn = map_fn_temp
-        shape = (self.n_obs_selected, self.n_var)
-        x = scipy.sparse.csr_matrix(np.zeros(shape))
-        counter = 0
-        it = self.iterator
-        for batch in it():
-            x_batch, = batch
-            x_batch_data = x_batch[0]
-            batch_len = x_batch_data.shape[0]
-            x[counter:(counter + batch_len), :] = x_batch_data
-            counter += batch_len
-        # Reset map_fn
-        self.map_fn = map_fn
-        return x
-
-    # Methods that are specific to this child class:
-    @property
-    def x_dask(self):
-        """
-        Selected data matrix (cells x features) that is emitted in batches by .iterator() as dask array.
-
-        See also `.x` for an implementation that yields csr matrices.
-        """
         if self.var_idx is None:
             return self._x[self.schedule.idx, :]
         else:
             return self._x[self.schedule.idx, :][:, self.var_idx]
+
+    # Methods that are specific to this child class:
+
+    def move_to_memory(self):
+        """
+        Persist underlying dask array into memory in sparse.COO format.
+        """
+        self._x = self._x.map_blocks(scipy.sparse.csr_matrix).persist().compute()

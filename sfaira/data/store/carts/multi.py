@@ -102,6 +102,13 @@ class CartMulti(CartBase):
             self.carts[k].obs_idx = x[k]
         self._ratios = None  # Reset ratios.
 
+    def move_to_memory(self):
+        """
+        Persist underlying arrays into memory in sparse.COO format.
+        """
+        for v in self.carts.values():
+            v.move_to_memory()
+
     @property
     def ratios(self):
         """
