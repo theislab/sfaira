@@ -1,6 +1,6 @@
 .. _consuming_data_rst:
 
-Consuming data
+Data loaderes
 ===============
 
 .. image:: https://raw.githubusercontent.com/theislab/sfaira/master/resources/images/data_zoo.png
