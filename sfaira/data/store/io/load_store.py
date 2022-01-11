@@ -1,11 +1,11 @@
 import os
 from typing import List, Union
 
-from sfaira.data.store.multi_store import DistributedStoresDao, DistributedStoresH5ad, \
+from sfaira.data.store.stores.multi_store import DistributedStoresDao, DistributedStoresH5ad, \
     DistributedStoreMultipleFeatureSpaceBase
 
 
-def load_store(cache_path: Union[str, os.PathLike], store_format: str = "dao",
+def load_store(cache_path: Union[str, os.PathLike, List[str], List[os.PathLike]], store_format: str = "dao",
                columns: Union[None, List[str]] = None) -> DistributedStoreMultipleFeatureSpaceBase:
     """
     Instantiates a distributed store class.

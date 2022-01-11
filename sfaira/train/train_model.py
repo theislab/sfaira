@@ -6,7 +6,7 @@ import pickle
 from typing import Union
 
 from sfaira.consts import AdataIdsSfaira
-from sfaira.data.store.base import DistributedStoreBase
+from sfaira.data.store.stores.base import DistributedStoreBase
 from sfaira.data import DistributedStoreSingleFeatureSpace, Universe
 from sfaira.estimators import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
 from sfaira.ui import ModelZoo

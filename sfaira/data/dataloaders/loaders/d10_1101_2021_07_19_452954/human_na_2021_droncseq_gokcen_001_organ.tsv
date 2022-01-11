@@ -1,0 +1,9 @@
+source	target	target_id
+breast	breast	UBERON:0000310
+esophagusmucosa	esophagus mucosa	UBERON:0002469
+esophagusmuscularis	esophagus muscle	UBERON:0003832
+heart	heart	UBERON:0000948
+lung	lung	UBERON:0002048
+prostate	prostate gland	UBERON:0002367
+skeletalmuscle	skeletal muscle organ	UBERON:0014892
+skin	skin of body	UBERON:0002097

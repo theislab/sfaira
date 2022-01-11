@@ -1,0 +1,52 @@
+dataset_structure:
+    dataset_index: 1
+    sample_fns:
+        - "GTEx_8_tissues_snRNAseq_atlas_071421.public_obs.h5ad"
+dataset_wise:
+    author: "Gokcen"
+    default_embedding: "X_umap"
+    doi_preprint: "10.1101/2021.07.19.452954"
+    doi_journal:
+    download_url_data: "https://storage.googleapis.com/gtex_analysis_v9/snrna_seq_data/GTEx_8_tissues_snRNAseq_atlas_071421.public_obs.h5ad"
+    download_url_meta:
+    primary_data: True
+    normalization: "raw"
+    year: 2021
+dataset_or_observation_wise:
+    assay_sc: "DroNc-seq"
+    assay_sc_obs_key:
+    assay_differentiation:
+    assay_differentiation_obs_key:
+    assay_type_differentiation:
+    assay_type_differentiation_obs_key:
+    bio_sample:
+    bio_sample_obs_key: "tissue-individual-prep"
+    cell_line:
+    cell_line_obs_key:
+    cell_type:
+    cell_type_obs_key: "Granular cell type"
+    development_stage:
+    development_stage_obs_key: "Age_bin"
+    disease: "healthy"
+    disease_obs_key:
+    ethnicity:
+    ethnicity_obs_key:
+    individual:
+    individual_obs_key: "Participant ID"
+    organ:
+    organ_obs_key: "tissue"
+    organism: "Homo sapiens"
+    organism_obs_key:
+    sample_source: "primary_tissue"
+    sample_source_obs_key:
+    sex:
+    sex_obs_key: "Sex"
+    state_exact: "healthy"
+    state_exact_obs_key:
+    tech_sample:
+    tech_sample_obs_key: "batch"
+feature_wise:
+    gene_id_ensembl_var_key: "gene_ids"
+    gene_id_symbols_var_key: "index"
+meta:
+    version: "1.1"

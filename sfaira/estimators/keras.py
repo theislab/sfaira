@@ -12,10 +12,10 @@ import warnings
 from tqdm import tqdm
 
 from sfaira.consts import AdataIdsSfaira, OCS, AdataIds
-from sfaira.data.store.base import DistributedStoreBase
-from sfaira.data.store.generators import GeneratorSingle
-from sfaira.data.store.multi_store import DistributedStoresAnndata
-from sfaira.data.store.single_store import DistributedStoreSingleFeatureSpace
+from sfaira.data.store.stores.base import DistributedStoreBase
+from sfaira.data.store.carts.single import CartSingle
+from sfaira.data.store.stores.multi_store import DistributedStoresAnndata
+from sfaira.data.store.stores.single_store import DistributedStoreSingleFeatureSpace
 from sfaira.models import BasicModelKeras
 from sfaira.models.celltype import BasicModelKerasCelltype
 from sfaira.models.embedding import BasicModelKerasEmbedding
@@ -312,7 +312,7 @@ class EstimatorKeras:
             raise ValueError("md5 of %s did not match expectation" % fn)
 
     @abc.abstractmethod
-    def _get_generator(self, **kwargs) -> GeneratorSingle:
+    def _get_cart(self, **kwargs) -> CartSingle:
         """
         Yield a generator based on which a tf dataset can be built.
         """
@@ -331,8 +331,8 @@ class EstimatorKeras:
             "prefetch": prefetch,
             "shuffle_buffer_size": 0,
         }
-        train_gen = self._get_generator(idx=idx, mode=mode, retrieval_batch_size=128,
-                                        randomized_batch_access=False)
+        train_gen = self._get_cart(idx=idx, mode=mode, retrieval_batch_size=128,
+                                   randomized_batch_access=False)
         train_tf_dataset_kwargs = self._tf_dataset_kwargs(mode=mode)
         train_dataset = train_gen.adaptor(generator_type="tensorflow", **train_tf_dataset_kwargs)
         train_dataset = process_tf_dataset(dataset=train_dataset, mode=mode, **tf_kwargs)
@@ -469,13 +469,13 @@ class EstimatorKeras:
 
         tf_kwargs = {"batch_size": batch_size, "cache": cache_full, "prefetch": prefetch,
                      "shuffle_buffer_size": min(shuffle_buffer_size, len(self.idx_train))}
-        train_gen = self._get_generator(idx=self.idx_train, mode='train', retrieval_batch_size=retrieval_batch_size,
-                                        randomized_batch_access=randomized_batch_access, weighted=weighted)
+        train_gen = self._get_cart(idx=self.idx_train, mode='train', retrieval_batch_size=retrieval_batch_size,
+                                   randomized_batch_access=randomized_batch_access, weighted=weighted)
         train_tf_dataset_kwargs = self._tf_dataset_kwargs(mode="train")
         train_dataset = train_gen.adaptor(generator_type="tensorflow", **train_tf_dataset_kwargs)
         train_dataset = process_tf_dataset(dataset=train_dataset, mode="train", **tf_kwargs)
-        val_gen = self._get_generator(idx=self.idx_train, mode='train', retrieval_batch_size=retrieval_batch_size,
-                                      randomized_batch_access=randomized_batch_access, weighted=weighted)
+        val_gen = self._get_cart(idx=self.idx_train, mode='train', retrieval_batch_size=retrieval_batch_size,
+                                 randomized_batch_access=randomized_batch_access, weighted=weighted)
         val_tf_dataset_kwargs = self._tf_dataset_kwargs(mode="train_val")
         val_dataset = val_gen.adaptor(generator_type="tensorflow", **val_tf_dataset_kwargs)
         val_dataset = process_tf_dataset(dataset=val_dataset, mode="train", **tf_kwargs)
@@ -581,7 +581,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             output_shapes = (output_shapes_x, (self.data.n_vars, ))
         return {"output_types": output_types, "output_shapes": output_shapes}
 
-    def _get_generator(
+    def _get_cart(
             self,
             idx: Union[np.ndarray, None],
             mode: str,
@@ -604,9 +604,9 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 output = output_x, (x_sample, )
             return output
 
-        g = self.data.generator(idx=idx, retrieval_batch_size=retrieval_batch_size, obs_keys=[], map_fn=map_fn,
-                                return_dense=True, randomized_batch_access=randomized_batch_access,
-                                random_access=False)
+        g = self.data.checkout(idx=idx, retrieval_batch_size=retrieval_batch_size, obs_keys=[], map_fn=map_fn,
+                               return_dense=True, randomized_batch_access=randomized_batch_access,
+                               random_access=False)
         return g
 
     def _get_loss(self):
@@ -940,7 +940,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             output_shapes = (output_shapes_x, tf.TensorShape([self.ntypes]))
         return {"output_types": output_types, "output_shapes": output_shapes}
 
-    def _get_generator(
+    def _get_cart(
             self,
             idx: Union[np.ndarray, None],
             mode: str,
@@ -948,7 +948,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             randomized_batch_access: bool,
             weighted: bool = False,
             **kwargs
-    ) -> GeneratorSingle:
+    ) -> CartSingle:
         # Define constants used by map_fn in outer name space so that they are not created for each sample.
         if weighted:
             raise ValueError("using weights with store is not supported yet")
@@ -973,10 +973,10 @@ class EstimatorKerasCelltype(EstimatorKeras):
                 output = output_x,
             return output
 
-        g = self.data.generator(idx=idx, retrieval_batch_size=retrieval_batch_size,
-                                obs_keys=[self._adata_ids.cell_type + self._adata_ids.onto_id_suffix], map_fn=map_fn,
-                                return_dense=True, randomized_batch_access=randomized_batch_access,
-                                random_access=False)
+        g = self.data.checkout(idx=idx, retrieval_batch_size=retrieval_batch_size,
+                               obs_keys=[self._adata_ids.cell_type + self._adata_ids.onto_id_suffix], map_fn=map_fn,
+                               return_dense=True, randomized_batch_access=randomized_batch_access,
+                               random_access=False)
         return g
 
     def _get_loss(self):

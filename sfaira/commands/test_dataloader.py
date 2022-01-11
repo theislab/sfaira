@@ -78,7 +78,7 @@ class DataloaderTester:
               'conflicts and add the correct cell ontology class name into the .tsv "target" column.')
 
         ds, cache_path = self._get_ds()
-        ds.clean_ontology_class_map()
+        ds.clean_ontology_class_maps()
 
         # TODO try-except with good error description saying that the data loader is broken here:
         ds.load(
