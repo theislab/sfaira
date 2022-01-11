@@ -6,6 +6,15 @@ import numpy as np
 
 class BatchDesignBase:
 
+    """
+    Manages distribution of selected indices for a given data object over subsequent batches.
+
+    This involves randomisation and possible meta-data dependent batching.
+    This class is centred on the property `.design` which yields a list of observation indices (arrays), where each
+    array is the set of indices that map to a batch and the sequence of batches in the list encodes the sequence of
+    batches during an epoch over the data.
+    """
+
     def __init__(self,
                  retrieval_batch_size: int,
                  randomized_batch_access: bool,
@@ -63,19 +72,6 @@ class BatchDesignBase:
         raise NotImplementedError()
 
 
-class BatchDesignFull(BatchDesignBase):
-
-    """Emits full dataset as a single batch in each query."""
-
-    @property
-    def design(self) -> List[np.ndarray]:
-        idx = np.arange(0, len(self.idx))
-        if self.random_access:
-            # shuffle idx for random access
-            idx = np.random.permutation(idx)
-        return [idx]
-
-
 class BatchDesignBasic(BatchDesignBase):
 
     """Standard batched access to data."""
@@ -101,6 +97,10 @@ class BatchDesignBasic(BatchDesignBase):
 
 
 class BatchDesignBalanced(BatchDesignBase):
+
+    """
+    Balanced batches across meta data partitions of data.
+    """
 
     def __init__(self, grouping, group_weights: dict, randomized_batch_access: bool, random_access: bool,
                  **kwargs):
@@ -148,12 +148,18 @@ class BatchDesignBalanced(BatchDesignBase):
 
 
 class BatchDesignBlocks(BatchDesignBase):
-    """Yields meta data-defined blocks of observations in each iteration."""
+
+    """
+    Meta data-defined blocks of observations in each batch.
+
+    Note that the batches do not necessarily contain equal numbers of observations! The yielded batch size depends
+    solely on the number of observations in a meta data partition.
+    """
 
     def __init__(self, grouping, random_access: bool, **kwargs):
         """
 
-        :param grouping: Group label for each entry in idx.
+        :param grouping: List of group labels for each element in idx. Must have same length as data array.
         :param group_weights: Group weight for each unique group in grouping. Does not have to normalise to a probability
             distribution but is normalised in this function. The outcome vector is always of length idx.
         """
@@ -216,6 +222,19 @@ class BatchDesignBlocks(BatchDesignBase):
             shuffle(batches)
 
         return batches
+
+
+class BatchDesignFull(BatchDesignBase):
+
+    """Emits full dataset as a single batch in each query."""
+
+    @property
+    def design(self) -> List[np.ndarray]:
+        idx = np.arange(0, len(self.idx))
+        if self.random_access:
+            # shuffle idx for random access
+            idx = np.random.permutation(idx)
+        return [idx]
 
 
 BATCH_SCHEDULE = {

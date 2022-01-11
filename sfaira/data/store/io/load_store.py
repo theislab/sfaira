@@ -1,7 +1,7 @@
 import os
 from typing import List, Union
 
-from sfaira.data.store.multi_store import DistributedStoresDao, DistributedStoresH5ad, \
+from sfaira.data.store.stores.multi_store import DistributedStoresDao, DistributedStoresH5ad, \
     DistributedStoreMultipleFeatureSpaceBase
 
 

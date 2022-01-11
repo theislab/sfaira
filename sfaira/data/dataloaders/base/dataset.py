@@ -22,7 +22,7 @@ from sfaira.versions.metadata import Ontology, OntologyHierarchical, CelltypeUni
 from sfaira.consts import AdataIds, AdataIdsCellxgene_v2_0_0, AdataIdsSfaira, META_DATA_FIELDS, OCS
 from sfaira.data.dataloaders.base.utils import identify_tsv
 from sfaira.data.dataloaders.export_adaptors import cellxgene_export_adaptor
-from sfaira.data.store.io_dao import write_dao
+from sfaira.data.store.io.io_dao import write_dao
 from sfaira.data.dataloaders.base.utils import is_child, get_directory_formatted_doi
 from sfaira.data.utils import collapse_matrix, read_yaml
 from sfaira.consts.utils import clean_id_str
@@ -333,7 +333,6 @@ class DatasetBase(abc.ABC):
                           "selected datasets. Run `pip install synapseclient` to install it. Skipping download of the "
                           f"following dataset: {self.id}")
             return
-        import shutil
         import logging
         logging.captureWarnings(False)  # required to properly display warning messages below with sypaseclient loaded
 

@@ -5,7 +5,7 @@ import os
 import pandas as pd
 import pathlib
 
-from sfaira.data.store.multi_store import DistributedStoresAnndata
+from sfaira.data.store.stores.multi_store import DistributedStoresAnndata
 from sfaira.versions.genomes import GenomeContainer
 
 from sfaira.unit_tests.directories import DIR_DATA_LOADERS_CACHE, DIR_DATA_LOADERS_STORE_DAO, \

@@ -419,8 +419,8 @@ def test_dataset_size(batch_size: int, randomized_batch_access: bool):
     def map_fn(x, obs):
         return (x, ),
 
-    g_train = test_estim.estimator.data.generator(idx=idx_train, retrieval_batch_size=retrieval_batch_size,
-                                                  randomized_batch_access=randomized_batch_access, map_fn=map_fn)
+    g_train = test_estim.estimator.data.checkout(idx=idx_train, retrieval_batch_size=retrieval_batch_size,
+                                                 randomized_batch_access=randomized_batch_access, map_fn=map_fn)
     x_train2_shape = 0
     for x, in g_train.iterator():
         x = x[0]

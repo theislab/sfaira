@@ -7,11 +7,11 @@ import pickle
 from typing import Dict, List, Tuple, Union
 
 from sfaira.consts import AdataIdsSfaira
-from sfaira.data.store.base import DistributedStoreBase
-from sfaira.data.store.single_store import DistributedStoreSingleFeatureSpace, \
+from sfaira.data.store.stores.base import DistributedStoreBase
+from sfaira.data.store.stores.single_store import DistributedStoreSingleFeatureSpace, \
     DistributedStoreDao, DistributedStoreAnndata
-from sfaira.data.store.generators import GeneratorMulti
-from sfaira.data.store.io_dao import read_dao
+from sfaira.data.store.carts.multi import CartMulti
+from sfaira.data.store.io.io_dao import read_dao
 from sfaira.versions.genomes.genomes import GenomeContainer
 
 
@@ -119,27 +119,6 @@ class DistributedStoreMultipleFeatureSpaceBase(DistributedStoreBase):
         return dict([(k, v.n_obs) for k, v in self.stores.items()])
 
     @property
-    def obs(self):
-        """
-        Dictionary of concatenated .obs tables by store, only including non-empty stores.
-        """
-        return dict([(k, v.obs) for k, v in self.stores.items()])
-
-    @property
-    def var(self):
-        """
-        Dictionaries of .var tables by store, only including non-empty stores.
-        """
-        return dict([(k, v.var) for k, v in self.stores.items()])
-
-    @property
-    def X(self):
-        """
-        Dictionary of concatenated data matrices by store, only including non-empty stores.
-        """
-        return dict([(k, v.X) for k, v in self.stores.items()])
-
-    @property
     def shape(self) -> Dict[str, Tuple[int, int]]:
         """
         Dictionary of full selected data matrix shape by store.
@@ -213,16 +192,16 @@ class DistributedStoreMultipleFeatureSpaceBase(DistributedStoreBase):
         if len(keys_not_found) > 0:
             raise ValueError(f"did not find object(s) with name(s) in store: {keys_not_found}")
 
-    def generator(
+    def checkout(
             self,
             idx: Union[Dict[str, Union[np.ndarray, None]], None] = None,
             intercalated: bool = True,
             **kwargs
-    ) -> GeneratorMulti:
+    ) -> CartMulti:
         """
-        Emission of batches from unbiased generators of all stores.
+        Carts per store.
 
-        See also DistributedStore*.generator().
+        See also DistributedStore*.checkout().
 
         :param idx:
         :param intercalated: Whether to do sequential or intercalated emission.
@@ -234,8 +213,8 @@ class DistributedStoreMultipleFeatureSpaceBase(DistributedStoreBase):
             idx = dict([(k, None) for k in self.stores.keys()])
         for k in self.stores.keys():
             assert k in idx.keys(), (idx.keys(), self.stores.keys())
-        generators = dict([(k, v.generator(idx=idx[k], **kwargs)) for k, v in self.stores.items()])
-        return GeneratorMulti(generators=generators, intercalated=intercalated)
+        carts = dict([(k, v.checkout(idx=idx[k], **kwargs)) for k, v in self.stores.items()])
+        return CartMulti(carts=carts, intercalated=intercalated)
 
 
 class DistributedStoresAnndata(DistributedStoreMultipleFeatureSpaceBase):
