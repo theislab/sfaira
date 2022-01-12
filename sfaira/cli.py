@@ -173,9 +173,9 @@ def test_dataloader(path_loader, path_data, doi) -> None:
               type=click.Path(exists=True),
               help='Absolute path of the location of the streamlined output h5ads.')
 @click.option('--path-data',
-                default="./",
-                type=click.Path(exists=True),
-                help='Absolute path of the location of the raw data directory.')
+              default="./",
+              type=click.Path(exists=True),
+              help='Absolute path of the location of the raw data directory.')
 @click.option('--path_cache',
               type=click.Path(exists=True),
               default=None,
