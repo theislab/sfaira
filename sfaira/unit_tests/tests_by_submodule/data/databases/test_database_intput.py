@@ -2,7 +2,7 @@ import os
 import pytest
 
 from sfaira.consts import AdataIdsSfaira
-from sfaira.data.store.io_dao import read_dao
+from sfaira.data.store.io.io_dao import read_dao
 from sfaira.unit_tests.data_for_tests.databases.utils import prepare_dsg_database
 from sfaira.unit_tests.data_for_tests.databases.consts import CELLXGENE_DATASET_ID
 from sfaira.unit_tests.data_for_tests.loaders import RELEASE_HUMAN, RELEASE_MOUSE

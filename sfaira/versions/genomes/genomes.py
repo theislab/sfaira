@@ -50,20 +50,36 @@ class GtfInterface:
 
     @property
     def assembly(self) -> str:
-        # Get variable middle string of assembly name by looking files up on ftp server:
-        ftp = ftplib.FTP("ftp.ensembl.org")
-        ftp.login()
-        ftp.cwd(self.url_ensembl_dir)
-        data = []
-        ftp.dir(data.append)
-        ftp.quit()
-        target_file = [line.split(' ')[-1] for line in data]
-        # Filter assembly files starting with organism name:
-        target_file = [x for x in target_file if x.split(".")[0].lower() == self.ensembl_organism]
-        # Filter target assembly:
-        target_file = [x for x in target_file if len(x.split(".")) == 5]
-        assert len(target_file) == 1, target_file  # There should only be one file left if filters work correctly.
-        assembly = target_file[0].split(".gtf.gz")[0]
+        """
+        Get full assembly name of genome represented in this class.
+        """
+        def file_filter(fns) -> List[str]:
+            # Filter assembly files starting with organism name:
+            y = [x for x in fns if x.split(".")[0].lower() == self.ensembl_organism]
+            # Filter target release:
+            y = [x for x in y if x.split(".")[-2] == self.release]
+            return y
+
+        # Check first in local files and then query ensembl if no match is found:
+        target_file = file_filter(fns=os.listdir(self.cache_dir))
+        if len(target_file) == 0:
+            # Get variable middle string of assembly name by looking files up on ftp server:
+            ftp = ftplib.FTP("ftp.ensembl.org")
+            ftp.login()
+            ftp.cwd(self.url_ensembl_dir)
+            data = []
+            ftp.dir(data.append)
+            ftp.quit()
+            target_file = [line.split(' ')[-1] for line in data]
+            # Filter assembly files starting with organism name:
+            target_file = [x for x in target_file if x.split(".")[0].lower() == self.ensembl_organism]
+            # Filter target assembly:
+            target_file = [x for x in target_file if len(x.split(".")) == 5]
+            assert len(target_file) == 1, target_file  # There should only be one file left if filters work correctly.
+            assembly = target_file[0].split(".gtf.gz")[0]
+        else:
+            assert len(target_file) == 1, target_file  # There should only be one file left if filters work correctly.
+            assembly = target_file[0].split(".csv")[0]
         return assembly
 
     @property

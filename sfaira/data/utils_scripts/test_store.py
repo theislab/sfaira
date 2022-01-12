@@ -45,7 +45,7 @@ def _map_fn(x_sample, obs_sample):
     return x, y
 
 
-def _time_gen(_store: sfaira.data.store.DistributedStoreSingleFeatureSpace,
+def _time_gen(_store: sfaira.data.store.StoreSingleFeatureSpace,
               store_format: str,
               kwargs_generator: Dict[str, any],
               num_draws: int) -> List[float]:
@@ -58,7 +58,7 @@ def _time_gen(_store: sfaira.data.store.DistributedStoreSingleFeatureSpace,
     del kwargs_generator["var_subset"]
     _gen = (
         _store
-        .generator(**kwargs_generator)
+        .checkout(**kwargs_generator)
         .iterator()
     )
     _measurements = []
@@ -123,7 +123,7 @@ for store_type_i in store_type:
         t0 = time.perf_counter()
         store = sfaira.data.load_store(cache_path=path_store, store_format=store_type_i)
         # Include initialisation of generator in timing to time overhead generated here.
-        _ = store.generator(map_fn=_map_fn, obs_keys=OBS_KEYS).iterator()
+        _ = store.checkout(map_fn=_map_fn, obs_keys=OBS_KEYS).iterator()
         time_measurements_initiate['instantiation_time'].append(time.perf_counter() - t0)
         time_measurements_initiate['storage_format'].append(store_type_i)
         time_measurements_initiate['run'].append(i)
