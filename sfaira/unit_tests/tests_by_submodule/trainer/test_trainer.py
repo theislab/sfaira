@@ -84,7 +84,7 @@ class HelperTrainerBase:
         if not os.path.exists(self.dir_temp):
             pathlib.Path(self.dir_temp).mkdir(parents=True, exist_ok=True)
         self.trainer.estimator.train(
-            epochs=1,
+            epochs=3,
             max_steps_per_epoch=1,
             test_split=0.1,
             validation_split=0.1,

@@ -10,6 +10,9 @@ Import sfaira as::
 Data: `data`
 -------------
 
+Data loaders
+~~~~~~~~~~~~~
+
 .. module:: sfaira.data
 .. currentmodule:: sfaira
 
@@ -39,16 +42,74 @@ Dataset universe to interact with all data loader classes:
 
    data.Universe
 
-Data store handling:
+Stores
+~~~~~~~
+
+.. module:: sfaira.data
+.. currentmodule:: sfaira
+
+We distinguish stores for a single feature space, which could for example be a single organism,
+and those for multiple feature spaces.
+Critically, data from multiple feature spaces can be represented as a data array for each feature space.
+In `load_store` we represent a directory of datasets as a instance of a multi-feature space store and discover all feature
+spaces present.
+This store can be subsetted to a single store if only data corresponding to a single organism is desired,
+for example.
+The core API exposed to users is:
 
 .. autosummary::
    :toctree: api
 
    data.load_store
-   data.DistributedStoreBase
-   data.DistributedStoreDao
-   data.DistributedStoreH5ad
 
+Store classes for a single feature space:
+
+.. autosummary::
+   :toctree: api
+
+   data.StoreSingleFeatureSpace
+
+Store classes for a multiple feature spaces:
+
+.. autosummary::
+   :toctree: api
+
+   data.StoreMultipleFeatureSpaceBase
+   data.StoresAnndata
+   data.StoresDao
+   data.StoresH5ad
+
+Carts
+~~~~~~
+
+.. module:: sfaira.data
+.. currentmodule:: sfaira
+
+Stores represent on-disk data collection and perform operations such as subsetting.
+Ultimatively, they are often used to emit data objects, which are "carts".
+Carts are specific to the underlying store's data format and expose iterators, data matrices and
+adaptors to machine learning framework data pipelines, such as tensorflow and torchc data.
+Again, carts can cover one or multiple feature spaces.
+
+.. autosummary::
+   :toctree: api
+
+   data.store.carts.CartSingle
+   data.store.carts.CartMulti
+
+The emission of data from cart iterators and adaptors is controlled by batch schedules,
+which direct how data is released from the underlying data matrix:
+
+.. autosummary::
+   :toctree: api
+
+   data.store.batch_schedule.BatchDesignBase
+   data.store.batch_schedule.BatchDesignBasic
+   data.store.batch_schedule.BatchDesignBalanced
+   data.store.batch_schedule.BatchDesignBlocks
+   data.store.batch_schedule.BatchDesignFull
+
+For most purposes related to stochastic optimisation, `BatchDesignBasic` is chosen.
 
 Estimator classes: `estimators`
 --------------------------------

@@ -22,7 +22,7 @@ from sfaira.versions.metadata import Ontology, OntologyHierarchical, CelltypeUni
 from sfaira.consts import AdataIds, AdataIdsCellxgene_v2_0_0, AdataIdsSfaira, META_DATA_FIELDS, OCS
 from sfaira.data.dataloaders.base.utils import identify_tsv
 from sfaira.data.dataloaders.export_adaptors import cellxgene_export_adaptor
-from sfaira.data.store.io_dao import write_dao
+from sfaira.data.store.io.io_dao import write_dao
 from sfaira.data.dataloaders.base.utils import is_child, get_directory_formatted_doi
 from sfaira.data.utils import collapse_matrix, read_yaml
 from sfaira.consts.utils import clean_id_str
@@ -65,7 +65,6 @@ class DatasetBase(abc.ABC):
     _ethnicity: Union[None, str]
     _id: Union[None, str]
     _individual: Union[None, str]
-    _ncells: Union[None, int]
     _normalization: Union[None, str]
     _organ: Union[None, str]
     _organism: Union[None, str]
@@ -171,7 +170,6 @@ class DatasetBase(abc.ABC):
         self._ethnicity = None
         self._id = None
         self._individual = None
-        self._ncells = None
         self._normalization = None
         self._organ = None
         self._organism = None
@@ -335,7 +333,6 @@ class DatasetBase(abc.ABC):
                           "selected datasets. Run `pip install synapseclient` to install it. Skipping download of the "
                           f"following dataset: {self.id}")
             return
-        import shutil
         import logging
         logging.captureWarnings(False)  # required to properly display warning messages below with sypaseclient loaded
 
@@ -1362,29 +1359,11 @@ class DatasetBase(abc.ABC):
         if self.cell_type_obs_key is not None:
             return True
         else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.annotated in self.meta.columns:
-                return self.meta[self._adata_ids.annotated].values[0]
-            elif self.loaded:
-                # If data set was loaded and there is still no annotation indicated, it is declared unannotated.
-                return False
-            else:
-                # If data set was not yet loaded, it is unclear if annotation would be loaded in ._load(),
-                # if also no meta data is available, we do not know the status of the data set.
-                return None
+            return False
 
     @property
     def assay_sc(self) -> Union[None, str]:
-        if self._assay_sc is not None:
-            return self._assay_sc
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.assay_sc in self.meta.columns:
-                return self.meta[self._adata_ids.assay_sc]
-            else:
-                return None
+        return self._assay_sc
 
     @assay_sc.setter
     def assay_sc(self, x: str):
@@ -1393,15 +1372,7 @@ class DatasetBase(abc.ABC):
 
     @property
     def assay_differentiation(self) -> Union[None, str]:
-        if self._assay_differentiation is not None:
-            return self._assay_differentiation
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.assay_differentiation in self.meta.columns:
-                return self.meta[self._adata_ids.assay_differentiation]
-            else:
-                return None
+        return self._assay_differentiation
 
     @assay_differentiation.setter
     def assay_differentiation(self, x: str):
@@ -1411,15 +1382,7 @@ class DatasetBase(abc.ABC):
 
     @property
     def assay_type_differentiation(self) -> Union[None, str]:
-        if self._assay_type_differentiation is not None:
-            return self._assay_type_differentiation
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.assay_type_differentiation in self.meta.columns:
-                return self.meta[self._adata_ids.assay_type_differentiation]
-            else:
-                return None
+        return self._assay_type_differentiation
 
     @assay_type_differentiation.setter
     def assay_type_differentiation(self, x: str):
@@ -1479,15 +1442,7 @@ class DatasetBase(abc.ABC):
 
     @property
     def cell_line(self) -> Union[None, str]:
-        if self._cell_line is not None:
-            return self._cell_line
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.cell_line in self.meta.columns:
-                return self.meta[self._adata_ids.cell_line]
-            else:
-                return None
+        return self._cell_line
 
     @cell_line.setter
     def cell_line(self, x: str):
@@ -1495,15 +1450,7 @@ class DatasetBase(abc.ABC):
 
     @property
     def cell_type(self) -> Union[None, str]:
-        if self._cell_type is not None:
-            return self._cell_type
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.cell_type in self.meta.columns:
-                return self.meta[self._adata_ids.cell_type]
-            else:
-                return None
+        return self._cell_type
 
     @cell_type.setter
     def cell_type(self, x: str):
@@ -1533,15 +1480,7 @@ class DatasetBase(abc.ABC):
 
     @property
     def default_embedding(self) -> Union[None, str]:
-        if self._default_embedding is not None:
-            return self._default_embedding
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.default_embedding in self.meta.columns:
-                return self.meta[self._adata_ids.default_embedding]
-            else:
-                return None
+        return self._default_embedding
 
     @default_embedding.setter
     def default_embedding(self, x: str):
@@ -1551,15 +1490,7 @@ class DatasetBase(abc.ABC):
 
     @property
     def development_stage(self) -> Union[None, str]:
-        if self._development_stage is not None:
-            return self._development_stage
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.development_stage in self.meta.columns:
-                return self.meta[self._adata_ids.development_stage]
-            else:
-                return None
+        return self._development_stage
 
     @development_stage.setter
     def development_stage(self, x: str):
@@ -1570,15 +1501,7 @@ class DatasetBase(abc.ABC):
 
     @property
     def disease(self) -> Union[None, str]:
-        if self._disease is not None:
-            return self._disease
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.disease in self.meta.columns:
-                return self.meta[self._adata_ids.disease]
-            else:
-                return None
+        return self._disease
 
     @disease.setter
     def disease(self, x: str):
@@ -1693,15 +1616,7 @@ class DatasetBase(abc.ABC):
 
     @property
     def ethnicity(self) -> Union[None, str]:
-        if self._ethnicity is not None:
-            return self._ethnicity
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.ethnicity in self.meta.columns:
-                return self.meta[self._adata_ids.ethnicity]
-            else:
-                return None
+        return self._ethnicity
 
     @ethnicity.setter
     def ethnicity(self, x: str):
@@ -1723,15 +1638,7 @@ class DatasetBase(abc.ABC):
 
     @property
     def individual(self) -> Union[None, str]:
-        if self._individual is not None:
-            return self._individual
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.individual in self.meta.columns:
-                return self.meta[self._adata_ids.individual]
-            else:
-                return None
+        return self._individual
 
     @individual.setter
     def individual(self, x: str):
@@ -1765,29 +1672,16 @@ class DatasetBase(abc.ABC):
         self._meta = x
 
     @property
-    def ncells(self) -> int:
+    def ncells(self) -> Union[None, int]:
         # ToDo cache this if it was loaded from meta?
         if self.adata is not None:
-            x = self.adata.n_obs
-        elif self._ncells is not None:
-            x = self._ncells
+            return self.adata.n_obs
         else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            x = self.meta[self._adata_ids.ncells]
-        return int(x)
+            return None
 
     @property
     def normalization(self) -> Union[None, str]:
-        if self._normalization is not None:
-            return self._normalization
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.normalization in self.meta.columns:
-                return self.meta[self._adata_ids.normalization]
-            else:
-                return None
+        return self._normalization
 
     @normalization.setter
     def normalization(self, x: str):
@@ -1797,15 +1691,7 @@ class DatasetBase(abc.ABC):
 
     @property
     def primary_data(self) -> Union[None, bool]:
-        if self._primary_data is not None:
-            return self._primary_data
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.primary_data in self.meta.columns:
-                return self.meta[self._adata_ids.primary_data]
-            else:
-                return None
+        return self._primary_data
 
     @primary_data.setter
     def primary_data(self, x: bool):
@@ -1815,15 +1701,7 @@ class DatasetBase(abc.ABC):
 
     @property
     def organ(self) -> Union[None, str]:
-        if self._organ is not None:
-            return self._organ
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.organ in self.meta.columns:
-                return self.meta[self._adata_ids.organ]
-            else:
-                return None
+        return self._organ
 
     @organ.setter
     def organ(self, x: str):
@@ -1832,15 +1710,7 @@ class DatasetBase(abc.ABC):
 
     @property
     def organism(self) -> Union[None, str]:
-        if self._organism is not None:
-            return self._organism
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.organism in self.meta.columns:
-                return self.meta[self._adata_ids.organism]
-            else:
-                return None
+        return self._organism
 
     @organism.setter
     def organism(self, x: str):
@@ -1851,15 +1721,7 @@ class DatasetBase(abc.ABC):
 
     @property
     def sample_source(self) -> Union[None, str]:
-        if self._sample_source is not None:
-            return self._sample_source
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.sample_source in self.meta.columns:
-                return self.meta[self._adata_ids.sample_source]
-            else:
-                return None
+        return self._sample_source
 
     @sample_source.setter
     def sample_source(self, x: str):
@@ -1869,15 +1731,7 @@ class DatasetBase(abc.ABC):
 
     @property
     def sex(self) -> Union[None, str]:
-        if self._sex is not None:
-            return self._sex
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.sex in self.meta.columns:
-                return self.meta[self._adata_ids.sex]
-            else:
-                return None
+        return self._sex
 
     @sex.setter
     def sex(self, x: str):
@@ -1894,15 +1748,7 @@ class DatasetBase(abc.ABC):
 
     @property
     def state_exact(self) -> Union[None, str]:
-        if self._state_exact is not None:
-            return self._state_exact
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.state_exact in self.meta.columns:
-                return self.meta[self._adata_ids.state_exact]
-            else:
-                return None
+        return self._state_exact
 
     @state_exact.setter
     def state_exact(self, x: str):
@@ -1934,16 +1780,23 @@ class DatasetBase(abc.ABC):
         self._tech_sample_obs_key = x
 
     @property
-    def year(self) -> Union[None, int]:
-        if self._year is not None:
-            return self._year
+    def author(self) -> str:
+        return self._author
+
+    @author.setter
+    def author(self, x: str):
+        self._author = x
+
+    @property
+    def title(self):
+        if self._title is not None:
+            return self._title
         else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.year in self.meta.columns:
-                return self.meta[self._adata_ids.year]
-            else:
-                return None
+            return self.__crossref_query(k="title")
+
+    @property
+    def year(self) -> Union[None, int]:
+        return self._year
 
     @year.setter
     def year(self, x: int):
@@ -2015,33 +1868,6 @@ class DatasetBase(abc.ABC):
         except ConnectionError as e:
             print(f"ConnectionError: {e}")
             return None
-
-    @property
-    def author(self) -> str:
-        if self._author is not None:
-            return self._author
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is None or self._adata_ids.author not in self.meta.columns:
-                raise ValueError("author must be set but was neither set in constructor nor in meta data")
-            return self.meta[self._adata_ids.author]
-
-    @author.setter
-    def author(self, x: str):
-        self._author = x
-
-    @property
-    def title(self):
-        if self._title is not None:
-            return self._title
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.title in self.meta.columns:
-                return self.meta[self._adata_ids.title]
-            else:
-                return self.__crossref_query(k="title")
 
     def _value_protection(
             self,
