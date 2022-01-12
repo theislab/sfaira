@@ -96,9 +96,7 @@ class TrainModel:
             self._save_specific(fn=fn)
 
     def n_counts(self, idx):
-        return np.asarray(
-            self.estimator.data.X[np.sort(idx), :].sum(axis=1)[np.argsort(idx)]
-        ).flatten()
+        return np.asarray(self.estimator.data.checkout(idx=idx, return_dense=False).x.sum(axis=1)).flatten()
 
 
 class TrainModelEmbedding(TrainModel):
@@ -230,7 +228,6 @@ class TrainModelCelltype(TrainModel):
         :param fn:
         :return:
         """
-        obs = self.estimator.data.obs
         ytrue = self.estimator.ytrue()
         yhat = self.estimator.predict()
         df_summary = self.estimator.obs_test
@@ -246,6 +243,7 @@ class TrainModelCelltype(TrainModel):
         with open(fn + "_topology.pickle", "wb") as f:
             pickle.dump(obj=self.topology_dict, file=f)
 
+        obs = self.estimator.data.checkout(idx=None, obs_keys=["cell_type"]).obs
         cell_counts = obs['cell_type'].value_counts().to_dict()
         with open(fn + '_celltypes_valuecounts_wholedata.pickle', 'wb') as f:
             pickle.dump(obj=[cell_counts], file=f)
