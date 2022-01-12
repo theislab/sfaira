@@ -45,7 +45,7 @@ def _map_fn(x_sample, obs_sample):
     return x, y
 
 
-def _time_gen(_store: sfaira.data.store.DistributedStoreSingleFeatureSpace,
+def _time_gen(_store: sfaira.data.store.StoreSingleFeatureSpace,
               store_format: str,
               kwargs_generator: Dict[str, any],
               num_draws: int) -> List[float]:

@@ -8,7 +8,7 @@ import sys
 from typing import Dict, List, Union
 
 
-class DistributedStoreBase(abc.ABC):
+class StoreBase(abc.ABC):
     """
     Base class for store API for attribute typing and shared methods.
     """

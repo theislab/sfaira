@@ -7,15 +7,15 @@ import pickle
 from typing import Dict, List, Tuple, Union
 
 from sfaira.consts import AdataIdsSfaira
-from sfaira.data.store.stores.base import DistributedStoreBase
-from sfaira.data.store.stores.single_store import DistributedStoreSingleFeatureSpace, \
-    DistributedStoreDao, DistributedStoreAnndata
+from sfaira.data.store.stores.base import StoreBase
+from sfaira.data.store.stores.single import StoreSingleFeatureSpace, \
+    StoreDao, StoreAnndata
 from sfaira.data.store.carts.multi import CartMulti
 from sfaira.data.store.io.io_dao import read_dao
 from sfaira.versions.genomes.genomes import GenomeContainer
 
 
-class DistributedStoreMultipleFeatureSpaceBase(DistributedStoreBase):
+class StoreMultipleFeatureSpaceBase(StoreBase):
 
     """
     Umbrella class for a dictionary over multiple instances DistributedStoreSingleFeatureSpace.
@@ -24,20 +24,20 @@ class DistributedStoreMultipleFeatureSpaceBase(DistributedStoreBase):
     """
 
     _adata_ids_sfaira: AdataIdsSfaira
-    _stores: Dict[str, DistributedStoreSingleFeatureSpace]
+    _stores: Dict[str, StoreSingleFeatureSpace]
 
-    def __init__(self, stores: Dict[str, DistributedStoreSingleFeatureSpace]):
+    def __init__(self, stores: Dict[str, StoreSingleFeatureSpace]):
         self._stores = stores
 
     @property
-    def stores(self) -> Dict[str, DistributedStoreSingleFeatureSpace]:
+    def stores(self) -> Dict[str, StoreSingleFeatureSpace]:
         """
         Only expose stores that contain observations.
         """
         return dict([(k, v) for k, v in self._stores.items() if v.n_obs > 0])
 
     @stores.setter
-    def stores(self, x: Dict[str, DistributedStoreSingleFeatureSpace]):
+    def stores(self, x: Dict[str, StoreSingleFeatureSpace]):
         raise NotImplementedError("cannot set this attribute, it s defined in constructor")
 
     @property
@@ -217,7 +217,7 @@ class DistributedStoreMultipleFeatureSpaceBase(DistributedStoreBase):
         return CartMulti(carts=carts, intercalated=intercalated)
 
 
-class DistributedStoresAnndata(DistributedStoreMultipleFeatureSpaceBase):
+class StoresAnndata(StoreMultipleFeatureSpaceBase):
 
     def __init__(self, adatas: Union[anndata.AnnData, List[anndata.AnnData], Tuple[anndata.AnnData]]):
         # Collect all data loaders from files in directory:
@@ -254,13 +254,13 @@ class DistributedStoresAnndata(DistributedStoreMultipleFeatureSpaceBase):
             except TypeError as e:
                 raise TypeError(f"{e} for {organism} or {adata.uns[self._adata_ids_sfaira.id]}")
         stores = dict([
-            (k, DistributedStoreAnndata(adata_by_key=adata_by_key[k], indices=indices[k], in_memory=True))
+            (k, StoreAnndata(adata_by_key=adata_by_key[k], indices=indices[k], in_memory=True))
             for k in adata_by_key.keys()
         ])
-        super(DistributedStoresAnndata, self).__init__(stores=stores)
+        super(StoresAnndata, self).__init__(stores=stores)
 
 
-class DistributedStoresDao(DistributedStoreMultipleFeatureSpaceBase):
+class StoresDao(StoreMultipleFeatureSpaceBase):
 
     _dataset_weights: Union[None, Dict[str, float]]
 
@@ -301,15 +301,15 @@ class DistributedStoresDao(DistributedStoreMultipleFeatureSpaceBase):
                     x_by_key[organism][adata.uns[self._adata_ids_sfaira.id]] = x
                     indices[organism][adata.uns[self._adata_ids_sfaira.id]] = np.arange(0, adata.n_obs)
         stores = dict([
-            (k, DistributedStoreDao(adata_by_key=adata_by_key[k], x_by_key=x_by_key[k], indices=indices[k],
-                                    obs_by_key=None))
+            (k, StoreDao(adata_by_key=adata_by_key[k], x_by_key=x_by_key[k], indices=indices[k],
+                         obs_by_key=None))
             for k in adata_by_key.keys()
         ])
         self._x_by_key = x_by_key
-        super(DistributedStoresDao, self).__init__(stores=stores)
+        super(StoresDao, self).__init__(stores=stores)
 
 
-class DistributedStoresH5ad(DistributedStoreMultipleFeatureSpaceBase):
+class StoresH5ad(StoreMultipleFeatureSpaceBase):
 
     def __init__(
             self,
@@ -347,7 +347,7 @@ class DistributedStoresH5ad(DistributedStoreMultipleFeatureSpaceBase):
                     adata_by_key[organism][adata.uns[self._adata_ids_sfaira.id]] = adata
                     indices[organism][adata.uns[self._adata_ids_sfaira.id]] = np.arange(0, adata.n_obs)
         stores = dict([
-            (k, DistributedStoreAnndata(adata_by_key=adata_by_key[k], indices=indices[k], in_memory=in_memory))
+            (k, StoreAnndata(adata_by_key=adata_by_key[k], indices=indices[k], in_memory=in_memory))
             for k in adata_by_key.keys()
         ])
-        super(DistributedStoresH5ad, self).__init__(stores=stores)
+        super(StoresH5ad, self).__init__(stores=stores)

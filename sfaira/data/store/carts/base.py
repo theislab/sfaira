@@ -130,7 +130,7 @@ class CartBase:
 
     def move_to_memory(self):
         """
-        Load underlying array into memory in sparse.COO format.
+        Load underlying array into memory into memory.
         """
         raise NotImplementedError()
 

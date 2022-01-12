@@ -12,10 +12,10 @@ import warnings
 from tqdm import tqdm
 
 from sfaira.consts import AdataIdsSfaira, OCS, AdataIds
-from sfaira.data.store.stores.base import DistributedStoreBase
+from sfaira.data.store.stores.base import StoreBase
 from sfaira.data.store.carts.single import CartSingle
-from sfaira.data.store.stores.multi_store import DistributedStoresAnndata
-from sfaira.data.store.stores.single_store import DistributedStoreSingleFeatureSpace
+from sfaira.data.store.stores.multi import StoresAnndata
+from sfaira.data.store.stores.single import StoreSingleFeatureSpace
 from sfaira.models import BasicModelKeras
 from sfaira.models.celltype import BasicModelKerasCelltype
 from sfaira.models.embedding import BasicModelKerasEmbedding
@@ -35,7 +35,7 @@ def prepare_sf(x):
     return sf
 
 
-def split_idx(data: DistributedStoreSingleFeatureSpace, test_split, val_split):
+def split_idx(data: StoreSingleFeatureSpace, test_split, val_split):
     """
     Split training and evaluation data.
     """
@@ -163,7 +163,7 @@ class EstimatorKeras:
     """
     Estimator base class for keras models.
     """
-    data: DistributedStoreSingleFeatureSpace
+    data: StoreSingleFeatureSpace
     model: Union[BasicModelKeras, None]
     topology_container: TopologyContainer
     model_id: Union[str, None]
@@ -178,7 +178,7 @@ class EstimatorKeras:
 
     def __init__(
             self,
-            data: Union[anndata.AnnData, List[anndata.AnnData], DistributedStoreSingleFeatureSpace],
+            data: Union[anndata.AnnData, List[anndata.AnnData], StoreSingleFeatureSpace],
             model_dir: Union[str, None],
             model_class: str,
             model_id: Union[str, None],
@@ -193,17 +193,17 @@ class EstimatorKeras:
         self.model_class = model_class
         self.topology_container = model_topology
         if isinstance(data, anndata.AnnData):
-            data = DistributedStoresAnndata(adatas=data).stores[self.organism]
+            data = StoresAnndata(adatas=data).stores[self.organism]
         if isinstance(data, list) or isinstance(data, tuple):
             for x in data:
                 assert isinstance(x, anndata.AnnData), f"found element in list that was not anndata but {type(x)}"
-            data = DistributedStoresAnndata(adatas=data).stores[self.organism]
+            data = StoresAnndata(adatas=data).stores[self.organism]
         self.data = data
         # Prepare store with genome container sub-setting:
         # This class is tailored for DistributedStoreSingleFeatureSpace but we test for the base class here in the
         # constructor so that genome_container can also be set in inheriting classes that may be centred around
         # different child classes of DistributedStoreBase.
-        if isinstance(self.data, DistributedStoreBase):
+        if isinstance(self.data, StoreBase):
             self.data.genome_container = self.topology_container.gc
 
         self.history = None
@@ -495,7 +495,7 @@ class EstimatorKeras:
 
     @property
     def using_store(self) -> bool:
-        return isinstance(self.data, DistributedStoreSingleFeatureSpace)
+        return isinstance(self.data, StoreSingleFeatureSpace)
 
     @property
     def obs_train(self):
@@ -519,7 +519,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
 
     def __init__(
             self,
-            data: Union[anndata.AnnData, np.ndarray, DistributedStoreSingleFeatureSpace],
+            data: Union[anndata.AnnData, np.ndarray, StoreSingleFeatureSpace],
             model_dir: Union[str, None],
             model_id: Union[str, None],
             model_topology: TopologyContainer,
@@ -802,7 +802,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
 
     def __init__(
             self,
-            data: Union[anndata.AnnData, DistributedStoreSingleFeatureSpace],
+            data: Union[anndata.AnnData, StoreSingleFeatureSpace],
             model_dir: Union[str, None],
             model_id: Union[str, None],
             model_topology: TopologyContainer,

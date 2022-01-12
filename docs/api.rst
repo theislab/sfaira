@@ -67,17 +67,17 @@ Store classes for a single feature space:
 .. autosummary::
    :toctree: api
 
-   data.DistributedStoreSingleFeatureSpace
+   data.StoreSingleFeatureSpace
 
 Store classes for a multiple feature spaces:
 
 .. autosummary::
    :toctree: api
 
-   data.DistributedStoreMultipleFeatureSpaceBase
-   data.DistributedStoresAnndata
-   data.DistributedStoresDao
-   data.DistributedStoresH5ad
+   data.StoreMultipleFeatureSpaceBase
+   data.StoresAnndata
+   data.StoresDao
+   data.StoresH5ad
 
 Carts
 ~~~~~~

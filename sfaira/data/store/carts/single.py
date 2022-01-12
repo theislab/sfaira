@@ -25,12 +25,12 @@ class CartSingle(CartBase):
     var: pd.DataFrame
     var_idx: Union[None, np.ndarray]
 
-    def __init__(self, batch_schedule, batch_size, map_fn, obs_idx, obs_keys, var, var_idx, **kwargs):
+    def __init__(self, obs_idx, obs_keys, var, var_idx=None, batch_schedule="base", batch_size=1, map_fn=None, **kwargs):
         """
 
         :param batch_schedule: A valid batch schedule name or a class that inherits from BatchDesignBase.
 
-            - "basic": sfaira.data.store.batch_schedule.BatchDesignBasic
+            - "base": sfaira.data.store.batch_schedule.BatchDesignBasic
             - "balanced": sfaira.data.store.batch_schedule.BatchDesignBalanced
             - "blocks": sfaira.data.store.batch_schedule.BatchDesignBlocks
             - "full":  sfaira.data.store.batch_schedule.BatchDesignFull
@@ -129,7 +129,9 @@ class CartSingle(CartBase):
             x = self._validate_idx(x)
             x = np.sort(x)
         # Only reset if they are actually different:
-        if (self._obs_idx is not None and len(x) != len(self._obs_idx)) or np.any(x != self._obs_idx):
+        if self._obs_idx is not None or \
+                (self._obs_idx is not None and len(x) != len(self._obs_idx)) or \
+                np.any(x != self._obs_idx):
             self._obs_idx = x
             self.schedule.idx = x
 
@@ -144,7 +146,7 @@ class CartAnndata(CartSingle):
     return_dense: bool
     single_object: bool
 
-    def __init__(self, adata_dict, return_dense, **kwargs):
+    def __init__(self, adata_dict, return_dense=False, **kwargs):
         self.return_dense = return_dense
         self.single_object = len(adata_dict.keys()) == 1
         self.adata_dict = adata_dict
@@ -223,6 +225,12 @@ class CartAnndata(CartSingle):
                     yield data_tuple
 
         return g
+
+    def move_to_memory(self):
+        """
+        No action.
+        """
+        pass
 
     @property
     def n_obs(self) -> int:
@@ -329,12 +337,12 @@ class CartDask(CartSingle):
     _x: dask.array
     _obs: pd.DataFrame
 
-    def __init__(self, x, obs, obs_keys, var_idx, **kwargs):
+    def __init__(self, x, obs, obs_keys, **kwargs):
         self._x = x
         self._obs = obs[obs_keys]
         # Redefine index so that .loc indexing can be used instead of .iloc indexing:
         self._obs.index = np.arange(0, obs.shape[0])
-        super(CartDask, self).__init__(obs_keys=obs_keys, var_idx=var_idx, **kwargs)
+        super(CartDask, self).__init__(obs_keys=obs_keys, **kwargs)
 
     @property
     def _obs_full(self):
@@ -380,6 +388,12 @@ class CartDask(CartSingle):
 
         return g
 
+    def move_to_memory(self):
+        """
+        Persist underlying dask array into memory in sparse.COO format.
+        """
+        self._x = self._x.map_blocks(scipy.sparse.csr_matrix).persist().compute()
+
     @property
     def n_obs(self) -> int:
         """Total number of observations in cart."""
@@ -413,9 +427,3 @@ class CartDask(CartSingle):
             return self._x[self.schedule.idx, :][:, self.var_idx]
 
     # Methods that are specific to this child class:
-
-    def move_to_memory(self):
-        """
-        Persist underlying dask array into memory in sparse.COO format.
-        """
-        self._x = self._x.map_blocks(scipy.sparse.csr_matrix).persist().compute()

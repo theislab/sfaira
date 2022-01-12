@@ -10,7 +10,7 @@ from typing import Dict, List, Tuple, Union
 
 from sfaira.consts import AdataIdsSfaira, OCS
 from sfaira.data.dataloaders.base.utils import is_child, UNS_STRING_META_IN_OBS
-from sfaira.data.store.stores.base import DistributedStoreBase
+from sfaira.data.store.stores.base import StoreBase
 from sfaira.data.store.carts.single import CartAnndata, CartDask, CartSingle
 from sfaira.versions.genomes.genomes import GenomeContainer, ReactiveFeatureContainer
 
@@ -39,7 +39,7 @@ def _process_batch_size(batch_size: int, retrival_batch_size: int) -> Tuple[int,
     return batch_size, retrival_batch_size
 
 
-class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
+class StoreSingleFeatureSpace(StoreBase):
 
     """
     Data set group class tailored to data access requirements common in high-performance computing (HPC).
@@ -555,7 +555,7 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
         return var
 
 
-class DistributedStoreAnndata(DistributedStoreSingleFeatureSpace):
+class StoreAnndata(StoreSingleFeatureSpace):
 
     in_memory: bool
 
@@ -563,7 +563,7 @@ class DistributedStoreAnndata(DistributedStoreSingleFeatureSpace):
         if "indices" not in kwargs.keys():  # Select all cells if no selection performed via indices.
             assert "adata_by_key" in kwargs.keys(), "supply adata_by_key in constructor call to DistributedStoreAnndata"
             kwargs["indices"] = dict([(k, np.arange(0, v.n_obs)) for k, v in kwargs["adata_by_key"].items()])
-        super(DistributedStoreAnndata, self).__init__(**kwargs)
+        super(StoreAnndata, self).__init__(**kwargs)
         self._x_as_dask = False
         self.in_memory = in_memory
 
@@ -580,21 +580,21 @@ class DistributedStoreAnndata(DistributedStoreSingleFeatureSpace):
         return dict([(k, self._adata_by_key[k][v, :]) for k, v in self.indices.items()])
 
 
-class DistributedStoreDao(DistributedStoreSingleFeatureSpace):
+class StoreDao(StoreSingleFeatureSpace):
 
     _dataset_weights: Union[None, Dict[str, float]]
     _x_dask_cache: Union[None, dask.array.Array]
     _x_by_key: Union[None, dask.array.Array]
 
     def __init__(self, x_by_key, **kwargs):
-        super(DistributedStoreDao, self).__init__(**kwargs)
+        super(StoreDao, self).__init__(**kwargs)
         self._x_as_dask = True
         self._x_by_key = x_by_key
         self._x_dask_cache = None
 
     @property
     def indices(self) -> Dict[str, np.ndarray]:
-        return super(DistributedStoreDao, self).indices
+        return super(StoreDao, self).indices
 
     @indices.setter
     def indices(self, x: Dict[str, np.ndarray]):

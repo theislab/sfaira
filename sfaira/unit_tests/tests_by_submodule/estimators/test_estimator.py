@@ -8,7 +8,7 @@ from typing import Union
 
 from sfaira import settings
 from sfaira.consts import AdataIdsSfaira
-from sfaira.data import DistributedStoreSingleFeatureSpace, DistributedStoreMultipleFeatureSpaceBase, load_store
+from sfaira.data import StoreSingleFeatureSpace, StoreMultipleFeatureSpaceBase, load_store
 from sfaira.estimators import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
 from sfaira.versions.genomes.genomes import CustomFeatureContainer
 from sfaira.versions.metadata import OntologyOboCustom
@@ -68,7 +68,7 @@ TOPOLOGY_CELLTYPE_MODEL = {
 class HelperEstimatorBase:
 
     adata_ids: AdataIdsSfaira
-    data: Union[anndata.AnnData, DistributedStoreSingleFeatureSpace, DistributedStoreMultipleFeatureSpaceBase]
+    data: Union[anndata.AnnData, StoreSingleFeatureSpace, StoreMultipleFeatureSpaceBase]
     tc: TopologyContainer
 
     def load_adata(self, organism="Homo sapiens", organ=None, match_to_reference=None):
@@ -107,7 +107,7 @@ class HelperEstimatorBase:
 
 class HelperEstimatorKeras(HelperEstimatorBase):
 
-    data: Union[anndata.AnnData, DistributedStoreSingleFeatureSpace]
+    data: Union[anndata.AnnData, StoreSingleFeatureSpace]
     estimator: Union[EstimatorKeras]
     model_type: str
     tc: TopologyContainer
@@ -240,7 +240,7 @@ class TestHelperEstimatorKerasCelltype(HelperEstimatorKeras):
 
     def init_estimator(self, test_split):
         tc = self.tc
-        if isinstance(self.data, DistributedStoreSingleFeatureSpace):
+        if isinstance(self.data, StoreSingleFeatureSpace):
             # Reset leaves below:
             tc.topology["output"]["targets"] = None
         self.estimator = EstimatorKerasCelltype(
@@ -457,14 +457,14 @@ def test_split_index_sets(data_type: str, test_split):
     assert len(idx_test) == len(np.unique(idx_test))
     assert len(idx_train) + len(idx_eval) + len(idx_test) == test_estim.estimator.data.n_obs, \
         (len(idx_train), len(idx_eval), len(idx_test), test_estim.estimator.data.n_obs)
-    if isinstance(test_estim.data, DistributedStoreSingleFeatureSpace):
+    if isinstance(test_estim.data, StoreSingleFeatureSpace):
         assert np.sum([v.shape[0] for v in test_estim.data.indices.values()]) == test_estim.estimator.data.n_obs
     # 2) Assert that index assignments are exclusive to each split:
     assert len(set(idx_train).intersection(set(idx_eval))) == 0
     assert len(set(idx_train).intersection(set(idx_test))) == 0
     assert len(set(idx_test).intersection(set(idx_eval))) == 0
     # 3) Check partition of index vectors over store data sets matches test split scenario:
-    if isinstance(test_estim.estimator.data, DistributedStoreSingleFeatureSpace):
+    if isinstance(test_estim.estimator.data, StoreSingleFeatureSpace):
         # Prepare data set-wise index vectors that are numbered in the same way as global split index vectors.
         idx_raw = []
         counter = 0
