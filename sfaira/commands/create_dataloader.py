@@ -60,7 +60,7 @@ class DataloaderCreator:
         self.template_attributes = TemplateAttributes()
         self.out_path = path_loader
 
-    def create_dataloader(self):
+    def create_dataloader(self, path_data):
         """
         Prompts and guides the user through a number of possible dataloader choices.
         Prompts the user for required attributes which must be present in the dataloader.
