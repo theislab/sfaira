@@ -129,7 +129,7 @@ class CartSingle(CartBase):
             x = self._validate_idx(x)
             x = np.sort(x)
         # Only reset if they are actually different:
-        if self._obs_idx is not None or \
+        if self._obs_idx is None or \
                 (self._obs_idx is not None and len(x) != len(self._obs_idx)) or \
                 np.any(x != self._obs_idx):
             self._obs_idx = x
@@ -184,45 +184,45 @@ class CartAnndata(CartSingle):
 
         def g():
             batches = self.schedule.design
-            for batch_idx in batches:
-                idx_i = batch_idx
-                # Match adata objects that overlap to batch:
-                idx_i_dict = self._obs_idx_dict_query(idx=idx_i)
-                if self.batch_size == 1:
-                    # Emit each data set separately and avoid concatenation into larger chunks for emission.
-                    for k, v in idx_i_dict.items():
-                        # I) Prepare data matrix.
-                        x = self.adata_dict[k].X[v, :]
-                        x = self._parse_array(x=x, return_dense=self.return_dense)
-                        # Prepare .obs.
-                        obs = self.adata_dict[k].obs[self.obs_keys].iloc[v, :]
-                        data_tuple = self.map_fn(x, obs)
-                        for data_tuple_i in split_batch(x=data_tuple):
-                            yield data_tuple_i
-                else:
-                    # Concatenates slices first before returning. Note that this is likely slower than emitting by
-                    # observation in most scenarios.
-                    # I) Prepare data matrix.
-                    x = [
-                        self._parse_array(self.adata_dict[k].X[v, :], return_dense=self.return_dense)
-                        for k, v in idx_i_dict.items()
-                    ]
-                    is_dense = isinstance(x[0], np.ndarray)
-                    # Concatenate blocks in observation dimension:
-                    if len(x) > 1:
-                        if is_dense:
-                            x = np.concatenate(x, axis=0)
-                        else:
-                            x = scipy.sparse.vstack(x)
+            for idx_i in batches:
+                if len(idx_i) > 0:
+                    # Match adata objects that overlap to batch:
+                    idx_i_dict = self._obs_idx_dict_query(idx=idx_i)
+                    if self.batch_size == 1:
+                        # Emit each data set separately and avoid concatenation into larger chunks for emission.
+                        for k, v in idx_i_dict.items():
+                            # I) Prepare data matrix.
+                            x = self.adata_dict[k].X[v, :]
+                            x = self._parse_array(x=x, return_dense=self.return_dense)
+                            # Prepare .obs.
+                            obs = self.adata_dict[k].obs[self.obs_keys].iloc[v, :]
+                            data_tuple = self.map_fn(x, obs)
+                            for data_tuple_i in split_batch(x=data_tuple):
+                                yield data_tuple_i
                     else:
-                        x = x[0]
-                    # Prepare .obs.
-                    obs = pd.concat([
-                        self.adata_dict[k].obs[self.obs_keys].iloc[v, :]
-                        for k, v in idx_i_dict.items()
-                    ], axis=0, join="inner", ignore_index=True, copy=False)
-                    data_tuple = self.map_fn(x, obs)
-                    yield data_tuple
+                        # Concatenates slices first before returning. Note that this is likely slower than emitting by
+                        # observation in most scenarios.
+                        # I) Prepare data matrix.
+                        x = [
+                            self._parse_array(self.adata_dict[k].X[v, :], return_dense=self.return_dense)
+                            for k, v in idx_i_dict.items()
+                        ]
+                        is_dense = isinstance(x[0], np.ndarray)
+                        # Concatenate blocks in observation dimension:
+                        if len(x) > 1:
+                            if is_dense:
+                                x = np.concatenate(x, axis=0)
+                            else:
+                                x = scipy.sparse.vstack(x)
+                        else:
+                            x = x[0]
+                        # Prepare .obs.
+                        obs = pd.concat([
+                            self.adata_dict[k].obs[self.obs_keys].iloc[v, :]
+                            for k, v in idx_i_dict.items()
+                        ], axis=0, join="inner", ignore_index=True, copy=False)
+                        data_tuple = self.map_fn(x, obs)
+                        yield data_tuple
 
         return g
 
@@ -373,18 +373,19 @@ class CartDask(CartSingle):
             x_temp = self._x
             obs_temp = self._obs
             for batch_idxs in batches:
-                x_i = x_temp[batch_idxs, :]
-                if self.var_idx is not None:
-                    x_i = x_i[:, self.var_idx]
-                # Exploit fact that index of obs is just increasing list of integers, so we can use the .loc[]
-                # indexing instead of .iloc[]:
-                obs_i = obs_temp.loc[obs_temp.index[batch_idxs], :]
-                data_tuple = self.map_fn(x_i, obs_i)
-                if self.batch_size == 1:
-                    for data_tuple_i in split_batch(x=data_tuple):
-                        yield data_tuple_i
-                else:
-                    yield data_tuple
+                if len(batch_idxs) > 0:
+                    x_i = x_temp[batch_idxs, :]
+                    if self.var_idx is not None:
+                        x_i = x_i[:, self.var_idx]
+                    # Exploit fact that index of obs is just increasing list of integers, so we can use the .loc[]
+                    # indexing instead of .iloc[]:
+                    obs_i = obs_temp.loc[obs_temp.index[batch_idxs], :]
+                    data_tuple = self.map_fn(x_i, obs_i)
+                    if self.batch_size == 1:
+                        for data_tuple_i in split_batch(x=data_tuple):
+                            yield data_tuple_i
+                    else:
+                        yield data_tuple
 
         return g
 
