@@ -250,9 +250,9 @@ class TestHelperEstimatorKerasCelltype(HelperEstimatorKeras):
             model_id="testid",
             model_topology=tc,
         )
+        obs_cl = self.estimator.data.checkout(obs_keys=[self.adata_ids.cell_type]).obs[self.adata_ids.cell_type].values
         leaves = self.estimator.celltype_universe.onto_cl.get_effective_leaves(
-            x=[x for x in self.estimator.data.obs[self.adata_ids.cell_type].values
-               if x != self.adata_ids.unknown_metadata_identifier]
+            x=[x for x in obs_cl if x != self.adata_ids.unknown_metadata_identifier]
         )
         self.nleaves = len(leaves)
         self.estimator.celltype_universe.onto_cl.leaves = leaves

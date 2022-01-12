@@ -2,6 +2,8 @@ import abc
 import anndata
 import hashlib
 import numpy as np
+import pandas as pd
+
 try:
     import tensorflow as tf
 except ImportError:
@@ -498,16 +500,16 @@ class EstimatorKeras:
         return isinstance(self.data, StoreSingleFeatureSpace)
 
     @property
-    def obs_train(self):
-        return self.data.obs.iloc[self.idx_train, :]
+    def obs_train(self) -> pd.DataFrame:
+        return self.data.checkout(idx=self.idx_train).obs
 
     @property
-    def obs_eval(self):
-        return self.data.obs.iloc[self.idx_eval, :]
+    def obs_eval(self) -> pd.DataFrame:
+        return self.data.checkout(idx=self.idx_eval).obs
 
     @property
-    def obs_test(self):
-        return self.data.obs.iloc[self.idx_test, :]
+    def obs_test(self) -> pd.DataFrame:
+        return self.data.checkout(idx=self.idx_test).obs
 
 
 class EstimatorKerasEmbedding(EstimatorKeras):
