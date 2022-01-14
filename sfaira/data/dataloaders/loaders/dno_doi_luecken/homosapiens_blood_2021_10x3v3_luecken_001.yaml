@@ -1,22 +1,22 @@
 dataset_structure:
     dataset_index: 1
     sample_fns:
-        - "cite/cite_gex_processed_training.h5ad"
-        - "multiome/multiome_gex_processed_training.h5ad"
+        - "cite/openproblems_bmmc_cite_complete.h5ad"
+        - "multiome/openproblems_bmmc_multiome_complete.h5ad"
 dataset_wise:
     author: "Luecken, Malte"
     default_embedding:
     doi_preprint:
     doi_journal: "no_doi_luecken"
-    download_url_data: "s3://openproblems-bio/public/explore"
+    download_url_data: "s3://openproblems-bio/public/phase2-private-data/common/openproblems_bmmc_complete"
     download_url_meta:
     primary_data: True
     normalization: "raw"
     year: 2021
 dataset_or_observation_wise:
     assay_sc:
-        cite/cite_gex_processed_training.h5ad: "10x 3' v3"
-        multiome/multiome_gex_processed_training.h5ad: "10x 3' v3"
+        cite/openproblems_bmmc_cite_complete.h5ad: "10x 3' v3"
+        multiome/openproblems_bmmc_multiome_complete.h5ad: "10x 3' v3"
     assay_sc_obs_key:
     assay_differentiation:
     assay_differentiation_obs_key:
@@ -31,7 +31,7 @@ dataset_or_observation_wise:
     disease: "healthy"
     disease_obs_key:
     ethnicity:
-    ethnicity_obs_key:
+    ethnicity_obs_key: "Ethnicity"
     individual:
     individual_obs_key: "donor"
     organ: "bone marrow"
@@ -41,9 +41,9 @@ dataset_or_observation_wise:
     sample_source: "primary_tissue"
     sample_source_obs_key:
     sex:
-    sex_obs_key:
+    sex_obs_key: "DonorGender"
     state_exact:
-    state_exact_obs_key:
+    state_exact_obs_key: "DonorSmoker"
     tech_sample:
     tech_sample_obs_key: "site*donor"
 observation_wise:
