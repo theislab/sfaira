@@ -29,7 +29,7 @@ class _ShuffleBuffer:
     def generator(self):
         buffer: List = []
         for x in self._g:
-            if len(buffer) == self.buffer_size:
+            if len(buffer) == self._buffer_size:
                 yield _ShuffleBuffer.buffer_replace(buffer, x)
             else:
                 buffer.append(x)
@@ -417,11 +417,9 @@ class CartDask(CartSingle):
                         yield data_tuple
 
         if shuffle_buffer_size > 0 and self.batch_size == 1:
-            return _ShuffleBuffer(g, shuffle_buffer_size).generator
+            return _ShuffleBuffer(g(), shuffle_buffer_size).generator
         else:
             return g
-
-        return g
 
     def move_to_memory(self):
         """
