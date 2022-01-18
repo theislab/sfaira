@@ -913,8 +913,9 @@ class DatasetBase(abc.ABC):
             dir_cache: Union[str, os.PathLike],
             store_format: str = "dao",
             dense: bool = False,
-            compression_kwargs: dict = {},
+            compression_kwargs: Union[dict, None] = None,
             chunks: Union[int, None] = None,
+            shuffle_data: bool = False
     ):
         """
         Write data set into a format that allows distributed access to data set on disk.
@@ -943,7 +944,10 @@ class DatasetBase(abc.ABC):
         :param chunks: Observation axes of chunk size of zarr array, see anndata.AnnData.write_zarr documentation.
             Only relevant for store=="dao". The feature dimension of the chunks is always is the full feature space.
             Uses zarr default chunking across both axes if None.
+        :param shuffle_data: If True -> shuffle datasets before writing store
         """
+        if compression_kwargs is None:
+            compression_kwargs = {}
         self.__assert_loaded()
         if store_format == "h5ad":
             if not isinstance(self.adata.X, scipy.sparse.csr_matrix):
@@ -960,7 +964,8 @@ class DatasetBase(abc.ABC):
                                  "consider writing as dense and consider that zarr arrays are compressed on disk!")
             fn = os.path.join(dir_cache, self.doi_cleaned_id)
             chunks = (chunks, self.adata.X.shape[1]) if chunks is not None else True
-            write_dao(store=fn, adata=self.adata, chunks=chunks, compression_kwargs=compression_kwargs)
+            write_dao(store=fn, adata=self.adata, chunks=chunks, compression_kwargs=compression_kwargs,
+                      shuffle_data=shuffle_data)
         else:
             raise ValueError()
 
