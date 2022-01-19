@@ -1,4 +1,3 @@
-from collections import Counter
 from typing import Dict, List, Tuple, Union
 
 import anndata
@@ -367,8 +366,7 @@ class CartDask(CartSingle):
         # and dask keeps expression data and obs out of memory.
 
         def g():
-            # use most common chunksize as batchsize for batch_schedule
-            self.schedule.batchsize = Counter(self._x.chunks[0]).most_common(1)[0][0]
+            self.schedule.batchsplits = self._x.chunks[0]
             batches = self.schedule.design
             x_temp = self._x
             obs_temp = self._obs
