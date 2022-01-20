@@ -1,8 +1,8 @@
 from random import shuffle
 from typing import List, Tuple
 
-from numba import njit
 import numpy as np
+from numba import njit
 
 
 def _split_idx_along_arr_chunks(indicies: np.ndarray, chunks: Tuple[int]):
@@ -120,7 +120,6 @@ class BatchDesignBasic(BatchDesignBase):
             if self.batchsplits is not None:
                 # if zarr chunk sizes are known -> split first along those and shuffle those batches
                 batches = _split_idx_along_arr_chunks(self.idx, self.batchsplits)
-                assert len(batches) > 0
                 shuffle(batches)
                 # accumulate smaller batches to the size of retrieval_batch_size
                 batches = np.array_split(np.concatenate(batches), max(len(self.idx) // self.retrieval_batch_size, 1))
