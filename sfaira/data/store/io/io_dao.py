@@ -61,7 +61,7 @@ def write_dao(store: Union[str, Path], adata: anndata.AnnData, chunks: Union[boo
     :param adata: Anndata to save.
     :param chunks: Chunking of .X for zarr.
     :param compression_kwargs: Compression kwargs for zarr.
-    :param shuffle_data: If True -> shuffle dataset (adata) before writing store to disk
+    :param shuffle_data: If True -> shuffle ordering of cells in dataset before writing store to disk
     """
     # Write numeric matrix as zarr array:
     f = zarr.open(store=path_x(store), mode="w")

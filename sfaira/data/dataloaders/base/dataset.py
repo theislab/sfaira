@@ -944,7 +944,7 @@ class DatasetBase(abc.ABC):
         :param chunks: Observation axes of chunk size of zarr array, see anndata.AnnData.write_zarr documentation.
             Only relevant for store=="dao". The feature dimension of the chunks is always is the full feature space.
             Uses zarr default chunking across both axes if None.
-        :param shuffle_data: If True -> shuffle datasets before writing store
+        :param shuffle_data: If True -> shuffle ordering of cells in datasets before writing store
         """
         if compression_kwargs is None:
             compression_kwargs = {}
