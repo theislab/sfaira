@@ -1,0 +1,55 @@
+dataset_structure:
+    dataset_index: 1
+    sample_fns:
+        - "GSM4257051_G2"
+        - "GSM4257052_D1_2"
+dataset_wise:
+    author: "Via"
+    default_embedding: 
+    doi_preprint: "10.1038/s41591-021-01245-5"
+    doi_journal:
+    download_url_data: "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE143317"
+    download_url_meta:
+    primary_data: True
+    normalization: "raw"
+    year: 2021
+dataset_or_observation_wise:
+    assay_sc: "10x 3' v2"
+    assay_sc_obs_key:
+    assay_differentiation:
+    assay_differentiation_obs_key:
+    assay_type_differentiation:
+    assay_type_differentiation_obs_key:
+    bio_sample:
+    bio_sample_obs_key: 
+    cell_line:
+    cell_line_obs_key:
+    cell_type:
+    cell_type_obs_key: 
+    development_stage: 
+    development_stage_obs_key: 
+    disease: "plasma cell myeloma"
+    disease_obs_key:
+    ethnicity:
+    ethnicity_obs_key:
+    individual:
+    individual_obs_key: 
+    organ: "bone marrow"
+    organ_obs_key: 
+    organism: "Homo sapiens"
+    organism_obs_key:
+    sample_source: "primary_tissue"
+    sample_source_obs_key:
+    sex:
+    sex_obs_key: 
+    state_exact: 
+      GSM4257051_G2: "baseline"
+      GSM4257052_D1_2: "relapse"
+    state_exact_obs_key:
+    tech_sample:
+    tech_sample_obs_key: 
+feature_wise:
+    gene_id_ensembl_var_key: 
+    gene_id_symbols_var_key: "index"
+meta:
+    version: "1.1"
