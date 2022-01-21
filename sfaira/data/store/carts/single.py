@@ -391,9 +391,9 @@ class CartDask(CartSingle):
 
     def move_to_memory(self):
         """
-        Persist underlying dask array into memory in sparse.COO format.
+        Persist underlying dask array into memory in sparse.CSR format.
         """
-        self._x = self._x.map_blocks(scipy.sparse.csr_matrix).persist().compute()
+        self._x = self._x.map_blocks(scipy.sparse.csr_matrix).persist()
 
     @property
     def n_obs(self) -> int:
