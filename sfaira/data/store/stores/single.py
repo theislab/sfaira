@@ -91,7 +91,7 @@ class StoreSingleFeatureSpace(StoreBase):
         # get list of all categorical columns - using one dataset is enough as they all have the same columns
         categorical_columns: List[str] = []
         for col in adata_by_key[datasets[0]].obs.columns:
-            if adata_by_key[datasets[0]].obs[col].dtype == 'category':
+            if isinstance(adata_by_key[datasets[0]].obs[col].dtype, pd.api.types.CategoricalDtype):
                 categorical_columns.append(col)
         # union categorical levels across datasets for each column
         categories_columns: Dict[str, pd.Index] = {}
