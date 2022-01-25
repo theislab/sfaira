@@ -1,17 +1,17 @@
 import abc
+import os
+import pickle
+from typing import Dict, List, Tuple, Union
+
 import anndata
 import dask.array
 import dask.dataframe
 import numpy as np
-import os
 import pandas as pd
-import pickle
-from typing import Dict, List, Tuple, Union
-
 from sfaira.consts import AdataIdsSfaira, OCS
 from sfaira.data.dataloaders.base.utils import is_child, UNS_STRING_META_IN_OBS
-from sfaira.data.store.stores.base import StoreBase
 from sfaira.data.store.carts.single import CartAnndata, CartDask, CartSingle
+from sfaira.data.store.stores.base import StoreBase
 from sfaira.versions.genomes.genomes import GenomeContainer, ReactiveFeatureContainer
 
 """
@@ -70,7 +70,7 @@ class StoreSingleFeatureSpace(StoreBase):
 
     def __init__(self, adata_by_key: Dict[str, anndata.AnnData], indices: Dict[str, np.ndarray],
                  obs_by_key: Union[None, Dict[str, dask.dataframe.DataFrame]] = None, data_source: str = "X"):
-        self.adata_by_key = adata_by_key
+        self.adata_by_key = self.__align_categorical_levels(adata_by_key)
         self.indices = indices
         self.obs_by_key = obs_by_key
         self.ontology_container = OCS
@@ -78,6 +78,34 @@ class StoreSingleFeatureSpace(StoreBase):
         self._adata_ids_sfaira = AdataIdsSfaira()
         self.data_source = data_source
         self._celltype_universe = None
+
+    @staticmethod
+    def __align_categorical_levels(adata_by_key: Dict[str, anndata.AnnData]) -> Dict[str, anndata.AnnData]:
+        """
+        Align the categorical levels across all datasets.
+
+        :param adata_by_key: Dict[str, anndata.Anndata]
+        :return: Dict[str, anndata.Anndata]
+        """
+        datasets = list(adata_by_key.keys())
+        # get list of all categorical columns - using one dataset is enough as they all have the same columns
+        categorical_columns: List[str] = []
+        for col in adata_by_key[datasets[0]].obs.columns:
+            if adata_by_key[datasets[0]].obs[col].dtype == 'category':
+                categorical_columns.append(col)
+        # union categorical levels across datasets for each column
+        categories_columns: Dict[str, pd.Index] = {}
+        for col in categorical_columns:
+            categories_columns[col] = pd.api.types.union_categoricals(
+                [pd.Categorical(v.obs[col].cat.categories) for v in adata_by_key.values()]
+            ).categories
+        # update categorical columns
+        for dataset in datasets:
+            for col, categories in categories_columns.items():
+                adata_by_key[dataset].obs[col] = pd.Categorical(adata_by_key[dataset].obs[col],
+                                                                categories=categories)
+
+        return adata_by_key
 
     @property
     def idx(self) -> np.ndarray:
@@ -661,7 +689,7 @@ class StoreDao(StoreSingleFeatureSpace):
 
         :return: .obs data frame.
         """
-        # TODO Using loc indexing here instead of iloc, this might be faster on larger tables?
+
         return pd.concat([
             self.adata_by_key[k].obs.loc[self.adata_by_key[k].obs.index[v], :]
             for k, v in self.indices.items()
