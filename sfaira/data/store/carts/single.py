@@ -421,8 +421,8 @@ class CartDask(CartSingle):
         Note: to obtain the dask array instead of a csr matrix, use `self.x_dask`
         """
         if self.var_idx is None:
-            return self._x[self.schedule.idx, :]
+            return self._x[self.schedule.idx, :].compute()
         else:
-            return self._x[self.schedule.idx, :][:, self.var_idx]
+            return self._x[self.schedule.idx, :][:, self.var_idx].compute()
 
     # Methods that are specific to this child class:
