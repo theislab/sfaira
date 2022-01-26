@@ -95,7 +95,16 @@ def write_dao(store: Union[str, Path], adata: anndata.AnnData, chunks: Union[boo
         # convert to dict to get rid of anndata OverloadedDict
         pickle.dump(obj=dict(adata.uns), file=f)
     # Write .obs and .var as a separate file as this can be easily interfaced with DataFrames.
-    adata.obs.iloc[perm].to_parquet(path=path_obs(store), engine='pyarrow', compression='snappy', index=None)
+    (
+        adata
+        .obs.iloc[perm]
+        # make sure all columns are dtype=str and are converted to categorical
+        # this has to change if we have numeric values in obs
+        # exclude 'perumtation_original_data' column from this as it's numeric
+        .astype({col: str for col in adata.obs.columns if col not in ['permutation_original_data']})
+        .astype({col: 'category' for col in adata.obs.columns if col not in ['permutation_original_data']})
+        .to_parquet(path=path_obs(store), engine='pyarrow', compression='snappy', index=None)
+    )
     adata.var.to_parquet(path=path_var(store), engine='pyarrow', compression='snappy', index=None)
 
 
@@ -117,6 +126,7 @@ def read_dao(store: Union[str, Path], use_dask: bool = True, columns: Union[None
     :param use_dask: Whether to use lazy dask arrays where appropriate.
     :param columns: Which columns to read into the obs copy in the output, see pandas.read_parquet().
     :param obs_separate: Whether to return .obs as a separate return value or in the returned AnnData.
+    :param x_separate: Whether to return .X as a separate return value or in the returned AnnData.
     :return: Tuple of:
         - AnnData with .X as dask array.
         - obs table separately as dataframe
@@ -134,10 +144,6 @@ def read_dao(store: Union[str, Path], use_dask: bool = True, columns: Union[None
     # Read tables:
     obs = pd.read_parquet(path_obs(store), columns=columns, engine="pyarrow")
     var = pd.read_parquet(path_var(store), engine="pyarrow")
-    # Convert to categorical variables where possible to save memory:
-    # for k, dtype in zip(list(obs.columns), obs.dtypes):
-    #    if dtype == "object":
-    #        obs[k] = obs[k].astype(dtype="category")
     d = {"var": var, "uns": uns}
     # Assemble AnnData without obs to save memory:
     adata = anndata.AnnData(**d, shape=x.shape)
