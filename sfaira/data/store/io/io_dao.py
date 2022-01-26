@@ -101,8 +101,8 @@ def write_dao(store: Union[str, Path], adata: anndata.AnnData, chunks: Union[boo
         # make sure all columns are dtype=str and are converted to categorical
         # this has to change if we have numeric values in obs
         # exclude 'perumtation_original_data' column from this as it's numeric
-        .astype({col: str} for col in adata.obs.columns if col not in ['permutation_original_data'])
-        .astype({col: 'category'} for col in adata.obs.columns if col not in ['permutation_original_data'])
+        .astype({col: str for col in adata.obs.columns if col not in ['permutation_original_data']})
+        .astype({col: 'category' for col in adata.obs.columns if col not in ['permutation_original_data']})
         .to_parquet(path=path_obs(store), engine='pyarrow', compression='snappy', index=None)
     )
     adata.var.to_parquet(path=path_var(store), engine='pyarrow', compression='snappy', index=None)
