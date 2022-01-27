@@ -14,7 +14,9 @@ def load(data_dir, sample_fn, **kwargs):
         obs = pd.read_csv(tar.extractfile(f"{sample_fn}_barcodes.tsv.gz"), compression="gzip", header=None,
                           sep="\t", index_col=0)
         obs.index.name = None
-        var = pd.read_csv(tar.extractfile(f"{sample_fn}_features.tsv.gz"), compression="gzip", header=None, sep="\t")
+        var = pd.read_csv(
+            tar.extractfile(f"{sample_fn}_features.tsv.gz"), compression="gzip", header=None, sep="\t", usecols=[0, 1]
+        )
         var.columns = ["ensembl", "symbol"]
         var.index = var["ensembl"].values
         adata = anndata.AnnData(X=x, obs=obs, var=var)
