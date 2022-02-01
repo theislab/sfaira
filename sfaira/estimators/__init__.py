@@ -1,4 +1,4 @@
-from sfaira.estimators.keras import EstimatorKeras, EstimatorKerasEmbedding, EstimatorKerasCelltype
+from sfaira.estimators.keras.keras import EstimatorKeras, EstimatorKerasEmbedding, EstimatorKerasCelltype
 
 try:
     from sfaira_extension.estimators import *  # noqa: F403

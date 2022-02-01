@@ -1,28 +1,22 @@
 import abc
-import anndata
-import hashlib
-import numpy as np
-import pandas as pd
-
-try:
-    import tensorflow as tf
-except ImportError:
-    tf = None
-from typing import List, Union
 import os
-import warnings
-from tqdm import tqdm
+from abc import ABC
+from typing import List, Union
 
-from sfaira.consts import AdataIdsSfaira, OCS, AdataIds
-from sfaira.data.store.stores.base import StoreBase
+import anndata
+import numpy as np
+import tensorflow as tf
+from sfaira.consts import AdataIdsSfaira, AdataIds
 from sfaira.data.store.carts.single import CartSingle
-from sfaira.data.store.stores.multi import StoresAnndata
 from sfaira.data.store.stores.single import StoreSingleFeatureSpace
+from sfaira.estimators.base import EstimatorBaseCelltype, EstimatorBaseEmbedding
 from sfaira.models import BasicModelKeras
 from sfaira.models.celltype import BasicModelKerasCelltype
 from sfaira.models.embedding import BasicModelKerasEmbedding
-from sfaira.versions.metadata import CelltypeUniverse, OntologyCl, OntologyObo
+from sfaira.versions.metadata import CelltypeUniverse, OntologyObo
 from sfaira.versions.topologies import TopologyContainer
+from tqdm import tqdm
+
 from .losses import LossLoglikelihoodNb, LossLoglikelihoodGaussian, LossCrossentropyAgg, KLLoss
 from .metrics import custom_mse, custom_negll_nb, custom_negll_gaussian, \
     CustomAccAgg, CustomF1Classwise, CustomFprClasswise, CustomTprClasswise, custom_cce_agg
@@ -35,66 +29,6 @@ def prepare_sf(x):
     sf = np.asarray(x.sum(axis=1, keepdims=True))
     sf = np.log(np.maximum(sf / 1e4, 1e-3))
     return sf
-
-
-def split_idx(data: StoreSingleFeatureSpace, test_split, val_split):
-    """
-    Split training and evaluation data.
-    """
-    np.random.seed(1)
-    all_idx = np.arange(0, data.n_obs)  # n_obs is both a property of AnnData and DistributedStoreBase
-    if isinstance(test_split, float) or isinstance(test_split, int):
-        idx_test = np.sort(np.random.choice(
-            a=all_idx,
-            size=round(data.n_obs * test_split),
-            replace=False,
-        ))
-    elif isinstance(test_split, dict):
-        in_test = np.ones((data.n_obs,), dtype=int) == 1
-        for k, v in test_split.items():
-            if isinstance(v, bool) or isinstance(v, int) or isinstance(v, str):
-                v = [v]
-            elif isinstance(v, tuple):
-                v = list(v)
-            elif isinstance(v, np.ndarray):
-                v = v.tolist()
-            if not isinstance(v, list):
-                raise ValueError(f"conversion of v {v} to list failed")
-            if np.any([isinstance(vi, list) or isinstance(vi, tuple) or isinstance(vi, np.ndarray) for vi in v]):
-                raise ValueError(f"found nested list v {v}, only use bool, scalar or string elements in v.")
-            idx = data.get_subset_idx(attr_key=k, values=v, excluded_values=None)
-            # Build continuous vector across all sliced data sets and establish which observations are kept
-            # in subset.
-            in_test_k = np.ones((data.n_obs,), dtype=int) == 0
-            counter = 0
-            for kk, vv in data.indices.items():
-                if kk in idx.keys() and len(idx[kk]) > 0:
-                    in_test_k[np.where([x in idx[kk] for x in vv])[0] + counter] = True
-                counter += len(vv)
-            in_test = np.logical_and(in_test, in_test_k)
-        idx_test = np.sort(np.where(in_test)[0])
-    else:
-        raise ValueError("type of test_split %s not recognized" % type(test_split))
-    print(f"Found {len(idx_test)} out of {data.n_obs} cells that correspond to test data set")
-    assert len(idx_test) < data.n_obs, f"test set covers full data set, apply a more restrictive test " \
-                                       f"data definiton ({len(idx_test)}, {data.n_obs})"
-    idx_train_eval = all_idx[~np.isin(all_idx, idx_test)]
-    np.random.seed(1)
-    idx_eval = np.sort(np.random.choice(
-        a=idx_train_eval,
-        size=round(len(idx_train_eval) * val_split),
-        replace=False
-    ))
-    idx_train = np.sort(idx_train_eval[~np.isin(idx_train_eval, idx_eval)])
-
-    # Check that none of the train, test, eval partitions are empty
-    if not len(idx_test):
-        warnings.warn("Test partition is empty!")
-    if not len(idx_eval):
-        raise ValueError("The evaluation dataset is empty.")
-    if not len(idx_train):
-        raise ValueError("The train dataset is empty.")
-    return idx_train, idx_eval, idx_test
 
 
 def process_tf_dataset(dataset, mode: str, batch_size: int, cache: bool, shuffle_buffer_size: int, prefetch)\
@@ -161,7 +95,7 @@ def assemble_cbs(patience, lr_schedule_factor, lr_schedule_patience, lr_schedule
     return cbs
 
 
-class EstimatorKeras:
+class EstimatorKeras(ABC):
     """
     Estimator base class for keras models.
     """
@@ -176,142 +110,6 @@ class EstimatorKeras:
     idx_train: Union[np.ndarray, None]
     idx_eval: Union[np.ndarray, None]
     idx_test: Union[np.ndarray, None]
-    adata_ids: AdataIds
-
-    def __init__(
-            self,
-            data: Union[anndata.AnnData, List[anndata.AnnData], StoreSingleFeatureSpace],
-            model_dir: Union[str, None],
-            model_class: str,
-            model_id: Union[str, None],
-            model_topology: TopologyContainer,
-            weights_md5: Union[str, None] = None,
-            cache_path: str = os.path.join('cache', ''),
-            adata_ids: AdataIds = AdataIdsSfaira()
-    ):
-        self.model = None
-        self.model_dir = model_dir
-        self.model_id = model_id
-        self.model_class = model_class
-        self.topology_container = model_topology
-        if isinstance(data, anndata.AnnData):
-            data = StoresAnndata(adatas=data).stores[self.organism]
-        if isinstance(data, list) or isinstance(data, tuple):
-            for x in data:
-                assert isinstance(x, anndata.AnnData), f"found element in list that was not anndata but {type(x)}"
-            data = StoresAnndata(adatas=data).stores[self.organism]
-        self.data = data
-        # Prepare store with genome container sub-setting:
-        # This class is tailored for DistributedStoreSingleFeatureSpace but we test for the base class here in the
-        # constructor so that genome_container can also be set in inheriting classes that may be centred around
-        # different child classes of DistributedStoreBase.
-        if isinstance(self.data, StoreBase):
-            self.data.genome_container = self.topology_container.gc
-
-        self.history = None
-        self.train_hyperparam = None
-        self.idx_train = None
-        self.idx_eval = None
-        self.idx_test = None
-        self.md5 = weights_md5
-        self.cache_path = cache_path
-        self._adata_ids = adata_ids
-
-    @property
-    def model_type(self):
-        return self.topology_container.model_type
-
-    @property
-    def organism(self):
-        return self.topology_container.organism
-
-    def load_pretrained_weights(self):
-        """
-        Loads model weights from local directory or zenodo.
-        """
-        if self.model_dir.startswith('http'):
-            # Remote repo
-            if not os.path.exists(self.cache_path):
-                os.makedirs(self.cache_path)
-
-            import urllib.request
-            from urllib.parse import urljoin
-            from urllib.error import HTTPError
-            try:
-                urllib.request.urlretrieve(self.model_dir,
-                                           os.path.join(self.cache_path, os.path.basename(self.model_dir))
-                                           )
-                fn = os.path.join(self.cache_path, os.path.basename(self.model_dir))
-            except HTTPError:
-                try:
-                    urllib.request.urlretrieve(urljoin(self.model_dir, f'{self.model_id}_weights.h5'),
-                                               os.path.join(self.cache_path, f'{self.model_id}_weights.h5')
-                                               )
-                    fn = os.path.join(self.cache_path, f"{self.model_id}_weights.h5")
-                except HTTPError:
-                    try:
-                        urllib.request.urlretrieve(
-                            urljoin(self.model_dir, f'{self.model_id}_weights.data-00000-of-00001'),
-                            os.path.join(self.cache_path, f'{self.model_id}_weights.data-00000-of-00001')
-                        )
-                        fn = os.path.join(self.cache_path, f"{self.model_id}_weights.data-00000-of-00001")
-                    except HTTPError:
-                        raise FileNotFoundError('cannot find remote weightsfile')
-        else:
-            # Local repo
-            if not self.model_dir:
-                raise ValueError('the model_id is set but the path to the model is empty')
-            if os.path.isfile(self.model_dir) \
-                    and not self.model_dir.endswith(".h5") \
-                    and not self.model_dir.endswith(".data-00000-of-00001"):
-                raise ValueError('weights files saved in h5 format need to have an h5 file extension')
-
-            if os.path.isfile(self.model_dir):
-                fn = self.model_dir
-            elif os.path.isfile(os.path.join(self.model_dir, f"{self.model_id}_weights.data-00000-of-00001")):
-                fn = os.path.join(self.model_dir, f"{self.model_id}_weights.data-00000-of-00001")
-            elif os.path.isfile(os.path.join(self.model_dir, f"{self.model_id}_weights.h5")):
-                fn = os.path.join(self.model_dir, f"{self.model_id}_weights.h5")
-            else:
-                raise ValueError('the weightsfile could not be found')
-
-        if self.md5 is not None:
-            self._assert_md5_sum(fn, self.md5)
-        if fn.endswith(".data-00000-of-00001"):
-            self.model.training_model.load_weights(".".join(fn.split(".")[:-1]))
-        else:
-            self.model.training_model.load_weights(fn)
-
-    def save_weights_to_cache(self):
-        if not os.path.exists(os.path.join(self.cache_path, 'weights')):
-            os.makedirs(os.path.join(self.cache_path, 'weights'))
-        fn = os.path.join(self.cache_path, 'weights', f"{self.model_id}_weights_cache.h5")
-        self.model.training_model.save_weights(fn)
-
-    def load_weights_from_cache(self):
-        fn = os.path.join(self.cache_path, 'weights', f"{self.model_id}_weights_cache.h5")
-        self.model.training_model.load_weights(fn)
-
-    def init_model(self, clear_weight_cache=True, override_hyperpar=None):
-        """
-        Instantiate the model.
-        :return:
-        """
-        if clear_weight_cache:
-            if os.path.exists(os.path.join(self.cache_path, 'weights')):
-                for file in os.listdir(os.path.join(self.cache_path, 'weights')):
-                    file_path = os.path.join(os.path.join(self.cache_path, 'weights'), file)
-                    os.remove(file_path)
-
-    @staticmethod
-    def _assert_md5_sum(
-            fn,
-            target_md5
-    ):
-        with open(fn, 'rb') as f:
-            hsh = hashlib.md5(f.read()).hexdigest()
-        if not hsh == target_md5:
-            raise ValueError("md5 of %s did not match expectation" % fn)
 
     @abc.abstractmethod
     def _get_cart(self, **kwargs) -> CartSingle:
@@ -322,6 +120,13 @@ class EstimatorKeras:
 
     @abc.abstractmethod
     def _tf_dataset_kwargs(self, mode: str):
+        pass
+
+    @abc.abstractmethod
+    def split_train_val_test(self, val_split: float, test_split: Union[float, dict]):
+        """
+        Split indices in store into train, valiation and test split.
+        """
         pass
 
     def get_one_time_tf_dataset(self, idx, mode, batch_size=None, prefetch=None):
@@ -340,20 +145,6 @@ class EstimatorKeras:
         train_dataset = process_tf_dataset(dataset=train_dataset, mode=mode, **tf_kwargs)
         return train_dataset
 
-    def _get_class_dict(
-            self,
-            obs_key: str
-    ):
-        y = self.data.obs[obs_key]
-        for i, val in enumerate(y):
-            if type(val) == list:
-                y[i] = " / ".join(val)
-        labels = np.unique(y)
-        label_dict = {}
-        for i, label in enumerate(labels):
-            label_dict.update({label: float(i)})
-        return label_dict
-
     @abc.abstractmethod
     def _get_loss(self):
         pass
@@ -371,23 +162,6 @@ class EstimatorKeras:
             loss=self._get_loss(),
             metrics=self._metrics()
         )
-
-    def split_train_val_test(self, val_split: float, test_split: Union[float, dict]):
-        """
-        Split indices in store into train, valiation and test split.
-        """
-        idx_train, idx_eval, idx_test = split_idx(data=self.data, test_split=test_split, val_split=val_split)
-        self.idx_train = idx_train
-        self.idx_eval = idx_eval
-        self.idx_test = idx_test
-
-    def _process_idx_for_eval(self, idx):
-        """
-        Defaults to all observations if no indices are defined.
-        """
-        if idx is None:
-            idx = np.arange(0, self.data.n_obs)
-        return idx
 
     def train(
             self,
@@ -495,24 +269,8 @@ class EstimatorKeras:
             verbose=verbose
         ).history
 
-    @property
-    def using_store(self) -> bool:
-        return isinstance(self.data, StoreSingleFeatureSpace)
 
-    @property
-    def obs_train(self) -> pd.DataFrame:
-        return self.data.checkout(idx=self.idx_train).obs
-
-    @property
-    def obs_eval(self) -> pd.DataFrame:
-        return self.data.checkout(idx=self.idx_eval).obs
-
-    @property
-    def obs_test(self) -> pd.DataFrame:
-        return self.data.checkout(idx=self.idx_test).obs
-
-
-class EstimatorKerasEmbedding(EstimatorKeras):
+class EstimatorKerasEmbedding(EstimatorBaseEmbedding, EstimatorKeras):
     """
     Estimator class for the embedding model.
     """
@@ -726,11 +484,11 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             idx = self.idx_test
             if self.idx_test is None:
                 num_samples = 10000
-                idx = np.random.randint(0, self.data.X.shape[0], num_samples)
+                idx = np.random.randint(0, self.data.n_obs, num_samples)
             n_obs = len(idx)
         else:
             idx = None
-            n_obs = self.data.X.shape[0]
+            n_obs = self.data.n_obs
 
         ds = self.get_one_time_tf_dataset(idx=idx, batch_size=batch_size, mode='gradient_method')
 
@@ -744,7 +502,8 @@ class EstimatorKerasEmbedding(EstimatorKeras):
         else:
             grads_x = 0
         # Loop over sub-selected data set and sum gradients across all selected observations.
-        if self.model_type[:3] == "vae":  # TODO: fix bug for vaeiaf model. This function can not be called for vaeiaf model
+        # TODO: fix bug for vaeiaf model. This function can not be called for vaeiaf model
+        if self.model_type[:3] == "vae":
             model = tf.keras.Model(
                 self.model.training_model.input,
                 self.model.encoder_model.output[0]
@@ -794,7 +553,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             return grads_x / n_obs
 
 
-class EstimatorKerasCelltype(EstimatorKeras):
+class EstimatorKerasCelltype(EstimatorBaseCelltype, EstimatorKeras):
     """
     Estimator class for the cell type model.
     """
@@ -818,31 +577,15 @@ class EstimatorKerasCelltype(EstimatorKeras):
         super(EstimatorKerasCelltype, self).__init__(
             data=data,
             model_dir=model_dir,
-            model_class="celltype",
             model_id=model_id,
             model_topology=model_topology,
             weights_md5=weights_md5,
             cache_path=cache_path,
+            celltype_ontology=celltype_ontology,
+            max_class_weight=max_class_weight,
+            remove_unlabeled_cells=remove_unlabeled_cells,
             adata_ids=adata_ids
         )
-        if remove_unlabeled_cells:
-            # Remove cells without type label from store:
-            self.data.subset(attr_key="cell_type", excluded_values=[
-                self._adata_ids.unknown_metadata_identifier,
-                self._adata_ids.not_a_cell_celltype_identifier,
-            ])
-        assert "cl" in self.topology_container.output.keys(), self.topology_container.output.keys()
-        assert "targets" in self.topology_container.output.keys(), self.topology_container.output.keys()
-        self.max_class_weight = max_class_weight
-        if celltype_ontology is None:
-            celltype_ontology = OntologyCl(branch=self.topology_container.output["cl"])
-        self.celltype_universe = CelltypeUniverse(
-            cl=celltype_ontology,
-            uberon=OCS.organ,
-        )
-        # Set leaves if they are defined in topology:
-        if self.topology_container.output["targets"] is not None:
-            self.celltype_universe.onto_cl.leaves = self.topology_container.output["targets"]
 
     def init_model(
             self,
@@ -866,70 +609,6 @@ class EstimatorKerasCelltype(EstimatorKeras):
             topology_container=self.topology_container,
             override_hyperpar=override_hyperpar
         )
-
-    @property
-    def ntypes(self):
-        return self.celltype_universe.onto_cl.n_leaves
-
-    @property
-    def ontology_ids(self):
-        return self.celltype_universe.onto_cl.convert_to_id(self.celltype_universe.onto_cl.leaves)
-
-    @property
-    def ontology_names(self):
-        return self.celltype_universe.onto_cl.convert_to_name(self.celltype_universe.onto_cl.leaves)
-
-    def _one_hot_encoder(self):
-        leave_maps = self.celltype_universe.onto_cl.prepare_maps_to_leaves(include_self=True)
-
-        def encoder(x) -> np.ndarray:
-            if isinstance(x, str):
-                x = [x]
-            # Encodes unknowns to empty rows.
-            idx = [
-                leave_maps[y] if y not in [
-                    self._adata_ids.unknown_metadata_identifier,
-                    self._adata_ids.not_a_cell_celltype_identifier,
-                ] else np.array([])
-                for y in x
-            ]
-            oh = np.zeros((len(x), self.ntypes,), dtype="float32")
-            for i, y in enumerate(idx):
-                scale = len(y)
-                if scale > 0:
-                    oh[i, y] = 1. / scale
-            return oh
-
-        return encoder
-
-    def _get_celltype_out(
-            self,
-            idx: Union[np.ndarray, None],
-    ):
-        """
-        TODO depreceate, carry over weight code to _get_generator
-        Build one hot encoded cell type output tensor and observation-wise weight matrix.
-
-        :param lookup_ontology: list of ontology names to consider.
-        :return:
-        """
-        if idx is None:
-            idx = np.arange(0, self.data.n_obs)
-        # One whether "unknown" is already included, otherwise add one extra column.
-        onehot_encoder = self._one_hot_encoder()
-        y = np.concatenate([
-            onehot_encoder(z)
-            for z in self.data.obs[self._adata_ids.cell_type + self._adata_ids.onto_id_suffix].values[idx].tolist()
-        ], axis=0)
-        # Distribute aggregated class weight for computation of weights:
-        freq = np.mean(y / np.sum(y, axis=1, keepdims=True), axis=0, keepdims=True)
-        weights = 1. / np.matmul(y, freq.T)  # observation wise weight matrix
-        # Threshold weights:
-        weights = np.asarray(
-            np.minimum(weights, np.zeros_like(weights) + self.max_class_weight),
-            dtype="float32"
-        ).flatten()
-        return weights, y
 
     def _tf_dataset_kwargs(self, mode):
         output_types_x = (tf.float32,)
