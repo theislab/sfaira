@@ -53,7 +53,7 @@ This 4-phase cycle completes initial curation and results in data loader code th
 GitHub repository.
 This cycle can be complemented by an optional workflow to cache curated `.h5ad` objects (e.g. on the cellxgene website):
 
-- Phase 5 (``export``): the data loader is used to create a streamlined `.h5ad` of a particular format.
+- Phase 5 (``export-h5ad``): the data loader is used to create a streamlined `.h5ad` of a particular format.
 - Phase 6 (``validate-h5ad``): the `.h5ad` from phase 4 is checked for compliance with a particular (e.g. the cellxgene format).
 
 The resulting `.h5ad` can be shared with collaborators or uploaded to data submission servers.
@@ -277,7 +277,7 @@ Phase 4: upload
     ..
 
 Phase 5: export-h5ad
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 Phase 5 and 6 are optional, see also introduction paragraphs on this documentation page.
 
@@ -290,7 +290,7 @@ Phase 5 and 6 are optional, see also introduction paragraphs on this documentati
     ..
 
 Phase 6: validate-h5ad
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
 
 Phase 5 and 6 are optional, see also introduction paragraphs on this documentation page.
 
