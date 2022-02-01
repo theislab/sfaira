@@ -23,6 +23,19 @@ WD = os.path.dirname(__file__)
 log = logging.getLogger()
 
 
+def set_paths_container(path_loader, path_data):
+    sfaira_container_loader = os.getenv('SFAIRA_DOCKER_LOADER')
+    sfaira_container_data = os.getenv('SFAIRA_DOCKER_DATA')
+    if sfaira_container_loader and sfaira_container_data:
+        print('[bold blue]Running in a container, ignoring --path-loader and --path-data if supplied.')
+        return sfaira_container_loader, sfaira_container_data
+    elif sfaira_container_loader or sfaira_container_data:
+        print('[bold red]Running in a container but internal paths not set. This should not happen. Aborting.')
+        sys.exit()
+    else:
+        return path_loader, path_data
+
+
 def main():
     traceback.install(width=200, word_wrap=True)
     print(r"""[bold blue]
@@ -99,6 +112,7 @@ def create_dataloader(path_data, path_loader) -> None:
     """
     Interactively create a new sfaira dataloader.
     """
+    path_loader, path_data = set_paths_container(path_loader, path_data)
     dataloader_creator = DataloaderCreator(path_loader)
     dataloader_creator.create_dataloader(path_data)
 
@@ -113,6 +127,7 @@ def validate_dataloader(doi, path_loader) -> None:
     """
     Verifies the dataloader against sfaira's requirements.
     """
+    path_loader, path_data = set_paths_container(path_loader, None)
     if doi is None or doi_lint(doi):
         dataloader_validator = DataloaderValidator(path_loader, doi)
         dataloader_validator.validate()
@@ -134,6 +149,7 @@ def annotate_dataloader(doi, path_data, path_loader) -> None:
     """
     Annotates a dataloader.
     """
+    path_loader, path_data = set_paths_container(path_loader, path_data)
     if doi is None or doi_lint(doi):
         dataloader_validator = DataloaderValidator(path_loader, doi)
         dataloader_validator.validate()
@@ -157,6 +173,7 @@ def finalize_dataloader(doi, path_data, path_loader) -> None:
     """
     Runs a dataloader integration test.
     """
+    path_loader, path_data = set_paths_container(path_loader, path_data)
     if doi is None or doi_lint(doi):
         dataloader_validator = DataloaderValidator(path_loader, doi)
         dataloader_validator.validate()
