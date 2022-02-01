@@ -161,6 +161,7 @@ Pd. Download the raw data into a local directory.
 Phase 1: create
 ~~~~~~~~~~~~~~~~
 
+This phase creates a skeleton for a data loader: `.__init__.py`, `.py` and `.yaml` files.
 Phase 1 is sub-structured into 2 sub-phases:
 
 * 1a: Create template files (``sfaira create-dataloader``).
@@ -195,28 +196,28 @@ Phase 1 is sub-structured into 2 sub-phases:
 Phase 2: annotate
 ~~~~~~~~~~~~~~~~~~~
 
+This phase creates annotation map files: `.tsv`.
+The metadata items that require annotation maps all non-empty entries that end on `*obs_key` under
+`dataset_or_observation_wise` in the `.yaml` which are subject to an ontology :ref:`field-descriptions:`.
+One file is created per such metadata `ITEM`, the corresponding file is `<path_loader>/<DOI-name>/<ID>_<ITEM>.tsv`
+This means that a variable number of such files is created and dependending on the scenario, even no such files may
+be necessary:
+Phase 2 can be entirely skipped if no annotation maps are necessary, this is indicated by the CLI at the end of phase 1a.
 Phase 2 is sub-structured into 2 sub-phases:
 
 * 2a: Create metadata annotation files (``sfaira annotate-dataloader``).
 * 2b: Completion of annotation (manual).
-
-Phase 2 can be entirely skipped if no annotation maps are necessary, this is indicated by the CLI at the end of phase 1a.
 
 2a. Create metadata annotation files (``sfaira annotate-dataloader``).
     .. code-block::
 
         sfaira annotate-dataloader --doi --path_data [--path_loader]
     ..
-    ``sfaira annotate-dataloader`` will run fuzzy string matching between the annotations in the metadata column you provided in the
-    `cell_types_original_obs_key` attribute of the yaml file and the Cell Ontology Database.
-    Note that this will abort with error if there are bugs in your data loader.
+    Creates `<path_loader>/<DOI-name>/ID*.tsv` files with meta data map suggestions for each meta data item that
+    requires such maps.
 2b. Completion of annotation (manual).
-    Sfaira creates suggestions for ontology maps in `<path_loader>/<DOI-name>/ID*.tsv` files.
-    One such file is created for each meta data item that is annotated per cell,
-    as an `ITEM_obs_key` rather than `ITEM` in the `.yaml`.
-    This means that a variable number of such files is created and dependending on the scenario, even no such files may
-    be necessary.
-    Each file contains two columns with one row for each unique free-text meta data item, e.g. each cell type label.
+    Each `<path_loader>/<DOI-name>/ID*.tsv` file contains two columns with one row for each unique free-text meta data
+    item, e.g. each cell type label.
 
     - The first column is labeled "source" and contains free-text identifiers.
     - The second column is labeled "target" and contains suggestions for matching the symbols from the corresponding ontology.
@@ -305,6 +306,7 @@ Advanced topics
 ----------------
 
 .. _sec-multiple-files:
+
 Loading multiple files of similar structure
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -422,6 +424,8 @@ Required are:
 - feature_wise: gene_id_ensembl_var_key or gene_id_symbols_var_key is required.
 - misc: None are required.
 
+.. _sec-field-descriptions:
+
 Field descriptions
 ~~~~~~~~~~~~~~~~~~
 
@@ -487,6 +491,8 @@ outlined below.
     See also the meta data items `individual` and `tech_sample`.
 - cell_line and cell_line_obs_key [ontology term]
     Cell line name from the cellosaurus cell line database (https://web.expasy.org/cellosaurus/)
+- cell_type and cell_type_obs_key [ontology term]
+    Cell type name from the Cell Ontology database (https://www.ebi.ac.uk/ols/ontologies/cl)
 - developmental_stage and developmental_stage_obs_key [ontology term]
     Developmental stage (age) of individual sampled.
     Choose from HSAPDV (https://www.ebi.ac.uk/ols/ontologies/hsapdv) for human
@@ -528,11 +534,6 @@ outlined below.
     keys with `*` in this string, e.g. `patient*treatment*protocol` to get one `tech_sample` for each patient, treatment
     and measurement protocol.
     See also the meta data items `individual` and `tech_sample`.
-
-Meta-data which are strictly observation-wise are in the section `observation_wise` in the `.yaml` file:
-
-- cell_types_original_obs_key [string]
-    Column name in `adata.obs` emitted by the `load()` function which contains free text cell type labels.
 
 Meta-data which are feature-wise are in the section `feature_wise` in the `.yaml` file:
 
