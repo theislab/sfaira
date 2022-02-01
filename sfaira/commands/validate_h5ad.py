@@ -9,8 +9,8 @@ log = logging.getLogger(__name__)
 
 class H5adValidator:
 
-    def __init__(self, test_h5ad, schema=None):
-        self.fn_h5ad: str = test_h5ad
+    def __init__(self, h5ad_file, schema=None):
+        self.fn_h5ad: str = h5ad_file
         if schema not in ["cellxgene"]:
             raise ValueError(f"Did not recognize schema {schema}")
         self.schema = schema
