@@ -33,7 +33,7 @@ class DataloaderTester:
         if not self.doi:
             self._prompt_doi()
         self.doi_sfaira_repr = clean_doi(self.doi)
-        print(f'[bold blue]Please ensure that your dataloader is in sfaira/dataloaders/loaders/{self.doi_sfaira_repr}.')
+        print(f'[bold blue]Please ensure that your dataloader is in sfaira/data/dataloaders/loaders/{self.doi_sfaira_repr}.')
         self._test_dataloader()
 
     def _prompt_doi(self):

@@ -176,7 +176,7 @@ def finalize_dataloader(doi, path_data, path_loader) -> None:
               default="./",
               type=click.Path(exists=True),
               help='Absolute path of the location of the raw data directory.')
-@click.option('--path_cache',
+@click.option('--path-cache',
               type=click.Path(exists=True),
               default=None,
               help='The optional absolute path to cached data library maintained by sfaira. Using such a cache speeds '
