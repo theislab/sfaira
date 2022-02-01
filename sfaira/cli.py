@@ -33,6 +33,7 @@ def set_paths_container(path_loader, path_data):
         print('[bold red]Running in a container but internal paths not set. This should not happen. Aborting.')
         sys.exit()
     else:
+        print('[bold blue]Not running in a container.')
         return path_loader, path_data
 
 
