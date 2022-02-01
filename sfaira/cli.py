@@ -104,12 +104,12 @@ def create_dataloader(path_data, path_loader) -> None:
 
 
 @sfaira_cli.command()
+@click.option('--doi', type=str, default=None, help="The doi of the paper that the dataloader refers to.")
 @click.option('--path-loader',
               default="sfaira/data/dataloaders/loaders/",
               type=click.Path(exists=True),
               help='Relative path from the current directory to the desired location of the dataloader.')
-@click.option('--doi', type=str, default=None, help="The doi of the paper that the dataloader refers to.")
-def validate_dataloader(path_loader, doi) -> None:
+def validate_dataloader(doi, path_loader) -> None:
     """
     Verifies the dataloader against sfaira's requirements.
     """
@@ -121,16 +121,16 @@ def validate_dataloader(path_loader, doi) -> None:
 
 
 @sfaira_cli.command()
-@click.option('--path-loader',
-              default="sfaira/data/dataloaders/loaders/",
-              type=click.Path(exists=True),
-              help='Relative path from the current directory to the location of the dataloader.')
+@click.option('--doi', type=str, default=None, help="The doi of the paper that the dataloader refers to.")
 @click.option('--path-data',
               default="./",
               type=click.Path(exists=True),
               help='Absolute path of the location of the raw data directory.')
-@click.option('--doi', type=str, default=None, help="The doi of the paper that the dataloader refers to.")
-def annotate_dataloader(path_loader, path_data, doi) -> None:
+@click.option('--path-loader',
+              default="sfaira/data/dataloaders/loaders/",
+              type=click.Path(exists=True),
+              help='Relative path from the current directory to the location of the dataloader.')
+def annotate_dataloader(doi, path_data, path_loader) -> None:
     """
     Annotates a dataloader.
     """
@@ -144,16 +144,16 @@ def annotate_dataloader(path_loader, path_data, doi) -> None:
 
 
 @sfaira_cli.command()
-@click.option('--path-loader',
-              default="sfaira/data/dataloaders/loaders/",
-              type=click.Path(exists=True),
-              help='Relative path from the current directory to the location of the dataloader.')
+@click.option('--doi', type=str, default=None, help="The doi of the paper that the dataloader refers to.")
 @click.option('--path-data',
               default="./",
               type=click.Path(exists=True),
               help='Absolute path of the location of the raw data directory.')
-@click.option('--doi', type=str, default=None, help="The doi of the paper that the dataloader refers to.")
-def test_dataloader(path_loader, path_data, doi) -> None:
+@click.option('--path-loader',
+              default="sfaira/data/dataloaders/loaders/",
+              type=click.Path(exists=True),
+              help='Relative path from the current directory to the location of the dataloader.')
+def finalize_dataloader(doi, path_data, path_loader) -> None:
     """
     Runs a dataloader integration test.
     """
@@ -169,7 +169,7 @@ def test_dataloader(path_loader, path_data, doi) -> None:
 @sfaira_cli.command()
 @click.option('--doi', type=str, default=None, help="DOI of data sets to export")
 @click.option('--schema', type=str, default=None, help="Schema to streamline to, e.g. 'cellxgene'")
-@click.option('--path_out',
+@click.option('--path-out',
               type=click.Path(exists=True),
               help='Absolute path of the location of the streamlined output h5ads.')
 @click.option('--path-data',
@@ -187,15 +187,15 @@ def export_h5ad(doi, schema, path_out, path_data, path_cache) -> None:
 
 
 @sfaira_cli.command()
-@click.option('--test-h5ad', type=click.Path(exists=True))
+@click.option('--h5ad', type=click.Path(exists=True))
 @click.option('--schema', type=str, default=None)
-def test_h5ad(test_h5ad, schema) -> None:
+def validate_h5ad(h5ad, schema) -> None:
     """Runs a component test on a streamlined h5ad object.
 
-    test-h5ad is the absolute path of the .h5ad file to test.
+    h5ad is the absolute path of the .h5ad file to test.
     schema is the schema type ("cellxgene",) to test.
     """
-    h5ad_tester = H5adValidator(test_h5ad, schema)
+    h5ad_tester = H5adValidator(h5ad, schema)
     h5ad_tester.test_schema()
     h5ad_tester.test_numeric_data()
 
