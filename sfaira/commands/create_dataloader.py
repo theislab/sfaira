@@ -38,7 +38,7 @@ class TemplateAttributes:
     ethnicity: str = ''  # ethnicity of the sample
     sample_source: str = ''  # source of the sample
     state_exact: str = ''  # state of the sample
-    year: int = 2021  # year in which sample was acquired
+    year: int = 2022  # year in which sample was acquired
     number_of_datasets: str = 1  # Required to determine the file names
 
     assay_sc_obs_key: str = ''  # Assay key in obs
@@ -100,7 +100,7 @@ class DataloaderCreator:
                       'Use no_doi_AUTHOR_SOME-NAME to name data sets that do not have a corresponding publication')
             doi_preprint = sfaira_questionary(
                 function='text',
-                question='DOI of the preprint publication: [10.1000/j.journal.2021.01.001]',
+                question='DOI of the preprint publication: [10.1000/j.journal.2022.01.001]',
                 default='')
             if doi_preprint != "":
                 while not re.match(r'\b10\.\d+/[\w.]+\b', doi_preprint) and not doi_preprint.startswith("no_doi"):
@@ -108,12 +108,12 @@ class DataloaderCreator:
                           'You may leave this field empty if you supply doi_journal.')
                     doi_preprint = sfaira_questionary(
                         function='text',
-                        question='DOI of the preprint publication: [10.1000/j.journal.2021.01.001]',
+                        question='DOI of the preprint publication: [10.1000/j.journal.2022.01.001]',
                         default='')
             self.template_attributes.doi_preprint = doi_preprint
             doi_journal = sfaira_questionary(
                 function='text',
-                question='DOI of the journal publication: [10.1000/j.journal.2021.01.001]',
+                question='DOI of the journal publication: [10.1000/j.journal.2022.01.001]',
                 default='')
             if doi_journal != "":
                 while not re.match(r'\b10\.\d+/[\w.]+\b', doi_journal) and not doi_journal.startswith("no_doi"):
@@ -121,7 +121,7 @@ class DataloaderCreator:
                           'You may leave this field empty if you supply doi_preprint.')
                     doi_journal = sfaira_questionary(
                         function='text',
-                        question='DOI of the journal publication: [10.1000/j.journal.2021.01.001]',
+                        question='DOI of the journal publication: [10.1000/j.journal.2022.01.001]',
                         default='')
             self.template_attributes.doi_journal = doi_journal
             doi = doi_journal if doi_journal != "" else doi_preprint
@@ -137,7 +137,7 @@ class DataloaderCreator:
             self.template_attributes.sample_fns = {'fns': []}
             for ds in range(int(self.template_attributes.number_of_datasets)):
                 fn = sfaira_questionary(function='text',
-                                        question='Sample file name:',
+                                        question=f'Filename for dataset {ds}:',
                                         default=f'data_{ds}.h5ad')
                 self.template_attributes.sample_fns['fns'].append(fn)
         else:
@@ -178,7 +178,7 @@ class DataloaderCreator:
             default='X_umap'))
         self.template_attributes.year = sfaira_questionary(function='text',
                                                            question='Year:',
-                                                           default="2021")
+                                                           default="2022")
         self.template_attributes.organism = sfaira_questionary(function='text',
                                                                question='Organism (from NCBItaxon):',
                                                                default='')
