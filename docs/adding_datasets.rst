@@ -4,10 +4,10 @@ Writing data loaders
 =====================
 
 For a high-level overview of data management in sfaira, read :ref:`data_life_cycle_rst` first.
-In brief, a data loader is a set of instructions allow for streamlining of raw count matrices
+In brief, a data loader is a set of instructions that allows for streamlining of raw count matrices
 and meta data into objects of a target format.
 Here, streamlining means that gene names are controlled based on a genome assembly,
-metadata items are contrained to follow ontologies,
+metadata items are constrained to follow ontologies,
 and key study metadata are described.
 This streamlining increases accessibility and visibility of a dataset and to makes it available to a large audience.
 In sfaira, data loaders are grouped by scientific study (DOI of a preprint or DOI of a publication).
@@ -21,12 +21,12 @@ A dataloader consists of four file components within a single directory:
 1. `__init__.py` file which is has same content in all loaders,
 2. `ID.py` file that contains a `load()` functions with based instructions of loading raw data on disk,
 3. `ID.yaml` file that describes most meta data,
-4. `ID*.tsv` files with ontology-wise maps of free-text metadata items to contrained vocabulary.
+4. `ID*.tsv` files with ontology-wise maps of free-text metadata items to constrained vocabulary.
 
-Note that all dataset-specific components receive and `ID` that is set during the curation process.
-Below, we desribe how multiple datasets within a study can be handled with the same dataloder.
+All dataset-specific components receive an `ID` that is set during the curation process.
+Below, we describe how multiple datasets within a study can be handled with the same dataloder.
 In cases where this is not efficient, one can go through the data loader creation process once for each dataset
-and then group the resuling loaders (file groups 1-4) in a single directory named after the study's DOI.
+and then group the resulting loaders (file groups 1-4) in a single directory named after the study's DOI.
 
 An experienced curator can directly write such a data loader.
 However, first-time contributors often struggle with the interplay of individual files,
@@ -56,7 +56,7 @@ This cycle can be complemented by an optional workflow to cache curated `.h5ad` 
 - Phase 5 (``export``): the data loader is used to create a streamlined `.h5ad` of a particular format.
 - Phase 6 (``validate-h5ad``): the `.h5ad` from phase 4 is checked for compliance with a particular (e.g. the cellxgene format).
 
-The resuling `.h5ad` can be shared with collaborators or uploaded to data submission servers.
+The resulting `.h5ad` can be shared with collaborators or uploaded to data submission servers.
 
 Create a new data loader
 -------------------------
