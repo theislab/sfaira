@@ -33,8 +33,13 @@ def set_paths_container(path_loader, path_data):
         print('[bold red]Running in a container but internal paths not set. This should not happen. Aborting.')
         sys.exit()
     else:
-        print('[bold blue]Not running in a container.')
         return path_loader, path_data
+
+
+def check_paths(pathlist):
+    for p in pathlist:
+        if not os.path.isdir(p):
+            print(f"Error: Path {p} does not exist.")
 
 
 def main():
@@ -107,13 +112,14 @@ def cache_reload() -> None:
               help='Absolute path of the desired location of the raw data directory.')
 @click.option('--path-loader',
               default="sfaira/data/dataloaders/loaders/",
-              type=click.Path(exists=True),
+              type=click.Path(exists=False),
               help='Relative path from the current directory to the desired location of the dataloader.')
 def create_dataloader(path_data, path_loader) -> None:
     """
     Interactively create a new sfaira dataloader.
     """
     path_loader, path_data = set_paths_container(path_loader, path_data)
+    check_paths([path_loader, path_data])
     dataloader_creator = DataloaderCreator(path_loader)
     dataloader_creator.create_dataloader(path_data)
 
@@ -122,13 +128,14 @@ def create_dataloader(path_data, path_loader) -> None:
 @click.option('--doi', type=str, default=None, help="The doi of the paper that the dataloader refers to.")
 @click.option('--path-loader',
               default="sfaira/data/dataloaders/loaders/",
-              type=click.Path(exists=True),
+              type=click.Path(exists=False),
               help='Relative path from the current directory to the desired location of the dataloader.')
 def validate_dataloader(doi, path_loader) -> None:
     """
     Verifies the dataloader against sfaira's requirements.
     """
-    path_loader, path_data = set_paths_container(path_loader, None)
+    path_loader, _ = set_paths_container(path_loader, None)
+    check_paths([path_loader])
     if doi is None or doi_lint(doi):
         dataloader_validator = DataloaderValidator(path_loader, doi)
         dataloader_validator.validate()
@@ -140,17 +147,18 @@ def validate_dataloader(doi, path_loader) -> None:
 @click.option('--doi', type=str, default=None, help="The doi of the paper that the dataloader refers to.")
 @click.option('--path-data',
               default="./",
-              type=click.Path(exists=True),
+              type=click.Path(exists=False),
               help='Absolute path of the location of the raw data directory.')
 @click.option('--path-loader',
               default="sfaira/data/dataloaders/loaders/",
-              type=click.Path(exists=True),
+              type=click.Path(exists=False),
               help='Relative path from the current directory to the location of the dataloader.')
 def annotate_dataloader(doi, path_data, path_loader) -> None:
     """
     Annotates a dataloader.
     """
     path_loader, path_data = set_paths_container(path_loader, path_data)
+    check_paths([path_loader, path_data])
     if doi is None or doi_lint(doi):
         dataloader_validator = DataloaderValidator(path_loader, doi)
         dataloader_validator.validate()
@@ -164,17 +172,18 @@ def annotate_dataloader(doi, path_data, path_loader) -> None:
 @click.option('--doi', type=str, default=None, help="The doi of the paper that the dataloader refers to.")
 @click.option('--path-data',
               default="./",
-              type=click.Path(exists=True),
+              type=click.Path(exists=False),
               help='Absolute path of the location of the raw data directory.')
 @click.option('--path-loader',
               default="sfaira/data/dataloaders/loaders/",
-              type=click.Path(exists=True),
+              type=click.Path(exists=False),
               help='Relative path from the current directory to the location of the dataloader.')
 def finalize_dataloader(doi, path_data, path_loader) -> None:
     """
     Runs a dataloader integration test.
     """
     path_loader, path_data = set_paths_container(path_loader, path_data)
+    check_paths([path_loader, path_data])
     if doi is None or doi_lint(doi):
         dataloader_validator = DataloaderValidator(path_loader, doi)
         dataloader_validator.validate()
