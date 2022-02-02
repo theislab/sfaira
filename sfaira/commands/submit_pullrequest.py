@@ -2,6 +2,7 @@ import logging
 import subprocess
 import os
 import shutil
+import sys
 
 from sfaira.consts.utils import clean_doi, clean_id_str
 from sfaira.commands.questionary import sfaira_questionary
@@ -80,7 +81,7 @@ class PullRequestHandler:
                 choices=self.loader_name_list
             )
         # Create new branch in sfaira git repo
-        git_call = subprocess.run(
+        subprocess.run(
             ["git", "checkout", "-b", f"dataset/{self.loader_name}"], check=True, text=True, shell=False, cwd="/root/sfaira/")
         # Move loader
         shutil.move(
@@ -98,21 +99,19 @@ class PullRequestHandler:
         if not current_email:
             git_email = subprocess.run(["gh", "api", "/user/public_emails", "-q", ".[0].email"], check=True, text=True,
                                        shell=False, stdout=subprocess.PIPE).stdout.strip()
-            git_call = subprocess.run(["git", "config", "--global", "user.email", git_email], check=True, text=True,
-                                      shell=False)
+            subprocess.run(["git", "config", "--global", "user.email", git_email], check=True, text=True, shell=False)
         current_user = subprocess.run(["git", "config", "user.name"], check=False, text=True, shell=False,
                                       stdout=subprocess.PIPE).stdout
         if not current_user:
             git_user = subprocess.run(["gh", "api", "/user", "-q", ".login"], check=True, text=True, shell=False,
                                       stdout=subprocess.PIPE).stdout.strip()
-            git_call = subprocess.run(["git", "config", "--global", "user.name", git_user], check=True, text=True,
-                                      shell=False)
+            subprocess.run(["git", "config", "--global", "user.name", git_user], check=True, text=True, shell=False)
         # Add and commit the dataloader
-        git_call = subprocess.run(["git", "add", "*"], check=True, text=True, shell=False, cwd="/root/sfaira/")
-        git_call = subprocess.run(["git", "commit", "-m", f"[from sfaira cli] adding dataloader {self.loader_name}"],
+        subprocess.run(["git", "add", "*"], check=True, text=True, shell=False, cwd="/root/sfaira/")
+        gsubprocess.run(["git", "commit", "-m", f"[from sfaira cli] adding dataloader {self.loader_name}"],
                                   check=True, text=True, shell=False, cwd="/root/sfaira/")
-        git_call = subprocess.run(["gh", "pr", "create", "--base", "dev", "--title",
-                                   f"Adding dataset {self.loader_name}", "--body",
-                                   f"This PR was created by the sfaira CLI adding dataset {self.loader_name}"],
-                                  check=True, text=True, shell=False, cwd="/root/sfaira/")
+        subprocess.run(["gh", "pr", "create", "--base", "dev",
+                        "--title", f"Adding dataset {self.loader_name}",
+                        "--body", "This PR was created by the sfaira CLI adding dataset {self.loader_name}"],
+                       check=True, text=True, shell=False, cwd="/root/sfaira/")
         print("[bold green]Your PR was sucessfully submitted. Feel free to add further comments to it at the URL in the line above.")
