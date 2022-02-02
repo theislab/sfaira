@@ -44,13 +44,18 @@ class PullRequestHandler:
         """
         Guides the user to authenticate with the GitHub CLI
         """
+        # Skip login procedure if already logged in
+        if subprocess.run(["gh", "auth", "status"], check=False, text=True, shell=False).returncode == 0:
+            subprocess.run(["gh", "auth", "setup-git"], check=True, text=True, shell=False)
+            print("[bold green]Already authenticated with GitHub.")
+            return
         print(
             "[bold blue]Please authenticate with GitHub. Hint: you can generate a Personal Access Token here: "
             "https://github.com/settings/tokens\nThe minimum required scopes are 'repo', 'read:org', 'workflow'."
         )
         returncode = 1
         while returncode != 0:
-            gh_token = sfaira_questionary(function='text',
+            gh_token = sfaira_questionary(function='password',
                                           question='Please enter your GitHub token. '
                                                    'Leave blank to interactively authenticate with GitHub.',
                                           default='')
@@ -61,6 +66,7 @@ class PullRequestHandler:
                 gh_call = subprocess.run(
                     f"echo {gh_token} | gh auth login --with-token", check=False, text=True, shell=True)
             returncode = gh_call.returncode
+        subprocess.run(["gh", "auth", "setup-git"], check=True, text=True, shell=False)
         print("[bold green]Successfully authenticated with GitHub.")
 
     def _clone_sfaira_and_move_dataloader(self) -> None:
@@ -108,10 +114,10 @@ class PullRequestHandler:
             subprocess.run(["git", "config", "--global", "user.name", git_user], check=True, text=True, shell=False)
         # Add and commit the dataloader
         subprocess.run(["git", "add", "*"], check=True, text=True, shell=False, cwd="/root/sfaira/")
-        subprocess.run(["git", "commit", "-m", f"[from sfaira cli] adding dataloader {self.loader_name}"],
+        subprocess.run(["git", "commit", "-m", f"[from sfaira cli] add dataloader {self.loader_name}"],
                        check=True, text=True, shell=False, cwd="/root/sfaira/")
         subprocess.run(["gh", "pr", "create", "--base", "dev",
                         "--title", f"Adding dataset {self.loader_name}",
-                        "--body", "This PR was created by the sfaira CLI adding dataset {self.loader_name}"],
+                        "--body", f"This PR was created by the sfaira CLI adding dataset {self.loader_name}"],
                        check=True, text=True, shell=False, cwd="/root/sfaira/")
-        print("[bold green]Your PR was sucessfully submitted. Feel free to add further comments to it at the URL in the line above.")
+        print("[bold green]Your PR was sucessfully submitted. Feel free to add further comments to it using the URL in the line above.")
