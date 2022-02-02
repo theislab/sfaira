@@ -14,6 +14,7 @@ from sfaira.commands.utils import doi_lint
 from sfaira.commands.validate_dataloader import DataloaderValidator
 from sfaira.commands.validate_h5ad import H5adValidator
 from sfaira.commands.test_dataloader import DataloaderTester
+from sfaira.commands.submit_pullrequest import PullRequestHandler
 
 from sfaira import __version__
 from sfaira.commands.create_dataloader import DataloaderCreator
@@ -235,6 +236,17 @@ def validate_h5ad(h5ad, schema) -> None:
     h5ad_tester = H5adValidator(h5ad, schema)
     h5ad_tester.test_schema()
     h5ad_tester.test_numeric_data()
+
+
+@sfaira_cli.command()
+def submit_pullrequest_container() -> None:
+    """
+    Interactively create a pullrequest for a newly created dataloader. This only works when called in the sfaira CLI docker container.
+    """
+    path_loader, _, _ = set_paths()
+    check_paths([path_loader])
+    pullrequest_handler = PullRequestHandler(path_loader)
+    pullrequest_handler.submit_pr()
 
 
 if __name__ == "__main__":
