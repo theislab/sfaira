@@ -223,7 +223,6 @@ def export_h5ad(doi, schema, path_out, path_data, path_cache) -> None:
     # check_paths([path_data, path_cache])
 
 
-
 @sfaira_cli.command()
 @click.option('--h5ad', type=click.Path(exists=True))
 @click.option('--schema', type=str, default=None)

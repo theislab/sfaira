@@ -108,8 +108,8 @@ class PullRequestHandler:
             subprocess.run(["git", "config", "--global", "user.name", git_user], check=True, text=True, shell=False)
         # Add and commit the dataloader
         subprocess.run(["git", "add", "*"], check=True, text=True, shell=False, cwd="/root/sfaira/")
-        gsubprocess.run(["git", "commit", "-m", f"[from sfaira cli] adding dataloader {self.loader_name}"],
-                                  check=True, text=True, shell=False, cwd="/root/sfaira/")
+        subprocess.run(["git", "commit", "-m", f"[from sfaira cli] adding dataloader {self.loader_name}"],
+                       check=True, text=True, shell=False, cwd="/root/sfaira/")
         subprocess.run(["gh", "pr", "create", "--base", "dev",
                         "--title", f"Adding dataset {self.loader_name}",
                         "--body", "This PR was created by the sfaira CLI adding dataset {self.loader_name}"],
