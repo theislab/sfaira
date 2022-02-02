@@ -23,23 +23,30 @@ WD = os.path.dirname(__file__)
 log = logging.getLogger()
 
 
-def set_paths_container(path_loader, path_data):
-    sfaira_container_loader = os.getenv('SFAIRA_DOCKER_LOADER')
-    sfaira_container_data = os.getenv('SFAIRA_DOCKER_DATA')
-    if sfaira_container_loader and sfaira_container_data:
-        print('[bold blue]Running in a container, ignoring --path-loader and --path-data if supplied.')
-        return sfaira_container_loader, sfaira_container_data
-    elif sfaira_container_loader or sfaira_container_data:
-        print('[bold red]Running in a container but internal paths not set. This should not happen. Aborting.')
-        sys.exit()
-    else:
-        return path_loader, path_data
+def set_paths(loader=None, data=None, cache=None):
+    env_loader_path = os.getenv('SFAIRA_LOADER_PATH')
+    env_data_path = os.getenv('SFAIRA_DATA_PATH')
+    env_cache_path = os.getenv('SFAIRA_CACHE_PATH')
+    if env_loader_path:
+        if not os.getenv('SFAIRA_DOCKER'):  # Skip print if running in sfaira docker where env variables are always set
+            print('[bold blue]SFAIRA_LOADER_PATH environment variable detected. Ignoring --path-loader if supplied.')
+        loader = env_loader_path
+    if env_data_path:
+        if not os.getenv('SFAIRA_DOCKER'):  # Skip print if running in sfaira docker where env variables are always set
+            print('[bold blue]SFAIRA_DATA_PATH environment variable detected. Ignoring --path-data if supplied.')
+        data = env_data_path
+    if env_cache_path:
+        if not os.getenv('SFAIRA_DOCKER'):  # Skip print if running in sfaira docker where env variables are always set
+            print('[bold blue]SFAIRA_CACHE_PATH environment variable detected. Ignoring --path-cache if supplied.')
+        cache = env_cache_path
+    return loader, data, cache
 
 
 def check_paths(pathlist):
     for p in pathlist:
         if not os.path.isdir(p):
             print(f"Error: Path {p} does not exist.")
+            sys.exit()
 
 
 def main():
@@ -118,7 +125,7 @@ def create_dataloader(path_data, path_loader) -> None:
     """
     Interactively create a new sfaira dataloader.
     """
-    path_loader, path_data = set_paths_container(path_loader, path_data)
+    path_loader, path_data, _ = set_paths(loader=path_loader, data=path_data)
     check_paths([path_loader, path_data])
     dataloader_creator = DataloaderCreator(path_loader)
     dataloader_creator.create_dataloader(path_data)
@@ -134,7 +141,7 @@ def validate_dataloader(doi, path_loader) -> None:
     """
     Verifies the dataloader against sfaira's requirements.
     """
-    path_loader, _ = set_paths_container(path_loader, None)
+    path_loader, _, _ = set_paths(loader=path_loader)
     check_paths([path_loader])
     if doi is None or doi_lint(doi):
         dataloader_validator = DataloaderValidator(path_loader, doi)
@@ -157,7 +164,7 @@ def annotate_dataloader(doi, path_data, path_loader) -> None:
     """
     Annotates a dataloader.
     """
-    path_loader, path_data = set_paths_container(path_loader, path_data)
+    path_loader, path_data, _ = set_paths(loader=path_loader, data=path_data)
     check_paths([path_loader, path_data])
     if doi is None or doi_lint(doi):
         dataloader_validator = DataloaderValidator(path_loader, doi)
@@ -182,7 +189,7 @@ def finalize_dataloader(doi, path_data, path_loader) -> None:
     """
     Runs a dataloader integration test.
     """
-    path_loader, path_data = set_paths_container(path_loader, path_data)
+    path_loader, path_data, _ = set_paths(loader=path_loader, data=path_data)
     check_paths([path_loader, path_data])
     if doi is None or doi_lint(doi):
         dataloader_validator = DataloaderValidator(path_loader, doi)
@@ -211,6 +218,9 @@ def finalize_dataloader(doi, path_data, path_loader) -> None:
 def export_h5ad(doi, schema, path_out, path_data, path_cache) -> None:
     """Creates a collection of streamlined h5ad object for a given DOI."""
     raise NotImplementedError()
+    # _, path_data, path_cache = set_paths(data=path_data, cache=path_cache)
+    # check_paths([path_data, path_cache])
+
 
 
 @sfaira_cli.command()
