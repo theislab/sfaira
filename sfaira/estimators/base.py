@@ -1,4 +1,3 @@
-import hashlib
 import os
 import warnings
 from typing import List, Union
@@ -11,7 +10,7 @@ from sfaira.consts import AdataIdsSfaira, OCS, AdataIds
 from sfaira.data.store.stores.base import StoreBase
 from sfaira.data.store.stores.multi import StoresAnndata
 from sfaira.data.store.stores.single import StoreSingleFeatureSpace
-from sfaira.models import BasicModelKeras
+from sfaira.models.base import BasicModel
 from sfaira.versions.metadata import CelltypeUniverse, OntologyCl, OntologyObo
 from sfaira.versions.topologies import TopologyContainer
 
@@ -79,7 +78,7 @@ def split_idx(data: StoreSingleFeatureSpace, test_split, val_split):
 class EstimatorBase:
 
     data: StoreSingleFeatureSpace
-    model: Union[BasicModelKeras, None]
+    model: Union[BasicModel, None]
     topology_container: TopologyContainer
     model_id: Union[str, None]
     weights: Union[np.ndarray, None]
@@ -188,94 +187,6 @@ class EstimatorBase:
         if idx is None:
             idx = np.arange(0, self.data.n_obs)
         return idx
-
-    def load_pretrained_weights(self):
-        """
-        Loads model weights from local directory or zenodo.
-        """
-        if self.model_dir.startswith('http'):
-            # Remote repo
-            if not os.path.exists(self.cache_path):
-                os.makedirs(self.cache_path)
-
-            import urllib.request
-            from urllib.parse import urljoin
-            from urllib.error import HTTPError
-            try:
-                urllib.request.urlretrieve(self.model_dir,
-                                           os.path.join(self.cache_path, os.path.basename(self.model_dir))
-                                           )
-                fn = os.path.join(self.cache_path, os.path.basename(self.model_dir))
-            except HTTPError:
-                try:
-                    urllib.request.urlretrieve(urljoin(self.model_dir, f'{self.model_id}_weights.h5'),
-                                               os.path.join(self.cache_path, f'{self.model_id}_weights.h5')
-                                               )
-                    fn = os.path.join(self.cache_path, f"{self.model_id}_weights.h5")
-                except HTTPError:
-                    try:
-                        urllib.request.urlretrieve(
-                            urljoin(self.model_dir, f'{self.model_id}_weights.data-00000-of-00001'),
-                            os.path.join(self.cache_path, f'{self.model_id}_weights.data-00000-of-00001')
-                        )
-                        fn = os.path.join(self.cache_path, f"{self.model_id}_weights.data-00000-of-00001")
-                    except HTTPError:
-                        raise FileNotFoundError('cannot find remote weightsfile')
-        else:
-            # Local repo
-            if not self.model_dir:
-                raise ValueError('the model_id is set but the path to the model is empty')
-            if os.path.isfile(self.model_dir) \
-                    and not self.model_dir.endswith(".h5") \
-                    and not self.model_dir.endswith(".data-00000-of-00001"):
-                raise ValueError('weights files saved in h5 format need to have an h5 file extension')
-
-            if os.path.isfile(self.model_dir):
-                fn = self.model_dir
-            elif os.path.isfile(os.path.join(self.model_dir, f"{self.model_id}_weights.data-00000-of-00001")):
-                fn = os.path.join(self.model_dir, f"{self.model_id}_weights.data-00000-of-00001")
-            elif os.path.isfile(os.path.join(self.model_dir, f"{self.model_id}_weights.h5")):
-                fn = os.path.join(self.model_dir, f"{self.model_id}_weights.h5")
-            else:
-                raise ValueError('the weightsfile could not be found')
-
-        if self.md5 is not None:
-            self._assert_md5_sum(fn, self.md5)
-        if fn.endswith(".data-00000-of-00001"):
-            self.model.training_model.load_weights(".".join(fn.split(".")[:-1]))
-        else:
-            self.model.training_model.load_weights(fn)
-
-    def save_weights_to_cache(self):
-        if not os.path.exists(os.path.join(self.cache_path, 'weights')):
-            os.makedirs(os.path.join(self.cache_path, 'weights'))
-        fn = os.path.join(self.cache_path, 'weights', f"{self.model_id}_weights_cache.h5")
-        self.model.training_model.save_weights(fn)
-
-    def load_weights_from_cache(self):
-        fn = os.path.join(self.cache_path, 'weights', f"{self.model_id}_weights_cache.h5")
-        self.model.training_model.load_weights(fn)
-
-    @staticmethod
-    def _assert_md5_sum(
-            fn,
-            target_md5
-    ):
-        with open(fn, 'rb') as f:
-            hsh = hashlib.md5(f.read()).hexdigest()
-        if not hsh == target_md5:
-            raise ValueError("md5 of %s did not match expectation" % fn)
-
-    def init_model(self, clear_weight_cache=True, override_hyperpar=None):
-        """
-        Instantiate the model.
-        :return:
-        """
-        if clear_weight_cache:
-            if os.path.exists(os.path.join(self.cache_path, 'weights')):
-                for file in os.listdir(os.path.join(self.cache_path, 'weights')):
-                    file_path = os.path.join(os.path.join(self.cache_path, 'weights'), file)
-                    os.remove(file_path)
 
 
 class EstimatorBaseEmbedding(EstimatorBase):
