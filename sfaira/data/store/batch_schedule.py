@@ -1,7 +1,42 @@
 from random import shuffle
-from typing import List
+from typing import List, Tuple
 
 import numpy as np
+from numba import njit
+
+
+def _split_idx_along_arr_chunks(indicies: np.ndarray, chunks: Tuple[int]):
+    assert np.all(np.diff(indicies) >= 0.)  # make sure array is sorted
+    assert indicies.dtype == np.int64
+
+    @njit
+    def split_along_array_boundaries(idxs: np.ndarray, arr_boundaries: np.ndarray):
+        idx_split = []  # variable to accumulate index groups
+
+        partition_ctr = 0
+        start_next_partition = arr_boundaries[partition_ctr]
+        idxs_partition = [np.int64(x) for x in range(0)]  # temporary variable to accumulate idxs for a index group
+        for idx in idxs:
+            if idx < start_next_partition:
+                # append idx to index group
+                idxs_partition.append(idx)
+            else:
+                # find next bigger partition
+                while idx >= start_next_partition:
+                    partition_ctr += 1
+                    start_next_partition = arr_boundaries[partition_ctr]
+                # start a new index group list
+                if len(idxs_partition) > 0:
+                    idx_split.append(idxs_partition)
+                    idxs_partition = [np.int64(x) for x in range(0)]
+                # append idx to index group
+                idxs_partition.append(idx)
+        if len(idxs_partition) > 0:
+            idx_split.append(idxs_partition)
+
+        return idx_split
+
+    return [np.array(xx) for xx in split_along_array_boundaries(indicies, np.cumsum(chunks))]
 
 
 class BatchDesignBase:
@@ -23,24 +58,22 @@ class BatchDesignBase:
         self.retrieval_batch_size = retrieval_batch_size
         self._batches = None
         self._idx = None
-        self._batch_size = None
+        self._batch_splits = None
         if randomized_batch_access and random_access:
             raise ValueError("Do not use randomized_batch_access and random_access.")
         self.randomized_batch_access = randomized_batch_access
         self.random_access = random_access
 
     @property
-    def batchsize(self) -> int:
+    def batchsplits(self) -> Tuple[int]:
         """
         Batch size of the yieleded batches.
         """
-        return self._batch_size
+        return self._batch_splits
 
-    @batchsize.setter
-    def batchsize(self, batch_size: int):
-        if not isinstance(batch_size, int):
-            raise ValueError('batchsize has to be of type int')
-        self._batch_size = batch_size
+    @batchsplits.setter
+    def batchsplits(self, batch_splits: Tuple[int]):
+        self._batch_splits = batch_splits
 
     @property
     def n_batches(self) -> int:
@@ -78,20 +111,23 @@ class BatchDesignBasic(BatchDesignBase):
 
     @property
     def design(self) -> List[np.ndarray]:
+
         if self.random_access:
             # shuffle idx for random access
             idx = np.random.permutation(self.idx)
-        else:
-            idx = self.idx
-        if self.batchsize is None:
             batches = np.array_split(idx, max(len(idx) // self.retrieval_batch_size, 1))
+        elif self.randomized_batch_access:
+            if self.batchsplits is not None:
+                # if zarr chunk sizes are known -> split first along those and shuffle those batches
+                batches = _split_idx_along_arr_chunks(self.idx, self.batchsplits)
+                shuffle(batches)
+                # accumulate smaller batches to the size of retrieval_batch_size
+                batches = np.array_split(np.concatenate(batches), max(len(self.idx) // self.retrieval_batch_size, 1))
+            else:
+                batches = np.array_split(self.idx, max(len(self.idx) // self.retrieval_batch_size, 1))
+                shuffle(batches)
         else:
-            batches = np.array_split(idx, max(len(idx) // self.batchsize, 1))
-        if self.randomized_batch_access:
-            shuffle(batches)
-        if self.batchsize is not None:
-            # accumulate smaller batches to the size of retrieval_batch_size
-            batches = np.array_split(np.concatenate(batches), max(len(idx) // self.retrieval_batch_size, 1))
+            batches = np.array_split(self.idx, max(len(self.idx) // self.retrieval_batch_size, 1))
 
         return batches
 
