@@ -1,5 +1,4 @@
 import random
-from collections import Counter
 from typing import Dict, List, Tuple, Union
 
 import anndata
@@ -396,8 +395,7 @@ class CartDask(CartSingle):
             raise ValueError("Shuffle buffer only supported if self.batch_size == 1")
 
         def g():
-            # use most common chunksize as batchsize for batch_schedule
-            self.schedule.batchsize = Counter(self._x.chunks[0]).most_common(1)[0][0]
+            self.schedule.batchsplits = self._x.chunks[0]
             batches = self.schedule.design
             x_temp = self._x
             obs_temp = self._obs
@@ -423,9 +421,9 @@ class CartDask(CartSingle):
 
     def move_to_memory(self):
         """
-        Persist underlying dask array into memory in sparse.COO format.
+        Persist underlying dask array into memory in sparse.CSR format.
         """
-        self._x = self._x.map_blocks(scipy.sparse.csr_matrix).persist().compute()
+        self._x = self._x.map_blocks(scipy.sparse.csr_matrix).persist()
 
     @property
     def n_obs(self) -> int:
@@ -455,8 +453,8 @@ class CartDask(CartSingle):
         Note: to obtain the dask array instead of a csr matrix, use `self.x_dask`
         """
         if self.var_idx is None:
-            return self._x[self.schedule.idx, :]
+            return self._x[self.schedule.idx, :].compute()
         else:
-            return self._x[self.schedule.idx, :][:, self.var_idx]
+            return self._x[self.schedule.idx, :][:, self.var_idx].compute()
 
     # Methods that are specific to this child class:
