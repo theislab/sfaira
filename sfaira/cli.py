@@ -45,7 +45,7 @@ def set_paths(loader=None, data=None, cache=None):
 
 def check_paths(pathlist):
     for p in pathlist:
-        if not os.path.isdir(p):
+        if p is None or not os.path.isdir(p):
             print(f"Error: Path {p} does not exist.")
             sys.exit()
 
