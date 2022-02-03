@@ -238,9 +238,10 @@ def validate_h5ad(h5ad, schema) -> None:
 
 
 @sfaira_cli.command()
-def submit_pullrequest_container() -> None:
+def publish_loader() -> None:
     """
-    Interactively create a pullrequest for a newly created dataloader. This only works when called in the sfaira CLI docker container.
+    Interactively create a GitHub pullrequest for a newly created dataloader.
+    This only works when called in the sfaira CLI docker container.
     """
     path_loader, _, _ = set_paths()
     pullrequest_handler = PullRequestHandler(path_loader)
