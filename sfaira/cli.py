@@ -243,7 +243,6 @@ def submit_pullrequest_container() -> None:
     Interactively create a pullrequest for a newly created dataloader. This only works when called in the sfaira CLI docker container.
     """
     path_loader, _, _ = set_paths()
-    check_paths([path_loader])
     pullrequest_handler = PullRequestHandler(path_loader)
     pullrequest_handler.submit_pr()
 

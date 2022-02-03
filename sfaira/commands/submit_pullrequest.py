@@ -28,7 +28,7 @@ class PullRequestHandler:
 
     def _check_container_and_loaders(self):
         sfaira_container = os.getenv('SFAIRA_DOCKER')
-        if self.path_loader and sfaira_container:
+        if sfaira_container and self.path_loader and os.path.isdir(self.path_loader):
             for d in os.listdir(self.path_loader):
                 if os.path.isdir(os.path.join(self.path_loader, d)) and d.startswith(("d10_", "dno_doi_")):
                     self.loader_name_list.append(d)
