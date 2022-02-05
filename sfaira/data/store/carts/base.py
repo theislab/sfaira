@@ -1,6 +1,34 @@
 import pandas as pd
+import random
 
 from sfaira.data.store.batch_schedule import BatchDesignBase
+
+
+class _ShuffleBuffer:
+
+    def __init__(self, generator: iter, buffer_size: int):
+        if buffer_size < 1:
+            raise ValueError('buffer_size should be larger than 0')
+        self._g = generator
+        self._buffer_size = buffer_size
+
+    @staticmethod
+    def buffer_replace(buffer, x):
+        idx = random.randint(0, len(buffer) - 1)
+        val = buffer[idx]
+        buffer[idx] = x
+        return val
+
+    def generator(self):
+        buffer = []
+        for x in self._g:
+            if len(buffer) == self._buffer_size:
+                yield self.buffer_replace(buffer, x)
+            else:
+                buffer.append(x)
+        random.shuffle(buffer)
+        while buffer:
+            yield buffer.pop()
 
 
 class CartBase:
@@ -30,8 +58,9 @@ class CartBase:
 
     schedule: BatchDesignBase
     var: pd.DataFrame  # Feature meta data (features x properties).
+    map_fn: callable
 
-    def adaptor(self, generator_type: str, dataset_kwargs: dict = {}, **kwargs):
+    def adaptor(self, generator_type: str, dataset_kwargs: dict = None, shuffle_buffer_size: int = 0, **kwargs):
         """
         The adaptor turns a python base generator into a different iteratable object, defined by generator_type.
 
@@ -53,14 +82,28 @@ class CartBase:
                     For model training in pytorch you need the "-loader" prefix. You can specify the arguments passed
                     to torch.utils.data.DataLoader by the dataset_kwargs dictionary.
         :param dataset_kwargs:
+        :param shuffle_buffer_size: int
+            If shuffle_buffer_size > 0 -> Use a shuffle buffer with size shuffle_buffer_size to shuffle output of
+            self.iterator (this option is useful when using randomized_batch_access in the DaskCart)
         :returns: Modified iteratable (see generator_type).
         """
+        if not dataset_kwargs:
+            dataset_kwargs = {}
+
         if generator_type == "python":
-            g = self.iterator()
+            if shuffle_buffer_size > 0:
+                g = _ShuffleBuffer(self.iterator(), shuffle_buffer_size).generator()
+            else:
+                g = self.iterator()
         elif generator_type == "tensorflow":
             import tensorflow as tf
 
-            g = tf.data.Dataset.from_generator(generator=self.iterator, **kwargs)
+            if shuffle_buffer_size > 0:
+                g = tf.data.Dataset.from_generator(
+                    generator=_ShuffleBuffer(self.iterator(), shuffle_buffer_size).generator, **kwargs
+                )
+            else:
+                g = tf.data.Dataset.from_generator(generator=self.iterator, **kwargs)
         elif generator_type in ["torch", "torch-loader"]:
             import torch
             # Only import this module if torch is used to avoid strict torch dependency:
@@ -74,7 +117,10 @@ class CartBase:
             # Only import this module if torch is used to avoid strict torch dependency:
             from sfaira.data.store.torch_dataset import SfairaIterableDataset
 
-            g = SfairaIterableDataset(iterator_fun=self.iterator)
+            if shuffle_buffer_size > 0:
+                g = SfairaIterableDataset(iterator_fun=_ShuffleBuffer(self.iterator(), shuffle_buffer_size).generator)
+            else:
+                g = SfairaIterableDataset(iterator_fun=self.iterator)
             if generator_type == "torch-iter-loader":
                 g = torch.utils.data.DataLoader(g, **kwargs)
         else:

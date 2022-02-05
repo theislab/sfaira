@@ -1,4 +1,3 @@
-import random
 from typing import Dict, List, Tuple, Union
 
 import anndata
@@ -9,32 +8,6 @@ import scipy.sparse
 from sfaira.data.store.batch_schedule import BATCH_SCHEDULE, BatchDesignBase
 from sfaira.data.store.carts.base import CartBase
 from sfaira.data.store.carts.utils import split_batch
-
-
-class _ShuffleBuffer:
-
-    def __init__(self, generator: iter, buffer_size: int):
-        assert buffer_size > 0, 'buffer_size should be larger than 0'
-        self._g = generator
-        self._buffer_size = buffer_size
-
-    @staticmethod
-    def buffer_replace(buffer, x):
-        idx = random.randint(0, len(buffer) - 1)
-        val = buffer[idx]
-        buffer[idx] = x
-        return val
-
-    def generator(self):
-        buffer: List = []
-        for x in self._g:
-            if len(buffer) == self._buffer_size:
-                yield _ShuffleBuffer.buffer_replace(buffer, x)
-            else:
-                buffer.append(x)
-        random.shuffle(buffer)
-        while buffer:
-            yield buffer.pop()
 
 
 class CartSingle(CartBase):
@@ -385,14 +358,12 @@ class CartDask(CartSingle):
         return self._x
 
     @property
-    def iterator(self, shuffle_buffer_size: int = 0) -> iter:
+    def iterator(self) -> iter:
         """
         Iterator over data matrix and meta data table, yields batches of data points.
         """
         # Can all data sets corresponding to one organism as a single array because they share the second dimension
         # and dask keeps expression data and obs out of memory.
-        if shuffle_buffer_size > 0 and self.batch_size != 1:
-            raise ValueError("Shuffle buffer only supported if self.batch_size == 1")
 
         def g():
             self.schedule.batchsplits = self._x.chunks[0]
@@ -414,10 +385,7 @@ class CartDask(CartSingle):
                     else:
                         yield data_tuple
 
-        if shuffle_buffer_size > 0 and self.batch_size == 1:
-            return _ShuffleBuffer(g(), shuffle_buffer_size).generator
-        else:
-            return g
+        return g
 
     def move_to_memory(self):
         """
