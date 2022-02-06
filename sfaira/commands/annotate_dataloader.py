@@ -105,8 +105,6 @@ class DataloaderAnnotater:
                              f"{test_data}, only found {os.listdir(test_data)}")
         ds = self._get_ds(test_data=test_data)
         ds.load(
-            remove_gene_version=False,
-            match_to_reference=None,
             load_raw=True,  # Force raw load so non confound future tests by data loader bugs in previous versions.
             allow_caching=False,
             verbose=3

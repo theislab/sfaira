@@ -1,9 +1,10 @@
+from dataclasses import dataclass, asdict
 import logging
 import numpy as np
 import os
 import re
-from dataclasses import dataclass, asdict
 from typing import Union, Dict
+import sys
 
 from sfaira.consts.utils import clean_doi, clean_id_str
 from sfaira.commands.questionary import sfaira_questionary
@@ -15,41 +16,70 @@ log = logging.getLogger(__name__)
 
 @dataclass
 class TemplateAttributes:
+    create_extra_description: str = ''  # Whether to create an optional extra description file or not
     dataloader_type: str = ''  # One of single_dataset, multiple_datasets_single_file, multiple_datasets_streamlined, multiple_datasets_not_streamlined
+    doi_sfaira_repr: str = ''
     id: str = ''  # unique identifier of data set (Organism_Organ_Year_Protocol_NumberOfDataset_FirstAuthorLastname_doi).
     id_without_doi: str = ''  # complete id without the doi -> usually used to name the python scripts
-    create_extra_description: str = ''  # Whether to create an optional extra description file or not
+    number_of_datasets: str = 1
 
-    author: Union[str, list] = ''  # author (list) who sampled / created the data set
-    doi_preprint: str = ''  # doi of data set accompanying preprint manuscript
-    doi_journal: str = ''  # doi of data set accompanying journal manuscript
-    doi_sfaira_repr: str = ''  # internal representation with any special characters replaced with underscores
+    sample_fns: Union[str, Dict[str, list]] = ''
 
-    sample_fns: Union[str, Dict[str, list]] = ''  # file name of the first *.h5ad file
-    download_url_data: str = ''  # download website(s) of data files
-    download_url_meta: str = ''  # download website(s) of meta data files
-    organ: str = ''  # (*) organ (anatomical structure)
-    organism: str = ''  # (*) species / organism
-    assay_sc: str = ''  # (*, optional) protocol used to sample data (e.g. smart-seq2)
-    normalization: str = ''  # raw or the used normalization technique
-    default_embedding: str = ''  # Default embedding of the data
-    primary_data: str = ''  # Is this a primary dataset?
-    disease: str = ''  # name of the disease of the condition
-    ethnicity: str = ''  # ethnicity of the sample
-    sample_source: str = ''  # source of the sample
-    state_exact: str = ''  # state of the sample
-    year: int = 2022  # year in which sample was acquired
-    number_of_datasets: str = 1  # Required to determine the file names
+    author: Union[str, list] = ''
+    default_embedding: str = ''
+    doi_preprint: str = ''
+    doi_journal: str = ''
+    download_url_data: str = ''
+    download_url_meta: str = ''
+    organism: str = ''
+    primary_data: str = ''
+    year: int = 2022
 
-    assay_sc_obs_key: str = ''  # Assay key in obs
-    cell_type_obs_key: str = ''  # Original cell type key in obs
-    development_stage_obs_key: str = ''  # Development stage key in obs
-    disease_obs_key: str = ''  # Disease key in obs
-    organ_obs_key: str = ''  # Organ key in obs
-    sex_obs_key: str = ''  # Sex key in obs
+    layer_counts: str = ''
+    layer_processed: str = ''
+    layer_spliced_counts: str = ''
+    layer_spliced_processed: str = ''
+    layer_unspliced_counts: str = ''
+    layer_unspliced_processed: str = ''
+    layer_velocity: str = ''
 
-    gene_id_ensembl_var_key: str = ''  # Gene id ensembl key in var
-    gene_id_symbols_var_key: str = ''  # Gene id symbols key in var
+    assay_sc: str = ''
+    cell_type: str = ''
+    development_stage: str = ''
+    disease: str = ''
+    ethnicity: str = ''
+    organ: str = ''
+    sample_source: str = ''
+    sex: str = ''
+
+    assay_sc_obs_key: str = ''
+    cell_type_obs_key: str = ''
+    development_stage_obs_key: str = ''
+    disease_obs_key: str = ''
+    ethnicity_obs_key: str = ''
+    organ_obs_key: str = ''
+    sample_source_obs_key: str = ''
+    sex_obs_key: str = ''
+
+    spatial_x_coord: str = ''
+    spatial_y_coord: str = ''
+    spatial_z_coord: str = ''
+    vdj_c_call: str = ''
+    vdj_consensus_count: str = ''
+    vdj_d_call: str = ''
+    vdj_duplicate_count: str = ''
+    vdj_j_call: str = ''
+    vdj_junction: str = ''
+    vdj_junction_aa: str = ''
+    vdj_locus: str = ''
+    vdj_productive: str = ''
+    vdj_v_call: str = ''
+
+    feature_reference: str = ''
+    feature_type: str = ''
+
+    feature_id_var_key: str = ''
+    feature_symbol_var_key: str = ''
 
 
 class DataloaderCreator:
@@ -62,17 +92,22 @@ class DataloaderCreator:
 
     def create_dataloader(self, path_data):
         """
-        Prompts and guides the user through a number of possible dataloader choices.
-        Prompts the user for required attributes which must be present in the dataloader.
-        Finally creates the specific cookiecutter dataloader template.
+        Prompts and guides the user through a number of possible data loader choices.
+        Prompts the user for required attributes which must be present in the data loader.
+        Finally creates the specific cookiecutter data loader template.
         """
-        self._prompt_dataloader_template()
-        self._prompt_dataloader_configuration(path_data)
-        self._create_dataloader_template()
+        try:
+            self._prompt_dataloader_template()
+            self._prompt_dataloader_configuration(path_data)
+            self._create_dataloader_template()
+        except FileExistsError as e:
+            print(f"[bold red]The data loader exists already in {self.out_path}. Delete the old version of this loader"
+                  "or consider completing the previous curation attempt.")
+            sys.exit()
 
     def _prompt_dataloader_template(self) -> None:
         """
-        Guides the user to select the appropriate dataloader template for his dataset.
+        Guides the user to select the appropriate data loader template for his dataset.
         Sets the dataloader_type
         """
         number_datasets = sfaira_questionary(function='select',
@@ -147,7 +182,7 @@ class DataloaderCreator:
                          'sample_fn):',
                 default='data.h5ad')
 
-        print('[bold blue]Meta data dataset-wise (encouraged).')
+        print('[bold blue]Cell-wise meta data that are shared across the dataset.')
         print('[bold blue]The following meta data queries are on dataset-resolution. '
               'These can also later be modified manually in the .yaml which has the same effect as setting them here.')
         first_author = author[0] if isinstance(author, list) else author
@@ -163,101 +198,305 @@ class DataloaderCreator:
                                                   f'{clean_id_str(first_author_lastname)}_001'
         self.template_attributes.id = f'{self.template_attributes.id_without_doi}_' \
                                       f'{self.template_attributes.doi_sfaira_repr}'
-        self.template_attributes.download_url_data = sfaira_questionary(function='text',
-                                                                        question='URL to download the data',
-                                                                        default='')
-        self.template_attributes.download_url_meta = sfaira_questionary(function='text',
-                                                                        question='URL to download the meta data',
-                                                                        default='')
-        self.template_attributes.primary_data = str(sfaira_questionary(function='confirm',
-                                                                       question='Primary data:',
-                                                                       default='Yes'))
         self.template_attributes.default_embedding = str(sfaira_questionary(
             function='text',
             question='Key of default embedding in obsm (if available):',
             default='X_umap'))
-        self.template_attributes.year = sfaira_questionary(function='text',
-                                                           question='Year:',
-                                                           default="2022")
-        self.template_attributes.organism = sfaira_questionary(function='text',
-                                                               question='Organism (from NCBItaxon):',
-                                                               default='')
-        self.template_attributes.organ = sfaira_questionary(function='text',
-                                                            question='Organ [from UBERON, can also be set per cell later]:',
-                                                            default='')
-        self.template_attributes.assay_sc = sfaira_questionary(function='text',
-                                                               question='Assay (from EFO, can also be set per cell later):',
-                                                               default='')
-        self.template_attributes.normalization = sfaira_questionary(function='text',
-                                                                    question='Normalization:',
-                                                                    default='raw')
-        self.template_attributes.disease = sfaira_questionary(function='text',
-                                                              question='Disease (from MONDO, can also be set per cell later):',
-                                                              default='healthy')
+        self.template_attributes.download_url_data = sfaira_questionary(
+            function='text',
+            question='URL to download the data',
+            default='')
+        self.template_attributes.download_url_meta = sfaira_questionary(
+            function='text',
+            question='URL to download the meta data (only necessary if different from download_url_data)',
+            default='')
+        self.template_attributes.organism = sfaira_questionary(
+            function='text',
+            question='Organism (from NCBItaxon):',
+            default='')
+        self.template_attributes.primary_data = str(sfaira_questionary(
+            function='confirm',
+            question='Is this primary data:',
+            default='Yes'))
+        self.template_attributes.year = sfaira_questionary(
+            function='text',
+            question='Year:',
+            default="2022")
+
+        # Data matrices in the dataset:
+        print('[bold blue]Data matrices.')
+        print('[bold blue]An AnnData object may contain multiple data matrices: raw and processed gene expression '
+              'counts, or spliced and unspliced count data and velocity estimates, for example. '
+              'Minimally, you need to supply either of the matrices "counts" or "processed". '
+              'In the following, "*counts" refers to the INTEGER count of alignment events (e.g. transcripts for RNA). '
+              'In the following, "*processed" refers to any processing that modifies these counts, for example: '
+              'normalization, batch correction, ambient RNA correction. '
+              'These items can also later be modified manually in the .yaml which has the same '
+              'effect as setting them here.')
+
+        def format_q_mat_key(attr) -> str:
+            return f"Layer that contains {attr} ['X', 'raw', or a .layers key]: "
+
+        main_layer = ""
+        counter = 0
+        while main_layer == "":
+            if counter > 0:
+                print('[bold red]You need to supply either a matrix for "counts" or for "processed"!')
+            self.template_attributes.layer_counts = sfaira_questionary(
+                function='text',
+                question=format_q_mat_key("counts"),
+                default='')
+            self.template_attributes.layer_processed = sfaira_questionary(
+                function='text',
+                question=format_q_mat_key("processed counts"),
+                default='')
+            main_layer = self.template_attributes.layer_counts if self.template_attributes.layer_counts != "" else \
+                self.template_attributes.layer_processed
+            counter += 1
+        self.template_attributes.layer_spliced_counts = sfaira_questionary(
+            function='text',
+            question=format_q_mat_key("spliced counts"),
+            default='')
+        self.template_attributes.layer_spliced_processed = sfaira_questionary(
+            function='text',
+            question=format_q_mat_key("processed spliced counts"),
+            default='')
+        self.template_attributes.layer_unspliced_counts = sfaira_questionary(
+            function='text',
+            question=format_q_mat_key("unspliced counts"),
+            default='')
+        self.template_attributes.layer_unspliced_processed = sfaira_questionary(
+            function='text',
+            question=format_q_mat_key("processed unspliced counts"),
+            default='')
+        self.template_attributes.layer_velocity = sfaira_questionary(
+            function='text',
+            question=format_q_mat_key("gene-wise velocities"),
+            default='')
+
+        # Meta data that may also be observation-wise:
+        print('[bold blue]Cell-wise meta data that are sometimes shared across the dataset.')
+        print('[bold blue]The following meta data queries are on a dataset-resolution and should be set '
+              'if they do not vary across the cells in that dataset. '
+              'Skip the corresponding cell-wise below annotation if you annotate metadata here. '
+              'If these meta data vary across cells in a data set, skip them here and annotate them in the next '
+              'section. '
+              'These items can also later be modified manually in the .yaml which has the same '
+              'effect as setting them here.')
+
+        def format_q_uns_key(attr, onto) -> str:
+            return f"Dataset-wide {attr} annotation (from {onto}): "
+
+        self.template_attributes.assay_sc = sfaira_questionary(
+            function='text',
+            question=format_q_uns_key("assay", "EFO"),
+            default='')
+        self.template_attributes.development_stage = sfaira_questionary(
+            function='text',
+            question=format_q_uns_key("developmental stage", "hsapdv for human, mmusdv for mouse"),
+            default='')
+        self.template_attributes.disease = sfaira_questionary(
+            function='text',
+            question=format_q_uns_key("disease", "MONDO"),
+            default='healthy')
+        self.template_attributes.ethnicity = sfaira_questionary(
+            function='text',
+            question=format_q_uns_key("ethnicity", "HANCESTRO for human, skip for non-human"),
+            default='')
+        self.template_attributes.organ = sfaira_questionary(
+            function='text',
+            question=format_q_uns_key("organ/tissue", "UBERON"),
+            default='')
         self.template_attributes.sample_source = sfaira_questionary(
             function='text',
-            question='Sample source ["primary_tissue", "2d_culture", "3d_culture", "tumor"]:',
+            question='Dataset-wide sample source annotation (from '
+                     '["primary_tissue", "2d_culture", "3d_culture", "tumor"]):',
+            default='')
+        self.template_attributes.sex = sfaira_questionary(
+            function='text',
+            question=format_q_uns_key("sex", "PATO"),
             default='')
 
         # Encouraged meta data that tend to be in .obs and would require mapping .tsv:
-        print('[bold blue]Meta data cell-wise (encouraged).')
+        print('[bold blue]Cell-wise meta data that are not shared across the dataset.')
         print('[bold blue]The following meta data queries are on cell-resolution and do not need to be set if they can '
-              'be annotated on a dataset-level. Skip cell- and dataset-level entries if the corresponding item is not '
-              'available all-together. These items can also later be modified manually in the .yaml which has the same '
-              'effect as setting them here, we do additionally check here if you need to run '
-              '\'sfaira annotate-dataloader\' though.')
+              'be annotated on a dataset-level. '
+              'Skip cell- and dataset-level entries if the corresponding item is not available at all. '
+              'These items can also later be modified manually in the .yaml which has the same effect as setting them '
+              'here except of that we do additionally check here if you need to run \'sfaira annotate-dataloader\'.')
+
+        def format_q_obs_key(attr, onto) -> str:
+            return f"Key of {attr} annotation field in .obs (from {onto}): "
+
+        def format_warning_double_curation(attr) -> str:
+            return f"[bold yellow]WARNING: you set '{attr}' before already, this new entry is ignored. " \
+                   "Define this meta data item either data set wide (as before) or cell-specific (here)."
+
+        # assay_sc:
         self.template_attributes.assay_sc_obs_key = sfaira_questionary(
             function='text',
-            question='Key of assay annotation field in .obs (from EFO, not required if "Assay" was set above):',
+            question=format_q_obs_key("assay", "EFO"),
             default='')
         if self.template_attributes.assay_sc != "" and self.template_attributes.assay_sc_obs_key != "":
-            print("[bold yellow]WARNING: you set 'Assay' before already, this new entry on assay is ignored."
-                  "Define this meta data item either data set wide (as before) or cell-specific (here).")
+            print(format_warning_double_curation('assay_sc'))
+        # cell_type:
         self.template_attributes.cell_type_obs_key = sfaira_questionary(
             function='text',
-            question='Key of cell type annotation field in .obs (from CL):',
+            question=format_q_obs_key("cell type", "CL"),
             default='')
+        if self.template_attributes.cell_type != "" and self.template_attributes.cell_type_obs_key != "":
+            print(format_warning_double_curation('cell type'))
+        # development_stage:
         self.template_attributes.development_stage_obs_key = sfaira_questionary(
             function='text',
-            question='Key of developmental stage annotation field in .obs (from hsapdv for human or mmusdv for mouse):',
+            question=format_q_obs_key("development stage", "hsapdv for human, mmusdv for mouse"),
             default='')
+        if self.template_attributes.development_stage != "" and \
+                self.template_attributes.development_stage_obs_key != "":
+            print(format_warning_double_curation('development_stage'))
+        # disease:
         self.template_attributes.disease_obs_key = sfaira_questionary(
             function='text',
-            question='Key of disease annotation field in .obs (from MONDO, not required if "Disease" was set above):',
+            question=format_q_obs_key("disease", "MONDO"),
             default='')
         if self.template_attributes.disease != "" and self.template_attributes.disease_obs_key != "":
-            print("[bold yellow]WARNING: you set 'Disease' before already, this new entry on disease is ignored."
-                  "Define this meta data item either data set wide (as before) or cell-specific (here).")
+            print(format_warning_double_curation('disease'))
+        # ethnicity:
+        self.template_attributes.ethnicity_obs_key = sfaira_questionary(
+            function='text',
+            question=format_q_obs_key("ethnicity", "HANCESTRO for human, skip for non-human"),
+            default='')
+        if self.template_attributes.ethnicity != "" and self.template_attributes.ethnicity_obs_key != "":
+            print(format_warning_double_curation('ethnicity'))
+        # organ:
         self.template_attributes.organ_obs_key = sfaira_questionary(
             function='text',
-            question='Key of organ annotation field in .obs (from UBERON, not required if "Organ" was set above]:',
+            question=format_q_obs_key("organ/tissue", "UBERON"),
             default='')
         if self.template_attributes.organ != "" and self.template_attributes.organ_obs_key != "":
-            print("[bold yellow]WARNING: you set 'Organ' before already, this new entry on organ is ignored."
-                  "Define this meta data item either data set wide (as before) or cell-specific (here).")
+            print(format_warning_double_curation('organ'))
+        # sample_source:
+        self.template_attributes.sample_source_obs_key = sfaira_questionary(
+            function='text',
+            question='Key of sample source annotation field in .obs (from '
+                     f'["primary_tissue", "2d_culture", "3d_culture", "tumor"]):',
+            default='')
+        if self.template_attributes.sample_source != "" and self.template_attributes.sample_source_obs_key != "":
+            print(format_warning_double_curation('sex'))
+        # sex:
         self.template_attributes.sex_obs_key = sfaira_questionary(
             function='text',
-            question='Key of sex annotation field in .obs (from PATO, not required if "Sex" will be set manually):',
+            question=format_q_obs_key("sex", "PATO"),
             default='')
+        if self.template_attributes.sex != "" and self.template_attributes.sex_obs_key != "":
+            print(format_warning_double_curation('sex'))
         requires_annotate = np.any([x != "" for x in [
             self.template_attributes.assay_sc_obs_key,
             self.template_attributes.cell_type_obs_key,
             self.template_attributes.development_stage_obs_key,
             self.template_attributes.disease_obs_key,
+            self.template_attributes.ethnicity_obs_key,
             self.template_attributes.organ_obs_key,
             self.template_attributes.sex_obs_key,
         ]])
 
-        print('[bold blue]Meta data gene-wise (encouraged).')
+        # Modality-specific data:
+
+        def format_q_modality_obs_key(modality, attr) -> str:
+            return f"{modality}: Key of {attr} annotation field in .obs: "
+
+        has_spatial = sfaira_questionary(
+            function='confirm',
+            question='Modality spatial: Does this data set contain spatial coordinates of observations?',
+            default='No')
+        if has_spatial:
+            self.template_attributes.spatial_x_coord = sfaira_questionary(
+                function='text',
+                question=format_q_modality_obs_key("Spatial", "x coordinate"),
+                default='')
+            self.template_attributes.spatial_y_coord = sfaira_questionary(
+                function='text',
+                question=format_q_modality_obs_key("Spatial", "y coordinate"),
+                default='')
+            self.template_attributes.spatial_z_coord = sfaira_questionary(
+                function='text',
+                question=format_q_modality_obs_key("Spatial", "z coordinate"),
+                default='')
+
+        has_vdj = sfaira_questionary(
+            function='confirm',
+            question='Modality V(D)J: Does this data set contain V(D)J gene reconstructions by observation?',
+            default='No')
+        if has_vdj:
+            print('[bold blue]V(D)J annotation: Meta data definitions are documented here '
+                  'https://docs.airr-community.org/en/latest/datarep/rearrangements.html.')
+            self.template_attributes.vdj_c_call = sfaira_questionary(
+                function='text',
+                question=format_q_modality_obs_key("V(D)J", "C gene"),
+                default='')
+            self.template_attributes.vdj_d_call = sfaira_questionary(
+                function='text',
+                question=format_q_modality_obs_key("V(D)J", "D gene"),
+                default='')
+            self.template_attributes.vdj_j_call = sfaira_questionary(
+                function='text',
+                question=format_q_modality_obs_key("V(D)J", "J gene"),
+                default='')
+            self.template_attributes.vdj_v_call = sfaira_questionary(
+                function='text',
+                question=format_q_modality_obs_key("VDJ", "V gene"),
+                default='')
+            self.template_attributes.vdj_duplicate_count = sfaira_questionary(
+                function='text',
+                question=format_q_modality_obs_key("V(D)J", "number of duplicate UMIs"),
+                default='')
+            self.template_attributes.vdj_junction = sfaira_questionary(
+                function='text',
+                question=format_q_modality_obs_key("V(D)J", "junction nt sequence"),
+                default='')
+            self.template_attributes.vdj_junction_aa = sfaira_questionary(
+                function='text',
+                question=format_q_modality_obs_key("V(D)J", "junction aa sequence"),
+                default='')
+            self.template_attributes.vdj_locus = sfaira_questionary(
+                function='text',
+                question=format_q_modality_obs_key("V(D)J", "gene locus (e.g elements from IGH, IGK, IGL, TRA, TRB, "
+                                                            "TRD, or TRG)"),
+                default='')
+            self.template_attributes.vdj_productive = sfaira_questionary(
+                function='text',
+                question=format_q_modality_obs_key("V(D)J", "'Is the gene productive?'"),
+                default='')
+            self.template_attributes.vdj_consensus_count = sfaira_questionary(
+                function='text',
+                question=format_q_modality_obs_key("V(D)J", "number of reads contributing to consensus"),
+                default='')
+
+        print('[bold blue]Feature-wise meta data that are shared across the dataset.')
+        print('[bold blue]The following meta data queries are on feature(gene)-wise. '
+              'In some cases, these meta data need to be set per feature, '
+              'skip here and annotate in the -yaml if that is the case. '
+              'These can also later be modified manually in the .yaml which has the same effect as setting them here.')
+
+        self.template_attributes.feature_reference = str(sfaira_questionary(
+            function='text',
+            question='Reference genome annotation release:',
+            default=''))
+        self.template_attributes.feature_type = sfaira_questionary(
+            function='text',
+            question='Feature type of features annotated:',
+            default='')
+
+        print('[bold blue]Feature-wise meta data that are not shared across the dataset.')
         print('[bold blue]The following meta data queries are on gene-resolution. '
               'These can also later be modified manually in the .yaml which has the same effect as setting them here.')
-        self.template_attributes.gene_id_symbols_var_key = sfaira_questionary(
+        self.template_attributes.feature_symbol_var_key = sfaira_questionary(
             function='text',
-            question='Key of gene symbol field in .var:',
+            question='Key of feature symbol field in .var:',
             default='index')
-        self.template_attributes.gene_id_ensembl_var_key = sfaira_questionary(
+        self.template_attributes.feature_id_var_key = sfaira_questionary(
             function='text',
-            question='Key of gene id ensembl field in .var:',
+            question='Key of feature ID field in .var:',
             default='')
 
         print('[bold orange]Sfaira butler: "Up next:"')
@@ -265,13 +504,13 @@ class DataloaderCreator:
         path_loader = os.path.join(self.out_path, self.template_attributes.doi_sfaira_repr)
         print(f'[bold orange]{self.action_counter}) Proceed to modify the .yaml and .py files in {path_loader}')
         self.action_counter += 1
-        self.create_datadir(path_data=path_data)
+        self.check_datadir(path_data=path_data)
         if requires_annotate:
-            print(f'[bold orange]{self.action_counter}) You will have to run \'sfaira annotate-dataloader\'.')
+            print(f'[bold orange]{self.action_counter}) Proceed to phase 2: \'sfaira annotate-dataloader\'.')
             self.action_counter += 1
         else:
-            print(f'[bold orange]{self.action_counter}) Proceed to run \'sfaira test-dataloader\', you do not need to '
-                  f'run \'sfaira annotate-dataloader\'.')
+            print(f'[bold orange]{self.action_counter}) Proceed to phase 3: \'sfaira finalize-dataloader\', '
+                  f'you can skip phase 2 (\'sfaira annotate-dataloader\').')
             self.action_counter += 1
 
     def _template_attributes_to_dict(self) -> dict:
@@ -289,9 +528,13 @@ class DataloaderCreator:
                      overwrite_if_exists=True,
                      extra_context=self._template_attributes_to_dict())
 
-    def create_datadir(self, path_data):
+    def check_datadir(self, path_data):
         path_data = os.path.join(path_data, self.template_attributes.doi_sfaira_repr)
-        os.makedirs(path_data)
-        print(f'[bold orange]{self.action_counter}) Proceed to copy unmodified downloaded data files into {path_data} '
-              f'for annotation and/or testing.')
-        self.action_counter += 1
+        if not os.path.exists(path_data):
+            print(f"[bold red]The unmodified downloaded data files were anticipated to lie in {path_data} but this path "
+                  "was not found. Create this directory and move the raw data files there. Aborting.")
+            sys.exit()
+        else:
+            print(f'[bold orange]{self.action_counter}) Make sure that the unmodified downloaded data files are in  '
+                  f'{path_data}.')
+            self.action_counter += 1

@@ -20,7 +20,7 @@ class Dataset(DatasetBase):
         self.author = "Hove"
         self.disease = "healthy"
         self.doi_journal = "10.1038/s41593-019-0393-4"
-        self.normalization = "raw"
+        self.layer_counts = "X"
         self.organism = "Mus musculus"
         self.primary_data = True
         self.sample_source = "primary_tissue"
@@ -31,8 +31,9 @@ class Dataset(DatasetBase):
         self.cell_type_obs_key = "cluster"
         self.organ_obs_key = "organ"
 
-        self.gene_id_ensembl_var_key = "ensembl"
-        self.gene_id_symbols_var_key = "name"
+        self.feature_id_var_key = "ensembl"
+        self.feature_symbol_var_key = "name"
+        self.feature_type = "rna"
 
         self.set_dataset_id(idx=1)
 

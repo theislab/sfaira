@@ -31,7 +31,7 @@ class Dataset(DatasetBase):
         self.assay_sc = "10x 3' v2"
         self.author = "Thompson"
         self.doi_journal = "10.1016/j.cmet.2019.01.021"
-        self.normalization = "raw"
+        self.layer_counts = "X"
         self.organ = "pancreas"
         self.organism = "Mus musculus"
         self.primary_data = True
@@ -39,8 +39,9 @@ class Dataset(DatasetBase):
         self.state_exact = "diabetic"
         self.year = 2019
 
-        self.gene_id_symbols_var_key = "names"
-        self.gene_id_ensembl_var_key = "ensembl"
+        self.feature_id_var_key = "ensembl"
+        self.feature_symbol_var_key = "names"
+        self.feature_type = "rna"
         self.cell_type_obs_key = "celltypes"
 
         self.set_dataset_id(idx=1)
