@@ -101,8 +101,9 @@ class DataloaderCreator:
             self._prompt_dataloader_configuration(path_data)
             self._create_dataloader_template()
         except FileExistsError as e:
-            print(f"[bold red]The data loader exists already in {self.out_path}. Delete the old version of this loader"
-                  "or consider completing the previous curation attempt.")
+            print(f"[bold red]The data loader exists already in {self.out_path}. "
+                  f"Delete the old version of this loader or consider completing the previous curation attempt. "
+                  f"The error message was: {e} ")
             sys.exit()
 
     def _prompt_dataloader_template(self) -> None:
@@ -379,7 +380,7 @@ class DataloaderCreator:
         self.template_attributes.sample_source_obs_key = sfaira_questionary(
             function='text',
             question='Key of sample source annotation field in .obs (from '
-                     f'["primary_tissue", "2d_culture", "3d_culture", "tumor"]):',
+                     '["primary_tissue", "2d_culture", "3d_culture", "tumor"]):',
             default='')
         if self.template_attributes.sample_source != "" and self.template_attributes.sample_source_obs_key != "":
             print(format_warning_double_curation('sex'))

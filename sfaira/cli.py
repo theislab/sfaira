@@ -165,7 +165,7 @@ def annotate_dataloader(doi, path_data, path_loader) -> None:
               default=PACKAGE_LOADER_PATH,
               type=click.Path(exists=False),
               help='Relative path from the current directory to the desired location of the data loader.')
-@click.option('--schema', type="sfaira", default=None, help="The curation schema to check meta data availability for.")
+@click.option('--schema', type="str", default="sfaira", help="The curation schema to check meta data availability for.")
 def validate_dataloader(doi, path_loader, schema) -> None:
     """
     Verifies the dataloader against sfaira's requirements.
@@ -198,7 +198,7 @@ def _full_test(path_loader, path_data, doi, schema, clean_tsvs, in_phase_3):
               default=PACKAGE_LOADER_PATH,
               type=click.Path(exists=False),
               help='Relative path from the current directory to the location of the data loader.')
-@click.option('--schema', type="sfaira", default=None, help="The curation schema to check meta data availability for.")
+@click.option('--schema', type="str", default="sfaira", help="The curation schema to check meta data availability for.")
 def test_dataloader(doi, path_data, path_loader, schema) -> None:
     """
     Runs a full data loader test.
@@ -217,7 +217,7 @@ def test_dataloader(doi, path_data, path_loader, schema) -> None:
               default=PACKAGE_LOADER_PATH,
               type=click.Path(exists=False),
               help='Relative path from the current directory to the location of the data loader.')
-@click.option('--schema', type="sfaira", default=None, help="The curation schema to check meta data availability for.")
+@click.option('--schema', type="str", default="sfaira", help="The curation schema to check meta data availability for.")
 def finalize_dataloader(doi, path_data, path_loader, schema) -> None:
     """
     Formats .tsvs and runs a full data loader test.
