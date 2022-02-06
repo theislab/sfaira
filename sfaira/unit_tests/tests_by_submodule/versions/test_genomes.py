@@ -31,7 +31,7 @@ def test_gc_subsetting(subset: Tuple[dict, int]):
     """
     Tests if genome container is subsetted correctly.
     """
-    gc = GenomeContainer(release=RELEASE, organism=ORGANISM)
+    gc = GenomeContainer(release="102", organism=ORGANISM)
     gc.set(**subset[0])
     assert gc.n_var == subset[1]
     assert len(gc.ensembl) == subset[1]

@@ -510,7 +510,49 @@ Common challenges in cell type curation include the following:
     Chose the best match from the ontology and leave an issue on the sfaira GitHub describing the missing cell type.
     We can then later update this data loader once the ontology is updated.
 
-.. _CL: https://www.ebi.ac.uk/ols/ontologies/cl
+Multi-modal data
+~~~~~~~~~~~~~~~~~
+Multi-modal can be represented in the sfaira curation schema,
+here we briefly outline what modalities are supported and how they are accounted for.
+You can use any combination of orthogonal meta data, e.g. organ and disease annotation, with multi-modal measurements.
+
+- RNA:
+    RNA is the standard modality in sfaira, unless otherwise specified, all information in this document is centered
+    around RNA data.
+- ATAC:
+    We support scATAC-seq and joint scRNA+ATAC-seq (multiome) data.
+    In both cases, the ATAC data is commonly represented as a UMI count matrix of the dimensions
+    ``(observations x peaks)``.
+    Here, peaks are defined by a peak calling algorithm as part of the read processing pipeline upstream of sfaira.
+    Peak counts can be deposited in the core data matrices managed in sfaira.
+    The corresponding feature meta data can be set such that they allow differentiation of RNA and peak features.
+    These features are documented :ref:`dataset-or-feature-wise` and :ref:`feature-wise`.
+- protein quantification through antibody quantification:
+    We support CITE-seq and spatial molecular profiling assays with protein quantification read-outs.
+    In these cases, the protein data can be represented as a gene expression matrix of the dimensions
+    ``(observations x proteins)``.
+    In the case of oligo-nucleotide-tagged antibody quantification, e.g. in CITE-seq, this can also be an UMI matrix.
+    The corresponding feature meta data can be set such that they allow differentiation of RNA and protein features.
+    These features are documented :ref:`dataset-or-feature-wise` and :ref:`feature-wise`.
+- spatial:
+    A couple of single-cell and spot-based assays have spatial coordinates associated with molecular profiles.
+    We use relative coordinates of observations in a batch as ``(x, y, z)`` tuples to characterize the spatial
+    information.
+    Note that spatial proximity graphs and similar spatial analyses are down-stream analyses on these coordinates.
+    This features are documented :ref:`feature-wise`.
+- spliced, unspliced transcript and velocities:
+    We support gene expression matrices on the level of spliced and unspliced transcript
+    and the common processed format of a RNA velocity matrix.
+    Note that the velocity matrix depends on the inference procedure.
+    These matrices share ``.var`` annotation with the core RNA data matrix
+    and can, therefore, be supplemented as further layeres in the ``AnnData`` object without further effort.
+    This features is documented :ref:`data-matrices`.
+- V(D)J in TCR and BCR reconstructions:
+    V(D)J data is collected in parallel to RNA data in a couple of single-cell assays.
+    We use key meta data defined by the AIRR_ consortium to characterize the reconstructed V(D)J genes,
+    which are all direct outputs of V(D)J alignment pipelines and are are stored in ``.obs``.
+    This features are documented :ref:`feature-wise`.
+
 
 Loading third party annotation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -580,13 +622,13 @@ Required are:
 - misc: None are required.
 
 .. _sec-field-descriptions:
-
 Field descriptions
 -------------------
 
 We constrain meta data by ontologies where possible.
 Meta data can either be dataset-wise, observation-wise or feature-wise.
 
+.. _sec-dataset-structure:
 Dataset structure
 ~~~~~~~~~~~~~~~~~~
 Dataset structure meta data are in the section `dataset_structure` in the `.yaml` file.
@@ -600,6 +642,7 @@ Dataset structure meta data are in the section `dataset_structure` in the `.yaml
     structured similarly, these can identified here.
     See also section `Loading multiple files of similar structure`.
 
+.. _sec-dataset-wise:
 Dataset-wise
 ~~~~~~~~~~~~~
 Dataset-wise meta data are in the section `dataset_wise` in the `.yaml` file.
@@ -628,6 +671,7 @@ Dataset-wise meta data are in the section `dataset_wise` in the `.yaml` file.
 - year: Year in which sample was first described [integer]
     Pre-print publication year.
 
+.. _sec-data-matrices:
 Data matrices
 ~~~~~~~~~~~~~~
 A curated AnnData object may contain multiple data matrices:
@@ -645,6 +689,7 @@ normalization, batch correction, ambient RNA correction.
 - layer_unspliced_processed: Processed complement of 'layer_unspliced_counts'. {a .layers key}
 - layer_velocity: The RNA velocity estimates per gene. {a .layers key}
 
+.. _sec-dataset-or-feature-wise:
 Dataset- or feature-wise
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 These meta data may be defined across the entire dataset or per feature
@@ -668,7 +713,7 @@ Note that in both cases the value, or the column values, have to fulfill constra
     - "peak": chromatin accessibility by peak
         e.g. from scATAC-seq
 
-
+.. _sec-dataset-or-observation-wise:
 Dataset- or observation-wise
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 These meta data may be defined across the entire dataset or per observation
@@ -763,7 +808,7 @@ outlined below.
 - treatment and treatment_obs_key [string]
     Treatment of sample, e.g. compound names in stimulation experiments.
 
-
+.. _sec-feature-wise:
 Feature-wise
 ~~~~~~~~~~~~~
 These meta data are always defined per feature and are in the section `feature_wise` in the `.yaml` file:
@@ -779,6 +824,7 @@ These meta data are always defined per feature and are in the section `feature_w
     This can also be "index" if the gene symbol are in the index of the `adata.var` data frame.
     Note that you do not have to map symbols to a specific annotation release but can keep them in their original form.
 
+.. _sec-observation-wise:
 Observation-wise
 ~~~~~~~~~~~~~~~~~
 These meta data are always defined per observation and are in the section `observation_wise` in the `.yaml` file:
@@ -815,8 +861,6 @@ the prefixed "vdj\_".
 - vdj_v_call  [string]
     V gene.
 
-.. _AIRR: https://docs.airr-community.org/en/latest/datarep/rearrangements.html
-
 Meta
 ~~~~~
 These meta data contain information about the curation process and schema:
@@ -824,6 +868,7 @@ These meta data contain information about the curation process and schema:
 - version: [string]
     Version identifier of meta data scheme.
 
+.. _AIRR: https://docs.airr-community.org/en/latest/datarep/rearrangements.html
 .. _cellosaurus: https://web.expasy.org/cellosaurus/
 .. _CL: https://www.ebi.ac.uk/ols/ontologies/cl
 .. _EFO: https://www.ebi.ac.uk/ols/ontologies/efo
