@@ -21,7 +21,7 @@ class Dataset(DatasetBase):
         self.author = "Han"
         self.doi_journal = "10.1038/s41586-020-2157-4"
         self.healthy = True
-        self.normalization = "raw"
+        self.layer_counts = "X"
         self.organism = "Homo sapiens"
         self.assay_sc = "microwell-seq"
         self.state_exact = "healthy"
@@ -36,7 +36,8 @@ class Dataset(DatasetBase):
         self.sex_obs_key = "sex"
         self.age_obs_key = "age"
 
-        self.gene_id_symbols_var_key = "index"
+        self.feature_symbol_var_key = "index"
+        self.feature_type = "rna"
 
         self.set_dataset_id(idx=1)
 

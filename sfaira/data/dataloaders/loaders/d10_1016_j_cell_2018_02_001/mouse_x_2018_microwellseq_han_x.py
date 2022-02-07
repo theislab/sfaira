@@ -302,17 +302,18 @@ class Dataset(DatasetBase):
         self.dev_stage = sample_dev_stage_dict[self.sample_fn]
         self.disease = "healthy"
         self.doi_journal = "10.1016/j.cell.2018.02.001"
-        self.normalization = "raw"
+        self.layer_counts = "X"
         self.primary_data = True
         self.organism = "Mus musculus"
         self.assay_sc = "microwell-seq"
         self.year = 2018
         self.sample_source = "primary_tissue"
 
-        self.gene_id_symbols_var_key = "index"
+        self.feature_symbol_var_key = "index"
+        self.feature_type = "rna"
 
         # Only adult and neonatal samples are annotated:
-        self.cell_types_obs_key = "Annotation" \
+        self.cell_type_obs_key = "Annotation" \
             if sample_dev_stage_dict[self.sample_fn] in ["adult", "neonatal"] and \
             self.sample_fn not in [
                 "NeontalBrain1_dge.txt.gz",
