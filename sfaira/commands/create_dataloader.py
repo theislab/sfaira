@@ -1,5 +1,4 @@
 from cookiecutter.main import cookiecutter
-from cookiecutter.exceptions import OutputDirExistsException
 from dataclasses import dataclass, asdict
 import logging
 import numpy as np
@@ -459,31 +458,31 @@ class DataloaderCreator:
             self.template_attributes.vdj_c_call = sfaira_questionary(
                 function='text',
                 question=format_q_modality_obs_key("V(D)J", "C gene"),
-                default='')
+                default='IR_VDJ_1_c_call')
             self.template_attributes.vdj_d_call = sfaira_questionary(
                 function='text',
                 question=format_q_modality_obs_key("V(D)J", "D gene"),
-                default='')
+                default='IR_VDJ_1_d_call')
             self.template_attributes.vdj_j_call = sfaira_questionary(
                 function='text',
                 question=format_q_modality_obs_key("V(D)J", "J gene"),
-                default='')
+                default='IR_VDJ_1_j_call')
             self.template_attributes.vdj_v_call = sfaira_questionary(
                 function='text',
                 question=format_q_modality_obs_key("VDJ", "V gene"),
-                default='')
+                default='IR_VDJ_1_v_call')
             self.template_attributes.vdj_duplicate_count = sfaira_questionary(
                 function='text',
                 question=format_q_modality_obs_key("V(D)J", "number of duplicate UMIs"),
-                default='')
+                default='IR_VDJ_1_duplicate_count')
             self.template_attributes.vdj_junction = sfaira_questionary(
                 function='text',
                 question=format_q_modality_obs_key("V(D)J", "junction nt sequence"),
-                default='')
+                default='IR_VDJ_1_junction')
             self.template_attributes.vdj_junction_aa = sfaira_questionary(
                 function='text',
                 question=format_q_modality_obs_key("V(D)J", "junction aa sequence"),
-                default='')
+                default='IR_VDJ_1_junction_aa')
             self.template_attributes.vdj_locus = sfaira_questionary(
                 function='text',
                 question=format_q_modality_obs_key("V(D)J", "gene locus (e.g elements from IGH, IGK, IGL, TRA, TRB, "
@@ -492,11 +491,11 @@ class DataloaderCreator:
             self.template_attributes.vdj_productive = sfaira_questionary(
                 function='text',
                 question=format_q_modality_obs_key("V(D)J", "'Is the gene productive?'"),
-                default='')
+                default='IR_VDJ_1_productive')
             self.template_attributes.vdj_consensus_count = sfaira_questionary(
                 function='text',
                 question=format_q_modality_obs_key("V(D)J", "number of reads contributing to consensus"),
-                default='')
+                default='IR_VDJ_1_consensus_count')
 
         print('[bold blue]Feature-wise meta data that are shared across the dataset.')
         print('[bold blue]The following meta data queries are on feature(gene)-wise. '
@@ -570,8 +569,7 @@ class DataloaderCreator:
         if not os.path.exists(path_data):
             print(f"[bold red]The unmodified downloaded data files were anticipated to lie in {path_data} "
                   f"but this path was not found. "
-                  f"Create this directory and move the raw data files there. Aborting.")
-            sys.exit()
+                  f"Create this directory and move the raw data files there.")
         else:
             print(f'[bold orange]{self.action_counter}) Make sure that the unmodified downloaded data files are in  '
                   f'{path_data}.')

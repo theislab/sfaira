@@ -1,0 +1,99 @@
+dataset_structure:
+    dataset_index: 1
+    sample_fns:
+        - "GSM5216975_Sample_20063a009_01"
+        - "GSM5216976_Sample_20063a010_01"
+        - "GSM5216977_Sample_20063a011_01"
+        - "GSM5216978_Sample_20063a012_01"
+dataset_wise:
+    author: "Fischer, David S"
+    default_embedding: 
+    doi_preprint: "10.1101/2020.12.07.20245274"
+    doi_journal: "10.1038/s41467-021-24730-4"
+    download_url_data: "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE171037&format=file"
+    download_url_meta: "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE171037&format=file&file=GSE171037%5FTcellReversePT%5Fmetadata%5Fmunich%2Etxt%2Egz"
+    primary_data: True
+    year: "2020"
+layers:
+    layer_counts: "X"
+    layer_processed: 
+    layer_spliced_counts: 
+    layer_spliced_processed: 
+    layer_unspliced_counts: 
+    layer_unspliced_processed: 
+    layer_velocity: 
+dataset_or_feature_wise:
+    feature_reference: 
+    feature_reference_var_key: 
+    feature_type: "rna"
+    feature_type_var_key: 
+dataset_or_observation_wise:
+    assay_sc: "10x 3' v3"
+    assay_sc_obs_key: 
+    assay_differentiation: 
+    assay_differentiation_obs_key: 
+    assay_type_differentiation: 
+    assay_type_differentiation_obs_key: 
+    bio_sample:
+    bio_sample_obs_key: 
+    cell_line: 
+    cell_line_obs_key: 
+    cell_type: 
+    cell_type_obs_key: "T_cell_type"
+    development_stage: "human adult stage"
+    development_stage_obs_key: 
+    disease: "COVID-19"
+    disease_obs_key: 
+    ethnicity: "Germany"
+    ethnicity_obs_key: 
+    gm:
+    gm_obs_key:
+    individual:
+        GSM5216975_Sample_20063a009_01: "patient_1"
+        GSM5216976_Sample_20063a010_01: "patient_1"
+        GSM5216977_Sample_20063a011_01: "patient_2"
+        GSM5216978_Sample_20063a012_01: "patient_2"
+    individual_obs_key: 
+    organ: "blood"
+    organ_obs_key: 
+    organism: "Homo sapiens"
+    organism_obs_key: 
+    sample_source: "primary_tissue"
+    sample_source_obs_key: 
+    sex: 
+    sex_obs_key: 
+    source_doi:
+    source_doi_obs_key:
+    state_exact:
+        GSM5216975_Sample_20063a009_01: "unstimulated"
+        GSM5216976_Sample_20063a010_01: "stimulated"
+        GSM5216977_Sample_20063a011_01: "unstimulated"
+        GSM5216978_Sample_20063a012_01: "stimulated"
+    state_exact_obs_key:
+    tech_sample:
+    tech_sample_obs_key: 
+    treatment:
+        GSM5216975_Sample_20063a009_01:
+        GSM5216976_Sample_20063a010_01: "SARS-CoV2 spike protein"
+        GSM5216977_Sample_20063a011_01:
+        GSM5216978_Sample_20063a012_01: "SARS-CoV2 spike protein"
+    treatment_obs_key:
+feature_wise:
+    feature_id_var_key: "gene_ids"
+    feature_symbol_var_key: "index"
+observation_wise:
+    spatial_x_coord: 
+    spatial_y_coord: 
+    spatial_z_coord: 
+    vdj_c_call: 
+    vdj_consensus_count: 
+    vdj_d_call: 
+    vdj_duplicate_count: 
+    vdj_j_call: 
+    vdj_junction: 
+    vdj_junction_aa: 
+    vdj_locus: 
+    vdj_productive: 
+    vdj_v_call: 
+meta:
+    version: "1.2"
