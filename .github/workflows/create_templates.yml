@@ -31,4 +31,5 @@ jobs:
         run: |
           mkdir -p ./d10_1000_j_journal_2022_01_001
           echo -e "\nEinstein, Albert\n\n10.1000/j.journal.2022.01.001\n1\nX_umap\nURL\nURL2\nHomo sapiens\nY2022\nX\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nindex\n\n" | sfaira create-dataloader
+          sfaira validate-dataloader --doi 10.1000/j.journal.2022.01.001 --path-data .
           rm -rf ./d10_1000_j_journal_2022_01_001
