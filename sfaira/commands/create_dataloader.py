@@ -126,13 +126,13 @@ class DataloaderCreator:
         """
         author = sfaira_questionary(function='text',
                                     question='Author(s):',
-                                    default='Einstein, Albert; Hawking, Stephen')
+                                    default='Einstein, Albert')
         self.template_attributes.author = author.split(';') if ';' in author else author
         doi = ""
         counter = 0
         while doi == "":
             if counter > 0:
-                print('[bold red]You need to supply either a preprint or a jounral DOI!'
+                print('[bold red]You need to supply either a preprint or a journal DOI!'
                       'Use no_doi_AUTHOR_SOME-NAME to name data sets that do not have a corresponding publication')
             doi_preprint = sfaira_questionary(
                 function='text',
