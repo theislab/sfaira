@@ -133,11 +133,13 @@ class DataloaderCreator:
         while doi == "":
             if counter > 0:
                 print('[bold red]You need to supply either a preprint or a journal DOI!'
-                      'Use no_doi_AUTHOR_SOME-NAME to name data sets that do not have a corresponding publication')
+                      'Use "no_doi_AUTHOR_SOME-NAME" to name data sets that do not have a corresponding publication.')
             doi_preprint_try = 0
             doi_preprint = ""
             while doi_preprint_try == 0 or (
-                    not re.match(r'\b10\.\d+/[\w.]+\b', doi_preprint) and not doi_preprint.startswith("no_doi")
+                    doi_preprint != "" and
+                    not re.match(r'\b10\.\d+/[\w.]+\b', doi_preprint) and
+                    not doi_preprint.startswith("no_doi")
             ):
                 if doi_preprint_try > 0:
                     print(f'[bold red]The entered DOI {doi_preprint} is malformed and needs to be an exact DOI! '
@@ -151,7 +153,9 @@ class DataloaderCreator:
             doi_journal_try = 0
             doi_journal = ""
             while doi_journal_try == 0 or (
-                    not re.match(r'\b10\.\d+/[\w.]+\b', doi_journal) and not doi_journal.startswith("no_doi")
+                    doi_journal != "" and
+                    not re.match(r'\b10\.\d+/[\w.]+\b', doi_journal) and
+                    not doi_journal.startswith("no_doi")
             ):
                 if doi_journal_try > 0:
                     print(f'[bold red]The entered DOI {doi_preprint} is malformed and needs to be an exact DOI! '

@@ -22,8 +22,8 @@ layers:
 dataset_or_feature_wise:
     feature_reference: {% if cookiecutter.feature_reference %}"{{ cookiecutter.feature_reference }}"{% endif %}
     feature_reference_var_key: {% if cookiecutter.feature_reference_var_key %}"{{ cookiecutter.feature_reference_var_key }}"{% endif %}
-    feature_type: { % if cookiecutter.feature_type % }"{{ cookiecutter.feature_type }}"{ % endif % }
-    feature_type_var_key: { % if cookiecutter.feature_type_var_key % }"{{ cookiecutter.feature_type_var_key }}"{ % endif % }
+    feature_type: {% if cookiecutter.feature_type %}"{{ cookiecutter.feature_type }}"{% endif %}
+    feature_type_var_key: {% if cookiecutter.feature_type_var_key %}"{{ cookiecutter.feature_type_var_key }}"{% endif %}
 dataset_or_observation_wise:
     assay_sc: {% if cookiecutter.assay_sc %}"{{ cookiecutter.assay_sc }}"{% endif %}
     assay_sc_obs_key: {% if cookiecutter.assay_sc_obs_key %}"{{ cookiecutter.assay_sc_obs_key }}"{% endif %}
@@ -74,11 +74,11 @@ observation_wise:
     vdj_consensus_count: {% if cookiecutter.vdj_consensus_count %}"{{ cookiecutter.vdj_consensus_count }}"{% endif %}
     vdj_d_call: {% if cookiecutter.vdj_d_call %}"{{ cookiecutter.vdj_d_call }}"{% endif %}
     vdj_duplicate_count: {% if cookiecutter.vdj_duplicate_count %}"{{ cookiecutter.vdj_duplicate_count }}"{% endif %}
-    vdj_j_call: { % if cookiecutter.vdj_j_call % }"{{ cookiecutter.vdj_j_call }}"{ % endif % }
-    vdj_junction: { % if cookiecutter.vdj_junction % }"{{ cookiecutter.vdj_junction }}"{ % endif % }
-    vdj_junction_aa: { % if cookiecutter.vdj_junction_aa % }"{{ cookiecutter.vdj_junction_aa }}"{ % endif % }
-    vdj_locus: { % if cookiecutter.vdj_locus % }"{{ cookiecutter.vdj_locus }}"{ % endif % }
-    vdj_productive: { % if cookiecutter.vdj_productive % }"{{ cookiecutter.vdj_productive }}"{ % endif % }
-    vdj_v_call: { % if cookiecutter.vdj_v_call % }"{{ cookiecutter.vdj_v_call }}"{ % endif % }
+    vdj_j_call: {% if cookiecutter.vdj_j_call % }"{{ cookiecutter.vdj_j_call }}"{% endif %}
+    vdj_junction: {% if cookiecutter.vdj_junction % }"{{ cookiecutter.vdj_junction }}"{% endif %}
+    vdj_junction_aa: {% if cookiecutter.vdj_junction_aa % }"{{ cookiecutter.vdj_junction_aa }}"{% endif %}
+    vdj_locus: {% if cookiecutter.vdj_locus % }"{{ cookiecutter.vdj_locus }}"{% endif %}
+    vdj_productive: {% if cookiecutter.vdj_productive % }"{{ cookiecutter.vdj_productive }}"{% endif %}
+    vdj_v_call: {% if cookiecutter.vdj_v_call % }"{{ cookiecutter.vdj_v_call }}"{% endif %}
 meta:
     version: "1.2"
