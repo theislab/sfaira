@@ -20,7 +20,7 @@
     "layer_unspliced_counts": "",
     "layer_unspliced_processed": "",
     "layer_velocity": "",
-    "create_extra_description",: "",
+    "create_extra_description": "",
     "assay_sc": "",
     "assay_sc_obs_key": "",
     "assay_differentiation": "",
@@ -71,5 +71,5 @@
     "vdj_junction_aa": "",
     "vdj_locus": "",
     "vdj_productive": "",
-    "vdj_v_call": "",
+    "vdj_v_call": ""
 }
