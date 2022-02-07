@@ -110,10 +110,10 @@ observation_wise:
     spatial_x_coord_obs_key:
     spatial_y_coord_obs_key:
     spatial_z_coord_obs_key:
-    vdj_vj_1_obs_key_prefix: "IR_VJ_1"
-    vdj_vj_2_obs_key_prefix: "IR_VJ_2"
-    vdj_vdj_1_obs_key_prefix: "IR_VDJ_1"
-    vdj_vdj_2_obs_key_prefix: "IR_VDJ_2"
+    vdj_vj_1_obs_key_prefix: "IR_VJ_1_"
+    vdj_vj_2_obs_key_prefix: "IR_VJ_2_"
+    vdj_vdj_1_obs_key_prefix: "IR_VDJ_1_"
+    vdj_vdj_2_obs_key_prefix: "IR_VDJ_2_"
     vdj_c_call_obs_key_suffix: "c_gene"
     vdj_consensus_count_obs_key_suffix: "reads"
     vdj_d_call_obs_key_suffix: "d_gene"

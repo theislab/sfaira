@@ -83,8 +83,9 @@ class DatasetBase(abc.ABC):
     _sample_source: Union[None, str]
     _state_exact: Union[None, str]
     _title: Union[None, str]
-    _bio_sample: Union[None, str]
     _year: Union[None, int]
+    gm: Union[None, str]
+    treatment: Union[None, str]
 
     _bio_sample_obs_key: Union[None, str]
     _tech_sample_obs_key: Union[None, str]
@@ -95,12 +96,14 @@ class DatasetBase(abc.ABC):
     development_stage_obs_key: Union[None, str]
     disease_obs_key: Union[None, str]
     ethnicity_obs_key: Union[None, str]
+    gm_obs_key: Union[None, str]
     individual_obs_key: Union[None, str]
     organ_obs_key: Union[None, str]
     organism_obs_key: Union[None, str]
     sample_source_obs_key: Union[None, str]
     sex_obs_key: Union[None, str]
     state_exact_obs_key: Union[None, str]
+    treatment_obs_key: Union[None, str]
 
     feature_id_var_key: Union[None, str]
     feature_reference_var_key: Union[None, str]
@@ -207,6 +210,7 @@ class DatasetBase(abc.ABC):
         self._ethnicity = None
         self._feature_type = None
         self._feature_reference = None
+        self.gm = None
         self._id = None
         self._individual = None
         self._organ = None
@@ -217,6 +221,7 @@ class DatasetBase(abc.ABC):
         self._source = None
         self._state_exact = None
         self._tech_sample = None
+        self.treatment = None
         self._title = None
         self._year = None
 
@@ -229,6 +234,7 @@ class DatasetBase(abc.ABC):
         self.development_stage_obs_key = None
         self.disease_obs_key = None
         self.ethnicity_obs_key = None
+        self.gm_obs_key = None
         self.individual_obs_key = None
         self.organ_obs_key = None
         self.organism_obs_key = None
@@ -236,6 +242,7 @@ class DatasetBase(abc.ABC):
         self.sex_obs_key = None
         self.state_exact_obs_key = None
         self.tech_sample_obs_key = None
+        self.treatment_obs_key = None
 
         self.feature_id_var_key = None
         self.feature_reference_var_key = None
