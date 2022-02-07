@@ -65,8 +65,8 @@ dataset_or_observation_wise:
     treatment:
     treatment_obs_key:
 feature_wise:
-    feature_id_var_key: {% if cookiecutter.gene_id_ensembl_var_key %}"{{ cookiecutter.feature_id_var_key }}"{% endif %}
-    feature_symbol_var_key: {% if cookiecutter.gene_id_symbols_var_key %}"{{ cookiecutter.feature_symbol_var_key }}"{% endif %}
+    feature_id_var_key: {% if cookiecutter.feature_id_var_key %}"{{ cookiecutter.feature_id_var_key }}"{% endif %}
+    feature_symbol_var_key: {% if cookiecutter.feature_symbol_var_key %}"{{ cookiecutter.feature_symbol_var_key }}"{% endif %}
 observation_wise:
     spatial_x_coord: {% if cookiecutter.spatial_x_coord %}"{{ cookiecutter.spatial_x_coord }}"{% endif %}
     spatial_y_coord: {% if cookiecutter.spatial_y_coord %}"{{ cookiecutter.spatial_y_coord }}"{% endif %}

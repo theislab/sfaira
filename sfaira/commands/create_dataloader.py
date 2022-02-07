@@ -122,10 +122,10 @@ class DataloaderCreator:
 
     def _prompt_dataloader_configuration(self, path_data):
         """
-        Prompts the user for all required attributes for a dataloader such as DOI, author, etc.
+        Prompts the user for all required attributes for a data loader such as DOI, author, etc.
         """
         author = sfaira_questionary(function='text',
-                                    question='Author(s) [Einstein, Albert]:',
+                                    question='Leading author (e.g.: Einstein, Albert)',
                                     default='')
         self.template_attributes.author = author.split(';') if ';' in author else author
         doi = ""
@@ -134,38 +134,38 @@ class DataloaderCreator:
             if counter > 0:
                 print('[bold red]You need to supply either a preprint or a journal DOI!'
                       'Use no_doi_AUTHOR_SOME-NAME to name data sets that do not have a corresponding publication')
-            doi_preprint = sfaira_questionary(
-                function='text',
-                question='DOI of the preprint publication: [10.1000/j.journal.2022.01.001]',
-                default='')
-            if doi_preprint != "":
-                while not re.match(r'\b10\.\d+/[\w.]+\b', doi_preprint) and not doi_preprint.startswith("no_doi"):
+            doi_preprint_try = 0
+            while doi_preprint_try == 0 or (
+                    not re.match(r'\b10\.\d+/[\w.]+\b', doi_preprint) and not doi_preprint.startswith("no_doi")
+            ):
+                if doi_preprint_try > 0:
                     print(f'[bold red]The entered DOI {doi_preprint} is malformed and needs to be an exact DOI! '
                           'You may leave this field empty if you supply doi_journal.')
-                    doi_preprint = sfaira_questionary(
-                        function='text',
-                        question='DOI of the preprint publication: [10.1000/j.journal.2022.01.001]',
-                        default='')
+                doi_preprint = sfaira_questionary(
+                    function='text',
+                    question='DOI of the preprint publication (e.g.: 10.1000/j.journal.2022.01.001)',
+                    default='')
+                doi_preprint_try += 1
             self.template_attributes.doi_preprint = doi_preprint
-            doi_journal = sfaira_questionary(
-                function='text',
-                question='DOI of the journal publication: [10.1000/j.journal.2022.01.001]',
-                default='')
-            if doi_journal != "":
-                while not re.match(r'\b10\.\d+/[\w.]+\b', doi_journal) and not doi_journal.startswith("no_doi"):
+            doi_journal_try = 0
+            while doi_journal_try == 0 or (
+                    not re.match(r'\b10\.\d+/[\w.]+\b', doi_journal) and not doi_journal.startswith("no_doi")
+            ):
+                if doi_journal_try > 0:
                     print(f'[bold red]The entered DOI {doi_preprint} is malformed and needs to be an exact DOI! '
                           'You may leave this field empty if you supply doi_preprint.')
-                    doi_journal = sfaira_questionary(
-                        function='text',
-                        question='DOI of the journal publication: [10.1000/j.journal.2022.01.001]',
-                        default='')
+                doi_journal = sfaira_questionary(
+                    function='text',
+                    question='DOI of the journal publication (e.g.: 10.1000/j.journal.2022.01.001)',
+                    default='')
+                doi_journal_try += 1
             self.template_attributes.doi_journal = doi_journal
             doi = doi_journal if doi_journal != "" else doi_preprint
             counter += 1
         self.template_attributes.doi_sfaira_repr = clean_doi(doi)
 
         self.template_attributes.number_of_datasets = sfaira_questionary(function='text',
-                                                                         question='Number of datasets:',
+                                                                         question='Number of datasets',
                                                                          default='1')
 
         # Differentiate between a single dataset or multiple datasets to get sample file names
@@ -173,7 +173,7 @@ class DataloaderCreator:
             self.template_attributes.sample_fns = {'fns': []}
             for ds in range(int(self.template_attributes.number_of_datasets)):
                 fn = sfaira_questionary(function='text',
-                                        question=f'Filename for dataset {ds}:',
+                                        question=f'Filename for dataset {ds}',
                                         default=f'data_{ds}.h5ad')
                 self.template_attributes.sample_fns['fns'].append(fn)
 
@@ -195,7 +195,7 @@ class DataloaderCreator:
                                       f'{self.template_attributes.doi_sfaira_repr}'
         self.template_attributes.default_embedding = str(sfaira_questionary(
             function='text',
-            question='Key of default embedding in obsm (if available):',
+            question='Key of default embedding in .obsm:',
             default=''))
         self.template_attributes.download_url_data = sfaira_questionary(
             function='text',
@@ -211,11 +211,11 @@ class DataloaderCreator:
             default='')
         self.template_attributes.primary_data = str(sfaira_questionary(
             function='confirm',
-            question='Is this primary data:',
+            question='Is this primary data?',
             default='Yes'))
         self.template_attributes.year = sfaira_questionary(
             function='text',
-            question='Year:',
+            question='Year {e.g. 2022}: ',
             default="2022")
 
         # Data matrices in the dataset:
@@ -230,7 +230,7 @@ class DataloaderCreator:
               'effect as setting them here.')
 
         def format_q_mat_key(attr) -> str:
-            return f"Layer that contains {attr} ['X', 'raw', or a .layers key]: "
+            return f"Layer that contains {attr} (either 'X', 'raw', or a .layers key)"
 
         main_layer = ""
         counter = 0
@@ -280,7 +280,7 @@ class DataloaderCreator:
               'effect as setting them here.')
 
         def format_q_uns_key(attr, onto) -> str:
-            return f"Dataset-wide {attr} annotation (from {onto}): "
+            return f"Dataset-wide {attr} annotation (from {onto})"
 
         self.template_attributes.assay_sc = sfaira_questionary(
             function='text',
@@ -321,7 +321,7 @@ class DataloaderCreator:
               'here except of that we do additionally check here if you need to run \'sfaira annotate-dataloader\'.')
 
         def format_q_obs_key(attr, onto) -> str:
-            return f"Key of {attr} annotation field in .obs (from {onto}): "
+            return f"Key of {attr} annotation field in .obs (from {onto})"
 
         def format_warning_double_curation(attr) -> str:
             return f"[bold yellow]WARNING: you set '{attr}' before already, this new entry is ignored. " \
@@ -398,7 +398,7 @@ class DataloaderCreator:
         # Modality-specific data:
 
         def format_q_modality_obs_key(modality, attr) -> str:
-            return f"{modality}: Key of {attr} annotation field in .obs: "
+            return f"{modality}: Key of {attr} annotation field in .obs"
 
         has_spatial = sfaira_questionary(
             function='confirm',
@@ -475,11 +475,11 @@ class DataloaderCreator:
 
         self.template_attributes.feature_reference = str(sfaira_questionary(
             function='text',
-            question='Reference genome annotation release:',
+            question='Reference genome annotation release (e.g. Homo_sapiens.GRCh38.104)',
             default=''))
         self.template_attributes.feature_type = sfaira_questionary(
             function='text',
-            question='Feature type of features annotated:',
+            question='Feature type of features annotated (either rna, protein, or peak)',
             default='rna')
 
         print('[bold blue]Feature-wise meta data that are not shared across the dataset.')
@@ -492,11 +492,11 @@ class DataloaderCreator:
                 print('[bold red]You need to supply either a .var key for feature IDs or for symbols!')
             self.template_attributes.feature_id_var_key = sfaira_questionary(
                 function='text',
-                question='Key of feature ID (e.g. ENSEMBL ID) field in .var:',
+                question='Key of feature ID (e.g. ENSEMBL ID) field in .var',
                 default='')
             self.template_attributes.feature_symbol_var_key = sfaira_questionary(
                 function='text',
-                question='Key of feature symbol (e.g. gene names) field in .var:',
+                question='Key of feature symbol (e.g. gene names) field in .var',
                 default='index')
             feature_id = self.template_attributes.feature_id_var_key \
                 if self.template_attributes.feature_id_var_key != "" else \
