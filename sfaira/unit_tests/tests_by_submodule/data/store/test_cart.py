@@ -109,9 +109,11 @@ def test_schedule_blocked(store_format: str, idx):
     assert np.sum([y.shape[0] for y in batches]) == target_nobs
 
 
-@pytest.mark.parametrize("adaptor", ["python", "tensorflow", "torch", "torch-loader", "torch-iter",
-                                     "torch-iter-loader"])
-def test_adaptors(adaptor: str):
+@pytest.mark.parametrize(
+    "adaptor", ["python", "tensorflow", "torch", "torch-loader", "torch-iter", "torch-iter-loader"]
+)
+@pytest.mark.parametrize("shuffle_buffer_size", [0, 1000])
+def test_adaptors(adaptor: str, shuffle_buffer_size: int):
     """
     Test if framework-specific generator adpators yield batches.
     """
@@ -139,12 +141,12 @@ def test_adaptors(adaptor: str):
         kwargs = {}
     else:
         assert False
-    it = cart.adaptor(generator_type=adaptor, **kwargs)
+    it = cart.adaptor(generator_type=adaptor, shuffle_buffer=shuffle_buffer_size, **kwargs)
     if adaptor == "tensorflow":
         it = iter(it.range(2))
     if adaptor in ["torch", "torch-iter"]:
-        import torch
-        it = list(torch.utils.data.DataLoader(it))
+        from torch.utils.data import DataLoader
+        it = list(DataLoader(it))
         it = iter(it)
     if adaptor in ["torch-loader", "torch-iter-loader"]:
         import torch
