@@ -155,8 +155,36 @@ Pd. Download the raw data into a local directory.
     Note that this should be the exact files that are downloadable from the download URL you provided in the dataloader:
     Do not decompress these files if these files are archives such as zip, tar or gz.
 
+Pe. Get an overview of the published data.
+    Data curation is much easier if you an idea of what the data that you are curating looks like before you start.
+    Especially, you will notice a difference in your ability to fully leverage phase 1a if you prepare here.
+    We recommend you load the cell-wise and gene-wise meta in a python session
+    and explore the type of meta data provided there.
+    You will receive further guidance throughout the curation process here,
+    but we recommend that you try locate the following meta data items now already if they are annotated in the data set
+    and if they are shared across the dataset or specific to a feature or observation,
+    where the latter usually corresponds to a column in ``.obs`` or ``.var`` of a published ``.h5ad``,
+    or to a corresponding column in a tabular file:
+
+    - single-cell assay
+    - cell type
+    - developmental stage
+    - disease state
+    - ethnicity (only relevant for human samples)
+    - organ / tissue
+    - organism
+    - sex
+
+    Note that these are also the key ontology-restricted and required meta data in the cellxgene curation schema_.
+    Next, we recommend you briefly consider the available features:
+
+    - Are count matrices, processed matrices or spliced/unspliced RNA published?
+    - Which gene identifiers are used (symbols or ENSEMBL IDs)?
+    - Which non-RNA modalities are present in the data?
+
 .. _code: https://github.com/theislab/sfaira/tree/dev/sfaira/data/dataloaders/loaders
 .. _issues: https://github.com/theislab/sfaira/issues
+.. _schema: https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/2.0.0/schema.md
 
 Phase 1: create
 ~~~~~~~~~~~~~~~~
