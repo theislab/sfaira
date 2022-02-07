@@ -68,9 +68,9 @@ class CustomAccAgg(torchmetrics.Metric):
         self.add_state('acc', default=torch.Tensor([0.]))
         self.add_state('count', default=torch.Tensor([0.]))
 
-    def update(self, y_true, y_pred, sample_weight=None):
-        phat_pos_agg = torch.sum(y_true * y_pred, dim=1, keepdim=True)
-        acc_agg = (phat_pos_agg > torch.max((torch.ones_like(y_true) - y_true) * y_pred, dim=1)).type(y_true.dtype)
+    def update(self, preds, target, sample_weight=None):
+        phat_pos_agg = torch.sum(target * preds, dim=1, keepdim=True)
+        acc_agg = (phat_pos_agg > torch.max((torch.ones_like(target) - target) * preds, dim=1)).type(target.dtype)
         # Do not use weighting for accuracy.
         self.acc += self.acc(torch.mean(acc_agg))
         self.count += 1.
@@ -86,9 +86,9 @@ class CustomTprClasswise(torchmetrics.Metric):
         self.add_state('tp', default=torch.zeros(size=(k, )))
         self.add_state('fn', default=torch.zeros(size=(k, )))
 
-    def update(self, y_true, y_pred, sample_weight=None):
-        tp_by_class = torch.sum((y_pred == torch.max(y_pred, dim=1, keepdim=True)).type(y_true.dtype) * y_true, dim=0)
-        fn_by_class = torch.sum((y_pred < torch.max(y_pred, dim=1, keepdim=True)).type(y_true.dtype) * y_true, dim=0)
+    def update(self, preds, target, sample_weight=None):
+        tp_by_class = torch.sum((preds == torch.max(preds, dim=1, keepdim=True)).type(target.dtype) * target, dim=0)
+        fn_by_class = torch.sum((preds < torch.max(preds, dim=1, keepdim=True)).type(target.dtype) * target, dim=0)
         self.tp += tp_by_class
         self.fn += fn_by_class
 
@@ -106,13 +106,13 @@ class CustomFprClasswise(torchmetrics.Metric):
         self.add_state('fp', default=torch.zeros(size=(k, )))
         self.add_state('tn', default=torch.zeros(size=(k, )))
 
-    def update(self, y_true, y_pred, sample_weight=None):
+    def update(self, preds, target, sample_weight=None):
         fp_by_class = torch.sum(
-            (y_pred == torch.max(y_pred, dim=1, keepdim=True)).type(y_true.dtype) * (1. - y_true),
+            (preds == torch.max(preds, dim=1, keepdim=True)).type(target.dtype) * (1. - target),
             dim=0
         )
         tn_by_class = torch.sum(
-            (y_pred < torch.max(y_pred, dim=1, keepdim=True)).type(y_true.dtype) * (1. - y_true),
+            (preds < torch.max(preds, dim=1, keepdim=True)).type(target.dtype) * (1. - target),
             dim=0
         )
         self.fp += fp_by_class
@@ -133,14 +133,14 @@ class CustomF1Classwise(torchmetrics.Metric):
         self.add_state('fp', default=torch.zeros(size=(k, )))
         self.add_state('fn', default=torch.zeros(size=(k, )))
 
-    def update(self, y_true, y_pred, sample_weight=None):
+    def update(self, preds, target, sample_weight=None):
         tp_by_class = torch.sum((
-            y_pred == torch.max(y_pred, dim=1, keepdim=True)).type(y_true.dtype) * y_true, dim=0)
+            preds == torch.max(preds, dim=1, keepdim=True)).type(target.dtype) * target, dim=0)
         fp_by_class = torch.sum(
-            (y_pred == torch.max(y_pred, dim=1, keepdim=True)).type(y_true.dtype) * (1. - y_true),
+            (preds == torch.max(preds, dim=1, keepdim=True)).type(target.dtype) * (1. - target),
             dim=0
         )
-        fn_by_class = torch.sum((y_pred < torch.max(y_pred, dim=1, keepdim=True)).type(y_true.dtype) * y_true, dim=0)
+        fn_by_class = torch.sum((preds < torch.max(preds, dim=1, keepdim=True)).type(target.dtype) * target, dim=0)
         self.tp.assign_add(tp_by_class)
         self.fp.assign_add(fp_by_class)
         self.fn.assign_add(fn_by_class)
