@@ -135,6 +135,7 @@ class DataloaderCreator:
                 print('[bold red]You need to supply either a preprint or a journal DOI!'
                       'Use no_doi_AUTHOR_SOME-NAME to name data sets that do not have a corresponding publication')
             doi_preprint_try = 0
+            doi_preprint = ""
             while doi_preprint_try == 0 or (
                     not re.match(r'\b10\.\d+/[\w.]+\b', doi_preprint) and not doi_preprint.startswith("no_doi")
             ):
@@ -148,6 +149,7 @@ class DataloaderCreator:
                 doi_preprint_try += 1
             self.template_attributes.doi_preprint = doi_preprint
             doi_journal_try = 0
+            doi_journal = ""
             while doi_journal_try == 0 or (
                     not re.match(r'\b10\.\d+/[\w.]+\b', doi_journal) and not doi_journal.startswith("no_doi")
             ):
