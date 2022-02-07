@@ -1,15 +1,16 @@
+from cookiecutter.main import cookiecutter
+from cookiecutter.exceptions import OutputDirExistsException
 from dataclasses import dataclass, asdict
 import logging
 import numpy as np
 import os
 import re
+from rich import print
 from typing import Union, Dict
 import sys
 
 from sfaira.consts.utils import clean_doi, clean_id_str
 from sfaira.commands.questionary import sfaira_questionary
-from rich import print
-from cookiecutter.main import cookiecutter
 
 log = logging.getLogger(__name__)
 
@@ -86,7 +87,7 @@ class DataloaderCreator:
 
     def __init__(self, path_loader):
         self.WD = os.path.dirname(__file__)
-        self.TEMPLATES_PATH = f'{self.WD}/templates'
+        self.TEMPLATES_PATH = os.path.join(self.WD, "templates")
         self.template_attributes = TemplateAttributes()
         self.out_path = path_loader
 
@@ -96,15 +97,9 @@ class DataloaderCreator:
         Prompts the user for required attributes which must be present in the data loader.
         Finally creates the specific cookiecutter data loader template.
         """
-        try:
-            self._prompt_dataloader_template()
-            self._prompt_dataloader_configuration(path_data)
-            self._create_dataloader_template()
-        except FileExistsError as e:
-            print(f"[bold red]The data loader exists already in {self.out_path}. "
-                  f"Delete the old version of this loader or consider completing the previous curation attempt. "
-                  f"The error message was: {e} ")
-            sys.exit()
+        self._prompt_dataloader_template()
+        self._prompt_dataloader_configuration(path_data)
+        self._create_dataloader_template()
 
     def _prompt_dataloader_template(self) -> None:
         """
@@ -169,6 +164,14 @@ class DataloaderCreator:
             doi = doi_journal if doi_journal != "" else doi_preprint
             counter += 1
         self.template_attributes.doi_sfaira_repr = clean_doi(doi)
+        if os.path.exists(self.path_loader):
+            print(f"[bold orange]A data loader for this DOI already exists: {self.path_loader}. "
+                  f"If you want to write a second data loader for this publication, "
+                  f"proceed with this curation workflow, take care that the old one is not overwritten, though. "
+                  f"If you were not aware of the other data loader, consider aborting this phase 1a and "
+                  f"decide if want delete the old version of this loader "
+                  f"or consider completing the previous curation attempt in phase 1b. "
+                  )
 
         self.template_attributes.number_of_datasets = sfaira_questionary(function='text',
                                                                          question='Number of datasets',
@@ -203,10 +206,17 @@ class DataloaderCreator:
             function='text',
             question='Key of default embedding in .obsm:',
             default=''))
-        self.template_attributes.download_url_data = sfaira_questionary(
-            function='text',
-            question='URL to download the data',
-            default='')
+        download_url_data_try = 0
+        download_url_data = ''
+        while download_url_data_try == 0 or download_url_data == '':
+            if download_url_data_try > 0:
+                print('[bold red]You need to supply a download url of the data.')
+            download_url_data = sfaira_questionary(
+                function='text',
+                question='URL to download the data',
+                default='')
+            download_url_data_try += 1
+        self.template_attributes.download_url_data = download_url_data
         self.template_attributes.download_url_meta = sfaira_questionary(
             function='text',
             question='URL to download the meta data (only necessary if different from download_url_data)',
@@ -510,8 +520,7 @@ class DataloaderCreator:
 
         print('[bold orange]Sfaira butler: "Up next:"')
         self.action_counter = 1
-        path_loader = os.path.join(self.out_path, self.template_attributes.doi_sfaira_repr)
-        print(f'[bold orange]{self.action_counter}) Proceed to modify the .yaml and .py files in {path_loader}')
+        print(f'[bold orange]{self.action_counter}) Proceed to modify the .yaml and .py files in {self.path_loader}')
         self.action_counter += 1
         self.check_datadir(path_data=path_data)
         if requires_annotate:
@@ -522,6 +531,10 @@ class DataloaderCreator:
                   f'you can skip phase 2 (\'sfaira annotate-dataloader\').')
             self.action_counter += 1
 
+    @property
+    def path_loader(self):
+        return os.path.join(self.out_path, self.template_attributes.doi_sfaira_repr)
+
     def _template_attributes_to_dict(self) -> dict:
         """
         Create a dict from the our Template Structure dataclass
@@ -530,7 +543,7 @@ class DataloaderCreator:
         return {key: val for key, val in asdict(self.template_attributes).items() if val != ''}
 
     def _create_dataloader_template(self):
-        template_path = f'{self.TEMPLATES_PATH}/{self.template_attributes.dataloader_type}'
+        template_path = os.path.join(self.TEMPLATES_PATH, self.template_attributes.dataloader_type)
         cookiecutter(f'{template_path}',
                      output_dir=self.out_path,
                      no_input=True,
@@ -540,8 +553,9 @@ class DataloaderCreator:
     def check_datadir(self, path_data):
         path_data = os.path.join(path_data, self.template_attributes.doi_sfaira_repr)
         if not os.path.exists(path_data):
-            print(f"[bold red]The unmodified downloaded data files were anticipated to lie in {path_data} but this path "
-                  "was not found. Create this directory and move the raw data files there. Aborting.")
+            print(f"[bold red]The unmodified downloaded data files were anticipated to lie in {path_data} "
+                  f"but this path was not found. "
+                  f"Create this directory and move the raw data files there. Aborting.")
             sys.exit()
         else:
             print(f'[bold orange]{self.action_counter}) Make sure that the unmodified downloaded data files are in  '

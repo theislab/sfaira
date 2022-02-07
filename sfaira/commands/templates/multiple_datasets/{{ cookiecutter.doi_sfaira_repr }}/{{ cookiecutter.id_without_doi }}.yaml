@@ -7,7 +7,7 @@ dataset_structure:
     default_embedding: {% if cookiecutter.default_embedding %}"{{ cookiecutter.default_embedding }}"{% endif %}
     doi_preprint: {% if cookiecutter.doi_preprint %}"{{ cookiecutter.doi_preprint }}"{% endif %}
     doi_journal: {% if cookiecutter.doi_journal %}"{{ cookiecutter.doi_journal }}"{% endif %}
-    download_url_data: "{{ cookiecutter.download_url_data }}"
+    download_url_data: {% if cookiecutter.download_url_data %}"{{ cookiecutter.download_url_data }}"{% endif %}
     download_url_meta: {% if cookiecutter.download_url_meta %}"{{ cookiecutter.download_url_meta }}"{% endif %}
     primary_data: {{ cookiecutter.primary_data }}
     layers:
