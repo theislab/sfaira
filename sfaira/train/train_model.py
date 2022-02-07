@@ -8,7 +8,7 @@ from typing import Union
 from sfaira.consts import AdataIdsSfaira
 from sfaira.data.store.stores.base import StoreBase
 from sfaira.data import StoreSingleFeatureSpace, Universe
-from sfaira.estimators.keras.keras import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
+from sfaira.estimators.keras.base import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
 from sfaira.ui import ModelZoo
 
 

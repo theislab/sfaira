@@ -11,7 +11,7 @@ import time
 from sfaira import settings
 from sfaira.consts import AdataIdsSfaira, AdataIds, OCS
 from sfaira.data import DatasetInteractive
-from sfaira.estimators.keras.keras import EstimatorKerasEmbedding, EstimatorKerasCelltype
+from sfaira.estimators.keras.base import EstimatorKerasEmbedding, EstimatorKerasCelltype
 from sfaira.ui.model_zoo import ModelZoo
 from sfaira.versions.topologies import TopologyContainer
 
