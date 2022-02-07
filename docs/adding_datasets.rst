@@ -283,6 +283,9 @@ Phase 2 is sub-structured into 2 sub-phases:
 2a. Create metadata annotation files (``sfaira annotate-dataloader``).
     This creates `<path_loader>/<DOI-name>/ID*.tsv` files with meta data map suggestions for each meta data item that
     requires such maps.
+    Note: You can identify the loader via ``--doi`` with the main DOI (ie. journal > preprint if both are defined)
+    or with the DOI-based data loader name defined by sfaira,
+    ie. ``<DOI-name>`` in ``<path_loader>/<DOI-name>``, which is either ``d10_*`` or ``dno_doi_*``.
 
     2a-docker.
         In the following command, replace `DOI` with the DOI of your data loader.
@@ -344,6 +347,9 @@ Phase 3: finalize
 3a. Clean and test data loader.
     This command will test data loading and will format the metadata maps in `ID*.tsv` files from phase 2b).
     If this command passes without further change requests, the data loader is finished and ready for phase 4.
+    Note: You can identify the loader via ``--doi`` with the main DOI (ie. journal > preprint if both are defined)
+    or with the DOI-based data loader name defined by sfaira,
+    ie. ``<DOI-name>`` in ``<path_loader>/<DOI-name>``, which is either ``d10_*`` or ``dno_doi_*``.
 
     3a-docker.
         In the following command, replace `DOI` with the DOI of your data loader.
@@ -373,6 +379,9 @@ You can push the code from with the sfaira docker with a single command or you c
 4a. Push data loader to the public sfaira repository.
     We will test the loader one last time, this test will not throw errors if you have not introduced changes since
     phase 3.
+    Note: You can identify the loader via ``--doi`` with the main DOI (ie. journal > preprint if both are defined)
+    or with the DOI-based data loader name defined by sfaira,
+    ie. ``<DOI-name>`` in ``<path_loader>/<DOI-name>``, which is either ``d10_*`` or ``dno_doi_*``.
 
     4a-docker.
         If you are writing a data loader from within the sfaira data curation docker, you can run phase 4 with a single
@@ -409,6 +418,10 @@ Phase 5 and 6 are optional, see also introduction paragraphs on this documentati
 5a. Export `.h5ads`'s.
     Write streamlined dataset(s) corresponding to data loader into (an) `.h5ad` file(s) according to a specific set of
     rules (a schema).
+    Note: You can identify the loader via ``--doi`` with the main DOI (ie. journal > preprint if both are defined)
+    or with the DOI-based data loader name defined by sfaira,
+    ie. ``<DOI-name>`` in ``<path_loader>/<DOI-name>``, which is either ``d10_*`` or ``dno_doi_*``.
+
     .. code-block::
 
         sfaira export-h5ad --doi --schema --path-out --path_data [--path_loader]

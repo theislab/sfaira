@@ -66,20 +66,16 @@ class DataloaderTester:
         Tests the dataloader.
         """
         print('[bold blue]Conflicts are not automatically resolved.')
-        print('[bold blue]Please go back to [bold]https://www.ebi.ac.uk/ols/ontologies/cl[blue] for every mismatch or '
-              'conflicts and add the correct cell ontology class name into the .tsv "target" column.')
+        print('[bold blue]In case of coflicts, please go back to [bold]https://www.ebi.ac.uk/ols/ontologies/cl[blue] '
+              'and add the correct cell ontology class name into the .tsv "target" column.')
 
         ds, cache_path = self._get_ds()
         if clean_tsvs:
             ds.clean_ontology_class_maps()
 
-        # TODO try-except with good error description saying that the data loader is broken here:
-        ds.load(load_raw=True, allow_caching=True)
-        # Try loading from cache:
         ds, cache_path = self._get_ds()
         # TODO try-except with good error description saying that the data loader is broken here:
-        ds.load(load_raw=False, allow_caching=True)
-        shutil.rmtree(cache_path, ignore_errors=True)
+        ds.load(load_raw=True, allow_caching=False)
         print("[bold blue]Completed testing of data loader, the data loader is now ready for use.")
         if in_phase_3:
             print('[bold orange]Sfaira butler: "You data loader is finished!"')

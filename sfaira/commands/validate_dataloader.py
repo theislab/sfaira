@@ -31,7 +31,7 @@ class DataloaderValidator:
                           if str(x).endswith(".yaml")]
         self.fns_loaders = loader_filenames
         self.paths_yamls = [os.path.join(path_loader, self._clean_doi, x) for x in yaml_filenames]
-        self.yaml_dicts = []
+        self.yaml_dicts = {}
         self.passed = []
         self.warned = []
         self.failed = []
@@ -156,9 +156,9 @@ class DataloaderValidator:
                 'individual',
                 'organ',
                 'organism',
-                'primary_doi',
                 'sample_source',
                 'sex',
+                'source_doi',
                 'state_exact',
                 'tech_sample',
                 'treatment']] for z in y],
@@ -210,7 +210,6 @@ class DataloaderValidator:
                 'author',
                 ['doi_journal', 'doi_preprint'],
                 'download_url_data',
-                'normalization',
                 'primary_data',
                 'year'],
             'layers': [
@@ -218,7 +217,7 @@ class DataloaderValidator:
             'dataset_or_feature_wise': [
                 ['feature_type', 'feature_type_var_key']],
             'feature_wise': [
-                ['gene_id_ensembl_var_key', 'gene_id_symbols_var_key']],
+                ['feature_id_var_key', 'feature_symbol_var_key']],
             'meta': [
                 'version'],
         }

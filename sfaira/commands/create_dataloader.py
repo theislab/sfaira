@@ -194,13 +194,6 @@ class DataloaderCreator:
         except KeyError:
             print('[bold yellow] First author was not in the expected format. Using full first author for the id.')
             first_author_lastname = first_author
-        self.template_attributes.id_without_doi = f'{clean_id_str(self.template_attributes.organism)}_' \
-                                                  f'{clean_id_str(self.template_attributes.organ)}_' \
-                                                  f'{clean_id_str(str(self.template_attributes.year))}_' \
-                                                  f'{clean_id_str(self.template_attributes.assay_sc)}_' \
-                                                  f'{clean_id_str(first_author_lastname)}_001'
-        self.template_attributes.id = f'{self.template_attributes.id_without_doi}_' \
-                                      f'{self.template_attributes.doi_sfaira_repr}'
 
         self.template_attributes.default_embedding = str(sfaira_questionary(
             function='text',
@@ -247,6 +240,14 @@ class DataloaderCreator:
                 default="")
             year_try += 1
         self.template_attributes.year = year
+
+        self.template_attributes.id_without_doi = f'{clean_id_str(self.template_attributes.organism)}_' \
+                                                  f'{clean_id_str(self.template_attributes.organ)}_' \
+                                                  f'{clean_id_str(str(self.template_attributes.year))}_' \
+                                                  f'{clean_id_str(self.template_attributes.assay_sc)}_' \
+                                                  f'{clean_id_str(first_author_lastname)}_001'
+        self.template_attributes.id = f'{self.template_attributes.id_without_doi}_' \
+                                      f'{self.template_attributes.doi_sfaira_repr}'
 
         # Data matrices in the dataset:
         print('[bold blue]Data matrices.')
