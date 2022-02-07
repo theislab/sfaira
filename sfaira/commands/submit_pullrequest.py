@@ -4,7 +4,6 @@ import os
 import shutil
 import sys
 
-from sfaira.consts.utils import clean_doi, clean_id_str
 from sfaira.commands.questionary import sfaira_questionary
 from rich import print
 
@@ -33,10 +32,11 @@ class PullRequestHandler:
                 if os.path.isdir(os.path.join(self.path_loader, d)) and d.startswith(("d10_", "dno_doi_")):
                     self.loader_name_list.append(d)
             if not self.loader_name_list:
-                print("[bold red]No dataloaders found in loader directory. Aborting.")
+                print("[bold red]No data loaders found in loader directory. Aborting.")
                 sys.exit()
         else:
-            print('[bold red]This function can only be called when running inside the sfaira CLI docker container. Aborting.')
+            print('[bold red]This function can only be called when running inside the sfaira CLI docker container. '
+                  'Aborting.')
             sys.exit()
 
     @staticmethod
@@ -88,7 +88,8 @@ class PullRequestHandler:
             )
         # Create new branch in sfaira git repo
         subprocess.run(
-            ["git", "checkout", "-b", f"dataset/{self.loader_name}"], check=True, text=True, shell=False, cwd="/root/sfaira/")
+            ["git", "checkout", "-b", f"dataset/{self.loader_name}"], check=True, text=True, shell=False,
+            cwd="/root/sfaira/")
         # Move loader
         shutil.move(
             src=os.path.join(self.path_loader, self.loader_name),
@@ -120,4 +121,5 @@ class PullRequestHandler:
                         "--title", f"Adding dataset {self.loader_name}",
                         "--body", f"This PR was created by the sfaira CLI adding dataset {self.loader_name}"],
                        check=True, text=True, shell=False, cwd="/root/sfaira/")
-        print("[bold green]Your PR was sucessfully submitted. Feel free to add further comments to it using the URL in the line above.")
+        print("[bold green]Your PR was sucessfully submitted. Feel free to add further comments to it using the URL in "
+              "the line above.")

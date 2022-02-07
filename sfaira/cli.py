@@ -23,6 +23,16 @@ from sfaira.commands.upgrade import UpgradeCommand
 WD = os.path.dirname(__file__)
 log = logging.getLogger()
 
+DEFAULT_DATA_PATH = "./"
+PACKAGE_LOADER_PATH = "sfaira/data/dataloaders/loaders/"
+
+
+def check_paths(pathlist):
+    for p in pathlist:
+        if p is None or not os.path.isdir(p):
+            print(f"Error: Path {p} does not exist.")
+            sys.exit()
+
 
 def set_paths(loader=None, data=None, cache=None):
     env_loader_path = os.getenv('SFAIRA_LOADER_PATH')
@@ -40,14 +50,8 @@ def set_paths(loader=None, data=None, cache=None):
         if not os.getenv('SFAIRA_DOCKER'):  # Skip print if running in sfaira docker where env variables are always set
             print('[bold blue]SFAIRA_CACHE_PATH environment variable detected. Ignoring --path-cache if supplied.')
         cache = env_cache_path
+    check_paths([loader, data])
     return loader, data, cache
-
-
-def check_paths(pathlist):
-    for p in pathlist:
-        if p is None or not os.path.isdir(p):
-            print(f"Error: Path {p} does not exist.")
-            sys.exit()
 
 
 def main():
@@ -115,58 +119,37 @@ def cache_reload() -> None:
 
 @sfaira_cli.command()
 @click.option('--path-data',
-              default="./",
+              default=DEFAULT_DATA_PATH,
               type=click.Path(exists=False),
               help='Absolute path of the desired location of the raw data directory.')
 @click.option('--path-loader',
-              default="sfaira/data/dataloaders/loaders/",
+              default=PACKAGE_LOADER_PATH,
               type=click.Path(exists=False),
-              help='Relative path from the current directory to the desired location of the dataloader.')
+              help='Relative path from the current directory to the desired location of the data loader.')
 def create_dataloader(path_data, path_loader) -> None:
     """
     Interactively create a new sfaira dataloader.
     """
     path_loader, path_data, _ = set_paths(loader=path_loader, data=path_data)
-    check_paths([path_loader, path_data])
     dataloader_creator = DataloaderCreator(path_loader)
     dataloader_creator.create_dataloader(path_data)
 
 
 @sfaira_cli.command()
-@click.option('--doi', type=str, default=None, help="The doi of the paper that the dataloader refers to.")
-@click.option('--path-loader',
-              default="sfaira/data/dataloaders/loaders/",
-              type=click.Path(exists=False),
-              help='Relative path from the current directory to the desired location of the dataloader.')
-def validate_dataloader(doi, path_loader) -> None:
-    """
-    Verifies the dataloader against sfaira's requirements.
-    """
-    path_loader, _, _ = set_paths(loader=path_loader)
-    check_paths([path_loader])
-    if doi is None or doi_lint(doi):
-        dataloader_validator = DataloaderValidator(path_loader, doi)
-        dataloader_validator.validate()
-    else:
-        print('[bold red]The supplied DOI is malformed!')  # noqa: W605
-
-
-@sfaira_cli.command()
-@click.option('--doi', type=str, default=None, help="The doi of the paper that the dataloader refers to.")
+@click.option('--doi', type=str, default=None, help="The doi of the paper that the data loader refers to.")
 @click.option('--path-data',
-              default="./",
+              default=DEFAULT_DATA_PATH,
               type=click.Path(exists=False),
               help='Absolute path of the location of the raw data directory.')
 @click.option('--path-loader',
-              default="sfaira/data/dataloaders/loaders/",
+              default=PACKAGE_LOADER_PATH,
               type=click.Path(exists=False),
-              help='Relative path from the current directory to the location of the dataloader.')
+              help='Relative path from the current directory to the location of the data loader.')
 def annotate_dataloader(doi, path_data, path_loader) -> None:
     """
     Annotates a dataloader.
     """
     path_loader, path_data, _ = set_paths(loader=path_loader, data=path_data)
-    check_paths([path_loader, path_data])
     if doi is None or doi_lint(doi):
         dataloader_validator = DataloaderValidator(path_loader, doi)
         dataloader_validator.validate()
@@ -177,28 +160,82 @@ def annotate_dataloader(doi, path_data, path_loader) -> None:
 
 
 @sfaira_cli.command()
-@click.option('--doi', type=str, default=None, help="The doi of the paper that the dataloader refers to.")
+@click.option('--doi', type=str, default=None, help="The doi of the paper that the data loader refers to.")
+@click.option('--path-loader',
+              default=PACKAGE_LOADER_PATH,
+              type=click.Path(exists=False),
+              help='Relative path from the current directory to the desired location of the data loader.')
+@click.option('--schema', type=str, default="sfaira", help="The curation schema to check meta data availability for.")
+def validate_dataloader(doi, path_loader, schema) -> None:
+    """
+    Verifies the dataloader against sfaira's requirements.
+    """
+    path_loader, _, _ = set_paths(loader=path_loader)
+    if doi is None or doi_lint(doi):
+        dataloader_validator = DataloaderValidator(path_loader=path_loader, doi=doi, schema=schema)
+        dataloader_validator.validate()
+    else:
+        print('[bold red]The supplied DOI is malformed!')  # noqa: W605
+
+
+def _full_test(path_loader, path_data, doi, schema, clean_tsvs, in_phase_3):
+    if doi is None or doi_lint(doi):
+        dataloader_validator = DataloaderValidator(path_loader=path_loader, doi=doi, schema=schema)
+        dataloader_validator.validate()
+        dataloader_tester = DataloaderTester(path_loader, path_data, doi)
+        dataloader_tester.test_dataloader(clean_tsvs=clean_tsvs, in_phase_3=in_phase_3)
+    else:
+        print('[bold red]The supplied DOI is malformed!')  # noqa: W605
+
+
+@sfaira_cli.command()
+@click.option('--doi', type=str, default=None, help="The doi of the paper that the data loader refers to.")
 @click.option('--path-data',
-              default="./",
+              default=DEFAULT_DATA_PATH,
               type=click.Path(exists=False),
               help='Absolute path of the location of the raw data directory.')
 @click.option('--path-loader',
-              default="sfaira/data/dataloaders/loaders/",
+              default=PACKAGE_LOADER_PATH,
               type=click.Path(exists=False),
-              help='Relative path from the current directory to the location of the dataloader.')
-def finalize_dataloader(doi, path_data, path_loader) -> None:
+              help='Relative path from the current directory to the location of the data loader.')
+@click.option('--schema', type=str, default="sfaira", help="The curation schema to check meta data availability for.")
+def test_dataloader(doi, path_data, path_loader, schema) -> None:
     """
-    Runs a dataloader integration test.
+    Runs a full data loader test.
     """
     path_loader, path_data, _ = set_paths(loader=path_loader, data=path_data)
-    check_paths([path_loader, path_data])
-    if doi is None or doi_lint(doi):
-        dataloader_validator = DataloaderValidator(path_loader, doi)
-        dataloader_validator.validate()
-        dataloader_tester = DataloaderTester(path_loader, path_data, doi)
-        dataloader_tester.test_dataloader()
-    else:
-        print('[bold red]The supplied DOI is malformed!')  # noqa: W605
+    _full_test(path_loader=path_loader, path_data=path_data, doi=doi, schema=schema, clean_tsvs=False, in_phase_3=False)
+
+
+@sfaira_cli.command()
+@click.option('--doi', type=str, default=None, help="The doi of the paper that the data loader refers to.")
+@click.option('--path-data',
+              default=DEFAULT_DATA_PATH,
+              type=click.Path(exists=False),
+              help='Absolute path of the location of the raw data directory.')
+@click.option('--path-loader',
+              default=PACKAGE_LOADER_PATH,
+              type=click.Path(exists=False),
+              help='Relative path from the current directory to the location of the data loader.')
+@click.option('--schema', type=str, default="sfaira", help="The curation schema to check meta data availability for.")
+def finalize_dataloader(doi, path_data, path_loader, schema) -> None:
+    """
+    Formats .tsvs and runs a full data loader test.
+    """
+    path_loader, path_data, _ = set_paths(loader=path_loader, data=path_data)
+    _full_test(path_loader=path_loader, path_data=path_data, doi=doi, schema=schema, clean_tsvs=True, in_phase_3=True)
+
+
+@sfaira_cli.command()
+def publish_loader() -> None:
+    """
+    Interactively create a GitHub pull request for a newly created data loader.
+    This only works when called in the sfaira CLI docker container.
+    Runs a full data loader test before starting the pull request.
+    """
+    path_loader, _, _ = set_paths()
+    pullrequest_handler = PullRequestHandler(path_loader)
+    pullrequest_handler.submit_pr()
 
 
 @sfaira_cli.command()
@@ -208,7 +245,7 @@ def finalize_dataloader(doi, path_data, path_loader) -> None:
               type=click.Path(exists=True),
               help='Absolute path of the location of the streamlined output h5ads.')
 @click.option('--path-data',
-              default="./",
+              default=DEFAULT_DATA_PATH,
               type=click.Path(exists=True),
               help='Absolute path of the location of the raw data directory.')
 @click.option('--path-cache',
@@ -235,17 +272,6 @@ def validate_h5ad(h5ad, schema) -> None:
     h5ad_tester = H5adValidator(h5ad, schema)
     h5ad_tester.test_schema()
     h5ad_tester.test_numeric_data()
-
-
-@sfaira_cli.command()
-def publish_loader() -> None:
-    """
-    Interactively create a GitHub pullrequest for a newly created dataloader.
-    This only works when called in the sfaira CLI docker container.
-    """
-    path_loader, _, _ = set_paths()
-    pullrequest_handler = PullRequestHandler(path_loader)
-    pullrequest_handler.submit_pr()
 
 
 if __name__ == "__main__":

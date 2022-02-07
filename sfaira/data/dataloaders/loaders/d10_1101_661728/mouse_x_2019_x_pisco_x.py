@@ -85,7 +85,7 @@ class Dataset(DatasetBase):
         self.disease = "healthy"
         self.doi_journal = "10.1038/s41586-020-2496-1"
         self.doi_preprint = "10.1101/661728"
-        self.normalization = "norm"
+        self.layer_processed = "X"
         self.organism = "Mus musculus"
         self.organ = organ
         self.primary_data = True
@@ -93,8 +93,9 @@ class Dataset(DatasetBase):
         self.year = 2019
         self.sample_source = "primary_tissue"
 
-        self.gene_id_ensembl_var_key = None
-        self.gene_id_symbols_var_key = "index"
+        self.feature_id_var_key = None
+        self.feature_symbol_var_key = "index"
+        self.feature_type = "rna"
 
         self.set_dataset_id(idx=1)
 

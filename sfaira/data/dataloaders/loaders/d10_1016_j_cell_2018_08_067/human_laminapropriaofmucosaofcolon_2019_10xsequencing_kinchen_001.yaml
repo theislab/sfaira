@@ -4,8 +4,7 @@ dataset_structure:
         - "HC"
         - "UC"
 dataset_wise:
-    author:
-        - "Kinchen"
+    author: "Kinchen"
     default_embedding:
     doi_journal: "10.1016/j.cell.2018.08.067"
     doi_preprint:
@@ -15,9 +14,21 @@ dataset_wise:
     download_url_meta:
         HC: "private,hc_meta_data_stromal_with_donor.txt"
         UC: "private,uc_meta_data_stromal_with_donor.txt"
-    normalization: "norm"
     primary_data: True
     year: 2019
+layers:
+    layer_counts:
+    layer_processed: "X"
+    layer_spliced_counts:
+    layer_spliced_processed:
+    layer_unspliced_counts:
+    layer_unspliced_processed:
+    layer_velocity:
+dataset_or_feature_wise:
+    feature_reference:
+    feature_reference_var_key:
+    feature_type: "rna"
+    feature_type_var_key:
 dataset_or_observation_wise:
     assay_sc: "10x 3' v2"
     assay_sc_obs_key:
@@ -29,12 +40,16 @@ dataset_or_observation_wise:
     bio_sample_obs_key:
     cell_line:
     cell_line_obs_key:
+    cell_type:
+    cell_type_obs_key: "Cluster"
     development_stage:
     development_stage_obs_key: "Age"
     disease:
     disease_obs_key:
     ethnicity:
     ethnicity_obs_key:
+    gm:
+    gm_obs_key:
     individual:
     individual_obs_key:
     organ: "lamina propria of mucosa of colon"
@@ -45,16 +60,32 @@ dataset_or_observation_wise:
     sample_source_obs_key:
     sex:
     sex_obs_key: "Sex"
+    source_doi:
+    source_doi_obs_key:
     state_exact:
         HC: "healthy"
         UC: "ulcerative colitis"
     state_exact_obs_key:
     tech_sample:
     tech_sample_obs_key:
-observation_wise:
-    cell_type_obs_key: "Cluster"
+    treatment:
+    treatment_obs_key:
 feature_wise:
-    gene_id_ensembl_var_key:
-    gene_id_symbols_var_key: "index"
+    feature_id_var_key:
+    feature_symbol_var_key: "index"
+observation_wise:
+    spatial_x_coord:
+    spatial_y_coord:
+    spatial_z_coord:
+    vdj_c_call:
+    vdj_consensus_count:
+    vdj_d_call:
+    vdj_duplicate_count:
+    vdj_j_call:
+    vdj_junction:
+    vdj_junction_aa:
+    vdj_locus:
+    vdj_productive:
+    vdj_v_call:
 meta:
-    version: "1.0"
+    version: "1.2"

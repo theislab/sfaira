@@ -10,8 +10,20 @@ dataset_wise:
     download_url_data: "https://storage.googleapis.com/gtex_analysis_v9/snrna_seq_data/GTEx_8_tissues_snRNAseq_atlas_071421.public_obs.h5ad"
     download_url_meta:
     primary_data: True
-    normalization: "raw"
     year: 2021
+layers:
+    layer_counts: "X"
+    layer_processed:
+    layer_spliced_counts:
+    layer_spliced_processed:
+    layer_unspliced_counts:
+    layer_unspliced_processed:
+    layer_velocity:
+dataset_or_feature_wise:
+    feature_reference:
+    feature_reference_var_key:
+    feature_type: "rna"
+    feature_type_var_key:
 dataset_or_observation_wise:
     assay_sc: "DroNc-seq"
     assay_sc_obs_key:
@@ -31,6 +43,8 @@ dataset_or_observation_wise:
     disease_obs_key:
     ethnicity:
     ethnicity_obs_key:
+    gm:
+    gm_obs_key:
     individual:
     individual_obs_key: "Participant ID"
     organ:
@@ -41,12 +55,30 @@ dataset_or_observation_wise:
     sample_source_obs_key:
     sex:
     sex_obs_key: "Sex"
+    source_doi:
+    source_doi_obs_key:
     state_exact: "healthy"
     state_exact_obs_key:
     tech_sample:
     tech_sample_obs_key: "batch"
+    treatment:
+    treatment_obs_key:
 feature_wise:
-    gene_id_ensembl_var_key: "gene_ids"
-    gene_id_symbols_var_key: "index"
+    feature_id_var_key: "gene_ids"
+    feature_symbol_var_key: "index"
+observation_wise:
+    spatial_x_coord:
+    spatial_y_coord:
+    spatial_z_coord:
+    vdj_c_call:
+    vdj_consensus_count:
+    vdj_d_call:
+    vdj_duplicate_count:
+    vdj_j_call:
+    vdj_junction:
+    vdj_junction_aa:
+    vdj_locus:
+    vdj_productive:
+    vdj_v_call:
 meta:
-    version: "1.1"
+    version: "1.2"

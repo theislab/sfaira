@@ -10,8 +10,20 @@ dataset_wise:
     download_url_data: "https://datashare.is.ed.ac.uk/bitstream/handle/10283/3433/tissue.rdata"
     download_url_meta:
     primary_data: True
-    normalization: "raw"
     year: 2019
+layers:
+    layer_counts: "X"
+    layer_processed:
+    layer_spliced_counts:
+    layer_spliced_processed:
+    layer_unspliced_counts:
+    layer_unspliced_processed:
+    layer_velocity:
+dataset_or_feature_wise:
+    feature_reference:
+    feature_reference_var_key:
+    feature_type: "rna"
+    feature_type_var_key:
 dataset_or_observation_wise:
     assay_sc: "10x 3' v2"
     assay_sc_obs_key:
@@ -31,6 +43,8 @@ dataset_or_observation_wise:
     disease_obs_key: "condition"
     ethnicity:
     ethnicity_obs_key:
+    gm:
+    gm_obs_key:
     individual:
     individual_obs_key: "liver"
     organ: "liver"
@@ -41,12 +55,30 @@ dataset_or_observation_wise:
     sample_source_obs_key:
     sex:
     sex_obs_key:
+    source_doi:
+    source_doi_obs_key:
     state_exact:
     state_exact_obs_key:
     tech_sample:
     tech_sample_obs_key:
+    treatment:
+    treatment_obs_key:
 feature_wise:
-    gene_id_ensembl_var_key:
-    gene_id_symbols_var_key: "index"
+    feature_id_var_key:
+    feature_symbol_var_key: "index"
+observation_wise:
+    spatial_x_coord:
+    spatial_y_coord:
+    spatial_z_coord:
+    vdj_c_call:
+    vdj_consensus_count:
+    vdj_d_call:
+    vdj_duplicate_count:
+    vdj_j_call:
+    vdj_junction:
+    vdj_junction_aa:
+    vdj_locus:
+    vdj_productive:
+    vdj_v_call:
 meta:
-    version: "1.1"
+    version: "1.2"
