@@ -202,6 +202,7 @@ class DataloaderCreator:
                                                   f'{clean_id_str(first_author_lastname)}_001'
         self.template_attributes.id = f'{self.template_attributes.id_without_doi}_' \
                                       f'{self.template_attributes.doi_sfaira_repr}'
+
         self.template_attributes.default_embedding = str(sfaira_questionary(
             function='text',
             question='Key of default embedding in .obsm:',
@@ -221,18 +222,32 @@ class DataloaderCreator:
             function='text',
             question='URL to download the meta data (only necessary if different from download_url_data)',
             default='')
-        self.template_attributes.organism = sfaira_questionary(
-            function='text',
-            question='Organism (from NCBItaxon):',
-            default='')
+        organism_try = 0
+        organism = ''
+        while organism_try == 0 or organism == '':
+            if organism_try > 0:
+                print('[bold red]You need to supply the main organism.')
+            organism = sfaira_questionary(
+                function='text',
+                question='Main organism (from NCBItaxon):',
+                default='')
+            organism_try += 1
+        self.template_attributes.organism = organism
         self.template_attributes.primary_data = str(sfaira_questionary(
             function='confirm',
             question='Is this primary data?',
             default='Yes'))
-        self.template_attributes.year = sfaira_questionary(
-            function='text',
-            question='Year {e.g. 2022}: ',
-            default="2022")
+        year_try = 0
+        year = ''
+        while year_try == 0 or year == '':
+            if year_try > 0:
+                print('[bold red]You need to supply the year of first publication.')
+            year = sfaira_questionary(
+                function='text',
+                question='Year of first publication (e.g. 2022)',
+                default="")
+            year_try += 1
+        self.template_attributes.year = year
 
         # Data matrices in the dataset:
         print('[bold blue]Data matrices.')
@@ -329,9 +344,9 @@ class DataloaderCreator:
             default='')
 
         # Encouraged meta data that tend to be in .obs and would require mapping .tsv:
-        print('[bold blue]Cell-wise meta data that are not shared across the dataset.')
-        print('[bold blue]The following meta data queries are on cell-resolution and do not need to be set if they can '
-              'be annotated on a dataset-level. '
+        print('[bold blue]Cell-wise meta data.')
+        print('[bold blue]The following meta data queries are on cell-resolution '
+              'and do not need to be set if they were annotated on a dataset-level above. '
               'Skip cell- and dataset-level entries if the corresponding item is not available at all. '
               'These items can also later be modified manually in the .yaml which has the same effect as setting them '
               'here except of that we do additionally check here if you need to run \'sfaira annotate-dataloader\'.')
@@ -486,7 +501,7 @@ class DataloaderCreator:
         print('[bold blue]Feature-wise meta data that are shared across the dataset.')
         print('[bold blue]The following meta data queries are on feature(gene)-wise. '
               'In some cases, these meta data need to be set per feature, '
-              'skip here and annotate in the -yaml if that is the case. '
+              'skip here and annotate in the .yaml if that is the case. '
               'These can also later be modified manually in the .yaml which has the same effect as setting them here.')
 
         self.template_attributes.feature_reference = str(sfaira_questionary(
@@ -498,7 +513,7 @@ class DataloaderCreator:
             question='Feature type of features annotated (either rna, protein, or peak)',
             default='rna')
 
-        print('[bold blue]Feature-wise meta data that are not shared across the dataset.')
+        print('[bold blue]Feature-wise meta data.')
         print('[bold blue]The following meta data queries are on gene-resolution. '
               'These can also later be modified manually in the .yaml which has the same effect as setting them here.')
         feature_id = ""
