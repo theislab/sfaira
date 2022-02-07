@@ -141,12 +141,12 @@ def test_adaptors(adaptor: str, shuffle_buffer_size: int):
         kwargs = {}
     else:
         assert False
-    it = cart.adaptor(generator_type=adaptor, shuffle_buffer_size=shuffle_buffer_size, **kwargs)
+    it = cart.adaptor(generator_type=adaptor, shuffle_buffer=shuffle_buffer_size, **kwargs)
     if adaptor == "tensorflow":
         it = iter(it.range(2))
     if adaptor in ["torch", "torch-iter"]:
-        import torch
-        it = list(torch.utils.data.DataLoader(it))
+        from torch.utils.data import DataLoader
+        it = list(DataLoader(it))
         it = iter(it)
     if adaptor in ["torch-loader", "torch-iter-loader"]:
         import torch

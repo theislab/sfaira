@@ -1,3 +1,4 @@
+import random
 from typing import Dict, List, Tuple, Union
 
 import anndata
@@ -9,6 +10,33 @@ import scipy.sparse
 from sfaira.data.store.batch_schedule import BATCH_SCHEDULE, BatchDesignBase
 from sfaira.data.store.carts.base import CartBase
 from sfaira.data.store.carts.utils import split_batch
+
+
+class _ShuffleBuffer:
+
+    def __init__(self, generator: iter, buffer_size: int):
+        if buffer_size < 1:
+            raise ValueError('buffer_size should be larger than 0')
+        self._g = generator
+        self._buffer_size = buffer_size
+
+    @staticmethod
+    def buffer_replace(buffer, x):
+        idx = random.randint(0, len(buffer) - 1)
+        val = buffer[idx]
+        buffer[idx] = x
+        return val
+
+    def generator(self):
+        buffer = []
+        for x in self._g:
+            if len(buffer) == self._buffer_size:
+                yield self.buffer_replace(buffer, x)
+            else:
+                buffer.append(x)
+        random.shuffle(buffer)
+        while buffer:
+            yield buffer.pop()
 
 
 class CartSingle(CartBase):
@@ -175,12 +203,15 @@ class CartAnndata(CartSingle):
             x = x.todense()
         return x
 
-    def iterator(self, repeat: int = 1) -> iter:
+    def _iterator(self, repeat: int):
         """
         Iterator over data matrix and meta data table, yields batches of data points.
         """
+        keep_repeating = True
+        num_repetitions = 0
+
         # Speed up access to single object by skipping index overlap operations:
-        for _ in range(repeat):
+        while keep_repeating:
             batches = self.schedule.design
             for idx_i in batches:
                 if len(idx_i) > 0:
@@ -221,6 +252,15 @@ class CartAnndata(CartSingle):
                         ], axis=0, join="inner", ignore_index=True, copy=False)
                         data_tuple = self.map_fn(x, obs)
                         yield data_tuple
+
+            num_repetitions += 1
+            keep_repeating = (num_repetitions < repeat) or (repeat <= 0)
+
+    def iterator(self, repeat: int = 1, shuffle_buffer: int = 0):
+        if shuffle_buffer > 2 and self.batch_size == 1:
+            return _ShuffleBuffer(self._iterator(repeat=repeat), shuffle_buffer).generator()
+        else:
+            return self._iterator(repeat=repeat)
 
     def move_to_memory(self):
         """
@@ -354,7 +394,7 @@ class CartDask(CartSingle):
         """
         return self._x
 
-    def iterator(self, repeat: int = 1) -> iter:
+    def _iterator(self, repeat: int):
         """
         Iterator over data matrix and meta data table, yields batches of data points.
         """
@@ -362,7 +402,10 @@ class CartDask(CartSingle):
         # and dask keeps expression data and obs out of memory.
         self.schedule.batchsplits = self._x.chunks[0]
 
-        for _ in range(repeat):
+        keep_repeating = True
+        num_repetitions = 0
+
+        while keep_repeating:
             for batch_idxs in self.schedule.design:
                 if len(batch_idxs) > 0:
                     x_i = self._x[batch_idxs, :]
@@ -375,6 +418,18 @@ class CartDask(CartSingle):
                             yield data_tuple_i
                     else:
                         yield data_tuple
+
+            num_repetitions += 1
+            keep_repeating = (num_repetitions < repeat) or (repeat <= 0)
+
+    def iterator(self, repeat: int = 1, shuffle_buffer: int = 0):
+        """
+        Iterator over data matrix and meta data table, yields batches of data points.
+        """
+        if shuffle_buffer > 2 and self.batch_size == 1:
+            return _ShuffleBuffer(self._iterator(repeat=repeat), shuffle_buffer).generator()
+        else:
+            return self._iterator(repeat=repeat)
 
     def move_to_memory(self):
         """

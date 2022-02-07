@@ -1,7 +1,8 @@
-import anndata
 from typing import Dict
 
+import anndata
 import numpy as np
+
 from sfaira.data.store.carts.base import CartBase
 from sfaira.data.store.carts.single import CartSingle
 
@@ -34,15 +35,17 @@ class CartMulti(CartBase):
         """
         return dict([(k, v.adata) for k, v in self.carts.items()])
 
-    def iterator(self, repeat: int = 1) -> iter:
+    def iterator(self, repeat: int = 1, shuffle_buffer: int = 0):
+        keep_repeating = True
+        num_repetitions = 0
 
         if self.intercalated:
-            for _ in range(repeat):
+            while keep_repeating:
                 ratios = self.ratios.copy()
                 print(f"GENERATOR: intercalating generators at ratios {ratios}")
                 # Document which generators are still yielding batches:
                 yielding = np.ones((ratios.shape[0],)) == 1.
-                iterators = [v.iterator() for v in self.carts.values()]
+                iterators = [v.iterator(repeat=1, shuffle_buffer=shuffle_buffer) for v in self.carts.values()]
                 while np.any(yielding):
                     # Loop over one iterator length adjusted cycle of emissions.
                     for i, (gi, n) in enumerate(zip(iterators, ratios)):
@@ -53,11 +56,16 @@ class CartMulti(CartBase):
                                 yield x
                             except StopIteration:
                                 yielding[i] = False
+                num_repetitions += 1
+                keep_repeating = (num_repetitions < repeat) or (repeat <= 0)
         else:
-            for _ in range(repeat):
+            while keep_repeating:
                 for gi in self.carts.values():
                     for x in gi.iterator():
                         yield x
+
+                num_repetitions += 1
+                keep_repeating = (num_repetitions < repeat) or (repeat <= 0)
 
     @property
     def n_batches(self) -> int:
