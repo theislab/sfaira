@@ -1,5 +1,4 @@
 from cookiecutter.main import cookiecutter
-from cookiecutter.exceptions import OutputDirExistsException
 from dataclasses import dataclass, asdict
 import logging
 import numpy as np
@@ -570,8 +569,7 @@ class DataloaderCreator:
         if not os.path.exists(path_data):
             print(f"[bold red]The unmodified downloaded data files were anticipated to lie in {path_data} "
                   f"but this path was not found. "
-                  f"Create this directory and move the raw data files there. Aborting.")
-            sys.exit()
+                  f"Create this directory and move the raw data files there.")
         else:
             print(f'[bold orange]{self.action_counter}) Make sure that the unmodified downloaded data files are in  '
                   f'{path_data}.')
