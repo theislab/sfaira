@@ -107,19 +107,23 @@ class DatasetBase(abc.ABC):
     feature_symbol_var_key: Union[None, str]
     feature_type_var_key: Union[None, str]
 
-    spatial_x_coord: Union[None, str]
-    spatial_y_coord: Union[None, str]
-    spatial_z_coord: Union[None, str]
-    vdj_c_call: Union[None, str]
-    vdj_consensus_count: Union[None, str]
-    vdj_d_call: Union[None, str]
-    vdj_duplicate_count: Union[None, str]
-    vdj_j_call: Union[None, str]
-    vdj_junction: Union[None, str]
-    vdj_junction_aa: Union[None, str]
-    vdj_locus: Union[None, str]
-    vdj_productive: Union[None, str]
-    vdj_v_call: Union[None, str]
+    spatial_x_coord_obs_key: Union[None, str]
+    spatial_y_coord_obs_key: Union[None, str]
+    spatial_z_coord_obs_key: Union[None, str]
+    vdj_vj_1_obs_key_prefix: Union[None, str]
+    vdj_vj_2_obs_key_prefix: Union[None, str]
+    vdj_vdj_1_obs_key_prefix: Union[None, str]
+    vdj_vdj_2_obs_key_prefix: Union[None, str]
+    vdj_c_call_obs_key_suffix: Union[None, str]
+    vdj_consensus_count_obs_key_suffix: Union[None, str]
+    vdj_d_call_obs_key_suffix: Union[None, str]
+    vdj_duplicate_count_obs_key_suffix: Union[None, str]
+    vdj_j_call_obs_key_suffix: Union[None, str]
+    vdj_junction_obs_key_suffix: Union[None, str]
+    vdj_junction_aa_obs_key_suffix: Union[None, str]
+    vdj_locus_obs_key_suffix: Union[None, str]
+    vdj_productive_obs_key_suffix: Union[None, str]
+    vdj_v_call_obs_key_suffix: Union[None, str]
 
     _celltype_universe: Union[None, CelltypeUniverse]
     _ontology_class_maps: Union[dict]
@@ -238,19 +242,24 @@ class DatasetBase(abc.ABC):
         self.feature_symbol_var_key = None
         self.feature_type_var_key = None
 
-        self.spatial_x_coord = None
-        self.spatial_y_coord = None
-        self.spatial_z_coord = None
-        self.vdj_c_call = None
-        self.vdj_consensus_count = None
-        self.vdj_d_call = None
-        self.vdj_duplicate_count = None
-        self.vdj_j_call = None
-        self.vdj_junction = None
-        self.vdj_junction_aa = None
-        self.vdj_locus = None
-        self.vdj_productive = None
-        self.vdj_v_call = None
+        self.spatial_x_coord_obs_key = None
+        self.spatial_y_coord_obs_key = None
+        self.spatial_z_coord_obs_key = None
+
+        self.vdj_vj_1_obs_key_prefix = None
+        self.vdj_vj_2_obs_key_prefix = None
+        self.vdj_vdj_1_obs_key_prefix = None
+        self.vdj_vdj_2_obs_key_prefix = None
+        self.vdj_c_call_obs_key_suffix = None
+        self.vdj_consensus_count_obs_key_suffix = None
+        self.vdj_d_call_obs_key_suffix = None
+        self.vdj_duplicate_count_obs_key_suffix = None
+        self.vdj_j_call_obs_key_suffix = None
+        self.vdj_junction_obs_key_suffix = None
+        self.vdj_junction_aa_obs_key_suffix = None
+        self.vdj_locus_obs_key_suffix = None
+        self.vdj_productive_obs_key_suffix = None
+        self.vdj_v_call_obs_key_suffix = None
 
         self._celltype_universe = None
         self._ontology_class_maps = dict([(k, None) for k in self._adata_ids.ontology_constrained])
