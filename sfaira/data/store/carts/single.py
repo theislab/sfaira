@@ -5,6 +5,7 @@ import dask.array
 import numpy as np
 import pandas as pd
 import scipy.sparse
+
 from sfaira.data.store.batch_schedule import BATCH_SCHEDULE, BatchDesignBase
 from sfaira.data.store.carts.base import CartBase
 from sfaira.data.store.carts.utils import split_batch
@@ -174,14 +175,12 @@ class CartAnndata(CartSingle):
             x = x.todense()
         return x
 
-    @property
-    def iterator(self) -> iter:
+    def iterator(self, repeat: int = 1) -> iter:
         """
         Iterator over data matrix and meta data table, yields batches of data points.
         """
         # Speed up access to single object by skipping index overlap operations:
-
-        def g():
+        for _ in range(repeat):
             batches = self.schedule.design
             for idx_i in batches:
                 if len(idx_i) > 0:
@@ -222,8 +221,6 @@ class CartAnndata(CartSingle):
                         ], axis=0, join="inner", ignore_index=True, copy=False)
                         data_tuple = self.map_fn(x, obs)
                         yield data_tuple
-
-        return g
 
     def move_to_memory(self):
         """
@@ -357,35 +354,27 @@ class CartDask(CartSingle):
         """
         return self._x
 
-    @property
-    def iterator(self) -> iter:
+    def iterator(self, repeat: int = 1) -> iter:
         """
         Iterator over data matrix and meta data table, yields batches of data points.
         """
         # Can all data sets corresponding to one organism as a single array because they share the second dimension
         # and dask keeps expression data and obs out of memory.
+        self.schedule.batchsplits = self._x.chunks[0]
 
-        def g():
-            self.schedule.batchsplits = self._x.chunks[0]
-            batches = self.schedule.design
-            x_temp = self._x
-            obs_temp = self._obs
-            for batch_idxs in batches:
+        for _ in range(repeat):
+            for batch_idxs in self.schedule.design:
                 if len(batch_idxs) > 0:
-                    x_i = x_temp[batch_idxs, :]
+                    x_i = self._x[batch_idxs, :]
                     if self.var_idx is not None:
                         x_i = x_i[:, self.var_idx]
-                    # Exploit fact that index of obs is just increasing list of integers, so we can use the .loc[]
-                    # indexing instead of .iloc[]:
-                    obs_i = obs_temp.loc[obs_temp.index[batch_idxs], :]
+                    obs_i = self._obs.iloc[batch_idxs, :]
                     data_tuple = self.map_fn(x_i, obs_i)
                     if self.batch_size == 1:
                         for data_tuple_i in split_batch(x=data_tuple):
                             yield data_tuple_i
                     else:
                         yield data_tuple
-
-        return g
 
     def move_to_memory(self):
         """
@@ -411,7 +400,7 @@ class CartDask(CartSingle):
         """
         Selected meta data matrix (cells x meta data) that is emitted in batches by .iterator().
         """
-        return self._obs.loc[self.schedule.idx, :]
+        return self._obs.iloc[self.schedule.idx, :]
 
     @property
     def x(self):

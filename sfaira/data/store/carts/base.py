@@ -1,6 +1,8 @@
 import pandas as pd
 import random
 
+from functools import partial
+
 from sfaira.data.store.batch_schedule import BatchDesignBase
 
 
@@ -60,7 +62,14 @@ class CartBase:
     var: pd.DataFrame  # Feature meta data (features x properties).
     map_fn: callable
 
-    def adaptor(self, generator_type: str, dataset_kwargs: dict = None, shuffle_buffer_size: int = 0, **kwargs):
+    def adaptor(
+            self,
+            generator_type: str,
+            dataset_kwargs: dict = None,
+            shuffle_buffer_size: int = 0,
+            repeat: int = 1,
+            **kwargs
+    ):
         """
         The adaptor turns a python base generator into a different iteratable object, defined by generator_type.
 
@@ -85,6 +94,8 @@ class CartBase:
         :param shuffle_buffer_size: int
             If shuffle_buffer_size > 0 -> Use a shuffle buffer with size shuffle_buffer_size to shuffle output of
             self.iterator (this option is useful when using randomized_batch_access in the DaskCart)
+        :param repeat: int
+            Number of times to repeat the dataset until the underlying generator runs out of samples.
         :returns: Modified iteratable (see generator_type).
         """
         if not dataset_kwargs:
@@ -92,37 +103,39 @@ class CartBase:
 
         if generator_type == "python":
             if shuffle_buffer_size > 0:
-                g = _ShuffleBuffer(self.iterator(), shuffle_buffer_size).generator()
+                g = _ShuffleBuffer(self.iterator(repeat=repeat), shuffle_buffer_size).generator()
             else:
-                g = self.iterator()
+                g = self.iterator(repeat=repeat)
         elif generator_type == "tensorflow":
             import tensorflow as tf
 
             if shuffle_buffer_size > 0:
                 g = tf.data.Dataset.from_generator(
-                    generator=_ShuffleBuffer(self.iterator(), shuffle_buffer_size).generator, **kwargs
+                    generator=_ShuffleBuffer(self.iterator(repeat=repeat), shuffle_buffer_size).generator, **kwargs
                 )
             else:
-                g = tf.data.Dataset.from_generator(generator=self.iterator, **kwargs)
+                g = tf.data.Dataset.from_generator(generator=partial(self.iterator, repeat=repeat), **kwargs)
         elif generator_type in ["torch", "torch-loader"]:
-            import torch
+            from torch.utils.data import DataLoader
             # Only import this module if torch is used to avoid strict torch dependency:
             from sfaira.data.store.torch_dataset import SfairaDataset
 
             g = SfairaDataset(map_fn=self.map_fn, obs=self.obs, x=self.x, **dataset_kwargs)
             if generator_type == "torch-loader":
-                g = torch.utils.data.DataLoader(g, **kwargs)
+                g = DataLoader(g, **kwargs)
         elif generator_type in ["torch-iter", "torch-iter-loader"]:
-            import torch
+            from torch.utils.data import DataLoader
             # Only import this module if torch is used to avoid strict torch dependency:
             from sfaira.data.store.torch_dataset import SfairaIterableDataset
 
             if shuffle_buffer_size > 0:
-                g = SfairaIterableDataset(iterator_fun=_ShuffleBuffer(self.iterator(), shuffle_buffer_size).generator)
+                g = SfairaIterableDataset(
+                    iterator_fun=_ShuffleBuffer(self.iterator(repeat=repeat), shuffle_buffer_size).generator
+                )
             else:
-                g = SfairaIterableDataset(iterator_fun=self.iterator)
+                g = SfairaIterableDataset(iterator_fun=partial(self.iterator, repeat=repeat))
             if generator_type == "torch-iter-loader":
-                g = torch.utils.data.DataLoader(g, **kwargs)
+                g = DataLoader(g, **kwargs)
         else:
             raise ValueError(f"{generator_type} not recognized")
         return g

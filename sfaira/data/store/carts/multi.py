@@ -34,14 +34,12 @@ class CartMulti(CartBase):
         """
         return dict([(k, v.adata) for k, v in self.carts.items()])
 
-    @property
-    def iterator(self) -> iter:
+    def iterator(self, repeat: int = 1) -> iter:
 
         if self.intercalated:
-            ratios = self.ratios.copy()
-            print(f"GENERATOR: intercalating generators at ratios {ratios}")
-
-            def g():
+            for _ in range(repeat):
+                ratios = self.ratios.copy()
+                print(f"GENERATOR: intercalating generators at ratios {ratios}")
                 # Document which generators are still yielding batches:
                 yielding = np.ones((ratios.shape[0],)) == 1.
                 iterators = [v.iterator() for v in self.carts.values()]
@@ -56,26 +54,24 @@ class CartMulti(CartBase):
                             except StopIteration:
                                 yielding[i] = False
         else:
-            def g():
+            for _ in range(repeat):
                 for gi in self.carts.values():
                     for x in gi.iterator():
                         yield x
 
-        return g
-
     @property
     def n_batches(self) -> int:
-        return np.sum([v.n_batches for v in self.carts.values()])
+        return int(np.sum([v.n_batches for v in self.carts.values()]))
 
     @property
     def n_obs(self) -> int:
         """Total number of observations in cart."""
-        return np.sum([v.n_obs for v in self.carts.values()])
+        return int(np.sum([v.n_obs for v in self.carts.values()]))
 
     @property
     def n_obs_selected(self) -> int:
         """Total number of selected observations in cart."""
-        return np.sum([v.n_obs_selected for v in self.carts.values()])
+        return int(np.sum([v.n_obs_selected for v in self.carts.values()]))
 
     @property
     def n_var(self) -> Dict[str, int]:
