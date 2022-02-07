@@ -125,8 +125,8 @@ class DataloaderCreator:
         Prompts the user for all required attributes for a dataloader such as DOI, author, etc.
         """
         author = sfaira_questionary(function='text',
-                                    question='Author(s):',
-                                    default='Einstein, Albert')
+                                    question='Author(s) [Einstein, Albert]:',
+                                    default='')
         self.template_attributes.author = author.split(';') if ';' in author else author
         doi = ""
         counter = 0
@@ -176,12 +176,6 @@ class DataloaderCreator:
                                         question=f'Filename for dataset {ds}:',
                                         default=f'data_{ds}.h5ad')
                 self.template_attributes.sample_fns['fns'].append(fn)
-        else:
-            self.template_attributes.sample_fns = sfaira_questionary(
-                function='text',
-                question='Sample file name of the first dataset (these will be made accessible to load() via '
-                         'sample_fn):',
-                default='data.h5ad')
 
         print('[bold blue]Cell-wise meta data that are shared across the dataset.')
         print('[bold blue]The following meta data queries are on dataset-resolution. '
@@ -202,7 +196,7 @@ class DataloaderCreator:
         self.template_attributes.default_embedding = str(sfaira_questionary(
             function='text',
             question='Key of default embedding in obsm (if available):',
-            default='X_umap'))
+            default=''))
         self.template_attributes.download_url_data = sfaira_questionary(
             function='text',
             question='URL to download the data',
@@ -486,19 +480,27 @@ class DataloaderCreator:
         self.template_attributes.feature_type = sfaira_questionary(
             function='text',
             question='Feature type of features annotated:',
-            default='')
+            default='rna')
 
         print('[bold blue]Feature-wise meta data that are not shared across the dataset.')
         print('[bold blue]The following meta data queries are on gene-resolution. '
               'These can also later be modified manually in the .yaml which has the same effect as setting them here.')
-        self.template_attributes.feature_symbol_var_key = sfaira_questionary(
-            function='text',
-            question='Key of feature symbol field in .var:',
-            default='index')
-        self.template_attributes.feature_id_var_key = sfaira_questionary(
-            function='text',
-            question='Key of feature ID field in .var:',
-            default='')
+        feature_id = ""
+        counter = 0
+        while feature_id == "":
+            if counter > 0:
+                print('[bold red]You need to supply either a .var key for feature IDs or for symbols!')
+            self.template_attributes.feature_id_var_key = sfaira_questionary(
+                function='text',
+                question='Key of feature ID (e.g. ENSEMBL ID) field in .var:',
+                default='')
+            self.template_attributes.feature_symbol_var_key = sfaira_questionary(
+                function='text',
+                question='Key of feature symbol (e.g. gene names) field in .var:',
+                default='index')
+            feature_id = self.template_attributes.feature_id_var_key \
+                if self.template_attributes.feature_id_var_key != "" else \
+                self.template_attributes.feature_symbol_var_key
 
         print('[bold orange]Sfaira butler: "Up next:"')
         self.action_counter = 1
