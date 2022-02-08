@@ -1,0 +1,42 @@
+source	target	target_id
+CD4.c01.Tn.TCF7	naive thymus-derived CD4-positive, alpha-beta T cell	CL:0000895
+CD4.c02.Tn.PASK	naive thymus-derived CD4-positive, alpha-beta T cell	CL:0000895
+CD4.c03.Tn.ADSL	naive thymus-derived CD4-positive, alpha-beta T cell	CL:0000895
+CD4.c04.Tn.il7r	naive thymus-derived CD4-positive, alpha-beta T cell	CL:0000895
+CD4.c05.Tm.TNF	CD4-positive, alpha-beta memory T cell	CL:0000897
+CD4.c06.Tm.ANXA1	CD4-positive, alpha-beta memory T cell	CL:0000897
+CD4.c07.Tm.ANXA2	CD4-positive, alpha-beta memory T cell	CL:0000897
+CD4.c08.Tm.CREM	CD4-positive, alpha-beta memory T cell	CL:0000897
+CD4.c09.Tm.CCL5	CD4-positive, alpha-beta memory T cell	CL:0000897
+CD4.c10.Tm.CAPG	CD4-positive, alpha-beta memory T cell	CL:0000897
+CD4.c11.Tm.GZMA	CD4-positive, alpha-beta memory T cell	CL:0000897
+CD4.c12.Tem.GZMK	effector memory CD4-positive, alpha-beta T cell	CL:0000905
+CD4.c13.Temra.CX3CR1	effector memory CD4-positive, alpha-beta T cell, terminally differentiated	CL:0001087
+CD4.c14.Th17.SLC4A10	T-helper 17 cell	CL:0000899
+CD4.c15.Th17.IL23R	T-helper 17 cell	CL:0000899
+CD4.c16.Tfh.CXCR5	T follicular helper cell	CL:0002038
+CD4.c17.TfhTh1.CXCL13	T follicular helper cell	CL:0002038
+CD4.c18.Treg.RTKN2	CD4-positive, CD25-positive, alpha-beta regulatory T cell	CL:0000792
+CD4.c19.Treg.S1PR1	CD4-positive, CD25-positive, alpha-beta regulatory T cell	CL:0000792
+CD4.c20.Treg.TNFRSF9	CD4-positive, CD25-positive, alpha-beta regulatory T cell	CL:0000792
+CD4.c21.Treg.OAS1	CD4-positive, CD25-positive, alpha-beta regulatory T cell	CL:0000792
+CD4.c22.ISG.IFIT1	activated CD4-positive, alpha-beta T cell	CL:0000896
+CD4.c23.Mix.NME1	CD4-positive, alpha-beta T cell	CL:0000624
+CD4.c24.Mix.NME2	CD4-positive, alpha-beta T cell	CL:0000624
+CD8.c01.Tn.MAL	naive thymus-derived CD8-positive, alpha-beta T cell	CL:0000900
+CD8.c02.Tm.IL7R	CD8-positive, alpha-beta memory T cell	CL:0000909
+CD8.c03.Tm.RPS12	CD8-positive, alpha-beta memory T cell	CL:0000909
+CD8.c04.Tm.CD52	CD8-positive, alpha-beta memory T cell	CL:0000909
+CD8.c05.Tem.CXCR5	effector memory CD8-positive, alpha-beta T cell	CL:0000913
+CD8.c06.Tem.GZMK	effector memory CD8-positive, alpha-beta T cell	CL:0000913
+CD8.c07.Temra.CX3CR1	effector memory CD8-positive, alpha-beta T cell, terminally differentiated	CL:0001062
+CD8.c08.Tk.TYROBP	mature NK T cell	CL:0000814
+CD8.c09.Tk.KIR2DL4	mature NK T cell	CL:0000814
+CD8.c10.Trm.ZNF683	CD8-positive, alpha-beta memory T cell	CL:0000909
+CD8.c11.Tex.PDCD1	exhausted T cell	CL:0011025
+CD8.c12.Tex.CXCL13	exhausted T cell	CL:0011025
+CD8.c13.Tex.myl12a	exhausted T cell	CL:0011025
+CD8.c14.Tex.TCF7	exhausted T cell	CL:0011025
+CD8.c15.ISG.IFIT1	activated CD8-positive, alpha-beta T cell	CL:0000906
+CD8.c16.MAIT.SLC4A10	mucosal invariant T cell	CL:0000940
+CD8.c17.Tm.NME1	CD8-positive, alpha-beta memory T cell	CL:0000909

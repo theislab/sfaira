@@ -682,6 +682,8 @@ Dataset structure meta data are in the section `dataset_structure` in the `.yaml
     If there are multiple data files which can be covered by one `load()` function and `.yaml` file because they are
     structured similarly, these can identified here.
     See also section `Loading multiple files of similar structure`.
+    You can simply hardcode a file name in the ``load()`` function and skip defining it here
+    if you are writing a single file loader.
 
 .. _sec-dataset-wise:
 Dataset-wise
