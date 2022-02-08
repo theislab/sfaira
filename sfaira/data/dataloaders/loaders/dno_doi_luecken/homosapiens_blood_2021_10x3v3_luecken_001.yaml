@@ -1,8 +1,8 @@
 dataset_structure:
     dataset_index: 1
     sample_fns:
-        - "GSE194122_openproblems_neurips2021_cite_BMMC_processed.h5ad"
-        - "GSE194122_openproblems_neurips2021_multiome_BMMC_processed.h5ad"
+        - "GSE194122_openproblems_neurips2021_cite_BMMC_processed.h5ad.gz"
+        - "GSE194122_openproblems_neurips2021_multiome_BMMC_processed.h5ad.gz"
 dataset_wise:
     author: "Luecken, Malte"
     default_embedding: "GEX_X_umap"
@@ -29,8 +29,8 @@ dataset_or_feature_wise:
     feature_type_var_key: "feature_types"
 dataset_or_observation_wise:
     assay_sc:
-        GSE194122_openproblems_neurips2021_cite_BMMC_processed.h5ad: "CITE-seq (cell surface protein profiling)"
-        GSE194122_openproblems_neurips2021_multiome_BMMC_processed.h5ad: "10x multiome"
+        GSE194122_openproblems_neurips2021_cite_BMMC_processed.h5ad.gz: "CITE-seq (cell surface protein profiling)"
+        GSE194122_openproblems_neurips2021_multiome_BMMC_processed.h5ad.gz: "10x multiome"
     assay_sc_obs_key:
     assay_differentiation:
     assay_differentiation_obs_key:

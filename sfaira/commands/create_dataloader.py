@@ -315,7 +315,10 @@ class DataloaderCreator:
               'If these meta data vary across cells in a data set, skip them here and annotate them in the next '
               'section. '
               'These items can also later be modified manually in the .yaml which has the same '
-              'effect as setting them here.')
+              'effect as setting them here. '
+              'A lot of these meta data are ontology constrained.'
+              'You should input symbols, ie. readable words and not IDs here.'
+              'You can look up term symbols here https://www.ebi.ac.uk/ols/index.')
 
         def format_q_uns_key(attr, onto) -> str:
             return f"Dataset-wide {attr} annotation (from {onto})"
@@ -324,6 +327,10 @@ class DataloaderCreator:
             function='text',
             question=format_q_uns_key("assay", "EFO"),
             default='')
+        self.template_attributes.cell_type = sfaira_questionary(
+            function='text',
+            question=format_q_uns_key("cell type", "CL (Cell ontology)"),
+            default='')
         self.template_attributes.development_stage = sfaira_questionary(
             function='text',
             question=format_q_uns_key("developmental stage", "hsapdv for human, mmusdv for mouse"),
@@ -331,7 +338,7 @@ class DataloaderCreator:
         self.template_attributes.disease = sfaira_questionary(
             function='text',
             question=format_q_uns_key("disease", "MONDO"),
-            default='healthy')
+            default='')
         self.template_attributes.ethnicity = sfaira_questionary(
             function='text',
             question=format_q_uns_key("ethnicity", "HANCESTRO for human, skip for non-human"),

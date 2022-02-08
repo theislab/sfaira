@@ -242,6 +242,11 @@ Phase 1 is sub-structured into 2 sub-phases:
     all files associated with the current dataset.
     The CLI tells you how to continue from here, phase 1b) is always necessary, phase 2) is case-dependent and mistakes
     in naming the data folder in phase Pd) are flagged here.
+    As indicated at appropriate places by the CLI, some meta data are ontology constrained.
+    You should input symbols, ie. readable words and not IDs in these places.
+    For example, the `.yaml` entry ``organ`` could be "lung", which is a symbol in the UBERON ontology,
+    whereas ``organ_obs_key`` could be any string pointing to a column in the ``.obs`` in the ``anndata`` instance
+    that is output by ``load()``, where the elements of the column are then mapped to UBERON terms in phase 2.
 
     1a-docker.
         .. code-block::
@@ -649,8 +654,13 @@ See also the anndata_ and scanpy_ IO documentation.
 
     import anndata
     import gzip
-    with gzip.open(fn, "r") as f:
-        adata = anndata.read_h5ad(f)
+    from tempfile import TemporaryDirectory
+    import shutil
+    with TemporaryDirectory() as tmpdir:
+        tmppth = tmpdir + "/decompressed.h5ad"
+        with gzip.open(fn, "rb") as input_f, open(tmppth, "wb") as output_f:
+            shutil.copyfileobj(input_f, output_f)
+        adata = anndata.read_h5ad(tmppth)
 ..
 
 - Read from within a .tar archive (.tar.gz):
