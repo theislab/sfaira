@@ -1,14 +1,13 @@
 import numpy as np
 import os
 import pydoc
+from rich import print
 import shutil
 from typing import Union
 
 from sfaira.data import DatasetGroupDirectoryOriented, DatasetGroup, DatasetBase
 from sfaira.data.utils import read_yaml
 from sfaira.consts.utils import clean_doi
-from sfaira.commands.questionary import sfaira_questionary
-from sfaira.commands.utils import doi_lint
 
 try:
     import sfaira_extension as sfairae
@@ -40,15 +39,6 @@ class DataloaderAnnotater:
         (Note that columns are separated by ",")
         You can also manually check maps here: https://www.ebi.ac.uk/ols/ontologies/cl
         """
-        if not doi:
-            doi = sfaira_questionary(function='text',
-                                     question='DOI:',
-                                     default='10.1000/j.journal.2021.01.001')
-            while not doi_lint(doi):
-                print('[bold red]The entered DOI is malformed!')  # noqa: W605
-                doi = sfaira_questionary(function='text',
-                                         question='DOI:',
-                                         default='10.1000/j.journal.2021.01.001')
         doi_sfaira_repr = clean_doi(doi)
         self._setup_loader(doi_sfaira_repr)
         self._annotate(path_data, path_loader, doi, doi_sfaira_repr)
@@ -94,7 +84,6 @@ class DataloaderAnnotater:
             meta_path=None,
             cache_path=None
         )
-
         return ds
 
     def buffered_load(self, test_data: str, doi_sfaira_repr: str):
@@ -219,5 +208,5 @@ class DataloaderAnnotater:
         self.action_counter += 1
         print(f'[bold orange]{self.action_counter}) Then proceed to finish .yaml file if not already done.')
         self.action_counter += 1
-        print(f'[bold orange]{self.action_counter}) Proceed to run \'sfaira test-dataloader\'')
+        print(f'[bold orange]{self.action_counter}) Then proceed to phase 3 \'sfaira finalize-dataloader\'')
         self.action_counter += 1

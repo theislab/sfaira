@@ -6,7 +6,6 @@ import os
 import re
 from rich import print
 from typing import Union, Dict
-import sys
 
 from sfaira.consts.utils import clean_doi, clean_id_str
 from sfaira.commands.questionary import sfaira_questionary
@@ -123,7 +122,7 @@ class DataloaderCreator:
         Prompts the user for all required attributes for a data loader such as DOI, author, etc.
         """
         author = sfaira_questionary(function='text',
-                                    question='Leading author (e.g.: Einstein, Albert)',
+                                    question='Leading author "Last name, first name" (e.g.: Einstein, Albert)',
                                     default='')
         self.template_attributes.author = author.split(';') if ';' in author else author
         doi = ""
