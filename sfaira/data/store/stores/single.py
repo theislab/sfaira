@@ -1,18 +1,17 @@
 import abc
+import os
+import pickle
+from typing import Dict, List, Tuple, Union
+
 import anndata
 import dask.array
 import dask.dataframe
 import numpy as np
-import os
 import pandas as pd
-import pickle
-import scipy.sparse
-from typing import Dict, List, Tuple, Union
-
 from sfaira.consts import AdataIdsSfaira, OCS
 from sfaira.data.dataloaders.base.utils import is_child, UNS_STRING_META_IN_OBS
-from sfaira.data.store.base import DistributedStoreBase
-from sfaira.data.store.generators import GeneratorAnndata, GeneratorDask, GeneratorSingle
+from sfaira.data.store.carts.single import CartAnndata, CartDask, CartSingle
+from sfaira.data.store.stores.base import StoreBase
 from sfaira.versions.genomes.genomes import GenomeContainer, ReactiveFeatureContainer
 
 """
@@ -40,7 +39,7 @@ def _process_batch_size(batch_size: int, retrival_batch_size: int) -> Tuple[int,
     return batch_size, retrival_batch_size
 
 
-class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
+class StoreSingleFeatureSpace(StoreBase):
 
     """
     Data set group class tailored to data access requirements common in high-performance computing (HPC).
@@ -71,7 +70,7 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
 
     def __init__(self, adata_by_key: Dict[str, anndata.AnnData], indices: Dict[str, np.ndarray],
                  obs_by_key: Union[None, Dict[str, dask.dataframe.DataFrame]] = None, data_source: str = "X"):
-        self.adata_by_key = adata_by_key
+        self.adata_by_key = self.__align_categorical_levels(adata_by_key)
         self.indices = indices
         self.obs_by_key = obs_by_key
         self.ontology_container = OCS
@@ -79,6 +78,34 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
         self._adata_ids_sfaira = AdataIdsSfaira()
         self.data_source = data_source
         self._celltype_universe = None
+
+    @staticmethod
+    def __align_categorical_levels(adata_by_key: Dict[str, anndata.AnnData]) -> Dict[str, anndata.AnnData]:
+        """
+        Align the categorical levels across all datasets.
+
+        :param adata_by_key: Dict[str, anndata.Anndata]
+        :return: Dict[str, anndata.Anndata]
+        """
+        datasets = list(adata_by_key.keys())
+        # get list of all categorical columns - using one dataset is enough as they all have the same columns
+        categorical_columns: List[str] = []
+        for col in adata_by_key[datasets[0]].obs.columns:
+            if isinstance(adata_by_key[datasets[0]].obs[col].dtype, pd.api.types.CategoricalDtype):
+                categorical_columns.append(col)
+        # union categorical levels across datasets for each column
+        categories_columns: Dict[str, pd.Index] = {}
+        for col in categorical_columns:
+            categories_columns[col] = pd.api.types.union_categoricals(
+                [pd.Categorical(v.obs[col].cat.categories) for v in adata_by_key.values()]
+            ).categories
+        # update categorical columns
+        for dataset in datasets:
+            for col, categories in categories_columns.items():
+                adata_by_key[dataset].obs[col] = pd.Categorical(adata_by_key[dataset].obs[col],
+                                                                categories=categories)
+
+        return adata_by_key
 
     @property
     def idx(self) -> np.ndarray:
@@ -272,16 +299,30 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
                 raise ValueError(f"{k} not a valid property of ontology_container object")
 
             values_found_unique_matched = []
+
+            unknown_identifiers = [
+                self._adata_ids_sfaira.unknown_metadata_identifier,
+                self._adata_ids_sfaira.not_a_cell_celltype_identifier
+            ]
+            if v:
+                for unknown_ident in unknown_identifiers:
+                    if unknown_ident in v:
+                        v.remove(unknown_ident)
+                        values_found_unique_matched.append(unknown_ident)
+            elif xv:
+                for unknown_ident in unknown_identifiers:
+                    if unknown_ident in xv:
+                        xv.remove(unknown_ident)
+                        values_found_unique_matched.append(unknown_ident)
+
             for x in pd.unique(values_found):
-                # don't do checking for 'unknown' placeholders
-                if any([
-                    x == self._adata_ids_sfaira.unknown_metadata_identifier,
-                    x == self._adata_ids_sfaira.not_a_cell_celltype_identifier
-                ]):
-                    values_found_unique_matched.append(x)
+                if x in unknown_identifiers:
+                    pass
                 elif v is not None and np.any([is_child(query=x, ontology=ontology, ontology_parent=y) for y in v]):
                     values_found_unique_matched.append(x)
-                elif xv is not None and np.all([not is_child(query=x, ontology=ontology, ontology_parent=y) for y in xv]):
+                elif xv is not None and np.all([
+                    not is_child(query=x, ontology=ontology, ontology_parent=y) for y in xv
+                ]):
                     values_found_unique_matched.append(x)
 
             idx = np.where(np.isin(values_found, values_found_unique_matched))[0]
@@ -443,7 +484,7 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
         return var_idx, batch_size, retrival_batch_size
 
     @abc.abstractmethod
-    def _get_generator(
+    def _get_cart(
             self,
             batch_schedule,
             obs_idx: np.ndarray,
@@ -453,7 +494,7 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
             **kwargs
     ) -> iter:
         """
-        Yields an instance of GeneratorSingle which can emit an iterator over the data defined in the arguments here.
+        Yields an instance of CartSingle which can emit an iterator over the data defined in the arguments here.
 
         :param obs_idx: The observations to emit.
         :param var_idx: The features to emit.
@@ -465,7 +506,7 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
         """
         pass
 
-    def generator(
+    def checkout(
             self,
             idx: Union[np.ndarray, None] = None,
             batch_size: int = 1,
@@ -477,7 +518,7 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
             random_access: bool = False,
             batch_schedule: str = "base",
             **kwargs
-    ) -> GeneratorSingle:
+    ) -> CartSingle:
         """
         Yields an instance of a generator class over observations in the contained data sets.
 
@@ -506,14 +547,14 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
         :param random_access: Whether to fully shuffle observations before batched access takes place. May
             slow down access compared randomized_batch_access and to no randomization.
             Do not use randomized_batch_access and random_access.
-        :param batch_schedule: Re
-            - "base"
-            - "balanced": idx_generator_kwarg need to include:
-                - "balance_obs": .obs column key to balance samples from each data set over.
-                    Note that each data set must contain this column in its .obs table.
-                - "balance_damping": Damping to apply to class weighting induced by balance_obs. The class-wise
-                    wise sampling probabilities become `max(balance_damping, (1. - frequency))`
-            - function: This can be a function that satisfies the interface. It will also receive idx_generator_kwarg.
+        :param batch_schedule: A valid batch schedule name or a class that inherits from BatchDesignBase.
+
+            - "basic": sfaira.data.store.batch_schedule.BatchDesignBasic
+            - "balanced": sfaira.data.store.batch_schedule.BatchDesignBalanced
+            - "blocks": sfaira.data.store.batch_schedule.BatchDesignBlocks
+            - "full":  sfaira.data.store.batch_schedule.BatchDesignFull
+            - class: batch_schedule needs to be a class (not instance), subclassing BatchDesignBase.
+
         :param kwargs: kwargs for idx_generator chosen.
         :return: Generator function which yields batch_size at every invocation.
             The generator returns a tuple of (.X, .obs).
@@ -525,20 +566,10 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
         batch_schedule_kwargs = {"randomized_batch_access": randomized_batch_access,
                                  "random_access": random_access,
                                  "retrieval_batch_size": retrieval_batch_size}
-        kwargs['return_dense'] = return_dense
-        gen = self._get_generator(batch_schedule=batch_schedule, batch_size=batch_size, map_fn=map_fn, obs_idx=idx,
-                                  obs_keys=obs_keys, var_idx=var_idx, **batch_schedule_kwargs, **kwargs)
-        return gen
-
-    @property
-    @abc.abstractmethod
-    def X(self):
-        pass
-
-    @property
-    @abc.abstractmethod
-    def obs(self) -> Union[pd.DataFrame]:
-        pass
+        cart = self._get_cart(batch_schedule=batch_schedule, batch_size=batch_size, map_fn=map_fn, obs_idx=idx,
+                              obs_keys=obs_keys, return_dense=return_dense, var=self.var, var_idx=var_idx,
+                              **batch_schedule_kwargs, **kwargs)
+        return cart
 
     @property
     def var(self) -> Union[pd.DataFrame]:
@@ -551,78 +582,23 @@ class DistributedStoreSingleFeatureSpace(DistributedStoreBase):
             }, index=self.var_names)
         return var
 
-    def adata_slice(self, idx: np.ndarray, as_sparse: bool = True, **kwargs) -> anndata.AnnData:
-        """
-        Assembles a slice of a store as a anndata instance using a generator.
 
-        Avoids loading entire data into memory first to then index. Uses .X_slice and loads var annotation from
-        .genome_container.
-        Note: this slice is a slice based on the subset already selected via previous subsetting on this instance.
-
-        :param idx: Global idx to query from store. These is an array with indices corresponding to a contiuous index
-            along all observations in self.adata_by_key, ordered along a hypothetical concatenation along the keys of
-            self.adata_by_key. If None, all observations are selected.
-        :param as_sparse: Whether to format .X as a sparse matrix.
-        :param kwargs: kwargs to .generator().
-        :return: Slice of data array.
-        """
-        # Note: .obs is already in memory so can be sliced in memory without great disadvantages.
-        return anndata.AnnData(
-            X=self.X_slice(idx=idx, as_sparse=as_sparse, **kwargs),
-            obs=self.obs.iloc[idx, :],
-            var=self.var
-        )
-
-    def X_slice(self, idx: np.ndarray, as_sparse: bool = True, **kwargs) -> Union[np.ndarray, scipy.sparse.csr_matrix]:
-        """
-        Assembles a slice of a store data matrix as a numpy / scipy array using a generator.
-
-        Avoids loading entire data matrix first to then index, ie replaces:
-
-        ``` python
-        # idx = some indices
-        x = store.X
-        x = x[idx,:]
-        ```
-
-        Note: this slice is a slice based on the subset already selected via previous subsetting on this instance.
-
-        :param idx: Global idx to query from store. These is an array with indices corresponding to a contiuous index
-            along all observations in self.adata_by_key, ordered along a hypothetical concatenation along the keys of
-            self.adata_by_key. If None, all observations are selected.
-        :param as_sparse: Whether to return a sparse matrix.
-        :param kwargs: kwargs to .generator().
-        :return: Slice of data array.
-        """
-        batch_size = min(len(idx), 128)
-
-        def map_fn(x_, obs):
-            return (x_, ),
-
-        g = self.generator(idx=idx, retrieval_batch_size=batch_size, return_dense=True, random_access=False,
-                           randomized_batch_access=False, map_fn=map_fn, **kwargs)
-        shape = (idx.shape[0], self.n_vars)
-        if as_sparse:
-            x = scipy.sparse.csr_matrix(np.zeros(shape))
-        else:
-            x = np.empty(shape)
-        counter = 0
-        for x_batch, in g.iterator():
-            x_batch = x_batch[0]
-            batch_len = x_batch.shape[0]
-            x[counter:(counter + batch_len), :] = x_batch
-            counter += batch_len
-        return x
-
-
-class DistributedStoreAnndata(DistributedStoreSingleFeatureSpace):
+class StoreAnndata(StoreSingleFeatureSpace):
 
     in_memory: bool
 
-    def __init__(self, in_memory: bool, **kwargs):
-        super(DistributedStoreAnndata, self).__init__(**kwargs)
+    def __init__(self, in_memory: bool = True, **kwargs):
+        if "indices" not in kwargs.keys():  # Select all cells if no selection performed via indices.
+            assert "adata_by_key" in kwargs.keys(), "supply adata_by_key in constructor call to DistributedStoreAnndata"
+            kwargs["indices"] = dict([(k, np.arange(0, v.n_obs)) for k, v in kwargs["adata_by_key"].items()])
+        super(StoreAnndata, self).__init__(**kwargs)
         self._x_as_dask = False
         self.in_memory = in_memory
+
+    def _get_cart(self, return_dense: bool = False, **kwargs) -> iter:
+        return CartAnndata(adata_dict=self._adata_sliced, return_dense=return_dense, **kwargs)
+
+    # Methods that are specific to this child class:
 
     @property
     def _adata_sliced(self) -> Dict[str, anndata.AnnData]:
@@ -631,66 +607,22 @@ class DistributedStoreAnndata(DistributedStoreSingleFeatureSpace):
         """
         return dict([(k, self._adata_by_key[k][v, :]) for k, v in self.indices.items()])
 
-    @property
-    def indices_global(self) -> dict:
-        """
-        Increasing indices across data sets which can be concatenated into a single index vector with unique entries
-        for cells.
 
-        E.g.: For two data sets of 10 cells each, the return value would be {A:[0..9], B:[10..19]}.
-        Note that this operates over pre-selected indices, if this store was subsetted before resulting in only the
-        second half B to be kept, the return value would be {A:[0..9], B:[10..14]}, where .indices would be
-        {A:[0..9], B:[15..19]}.
-        """
-        counter = 0
-        indices = {}
-        for k, v in self.indices.items():
-            indices[k] = np.arange(counter, counter + len(v))
-            counter += len(v)
-        return indices
-
-    @property
-    def X(self):
-        if self.in_memory:
-            assert np.all([isinstance(v.X, scipy.sparse.spmatrix) for v in self.adata_by_key.values()])
-            return scipy.sparse.vstack([v.X for v in self.adata_by_key.values()])
-        else:
-            raise NotImplementedError("this operation is not efficient with backed objects")
-
-    @property
-    def obs(self) -> Union[pd.DataFrame]:
-        """
-        Assemble .obs table of subset of selected data.
-
-        :return: .obs data frame.
-        """
-        return pd.concat([
-            self._adata_by_key[k].obs.iloc[v, :]
-            for k, v in self.indices.items()
-        ], axis=0, join="inner", ignore_index=False, copy=False)
-
-    def _get_generator(self, return_dense: bool = False, **kwargs) -> iter:
-        idx_dict_global = dict([(k1, (v1, v2))
-                                for (k1, v1), v2 in zip(self.indices_global.items(), self.indices.values())])
-        return GeneratorAnndata(adata_dict=self._adata_sliced, idx_dict_global=idx_dict_global,
-                                return_dense=return_dense, **kwargs)
-
-
-class DistributedStoreDao(DistributedStoreSingleFeatureSpace):
+class StoreDao(StoreSingleFeatureSpace):
 
     _dataset_weights: Union[None, Dict[str, float]]
-    _x: Union[None, dask.array.Array]
+    _x_dask_cache: Union[None, dask.array.Array]
     _x_by_key: Union[None, dask.array.Array]
 
     def __init__(self, x_by_key, **kwargs):
-        super(DistributedStoreDao, self).__init__(**kwargs)
-        self._x = None
+        super(StoreDao, self).__init__(**kwargs)
         self._x_as_dask = True
         self._x_by_key = x_by_key
+        self._x_dask_cache = None
 
     @property
     def indices(self) -> Dict[str, np.ndarray]:
-        return super(DistributedStoreDao, self).indices
+        return super(StoreDao, self).indices
 
     @indices.setter
     def indices(self, x: Dict[str, np.ndarray]):
@@ -704,7 +636,7 @@ class DistributedStoreDao(DistributedStoreSingleFeatureSpace):
             3) checks that indces are not duplicated
             4) checks that indices are sorted
         """
-        self._x = None
+        self._x_dask_cache = None
         for k, v in x.items():
             assert k in self._adata_by_key.keys(), f"did not find key {k}"
             assert np.max(v) < self._adata_by_key[k].n_obs, f"found index for key {k} that exceeded data set size"
@@ -720,28 +652,36 @@ class DistributedStoreDao(DistributedStoreSingleFeatureSpace):
         # Accesses _x_by_key rather than _adata_by_key as long as the dask arrays are stored there.
         return dict([(k, self._x_by_key[k][v, :]) for k, v in self.indices.items()])
 
+    def _get_cart(self, **kwargs) -> CartDask:
+        return CartDask(x=self._x, obs=self._obs, **kwargs)
+
+    # Methods that are specific to this child class:
+
     @property
-    def X(self) -> dask.array.Array:
+    def _x(self) -> dask.array.Array:
         """
         One dask array of all cells.
 
         Requires feature dimension to be shared.
         """
-        if self._x is None:
+        if self._x_dask_cache is None:
             if self.data_source == "X":
-                # TODO avoiding anndata .X here
-                # assert np.all([isinstance(self._adata_by_key[k].X, dask.array.Array) for k in self.indices.keys()])
                 assert np.all([isinstance(self._x_by_key[k], dask.array.Array) for k in self.indices.keys()])
-                self._x = dask.optimize(dask.array.vstack([
-                    self._x_by_key[k][v, :]
-                    for k, v in self.indices.items()
-                ]))[0]
+                arrs_to_concat = []
+                for k, v in self.indices.items():
+                    if self._x_by_key[k].shape[0] == len(v):
+                        arrs_to_concat.append(self._x_by_key[k])
+                    elif len(v) == 0:
+                        continue
+                    else:
+                        arrs_to_concat.append(self._x_by_key[k][v, :])
+                self._x_dask_cache = dask.optimize(dask.array.vstack(arrs_to_concat))[0]
             else:
                 raise ValueError(f"Did not recognise data_source={self.data_source}.")
-        return self._x
+        return self._x_dask_cache
 
     @property
-    def obs(self) -> pd.DataFrame:
+    def _obs(self) -> pd.DataFrame:
         """
         Assemble .obs table of subset of selected data.
 
@@ -749,11 +689,8 @@ class DistributedStoreDao(DistributedStoreSingleFeatureSpace):
 
         :return: .obs data frame.
         """
-        # TODO Using loc indexing here instead of iloc, this might be faster on larger tables?
+
         return pd.concat([
             self.adata_by_key[k].obs.loc[self.adata_by_key[k].obs.index[v], :]
             for k, v in self.indices.items()
         ], axis=0, join="inner", ignore_index=True, copy=False)
-
-    def _get_generator(self, **kwargs) -> GeneratorDask:
-        return GeneratorDask(x=self.X, obs=self.obs, **kwargs)

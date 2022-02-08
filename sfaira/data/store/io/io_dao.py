@@ -11,6 +11,12 @@ from typing import List, Tuple, Union
 import zarr
 
 
+def _invert_permutation(p: np.ndarray):
+    s = np.empty_like(p)
+    s[p] = np.arange(p.size)
+    return s
+
+
 def _buffered_path(path_base, path, fn):
     path_base = os.path.join(path_base, path)
     if not os.path.exists(path_base):
@@ -37,7 +43,7 @@ def path_x(path):
 
 
 def write_dao(store: Union[str, Path], adata: anndata.AnnData, chunks: Union[bool, Tuple[int, int]],
-              compression_kwargs: dict):
+              compression_kwargs: dict, shuffle_data: bool = False):
     """
     Writes a distributed access optimised ("dao") store of a dataset based on an AnnData instance.
 
@@ -55,14 +61,22 @@ def write_dao(store: Union[str, Path], adata: anndata.AnnData, chunks: Union[boo
     :param adata: Anndata to save.
     :param chunks: Chunking of .X for zarr.
     :param compression_kwargs: Compression kwargs for zarr.
+    :param shuffle_data: If True -> shuffle ordering of cells in dataset before writing store to disk
     """
     # Write numeric matrix as zarr array:
     f = zarr.open(store=path_x(store), mode="w")
+    if shuffle_data:
+        perm = np.arange(0, adata.X.shape[0])
+        np.random.shuffle(perm)
+        adata.obs['permutation_original_data'] = _invert_permutation(perm)
+    else:
+        perm = np.arange(0, adata.X.shape[0])
+
     # If adata.X is already a dense array in memory, it can be safely written fully to a zarr array. Otherwise:
     # Create empty store and then write in dense chunks to avoid having to load entire adata.X into a dense array in
     # memory.
     if isinstance(adata.X, np.ndarray) or isinstance(adata.X, np.matrix):
-        f.create_dataset("X", data=adata.X.todense(), chunks=chunks, dtype=adata.X.dtype, **compression_kwargs)
+        f.create_dataset("X", data=np.array(adata.X)[perm], chunks=chunks, dtype=adata.X.dtype, **compression_kwargs)
     elif isinstance(adata.X, scipy.sparse.csr_matrix):
         # Initialise empty array
         dtype = adata.X.data.dtype
@@ -71,15 +85,26 @@ def write_dao(store: Union[str, Path], adata: anndata.AnnData, chunks: Union[boo
         batch_size = 128  # Use a batch size that guarantees that the dense batch fits easily into memory.
         n_batches = shape[0] // batch_size + int(shape[0] % batch_size > 0)
         batches = [(i * batch_size, min(i * batch_size + batch_size, shape[0])) for i in range(n_batches)]
+        x_permuted = adata.X[perm]
         for s, e in batches:
-            f["X"][s:e, :] = np.asarray(adata.X[s:e, :].todense(), dtype=dtype)
+            f["X"][s:e, :] = np.asarray(x_permuted[s:e, :].todense(), dtype=dtype)
     else:
         raise ValueError(f"did not recognise array format {type(adata.X)}")
     # Write .uns into pickle:
     with open(path_uns(store), "wb") as f:
-        pickle.dump(obj=adata.uns, file=f)
+        # convert to dict to get rid of anndata OverloadedDict
+        pickle.dump(obj=dict(adata.uns), file=f)
     # Write .obs and .var as a separate file as this can be easily interfaced with DataFrames.
-    adata.obs.to_parquet(path=path_obs(store), engine='pyarrow', compression='snappy', index=None)
+    (
+        adata
+        .obs.iloc[perm]
+        # make sure all columns are dtype=str and are converted to categorical
+        # this has to change if we have numeric values in obs
+        # exclude 'perumtation_original_data' column from this as it's numeric
+        .astype({col: str for col in adata.obs.columns if col not in ['permutation_original_data']})
+        .astype({col: 'category' for col in adata.obs.columns if col not in ['permutation_original_data']})
+        .to_parquet(path=path_obs(store), engine='pyarrow', compression='snappy', index=None)
+    )
     adata.var.to_parquet(path=path_var(store), engine='pyarrow', compression='snappy', index=None)
 
 
@@ -101,6 +126,7 @@ def read_dao(store: Union[str, Path], use_dask: bool = True, columns: Union[None
     :param use_dask: Whether to use lazy dask arrays where appropriate.
     :param columns: Which columns to read into the obs copy in the output, see pandas.read_parquet().
     :param obs_separate: Whether to return .obs as a separate return value or in the returned AnnData.
+    :param x_separate: Whether to return .X as a separate return value or in the returned AnnData.
     :return: Tuple of:
         - AnnData with .X as dask array.
         - obs table separately as dataframe
@@ -118,10 +144,6 @@ def read_dao(store: Union[str, Path], use_dask: bool = True, columns: Union[None
     # Read tables:
     obs = pd.read_parquet(path_obs(store), columns=columns, engine="pyarrow")
     var = pd.read_parquet(path_var(store), engine="pyarrow")
-    # Convert to categorical variables where possible to save memory:
-    # for k, dtype in zip(list(obs.columns), obs.dtypes):
-    #    if dtype == "object":
-    #        obs[k] = obs[k].astype(dtype="category")
     d = {"var": var, "uns": uns}
     # Assemble AnnData without obs to save memory:
     adata = anndata.AnnData(**d, shape=x.shape)

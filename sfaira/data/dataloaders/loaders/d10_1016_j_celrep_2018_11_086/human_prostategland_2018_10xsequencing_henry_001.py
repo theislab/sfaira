@@ -22,7 +22,7 @@ class Dataset(DatasetBase):
         self.author = "Henry"
         self.disease = "healthy"
         self.doi_journal = "10.1016/j.celrep.2018.11.086"
-        self.normalization = "raw"
+        self.layer_counts = "X"
         self.sample_source = "primary_tissue"
         self.state_exact = "healthy"
         self.organ = "prostate gland"
@@ -30,7 +30,8 @@ class Dataset(DatasetBase):
         self.primary_data = True
         self.year = 2018
 
-        self.gene_id_symbols_var_key = "index"
+        self.feature_symbol_var_key = "index"
+        self.feature_type = "rna"
 
         self.cell_type_obs_key = "CellType"
 

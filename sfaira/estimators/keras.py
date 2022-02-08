@@ -2,6 +2,8 @@ import abc
 import anndata
 import hashlib
 import numpy as np
+import pandas as pd
+
 try:
     import tensorflow as tf
 except ImportError:
@@ -12,10 +14,10 @@ import warnings
 from tqdm import tqdm
 
 from sfaira.consts import AdataIdsSfaira, OCS, AdataIds
-from sfaira.data.store.base import DistributedStoreBase
-from sfaira.data.store.generators import GeneratorSingle
-from sfaira.data.store.multi_store import DistributedStoresAnndata
-from sfaira.data.store.single_store import DistributedStoreSingleFeatureSpace
+from sfaira.data.store.stores.base import StoreBase
+from sfaira.data.store.carts.single import CartSingle
+from sfaira.data.store.stores.multi import StoresAnndata
+from sfaira.data.store.stores.single import StoreSingleFeatureSpace
 from sfaira.models import BasicModelKeras
 from sfaira.models.celltype import BasicModelKerasCelltype
 from sfaira.models.embedding import BasicModelKerasEmbedding
@@ -35,7 +37,7 @@ def prepare_sf(x):
     return sf
 
 
-def split_idx(data: DistributedStoreSingleFeatureSpace, test_split, val_split):
+def split_idx(data: StoreSingleFeatureSpace, test_split, val_split):
     """
     Split training and evaluation data.
     """
@@ -50,8 +52,16 @@ def split_idx(data: DistributedStoreSingleFeatureSpace, test_split, val_split):
     elif isinstance(test_split, dict):
         in_test = np.ones((data.n_obs,), dtype=int) == 1
         for k, v in test_split.items():
-            if isinstance(v, bool) or isinstance(v, int) or isinstance(v, list):
+            if isinstance(v, bool) or isinstance(v, int) or isinstance(v, str):
                 v = [v]
+            elif isinstance(v, tuple):
+                v = list(v)
+            elif isinstance(v, np.ndarray):
+                v = v.tolist()
+            if not isinstance(v, list):
+                raise ValueError(f"conversion of v {v} to list failed")
+            if np.any([isinstance(vi, list) or isinstance(vi, tuple) or isinstance(vi, np.ndarray) for vi in v]):
+                raise ValueError(f"found nested list v {v}, only use bool, scalar or string elements in v.")
             idx = data.get_subset_idx(attr_key=k, values=v, excluded_values=None)
             # Build continuous vector across all sliced data sets and establish which observations are kept
             # in subset.
@@ -155,7 +165,7 @@ class EstimatorKeras:
     """
     Estimator base class for keras models.
     """
-    data: DistributedStoreSingleFeatureSpace
+    data: StoreSingleFeatureSpace
     model: Union[BasicModelKeras, None]
     topology_container: TopologyContainer
     model_id: Union[str, None]
@@ -170,7 +180,7 @@ class EstimatorKeras:
 
     def __init__(
             self,
-            data: Union[anndata.AnnData, List[anndata.AnnData], DistributedStoreSingleFeatureSpace],
+            data: Union[anndata.AnnData, List[anndata.AnnData], StoreSingleFeatureSpace],
             model_dir: Union[str, None],
             model_class: str,
             model_id: Union[str, None],
@@ -185,17 +195,17 @@ class EstimatorKeras:
         self.model_class = model_class
         self.topology_container = model_topology
         if isinstance(data, anndata.AnnData):
-            data = DistributedStoresAnndata(adatas=data).stores[self.organism]
+            data = StoresAnndata(adatas=data).stores[self.organism]
         if isinstance(data, list) or isinstance(data, tuple):
             for x in data:
                 assert isinstance(x, anndata.AnnData), f"found element in list that was not anndata but {type(x)}"
-            data = DistributedStoresAnndata(adatas=data).stores[self.organism]
+            data = StoresAnndata(adatas=data).stores[self.organism]
         self.data = data
         # Prepare store with genome container sub-setting:
         # This class is tailored for DistributedStoreSingleFeatureSpace but we test for the base class here in the
         # constructor so that genome_container can also be set in inheriting classes that may be centred around
         # different child classes of DistributedStoreBase.
-        if isinstance(self.data, DistributedStoreBase):
+        if isinstance(self.data, StoreBase):
             self.data.genome_container = self.topology_container.gc
 
         self.history = None
@@ -265,7 +275,8 @@ class EstimatorKeras:
             else:
                 raise ValueError('the weightsfile could not be found')
 
-        self._assert_md5_sum(fn, self.md5)
+        if self.md5 is not None:
+            self._assert_md5_sum(fn, self.md5)
         if fn.endswith(".data-00000-of-00001"):
             self.model.training_model.load_weights(".".join(fn.split(".")[:-1]))
         else:
@@ -303,7 +314,7 @@ class EstimatorKeras:
             raise ValueError("md5 of %s did not match expectation" % fn)
 
     @abc.abstractmethod
-    def _get_generator(self, **kwargs) -> GeneratorSingle:
+    def _get_cart(self, **kwargs) -> CartSingle:
         """
         Yield a generator based on which a tf dataset can be built.
         """
@@ -322,8 +333,8 @@ class EstimatorKeras:
             "prefetch": prefetch,
             "shuffle_buffer_size": 0,
         }
-        train_gen = self._get_generator(idx=idx, mode=mode, retrieval_batch_size=128,
-                                        randomized_batch_access=False)
+        train_gen = self._get_cart(idx=idx, mode=mode, retrieval_batch_size=128,
+                                   randomized_batch_access=False)
         train_tf_dataset_kwargs = self._tf_dataset_kwargs(mode=mode)
         train_dataset = train_gen.adaptor(generator_type="tensorflow", **train_tf_dataset_kwargs)
         train_dataset = process_tf_dataset(dataset=train_dataset, mode=mode, **tf_kwargs)
@@ -460,13 +471,13 @@ class EstimatorKeras:
 
         tf_kwargs = {"batch_size": batch_size, "cache": cache_full, "prefetch": prefetch,
                      "shuffle_buffer_size": min(shuffle_buffer_size, len(self.idx_train))}
-        train_gen = self._get_generator(idx=self.idx_train, mode='train', retrieval_batch_size=retrieval_batch_size,
-                                        randomized_batch_access=randomized_batch_access, weighted=weighted)
+        train_gen = self._get_cart(idx=self.idx_train, mode='train', retrieval_batch_size=retrieval_batch_size,
+                                   randomized_batch_access=randomized_batch_access, weighted=weighted)
         train_tf_dataset_kwargs = self._tf_dataset_kwargs(mode="train")
         train_dataset = train_gen.adaptor(generator_type="tensorflow", **train_tf_dataset_kwargs)
         train_dataset = process_tf_dataset(dataset=train_dataset, mode="train", **tf_kwargs)
-        val_gen = self._get_generator(idx=self.idx_train, mode='train', retrieval_batch_size=retrieval_batch_size,
-                                      randomized_batch_access=randomized_batch_access, weighted=weighted)
+        val_gen = self._get_cart(idx=self.idx_train, mode='train', retrieval_batch_size=retrieval_batch_size,
+                                 randomized_batch_access=randomized_batch_access, weighted=weighted)
         val_tf_dataset_kwargs = self._tf_dataset_kwargs(mode="train_val")
         val_dataset = val_gen.adaptor(generator_type="tensorflow", **val_tf_dataset_kwargs)
         val_dataset = process_tf_dataset(dataset=val_dataset, mode="train", **tf_kwargs)
@@ -486,19 +497,19 @@ class EstimatorKeras:
 
     @property
     def using_store(self) -> bool:
-        return isinstance(self.data, DistributedStoreSingleFeatureSpace)
+        return isinstance(self.data, StoreSingleFeatureSpace)
 
     @property
-    def obs_train(self):
-        return self.data.obs.iloc[self.idx_train, :]
+    def obs_train(self) -> pd.DataFrame:
+        return self.data.checkout(idx=self.idx_train).obs
 
     @property
-    def obs_eval(self):
-        return self.data.obs.iloc[self.idx_eval, :]
+    def obs_eval(self) -> pd.DataFrame:
+        return self.data.checkout(idx=self.idx_eval).obs
 
     @property
-    def obs_test(self):
-        return self.data.obs.iloc[self.idx_test, :]
+    def obs_test(self) -> pd.DataFrame:
+        return self.data.checkout(idx=self.idx_test).obs
 
 
 class EstimatorKerasEmbedding(EstimatorKeras):
@@ -510,7 +521,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
 
     def __init__(
             self,
-            data: Union[anndata.AnnData, np.ndarray, DistributedStoreSingleFeatureSpace],
+            data: Union[anndata.AnnData, np.ndarray, StoreSingleFeatureSpace],
             model_dir: Union[str, None],
             model_id: Union[str, None],
             model_topology: TopologyContainer,
@@ -572,7 +583,7 @@ class EstimatorKerasEmbedding(EstimatorKeras):
             output_shapes = (output_shapes_x, (self.data.n_vars, ))
         return {"output_types": output_types, "output_shapes": output_shapes}
 
-    def _get_generator(
+    def _get_cart(
             self,
             idx: Union[np.ndarray, None],
             mode: str,
@@ -595,9 +606,9 @@ class EstimatorKerasEmbedding(EstimatorKeras):
                 output = output_x, (x_sample, )
             return output
 
-        g = self.data.generator(idx=idx, retrieval_batch_size=retrieval_batch_size, obs_keys=[], map_fn=map_fn,
-                                return_dense=True, randomized_batch_access=randomized_batch_access,
-                                random_access=False)
+        g = self.data.checkout(idx=idx, retrieval_batch_size=retrieval_batch_size, obs_keys=[], map_fn=map_fn,
+                               return_dense=True, randomized_batch_access=randomized_batch_access,
+                               random_access=False)
         return g
 
     def _get_loss(self):
@@ -793,7 +804,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
 
     def __init__(
             self,
-            data: Union[anndata.AnnData, DistributedStoreSingleFeatureSpace],
+            data: Union[anndata.AnnData, StoreSingleFeatureSpace],
             model_dir: Union[str, None],
             model_id: Union[str, None],
             model_topology: TopologyContainer,
@@ -931,7 +942,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             output_shapes = (output_shapes_x, tf.TensorShape([self.ntypes]))
         return {"output_types": output_types, "output_shapes": output_shapes}
 
-    def _get_generator(
+    def _get_cart(
             self,
             idx: Union[np.ndarray, None],
             mode: str,
@@ -939,7 +950,7 @@ class EstimatorKerasCelltype(EstimatorKeras):
             randomized_batch_access: bool,
             weighted: bool = False,
             **kwargs
-    ) -> GeneratorSingle:
+    ) -> CartSingle:
         # Define constants used by map_fn in outer name space so that they are not created for each sample.
         if weighted:
             raise ValueError("using weights with store is not supported yet")
@@ -964,10 +975,10 @@ class EstimatorKerasCelltype(EstimatorKeras):
                 output = output_x,
             return output
 
-        g = self.data.generator(idx=idx, retrieval_batch_size=retrieval_batch_size,
-                                obs_keys=[self._adata_ids.cell_type + self._adata_ids.onto_id_suffix], map_fn=map_fn,
-                                return_dense=True, randomized_batch_access=randomized_batch_access,
-                                random_access=False)
+        g = self.data.checkout(idx=idx, retrieval_batch_size=retrieval_batch_size,
+                               obs_keys=[self._adata_ids.cell_type + self._adata_ids.onto_id_suffix], map_fn=map_fn,
+                               return_dense=True, randomized_batch_access=randomized_batch_access,
+                               random_access=False)
         return g
 
     def _get_loss(self):

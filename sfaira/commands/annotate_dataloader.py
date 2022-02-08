@@ -1,13 +1,13 @@
+import numpy as np
 import os
 import pydoc
+from rich import print
 import shutil
-import re
 from typing import Union
 
 from sfaira.data import DatasetGroupDirectoryOriented, DatasetGroup, DatasetBase
 from sfaira.data.utils import read_yaml
 from sfaira.consts.utils import clean_doi
-from sfaira.commands.questionary import sfaira_questionary
 
 try:
     import sfaira_extension as sfairae
@@ -39,15 +39,6 @@ class DataloaderAnnotater:
         (Note that columns are separated by ",")
         You can also manually check maps here: https://www.ebi.ac.uk/ols/ontologies/cl
         """
-        if not doi:
-            doi = sfaira_questionary(function='text',
-                                     question='DOI:',
-                                     default='10.1000/j.journal.2021.01.001')
-            while not re.match(r'\b10\.\d+/[\w.]+\b', doi):
-                print('[bold red]The entered DOI is malformed!')  # noqa: W605
-                doi = sfaira_questionary(function='text',
-                                         question='DOI:',
-                                         default='10.1000/j.journal.2021.01.001')
         doi_sfaira_repr = clean_doi(doi)
         self._setup_loader(doi_sfaira_repr)
         self._annotate(path_data, path_loader, doi, doi_sfaira_repr)
@@ -57,10 +48,10 @@ class DataloaderAnnotater:
         Define the file names, loader paths and base paths of loader collections for sfaira and sfaira_extension
         """
         dir_loader_sfaira = "sfaira.data.dataloaders.loaders."
-        file_path_sfaira = "/" + "/".join(pydoc.locate(dir_loader_sfaira + "FILE_PATH").split("/")[:-1])
+        file_path_sfaira = os.sep + os.sep.join(pydoc.locate(dir_loader_sfaira + "FILE_PATH").split(os.sep)[:-1])
         if sfairae is not None:
             dir_loader_sfairae = "sfaira_extension.data.dataloaders.loaders."
-            file_path_sfairae = "/" + "/".join(pydoc.locate(dir_loader_sfairae + "FILE_PATH").split("/")[:-1])
+            file_path_sfairae = os.sep + os.sep.join(pydoc.locate(dir_loader_sfairae + "FILE_PATH").split(os.sep)[:-1])
         else:
             file_path_sfairae = None
         # Check if loader name is a directory either in sfaira or sfaira_extension loader collections:
@@ -93,7 +84,6 @@ class DataloaderAnnotater:
             meta_path=None,
             cache_path=None
         )
-
         return ds
 
     def buffered_load(self, test_data: str, doi_sfaira_repr: str):
@@ -104,8 +94,6 @@ class DataloaderAnnotater:
                              f"{test_data}, only found {os.listdir(test_data)}")
         ds = self._get_ds(test_data=test_data)
         ds.load(
-            remove_gene_version=False,
-            match_to_reference=None,
             load_raw=True,  # Force raw load so non confound future tests by data loader bugs in previous versions.
             allow_caching=False,
             verbose=3
@@ -118,7 +106,7 @@ class DataloaderAnnotater:
         ds = self.buffered_load(test_data=test_data, doi_sfaira_repr=doi_sfaira_repr)
         # Create cell type conversion table:
         cwd = os.path.dirname(self.file_path)
-        dataset_module = str(cwd.split("/")[-1])
+        dataset_module = str(cwd.split(os.sep)[-1])
         # Group data sets by file module:
         # Note that if we were not grouping the cell type map .tsv files by file module, we could directly call
         # write_ontology_class_map on the ds.
@@ -190,12 +178,35 @@ class DataloaderAnnotater:
                     dsg_f = DatasetGroup(datasets=dict([(x.id, ds.datasets[x.id]) for x in datasets_f]))
                     # III) Write this directly into the sfaira clone so that it can be committed via git.
                     # TODO any errors not to be caught here?
-                    doi_sfaira_repr = f'd{doi.translate({ord(c): "_" for c in r"!@#$%^&*()[]/{};:,.<>?|`~-=_+"})}'
-                    fn_tsv = os.path.join(path, doi_sfaira_repr, f"{file_module}.tsv")
-                    dsg_f.write_ontology_class_map(
+                    doi_sfaira_repr = clean_doi(doi)
+                    fn_tsv = os.path.join(path, doi_sfaira_repr, f"{file_module}")
+                    # Define .tsvs to write:
+                    attrs = [
+                        k for k in dsg_f._adata_ids.ontology_constrained
+                        if np.any([getattr(v, k + "_obs_key") is not None for v in dsg_f.datasets.values()])
+                    ]
+                    dsg_f.write_ontology_class_maps(
                         fn=fn_tsv,
+                        attrs=attrs,
                         protected_writing=True,
                         n_suggest=4,
                     )
                     tsvs_written.append(fn_tsv)
-        print(f"Completed annotation. Wrote {len(tsvs_written)} files:\n" + "\n".join(tsvs_written))
+        print("[bold blue]Completed annotation.")
+        print('[bold orange]Sfaira butler: "Up next:"')
+        self.action_counter = 1
+        tsv_file_overview = "\n".join(tsvs_written)
+        print(f'[bold orange]{self.action_counter}) Proceed to chose ontology symbols for each free text label in the '
+              f'tsv files:\n{tsv_file_overview}\n'
+              'Each tsv has two columns: free text labels found in the data on the left and suggestions on the right.'
+              'Each suggested symbol lies between two : characters.\n'
+              ': is a separator between suggested symbols and :|||: between symbol groups that were found via different'
+              'search strategies.\n'
+              'Take care to not remove the \\t separators in the table.\n'
+              'You only need to finish the second column now - the third column with ontology IDs is added '
+              'automatically to this table in phase 3 (finalize).')
+        self.action_counter += 1
+        print(f'[bold orange]{self.action_counter}) Then proceed to finish .yaml file if not already done.')
+        self.action_counter += 1
+        print(f'[bold orange]{self.action_counter}) Then proceed to phase 3 \'sfaira finalize-dataloader\'')
+        self.action_counter += 1
