@@ -307,6 +307,7 @@ def _prepare_ontology_map_fuzzy(
         - List with boolean indicator whether or not this output should be reported.
     """
     from fuzzywuzzy import fuzz
+    source = [str(x) for x in source]
     matches = []
     nodes = onto.nodes
     nodes = [x for x in nodes if x[1]["name"] not in omit_target_list]

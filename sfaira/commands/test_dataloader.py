@@ -1,10 +1,10 @@
 import logging
 import os
+from rich import print
 import shutil
 import pydoc
 
 from rich import print
-from sfaira.commands.questionary import sfaira_questionary
 from sfaira.consts.utils import clean_doi
 from sfaira.data import DatasetGroupDirectoryOriented
 
