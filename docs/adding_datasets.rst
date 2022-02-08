@@ -682,6 +682,8 @@ Dataset structure meta data are in the section `dataset_structure` in the `.yaml
     If there are multiple data files which can be covered by one `load()` function and `.yaml` file because they are
     structured similarly, these can identified here.
     See also section `Loading multiple files of similar structure`.
+    You can simply hardcode a file name in the ``load()`` function and skip defining it here
+    if you are writing a single file loader.
 
 .. _sec-dataset-wise:
 Dataset-wise
@@ -880,27 +882,45 @@ The following items are only relevant for spatially resolved data, e.g. spot tra
 The following items are only relevant for V(D)J reconstruction data, e.g. TCR or BCR sequencing in single cells.
 These meta data items are described in the AIRR_ project, search the this link for the element in question without
 the prefixed "vdj\_".
+These 10 meta data items describe chains (or loci).
+In accordance with the corresponding scirpy defaults_, we allow for up to two loci per cell.
+In T cells, this correspond to two VJ loci (TRA) and two VDJ loci (TRB).
+You can set the prefix of the column of each of the four loci below.
+In total, these 10+4 meta data queries in sfaira describe 4*10 columns in ``.obs`` after ``.load()``.
+Note that for this to work, you need to stick to the naming convention ``PREFIX_SUFFIX``.
+We recommend that you use ``scirpy.io`` functions for reading the VDJ data in your ``load()``
+to use the default meta data keys suggested by the CLI and to guarantee that this naming convention is obeyed.
 
-- vdj_c_call  [string]
-    C gene.
-- vdj_consensus_count  [string]
-    Number of reads contributing to consensus.
-- vdj_d_call  [string]
-    D gene.
-- vdj_duplicate_count  [string]
-    Number of duplicate UMIs.
-- vdj_j_call  [string]
-    J gene.
-- vdj_junction  [string]
-    Junction nt sequence.
-- vdj_junction_aa  [string]
-    Junction aa sequence.
-- vdj_locus  [string]
-    Gene locus, i.e IGH, IGK, or IGL for BCR data and TRA, TRB, TRD, or TRG for TCR data.
-- vdj_productive  [string]
-    Whether the V(D)J gene is productive.
-- vdj_v_call  [string]
-    V gene.
+- vdj_vj_1_obs_key_prefix
+    Prefix of key of columns corresponding to first VJ gene.
+- vdj_vj_2_obs_key_prefix
+    Prefix of key of columns corresponding to second VJ gene.
+- vdj_vdj_1_obs_key_prefix
+    Prefix of key of columns corresponding to first VDJ gene.
+- vdj_vdj_2_obs_key_prefix
+    Prefix of key of columns corresponding to second VDJ gene.
+- vdj_c_call_obs_key_suffix
+    Suffix of key of columns corresponding to C gene.
+- vdj_consensus_count_obs_key_suffix
+    Suffix of key of columns corresponding to number of reads contributing to consensus.
+- vdj_d_call_obs_key_suffix
+    Suffix of key of columns corresponding to D gene.
+- vdj_duplicate_count_obs_key_suffix
+    Suffix of key of columns corresponding to number of duplicate UMIs.
+- vdj_j_call_obs_key_suffix
+    Suffix of key of columns corresponding to J gene.
+- vdj_junction_obs_key_suffix
+    Suffix of key of columns corresponding to junction nt sequence.
+- vdj_junction_aa_obs_key_suffix
+    Suffix of key of columns corresponding to junction aa sequence.
+- vdj_locus_obs_key_suffix
+    Suffix of key of columns corresponding to gene locus,
+    i.e IGH, IGK, or IGL for BCR data and TRA, TRB, TRD, or TRG for TCR data.
+- vdj_productive_obs_key_suffix
+    Suffix of key of columns corresponding to locus productivity:
+    whether the V(D)J gene is productive.
+- vdj_v_call_obs_key_suffix
+    Suffix of key of columns corresponding to V gene.
 
 Meta
 ~~~~~

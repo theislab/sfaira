@@ -83,8 +83,9 @@ class DatasetBase(abc.ABC):
     _sample_source: Union[None, str]
     _state_exact: Union[None, str]
     _title: Union[None, str]
-    _bio_sample: Union[None, str]
     _year: Union[None, int]
+    gm: Union[None, str]
+    treatment: Union[None, str]
 
     _bio_sample_obs_key: Union[None, str]
     _tech_sample_obs_key: Union[None, str]
@@ -95,31 +96,37 @@ class DatasetBase(abc.ABC):
     development_stage_obs_key: Union[None, str]
     disease_obs_key: Union[None, str]
     ethnicity_obs_key: Union[None, str]
+    gm_obs_key: Union[None, str]
     individual_obs_key: Union[None, str]
     organ_obs_key: Union[None, str]
     organism_obs_key: Union[None, str]
     sample_source_obs_key: Union[None, str]
     sex_obs_key: Union[None, str]
     state_exact_obs_key: Union[None, str]
+    treatment_obs_key: Union[None, str]
 
     feature_id_var_key: Union[None, str]
     feature_reference_var_key: Union[None, str]
     feature_symbol_var_key: Union[None, str]
     feature_type_var_key: Union[None, str]
 
-    spatial_x_coord: Union[None, str]
-    spatial_y_coord: Union[None, str]
-    spatial_z_coord: Union[None, str]
-    vdj_c_call: Union[None, str]
-    vdj_consensus_count: Union[None, str]
-    vdj_d_call: Union[None, str]
-    vdj_duplicate_count: Union[None, str]
-    vdj_j_call: Union[None, str]
-    vdj_junction: Union[None, str]
-    vdj_junction_aa: Union[None, str]
-    vdj_locus: Union[None, str]
-    vdj_productive: Union[None, str]
-    vdj_v_call: Union[None, str]
+    spatial_x_coord_obs_key: Union[None, str]
+    spatial_y_coord_obs_key: Union[None, str]
+    spatial_z_coord_obs_key: Union[None, str]
+    vdj_vj_1_obs_key_prefix: Union[None, str]
+    vdj_vj_2_obs_key_prefix: Union[None, str]
+    vdj_vdj_1_obs_key_prefix: Union[None, str]
+    vdj_vdj_2_obs_key_prefix: Union[None, str]
+    vdj_c_call_obs_key_suffix: Union[None, str]
+    vdj_consensus_count_obs_key_suffix: Union[None, str]
+    vdj_d_call_obs_key_suffix: Union[None, str]
+    vdj_duplicate_count_obs_key_suffix: Union[None, str]
+    vdj_j_call_obs_key_suffix: Union[None, str]
+    vdj_junction_obs_key_suffix: Union[None, str]
+    vdj_junction_aa_obs_key_suffix: Union[None, str]
+    vdj_locus_obs_key_suffix: Union[None, str]
+    vdj_productive_obs_key_suffix: Union[None, str]
+    vdj_v_call_obs_key_suffix: Union[None, str]
 
     _celltype_universe: Union[None, CelltypeUniverse]
     _ontology_class_maps: Union[dict]
@@ -203,6 +210,7 @@ class DatasetBase(abc.ABC):
         self._ethnicity = None
         self._feature_type = None
         self._feature_reference = None
+        self.gm = None
         self._id = None
         self._individual = None
         self._organ = None
@@ -213,6 +221,7 @@ class DatasetBase(abc.ABC):
         self._source = None
         self._state_exact = None
         self._tech_sample = None
+        self.treatment = None
         self._title = None
         self._year = None
 
@@ -225,6 +234,7 @@ class DatasetBase(abc.ABC):
         self.development_stage_obs_key = None
         self.disease_obs_key = None
         self.ethnicity_obs_key = None
+        self.gm_obs_key = None
         self.individual_obs_key = None
         self.organ_obs_key = None
         self.organism_obs_key = None
@@ -232,25 +242,31 @@ class DatasetBase(abc.ABC):
         self.sex_obs_key = None
         self.state_exact_obs_key = None
         self.tech_sample_obs_key = None
+        self.treatment_obs_key = None
 
         self.feature_id_var_key = None
         self.feature_reference_var_key = None
         self.feature_symbol_var_key = None
         self.feature_type_var_key = None
 
-        self.spatial_x_coord = None
-        self.spatial_y_coord = None
-        self.spatial_z_coord = None
-        self.vdj_c_call = None
-        self.vdj_consensus_count = None
-        self.vdj_d_call = None
-        self.vdj_duplicate_count = None
-        self.vdj_j_call = None
-        self.vdj_junction = None
-        self.vdj_junction_aa = None
-        self.vdj_locus = None
-        self.vdj_productive = None
-        self.vdj_v_call = None
+        self.spatial_x_coord_obs_key = None
+        self.spatial_y_coord_obs_key = None
+        self.spatial_z_coord_obs_key = None
+
+        self.vdj_vj_1_obs_key_prefix = None
+        self.vdj_vj_2_obs_key_prefix = None
+        self.vdj_vdj_1_obs_key_prefix = None
+        self.vdj_vdj_2_obs_key_prefix = None
+        self.vdj_c_call_obs_key_suffix = None
+        self.vdj_consensus_count_obs_key_suffix = None
+        self.vdj_d_call_obs_key_suffix = None
+        self.vdj_duplicate_count_obs_key_suffix = None
+        self.vdj_j_call_obs_key_suffix = None
+        self.vdj_junction_obs_key_suffix = None
+        self.vdj_junction_aa_obs_key_suffix = None
+        self.vdj_locus_obs_key_suffix = None
+        self.vdj_productive_obs_key_suffix = None
+        self.vdj_v_call_obs_key_suffix = None
 
         self._celltype_universe = None
         self._ontology_class_maps = dict([(k, None) for k in self._adata_ids.ontology_constrained])

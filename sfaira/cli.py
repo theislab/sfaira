@@ -145,13 +145,14 @@ def create_dataloader(path_data, path_loader) -> None:
               default=PACKAGE_LOADER_PATH,
               type=click.Path(exists=False),
               help='Relative path from the current directory to the location of the data loader.')
-def annotate_dataloader(doi, path_data, path_loader) -> None:
+@click.option('--schema', type=str, default="sfaira", help="The curation schema to check meta data availability for.")
+def annotate_dataloader(doi, path_data, path_loader, schema) -> None:
     """
     Annotates a dataloader.
     """
     path_loader, path_data, _ = set_paths(loader=path_loader, data=path_data)
     if doi is None or doi_lint(doi):
-        dataloader_validator = DataloaderValidator(path_loader, doi)
+        dataloader_validator = DataloaderValidator(path_loader, doi, schema=schema)
         dataloader_validator.validate()
         dataloader_annotater = DataloaderAnnotater()
         dataloader_annotater.annotate(path_loader, path_data, dataloader_validator.doi)

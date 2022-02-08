@@ -33,7 +33,7 @@ class TemplateAttributes:
     download_url_meta: str = ''
     organism: str = ''
     primary_data: str = ''
-    year: int = 2022
+    year: int = 0
 
     layer_counts: str = ''
     layer_processed: str = ''
@@ -61,19 +61,23 @@ class TemplateAttributes:
     sample_source_obs_key: str = ''
     sex_obs_key: str = ''
 
-    spatial_x_coord: str = ''
-    spatial_y_coord: str = ''
-    spatial_z_coord: str = ''
-    vdj_c_call: str = ''
-    vdj_consensus_count: str = ''
-    vdj_d_call: str = ''
-    vdj_duplicate_count: str = ''
-    vdj_j_call: str = ''
-    vdj_junction: str = ''
-    vdj_junction_aa: str = ''
-    vdj_locus: str = ''
-    vdj_productive: str = ''
-    vdj_v_call: str = ''
+    spatial_x_coord_obs_key: str = ''
+    spatial_y_coord_obs_key: str = ''
+    spatial_z_coord_obs_key: str = ''
+    vdj_vj_1_obs_key_prefix: str = ''
+    vdj_vj_2_obs_key_prefix: str = ''
+    vdj_vdj_1_obs_key_prefix: str = ''
+    vdj_vdj_2_obs_key_prefix: str = ''
+    vdj_c_call_obs_key_suffix: str = ''
+    vdj_consensus_count_obs_key_suffix: str = ''
+    vdj_d_call_obs_key_suffix: str = ''
+    vdj_duplicate_count_obs_key_suffix: str = ''
+    vdj_j_call_obs_key_suffix: str = ''
+    vdj_junction_obs_key_suffix: str = ''
+    vdj_junction_aa_obs_key_suffix: str = ''
+    vdj_locus_obs_key_suffix: str = ''
+    vdj_productive_obs_key_suffix: str = ''
+    vdj_v_call_obs_key_suffix: str = ''
 
     feature_reference: str = ''
     feature_type: str = ''
@@ -239,13 +243,17 @@ class DataloaderCreator:
                 question='Year of first publication (e.g. 2022)',
                 default="")
             year_try += 1
-        self.template_attributes.year = year
+        self.template_attributes.year = int(year)
 
-        self.template_attributes.id_without_doi = f'{clean_id_str(self.template_attributes.organism)}_' \
-                                                  f'{clean_id_str(self.template_attributes.organ)}_' \
-                                                  f'{clean_id_str(str(self.template_attributes.year))}_' \
-                                                  f'{clean_id_str(self.template_attributes.assay_sc)}_' \
-                                                  f'{clean_id_str(first_author_lastname)}_001'
+        def insert_placeholder(id_str):
+            return id_str if id_str != "" else "x"
+
+        self.template_attributes.id_without_doi = \
+            f'{insert_placeholder(clean_id_str(self.template_attributes.organism))}_' \
+            f'{insert_placeholder(clean_id_str(self.template_attributes.organ))}_' \
+            f'{insert_placeholder(clean_id_str(str(self.template_attributes.year)))}_' \
+            f'{insert_placeholder(clean_id_str(self.template_attributes.assay_sc))}_' \
+            f'{first_author_lastname}_001'
         self.template_attributes.id = f'{self.template_attributes.id_without_doi}_' \
                                       f'{self.template_attributes.doi_sfaira_repr}'
 
@@ -436,15 +444,15 @@ class DataloaderCreator:
             question='Modality spatial: Does this data set contain spatial coordinates of observations?',
             default='No')
         if has_spatial:
-            self.template_attributes.spatial_x_coord = sfaira_questionary(
+            self.template_attributes.spatial_x_coord_obs_key = sfaira_questionary(
                 function='text',
                 question=format_q_modality_obs_key("Spatial", "x coordinate"),
                 default='')
-            self.template_attributes.spatial_y_coord = sfaira_questionary(
+            self.template_attributes.spatial_y_coord_obs_key = sfaira_questionary(
                 function='text',
                 question=format_q_modality_obs_key("Spatial", "y coordinate"),
                 default='')
-            self.template_attributes.spatial_z_coord = sfaira_questionary(
+            self.template_attributes.spatial_z_coord_obs_key = sfaira_questionary(
                 function='text',
                 question=format_q_modality_obs_key("Spatial", "z coordinate"),
                 default='')
@@ -456,47 +464,66 @@ class DataloaderCreator:
         if has_vdj:
             print('[bold blue]V(D)J annotation: Meta data definitions are documented here '
                   'https://docs.airr-community.org/en/latest/datarep/rearrangements.html.')
-            self.template_attributes.vdj_c_call = sfaira_questionary(
+            print('[bold blue]Below, default column names in scirpy are chose, use deafults if you read the V(D)J data '
+                  'with scirpy, for example.')
+            self.template_attributes.vdj_vj_1_obs_key_prefix = sfaira_questionary(
+                function='text',
+                question=format_q_modality_obs_key("V(D)J", "prefix of first VJ locus/chain"),
+                default='IR_VJ_1_')
+            self.template_attributes.vdj_vj_2_obs_key_prefix = sfaira_questionary(
+                function='text',
+                question=format_q_modality_obs_key("V(D)J", "prefix of second VJ locus/chain"),
+                default='IR_VJ_2_')
+            self.template_attributes.vdj_vdj_1_obs_key_prefix = sfaira_questionary(
+                function='text',
+                question=format_q_modality_obs_key("V(D)J", "prefix of first VDJ locus/chain"),
+                default='IR_VDJ_1_')
+            self.template_attributes.vdj_vdj_2_obs_key_prefix = sfaira_questionary(
+                function='text',
+                question=format_q_modality_obs_key("V(D)J", "prefix of second VDJ locus/chain"),
+                default='IR_VDJ_2_')
+            self.template_attributes.vdj_c_call_obs_key_suffix = sfaira_questionary(
                 function='text',
                 question=format_q_modality_obs_key("V(D)J", "C gene"),
-                default='')
-            self.template_attributes.vdj_d_call = sfaira_questionary(
+                default='c_call')
+            self.template_attributes.vdj_d_call_obs_key_suffix = sfaira_questionary(
                 function='text',
                 question=format_q_modality_obs_key("V(D)J", "D gene"),
-                default='')
-            self.template_attributes.vdj_j_call = sfaira_questionary(
+                default='d_call')
+            self.template_attributes.vdj_j_call_obs_key_suffix = sfaira_questionary(
                 function='text',
                 question=format_q_modality_obs_key("V(D)J", "J gene"),
-                default='')
-            self.template_attributes.vdj_v_call = sfaira_questionary(
+                default='j_call')
+            self.template_attributes.vdj_v_call_obs_key_suffix = sfaira_questionary(
                 function='text',
                 question=format_q_modality_obs_key("VDJ", "V gene"),
-                default='')
-            self.template_attributes.vdj_duplicate_count = sfaira_questionary(
+                default='v_call')
+            self.template_attributes.vdj_duplicate_count_obs_key_suffix = sfaira_questionary(
                 function='text',
-                question=format_q_modality_obs_key("V(D)J", "number of duplicate UMIs"),
-                default='')
-            self.template_attributes.vdj_junction = sfaira_questionary(
+                question=format_q_modality_obs_key("V(D)J", "number of duplicate UMIs (duplicate count)"),
+                default='duplicate_count')
+            self.template_attributes.vdj_junction_obs_key_suffix = sfaira_questionary(
                 function='text',
                 question=format_q_modality_obs_key("V(D)J", "junction nt sequence"),
-                default='')
-            self.template_attributes.vdj_junction_aa = sfaira_questionary(
+                default='junction')
+            self.template_attributes.vdj_junction_aa_obs_key_suffix = sfaira_questionary(
                 function='text',
                 question=format_q_modality_obs_key("V(D)J", "junction aa sequence"),
-                default='')
-            self.template_attributes.vdj_locus = sfaira_questionary(
+                default='junction_aa')
+            self.template_attributes.vdj_locus_obs_key_suffix = sfaira_questionary(
                 function='text',
                 question=format_q_modality_obs_key("V(D)J", "gene locus (e.g elements from IGH, IGK, IGL, TRA, TRB, "
                                                             "TRD, or TRG)"),
-                default='')
-            self.template_attributes.vdj_productive = sfaira_questionary(
+                default='locus')
+            self.template_attributes.vdj_productive_obs_key_suffix = sfaira_questionary(
                 function='text',
                 question=format_q_modality_obs_key("V(D)J", "'Is the gene productive?'"),
-                default='')
-            self.template_attributes.vdj_consensus_count = sfaira_questionary(
+                default='productive')
+            self.template_attributes.vdj_consensus_count_obs_key_suffix = sfaira_questionary(
                 function='text',
-                question=format_q_modality_obs_key("V(D)J", "number of reads contributing to consensus"),
-                default='')
+                question=format_q_modality_obs_key("V(D)J", "number of reads contributing to consensus "
+                                                            "(consensus count)"),
+                default='consensus_count')
 
         print('[bold blue]Feature-wise meta data that are shared across the dataset.')
         print('[bold blue]The following meta data queries are on feature(gene)-wise. '
