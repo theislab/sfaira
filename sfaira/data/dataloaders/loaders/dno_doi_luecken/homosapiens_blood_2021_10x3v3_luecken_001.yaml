@@ -1,20 +1,22 @@
 dataset_structure:
     dataset_index: 1
     sample_fns:
-        - "cite/openproblems_bmmc_cite_complete.h5ad"
-        - "multiome/openproblems_bmmc_multiome_complete.h5ad"
+        - "GSE194122_openproblems_neurips2021_cite_BMMC_processed.h5ad.gz"
+        - "GSE194122_openproblems_neurips2021_multiome_BMMC_processed.h5ad.gz"
 dataset_wise:
     author: "Luecken, Malte"
-    default_embedding:
+    default_embedding: "GEX_X_umap"
     doi_preprint:
     doi_journal: "no_doi_luecken"
-    download_url_data: "s3://openproblems-bio/public/phase2-private-data/common/openproblems_bmmc_complete"
+    download_url_data:
+        - "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE194122&format=file&file=GSE194122%5Fopenproblems%5Fneurips2021%5Fcite%5FBMMC%5Fprocessed%2Eh5ad%2Egz"
+        - "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE194122&format=file&file=GSE194122%5Fopenproblems%5Fneurips2021%5Fmultiome%5FBMMC%5Fprocessed%2Eh5ad%2Egz"
     download_url_meta:
     primary_data: True
     year: 2021
 layers:
-    layer_counts: "X"
-    layer_processed:
+    layer_counts: "counts"
+    layer_processed: "X"
     layer_spliced_counts:
     layer_spliced_processed:
     layer_unspliced_counts:
@@ -23,12 +25,12 @@ layers:
 dataset_or_feature_wise:
     feature_reference:
     feature_reference_var_key:
-    feature_type: "rna"
-    feature_type_var_key:
+    feature_type:
+    feature_type_var_key: "feature_types"
 dataset_or_observation_wise:
     assay_sc:
-        cite/openproblems_bmmc_cite_complete.h5ad: "10x 3' v3"
-        multiome/openproblems_bmmc_multiome_complete.h5ad: "10x 3' v3"
+        GSE194122_openproblems_neurips2021_cite_BMMC_processed.h5ad.gz: "10x 3' v3"
+        GSE194122_openproblems_neurips2021_multiome_BMMC_processed.h5ad.gz: "10x 3' v3"
     assay_sc_obs_key:
     assay_differentiation:
     assay_differentiation_obs_key:
