@@ -264,6 +264,31 @@ Phase 1 is sub-structured into 2 sub-phases:
         further attributes you may have forgotten in step 2.
         See :ref:`sec-multiple-files` for short-cuts if you have multiple data sets.
         This step is can be skipped if there are the `.yaml` is complete after phase 1a).
+        Note on lists and dictionaries in the yaml file format:
+        Some times, you need to write a list in yaml, e.g. because you have multiple data URLs.
+        A list looks as follows:
+        .. code-block::
+
+                # Single URL:
+                download_url_data: "URL1"
+                # Two URLs:
+                download_url_data:
+                    - "URL1"
+                    - "URL2"
+        ..
+        As suggested in this example, do not use lists of length 1.
+        In contrast, you may need to map a specific ``sample_fns`` to a meta data in multi file loaders:
+        .. code-block::
+
+                sample_fns:
+                    - "FN1"
+                    - "FN2"
+                [...]
+                assay_sc:
+                    FN1: 10x 3' v2
+                    FN2: 10x 3' v3
+        ..
+        Take particular care with the usage of quotes and ":" when using maps as outlined in this example.
     2. Complete the load function.
         Complete the ``load()`` function in `<path_loader>/<DOI-name>/ID.py`.
         If you need to read compressed files directly from python, consider our guide :ref:`reading-compressed-files`.
@@ -342,6 +367,9 @@ Phase 2 is sub-structured into 2 sub-phases:
     make sure to not accidentally delete this token.
     If you accidentally replace it with `" "`, you will receive errors in phase 3, so do a visual check after finishing
     your work on each `ID*.tsv` file.
+
+    Note 3: Perfect matches are filled wihtout further suggestions,
+    you can often directly leave these rows as they are after a brief sanity check.
 
 .. _OLS:https://www.ebi.ac.uk/ols/ontologies/cl
 
