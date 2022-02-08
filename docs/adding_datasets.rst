@@ -259,13 +259,15 @@ Phase 1 is sub-structured into 2 sub-phases:
             sfaira create-dataloader --path-data DATA_DIR
         ..
 1b. Manual completion of created files (manual).
-    1. Correct yaml file.
+    1. Correct the `.yaml` file.
         Correct errors in `<path_loader>/<DOI-name>/ID.yaml` file and add
         further attributes you may have forgotten in step 2.
         See :ref:`sec-multiple-files` for short-cuts if you have multiple data sets.
         This step is can be skipped if there are the `.yaml` is complete after phase 1a).
-    2. Write load function.
-        Complete the `load()` function in `<path_loader>/<DOI-name>/ID.py`.
+    2. Complete the load function.
+        Complete the ``load()`` function in `<path_loader>/<DOI-name>/ID.py`.
+        If you need to read compressed files directly from python, consider our guide :ref:`reading-compressed-files`.
+        If you need to read R files directly from python, consider our guide :ref:`reading-r-files`.
 
 Phase 2: annotate
 ~~~~~~~~~~~~~~~~~~~
@@ -596,6 +598,76 @@ You can use any combination of orthogonal meta data, e.g. organ and disease anno
     which are all direct outputs of V(D)J alignment pipelines and are are stored in ``.obs``.
     This features are documented :ref:`feature-wise`.
 
+.. _sec-reading-compressed-files:
+Reading compressed files
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This is a collection of code snippets that can be used in tha ``load()`` function to read compressed download files.
+See also the anndata_ and scanpy_ IO documentation.
+
+- Read a .gz compressed .mtx (.mtx.gz):
+    Note that this often occurs in cellranger output for which their is a scanpy load function that
+    applies to data of the following structure ``./PREFIX_matrix.mtx.gz``, ``./PREFIX_barcodes.tsv.gz``, and
+    ``./PREFIX_features.mtx.gz``. This can be read as:
+
+.. code-block:: python
+
+    import scanpy
+    adata = scanpy.read_10x_mtx("./", prefix="PREFIX_")
+..
+- Read a .gz compressed .h5ad (.h5ad.gz):
+
+.. code-block:: python
+
+    import anndata
+    import gzip
+    with gzip.open(fn, "r") as f:
+        adata = anndata.read_h5ad(f)
+..
+
+- Read from within a .tar archive (.tar.gz):
+    It is often useful to decompress the tar archive once manually to understand its internal directory structure.
+    Let's assume you are interested in a file ``fn_target`` within a tar archive ``fn_tar``,
+    i.e. after decompressing the tar the director is ``<fn_tar>/<fn_target>``.
+
+.. code-block:: python
+
+    import pandas
+    import tarfile
+    with tarfile.open(fn_tar) as tar:
+        # Access files in archive with tar.extractfile(fn_target), e.g.
+        tab = pandas.read_csv(tar.extractfile(sample_fn))
+..
+
+.. _anndata: https://anndata.readthedocs.io/en/latest/api.html#reading
+.. _scanpy: https://scanpy.readthedocs.io/en/stable/api.html#reading
+
+.. _sec-reading-r-files:
+Reading R files
+~~~~~~~~~~~~~~~~
+
+Some studies deposit single-cell data in R language files, e.g. ``.rdata``, ``.Rds`` or Seurat objects.
+These objects can be read with python functions in sfaira using anndata2ri and rpy2.
+These modules allow you to run R code from within this python code:
+
+.. code-block:: python
+
+    def load(data_dir, **kwargs):
+        import anndata2ri
+        from rpy2.robjects import r
+
+        fn = os.path.join(data_dir, "SOME_FILE.rdata")
+        anndata2ri.activate()
+        adata = r(
+            f"library(Seurat)\n"
+            f"load('{fn}')\n"
+            f"new_obj = CreateSeuratObject(counts = tissue@raw.data)\n"
+            f"new_obj@meta.data = tissue@meta.data\n"
+            f"as.SingleCellExperiment(new_obj)\n"
+        )
+        return adata
+..
+
 
 Loading third party annotation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -631,6 +703,7 @@ Here an example of a `.py` file with additional annotation:
         "meta_study_y": load_annotation_meta_study_y,
     }
 
+..
 
 The table returned by `load_annotation_meta_study_x` needs to be indexed with the observation names used in `.adata`,
 the object generated in `load()`.
@@ -748,6 +821,11 @@ Note that in both cases the value, or the column values, have to fulfill constra
 - feature_reference and feature_reference_var_key [string]
     The genome annotation release that was used to quantify the features presented here,
     e.g. "Homo_sapiens.GRCh38.105".
+    You can find all ENSEMBL gtf files on the ensembl_ ftp server.
+    Here, you ll find a summary of the gtf files by release, e.g. for 105_.
+    You will find a list across organisms for this release, the target release name is the name of the gtf files that
+    ends on ``.RELEASE.gtf.gz`` under the corresponding organism.
+    For homo_sapiens_ and release 105, this yields the following reference name "Homo_sapiens.GRCh38.105".
 - feature_type and feature_type_var_key {"rna", "protein", "peak"}
     The type of a feature:
 
@@ -757,6 +835,10 @@ Note that in both cases the value, or the column values, have to fulfill constra
         e.g. via antibody counts in CITE-seq or spatial protocols
     - "peak": chromatin accessibility by peak
         e.g. from scATAC-seq
+
+.. _ensembl: http://ftp.ensembl.org/pub/
+.. _105: http://ftp.ensembl.org/pub/release-105/gtf/
+.. _homo_sapiens: http://ftp.ensembl.org/pub/release-105/gtf/homo_sapiens/
 
 .. _sec-dataset-or-observation-wise:
 Dataset- or observation-wise
@@ -824,8 +906,11 @@ outlined below.
     The UBERON_ label of the sample.
     This meta data item ontology is for tissue or organ identifiers from UBERON.
 - organism and organism_obs_key. [ontology term]
-    The NCBItaxon_ label of the sample.
+    The NCBItaxon_ label of the main organism sampled here.
+    For a data matrix of an infection sample aligned against a human and virus joint reference genome,
+    this would "Homo sapiens" as it is the "main organism" in this case.
     For example, "Homo sapiens" or "Mus musculus".
+    See also the documentation of feature_reference to see which orgainsms are supported.
 - primary_data [bool]
     Whether contains cells that were measured in this study (ie this is not a meta study on published data).
 - sample_source and sample_source_obs_key. {"primary_tissue", "2d_culture", "3d_culture", "tumor"}
