@@ -8,7 +8,7 @@ import sys
 from typing import Dict, List, Union
 
 
-class DistributedStoreBase(abc.ABC):
+class StoreBase(abc.ABC):
     """
     Base class for store API for attribute typing and shared methods.
     """
@@ -45,11 +45,6 @@ class DistributedStoreBase(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def obs(self):
-        pass
-
-    @property
-    @abc.abstractmethod
     def obs_by_key(self) -> Dict[str, Union[pd.DataFrame, dask.dataframe.DataFrame]]:
         pass
 
@@ -61,16 +56,6 @@ class DistributedStoreBase(abc.ABC):
     @property
     @abc.abstractmethod
     def shape(self):
-        pass
-
-    @property
-    @abc.abstractmethod
-    def var(self):
-        pass
-
-    @property
-    @abc.abstractmethod
-    def X(self):
         pass
 
     @abc.abstractmethod
@@ -87,7 +72,7 @@ class DistributedStoreBase(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def generator(
+    def checkout(
             self,
             idx: Union[np.ndarray, None],
             batch_size: int,

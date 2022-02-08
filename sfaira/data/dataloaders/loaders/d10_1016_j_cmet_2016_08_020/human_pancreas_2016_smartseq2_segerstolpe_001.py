@@ -18,14 +18,15 @@ class Dataset(DatasetBase):
         self.assay_sc = "Smart-seq2"
         self.author = "Segerstolpe"
         self.doi_journal = "10.1016/j.cmet.2016.08.020"
-        self.normalization = "raw"
+        self.layer_counts = "X"
         self.organ = "pancreas"
         self.organism = "Homo sapiens"
         self.primary_data = True
         self.sample_source = "primary_tissue"
         self.year = 2016
 
-        self.gene_id_symbols_var_key = "index"
+        self.feature_symbol_var_key = "index"
+        self.feature_type = "rna"
 
         self.cell_type_obs_key = "Characteristics[cell type]"
         self.state_exact_obs_key = "Characteristics[disease]"

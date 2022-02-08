@@ -17,15 +17,16 @@ class Dataset(DatasetBase):
         self.author = "Martin"
         self.disease = "healthy"
         self.doi_journal = "10.1016/j.cell.2019.08.008"
-        self.normalization = "raw"
+        self.layer_counts = "X"
         self.organ = "ileum"
         self.organism = "Homo sapiens"
         self.primary_data = True
         self.sample_source = "primary_tissue"
         self.year = 2019
 
-        self.gene_id_symbols_var_key = "index"
-        self.gene_id_ensembl_var_key = "gene_ids"
+        self.feature_id_var_key = "gene_ids"
+        self.feature_symbol_var_key = "index"
+        self.feature_type = "rna"
 
         self.cell_type_obs_key = "CellType"
 
