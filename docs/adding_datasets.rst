@@ -648,19 +648,21 @@ See also the anndata_ and scanpy_ IO documentation.
     import scanpy
     adata = scanpy.read_10x_mtx("./", prefix="PREFIX_")
 ..
-- Read a .gz compressed .h5ad (.h5ad.gz):
+- Read from within a .gz archive (.gz):
+    Note: this requires temporary files, so avoid if read_function can read directly from .gz.
 
 .. code-block:: python
 
-    import anndata
     import gzip
     from tempfile import TemporaryDirectory
     import shutil
+    # Insert the file type as a string here so that read_function recognizes the decompressed file:
+    uncompressed_file_type = ""
     with TemporaryDirectory() as tmpdir:
-        tmppth = tmpdir + "/decompressed.h5ad"
+        tmppth = tmpdir + f"/decompressed.{uncompressed_file_type}"
         with gzip.open(fn, "rb") as input_f, open(tmppth, "wb") as output_f:
             shutil.copyfileobj(input_f, output_f)
-        adata = anndata.read_h5ad(tmppth)
+        x = read_function(tmppth)
 ..
 
 - Read from within a .tar archive (.tar.gz):
