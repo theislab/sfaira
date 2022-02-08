@@ -1,7 +1,6 @@
 dataset_structure:
     dataset_index: 1
     sample_fns:
-        - "SE158055_covid19_counts.mtx.gz"
 dataset_wise:
     author: "Ren, Xianwen"
     default_embedding: 
@@ -11,8 +10,7 @@ dataset_wise:
         - "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE158055&format=file&file=GSE158055%5Fcovid19%5Fcounts%2Emtx%2Egz"
         - "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE158055&format=file&file=GSE158055%5Fcovid19%5Fbarcodes%2Etsv%2Egz"
         - "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE158055&format=file&file=GSE158055%5Fcovid19%5Ffeatures%2Etsv%2Egz"
-    # Download URL to processed adata. Raw counts in adata.raw: "https://drive.google.com/file/d/1IwWcn4W-YKgNbz4DpNweM2cKxlx1hbM0/view"
-    download_url_meta: 
+    download_url_meta:
         - "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE158055&format=file&file=GSE158055%5Fcell%5Fannotation%2Ecsv%2Egz"
         - "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE158055&format=file&file=GSE158055%5Fsample%5Fmetadata%2Exlsx"
     primary_data: True
@@ -32,7 +30,7 @@ dataset_or_feature_wise:
     feature_type_var_key:
 dataset_or_observation_wise:
     assay_sc: 
-    assay_sc_obs_key: "assay_sc"
+    assay_sc_obs_key: "Single cell sequencing platform"
     assay_differentiation:
     assay_differentiation_obs_key:
     assay_type_differentiation:
@@ -46,7 +44,7 @@ dataset_or_observation_wise:
     development_stage:
     development_stage_obs_key:
     disease: 
-    disease_obs_key: "disease"
+    disease_obs_key: "SARS-CoV-2"
     ethnicity:
     ethnicity_obs_key:
     gm:
@@ -54,7 +52,7 @@ dataset_or_observation_wise:
     individual:
     individual_obs_key: "PatientID"
     organ: 
-    organ_obs_key: "organ"
+    organ_obs_key: "Sample type"
     organism: "Homo sapiens"
     organism_obs_key:
     sample_source: "primary_tissue"

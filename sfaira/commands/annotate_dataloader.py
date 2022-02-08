@@ -177,7 +177,6 @@ class DataloaderAnnotater:
                     # function.
                     dsg_f = DatasetGroup(datasets=dict([(x.id, ds.datasets[x.id]) for x in datasets_f]))
                     # III) Write this directly into the sfaira clone so that it can be committed via git.
-                    # TODO any errors not to be caught here?
                     doi_sfaira_repr = clean_doi(doi)
                     fn_tsv = os.path.join(path, doi_sfaira_repr, f"{file_module}")
                     # Define .tsvs to write:
