@@ -177,7 +177,6 @@ class DataloaderAnnotater:
                     # function.
                     dsg_f = DatasetGroup(datasets=dict([(x.id, ds.datasets[x.id]) for x in datasets_f]))
                     # III) Write this directly into the sfaira clone so that it can be committed via git.
-                    # TODO any errors not to be caught here?
                     doi_sfaira_repr = clean_doi(doi)
                     fn_tsv = os.path.join(path, doi_sfaira_repr, f"{file_module}")
                     # Define .tsvs to write:
@@ -196,17 +195,19 @@ class DataloaderAnnotater:
         print('[bold orange]Sfaira butler: "Up next:"')
         self.action_counter = 1
         tsv_file_overview = "\n".join(tsvs_written)
-        print(f'[bold orange]{self.action_counter}) Proceed to chose ontology symbols for each free text label in the '
-              f'tsv files:\n{tsv_file_overview}\n'
-              'Each tsv has two columns: free text labels found in the data on the left and suggestions on the right.'
-              'Each suggested symbol lies between two : characters.\n'
-              ': is a separator between suggested symbols and :|||: between symbol groups that were found via different'
-              'search strategies.\n'
-              'Take care to not remove the \\t separators in the table.\n'
-              'You only need to finish the second column now - the third column with ontology IDs is added '
-              'automatically to this table in phase 3 (finalize).')
+        print(f'[bold orange]               "{self.action_counter}) Proceed to chose ontology symbols for each free '
+              f'text label in the tsv files:\n{tsv_file_overview}\n'
+              '                Each tsv has two columns: free text labels found in the data on the left and suggestions'
+              ' on the right. Each suggested symbol lies between two : characters.\n'
+              '                \':\' is a separator between suggested symbols and :|||: between symbol groups that '
+              'were found through different search strategies.\n'
+              '                Take care to not remove the \\t separators in the table.\n'
+              '                You only need to finish the second column now - the third column with ontology IDs is '
+              'added automatically to this table in phase 3 (finalize)."')
         self.action_counter += 1
-        print(f'[bold orange]{self.action_counter}) Then proceed to finish .yaml file if not already done.')
+        print(f'[bold orange]               "{self.action_counter}) Then proceed to finish .yaml file if not already '
+              f'done."')
         self.action_counter += 1
-        print(f'[bold orange]{self.action_counter}) Then proceed to phase 3 \'sfaira finalize-dataloader\'')
+        print(f'[bold orange]               "{self.action_counter}) Then proceed to phase 3 '
+              f'\'sfaira finalize-dataloader\'."')
         self.action_counter += 1

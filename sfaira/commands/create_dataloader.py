@@ -568,15 +568,17 @@ class DataloaderCreator:
 
         print('[bold orange]Sfaira butler: "Up next:"')
         self.action_counter = 1
-        print(f'[bold orange]{self.action_counter}) Proceed to modify the .yaml and .py files in {self.path_loader}')
+        print(f'[bold orange]               "{self.action_counter}) Proceed to modify the .yaml and .py files in '
+              f'{self.path_loader}"')
         self.action_counter += 1
         self.check_datadir(path_data=path_data)
         if requires_annotate:
-            print(f'[bold orange]{self.action_counter}) Proceed to phase 2: \'sfaira annotate-dataloader\'.')
+            print(f'[bold orange]               "{self.action_counter}) Proceed to phase 2: '
+                  f'\'sfaira annotate-dataloader\'."')
             self.action_counter += 1
         else:
-            print(f'[bold orange]{self.action_counter}) Proceed to phase 3: \'sfaira finalize-dataloader\', '
-                  f'you can skip phase 2 (\'sfaira annotate-dataloader\').')
+            print(f'[bold orange]               "{self.action_counter}) Proceed to phase 3: \'sfaira finalize-dataloader\', '
+                  f'you can skip phase 2 (\'sfaira annotate-dataloader\')."')
             self.action_counter += 1
 
     @property

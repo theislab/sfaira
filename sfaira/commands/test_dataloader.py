@@ -73,11 +73,16 @@ class DataloaderTester:
             ds.clean_ontology_class_maps()
 
         ds, cache_path = self._get_ds()
-        # TODO try-except with good error description saying that the data loader is broken here:
         ds.load(load_raw=True, allow_caching=False)
         print("[bold blue]Completed testing of data loader, the data loader is now ready for use.")
         if in_phase_3:
             print('[bold orange]Sfaira butler: "You data loader is finished!"')
-            print('[bold orange]"Proceed to phase 4 (publish) or use data loader."')
+            print('[bold orange]               "Proceed to phase 4 (publish) or use data loader."')
+            print('[bold orange]               "Copy the following lines as a post into the pull request:"')
+            print('[bold blue]=========================')
+            print('[bold blue]Data loader test passed:')
+            for x in ds.datasets.keys():
+                print(f'[bold blue]    - {x}')
+            print('[bold blue]=========================')
         else:
             print('[bold orange]Sfaira butler: "You data loader works!"')
