@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-import scanpy
+import scanpy as sc
 
 # This is provided in plain text on GEO
 sample_map = {"Sample1": "nCoV 1 scRNA-seq",
@@ -27,7 +27,7 @@ sample_map = {"Sample1": "nCoV 1 scRNA-seq",
 
 
 def load(data_dir, sample_fn, **kwargs):
-    adata = scanpy.read_10x_mtx(data_dir, prefix="GSE149689_")
+    adata = sc.read_10x_mtx(data_dir, prefix="GSE149689_")
     adata.obs["sample"] = "Sample" + adata.obs.index.str.split("-").str[1]
     adata.obs["GEO upload info"] = adata.obs["sample"].map(sample_map)
 

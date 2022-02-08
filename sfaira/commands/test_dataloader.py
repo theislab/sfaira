@@ -4,7 +4,6 @@ from rich import print
 import shutil
 import pydoc
 
-from rich import print
 from sfaira.consts.utils import clean_doi
 from sfaira.data import DatasetGroupDirectoryOriented
 
