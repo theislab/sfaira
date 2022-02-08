@@ -91,6 +91,8 @@ Pa. Name the data loader.
 Pb. Check that the data loader was not already implemented.
     We will open issues for all planned data loaders, so you can search both the code_ base and our GitHub issues_ for
     matching data loaders before you start writing one.
+    You can also search for GEO IDs if our code base as they are included in the data URL that is annotated in the data
+    loader.
     The core data loader identified is the directory compatible doi,
     which is the doi with all special characters replaced by "_" and a "d" prefix is used:
     "10.1016/j.cell.2019.06.029" becomes "d10_1016_j_cell_2019_06_029".
