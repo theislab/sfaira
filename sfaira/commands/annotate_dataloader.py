@@ -58,10 +58,10 @@ class DataloaderAnnotater:
         Define the file names, loader paths and base paths of loader collections for sfaira and sfaira_extension
         """
         dir_loader_sfaira = "sfaira.data.dataloaders.loaders."
-        file_path_sfaira = "/" + "/".join(pydoc.locate(dir_loader_sfaira + "FILE_PATH").split("/")[:-1])
+        file_path_sfaira = os.sep + os.sep.join(pydoc.locate(dir_loader_sfaira + "FILE_PATH").split(os.sep)[:-1])
         if sfairae is not None:
             dir_loader_sfairae = "sfaira_extension.data.dataloaders.loaders."
-            file_path_sfairae = "/" + "/".join(pydoc.locate(dir_loader_sfairae + "FILE_PATH").split("/")[:-1])
+            file_path_sfairae = os.sep + os.sep.join(pydoc.locate(dir_loader_sfairae + "FILE_PATH").split(os.sep)[:-1])
         else:
             file_path_sfairae = None
         # Check if loader name is a directory either in sfaira or sfaira_extension loader collections:
@@ -105,8 +105,6 @@ class DataloaderAnnotater:
                              f"{test_data}, only found {os.listdir(test_data)}")
         ds = self._get_ds(test_data=test_data)
         ds.load(
-            remove_gene_version=False,
-            match_to_reference=None,
             load_raw=True,  # Force raw load so non confound future tests by data loader bugs in previous versions.
             allow_caching=False,
             verbose=3
@@ -119,7 +117,7 @@ class DataloaderAnnotater:
         ds = self.buffered_load(test_data=test_data, doi_sfaira_repr=doi_sfaira_repr)
         # Create cell type conversion table:
         cwd = os.path.dirname(self.file_path)
-        dataset_module = str(cwd.split("/")[-1])
+        dataset_module = str(cwd.split(os.sep)[-1])
         # Group data sets by file module:
         # Note that if we were not grouping the cell type map .tsv files by file module, we could directly call
         # write_ontology_class_map on the ds.
@@ -191,7 +189,7 @@ class DataloaderAnnotater:
                     dsg_f = DatasetGroup(datasets=dict([(x.id, ds.datasets[x.id]) for x in datasets_f]))
                     # III) Write this directly into the sfaira clone so that it can be committed via git.
                     # TODO any errors not to be caught here?
-                    doi_sfaira_repr = f'd{doi.translate({ord(c): "_" for c in r"!@#$%^&*()[]/{};:,.<>?|`~-=_+"})}'
+                    doi_sfaira_repr = clean_doi(doi)
                     fn_tsv = os.path.join(path, doi_sfaira_repr, f"{file_module}")
                     # Define .tsvs to write:
                     attrs = [
@@ -205,4 +203,21 @@ class DataloaderAnnotater:
                         n_suggest=4,
                     )
                     tsvs_written.append(fn_tsv)
-        print("Completed annotation. Wrote .tsv files for loaders:\n" + "\n".join(tsvs_written))
+        print("[bold blue]Completed annotation.")
+        print('[bold orange]Sfaira butler: "Up next:"')
+        self.action_counter = 1
+        tsv_file_overview = "\n".join(tsvs_written)
+        print(f'[bold orange]{self.action_counter}) Proceed to chose ontology symbols for each free text label in the '
+              f'tsv files:\n{tsv_file_overview}\n'
+              'Each tsv has two columns: free text labels found in the data on the left and suggestions on the right.'
+              'Each suggested symbol lies between two : characters.\n'
+              ': is a separator between suggested symbols and :|||: between symbol groups that were found via different'
+              'search strategies.\n'
+              'Take care to not remove the \\t separators in the table.\n'
+              'You only need to finish the second column now - the third column with ontology IDs is added '
+              'automatically to this table in phase 3 (finalize).')
+        self.action_counter += 1
+        print(f'[bold orange]{self.action_counter}) Then proceed to finish .yaml file if not already done.')
+        self.action_counter += 1
+        print(f'[bold orange]{self.action_counter}) Proceed to run \'sfaira test-dataloader\'')
+        self.action_counter += 1

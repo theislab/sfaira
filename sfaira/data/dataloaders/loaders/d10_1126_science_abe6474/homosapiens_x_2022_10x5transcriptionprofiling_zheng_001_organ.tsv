@@ -1,0 +1,12 @@
+source	target	target_id
+BC	skin epidermis	UBERON:0001003
+BCL	blood	UBERON:0000178
+CHOL	bile duct	UBERON:0002394
+ESCA	esophagus	UBERON:0001043
+FTC	fallopian tube	UBERON:0003889
+MM	blood	UBERON:0000178
+OV	ovary	UBERON:0000992
+PACA	pancreas	UBERON:0001264
+RC	kidney	UBERON:0002113
+THCA	thyroid gland	UBERON:0002046
+UCEC	endometrium	UBERON:0001295

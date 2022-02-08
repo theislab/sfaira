@@ -19,10 +19,6 @@ KEY_ID = "gene_id"
 KEY_TYPE = "gene_biotype"
 VALUE_GTF_GENE = "gene"
 KEY_GTF_REGION_TYPE = 2
-KEY_GTF_REGION_DETAIL_FIELD = 8
-IDX_GTF_REGION_DETAIL_FIELD_ID = 0
-IDX_GTF_REGION_DETAIL_FIELD_SYMBOL = 2
-IDX_GTF_REGION_DETAIL_FIELD_TYPE = 4
 
 
 class GtfInterface:
@@ -74,8 +70,9 @@ class GtfInterface:
             # Filter assembly files starting with organism name:
             target_file = [x for x in target_file if x.split(".")[0].lower() == self.ensembl_organism]
             # Filter target assembly:
-            target_file = [x for x in target_file if len(x.split(".")) == 5]
-            assert len(target_file) == 1, target_file  # There should only be one file left if filters work correctly.
+            target_file = [x for x in target_file if x.endswith(f".{self.release}.gtf.gz")]
+            # There should only be one file left if filters work correctly:
+            assert len(target_file) == 1, target_file
             assembly = target_file[0].split(".gtf.gz")[0]
         else:
             assert len(target_file) == 1, target_file  # There should only be one file left if filters work correctly.
@@ -111,17 +108,20 @@ class GtfInterface:
         if os.path.exists(temp_file):
             os.remove(temp_file)
         tab = tab.loc[tab[KEY_GTF_REGION_TYPE].values == VALUE_GTF_GENE, :]
+        # KEY_SYMBOL column: Uses symbol if available, otherwise replaces with ID.
         conversion_tab = pandas.DataFrame({
             KEY_ID: [
-                x.split(";")[IDX_GTF_REGION_DETAIL_FIELD_ID].split(" ")[-1].strip("\"")
-                for x in tab[KEY_GTF_REGION_DETAIL_FIELD].values],
+                x.split(KEY_ID)[1].split(";")[0].strip(" ").strip("\"")
+                for x in tab.iloc[:, -1].values],
             KEY_SYMBOL: [
-                x.split(";")[IDX_GTF_REGION_DETAIL_FIELD_SYMBOL].split(" ")[-1].strip("\"")
-                for x in tab[KEY_GTF_REGION_DETAIL_FIELD].values],
+                x.split(KEY_SYMBOL)[1].split(";")[0].strip(" ").strip("\"")
+                if KEY_SYMBOL in x else
+                x.split(KEY_ID)[1].split(";")[0].strip(" ").strip("\"")
+                for x in tab.iloc[:, -1].values],
             KEY_TYPE: [
-                x.split(";")[IDX_GTF_REGION_DETAIL_FIELD_TYPE].split(" ")[-1].strip("\"")
-                for x in tab[KEY_GTF_REGION_DETAIL_FIELD].values],
-        }).sort_values("gene_id")
+                x.split(KEY_TYPE)[1].split(";")[0].strip(" ").strip("\"")
+                for x in tab.iloc[:, -1].values],
+        }).sort_values(KEY_ID)
         conversion_tab.to_csv(self.cache_fn)
 
     @property

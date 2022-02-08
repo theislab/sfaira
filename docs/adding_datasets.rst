@@ -4,25 +4,95 @@ Writing data loaders
 =====================
 
 For a high-level overview of data management in sfaira, read :ref:`data_life_cycle_rst` first.
-Adding datasets to sfaira is a great way to increase the visibility of your dataset and to make it available to a large audience.
-This process requires a couple of steps as outlined in the following sections.
+In brief, a data loader is a set of instructions that allows for streamlining of raw count matrices
+and meta data into objects of a target format.
+Here, streamlining means that gene names are controlled based on a genome assembly,
+metadata items are constrained to follow ontologies,
+and key study metadata are described.
+This streamlining increases accessibility and visibility of a dataset and to makes it available to a large audience.
+In sfaira, data loaders are grouped by scientific study (DOI of a preprint or DOI of a publication).
+A data loader for a study is a directory named after the DOI of the study that contains code and text files.
+This directory is part of the sfaira python package and, thus, maintained on GitHub.
+This allows for data loaders to be maintained via GitHub workflows: contribution and fixes via pull requests and
+deployment via repository cloning and package installation.
 
+A dataloader consists of four file components within a single directory:
 
-.. figure:: https://user-images.githubusercontent.com/21954664/126300611-c5ba18b7-7c88-4bb1-8865-a20587cd5f7b.png
-   :alt: sfaira adding datasets
+1. `__init__.py` file which is has same content in all loaders,
+2. `ID.py` file that contains a `load()` functions with based instructions of loading raw data on disk,
+3. `ID.yaml` file that describes most meta data,
+4. `ID*.tsv` files with ontology-wise maps of free-text metadata items to constrained vocabulary.
 
-   Overview of contributing dataloaders to sfaira. First, ensure that your data is not yet available as a dataloader.
-   Next, create a dataloader. Afterwards, validate/annotate it to finally test it. Finally, submit your dataloader to sfaira.
+All dataset-specific components receive an `ID` that is set during the curation process.
+Below, we describe how multiple datasets within a study can be handled with the same dataloder.
+In cases where this is not efficient, one can go through the data loader creation process once for each dataset
+and then group the resulting loaders (file groups 1-4) in a single directory named after the study's DOI.
 
-Preparation
------------
+An experienced curator can directly write such a data loader.
+However, first-time contributors often struggle with the interplay of individual files,
+metadata maps from free-text annotation are notoriously buggy
+and comprehensive testing is important also for contributions by experienced curators.
+Therefore, we broke the process of writing a loader down into phases
+and built a CLI to guide users through this process.
+Each phase corresponds to one command (one execution of a shell command) in the CLI.
+In addition, the CLI guides the user through manual steps that are necessary in each phase.
+We structured the process of curation into four phases,
+a preparatory phase P precedes CLI execution and is described in this documentation.
 
-sfaira features an interactive way of creating, formatting and testing dataloaders through a command line interface (CLI).
-The common workflow using the CLI looks as follows:
+- Phase P (``prepare``): data and python environment setup for curation.
+- Phase 1 (``create``): a `load()` function (in a `.py`) and a YAML are written.
+- Phase 2 (``annotate``): ontology-specific maps of free-text metadata to contrained vocabulary (in `*.tsv`) are written.
+- Phase 3 (``finalize``): the data loader is tested and metadata are cleaned up.
+- Phase 4 (``upload``): the data loader is uploaded to the sfaira GitHub repository.
 
-1. Check that the data loader was not already implemented.
+An experienced curator could skip using the CLI for phase 1 and write the `__init__.py`, `ID.py` and `ID.yaml` by hand.
+In this case, we still highly recommend using the CLI for phase 2 and 3.
+Note that phase 2 is only necessary if you have free-text metadata that needs to be mapped,
+the CLI will point this out accordingly in phase 1.
+This 4-phase cycle completes initial curation and results in data loader code that can be pushed to the sfaira
+GitHub repository.
+You have the choice between using a docker image or a sfaira installation (e.g. in conda) for phase P-4.
+The workflow is more restricted but safer in conda, we recommend docker if you are inexperienced with software
+development with conda, git and GitHub.
+Where appropriate, separate instruction options are given for workflows in conda and docker below.
+Overall, the workflow looks the same in both frameworks, though.
+This cycle can be complemented by an optional workflow to cache curated `.h5ad` objects (e.g. on the cellxgene website):
+
+- Phase 5 (``export-h5ad``): the data loader is used to create a streamlined `.h5ad` of a particular format.
+- Phase 6 (``validate-h5ad``): the `.h5ad` from phase 4 is checked for compliance with a particular (e.g. the cellxgene format).
+
+The resulting `.h5ad` can be shared with collaborators or uploaded to data submission servers.
+
+Create a new data loader
+-------------------------
+
+Phase P: Preparation
+~~~~~~~~~~~~~~~~~~~~~
+
+Before you start writing the data loader, we recommend completing this checks and preparation measures.
+Phase P is sub-structured into 3 sub-phases:
+
+* Pa: Name the data loader.
+* Pb: Check that the data loader was not already implemented.
+* Pc: Prepare an installation of sfaira to use for data loader writing.
+* Pd: Download the raw data into a local directory.
+
+Pa. Name the data loader.
+    We will decide for a  name of the dataloader based on its DOI.
+    Prefix the DOI with `"d"` and replace the special characters in the DOI with `"_"` here to prevent copy mistakes,
+    e.g. the DOI `10.1000/j.journal.2021.01.001` becomes `d10_1000_j_journal_2021_01_001`
+    Remember to replace this DOI with the DOI of the study you want to contribute, choose a publication (journal)
+    DOI if available, otherwise a preprint DOI.
+    If neither DOI is available, because this is unpublished data, for example, use an identifier that makes sense to
+    you, that is prefixed with `dno_doi` and contains a name of an author of the dataset, e.g.
+    `dno_doi_einstein_brain_atlas`.
+    We will refer to this name as `DOI-name` and it will be used to label the contributed code and the stored data.
+
+Pb. Check that the data loader was not already implemented.
     We will open issues for all planned data loaders, so you can search both the code_ base and our GitHub issues_ for
     matching data loaders before you start writing one.
+    You can also search for GEO IDs if our code base as they are included in the data URL that is annotated in the data
+    loader.
     The core data loader identified is the directory compatible doi,
     which is the doi with all special characters replaced by "_" and a "d" prefix is used:
     "10.1016/j.cell.2019.06.029" becomes "d10_1016_j_cell_2019_06_029".
@@ -30,314 +100,350 @@ The common workflow using the CLI looks as follows:
     preprint and publication DOIs if both are available.
     We will also mention publication names in issues, you will however not find these in the code.
 
+Pc. Prepare an installation of sfaira to use for data loader writing.
+    Instead of working in your own sfaira installation, you can download the sfaira data curation docker container
+    instead of going through any of the steps here.
+
+    Pc-docker.
+        1. Install docker.
+            TODO
+        2. Download the sfaira docker image.
+            TODO
+        3. Test run the sfaira CLI within the docker image.
+            TODO
+    Pc-conda.
+        Jump to 2d) if you do not require explanations of specifc parts of the shell script.
+
+        1. Install sfaira.
+            Clone sfaira into a local repository `DIR_SFAIRA`.
+
+            .. code-block::
+
+                cd DIR_SFAIRA
+                git clone https://github.com/theislab/sfaira.git
+                cd sfaira
+                git checkout dev
+            ..
+        2. Prepare a local branch of sfaira dedicated to your loader.
+            You can name this branch after the `DOI-name`, prefix this branch with `data/` as the code change suggested
+            is a data addition.
+
+            .. code-block::
+
+                cd DIR_SFAIRA
+                cd sfaira
+                git checkout dev
+                git pull
+                git checkout -b data/DOI-name
+            ..
+        3. Install sfaira into a conda environment.
+            You can for example use pip inside of a conda environment dedicated to data curation.
+
+            .. code-block::
+
+                cd DIR_SFAIRA
+                cd sfaira
+                git checkout -b data/DOI-name
+                conda create -n sfaira_loader
+                conda install -n sfaira_loader python=3.8
+                conda activate sfaira_loader
+                pip install -e .
+            ..
+        4. Summary of step 1-3.
+            P2a-c are all covered by the following code block, remember to name the git branch after your DOI:
+
+            .. code-block::
+
+                cd DIR_SFAIRA
+                git clone https://github.com/theislab/sfaira.git
+                cd sfaira
+                git checkout dev
+                git pull
+                git checkout -b data/DOI-name
+                conda create -n sfaira_loader
+                conda install -n sfaira_loader python=3.8
+                conda activate sfaira_loader
+                pip install -e .
+            ..
+
+Pd. Download the raw data into a local directory.
+    You will need to set a path in which the data files can be accessed by sfaira, in the following referred to as
+    `<path_data>/<DOI-name>/`.
+    Identify the raw data files and copy them into the datafolder `<path_data>/<DOI-name>/`.
+    Note that this should be the exact files that are downloadable from the download URL you provided in the dataloader:
+    Do not decompress these files if these files are archives such as zip, tar or gz.
+    In some cases, multiple processing forms of the raw data are available, some times even on different websites.
+    Follow these rules to disambiguate the data source for the data loader:
+
+    - Rule 1: Prefer unprocessed gene expression count data over normalised data.
+        Often it makes sense to provide author-normalised data in a curated object in addition to count data.
+    - Rule 2: Prefer dedicated data archives over websites that may be temporary
+        Examples of archives include EGA, GEO, zenodo, potentially temporary websites may be institute websites,
+        cloud files linked to a person's account.
+
+    Note that it may in exception cases make sense to collect count data and cell-wise meta data from different
+    locations, or similar, collect normalised and count matrices from different locations.
+    You can supply multiple data URLs below, so collect all relevant files in this phase.
+
+Pe. Get an overview of the published data.
+    Data curation is much easier if you an idea of what the data that you are curating looks like before you start.
+    Especially, you will notice a difference in your ability to fully leverage phase 1a if you prepare here.
+    We recommend you load the cell-wise and gene-wise meta in a python session
+    and explore the type of meta data provided there.
+    You will receive further guidance throughout the curation process here,
+    but we recommend that you try locate the following meta data items now already if they are annotated in the data set
+    and if they are shared across the dataset or specific to a feature or observation,
+    where the latter usually corresponds to a column in ``.obs`` or ``.var`` of a published ``.h5ad``,
+    or to a corresponding column in a tabular file:
+
+    - single-cell assay
+    - cell type
+    - developmental stage
+    - disease state
+    - ethnicity (only relevant for human samples)
+    - organ / tissue
+    - organism
+    - sex
+
+    Note that these are also the key ontology-restricted and required meta data in the cellxgene curation schema_.
+    Next, we recommend you briefly consider the available features:
+
+    - Are count matrices, processed matrices or spliced/unspliced RNA published?
+    - Which gene identifiers are used (symbols or ENSEMBL IDs)?
+    - Which non-RNA modalities are present in the data?
+
 .. _code: https://github.com/theislab/sfaira/tree/dev/sfaira/data/dataloaders/loaders
 .. _issues: https://github.com/theislab/sfaira/issues
+.. _schema: https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/2.0.0/schema.md
 
-2. Install sfaira.
-    Clone sfaira into a local repository from `dev` branch and install via pip.
+Phase 1: create
+~~~~~~~~~~~~~~~~
 
-.. code-block::
+This phase creates a skeleton for a data loader: `.__init__.py`, `.py` and `.yaml` files.
+Phase 1 is sub-structured into 2 sub-phases:
 
-    cd target_directory
-    git clone https://github.com/theislab/sfaira.git
-    git checkout dev
-    # git pull  # use this to update your installation
-    cd sfaira  # go into sfaira directory
-    pip install -e .  # install
-..
-
-3. Download data into local directory.
-    You will need to set a path in which the data files can be accessed by sfaira, in the following referred to as
-    `<path_data>/--DOI-folder--/`.
-    For now, you do not know `--DOI-folder--` yet and can call it temp.
-    You will then need to rename this folder `<path_data>/temp/` into `<path_data>/--DOI-folder--/` later when sfaira
-    gave you the name for this data set (after I.1).
-    Identify the raw data files and copy them into the datafolder `<path_data>/--DOI-folder--/`.
-    Note that this should be the exact files that are downloadable from the download URL you provided in the dataloader.
-    Do not decompress these files if these files are archives such as zip, tar or gz.
-    After finishing loader contribution, you can delete this data again without any consequences for your loader.
+* 1a: Create template files (``sfaira create-dataloader``).
+* 1b: Completion of created files (manual).
 
 
-Create a new data loader
-------------------------
-
-Phase I: Create a basic loader
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-1. Create template files
-
+1a. Create template files.
     When creating a dataloader with ``sfaira create-dataloader`` dataloader specific attributes such as organ, organism
     and many more are prompted for.
-    We provide a description of all meta data items at the bottom of this page.
-    If the requested information is not available simply hit enter and continue until done.
+    We provide a description of all meta data items at the bottom of this page,
+    note that these metadata underly specific formattig and ontology constraints described below.
+    If the requested information is not available simply hit enter to skip the entry.
+    Note that some meta data items are always defined per data set, e.g. a DOI,
+    whereas other meta data items may or may not be the same for all cells in a data set.
+    For example, an entire organ may belong to one disease condition or one organ, or may consist of a pool of multiple
+    samples that cover multiple values of the given metadata item.
+    The questionaire and YAML are set up to guide you through finding the best fit.
+    Note that annotating dataset-wide is preferable where possible as it results in briefer curation code.
+    The CLI decides on an `ID` of this dataset within the loader that you are writing, this will be used to label
+    all files associated with the current dataset.
+    The CLI tells you how to continue from here, phase 1b) is always necessary, phase 2) is case-dependent and mistakes
+    in naming the data folder in phase Pd) are flagged here.
 
-.. code-block::
+    1a-docker.
+        .. code-block::
 
-    # make sure you are in the top-level sfaira directory from step 1
-    git checkout -b YOUR_BRANCH_NAME  # create a new branch for your data loader.
-    sfaira create-dataloader [--doi] [--path-loader] [--path-data]
+            sfaira create-dataloader
+        ..
+    1a-conda.
+        In the following command, replace `DATA_DIR` with the path `<path_data>/` you used above.
+        You can optionally supply `--path-loader` to `create-dataloader` to change the location of the created data loader
+        to an arbitrary directory other than the internal collection of sfaira in `./sfaira/data/dataloaders/loaders/`.
+        Note: Use the default location if you want to commit and push changes from this sfaira clone.
 
-If `--doi` is not provided in the command above, the user will be prompted to enter it in the creation process.
-If `--path-loader` is not provided the following default location will be used: `./sfaira/data/dataloaders/loaders/`.
-If `--path-data` is not provided, the empty folder for the data files will be created in the following default location: `./sfaira/unit_tests/template_data/`.
-The created files are created in the sfaira installation under `<path-loader>/--DOI-folder--`,
-where the DOI-specific folder starts with `d` and is followed by the DOI in which all special characters are replaced
-by `_`, below referred to as `--DOI-folder--`:
+        .. code-block::
 
-.. code-block::
+            sfaira create-dataloader --path-data DATA_DIR
+        ..
+1b. Manual completion of created files (manual).
+    1. Correct yaml file.
+        Correct errors in `<path_loader>/<DOI-name>/ID.yaml` file and add
+        further attributes you may have forgotten in step 2.
+        See :ref:`sec-multiple-files` for short-cuts if you have multiple data sets.
+        This step is can be skipped if there are the `.yaml` is complete after phase 1a).
+    2. Write load function.
+        Complete the `load()` function in `<path_loader>/<DOI-name>/ID.py`.
 
-    ├── <path_loader>/--DOI-folder--
-        ├── extra_description.txt <- Optional extra description file
-        ├── __init__.py
-        ├── NA_NA_2021_NA_Einstein_001.py <- Contains the load function to load the data
-        ├── NA_NA_2021_NA_Einstein_001.yaml <- Specifies all data loader data
-    ├── <path_data>/--DOI-folder--
-..
+Phase 2: annotate
+~~~~~~~~~~~~~~~~~~~
 
-2. Correct yaml file.
-    Correct errors in `<path_loader>/--DOI-folder--/NA_NA_2021_NA_Einstein_001.yaml` file and add
-    further attributes you may have forgotten in step 2.
-    See :ref:`_sec-example_loader` for an example yaml file after this step.
-    See :ref:`_sec-multiple-files` for short-cuts if you have multiple data sets.
-    This step is optional.
+This phase creates annotation map files: `.tsv`.
+The metadata items that require annotation maps all non-empty entries that end on `*obs_key` under
+`dataset_or_observation_wise` in the `.yaml` which are subject to an ontology :ref:`field-descriptions:`.
+One file is created per such metadata `ITEM`, the corresponding file is `<path_loader>/<DOI-name>/<ID>_<ITEM>.tsv`
+This means that a variable number of such files is created and dependending on the scenario, even no such files may
+be necessary:
+Phase 2 can be entirely skipped if no annotation maps are necessary, this is indicated by the CLI at the end of phase 1a.
+Phase 2 is sub-structured into 2 sub-phases:
 
-3. Rename data folder.
-    Rename the data folder `<path_data>/temp/` into `<path_data>/--DOI-folder--/` if not done already.
+* 2a: Create metadata annotation files (``sfaira annotate-dataloader``).
+* 2b: Completion of annotation (manual).
 
-4. Write load function.
-    Complete the load function in `<path_loader>/--DOI-folder--/NA_NA_2021_NA_Einstein_001.py`.
-    See :ref:`_sec-example_loader` for an example load function after this step.
+2a. Create metadata annotation files (``sfaira annotate-dataloader``).
+    This creates `<path_loader>/<DOI-name>/ID*.tsv` files with meta data map suggestions for each meta data item that
+    requires such maps.
+    Note: You can identify the loader via ``--doi`` with the main DOI (ie. journal > preprint if both are defined)
+    or with the DOI-based data loader name defined by sfaira,
+    ie. ``<DOI-name>`` in ``<path_loader>/<DOI-name>``, which is either ``d10_*`` or ``dno_doi_*``.
 
-Phase II: Annotate data loader
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    2a-docker.
+        In the following command, replace `DOI` with the DOI of your data loader.
 
-1. Create cell type annotation if your data set is annotated.
-    This function will run fuzzy string matching between the annotations in the metadata column you provided in the
-    `cell_types_original_obs_key` attribute of the yaml file and the Cell Ontology Database.
-    Note that this will abort with error if there are bugs in your data loader.
+        .. code-block::
 
-.. code-block::
+            sfaira annotate-dataloader --doi DOI
+        ..
+    2a-conda.
+        In the following command, replace `DATA_DIR` with the path `<path_data>/` you used above and replace `DOI` with the
+        DOI of your data loader.
+        You can optionally supply `--path-loader` to `create-dataloader` if the data loader is not in the internal
+        collection of sfaira in `./sfaira/data/dataloaders/loaders/`.
 
-    # make sure you are in the top-level sfaira directory from step 1
-    sfaira annotate-dataloader [--doi] [--path_loader] [--path_data]
-..
+        .. code-block::
 
-2. Clean up the automated cell type maps.
-    Sfaira creates suggestions for cell type mapping in a `.tsv` file in the directory in which your data loaders is
-    located if you indicated that annotation is present by filling `cell_types_original_obs_key`.
-    This file is: `<path_loader>/--DOI-folder--/NA_NA_2021_NA_Einstein_001.tsv`.
-    This file contains two columns with one row for each unique cell type label.
-    The free text identifiers in the first column "source",
-    and the corresponding ontology term in the second column "target".
-    After running the `annotate-dataloader` function, you can find a number of suggestions for matching the existing
-    celltype labels to cell labels from the cell ontology. It is now up to you to pick the best match from the
-    suggestions and delete all others from the line in the `.tsv` file. In certain cases the string matching might
-    not give the desired result. In such a case you can manually search the Cell Ontology database for the best
-    match via the OLS_ web-interface.
-    Note that you do not have to include the non-human-readable `target_id` here as they are added later in a fully
-    automated fashion.
+            sfaira annotate-dataloader --doi DOI --path_data DATA_DIR
+        ..
+2b. Completion of annotation (manual).
+    Each `<path_loader>/<DOI-name>/ID*.tsv` file contains two columns with one row for each unique free-text meta data
+    item, e.g. each cell type label.
 
-3. Clean and test data loader.
-    This command will test data loading and will clean the cell type maps from II.2.
-    Note that this will abort with error if there are bugs in your data loader.
+    - The first column is labeled "source" and contains free-text identifiers.
+    - The second column is labeled "target" and contains suggestions for matching the symbols from the corresponding ontology.
 
-.. code-block::
+    The suggestions are based on multiple search criteria, mostly on similarity of the free-text token to tokes in the
+    ontology.
+    Suggested tokens are separated by ":" in the target column,
+    for each token, the same number of suggestions is supplied.
+    We use different search strategies on each token and separate the output by strategy by ":||:".
+    You might notice that one strategy works well for a particular `ID*.tsv` and focus your attention on that group.
+    It is now up to you to manually mitigate the suggestions in the "target" column of each `.tsv` file,
+    for example in a text editor.
+    Depending on the ontology and on the accuracy of the free-text annotation, these suggestions may be more or
+    less helpful.
+    The worst case is that you need to go to search engine of the ontology at hand for each entry to check for matches.
+    The best case is that you know the ontology well enough to choose from the suggestions,
+    assuming that the best match is in the suggestions.
+    Reality lies somewhere in the middle of the two, do not be too conservative with looking items up online.
+    We suggest to use the ontology search engine on the OLS_ web-interface for your manual queries.
+    For each meta data item, the correspond ontology is listed in the detailed meta data description
+    :ref:`field-descriptions`.
+    Make sure to read our notes on cell type curation :ref:`celltype-annotation`.
 
-    # make sure you are in the top-level sfaira directory from step 1
-    sfaira test-dataloader [--doi] [--path_loader] [--path_data]
-..
+    Note 1: If you compare these `ID*.tsv` to `tsv` files from published data loaders,
+    you will notice that published ones contain a third column.
+    This column is automatically added in phase 3 if the second column was correctly filled here.
+
+    Note 2: The two columns in the `ID*.tsv` are separated by a tab-separator ("\\t"),
+    make sure to not accidentally delete this token.
+    If you accidentally replace it with `" "`, you will receive errors in phase 3, so do a visual check after finishing
+    your work on each `ID*.tsv` file.
 
 .. _OLS:https://www.ebi.ac.uk/ols/ontologies/cl
 
-Phase III: Finish data loader
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Phase 3: finalize
+~~~~~~~~~~~~~~~~~~~~
 
-2. Make loader public.
-    You can contribute the data loader to public sfaira as code through a pull request.
-    Note that you can also just keep the data loader in your local installation or keep it in sfaira_extensions
-    if you do not want to make it public.
-    Note that we do not manage data upload!
-    During publication, you would upload this data set to a server like GEO and the data loader contributed to
-    sfaira would use this download link.
+3a. Clean and test data loader.
+    This command will test data loading and will format the metadata maps in `ID*.tsv` files from phase 2b).
+    If this command passes without further change requests, the data loader is finished and ready for phase 4.
+    Note: You can identify the loader via ``--doi`` with the main DOI (ie. journal > preprint if both are defined)
+    or with the DOI-based data loader name defined by sfaira,
+    ie. ``<DOI-name>`` in ``<path_loader>/<DOI-name>``, which is either ``d10_*`` or ``dno_doi_*``.
 
-.. code-block::
+    3a-docker.
+        In the following command, replace `DOI` with the DOI of your data loader.
 
-    # make sure you are in the top-level sfaira directory from step 1
-    git add *
-    git commit  # enter your commit description
-    # Next make sure you are up to date with dev
-    git checkout dev
-    git pull
-    git checkout YOUR_BRANCH_NAME
-    git merge dev
-    git push  # this starts the pull request.
-..
+        .. code-block::
 
-The following sections will first describe the underlying design principles of sfaira dataloaders and
-then explain how to interactively create, annotate and test dataloaders.
+            sfaira finalize-dataloader --doi DOI
+        ..
+    3a-conda.
+        In the following command, replace `DATA_DIR` with the path `<path_data>/` you used above and replace `DOI` with the
+        DOI of your data loader.
+        You can optionally supply `--path-loader` to `create-dataloader` if the data loader is not in the internal
+        collection of sfaira in `./sfaira/data/dataloaders/loaders/`.
 
+        .. code-block::
 
-Writing dataloaders
----------------------
-
-The study-centric data loader module
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-In the sfaira code, data loaders are organised into directories, which correspond to publications.
-All data loaders corresponding to data sets of one study are grouped into this directory.
-Next, each data set is represented by one data loader python file in this directory.
-See below for more complex set ups with repetitive data loader code.
-
-.. _sec-example-loader:
-The data loader python file
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Each data set, ie a single file or a set of files with similar structures, has its own data loader function and a yaml
-files that describes its meta data.
-Alternatively to the (preferred) yaml file, meta data can be also be described in a constructor of a class in the same python file
-as the loading function. For a documentation on writing a python class-based dataloader, please see here: https://github.com/theislab/sfaira/blob/dev/docs/adding_dataset_classes.rst
-A detailed description of all meta data is given at the bottom of this page.
-
-1. A yaml file or constructor of the following form that can be used to interact with the data set
-before it is loaded into memory:
-
-.. code-block:: yaml
-
-    dataset_structure:
-        dataset_index: 1
-        sample_fns:
-    dataset_wise:
-        author:
-        doi_preprint:
-        doi_journal:
-        download_url_data:
-        download_url_meta:
-        normalization:
-        primary_data:
-        year:
-    dataset_or_observation_wise:
-        assay_sc:
-        assay_sc_obs_key:
-        assay_differentiation:
-        assay_differentiation_obs_key:
-        assay_type_differentiation:
-        assay_type_differentiation_obs_key:
-        bio_sample:
-        bio_sample_obs_key:
-        cell_line:
-        cell_line_obs_key:
-        development_stage:
-        development_stage_obs_key:
-        disease_stage:
-        disease_obs_key:
-        ethnicity:
-        ethnicity_obs_key:
-        individual:
-        individual_obs_key:
-        organ:
-        organ_obs_key:
-        organism:
-        organism_obs_key:
-        sample_source:
-        sample_source_obs_key:
-        sex:
-        sex_obs_key:
-        state_exact:
-        state_exact_obs_key:
-        tech_sample:
-        tech_sample_obs_key:
-    observation_wise:
-        cell_types_original_obs_key:
-    feature_wise:
-        gene_id_ensembl_var_key:
-        gene_id_symbols_var_key:
-    meta:
-        version: "1.0"
+            sfaira finalize-dataloader --doi DOI --path_data DATA_DIR
+        ..
 
 
-2. A function called to load the data set into memory:
-It is important to set an automated path indicating the location of the raw files here.
-Our recommendation for this directory set-up is that you define a directory folder in your directory structure
-in which all of these raw files will be (self.path) and then add a sub-directory named as
-`self.directory_formatted_doi` (ie. the doi with all special characters replaced by "_" and place the raw files
-directly into this sub directory.
+Phase 4: publish
+~~~~~~~~~~~~~~~~~
 
-.. code-block:: python
+You will need to authenticate with GitHub during this phase.
+You can push the code from with the sfaira docker with a single command or you can use `git` directly:
 
-    def load(data_dir, fn=None) -> anndata.AnnData:
-        fn = os.path.join(data_dir, "my.h5ad")
-        adata = anndata.read(fn)  # loading instruction into adata, use other ones if the data is not h5ad
-        return adata
+4a. Push data loader to the public sfaira repository.
+    We will test the loader one last time, this test will not throw errors if you have not introduced changes since
+    phase 3.
+    Note: You can identify the loader via ``--doi`` with the main DOI (ie. journal > preprint if both are defined)
+    or with the DOI-based data loader name defined by sfaira,
+    ie. ``<DOI-name>`` in ``<path_loader>/<DOI-name>``, which is either ``d10_*`` or ``dno_doi_*``.
 
-In summary, a the dataloader for a mouse lung data set could look like this:
+    4a-docker.
+        If you are writing a data loader from within the sfaira data curation docker, you can run phase 4 with a single
+        command.
+        In the following command, replace `DOI` with the DOI of your data loader.
 
-.. code-block:: yaml
+        .. code-block::
 
-    dataset_structure:
-        dataset_index: 1
-        sample_fns:
-    dataset_wise:
-        author: "me"
-        doi_preprint: "my preprint"
-        doi_journal: "my journal"
-        download_url_data: "my GEO upload"
-        download_url_meta:
-        normalization: "raw"
-        primary_data:
-        year:
-    dataset_or_observation_wise:
-        assay_sc: "smart-seq2"
-        assay_sc_obs_key:
-        assay_differentiation:
-        assay_differentiation_obs_key:
-        assay_type_differentiation:
-        assay_type_differentiation_obs_key:
-        bio_sample:
-        bio_sample_obs_key:
-        cell_line:
-        cell_line_obs_key:
-        development_stage:
-        development_stage_obs_key:
-        disease_stage:
-        disease_obs_key:
-        ethnicity:
-        ethnicity_obs_key:
-        individual:
-        individual_obs_key:
-        organ: "lung"
-        organ_obs_key:
-        organism: "mouse"
-        organism_obs_key:
-        sample_source: "primary_tissue"
-        sample_source_obs_key:
-        sex:
-        sex_obs_key:
-        state_exact:
-        state_exact_obs_key:
-        tech_sample:
-        tech_sample_obs_key:
-    observation_wise:
-        cell_types_original_obs_key: "louvain_named"
-    feature_wise:
-        gene_id_ensembl_var_key:
-        gene_id_symbols_var_key:
-    meta:
-        version: "1.0"
+            sfaira test-dataloader --doi DOI
+            sfaira publish-dataloader
+        ..
+    4a-git.
+        You can contribute the data loader to public sfaira as code through a pull request.
+        Note that you can also just keep the data loader in your local installation if you do not want to make it
+        public.
+        In the following command, replace `DATA_DIR` with the path `<path_data>/` you used above and replace `DOI` with
+        the DOI of your data loader.
 
-.. code-block:: python
+        .. code-block::
 
-    def load(data_dir, fn=None) -> anndata.AnnData:
-        fn = os.path.join(data_dir, "my.h5ad")
-        adata = anndata.read(fn)
-        return adata
+            sfaira test-dataloader --doi DOI --path_data DATA_DIR
+            cd DIR_SFAIRA
+            cd sfaira
+            git add *
+            git commit -m "Completed data loader."
+            git push TODO put full line for branch creation here.
+        ..
+
+Phase 5: export-h5ad
+~~~~~~~~~~~~~~~~~~~~~
+
+Phase 5 and 6 are optional, see also introduction paragraphs on this documentation page.
+
+5a. Export `.h5ads`'s.
+    Write streamlined dataset(s) corresponding to data loader into (an) `.h5ad` file(s) according to a specific set of
+    rules (a schema).
+    Note: You can identify the loader via ``--doi`` with the main DOI (ie. journal > preprint if both are defined)
+    or with the DOI-based data loader name defined by sfaira,
+    ie. ``<DOI-name>`` in ``<path_loader>/<DOI-name>``, which is either ``d10_*`` or ``dno_doi_*``.
+
+    .. code-block::
+
+        sfaira export-h5ad --doi --schema --path-out --path_data [--path_loader]
+    ..
+
+Phase 6: validate-h5ad
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Phase 5 and 6 are optional, see also introduction paragraphs on this documentation page.
+
+6a. Validate format of `.h5ad` according to a specific set of rules (a schema).
+    .. code-block::
+
+        sfaira validate-h5ad --h5ad --schema
+    ..
 
 
-Data loaders can be added into a copy of the sfaira repository and can be used locally before they are contributed to
-the public sfaira repository.
-Alternatively, we also provide the optional dependency sfaira_extensions (https://github.com/theislab/sfaira_extension)
-in which local data and cell type annotation can be managed separately but still be loaded as usual through sfaira.
-The data loaders and cell type annotation formats between sfaira and sfaira_extensions are identical and can be easily
-copied over.
+
+Advanced topics
+----------------
 
 .. _sec-multiple-files:
 Loading multiple files of similar structure
@@ -388,6 +494,107 @@ The corresponding `load` function would be:
         adata = anndata.read(fn)
         return adata
 ..
+
+.. _sec-meta-studies:
+Loaders for meta studies or atlases
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Meta studies are studies on published gene expression data.
+Often, multiple previous studies are combined or meta data annotation is changed.
+Data sets from such meta studies can be added to sfaira just as primary data can be added,
+we ask for theses studies to be identified through the meta data attribute `primary_data`
+to allow sfaira users to avoid duplicate cells in data universe partitions.
+
+Let's consider an example case:
+Study ``A`` published 2 data sets ``A1`` and ``A2``.
+Study ``B`` published 1 data set ``B1``.
+Data loaders for ``A`` and ``B`` can label as ``primary_data: True``.
+Now, study ``C`` published 1 data set ``C1`` that consists of ``A2`` and ``B1``.
+We can write a data loaders for ``C`` and label it as ``primary_data: False``.
+Moreover, when conducting the study ``C``, we could even base our analyses directly on the data loaders of ``A2`` and
+``B1`` to make the data analysis pipeline more reproducible.
+
+.. _sec-celltype-annotation:
+Curating cell type annotation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Common challenges in cell type curation include the following:
+
+1. An free-text label is used that is not well captured by the automated search.
+    Often, these are abbreviations are synonyms that can be mapped to the ontology after looking these terms up online
+    or in the manuscript corresponding to the data loader.
+    Indeed, it is good practice to manually verify non-trivial cell type label maps with a quick contextualization in
+    manuscript figures or text.
+    As for all other ontology-constrained meta data, EBI OLS maintains a great interface to the ontology under CL_.
+2. The free-text labels contain nested annotation.
+    For example, a low-resolution cluster may be annotated as "T cell" in one data set, while other data sets within the
+    same study have more specific T cell labels.
+    Simply map each of these labels to their best fit ontology name, you do not need to mitigate differential
+    granularity.
+3. The free-text labels contain cellular phenotypes that map badly to the ontology.
+    A common example would be "cycling cells".
+    In some tissues, these phenotypes can be related to specific cell types through knowledge on the phenotypes of the
+    cell types that occur in that tissue.
+    If this is not possible or you do not know the tissue well enough,
+    you can leave the cell type as "UNKNOWN" and future curators may improve this annotaiton.
+    In cases such as "cycling T cell", you may just resort to the parent label "T cell" unless you have reason to
+    believe that "cycling" identifies a specific T cell subset here.
+4. The free-text labels are more fine-grained than the ontology.
+    A common example would be the addition of marker gene expression to cell cluster labels that are grouped under the
+    same ontology identifier.
+    Some times, these marker genes can be mapped to a child node of the ontology identifier.
+    However, often these indicate cell state variation or other, not fully attributed, variation and do not need to be
+    accounted for in this cell type curation step.
+    These are often among the hardest cell type curation problems, keep in mind that you want to find a reasonable
+    translation of the existing curation, you may be limited by the ontology or by the data reported by the authors,
+    so keep an eye on the overall effort that you spend on optimizing these label maps.
+5. A new cell type in annotated in free-text but is not available in the ontology yet.
+    This is most likely only a problem for a limited period of time in which the ontology works on adding this element.
+    Chose the best match from the ontology and leave an issue on the sfaira GitHub describing the missing cell type.
+    We can then later update this data loader once the ontology is updated.
+
+Multi-modal data
+~~~~~~~~~~~~~~~~~
+Multi-modal can be represented in the sfaira curation schema,
+here we briefly outline what modalities are supported and how they are accounted for.
+You can use any combination of orthogonal meta data, e.g. organ and disease annotation, with multi-modal measurements.
+
+- RNA:
+    RNA is the standard modality in sfaira, unless otherwise specified, all information in this document is centered
+    around RNA data.
+- ATAC:
+    We support scATAC-seq and joint scRNA+ATAC-seq (multiome) data.
+    In both cases, the ATAC data is commonly represented as a UMI count matrix of the dimensions
+    ``(observations x peaks)``.
+    Here, peaks are defined by a peak calling algorithm as part of the read processing pipeline upstream of sfaira.
+    Peak counts can be deposited in the core data matrices managed in sfaira.
+    The corresponding feature meta data can be set such that they allow differentiation of RNA and peak features.
+    These features are documented :ref:`dataset-or-feature-wise` and :ref:`feature-wise`.
+- protein quantification through antibody quantification:
+    We support CITE-seq and spatial molecular profiling assays with protein quantification read-outs.
+    In these cases, the protein data can be represented as a gene expression matrix of the dimensions
+    ``(observations x proteins)``.
+    In the case of oligo-nucleotide-tagged antibody quantification, e.g. in CITE-seq, this can also be an UMI matrix.
+    The corresponding feature meta data can be set such that they allow differentiation of RNA and protein features.
+    These features are documented :ref:`dataset-or-feature-wise` and :ref:`feature-wise`.
+- spatial:
+    A couple of single-cell and spot-based assays have spatial coordinates associated with molecular profiles.
+    We use relative coordinates of observations in a batch as ``(x, y, z)`` tuples to characterize the spatial
+    information.
+    Note that spatial proximity graphs and similar spatial analyses are down-stream analyses on these coordinates.
+    This features are documented :ref:`feature-wise`.
+- spliced, unspliced transcript and velocities:
+    We support gene expression matrices on the level of spliced and unspliced transcript
+    and the common processed format of a RNA velocity matrix.
+    Note that the velocity matrix depends on the inference procedure.
+    These matrices share ``.var`` annotation with the core RNA data matrix
+    and can, therefore, be supplemented as further layeres in the ``AnnData`` object without further effort.
+    This features is documented :ref:`data-matrices`.
+- V(D)J in TCR and BCR reconstructions:
+    V(D)J data is collected in parallel to RNA data in a couple of single-cell assays.
+    We use key meta data defined by the AIRR_ consortium to characterize the reconstructed V(D)J genes,
+    which are all direct outputs of V(D)J alignment pipelines and are are stored in ``.obs``.
+    This features are documented :ref:`feature-wise`.
 
 
 Loading third party annotation
@@ -441,95 +648,8 @@ either `Dataset`, `DatasetGroup` or `DatasetSuperGroup` to define data sets
 for which you want to load additional annotation and which additional you want to load for these.
 See also the docstrings of these functions for further details on how these can be set.
 
-
-Creating dataloaders with the commandline interface
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-sfaira features an interactive way of creating, formatting and testing dataloaders.
-The common workflow look as follows:
-
-1. Create a new dataloader with ``sfaira create-dataloader``
-2. Validate the dataloader with ``sfaira lint-dataloader <path>``
-3. Test the dataloader with ``sfaira test-dataloader . --doi <doi> --test-data <folder_above_test_data>``
-
-When creating a dataloader with ``sfaira create-dataloader`` common information such as
-your name and email are prompted for, followed by dataloader specific attributes such as organ, organism and many more.
-If the requested information is not available simply hit enter and continue until done. If you have mixed organ or organism
-data you will have to resolve this manually later. Your dataloader template will be created in your current working directory
-in a folder resembling your doi.
-
-The created files are:
-
-.. code-block::
-
-    ├── extra_description.txt <- Optional extra description file
-    ├── __init__.py
-    ├── NA_NA_2021_NA_Einstein_001.py <- Contains the load function to load the data
-    ├── NA_NA_2021_NA_Einstein_001.yaml <- Specifies all data loader data
-
-Now simply fill in all missing properties in your dataloader scripts and yaml file.
-When done optionally run ``sfaira clean-dataloader <path to *.yaml>`` on the just filled out dataloader yaml file.
-All unused attributes will be removed.
-
-Next validate the integrity of your dataloader content with ``sfaira validate-dataloader <path to *.yaml>``.
-All tests must pass! If any of the tests fail please revisit your dataloader and add the missing information.
-
-Finally, copy your dataloader into the ``sfaira/dataloaders/loaders/`` folder.
-Now you can test your dataloader with ``sfaira test-dataloader <path_to_sfaira> --doi <doi> --test-data <template_data_folder>``.
-Note that sfaira expects a folder structure for the test data such as:
-
-.. code-block::
-
-    ├── template_data
-    │   └── d10_1016_j_cmet_2019_01_021
-    │       ├── GSE117770_RAW.tar
-    │       ├── GSM3308545_NOD_08w_A_annotation.csv
-    │       ├── GSM3308547_NOD_08w_C_annotation.csv
-    │       ├── GSM3308548_NOD_14w_A_annotation.csv
-    │       ├── GSM3308549_NOD_14w_B_annotation.csv
-    │       ├── GSM3308550_NOD_14w_C_annotation.csv
-    │       ├── GSM3308551_NOD_16w_A_annotation.csv
-    │       ├── GSM3308552_NOD_16w_B_annotation.csv
-    │       └── GSM3308553_NOD_16w_C_annotation.csv
-
-Pass the path to the template_data folder, not the doi. Sfaira will use this path to cache further data for speedups.
-All tests must pass! If any of the tests fail please revisit your dataloader and fix the error.
-
-Map cell type labels to ontology
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The entries in `self.cell_types_original_obs_key` are free text but are mapped to an ontology via a .tsv file with
-the same name and directory as the python file in which the data loader is located.
-This .tsv contains two columns with one row for each unique cell type label.
-The free text identifiers in the first column "source",
-and the corresponding ontology term in the second column "target".
-You can write this file entirely from scratch.
-Sfaira also allows you to generate a first guess of this file using fuzzy string matching
-which is automatically executed when you run the template data loader unit test for the first time with you new loader.
-Conflicts are not resolved in this first guess and you have to manually decide which free text field corresponds to which
-ontology term in the case of conflicts.
-Still, this first guess usually drastically speeds up this annotation harmonization.
-
-Cell type ontology management
------------------------------
-
-Sfaira maintains a wrapper of the Cell Ontology as a class which allows additions to this ontology.
-This allows us to use the core ontology used in the community as a backbone and to keep up with newly identifed cell types on our own.
-We require all extensions of the core ontology not to break the directed acyclic graph that is the ontology:
-Usually, such extensions would be additional leave nodes.
-
-Second, we maintain cell type universes for anatomic structures.
-These are dedicated for cell type-dependent models which require a defined set of cell types.
-Such a universe is a set of nodes in the ontology.
-
-Contribute cell types to ontology
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Please open an issue on the sfaira repo with a description what type of cell type you want to add.
-
-
-Metadata
---------
+Metadata conventions and ontologies
+------------------------------------
 
 Required fields
 ~~~~~~~~~~~~~~~
@@ -544,12 +664,16 @@ Required are:
 - feature_wise: gene_id_ensembl_var_key or gene_id_symbols_var_key is required.
 - misc: None are required.
 
+.. _sec-field-descriptions:
 Field descriptions
-~~~~~~~~~~~~~~~~~~
+-------------------
 
 We constrain meta data by ontologies where possible.
 Meta data can either be dataset-wise, observation-wise or feature-wise.
 
+.. _sec-dataset-structure:
+Dataset structure
+~~~~~~~~~~~~~~~~~~
 Dataset structure meta data are in the section `dataset_structure` in the `.yaml` file.
 
 - dataset_index [int]
@@ -560,7 +684,12 @@ Dataset structure meta data are in the section `dataset_structure` in the `.yaml
     If there are multiple data files which can be covered by one `load()` function and `.yaml` file because they are
     structured similarly, these can identified here.
     See also section `Loading multiple files of similar structure`.
+    You can simply hardcode a file name in the ``load()`` function and skip defining it here
+    if you are writing a single file loader.
 
+.. _sec-dataset-wise:
+Dataset-wise
+~~~~~~~~~~~~~
 Dataset-wise meta data are in the section `dataset_wise` in the `.yaml` file.
 
 - author [list of strings]
@@ -577,22 +706,74 @@ Dataset-wise meta data are in the section `dataset_wise` in the `.yaml` file.
     Full URLs of all observation-wise meta data files such as count matrices.
     This attribute is optional and not necessary ff observation-wise meta data is already in the files defined in
     `download_url_data`, e.g. often the case for .h5ad`.
-- normalization: Data normalisation {"raw", "scaled"}
-    Type of normalisation of data stored in `adata.X` emitted by the `load()` function.
+- primary_data: If this is the first publication to report this gene expression data {True, False}.
+    This is False if the study is a meta study that uses data that was previously published.
+    This usually implies that one can also write a data loader for the data from the primary study.
+    Usually, the data here contains new meta data or is combined with other data sets (e.g. in an "atlas"),
+    Therefore, this data loader is different from a data laoder for the primary data.
+    In sfaira, we maintain data loaders both for the corresponding primary and such meta data publications.
+    See also the section on meta studies :ref:`meta-studies`.
 - year: Year in which sample was first described [integer]
     Pre-print publication year.
 
-Meta-data which can either be dataset- or observation-wise are in the section `dataset_or_observation_wise` in the
-`.yaml` file.
+.. _sec-data-matrices:
+Data matrices
+~~~~~~~~~~~~~~
+A curated AnnData object may contain multiple data matrices:
+raw and processed gene expression counts, or spliced and unspliced count data and velocity estimates, for example.
+Minimally, you need to supply either of the matrices "counts" or "processed".
+In the following, "*counts" refers to the INTEGER count of alignment events (e.g. transcripts for RNA).
+In the following, "*processed" refers to any processing that modifies these counts, for example:
+normalization, batch correction, ambient RNA correction.
+
+- layer_counts: The total event counts per feature, e.g. UMIs that align to a gene. {'X', 'raw', or a .layers key}
+- layer_processed: Processed complement of 'layer_counts'. {'X', 'raw', or a .layers key}
+- layer_spliced_counts: The total spliced RNA counts per gene. {a .layers key}
+- layer_spliced_processed: Processed complement of 'layer_spliced_counts'. {a .layers key}
+- layer_unspliced_counts:  The total unspliced RNA counts per gene. {a .layers key}
+- layer_unspliced_processed: Processed complement of 'layer_unspliced_counts'. {a .layers key}
+- layer_velocity: The RNA velocity estimates per gene. {a .layers key}
+
+.. _sec-dataset-or-feature-wise:
+Dataset- or feature-wise
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+These meta data may be defined across the entire dataset or per feature
+and are in the section `dataset_or_feature_wise` in the `.yaml` file:
+They can all be supplied as `NAME` or as `NAME_var_key`:
+The former indicates that the entire data set has the value stated in the yaml.
+The latter, `NAME_var_key`, indicates that there is a column in `adata.var` emitted by the `load()` function of the name
+`NAME_var_key` which contains the annotation per feature for this meta data item.
+Note that in both cases the value, or the column values, have to fulfill constraints imposed on the meta data item as
+
+- feature_reference and feature_reference_var_key [string]
+    The genome annotation release that was used to quantify the features presented here,
+    e.g. "Homo_sapiens.GRCh38.105".
+- feature_type and feature_type_var_key {"rna", "protein", "peak"}
+    The type of a feature:
+
+    - "rna": gene expression quantification on the level of RNA
+        e.g. from scRNA-seq or spatial RNA capture experiments
+    - "protein": gene expression quantification on the level of proteins
+        e.g. via antibody counts in CITE-seq or spatial protocols
+    - "peak": chromatin accessibility by peak
+        e.g. from scATAC-seq
+
+.. _sec-dataset-or-observation-wise:
+Dataset- or observation-wise
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+These meta data may be defined across the entire dataset or per observation
+and are in the section `dataset_or_observation_wise` in the `.yaml` file:
 They can all be supplied as `NAME` or as `NAME_obs_key`:
 The former indicates that the entire data set has the value stated in the yaml.
 The latter, `NAME_obs_key`, indicates that there is a column in `adata.obs` emitted by the `load()` function of the name
 `NAME_obs_key` which contains the annotation per observation for this meta data item.
-Note that in both cases the value, or the column values, have to fulfill contraints imposed on the meta data item as
+Note that in both cases the value, or the column values, have to fulfill constraints imposed on the meta data item as
 outlined below.
 
 - assay_sc and assay_sc_obs_key [ontology term]
-    Choose a term from https://www.ebi.ac.uk/ols/ontologies/efo/terms?iri=http%3A%2F%2Fwww.ebi.ac.uk%2Fefo%2FEFO_0010183&viewMode=All&siblings=false
+    The EFO_ label corresponding to single-cell assay of the sample.
+    The corresponding subset of EFO_SUBSET_ is the set of child nodes of "single cell library construction"
+    (EFO:0010183).
 - assay_differentiation and assay_differentiation_obs_key [string]
     Try to provide a base differentiation protocol (eg. "Lancaster, 2014") as well as any amendments to the original
     protocol.
@@ -608,15 +789,28 @@ outlined below.
     researchers to distinguish technical and biological replicates within one study for example.
     See also the meta data items `individual` and `tech_sample`.
 - cell_line and cell_line_obs_key [ontology term]
-    Cell line name from the cellosaurus cell line database (https://web.expasy.org/cellosaurus/)
+    Cell line name from the cellosaurus_ cell line database.
+- cell_type and cell_type_obs_key [ontology term]
+    Cell type name from the Cell Ontology CL_ database.
+    Note that sometimes, original (free-text) cell type annotation is provided at different granularities.
+    We recommend choosing the most fine-grained annotation here so that future re-annotation of the cell types in this
+    loader is easier.
+    You may choose to compromise the potential for re-annotation of the data loader with the size of the mapping `.tsv`
+    that is generated during annotation:
+    This file has one row for free text label and may be undesirably large in some cases, which reduces accessibilty of
+    the data loader code for future curators, thus presenting a trade-off.
+    See also the section on cell type annotation :ref:`celltype-annotation`.
 - developmental_stage and developmental_stage_obs_key [ontology term]
     Developmental stage (age) of individual sampled.
-    Choose from HSAPDV (https://www.ebi.ac.uk/ols/ontologies/hsapdv) for human
-    or from MMUSDEV (https://www.ebi.ac.uk/ols/ontologies/mmusdv) for mouse.
+    Choose from HSAPDV_ for human
+    or from MMUSDEV_ for mouse.
 - disease and disease_obs_key [ontology term]
-    Choose from MONDO (https://www.ebi.ac.uk/ols/ontologies/mondo) for human
+    Choose from MONDO_.
 - ethnicity and ethnicity_obs_key [ontology term]
-    Choose from HANCESTRO (https://www.ebi.ac.uk/ols/ontologies/hancestro)
+    Choose from HANCESTRO_.
+- gm and gm_obs_key [string]
+    Genetic modification. E.g. identify gene knock-outs or over-expression as a boolean indicator per cell or as
+    guide RNA counts in approaches like CROP-seq or PERTURB-seq.
 - individual and individual_obs_key [string]
     Column name in `adata.obs` emitted by the `load()` function which reflects the indvidual sampled as a categorical
     variable.
@@ -627,16 +821,22 @@ outlined below.
     researchers to distinguish sample groups that originate from biological material with distinct genotypes.
     See also the meta data items `individual` and `tech_sample`.
 - organ and organ_obs_key [ontology term]
-    The UBERON anatomic location of the sample (https://www.ebi.ac.uk/ols/ontologies/uberon).
-- organism and organism_obs_key. {"mouse", "human"}.
-    The organism from which the sample originates.
-    In the future, we will use NCBITAXON (https://www.ebi.ac.uk/ols/ontologies/ncbitaxon).
+    The UBERON_ label of the sample.
+    This meta data item ontology is for tissue or organ identifiers from UBERON.
+- organism and organism_obs_key. [ontology term]
+    The NCBItaxon_ label of the sample.
+    For example, "Homo sapiens" or "Mus musculus".
 - primary_data [bool]
     Whether contains cells that were measured in this study (ie this is not a meta study on published data).
 - sample_source and sample_source_obs_key. {"primary_tissue", "2d_culture", "3d_culture", "tumor"}
     Which cellular system the sample was derived from.
-- sex and sex_obs_key. Sex of individual sampled. {"female", "male", None}
-    Sex of the individual sampled.
+- sex and sex_obs_key. Sex of individual sampled. [ontology term]
+    The PATO_ label corresponding to sex of the sample.
+    The corresponding subset of PATO_SUBSET_ is the set of child nodes of "phenotypic sex" (PATO:0001894).
+- source_doi and source_doi_obs_key [string]
+    If this dataset is not primary data, you can supply the source of the analyzed data as a DOI per dataset or per cell
+    in this meta data item.
+    The value of this metadata item (or the entries in the corresponding ``.obs`` column) needs to be a DOI
 - state_exact and state_exact_obs_key [string]
     Free text description of condition.
     If you give treatment concentrations, intervals or similar measurements use square brackets around the quantity
@@ -650,24 +850,97 @@ outlined below.
     keys with `*` in this string, e.g. `patient*treatment*protocol` to get one `tech_sample` for each patient, treatment
     and measurement protocol.
     See also the meta data items `individual` and `tech_sample`.
+- treatment and treatment_obs_key [string]
+    Treatment of sample, e.g. compound names in stimulation experiments.
 
-Meta-data which are strictly observation-wise are in the section `observation_wise` in the `.yaml` file:
+.. _sec-feature-wise:
+Feature-wise
+~~~~~~~~~~~~~
+These meta data are always defined per feature and are in the section `feature_wise` in the `.yaml` file:
 
-- cell_types_original_obs_key [string]
-    Column name in `adata.obs` emitted by the `load()` function which contains free text cell type labels.
-
-Meta-data which are feature-wise are in the section `feature_wise` in the `.yaml` file:
-
-- gene_id_ensembl_var_key [string]
+- feature_id_var_key [string]
     Name of the column in `adata.var` emitted by the `load()` which contains ENSEMBL gene IDs.
     This can also be "index" if the ENSEMBL gene names are in the index of the `adata.var` data frame.
-- gene_id_symbols_var_key:.[string]
+    Note that you do not have to map IDs to a specific annotation release but can keep them in their original form.
+    If available, IDs are preferred over symbols.
+- feature_symbol_var_key [string]
     Name of the column in `adata.var` emitted by the `load()` which contains gene symbol:
     HGNC for human and MGI for mouse.
     This can also be "index" if the gene symbol are in the index of the `adata.var` data frame.
+    Note that you do not have to map symbols to a specific annotation release but can keep them in their original form.
 
-The meta data on the meta data file do not have to modified by you are automatically controlled are in the section
-`meta` in the `.yaml` file:
+.. _sec-observation-wise:
+Observation-wise
+~~~~~~~~~~~~~~~~~
+These meta data are always defined per observation and are in the section `observation_wise` in the `.yaml` file:
+
+The following items are only relevant for spatially resolved data, e.g. spot transcriptomics or MERFISH:
+
+- spatial_x_coord, spatial_y_coord, spatial_z_coord  [string]
+    Spatial coordinates (numeric) of observations.
+    Most commonly, the centre of a segment or of a spot is indicated here.
+    For 2D data, a z-coordinate is not relevant and can be skipped.
+
+The following items are only relevant for V(D)J reconstruction data, e.g. TCR or BCR sequencing in single cells.
+These meta data items are described in the AIRR_ project, search the this link for the element in question without
+the prefixed "vdj\_".
+These 10 meta data items describe chains (or loci).
+In accordance with the corresponding scirpy defaults_, we allow for up to two loci per cell.
+In T cells, this correspond to two VJ loci (TRA) and two VDJ loci (TRB).
+You can set the prefix of the column of each of the four loci below.
+In total, these 10+4 meta data queries in sfaira describe 4*10 columns in ``.obs`` after ``.load()``.
+Note that for this to work, you need to stick to the naming convention ``PREFIX_SUFFIX``.
+We recommend that you use ``scirpy.io`` functions for reading the VDJ data in your ``load()``
+to use the default meta data keys suggested by the CLI and to guarantee that this naming convention is obeyed.
+
+- vdj_vj_1_obs_key_prefix
+    Prefix of key of columns corresponding to first VJ gene.
+- vdj_vj_2_obs_key_prefix
+    Prefix of key of columns corresponding to second VJ gene.
+- vdj_vdj_1_obs_key_prefix
+    Prefix of key of columns corresponding to first VDJ gene.
+- vdj_vdj_2_obs_key_prefix
+    Prefix of key of columns corresponding to second VDJ gene.
+- vdj_c_call_obs_key_suffix
+    Suffix of key of columns corresponding to C gene.
+- vdj_consensus_count_obs_key_suffix
+    Suffix of key of columns corresponding to number of reads contributing to consensus.
+- vdj_d_call_obs_key_suffix
+    Suffix of key of columns corresponding to D gene.
+- vdj_duplicate_count_obs_key_suffix
+    Suffix of key of columns corresponding to number of duplicate UMIs.
+- vdj_j_call_obs_key_suffix
+    Suffix of key of columns corresponding to J gene.
+- vdj_junction_obs_key_suffix
+    Suffix of key of columns corresponding to junction nt sequence.
+- vdj_junction_aa_obs_key_suffix
+    Suffix of key of columns corresponding to junction aa sequence.
+- vdj_locus_obs_key_suffix
+    Suffix of key of columns corresponding to gene locus,
+    i.e IGH, IGK, or IGL for BCR data and TRA, TRB, TRD, or TRG for TCR data.
+- vdj_productive_obs_key_suffix
+    Suffix of key of columns corresponding to locus productivity:
+    whether the V(D)J gene is productive.
+- vdj_v_call_obs_key_suffix
+    Suffix of key of columns corresponding to V gene.
+
+Meta
+~~~~~
+These meta data contain information about the curation process and schema:
 
 - version: [string]
     Version identifier of meta data scheme.
+
+.. _AIRR: https://docs.airr-community.org/en/latest/datarep/rearrangements.html
+.. _cellosaurus: https://web.expasy.org/cellosaurus/
+.. _CL: https://www.ebi.ac.uk/ols/ontologies/cl
+.. _EFO: https://www.ebi.ac.uk/ols/ontologies/efo
+.. _EFO_SUBSET: https://www.ebi.ac.uk/ols/ontologies/efo/terms?iri=http%3A%2F%2Fwww.ebi.ac.uk%2Fefo%2FEFO_0010183&viewMode=All&siblings=false
+.. _HANCESTRO: https://www.ebi.ac.uk/ols/ontologies/hancestro
+.. _HSAPDV: https://www.ebi.ac.uk/ols/ontologies/hsapdv
+.. _MONDO: https://www.ebi.ac.uk/ols/ontologies/mondo
+.. _MMUSDEV: https://www.ebi.ac.uk/ols/ontologies/mmusdv
+.. _NCBItaxon: https://www.ebi.ac.uk/ols/ontologies/ncbitaxon
+.. _PATO: https://www.ebi.ac.uk/ols/ontologies/pato
+.. _PATO_SUBSET: https://www.ebi.ac.uk/ols/ontologies/pato/terms?iri=http%3A%2F%2Fpurl.obolibrary.org%2Fobo%2FPATO_0001894&viewMode=PreferredRoots&siblings=false
+.. _UBERON: https://www.ebi.ac.uk/ols/ontologies/uberon

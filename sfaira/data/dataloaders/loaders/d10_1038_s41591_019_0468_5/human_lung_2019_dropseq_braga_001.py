@@ -16,7 +16,7 @@ class Dataset(DatasetBase):
         self.author = "Braga"
         self.disease = "healthy"
         self.doi_journal = "10.1038/s41591-019-0468-5"
-        self.normalization = "raw"
+        self.layer_counts = "X"
         self.organ = "lung"
         self.organism = "Homo sapiens"
         self.primary_data = True
@@ -24,7 +24,8 @@ class Dataset(DatasetBase):
         self.state_exact = "uninvolved areas of tumour resection material"
         self.year = 2019
 
-        self.gene_id_symbols_var_key = "index"
+        self.feature_symbol_var_key = "index"
+        self.feature_type = "rna"
         self.cell_type_obs_key = "celltype"
 
         self.set_dataset_id(idx=1)
