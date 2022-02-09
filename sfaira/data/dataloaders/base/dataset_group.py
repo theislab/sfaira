@@ -8,6 +8,7 @@ import os
 from os import PathLike
 import pandas
 import pydoc
+import sys
 from typing import Dict, List, Union
 import warnings
 
@@ -708,12 +709,20 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
             elif package_source == "sfaira_extension":
                 package_source = "sfairae"
             else:
-                raise ValueError(f"invalid package source {package_source} for {self._cwd}")
+                package_source = "external"
         except IndexError as e:
             raise IndexError(f"{e} for {self._cwd}")
         loader_pydoc_path_sfaira = "sfaira.data.dataloaders.loaders."
         loader_pydoc_path_sfairae = "sfaira_extension.data.dataloaders.loaders."
-        loader_pydoc_path = loader_pydoc_path_sfaira if package_source == "sfaira" else loader_pydoc_path_sfairae
+        if package_source == "sfaira":
+            loader_pydoc_path = loader_pydoc_path_sfaira
+        elif package_source == "sfaira_extension":
+            loader_pydoc_path = loader_pydoc_path_sfairae
+        else:
+            external_dir = os.path.dirname(os.path.dirname(file_base))
+            if external_dir not in sys.path:
+                sys.path.append(external_dir)
+            loader_pydoc_path = ""
 
         # List all files:
         fns = [x for x in os.listdir(self._cwd) if os.path.isfile(os.path.join(self._cwd, x))]

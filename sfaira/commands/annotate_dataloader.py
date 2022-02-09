@@ -5,9 +5,10 @@ from rich import print
 import shutil
 from typing import Union
 
+from sfaira.commands.utils import get_pydoc
+from sfaira.consts.utils import clean_doi
 from sfaira.data import DatasetGroupDirectoryOriented, DatasetGroup, DatasetBase
 from sfaira.data.utils import read_yaml
-from sfaira.consts.utils import clean_doi
 
 try:
     import sfaira_extension as sfairae
@@ -20,12 +21,9 @@ class DataloaderAnnotater:
     def __init__(self):
         self.WD = os.path.dirname(__file__)
         self.file_path = None
-        self.file_path_sfairae = None
         self.meta_path = None
         self.cache_path = None
-        self.dir_loader = None
-        self.dir_loader_sfairae = None
-        self.package_source = None
+        self.pydoc_handle = None
 
     def annotate(self, path_loader: str, path_data: str, doi: Union[str, None]):
         """
@@ -40,42 +38,23 @@ class DataloaderAnnotater:
         You can also manually check maps here: https://www.ebi.ac.uk/ols/ontologies/cl
         """
         doi_sfaira_repr = clean_doi(doi)
-        self._setup_loader(doi_sfaira_repr)
+        self._setup_loader(path_loader, doi_sfaira_repr)
         self._annotate(path_data, path_loader, doi, doi_sfaira_repr)
 
-    def _setup_loader(self, doi_sfaira_repr: str):
+    def _setup_loader(self, path_loader: str, doi_sfaira_repr: str):
         """
         Define the file names, loader paths and base paths of loader collections for sfaira and sfaira_extension
         """
-        dir_loader_sfaira = "sfaira.data.dataloaders.loaders."
-        file_path_sfaira = os.sep + os.sep.join(pydoc.locate(dir_loader_sfaira + "FILE_PATH").split(os.sep)[:-1])
-        if sfairae is not None:
-            dir_loader_sfairae = "sfaira_extension.data.dataloaders.loaders."
-            file_path_sfairae = os.sep + os.sep.join(pydoc.locate(dir_loader_sfairae + "FILE_PATH").split(os.sep)[:-1])
-        else:
-            file_path_sfairae = None
-        # Check if loader name is a directory either in sfaira or sfaira_extension loader collections:
-        if doi_sfaira_repr in os.listdir(file_path_sfaira):
-            dir_loader = dir_loader_sfaira + "." + doi_sfaira_repr
-            package_source = "sfaira"
-        elif doi_sfaira_repr in os.listdir(file_path_sfairae):
-            dir_loader = dir_loader_sfairae + "." + doi_sfaira_repr
-            package_source = "sfairae"
-        else:
-            raise ValueError("data loader not found in sfaira and also not in sfaira_extension")
-        file_path = pydoc.locate(dir_loader + ".FILE_PATH")
+        file_path, pydoc_handle = get_pydoc(path_loader=path_loader, doi_sfaira_repr=doi_sfaira_repr)
         meta_path = None
         cache_path = None
         # Clear dataset cache
         shutil.rmtree(cache_path, ignore_errors=True)
 
         self.file_path = file_path
-        self.file_path_sfairae = file_path_sfairae
         self.meta_path = meta_path
         self.cache_path = cache_path
-        self.dir_loader = dir_loader
-        self.dir_loader_sfairae = None if sfairae is None else dir_loader_sfairae
-        self.package_source = package_source
+        self.pydoc_handle = pydoc_handle
 
     def _get_ds(self, test_data: str):
         ds = DatasetGroupDirectoryOriented(
@@ -119,22 +98,13 @@ class DataloaderAnnotater:
 
                     # I) Instantiate Data set group to get all IDs of data sets associated with this .py file.
                     # Note that all data sets in this directory are already loaded in ds, so we just need the IDs.
-                    DatasetFound = pydoc.locate(self.dir_loader + "." + file_module + ".Dataset")
+                    DatasetFound = pydoc.locate(self.pydoc_handle + "." + file_module + ".Dataset")
                     # Load objects from name space:
                     # - load(): Loading function that return anndata instance.
                     # - SAMPLE_FNS: File name list for DatasetBaseGroupLoadingManyFiles
-                    load_func = pydoc.locate(self.dir_loader + "." + file_module + ".load")
-                    load_func_annotation = pydoc.locate(self.dir_loader + "." + file_module + ".LOAD_ANNOTATION")
-                    # Also check sfaira_extension for additional load_func_annotation:
-                    if self.package_source != "sfairae" and sfairae is not None:
-                        load_func_annotation_sfairae = pydoc.locate(self.dir_loader_sfairae + "." + dataset_module +
-                                                                    "." + file_module + ".LOAD_ANNOTATION")
-                        # LOAD_ANNOTATION is a dictionary so we can use update to extend it.
-                        if load_func_annotation_sfairae is not None and load_func_annotation is not None:
-                            load_func_annotation.update(load_func_annotation_sfairae)
-                        elif load_func_annotation_sfairae is not None and load_func_annotation is None:
-                            load_func_annotation = load_func_annotation_sfairae
-                    sample_fns = pydoc.locate(self.dir_loader + "." + file_module + ".SAMPLE_FNS")
+                    load_func = pydoc.locate(self.pydoc_handle + "." + file_module + ".load")
+                    load_func_annotation = pydoc.locate(self.pydoc_handle + "." + file_module + ".LOAD_ANNOTATION")
+                    sample_fns = pydoc.locate(self.pydoc_handle + "." + file_module + ".SAMPLE_FNS")
                     fn_yaml = os.path.join(cwd, file_module + ".yaml")
                     fn_yaml = fn_yaml if os.path.exists(fn_yaml) else None
                     # Check for sample_fns in yaml:
@@ -195,17 +165,18 @@ class DataloaderAnnotater:
         print('[bold orange]Sfaira butler: "Up next:"')
         self.action_counter = 1
         print(f'[bold orange]               "{self.action_counter}) Proceed to chose ontology symbols for each free '
-              f'text label in the tsv files:\n')
+              f'text label in the tsv files:"')
         for prefix, attrs in tsvs_written:
             for attr in attrs:
-                print(f'[bold orange]                    -{prefix}_{attr}')
-        print('[bold orange]                Each tsv has two columns: free text labels found in the data on the left '
-              'and suggestions on the right. Each suggested symbol lies between two : characters.\n'
-              '[bold orange]                \':\' is a separator between suggested symbols and :|||: between symbol '
-              'groups that were found through different search strategies.\n'
-              '[bold orange]                Take care to not remove the \\t separators in the table.\n'
-              '[bold orange]                You only need to finish the second column now - the third column with '
-              'ontology IDs is added automatically to this table in phase 3 (finalize)."')
+                print(f'[bold orange]                    -{prefix}_{attr}.tsv')
+        print('[bold orange]                "Each tsv has two columns: free text labels found in the data on the left '
+              'and suggestions on the right."')
+        print('[bold orange]                "Each suggested symbol lies between two : characters."')
+        print('[bold orange]                "\':\' is a separator between suggested symbols and :|||: between symbol '
+              'groups that were found through different search strategies."')
+        print('[bold orange]                "Take care to not remove the \\t separators in the table."')
+        print('[bold orange]                "You only need to finish the second column now."')
+        print('[bold orange]                "The third column with ontology IDs is added by `finalize` in phase 3."')
         self.action_counter += 1
         print(f'[bold orange]               "{self.action_counter}) Then proceed to finish .yaml file if not already '
               f'done."')

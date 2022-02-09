@@ -2,8 +2,8 @@ import logging
 import os
 from rich import print
 import shutil
-import pydoc
 
+from sfaira.commands.utils import get_pydoc
 from sfaira.consts.utils import clean_doi
 from sfaira.data import DatasetGroupDirectoryOriented
 
@@ -17,10 +17,10 @@ log = logging.getLogger(__name__)
 
 class DataloaderTester:
 
-    def __init__(self, path, test_data, doi):
+    def __init__(self, path_loader, path_data, doi):
         self.WD = os.path.dirname(__file__)
-        self.path = path
-        self.test_data = test_data
+        self.path_loader = path_loader
+        self.path_data = path_data
         self.cwd = os.getcwd()
         self.doi = doi
         self.doi_sfaira_repr = ''
@@ -33,27 +33,14 @@ class DataloaderTester:
         self._test_dataloader(clean_tsvs=clean_tsvs, in_phase_3=in_phase_3)
 
     def _get_ds(self):
-        dir_loader_sfaira = "sfaira.data.dataloaders.loaders."
-        file_path_sfaira = os.path.dirname(str(pydoc.locate(dir_loader_sfaira + "FILE_PATH")))
-
-        dir_loader_sfairae = "sfaira_extension.data.dataloaders.loaders." if sfairae else None
-        file_path_sfairae = os.path.dirname(str(pydoc.locate(dir_loader_sfairae + "FILE_PATH"))) if sfairae else None
-
-        # Check if loader name is a directory either in sfaira or sfaira_extension loader collections:
-        if self.doi_sfaira_repr in os.listdir(file_path_sfaira):
-            dir_loader = dir_loader_sfaira + "." + self.doi_sfaira_repr
-        elif file_path_sfairae and self.doi_sfaira_repr in os.listdir(file_path_sfairae):
-            dir_loader = dir_loader_sfairae + "." + self.doi_sfaira_repr
-        else:
-            raise ValueError("data loader not found in sfaira and also not in sfaira_extension")
-        file_path = str(pydoc.locate(dir_loader + ".FILE_PATH"))
+        file_path, _ = get_pydoc(path_loader=self.path_loader, doi_sfaira_repr=self.doi_sfaira_repr)
         cache_path = None
         # Clear dataset cache
         shutil.rmtree(cache_path, ignore_errors=True)
 
         ds = DatasetGroupDirectoryOriented(
             file_base=file_path,
-            data_path=self.test_data,
+            data_path=self.path_data,
             meta_path=None,
             cache_path=None
         )
