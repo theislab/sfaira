@@ -130,7 +130,7 @@ class Dataset(DatasetBase):
         self.organ_obs_key = self._adata_ids_cellxgene.organ
         self.state_exact_obs_key = self._adata_ids_cellxgene.state_exact
 
-        self.gene_id_symbols_var_key = self._adata_ids_cellxgene.feature_symbol
+        self.feature_symbol_var_key = self._adata_ids_cellxgene.feature_symbol
 
         self._unknown_celltype_identifiers = self._adata_ids_cellxgene.unknown_metadata_identifier
 

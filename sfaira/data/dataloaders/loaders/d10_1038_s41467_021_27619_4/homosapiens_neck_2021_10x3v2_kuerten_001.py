@@ -15,7 +15,7 @@ def load(data_dir, sample_fn, **kwargs):
                           sep="\t", index_col=0)
         obs.index.name = None
         var = pd.read_csv(tar.extractfile(f"{sample_fn}_features.tsv.gz"), compression="gzip", header=None, sep="\t")
-        var.columns = ["ensembl", "symbol"]
+        var.columns = ["ensembl", "symbol", "feature_class"]
         var.index = var["ensembl"].values
         adata = anndata.AnnData(X=x, obs=obs, var=var)
     # Annotate organism in .var

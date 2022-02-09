@@ -1,0 +1,12 @@
+source	target	target_id
+BC	skin basal cell carcinoma	MONDO:0005341
+BCL	B-cell neoplasm	MONDO:0004095
+CHOL	cholangiocarcinoma	MONDO:0019087
+ESCA	carcinoma of esophagus	MONDO:0019086
+FTC	fallopian tube cancer	MONDO:0002158
+MM	myeloid neoplasm	MONDO:0005170
+OV	ovarian cancer	MONDO:0008170
+PACA	malignant pancreatic neoplasm	MONDO:0009831
+RC	renal carcinoma	MONDO:0005206
+THCA	thyroid gland carcinoma	MONDO:0015075
+UCEC	uterine corpus endometrial carcinoma	MONDO:0000553

@@ -20,16 +20,16 @@ class Dataset(DatasetBase):
         super().__init__(**kwargs)
         if self.sample_fn == "madissoon19_lung.processed.h5ad":
             self.download_url_data = "https://covid19.cog.sanger.ac.uk/madissoon19_lung.processed.h5ad"
-            self.gene_id_ensembl_var_key = "gene.ids.HCATisStab7509734"
+            self.feature_id_var_key = "gene.ids.HCATisStab7509734"
         elif self.sample_fn == "oesophagus.cellxgene.h5ad":
             self.download_url_data = \
                 "https://cellgeni.cog.sanger.ac.uk/tissue-stability/tissue-stability/oesophagus.cellxgene.h5ad"
             # Associated DCP: https://data.humancellatlas.org/explore/projects/c4077b3c-5c98-4d26-a614-246d12c2e5d7
-            self.gene_id_ensembl_var_key = "gene_ids-HCATisStab7413619"
+            self.feature_id_var_key = "gene_ids-HCATisStab7413619"
         else:
             self.download_url_data = \
                 "https://cellgeni.cog.sanger.ac.uk/tissue-stability/tissue-stability/spleen.cellxgene.h5ad"
-            self.gene_id_ensembl_var_key = "gene_ids-HCATisStab7463846"
+            self.feature_id_var_key = "gene_ids-HCATisStab7463846"
 
         self.download_url_meta = None
 
@@ -37,7 +37,7 @@ class Dataset(DatasetBase):
         self.author = "Madissoon"
         self.disease = "healthy"
         self.doi_journal = "10.1186/s13059-019-1906-x"
-        self.normalization = "raw"  # ToDo "madissoon19_lung.processed.h5ad" is close to integer but not quire (~1e-4)
+        self.layer_counts = "X"  # ToDo "madissoon19_lung.processed.h5ad" is close to integer but not quire (~1e-4)
         self.organ = "lung parenchyma" if self.sample_fn == "madissoon19_lung.processed.h5ad" else \
             "esophagus" if self.sample_fn == "oesophagus.cellxgene.h5ad" else "spleen"
         self.organism = "Homo sapiens"
@@ -45,7 +45,8 @@ class Dataset(DatasetBase):
         self.year = 2019
         self.sample_source = "primary_tissue"
 
-        self.gene_id_symbols_var_key = "index"
+        self.feature_symbol_var_key = "index"
+        self.feature_type = "rna"
         self.cell_type_obs_key = "Celltypes"
 
         self.set_dataset_id(idx=1)

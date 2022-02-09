@@ -1,12 +1,12 @@
 import os
 from typing import List, Union
 
-from sfaira.data.store.multi_store import DistributedStoresDao, DistributedStoresH5ad, \
-    DistributedStoreMultipleFeatureSpaceBase
+from sfaira.data.store.stores.multi import StoresDao, StoresH5ad, \
+    StoreMultipleFeatureSpaceBase
 
 
-def load_store(cache_path: Union[str, os.PathLike], store_format: str = "dao",
-               columns: Union[None, List[str]] = None) -> DistributedStoreMultipleFeatureSpaceBase:
+def load_store(cache_path: Union[str, os.PathLike, List[str], List[os.PathLike]], store_format: str = "dao",
+               columns: Union[None, List[str]] = None) -> StoreMultipleFeatureSpaceBase:
     """
     Instantiates a distributed store class.
 
@@ -25,10 +25,10 @@ def load_store(cache_path: Union[str, os.PathLike], store_format: str = "dao",
     :return: Instances of a distributed store class.
     """
     if store_format == "h5ad":
-        return DistributedStoresH5ad(cache_path=cache_path, in_memory=True)
+        return StoresH5ad(cache_path=cache_path, in_memory=True)
     elif store_format == "dao":
-        return DistributedStoresDao(cache_path=cache_path, columns=columns)
+        return StoresDao(cache_path=cache_path, columns=columns)
     elif store_format == "h5ad_backed":
-        return DistributedStoresH5ad(cache_path=cache_path, in_memory=False)
+        return StoresH5ad(cache_path=cache_path, in_memory=False)
     else:
         raise ValueError(f"Did not recognize store_format {store_format}.")

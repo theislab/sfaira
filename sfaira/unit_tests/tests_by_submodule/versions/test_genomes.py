@@ -4,7 +4,7 @@ from typing import Tuple, Union
 
 from sfaira.versions.genomes import GenomeContainer, translate_id_to_symbols, translate_symbols_to_id
 
-RELEASE = "102"
+RELEASE = "105"
 ORGANISM = "Mus musculus"
 
 """
@@ -31,7 +31,7 @@ def test_gc_subsetting(subset: Tuple[dict, int]):
     """
     Tests if genome container is subsetted correctly.
     """
-    gc = GenomeContainer(release=RELEASE, organism=ORGANISM)
+    gc = GenomeContainer(release="102", organism=ORGANISM)
     gc.set(**subset[0])
     assert gc.n_var == subset[1]
     assert len(gc.ensembl) == subset[1]
@@ -39,6 +39,17 @@ def test_gc_subsetting(subset: Tuple[dict, int]):
     assert len(gc.biotype) == subset[1]
     if list(subset[0].keys())[0] == "protein_coding":
         assert np.all(gc.biotype == "protein_coding")
+
+
+@pytest.mark.parametrize("organism", ["Caenorhabditis elegans",
+                                      "Callithrix jacchus",
+                                      "Sus scrofa"])
+def test_gc_nonstandard_organism(organism: str):
+    """
+    Tests if genome container works for selected non-standard organism.
+    """
+    gc = GenomeContainer(release=RELEASE, organism=organism)
+    assert gc.n_var > 10
 
 
 """

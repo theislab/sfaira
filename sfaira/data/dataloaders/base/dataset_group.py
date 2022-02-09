@@ -377,7 +377,7 @@ class DatasetGroup:
                 warnings.warn(f"Attempted to write ontology class-maps for meta data {x} without corresponding "
                               "annotation in any data set.")
             else:
-                labels_original = np.concatenate(labels_original)
+                labels_original = np.sort(np.unique(np.concatenate(labels_original)))
                 # Only use anatomic constraint if all data sets are from same organ.
                 # TODO this could be extended in the future.
                 organs = np.unique(organs)

@@ -21,15 +21,16 @@ class Dataset(DatasetBase):
         self.author = "Regev"
         self.disease = "healthy"
         self.doi_journal = "no_doi_regev"
-        self.normalization = "raw"
+        self.layer_counts = "X"
         self.organ_obs_key = "derived_organ_parts_label"
         self.organism = "Homo sapiens"
         self.primary_data = True
         self.sample_source = "primary_tissue"
         self.year = 2018
 
-        self.gene_id_symbols_var_key = "index"
-        self.gene_id_ensembl_var_key = "Accession"
+        self.feature_id_var_key = "Accession"
+        self.feature_symbol_var_key = "index"
+        self.feature_type = "rna"
 
         self.set_dataset_id(idx=1)
 
