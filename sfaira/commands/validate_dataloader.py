@@ -233,6 +233,7 @@ class DataloaderValidator:
             attributes['dataset_wise'].append("default_embedding")
             attributes['dataset_or_observation_wise'] = [[x, x + "_obs_key"] for x in [
                 'assay_sc',
+                'cell_type',
                 'development_stage',
                 'disease',
                 'ethnicity',
