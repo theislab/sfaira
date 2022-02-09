@@ -1,0 +1,11 @@
+source	target	target_id
+B cells sorted from frozen PBMC (MACS, STEMCELL 19054)	blood	UBERON:0000178
+CD19+ B cell sorted from fresh PBMC (FACS)	blood	UBERON:0000178
+CD19+ B cell sorted from fresh PBMC (MACS)	blood	UBERON:0000178
+CD3+ T cell and CD19+ B cell sorted from fresh PBMC (FACS)	blood	UBERON:0000178
+CD3+ T cell sorted from fresh PBMC (FACS)	blood	UBERON:0000178
+fresh BALF	lung	UBERON:0002048
+fresh PBMC	blood	UBERON:0000178
+fresh PFMC	lung	UBERON:0002048
+fresh Sputum	lung	UBERON:0002048
+frozen PBMC	blood	UBERON:0000178

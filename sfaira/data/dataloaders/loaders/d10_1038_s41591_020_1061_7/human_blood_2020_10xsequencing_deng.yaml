@@ -1,0 +1,111 @@
+dataset_structure:
+     dataset_index: 1
+     sample_fns:
+        - "GSM4579891_ac01_bc_matrix.tar.gz"
+        - "GSM4579892_ac02_bc_matrix.tar.gz"
+        - "GSM4579893_ac03_bc_matrix.tar.gz"
+        - "GSM4579894_ac04_bc_matrix.tar.gz"
+        - "GSM4579895_ac05_bc_matrix.tar.gz"
+        - "GSM4579896_ac06_bc_matrix.tar.gz"
+        - "GSM4579897_ac07_bc_matrix.tar.gz"
+        - "GSM4579898_ac08_bc_matrix.tar.gz"
+        - "GSM4579899_ac09_bc_matrix.tar.gz"
+        - "GSM4579900_ac10_bc_matrix.tar.gz"
+        - "GSM4579901_ac11_bc_matrix.tar.gz"
+        - "GSM4579902_ac12_bc_matrix.tar.gz"
+        - "GSM4579903_ac13_bc_matrix.tar.gz"
+        - "GSM4579904_ac14_bc_matrix.tar.gz"
+        - "GSM4579905_ac15_bc_matrix.tar.gz"
+        - "GSM4579906_ac16_bc_matrix.tar.gz"
+        - "GSM4579907_ac17_bc_matrix.tar.gz"
+        - "GSM4579908_ac18_bc_matrix.tar.gz"
+        - "GSM4579909_ac19_bc_matrix.tar.gz"
+        - "GSM4579910_ac20_bc_matrix.tar.gz"
+        - "GSM4579911_ac21_bc_matrix.tar.gz"
+        - "GSM4579912_ac22_bc_matrix.tar.gz"
+        - "GSM4579913_ac23_bc_matrix.tar.gz"
+        - "GSM4579914_ac24_bc_matrix.tar.gz"
+dataset_wise:
+    author: "Deng, Qing"
+    default_embedding: 
+    doi_preprint: 
+    doi_journal: "10.1038/s41591-020-1061-7"
+    download_url_data: "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE151511&format=file"
+    download_url_meta: "https://static-content.springer.com/esm/art%3A10.1038%2Fs41591-020-1061-7/MediaObjects/41591_2020_1061_MOESM3_ESM.xlsx"
+    primary_data: True
+    year: 2020
+layers:
+    layer_counts: "X"
+    layer_processed:
+    layer_spliced_counts:
+    layer_spliced_processed:
+    layer_unspliced_counts:
+    layer_unspliced_processed:
+    layer_velocity:
+dataset_or_feature_wise:
+    feature_reference:
+    feature_reference_var_key:
+    feature_type: "rna"
+    feature_type_var_key:
+dataset_or_observation_wise:
+    assay_sc: "10x 5' transcription profiling"
+    assay_sc_obs_key:
+    assay_differentiation:
+    assay_differentiation_obs_key: 
+    assay_type_differentiation:
+    assay_type_differentiation_obs_key:
+    bio_sample:
+    bio_sample_obs_key: 
+    cell_line:
+    cell_line_obs_key:
+    cell_type: "alpha-beta T cell"
+    cell_type_obs_key: 
+    development_stage: 
+    development_stage_obs_key: "Age"
+    disease: 
+    disease_obs_key: "Histology"
+    ethnicity:
+    ethnicity_obs_key:
+    gm:
+    gm_obs_key:
+    individual:
+    individual_obs_key: 
+    organ: "blood"
+    organ_obs_key: 
+    organism: "Homo sapiens"
+    organism_obs_key:
+    sample_source: "primary_tissue"
+    sample_source_obs_key:
+    sex:
+    sex_obs_key: "Gender"
+    source_doi:
+    source_doi_obs_key:
+    state_exact: "CAR T cells"
+    state_exact_obs_key:
+    tech_sample:
+    tech_sample_obs_key: "Sample ID"
+    treatment:
+    treatment_obs_key:
+feature_wise:
+    feature_id_var_key: "ensembl"
+    feature_symbol_var_key: "names"
+observation_wise:
+    spatial_x_coord_obs_key:
+    spatial_y_coord_obs_key:
+    spatial_z_coord_obs_key:
+    vdj_vj_1_obs_key_prefix:
+    vdj_vj_2_obs_key_prefix:
+    vdj_vdj_1_obs_key_prefix:
+    vdj_vdj_2_obs_key_prefix:
+    vdj_c_call_obs_key_suffix:
+    vdj_consensus_count_obs_key_suffix:
+    vdj_d_call_obs_key_suffix:
+    vdj_duplicate_count_obs_key_suffix:
+    vdj_j_call_obs_key_suffix:
+    vdj_junction_obs_key_suffix:
+    vdj_junction_aa_obs_key_suffix:
+    vdj_locus_obs_key_suffix:
+    vdj_productive_obs_key_suffix:
+    vdj_v_call_obs_key_suffix:
+meta:
+    version: "1.2"
