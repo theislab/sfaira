@@ -47,7 +47,7 @@ a preparatory phase P precedes CLI execution and is described in this documentat
 - Phase 1 (``create``): a `load()` function (in a `.py`) and a YAML are written.
 - Phase 2 (``annotate``): ontology-specific maps of free-text metadata to contrained vocabulary (in `*.tsv`) are written.
 - Phase 3 (``finalize``): the data loader is tested and metadata are cleaned up.
-- Phase 4 (``upload``): the data loader is uploaded to the sfaira GitHub repository.
+- Phase 4 (``publish``): the data loader is uploaded to the sfaira GitHub repository.
 
 An experienced curator could skip using the CLI for phase 1 and write the `__init__.py`, `ID.py` and `ID.yaml` by hand.
 In this case, we still highly recommend using the CLI for phase 2 and 3.
