@@ -190,20 +190,22 @@ class DataloaderAnnotater:
                         protected_writing=True,
                         n_suggest=4,
                     )
-                    tsvs_written.append(fn_tsv)
+                    tsvs_written.append((fn_tsv, attrs))
         print("[bold blue]Completed annotation.")
         print('[bold orange]Sfaira butler: "Up next:"')
         self.action_counter = 1
-        tsv_file_overview = "\n".join(tsvs_written)
         print(f'[bold orange]               "{self.action_counter}) Proceed to chose ontology symbols for each free '
-              f'text label in the tsv files:\n{tsv_file_overview}\n'
-              '                Each tsv has two columns: free text labels found in the data on the left and suggestions'
-              ' on the right. Each suggested symbol lies between two : characters.\n'
-              '                \':\' is a separator between suggested symbols and :|||: between symbol groups that '
-              'were found through different search strategies.\n'
-              '                Take care to not remove the \\t separators in the table.\n'
-              '                You only need to finish the second column now - the third column with ontology IDs is '
-              'added automatically to this table in phase 3 (finalize)."')
+              f'text label in the tsv files:\n')
+        for prefix, attrs in tsvs_written:
+            for attr in attrs:
+                print(f'[bold orange]                    -{prefix}_{attr}')
+        print('[bold orange]                Each tsv has two columns: free text labels found in the data on the left '
+              'and suggestions on the right. Each suggested symbol lies between two : characters.\n'
+              '[bold orange]                \':\' is a separator between suggested symbols and :|||: between symbol '
+              'groups that were found through different search strategies.\n'
+              '[bold orange]                Take care to not remove the \\t separators in the table.\n'
+              '[bold orange]                You only need to finish the second column now - the third column with '
+              'ontology IDs is added automatically to this table in phase 3 (finalize)."')
         self.action_counter += 1
         print(f'[bold orange]               "{self.action_counter}) Then proceed to finish .yaml file if not already '
               f'done."')

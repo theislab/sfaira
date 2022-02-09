@@ -25,6 +25,8 @@ class DatasetGroupCellxgene(DatasetGroup):
     ):
         self._collection = None
         dataset_ids = [x["id"] for x in get_collection(collection_id=collection_id)['datasets']]
+        if len(dataset_ids) == 0:
+            print(f"WARNING: Zero data sets retrieved for cellxgene collection {collection_id}.")
         loader_pydoc_path_sfaira = "sfaira.data.dataloaders.databases.cellxgene.cellxgene_loader"
         load_func = pydoc.locate(loader_pydoc_path_sfaira + ".load")
         datasets = [
@@ -70,6 +72,10 @@ class DatasetSuperGroupCellxgene(DatasetSuperGroup):
     ):
         self._collections = None
         # Get all collection IDs and instantiate one data set group per collection.
+        # Throw warning in collection are not obtained:
+        collections = self.collections
+        if len(collections) == 0:
+            print("WARNING: Zero cellxgene collections retrieved.")
         # Note that the collection itself is not passed to DatasetGroupCellxgene but only the ID string.
         dataset_groups = [
             DatasetGroupCellxgene(
@@ -79,7 +85,7 @@ class DatasetSuperGroupCellxgene(DatasetSuperGroup):
                 cache_path=cache_path,
                 verbose=verbose,
             )
-            for x in self.collections
+            for x in collections
         ]
         super().__init__(dataset_groups=dataset_groups)
 

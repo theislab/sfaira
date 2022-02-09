@@ -5,11 +5,6 @@ import pandas as pd
 import scipy.io
 import tarfile
 
-sex_map = {"M": "male", "F": "female"}
-disease_map = {"DLBCL": "diffuse large B-cell lymphoma",
-               "tFL": "follicular lymphoma",
-               "PMBCL": "primary mediastinal large B-cell lymphoma"}
-
 
 def load(data_dir, sample_fn, **kwargs):
     fn = [os.path.join(data_dir, "GSE151511_RAW.tar"),
@@ -30,9 +25,7 @@ def load(data_dir, sample_fn, **kwargs):
 
     adata.obs['Sample ID'] = name
     adata.obs = adata.obs.reset_index().merge(metadata, on='Sample ID').set_index("index")
-    adata.obs["Age"] = [f"{x}-year-old human stage" for x in adata.obs["Age"].values]
-    adata.obs["Gender"] = adata.obs["Gender"].map(sex_map)
-    adata.obs["Histology"] = adata.obs["Histology"].map(disease_map)
+    adata.obs["Age"] = [str(x) for x in adata.obs["Age"].values]
 
     adata.obs = adata.obs.astype(str)
     return adata

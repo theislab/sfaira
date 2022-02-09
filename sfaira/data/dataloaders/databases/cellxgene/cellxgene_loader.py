@@ -161,6 +161,9 @@ class Dataset(DatasetBase):
 
     @property
     def _collection_dataset(self):
+        print(self.collection['datasets'])
+        print(self._sample_fns)
+        print(self.sample_fn)
         return self.collection['datasets'][self._sample_fns.index(self.sample_fn)]
 
     @property
