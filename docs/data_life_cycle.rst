@@ -3,6 +3,10 @@
 The data life cycle
 ===================
 
+.. image:: https://raw.githubusercontent.com/theislab/sfaira/release/resources/images/figure_rtd_api_data.png
+   :width: 600px
+   :align: center
+
 The life cycle of a single-cell count matrix often looks as follows:
 
     1. **Generation** from primary read data in a read alignment pipeline.

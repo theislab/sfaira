@@ -16,6 +16,10 @@ This directory is part of the sfaira python package and, thus, maintained on Git
 This allows for data loaders to be maintained via GitHub workflows: contribution and fixes via pull requests and
 deployment via repository cloning and package installation.
 
+.. image:: https://raw.githubusercontent.com/theislab/sfaira/release/resources/images/figure_rtd_dataloader.png
+   :width: 600px
+   :align: center
+
 A dataloader consists of four file components within a single directory:
 
 1. `__init__.py` file which is has same content in all loaders,
@@ -43,7 +47,7 @@ a preparatory phase P precedes CLI execution and is described in this documentat
 - Phase 1 (``create``): a `load()` function (in a `.py`) and a YAML are written.
 - Phase 2 (``annotate``): ontology-specific maps of free-text metadata to contrained vocabulary (in `*.tsv`) are written.
 - Phase 3 (``finalize``): the data loader is tested and metadata are cleaned up.
-- Phase 4 (``upload``): the data loader is uploaded to the sfaira GitHub repository.
+- Phase 4 (``publish``): the data loader is uploaded to the sfaira GitHub repository.
 
 An experienced curator could skip using the CLI for phase 1 and write the `__init__.py`, `ID.py` and `ID.yaml` by hand.
 In this case, we still highly recommend using the CLI for phase 2 and 3.
@@ -65,6 +69,10 @@ The resulting `.h5ad` can be shared with collaborators or uploaded to data submi
 
 Create a new data loader
 -------------------------
+
+.. image:: https://raw.githubusercontent.com/theislab/sfaira/release/resources/images/figure_rtd_dataloader_create.png
+   :width: 600px
+   :align: center
 
 Phase P: Preparation
 ~~~~~~~~~~~~~~~~~~~~~

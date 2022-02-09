@@ -3,7 +3,7 @@
 Using data loaders
 ====================
 
-.. image:: https://raw.githubusercontent.com/theislab/sfaira/master/resources/images/data_zoo.png
+.. image:: https://raw.githubusercontent.com/theislab/sfaira/release/resources/images/figure_rtd_data.png
    :width: 600px
    :align: center
 
