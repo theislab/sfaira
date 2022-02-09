@@ -40,10 +40,10 @@ class DataloaderAnnotater:
         You can also manually check maps here: https://www.ebi.ac.uk/ols/ontologies/cl
         """
         doi_sfaira_repr = clean_doi(doi)
-        self._setup_loader(doi_sfaira_repr, path_loader)
+        self._setup_loader(doi_sfaira_repr)
         self._annotate(path_data, path_loader, doi, doi_sfaira_repr)
 
-    def _setup_loader(self, doi_sfaira_repr: str, path_loader: str):
+    def _setup_loader(self, doi_sfaira_repr: str):
         """
         Define the file names, loader paths and base paths of loader collections for sfaira and sfaira_extension
         """
@@ -61,9 +61,6 @@ class DataloaderAnnotater:
         elif doi_sfaira_repr in os.listdir(file_path_sfairae):
             dir_loader = dir_loader_sfairae + "." + doi_sfaira_repr
             package_source = "sfairae"
-        elif doi_sfaira_repr in os.listdir(path_loader):
-            dir_loader = path_loader + "." + doi_sfaira_repr
-            package_source = "external"
         else:
             raise ValueError("data loader not found in sfaira and also not in sfaira_extension")
         file_path = pydoc.locate(dir_loader + ".FILE_PATH")
