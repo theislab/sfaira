@@ -21,6 +21,7 @@ class DatasetGroupCellxgene(DatasetGroup):
             data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
+            cache_metadata: bool = False,
             verbose: int = 0,
     ):
         self._collection = None
@@ -38,6 +39,7 @@ class DatasetGroupCellxgene(DatasetGroup):
                 load_func=load_func,
                 sample_fn=x,
                 sample_fns=dataset_ids,
+                cache_metadata=cache_metadata,
                 verbose=verbose,
             )
             for x in dataset_ids
@@ -68,6 +70,7 @@ class DatasetSuperGroupCellxgene(DatasetSuperGroup):
             data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
+            cache_metadata: bool = False,
             verbose: int = 0,
     ):
         self._collections = None
@@ -83,6 +86,7 @@ class DatasetSuperGroupCellxgene(DatasetSuperGroup):
                 data_path=data_path,
                 meta_path=meta_path,
                 cache_path=cache_path,
+                cache_metadata=cache_metadata,
                 verbose=verbose,
             )
             for x in collections
