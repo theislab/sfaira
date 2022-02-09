@@ -1,0 +1,22 @@
+source	target	target_id
+HSP.high	activated CD4-positive, alpha-beta T cell	CL:0000896
+IFN.high	activated CD4-positive, alpha-beta T cell	CL:0000896
+Mitotic	CD4-positive, alpha-beta T cell	CL:0000624
+TCM (resting)	central memory CD4-positive, alpha-beta T cell	CL:0000904
+TCM1 (Th0)	central memory CD4-positive, alpha-beta T cell	CL:0000904
+TCM2 (Th0)	central memory CD4-positive, alpha-beta T cell	CL:0000904
+TCM2 (Th17/iTreg)	induced T-regulatory cell	CL:0000902
+TEM (Th0)	effector memory CD4-positive, alpha-beta T cell	CL:0000905
+TEM (Th17/iTreg)	induced T-regulatory cell	CL:0000902
+TEM (resting)	effector memory CD4-positive, alpha-beta T cell	CL:0000905
+TEMRA (Th0)	effector memory CD4-positive, alpha-beta T cell, terminally differentiated	CL:0001087
+TEMRA (Th17/iTreg)	induced T-regulatory cell	CL:0000902
+TEMRA (resting)	effector memory CD4-positive, alpha-beta T cell, terminally differentiated	CL:0001087
+TN (Th0)	activated CD4-positive, alpha-beta T cell	CL:0000896
+TN (Th17)	T-helper 17 cell	CL:0000899
+TN (Th17/iTreg)	induced T-regulatory cell	CL:0000902
+TN (Th2)	T-helper 2 cell	CL:0000546
+TN (iTreg)	induced T-regulatory cell	CL:0000902
+TN (resting)	naive thymus-derived CD4-positive, alpha-beta T cell	CL:0000895
+nTreg (Th0)	natural T-regulatory cell	CL:0000903
+nTreg (resting)	natural T-regulatory cell	CL:0000903

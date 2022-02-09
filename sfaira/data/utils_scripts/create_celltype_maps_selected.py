@@ -80,7 +80,7 @@ if os.path.isdir(os.path.join(dir_sfaira_dataloaders, dir_study)):  # only direc
                         match_to_reference=False,
                         remove_gene_version=False,
                     )
-                    dsg_f.write_ontology_class_map(
+                    dsg_f.write_ontology_class_maps(
                         fn=os.path.join(dir_sfaira_dataloaders, dir_study, file_module + ".tsv"),
                         protected_writing=True,
                         n_suggest=4,
