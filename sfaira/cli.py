@@ -161,7 +161,7 @@ def annotate_dataloader(doi, path_data, path_loader, schema) -> None:
 
 
 @sfaira_cli.command()
-@click.option('--doi', type=str, default=None, help="The doi of the paper that the data loader refers to.")
+@click.option('--doi', type=str, help="The doi of the paper that the data loader refers to.")
 @click.option('--path-loader',
               default=PACKAGE_LOADER_PATH,
               type=click.Path(exists=False),
@@ -172,7 +172,7 @@ def validate_dataloader(doi, path_loader, schema) -> None:
     Verifies the dataloader against sfaira's requirements.
     """
     path_loader, _, _ = set_paths(loader=path_loader)
-    if doi is None or doi_lint(doi):
+    if doi_lint(doi):
         dataloader_validator = DataloaderValidator(path_loader=path_loader, doi=doi, schema=schema)
         dataloader_validator.validate()
     else:
