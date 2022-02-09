@@ -71,7 +71,6 @@ class Dataset(DatasetBase):
             sample_fn: Union[str, None] = None,
             sample_fns: Union[List[str], None] = None,
             additional_annotation_key: Union[str, None] = None,
-            cache_metadata: bool = False,
             verbose: int = 0,
             **kwargs
     ):
@@ -86,7 +85,6 @@ class Dataset(DatasetBase):
         # General keys are defined in the shared IDs object. Further down, the species specific one is loaded to
         # disambiguate species-dependent differences.
         self._adata_ids_cellxgene = AdataIdsCellxgene()
-        self._cache_metadata = cache_metadata
         self._collection = None
         self.collection_id = collection_id
         self.supplier = "cellxgene"
@@ -132,7 +130,7 @@ class Dataset(DatasetBase):
         self.organ_obs_key = self._adata_ids_cellxgene.organ
         self.state_exact_obs_key = self._adata_ids_cellxgene.state_exact
 
-        self.feature_symbol_var_key = self._adata_ids_cellxgene.feature_symbol
+        self.gene_id_symbols_var_key = self._adata_ids_cellxgene.feature_symbol
 
         self._unknown_celltype_identifiers = self._adata_ids_cellxgene.unknown_metadata_identifier
 
@@ -149,23 +147,16 @@ class Dataset(DatasetBase):
 
     @property
     def collection(self):
-        """
-        Cached collection meta data.
-
-        Note on caching: updates to the remote collection break these caches.
-        Disbale caching are clear caches manually (~/.cache/sfaira/dataset_meta/cellxgene) if this causes issues.
-        """
         if self._collection is None:
             # Check if cached:
-            if os.path.exists(self._collection_cache_fn) and self._cache_metadata:
+            if os.path.exists(self._collection_cache_fn):
                 with open(self._collection_cache_fn, "rb") as f:
                     self._collection = pickle.load(f)
             else:
                 # Download and cache:
                 self._collection = get_collection(collection_id=self.collection_id)
-                if self._cache_metadata:
-                    with open(self._collection_cache_fn, "wb") as f:
-                        pickle.dump(obj=self._collection, file=f)
+                with open(self._collection_cache_fn, "wb") as f:
+                    pickle.dump(obj=self._collection, file=f)
         return self._collection
 
     @property

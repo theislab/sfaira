@@ -23,15 +23,14 @@ class Dataset(DatasetBase):
         self.disease = "healthy"
         self.doi_journal = "10.15252/embj.20105114"
         self.doi_preprint = "10.1101/2020.03.13.991455"
-        self.layer_counts = "X"
+        self.normalization = "raw"
         self.organ = "lung"
         self.organism = "Homo sapiens"
         self.primary_data = True
         self.sample_source = "primary_tissue"
         self.year = 2020
 
-        self.feature_symbol_var_key = "index"
-        self.feature_type = "rna"
+        self.gene_id_symbols_var_key = "index"
         self.cell_type_obs_key = "CellType"
 
         self.set_dataset_id(idx=1)

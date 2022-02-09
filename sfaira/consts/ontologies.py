@@ -77,27 +77,28 @@ class OntologyContainerSfaira:
             self._assay_sc = OntologyEfo(**kwargs)
         elif attr == "cell_line":
             self._cell_line = OntologyCellosaurus(**kwargs)
-        elif attr == "cell_type":
+        elif attr == "cellontology_class":
             self._cell_type = OntologyCl(branch=DEFAULT_CL, **kwargs)
         elif attr == "development_stage":
             self._development_stage = {
-                "Homo sapiens": OntologyHsapdv(branch=DEFAULT_HSAPDV, **kwargs),
-                "Mus musculus": OntologyMmusdv(branch=DEFAULT_MMUSDV, **kwargs),
+                "homosapiens": OntologyHsapdv(**kwargs),
+                "musmusculus": OntologyMmusdv(**kwargs),
                 self.key_other: OntologyUberonLifecyclestage(branch=DEFAULT_UBERON, **kwargs),
             }
         elif attr == "disease":
-            self._disease = OntologyMondo(branch=DEFAULT_MONDO, **kwargs)
+            self._disease = OntologyMondo(**kwargs)
         elif attr == "ethnicity":
             self._ethnicity = {
                 "homosapiens": OntologyHancestro(),
                 self.key_other: None,
             }
         elif attr == "organ":
-            self._organ = OntologyUberon(branch=DEFAULT_UBERON, **kwargs)
+            self._organ = OntologyUberon(**kwargs)
         elif attr == "organism":
-            self._organism = OntologyTaxon(branch=DEFAULT_NCBITAXON, **kwargs)
+            self._organism = OntologyTaxon(**kwargs)
         elif attr == "sex":
-            self._sex = OntologySex(branch=DEFAULT_PATO, **kwargs)
+            self._sex = OntologySex(**kwargs)
+        return self._assay_sc
 
     @property
     def assay_sc(self):

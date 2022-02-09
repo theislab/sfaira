@@ -11,14 +11,12 @@ class DatasetSuperGroupDatabases(DatasetSuperGroup):
             data_path: Union[str, None] = None,
             meta_path: Union[str, None] = None,
             cache_path: Union[str, None] = None,
-            cache_metadata: bool = False,
     ):
         dataset_super_groups = [
             DatasetSuperGroupCellxgene(
                 data_path=data_path,
                 meta_path=meta_path,
-                cache_path=cache_path,
-                cache_metadata=cache_metadata,
+                cache_path=cache_path
             ),
         ]
         super().__init__(dataset_groups=dataset_super_groups)

@@ -24,7 +24,7 @@ class Dataset(DatasetBase):
         self.disease = "healthy"
         self.doi_journal = "10.1126/science.aay3224"
         self.individual_obs_key = "donor"
-        self.layer_processed = "X"
+        self.normalization = "norm"
         self.organ = "thymus"
         self.organism = "Homo sapiens"
         self.primary_data = True
@@ -33,8 +33,7 @@ class Dataset(DatasetBase):
         self.tech_sample_obs_key = "Sample"
         self.year = 2020
 
-        self.feature_symbol_var_key = "index"
-        self.feature_type = "rna"
+        self.gene_id_symbols_var_key = "index"
         self.cell_type_obs_key = "Anno_level_fig1"
 
         self.set_dataset_id(idx=1)

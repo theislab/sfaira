@@ -32,11 +32,7 @@ def clean_cache(cache: Union[None, str] = None):
 
 
 def clean_doi(doi: str):
-    # Check if DOI is already in sfaira format, in that case do not prefix with "d":
-    if doi.startswith("d10_") or doi.startswith("dno_doi_"):
-        return f'{doi.translate({ord(c): "_" for c in r"!@#$%^&*()[]/{};:,.<>?|`~-=_+"})}'
-    else:
-        return f'd{doi.translate({ord(c): "_" for c in r"!@#$%^&*()[]/{};:,.<>?|`~-=_+"})}'
+    return f'd{doi.translate({ord(c): "_" for c in r"!@#$%^&*()[]/{};:,.<>?|`~-=_+"})}'
 
 
 def clean_id_str(s):

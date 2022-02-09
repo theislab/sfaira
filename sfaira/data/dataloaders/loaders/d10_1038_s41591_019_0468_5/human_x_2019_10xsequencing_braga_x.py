@@ -21,15 +21,14 @@ class Dataset(DatasetBase):
         self.author = "Braga"
         self.disease = "healthy"
         self.doi_journal = "10.1038/s41591-019-0468-5"
-        self.layer_processed = "X"
+        self.normalization = "scaled"
         self.organ = "bronchus" if self.sample_fn == "vieira19_Bronchi_anonymised.processed.h5ad" else "lung parenchyma"
         self.organism = "Homo sapiens"
         self.primary_data = True
         self.sample_source = "primary_tissue"
         self.year = 2019
 
-        self.feature_symbol_var_key = "index"
-        self.feature_type = "rna"
+        self.gene_id_symbols_var_key = "index"
         self.cell_type_obs_key = "CellType"
 
         self.set_dataset_id(idx=1)

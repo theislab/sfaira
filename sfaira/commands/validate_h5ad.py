@@ -2,7 +2,6 @@ import logging
 
 import anndata
 import numpy as np
-from rich import print
 import scipy.sparse
 
 log = logging.getLogger(__name__)

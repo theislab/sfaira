@@ -17,7 +17,7 @@ class Dataset(DatasetBase):
         self.author = "Miller"
         self.disease = "healthy"
         self.doi_journal = "10.1016/j.devcel.2020.01.033"
-        self.layer_counts = "X"
+        self.normalization = "raw"
         self.organ = "lung"
         self.organism = "Homo sapiens"
         self.primary_data = True
@@ -25,8 +25,7 @@ class Dataset(DatasetBase):
         self.state_exact = "healthy"
         self.year = 2020
 
-        self.feature_symbol_var_key = "index"
-        self.feature_type = "rna"
+        self.gene_id_symbols_var_key = "index"
         self.cell_type_obs_key = "Cell_type"
 
         self.set_dataset_id(idx=1)

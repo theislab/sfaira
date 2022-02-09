@@ -16,15 +16,14 @@ class Dataset(DatasetBase):
         self.author = "Voigt"
         self.disease = "healthy"
         self.doi_journal = "10.1073/pnas.1914143116"
-        self.layer_processed = "X"
+        self.normalization = "norm"
         self.organ = "retina"
         self.organism = "Homo sapiens"
         self.primary_data = True
         self.sample_source = "primary_tissue"
         self.year = 2019
 
-        self.feature_symbol_var_key = "index"
-        self.feature_type = "rna"
+        self.gene_id_symbols_var_key = "index"
         self.cell_type_obs_key = "CellType"
 
         self.set_dataset_id(idx=1)
