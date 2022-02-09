@@ -48,6 +48,14 @@ class DatasetBase(abc.ABC):
     genome: Union[None, str]
     supplier: str
 
+    layer_counts: Union[None, str]
+    layer_processed: Union[None, str]
+    layer_spliced_counts: Union[None, str]
+    layer_spliced_processed: Union[None, str]
+    layer_unspliced_counts: Union[None, str]
+    layer_unspliced_processed: Union[None, str]
+    layer_velocity: Union[None, str]
+
     _assay_sc: Union[None, str]
     _assay_differentiation: Union[None, str]
     _assay_type_differentiation: Union[None, str]
@@ -63,9 +71,10 @@ class DatasetBase(abc.ABC):
     _download_url_data: Union[Tuple[List[None]], Tuple[List[str]], None]
     _download_url_meta: Union[Tuple[List[None]], Tuple[List[str]], None]
     _ethnicity: Union[None, str]
+    _feature_type: Union[None, str]
+    _feature_reference: Union[None, str]
     _id: Union[None, str]
     _individual: Union[None, str]
-    _normalization: Union[None, str]
     _organ: Union[None, str]
     _organism: Union[None, str]
     _primary_data: Union[None, bool]
@@ -74,8 +83,9 @@ class DatasetBase(abc.ABC):
     _sample_source: Union[None, str]
     _state_exact: Union[None, str]
     _title: Union[None, str]
-    _bio_sample: Union[None, str]
     _year: Union[None, int]
+    gm: Union[None, str]
+    treatment: Union[None, str]
 
     _bio_sample_obs_key: Union[None, str]
     _tech_sample_obs_key: Union[None, str]
@@ -86,15 +96,37 @@ class DatasetBase(abc.ABC):
     development_stage_obs_key: Union[None, str]
     disease_obs_key: Union[None, str]
     ethnicity_obs_key: Union[None, str]
+    gm_obs_key: Union[None, str]
     individual_obs_key: Union[None, str]
     organ_obs_key: Union[None, str]
     organism_obs_key: Union[None, str]
     sample_source_obs_key: Union[None, str]
     sex_obs_key: Union[None, str]
     state_exact_obs_key: Union[None, str]
+    treatment_obs_key: Union[None, str]
 
-    gene_id_symbols_var_key: Union[None, str]
-    gene_id_ensembl_var_key: Union[None, str]
+    feature_id_var_key: Union[None, str]
+    feature_reference_var_key: Union[None, str]
+    feature_symbol_var_key: Union[None, str]
+    feature_type_var_key: Union[None, str]
+
+    spatial_x_coord_obs_key: Union[None, str]
+    spatial_y_coord_obs_key: Union[None, str]
+    spatial_z_coord_obs_key: Union[None, str]
+    vdj_vj_1_obs_key_prefix: Union[None, str]
+    vdj_vj_2_obs_key_prefix: Union[None, str]
+    vdj_vdj_1_obs_key_prefix: Union[None, str]
+    vdj_vdj_2_obs_key_prefix: Union[None, str]
+    vdj_c_call_obs_key_suffix: Union[None, str]
+    vdj_consensus_count_obs_key_suffix: Union[None, str]
+    vdj_d_call_obs_key_suffix: Union[None, str]
+    vdj_duplicate_count_obs_key_suffix: Union[None, str]
+    vdj_j_call_obs_key_suffix: Union[None, str]
+    vdj_junction_obs_key_suffix: Union[None, str]
+    vdj_junction_aa_obs_key_suffix: Union[None, str]
+    vdj_locus_obs_key_suffix: Union[None, str]
+    vdj_productive_obs_key_suffix: Union[None, str]
+    vdj_v_call_obs_key_suffix: Union[None, str]
 
     _celltype_universe: Union[None, CelltypeUniverse]
     _ontology_class_maps: Union[dict]
@@ -153,6 +185,14 @@ class DatasetBase(abc.ABC):
         self.meta_path = meta_path
         self.cache_path = cache_path
 
+        self.layer_counts = None
+        self.layer_processed = None
+        self.layer_spliced_counts = None
+        self.layer_spliced_processed = None
+        self.layer_unspliced_counts = None
+        self.layer_unspliced_processed = None
+        self.layer_velocity = None
+
         self._author = None
         self._assay_sc = None
         self._assay_differentiation = None
@@ -168,9 +208,11 @@ class DatasetBase(abc.ABC):
         self._download_url_data = None
         self._download_url_meta = None
         self._ethnicity = None
+        self._feature_type = None
+        self._feature_reference = None
+        self.gm = None
         self._id = None
         self._individual = None
-        self._normalization = None
         self._organ = None
         self._organism = None
         self._primary_data = None
@@ -179,6 +221,7 @@ class DatasetBase(abc.ABC):
         self._source = None
         self._state_exact = None
         self._tech_sample = None
+        self.treatment = None
         self._title = None
         self._year = None
 
@@ -191,6 +234,7 @@ class DatasetBase(abc.ABC):
         self.development_stage_obs_key = None
         self.disease_obs_key = None
         self.ethnicity_obs_key = None
+        self.gm_obs_key = None
         self.individual_obs_key = None
         self.organ_obs_key = None
         self.organism_obs_key = None
@@ -198,9 +242,31 @@ class DatasetBase(abc.ABC):
         self.sex_obs_key = None
         self.state_exact_obs_key = None
         self.tech_sample_obs_key = None
+        self.treatment_obs_key = None
 
-        self.gene_id_symbols_var_key = None
-        self.gene_id_ensembl_var_key = None
+        self.feature_id_var_key = None
+        self.feature_reference_var_key = None
+        self.feature_symbol_var_key = None
+        self.feature_type_var_key = None
+
+        self.spatial_x_coord_obs_key = None
+        self.spatial_y_coord_obs_key = None
+        self.spatial_z_coord_obs_key = None
+
+        self.vdj_vj_1_obs_key_prefix = None
+        self.vdj_vj_2_obs_key_prefix = None
+        self.vdj_vdj_1_obs_key_prefix = None
+        self.vdj_vdj_2_obs_key_prefix = None
+        self.vdj_c_call_obs_key_suffix = None
+        self.vdj_consensus_count_obs_key_suffix = None
+        self.vdj_d_call_obs_key_suffix = None
+        self.vdj_duplicate_count_obs_key_suffix = None
+        self.vdj_j_call_obs_key_suffix = None
+        self.vdj_junction_obs_key_suffix = None
+        self.vdj_junction_aa_obs_key_suffix = None
+        self.vdj_locus_obs_key_suffix = None
+        self.vdj_productive_obs_key_suffix = None
+        self.vdj_v_call_obs_key_suffix = None
 
         self._celltype_universe = None
         self._ontology_class_maps = dict([(k, None) for k in self._adata_ids.ontology_constrained])
@@ -441,19 +507,19 @@ class DatasetBase(abc.ABC):
             self,
             match_to_reference: Union[str, bool, None],
     ):
-        if self.gene_id_symbols_var_key is None and self.gene_id_ensembl_var_key is None:
-            raise ValueError("Either gene_id_symbols_var_key or gene_id_ensembl_var_key needs to be provided in the"
+        if self.feature_symbol_var_key is None and self.feature_id_var_key is None:
+            raise ValueError("Either feature_symbol_var_key or feature_id_var_key needs to be provided in the"
                              " dataloader")
-        elif self.gene_id_symbols_var_key is None and self.gene_id_ensembl_var_key:
+        elif self.feature_symbol_var_key is None and self.feature_id_var_key:
             # Convert ensembl ids to gene symbols
             id_dict = self.genome_container.id_to_symbols_dict
-            ensids = self.adata.var.index if self.gene_id_ensembl_var_key == "index" else self.adata.var[self.gene_id_ensembl_var_key]
+            ensids = self.adata.var.index if self.feature_id_var_key == "index" else self.adata.var[self.feature_id_var_key]
             self.adata.var[self._adata_ids.feature_symbol] = [
                 id_dict[n.split(".")[0]] if n.split(".")[0] in id_dict.keys() else 'n/a'
                 for n in ensids
             ]
-            self.gene_id_symbols_var_key = self._adata_ids.feature_symbol
-        elif self.gene_id_symbols_var_key and self.gene_id_ensembl_var_key is None:
+            self.feature_symbol_var_key = self._adata_ids.feature_symbol
+        elif self.feature_symbol_var_key and self.feature_id_var_key is None:
             # Convert gene symbols to ensembl ids
             id_dict = self.genome_container.symbol_to_id_dict
             id_strip_dict = self.genome_container.strippednames_to_id_dict
@@ -461,8 +527,8 @@ class DatasetBase(abc.ABC):
             # match it straight away, if it is not in there we try to match everything in front of the first period in
             # the gene name with a dictionary that was modified in the same way, if there is still no match we append na
             ensids = []
-            symbs = self.adata.var.index if self.gene_id_symbols_var_key == "index" else \
-                self.adata.var[self.gene_id_symbols_var_key]
+            symbs = self.adata.var.index if self.feature_symbol_var_key == "index" else \
+                self.adata.var[self.feature_symbol_var_key]
             for n in symbs:
                 if n in id_dict.keys():
                     ensids.append(id_dict[n])
@@ -471,7 +537,7 @@ class DatasetBase(abc.ABC):
                 else:
                     ensids.append('n/a')
             self.adata.var[self._adata_ids.feature_id] = ensids
-            self.gene_id_ensembl_var_key = self._adata_ids.feature_id
+            self.feature_id_var_key = self._adata_ids.feature_id
 
     def _collapse_ensembl_gene_id_versions(self):
         """
@@ -479,21 +545,21 @@ class DatasetBase(abc.ABC):
 
         :return:
         """
-        if not self.gene_id_ensembl_var_key:
+        if not self.feature_id_var_key:
             raise ValueError(
                 "Cannot remove gene version when gene_id_ensembl_var_key is not set in dataloader and "
                 "match_to_reference is False"
             )
-        elif self.gene_id_ensembl_var_key == "index":
+        elif self.feature_id_var_key == "index":
             self.adata.index = [
                 x.split(".")[0] for x in self.adata.var.index
             ]
         else:
-            self.adata.var[self.gene_id_ensembl_var_key] = [
-                x.split(".")[0] for x in self.adata.var[self.gene_id_ensembl_var_key].values
+            self.adata.var[self.feature_id_var_key] = [
+                x.split(".")[0] for x in self.adata.var[self.feature_id_var_key].values
             ]
         # Collapse if necessary:
-        self.adata = collapse_matrix(adata=self.adata, var_column=self.gene_id_ensembl_var_key)
+        self.adata = collapse_matrix(adata=self.adata, var_column=self.feature_id_var_key)
 
     def collapse_counts(self):
         """
@@ -550,7 +616,7 @@ class DatasetBase(abc.ABC):
         self.subset_gene_type = subset_genes_to_type
         # Streamline feature space:
         self._add_missing_featurenames(match_to_reference=match_to_release)
-        for key in [self.gene_id_ensembl_var_key, self.gene_id_symbols_var_key]:
+        for key in [self.feature_id_var_key, self.feature_symbol_var_key]:
             # Make features unique (to avoid na-matches in converted columns to be collapsed by
             # _collapse_ensembl_gene_id_versions() below.
             if not key:
@@ -574,8 +640,8 @@ class DatasetBase(abc.ABC):
             raise ValueError(f"Data type {type(self.adata.X)} not recognized.")
 
         # Compute indices of genes to keep
-        data_ids_ensg = self.adata.var.index.values if self.gene_id_ensembl_var_key == "index" \
-            else self.adata.var[self.gene_id_ensembl_var_key].values
+        data_ids_ensg = self.adata.var.index.values if self.feature_id_var_key == "index" \
+            else self.adata.var[self.feature_id_var_key].values
         if subset_genes_to_type is None:
             subset_ids_ensg = self.genome_container.ensembl
             subset_ids_symbol = self.genome_container.symbols
@@ -616,16 +682,16 @@ class DatasetBase(abc.ABC):
         x_new = x_new.tocsr()
 
         # Create new var dataframe
-        if self.gene_id_symbols_var_key == "index":
+        if self.feature_symbol_var_key == "index":
             var_index = subset_ids_symbol
-            var_data = {self.gene_id_ensembl_var_key: subset_ids_ensg}
-        elif self.gene_id_ensembl_var_key == "index":
+            var_data = {self.feature_id_var_key: subset_ids_ensg}
+        elif self.feature_id_var_key == "index":
             var_index = subset_ids_ensg
-            var_data = {self.gene_id_symbols_var_key: subset_ids_symbol}
+            var_data = {self.feature_symbol_var_key: subset_ids_symbol}
         else:
             var_index = None
-            var_data = {self.gene_id_symbols_var_key: subset_ids_symbol,
-                        self.gene_id_ensembl_var_key: subset_ids_ensg}
+            var_data = {self.feature_symbol_var_key: subset_ids_symbol,
+                        self.feature_id_var_key: subset_ids_ensg}
         var_new = pd.DataFrame(data=var_data, index=var_index)
 
         self.adata = anndata.AnnData(
@@ -701,27 +767,27 @@ class DatasetBase(abc.ABC):
         var_new = pd.DataFrame()
         for k in adata_target_ids.var_keys:
             if k == "feature_id":
-                if not self.gene_id_ensembl_var_key:
+                if not self.feature_id_var_key:
                     raise ValueError("feature_id not set in dataloader despite being required by the "
                                      "selected meta data schema. please run streamline_features() first to create the "
                                      "missing annotation")
-                elif self.gene_id_ensembl_var_key == "index":
+                elif self.feature_id_var_key == "index":
                     var_new[getattr(adata_target_ids, k)] = self.adata.var.index.tolist()
                 else:
-                    var_new[getattr(adata_target_ids, k)] = self.adata.var[self.gene_id_ensembl_var_key].tolist()
-                    del self.adata.var[self.gene_id_ensembl_var_key]
-                self.gene_id_ensembl_var_key = getattr(adata_target_ids, k)
+                    var_new[getattr(adata_target_ids, k)] = self.adata.var[self.feature_id_var_key].tolist()
+                    del self.adata.var[self.feature_id_var_key]
+                self.feature_id_var_key = getattr(adata_target_ids, k)
             elif k == "feature_symbol":
-                if not self.gene_id_symbols_var_key:
+                if not self.feature_symbol_var_key:
                     raise ValueError("gene_id_symbols_var_key not set in dataloader despite being required by the "
                                      "selected meta data schema. please run streamline_features() first to create the "
                                      "missing annotation")
-                elif self.gene_id_symbols_var_key == "index":
+                elif self.feature_symbol_var_key == "index":
                     var_new[getattr(adata_target_ids, k)] = self.adata.var.index.tolist()
                 else:
-                    var_new[getattr(adata_target_ids, k)] = self.adata.var[self.gene_id_symbols_var_key].tolist()
-                    del self.adata.var[self.gene_id_symbols_var_key]
-                self.gene_id_symbols_var_key = getattr(adata_target_ids, k)
+                    var_new[getattr(adata_target_ids, k)] = self.adata.var[self.feature_symbol_var_key].tolist()
+                    del self.adata.var[self.feature_symbol_var_key]
+                self.feature_symbol_var_key = getattr(adata_target_ids, k)
             else:
                 val = getattr(self, k)
                 while hasattr(val, '__len__') and not isinstance(val, str) and len(val) == 1:  # unpack nested lists/tuples
@@ -736,9 +802,9 @@ class DatasetBase(abc.ABC):
                 del self.adata.varp
             self.adata.var = var_new
             if "feature_id" not in adata_target_ids.var_keys:
-                self.gene_id_ensembl_var_key = None
+                self.feature_id_var_key = None
             if "feature_symbol" not in adata_target_ids.var_keys:
-                self.gene_id_symbols_var_key = None
+                self.feature_symbol_var_key = None
         else:
             index_old = self.adata.var.index.copy()
             # Add old columns in if they are not duplicated:
@@ -1683,16 +1749,6 @@ class DatasetBase(abc.ABC):
             return self.adata.n_obs
         else:
             return None
-
-    @property
-    def normalization(self) -> Union[None, str]:
-        return self._normalization
-
-    @normalization.setter
-    def normalization(self, x: str):
-        x = self._value_protection(attr="normalization", allowed=self.get_ontology(k="normalization"),
-                                   attempted=x)
-        self._normalization = x
 
     @property
     def primary_data(self) -> Union[None, bool]:

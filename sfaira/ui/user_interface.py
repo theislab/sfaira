@@ -381,8 +381,8 @@ class UserInterface:
 
         self.data = DatasetInteractive(
             data=data,
-            gene_symbol_col=gene_symbol_col,
-            gene_ens_col=gene_ens_col,
+            feature_symbol_col=gene_symbol_col,
+            feature_id_col=gene_ens_col,
         )
         self.data.organism = organism
         self.data.organ = organ

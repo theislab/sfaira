@@ -20,14 +20,15 @@ class Dataset(DatasetBase):
         self.author = "Cano-Gamez"
         self.disease = "healthy"
         self.doi_journal = "10.1038/s41467-020-15543-y"
-        self.normalization = "raw"
+        self.layer_counts = "X"
         self.organ = "blood"
         self.organism = "Homo sapiens"
         self.primary_data = True
         self.sample_source = "primary_tissue"
         self.year = 2020
 
-        self.gene_id_symbols_var_key = "names"
+        self.feature_symbol_var_key = "names"
+        self.feature_type = "rna"
         self.cell_type_obs_key = "cluster.id"
 
         self.set_dataset_id(idx=1)

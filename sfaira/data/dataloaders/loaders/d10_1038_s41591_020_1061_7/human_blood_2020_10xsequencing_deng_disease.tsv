@@ -1,0 +1,4 @@
+source	target	target_id
+DLBCL	diffuse large B-cell lymphoma	MONDO:0018905
+PMBCL	primary mediastinal large B-cell lymphoma	MONDO:0020323
+tFL	follicular lymphoma	MONDO:0018906
