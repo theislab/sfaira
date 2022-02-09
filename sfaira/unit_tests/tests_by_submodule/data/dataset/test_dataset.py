@@ -132,7 +132,7 @@ def test_ds_interactive():
     ds.subset(key="doi_journal", values=["no_doi_mock1"])
     ds.load()
     adata = ds.adata_ls[0]
-    di = DatasetInteractive(data=adata, feature_id_col="index")
+    di = DatasetInteractive(data=adata, gene_ens_col="index")
     di.organism = "Homo sapiens"
     di.organ = "lung"
     di.cell_type_obs_key = "free_annotation"

@@ -18,15 +18,14 @@ class Dataset(DatasetBase):
         self.author = "Smilie"
         self.disease = "healthy"
         self.doi_journal = "10.1016/j.cell.2019.06.029"
-        self.layer_counts = "X"
+        self.normalization = "raw"
         self.organ = "colonic epithelium"
         self.organism = "Homo sapiens"
         self.primary_data = True
         self.sample_source = "primary_tissue"
         self.year = 2019
 
-        self.feature_symbol_var_key = "index"
-        self.feature_type = "rna"
+        self.gene_id_symbols_var_key = "index"
 
         self.cell_type_obs_key = "CellType"
 

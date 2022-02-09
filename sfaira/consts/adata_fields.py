@@ -152,8 +152,6 @@ class AdataIdsSfaira(AdataIds):
             "disease",
             "ethnicity",
             "organ",
-            "organism",
-            "sex",
         ]
         self.obs_keys = [
             "assay_sc",

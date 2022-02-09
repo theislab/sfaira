@@ -62,7 +62,7 @@ class Dataset(DatasetBase):
         self.author = "Szabo"
         self.doi_journal = "10.1038/s41467-019-12464-3"
         self.individual = SAMPLE_DICT[self.sample_fn][1]
-        self.layer_counts = "X"
+        self.normalization = "raw"
         self.organ = SAMPLE_DICT[self.sample_fn][0]
         self.organism = "Homo sapiens"
         self.primary_data = True
@@ -70,9 +70,8 @@ class Dataset(DatasetBase):
         self.state_exact = SAMPLE_DICT[self.sample_fn][2]
         self.year = 2019
 
-        self.feature_id_var_key = "Accession"
-        self.feature_symbol_var_key = "Gene"
-        self.feature_type = "rna"
+        self.gene_id_symbols_var_key = "Gene"
+        self.gene_id_ensembl_var_key = "Accession"
 
         self.cell_type_obs_key = "cell_ontology_class"
 

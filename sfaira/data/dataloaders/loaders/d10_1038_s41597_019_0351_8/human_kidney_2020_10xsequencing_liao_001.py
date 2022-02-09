@@ -18,7 +18,7 @@ class Dataset(DatasetBase):
         self.assay_sc = "10x 3' v2"
         self.author = "Liao"
         self.disease = "healthy"
-        self.layer_counts = "X"
+        self.normalization = "raw"
         self.organ = "kidney"
         self.organism = "Homo sapiens"
         self.primary_data = True
@@ -26,9 +26,8 @@ class Dataset(DatasetBase):
         self.year = 2020
         self.doi_journal = "10.1038/s41597-019-0351-8"
 
-        self.feature_id_var_key = "ensembl"
-        self.feature_symbol_var_key = "names"
-        self.feature_type = "rna"
+        self.gene_id_symbols_var_key = "names"
+        self.gene_id_ensembl_var_key = "ensembl"
 
         self.set_dataset_id(idx=1)
 

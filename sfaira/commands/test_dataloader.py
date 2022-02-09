@@ -1,9 +1,10 @@
 import logging
 import os
-from rich import print
 import shutil
 import pydoc
 
+from rich import print
+from sfaira.commands.questionary import sfaira_questionary
 from sfaira.consts.utils import clean_doi
 from sfaira.data import DatasetGroupDirectoryOriented
 
@@ -25,12 +26,20 @@ class DataloaderTester:
         self.doi = doi
         self.doi_sfaira_repr = ''
 
-    def test_dataloader(self, clean_tsvs: bool, in_phase_3: bool):
+    def test_dataloader(self):
         """
         Runs a predefined unit test on a given dataloader.
         """
+        if not self.doi:
+            self._prompt_doi()
         self.doi_sfaira_repr = clean_doi(self.doi)
-        self._test_dataloader(clean_tsvs=clean_tsvs, in_phase_3=in_phase_3)
+        print(f'[bold blue]Please ensure that your dataloader is in sfaira/dataloaders/loaders/{self.doi_sfaira_repr}.')
+        self._test_dataloader()
+
+    def _prompt_doi(self):
+        self.doi = sfaira_questionary(function='text',
+                                      question='Enter your DOI',
+                                      default='10.1000/j.journal.2021.01.001')
 
     def _get_ds(self):
         dir_loader_sfaira = "sfaira.data.dataloaders.loaders."
@@ -60,29 +69,31 @@ class DataloaderTester:
 
         return ds, cache_path
 
-    def _test_dataloader(self, clean_tsvs: bool, in_phase_3: bool):
+    def _test_dataloader(self):
         """
         Tests the dataloader.
         """
         print('[bold blue]Conflicts are not automatically resolved.')
-        print('[bold blue]In case of coflicts, please go back to [bold]https://www.ebi.ac.uk/ols/ontologies/cl[blue] '
-              'and add the correct cell ontology class name into the .tsv "target" column.')
+        print('[bold blue]Please go back to [bold]https://www.ebi.ac.uk/ols/ontologies/cl[blue] for every mismatch or '
+              'conflicts and add the correct cell ontology class name into the .tsv "target" column.')
 
         ds, cache_path = self._get_ds()
-        if clean_tsvs:
-            ds.clean_ontology_class_maps()
+        ds.clean_ontology_class_map()
 
+        # TODO try-except with good error description saying that the data loader is broken here:
+        ds.load(
+            remove_gene_version=True,
+            # match_to_reference=TODO get organism here,
+            load_raw=True,
+            allow_caching=True
+        )
+        # Try loading from cache:
         ds, cache_path = self._get_ds()
-        ds.load(load_raw=True, allow_caching=False)
-        print("[bold blue]Completed testing of data loader, the data loader is now ready for use.")
-        if in_phase_3:
-            print('[bold orange]Sfaira butler: "You data loader is finished!"')
-            print('[bold orange]               "Proceed to phase 4 (publish) or use data loader."')
-            print('[bold orange]               "Copy the following lines as a post into the pull request:"')
-            print('[bold blue]=========================')
-            print('[bold blue]Data loader test passed:')
-            for x in ds.datasets.keys():
-                print(f'[bold blue]    - {x}')
-            print('[bold blue]=========================')
-        else:
-            print('[bold orange]Sfaira butler: "You data loader works!"')
+        # TODO try-except with good error description saying that the data loader is broken here:
+        ds.load(
+            remove_gene_version=True,
+            # match_to_reference=TODO get organism here,
+            load_raw=False,
+            allow_caching=True
+        )
+        shutil.rmtree(cache_path, ignore_errors=True)

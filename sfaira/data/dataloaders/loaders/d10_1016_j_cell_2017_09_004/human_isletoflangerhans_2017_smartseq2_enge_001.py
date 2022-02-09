@@ -20,15 +20,14 @@ class Dataset(DatasetBase):
         self.disease = "healthy"
         self.doi_journal = "10.1016/j.cell.2017.09.004"
         self.doi_preprint = "10.1101/108043"
-        self.layer_counts = "X"
+        self.normalization = "raw"
         self.assay_sc = "Smart-seq2"
         self.organ = "islet of Langerhans"
         self.organism = "Homo sapiens"
         self.primary_data = True
         self.year = 2017
-        self.feature_symbol_var_key = "index"
-        self.feature_type = "rna"
-        self.cell_type_obs_key = "celltype"
+        self.gene_id_symbols_var_key = "index"
+        self.cell_types_obs_key = "celltype"
         self.sample_source = "primary_tissue"
 
         self.set_dataset_id(idx=1)

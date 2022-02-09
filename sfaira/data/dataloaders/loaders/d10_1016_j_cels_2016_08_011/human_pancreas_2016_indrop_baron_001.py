@@ -15,10 +15,9 @@ class Dataset(DatasetBase):
 
         self.assay_sc = "inDrop"
         self.author = "Baron"
-        self.cell_type_obs_key = "CellType"
         self.disease = "healthy"
         self.doi_journal = "10.1016/j.cels.2016.08.011"
-        self.layer_counts = "X"
+        self.normalization = "raw"
         self.organ = "pancreas"
         self.organism = "Homo sapiens"
         self.primary_data = True
@@ -26,8 +25,8 @@ class Dataset(DatasetBase):
         self.state_exact = "healthy"
         self.year = 2016
 
-        self.feature_symbol_var_key = "index"
-        self.feature_type = "rna"
+        self.gene_id_symbols_var_key = "index"
+        self.cell_type_obs_key = "CellType"
 
         self.set_dataset_id(idx=1)
 

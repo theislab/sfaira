@@ -31,7 +31,7 @@ class Dataset(DatasetBase):
         self.author = "Habermann"
         self.doi_journal = "10.1126/sciadv.aba1972"
         self.doi_preprint = "10.1101/753806"
-        self.layer_counts = "X"
+        self.normalization = "raw"
         self.organ = "lung parenchyma"
         self.organism = "Homo sapiens"
         self.primary_data = True
@@ -41,8 +41,7 @@ class Dataset(DatasetBase):
         self.sex_obs_key = "Gender"
         self.tech_sample_obs_key = "Sample_Name"
 
-        self.feature_symbol_var_key = "index"
-        self.feature_type = "rna"
+        self.gene_id_symbols_var_key = "index"
 
         self.cell_type_obs_key = "celltype"
         self.state_exact_obs_key = "Diagnosis"

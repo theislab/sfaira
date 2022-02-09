@@ -37,11 +37,11 @@ def cached_load_file(url, ontology_cache_dir, ontology_cache_fn, recache: bool =
         ontology_cache_dir = os.path.join(settings.cachedir_ontologies, ontology_cache_dir)
         obofile = os.path.join(ontology_cache_dir, ontology_cache_fn)
         # Download if necessary:
-        if not os.path.exists(obofile) or recache:
+        if not os.path.isfile(obofile) or recache:
             os.makedirs(name=ontology_cache_dir, exist_ok=True)
 
             def download_file():
-                print(f"Downloading: {ontology_cache_fn} to {ontology_cache_dir}")
+                print(f"Downloading: {ontology_cache_fn}")
                 if not os.path.exists(ontology_cache_dir):
                     os.makedirs(ontology_cache_dir)
                 r = requests.get(url, allow_redirects=True)

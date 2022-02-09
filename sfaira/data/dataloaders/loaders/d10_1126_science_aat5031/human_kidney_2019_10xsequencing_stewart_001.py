@@ -23,7 +23,7 @@ class Dataset(DatasetBase):
         self.author = "Stewart"
         self.disease = "healthy"
         self.doi_journal = "10.1126/science.aat5031"
-        self.layer_processed = "X"
+        self.normalization = "norm"
         self.organ = "kidney"
         self.organism = "Homo sapiens"
         self.primary_data = True
@@ -31,9 +31,8 @@ class Dataset(DatasetBase):
         self.state_exact = "healthy"
         self.year = 2019
 
-        self.feature_id_var_key = "ID"
-        self.feature_symbol_var_key = "index"
-        self.feature_type = "rna"
+        self.gene_id_symbols_var_key = "index"
+        self.gene_id_ensembl_var_key = "ID"
         self.cell_type_obs_key = "celltype"
 
         self.set_dataset_id(idx=1)

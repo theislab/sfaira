@@ -18,9 +18,7 @@ def prepare_dsg_database(database: str, download: bool = True) -> DatasetSuperGr
     if not os.path.exists(DIR_DATA_DATABASES_CACHE):
         pathlib.Path(DIR_DATA_DATABASES_CACHE).mkdir(parents=True, exist_ok=True)
     if database == "cellxgene":
-        # Note: if unit tests related to cellxgene throw error because of caching, empty cache.
-        # Unit tests are slow if cache_metadata is False.
-        dsg = DatasetSuperGroupDatabases(data_path=DIR_DATA_DATABASES_CACHE, cache_metadata=True)
+        dsg = DatasetSuperGroupDatabases(data_path=DIR_DATA_DATABASES_CACHE)
         # Only retain pre-defined target collections to avoid bulk downloads during unit tests.
         dsg.subset(key="collection_id", values=CELLXGENE_COLLECTION_ID)
     else:

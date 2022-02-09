@@ -19,6 +19,10 @@ KEY_ID = "gene_id"
 KEY_TYPE = "gene_biotype"
 VALUE_GTF_GENE = "gene"
 KEY_GTF_REGION_TYPE = 2
+KEY_GTF_REGION_DETAIL_FIELD = 8
+IDX_GTF_REGION_DETAIL_FIELD_ID = 0
+IDX_GTF_REGION_DETAIL_FIELD_SYMBOL = 2
+IDX_GTF_REGION_DETAIL_FIELD_TYPE = 4
 
 
 class GtfInterface:
@@ -46,37 +50,20 @@ class GtfInterface:
 
     @property
     def assembly(self) -> str:
-        """
-        Get full assembly name of genome represented in this class.
-        """
-        def file_filter(fns) -> List[str]:
-            # Filter assembly files starting with organism name:
-            y = [x for x in fns if x.split(".")[0].lower() == self.ensembl_organism]
-            # Filter target release:
-            y = [x for x in y if x.split(".")[-2] == self.release]
-            return y
-
-        # Check first in local files and then query ensembl if no match is found:
-        target_file = file_filter(fns=os.listdir(self.cache_dir))
-        if len(target_file) == 0:
-            # Get variable middle string of assembly name by looking files up on ftp server:
-            ftp = ftplib.FTP("ftp.ensembl.org")
-            ftp.login()
-            ftp.cwd(self.url_ensembl_dir)
-            data = []
-            ftp.dir(data.append)
-            ftp.quit()
-            target_file = [line.split(' ')[-1] for line in data]
-            # Filter assembly files starting with organism name:
-            target_file = [x for x in target_file if x.split(".")[0].lower() == self.ensembl_organism]
-            # Filter target assembly:
-            target_file = [x for x in target_file if x.endswith(f".{self.release}.gtf.gz")]
-            # There should only be one file left if filters work correctly:
-            assert len(target_file) == 1, target_file
-            assembly = target_file[0].split(".gtf.gz")[0]
-        else:
-            assert len(target_file) == 1, target_file  # There should only be one file left if filters work correctly.
-            assembly = target_file[0].split(".csv")[0]
+        # Get variable middle string of assembly name by looking files up on ftp server:
+        ftp = ftplib.FTP("ftp.ensembl.org")
+        ftp.login()
+        ftp.cwd(self.url_ensembl_dir)
+        data = []
+        ftp.dir(data.append)
+        ftp.quit()
+        target_file = [line.split(' ')[-1] for line in data]
+        # Filter assembly files starting with organism name:
+        target_file = [x for x in target_file if x.split(".")[0].lower() == self.ensembl_organism]
+        # Filter target assembly:
+        target_file = [x for x in target_file if len(x.split(".")) == 5]
+        assert len(target_file) == 1, target_file  # There should only be one file left if filters work correctly.
+        assembly = target_file[0].split(".gtf.gz")[0]
         return assembly
 
     @property
@@ -108,20 +95,17 @@ class GtfInterface:
         if os.path.exists(temp_file):
             os.remove(temp_file)
         tab = tab.loc[tab[KEY_GTF_REGION_TYPE].values == VALUE_GTF_GENE, :]
-        # KEY_SYMBOL column: Uses symbol if available, otherwise replaces with ID.
         conversion_tab = pandas.DataFrame({
             KEY_ID: [
-                x.split(KEY_ID)[1].split(";")[0].strip(" ").strip("\"")
-                for x in tab.iloc[:, -1].values],
+                x.split(";")[IDX_GTF_REGION_DETAIL_FIELD_ID].split(" ")[-1].strip("\"")
+                for x in tab[KEY_GTF_REGION_DETAIL_FIELD].values],
             KEY_SYMBOL: [
-                x.split(KEY_SYMBOL)[1].split(";")[0].strip(" ").strip("\"")
-                if KEY_SYMBOL in x else
-                x.split(KEY_ID)[1].split(";")[0].strip(" ").strip("\"")
-                for x in tab.iloc[:, -1].values],
+                x.split(";")[IDX_GTF_REGION_DETAIL_FIELD_SYMBOL].split(" ")[-1].strip("\"")
+                for x in tab[KEY_GTF_REGION_DETAIL_FIELD].values],
             KEY_TYPE: [
-                x.split(KEY_TYPE)[1].split(";")[0].strip(" ").strip("\"")
-                for x in tab.iloc[:, -1].values],
-        }).sort_values(KEY_ID)
+                x.split(";")[IDX_GTF_REGION_DETAIL_FIELD_TYPE].split(" ")[-1].strip("\"")
+                for x in tab[KEY_GTF_REGION_DETAIL_FIELD].values],
+        }).sort_values("gene_id")
         conversion_tab.to_csv(self.cache_fn)
 
     @property

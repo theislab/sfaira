@@ -10,7 +10,7 @@
 sfaira - data and model repository for single-cell data
 =======================================================
 
-.. image:: https://raw.githubusercontent.com/theislab/sfaira/release/resources/images/figure_rtd_intro.png
+.. image:: https://raw.githubusercontent.com/theislab/sfaira/master/resources/images/concept.png
    :width: 600px
    :align: center
 

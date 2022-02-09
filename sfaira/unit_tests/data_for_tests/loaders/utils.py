@@ -5,7 +5,7 @@ import os
 import pandas as pd
 import pathlib
 
-from sfaira.data.store.stores.multi import StoresAnndata
+from sfaira.data.store.multi_store import DistributedStoresAnndata
 from sfaira.versions.genomes import GenomeContainer
 
 from sfaira.unit_tests.directories import DIR_DATA_LOADERS_CACHE, DIR_DATA_LOADERS_STORE_DAO, \
@@ -61,9 +61,9 @@ class PrepareData:
             dsg = _load_script(dsg=dsg, rewrite=rewrite, match_to_release=match_to_release)
         return dsg
 
-    def prepare_store_anndata(self, match_to_reference=None) -> StoresAnndata:
+    def prepare_store_anndata(self, match_to_reference=None) -> DistributedStoresAnndata:
         dsg = self.prepare_dsg(load=True, match_to_release=match_to_reference)
-        store = StoresAnndata(adatas=dsg.adata_ls)
+        store = DistributedStoresAnndata(adatas=dsg.adata_ls)
         return store
 
     def prepare_store(self, store_format: str, rewrite: bool = False, rewrite_store: bool = False,
