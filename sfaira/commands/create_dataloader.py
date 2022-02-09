@@ -244,18 +244,6 @@ class DataloaderCreator:
             year_try += 1
         self.template_attributes.year = int(year)
 
-        def insert_placeholder(id_str):
-            return id_str if id_str != "" else "x"
-
-        self.template_attributes.id_without_doi = \
-            f'{insert_placeholder(clean_id_str(self.template_attributes.organism))}_' \
-            f'{insert_placeholder(clean_id_str(self.template_attributes.organ))}_' \
-            f'{insert_placeholder(clean_id_str(str(self.template_attributes.year)))}_' \
-            f'{insert_placeholder(clean_id_str(self.template_attributes.assay_sc))}_' \
-            f'{first_author_lastname}_001'
-        self.template_attributes.id = f'{self.template_attributes.id_without_doi}_' \
-                                      f'{self.template_attributes.doi_sfaira_repr}'
-
         # Data matrices in the dataset:
         print('[bold blue]Data matrices.')
         print('[bold blue]An AnnData object may contain multiple data matrices: raw and processed gene expression '
@@ -565,6 +553,18 @@ class DataloaderCreator:
             feature_id = self.template_attributes.feature_id_var_key \
                 if self.template_attributes.feature_id_var_key != "" else \
                 self.template_attributes.feature_symbol_var_key
+
+        def insert_placeholder(id_str):
+            return id_str if id_str != "" else "x"
+
+        self.template_attributes.id_without_doi = \
+            f'{insert_placeholder(clean_id_str(self.template_attributes.organism))}_' \
+            f'{insert_placeholder(clean_id_str(self.template_attributes.organ))}_' \
+            f'{insert_placeholder(clean_id_str(str(self.template_attributes.year)))}_' \
+            f'{insert_placeholder(clean_id_str(self.template_attributes.assay_sc))}_' \
+            f'{insert_placeholder(clean_id_str(first_author_lastname))}_001'
+        self.template_attributes.id = f'{self.template_attributes.id_without_doi}_' \
+                                      f'{self.template_attributes.doi_sfaira_repr}'
 
         print('[bold orange]Sfaira butler: "Up next:"')
         self.action_counter = 1
