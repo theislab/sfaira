@@ -136,7 +136,7 @@ def create_dataloader(path_data, path_loader) -> None:
 
 
 @sfaira_cli.command()
-@click.option('--doi', type=str, default=None, help="The doi of the paper that the data loader refers to.")
+@click.option('--doi', type=str, required=True, help="The doi of the paper that the data loader refers to.")
 @click.option('--path-data',
               default=DEFAULT_DATA_PATH,
               type=click.Path(exists=False),
@@ -151,7 +151,7 @@ def annotate_dataloader(doi, path_data, path_loader, schema) -> None:
     Annotates a dataloader.
     """
     path_loader, path_data, _ = set_paths(loader=path_loader, data=path_data)
-    if doi is None or doi_lint(doi):
+    if doi_lint(doi):
         dataloader_validator = DataloaderValidator(path_loader, doi, schema=schema)
         dataloader_validator.validate()
         dataloader_annotater = DataloaderAnnotater()
@@ -161,7 +161,7 @@ def annotate_dataloader(doi, path_data, path_loader, schema) -> None:
 
 
 @sfaira_cli.command()
-@click.option('--doi', type=str, default=None, help="The doi of the paper that the data loader refers to.")
+@click.option('--doi', type=str, required=True, help="The doi of the paper that the data loader refers to.")
 @click.option('--path-loader',
               default=PACKAGE_LOADER_PATH,
               type=click.Path(exists=False),
@@ -172,7 +172,7 @@ def validate_dataloader(doi, path_loader, schema) -> None:
     Verifies the dataloader against sfaira's requirements.
     """
     path_loader, _, _ = set_paths(loader=path_loader)
-    if doi is None or doi_lint(doi):
+    if doi_lint(doi):
         dataloader_validator = DataloaderValidator(path_loader=path_loader, doi=doi, schema=schema)
         dataloader_validator.validate()
     else:
@@ -190,7 +190,7 @@ def _full_test(path_loader, path_data, doi, schema, clean_tsvs, in_phase_3):
 
 
 @sfaira_cli.command()
-@click.option('--doi', type=str, default=None, help="The doi of the paper that the data loader refers to.")
+@click.option('--doi', type=str, required=True, help="The doi of the paper that the data loader refers to.")
 @click.option('--path-data',
               default=DEFAULT_DATA_PATH,
               type=click.Path(exists=False),
@@ -209,7 +209,7 @@ def test_dataloader(doi, path_data, path_loader, schema) -> None:
 
 
 @sfaira_cli.command()
-@click.option('--doi', type=str, default=None, help="The doi of the paper that the data loader refers to.")
+@click.option('--doi', type=str, required=True, help="The doi of the paper that the data loader refers to.")
 @click.option('--path-data',
               default=DEFAULT_DATA_PATH,
               type=click.Path(exists=False),
@@ -228,7 +228,7 @@ def finalize_dataloader(doi, path_data, path_loader, schema) -> None:
 
 
 @sfaira_cli.command()
-def publish_loader() -> None:
+def publish_dataloader() -> None:
     """
     Interactively create a GitHub pull request for a newly created data loader.
     This only works when called in the sfaira CLI docker container.
