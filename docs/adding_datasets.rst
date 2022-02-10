@@ -280,6 +280,7 @@ Phase 1 is sub-structured into 2 sub-phases:
         Note on lists and dictionaries in the yaml file format:
         Some times, you need to write a list in yaml, e.g. because you have multiple data URLs.
         A list looks as follows:
+
         .. code-block::
 
                 # Single URL:
@@ -291,6 +292,7 @@ Phase 1 is sub-structured into 2 sub-phases:
         ..
         As suggested in this example, do not use lists of length 1.
         In contrast, you may need to map a specific ``sample_fns`` to a meta data in multi file loaders:
+
         .. code-block::
 
                 sample_fns:
@@ -384,7 +386,7 @@ Phase 2 is sub-structured into 2 sub-phases:
     Note 3: Perfect matches are filled wihtout further suggestions,
     you can often directly leave these rows as they are after a brief sanity check.
 
-.. _OLS:https://www.ebi.ac.uk/ols/ontologies/cl
+.. _OLS: https://www.ebi.ac.uk/ols/ontologies/cl
 
 Phase 3: finalize
 ~~~~~~~~~~~~~~~~~~~~
@@ -796,7 +798,7 @@ In brief, the following meta data are required:
     - ``primary_data``
     - ``year``
 - ``layers``:
-    - ``layer_counts or layer_processed
+    - ``layer_counts`` or ``layer_processed``
 - ``dataset_or_feature_wise``:
     - ``feature_type`` or ``feature_type_var_key``
 - ``dataset_or_observation_wise``:
@@ -1054,7 +1056,7 @@ The following items are only relevant for V(D)J reconstruction data, e.g. TCR or
 These meta data items are described in the AIRR_ project, search the this link for the element in question without
 the prefixed "vdj\_".
 These 10 meta data items describe chains (or loci).
-In accordance with the corresponding scirpy defaults_, we allow for up to two loci per cell.
+In accordance with the corresponding scirpy_ defaults, we allow for up to two loci per cell.
 In T cells, this correspond to two VJ loci (TRA) and two VDJ loci (TRB).
 You can set the prefix of the column of each of the four loci below.
 In total, these 10+4 meta data queries in sfaira describe 4*10 columns in ``.obs`` after ``.load()``.
@@ -1102,6 +1104,7 @@ These meta data contain information about the curation process and schema:
 
 .. _AIRR: https://docs.airr-community.org/en/latest/datarep/rearrangements.html
 .. _cellosaurus: https://web.expasy.org/cellosaurus/
+.. _scirpy: https://icbi-lab.github.io/scirpy/latest/ir-biology.html
 .. _CL: https://www.ebi.ac.uk/ols/ontologies/cl
 .. _EFO: https://www.ebi.ac.uk/ols/ontologies/efo
 .. _EFO_SUBSET: https://www.ebi.ac.uk/ols/ontologies/efo/terms?iri=http%3A%2F%2Fwww.ebi.ac.uk%2Fefo%2FEFO_0010183&viewMode=All&siblings=false
