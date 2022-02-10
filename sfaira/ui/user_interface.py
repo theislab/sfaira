@@ -11,7 +11,7 @@ import time
 from sfaira import settings
 from sfaira.consts import AdataIdsSfaira, AdataIds, OCS
 from sfaira.data import DatasetInteractive
-from sfaira.estimators import EstimatorKerasEmbedding, EstimatorKerasCelltype
+from sfaira.estimators.keras.base import EstimatorKerasEmbedding, EstimatorKerasCelltype
 from sfaira.ui.model_zoo import ModelZoo
 from sfaira.versions.topologies import TopologyContainer
 
@@ -381,8 +381,8 @@ class UserInterface:
 
         self.data = DatasetInteractive(
             data=data,
-            gene_symbol_col=gene_symbol_col,
-            gene_ens_col=gene_ens_col,
+            feature_symbol_col=gene_symbol_col,
+            feature_id_col=gene_ens_col,
         )
         self.data.organism = organism
         self.data.organ = organ

@@ -10,7 +10,7 @@ import os
 from sfaira.consts import OCS
 from sfaira.data import load_store
 from sfaira.data.dataloaders import Universe
-from sfaira.estimators import EstimatorKerasEmbedding
+from sfaira.estimators.keras.base import EstimatorKerasEmbedding
 from sfaira.ui import ModelZoo
 from sfaira.versions.metadata import CelltypeUniverse, OntologyCl
 

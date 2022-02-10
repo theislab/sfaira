@@ -3,7 +3,6 @@ from __future__ import annotations
 import abc
 import anndata
 from anndata.utils import make_index_unique
-import h5py
 import numpy as np
 import pandas as pd
 import os
@@ -21,11 +20,13 @@ import ssl
 from sfaira.versions.genomes import GenomeContainer
 from sfaira.versions.metadata import Ontology, OntologyHierarchical, CelltypeUniverse
 from sfaira.consts import AdataIds, AdataIdsCellxgene_v2_0_0, AdataIdsSfaira, META_DATA_FIELDS, OCS
+from sfaira.data.dataloaders.base.utils import identify_tsv
 from sfaira.data.dataloaders.export_adaptors import cellxgene_export_adaptor
-from sfaira.data.store.io_dao import write_dao
+from sfaira.data.store.io.io_dao import write_dao
 from sfaira.data.dataloaders.base.utils import is_child, get_directory_formatted_doi
 from sfaira.data.utils import collapse_matrix, read_yaml
 from sfaira.consts.utils import clean_id_str
+from sfaira.versions.metadata.maps import prepare_ontology_map_tab
 
 
 load_doc = \
@@ -47,6 +48,14 @@ class DatasetBase(abc.ABC):
     genome: Union[None, str]
     supplier: str
 
+    layer_counts: Union[None, str]
+    layer_processed: Union[None, str]
+    layer_spliced_counts: Union[None, str]
+    layer_spliced_processed: Union[None, str]
+    layer_unspliced_counts: Union[None, str]
+    layer_unspliced_processed: Union[None, str]
+    layer_velocity: Union[None, str]
+
     _assay_sc: Union[None, str]
     _assay_differentiation: Union[None, str]
     _assay_type_differentiation: Union[None, str]
@@ -62,10 +71,10 @@ class DatasetBase(abc.ABC):
     _download_url_data: Union[Tuple[List[None]], Tuple[List[str]], None]
     _download_url_meta: Union[Tuple[List[None]], Tuple[List[str]], None]
     _ethnicity: Union[None, str]
+    _feature_type: Union[None, str]
+    _feature_reference: Union[None, str]
     _id: Union[None, str]
     _individual: Union[None, str]
-    _ncells: Union[None, int]
-    _normalization: Union[None, str]
     _organ: Union[None, str]
     _organism: Union[None, str]
     _primary_data: Union[None, bool]
@@ -74,8 +83,9 @@ class DatasetBase(abc.ABC):
     _sample_source: Union[None, str]
     _state_exact: Union[None, str]
     _title: Union[None, str]
-    _bio_sample: Union[None, str]
     _year: Union[None, int]
+    gm: Union[None, str]
+    treatment: Union[None, str]
 
     _bio_sample_obs_key: Union[None, str]
     _tech_sample_obs_key: Union[None, str]
@@ -86,18 +96,40 @@ class DatasetBase(abc.ABC):
     development_stage_obs_key: Union[None, str]
     disease_obs_key: Union[None, str]
     ethnicity_obs_key: Union[None, str]
+    gm_obs_key: Union[None, str]
     individual_obs_key: Union[None, str]
     organ_obs_key: Union[None, str]
     organism_obs_key: Union[None, str]
     sample_source_obs_key: Union[None, str]
     sex_obs_key: Union[None, str]
     state_exact_obs_key: Union[None, str]
+    treatment_obs_key: Union[None, str]
 
-    gene_id_symbols_var_key: Union[None, str]
-    gene_id_ensembl_var_key: Union[None, str]
+    feature_id_var_key: Union[None, str]
+    feature_reference_var_key: Union[None, str]
+    feature_symbol_var_key: Union[None, str]
+    feature_type_var_key: Union[None, str]
+
+    spatial_x_coord_obs_key: Union[None, str]
+    spatial_y_coord_obs_key: Union[None, str]
+    spatial_z_coord_obs_key: Union[None, str]
+    vdj_vj_1_obs_key_prefix: Union[None, str]
+    vdj_vj_2_obs_key_prefix: Union[None, str]
+    vdj_vdj_1_obs_key_prefix: Union[None, str]
+    vdj_vdj_2_obs_key_prefix: Union[None, str]
+    vdj_c_call_obs_key_suffix: Union[None, str]
+    vdj_consensus_count_obs_key_suffix: Union[None, str]
+    vdj_d_call_obs_key_suffix: Union[None, str]
+    vdj_duplicate_count_obs_key_suffix: Union[None, str]
+    vdj_j_call_obs_key_suffix: Union[None, str]
+    vdj_junction_obs_key_suffix: Union[None, str]
+    vdj_junction_aa_obs_key_suffix: Union[None, str]
+    vdj_locus_obs_key_suffix: Union[None, str]
+    vdj_productive_obs_key_suffix: Union[None, str]
+    vdj_v_call_obs_key_suffix: Union[None, str]
 
     _celltype_universe: Union[None, CelltypeUniverse]
-    _ontology_class_map: Union[None, dict]
+    _ontology_class_maps: Union[dict]
 
     load_raw: Union[None, bool]
     mapped_features: Union[None, str, bool]
@@ -153,6 +185,14 @@ class DatasetBase(abc.ABC):
         self.meta_path = meta_path
         self.cache_path = cache_path
 
+        self.layer_counts = None
+        self.layer_processed = None
+        self.layer_spliced_counts = None
+        self.layer_spliced_processed = None
+        self.layer_unspliced_counts = None
+        self.layer_unspliced_processed = None
+        self.layer_velocity = None
+
         self._author = None
         self._assay_sc = None
         self._assay_differentiation = None
@@ -168,10 +208,11 @@ class DatasetBase(abc.ABC):
         self._download_url_data = None
         self._download_url_meta = None
         self._ethnicity = None
+        self._feature_type = None
+        self._feature_reference = None
+        self.gm = None
         self._id = None
         self._individual = None
-        self._ncells = None
-        self._normalization = None
         self._organ = None
         self._organism = None
         self._primary_data = None
@@ -180,6 +221,7 @@ class DatasetBase(abc.ABC):
         self._source = None
         self._state_exact = None
         self._tech_sample = None
+        self.treatment = None
         self._title = None
         self._year = None
 
@@ -192,6 +234,7 @@ class DatasetBase(abc.ABC):
         self.development_stage_obs_key = None
         self.disease_obs_key = None
         self.ethnicity_obs_key = None
+        self.gm_obs_key = None
         self.individual_obs_key = None
         self.organ_obs_key = None
         self.organism_obs_key = None
@@ -199,12 +242,34 @@ class DatasetBase(abc.ABC):
         self.sex_obs_key = None
         self.state_exact_obs_key = None
         self.tech_sample_obs_key = None
+        self.treatment_obs_key = None
 
-        self.gene_id_symbols_var_key = None
-        self.gene_id_ensembl_var_key = None
+        self.feature_id_var_key = None
+        self.feature_reference_var_key = None
+        self.feature_symbol_var_key = None
+        self.feature_type_var_key = None
+
+        self.spatial_x_coord_obs_key = None
+        self.spatial_y_coord_obs_key = None
+        self.spatial_z_coord_obs_key = None
+
+        self.vdj_vj_1_obs_key_prefix = None
+        self.vdj_vj_2_obs_key_prefix = None
+        self.vdj_vdj_1_obs_key_prefix = None
+        self.vdj_vdj_2_obs_key_prefix = None
+        self.vdj_c_call_obs_key_suffix = None
+        self.vdj_consensus_count_obs_key_suffix = None
+        self.vdj_d_call_obs_key_suffix = None
+        self.vdj_duplicate_count_obs_key_suffix = None
+        self.vdj_j_call_obs_key_suffix = None
+        self.vdj_junction_obs_key_suffix = None
+        self.vdj_junction_aa_obs_key_suffix = None
+        self.vdj_locus_obs_key_suffix = None
+        self.vdj_productive_obs_key_suffix = None
+        self.vdj_v_call_obs_key_suffix = None
 
         self._celltype_universe = None
-        self._ontology_class_map = None
+        self._ontology_class_maps = dict([(k, None) for k in self._adata_ids.ontology_constrained])
 
         self.load_raw = None
         self.mapped_features = None
@@ -334,7 +399,6 @@ class DatasetBase(abc.ABC):
                           "selected datasets. Run `pip install synapseclient` to install it. Skipping download of the "
                           f"following dataset: {self.id}")
             return
-        import shutil
         import logging
         logging.captureWarnings(False)  # required to properly display warning messages below with sypaseclient loaded
 
@@ -443,19 +507,19 @@ class DatasetBase(abc.ABC):
             self,
             match_to_reference: Union[str, bool, None],
     ):
-        if self.gene_id_symbols_var_key is None and self.gene_id_ensembl_var_key is None:
-            raise ValueError("Either gene_id_symbols_var_key or gene_id_ensembl_var_key needs to be provided in the"
+        if self.feature_symbol_var_key is None and self.feature_id_var_key is None:
+            raise ValueError("Either feature_symbol_var_key or feature_id_var_key needs to be provided in the"
                              " dataloader")
-        elif self.gene_id_symbols_var_key is None and self.gene_id_ensembl_var_key:
+        elif self.feature_symbol_var_key is None and self.feature_id_var_key:
             # Convert ensembl ids to gene symbols
             id_dict = self.genome_container.id_to_symbols_dict
-            ensids = self.adata.var.index if self.gene_id_ensembl_var_key == "index" else self.adata.var[self.gene_id_ensembl_var_key]
+            ensids = self.adata.var.index if self.feature_id_var_key == "index" else self.adata.var[self.feature_id_var_key]
             self.adata.var[self._adata_ids.feature_symbol] = [
                 id_dict[n.split(".")[0]] if n.split(".")[0] in id_dict.keys() else 'n/a'
                 for n in ensids
             ]
-            self.gene_id_symbols_var_key = self._adata_ids.feature_symbol
-        elif self.gene_id_symbols_var_key and self.gene_id_ensembl_var_key is None:
+            self.feature_symbol_var_key = self._adata_ids.feature_symbol
+        elif self.feature_symbol_var_key and self.feature_id_var_key is None:
             # Convert gene symbols to ensembl ids
             id_dict = self.genome_container.symbol_to_id_dict
             id_strip_dict = self.genome_container.strippednames_to_id_dict
@@ -463,8 +527,8 @@ class DatasetBase(abc.ABC):
             # match it straight away, if it is not in there we try to match everything in front of the first period in
             # the gene name with a dictionary that was modified in the same way, if there is still no match we append na
             ensids = []
-            symbs = self.adata.var.index if self.gene_id_symbols_var_key == "index" else \
-                self.adata.var[self.gene_id_symbols_var_key]
+            symbs = self.adata.var.index if self.feature_symbol_var_key == "index" else \
+                self.adata.var[self.feature_symbol_var_key]
             for n in symbs:
                 if n in id_dict.keys():
                     ensids.append(id_dict[n])
@@ -473,7 +537,7 @@ class DatasetBase(abc.ABC):
                 else:
                     ensids.append('n/a')
             self.adata.var[self._adata_ids.feature_id] = ensids
-            self.gene_id_ensembl_var_key = self._adata_ids.feature_id
+            self.feature_id_var_key = self._adata_ids.feature_id
 
     def _collapse_ensembl_gene_id_versions(self):
         """
@@ -481,21 +545,21 @@ class DatasetBase(abc.ABC):
 
         :return:
         """
-        if not self.gene_id_ensembl_var_key:
+        if not self.feature_id_var_key:
             raise ValueError(
                 "Cannot remove gene version when gene_id_ensembl_var_key is not set in dataloader and "
                 "match_to_reference is False"
             )
-        elif self.gene_id_ensembl_var_key == "index":
+        elif self.feature_id_var_key == "index":
             self.adata.index = [
                 x.split(".")[0] for x in self.adata.var.index
             ]
         else:
-            self.adata.var[self.gene_id_ensembl_var_key] = [
-                x.split(".")[0] for x in self.adata.var[self.gene_id_ensembl_var_key].values
+            self.adata.var[self.feature_id_var_key] = [
+                x.split(".")[0] for x in self.adata.var[self.feature_id_var_key].values
             ]
         # Collapse if necessary:
-        self.adata = collapse_matrix(adata=self.adata, var_column=self.gene_id_ensembl_var_key)
+        self.adata = collapse_matrix(adata=self.adata, var_column=self.feature_id_var_key)
 
     def collapse_counts(self):
         """
@@ -552,7 +616,7 @@ class DatasetBase(abc.ABC):
         self.subset_gene_type = subset_genes_to_type
         # Streamline feature space:
         self._add_missing_featurenames(match_to_reference=match_to_release)
-        for key in [self.gene_id_ensembl_var_key, self.gene_id_symbols_var_key]:
+        for key in [self.feature_id_var_key, self.feature_symbol_var_key]:
             # Make features unique (to avoid na-matches in converted columns to be collapsed by
             # _collapse_ensembl_gene_id_versions() below.
             if not key:
@@ -576,8 +640,8 @@ class DatasetBase(abc.ABC):
             raise ValueError(f"Data type {type(self.adata.X)} not recognized.")
 
         # Compute indices of genes to keep
-        data_ids_ensg = self.adata.var.index.values if self.gene_id_ensembl_var_key == "index" \
-            else self.adata.var[self.gene_id_ensembl_var_key].values
+        data_ids_ensg = self.adata.var.index.values if self.feature_id_var_key == "index" \
+            else self.adata.var[self.feature_id_var_key].values
         if subset_genes_to_type is None:
             subset_ids_ensg = self.genome_container.ensembl
             subset_ids_symbol = self.genome_container.symbols
@@ -618,16 +682,16 @@ class DatasetBase(abc.ABC):
         x_new = x_new.tocsr()
 
         # Create new var dataframe
-        if self.gene_id_symbols_var_key == "index":
+        if self.feature_symbol_var_key == "index":
             var_index = subset_ids_symbol
-            var_data = {self.gene_id_ensembl_var_key: subset_ids_ensg}
-        elif self.gene_id_ensembl_var_key == "index":
+            var_data = {self.feature_id_var_key: subset_ids_ensg}
+        elif self.feature_id_var_key == "index":
             var_index = subset_ids_ensg
-            var_data = {self.gene_id_symbols_var_key: subset_ids_symbol}
+            var_data = {self.feature_symbol_var_key: subset_ids_symbol}
         else:
             var_index = None
-            var_data = {self.gene_id_symbols_var_key: subset_ids_symbol,
-                        self.gene_id_ensembl_var_key: subset_ids_ensg}
+            var_data = {self.feature_symbol_var_key: subset_ids_symbol,
+                        self.feature_id_var_key: subset_ids_ensg}
         var_new = pd.DataFrame(data=var_data, index=var_index)
 
         self.adata = anndata.AnnData(
@@ -703,27 +767,27 @@ class DatasetBase(abc.ABC):
         var_new = pd.DataFrame()
         for k in adata_target_ids.var_keys:
             if k == "feature_id":
-                if not self.gene_id_ensembl_var_key:
+                if not self.feature_id_var_key:
                     raise ValueError("feature_id not set in dataloader despite being required by the "
                                      "selected meta data schema. please run streamline_features() first to create the "
                                      "missing annotation")
-                elif self.gene_id_ensembl_var_key == "index":
+                elif self.feature_id_var_key == "index":
                     var_new[getattr(adata_target_ids, k)] = self.adata.var.index.tolist()
                 else:
-                    var_new[getattr(adata_target_ids, k)] = self.adata.var[self.gene_id_ensembl_var_key].tolist()
-                    del self.adata.var[self.gene_id_ensembl_var_key]
-                self.gene_id_ensembl_var_key = getattr(adata_target_ids, k)
+                    var_new[getattr(adata_target_ids, k)] = self.adata.var[self.feature_id_var_key].tolist()
+                    del self.adata.var[self.feature_id_var_key]
+                self.feature_id_var_key = getattr(adata_target_ids, k)
             elif k == "feature_symbol":
-                if not self.gene_id_symbols_var_key:
+                if not self.feature_symbol_var_key:
                     raise ValueError("gene_id_symbols_var_key not set in dataloader despite being required by the "
                                      "selected meta data schema. please run streamline_features() first to create the "
                                      "missing annotation")
-                elif self.gene_id_symbols_var_key == "index":
+                elif self.feature_symbol_var_key == "index":
                     var_new[getattr(adata_target_ids, k)] = self.adata.var.index.tolist()
                 else:
-                    var_new[getattr(adata_target_ids, k)] = self.adata.var[self.gene_id_symbols_var_key].tolist()
-                    del self.adata.var[self.gene_id_symbols_var_key]
-                self.gene_id_symbols_var_key = getattr(adata_target_ids, k)
+                    var_new[getattr(adata_target_ids, k)] = self.adata.var[self.feature_symbol_var_key].tolist()
+                    del self.adata.var[self.feature_symbol_var_key]
+                self.feature_symbol_var_key = getattr(adata_target_ids, k)
             else:
                 val = getattr(self, k)
                 while hasattr(val, '__len__') and not isinstance(val, str) and len(val) == 1:  # unpack nested lists/tuples
@@ -738,9 +802,9 @@ class DatasetBase(abc.ABC):
                 del self.adata.varp
             self.adata.var = var_new
             if "feature_id" not in adata_target_ids.var_keys:
-                self.gene_id_ensembl_var_key = None
+                self.feature_id_var_key = None
             if "feature_symbol" not in adata_target_ids.var_keys:
-                self.gene_id_symbols_var_key = None
+                self.feature_symbol_var_key = None
         else:
             index_old = self.adata.var.index.copy()
             # Add old columns in if they are not duplicated:
@@ -915,8 +979,9 @@ class DatasetBase(abc.ABC):
             dir_cache: Union[str, os.PathLike],
             store_format: str = "dao",
             dense: bool = False,
-            compression_kwargs: dict = {},
+            compression_kwargs: Union[dict, None] = None,
             chunks: Union[int, None] = None,
+            shuffle_data: bool = False
     ):
         """
         Write data set into a format that allows distributed access to data set on disk.
@@ -945,7 +1010,10 @@ class DatasetBase(abc.ABC):
         :param chunks: Observation axes of chunk size of zarr array, see anndata.AnnData.write_zarr documentation.
             Only relevant for store=="dao". The feature dimension of the chunks is always is the full feature space.
             Uses zarr default chunking across both axes if None.
+        :param shuffle_data: If True -> shuffle ordering of cells in datasets before writing store
         """
+        if compression_kwargs is None:
+            compression_kwargs = {}
         self.__assert_loaded()
         if store_format == "h5ad":
             if not isinstance(self.adata.X, scipy.sparse.csr_matrix):
@@ -962,7 +1030,8 @@ class DatasetBase(abc.ABC):
                                  "consider writing as dense and consider that zarr arrays are compressed on disk!")
             fn = os.path.join(dir_cache, self.doi_cleaned_id)
             chunks = (chunks, self.adata.X.shape[1]) if chunks is not None else True
-            write_dao(store=fn, adata=self.adata, chunks=chunks, compression_kwargs=compression_kwargs)
+            write_dao(store=fn, adata=self.adata, chunks=chunks, compression_kwargs=compression_kwargs,
+                      shuffle_data=shuffle_data)
         else:
             raise ValueError()
 
@@ -987,11 +1056,6 @@ class DatasetBase(abc.ABC):
             assert x is None or isinstance(x, Ontology), x  # Sanity check on dictionary element.
         return x
 
-    @property
-    def fn_ontology_class_map_tsv(self):
-        """Standardised file name under which cell type conversion tables are saved."""
-        return self.doi_cleaned_id + ".tsv"
-
     def _write_ontology_class_map(self, fn, tab: pd.DataFrame):
         """
         Write class map to file.
@@ -1003,33 +1067,46 @@ class DatasetBase(abc.ABC):
         """
         tab.to_csv(fn, index=False, sep="\t")
 
-    def write_ontology_class_map(
+    def write_ontology_class_maps(
             self,
             fn,
+            attrs: List[str],
             protected_writing: bool = True,
             **kwargs
     ):
         """
-        Load class maps of free text cell types to ontology classes.
+        Load class maps of ontology-controlled field to ontology classes.
+
+        TODO: deprecate and only keep DatasetGroup writing?
 
         :param fn: File name of tsv to write class maps to.
+        :param attrs: Attributes to create a tsv for. Must correspond to *_obs_key in yaml.
         :param protected_writing: Only write if file was not already found.
         :return:
         """
-        if not self.annotated:
-            warnings.warn(f"attempted to write ontology class maps for data set {self.id} without annotation")
-        else:
-            labels_original = np.unique(self.adata.obs[self.cell_type_obs_key].values)
-            tab = self.celltypes_universe.prepare_celltype_map_tab(
-                source=labels_original,
-                match_only=False,
-                anatomical_constraint=self.organ,
-                include_synonyms=True,
-                omit_list=[self._adata_ids.unknown_metadata_identifier],
-                **kwargs
-            )
-            if not os.path.exists(fn) or not protected_writing:
-                self._write_ontology_class_map(fn=fn, tab=tab)
+        for x in attrs:
+            k = getattr(self, x + "_obs_key")
+            if k is None:
+                warnings.warn(f"attempted to write ontology class maps for data set {self.id} without annotation of "
+                              f"meta data {x}")
+            elif k not in self.adata.obs.columns:
+                warnings.warn(f"attempted to write ontology class maps for data set {self.id} but did not find column "
+                              f"{k} in .obs which should correspond to {x}")
+            else:
+                fn_x = fn + "_" + x + ".tsv"
+                labels_original = np.unique(self.adata.obs[k].values)
+                tab = prepare_ontology_map_tab(
+                    source=labels_original,
+                    onto=x,
+                    organism=self.organism,
+                    match_only=False,
+                    anatomical_constraint=self.organ,
+                    include_synonyms=True,
+                    omit_list=[self._adata_ids.unknown_metadata_identifier],
+                    **kwargs
+                )
+                if not os.path.exists(fn_x) or not protected_writing:
+                    self._write_ontology_class_map(fn=fn_x, tab=tab)
 
     def _read_ontology_class_map(self, fn) -> pd.DataFrame:
         """
@@ -1048,31 +1125,28 @@ class DatasetBase(abc.ABC):
             raise pandas.errors.ParserError(e)
         return tab
 
-    def read_ontology_class_map(self, fn):
+    def read_ontology_class_maps(self, fns: List[str]):
         """
-        Load class maps of free text cell types to ontology classes.
+        Load class maps of free text class labels to ontology classes.
 
-        :param fn: File name of csv to load class maps from.
+        :param fns: File names of tsv to load class maps from.
         :return:
         """
-        if os.path.exists(fn):
-            self.cell_type_map = self._read_ontology_class_map(fn=fn)
-        else:
-            if self.cell_type_obs_key is not None:
-                warnings.warn(f"file {fn} does not exist but cell_type_obs_key {self.cell_type_obs_key} is given")
+        assert isinstance(fns, list)
+        ontology_class_maps = {}
+        for fn in fns:
+            k = identify_tsv(fn=fn, ontology_names=self._adata_ids.ontology_constrained)
+            if os.path.exists(fn):
+                ontology_class_maps[k] = self._read_ontology_class_map(fn=fn)
+        self.ontology_class_maps = ontology_class_maps
 
     def project_free_to_ontology(self, attr: str):
         """
         Project free text cell type names to ontology based on mapping table.
 
         ToDo: add ontology ID setting here.
-        ToDo: only for cell type right now, extend to other meta data in the future.
         """
-        ontology_map = attr + "_map"
-        if hasattr(self, ontology_map):
-            ontology_map = getattr(self, ontology_map)
-        else:
-            ontology_map = None
+        ontology_map = self.ontology_class_maps[attr]
         adata_fields = self._adata_ids
         col_original = attr + adata_fields.onto_original_suffix
         labels_original = self.adata.obs[col_original].values
@@ -1193,7 +1267,6 @@ class DatasetBase(abc.ABC):
         """
         Project ontology names to IDs for a given ontology in .obs entries.
 
-        :param ontology: ontology to use when converting to IDs
         :param attr: name of obs_column containing names to convert or python list containing these values
         :param map_exceptions: list of values that should not be mapped.
             Defaults to unknown meta data identifier defined in ID object if None.
@@ -1357,29 +1430,11 @@ class DatasetBase(abc.ABC):
         if self.cell_type_obs_key is not None:
             return True
         else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.annotated in self.meta.columns:
-                return self.meta[self._adata_ids.annotated].values[0]
-            elif self.loaded:
-                # If data set was loaded and there is still no annotation indicated, it is declared unannotated.
-                return False
-            else:
-                # If data set was not yet loaded, it is unclear if annotation would be loaded in ._load(),
-                # if also no meta data is available, we do not know the status of the data set.
-                return None
+            return False
 
     @property
     def assay_sc(self) -> Union[None, str]:
-        if self._assay_sc is not None:
-            return self._assay_sc
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.assay_sc in self.meta.columns:
-                return self.meta[self._adata_ids.assay_sc]
-            else:
-                return None
+        return self._assay_sc
 
     @assay_sc.setter
     def assay_sc(self, x: str):
@@ -1388,15 +1443,7 @@ class DatasetBase(abc.ABC):
 
     @property
     def assay_differentiation(self) -> Union[None, str]:
-        if self._assay_differentiation is not None:
-            return self._assay_differentiation
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.assay_differentiation in self.meta.columns:
-                return self.meta[self._adata_ids.assay_differentiation]
-            else:
-                return None
+        return self._assay_differentiation
 
     @assay_differentiation.setter
     def assay_differentiation(self, x: str):
@@ -1406,15 +1453,7 @@ class DatasetBase(abc.ABC):
 
     @property
     def assay_type_differentiation(self) -> Union[None, str]:
-        if self._assay_type_differentiation is not None:
-            return self._assay_type_differentiation
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.assay_type_differentiation in self.meta.columns:
-                return self.meta[self._adata_ids.assay_type_differentiation]
-            else:
-                return None
+        return self._assay_type_differentiation
 
     @assay_type_differentiation.setter
     def assay_type_differentiation(self, x: str):
@@ -1474,15 +1513,7 @@ class DatasetBase(abc.ABC):
 
     @property
     def cell_line(self) -> Union[None, str]:
-        if self._cell_line is not None:
-            return self._cell_line
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.cell_line in self.meta.columns:
-                return self.meta[self._adata_ids.cell_line]
-            else:
-                return None
+        return self._cell_line
 
     @cell_line.setter
     def cell_line(self, x: str):
@@ -1490,15 +1521,7 @@ class DatasetBase(abc.ABC):
 
     @property
     def cell_type(self) -> Union[None, str]:
-        if self._cell_type is not None:
-            return self._cell_type
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.cell_type in self.meta.columns:
-                return self.meta[self._adata_ids.cell_type]
-            else:
-                return None
+        return self._cell_type
 
     @cell_type.setter
     def cell_type(self, x: str):
@@ -1528,15 +1551,7 @@ class DatasetBase(abc.ABC):
 
     @property
     def default_embedding(self) -> Union[None, str]:
-        if self._default_embedding is not None:
-            return self._default_embedding
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.default_embedding in self.meta.columns:
-                return self.meta[self._adata_ids.default_embedding]
-            else:
-                return None
+        return self._default_embedding
 
     @default_embedding.setter
     def default_embedding(self, x: str):
@@ -1546,15 +1561,7 @@ class DatasetBase(abc.ABC):
 
     @property
     def development_stage(self) -> Union[None, str]:
-        if self._development_stage is not None:
-            return self._development_stage
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.development_stage in self.meta.columns:
-                return self.meta[self._adata_ids.development_stage]
-            else:
-                return None
+        return self._development_stage
 
     @development_stage.setter
     def development_stage(self, x: str):
@@ -1565,15 +1572,7 @@ class DatasetBase(abc.ABC):
 
     @property
     def disease(self) -> Union[None, str]:
-        if self._disease is not None:
-            return self._disease
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.disease in self.meta.columns:
-                return self.meta[self._adata_ids.disease]
-            else:
-                return None
+        return self._disease
 
     @disease.setter
     def disease(self, x: str):
@@ -1688,15 +1687,7 @@ class DatasetBase(abc.ABC):
 
     @property
     def ethnicity(self) -> Union[None, str]:
-        if self._ethnicity is not None:
-            return self._ethnicity
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.ethnicity in self.meta.columns:
-                return self.meta[self._adata_ids.ethnicity]
-            else:
-                return None
+        return self._ethnicity
 
     @ethnicity.setter
     def ethnicity(self, x: str):
@@ -1718,15 +1709,7 @@ class DatasetBase(abc.ABC):
 
     @property
     def individual(self) -> Union[None, str]:
-        if self._individual is not None:
-            return self._individual
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.individual in self.meta.columns:
-                return self.meta[self._adata_ids.individual]
-            else:
-                return None
+        return self._individual
 
     @individual.setter
     def individual(self, x: str):
@@ -1760,47 +1743,16 @@ class DatasetBase(abc.ABC):
         self._meta = x
 
     @property
-    def ncells(self) -> int:
+    def ncells(self) -> Union[None, int]:
         # ToDo cache this if it was loaded from meta?
         if self.adata is not None:
-            x = self.adata.n_obs
-        elif self._ncells is not None:
-            x = self._ncells
+            return self.adata.n_obs
         else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            x = self.meta[self._adata_ids.ncells]
-        return int(x)
-
-    @property
-    def normalization(self) -> Union[None, str]:
-        if self._normalization is not None:
-            return self._normalization
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.normalization in self.meta.columns:
-                return self.meta[self._adata_ids.normalization]
-            else:
-                return None
-
-    @normalization.setter
-    def normalization(self, x: str):
-        x = self._value_protection(attr="normalization", allowed=self.get_ontology(k="normalization"),
-                                   attempted=x)
-        self._normalization = x
+            return None
 
     @property
     def primary_data(self) -> Union[None, bool]:
-        if self._primary_data is not None:
-            return self._primary_data
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.primary_data in self.meta.columns:
-                return self.meta[self._adata_ids.primary_data]
-            else:
-                return None
+        return self._primary_data
 
     @primary_data.setter
     def primary_data(self, x: bool):
@@ -1810,15 +1762,7 @@ class DatasetBase(abc.ABC):
 
     @property
     def organ(self) -> Union[None, str]:
-        if self._organ is not None:
-            return self._organ
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.organ in self.meta.columns:
-                return self.meta[self._adata_ids.organ]
-            else:
-                return None
+        return self._organ
 
     @organ.setter
     def organ(self, x: str):
@@ -1827,15 +1771,7 @@ class DatasetBase(abc.ABC):
 
     @property
     def organism(self) -> Union[None, str]:
-        if self._organism is not None:
-            return self._organism
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.organism in self.meta.columns:
-                return self.meta[self._adata_ids.organism]
-            else:
-                return None
+        return self._organism
 
     @organism.setter
     def organism(self, x: str):
@@ -1846,15 +1782,7 @@ class DatasetBase(abc.ABC):
 
     @property
     def sample_source(self) -> Union[None, str]:
-        if self._sample_source is not None:
-            return self._sample_source
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.sample_source in self.meta.columns:
-                return self.meta[self._adata_ids.sample_source]
-            else:
-                return None
+        return self._sample_source
 
     @sample_source.setter
     def sample_source(self, x: str):
@@ -1864,15 +1792,7 @@ class DatasetBase(abc.ABC):
 
     @property
     def sex(self) -> Union[None, str]:
-        if self._sex is not None:
-            return self._sex
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.sex in self.meta.columns:
-                return self.meta[self._adata_ids.sex]
-            else:
-                return None
+        return self._sex
 
     @sex.setter
     def sex(self, x: str):
@@ -1889,15 +1809,7 @@ class DatasetBase(abc.ABC):
 
     @property
     def state_exact(self) -> Union[None, str]:
-        if self._state_exact is not None:
-            return self._state_exact
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.state_exact in self.meta.columns:
-                return self.meta[self._adata_ids.state_exact]
-            else:
-                return None
+        return self._state_exact
 
     @state_exact.setter
     def state_exact(self, x: str):
@@ -1929,16 +1841,23 @@ class DatasetBase(abc.ABC):
         self._tech_sample_obs_key = x
 
     @property
-    def year(self) -> Union[None, int]:
-        if self._year is not None:
-            return self._year
+    def author(self) -> str:
+        return self._author
+
+    @author.setter
+    def author(self, x: str):
+        self._author = x
+
+    @property
+    def title(self):
+        if self._title is not None:
+            return self._title
         else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.year in self.meta.columns:
-                return self.meta[self._adata_ids.year]
-            else:
-                return None
+            return self.__crossref_query(k="title")
+
+    @property
+    def year(self) -> Union[None, int]:
+        return self._year
 
     @year.setter
     def year(self, x: int):
@@ -1955,27 +1874,30 @@ class DatasetBase(abc.ABC):
         return self._celltype_universe
 
     @property
-    def cell_type_map(self) -> dict:
-        return self._ontology_class_map
+    def ontology_class_maps(self) -> Dict[str, pd.DataFrame]:
+        return self._ontology_class_maps
 
-    @cell_type_map.setter
-    def cell_type_map(self, x: pd.DataFrame):
-        assert x.shape[1] in [2, 3], f"{x.shape} in {self.id}"
-        assert x.columns[0] == self._adata_ids.classmap_source_key
-        assert x.columns[1] == self._adata_ids.classmap_target_key
-        # Check for weird entries:
-        # nan arises if columns was empty in that row.
-        nan_vals = np.where([
-            False if isinstance(x, str) else (np.isnan(x) or x is None)
-            for x in x[self._adata_ids.classmap_target_key].values.tolist()
-        ])[0]
-        assert len(nan_vals) == 0, \
-            f"Found nan target values in {self.id} for {x[self._adata_ids.classmap_target_key].values[nan_vals]}"
-        # Transform data frame into a mapping dictionary:
-        self._ontology_class_map = dict(list(zip(
-            x[self._adata_ids.classmap_source_key].values.tolist(),
-            x[self._adata_ids.classmap_target_key].values.tolist()
-        )))
+    @ontology_class_maps.setter
+    def ontology_class_maps(self, x: Dict[str, pd.DataFrame]):
+        for k, v in x.items():
+            assert v.shape[1] in [2, 3], f"{v.shape} in {self.id}"
+            assert v.columns[0] == self._adata_ids.classmap_source_key
+            assert v.columns[1] == self._adata_ids.classmap_target_key
+            # Check for weird entries:
+            # nan arises if columns was empty in that row.
+            nan_vals = np.where([
+                False if isinstance(x, str) else (np.isnan(x) or x is None)
+                for x in v[self._adata_ids.classmap_target_key].values.tolist()
+            ])[0]
+            assert len(nan_vals) == 0, \
+                f"Found nan target values in {self.id} for {x[self._adata_ids.classmap_target_key].values[nan_vals]}," \
+                f" check if all entries in cell type .tsv file are non-empty, for example." \
+                f"This bug may arise if a tab separator of columns is missing in one or multiple rows, for example."
+            # Transform data frame into a mapping dictionary:
+            self._ontology_class_maps[k] = dict(list(zip(
+                v[self._adata_ids.classmap_source_key].values.tolist(),
+                v[self._adata_ids.classmap_target_key].values.tolist()
+            )))
 
     def __crossref_query(self, k):
         """
@@ -2007,33 +1929,6 @@ class DatasetBase(abc.ABC):
         except ConnectionError as e:
             print(f"ConnectionError: {e}")
             return None
-
-    @property
-    def author(self) -> str:
-        if self._author is not None:
-            return self._author
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is None or self._adata_ids.author not in self.meta.columns:
-                raise ValueError("author must be set but was neither set in constructor nor in meta data")
-            return self.meta[self._adata_ids.author]
-
-    @author.setter
-    def author(self, x: str):
-        self._author = x
-
-    @property
-    def title(self):
-        if self._title is not None:
-            return self._title
-        else:
-            if self.meta is None:
-                self.load_meta(fn=None)
-            if self.meta is not None and self._adata_ids.title in self.meta.columns:
-                return self.meta[self._adata_ids.title]
-            else:
-                return self.__crossref_query(k="title")
 
     def _value_protection(
             self,

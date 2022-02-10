@@ -1,7 +1,7 @@
 Models
 ======
 
-.. image:: https://raw.githubusercontent.com/theislab/sfaira/master/resources/images/model_zoo.png
+.. image:: https://raw.githubusercontent.com/theislab/sfaira/release/resources/images/figure_rtd_model.png
    :width: 600px
    :align: center
 

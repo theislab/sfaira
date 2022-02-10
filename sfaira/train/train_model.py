@@ -6,20 +6,20 @@ import pickle
 from typing import Union
 
 from sfaira.consts import AdataIdsSfaira
-from sfaira.data.store.base import DistributedStoreBase
-from sfaira.data import DistributedStoreSingleFeatureSpace, Universe
-from sfaira.estimators import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
+from sfaira.data.store.stores.base import StoreBase
+from sfaira.data import StoreSingleFeatureSpace, Universe
+from sfaira.estimators.keras.base import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
 from sfaira.ui import ModelZoo
 
 
 class TrainModel:
 
-    data: Union[anndata.AnnData, DistributedStoreSingleFeatureSpace]
+    data: Union[anndata.AnnData, StoreSingleFeatureSpace]
     estimator: Union[EstimatorKeras, None]
 
     def __init__(
             self,
-            data: Union[str, anndata.AnnData, Universe, DistributedStoreSingleFeatureSpace],
+            data: Union[str, anndata.AnnData, Universe, StoreSingleFeatureSpace],
     ):
         # Check if handling backed anndata or base path to directory of raw files:
         if isinstance(data, str) and data.split(".")[-1] == "h5ad":
@@ -33,7 +33,7 @@ class TrainModel:
             self.data = data
         elif isinstance(data, Universe):
             self.data = data.adata
-        elif isinstance(data, DistributedStoreBase):
+        elif isinstance(data, StoreBase):
             self.data = data
         else:
             raise ValueError(f"did not recognize data of type {type(data)}")
@@ -45,7 +45,7 @@ class TrainModel:
         Loads backed objects from DistributedStoreBase into single adata object in memory in .data slot.
         :return:
         """
-        if isinstance(self.data, DistributedStoreSingleFeatureSpace):
+        if isinstance(self.data, StoreSingleFeatureSpace):
             adata = None
             for k, v in self.data.indices.items():
                 x = self.data.adata_by_key[k][v, :].to_memory()
@@ -96,9 +96,7 @@ class TrainModel:
             self._save_specific(fn=fn)
 
     def n_counts(self, idx):
-        return np.asarray(
-            self.estimator.data.X[np.sort(idx), :].sum(axis=1)[np.argsort(idx)]
-        ).flatten()
+        return np.asarray(self.estimator.data.checkout(idx=idx, return_dense=False).x.sum(axis=1)).flatten()
 
 
 class TrainModelEmbedding(TrainModel):
@@ -108,7 +106,7 @@ class TrainModelEmbedding(TrainModel):
     def __init__(
             self,
             model_path: str,
-            data: Union[str, anndata.AnnData, Universe, DistributedStoreSingleFeatureSpace],
+            data: Union[str, anndata.AnnData, Universe, StoreSingleFeatureSpace],
     ):
         super(TrainModelEmbedding, self).__init__(data=data)
         self.estimator = None
@@ -172,7 +170,7 @@ class TrainModelCelltype(TrainModel):
     def __init__(
             self,
             model_path: str,
-            data: Union[str, anndata.AnnData, Universe, DistributedStoreSingleFeatureSpace],
+            data: Union[str, anndata.AnnData, Universe, StoreSingleFeatureSpace],
             fn_target_universe: str,
     ):
         super(TrainModelCelltype, self).__init__(data=data)
@@ -230,7 +228,6 @@ class TrainModelCelltype(TrainModel):
         :param fn:
         :return:
         """
-        obs = self.estimator.data.obs
         ytrue = self.estimator.ytrue()
         yhat = self.estimator.predict()
         df_summary = self.estimator.obs_test
@@ -246,6 +243,7 @@ class TrainModelCelltype(TrainModel):
         with open(fn + "_topology.pickle", "wb") as f:
             pickle.dump(obj=self.topology_dict, file=f)
 
+        obs = self.estimator.data.checkout(idx=None, obs_keys=["cell_type"]).obs
         cell_counts = obs['cell_type'].value_counts().to_dict()
         with open(fn + '_celltypes_valuecounts_wholedata.pickle', 'wb') as f:
             pickle.dump(obj=[cell_counts], file=f)

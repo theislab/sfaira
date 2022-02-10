@@ -3,7 +3,8 @@ import sys
 import tensorflow as tf
 
 # Any data loader here to extract path:
-from sfaira.data import load_store, clean_string
+from sfaira.data import load_store
+from sfaira.data.dataloaders.base import clean_string
 
 print(tf.__version__)
 

@@ -19,15 +19,16 @@ class Dataset(DatasetBase):
         self.author = "10x Genomics"
         self.disease = "healthy"
         self.doi_journal = "no_doi_10x_genomics"
-        self.normalization = "raw"
+        self.layer_counts = "X"
         self.organ = "blood"
         self.organism = "Homo sapiens"
         self.primary_data = True
         self.sample_source = "primary_tissue"
         self.year = 2019
 
-        self.gene_id_symbols_var_key = "index"
-        self.gene_id_ensembl_var_key = "gene_ids"
+        self.feature_id_var_key = "gene_ids"
+        self.feature_symbol_var_key = "index"
+        self.feature_type = "rna"
 
         self.set_dataset_id(idx=1)
 
