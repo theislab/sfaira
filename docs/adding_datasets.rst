@@ -78,7 +78,7 @@ Phase P: Preparation
 ~~~~~~~~~~~~~~~~~~~~~
 
 Before you start writing the data loader, we recommend completing this checks and preparation measures.
-Phase P is sub-structured into 4 sub-phases:
+Phase P is sub-structured into 3 sub-phases:
 
 * Pa: Name the data loader.
 * Pb: Check that the data loader was not already implemented.
@@ -113,21 +113,14 @@ Pc. Prepare an installation of sfaira to use for data loader writing.
     instead of going through any of the steps here.
 
     Pc-docker.
-        1. Install docker_ (and start Docker Desktop if you're on Mac or Windows).
-        2. Pull the latest version of the sfaira cli container.
-            .. code-block::
-
-                sudo docker pull leanderd/sfaira-cli:latest
-            ..
-        3. Run the sfaira CLI within the docker image. Please replace <path_data> and <path_loader> with paths to two
-           empty directories on your machine. The sfaira CLI will use these to read your
-           datafiles from and write the dataloaders to respectively.
-            .. code-block::
-
-                sudo docker run --rm -it -v <path_data>:/root/sfaira_data -v <path_loader>:/root/sfaira_loader leanderd/sfaira-cli:latest
-            ..
+        1. Install docker.
+            TODO
+        2. Download the sfaira docker image.
+            TODO
+        3. Test run the sfaira CLI within the docker image.
+            TODO
     Pc-conda.
-        Jump to step 4 if you do not require explanations of specific parts of the shell script.
+        Jump to 2d) if you do not require explanations of specifc parts of the shell script.
 
         1. Install sfaira.
             Clone sfaira into a local repository `DIR_SFAIRA`.
@@ -165,7 +158,7 @@ Pc. Prepare an installation of sfaira to use for data loader writing.
                 pip install -e .
             ..
         4. Summary of step 1-3.
-            Pc1-3 are all covered by the following code block. Remember to name the git branch after your DOI:
+            P2a-c are all covered by the following code block, remember to name the git branch after your DOI:
 
             .. code-block::
 
@@ -201,7 +194,7 @@ Pd. Download the raw data into a local directory.
     You can supply multiple data URLs below, so collect all relevant files in this phase.
 
 Pe. Get an overview of the published data.
-    Data curation is much easier if you have an idea of what the data that you are curating looks like before you start.
+    Data curation is much easier if you an idea of what the data that you are curating looks like before you start.
     Especially, you will notice a difference in your ability to fully leverage phase 1a if you prepare here.
     We recommend you load the cell-wise and gene-wise meta in a python session
     and explore the type of meta data provided there.
@@ -227,7 +220,6 @@ Pe. Get an overview of the published data.
     - Which gene identifiers are used (symbols or ENSEMBL IDs)?
     - Which non-RNA modalities are present in the data?
 
-.. _docker: https://docs.docker.com/get-docker/
 .. _code: https://github.com/theislab/sfaira/tree/dev/sfaira/data/dataloaders/loaders
 .. _issues: https://github.com/theislab/sfaira/issues
 .. _schema: https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/2.0.0/schema.md
@@ -235,7 +227,7 @@ Pe. Get an overview of the published data.
 Phase 1: create
 ~~~~~~~~~~~~~~~~
 
-This phase creates a skeleton for a data loader: `__init__.py`, `.py` and `.yaml` files.
+This phase creates a skeleton for a data loader: `.__init__.py`, `.py` and `.yaml` files.
 Phase 1 is sub-structured into 2 sub-phases:
 
 * 1a: Create template files (``sfaira create-dataloader``).
@@ -265,7 +257,6 @@ Phase 1 is sub-structured into 2 sub-phases:
     that is output by ``load()``, where the elements of the column are then mapped to UBERON terms in phase 2.
 
     1a-docker.
-
         .. code-block::
 
             sfaira create-dataloader
@@ -289,7 +280,6 @@ Phase 1 is sub-structured into 2 sub-phases:
         Note on lists and dictionaries in the yaml file format:
         Some times, you need to write a list in yaml, e.g. because you have multiple data URLs.
         A list looks as follows:
-
         .. code-block::
 
                 # Single URL:
@@ -301,7 +291,6 @@ Phase 1 is sub-structured into 2 sub-phases:
         ..
         As suggested in this example, do not use lists of length 1.
         In contrast, you may need to map a specific ``sample_fns`` to a meta data in multi file loaders:
-
         .. code-block::
 
                 sample_fns:
@@ -395,7 +384,7 @@ Phase 2 is sub-structured into 2 sub-phases:
     Note 3: Perfect matches are filled wihtout further suggestions,
     you can often directly leave these rows as they are after a brief sanity check.
 
-.. _OLS: https://www.ebi.ac.uk/ols/ontologies/cl
+.. _OLS:https://www.ebi.ac.uk/ols/ontologies/cl
 
 Phase 3: finalize
 ~~~~~~~~~~~~~~~~~~~~
@@ -459,8 +448,6 @@ You can push the code from with the sfaira docker with a single command or you c
         the DOI of your data loader.
         If you have not modified any aspects of the data loader since phase 3, you can skip ``sfaira test-dataloader``
         below.
-        In order to create a pullrequest you first need to fork_ the sfaira repository on GitHub. Once forked, you can
-        use the code shown below to submit your new dataloader.
         Note: the CLI will ask you to copy a data loader testing summary into the pull request at the end of the output
         generated by ``finalize-dataloader``.
 
@@ -469,18 +456,10 @@ You can push the code from with the sfaira docker with a single command or you c
             sfaira test-dataloader --doi DOI --path_data DATA_DIR
             cd DIR_SFAIRA
             cd sfaira
-            git remote set-url origin https://github.com/<user>/sfaira.git  # Replace <user> with your github username.
-            git checkout dev
             git add *
             git commit -m "Completed data loader."
-            git push
+            git push TODO put full line for branch creation here.
         ..
-
-        After successfully pushing the new dataloader to your fork, you can go to github.com and create a pullrequest
-        from your fork to the dev branch of the original sfaira repo. Please include the doi of your added dataset in
-        the PR title
-
-.. _fork: https://docs.github.com/en/get-started/quickstart/fork-a-repo
 
 Phase 5: export-h5ad
 ~~~~~~~~~~~~~~~~~~~~~
@@ -817,7 +796,7 @@ In brief, the following meta data are required:
     - ``primary_data``
     - ``year``
 - ``layers``:
-    - ``layer_counts`` or ``layer_processed``
+    - ``layer_counts or layer_processed
 - ``dataset_or_feature_wise``:
     - ``feature_type`` or ``feature_type_var_key``
 - ``dataset_or_observation_wise``:
@@ -1075,7 +1054,7 @@ The following items are only relevant for V(D)J reconstruction data, e.g. TCR or
 These meta data items are described in the AIRR_ project, search the this link for the element in question without
 the prefixed "vdj\_".
 These 10 meta data items describe chains (or loci).
-In accordance with the corresponding scirpy_ defaults, we allow for up to two loci per cell.
+In accordance with the corresponding scirpy defaults_, we allow for up to two loci per cell.
 In T cells, this correspond to two VJ loci (TRA) and two VDJ loci (TRB).
 You can set the prefix of the column of each of the four loci below.
 In total, these 10+4 meta data queries in sfaira describe 4*10 columns in ``.obs`` after ``.load()``.
@@ -1123,7 +1102,6 @@ These meta data contain information about the curation process and schema:
 
 .. _AIRR: https://docs.airr-community.org/en/latest/datarep/rearrangements.html
 .. _cellosaurus: https://web.expasy.org/cellosaurus/
-.. _scirpy: https://icbi-lab.github.io/scirpy/latest/ir-biology.html
 .. _CL: https://www.ebi.ac.uk/ols/ontologies/cl
 .. _EFO: https://www.ebi.ac.uk/ols/ontologies/efo
 .. _EFO_SUBSET: https://www.ebi.ac.uk/ols/ontologies/efo/terms?iri=http%3A%2F%2Fwww.ebi.ac.uk%2Fefo%2FEFO_0010183&viewMode=All&siblings=false
