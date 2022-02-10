@@ -75,6 +75,8 @@ class PullRequestHandler:
         """
         # Clone sfaira
         subprocess.run(
+            ["rm", "-rf", "/root/sfaira"], check=False, text=True, shell=False)
+        subprocess.run(
             ["gh", "repo", "clone", "theislab/sfaira", "/root/sfaira/"], check=True, text=True, shell=False)
         # Get loader name
         if len(self.loader_name_list) == 1:
