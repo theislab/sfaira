@@ -8,6 +8,7 @@ from rich.progress import Progress, BarColumn
 from typing import Dict, List
 import yaml
 
+from sfaira.commands.utils import get_pydoc
 from sfaira.consts.utils import clean_doi
 
 log = logging.getLogger(__name__)
@@ -29,6 +30,7 @@ class DataloaderValidator:
                             if str(x).endswith(".py") and str(x) != "__init__.py"]
         yaml_filenames = [x for x in os.listdir(os.path.join(path_loader, self._clean_doi))
                           if str(x).endswith(".yaml")]
+        self.path_loader = path_loader
         self.fns_loaders = loader_filenames
         self.paths_yamls = [os.path.join(path_loader, self._clean_doi, x) for x in yaml_filenames]
         self.yaml_dicts = {}
@@ -79,9 +81,10 @@ class DataloaderValidator:
 
         for fn in self.fns_loaders:
             file_module = ".".join(fn.split(".")[:-1])
-            pydoc_path = "sfaira.data.dataloaders.loaders." + self._clean_doi + "." + file_module
+            _, pydoc_handle = get_pydoc(path_loader=self.path_loader, doi_sfaira_repr=self._clean_doi)
+            pydoc_handle = pydoc_handle + "." + file_module
             for x in elements:
-                query_element = pydoc.locate(pydoc_path + "." + x)
+                query_element = pydoc.locate(pydoc_handle + "." + x)
                 if query_element is None:
                     passed_required_elements = False
                     self.failed.append(f'Missing element in namespace of {fn}.py file: {x}')
