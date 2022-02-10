@@ -85,7 +85,6 @@ class DataloaderAnnotater:
         ds = self.buffered_load(test_data=test_data, doi_sfaira_repr=doi_sfaira_repr)
         # Create cell type conversion table:
         cwd = os.path.dirname(self.file_path)
-        dataset_module = str(cwd.split(os.sep)[-1])
         # Group data sets by file module:
         # Note that if we were not grouping the cell type map .tsv files by file module, we could directly call
         # write_ontology_class_map on the ds.
