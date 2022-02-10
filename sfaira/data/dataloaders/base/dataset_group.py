@@ -703,11 +703,14 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
         self._cwd = os.path.dirname(file_base)
         try:
             collection_id = str(self._cwd).split(os.sep)[-1]
-            package_source = str(self._cwd).split(os.sep)[-5]
-            if package_source == "sfaira":
-                pass
-            elif package_source == "sfaira_extension":
-                package_source = "sfairae"
+            if len(str(self._cwd).split(os.sep)) > 4:
+                package_source = str(self._cwd).split(os.sep)[-5]
+                if package_source == "sfaira":
+                    pass
+                elif package_source == "sfaira_extension":
+                    package_source = "sfairae"
+                else:
+                    package_source = "external"
             else:
                 package_source = "external"
         except IndexError as e:
