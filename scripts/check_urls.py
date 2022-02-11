@@ -25,5 +25,6 @@ for url in flat_urls:
         failed_urls.append([url, e])
 
 if len(failed_urls) != 0:
-    print(failed_urls)
+    for fail in failed_urls:
+        print(fail)
     raise AssertionError(f"{len(failed_urls)} URLs failed.")
