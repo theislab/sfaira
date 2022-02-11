@@ -84,7 +84,7 @@ class PullRequestHandler:
         else:
             self.loader_name = sfaira_questionary(
                 function='select',
-                question='Multiple dataloaders detected in the loader directory.\n'
+                question='Multiple dataloaders detected in the loader directory. '
                          'Which one do you want to submit as a pull request?',
                 choices=self.loader_name_list
             )
