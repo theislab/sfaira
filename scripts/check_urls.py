@@ -1,10 +1,12 @@
 import itertools
 import urllib
+from typing import List
+from urllib.error import HTTPError, URLError
 
 import sfaira
 
 u = sfaira.data.Universe()
-urls = []
+urls: List[str] = []
 for x in u.datasets.values():
     a = x.download_url_data
     if a is not None:
@@ -14,5 +16,14 @@ for x in u.datasets.values():
         urls.append(b) if isinstance(b, str) else urls.extend(b)
 
 flat_urls = list(filter(lambda url: url is not None, list(itertools.chain(*urls))))
+failed_urls: List[List[str]] = []
 for url in flat_urls:
-    assert urllib.request.urlopen(url).getcode() == 200
+    try:
+        if not url.startswith(("syn", "manual", "private")):
+            assert urllib.request.urlopen(url).getcode() == 200
+    except (AssertionError, ValueError, HTTPError, URLError) as e:
+        failed_urls.append([url, e])
+
+if len(failed_urls) != 0:
+    print(failed_urls)
+    raise AssertionError(f"{len(failed_urls)} URLs failed.")
