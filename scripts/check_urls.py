@@ -1,5 +1,5 @@
 import itertools
-import urllib
+import urllib.request
 
 import sfaira
 
@@ -15,4 +15,5 @@ for x in u.datasets.values():
 
 flat_urls = list(filter(lambda url: url is not None, list(itertools.chain(*urls))))
 for url in flat_urls:
-    assert urllib.request.urlopen(url).getcode() == 200
+    if not url.startswith(("syn", "manual", "private")):
+        assert urllib.request.urlopen(url).getcode() == 200
