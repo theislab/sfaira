@@ -18,7 +18,7 @@ sample_dict = {
 def load(data_dir, sample_fn, **kwargs):
     fn = os.path.join(data_dir, "GSE163973_RAW.tar")
     with tarfile.open(fn) as tar:
-        with tarfile.open(fileobj=tar.extractfile(sample_fn+"_matrix.tar.gz")) as tar2:
+        with tarfile.open(fileobj=tar.extractfile(sample_fn + "_matrix.tar.gz")) as tar2:
             with gzip.open(tar2.extractfile(f"{tar2.getnames()[0]}/matrix.mtx.gz"), "rb") as mm:
                 x = scipy.io.mmread(mm).T.tocsr()
             obs = pd.read_csv(tar2.extractfile(f"{tar2.getnames()[0]}/barcodes.tsv.gz"), compression="gzip", header=None, sep="\t", index_col=0)
