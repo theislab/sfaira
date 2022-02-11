@@ -120,8 +120,9 @@ class PullRequestHandler:
         subprocess.run(["git", "commit", "-m", f"[from sfaira cli] add dataloader {self.loader_name}"],
                        check=True, text=True, shell=False, cwd="/root/sfaira/")
         subprocess.run(["gh", "pr", "create", "--base", "dev",
-                        "--title", f"Adding dataset {self.loader_name}",
-                        "--body", f"This PR was created by the sfaira CLI adding dataset {self.loader_name}"],
+                        "--title", f"{self.loader_name}",
+                        "--body", f"This PR was created by the sfaira CLI adding dataset {self.loader_name}",
+                        "--label", "dataset"],
                        check=True, text=True, shell=False, cwd="/root/sfaira/")
-        print("[bold green]Your PR was sucessfully submitted. Feel free to add further comments to it using the URL in "
-              "the line above.")
+        print("[bold green]Your PR was successfully submitted. Feel free to add further comments to it using the URL "
+              "in the line above.")
