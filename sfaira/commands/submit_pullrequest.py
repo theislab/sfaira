@@ -18,6 +18,7 @@ class PullRequestHandler:
         self.path_loader = path_loader
         self.loader_name_list = []
         self.loader_name = None
+        self.gh_token = ""
 
     def submit_pr(self):
         self._check_container_and_loaders()
@@ -39,8 +40,7 @@ class PullRequestHandler:
                   'Aborting.')
             sys.exit()
 
-    @staticmethod
-    def _gh_authenticate() -> None:
+    def _gh_authenticate(self) -> None:
         """
         Guides the user to authenticate with the GitHub CLI
         """
@@ -66,6 +66,7 @@ class PullRequestHandler:
                 gh_call = subprocess.run(
                     f"echo {gh_token} | gh auth login --with-token", check=False, text=True, shell=True)
             returncode = gh_call.returncode
+        self.gh_token = gh_token
         subprocess.run(["gh", "auth", "setup-git"], check=True, text=True, shell=False)
         print("[bold green]Successfully authenticated with GitHub.")
 
@@ -74,8 +75,7 @@ class PullRequestHandler:
         Clones the sfaira repo, creates a new branch and moves dataloader into the right location.
         """
         # Clone sfaira
-        subprocess.run(
-            ["rm", "-rf", "/root/sfaira"], check=False, text=True, shell=False)
+        subprocess.run(["rm", "-rf", "/root/sfaira"], check=False, text=True, shell=False)
         subprocess.run(
             ["gh", "repo", "clone", "theislab/sfaira", "/root/sfaira/"], check=True, text=True, shell=False)
         # Get loader name
@@ -90,10 +90,11 @@ class PullRequestHandler:
             )
         # Create new branch in sfaira git repo
         subprocess.run(
-            ["git", "checkout", "-b", f"dataset/{self.loader_name}"], check=True, text=True, shell=False,
-            cwd="/root/sfaira/")
-        # Move loader
-        shutil.move(
+            ["git", "checkout", "-b", f"dataset/{self.loader_name}"],
+            check=True, text=True, shell=False,cwd="/root/sfaira/"
+        )
+        # Copy loader
+        shutil.copytree(
             src=os.path.join(self.path_loader, self.loader_name),
             dst=os.path.join("/root/sfaira/data/dataloaders/loaders", self.loader_name)
         )
@@ -119,10 +120,16 @@ class PullRequestHandler:
         subprocess.run(["git", "add", "*"], check=True, text=True, shell=False, cwd="/root/sfaira/")
         subprocess.run(["git", "commit", "-m", f"[from sfaira cli] add dataloader {self.loader_name}"],
                        check=True, text=True, shell=False, cwd="/root/sfaira/")
-        subprocess.run(["gh", "pr", "create", "--base", "dev",
-                        "--title", f"{self.loader_name}",
-                        "--body", f"This PR was created by the sfaira CLI adding dataset {self.loader_name}",
-                        "--label", "dataset"],
-                       check=True, text=True, shell=False, cwd="/root/sfaira/")
+        # Create pullrequest (authenticate again beforehand if gh_token was provided before)
+        create_pr_str = f"gh pr create --base dev --title {self.loader_name} " \
+                        f"--body 'This PR was created by the sfaira CLI adding dataset {self.loader_name}' " \
+                        f"--label dataset"
+        if self.gh_token != "":
+            subprocess.run(f"echo {self.gh_token} | gh auth login --with-token && {create_pr_str}",
+                           check=True, text=True, shell=True, cwd="/root/sfaira/")
+        else:
+            subprocess.run(create_pr_str, check=True, text=True, shell=True, cwd="/root/sfaira/")
+        subprocess.run(
+            ["rm", "-rf", os.path.join(self.path_loader, self.loader_name)], check=False, text=True, shell=False)
         print("[bold green]Your PR was successfully submitted. Feel free to add further comments to it using the URL "
               "in the line above.")
