@@ -451,6 +451,19 @@ You can push the code from with the sfaira docker with a single command or you c
             sfaira test-dataloader --doi DOI
             sfaira publish-dataloader
         ..
+
+        You will be prompted to paste your github token in order to authenticate with github. If you do not have a token
+        you can leave the field blank and you will be interactively guided to authenticating your github account using
+        your browser. (You will have to manually copy a url into the browser at some point.)
+        In certain cases you might be prompted to enter you github username and password again during the process.
+        Please note that this requires you to enter you username and github token as before, not the password you use to
+        log into github.com in your browser.
+
+        You will also be prompted the following by the CLI: ``Where should we push the xxx branch?``
+        You generally want to select the second option here ("Create a fork of theislab/sfaira") unless you are a member
+        of the theislab organisation or otherwise have previously obtained write access to the sfaira repository.
+        In this case you can select the first option ("theislab/sfaira").
+
     4a-git.
         You can contribute the data loader to public sfaira as code through a pull request.
         Note that you can also just keep the data loader in your local installation if you do not want to make it
