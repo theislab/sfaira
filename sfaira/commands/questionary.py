@@ -41,10 +41,9 @@ def sfaira_questionary(function: str,
             if default not in choices:  # type: ignore
                 log.debug(f'Default value {default} is not in the set of choices!')
             answer = getattr(questionary, function)(f'{question}: ', choices=choices, style=sfaira_style).unsafe_ask()
-        # Reasking behaviour is unwanted for sfaira cli pullrequest submission
-        # elif function == 'password':
-        #     while not answer or answer == '':
-        #         answer = getattr(questionary, function)(f'{question}: ', style=sfaira_style).unsafe_ask()
+        elif function == 'password':
+        #   while not answer or answer == '': # reasking behaviour is unwanted for sfaira cli pullrequest submission
+            answer = getattr(questionary, function)(f'{question}: ', style=sfaira_style).unsafe_ask()
         elif function == 'text':
             if not default:
                 log.debug('Tried to utilize default value in questionary prompt, but is None! Please set a default value.')
