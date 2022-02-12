@@ -91,7 +91,7 @@ class PullRequestHandler:
         # Create new branch in sfaira git repo
         subprocess.run(
             ["git", "checkout", "-b", f"dataset/{self.loader_name}"],
-            check=True, text=True, shell=False,cwd="/root/sfaira/"
+            check=True, text=True, shell=False, cwd="/root/sfaira/"
         )
         # Copy loader
         shutil.copytree(
