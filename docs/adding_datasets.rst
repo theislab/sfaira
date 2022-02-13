@@ -43,11 +43,11 @@ In addition, the CLI guides the user through manual steps that are necessary in 
 We structured the process of curation into four phases,
 a preparatory phase P precedes CLI execution and is described in this documentation.
 
-- Phase P (``prepare``): data and python environment setup for curation.
-- Phase 1 (``create``): a `load()` function (in a `.py`) and a YAML are written.
-- Phase 2 (``annotate``): ontology-specific maps of free-text metadata to contrained vocabulary (in `*.tsv`) are written.
-- Phase 3 (``finalize``): the data loader is tested and metadata are cleaned up.
-- Phase 4 (``publish``): the data loader is uploaded to the sfaira GitHub repository.
+0. Phase P (``prepare``): data and python environment setup for curation.
+1. Phase 1 (``create``): a `load()` function (in a `.py`) and a YAML are written.
+2. Phase 2 (``annotate``): ontology-specific maps of free-text metadata to contrained vocabulary (in `*.tsv`) are written.
+3. Phase 3 (``finalize``): the data loader is tested and metadata are cleaned up.
+4. Phase 4 (``publish``): the data loader is uploaded to the sfaira GitHub repository.
 
 An experienced curator could skip using the CLI for phase 1 and write the `__init__.py`, `ID.py` and `ID.yaml` by hand.
 In this case, we still highly recommend using the CLI for phase 2 and 3.
@@ -62,8 +62,8 @@ Where appropriate, separate instruction options are given for workflows in conda
 Overall, the workflow looks the same in both frameworks, though.
 This cycle can be complemented by an optional workflow to cache curated `.h5ad` objects (e.g. on the cellxgene website):
 
-- Phase 5 (``export-h5ad``): the data loader is used to create a streamlined `.h5ad` of a particular format.
-- Phase 6 (``validate-h5ad``): the `.h5ad` from phase 4 is checked for compliance with a particular (e.g. the cellxgene format).
+5. Phase 5 (``export-h5ad``): the data loader is used to create a streamlined `.h5ad` of a particular format.
+6. Phase 6 (``validate-h5ad``): the `.h5ad` from phase 4 is checked for compliance with a particular (e.g. the cellxgene format).
 
 The resulting `.h5ad` can be shared with collaborators or uploaded to data submission servers.
 
@@ -78,12 +78,7 @@ Phase P: Preparation
 ~~~~~~~~~~~~~~~~~~~~~
 
 Before you start writing the data loader, we recommend completing this checks and preparation measures.
-Phase P is sub-structured into 4 sub-phases:
-
-* Pa: Name the data loader.
-* Pb: Check that the data loader was not already implemented.
-* Pc: Prepare an installation of sfaira to use for data loader writing.
-* Pd: Download the raw data into a local directory.
+Phase P is sub-structured into sub-phases:
 
 Pa. Name the data loader.
     We will decide for a  name of the dataloader based on its DOI.
@@ -212,20 +207,27 @@ Pe. Get an overview of the published data.
     or to a corresponding column in a tabular file:
 
     - single-cell assay
+
     - cell type
+
     - developmental stage
+
     - disease state
+
     - ethnicity (only relevant for human samples)
+
     - organ / tissue
+
     - organism
+
     - sex
+
 
     Note that these are also the key ontology-restricted and required meta data in the cellxgene curation schema_.
     Next, we recommend you briefly consider the available features:
-
-    - Are count matrices, processed matrices or spliced/unspliced RNA published?
-    - Which gene identifiers are used (symbols or ENSEMBL IDs)?
-    - Which non-RNA modalities are present in the data?
+    Are count matrices, processed matrices or spliced/unspliced RNA published?
+    Which gene identifiers are used (symbols or ENSEMBL IDs)?
+    Which non-RNA modalities are present in the data?
 
 .. _docker: https://docs.docker.com/get-docker/
 .. _code: https://github.com/theislab/sfaira/tree/dev/sfaira/data/dataloaders/loaders
@@ -265,6 +267,7 @@ Phase 1 is sub-structured into 2 sub-phases:
     that is output by ``load()``, where the elements of the column are then mapped to UBERON terms in phase 2.
 
     1a-docker.
+        You can run the `create-dataloader` command directly.
 
         .. code-block::
 
@@ -355,14 +358,22 @@ Phase 2 is sub-structured into 2 sub-phases:
 
         .. code-block::
 
-            sfaira annotate-dataloader --doi DOI --path_data DATA_DIR
+            sfaira annotate-dataloader --doi DOI --path-data DATA_DIR
         ..
 2b. Completion of annotation (manual).
-    Each `<path_loader>/<DOI-name>/ID*.tsv` file contains two columns with one row for each unique free-text meta data
+    Each `<path_loader>/<DOI-name>/ID*.tsv` files contains two columns with one row for each unique free-text meta data
     item, e.g. each cell type label.
+    One file is created for each ``*_obs_key`` that requires mapping to an ontology, which are:
+    ``assay_sc_obs_key``, ``cell_line_sc_obs_key``, ``cell_type_sc_obs_key``, ``development_stage_sc_obs_key``,
+    ``disease_sc_obs_key``, ``ethnicity_sc_obs_key``, ``organ_sc_obs_key``, ``organism_sc_obs_key``,
+    ``sex_sc_obs_key``.
+    Depending on the number of such ``*_obs_key`` items that are set in the `.yaml`,
+    you will have between 0 amd 9 `.tsv` files.
 
-    - The first column is labeled "source" and contains free-text identifiers.
-    - The second column is labeled "target" and contains suggestions for matching the symbols from the corresponding ontology.
+    - "source":
+        The first column is labeled "source" and contains free-text identifiers.
+    - "target":
+        The second column is labeled "target" and contains suggestions for matching the symbols from the corresponding ontology.
 
     The suggestions are based on multiple search criteria, mostly on similarity of the free-text token to tokes in the
     ontology.
@@ -424,7 +435,7 @@ Phase 3: finalize
 
         .. code-block::
 
-            sfaira finalize-dataloader --doi DOI --path_data DATA_DIR
+            sfaira finalize-dataloader --doi DOI --path-data DATA_DIR
         ..
 
 
@@ -466,7 +477,7 @@ You can push the code from with the sfaira docker with a single command or you c
 
         .. code-block::
 
-            sfaira test-dataloader --doi DOI --path_data DATA_DIR
+            sfaira test-dataloader --doi DOI --path-data DATA_DIR
             cd DIR_SFAIRA
             cd sfaira
             git remote set-url origin https://github.com/<user>/sfaira.git  # Replace <user> with your github username.
@@ -496,7 +507,7 @@ Phase 5 and 6 are optional, see also introduction paragraphs on this documentati
 
     .. code-block::
 
-        sfaira export-h5ad --doi --schema --path-out --path_data [--path_loader]
+        sfaira export-h5ad --doi --schema --path-out --path-data [--path_loader]
     ..
 
 Phase 6: validate-h5ad
@@ -883,7 +894,7 @@ Dataset-wise meta data are in the section `dataset_wise` in the `.yaml` file.
     Download links for observation-wise data.
     Full URLs of all observation-wise meta data files such as count matrices.
     This attribute is optional and not necessary ff observation-wise meta data is already in the files defined in
-    `download_url_data`, e.g. often the case for .h5ad`.
+    `download_url_data`, e.g. often the case for `.h5ad`.
 - primary_data: If this is the first publication to report this gene expression data {True, False}.
     This is False if the study is a meta study that uses data that was previously published.
     This usually implies that one can also write a data loader for the data from the primary study.
@@ -905,12 +916,19 @@ In the following, "*processed" refers to any processing that modifies these coun
 normalization, batch correction, ambient RNA correction.
 
 - layer_counts: The total event counts per feature, e.g. UMIs that align to a gene. {'X', 'raw', or a .layers key}
+
 - layer_processed: Processed complement of 'layer_counts'. {'X', 'raw', or a .layers key}
+
 - layer_spliced_counts: The total spliced RNA counts per gene. {a .layers key}
+
 - layer_spliced_processed: Processed complement of 'layer_spliced_counts'. {a .layers key}
+
 - layer_unspliced_counts:  The total unspliced RNA counts per gene. {a .layers key}
+
 - layer_unspliced_processed: Processed complement of 'layer_unspliced_counts'. {a .layers key}
+
 - layer_velocity: The RNA velocity estimates per gene. {a .layers key}
+
 
 .. _sec-dataset-or-feature-wise:
 Dataset- or feature-wise
@@ -991,6 +1009,12 @@ outlined below.
     Developmental stage (age) of individual sampled.
     Choose from HSAPDV_ for human
     or from MMUSDEV_ for mouse.
+    Note: There has been updates related to the naming of human developmental stages in HSAPDV recently that are not
+    not fully reflected on OLS and on the main ontology release.
+    In particular, this affects a difference in refering to a particular year of life:
+    ``53-year-old stage`` and ``53-year-old human stage``.
+    If you get an error for one version, just choose the other one.
+    At the time of this update to the sfaira documemtation, ``53-year-old stage`` is the valid notation.
 - disease and disease_obs_key [ontology term]
     Choose from MONDO_.
 - ethnicity and ethnicity_obs_key [ontology term]

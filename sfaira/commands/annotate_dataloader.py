@@ -161,7 +161,7 @@ class DataloaderAnnotater:
                     )
                     tsvs_written.append((fn_tsv, attrs))
         print("[bold blue]Completed annotation.")
-        print('[bold orange]Sfaira butler: "Up next:"')
+        print('[bold orange]Sfaira butler: "Up next, follow these steps until the next call of the sfaira CLI:"')
         self.action_counter = 1
         print(f'[bold orange]               "{self.action_counter}) Proceed to chose ontology symbols for each free '
               f'text label in the tsv files:"')
