@@ -24,7 +24,7 @@ from sfaira.data.dataloaders.base.utils import identify_tsv
 from sfaira.data.dataloaders.export_adaptors import cellxgene_export_adaptor
 from sfaira.data.store.io.io_dao import write_dao
 from sfaira.data.dataloaders.base.utils import is_child, get_directory_formatted_doi
-from sfaira.data.utils import collapse_matrix, read_yaml
+from sfaira.data.utils import collapse_matrix, read_yaml, subset_adata_genes
 from sfaira.consts.utils import clean_id_str
 from sfaira.versions.metadata.maps import prepare_ontology_map_tab
 
@@ -104,6 +104,9 @@ class DatasetBase(abc.ABC):
     sex_obs_key: Union[None, str]
     state_exact_obs_key: Union[None, str]
     treatment_obs_key: Union[None, str]
+
+    _feature_reference: Union[None, str]
+    _feature_type: Union[None, str]
 
     feature_id_var_key: Union[None, str]
     feature_reference_var_key: Union[None, str]
@@ -243,6 +246,9 @@ class DatasetBase(abc.ABC):
         self.state_exact_obs_key = None
         self.tech_sample_obs_key = None
         self.treatment_obs_key = None
+
+        self._feature_reference = None
+        self._feature_type = None
 
         self.feature_id_var_key = None
         self.feature_reference_var_key = None
@@ -513,11 +519,19 @@ class DatasetBase(abc.ABC):
         elif self.feature_symbol_var_key is None and self.feature_id_var_key:
             # Convert ensembl ids to gene symbols
             id_dict = self.genome_container.id_to_symbols_dict
-            ensids = self.adata.var.index if self.feature_id_var_key == "index" else self.adata.var[self.feature_id_var_key]
+            ensids = self.adata.var.index if self.feature_id_var_key == "index" else \
+                self.adata.var[self.feature_id_var_key]
             self.adata.var[self._adata_ids.feature_symbol] = [
                 id_dict[n.split(".")[0]] if n.split(".")[0] in id_dict.keys() else 'n/a'
                 for n in ensids
             ]
+            if self.adata.raw is not None:
+                ensids = self.adata.raw.var.index if self.feature_id_var_key == "index" else \
+                    self.adata.raw.var[self.feature_id_var_key]
+                self.adata.raw.var[self._adata_ids.feature_symbol] = [
+                    id_dict[n.split(".")[0]] if n.split(".")[0] in id_dict.keys() else 'n/a'
+                    for n in ensids
+                ]
             self.feature_symbol_var_key = self._adata_ids.feature_symbol
         elif self.feature_symbol_var_key and self.feature_id_var_key is None:
             # Convert gene symbols to ensembl ids
@@ -537,6 +551,18 @@ class DatasetBase(abc.ABC):
                 else:
                     ensids.append('n/a')
             self.adata.var[self._adata_ids.feature_id] = ensids
+            if self.adata.raw is not None:
+                ensids = []
+                symbs = self.adata.raw.var.index if self.feature_symbol_var_key == "index" else \
+                    self.adata.raw.var[self.feature_symbol_var_key]
+                for n in symbs:
+                    if n in id_dict.keys():
+                        ensids.append(id_dict[n])
+                    elif n.split(".")[0] in id_strip_dict.keys():
+                        ensids.append(id_strip_dict[n.split(".")[0]])
+                    else:
+                        ensids.append('n/a')
+                self.adata.raw.var[self._adata_ids.feature_id] = ensids
             self.feature_id_var_key = self._adata_ids.feature_id
 
     def _collapse_ensembl_gene_id_versions(self):
@@ -551,15 +577,21 @@ class DatasetBase(abc.ABC):
                 "match_to_reference is False"
             )
         elif self.feature_id_var_key == "index":
-            self.adata.index = [
-                x.split(".")[0] for x in self.adata.var.index
-            ]
+            self.adata.index = [x.split(".")[0] for x in self.adata.var.index]
+            if self.adata.raw is not None:
+                self.adata.raw.index = [x.split(".")[0] for x in self.adata.raw.var.index]
         else:
             self.adata.var[self.feature_id_var_key] = [
                 x.split(".")[0] for x in self.adata.var[self.feature_id_var_key].values
             ]
+            if self.adata.raw is not None:
+                self.adata.raw.var[self.feature_id_var_key] = [
+                    x.split(".")[0] for x in self.adata.raw.var[self.feature_id_var_key].values
+                ]
         # Collapse if necessary:
         self.adata = collapse_matrix(adata=self.adata, var_column=self.feature_id_var_key)
+        if self.adata.raw is not None:
+            self.adata.raw = collapse_matrix(adata=self.adata.raw, var_column=self.feature_id_var_key)
 
     def collapse_counts(self):
         """
@@ -606,6 +638,68 @@ class DatasetBase(abc.ABC):
             remove_gene_version = adata_target_ids.feature_kwargs["remove_gene_version"]
             subset_genes_to_type = adata_target_ids.feature_kwargs["subset_genes_to_type"]
 
+        # Move data matrices around.
+        assert self.layer_processed or self.layer_counts
+        if self.layer_processed is None:
+            x_proc = None
+            var_proc = None
+        elif self.layer_processed == "X":
+            x_proc = self.adata.X
+            var_proc = self.adata.var
+        elif self.layer_processed == "raw":
+            x_proc = self.adata.raw.X
+            var_proc = self.adata.raw.var
+        else:
+            if self.layer_processed not in self.adata.layers.keys():
+                raise ValueError(f"layer {self.layer_processed} not in layers {list(self.adata.layers.keys())}")
+            else:
+                x_proc = self.adata.layers[self.layer_processed]
+                var_proc = self.adata.var
+        if self.layer_counts is None:
+            x_counts = None
+            var_counts = None
+        elif self.layer_counts == "X":
+            x_counts = self.adata.X
+            var_counts = self.adata.var
+        elif self.layer_counts == "raw":
+            x_counts = self.adata.raw.X
+            var_counts = self.adata.raw.var
+        else:
+            if self.layer_counts not in self.adata.layers.keys():
+                raise ValueError(f"layer {self.layer_counts} not in layers {list(self.adata.layers.keys())}")
+            else:
+                x_counts = self.adata.layers[self.layer_counts]
+                var_counts = self.adata.var
+        if x_proc is None and x_counts is not None:
+            x = x_counts
+            var = var_counts
+            x_raw = None
+            var_raw = None
+        elif x_proc is not None and x_counts is None:
+            x = x_proc
+            var = var_counts
+            x_raw = None
+            var_raw = None
+        elif x_proc is not None and x_counts is not None:
+            x = x_proc
+            var = var_proc
+            x_raw = x_counts
+            var_raw = var_counts
+        else:
+            assert False
+        self.adata = anndata.AnnData(
+            X=x,
+            obs=self.adata.obs,
+            obsm=self.adata.obsm,
+            var=var,
+            uns=self.adata.uns
+        )
+        if x_raw is not None:
+            self.adata.raw = self.adata = anndata.AnnData(
+                X=x_raw,
+                var=var_raw
+            )
+
         # Set genome container if mapping of gene labels is requested
         if isinstance(match_to_release, dict):
             match_to_release = match_to_release[self.organism]
@@ -628,20 +722,7 @@ class DatasetBase(abc.ABC):
         if remove_gene_version:
             self._collapse_ensembl_gene_id_versions()
 
-        # Convert data matrix to csc matrix
-        if isinstance(self.adata.X, np.ndarray):
-            # Change NaN to zero. This occurs for example in concatenation of anndata instances.
-            if np.any(np.isnan(self.adata.X)):
-                self.adata.X[np.isnan(self.adata.X)] = 0
-            x = scipy.sparse.csc_matrix(self.adata.X)
-        elif isinstance(self.adata.X, scipy.sparse.spmatrix):
-            x = self.adata.X.tocsc()
-        else:
-            raise ValueError(f"Data type {type(self.adata.X)} not recognized.")
-
         # Compute indices of genes to keep
-        data_ids_ensg = self.adata.var.index.values if self.feature_id_var_key == "index" \
-            else self.adata.var[self.feature_id_var_key].values
         if subset_genes_to_type is None:
             subset_ids_ensg = self.genome_container.ensembl
             subset_ids_symbol = self.genome_container.symbols
@@ -660,48 +741,35 @@ class DatasetBase(abc.ABC):
                 if y in subset_genes_to_type
             ]
 
-        # Remove unmapped genes
-        idx_feature_kept = np.where([x.upper() in subset_ids_ensg for x in data_ids_ensg])[0]
-        data_ids_kept = data_ids_ensg[idx_feature_kept]
-        x = x[:, idx_feature_kept]
-        # Build map of subset_ids to features in x:
-        idx_feature_map = np.array([subset_ids_ensg.index(x) for x in data_ids_kept])
-        # Create reordered feature matrix based on reference and convert to csr
-        x_new = scipy.sparse.csc_matrix((x.shape[0], len(subset_ids_ensg)), dtype=x.dtype)
-        # copying this over to the new matrix in chunks of size `steps` prevents a strange scipy error:
-        # ... scipy/sparse/compressed.py", line 922, in _zero_many i, j, offsets)
-        # ValueError: could not convert integer scalar
-        step = 500
-        if step < len(idx_feature_map):
-            i = 0
-            for i in range(0, len(idx_feature_map), step):
-                x_new[:, idx_feature_map[i:i + step]] = x[:, i:i + step]
-            x_new[:, idx_feature_map[i + step:]] = x[:, i + step:]
-        else:
-            x_new[:, idx_feature_map] = x
-        x_new = x_new.tocsr()
-
-        # Create new var dataframe
-        if self.feature_symbol_var_key == "index":
-            var_index = subset_ids_symbol
-            var_data = {self.feature_id_var_key: subset_ids_ensg}
-        elif self.feature_id_var_key == "index":
-            var_index = subset_ids_ensg
-            var_data = {self.feature_symbol_var_key: subset_ids_symbol}
-        else:
-            var_index = None
-            var_data = {self.feature_symbol_var_key: subset_ids_symbol,
-                        self.feature_id_var_key: subset_ids_ensg}
-        var_new = pd.DataFrame(data=var_data, index=var_index)
-
-        self.adata = anndata.AnnData(
+        x_new, var_new = subset_adata_genes(
+            x=self.adata.X,
+            var=self.adata.var,
+            feature_id_var_key=self.feature_id_var_key,
+            feature_symbol_var_key=self.feature_symbol_var_key,
+            subset_ids_ensg=subset_ids_ensg,
+            subset_ids_symbol=subset_ids_symbol)
+        adata_new = anndata.AnnData(
             X=x_new,
             obs=self.adata.obs,
             obsm=self.adata.obsm,
             var=var_new,
             uns=self.adata.uns
         )
-        self.adata.uns[self._adata_ids.mapped_features] = match_to_release
+        adata_new.uns[self._adata_ids.mapped_features] = match_to_release
+        if self.adata.raw is not None:
+            x_raw_new, var_raw_new = subset_adata_genes(
+                x=self.adata.raw.X,
+                var=self.adata.raw.var,
+                feature_id_var_key=self.feature_id_var_key,
+                feature_symbol_var_key=self.feature_symbol_var_key,
+                subset_ids_ensg=subset_ids_ensg,
+                subset_ids_symbol=subset_ids_symbol)
+            adata_new.raw = anndata.AnnData(
+                X=x_raw_new,
+                obs=self.adata.obs,
+                var=var_raw_new,
+            )
+        self.adata = adata_new
 
     def streamline_metadata(
             self,
@@ -1694,6 +1762,24 @@ class DatasetBase(abc.ABC):
         x = self._value_protection(attr="ethnicity", allowed=self.get_ontology(k="ethnicity"),
                                    attempted=x)
         self._ethnicity = x
+
+    @property
+    def feature_reference(self) -> str:
+        return self._feature_reference
+
+    @feature_reference.setter
+    def feature_reference(self, x: str):
+        self._feature_reference = x
+
+    @property
+    def feature_type(self) -> str:
+        return self._feature_type
+
+    @feature_type.setter
+    def feature_type(self, x: str):
+        x = self._value_protection(attr="feature_type", allowed=self.get_ontology(k="feature_type"),
+                                   attempted=x)
+        self._feature_type = x
 
     @property
     def id(self) -> str:

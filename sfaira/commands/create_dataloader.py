@@ -132,6 +132,12 @@ class DataloaderCreator:
                                              '(e.g.: Einstein, Albert)',
                                     default='')
         self.template_attributes.author = author.split(';') if ';' in author else author
+        first_author = author[0] if isinstance(author, list) else author
+        try:
+            first_author_lastname = first_author.split(',')[0]
+        except KeyError:
+            print('[bold yellow] First author was not in the expected format. Using full first author for the id.')
+            first_author_lastname = first_author
 
         self.template_attributes.default_embedding = str(sfaira_questionary(
             function='text',
@@ -188,13 +194,6 @@ class DataloaderCreator:
                   f"or consider completing the previous curation attempt in phase 1b. "
                   )
 
-        first_author = author[0] if isinstance(author, list) else author
-        try:
-            first_author_lastname = first_author.split(',')[0]
-        except KeyError:
-            print('[bold yellow] First author was not in the expected format. Using full first author for the id.')
-            first_author_lastname = first_author
-
         download_url_data_try = 0
         download_url_data = ''
         while download_url_data_try == 0 or download_url_data == '':
@@ -218,8 +217,8 @@ class DataloaderCreator:
             default='Yes'))
 
         year_try = 0
-        year = ''
-        while year_try == 0 or year == '':
+        year = ""
+        while year_try == 0 or year == "":
             if year_try > 0:
                 print('[bold red]You need to supply the year of first publication.')
             year = sfaira_questionary(
@@ -536,19 +535,25 @@ class DataloaderCreator:
             function='text',
             question='[.feature_reference] Genome annotation release per dataset (e.g. Homo_sapiens.GRCh38.104)',
             default=''))
-        self.template_attributes.feature_reference_var_key = str(sfaira_questionary(
-            function='text',
-            question='[.feature_reference_var_key] Genome annotation release per feature '
-                     '(e.g. Homo_sapiens.GRCh38.104)',
-            default=''))
+        if self.template_attributes.feature_reference == '':
+            self.template_attributes.feature_reference_var_key = str(sfaira_questionary(
+                function='text',
+                question='[.feature_reference_var_key] .var key of genome annotation release per feature'
+                         '(e.g. Homo_sapiens.GRCh38.104)',
+                default=''))
+        else:
+            self.template_attributes.feature_reference_var_key = ''
         self.template_attributes.feature_type = sfaira_questionary(
             function='text',
             question='[.feature_type] Feature type of features per dataset (either rna, protein, or peak)',
-            default='rna')
-        self.template_attributes.feature_type_var_key = sfaira_questionary(
-            function='text',
-            question='[.feature_type_var_key] Feature type of features per feature (either rna, protein, or peak)',
-            default='rna')
+            default='')
+        if self.template_attributes.feature_type == '':
+            self.template_attributes.feature_type_var_key = sfaira_questionary(
+                function='text',
+                question='[.feature_type_var_key] .var key of feature type of features per feature',
+                default='')
+        else:
+            self.template_attributes.feature_type_var_key = ''
 
         print('[bold blue]Feature-wise meta data (yaml::feature_wise).')
         print('[bold blue]The following meta data queries are on gene-resolution. '
@@ -590,16 +595,16 @@ class DataloaderCreator:
         self.check_datadir(path_data=path_data)
         if requires_annotate:
             print(f'[bold orange]               "{self.action_counter}) Proceed to phase 2: '
-                  f'\'sfaira annotate-dataloader\'."')
+                  'sfaira annotate-dataloader."')
             self.action_counter += 1
         else:
             print(f'[bold orange]               "{self.action_counter}) Proceed to phase 3: '
-                  f'\'sfaira finalize-dataloader\'. ')
-            print(f'[bold orange]               "You can skip phase 2 (\'sfaira annotate-dataloader\'), '
-                  f'unless you set any of the following items in the .yaml during manual editing:')
-            print(f'[bold orange]               "assay_sc_obs_key, cell_line_sc_obs_key, cell_type_sc_obs_key, '
-                  f'development_stage_sc_obs_key, disease_sc_obs_key, ethnicity_sc_obs_key, organ_sc_obs_key, '
-                  f'organism_sc_obs_key, sex_sc_obs_key')
+                  'sfaira finalize-dataloader."')
+            print('[bold orange]               "   You can skip phase 2 (sfaira annotate-dataloader), '
+                  'unless you set any of the following items in the .yaml during manual editing:"')
+            print('[bold orange]               "   assay_sc_obs_key, cell_line_sc_obs_key, cell_type_sc_obs_key, '
+                  'development_stage_sc_obs_key, disease_sc_obs_key, ethnicity_sc_obs_key, organ_sc_obs_key, '
+                  'organism_sc_obs_key, sex_sc_obs_key."')
             self.action_counter += 1
 
     @property
@@ -628,6 +633,6 @@ class DataloaderCreator:
                   f"but this path was not found. "
                   f"Create this directory and move the raw data files there.")
         else:
-            print(f'[bold orange]{self.action_counter}) Make sure that the unmodified downloaded data files are in  '
-                  f'{path_data}.')
+            print(f'[bold orange]               "{self.action_counter}) Make sure that the unmodified downloaded data '
+                  f'files are in  {path_data}."')
             self.action_counter += 1

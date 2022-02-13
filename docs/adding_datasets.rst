@@ -119,7 +119,9 @@ Pc. Prepare an installation of sfaira to use for data loader writing.
            datafiles from and write the dataloaders to respectively.
             .. code-block::
 
-                sudo docker run --rm -it -v <path_data>:/root/sfaira_data -v <path_loader>:/root/sfaira_loader leanderd/sfaira-cli:latest
+                PATH_DATA=<path_data>
+                PATH_LOADER=<path_loader>
+                sudo docker run --rm -it -v ${PATH_DATA}:/root/sfaira_data -v ${PATH_LOADER}:/root/sfaira_loader leanderd/sfaira-cli:latest
             ..
     Pc-conda.
         Jump to step 4 if you do not require explanations of specific parts of the shell script.
@@ -513,27 +515,53 @@ Phase 5 and 6 are optional, see also introduction paragraphs on this documentati
 
 5a. Export `.h5ads`'s.
     Write streamlined dataset(s) corresponding to data loader into (an) `.h5ad` file(s) according to a specific set of
-    rules (a schema).
+    rules (a schema, e.g. "cellxgene").
     Note: You can identify the loader via ``--doi`` with the main DOI (ie. journal > preprint if both are defined)
     or with the DOI-based data loader name defined by sfaira,
     ie. ``<DOI-name>`` in ``<path_loader>/<DOI-name>``, which is either ``d10_*`` or ``dno_doi_*``.
 
-    .. code-block::
+    5a-docker.
+        In the following command, replace `DOI` with the DOI of your data loader,
+        replace `SCHEMA` with the target data schema,
+        and replace `OUT_DIR` with the directory to which the objects are written to.
+        .. code-block::
 
-        sfaira export-h5ad --doi --schema --path-out --path-data [--path_loader]
-    ..
+            sfaira export-h5ad --doi DOI --schema SCHEMA --path-out OUT_DIR
+        ..
+    5a-conda.
+        In the following command, replace `DATA_DIR` with the path `<path_data>/` you used above,
+        replace `DOI` with the DOI of your data loader,
+        replace `SCHEMA` with the target data schema,
+        and replace `OUT_DIR` with the directory to which the objects are written to.
+        You can optionally supply `--path-loader` to `create-dataloader` if the data loader is not in the internal
+        collection of sfaira in `./sfaira/data/dataloaders/loaders/`.
+        .. code-block::
+
+            sfaira export-h5ad --doi DOI --path-data DATA_DIR --schema SCHEMA --path-out OUT_DIR
+        ..
 
 Phase 6: validate-h5ad
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 Phase 5 and 6 are optional, see also introduction paragraphs on this documentation page.
 
-6a. Validate format of `.h5ad` according to a specific set of rules (a schema).
-    .. code-block::
+6a. Validate format of `.h5ad`
+    The streamlined `.h5ad` files from phase 5 are validated according to a specific set of rules (a schema).
 
-        sfaira validate-h5ad --h5ad --schema
-    ..
+    6a-docker.
+        In the following command, replace FN with the file name of the `.h5ad` file to test,
+        and replace `SCHEMA` with the target data schema.
+        .. code-block::
 
+            sfaira validate-h5ad --h5ad FN --schema SCHEMA
+        ..
+    6a-conda.
+        In the following command, replace FN with the file name of the `.h5ad` file to test,
+        and replace `SCHEMA` with the target data schema.
+        .. code-block::
+
+            sfaira validate-h5ad --h5ad FN --schema SCHEMA
+        ..
 
 
 Advanced topics
@@ -1022,12 +1050,6 @@ outlined below.
     Developmental stage (age) of individual sampled.
     Choose from HSAPDV_ for human
     or from MMUSDEV_ for mouse.
-    Note: There has been updates related to the naming of human developmental stages in HSAPDV recently that are not
-    not fully reflected on OLS and on the main ontology release.
-    In particular, this affects a difference in refering to a particular year of life:
-    ``53-year-old stage`` and ``53-year-old human stage``.
-    If you get an error for one version, just choose the other one.
-    At the time of this update to the sfaira documemtation, ``53-year-old stage`` is the valid notation.
 - disease and disease_obs_key [ontology term]
     Choose from MONDO_.
 - ethnicity and ethnicity_obs_key [ontology term]

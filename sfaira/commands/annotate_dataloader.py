@@ -171,9 +171,9 @@ class DataloaderAnnotater:
         print('[bold orange]                "Each tsv has two columns: free text labels found in the data on the left '
               'and suggestions on the right."')
         print('[bold orange]                "Each suggested symbol lies between two : characters."')
-        print('[bold orange]                "\':\' is a separator between suggested symbols and :|||: between symbol '
+        print('[bold orange]                ": is a separator between suggested symbols and :|||: between symbol '
               'groups that were found through different search strategies."')
-        print('[bold orange]                "Take care to not remove the \\t separators in the table."')
+        print('[bold orange]                "Take care to not remove the tab separators in the table."')
         print('[bold orange]                "You only need to finish the second column now."')
         print('[bold orange]                "The third column with ontology IDs is added by `finalize` in phase 3."')
         self.action_counter += 1
@@ -181,5 +181,5 @@ class DataloaderAnnotater:
               f'done."')
         self.action_counter += 1
         print(f'[bold orange]               "{self.action_counter}) Then proceed to phase 3 '
-              f'\'sfaira finalize-dataloader\'."')
+              f'sfaira finalize-dataloader."')
         self.action_counter += 1

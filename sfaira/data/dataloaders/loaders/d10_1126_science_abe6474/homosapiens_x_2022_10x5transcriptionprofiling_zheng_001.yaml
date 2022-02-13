@@ -77,7 +77,7 @@ dataset_or_observation_wise:
     cell_line_obs_key: 
     cell_type: 
     cell_type_obs_key: "meta.cluster"
-    development_stage: "adult stage"
+    development_stage: "human adult stage"
     development_stage_obs_key: 
     disease: "healthy"
     disease_obs_key: "cancerType"

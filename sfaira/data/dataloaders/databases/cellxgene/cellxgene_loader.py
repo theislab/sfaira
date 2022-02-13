@@ -2,7 +2,6 @@ import anndata
 from IPython.display import display_javascript, display_html
 import json
 import os
-import pathlib
 import pickle
 import requests
 from typing import List, Union
@@ -121,6 +120,8 @@ class Dataset(DatasetBase):
         self._adata_ids_cellxgene = AdataIdsCellxgene_v2_0_0()
         # Add author information.  # TODO need to change this to contributor?
         self.author = "cellxgene"
+        self.layer_processed = "X"
+        # TODO extract counts vs processed layers
         # The h5ad objects from cellxgene follow a particular structure and the following attributes are guaranteed to
         # be in place. Note that these point at the anndata instance and will only be available for evaluation after
         # download. See below for attributes that are lazily available
