@@ -15,11 +15,11 @@ log = logging.getLogger(__name__)
 
 @dataclass
 class TemplateAttributes:
-    create_extra_description: str = ''  # Whether to create an optional extra description file or not
-    dataloader_type: str = ''  # One of single_dataset, multiple_datasets_single_file, multiple_datasets_streamlined, multiple_datasets_not_streamlined
+    create_extra_description: str = ''
+    dataloader_type: str = ''
     doi_sfaira_repr: str = ''
-    id: str = ''  # unique identifier of data set (Organism_Organ_Year_Protocol_NumberOfDataset_FirstAuthorLastname_doi).
-    id_without_doi: str = ''  # complete id without the doi -> usually used to name the python scripts
+    id: str = ''
+    id_without_doi: str = ''
     number_of_datasets: str = 1
 
     sample_fns: Union[str, Dict[str, list]] = ''
@@ -79,7 +79,9 @@ class TemplateAttributes:
     vdj_v_call_obs_key_suffix: str = ''
 
     feature_reference: str = ''
+    feature_reference_var_key: str = ''
     feature_type: str = ''
+    feature_type_var_key: str = ''
 
     feature_id_var_key: str = ''
     feature_symbol_var_key: str = ''
@@ -101,17 +103,6 @@ class DataloaderCreator:
         """
         self._prompt_dataloader_configuration(path_data)
         self._create_dataloader_template()
-
-    def _prompt_dataloader_template(self) -> None:
-        """
-        Guides the user to select the appropriate data loader template for his dataset.
-        Sets the dataloader_type
-        """
-        number_datasets = sfaira_questionary(function='select',
-                                             question='How many datasets does your project have?',
-                                             choices=['One', 'More than one'])
-        # One dataset
-
 
     def _prompt_dataloader_configuration(self, path_data):
         """
@@ -137,7 +128,8 @@ class DataloaderCreator:
         print('[bold blue]The following meta data queries are on dataset-resolution. '
               'These can also later be modified manually in the .yaml which has the same effect as setting them here.')
         author = sfaira_questionary(function='text',
-                                    question='[.author] Leading author "Last name, first name" (e.g.: Einstein, Albert)',
+                                    question='[.author] Leading author "Last name, first name" '
+                                             '(e.g.: Einstein, Albert)',
                                     default='')
         self.template_attributes.author = author.split(';') if ';' in author else author
 
@@ -534,19 +526,28 @@ class DataloaderCreator:
                                                    "number of reads contributing to consensus (consensus count)"),
                 default='consensus_count')
 
-        print('[bold blue]Feature-wise meta data that are shared across the dataset (yaml::dataset_or_feature_wise).')
-        print('[bold blue]The following meta data queries are on feature(gene)-wise. '
-              'In some cases, these meta data need to be set per feature, '
-              'skip here and annotate in the .yaml if that is the case. '
+        print('[bold blue]Feature-wise meta data that may be shared across the dataset '
+              '(yaml::dataset_or_feature_wise).')
+        print('[bold blue]In some cases, these meta data need to be set per feature, '
+              'chose the dataset-wide or feature-wise ("*_var_key") entry accordingly." '
               'These can also later be modified manually in the .yaml which has the same effect as setting them here.')
 
         self.template_attributes.feature_reference = str(sfaira_questionary(
             function='text',
-            question='[.feature_reference] Reference genome annotation release (e.g. Homo_sapiens.GRCh38.104)',
+            question='[.feature_reference] Genome annotation release per dataset (e.g. Homo_sapiens.GRCh38.104)',
+            default=''))
+        self.template_attributes.feature_reference_var_key = str(sfaira_questionary(
+            function='text',
+            question='[.feature_reference_var_key] Genome annotation release per feature '
+                     '(e.g. Homo_sapiens.GRCh38.104)',
             default=''))
         self.template_attributes.feature_type = sfaira_questionary(
             function='text',
-            question='[.feature_type] Feature type of features annotated (either rna, protein, or peak)',
+            question='[.feature_type] Feature type of features per dataset (either rna, protein, or peak)',
+            default='rna')
+        self.template_attributes.feature_type_var_key = sfaira_questionary(
+            function='text',
+            question='[.feature_type_var_key] Feature type of features per feature (either rna, protein, or peak)',
             default='rna')
 
         print('[bold blue]Feature-wise meta data (yaml::feature_wise).')
