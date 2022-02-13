@@ -482,47 +482,47 @@ class DataloaderCreator:
                 default='IR_VDJ_2_')
             self.template_attributes.vdj_c_call_obs_key_suffix = sfaira_questionary(
                 function='text',
-                question=format_q_modality_obs_key("vdj_c_call_obs_key_suffix",  "V(D)J", "C gene"),
+                question=format_q_modality_obs_key("vdj_c_call_obs_key_suffix", "V(D)J", "C gene"),
                 default='c_call')
             self.template_attributes.vdj_d_call_obs_key_suffix = sfaira_questionary(
                 function='text',
-                question=format_q_modality_obs_key("vdj_d_call_obs_key_suffix",  "V(D)J", "D gene"),
+                question=format_q_modality_obs_key("vdj_d_call_obs_key_suffix", "V(D)J", "D gene"),
                 default='d_call')
             self.template_attributes.vdj_j_call_obs_key_suffix = sfaira_questionary(
                 function='text',
-                question=format_q_modality_obs_key("vdj_j_call_obs_key_suffix",  "V(D)J", "J gene"),
+                question=format_q_modality_obs_key("vdj_j_call_obs_key_suffix", "V(D)J", "J gene"),
                 default='j_call')
             self.template_attributes.vdj_v_call_obs_key_suffix = sfaira_questionary(
                 function='text',
-                question=format_q_modality_obs_key("vdj_v_call_obs_key_suffix",  "VDJ", "V gene"),
+                question=format_q_modality_obs_key("vdj_v_call_obs_key_suffix", "VDJ", "V gene"),
                 default='v_call')
             self.template_attributes.vdj_duplicate_count_obs_key_suffix = sfaira_questionary(
                 function='text',
-                question=format_q_modality_obs_key("vdj_duplicate_count_obs_key_suffix",  "V(D)J",
+                question=format_q_modality_obs_key("vdj_duplicate_count_obs_key_suffix", "V(D)J",
                                                    "number of duplicate UMIs (duplicate count)"),
                 default='duplicate_count')
             self.template_attributes.vdj_junction_obs_key_suffix = sfaira_questionary(
                 function='text',
-                question=format_q_modality_obs_key("vdj_junction_obs_key_suffix",  "V(D)J", "junction nt sequence"),
+                question=format_q_modality_obs_key("vdj_junction_obs_key_suffix", "V(D)J", "junction nt sequence"),
                 default='junction')
             self.template_attributes.vdj_junction_aa_obs_key_suffix = sfaira_questionary(
                 function='text',
-                question=format_q_modality_obs_key("vdj_junction_aa_obs_key_suffix",  "V(D)J", "junction aa sequence"),
+                question=format_q_modality_obs_key("vdj_junction_aa_obs_key_suffix", "V(D)J", "junction aa sequence"),
                 default='junction_aa')
             self.template_attributes.vdj_locus_obs_key_suffix = sfaira_questionary(
                 function='text',
-                question=format_q_modality_obs_key("vdj_locus_obs_key_suffix",  "V(D)J",
+                question=format_q_modality_obs_key("vdj_locus_obs_key_suffix", "V(D)J",
                                                    "gene locus (e.g elements from IGH, IGK, IGL, TRA, TRB, TRD, or "
                                                    "TRG)"),
                 default='locus')
             self.template_attributes.vdj_productive_obs_key_suffix = sfaira_questionary(
                 function='text',
-                question=format_q_modality_obs_key("vdj_productive_obs_key_suffix",  "V(D)J",
+                question=format_q_modality_obs_key("vdj_productive_obs_key_suffix", "V(D)J",
                                                    "'Is the gene productive?'"),
                 default='productive')
             self.template_attributes.vdj_consensus_count_obs_key_suffix = sfaira_questionary(
                 function='text',
-                question=format_q_modality_obs_key("vdj_consensus_count_obs_key_suffix",  "V(D)J",
+                question=format_q_modality_obs_key("vdj_consensus_count_obs_key_suffix", "V(D)J",
                                                    "number of reads contributing to consensus (consensus count)"),
                 default='consensus_count')
 
