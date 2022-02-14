@@ -36,7 +36,7 @@ dataset_or_observation_wise:
     cell_line_obs_key:
     cell_type:
     cell_type_obs_key: "free_annotation"
-    development_stage: "50-year-old stage"
+    development_stage: "50-year-old human stage"
     development_stage_obs_key:
     disease: "healthy"
     disease_obs_key:

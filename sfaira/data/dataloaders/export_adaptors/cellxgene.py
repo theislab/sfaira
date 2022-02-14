@@ -140,8 +140,10 @@ def cellxgene_export_adaptor_2_0_0(adata: anndata.AnnData, adata_ids: AdataIdsCe
     # 4) Modify .var:
     adata.var[adata_ids.feature_biotype] = "gene"
     adata.var[adata_ids.feature_reference] = adata.obs[adata_ids.organism + adata_ids.onto_id_suffix].values[0]
+    # TODO set filtered based on feature overlap between raw and X.
     adata.var[adata_ids.feature_is_filtered] = False
     adata.var[adata_ids.feature_biotype] = pd.Categorical(adata.var[adata_ids.feature_biotype].values.tolist())
+    adata.var.index = adata.var[adata_ids.feature_id].values
     # Modify ensembl ID writing:
     # adata.var[adata_ids.feature_id] = ["G:".join(x.split("G")) for x in adata.var[adata_ids.feature_id]]
     # adata.var.index = ["G:".join(x.split("G")) for x in adata.var.index]

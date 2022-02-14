@@ -1,15 +1,21 @@
 dataset_structure:
     dataset_index: 1
     sample_fns:
+        - "GSM4994379_KL1"
+        - "GSM4994380_KL2"
+        - "GSM4994381_KL3"
+        - "GSM4994382_NS1"
+        - "GSM4994383_NS2"
+        - "GSM4994384_NS3"
 dataset_wise:
-    author: "Hao, Yuhan"
+    author: "Deng, Cheng-Cheng"
     default_embedding:
-    doi_journal: "10.1016/j.cell.2021.04.048"
-    doi_preprint: "10.1101/2020.10.12.335331"
-    download_url_data: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE164nnn/GSE164378/suppl/GSE164378_RAW.tar"
-    download_url_meta: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE164nnn/GSE164378/suppl/GSE164378_sc.meta.data_3P.csv.gz"
+    doi_preprint:
+    doi_journal: "10.1038/s41467-021-24110-y"
+    download_url_data: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE163nnn/GSE163973/suppl/GSE163973_RAW.tar"
+    download_url_meta: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE163nnn/GSE163973/suppl/GSE163973_integrate.all.NS.all.KL_cell.meta.data.csv.gz"
     primary_data: True
-    year: 2020
+    year: 2021
 layers:
     layer_counts: "X"
     layer_processed:
@@ -24,7 +30,7 @@ dataset_or_feature_wise:
     feature_type: "rna"
     feature_type_var_key:
 dataset_or_observation_wise:
-    assay_sc: "CITE-seq (cell surface protein profiling)"
+    assay_sc: "10x 3' v2"
     assay_sc_obs_key:
     assay_differentiation:
     assay_differentiation_obs_key:
@@ -35,36 +41,54 @@ dataset_or_observation_wise:
     cell_line:
     cell_line_obs_key:
     cell_type:
-    cell_type_obs_key: "celltype.l3"
-    development_stage: "human adult stage"
+    cell_type_obs_key: "cellType"
+    development_stage:
+      GSM4994379_KL1: 20-year-old stage
+      GSM4994380_KL2: 23-year-old stage
+      GSM4994381_KL3: 34-year-old stage
+      GSM4994382_NS1: 39-year-old stage
+      GSM4994383_NS2: 28-year-old stage
+      GSM4994384_NS3: 26-year-old stage
     development_stage_obs_key:
-    disease: "healthy"
+    disease:
+      GSM4994379_KL1: keloid
+      GSM4994380_KL2: keloid
+      GSM4994381_KL3: keloid
+      GSM4994382_NS1: healthy
+      GSM4994383_NS2: healthy
+      GSM4994384_NS3: healthy
     disease_obs_key:
-    ethnicity:
+    ethnicity: "Han Chinese"
     ethnicity_obs_key:
     gm:
     gm_obs_key:
     individual:
-    individual_obs_key: "donor"
-    organ: "blood"
+    individual_obs_key:
+    organ: "dermis"
     organ_obs_key:
     organism: "Homo sapiens"
     organism_obs_key:
     sample_source: "primary_tissue"
     sample_source_obs_key:
     sex:
+      GSM4994379_KL1: male
+      GSM4994380_KL2: male
+      GSM4994381_KL3: female
+      GSM4994382_NS1: male
+      GSM4994383_NS2: male
+      GSM4994384_NS3: female
     sex_obs_key:
     source_doi:
     source_doi_obs_key:
     state_exact:
-    state_exact_obs_key: 'time'
+    state_exact_obs_key:
     tech_sample:
-    tech_sample_obs_key: 'Batch'
+    tech_sample_obs_key:
     treatment:
     treatment_obs_key:
 feature_wise:
-    feature_id_var_key:
-    feature_symbol_var_key: "names"
+    feature_id_var_key: "ensembl"
+    feature_symbol_var_key: "symbol"
 observation_wise:
     spatial_x_coord_obs_key:
     spatial_y_coord_obs_key:

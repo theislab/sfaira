@@ -9,7 +9,7 @@ dataset_wise:
     download_url_data: {% if cookiecutter.download_url_data %}"{{ cookiecutter.download_url_data }}"{% endif %}
     download_url_meta: {% if cookiecutter.download_url_meta %}"{{ cookiecutter.download_url_meta }}"{% endif %}
     primary_data: {{ cookiecutter.primary_data }}
-    year: "{{ cookiecutter.year }}"
+    year: {{ cookiecutter.year }}
 layers:
     layer_counts: {% if cookiecutter.layer_counts %}"{{ cookiecutter.layer_counts }}"{% endif %}
     layer_processed: {% if cookiecutter.layer_processed %}"{{ cookiecutter.layer_processed }}"{% endif %}

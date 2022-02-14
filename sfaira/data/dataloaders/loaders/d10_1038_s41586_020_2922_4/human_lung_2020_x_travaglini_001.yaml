@@ -4,8 +4,7 @@ dataset_structure:
         - "droplet_normal_lung_blood_scanpy.20200205.RC4.h5ad"
         - "facs_normal_lung_blood_scanpy.20200205.RC4.h5ad"
 dataset_wise:
-    author:
-        - "Travaglini"
+    author: "Travaglini"
     default_embedding: "X_tSNE"
     doi_journal: "10.1038/s41586-020-2922-4"
     doi_preprint:

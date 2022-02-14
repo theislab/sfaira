@@ -37,6 +37,8 @@ class DatasetInteractive(DatasetBase):
         self.download_url_data = "."
         self.download_url_meta = "."
 
+        self.layer_processed = "X"
+
         self.feature_symbol_var_key = feature_symbol_col
         self.feature_id_var_key = feature_id_col
         self.feature_type_var_key = feature_type_col

@@ -10,11 +10,12 @@ from rich import print
 
 from sfaira.commands.annotate_dataloader import DataloaderAnnotater
 from sfaira.commands.cache_control import CacheControl
+from sfaira.commands.export_h5ad import H5adExport
+from sfaira.commands.submit_pullrequest import PullRequestHandler
+from sfaira.commands.test_dataloader import DataloaderTester
 from sfaira.commands.utils import doi_lint
 from sfaira.commands.validate_dataloader import DataloaderValidator
 from sfaira.commands.validate_h5ad import H5adValidator
-from sfaira.commands.test_dataloader import DataloaderTester
-from sfaira.commands.submit_pullrequest import PullRequestHandler
 
 from sfaira import __version__
 from sfaira.commands.create_dataloader import DataloaderCreator
@@ -240,7 +241,7 @@ def publish_dataloader() -> None:
 
 
 @sfaira_cli.command()
-@click.option('--doi', type=str, default=None, help="DOI of data sets to export")
+@click.option('--doi', type=str, required=True, help="The doi of the paper that the data loader refers to.")
 @click.option('--schema', type=str, default=None, help="Schema to streamline to, e.g. 'cellxgene'")
 @click.option('--path-out',
               type=click.Path(exists=True),
@@ -249,16 +250,21 @@ def publish_dataloader() -> None:
               default=DEFAULT_DATA_PATH,
               type=click.Path(exists=True),
               help='Absolute path of the location of the raw data directory.')
+@click.option('--path-loader',
+              default=PACKAGE_LOADER_PATH,
+              type=click.Path(exists=False),
+              help='Relative path from the current directory to the location of the data loader.')
 @click.option('--path-cache',
               type=click.Path(exists=True),
               default=None,
               help='The optional absolute path to cached data library maintained by sfaira. Using such a cache speeds '
                    'up loading in sequential runs but is not necessary.')
-def export_h5ad(doi, schema, path_out, path_data, path_cache) -> None:
+def export_h5ad(doi, schema, path_out, path_data, path_loader, path_cache) -> None:
     """Creates a collection of streamlined h5ad object for a given DOI."""
-    raise NotImplementedError()
-    # _, path_data, path_cache = set_paths(data=path_data, cache=path_cache)
-    # check_paths([path_data, path_cache])
+    path_loader, path_data, _ = set_paths(loader=path_loader, data=path_data, cache=path_cache)
+    h5ad_export = H5adExport(doi=doi, path_cache=path_cache, path_data=path_data, path_loader=path_loader,
+                             path_out=path_out, schema=schema)
+    h5ad_export.write()
 
 
 @sfaira_cli.command()
@@ -270,9 +276,8 @@ def validate_h5ad(h5ad, schema) -> None:
     h5ad is the absolute path of the .h5ad file to test.
     schema is the schema type ("cellxgene",) to test.
     """
-    h5ad_tester = H5adValidator(h5ad, schema)
-    h5ad_tester.test_schema()
-    h5ad_tester.test_numeric_data()
+    h5ad_validator = H5adValidator(h5ad, schema)
+    h5ad_validator.validate()
 
 
 if __name__ == "__main__":

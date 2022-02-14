@@ -52,6 +52,7 @@ class OntologyContainerSfaira:
         self.doi_journal = None
         self.doi_preprint = None
         self._ethnicity = None
+        self.feature_type = OntologyList(terms=["rna", "peak", "protein"])
         self.id = None
         self.individual = None
         self.normalization = None
