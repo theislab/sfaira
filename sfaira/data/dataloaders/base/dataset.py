@@ -677,7 +677,7 @@ class DatasetBase(abc.ABC):
             var_raw = None
         elif x_proc is not None and x_counts is None:
             x = x_proc
-            var = var_counts
+            var = var_proc
             x_raw = None
             var_raw = None
         elif x_proc is not None and x_counts is not None:

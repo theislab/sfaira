@@ -183,8 +183,6 @@ class Dataset(DatasetBase):
 
     def load(
             self,
-            remove_gene_version: bool = True,
-            match_to_reference: Union[str, bool, None] = None,
             load_raw: bool = False,
             allow_caching: bool = True,
             set_metadata: bool = True,
@@ -193,8 +191,6 @@ class Dataset(DatasetBase):
         # Invoke load with cellxgene adapted parameters:
         #  - Never cache as the cellxgene objects already fast to read.
         super().load(
-            remove_gene_version=False,
-            match_to_reference=match_to_reference,
             load_raw=True,
             allow_caching=False,
             set_metadata=set_metadata,
