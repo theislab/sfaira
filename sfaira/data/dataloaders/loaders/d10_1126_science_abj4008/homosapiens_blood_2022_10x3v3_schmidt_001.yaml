@@ -39,7 +39,7 @@ dataset_or_observation_wise:
     cell_line_obs_key: 
     cell_type: "T cell"
     cell_type_obs_key: 
-    development_stage: "adult stage"
+    development_stage: "human adult stage"
     development_stage_obs_key: 
     disease: "healthy"
     disease_obs_key: 
@@ -66,7 +66,7 @@ dataset_or_observation_wise:
     treatment:
     treatment_obs_key:
 feature_wise:
-    feature_id_var_key: "gene_id"
+    feature_id_var_key: "gene_ids"
     feature_symbol_var_key: "index"
 observation_wise:
     spatial_x_coord_obs_key:

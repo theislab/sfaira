@@ -1,7 +1,10 @@
 import anndata
 import numpy as np
-import yaml
+import pandas as pd
+import scipy.sparse
 from typing import Dict, List, Union
+import yaml
+
 
 from sfaira.versions.metadata.maps import prepare_ontology_map
 
@@ -147,3 +150,52 @@ def collapse_matrix(adata: anndata.AnnData, var_column: str) -> anndata.AnnData:
         )
         adata.obs_names = obs_names
     return adata
+
+
+def subset_adata_genes(x, var, feature_id_var_key, feature_symbol_var_key, subset_ids_ensg, subset_ids_symbol):
+    # Convert data matrix to csc matrix
+    if isinstance(x, np.ndarray):
+        # Change NaN to zero. This occurs for example in concatenation of anndata instances.
+        if np.any(np.isnan(x)):
+            x[np.isnan(x)] = 0
+        x = scipy.sparse.csc_matrix(x)
+    elif isinstance(x, scipy.sparse.spmatrix):
+        x = x.tocsc()
+    else:
+        raise ValueError(f"Data type {type(x)} not recognized.")
+
+    # Remove unmapped genes
+    data_ids_ensg = var.index.values if feature_id_var_key == "index" else var[feature_id_var_key].values
+    idx_feature_kept = np.where([x.upper() in subset_ids_ensg for x in data_ids_ensg])[0]
+    data_ids_kept = data_ids_ensg[idx_feature_kept]
+    x = x[:, idx_feature_kept]
+    # Build map of subset_ids to features in x:
+    idx_feature_map = np.array([subset_ids_ensg.index(x) for x in data_ids_kept])
+    # Create reordered feature matrix based on reference and convert to csr
+    x_new = scipy.sparse.csc_matrix((x.shape[0], len(subset_ids_ensg)), dtype=x.dtype)
+    # copying this over to the new matrix in chunks of size `steps` prevents a strange scipy error:
+    # ... scipy/sparse/compressed.py", line 922, in _zero_many i, j, offsets)
+    # ValueError: could not convert integer scalar
+    step = 500
+    if step < len(idx_feature_map):
+        i = 0
+        for i in range(0, len(idx_feature_map), step):
+            x_new[:, idx_feature_map[i:i + step]] = x[:, i:i + step]
+        x_new[:, idx_feature_map[i + step:]] = x[:, i + step:]
+    else:
+        x_new[:, idx_feature_map] = x
+    x_new = x_new.tocsr()
+
+    # Create new var dataframe
+    if feature_symbol_var_key == "index":
+        var_index = subset_ids_symbol
+        var_data = {feature_id_var_key: subset_ids_ensg}
+    elif feature_id_var_key == "index":
+        var_index = subset_ids_ensg
+        var_data = {feature_symbol_var_key: subset_ids_symbol}
+    else:
+        var_index = None
+        var_data = {feature_symbol_var_key: subset_ids_symbol,
+                    feature_id_var_key: subset_ids_ensg}
+    var_new = pd.DataFrame(data=var_data, index=var_index)
+    return x_new, var_new

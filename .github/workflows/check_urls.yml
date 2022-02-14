@@ -1,0 +1,25 @@
+name: Check URLs
+
+on:
+  schedule:
+    - cron: "0 0 * * *" #runs at 00:00 UTC everyday
+  workflow_dispatch:
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout repo content
+        uses: actions/checkout@v2
+      - name: setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Build sfaira
+        run: pip install .
+
+      - name: check URLs
+        run: python ./scripts/check_urls.py

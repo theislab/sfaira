@@ -1,9 +1,11 @@
 import os
 import re
 import pydoc
+import shutil
 import sys
 
 from sfaira.commands.consts import PACKAGE_LOADER_PATH, PACKAGE_SFAIRAE_LOADER_PATH
+from sfaira.data import DatasetGroupDirectoryOriented
 
 try:
     import sfaira_extension as sfairae
@@ -49,3 +51,18 @@ def get_pydoc(path_loader, doi_sfaira_repr) -> [str, str]:
     else:
         raise ValueError("data loader not found in sfaira and also not in sfaira_extension")
     return file_path, pydoc_handle
+
+
+def get_ds(doi_sfaira_repr, path_data, path_loader, path_cache=None, clear_cache=True):
+    file_path, _ = get_pydoc(path_loader=path_loader, doi_sfaira_repr=doi_sfaira_repr)
+    if path_cache is not None and clear_cache:
+        shutil.rmtree(path_cache, ignore_errors=True)
+
+    ds = DatasetGroupDirectoryOriented(
+        file_base=file_path,
+        data_path=path_data,
+        meta_path=None,
+        cache_path=path_cache,
+    )
+
+    return ds, path_cache

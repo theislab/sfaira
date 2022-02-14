@@ -1,0 +1,172 @@
+dataset_structure:
+    dataset_index: 1
+    sample_fns:
+        - "GSM3489194_SSc-ILD_01"
+        - "GSM3489187_Donor_03"
+        - "GSM3489184_IPF_02"
+        - "GSM3489183_IPF_01"
+        - "GSM3489182_Donor_01"
+        - "GSM3489186_Cryobiopsy_01"
+        - "GSM3489188_IPF_03"
+        - "GSM3489193_Donor_06"
+        - "GSM3489196_Myositis-ILD_01"
+        - "GSM3489189_Donor_04"
+        - "GSM3489197_Donor_08"
+        - "GSM3489191_Donor_05"
+        - "GSM3489192_HP_01"
+        - "GSM3489185_Donor_02"
+        - "GSM3489195_Donor_07"
+        - "GSM3489190_IPF_04"
+        - "GSM3489198_SSc-ILD_02"
+dataset_wise:
+    author: "Reyfman, Paul A"
+    default_embedding: 
+    doi_preprint: 
+    doi_journal: "10.1164/rccm.201712-2410OC"
+    download_url_data: "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE122960&format=file"
+    download_url_meta: 
+    primary_data: True
+    year: 2018
+layers:
+    layer_counts: "X"
+    layer_processed:
+    layer_spliced_counts: 
+    layer_spliced_processed: 
+    layer_unspliced_counts: 
+    layer_unspliced_processed: 
+    layer_velocity: 
+dataset_or_feature_wise:
+    feature_reference:
+    feature_reference_var_key: 
+    feature_type: "rna"
+    feature_type_var_key: 
+dataset_or_observation_wise:
+    assay_sc: "10x 3' v2"
+    assay_sc_obs_key: 
+    assay_differentiation: 
+    assay_differentiation_obs_key: 
+    assay_type_differentiation: 
+    assay_type_differentiation_obs_key: 
+    bio_sample:
+    bio_sample_obs_key: 
+    cell_line: 
+    cell_line_obs_key: 
+    cell_type: 
+    cell_type_obs_key: 
+    development_stage:
+        GSM3489194_SSc-ILD_01: "53-year-old human stage"
+        GSM3489187_Donor_03: "29-year-old human stage"
+        GSM3489184_IPF_02: "60-year-old human stage"
+        GSM3489183_IPF_01: "66-year-old human stage"
+        GSM3489182_Donor_01: "63-year-old human stage"
+        GSM3489186_Cryobiopsy_01: "71-year-old human stage"
+        GSM3489188_IPF_03: "68-year-old human stage"
+        GSM3489193_Donor_06: "22-year-old human stage"
+        GSM3489196_Myositis-ILD_01: "37-year-old human stage"
+        GSM3489189_Donor_04: "57-year-old human stage"
+        GSM3489197_Donor_08: "21-year-old human stage"
+        GSM3489191_Donor_05: "49-year-old human stage"
+        GSM3489192_HP_01: "55-year-old human stage"
+        GSM3489185_Donor_02: "55-year-old human stage"
+        GSM3489195_Donor_07: "47-year-old human stage"
+        GSM3489190_IPF_04: "72-year-old human stage"
+        GSM3489198_SSc-ILD_02: "53-year-old human stage"
+    development_stage_obs_key:
+    disease:
+        GSM3489194_SSc-ILD_01: "systemic sclerosis"
+        GSM3489187_Donor_03: "brain injury"
+        GSM3489184_IPF_02: "idiopathic pulmonary fibrosis"
+        GSM3489183_IPF_01: "idiopathic pulmonary fibrosis"
+        GSM3489182_Donor_01: "stroke disorder"
+        GSM3489186_Cryobiopsy_01: "idiopathic pulmonary fibrosis"
+        GSM3489188_IPF_03: "idiopathic pulmonary fibrosis"
+        GSM3489193_Donor_06: "brain injury"
+        GSM3489196_Myositis-ILD_01: "interstitial lung disease"
+        GSM3489189_Donor_04: "brain injury"
+        GSM3489197_Donor_08: "brain injury"
+        GSM3489191_Donor_05: "intracranial hemorrhage"
+        GSM3489192_HP_01: "hypersensitivity pneumonitis"
+        GSM3489185_Donor_02: "intracranial hemorrhage"
+        GSM3489195_Donor_07: "intracranial hemorrhage"
+        GSM3489190_IPF_04: "idiopathic pulmonary fibrosis"
+        GSM3489198_SSc-ILD_02: "interstitial lung disease"
+    disease_obs_key:
+    ethnicity:
+    ethnicity_obs_key: 
+    gm:
+    gm_obs_key:
+    individual:
+        GSM3489194_SSc-ILD_01: "SSc-ILD 1"
+        GSM3489187_Donor_03: "Donor 3"
+        GSM3489184_IPF_02: "IPF 2"
+        GSM3489183_IPF_01: "IPF 1"
+        GSM3489182_Donor_01: "Donor 1"
+        GSM3489186_Cryobiopsy_01: "Cryobiopsy"
+        GSM3489188_IPF_03: "IPF 3"
+        GSM3489193_Donor_06: "Donor 6"
+        GSM3489196_Myositis-ILD_01: "PM-ILD"
+        GSM3489189_Donor_04: "Donor 4"
+        GSM3489197_Donor_08: "Donor 8"
+        GSM3489191_Donor_05: "Donor 5"
+        GSM3489192_HP_01: "HP"
+        GSM3489185_Donor_02: "Donor 2"
+        GSM3489195_Donor_07: "Donor 7"
+        GSM3489190_IPF_04: "IPF 4"
+        GSM3489198_SSc-ILD_02: "SSc-ILD 2"
+    individual_obs_key: 
+    organ: "lung"
+    organ_obs_key: 
+    organism: "Homo sapiens"
+    organism_obs_key: 
+    sample_source: 
+    sample_source_obs_key: 
+    sex:
+        GSM3489194_SSc-ILD_01: "female"
+        GSM3489187_Donor_03: "female"
+        GSM3489184_IPF_02: "male"
+        GSM3489183_IPF_01: "male"
+        GSM3489182_Donor_01: "female"
+        GSM3489186_Cryobiopsy_01: "female"
+        GSM3489188_IPF_03: "male"
+        GSM3489193_Donor_06: "female"
+        GSM3489196_Myositis-ILD_01: "female"
+        GSM3489189_Donor_04: "female"
+        GSM3489197_Donor_08: "male"
+        GSM3489191_Donor_05: "female"
+        GSM3489192_HP_01: "female"
+        GSM3489185_Donor_02: "male"
+        GSM3489195_Donor_07: "female"
+        GSM3489190_IPF_04: "female"
+        GSM3489198_SSc-ILD_02: "female"
+    sex_obs_key: 
+    source_doi:
+    source_doi_obs_key:
+    state_exact:
+    state_exact_obs_key:
+    tech_sample:
+    tech_sample_obs_key: 
+    treatment:
+    treatment_obs_key:
+feature_wise:
+    feature_id_var_key: "feature_id"
+    feature_symbol_var_key: "feature_symbol"
+observation_wise:
+    spatial_x_coord_obs_key: 
+    spatial_y_coord_obs_key: 
+    spatial_z_coord_obs_key: 
+    vdj_vj_1_obs_key_prefix: 
+    vdj_vj_2_obs_key_prefix: 
+    vdj_vdj_1_obs_key_prefix: 
+    vdj_vdj_2_obs_key_prefix: 
+    vdj_c_call_obs_key_suffix: 
+    vdj_consensus_count_obs_key_suffix: 
+    vdj_d_call_obs_key_suffix: 
+    vdj_duplicate_count_obs_key_suffix: 
+    vdj_j_call_obs_key_suffix: 
+    vdj_junction_obs_key_suffix: 
+    vdj_junction_aa_obs_key_suffix: 
+    vdj_locus_obs_key_suffix: 
+    vdj_productive_obs_key_suffix: 
+    vdj_v_call_obs_key_suffix: 
+meta:
+    version: "1.2"
