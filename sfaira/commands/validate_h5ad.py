@@ -38,10 +38,10 @@ class H5adValidator:
 
     def _test_numeric_data(self) -> None:
         """Verify that numeric matrices match schema definitions."""
-        #if isinstance(self.adata.X, scipy.sparse.spmatrix):
-        #    x = np.unique(np.asarray(self.adata.X.todense()))
-        #else:
-        #    x = np.unique(np.asarray(self.adata.X))
-        #deviation_from_integer = np.minimum(x % 1, 1. - x % 1)
-        #assert np.max(deviation_from_integer) < 1e-6
+        # if isinstance(self.adata.X, scipy.sparse.spmatrix):
+        #     x = np.unique(np.asarray(self.adata.X.todense()))
+        # else:
+        #     x = np.unique(np.asarray(self.adata.X))
+        # deviation_from_integer = np.minimum(x % 1, 1. - x % 1)
+        # assert np.max(deviation_from_integer) < 1e-6
         pass
