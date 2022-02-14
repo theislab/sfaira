@@ -80,6 +80,7 @@ class DatasetBase(abc.ABC):
     _primary_data: Union[None, bool]
     _sex: Union[None, str]
     _source: Union[None, str]
+    _source_doi: Union[None, str]
     _sample_source: Union[None, str]
     _state_exact: Union[None, str]
     _title: Union[None, str]
@@ -102,6 +103,7 @@ class DatasetBase(abc.ABC):
     organism_obs_key: Union[None, str]
     sample_source_obs_key: Union[None, str]
     sex_obs_key: Union[None, str]
+    source_doi_obs_key: Union[None, str]
     state_exact_obs_key: Union[None, str]
     treatment_obs_key: Union[None, str]
 
@@ -222,6 +224,7 @@ class DatasetBase(abc.ABC):
         self._sample_source = None
         self._sex = None
         self._source = None
+        self._source_doi = None
         self._state_exact = None
         self._tech_sample = None
         self.treatment = None
@@ -243,6 +246,7 @@ class DatasetBase(abc.ABC):
         self.organism_obs_key = None
         self.sample_source_obs_key = None
         self.sex_obs_key = None
+        self.source_doi_obs_key = None
         self.state_exact_obs_key = None
         self.tech_sample_obs_key = None
         self.treatment_obs_key = None
@@ -695,7 +699,7 @@ class DatasetBase(abc.ABC):
             uns=self.adata.uns
         )
         if x_raw is not None:
-            self.adata.raw = self.adata = anndata.AnnData(
+            self.adata.raw = anndata.AnnData(
                 X=x_raw,
                 var=var_raw
             )
@@ -931,13 +935,14 @@ class DatasetBase(abc.ABC):
                 old_cols = getattr(self, f"{k}_obs_key")
                 batch_cols = []
                 for batch_col in old_cols.split("*"):
-                    if batch_col in self.adata.obs_keys():
+                    if batch_col in self.adata.obs.columns:
                         batch_cols.append(batch_col)
                     else:
                         # This should not occur in single data set loaders (see warning below) but can occur in
                         # streamlined data loaders if not all instances of the streamlined data sets have all columns
                         # in .obs set.
-                        print(f"WARNING: attribute {batch_col} of data set {self.id} was not found in columns.")
+                        print(f"WARNING: attribute {batch_col} of data set {self.id} was not found in columns: "
+                              f"{self.adata.obs.columns}.")
                 # Build a combination label out of all columns used to describe this group.
                 # Add data set label into this label so that these groups are unique across data sets.
                 val = [
@@ -1892,6 +1897,14 @@ class DatasetBase(abc.ABC):
     @source.setter
     def source(self, x: Union[str, None]):
         self._source = x
+
+    @property
+    def source_doi(self) -> str:
+        return self._source_doi
+
+    @source_doi.setter
+    def source_doi(self, x: Union[str, None]):
+        self._source_doi = x
 
     @property
     def state_exact(self) -> Union[None, str]:

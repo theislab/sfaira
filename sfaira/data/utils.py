@@ -117,7 +117,7 @@ def read_yaml(fn) -> Dict[str, Dict[str, Union[str, int, bool]]]:
     return {"attr": attr_dict, "meta": meta_dict}
 
 
-def collapse_matrix(adata: anndata.AnnData, var_column: str) -> anndata.AnnData:
+def collapse_matrix(adata: Union[anndata.AnnData, anndata.Raw], var_column: str) -> anndata.AnnData:
     """
     Collapses (sum) features with the same var_name in a provided var column.
 
@@ -141,13 +141,21 @@ def collapse_matrix(adata: anndata.AnnData, var_column: str) -> anndata.AnnData:
 
         # Remove varm and populate var with first occurrence only:
         obs_names = adata.obs_names
-        adata = anndata.AnnData(
-            X=data,
-            obs=adata.obs,
-            obsm=adata.obsm,
-            var=adata.var.iloc[[old_index.index(x) for x in new_index]],
-            uns=adata.uns
-        )
+        if isinstance(adata, anndata.AnnData):
+            adata = anndata.AnnData(
+                X=data,
+                obs=adata.obs,
+                obsm=adata.obsm,
+                var=adata.var.iloc[[old_index.index(x) for x in new_index]],
+                uns=adata.uns
+            )
+        elif isinstance(adata, anndata.Raw):
+            adata = anndata.AnnData(
+                X=data,
+                var=adata.var.iloc[[old_index.index(x) for x in new_index]],
+            )
+        else:
+            assert False
         adata.obs_names = obs_names
     return adata
 

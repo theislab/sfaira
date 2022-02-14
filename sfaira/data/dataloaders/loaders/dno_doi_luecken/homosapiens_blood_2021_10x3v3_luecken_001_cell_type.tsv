@@ -46,6 +46,6 @@ Transitional B	transitional stage B cell	CL:0000818
 cDC1	conventional dendritic cell	CL:0000990
 cDC2	conventional dendritic cell	CL:0000990
 dnT	double negative thymocyte	CL:0002489
-gdT	gamma-delta T cell	CL:0000798
-gdT	gamma-delta T cell	CL:0000798
+gdT CD158b+	gamma-delta T cell	CL:0000798
+gdT TCRVD2+	gamma-delta T cell	CL:0000798
 pDC	plasmacytoid dendritic cell	CL:0000784
