@@ -60,7 +60,7 @@ class DataloaderTester:
                 print('[bold red]Mapping your feature space to a reference annotation resulted in a heavy loss of '
                       f'counts in dataset {k}.')
                 print(f'[bold red]From {signal_raw} total counts before streamlining, {signal_proc} are left after.')
-                print(f'[bold red]Consider revising feature meta data.')
+                print('[bold red]Consider revising feature meta data.')
                 sys.exit()
             v.streamline_metadata(schema="cellxgene")
         print("[bold blue]Completed testing of data loader, the data loader is now ready for use.")
