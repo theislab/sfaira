@@ -963,8 +963,10 @@ class OntologyHsapdv(OntologyExtendedObo):
             recache: bool = False,
             **kwargs
     ):
+        # Note on URL: berkeleybop is the ontology supported by cellxgene, GitHub seems to be older but versioned.
         obofile = cached_load_file(
-            url=f"https://raw.githubusercontent.com/obophenotype/developmental-stage-ontologies/{branch}/src/hsapdv/hsapdv.obo",
+            url="http://ontologies.berkeleybop.org/hsapdv.obo",
+            # url=f"https://raw.githubusercontent.com/obophenotype/developmental-stage-ontologies/{branch}/src/hsapdv/hsapdv.obo",
             ontology_cache_dir="hsapdv",
             ontology_cache_fn=f"hsapdv_{branch}.obo",
             recache=recache,

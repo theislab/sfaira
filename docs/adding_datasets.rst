@@ -43,11 +43,11 @@ In addition, the CLI guides the user through manual steps that are necessary in 
 We structured the process of curation into four phases,
 a preparatory phase P precedes CLI execution and is described in this documentation.
 
-- Phase P (``prepare``): data and python environment setup for curation.
-- Phase 1 (``create``): a `load()` function (in a `.py`) and a YAML are written.
-- Phase 2 (``annotate``): ontology-specific maps of free-text metadata to contrained vocabulary (in `*.tsv`) are written.
-- Phase 3 (``finalize``): the data loader is tested and metadata are cleaned up.
-- Phase 4 (``publish``): the data loader is uploaded to the sfaira GitHub repository.
+0. Phase P (``prepare``): data and python environment setup for curation.
+1. Phase 1 (``create``): a `load()` function (in a `.py`) and a YAML are written.
+2. Phase 2 (``annotate``): ontology-specific maps of free-text metadata to contrained vocabulary (in `*.tsv`) are written.
+3. Phase 3 (``finalize``): the data loader is tested and metadata are cleaned up.
+4. Phase 4 (``publish``): the data loader is uploaded to the sfaira GitHub repository.
 
 An experienced curator could skip using the CLI for phase 1 and write the `__init__.py`, `ID.py` and `ID.yaml` by hand.
 In this case, we still highly recommend using the CLI for phase 2 and 3.
@@ -62,8 +62,8 @@ Where appropriate, separate instruction options are given for workflows in conda
 Overall, the workflow looks the same in both frameworks, though.
 This cycle can be complemented by an optional workflow to cache curated `.h5ad` objects (e.g. on the cellxgene website):
 
-- Phase 5 (``export-h5ad``): the data loader is used to create a streamlined `.h5ad` of a particular format.
-- Phase 6 (``validate-h5ad``): the `.h5ad` from phase 4 is checked for compliance with a particular (e.g. the cellxgene format).
+5. Phase 5 (``export-h5ad``): the data loader is used to create a streamlined `.h5ad` of a particular format.
+6. Phase 6 (``validate-h5ad``): the `.h5ad` from phase 4 is checked for compliance with a particular (e.g. the cellxgene format).
 
 The resulting `.h5ad` can be shared with collaborators or uploaded to data submission servers.
 
@@ -78,12 +78,7 @@ Phase P: Preparation
 ~~~~~~~~~~~~~~~~~~~~~
 
 Before you start writing the data loader, we recommend completing this checks and preparation measures.
-Phase P is sub-structured into 4 sub-phases:
-
-* Pa: Name the data loader.
-* Pb: Check that the data loader was not already implemented.
-* Pc: Prepare an installation of sfaira to use for data loader writing.
-* Pd: Download the raw data into a local directory.
+Phase P is sub-structured into sub-phases:
 
 Pa. Name the data loader.
     We will decide for a  name of the dataloader based on its DOI.
@@ -124,7 +119,9 @@ Pc. Prepare an installation of sfaira to use for data loader writing.
            datafiles from and write the dataloaders to respectively.
             .. code-block::
 
-                sudo docker run --rm -it -v <path_data>:/root/sfaira_data -v <path_loader>:/root/sfaira_loader leanderd/sfaira-cli:latest
+                PATH_DATA=<path_data>
+                PATH_LOADER=<path_loader>
+                sudo docker run --rm -it -v ${PATH_DATA}:/root/sfaira_data -v ${PATH_LOADER}:/root/sfaira_loader leanderd/sfaira-cli:latest
             ..
     Pc-conda.
         Jump to step 4 if you do not require explanations of specific parts of the shell script.
@@ -212,20 +209,27 @@ Pe. Get an overview of the published data.
     or to a corresponding column in a tabular file:
 
     - single-cell assay
+
     - cell type
+
     - developmental stage
+
     - disease state
+
     - ethnicity (only relevant for human samples)
+
     - organ / tissue
+
     - organism
+
     - sex
+
 
     Note that these are also the key ontology-restricted and required meta data in the cellxgene curation schema_.
     Next, we recommend you briefly consider the available features:
-
-    - Are count matrices, processed matrices or spliced/unspliced RNA published?
-    - Which gene identifiers are used (symbols or ENSEMBL IDs)?
-    - Which non-RNA modalities are present in the data?
+    Are count matrices, processed matrices or spliced/unspliced RNA published?
+    Which gene identifiers are used (symbols or ENSEMBL IDs)?
+    Which non-RNA modalities are present in the data?
 
 .. _docker: https://docs.docker.com/get-docker/
 .. _code: https://github.com/theislab/sfaira/tree/dev/sfaira/data/dataloaders/loaders
@@ -265,6 +269,7 @@ Phase 1 is sub-structured into 2 sub-phases:
     that is output by ``load()``, where the elements of the column are then mapped to UBERON terms in phase 2.
 
     1a-docker.
+        You can run the `create-dataloader` command directly.
 
         .. code-block::
 
@@ -355,14 +360,22 @@ Phase 2 is sub-structured into 2 sub-phases:
 
         .. code-block::
 
-            sfaira annotate-dataloader --doi DOI --path_data DATA_DIR
+            sfaira annotate-dataloader --doi DOI --path-data DATA_DIR
         ..
 2b. Completion of annotation (manual).
-    Each `<path_loader>/<DOI-name>/ID*.tsv` file contains two columns with one row for each unique free-text meta data
+    Each `<path_loader>/<DOI-name>/ID*.tsv` files contains two columns with one row for each unique free-text meta data
     item, e.g. each cell type label.
+    One file is created for each ``*_obs_key`` that requires mapping to an ontology, which are:
+    ``assay_sc_obs_key``, ``cell_line_sc_obs_key``, ``cell_type_sc_obs_key``, ``development_stage_sc_obs_key``,
+    ``disease_sc_obs_key``, ``ethnicity_sc_obs_key``, ``organ_sc_obs_key``, ``organism_sc_obs_key``,
+    ``sex_sc_obs_key``.
+    Depending on the number of such ``*_obs_key`` items that are set in the `.yaml`,
+    you will have between 0 amd 9 `.tsv` files.
 
-    - The first column is labeled "source" and contains free-text identifiers.
-    - The second column is labeled "target" and contains suggestions for matching the symbols from the corresponding ontology.
+    - "source":
+        The first column is labeled "source" and contains free-text identifiers.
+    - "target":
+        The second column is labeled "target" and contains suggestions for matching the symbols from the corresponding ontology.
 
     The suggestions are based on multiple search criteria, mostly on similarity of the free-text token to tokes in the
     ontology.
@@ -424,7 +437,7 @@ Phase 3: finalize
 
         .. code-block::
 
-            sfaira finalize-dataloader --doi DOI --path_data DATA_DIR
+            sfaira finalize-dataloader --doi DOI --path-data DATA_DIR
         ..
 
 
@@ -479,7 +492,7 @@ You can push the code from with the sfaira docker with a single command or you c
 
         .. code-block::
 
-            sfaira test-dataloader --doi DOI --path_data DATA_DIR
+            sfaira test-dataloader --doi DOI --path-data DATA_DIR
             cd DIR_SFAIRA
             cd sfaira
             git remote set-url origin https://github.com/<user>/sfaira.git  # Replace <user> with your github username.
@@ -502,27 +515,53 @@ Phase 5 and 6 are optional, see also introduction paragraphs on this documentati
 
 5a. Export `.h5ads`'s.
     Write streamlined dataset(s) corresponding to data loader into (an) `.h5ad` file(s) according to a specific set of
-    rules (a schema).
+    rules (a schema, e.g. "cellxgene").
     Note: You can identify the loader via ``--doi`` with the main DOI (ie. journal > preprint if both are defined)
     or with the DOI-based data loader name defined by sfaira,
     ie. ``<DOI-name>`` in ``<path_loader>/<DOI-name>``, which is either ``d10_*`` or ``dno_doi_*``.
 
-    .. code-block::
+    5a-docker.
+        In the following command, replace `DOI` with the DOI of your data loader,
+        replace `SCHEMA` with the target data schema,
+        and replace `OUT_DIR` with the directory to which the objects are written to.
+        .. code-block::
 
-        sfaira export-h5ad --doi --schema --path-out --path_data [--path_loader]
-    ..
+            sfaira export-h5ad --doi DOI --schema SCHEMA --path-out OUT_DIR
+        ..
+    5a-conda.
+        In the following command, replace `DATA_DIR` with the path `<path_data>/` you used above,
+        replace `DOI` with the DOI of your data loader,
+        replace `SCHEMA` with the target data schema,
+        and replace `OUT_DIR` with the directory to which the objects are written to.
+        You can optionally supply `--path-loader` to `create-dataloader` if the data loader is not in the internal
+        collection of sfaira in `./sfaira/data/dataloaders/loaders/`.
+        .. code-block::
+
+            sfaira export-h5ad --doi DOI --path-data DATA_DIR --schema SCHEMA --path-out OUT_DIR
+        ..
 
 Phase 6: validate-h5ad
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 Phase 5 and 6 are optional, see also introduction paragraphs on this documentation page.
 
-6a. Validate format of `.h5ad` according to a specific set of rules (a schema).
-    .. code-block::
+6a. Validate format of `.h5ad`
+    The streamlined `.h5ad` files from phase 5 are validated according to a specific set of rules (a schema).
 
-        sfaira validate-h5ad --h5ad --schema
-    ..
+    6a-docker.
+        In the following command, replace FN with the file name of the `.h5ad` file to test,
+        and replace `SCHEMA` with the target data schema.
+        .. code-block::
 
+            sfaira validate-h5ad --h5ad FN --schema SCHEMA
+        ..
+    6a-conda.
+        In the following command, replace FN with the file name of the `.h5ad` file to test,
+        and replace `SCHEMA` with the target data schema.
+        .. code-block::
+
+            sfaira validate-h5ad --h5ad FN --schema SCHEMA
+        ..
 
 
 Advanced topics
@@ -896,7 +935,7 @@ Dataset-wise meta data are in the section `dataset_wise` in the `.yaml` file.
     Download links for observation-wise data.
     Full URLs of all observation-wise meta data files such as count matrices.
     This attribute is optional and not necessary ff observation-wise meta data is already in the files defined in
-    `download_url_data`, e.g. often the case for .h5ad`.
+    `download_url_data`, e.g. often the case for `.h5ad`.
 - primary_data: If this is the first publication to report this gene expression data {True, False}.
     This is False if the study is a meta study that uses data that was previously published.
     This usually implies that one can also write a data loader for the data from the primary study.
@@ -918,12 +957,19 @@ In the following, "*processed" refers to any processing that modifies these coun
 normalization, batch correction, ambient RNA correction.
 
 - layer_counts: The total event counts per feature, e.g. UMIs that align to a gene. {'X', 'raw', or a .layers key}
+
 - layer_processed: Processed complement of 'layer_counts'. {'X', 'raw', or a .layers key}
+
 - layer_spliced_counts: The total spliced RNA counts per gene. {a .layers key}
+
 - layer_spliced_processed: Processed complement of 'layer_spliced_counts'. {a .layers key}
+
 - layer_unspliced_counts:  The total unspliced RNA counts per gene. {a .layers key}
+
 - layer_unspliced_processed: Processed complement of 'layer_unspliced_counts'. {a .layers key}
+
 - layer_velocity: The RNA velocity estimates per gene. {a .layers key}
+
 
 .. _sec-dataset-or-feature-wise:
 Dataset- or feature-wise
