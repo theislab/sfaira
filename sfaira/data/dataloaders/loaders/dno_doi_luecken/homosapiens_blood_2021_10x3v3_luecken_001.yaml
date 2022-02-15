@@ -51,7 +51,7 @@ dataset_or_observation_wise:
     gm:
     gm_obs_key:
     individual:
-    individual_obs_key: "donor"
+    individual_obs_key: "DonorID"
     organ: "bone marrow"
     organ_obs_key:
     organism: "Homo sapiens"
@@ -65,7 +65,7 @@ dataset_or_observation_wise:
     state_exact:
     state_exact_obs_key: "DonorSmoker"
     tech_sample:
-    tech_sample_obs_key: "site*donor"
+    tech_sample_obs_key: "batch"
     treatment:
     treatment_obs_key:
 feature_wise:
