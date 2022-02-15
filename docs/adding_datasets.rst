@@ -916,6 +916,8 @@ Dataset structure meta data are in the section `dataset_structure` in the `.yaml
     See also section `Loading multiple files of similar structure`.
     You can simply hardcode a file name in the ``load()`` function and skip defining it here
     if you are writing a single file loader.
+    Note: A sample is a an object similar to a count matrix or a `.h5ad`,
+    the definition of biological or technical batches or samples within one count matrix does not affect this entry.
 
 .. _sec-dataset-wise:
 Dataset-wise

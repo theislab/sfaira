@@ -110,7 +110,7 @@ class DataloaderCreator:
         """
         print('[bold blue]Dataset structure meta data (yaml::dataset_structure).')
         self.template_attributes.number_of_datasets = sfaira_questionary(function='text',
-                                                                         question='Number of datasets',
+                                                                         question='Number of count matrices',
                                                                          default='1')
         if int(self.template_attributes.number_of_datasets) == 1:
             self.template_attributes.dataloader_type = 'single_dataset'
@@ -120,7 +120,7 @@ class DataloaderCreator:
             self.template_attributes.sample_fns = {'fns': []}
             for ds in range(int(self.template_attributes.number_of_datasets)):
                 fn = sfaira_questionary(function='text',
-                                        question=f'[.sample_fns] Filename for dataset {ds}',
+                                        question=f'[.sample_fns] Filename for dataset (count matrix) {ds}',
                                         default=f'data_{ds}.h5ad')
                 self.template_attributes.sample_fns['fns'].append(fn)
 
