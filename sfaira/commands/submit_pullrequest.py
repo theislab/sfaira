@@ -96,7 +96,7 @@ class PullRequestHandler:
         # Copy loader
         shutil.copytree(
             src=os.path.join(self.path_loader, self.loader_name),
-            dst=os.path.join("/root/sfaira/sfaira/data/dataloaders/loaders", self.loader_name)
+            dst=os.path.join("/root/sfaira/data/dataloaders/loaders", self.loader_name)
         )
 
     def _submit_pr(self):
