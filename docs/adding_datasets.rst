@@ -522,11 +522,11 @@ Phase 5 and 6 are optional, see also introduction paragraphs on this documentati
 
     5a-docker.
         In the following command, replace `DOI` with the DOI of your data loader,
-        replace `SCHEMA` with the target data schema,
-        and replace `OUT_DIR` with the directory to which the objects are written to.
+        replace `SCHEMA` with the target data schema. You can find the resulting h5ad file in the `sfaira_data`
+        directory you specified when starting the container.
         .. code-block::
 
-            sfaira export-h5ad --doi DOI --schema SCHEMA --path-out OUT_DIR
+            sfaira export-h5ad --doi DOI --schema SCHEMA --path-out /root/sfaira_data/
         ..
     5a-conda.
         In the following command, replace `DATA_DIR` with the path `<path_data>/` you used above,
@@ -549,14 +549,16 @@ Phase 5 and 6 are optional, see also introduction paragraphs on this documentati
     The streamlined `.h5ad` files from phase 5 are validated according to a specific set of rules (a schema).
 
     6a-docker.
-        In the following command, replace FN with the file name of the `.h5ad` file to test,
-        and replace `SCHEMA` with the target data schema.
+        In the following command, replace FN with the file name of the `.h5ad` file to test (just the filename,
+        not the full path here), and replace `SCHEMA` with the target data schema. The h5ad file must be placed in the
+        `sfaira_data` directory you specified when starting the container.
+
         .. code-block::
 
-            sfaira validate-h5ad --h5ad FN --schema SCHEMA
+            sfaira validate-h5ad --h5ad /root/sfaira_data/FN --schema SCHEMA
         ..
     6a-conda.
-        In the following command, replace FN with the file name of the `.h5ad` file to test,
+        In the following command, replace FN with ful path of the `.h5ad` file to test,
         and replace `SCHEMA` with the target data schema.
         .. code-block::
 
@@ -782,14 +784,15 @@ These modules allow you to run R code from within this python code:
     def load(data_dir, **kwargs):
         import anndata2ri
         from rpy2.robjects import r
+        anndata2ri.activate()
 
         fn = os.path.join(data_dir, "SOME_FILE.rdata")
-        anndata2ri.activate()
+        seurat_object_name = "tissue"
         adata = r(
             f"library(Seurat)\n"
             f"load('{fn}')\n"
-            f"new_obj = CreateSeuratObject(counts = tissue@raw.data)\n"
-            f"new_obj@meta.data = tissue@meta.data\n"
+            f"new_obj = CreateSeuratObject(counts = {seurat_object_name}@raw.data)\n"
+            f"new_obj@meta.data = {seurat_object_name}@meta.data\n"
             f"as.SingleCellExperiment(new_obj)\n"
         )
         return adata
