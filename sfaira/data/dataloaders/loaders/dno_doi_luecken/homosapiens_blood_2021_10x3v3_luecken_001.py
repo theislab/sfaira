@@ -16,4 +16,6 @@ def load(data_dir, sample_fn, **kwargs):
         {"ATAC": "peak", "GEX": "rna", "ADT": "protein"}[x]
         for x in adata.var["feature_types"].values
     ]
+    # There is NAN entries in gene_id for some antibodies:
+    adata.var["gene_id"] = [str(x) for x in adata.var["gene_id"].values]
     return adata
