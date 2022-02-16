@@ -11,10 +11,11 @@ class CacheControl:
         self.adata_ids = AdataIdsSfaira()
 
     @staticmethod
-    def clear():
-        for i in range(5):
-            print(f"WARNING: deleting entire folder {settings.cachedir_ontologies} in {5 - i} sec ...")
-            time.sleep(1)
+    def clear(countdown=True):
+        if countdown:
+            for i in range(5):
+                print(f"WARNING: deleting entire folder {settings.cachedir_ontologies} in {5 - i} sec ...")
+                time.sleep(1)
         shutil.rmtree(path=settings.cachedir_ontologies)
 
     def reload(self):
