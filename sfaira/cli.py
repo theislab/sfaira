@@ -105,17 +105,17 @@ def sfaira_cli(ctx, verbose, log_file):
 
 
 @sfaira_cli.command()
-def cache_clear() -> None:
+@click.option('--reload',
+              is_flag=True,
+              help='Downloads new ontology versions into cache after clearing it.')
+def clear_cache(reload) -> None:
     """Clears sfaira cache, including ontology and genome cache."""
     ctrl = CacheControl()
-    ctrl.clear()
-
-
-@sfaira_cli.command()
-def cache_reload() -> None:
-    """Downloads new ontology versions into cache."""
-    ctrl = CacheControl()
-    ctrl.reload()
+    if reload:
+        ctrl.clear(countdown=False)
+        ctrl.reload()
+    else:
+        ctrl.clear(countdown=True)
 
 
 @sfaira_cli.command()

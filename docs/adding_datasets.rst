@@ -1070,7 +1070,7 @@ outlined below.
     keys with `*` in this string, e.g. `group1*group2` to get one `individual` for each group1 and group2 entry.
     Note that the notion of individuals is slightly mal-defined in some cases, we allow this element to allow
     researchers to distinguish sample groups that originate from biological material with distinct genotypes.
-    See also the meta data items `individual` and `tech_sample`.
+    See also the meta data items `bio_sample` and `tech_sample`.
 - organ and organ_obs_key [ontology term]
     The UBERON_ label of the sample.
     This meta data item ontology is for tissue or organ identifiers from UBERON.
@@ -1103,7 +1103,7 @@ outlined below.
     You can concatenate multiple columns to build more fine grained observation groupings by concatenating the column
     keys with `*` in this string, e.g. `patient*treatment*protocol` to get one `tech_sample` for each patient, treatment
     and measurement protocol.
-    See also the meta data items `individual` and `tech_sample`.
+    See also the meta data items `individual` and `bio_sample`.
 - treatment and treatment_obs_key [string]
     Treatment of sample, e.g. compound names in stimulation experiments.
 

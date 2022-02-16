@@ -159,7 +159,11 @@ class DataloaderAnnotater:
                         protected_writing=True,
                         n_suggest=4,
                     )
-                    tsvs_written.append((fn_tsv, attrs))
+                    if os.getenv('SFAIRA_DOCKER'):
+                        written_output = (os.path.join("<PATCH_LOADER_YOU_MOUNTED_TO_THE_CONTAINER>", doi_sfaira_repr, f"{file_module}"), attrs)
+                    else:
+                        written_output = (fn_tsv, attrs)
+                    tsvs_written.append(written_output)
         print("[bold blue]Completed annotation.")
         print('[bold orange]Sfaira butler: "Up next, follow these steps until the next call of the sfaira CLI:"')
         self.action_counter = 1
