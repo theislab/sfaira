@@ -29,8 +29,8 @@ class AdataIds:
     feature_symbol: str
     id: str
     individual: str
+    layer_proc: str
     ncells: str
-    normalization: str
     organ: str
     organism: str
     primary_data: str
@@ -115,8 +115,8 @@ class AdataIdsSfaira(AdataIds):
         self.feature_biotype = "feature_biotype"
         self.id = "id"
         self.individual = "individual"
+        self.layer_proc = "processed_counts"
         self.ncells = "ncells"
-        self.normalization = "normalization"
         self.organ = "organ"
         self.organism = "organism"
         self.primary_data = "primary_data"
@@ -186,7 +186,6 @@ class AdataIdsSfaira(AdataIds):
             "doi_preprint",
             "download_url_data",
             "download_url_meta",
-            "normalization",
             "primary_data",
             "title",
             "year",
@@ -225,6 +224,7 @@ class AdataIdsCellxgene(AdataIds):
         self.feature_symbol = "feature_name"
         self.id = "id"
         self.ncells = "ncells"
+        self.layer_proc = "processed_counts"
         self.organ = "tissue"
         self.organism = "organism"
         self.primary_data = "is_primary_data"
