@@ -565,7 +565,7 @@ class DatasetBase(abc.ABC):
 
     def streamline_features(
             self,
-            match_to_release: Union[str, Dict[str, str]],
+            match_to_release: Union[str, Dict[str, str], None],
             remove_gene_version: bool = True,
             subset_genes_to_type: Union[None, str, List[str]] = None,
             schema: Union[str, None] = None,
