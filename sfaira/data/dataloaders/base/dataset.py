@@ -677,7 +677,7 @@ class DatasetBase(abc.ABC):
             var = var_proc
             layer_proc = False
         else:
-            raise ValueError(f"Neither layer_counts nor layer_proc are set in yaml. Aborting")
+            raise ValueError("Neither layer_counts nor layer_proc are set in yaml. Aborting")
         # Streamline features
         x_new, var_new = subset_adata_genes(
             x=x,
@@ -708,7 +708,7 @@ class DatasetBase(abc.ABC):
                 ids_proc = var_proc.index.values if self.feature_symbol_var_key == "index" \
                     else var_proc[self.feature_symbol_var_key].values
             else:
-                raise ValueError(f"Neither feature_id_var_key nor feature_symbol_var_key are set in yaml. Aborting")
+                raise ValueError("Neither feature_id_var_key nor feature_symbol_var_key are set in yaml. Aborting")
             if set(ids_proc) - set(ids_counts):
                 raise IndexError(f"Features of layer specified as `layer_processed` ('{self.layer_processed}') are "
                                  f"not a subset of the features of layer specified as `layer_counts` "
