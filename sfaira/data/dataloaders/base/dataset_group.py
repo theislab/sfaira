@@ -230,23 +230,29 @@ class DatasetGroup:
 
     def streamline_features(
             self,
-            match_to_release: Union[str, Dict[str, str], None] = None,
+            match_to_release: Union[str, Dict[str, str]],
             remove_gene_version: bool = True,
             subset_genes_to_type: Union[None, str, List[str]] = None,
             schema: Union[str, None] = None,
     ):
         """
         Subset and sort genes to genes defined in an assembly or genes of a particular type, such as protein coding.
-        :param match_to_release: Which genome annotation release to map the feature space to. Note that assemblies from
-            ensbeml are usually named as Organism.Assembly.Release, this is the Release string. Can be:
-                - str: Provide the name of the release.
+        This also adds missing ensid or gene symbol columns if match_to_reference is not set to False and removes all
+        adata.var columns that are not defined as gene_id_ensembl_var_key or gene_id_symbol_var_key in the dataloader.
+
+        :param match_to_release: Which ensembl genome annotation release to map the feature space to. Can be:
+                - str: Provide the name of the release (eg. "104").
                 - dict: Mapping of organism to name of the release (see str format). Chooses release for each
-                    data set based on organism annotation.:param remove_gene_version: Whether to remove the version
-                    number after the colon sometimes found in ensembl gene ids.
+                    data set based on organism annotation.
+        :param remove_gene_version: Whether to remove the version number after the colon sometimes found in ensembl
+            gene ids.
         :param subset_genes_to_type: Type(s) to subset to. Can be a single type or a list of types or None.
             Types can be:
                 - None: All genes in assembly.
                 - "protein_coding": All protein coding genes in assembly.
+        :param schema: Export format.
+            - "sfaira"
+            - "cellxgene"
         """
         for x in self.ids:
             self.datasets[x].streamline_features(
@@ -992,24 +998,29 @@ class DatasetSuperGroup:
 
     def streamline_features(
             self,
-            match_to_release: Union[str, Dict[str, str], None] = None,
+            match_to_release: Union[str, Dict[str, str]],
             remove_gene_version: bool = True,
             subset_genes_to_type: Union[None, str, List[str]] = None,
             schema: Union[str, None] = None,
     ):
         """
         Subset and sort genes to genes defined in an assembly or genes of a particular type, such as protein coding.
+        This also adds missing ensid or gene symbol columns if match_to_reference is not set to False and removes all
+        adata.var columns that are not defined as gene_id_ensembl_var_key or gene_id_symbol_var_key in the dataloader.
 
-        :param match_to_release: Which genome annotation release to map the feature space to. Note that assemblies from
-            ensembl are usually named as Organism.Assembly.Release, this is the Release string. Can be:
-                - str: Provide the name of the release.
+        :param match_to_release: Which ensembl genome annotation release to map the feature space to. Can be:
+                - str: Provide the name of the release (eg. "104").
                 - dict: Mapping of organism to name of the release (see str format). Chooses release for each
-                    data set based on organism annotation.:param remove_gene_version: Whether to remove the version
-                    number after the colon sometimes found in ensembl gene ids.
+                    data set based on organism annotation.
+        :param remove_gene_version: Whether to remove the version number after the colon sometimes found in ensembl
+            gene ids.
         :param subset_genes_to_type: Type(s) to subset to. Can be a single type or a list of types or None.
             Types can be:
                 - None: All genes in assembly.
                 - "protein_coding": All protein coding genes in assembly.
+        :param schema: Export format.
+            - "sfaira"
+            - "cellxgene"
         """
         for x in self.dataset_groups:
             x.streamline_features(
