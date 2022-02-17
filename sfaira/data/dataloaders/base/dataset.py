@@ -712,7 +712,7 @@ class DatasetBase(abc.ABC):
         self.remove_gene_version = remove_gene_version
         self.subset_gene_type = subset_genes_to_type
         # Streamline feature space:
-        self._add_missing_featurenames(match_to_reference=match_to_release)
+        self._add_missing_featurenames()
         for key in [self.feature_id_var_key, self.feature_symbol_var_key]:
             # Make features unique (to avoid na-matches in converted columns to be collapsed by
             # _collapse_ensembl_gene_id_versions() below.
