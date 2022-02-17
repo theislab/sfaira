@@ -729,7 +729,6 @@ class DatasetBase(abc.ABC):
         self.layer_processed = layer_proc
         self.adata.uns[self._adata_ids.mapped_features] = match_to_release
 
-
     def streamline_metadata(
             self,
             schema: str = "sfaira",
