@@ -663,15 +663,21 @@ class DatasetBase(abc.ABC):
         if x_proc is not None and x_counts is not None:
             x = x_counts
             var = var_counts
-            layer_proc = True
+            layer_proc_exists = True
+            layer_counts = "X"
+            layer_proc = self._adata_ids.layer_proc
         elif x_proc is None and x_counts is not None:
             x = x_counts
             var = var_counts
-            layer_proc = False
+            layer_proc_exists = False
+            layer_counts = "X"
+            layer_proc = None
         elif x_proc is not None and x_counts is None:
             x = x_proc
             var = var_proc
-            layer_proc = False
+            layer_proc_exists = False
+            layer_counts = None
+            layer_proc = "X"
         else:
             raise ValueError("Neither layer_counts nor layer_proc are set in yaml. Aborting")
         # Streamline features
@@ -691,7 +697,7 @@ class DatasetBase(abc.ABC):
             var=var_new,
             uns=self.adata.uns
         )
-        if layer_proc:
+        if layer_proc_exists:
             # if feature spaces of proc and var are not the same, proc features must be a subset of counts features
             if self.feature_id_var_key is not None:
                 ids_counts = var_counts.index.values if self.feature_id_var_key == "index" \
@@ -718,8 +724,11 @@ class DatasetBase(abc.ABC):
                 subset_ids_symbol=subset_ids_symbol,
                 remove_gene_version=remove_gene_version
             )
-            self.adata.layers["processed_counts"] = layer_proc_new
+            self.adata.layers[layer_proc] = layer_proc_new
+        self.layer_counts = layer_counts
+        self.layer_processed = layer_proc
         self.adata.uns[self._adata_ids.mapped_features] = match_to_release
+
 
     def streamline_metadata(
             self,
