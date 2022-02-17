@@ -535,12 +535,9 @@ class DatasetBase(abc.ABC):
         elif self.feature_symbol_var_key is None and self.feature_id_var_key:
             # Convert ensembl ids to gene symbols
             id_dict = self.genome_container.id_to_symbols_dict
-            ensids = var.index if self.feature_id_var_key == "index" else \
-                var[self.feature_id_var_key]
-            var[self._adata_ids.feature_symbol] = [
-                id_dict[n.split(".")[0]] if n.split(".")[0] in id_dict.keys() else 'n/a'
-                for n in ensids
-            ]
+            ensids = var.index if self.feature_id_var_key == "index" else var[self.feature_id_var_key]
+            var[self._adata_ids.feature_symbol] = [id_dict[n.split(".")[0]] if n.split(".")[0] in id_dict.keys()
+                                                   else 'n/a' for n in ensids]
             self.feature_symbol_var_key = self._adata_ids.feature_symbol
         elif self.feature_symbol_var_key and self.feature_id_var_key is None:
             # Convert gene symbols to ensembl ids
@@ -550,8 +547,7 @@ class DatasetBase(abc.ABC):
             # match it straight away, if it is not in there we try to match everything in front of the first period in
             # the gene name with a dictionary that was modified in the same way, if there is still no match we append na
             ensids = []
-            symbs = var.index if self.feature_symbol_var_key == "index" else \
-                var[self.feature_symbol_var_key]
+            symbs = var.index if self.feature_symbol_var_key == "index" else var[self.feature_symbol_var_key]
             for n in symbs:
                 if n in id_dict.keys():
                     ensids.append(id_dict[n])
@@ -561,7 +557,7 @@ class DatasetBase(abc.ABC):
                     ensids.append('n/a')
             var[self._adata_ids.feature_id] = ensids
             self.feature_id_var_key = self._adata_ids.feature_id
-            return var
+        return var
 
     def streamline_features(
             self,
