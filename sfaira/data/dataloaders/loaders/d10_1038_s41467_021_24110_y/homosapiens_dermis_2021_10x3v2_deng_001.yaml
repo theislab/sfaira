@@ -43,12 +43,12 @@ dataset_or_observation_wise:
     cell_type:
     cell_type_obs_key: "cellType"
     development_stage:
-      GSM4994379_KL1: 20-year-old stage
-      GSM4994380_KL2: 23-year-old stage
-      GSM4994381_KL3: 34-year-old stage
-      GSM4994382_NS1: 39-year-old stage
-      GSM4994383_NS2: 28-year-old stage
-      GSM4994384_NS3: 26-year-old stage
+      GSM4994379_KL1: 20-year-old human stage
+      GSM4994380_KL2: 23-year-old human stage
+      GSM4994381_KL3: 34-year-old human stage
+      GSM4994382_NS1: 39-year-old human stage
+      GSM4994383_NS2: 28-year-old human stage
+      GSM4994384_NS3: 26-year-old human stage
     development_stage_obs_key:
     disease:
       GSM4994379_KL1: keloid
