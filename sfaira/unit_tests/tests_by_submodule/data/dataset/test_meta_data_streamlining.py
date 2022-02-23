@@ -69,7 +69,7 @@ def test_cellxgene_export(schema_version: str, organism: str):
     else:
         ds.subset(key="doi_journal", values=["no_doi_mock2"])
     ds.load()
-    ds.streamline_features(schema="cellxgene:" + schema_version)
+    ds.streamline_features(match_to_release=None, schema="cellxgene:" + schema_version)
     ds.streamline_metadata(schema="cellxgene:" + schema_version, clean_obs=False, clean_var=True,
                            clean_uns=True, clean_obs_names=False,
                            keep_id_obs=True, keep_orginal_obs=False, keep_symbol_obs=True)

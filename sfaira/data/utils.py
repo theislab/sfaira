@@ -1,4 +1,4 @@
-import anndata
+from anndata.utils import make_index_unique
 import numpy as np
 import pandas as pd
 import scipy.sparse
@@ -117,50 +117,63 @@ def read_yaml(fn) -> Dict[str, Dict[str, Union[str, int, bool]]]:
     return {"attr": attr_dict, "meta": meta_dict}
 
 
-def collapse_matrix(adata: Union[anndata.AnnData, anndata.Raw], var_column: str) -> anndata.AnnData:
+def collapse_matrix(x, var, var_column):
     """
     Collapses (sum) features with the same var_name in a provided var column.
+    Keeps .var column of first occurrence of duplicated variables.
 
-    Does not retain .varm if duplicated var_names are found.
-    keeps .var column of first occurrence of duplicated variables.
-
-    :param adata: Input anndata instance with potential duplicated var names.
+    :param x: Input data matrix.
+    :param var: Input var object.
     :param var_column: column name in .var that contains the duplicated features of interest
-    :return: Processed anndata instance without duplicated var names.
+    :return: Processed x and var.
     """
-    old_index = adata.var.index.tolist() if var_column == "index" else adata.var[var_column].tolist()
+    old_index = var.index.tolist() if var_column == "index" else var[var_column].tolist()
     new_index = list(np.unique(old_index))
     if len(new_index) < len(old_index):
         idx_map = np.array([np.where(x == np.array(old_index))[0] for x in new_index])
         # Build initial matrix from first match.
-        data = adata.X[:, np.array([x[0] for x in idx_map])].copy()
+        data = x[:, np.array([xx[0] for xx in idx_map])].copy()
         # Add additional matched (duplicates) on top:
         for i, idx in enumerate(idx_map):
             if len(idx) > 1:
-                data[:, i] = data[:, i] + adata.X[:, idx[1:]].sum(axis=1)
+                data[:, i] = data[:, i] + x[:, idx[1:]].sum(axis=1)
+        x = data
+        # Populate var with first occurrence only:
+        var = var.iloc[[old_index.index(x) for x in new_index]]
+    return x, var
 
-        # Remove varm and populate var with first occurrence only:
-        obs_names = adata.obs_names
-        if isinstance(adata, anndata.AnnData):
-            adata = anndata.AnnData(
-                X=data,
-                obs=adata.obs,
-                obsm=adata.obsm,
-                var=adata.var.iloc[[old_index.index(x) for x in new_index]],
-                uns=adata.uns
-            )
-        elif isinstance(adata, anndata.Raw):
-            adata = anndata.AnnData(
-                X=data,
-                var=adata.var.iloc[[old_index.index(x) for x in new_index]],
-            )
+
+def subset_adata_genes(
+        x,
+        var,
+        feature_id_var_key,
+        feature_symbol_var_key,
+        subset_ids_ensg,
+        subset_ids_symbol,
+        remove_gene_version
+):
+    # Process gene annotations
+    for key in [feature_id_var_key, feature_symbol_var_key]:
+        # Make features unique (to avoid na-matches in converted columns to be collapsed below.
+        if not key:
+            pass
+        elif key == "index":
+            var.index = make_index_unique(var.index).tolist()
         else:
-            assert False
-        adata.obs_names = obs_names
-    return adata
-
-
-def subset_adata_genes(x, var, feature_id_var_key, feature_symbol_var_key, subset_ids_ensg, subset_ids_symbol):
+            var[key] = make_index_unique(pd.Index(var[key].values.tolist())).tolist()
+    # Remove version tag on ensembl gene ID so that different versions are superimposed downstream.
+    if remove_gene_version:
+        if not feature_id_var_key:
+            raise ValueError(
+                "Cannot remove gene version when gene_id_ensembl_var_key is not set in dataloader and "
+                "match_to_reference is False"
+            )
+        elif feature_id_var_key == "index":
+            var.index = [x.split(".")[0] for x in var.index]
+        else:
+            var[feature_id_var_key] = [
+                x.split(".")[0] for x in var[feature_id_var_key].values]
+        x, var = collapse_matrix(x=x, var=var, var_column=feature_id_var_key)
     # Convert data matrix to csc matrix
     if isinstance(x, np.ndarray):
         # Change NaN to zero. This occurs for example in concatenation of anndata instances.

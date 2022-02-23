@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import abc
 import anndata
-from anndata.utils import make_index_unique
 import numpy as np
 import pandas as pd
 import os
@@ -513,29 +512,32 @@ class DatasetBase(abc.ABC):
 
     load.__doc__ = load_doc
 
-    def _add_missing_featurenames(
-            self,
-            match_to_reference: Union[str, bool, None],
-    ):
+    def collapse_counts(self):
+        """
+        Collapse count matrix along duplicated index.
+        """
+        if len(np.unique(self.adata.var.index)) < self.adata.var.shape[0]:
+            obs_names = self.adata.obs_names
+            x, var = collapse_matrix(x=self.adata.X, var=self.adata.var, var_column="index")
+            self.adata = anndata.AnnData(
+                X=x,
+                obs=self.adata.obs,
+                obsm=self.adata.obsm,
+                var=var,
+                uns=self.adata.uns
+            )
+            self.adata.obs_names = obs_names
+
+    def _add_missing_featurenames(self, var):
         if self.feature_symbol_var_key is None and self.feature_id_var_key is None:
             raise ValueError("Either feature_symbol_var_key or feature_id_var_key needs to be provided in the"
                              " dataloader")
         elif self.feature_symbol_var_key is None and self.feature_id_var_key:
             # Convert ensembl ids to gene symbols
             id_dict = self.genome_container.id_to_symbols_dict
-            ensids = self.adata.var.index if self.feature_id_var_key == "index" else \
-                self.adata.var[self.feature_id_var_key]
-            self.adata.var[self._adata_ids.feature_symbol] = [
-                id_dict[n.split(".")[0]] if n.split(".")[0] in id_dict.keys() else 'n/a'
-                for n in ensids
-            ]
-            if self.adata.raw is not None:
-                ensids = self.adata.raw.var.index if self.feature_id_var_key == "index" else \
-                    self.adata.raw.var[self.feature_id_var_key]
-                self.adata.raw.var[self._adata_ids.feature_symbol] = [
-                    id_dict[n.split(".")[0]] if n.split(".")[0] in id_dict.keys() else 'n/a'
-                    for n in ensids
-                ]
+            ensids = var.index if self.feature_id_var_key == "index" else var[self.feature_id_var_key]
+            var[self._adata_ids.feature_symbol] = [id_dict[n.split(".")[0]] if n.split(".")[0] in id_dict.keys()
+                                                   else 'n/a' for n in ensids]
             self.feature_symbol_var_key = self._adata_ids.feature_symbol
         elif self.feature_symbol_var_key and self.feature_id_var_key is None:
             # Convert gene symbols to ensembl ids
@@ -545,8 +547,7 @@ class DatasetBase(abc.ABC):
             # match it straight away, if it is not in there we try to match everything in front of the first period in
             # the gene name with a dictionary that was modified in the same way, if there is still no match we append na
             ensids = []
-            symbs = self.adata.var.index if self.feature_symbol_var_key == "index" else \
-                self.adata.var[self.feature_symbol_var_key]
+            symbs = var.index if self.feature_symbol_var_key == "index" else var[self.feature_symbol_var_key]
             for n in symbs:
                 if n in id_dict.keys():
                     ensids.append(id_dict[n])
@@ -554,59 +555,13 @@ class DatasetBase(abc.ABC):
                     ensids.append(id_strip_dict[n.split(".")[0]])
                 else:
                     ensids.append('n/a')
-            self.adata.var[self._adata_ids.feature_id] = ensids
-            if self.adata.raw is not None:
-                ensids = []
-                symbs = self.adata.raw.var.index if self.feature_symbol_var_key == "index" else \
-                    self.adata.raw.var[self.feature_symbol_var_key]
-                for n in symbs:
-                    if n in id_dict.keys():
-                        ensids.append(id_dict[n])
-                    elif n.split(".")[0] in id_strip_dict.keys():
-                        ensids.append(id_strip_dict[n.split(".")[0]])
-                    else:
-                        ensids.append('n/a')
-                self.adata.raw.var[self._adata_ids.feature_id] = ensids
+            var[self._adata_ids.feature_id] = ensids
             self.feature_id_var_key = self._adata_ids.feature_id
-
-    def _collapse_ensembl_gene_id_versions(self):
-        """
-        Remove version tag on ensembl gene ID so that different versions are superimposed downstream.
-
-        :return:
-        """
-        if not self.feature_id_var_key:
-            raise ValueError(
-                "Cannot remove gene version when gene_id_ensembl_var_key is not set in dataloader and "
-                "match_to_reference is False"
-            )
-        elif self.feature_id_var_key == "index":
-            self.adata.index = [x.split(".")[0] for x in self.adata.var.index]
-            if self.adata.raw is not None:
-                self.adata.raw.index = [x.split(".")[0] for x in self.adata.raw.var.index]
-        else:
-            self.adata.var[self.feature_id_var_key] = [
-                x.split(".")[0] for x in self.adata.var[self.feature_id_var_key].values
-            ]
-            if self.adata.raw is not None:
-                self.adata.raw.var[self.feature_id_var_key] = [
-                    x.split(".")[0] for x in self.adata.raw.var[self.feature_id_var_key].values
-                ]
-        # Collapse if necessary:
-        self.adata = collapse_matrix(adata=self.adata, var_column=self.feature_id_var_key)
-        if self.adata.raw is not None:
-            self.adata.raw = collapse_matrix(adata=self.adata.raw, var_column=self.feature_id_var_key)
-
-    def collapse_counts(self):
-        """
-        Collapse count matrix along duplicated index.
-        """
-        if len(np.unique(self.adata.var.index)) < self.adata.var.shape[0]:
-            self.adata = collapse_matrix(adata=self.adata, var_column="index")
+        return var
 
     def streamline_features(
             self,
-            match_to_release: Union[str, Dict[str, str], None] = None,
+            match_to_release: Union[str, Dict[str, str], None],
             remove_gene_version: bool = True,
             subset_genes_to_type: Union[None, str, List[str]] = None,
             schema: Union[str, None] = None,
@@ -616,9 +571,8 @@ class DatasetBase(abc.ABC):
         This also adds missing ensid or gene symbol columns if match_to_reference is not set to False and removes all
         adata.var columns that are not defined as gene_id_ensembl_var_key or gene_id_symbol_var_key in the dataloader.
 
-        :param match_to_release: Which genome annotation release to map the feature space to. Note that assemblies from
-            ensbeml are usually named as Organism.Assembly.Release, this is the Release string. Can be:
-                - str: Provide the name of the release.
+        :param match_to_release: Which ensembl genome annotation release to map the feature space to. Can be:
+                - str: Provide the name of the release (eg. "104").
                 - dict: Mapping of organism to name of the release (see str format). Chooses release for each
                     data set based on organism annotation.
         :param remove_gene_version: Whether to remove the version number after the colon sometimes found in ensembl
@@ -627,6 +581,9 @@ class DatasetBase(abc.ABC):
             Types can be:
                 - None: All genes in assembly.
                 - "protein_coding": All protein coding genes in assembly.
+        :param schema: Export format.
+            - "sfaira"
+            - "cellxgene"
         """
         self.__assert_loaded()
         if schema is not None:
@@ -642,7 +599,34 @@ class DatasetBase(abc.ABC):
             remove_gene_version = adata_target_ids.feature_kwargs["remove_gene_version"]
             subset_genes_to_type = adata_target_ids.feature_kwargs["subset_genes_to_type"]
 
-        # Move data matrices around.
+        # Set genome container if mapping of gene labels is requested
+        if isinstance(match_to_release, dict):
+            match_to_release = match_to_release[self.organism]
+        self._set_genome(organism=self.organism, release=match_to_release)
+        self.mapped_features = self.genome_container.release
+        self.remove_gene_version = remove_gene_version
+        self.subset_gene_type = subset_genes_to_type
+
+        # Compute indices of genes to keep
+        if subset_genes_to_type is None:
+            subset_ids_ensg = self.genome_container.ensembl
+            subset_ids_symbol = self.genome_container.symbols
+        else:
+            if isinstance(subset_genes_to_type, str):
+                subset_genes_to_type = [subset_genes_to_type]
+            keys = np.unique(self.genome_container.biotype)
+            if subset_genes_to_type not in keys:
+                raise ValueError(f"subset type {subset_genes_to_type} not available in list {keys}")
+            subset_ids_ensg = [
+                x.upper() for x, y in zip(self.genome_container.ensembl, self.genome_container.biotype)
+                if y in subset_genes_to_type
+            ]
+            subset_ids_symbol = [
+                x for x, y in zip(self.genome_container.symbols, self.genome_container.biotype)
+                if y in subset_genes_to_type
+            ]
+
+        # Extract layers in order to move data matrices around.
         assert self.layer_processed or self.layer_counts
         if self.layer_processed is None:
             x_proc = None
@@ -674,106 +658,76 @@ class DatasetBase(abc.ABC):
             else:
                 x_counts = self.adata.layers[self.layer_counts]
                 var_counts = self.adata.var
-        if x_proc is None and x_counts is not None:
+
+        # create new adata using extracted layers
+        if x_proc is not None and x_counts is not None:
             x = x_counts
             var = var_counts
-            x_raw = None
-            var_raw = None
+            layer_proc_exists = True
+            layer_counts = "X"
+            layer_proc = self._adata_ids.layer_proc
+        elif x_proc is None and x_counts is not None:
+            x = x_counts
+            var = var_counts
+            layer_proc_exists = False
+            layer_counts = "X"
+            layer_proc = None
         elif x_proc is not None and x_counts is None:
             x = x_proc
             var = var_proc
-            x_raw = None
-            var_raw = None
-        elif x_proc is not None and x_counts is not None:
-            x = x_proc
-            var = var_proc
-            x_raw = x_counts
-            var_raw = var_counts
+            layer_proc_exists = False
+            layer_counts = None
+            layer_proc = "X"
         else:
-            assert False
-        self.adata = anndata.AnnData(
-            X=x,
-            obs=self.adata.obs,
-            obsm=self.adata.obsm,
-            var=var,
-            uns=self.adata.uns
-        )
-        if x_raw is not None:
-            self.adata.raw = anndata.AnnData(
-                X=x_raw,
-                var=var_raw
-            )
-
-        # Set genome container if mapping of gene labels is requested
-        if isinstance(match_to_release, dict):
-            match_to_release = match_to_release[self.organism]
-        self._set_genome(organism=self.organism, release=match_to_release)
-        self.mapped_features = self.genome_container.release
-
-        self.remove_gene_version = remove_gene_version
-        self.subset_gene_type = subset_genes_to_type
-        # Streamline feature space:
-        self._add_missing_featurenames(match_to_reference=match_to_release)
-        for key in [self.feature_id_var_key, self.feature_symbol_var_key]:
-            # Make features unique (to avoid na-matches in converted columns to be collapsed by
-            # _collapse_ensembl_gene_id_versions() below.
-            if not key:
-                pass
-            elif key == "index":
-                self.adata.var.index = make_index_unique(self.adata.var.index).tolist()
-            else:
-                self.adata.var[key] = make_index_unique(pd.Index(self.adata.var[key].values.tolist())).tolist()
-        if remove_gene_version:
-            self._collapse_ensembl_gene_id_versions()
-
-        # Compute indices of genes to keep
-        if subset_genes_to_type is None:
-            subset_ids_ensg = self.genome_container.ensembl
-            subset_ids_symbol = self.genome_container.symbols
-        else:
-            if isinstance(subset_genes_to_type, str):
-                subset_genes_to_type = [subset_genes_to_type]
-            keys = np.unique(self.genome_container.biotype)
-            if subset_genes_to_type not in keys:
-                raise ValueError(f"subset type {subset_genes_to_type} not available in list {keys}")
-            subset_ids_ensg = [
-                x.upper() for x, y in zip(self.genome_container.ensembl, self.genome_container.biotype)
-                if y in subset_genes_to_type
-            ]
-            subset_ids_symbol = [
-                x for x, y in zip(self.genome_container.symbols, self.genome_container.biotype)
-                if y in subset_genes_to_type
-            ]
-
+            raise ValueError("Neither layer_counts nor layer_proc are set in yaml. Aborting")
+        # Streamline features
         x_new, var_new = subset_adata_genes(
-            x=self.adata.X,
-            var=self.adata.var,
+            x=x,
+            var=self._add_missing_featurenames(var=var),
             feature_id_var_key=self.feature_id_var_key,
             feature_symbol_var_key=self.feature_symbol_var_key,
             subset_ids_ensg=subset_ids_ensg,
-            subset_ids_symbol=subset_ids_symbol)
-        adata_new = anndata.AnnData(
+            subset_ids_symbol=subset_ids_symbol,
+            remove_gene_version=remove_gene_version
+        )
+        self.adata = anndata.AnnData(
             X=x_new,
             obs=self.adata.obs,
             obsm=self.adata.obsm,
             var=var_new,
             uns=self.adata.uns
         )
-        adata_new.uns[self._adata_ids.mapped_features] = match_to_release
-        if self.adata.raw is not None:
-            x_raw_new, var_raw_new = subset_adata_genes(
-                x=self.adata.raw.X,
-                var=self.adata.raw.var,
+        if layer_proc_exists:
+            # if feature spaces of proc and var are not the same, proc features must be a subset of counts features
+            if self.feature_id_var_key is not None:
+                ids_counts = var_counts.index.values if self.feature_id_var_key == "index" \
+                    else var_counts[self.feature_id_var_key].values
+                ids_proc = var_proc.index.values if self.feature_id_var_key == "index" \
+                    else var_proc[self.feature_id_var_key].values
+            elif self.feature_symbol_var_key is not None:
+                ids_counts = var_counts.index.values if self.feature_symbol_var_key == "index" \
+                    else var_counts[self.feature_symbol_var_key].values
+                ids_proc = var_proc.index.values if self.feature_symbol_var_key == "index" \
+                    else var_proc[self.feature_symbol_var_key].values
+            else:
+                raise ValueError("Neither feature_id_var_key nor feature_symbol_var_key are set in yaml. Aborting")
+            if set(ids_proc) - set(ids_counts):
+                raise IndexError(f"Features of layer specified as `layer_processed` ('{self.layer_processed}') are "
+                                 f"not a subset of the features of layer specified as `layer_counts` "
+                                 f"('{self.layer_counts}'). This is not supported.")
+            layer_proc_new, _ = subset_adata_genes(
+                x=x_proc,
+                var=self._add_missing_featurenames(var=var_proc),
                 feature_id_var_key=self.feature_id_var_key,
                 feature_symbol_var_key=self.feature_symbol_var_key,
                 subset_ids_ensg=subset_ids_ensg,
-                subset_ids_symbol=subset_ids_symbol)
-            adata_new.raw = anndata.AnnData(
-                X=x_raw_new,
-                obs=self.adata.obs,
-                var=var_raw_new,
+                subset_ids_symbol=subset_ids_symbol,
+                remove_gene_version=remove_gene_version
             )
-        self.adata = adata_new
+            self.adata.layers[layer_proc] = layer_proc_new
+        self.layer_counts = layer_counts
+        self.layer_processed = layer_proc
+        self.adata.uns[self._adata_ids.mapped_features] = match_to_release
 
     def streamline_metadata(
             self,

@@ -19,7 +19,6 @@ META_DATA_FIELDS = {
     "download_url_meta": str,
     "id": str,
     "ncells": int,
-    "normalization": str,
     "organ": str,
     "organism": str,
     "sample_source": str,
