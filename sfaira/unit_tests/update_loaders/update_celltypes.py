@@ -10,7 +10,7 @@ from sfaira.unit_tests.directories import DIR_DATA_LOADERS_CACHE
 
 SYMBOL_COL = "target"
 ID_COL = "target_id"
-unknown_IDS = ["unknown", "NOT_A_CELL"]
+UNKNOWN_IDS = ["unknown", "NOT_A_CELL"]
 
 
 def test_celltype_update():
@@ -31,7 +31,7 @@ def test_celltype_update():
                         tab = ds._read_ontology_class_map(fn=fn_map)
                         tab[SYMBOL_COL] = [
                             ds.celltypes_universe.onto_cl.convert_to_name(x)
-                            if x not in unknown_IDS else x
+                            if x not in UNKNOWN_IDS else x
                             for x in tab[ID_COL].values
                         ]
                         tab.to_csv(path_or_buf=fn_map, index=False, sep="\t")
