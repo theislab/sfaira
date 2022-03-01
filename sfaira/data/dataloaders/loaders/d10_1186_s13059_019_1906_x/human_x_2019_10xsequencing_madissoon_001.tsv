@@ -9,7 +9,7 @@ B_cells	B cell	CL:0000236
 B_follicular	follicular B cell	CL:0000843
 B_mantle	B cell	CL:0000236
 Blood_vessel	blood vessel endothelial cell	CL:0000071
-CD34_progenitor	UNKNOWN	UNKNOWN
+CD34_progenitor	unknown	unknown
 Ciliated	ciliated cell	CL:0000064
 DC_1	dendritic cell	CL:0000451
 DC_2	dendritic cell	CL:0000451
@@ -47,7 +47,7 @@ Plasma_IgM	IgM plasma cell	CL:0000986
 Plasma_cells	plasma cell	CL:0000786
 Plasmablast	plasmablast	CL:0000980
 Platelet	platelet	CL:0000233
-Stroma	UNKNOWN	UNKNOWN
+Stroma	unknown	unknown
 T_CD4	CD4-positive, alpha-beta T cell	CL:0000624
 T_CD4_conv	CD4-positive, alpha-beta T cell	CL:0000624
 T_CD4_fh	T follicular helper cell	CL:0002038
@@ -62,4 +62,4 @@ T_CD8_gd	CD8-alpha alpha positive, gamma-delta intraepithelial T cell	CL:0000802
 T_cell_dividing	T cell	CL:0000084
 T_cells_Dividing	T cell	CL:0000084
 T_regulatory	regulatory T cell	CL:0000815
-Unknown	UNKNOWN	UNKNOWN
+Unknown	unknown	unknown

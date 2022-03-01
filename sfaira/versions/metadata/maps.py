@@ -93,7 +93,8 @@ def _prepare_celltype_map_fuzzy(
     for x in source:
         if not isinstance(x, list) and not isinstance(x, tuple):
             x = [x, "nan"]
-        term = x[0].lower().strip("'").strip("\"").strip("'").strip("\"").strip("]").strip("[")
+        term_original_case = x[0].strip("'").strip("\"").strip("'").strip("\"").strip("]").strip("[")
+        term = term_original_case.lower()
         # Test for perfect string matching:
         scores_strict = np.array([
             np.max(
@@ -127,7 +128,7 @@ def _prepare_celltype_map_fuzzy(
             fuzz.partial_ratio(term, y[1]["name"].lower())
             for y in nodes
         ])
-        include_terms.append(term not in omit_list)
+        include_terms.append(term_original_case not in omit_list)
         if match_only and not anatomical_constraint:
             # Explicitly trying to report perfect matches (match_only is True).
             matches.append({"perfect_match": [nodes[i][1]["name"] for i in np.where(scores_strict == 100)[0]][0]})
