@@ -1,8 +1,8 @@
 source	target	target_id
 Airway Smooth Muscle	bronchial smooth muscle cell	CL:0002598
 Basal cell	respiratory basal cell	CL:0002633
-Bud tip adjacent	UNKNOWN	UNKNOWN
-Bud tip progenitor	UNKNOWN	UNKNOWN
+Bud tip adjacent	unknown	unknown
+Bud tip progenitor	unknown	unknown
 Cartilage	chondrocyte	CL:0000138
 Club-like secretory	secretory cell	CL:0000151
 Endothelial	endothelial cell	CL:0000115
@@ -22,5 +22,5 @@ Neuroendocrine	neuroendocrine cell	CL:0000165
 Pericyte	pericyte cell	CL:0000669
 RBC	erythrocyte	CL:0000232
 Secretory progenitor	secretory cell	CL:0000151
-Submucosal gland	UNKNOWN	UNKNOWN
-Submucosal gland basal	UNKNOWN	UNKNOWN
+Submucosal gland	unknown	unknown
+Submucosal gland basal	unknown	unknown

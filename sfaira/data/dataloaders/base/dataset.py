@@ -1185,7 +1185,7 @@ class DatasetBase(abc.ABC):
             # Convert unknown celltype placeholders (needs to be hardcoded here as placeholders are also hardcoded in
             # conversion tsv files
             placeholder_conversion = {
-                "UNKNOWN": adata_fields.unknown_metadata_identifier,
+                "unknown": adata_fields.unknown_metadata_identifier,
                 "NOT_A_CELL": adata_fields.not_a_cell_celltype_identifier,
             }
             labels_mapped = [

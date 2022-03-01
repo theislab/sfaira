@@ -660,7 +660,7 @@ Common challenges in cell type curation include the following:
     In some tissues, these phenotypes can be related to specific cell types through knowledge on the phenotypes of the
     cell types that occur in that tissue.
     If this is not possible or you do not know the tissue well enough,
-    you can leave the cell type as "UNKNOWN" and future curators may improve this annotaiton.
+    you can leave the cell type as "unknown" and future curators may improve this annotaiton.
     In cases such as "cycling T cell", you may just resort to the parent label "T cell" unless you have reason to
     believe that "cycling" identifies a specific T cell subset here.
 4. The free-text labels are more fine-grained than the ontology.
