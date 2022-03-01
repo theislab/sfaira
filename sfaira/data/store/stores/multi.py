@@ -52,13 +52,15 @@ class StoreMultipleFeatureSpaceBase(StoreBase):
             if isinstance(organisms, list) and len(organisms) == 0:
                 raise Warning("found empty organism lists in genome_container.setter")
             if len(organisms) > 1:
-                raise ValueError(f"Gave a single GenomeContainer for a store instance that has mulitiple organism: "
+                raise ValueError(f"Gave a single GenomeContainer for a store instance that has multiple organism: "
                                  f"{organisms}, either further subset the store or give a dictionary of "
                                  f"GenomeContainers")
             else:
                 x = {organisms[0]: x}
         for k, v in x.items():
-            self.stores[k].genome_container = v
+            # Note: the store can be empty for some organism and not have the corresponding key set:
+            if k in self.stores.keys():
+                self.stores[k].genome_container = v
 
     @property
     def indices(self) -> Dict[str, np.ndarray]:
