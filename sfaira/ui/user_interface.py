@@ -339,9 +339,9 @@ class UserInterface:
     def load_data(
             self,
             data: anndata.AnnData,
-            gene_symbol_col: Union[str, None] = None,
-            gene_ens_col: Union[str, None] = None,
-            obs_key_celltypes: Union[str, None] = None,
+            feature_symbol_col: Union[str, None] = None,
+            feature_id_col: Union[str, None] = None,
+            cell_type_obs_key: Union[str, None] = None,
     ):
         """
         Loads the provided AnnData object into sfaira.
@@ -352,9 +352,9 @@ class UserInterface:
          please provide the name of the corresponding var column (or 'index') through the gene_ens_col argument.
         You need to provide at least one of the two.
         :param data: AnnData object to load
-        :param gene_symbol_col: Var column name (or 'index') which contains gene symbols
-        :param gene_ens_col: ar column name (or 'index') which contains ensembl ids
-        :param obs_key_celltypes: .obs column name which contains cell type labels.
+        :param feature_symbol_col: Var column name (or 'index') which contains gene symbols
+        :param feature_id_col: ar column name (or 'index') which contains ensembl ids
+        :param cell_type_obs_key: .obs column name which contains cell type labels.
         """
         if self.zoo_embedding.model_organism is not None and self.zoo_celltype.model_organism is not None:
             assert self.zoo_embedding.model_organism == self.zoo_celltype.model_organism, \
@@ -370,23 +370,23 @@ class UserInterface:
         else:
             raise ValueError("Please first set which model_id to use via the model zoo before loading the data")
 
-        if gene_ens_col is None and gene_symbol_col is None:
+        if feature_id_col is None and feature_symbol_col is None:
             raise ValueError("Please provide either the gene_ens_col or the gene_symbol_col argument.")
 
         # handle organ names with stripped spaces
         if organ not in OCS.organ.node_names:
             organ_dict = {i.replace(" ", ""): i for i in OCS.organ.node_names}
-            assert organ in organ_dict, f"Organ {organ} is not a valid nodename in the UBERON organ ontology"
+            assert organ in organ_dict, f"Organ {organ} is not a valid node name in the UBERON organ ontology"
             organ = {i.replace(" ", ""): i for i in OCS.organ.node_names}[organ]
 
         self.data = DatasetInteractive(
             data=data,
-            feature_symbol_col=gene_symbol_col,
-            feature_id_col=gene_ens_col,
+            feature_symbol_col=feature_symbol_col,
+            feature_id_col=feature_id_col,
         )
         self.data.organism = organism
         self.data.organ = organ
-        self.data.cell_type_obs_key = obs_key_celltypes
+        self.data.cell_type_obs_key = cell_type_obs_key
         # Align to correct featurespace
         self.data.streamline_features(
             match_to_release=self.zoo_embedding.topology_container.gc.release,
