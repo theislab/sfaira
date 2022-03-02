@@ -51,13 +51,8 @@ setup(
     },
     install_requires=requirements,
     extras_require={
-        'tensorflow': [
-            # 'tensorflow>=2.0.0'  # TODO Add Tensorflow here again
-        ],
-        'plotting_deps': [
-            "seaborn",
-            "matplotlib",
-            "sklearn"
+        'curation': [
+            "scirpy",
         ],
         'extension': [
             "sfaira_extension",
