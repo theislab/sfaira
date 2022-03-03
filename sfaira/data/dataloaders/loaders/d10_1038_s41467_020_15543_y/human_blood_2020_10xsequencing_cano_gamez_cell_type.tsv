@@ -4,7 +4,7 @@ IFN.high	activated CD4-positive, alpha-beta T cell	CL:0000896
 Mitotic	CD4-positive, alpha-beta T cell	CL:0000624
 TCM (resting)	central memory CD4-positive, alpha-beta T cell	CL:0000904
 TCM1 (Th0)	central memory CD4-positive, alpha-beta T cell	CL:0000904
-TCM1 (Th17/iTreg)   induced T-regulatory cell	CL:0000902
+TCM1 (Th17/iTreg)	induced T-regulatory cell	CL:0000902
 TCM2 (Th0)	central memory CD4-positive, alpha-beta T cell	CL:0000904
 TCM2 (Th17/iTreg)	induced T-regulatory cell	CL:0000902
 TEM (Th0)	effector memory CD4-positive, alpha-beta T cell	CL:0000905
