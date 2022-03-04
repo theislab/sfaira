@@ -109,7 +109,7 @@ html_context = dict(
     display_github=True,      # Integrate GitHub
     github_user='theislab',   # Username
     github_repo='sfaira',    # Repo name
-    github_version='master',  # Version
+    github_version='main',  # Version
     conf_py_path='/docs/',    # Path in the checkout to the docs root
 )
 html_static_path = ['_static']
