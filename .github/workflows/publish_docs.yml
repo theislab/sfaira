@@ -2,11 +2,12 @@ name: Build Documentation
 
 on:
   push:
-    paths:
-      - "docs/**"
+    branches:
+      - main
   pull_request:
     paths:
       - "docs/**"
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
