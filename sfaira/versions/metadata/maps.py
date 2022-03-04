@@ -439,7 +439,7 @@ def prepare_ontology_map(
         onto_cls = getattr(OCS, onto)
         if isinstance(onto_cls, dict):
             try:
-                onto_cls = onto_cls[organism]
+                onto_cls = onto_cls[organism] if organism in onto_cls else onto_cls['other']
             except AttributeError as e:
                 raise AttributeError(f"did not find requested organism {organism} in ontology {onto}, "
                                      f"choose from {onto_cls.keys()}.\n{e}")
