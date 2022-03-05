@@ -1,0 +1,146 @@
+source	target
+B cell	B cell
+CD4-positive, alpha-beta T cell	CD4-positive, alpha-beta T cell
+CD8-positive, alpha-beta T cell	CD8-positive, alpha-beta T cell
+GABAergic neuron	GABAergic neuron
+M cell of gut	M cell of gut
+Muller cell	Muller cell
+OFF-bipolar cell	OFF-bipolar cell
+ON-bipolar cell	ON-bipolar cell
+Purkinje myocyte	Purkinje myocyte
+T cell	T cell
+alveolar macrophage	alveolar macrophage
+astrocyte	astrocyte
+basal cell of epidermis	basal cell of epidermis
+basal cell of epithelium of bronchus	basal cell of epithelium of bronchus
+basal cell of epithelium of trachea	basal cell of epithelium of trachea
+basophil	basophil
+bladder urothelial cell	bladder urothelial cell
+brush cell of bronchus	brush cell of bronchus
+brush cell of trachea	brush cell of trachea
+capillary endothelial cell	capillary endothelial cell
+cardiomyocyte	cardiac muscle cell
+cell	cell
+chondrocyte	chondrocyte
+choroid plexus epithelial cell	choroid plexus epithelial cell
+ciliated cell	ciliated cell
+club cell	club cell
+conventional dendritic cell	conventional dendritic cell
+corticotroph	corticotroph
+dendritic cell	dendritic cell
+endothelial cell	endothelial cell
+endothelial cell of artery	endothelial cell of artery
+endothelial cell of hepatic sinusoid	endothelial cell of hepatic sinusoid
+endothelial cell of lymphatic vessel	endothelial cell of lymphatic vessel
+endothelial cell of sinusoid	endothelial cell of sinusoid
+enterocyte of epithelium of large intestine	enterocyte of epithelium of large intestine
+enterocyte of epithelium of small intestine	enterocyte of epithelium of small intestine
+eosinophil	eosinophil
+ependymal cell	ependymal cell
+epidermal cell	epidermal cell
+epithelial cell	epithelial cell
+epithelial cell of exocrine pancreas	epithelial cell of exocrine pancreas
+epithelial cell of large intestine	epithelial cell of large intestine
+epithelial cell of proximal tubule	epithelial cell of proximal tubule
+epithelial cell of small intestine	epithelial cell of small intestine
+epithelial cell of sweat gland	epithelial cell of sweat gland
+epithelial cell of uterus	epithelial cell of uterus
+erythroid lineage cell	erythroid lineage cell
+erythroid progenitor cell	erythroid progenitor cell
+fast muscle cell	fast muscle cell
+fat cell	fat cell
+fibroblast	fibroblast
+fibroblast of lung	fibroblast of lung
+glomerular endothelial cell	glomerular endothelial cell
+glutamatergic neuron	glutamatergic neuron
+gonadotroph	gonadtroph
+granulocyte monocyte progenitor cell	granulocyte monocyte progenitor cell
+granulosa cell	granulosa cell
+hair follicle cell	hair follicle cell
+hematopoietic precursor cell	hematopoietic precursor cell
+hepatocyte	hepatocyte
+innate lymphoid cell	innate lymphoid cell
+interstitial cell of Cajal	interstitial cell of Cajal
+intestinal enteroendocrine cell	intestinal enteroendocrine cell
+intestinal tuft cell	intestinal tuft cell
+intrahepatic bile duct epithelial cell	intrahepatic bile duct epithelium
+kidney collecting duct cell	kidney collecting duct cell
+kidney distal convoluted tubule epithelial cell	kidney distal convoluted tubule epithelial cell
+kidney loop of Henle epithelial cell	kidney loop of Henle epithelial cell
+kidney loop of Henle thick ascending limb epithelial cell	kidney loop of Henle thick ascending limb epithelial cell
+kidney loop of Henle thin ascending limb epithelial cell	kidney loop of Henle thin ascending limb epithelial cell
+kidney loop of Henle thin descending limb epithelial cell	kidney loop of Henle thin descending limb epithelial cell
+kidney proximal convoluted tubule epithelial cell	kidney proximal convoluted tubule epithelial cell
+kidney proximal straight tubule epithelial cell	kidney proximal straight tubule epithelial cell
+lactotroph	mammotroph
+large intestine goblet cell	large intestine goblet cell
+leptomeningeal cell	leptomeningeal cell
+lung ciliated cell	lung ciliated cell
+lung neuroendocrine cell	lung neuroendocrine cell
+lymphocyte	lymphocyte
+macrophage	macrophage
+macula densa epithelial cell	macula densa epithelial cell
+mature NK T cell	mature NK T cell
+megakaryocyte progenitor cell	megakaryocyte progenitor cell
+melanocyte	melanocyte
+mesenchymal stem cell	mesenchymal stem cell
+mesothelial cell	mesothelial cell
+mesothelial cell of epicardium	mesothelial cell of epicardium
+monocyte	monocyte
+myelinating Schwann cell	myelinating Schwann cell
+myeloid cell	myeloid cell
+myofibroblast cell	myofibroblast cell
+natural killer cell	natural killer cell
+neuroendocrine cell	neuroendocrine cell
+neuron	neuron
+neutrophil	neutrophil
+nodal myocyte	nodal myocyte
+non-myelinating Schwann cell	non-myelinating Schwann cell
+oligodendrocyte	oligodendrocyte
+oligodendrocyte precursor cell	oligodendrocyte precursor cell
+oral mucosa squamous cell	oral mucosa squamous cell
+osteoblast	osteoblast
+pancreatic A cell	pancreatic A cell
+pancreatic B cell	type B pancreatic cell
+pancreatic D cell	pancreatic D cell
+pancreatic PP cell	pancreatic PP cell
+pancreatic acinar cell	pancreatic acinar cell
+pancreatic ductal cell	pancreatic ductal cell
+pancreatic endocrine cell	pancreatic endocrine cell
+pericyte cell	pericyte cell
+plasma cell	plasma cell
+plasmacytoid dendritic cell	plasmacytoid dendritic cell
+platelet	platelet
+podocyte	glomerular visceral epithelial cell
+preosteoblast	preosteoblast
+regular atrial cardiac myocyte	regular atrial cardiac myocyte
+regular ventricular cardiac myocyte	regular ventricular cardiac myocyte
+renal alpha-intercalated cell	renal alpha-intercalated cell
+renal beta-intercalated cell	renal beta-intercalated cell
+renal intercalated cell	renal intercalated cell
+renal principal cell	renal principal cell
+reticular cell	reticular cell
+retina horizontal cell	retina horizontal cell
+retinal bipolar neuron	retinal bipolar neuron
+retinal cone cell	retinal cone cell
+retinal rod cell	retinal rod cell
+secretory cell	secretory cell
+skeletal muscle satellite stem cell	skeletal muscle satellite stem cell
+slow muscle cell	slow muscle cell
+small intestine goblet cell	small intestine goblet cell
+smooth muscle cell	smooth muscle cell
+somatotroph	somatotroph
+spermatid	spermatid
+spermatocyte	spermatocyte
+spermatogonium	spermatogonium
+stromal cell	stromal cell
+tendon cell	tendon cell
+thyrotroph	thyrotroph
+type I pneumocyte	type I pneumocyte
+type II pneumocyte	type II pneumocyte
+unassigned	cell
+urothelial cell	urothelial cell
+vasa recta ascending limb cell	vasa recta ascending limb cell
+vasa recta descending limb cell	vasa recta descending limb cell
+vascular associated smooth muscle cell	vascular associated smooth muscle cell
+vein endothelial cell	vein endothelial cell
