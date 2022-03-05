@@ -178,7 +178,11 @@ class Dataset(DatasetBase):
         return self.collection_id
 
     @property
-    def doi_cleaned_id(self):
+    def id_without_doi(self):
+        return self.id
+
+    @property
+    def id_cleaned(self):
         return self.id
 
     def load(

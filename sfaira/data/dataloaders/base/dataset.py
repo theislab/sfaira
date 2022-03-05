@@ -24,7 +24,7 @@ from sfaira.data.dataloaders.export_adaptors import cellxgene_export_adaptor
 from sfaira.data.store.io.io_dao import write_dao
 from sfaira.data.dataloaders.base.utils import is_child, get_directory_formatted_doi
 from sfaira.data.utils import collapse_matrix, read_yaml, subset_adata_genes
-from sfaira.consts.utils import clean_id_str
+from sfaira.consts.utils import clean_doi, clean_id_str
 from sfaira.versions.metadata.maps import prepare_ontology_map_tab
 
 
@@ -318,10 +318,6 @@ class DatasetBase(abc.ABC):
 
         self.supplier = "sfaira"
 
-    @property
-    def _directory_formatted_id(self) -> str:
-        return "_".join("_".join(self.id.split("/")).split("."))
-
     def clear(self):
         """
         Remove loaded .adata to reduce memory footprint.
@@ -428,16 +424,11 @@ class DatasetBase(abc.ABC):
 
     @property
     def cache_fn(self):
-        if self.directory_formatted_doi is None or self._directory_formatted_id is None:
-            # TODO is this case necessary?
-            warnings.warn("Caching enabled, but Dataset.id or Dataset.doi not set. Disabling caching for now.")
-            return None
+        if self.cache_path is None:
+            cache = self.data_dir
         else:
-            if self.cache_path is None:
-                cache = self.data_dir
-            else:
-                cache = os.path.join(self.cache_path, self.directory_formatted_doi)
-            return os.path.join(cache, "cache", self._directory_formatted_id + ".h5ad")
+            cache = os.path.join(self.cache_path, self.directory_formatted_doi)
+        return os.path.join(cache, "cache", self.id_cleaned + ".h5ad")
 
     def load(
             self,
@@ -900,7 +891,7 @@ class DatasetBase(abc.ABC):
                 # Build a combination label out of all columns used to describe this group.
                 # Add data set label into this label so that these groups are unique across data sets.
                 val = [
-                    self.doi_cleaned_id + "_".join([str(xxx) for xxx in xx])
+                    self.id_without_doi + "_".join([str(xxx) for xxx in xx])
                     for xx in zip(*[self.adata.obs[batch_col].values.tolist() for batch_col in batch_cols])
                 ]
             else:
@@ -1046,7 +1037,7 @@ class DatasetBase(abc.ABC):
             if not isinstance(self.adata.X, scipy.sparse.csr_matrix):
                 print(f"WARNING: high-perfomances caches based on .h5ad work better with .csr formatted expression "
                       f"data, found {type(self.adata.X)}")
-            fn = os.path.join(dir_cache, self.doi_cleaned_id + ".h5ad")
+            fn = os.path.join(dir_cache, self.id_cleaned + ".h5ad")
             as_dense = ("X",) if dense else ()
             print(f"writing {self.adata.shape} into {fn}")
             self.adata.write_h5ad(filename=fn, as_dense=as_dense, **compression_kwargs)
@@ -1055,7 +1046,7 @@ class DatasetBase(abc.ABC):
             if not dense:
                 raise ValueError("WARNING: sparse zarr array performance is not be optimal and not supported yet, "
                                  "consider writing as dense and consider that zarr arrays are compressed on disk!")
-            fn = os.path.join(dir_cache, self.doi_cleaned_id)
+            fn = os.path.join(dir_cache, self.id_cleaned)
             chunks = (chunks, self.adata.X.shape[1]) if chunks is not None else True
             write_dao(store=fn, adata=self.adata, chunks=chunks, compression_kwargs=compression_kwargs,
                       shuffle_data=shuffle_data)
@@ -1066,8 +1057,18 @@ class DatasetBase(abc.ABC):
         self.genome_container = GenomeContainer(organism=organism, release=release)
 
     @property
-    def doi_cleaned_id(self):
-        return "_".join(self.id.split("_")[:-1])
+    def id_without_doi(self):
+        """ID without DOI."""
+        return "_".join(self.id.split("_")[:6])
+
+    @property
+    def id_cleaned(self):
+        """
+        Replaces DOI in ID by directory formatted (cleaned) DOI.
+
+        This output is suitable as a file name identifying the data set.
+        """
+        return "_".join(self.id.split("_")[:6]) + "_" + clean_doi("_".join(self.id.split("_")[6:]))
 
     def get_ontology(self, k) -> Union[OntologyHierarchical, None]:
         x = getattr(self.ontology_container_sfaira, k) if hasattr(self.ontology_container_sfaira, k) else None
@@ -1354,7 +1355,7 @@ class DatasetBase(abc.ABC):
         if meta is None:
             return None
         else:
-            return os.path.join(meta, "meta", self.doi_cleaned_id + "_meta.csv")
+            return os.path.join(meta, "meta", self.id_without_doi + "_meta.csv")
 
     def load_meta(self, fn: Union[PathLike, str, None]):
         if fn is None:
@@ -1397,7 +1398,7 @@ class DatasetBase(abc.ABC):
                 raise ValueError("provide either fn in load or via constructor (meta_path)")
             fn_meta = self.meta_fn
         elif fn_meta is None and dir_out is not None:
-            fn_meta = os.path.join(dir_out, self.doi_cleaned_id + "_meta.csv")
+            fn_meta = os.path.join(dir_out, self.id_without_doi + "_meta.csv")
         elif fn_meta is not None and dir_out is None:
             pass  # fn_meta is used
         else:

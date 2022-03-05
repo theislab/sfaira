@@ -32,9 +32,9 @@ universe = sfaira.data.dataloaders.Universe(data_path=args.data_path,
 
 for k, ds in universe.datasets.items():
     if args.store_type == "h5ad":
-        fn_store = os.path.join(args.path_store, ds.doi_cleaned_id + ".h5ad")
+        fn_store = os.path.join(args.path_store, ds.id_without_doi + ".h5ad")
     elif args.store_type == "dao":
-        fn_store = os.path.join(args.path_store, ds.doi_cleaned_id)
+        fn_store = os.path.join(args.path_store, ds.id_without_doi)
     else:
         assert False
     if os.path.exists(fn_store):

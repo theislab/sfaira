@@ -85,7 +85,7 @@ def test_dsgs_subset_cell_wise(celltype: str):
     ds.subset_cells(key="cell_type", values=celltype)
     for x in ds.dataset_groups:
         for k, v in x.datasets.items():
-            assert v.organism == "Homo sapiens", v.id
+            assert v.organism == "Homo sapiens", v.id_cleaned
             assert v.ontology_container_sfaira.organ.is_a(query=v.organ, reference=organ), v.organ
             for y in np.unique(v.adata.obs[v._adata_ids.cell_type].values):
                 assert v.ontology_container_sfaira.cell_type.is_a(query=y, reference=celltype), y

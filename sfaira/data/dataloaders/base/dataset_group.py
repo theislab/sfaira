@@ -40,7 +40,7 @@ def map_fn(inputs):
         else:
             return None
     except (FileNotFoundError, OSError) as e:
-        return ds.id, e,
+        return ds.id_cleaned, e,
 
 
 def merge_uns_from_list(adata_ls):
