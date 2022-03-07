@@ -80,8 +80,10 @@ def test_collapse_matrix(
                 ["g" + str(i) for i in range(x.shape[1] - 3 - 2)]
     else:
         index = ["g" + str(i) for i in range(x.shape[1])]
-    adata = anndata.AnnData(x, var=pd.DataFrame({"var_column": index}))
-    adata2 = collapse_matrix(adata=adata, var_column="var_column")
+    var = pd.DataFrame({"var_column": index})
+    adata = anndata.AnnData(x, var=var)
+    x_new, var_new = collapse_matrix(x, var, var_column="var_column")
+    adata2 = anndata.AnnData(x_new, var=var_new)
     assert adata.X.shape[0] == adata2.X.shape[0], "observation dimension mismatch"
     assert adata.X.dtype == adata2.X.dtype, "type mismatch"
     assert adata2.X.shape[1] == len(np.unique(adata.var["var_column"])), "feature dimension mismatch"
