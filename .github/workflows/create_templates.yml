@@ -1,6 +1,17 @@
 name: Create sfaira data-loader templates
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+      - release
+      - dev
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   create-templates:
