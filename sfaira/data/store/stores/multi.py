@@ -229,20 +229,20 @@ class StoresAnndata(StoreMultipleFeatureSpaceBase):
             adatas = [adatas]
         for i, adata in enumerate(adatas):
             # Check if adata has a unique ID, if not, add one:
-            if self._adata_ids_sfaira.id_cleaned not in adata.uns.keys():
-                adata.uns[self._adata_ids_sfaira.id_cleaned] = f"adata_{i}"
+            if self._adata_ids_sfaira.id not in adata.uns.keys():
+                adata.uns[self._adata_ids_sfaira.id] = f"adata_{i}"
             if self._adata_ids_sfaira.organism in adata.uns.keys():
                 organism = adata.uns[self._adata_ids_sfaira.organism]
             else:
                 # Declare as unknown organism and genome and make a group of its own:
-                organism = adata.uns[self._adata_ids_sfaira.id_cleaned]
+                organism = adata.uns[self._adata_ids_sfaira.id]
             if isinstance(organism, list):
                 if len(organism) == 1:
                     organism = organism[0]
                     assert isinstance(organism, str), organism
                 else:
                     raise ValueError(f"tried to register mixed organism data set ({organism})")
-            adata_id = adata.uns[self._adata_ids_sfaira.id_cleaned]
+            adata_id = adata.uns[self._adata_ids_sfaira.id]
             # Make up a new merged ID for data set indexing if there is a list of IDs in .uns.
             if isinstance(adata_id, list):
                 adata_id = "_".join(adata_id)
@@ -253,7 +253,7 @@ class StoresAnndata(StoreMultipleFeatureSpaceBase):
                 adata_by_key[organism][adata_id] = adata
                 indices[organism][adata_id] = np.arange(0, adata.n_obs)
             except TypeError as e:
-                raise TypeError(f"{e} for {organism} or {adata.uns[self._adata_ids_sfaira.id_cleaned]}")
+                raise TypeError(f"{e} for {organism} or {adata.uns[self._adata_ids_sfaira.id]}")
         stores = dict([
             (k, StoreAnndata(adata_by_key=adata_by_key[k], indices=indices[k], in_memory=True))
             for k in adata_by_key.keys()
@@ -295,12 +295,12 @@ class StoresDao(StoreMultipleFeatureSpaceBase):
                         adata_by_key[organism] = {}
                         x_by_key[organism] = {}
                         indices[organism] = {}
-                    if adata.uns[self._adata_ids_sfaira.id_cleaned] in adata_by_key[organism].keys():
-                        print(f"WARNING: overwriting store entry in {adata.uns[self._adata_ids_sfaira.id_cleaned]} in store "
+                    if adata.uns[self._adata_ids_sfaira.id] in adata_by_key[organism].keys():
+                        print(f"WARNING: overwriting store entry in {adata.uns[self._adata_ids_sfaira.id]} in store "
                               f"{cache_path_i}.")
-                    adata_by_key[organism][adata.uns[self._adata_ids_sfaira.id_cleaned]] = adata
-                    x_by_key[organism][adata.uns[self._adata_ids_sfaira.id_cleaned]] = x
-                    indices[organism][adata.uns[self._adata_ids_sfaira.id_cleaned]] = np.arange(0, adata.n_obs)
+                    adata_by_key[organism][adata.uns[self._adata_ids_sfaira.id]] = adata
+                    x_by_key[organism][adata.uns[self._adata_ids_sfaira.id]] = x
+                    indices[organism][adata.uns[self._adata_ids_sfaira.id]] = np.arange(0, adata.n_obs)
         stores = dict([
             (k, StoreDao(adata_by_key=adata_by_key[k], x_by_key=x_by_key[k], indices=indices[k],
                          obs_by_key=None))
@@ -342,11 +342,11 @@ class StoresH5ad(StoreMultipleFeatureSpaceBase):
                     if organism not in adata_by_key.keys():
                         adata_by_key[organism] = {}
                         indices[organism] = {}
-                    if adata.uns[self._adata_ids_sfaira.id_cleaned] in adata_by_key[organism].keys():
-                        print(f"WARNING: overwriting store entry in {adata.uns[self._adata_ids_sfaira.id_cleaned]} in store "
+                    if adata.uns[self._adata_ids_sfaira.id] in adata_by_key[organism].keys():
+                        print(f"WARNING: overwriting store entry in {adata.uns[self._adata_ids_sfaira.id]} in store "
                               f"{cache_path_i}.")
-                    adata_by_key[organism][adata.uns[self._adata_ids_sfaira.id_cleaned]] = adata
-                    indices[organism][adata.uns[self._adata_ids_sfaira.id_cleaned]] = np.arange(0, adata.n_obs)
+                    adata_by_key[organism][adata.uns[self._adata_ids_sfaira.id]] = adata
+                    indices[organism][adata.uns[self._adata_ids_sfaira.id]] = np.arange(0, adata.n_obs)
         stores = dict([
             (k, StoreAnndata(adata_by_key=adata_by_key[k], indices=indices[k], in_memory=in_memory))
             for k in adata_by_key.keys()

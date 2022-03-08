@@ -27,7 +27,7 @@ class AdataIds:
     feature_index: str
     feature_reference: str
     feature_symbol: str
-    id_cleaned: str
+    id: str
     individual: str
     layer_proc: str
     ncells: str
@@ -113,7 +113,7 @@ class AdataIdsSfaira(AdataIds):
         self.feature_index = self.feature_id
         self.feature_symbol = "gene_symbol"
         self.feature_biotype = "feature_biotype"
-        self.id_cleaned = "id_cleaned"
+        self.id = "id"
         self.individual = "individual"
         self.layer_proc = "processed_counts"
         self.ncells = "ncells"
@@ -165,7 +165,7 @@ class AdataIdsSfaira(AdataIds):
             "development_stage",
             "disease",
             "ethnicity",
-            "id_cleaned",
+            "id",
             "individual",
             "organ",
             "organism",
@@ -222,7 +222,7 @@ class AdataIdsCellxgene(AdataIds):
         self.feature_is_filtered = "feature_is_filtered"
         self.feature_reference = "feature_reference"
         self.feature_symbol = "feature_name"
-        self.id_cleaned = "id_cleaned"
+        self.id = "id"
         self.ncells = "ncells"
         self.layer_proc = "processed_counts"
         self.organ = "tissue"
