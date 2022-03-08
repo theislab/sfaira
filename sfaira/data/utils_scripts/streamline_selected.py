@@ -40,7 +40,7 @@ for doi in dois.split(","):
     assert len(ds.dataset_groups) == 1, len(ds.dataset_groups)
     dsg = ds.dataset_groups[0]
     for k, v in dsg.datasets.items():
-        fn = v.id_without_doi + ".h5ad"
+        fn = v.id + ".h5ad"
         dir_name = v.directory_formatted_doi
         if not os.path.exists(os.path.join(path_out, dir_name)):
             os.makedirs(os.path.join(path_out, dir_name))

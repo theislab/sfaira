@@ -891,7 +891,7 @@ class DatasetBase(abc.ABC):
                 # Build a combination label out of all columns used to describe this group.
                 # Add data set label into this label so that these groups are unique across data sets.
                 val = [
-                    self.id_without_doi + "_".join([str(xxx) for xxx in xx])
+                    self.id + "_".join([str(xxx) for xxx in xx])
                     for xx in zip(*[self.adata.obs[batch_col].values.tolist() for batch_col in batch_cols])
                 ]
             else:
@@ -1341,7 +1341,7 @@ class DatasetBase(abc.ABC):
         if meta is None:
             return None
         else:
-            return os.path.join(meta, "meta", self.id_without_doi + "_meta.csv")
+            return os.path.join(meta, "meta", self.id + "_meta.csv")
 
     def load_meta(self, fn: Union[PathLike, str, None]):
         if fn is None:
@@ -1384,7 +1384,7 @@ class DatasetBase(abc.ABC):
                 raise ValueError("provide either fn in load or via constructor (meta_path)")
             fn_meta = self.meta_fn
         elif fn_meta is None and dir_out is not None:
-            fn_meta = os.path.join(dir_out, self.id_without_doi + "_meta.csv")
+            fn_meta = os.path.join(dir_out, self.id + "_meta.csv")
         elif fn_meta is not None and dir_out is None:
             pass  # fn_meta is used
         else:
@@ -1422,12 +1422,11 @@ class DatasetBase(abc.ABC):
         # Note: access private attributes here, e.g. _organism, to avoid loading of content via meta data, which would
         # invoke call to self.id before it is set.
         self.id_base = f"{clean_id_str(self._organism)}_" \
-                  f"{clean_id_str(self._organ)}_" \
-                  f"{self._year}_" \
-                  f"{clean_id_str(self._assay_sc)}_" \
-                  f"{clean_id_str(author)}_" \
-                  f"{idx}_" \
-                  f"{self.doi_main}"
+                       f"{clean_id_str(self._organ)}_" \
+                       f"{self._year}_" \
+                       f"{clean_id_str(self._assay_sc)}_" \
+                       f"{clean_id_str(author)}_" \
+                       f"{idx}"
 
     # Properties:
 
@@ -1728,16 +1727,22 @@ class DatasetBase(abc.ABC):
         self._feature_type = x
 
     @property
-    def id(self):
+    def id(self) -> str:
         """
-        Replaces DOI in ID by directory formatted (cleaned) DOI.
+        Extends base ID by directory formatted (cleaned) DOI.
 
-        This output is suitable as a file name identifying the data set.
+        In contrast to the based ID, this ID is guaranteed to be unique across studies and is also suitable as a file
+        name.
         """
-        return "_".join(self.id_base.split("_")[:6]) + "_" + clean_doi("_".join(self.id_base.split("_")[6:]))
+        return self.id_base + "_" + clean_doi(self.doi_main)
 
     @property
     def id_base(self) -> str:
+        """
+        Base ID of a dataset, unique identifies dataset within study.
+
+        See also .id().
+        """
         if self._id_base is not None:
             return self._id_base
         else:
@@ -1747,11 +1752,6 @@ class DatasetBase(abc.ABC):
     @id_base.setter
     def id_base(self, x: str):
         self._id_base = x
-
-    @property
-    def id_without_doi(self):
-        """ID without DOI."""
-        return "_".join(self.id_base.split("_")[:6])
 
     @property
     def individual(self) -> Union[None, str]:
