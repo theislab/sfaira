@@ -30,7 +30,7 @@ class DatasetInteractive(DatasetBase):
         :param cache_path:
         """
         super().__init__(data_path=data_path, meta_path=meta_path, cache_path=cache_path)
-        self.id = dataset_id
+        self.id_base = dataset_id
 
         self.author = "interactive_dataset"
         self.doi_journal = "interactive_dataset"
@@ -47,3 +47,11 @@ class DatasetInteractive(DatasetBase):
 
     def _load(self):
         pass
+
+    @property
+    def id(self):
+        return self.id_base
+
+    @property
+    def id_without_doi(self):
+        return self.id_base

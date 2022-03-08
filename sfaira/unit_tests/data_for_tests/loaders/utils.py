@@ -87,9 +87,9 @@ class PrepareData:
             else:
                 compression_kwargs = {}
             if store_format == "dao":
-                anticipated_fn = os.path.join(dir_store_formatted, ds.doi_cleaned_id)
+                anticipated_fn = os.path.join(dir_store_formatted, ds.id)
             elif store_format == "h5ad":
-                anticipated_fn = os.path.join(dir_store_formatted, ds.doi_cleaned_id + ".h5ad")
+                anticipated_fn = os.path.join(dir_store_formatted, ds.id + ".h5ad")
             else:
                 assert False
             if rewrite_store and os.path.exists(anticipated_fn):

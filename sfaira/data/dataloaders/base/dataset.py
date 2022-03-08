@@ -24,7 +24,7 @@ from sfaira.data.dataloaders.export_adaptors import cellxgene_export_adaptor
 from sfaira.data.store.io.io_dao import write_dao
 from sfaira.data.dataloaders.base.utils import is_child, get_directory_formatted_doi
 from sfaira.data.utils import collapse_matrix, read_yaml, subset_adata_genes
-from sfaira.consts.utils import clean_id_str
+from sfaira.consts.utils import clean_doi, clean_id_str
 from sfaira.versions.metadata.maps import prepare_ontology_map_tab
 
 
@@ -72,7 +72,7 @@ class DatasetBase(abc.ABC):
     _ethnicity: Union[None, str]
     _feature_type: Union[None, str]
     _feature_reference: Union[None, str]
-    _id: Union[None, str]
+    _id_base: Union[None, str]
     _individual: Union[None, str]
     _organ: Union[None, str]
     _organism: Union[None, str]
@@ -215,7 +215,7 @@ class DatasetBase(abc.ABC):
         self._feature_type = None
         self._feature_reference = None
         self.gm = None
-        self._id = None
+        self._id_base = None
         self._individual = None
         self._organ = None
         self._organism = None
@@ -318,10 +318,6 @@ class DatasetBase(abc.ABC):
 
         self.supplier = "sfaira"
 
-    @property
-    def _directory_formatted_id(self) -> str:
-        return "_".join("_".join(self.id.split("/")).split("."))
-
     def clear(self):
         """
         Remove loaded .adata to reduce memory footprint.
@@ -333,7 +329,7 @@ class DatasetBase(abc.ABC):
         gc.collect()
 
     def download(self, **kwargs):
-        assert self.download_url_data is not None, f"The `download_url_data` attribute of dataset {self.id} " \
+        assert self.download_url_data is not None, f"The `download_url_data` attribute of dataset {self.id_base} " \
                                                    f"is not set, cannot download dataset."
         assert self.data_dir_base is not None, "No path was provided when instantiating the dataset container, " \
                                                "cannot download datasets."
@@ -353,11 +349,11 @@ class DatasetBase(abc.ABC):
                     if os.path.isfile(os.path.join(self.data_dir, fn)):
                         print(f"File {fn} already found on disk, skipping download.")
                     else:
-                        warnings.warn(f"Dataset {self.id} is not available for automatic download, please manually "
+                        warnings.warn(f"Dataset {self.id_base} is not available for automatic download, please manually "
                                       f"copy the file {fn} to the following location: "
                                       f"{self.data_dir}")
                 else:
-                    warnings.warn(f"A file for dataset {self.id} is not available for automatic download, please"
+                    warnings.warn(f"A file for dataset {self.id_base} is not available for automatic download, please"
                                   f"manually copy the associated file to the following location: {self.data_dir}")
             # Special case for data from the synapse portal
             elif url.split(",")[0].startswith('syn'):
@@ -373,7 +369,7 @@ class DatasetBase(abc.ABC):
                 if os.path.isfile(os.path.join(self.data_dir, fn)):
                     print(f"File {fn} already found on disk, skipping download.")
                 else:
-                    print(f"Data file {fn} for dataset {self.id} cannot be retrieved automatically. "
+                    print(f"Data file {fn} for dataset {self.id_base} cannot be retrieved automatically. "
                           f"Please download it from {u} and copy to {os.path.join(self.data_dir, fn)}")
             # All other cases
             else:
@@ -406,7 +402,7 @@ class DatasetBase(abc.ABC):
         except ImportError:
             warnings.warn("synapseclient python package not found. This package is required to download some of the "
                           "selected datasets. Run `pip install synapseclient` to install it. Skipping download of the "
-                          f"following dataset: {self.id}")
+                          f"following dataset: {self.id_base}")
             return
         import logging
         logging.captureWarnings(False)  # required to properly display warning messages below with sypaseclient loaded
@@ -428,16 +424,11 @@ class DatasetBase(abc.ABC):
 
     @property
     def cache_fn(self):
-        if self.directory_formatted_doi is None or self._directory_formatted_id is None:
-            # TODO is this case necessary?
-            warnings.warn("Caching enabled, but Dataset.id or Dataset.doi not set. Disabling caching for now.")
-            return None
+        if self.cache_path is None:
+            cache = self.data_dir
         else:
-            if self.cache_path is None:
-                cache = self.data_dir
-            else:
-                cache = os.path.join(self.cache_path, self.directory_formatted_doi)
-            return os.path.join(cache, "cache", self._directory_formatted_id + ".h5ad")
+            cache = os.path.join(self.cache_path, self.directory_formatted_doi)
+        return os.path.join(cache, "cache", self.id + ".h5ad")
 
     def load(
             self,
@@ -455,7 +446,7 @@ class DatasetBase(abc.ABC):
         """
         # Sanity checks
         if self.adata is not None:
-            raise ValueError(f"adata of {self.id} already loaded.")
+            raise ValueError(f"adata of {self.id_base} already loaded.")
         if self.data_dir is None:
             raise ValueError("No sfaira data repo path provided in constructor.")
 
@@ -465,7 +456,7 @@ class DatasetBase(abc.ABC):
         # Run data set-specific loading script:
         def _assembly_wrapper():
             if self.load_func is None:
-                raise ValueError(f"Tried to access load_func for {self.id} but did not find any.")
+                raise ValueError(f"Tried to access load_func for {self.id_base} but did not find any.")
             _error_buffered_reading(**kwargs)
             # Enable loading of additional annotation, e.g. secondary cell type annotation
             # The additional annotation `obs2 needs to be on a subset of the original annotation `self.adata.obs`.
@@ -895,12 +886,12 @@ class DatasetBase(abc.ABC):
                         # This should not occur in single data set loaders (see warning below) but can occur in
                         # streamlined data loaders if not all instances of the streamlined data sets have all columns
                         # in .obs set.
-                        print(f"WARNING: attribute {batch_col} of data set {self.id} was not found in columns: "
+                        print(f"WARNING: attribute {batch_col} of data set {self.id_base} was not found in columns: "
                               f"{self.adata.obs.columns}.")
                 # Build a combination label out of all columns used to describe this group.
                 # Add data set label into this label so that these groups are unique across data sets.
                 val = [
-                    self.doi_cleaned_id + "_".join([str(xxx) for xxx in xx])
+                    self.id + "_".join([str(xxx) for xxx in xx])
                     for xx in zip(*[self.adata.obs[batch_col].values.tolist() for batch_col in batch_cols])
                 ]
             else:
@@ -1046,7 +1037,7 @@ class DatasetBase(abc.ABC):
             if not isinstance(self.adata.X, scipy.sparse.csr_matrix):
                 print(f"WARNING: high-perfomances caches based on .h5ad work better with .csr formatted expression "
                       f"data, found {type(self.adata.X)}")
-            fn = os.path.join(dir_cache, self.doi_cleaned_id + ".h5ad")
+            fn = os.path.join(dir_cache, self.id + ".h5ad")
             as_dense = ("X",) if dense else ()
             print(f"writing {self.adata.shape} into {fn}")
             self.adata.write_h5ad(filename=fn, as_dense=as_dense, **compression_kwargs)
@@ -1055,7 +1046,7 @@ class DatasetBase(abc.ABC):
             if not dense:
                 raise ValueError("WARNING: sparse zarr array performance is not be optimal and not supported yet, "
                                  "consider writing as dense and consider that zarr arrays are compressed on disk!")
-            fn = os.path.join(dir_cache, self.doi_cleaned_id)
+            fn = os.path.join(dir_cache, self.id)
             chunks = (chunks, self.adata.X.shape[1]) if chunks is not None else True
             write_dao(store=fn, adata=self.adata, chunks=chunks, compression_kwargs=compression_kwargs,
                       shuffle_data=shuffle_data)
@@ -1064,10 +1055,6 @@ class DatasetBase(abc.ABC):
 
     def _set_genome(self, organism: str, release: str):
         self.genome_container = GenomeContainer(organism=organism, release=release)
-
-    @property
-    def doi_cleaned_id(self):
-        return "_".join(self.id.split("_")[:-1])
 
     def get_ontology(self, k) -> Union[OntologyHierarchical, None]:
         x = getattr(self.ontology_container_sfaira, k) if hasattr(self.ontology_container_sfaira, k) else None
@@ -1114,10 +1101,10 @@ class DatasetBase(abc.ABC):
         for x in attrs:
             k = getattr(self, x + "_obs_key")
             if k is None:
-                warnings.warn(f"attempted to write ontology class maps for data set {self.id} without annotation of "
+                warnings.warn(f"attempted to write ontology class maps for data set {self.id_base} without annotation of "
                               f"meta data {x}")
             elif k not in self.adata.obs.columns:
-                warnings.warn(f"attempted to write ontology class maps for data set {self.id} but did not find column "
+                warnings.warn(f"attempted to write ontology class maps for data set {self.id_base} but did not find column "
                               f"{k} in .obs which should correspond to {x}")
             else:
                 fn_x = fn + "_" + x + ".tsv"
@@ -1148,7 +1135,7 @@ class DatasetBase(abc.ABC):
             # Need dtype="str" to force numeric cell type identifiers, e.g. cluster numbers to be in string format.
             tab = pd.read_csv(fn, header=0, index_col=None, sep="\t", dtype="str").astype(str)
         except pandas.errors.ParserError as e:
-            print(f"{self.id}")
+            print(f"{self.id_base}")
             raise pandas.errors.ParserError(e)
         return tab
 
@@ -1354,7 +1341,7 @@ class DatasetBase(abc.ABC):
         if meta is None:
             return None
         else:
-            return os.path.join(meta, "meta", self.doi_cleaned_id + "_meta.csv")
+            return os.path.join(meta, "meta", self.id + "_meta.csv")
 
     def load_meta(self, fn: Union[PathLike, str, None]):
         if fn is None:
@@ -1397,7 +1384,7 @@ class DatasetBase(abc.ABC):
                 raise ValueError("provide either fn in load or via constructor (meta_path)")
             fn_meta = self.meta_fn
         elif fn_meta is None and dir_out is not None:
-            fn_meta = os.path.join(dir_out, self.doi_cleaned_id + "_meta.csv")
+            fn_meta = os.path.join(dir_out, self.id + "_meta.csv")
         elif fn_meta is not None and dir_out is None:
             pass  # fn_meta is used
         else:
@@ -1434,13 +1421,12 @@ class DatasetBase(abc.ABC):
 
         # Note: access private attributes here, e.g. _organism, to avoid loading of content via meta data, which would
         # invoke call to self.id before it is set.
-        self.id = f"{clean_id_str(self._organism)}_" \
-                  f"{clean_id_str(self._organ)}_" \
-                  f"{self._year}_" \
-                  f"{clean_id_str(self._assay_sc)}_" \
-                  f"{clean_id_str(author)}_" \
-                  f"{idx}_" \
-                  f"{self.doi_main}"
+        self.id_base = f"{clean_id_str(self._organism)}_" \
+                       f"{clean_id_str(self._organ)}_" \
+                       f"{self._year}_" \
+                       f"{clean_id_str(self._assay_sc)}_" \
+                       f"{clean_id_str(author)}_" \
+                       f"{idx}"
 
     # Properties:
 
@@ -1742,15 +1728,30 @@ class DatasetBase(abc.ABC):
 
     @property
     def id(self) -> str:
-        if self._id is not None:
-            return self._id
+        """
+        Extends base ID by directory formatted (cleaned) DOI.
+
+        In contrast to the based ID, this ID is guaranteed to be unique across studies and is also suitable as a file
+        name.
+        """
+        return self.id_base + "_" + clean_doi(self.doi_main)
+
+    @property
+    def id_base(self) -> str:
+        """
+        Base ID of a dataset, unique identifies dataset within study.
+
+        See also .id().
+        """
+        if self._id_base is not None:
+            return self._id_base
         else:
             raise AttributeError(f"Dataset ID was not set in dataloader in {self.doi_main}, please ensure the "
                                  f"dataloader constructor of this dataset contains a call to self.set_dataset_id()")
 
-    @id.setter
-    def id(self, x: str):
-        self._id = x
+    @id_base.setter
+    def id_base(self, x: str):
+        self._id_base = x
 
     @property
     def individual(self) -> Union[None, str]:
@@ -1933,7 +1934,7 @@ class DatasetBase(abc.ABC):
     @ontology_class_maps.setter
     def ontology_class_maps(self, x: Dict[str, pd.DataFrame]):
         for k, v in x.items():
-            assert v.shape[1] in [2, 3], f"{v.shape} in {self.id}"
+            assert v.shape[1] in [2, 3], f"{v.shape} in {self.id_base}"
             assert v.columns[0] == self._adata_ids.classmap_source_key
             assert v.columns[1] == self._adata_ids.classmap_target_key
             # Check for weird entries:
@@ -1943,7 +1944,7 @@ class DatasetBase(abc.ABC):
                 for x in v[self._adata_ids.classmap_target_key].values.tolist()
             ])[0]
             assert len(nan_vals) == 0, \
-                f"Found nan target values in {self.id} for {x[self._adata_ids.classmap_target_key].values[nan_vals]}," \
+                f"Found nan target values in {self.id_base} for {x[self._adata_ids.classmap_target_key].values[nan_vals]}," \
                 f" check if all entries in cell type .tsv file are non-empty, for example." \
                 f"This bug may arise if a tab separator of columns is missing in one or multiple rows, for example."
             # Transform data frame into a mapping dictionary:
@@ -2089,7 +2090,7 @@ class DatasetBase(abc.ABC):
                     ])
                 ]
                 # TODO keep this logging for now to catch undesired behaviour resulting from loaded edges in ontologies.
-                print(f"matched cell-wise keys {str(values_found_unique_matched)} in data set {self.id}")
+                print(f"matched cell-wise keys {str(values_found_unique_matched)} in data set {self.id_base}")
                 idx = np.where([x in values_found_unique_matched for x in values_found])[0]
             else:
                 assert False, "no subset chosen"

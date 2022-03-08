@@ -91,7 +91,7 @@ class Dataset(DatasetBase):
         self.supplier = "cellxgene"
         doi = [x['link_url'] for x in self.collection["links"] if x['link_type'] == 'DOI']
         self.doi_journal = collection_id if len(doi) == 0 else doi[0]  # TODO access journal DOI explicitly.
-        self.id = sample_fn
+        self.id_base = sample_fn
         # Set h5ad download URLs:
         download_url_data = []
         for asset in self._collection_dataset['dataset_assets']:
@@ -178,8 +178,12 @@ class Dataset(DatasetBase):
         return self.collection_id
 
     @property
-    def doi_cleaned_id(self):
-        return self.id
+    def id(self):
+        return self.id_base
+
+    @property
+    def id_without_doi(self):
+        return self.id_base
 
     def load(
             self,

@@ -8,8 +8,7 @@ from typing import Dict, List, Tuple, Union
 
 from sfaira.consts import AdataIdsSfaira
 from sfaira.data.store.stores.base import StoreBase
-from sfaira.data.store.stores.single import StoreSingleFeatureSpace, \
-    StoreDao, StoreAnndata
+from sfaira.data.store.stores.single import StoreSingleFeatureSpace, StoreDao, StoreAnndata
 from sfaira.data.store.carts.multi import CartMulti
 from sfaira.data.store.io.io_dao import read_dao
 from sfaira.versions.genomes.genomes import GenomeContainer
