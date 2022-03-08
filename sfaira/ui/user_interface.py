@@ -387,7 +387,7 @@ class UserInterface:
         self.data.organism = organism
         self.data.organ = organ
         self.data.cell_type_obs_key = cell_type_obs_key
-        # Align to correct featurespace
+        # Align to correct feature space
         self.data.streamline_features(
             match_to_release=self.zoo_embedding.topology_container.gc.release,
             subset_genes_to_type=list(set(self.zoo_embedding.topology_container.gc.biotype))
