@@ -1,6 +1,5 @@
 import anndata
 import os
-import scipy.sparse
 import tarfile
 import pandas as pd
 import scipy.sparse
@@ -8,11 +7,12 @@ import h5py
 import yaml
 import re
 
+
 def load(data_dir, sample_fn, **kwargs):
     fn = os.path.join(data_dir, "GSE118127_RAW.tar")
     fn_annot = os.path.join(data_dir, "cell_id_to_type.tsv")
-    cell_annot = pd.read_csv(fn_annot, sep = "\t")
-    cell_annot.set_index(keys = "cellID", inplace = True)
+    cell_annot = pd.read_csv(fn_annot, sep="\t")
+    cell_annot.set_index(keys="cellID", inplace=True)
     print(cell_annot.head())
     with tarfile.open(fn) as tar:
         f = h5py.File(tar.extractfile(sample_fn), 'r')['GRCh38']
@@ -35,7 +35,7 @@ def load(data_dir, sample_fn, **kwargs):
             barcode = brcd.decode('UTF-8').replace("-1", "")
             barcodes.append(id_cor + "_" + barcode)
         obs = pd.DataFrame({'barcode': barcodes})
-        obs_cell_types = obs.join(cell_annot, on = 'barcode', how = 'left')
+        obs_cell_types = obs.join(cell_annot, on='barcode', how='left')
         obs_cell_types['organ'] = 'ovary'
         adata = anndata.AnnData(X=x, obs=obs_cell_types, var=var)
         
