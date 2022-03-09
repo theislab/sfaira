@@ -38,7 +38,7 @@ def load(data_dir, sample_fn, **kwargs):
         obs_cell_types = obs.join(cell_annot, on='barcode', how='left')
         obs_cell_types['organ'] = 'ovary'
         adata = anndata.AnnData(X=x, obs=obs_cell_types, var=var)
-        
+
         # NaN introduced if a cell not in annotation. Remove these cells
         adata = adata[adata.obs["clusterID"].notna(), :]
     return adata
