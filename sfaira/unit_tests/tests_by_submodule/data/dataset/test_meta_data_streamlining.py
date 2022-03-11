@@ -1,8 +1,10 @@
 import os
 
 import anndata
+import numpy as np
 import pytest
 
+from sfaira.consts.adata_fields import AdataIdsSfaira, AdataIdsCellxgene_v2_0_0
 from sfaira.unit_tests.data_for_tests.loaders import RELEASE_HUMAN, PrepareData
 from sfaira.unit_tests.directories import DIR_TEMP
 
@@ -25,7 +27,7 @@ def test_dsgs_streamline_metadata(out_format: str, clean_obs: bool, clean_var: b
         # Other data data sets do not have complete enough annotation
         ds.subset(key="doi_journal", values=["no_doi_mock1", "no_doi_mock3"])
     ds.load()
-    ds.streamline_features(remove_gene_version=False, match_to_release=RELEASE_HUMAN,
+    ds.streamline_features(schema=out_format, remove_gene_version=False, match_to_release=RELEASE_HUMAN,
                            subset_genes_to_type=None)
     ds.streamline_metadata(schema=out_format, clean_obs=clean_obs, clean_var=clean_var,
                            clean_uns=clean_uns, clean_obs_names=clean_obs_names,
@@ -65,14 +67,41 @@ def test_cellxgene_export(schema_version: str, organism: str):
 
     ds = PrepareData().prepare_dsg(load=False)
     if organism == "Homo sapiens":
-        ds.subset(key="doi_journal", values=["no_doi_mock1"])
+        k = "no_doi_mock1"
     else:
-        ds.subset(key="doi_journal", values=["no_doi_mock2"])
+        k = "no_doi_mock2"
+    ds.subset(key="doi_journal", values=[k])
     ds.load()
+    adata_pre = ds.adata_ls[0].copy()
     ds.streamline_features(match_to_release=None, schema="cellxgene:" + schema_version)
     ds.streamline_metadata(schema="cellxgene:" + schema_version, clean_obs=False, clean_var=True,
                            clean_uns=True, clean_obs_names=False,
                            keep_id_obs=True, keep_orginal_obs=False, keep_symbol_obs=True)
+    adata_post = ds.adata_ls[0].copy()
+    # Custom checks:
+    adata_ids_sfaira = AdataIdsSfaira()
+    if schema_version == "2_0_0":
+        adata_ids_cellxgene = AdataIdsCellxgene_v2_0_0()
+    else:
+        assert False
+    # .obs
+    # Check that number of observations and obs names were not changed:
+    assert adata_pre.obs.shape[0] == adata_post.obs.shape[0]
+    assert np.all(adata_post.obs_names == adata_pre.obs_names)
+    # Check that original columns are removed:
+    assert np.all([adata_ids_cellxgene.onto_original_suffix not in k for k in adata_post.obs.columns])
+    assert np.all([adata_ids_sfaira.onto_original_suffix not in k for k in adata_post.obs.columns])
+    # .var
+    # Check that feature space remained unchanged:
+    assert adata_pre.var.shape[0] == adata_post.var.shape[0]
+    assert np.all(adata_post.var.index == adata_pre.var.index)
+    # .X, layers
+    # Check that sum over count matrix remained unchanged:
+    assert np.asarray(np.sum(adata_pre.X)).flatten() == \
+           np.asarray(np.sum(adata_post.raw.X)).flatten()
+    # .uns
+    # None yet.
+    # Native cellxgene checks:
     counter = 0
     for ds in ds.datasets.values():
         # Validate in memory:

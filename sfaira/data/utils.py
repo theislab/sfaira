@@ -144,14 +144,31 @@ def collapse_matrix(x, var, var_column):
 
 
 def subset_adata_genes(
+        allowed_ids: Union[np.ndarray, None],
+        feature_id_var_key: str,
+        feature_symbol_var_key: str,
+        remove_gene_version: bool,
+        target_ids: Union[np.ndarray, None],
+        target_symbols: Union[np.ndarray, None],
+        var: pd.DataFrame,
         x,
-        var,
-        feature_id_var_key,
-        feature_symbol_var_key,
-        subset_ids_ensg,
-        subset_ids_symbol,
-        remove_gene_version
 ):
+    """
+    Reorders gene-dimensional x and var matrices to a target set of genes.
+
+    Does not modify array if subset_ids_ensg and subset_ids_symbol are None, still applies processing like
+    remove_gene_version, collapses potential duplicates after version removal, and returns a cleaned var.
+
+    :param allowed_ids: Allowed IDs, can use this to subset if target IDs is not set.
+    :param feature_id_var_key: Key of feature IDs in var table.
+    :param feature_symbol_var_key:  Key of feature symbols in var table.
+    :param remove_gene_version: Whether to remove the version of feature IDs.
+    :param target_ids: Target set of feature IDs.
+    :param target_symbols:  Target set of feature symbols.
+    :param var: Feature meta data table (.var in anndata).
+    :param x: Expression matrix (.X or layer in anndata).
+    :return: Tuple of processed x and var.
+    """
     # Process gene annotations
     for key in [feature_id_var_key, feature_symbol_var_key]:
         # Make features unique (to avoid na-matches in converted columns to be collapsed below.
@@ -162,6 +179,7 @@ def subset_adata_genes(
         else:
             var[key] = make_index_unique(pd.Index(var[key].values.tolist())).tolist()
     # Remove version tag on ensembl gene ID so that different versions are superimposed downstream.
+    # TODO this should not be in this function but separate.
     if remove_gene_version:
         if not feature_id_var_key:
             raise ValueError(
@@ -174,49 +192,80 @@ def subset_adata_genes(
             var[feature_id_var_key] = [
                 x.split(".")[0] for x in var[feature_id_var_key].values]
         x, var = collapse_matrix(x=x, var=var, var_column=feature_id_var_key)
-    # Convert data matrix to csc matrix
-    if isinstance(x, np.ndarray):
-        # Change NaN to zero. This occurs for example in concatenation of anndata instances.
-        if np.any(np.isnan(x)):
-            x[np.isnan(x)] = 0
-        x = scipy.sparse.csc_matrix(x)
-    elif isinstance(x, scipy.sparse.spmatrix):
-        x = x.tocsc()
-    else:
-        raise ValueError(f"Data type {type(x)} not recognized.")
 
     # Remove unmapped genes
     data_ids_ensg = var.index.values if feature_id_var_key == "index" else var[feature_id_var_key].values
-    idx_feature_kept = np.where([x.upper() in subset_ids_ensg for x in data_ids_ensg])[0]
-    data_ids_kept = data_ids_ensg[idx_feature_kept]
+    data_ids_symbol = var.index.values if feature_symbol_var_key == "index" else var[feature_symbol_var_key].values
+    idx_feature_kept = np.ones_like(data_ids_ensg) == 1
+    if target_ids is not None:
+        idx_feature_kept = np.logical_and(
+            idx_feature_kept,
+            np.array([x.upper() in target_ids for x in data_ids_ensg]))
+    if target_symbols is not None:
+        idx_feature_kept = np.logical_and(
+            idx_feature_kept,
+            np.array([x.upper() in target_symbols for x in data_ids_symbol]))
+    if allowed_ids is not None:
+        idx_feature_kept = np.logical_and(
+            idx_feature_kept,
+            np.array([x.upper() in allowed_ids for x in data_ids_ensg]))
+    idx_feature_kept = np.where(idx_feature_kept)[0]
     x = x[:, idx_feature_kept]
-    # Build map of subset_ids to features in x:
-    idx_feature_map = np.array([subset_ids_ensg.index(x) for x in data_ids_kept])
-    # Create reordered feature matrix based on reference and convert to csr
-    x_new = scipy.sparse.csc_matrix((x.shape[0], len(subset_ids_ensg)), dtype=x.dtype)
-    # copying this over to the new matrix in chunks of size `steps` prevents a strange scipy error:
-    # ... scipy/sparse/compressed.py", line 922, in _zero_many i, j, offsets)
-    # ValueError: could not convert integer scalar
-    step = 500
-    if step < len(idx_feature_map):
-        i = 0
-        for i in range(0, len(idx_feature_map), step):
-            x_new[:, idx_feature_map[i:i + step]] = x[:, i:i + step]
-        x_new[:, idx_feature_map[i + step:]] = x[:, i + step:]
-    else:
-        x_new[:, idx_feature_map] = x
-    x_new = x_new.tocsr()
+    var = var.iloc[idx_feature_kept, :]
+    if target_ids is not None and target_symbols is not None:
+        # Convert data matrix to csc matrix to make reordering of features faster.
+        # if isinstance(x, np.ndarray):
+        #     # Change NaN to zero. This occurs for example in concatenation of anndata instances.
+        #     if np.any(np.isnan(x)):
+        #         x[np.isnan(x)] = 0
+        #     x = scipy.sparse.csc_matrix(x)
+        # elif isinstance(x, scipy.sparse.spmatrix):
+        #     x = x.tocsc()
+        # else:
+        #     raise ValueError(f"Data type {type(x)} not recognized.")
 
-    # Create new var dataframe
-    if feature_symbol_var_key == "index":
-        var_index = subset_ids_symbol
-        var_data = {feature_id_var_key: subset_ids_ensg}
-    elif feature_id_var_key == "index":
-        var_index = subset_ids_ensg
-        var_data = {feature_symbol_var_key: subset_ids_symbol}
+        # Build impute missing features as all zero:
+        data_ids_kept = data_ids_ensg[idx_feature_kept]
+        idx_feature_map = np.array([target_ids.index(x) for x in data_ids_kept])
+        # Create reordered feature matrix based on reference and convert to csr
+        x_new = scipy.sparse.csc_matrix((x.shape[0], len(target_ids)), dtype=x.dtype)
+        # copying this over to the new matrix in chunks of size `steps` prevents a strange scipy error:
+        # ... scipy/sparse/compressed.py", line 922, in _zero_many i, j, offsets)
+        # ValueError: could not convert integer scalar
+        step = 500
+        if step < len(idx_feature_map):
+            i = 0
+            for i in range(0, len(idx_feature_map), step):
+                x_new[:, idx_feature_map[i:i + step]] = x[:, i:i + step]
+            x_new[:, idx_feature_map[i + step:]] = x[:, i + step:]
+        else:
+            x_new[:, idx_feature_map] = x
+        x_new = x_new.tocsr()
+        # Create new var dataframe
+        if feature_symbol_var_key == "index":
+            var_index = target_symbols
+            var_data = {feature_id_var_key: target_ids}
+        elif feature_id_var_key == "index":
+            var_index = target_ids
+            var_data = {feature_symbol_var_key: target_symbols}
+        else:
+            var_index = None
+            var_data = {feature_symbol_var_key: target_symbols,
+                        feature_id_var_key: target_ids}
+        var_new = pd.DataFrame(data=var_data, index=var_index)
     else:
-        var_index = None
-        var_data = {feature_symbol_var_key: subset_ids_symbol,
-                    feature_id_var_key: subset_ids_ensg}
-    var_new = pd.DataFrame(data=var_data, index=var_index)
+        x_new = x
+        var_new = var
+
+    # Move data matrix to csr:
+    if isinstance(x_new, np.ndarray):
+        # Change NaN to zero. This occurs for example in concatenation of anndata instances.
+        if np.any(np.isnan(x_new)):
+            x_new[np.isnan(x_new)] = 0
+        x_new = scipy.sparse.csr_matrix(x_new)
+    elif isinstance(x_new, scipy.sparse.spmatrix):
+        x_new = x_new.tocsr()
+    else:
+        raise ValueError(f"Data type {type(x)} not recognized.")
+
     return x_new, var_new

@@ -29,6 +29,7 @@ class AdataIds:
     feature_symbol: str
     id: str
     individual: str
+    layer_counts: str
     layer_proc: str
     ncells: str
     organ: str
@@ -115,6 +116,7 @@ class AdataIdsSfaira(AdataIds):
         self.feature_biotype = "feature_biotype"
         self.id = "id"
         self.individual = "individual"
+        self.layer_counts = "X"
         self.layer_proc = "processed_counts"
         self.ncells = "ncells"
         self.organ = "organ"
@@ -207,6 +209,7 @@ class AdataIdsCellxgene(AdataIds):
         self.onto_original_suffix = "_original"
 
         self.feature_kwargs = {
+            "match_to_release": "104",
             "remove_gene_version": True,
             "subset_genes_to_type": None}
 
@@ -224,7 +227,8 @@ class AdataIdsCellxgene(AdataIds):
         self.feature_symbol = "feature_name"
         self.id = "id"
         self.ncells = "ncells"
-        self.layer_proc = "processed_counts"
+        self.layer_counts = "raw"
+        self.layer_proc = "X"
         self.organ = "tissue"
         self.organism = "organism"
         self.primary_data = "is_primary_data"
@@ -268,15 +272,12 @@ class AdataIdsCellxgene(AdataIds):
             "organism",
             "primary_data",
             "sex",
-            "tech_sample",
         ]
         self.var_keys = [
             "feature_id",
             "feature_symbol",
         ]
         self.uns_keys = [
-            "doi_journal",
-            "doi_preprint",
             "default_embedding",
             "title",
         ]

@@ -1,11 +1,12 @@
 import numpy as np
 import os
 import pytest
+from typing import Union
 
-import sfaira.versions.genomes
 from sfaira.consts import AdataIdsSfaira
 from sfaira.data import DatasetSuperGroup, DatasetInteractive
 from sfaira.data import Universe
+from  sfaira.versions.genomes import GenomeContainer
 
 from sfaira.unit_tests.data_for_tests.loaders import RELEASE_HUMAN, PrepareData
 from sfaira.unit_tests.directories import DIR_TEMP, DIR_DATA_LOADERS_CACHE
@@ -93,20 +94,34 @@ def test_dsgs_subset_cell_wise(celltype: str):
 
 @pytest.mark.parametrize("match_to_release", [RELEASE_HUMAN, {"Homo sapiens": RELEASE_HUMAN}])
 @pytest.mark.parametrize("remove_gene_version", [False, True])
-@pytest.mark.parametrize("subset_genes_to_type", [None, "protein_coding"])
-def test_dsgs_streamline_features(match_to_release: str, remove_gene_version: bool, subset_genes_to_type: str):
+@pytest.mark.parametrize("subset_genes_to_type", ["all", "protein_coding", None])
+def test_dsgs_streamline_features(match_to_release: str,
+                                  remove_gene_version: bool,
+                                  subset_genes_to_type: Union[str, None]):
+    adata_ids = AdataIdsSfaira()
     ds = PrepareData().prepare_dsg(load=False)
     ds.subset(key="organism", values=["Homo sapiens"])
     ds.subset(key="organ", values=["lung"])
     ds.load()
-    ds.streamline_features(remove_gene_version=remove_gene_version, match_to_release=match_to_release,
-                           subset_genes_to_type=subset_genes_to_type)
-    gc = sfaira.versions.genomes.GenomeContainer(
+    original_ids = dict([(k, np.asarray(v.adata.var.index.tolist())) for k, v in ds.datasets.items()])
+    ds.streamline_features(
+        schema="sfaira",
+        remove_gene_version=remove_gene_version,
+        match_to_release=match_to_release,
+        subset_genes_to_type=subset_genes_to_type)
+    # Initialise reference gc to check target space inside of ds.
+    gc = GenomeContainer(
         organism="Homo Sapiens",
         release=match_to_release["Homo sapiens"] if isinstance(match_to_release, dict) else match_to_release)
-    gc.set(biotype=subset_genes_to_type)
-    for x in ds.datasets.values():
-        assert x.adata.var["gene_symbol"].tolist() == gc.symbols
+    if subset_genes_to_type != "all":
+        gc.set(biotype=subset_genes_to_type)
+    for k, v in ds.datasets.items():
+        if subset_genes_to_type is None:
+            # Should have maintained original IDs.
+            assert np.all(v.adata.var.index == original_ids[k])
+        else:
+            # Should have expanded features to target space.
+            assert np.all(v.adata.var.index == gc.ensembl)
 
 
 def test_dsg_load():

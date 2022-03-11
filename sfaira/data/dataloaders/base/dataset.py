@@ -520,6 +520,12 @@ class DatasetBase(abc.ABC):
             self.adata.obs_names = obs_names
 
     def _add_missing_featurenames(self, var):
+        """
+        Maps feature names in var table to feature names in ontology, imputing symbols or IDs respectively if necessary.
+
+        :param var: Table to modify.
+        :return: Modified table.
+        """
         if self.feature_symbol_var_key is None and self.feature_id_var_key is None:
             raise ValueError("Either feature_symbol_var_key or feature_id_var_key needs to be provided in the"
                              " dataloader")
@@ -552,42 +558,48 @@ class DatasetBase(abc.ABC):
 
     def streamline_features(
             self,
-            match_to_release: Union[str, Dict[str, str], None],
+            match_to_release: Union[str, Dict[str, str], None] = None,
             remove_gene_version: bool = True,
+            schema: str = "sfaira",
             subset_genes_to_type: Union[None, str, List[str]] = None,
-            schema: Union[str, None] = None,
     ):
         """
         Subset and sort genes to genes defined in an assembly or genes of a particular type, such as protein coding.
         This also adds missing ensid or gene symbol columns if match_to_reference is not set to False and removes all
         adata.var columns that are not defined as gene_id_ensembl_var_key or gene_id_symbol_var_key in the dataloader.
 
-        :param match_to_release: Which ensembl genome annotation release to map the feature space to. Can be:
+        :param match_to_release: Which ensembl genome annotation release to map the feature space to.
+            Uses default set in schema if not set. Can be:
                 - str: Provide the name of the release (eg. "104").
                 - dict: Mapping of organism to name of the release (see str format). Chooses release for each
                     data set based on organism annotation.
         :param remove_gene_version: Whether to remove the version number after the colon sometimes found in ensembl
             gene ids.
-        :param subset_genes_to_type: Type(s) to subset to. Can be a single type or a list of types or None.
-            Types can be:
-                - None: All genes in assembly.
-                - "protein_coding": All protein coding genes in assembly.
+            Uses default set in schema if not set.
         :param schema: Export format.
             - "sfaira"
             - "cellxgene"
+        :param subset_genes_to_type: Type(s) to subset to. Can be a single type or a list of types or None.
+            Uses default set in schema if not set.
+            Types can be:
+                - None: Keep the subset of input gene set that can be mapped to assembly.
+                - "all": All genes in assembly.
+                - "protein_coding": All protein coding genes in assembly.
         """
         self.__assert_loaded()
-        if schema is not None:
-            # schema_version = schema.split(":")[-1] if ":" in schema else None
-            # Set schema as provided by the user
-            if schema.startswith("sfaira"):
-                adata_target_ids = AdataIdsSfaira()
-            elif schema.startswith("cellxgene"):
-                adata_target_ids = AdataIdsCellxgene_v2_0_0()
-            else:
-                raise ValueError(f"did not recognize schema {schema}")
+        # schema_version = schema.split(":")[-1] if ":" in schema else None
+        # Set schema as provided by the user
+        if schema.startswith("sfaira"):
+            adata_target_ids = AdataIdsSfaira()
+        elif schema.startswith("cellxgene"):
+            adata_target_ids = AdataIdsCellxgene_v2_0_0()
+        else:
+            raise ValueError(f"did not recognize schema {schema}")
+        if match_to_release is None:
             match_to_release = adata_target_ids.feature_kwargs["match_to_release"]
+        if remove_gene_version is None:
             remove_gene_version = adata_target_ids.feature_kwargs["remove_gene_version"]
+        if subset_genes_to_type is None:
             subset_genes_to_type = adata_target_ids.feature_kwargs["subset_genes_to_type"]
 
         # Set genome container if mapping of gene labels is requested
@@ -600,22 +612,26 @@ class DatasetBase(abc.ABC):
 
         # Compute indices of genes to keep
         if subset_genes_to_type is None:
-            subset_ids_ensg = self.genome_container.ensembl
-            subset_ids_symbol = self.genome_container.symbols
+            target_ids = None
+            target_symbols = None
+        elif isinstance(subset_genes_to_type, str) and subset_genes_to_type == "all":
+            target_ids = self.genome_container.ensembl
+            target_symbols = self.genome_container.symbols
         else:
             if isinstance(subset_genes_to_type, str):
                 subset_genes_to_type = [subset_genes_to_type]
             keys = np.unique(self.genome_container.biotype)
             if subset_genes_to_type not in keys:
                 raise ValueError(f"subset type {subset_genes_to_type} not available in list {keys}")
-            subset_ids_ensg = [
+            target_ids = [
                 x.upper() for x, y in zip(self.genome_container.ensembl, self.genome_container.biotype)
                 if y in subset_genes_to_type
             ]
-            subset_ids_symbol = [
+            target_symbols = [
                 x for x, y in zip(self.genome_container.symbols, self.genome_container.biotype)
                 if y in subset_genes_to_type
             ]
+        allowed_ids = np.asarray(self.genome_container.ensembl)
 
         # Extract layers in order to move data matrices around.
         assert self.layer_processed or self.layer_counts
@@ -650,72 +666,94 @@ class DatasetBase(abc.ABC):
                 x_counts = self.adata.layers[self.layer_counts]
                 var_counts = self.adata.var
 
-        # create new adata using extracted layers
+        # Create new adata using extracted layers.
+        # Note: one layer needs to be in X.
         if x_proc is not None and x_counts is not None:
-            x = x_counts
-            var = var_counts
-            layer_proc_exists = True
-            layer_counts = "X"
-            layer_proc = self._adata_ids.layer_proc
+            layer_counts = adata_target_ids.layer_counts
+            layer_proc = adata_target_ids.layer_proc
+            assert layer_counts == "X" or layer_proc == "X"
+            if layer_counts == "X" and layer_proc != "X":
+                x1 = x_counts
+                var1 = var_counts
+                x2 = x_proc
+                var2 = var_proc
+                layer2 = layer_proc
+            elif layer_counts != "X" and layer_proc == "X":
+                x1 = x_proc
+                var1 = var_proc
+                x2 = x_counts
+                var2 = var_counts
+                layer2 = layer_counts
+            else:
+                raise ValueError(f"one layer needs to be in X: layer_counts={layer_counts}, layer_proc={layer_proc}")
         elif x_proc is None and x_counts is not None:
-            x = x_counts
-            var = var_counts
-            layer_proc_exists = False
+            x1 = x_counts
+            var1 = var_counts
+            layer2 = None
             layer_counts = "X"
             layer_proc = None
         elif x_proc is not None and x_counts is None:
-            x = x_proc
-            var = var_proc
-            layer_proc_exists = False
+            x1 = x_proc
+            var1 = var_proc
+            layer2 = None
             layer_counts = None
             layer_proc = "X"
         else:
             raise ValueError("Neither layer_counts nor layer_proc are set in yaml. Aborting")
         # Streamline features
-        x_new, var_new = subset_adata_genes(
-            x=x,
-            var=self._add_missing_featurenames(var=var),
+        x1, var1 = subset_adata_genes(
+            x=x1,
+            var=self._add_missing_featurenames(var=var1),
+            allowed_ids=allowed_ids,
             feature_id_var_key=self.feature_id_var_key,
             feature_symbol_var_key=self.feature_symbol_var_key,
-            subset_ids_ensg=subset_ids_ensg,
-            subset_ids_symbol=subset_ids_symbol,
-            remove_gene_version=remove_gene_version
+            remove_gene_version=remove_gene_version,
+            target_ids=target_ids,
+            target_symbols=target_symbols,
         )
         self.adata = anndata.AnnData(
-            X=x_new,
+            X=x1,
             obs=self.adata.obs,
             obsm=self.adata.obsm,
-            var=var_new,
+            obsp=self.adata.obsp,
+            var=var1,
             uns=self.adata.uns
         )
-        if layer_proc_exists:
+        if layer2 is not None:
             # if feature spaces of proc and var are not the same, proc features must be a subset of counts features
             if self.feature_id_var_key is not None:
-                ids_counts = var_counts.index.values if self.feature_id_var_key == "index" \
-                    else var_counts[self.feature_id_var_key].values
-                ids_proc = var_proc.index.values if self.feature_id_var_key == "index" \
-                    else var_proc[self.feature_id_var_key].values
+                ids_counts = var2.index.values if self.feature_id_var_key == "index" \
+                    else var2[self.feature_id_var_key].values
+                ids_proc = var2.index.values if self.feature_id_var_key == "index" \
+                    else var2[self.feature_id_var_key].values
             elif self.feature_symbol_var_key is not None:
-                ids_counts = var_counts.index.values if self.feature_symbol_var_key == "index" \
-                    else var_counts[self.feature_symbol_var_key].values
-                ids_proc = var_proc.index.values if self.feature_symbol_var_key == "index" \
-                    else var_proc[self.feature_symbol_var_key].values
+                ids_counts = var2.index.values if self.feature_symbol_var_key == "index" \
+                    else var2[self.feature_symbol_var_key].values
+                ids_proc = var2.index.values if self.feature_symbol_var_key == "index" \
+                    else var2[self.feature_symbol_var_key].values
             else:
                 raise ValueError("Neither feature_id_var_key nor feature_symbol_var_key are set in yaml. Aborting")
             if set(ids_proc) - set(ids_counts):
                 raise IndexError(f"Features of layer specified as `layer_processed` ('{self.layer_processed}') are "
                                  f"not a subset of the features of layer specified as `layer_counts` "
                                  f"('{self.layer_counts}'). This is not supported.")
-            layer_proc_new, _ = subset_adata_genes(
-                x=x_proc,
-                var=self._add_missing_featurenames(var=var_proc),
+
+            x2, var2 = subset_adata_genes(
+                x=x2,
+                var=self._add_missing_featurenames(var=var2),
+                allowed_ids=allowed_ids,
                 feature_id_var_key=self.feature_id_var_key,
                 feature_symbol_var_key=self.feature_symbol_var_key,
-                subset_ids_ensg=subset_ids_ensg,
-                subset_ids_symbol=subset_ids_symbol,
-                remove_gene_version=remove_gene_version
+                remove_gene_version=remove_gene_version,
+                target_ids=target_ids,
+                target_symbols=target_symbols,
             )
-            self.adata.layers[layer_proc] = layer_proc_new
+            if layer2 != "raw":
+                self.adata.layers[layer2] = x2
+            else:
+                self.adata.raw = anndata.AnnData(x2,
+                                                 obs=pd.DataFrame({}, index=self.adata.obs_names),
+                                                 var=var2)
         self.layer_counts = layer_counts
         self.layer_processed = layer_proc
         self.adata.uns[self._adata_ids.mapped_features] = match_to_release
@@ -723,13 +761,14 @@ class DatasetBase(abc.ABC):
     def streamline_metadata(
             self,
             schema: str = "sfaira",
-            clean_obs: bool = True,
+            clean_obs: Union[bool, list, np.ndarray, tuple] = True,
             clean_var: bool = True,
             clean_uns: bool = True,
             clean_obs_names: bool = True,
-            keep_orginal_obs: bool = False,
+            keep_orginal_obs: Union[bool, list, np.ndarray, tuple] = False,
             keep_symbol_obs: bool = True,
             keep_id_obs: bool = True,
+            **kwargs
     ):
         """
         Streamline the adata instance to a defined output schema.
@@ -753,12 +792,13 @@ class DatasetBase(abc.ABC):
             - "sfaira"
             - "cellxgene"
         :param clean_obs: Whether to delete non-streamlined fields in .obs, .obsm and .obsp.
+             Alternatively, list of .obs fields to remove.
         :param clean_var: Whether to delete non-streamlined fields in .var, .varm and .varp.
         :param clean_uns: Whether to delete non-streamlined fields in .uns.
         :param clean_obs_names: Whether to replace obs_names with a string comprised of dataset id and an increasing
             integer.
         :param keep_orginal_obs: For ontology-constrained .obs columns, whether to keep a column with original
-            annotation.
+            annotation. Alternatively, list of original fields to keep, others are removed.
         :param keep_symbol_obs: For ontology-constrained .obs columns, whether to keep a column with ontology symbol
             annotation.
         :param keep_id_obs: For ontology-constrained .obs columns, whether to keep a column with ontology ID annotation.
@@ -766,6 +806,10 @@ class DatasetBase(abc.ABC):
         """
         schema_version = schema.split(":")[-1] if ":" in schema else None
         self.__assert_loaded()
+        if isinstance(keep_orginal_obs, tuple):
+            keep_orginal_obs = list(keep_orginal_obs)
+        elif isinstance(keep_orginal_obs, np.ndarray):
+            keep_orginal_obs = keep_orginal_obs.tolist()
 
         # Set schema as provided by the user
         if schema.startswith("sfaira"):
@@ -792,7 +836,11 @@ class DatasetBase(abc.ABC):
                     var_new[getattr(adata_target_ids, k)] = self.adata.var.index.tolist()
                 else:
                     var_new[getattr(adata_target_ids, k)] = self.adata.var[self.feature_id_var_key].tolist()
-                    del self.adata.var[self.feature_id_var_key]
+                    if self.feature_id_var_key != getattr(adata_target_ids, k):
+                        del self.adata.var[self.feature_id_var_key]
+                        if self.adata.raw is not None:
+                            if self.feature_id_var_key in self.adata.raw.var.columns:
+                                del self.adata.raw.var[self.feature_id_var_key]
                 self.feature_id_var_key = getattr(adata_target_ids, k)
             elif k == "feature_symbol":
                 if not self.feature_symbol_var_key:
@@ -803,7 +851,11 @@ class DatasetBase(abc.ABC):
                     var_new[getattr(adata_target_ids, k)] = self.adata.var.index.tolist()
                 else:
                     var_new[getattr(adata_target_ids, k)] = self.adata.var[self.feature_symbol_var_key].tolist()
-                    del self.adata.var[self.feature_symbol_var_key]
+                    if self.feature_symbol_var_key != getattr(adata_target_ids, k):
+                        del self.adata.var[self.feature_symbol_var_key]
+                        if self.adata.raw is not None:
+                            if self.feature_symbol_var_key in self.adata.raw.var.columns:
+                                del self.adata.raw.var[self.feature_symbol_var_key]
                 self.feature_symbol_var_key = getattr(adata_target_ids, k)
             else:
                 val = getattr(self, k)
@@ -823,13 +875,20 @@ class DatasetBase(abc.ABC):
             if "feature_symbol" not in adata_target_ids.var_keys:
                 self.feature_symbol_var_key = None
         else:
-            index_old = self.adata.var.index.copy()
             # Add old columns in if they are not duplicated:
-            self.adata.var = pd.concat([
-                var_new,
-                pd.DataFrame(dict([(k, v) for k, v in self.adata.var.items() if k not in var_new.columns]))
-            ], axis=1)
-            self.adata.var.index = index_old
+            var_old = self.adata.var
+            self.adata.var = var_new
+            for k in var_old.columns:
+                if k not in self.adata.var.columns:
+                    self.adata.var[k] = var_old[k].values
+            del var_old
+        # Update .raw.var if raw has the same shape:
+        if self.adata.raw is not None and self.adata.n_vars == self.adata.raw.n_vars:
+            # TODO: this assumes that they are ordered the same way which is hard to check unless we control fields,
+            #  such as feature ID, in .raw as well.
+            self.adata.raw.var.index = self.adata.var.index
+            for k in var_new.columns:
+                self.adata.raw.var[k] = var_new[k].values
 
         # Prepare new .uns dict:
         uns_new = {}
@@ -871,6 +930,7 @@ class DatasetBase(abc.ABC):
         # - for a non-ontology-constrained meta data item "attr":
         #   *  original labels: "attr" + self._adata_ids.onto_original_suffix
         obs_new = pd.DataFrame(index=self.adata.obs.index)
+        obs_to_delete = []
         for k in [x for x in adata_target_ids.obs_keys]:
             if k in experiment_batch_labels and getattr(self, f"{k}_obs_key") is not None:
                 # Handle batch-annotation columns which can be provided as a combination of columns separated by an
@@ -901,7 +961,10 @@ class DatasetBase(abc.ABC):
                     # Last and-clause to check if this column is included in data sets. This may be violated if data
                     # is obtained from a database which is not fully streamlined.
                     # Look for 1a-* and 1b-I
-                    val = self.adata.obs[getattr(self, f"{k}_obs_key")].values.tolist()
+                    k_custom = getattr(self, f"{k}_obs_key")
+                    val = self.adata.obs[k_custom].values.tolist()
+                    if not (isinstance(keep_orginal_obs, list) and k_custom in keep_orginal_obs):
+                        obs_to_delete.append(k_custom)
                 else:
                     # Look for 2a, 2b
                     val = getattr(self, k)
@@ -942,33 +1005,48 @@ class DatasetBase(abc.ABC):
             ])
             obs_new[new_col] = val
             # For ontology-constrained meta data, the remaining columns are added after .obs cleaning below.
-        if clean_obs:
+        if isinstance(clean_obs, bool) and clean_obs:
             if self.adata.obsm is not None:
                 del self.adata.obsm
             if self.adata.obsp is not None:
                 del self.adata.obsp
             self.adata.obs = obs_new
-        else:
+        elif isinstance(clean_obs, bool) and not clean_obs:
             index_old = self.adata.obs.index.copy()
             # Add old columns in if they are not duplicated in target obs column space, even if this column is not
             # defined. This would result in the instance accessing this column assuming it was streamlined.
             self.adata.obs = pd.concat([
                 obs_new,
                 pd.DataFrame(dict([(k, v) for k, v in self.adata.obs.items()
-                                   if k not in adata_target_ids.controlled_meta_keys]))
+                                   if (k not in adata_target_ids.controlled_meta_keys and
+                                       k not in obs_to_delete)]))
             ], axis=1)
             self.adata.obs.index = index_old
+        elif isinstance(clean_obs, list) or isinstance(clean_obs, tuple) or isinstance(clean_obs, np.ndarray):
+            index_old = self.adata.obs.index.copy()
+            # Add old columns in if they are not duplicated in target obs column space, even if this column is not
+            # defined. This would result in the instance accessing this column assuming it was streamlined.
+            self.adata.obs = pd.concat([
+                obs_new,
+                pd.DataFrame(dict([(k, v) for k, v in self.adata.obs.items()
+                                   if (k not in adata_target_ids.controlled_meta_keys and
+                                       k not in clean_obs and
+                                       k not in obs_to_delete)]))
+            ], axis=1)
+            self.adata.obs.index = index_old
+        else:
+            raise ValueError(clean_obs)
         for k in [x for x in adata_target_ids.obs_keys if x in adata_target_ids.ontology_constrained]:
             # Add remaining output columns for ontology-constrained meta data.
             self.__impute_ontology_cols_obs(attr=k, adata_ids=adata_target_ids)
             # Delete attribute-specific columns that are not desired.
-            col_name = getattr(self._adata_ids, k) + self._adata_ids.onto_id_suffix
+            col_name = getattr(adata_target_ids, k) + adata_target_ids.onto_id_suffix
             if not keep_id_obs and col_name in self.adata.obs.columns:
                 del self.adata.obs[col_name]
-            col_name = getattr(self._adata_ids, k) + self._adata_ids.onto_original_suffix
-            if not keep_orginal_obs and col_name in self.adata.obs.columns:
+            col_name = getattr(adata_target_ids, k) + adata_target_ids.onto_original_suffix
+            if (isinstance(keep_orginal_obs, list) or not keep_orginal_obs) and col_name in self.adata.obs.columns:
                 del self.adata.obs[col_name]
-            col_name = getattr(self._adata_ids, k)
+            col_name = getattr(adata_target_ids, k)
             if not keep_symbol_obs and col_name in self.adata.obs.columns:
                 del self.adata.obs[col_name]
         if clean_obs_names:
@@ -989,8 +1067,13 @@ class DatasetBase(abc.ABC):
         self.streamlined_meta = True
         # Add additional hard-coded description changes for cellxgene schema:
         if schema.startswith("cellxgene"):
-            self.adata = cellxgene_export_adaptor(adata=self.adata, adata_ids=self._adata_ids, version=schema_version,
-                                                  obs_keys_batch=self.tech_sample_obs_key)
+            self.adata = cellxgene_export_adaptor(adata=self.adata,
+                                                  adata_ids=self._adata_ids,
+                                                  layer_key_counts=self.layer_counts,
+                                                  layer_key_proc=self.layer_processed,
+                                                  obs_keys_batch=self.tech_sample_obs_key,
+                                                  version=schema_version,
+                                                  **kwargs)
 
     def write_distributed_store(
             self,
@@ -1101,11 +1184,11 @@ class DatasetBase(abc.ABC):
         for x in attrs:
             k = getattr(self, x + "_obs_key")
             if k is None:
-                warnings.warn(f"attempted to write ontology class maps for data set {self.id_base} without annotation of "
-                              f"meta data {x}")
+                warnings.warn(f"attempted to write ontology class maps for data set {self.id_base} without annotation "
+                              f"of meta data {x}")
             elif k not in self.adata.obs.columns:
-                warnings.warn(f"attempted to write ontology class maps for data set {self.id_base} but did not find column "
-                              f"{k} in .obs which should correspond to {x}")
+                warnings.warn(f"attempted to write ontology class maps for data set {self.id_base} but did not find "
+                              f"column {k} in .obs which should correspond to {x}")
             else:
                 fn_x = fn + "_" + x + ".tsv"
                 labels_original = np.unique(self.adata.obs[k].values)
@@ -1154,15 +1237,15 @@ class DatasetBase(abc.ABC):
                 ontology_class_maps[k] = self._read_ontology_class_map(fn=fn)
         self.ontology_class_maps = ontology_class_maps
 
-    def project_free_to_ontology(self, attr: str):
+    def project_free_to_ontology(self, attr: str, adata_ids):
         """
         Project free text cell type names to ontology based on mapping table.
 
         ToDo: add ontology ID setting here.
         """
         ontology_map = self.ontology_class_maps[attr]
-        adata_fields = self._adata_ids
-        col_original = attr + adata_fields.onto_original_suffix
+        #adata_ids = self._adata_ids
+        col_original = getattr(adata_ids, attr) + adata_ids.onto_original_suffix
         labels_original = self.adata.obs[col_original].values
         if ontology_map is not None:  # only if this was defined
             labels_mapped = [
@@ -1172,16 +1255,16 @@ class DatasetBase(abc.ABC):
             # Convert unknown celltype placeholders (needs to be hardcoded here as placeholders are also hardcoded in
             # conversion tsv files
             placeholder_conversion = {
-                "unknown": adata_fields.unknown_metadata_identifier,
-                "NOT_A_CELL": adata_fields.not_a_cell_celltype_identifier,
+                "unknown": adata_ids.unknown_metadata_identifier,
+                "NOT_A_CELL": adata_ids.not_a_cell_celltype_identifier,
             }
             labels_mapped = [
                 placeholder_conversion[x] if x in placeholder_conversion.keys()
                 else x for x in labels_mapped
             ]
-            map_exceptions = [adata_fields.unknown_metadata_identifier]
+            map_exceptions = [adata_ids.unknown_metadata_identifier]
             if attr == "cell_type":
-                map_exceptions.append(adata_fields.not_a_cell_celltype_identifier)
+                map_exceptions.append(adata_ids.not_a_cell_celltype_identifier)
             # Validate mapped IDs based on ontology:
             # This aborts with a readable error if there was a target in the mapping file that doesnt match the ontology
             # This protection blocks progression in the unit test if not deactivated.
@@ -1195,17 +1278,17 @@ class DatasetBase(abc.ABC):
             # TODO this could be changed in the future, this allows this function to be used both on cell type name
             #  mapping files with and without the ID in the third column.
             # This mapping blocks progression in the unit test if not deactivated.
-            self.adata.obs[getattr(adata_fields, attr)] = labels_mapped
+            self.adata.obs[getattr(adata_ids, attr)] = labels_mapped
             self.__project_ontology_ids_obs(attr=attr, map_exceptions=map_exceptions, from_id=False,
-                                            adata_ids=adata_fields)
+                                            adata_ids=adata_ids)
         else:
             # Assumes that the original labels are the correct ontology symbols, because of a lack of ontology,
             # ontology IDs cannot be inferred.
             # TODO is this necessary in the future?
-            self.adata.obs[getattr(adata_fields, attr)] = labels_original
-            self.adata.obs[getattr(adata_fields, attr) + adata_fields.onto_id_suffix] = \
-                [adata_fields.unknown_metadata_identifier] * self.adata.n_obs
-        self.adata.obs[getattr(adata_fields, attr) + adata_fields.onto_original_suffix] = labels_original
+            self.adata.obs[getattr(adata_ids, attr)] = labels_original
+            self.adata.obs[getattr(adata_ids, attr) + adata_ids.onto_id_suffix] = \
+                [adata_ids.unknown_metadata_identifier] * self.adata.n_obs
+        self.adata.obs[getattr(adata_ids, attr) + adata_ids.onto_original_suffix] = labels_original
 
     def __impute_ontology_cols_obs(
             self,
@@ -1258,7 +1341,7 @@ class DatasetBase(abc.ABC):
             # Original annotation (free text):
             original_present = col_original in self.adata.obs.columns
             if original_present and not symbol_present and not id_present:  # 1)
-                self.project_free_to_ontology(attr=attr)
+                self.project_free_to_ontology(attr=attr, adata_ids=adata_ids)
             if symbol_present or id_present:  # 2)
                 if symbol_present and not id_present:  # 2a)
                     self.__project_ontology_ids_obs(attr=attr, from_id=False, adata_ids=adata_ids)
