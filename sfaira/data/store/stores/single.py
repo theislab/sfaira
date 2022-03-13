@@ -60,13 +60,19 @@ class StoreSingleFeatureSpace(StoreBase):
     reduced.
     All data retrieval operations work on .indices: Generators run over these indices when retrieving observations for
     example.
+
+    Note on .obsm:
+    Optional cell-indexed arrays that are kept in memory! In contrast to the core data matrix that may be lazy.
+    Typical examples of such obsm include observation-wise predictors that are computed from .obs, e.g. a design
+    matrix.
     """
 
     _adata_by_key: Dict[str, anndata.AnnData]
+    _dataset_weights: Dict[str, float]
     _indices: Dict[str, np.ndarray]
     _obs_by_key: Union[None, Dict[str, dask.dataframe.DataFrame]]
     data_source: str
-    _dataset_weights: Dict[str, float]
+    obsm: dict
 
     def __init__(self, adata_by_key: Dict[str, anndata.AnnData], indices: Dict[str, np.ndarray],
                  obs_by_key: Union[None, Dict[str, dask.dataframe.DataFrame]] = None, data_source: str = "X"):
@@ -76,8 +82,9 @@ class StoreSingleFeatureSpace(StoreBase):
         self.ontology_container = OCS
         self._genome_container = None
         self._adata_ids_sfaira = AdataIdsSfaira()
-        self.data_source = data_source
         self._celltype_universe = None
+        self.data_source = data_source
+        self.obsm = {}
 
     @staticmethod
     def __align_categorical_levels(adata_by_key: Dict[str, anndata.AnnData]) -> Dict[str, anndata.AnnData]:
@@ -106,6 +113,9 @@ class StoreSingleFeatureSpace(StoreBase):
                                                                 categories=categories)
 
         return adata_by_key
+
+    def _reset_obsm(self):
+        self.obsm = {}
 
     @property
     def idx(self) -> np.ndarray:
@@ -351,6 +361,7 @@ class StoreSingleFeatureSpace(StoreBase):
         Subset list of adata objects based on cell-wise properties.
 
         Subsetting is done based on index vectors, the objects remain untouched.
+        Resets .obsm. TODO this could be indexed in the future.
 
         :param attr_key: Property to subset by. Options:
 
@@ -373,6 +384,7 @@ class StoreSingleFeatureSpace(StoreBase):
         self.indices = self.get_subset_idx(attr_key=attr_key, values=values, excluded_values=excluded_values)
         if self.n_obs == 0 and verbose > 0:
             print(f"WARNING: store is now empty after subsetting {attr_key} for {values}, excluding {excluded_values}.")
+        self._reset_obsm()
 
     def write_config(self, fn: Union[str, os.PathLike]):
         """
@@ -572,6 +584,10 @@ class StoreSingleFeatureSpace(StoreBase):
         return cart
 
     @property
+    def obs(self):
+        raise NotImplementedError()
+
+    @property
     def var(self) -> Union[pd.DataFrame]:
         if self.genome_container is None:
             var = pd.DataFrame({}, index=self.var_names)
@@ -596,7 +612,14 @@ class StoreAnndata(StoreSingleFeatureSpace):
         self.in_memory = in_memory
 
     def _get_cart(self, return_dense: bool = False, **kwargs) -> iter:
-        return CartAnndata(adata_dict=self._adata_sliced, return_dense=return_dense, **kwargs)
+        return CartAnndata(adata_dict=self._adata_sliced, obsm=self.obsm, return_dense=return_dense, **kwargs)
+
+    @property
+    def obs(self):
+        return pd.concat([
+            self._adata_by_key[k].obs.iloc[v, :]
+            for k, v in self.indices.items()
+        ], axis=0, join="inner", ignore_index=True, copy=False)
 
     # Methods that are specific to this child class:
 
@@ -653,7 +676,7 @@ class StoreDao(StoreSingleFeatureSpace):
         return dict([(k, self._x_by_key[k][v, :]) for k, v in self.indices.items()])
 
     def _get_cart(self, **kwargs) -> CartDask:
-        return CartDask(x=self._x, obs=self._obs, **kwargs)
+        return CartDask(x=self._x, obs=self.obs, obsm=self.obsm, **kwargs)
 
     # Methods that are specific to this child class:
 
@@ -681,7 +704,7 @@ class StoreDao(StoreSingleFeatureSpace):
         return self._x_dask_cache
 
     @property
-    def _obs(self) -> pd.DataFrame:
+    def obs(self) -> pd.DataFrame:
         """
         Assemble .obs table of subset of selected data.
 

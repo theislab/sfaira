@@ -29,6 +29,18 @@ class StoreMultipleFeatureSpaceBase(StoreBase):
         self._stores = stores
 
     @property
+    def obsm(self) -> Dict[str, dict]:
+        """
+        Only expose obsm of stores that contain observations.
+        """
+        return dict([(k, v.obsm) for k, v in self._stores.items() if v.n_obs > 0])
+
+    @obsm.setter
+    def obsm(self, x: Dict[str, dict]):
+        for k, v in x.items():
+            self._stores[k].obsm = v
+
+    @property
     def stores(self) -> Dict[str, StoreSingleFeatureSpace]:
         """
         Only expose stores that contain observations.

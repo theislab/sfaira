@@ -76,6 +76,28 @@ def test_data(store_format: str, idx, obs_keys: List[str], randomized_batch_acce
 
 
 @pytest.mark.parametrize("store_format", ["h5ad", "dao"])
+def test_obsm(store_format: str):
+    """
+    Test if in memory obsm interface works.
+    """
+    # Need to re-write because specific obs_keys are required:
+    kwargs = {"obs_keys": ["cell_type"]}
+    cart = _get_cart(store_format=store_format, feature_space="multi", obsm=True, **kwargs)
+    it = cart.iterator
+    counter = 0
+    for i, z in enumerate(it()):
+        counter += 1
+        data_tuple = z[0]
+        assert len(data_tuple) == 2
+        x_i, obsm_i = data_tuple
+        # Flat batches of size 1:
+        assert len(x_i.shape) == 1
+        assert len(obsm_i.shape) == 1
+        # Non-shared feature dimension:
+        assert x_i.shape[0] != obsm_i.shape[0], (x_i.shape, obsm_i.shape)
+
+
+@pytest.mark.parametrize("store_format", ["h5ad", "dao"])
 @pytest.mark.parametrize("idx", [None, np.array([1, 4, 98])])
 def test_schedule_blocked(store_format: str, idx):
     """
