@@ -4,7 +4,7 @@ import numpy as np
 import scipy.sparse
 import sparse
 import torch
-from typing import Union
+from typing import Dict, Union
 
 
 class SfairaDataset(torch.utils.data.Dataset):
@@ -14,11 +14,13 @@ class SfairaDataset(torch.utils.data.Dataset):
             map_fn,
             x: Union[np.ndarray, scipy.sparse.spmatrix, dask.array.Array],
             obs: pd.DataFrame,
+            obsm: Dict[str, Union[np.ndarray, scipy.sparse.spmatrix, dask.array.Array],],
             **kwargs):
         """
 
         :param map_fn:
         :param obs:
+        :param obsm:
         :param x:
         :param dask_to_memory: Whether to convert X to a sparse matrix in memory if it is a dask array.
             This implies that x is also moved from disk to memory if it is currently a lazy dask representation of
@@ -28,6 +30,8 @@ class SfairaDataset(torch.utils.data.Dataset):
         super(SfairaDataset, self).__init__()
         self.map_fn = map_fn
         self.obs = obs
+        self.obsm = obsm
+        self.emit_obsm = len(obsm.keys()) > 0
         if isinstance(x, scipy.sparse.spmatrix) or isinstance(x, sparse.spmatrix):
             self._using_sparse = True
         else:
@@ -48,7 +52,12 @@ class SfairaDataset(torch.utils.data.Dataset):
         if self._using_sparse:
             x = x.toarray()
         obs = self.obs.iloc[idx, :]
-        xy = self.map_fn(x, obs)
+        if self.emit_obsm:
+            obsm = dict([(k, v[idx, :]) for k, v in self.obsm.items()])
+            data_tuple = (x, obs, obsm)
+        else:
+            data_tuple = (x, obs)
+        xy = self.map_fn(*data_tuple)
         # Flatten batch dim for torch.Dataset [not necessary for IteratableDataset]
         # TODO this might be inefficient, might need different solution.
         if xy[0][0].shape[0] == 1 and len(xy[0][0].shape) >= 2:

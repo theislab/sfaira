@@ -31,7 +31,10 @@ def _get_cart(store_format, feature_space, map_fn=None, batch_size=1, obsm=False
     gc.set(**{"biotype": "protein_coding"})
     store.genome_container = gc
     if obsm:
-        store.obsm = dict([(k, {OBSM_KEY: get_dmat("~1+cell_type", v.obs)}) for k, v in store.stores.items()])
+        if feature_space == "single":
+            store.obsm = {OBSM_KEY: get_dmat("~1+cell_type", store.obs)}
+        else:
+            store.obsm = dict([(k, {OBSM_KEY: get_dmat("~1+cell_type", v.obs)}) for k, v in store.stores.items()])
 
     if map_fn is None:
         if obsm:

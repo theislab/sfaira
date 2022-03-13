@@ -134,22 +134,26 @@ def test_schedule_blocked(store_format: str, idx):
 @pytest.mark.parametrize(
     "adaptor", ["python", "tensorflow", "torch", "torch-loader", "torch-iter", "torch-iter-loader"]
 )
+@pytest.mark.parametrize("obsm", [False, True])
 @pytest.mark.parametrize("shuffle_buffer_size", [0, 1000])
-def test_adaptors(adaptor: str, shuffle_buffer_size: int):
+def test_adaptors(adaptor: str, obsm: bool, shuffle_buffer_size: int):
     """
     Test if framework-specific generator adpators yield batches.
     """
     idx = np.arange(0, 10)
 
-    def map_fn(x_, obs_):
-        """
-        Note: Need to convert to numpy in output because torch does not accept dask.
-        """
-        return (np.asarray(x_[:, :2]),),
+    if obsm:
+
+        def map_fn(x_, obs_, obsm_):
+            return (np.asarray(x_[:, :2]),),
+    else:
+
+        def map_fn(x_, obs_):
+            return (np.asarray(x_[:, :2]),),
 
     kwargs = {"idx": {"Mus musculus": idx}, "obs_keys": [], "randomized_batch_access": False, "retrieval_batch_size": 2,
               "map_fn": map_fn}
-    cart = _get_cart(store_format="dao", feature_space="single", **kwargs)
+    cart = _get_cart(store_format="dao", feature_space="single", obsm=obsm, **kwargs)
 
     if adaptor == "python":
         kwargs = {}
@@ -171,6 +175,5 @@ def test_adaptors(adaptor: str, shuffle_buffer_size: int):
         it = list(DataLoader(it))
         it = iter(it)
     if adaptor in ["torch-loader", "torch-iter-loader"]:
-        import torch
         it = iter(list(it))
     _ = next(it)
