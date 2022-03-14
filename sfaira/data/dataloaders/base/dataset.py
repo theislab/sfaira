@@ -2156,12 +2156,16 @@ class DatasetBase(abc.ABC):
             if sample_attr is not None and not isinstance(sample_attr, list):
                 sample_attr = [sample_attr]
             obs_key = getattr(self, cellwise_key)
-            if sample_attr is not None and len(sample_attr) == 1:
-                # Only use sample-wise subsetting if the sample-wise attribute is unique (not mixed).
-                if np.any([x in values for x in sample_attr]):
-                    idx = np.arange(1, self.ncells)
+            if sample_attr is not None:
+                if len(sample_attr) == 1:
+                    # Only use sample-wise subsetting if the sample-wise attribute is unique (not mixed).
+                    if np.any([x in values for x in sample_attr]):
+                        idx = np.arange(1, self.ncells)
+                    else:
+                        idx = np.array([])
                 else:
-                    idx = np.array([])
+                    # No per cell annotation and ambiguous sample annotation: pass entire data set if some keys match.
+                    raise NotImplementedError(f"{self.id}: {(samplewise_key, cellwise_key)}")
             elif obs_key is not None:
                 assert self.adata is not None, "call .load() before .subset_cells()"
                 values_found = self.adata.obs[obs_key].values

@@ -62,6 +62,10 @@ class SfairaDataset(torch.utils.data.Dataset):
         """
         Sets cache up.
 
+        The cache has the same structure as a sample from the data set but each tensor has the full length of the
+        dataset as observation dimension. This implies that no stacking needs to be performed during query, only
+        integer-based query of a dataset-shaped tensor.
+
         :param use_cache: Whether to use cache. If true, sets .cached_data: loads full transformed data.
         """
         self.use_cache = use_cache
@@ -78,6 +82,9 @@ class SfairaDataset(torch.utils.data.Dataset):
         return self._len
 
     def __getitem_cache(self, idx):
+        # Flatten batch dim for torch.Dataset [not necessary for IteratableDataset]
+        if len(idx) == 1:
+            idx = idx[0]
         xy = tuple(tuple(self.cached_data[i][j][idx] for j in range(xi)) for i, xi in enumerate(self._shapes))
         return xy
 

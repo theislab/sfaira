@@ -180,8 +180,8 @@ def test_adaptors(adaptor: str, obsm: bool, shuffle_buffer_size: int):
 
 
 @pytest.mark.parametrize("adaptor", ["torch"])
-@pytest.mark.parametrize("idx", [[2, 7], 3])
-def test_cache(adaptor: str, idx):
+@pytest.mark.parametrize("idx_subset", [[2, 7], 3])
+def test_cache(adaptor: str, idx_subset):
     """
     Test if cache and raw dataset yield same data: both in terms of map_fn transformation and in terms of indexing.
 
@@ -199,10 +199,24 @@ def test_cache(adaptor: str, idx):
               "map_fn": map_fn}
     cart = _get_cart(store_format="dao", feature_space="single", **kwargs)
     # Compare cached and raw dataset:
+    # Create non-cached reference data set:
     it_raw = cart.adaptor(generator_type=adaptor, shuffle_buffer=10, dataset_kwargs={"use_cache": False})
     assert it_raw.cached_data is None
-    xy_raw_selected = it_raw[idx]
+    xy_raw_selected = it_raw[idx_subset]
+    # Create cached data set:
     it_cached = cart.adaptor(generator_type=adaptor, shuffle_buffer=10, dataset_kwargs={"use_cache": True})
+    # Tests:
     assert it_cached.cached_data is not None
-    xy_cache_selected = it_cached[idx]
+    assert it_cached.cached_data[0][0].shape[0] == len(idx)
+    xy_cache_selected = it_cached[idx_subset]
+    len_idx = 1 if isinstance(idx_subset, int) else len(idx_subset)
+    if len_idx == 1:
+        assert len(xy_raw_selected[0][0].shape) == 1
+        assert len(xy_cache_selected[0][0].shape) == 1
+    else:
+        assert len(xy_raw_selected[0][0].shape) == 2
+        assert len(xy_cache_selected[0][0].shape) == 2
+        assert xy_raw_selected[0][0].shape[0] == len_idx
+        assert xy_cache_selected[0][0].shape[0] == len_idx
+    # Check that chosen elements are the same:
     assert torch.all(xy_raw_selected[0][0] == xy_cache_selected[0][0])

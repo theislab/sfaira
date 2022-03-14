@@ -30,7 +30,7 @@ def test_streamline_features(database: str, subset_genes_to_type: str):
         release=MATCH_TO_RELEASE["Mus musculus"])
     # Define set of raw IDs:
     original_ids = dict([
-        (k, np.array([x for x in v.adata.var.index.tolist() if x in gc.ensembl]))
+        (k, np.unique([x for x in v.adata.var.index.tolist() if x in gc.ensembl]))
         for k, v in dsg.datasets.items()])
     dsg.streamline_features(match_to_release=MATCH_TO_RELEASE,
                             schema="sfaira",
