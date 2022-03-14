@@ -7,6 +7,29 @@ import torch
 from typing import Dict, List, Tuple, Union
 
 
+class IndexDataset(torch.utils.data.Dataset):
+
+    """
+    Only yields index of selected observations back as tensor, can be used as proxy data set if data is already full
+    copied to GPU, for example.
+    """
+
+    def __init__(self, number_steps: int, **kwargs):
+        super(IndexDataset, self).__init__()
+        self._number_steps = number_steps
+
+    def __len__(self):
+        return self._number_steps
+
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+        if isinstance(idx, int):
+            idx = [idx]
+        xy = ((torch.from_numpy(np.asarray[idx]),),)
+        return xy
+
+
 class SfairaDataset(torch.utils.data.Dataset):
 
     _shapes: List[int]

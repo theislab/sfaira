@@ -36,11 +36,20 @@ def test_streamline_features(database: str, subset_genes_to_type: str):
                             schema="sfaira",
                             subset_genes_to_type=subset_genes_to_type)
     # Initialise reference gc to check target space inside of ds.
-    gc.set(biotype=subset_genes_to_type)
+    if subset_genes_to_type is not None:
+        gc.set(biotype=subset_genes_to_type)
     for k, v in dsg.datasets.items():
         if subset_genes_to_type is None:
             # Should have maintained original IDs.
-            assert len(v.adata.var.index) == len(original_ids[k]), (len(v.adata.var.index), len(original_ids[k]))
+            print(len(v.adata.var.index))
+            print(len(original_ids[k]))
+            print(len(np.unique(v.adata.var.index)))
+            print(len(np.unique(original_ids[k])))
+            print(len([x for x in v.adata.var.index.tolist() if x in gc.ensembl]))
+            print(len([x for x in original_ids[k] if x in gc.ensembl]))
+            print(len([x for x in v.adata.var.index.tolist() if x in original_ids[k]]))
+            print(len([x for x in original_ids[k] if x in v.adata.var.index.tolist()]))
+            assert len(v.adata.var.index) == len(original_ids[k])
             assert np.all(v.adata.var.index == original_ids[k])
         else:
             # Should have expanded features to target space.
