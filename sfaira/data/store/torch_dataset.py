@@ -4,10 +4,24 @@ import numpy as np
 import scipy.sparse
 import sparse
 import torch
-from typing import Dict, Union
+from typing import Dict, List, Union
 
 
 class SfairaDataset(torch.utils.data.Dataset):
+
+    _shapes: List[int]
+    cached_data: Union[None, List[List[torch.Tensor]]]
+    use_cache: bool
+
+    """
+    Note on caching:
+
+    Caches can be iteratively build during the first epoch, this does however constrain the data pipeline to be serial
+    during the first epoch which results in an awkward interface to torch lightning if parallelization is desired
+    in subsequent epoch. Therefore, we implemented a one-off pre-loading of the cache which has the disadvantage of an
+    overhead at initialization. We may provide sequential caching during first epoch in the future.
+    See also: https://discuss.pytorch.org/t/best-practice-to-cache-the-entire-dataset-during-first-epoch/19608
+    """
 
     def __init__(
             self,
@@ -15,6 +29,7 @@ class SfairaDataset(torch.utils.data.Dataset):
             x: Union[np.ndarray, scipy.sparse.spmatrix, dask.array.Array],
             obs: pd.DataFrame,
             obsm: Dict[str, Union[np.ndarray, scipy.sparse.spmatrix, dask.array.Array],],
+            use_cache: bool = False,
             **kwargs):
         """
 
@@ -25,6 +40,7 @@ class SfairaDataset(torch.utils.data.Dataset):
         :param dask_to_memory: Whether to convert X to a sparse matrix in memory if it is a dask array.
             This implies that x is also moved from disk to memory if it is currently a lazy dask representation of
             a zarr array.
+        :param use_cache: Whether to cache transformed data. Use with caution: Copy of full data will be in memory!
         :param kwargs:
         """
         super(SfairaDataset, self).__init__()
@@ -39,15 +55,37 @@ class SfairaDataset(torch.utils.data.Dataset):
         self.x = x
         assert self.x.shape[0] == self.obs.shape[0], (self.x.shape, self.obs.shape)
         self._len = self.x.shape[0]
+        # Caching:
+        self.setup_cache(use_cache)
+
+    def setup_cache(self, use_cache):
+        """
+        Sets cache up.
+
+        :param use_cache: Whether to use cache. If true, sets .cached_data: loads full transformed data.
+        """
+        self.use_cache = use_cache
+        if self.use_cache:
+            xy = [self.__getitem_raw(idx=i) for i in range(self._len)]
+            self._shapes = [len(z) for z in xy[0]]  # length of each data tuple, e.g. number of x and y tensors.
+            xy = [[torch.stack([xy[n][i][j] for n in range(self._len)]) for j in range(xi)]
+                  for i, xi in enumerate(self._shapes)]
+            self.cached_data = xy
+        else:
+            self.cached_data = None
 
     def __len__(self):
         return self._len
 
-    def __getitem__(self, idx):
-        if torch.is_tensor(idx):
-            idx = idx.tolist()
-        if isinstance(idx, int):
-            idx = [idx]
+    def __getitem_cache(self, idx):
+        xy = [self.__getitem_raw(idx=i) for i in idx]
+        if len(idx) > 1:
+            # Requires stacking:
+            xy = [[torch.stack([xy[n][i][j] for n in range(self._len)]) for j in range(xi)]
+                  for i, xi in enumerate(self._shapes)]
+        return xy
+
+    def __getitem_raw(self, idx):
         x = self.x[idx, :]
         if self._using_sparse:
             x = x.toarray()
@@ -63,6 +101,17 @@ class SfairaDataset(torch.utils.data.Dataset):
         if xy[0][0].shape[0] == 1 and len(xy[0][0].shape) >= 2:
             xy = tuple(tuple(zz.squeeze(axis=0) for zz in z) for z in xy)
         xy = tuple(tuple(torch.from_numpy(zz) for zz in z) for z in xy)
+        return xy
+
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+        if isinstance(idx, int):
+            idx = [idx]
+        if self.use_cache:
+            xy = self.__getitem_cache(idx=idx)
+        else:
+            xy = self.__getitem_raw(idx=idx)
         return xy
 
 

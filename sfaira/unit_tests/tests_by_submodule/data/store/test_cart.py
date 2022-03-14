@@ -177,3 +177,24 @@ def test_adaptors(adaptor: str, obsm: bool, shuffle_buffer_size: int):
     if adaptor in ["torch-loader", "torch-iter-loader"]:
         it = iter(list(it))
     _ = next(it)
+
+
+@pytest.mark.parametrize("adaptor", ["torch"])
+def test_torch_cache(adaptor: str):
+    """
+    Test if framework-specific generator adpators yield batches.
+    """
+    idx = np.arange(0, 10)
+
+    def map_fn(x_, obs_):
+        return (np.asarray(x_),),
+
+    kwargs = {"idx": {"Mus musculus": idx}, "obs_keys": [], "randomized_batch_access": False, "retrieval_batch_size": 2,
+              "map_fn": map_fn}
+    cart = _get_cart(store_format="dao", feature_space="single", **kwargs)
+
+    kwargs = {}
+    it = cart.adaptor(generator_type=adaptor, shuffle_buffer=10, dataset_kwargs={"use_cache": True}, **kwargs)
+    assert it.cached_data is not None
+    it = iter(list(it))
+    _ = next(it)
