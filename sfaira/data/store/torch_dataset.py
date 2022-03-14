@@ -4,13 +4,13 @@ import numpy as np
 import scipy.sparse
 import sparse
 import torch
-from typing import Dict, List, Union
+from typing import Dict, List, Tuple, Union
 
 
 class SfairaDataset(torch.utils.data.Dataset):
 
     _shapes: List[int]
-    cached_data: Union[None, List[List[torch.Tensor]]]
+    cached_data: Union[None, Tuple[Tuple[torch.Tensor]]]
     use_cache: bool
 
     """
@@ -68,8 +68,8 @@ class SfairaDataset(torch.utils.data.Dataset):
         if self.use_cache:
             xy = [self.__getitem_raw(idx=i) for i in range(self._len)]
             self._shapes = [len(z) for z in xy[0]]  # length of each data tuple, e.g. number of x and y tensors.
-            xy = [[torch.stack([xy[n][i][j] for n in range(self._len)]) for j in range(xi)]
-                  for i, xi in enumerate(self._shapes)]
+            xy = tuple(tuple(torch.stack([xy[n][i][j] for n in range(self._len)]) for j in range(xi))
+                       for i, xi in enumerate(self._shapes))
             self.cached_data = xy
         else:
             self.cached_data = None
@@ -78,13 +78,7 @@ class SfairaDataset(torch.utils.data.Dataset):
         return self._len
 
     def __getitem_cache(self, idx):
-        xy = [self.__getitem_raw(idx=i) for i in idx]
-        if len(idx) > 1:
-            # Requires stacking:
-            xy = tuple(tuple(torch.stack([xy[n][i][j] for n in range(self._len)]) for j in range(xi))
-                       for i, xi in enumerate(self._shapes))
-        else:
-            xy = xy[0]
+        xy = tuple(tuple(self.cached_data[i][j][idx] for j in range(xi)) for i, xi in enumerate(self._shapes))
         return xy
 
     def __getitem_raw(self, idx):
