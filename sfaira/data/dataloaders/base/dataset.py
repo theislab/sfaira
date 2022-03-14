@@ -2144,12 +2144,9 @@ class DatasetBase(abc.ABC):
             values = [values]
 
         def get_subset_idx(samplewise_key, cellwise_key):
-            try:
-                sample_attr = getattr(self, samplewise_key)
-                if not isinstance(sample_attr, list):
-                    sample_attr = [sample_attr]
-            except AttributeError:
-                sample_attr = None
+            sample_attr = getattr(self, samplewise_key)
+            if sample_attr is not None and not isinstance(sample_attr, list):
+                sample_attr = [sample_attr]
             obs_key = getattr(self, cellwise_key)
             if sample_attr is not None and len(sample_attr) == 1:
                 # Only use sample-wise subsetting if the sample-wise attribute is unique (not mixed).
@@ -2158,7 +2155,7 @@ class DatasetBase(abc.ABC):
                 else:
                     idx = np.array([])
             elif obs_key is not None:
-                assert self.adata is not None, "adata was not yet loaded"
+                assert self.adata is not None, "call .load() before .subset_cells()"
                 values_found = self.adata.obs[obs_key].values
                 values_found_unique = np.unique(values_found)
                 try:
@@ -2172,8 +2169,6 @@ class DatasetBase(abc.ABC):
                         for y in values
                     ])
                 ]
-                # TODO keep this logging for now to catch undesired behaviour resulting from loaded edges in ontologies.
-                print(f"matched cell-wise keys {str(values_found_unique_matched)} in data set {self.id_base}")
                 idx = np.where([x in values_found_unique_matched for x in values_found])[0]
             else:
                 assert False, "no subset chosen"
