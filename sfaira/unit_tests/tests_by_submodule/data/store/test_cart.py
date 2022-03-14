@@ -180,21 +180,29 @@ def test_adaptors(adaptor: str, obsm: bool, shuffle_buffer_size: int):
 
 
 @pytest.mark.parametrize("adaptor", ["torch"])
-def test_torch_cache(adaptor: str):
+@pytest.mark.parametrize("idx", [[2, 7], 3])
+def test_cache(adaptor: str, idx):
     """
-    Test if framework-specific generator adpators yield batches.
+    Test if cache and raw dataset yield same data: both in terms of map_fn transformation and in terms of indexing.
+
+    This is only re-implemented for the adapator "torch" and "toch-loader" (which directly builds upon caching in
+    "torch").
     """
+    import torch
+
     idx = np.arange(0, 10)
 
     def map_fn(x_, obs_):
-        return (np.asarray(x_),),
+        return (np.asarray(x_) + 2.,),
 
     kwargs = {"idx": {"Mus musculus": idx}, "obs_keys": [], "randomized_batch_access": False, "retrieval_batch_size": 2,
               "map_fn": map_fn}
     cart = _get_cart(store_format="dao", feature_space="single", **kwargs)
-
-    kwargs = {}
-    it = cart.adaptor(generator_type=adaptor, shuffle_buffer=10, dataset_kwargs={"use_cache": True}, **kwargs)
-    assert it.cached_data is not None
-    it = iter(list(it))
-    _ = next(it)
+    # Compare cached and raw dataset:
+    it_raw = cart.adaptor(generator_type=adaptor, shuffle_buffer=10, dataset_kwargs={"use_cache": False})
+    assert it_raw.cached_data is None
+    xy_raw_selected = it_raw[idx]
+    it_cached = cart.adaptor(generator_type=adaptor, shuffle_buffer=10, dataset_kwargs={"use_cache": True})
+    assert it_cached.cached_data is not None
+    xy_cache_selected = it_cached[idx]
+    assert torch.all(xy_raw_selected[0][0] == xy_cache_selected[0][0])

@@ -81,8 +81,10 @@ class SfairaDataset(torch.utils.data.Dataset):
         xy = [self.__getitem_raw(idx=i) for i in idx]
         if len(idx) > 1:
             # Requires stacking:
-            xy = [[torch.stack([xy[n][i][j] for n in range(self._len)]) for j in range(xi)]
-                  for i, xi in enumerate(self._shapes)]
+            xy = tuple(tuple(torch.stack([xy[n][i][j] for n in range(self._len)]) for j in range(xi))
+                       for i, xi in enumerate(self._shapes))
+        else:
+            xy = xy[0]
         return xy
 
     def __getitem_raw(self, idx):

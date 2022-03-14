@@ -612,20 +612,25 @@ class DatasetGroup:
         These keys are properties that are not available in lazy model and require loading first because the
         subsetting works on the cell-level: .adata are maintained but reduced to matches.
 
-        :param key: Property to subset by. Options:
+        :param key: Property to subset by. Options (defined in AdataIdsSfaira.obs_keys):
 
-            - "assay_differentiation" points to self.assay_differentiation_obs_key
-            - "assay_sc" points to self.assay_sc_obs_key
-            - "assay_type_differentiation" points to self.assay_type_differentiation_obs_key
-            - "cell_line" points to self.cell_line
-            - "cell_type" points to self.cell_type_obs_key
-            - "developmental_stage" points to self.developmental_stage_obs_key
-            - "ethnicity" points to self.ethnicity_obs_key
-            - "organ" points to self.organ_obs_key
-            - "organism" points to self.organism_obs_key
-            - "sample_source" points to self.sample_source_obs_key
-            - "sex" points to self.sex_obs_key
-            - "state_exact" points to self.state_exact_obs_key
+                - "assay_sc"
+                - "assay_differentiation"
+                - "assay_type_differentiation
+                - "bio_sample"
+                - "cell_line"
+                - "cell_type"
+                - "development_stage"
+                - "disease"
+                - "ethnicity"
+                - "id"
+                - "individual"
+                - "organ"
+                - "organism"
+                - "sex"
+                - "state_exact"
+                - "sample_source"
+                - "tech_sample"
         :param values: Classes to overlap to.
         :return:
         """
@@ -1285,20 +1290,25 @@ class DatasetSuperGroup:
         These keys are properties that are not available in lazy model and require loading first because the
         subsetting works on the cell-level: .adata are maintained but reduced to matches.
 
-        :param key: Property to subset by. Options:
+        :param key: Property to subset by. Options (defined in AdataIdsSfaira.obs_keys):
 
-            - "assay_sc" points to self.assay_sc_obs_key
-            - "assay_differentiation" points to self.assay_differentiation_obs_key
-            - "assay_type_differentiation" points to self.assay_type_differentiation_obs_key
-            - "cell_line" points to self.cell_line
-            - "cell_type" points to self.cell_type_obs_key
-            - "developmental_stage" points to self.developmental_stage_obs_key
-            - "ethnicity" points to self.ethnicity_obs_key
-            - "organ" points to self.organ_obs_key
-            - "organism" points to self.organism_obs_key
-            - "sample_source" points to self.sample_source_obs_key
-            - "sex" points to self.sex_obs_key
-            - "state_exact" points to self.state_exact_obs_key
+                - "assay_sc"
+                - "assay_differentiation"
+                - "assay_type_differentiation
+                - "bio_sample"
+                - "cell_line"
+                - "cell_type"
+                - "development_stage"
+                - "disease"
+                - "ethnicity"
+                - "id"
+                - "individual"
+                - "organ"
+                - "organism"
+                - "sex"
+                - "state_exact"
+                - "sample_source"
+                - "tech_sample"
         :param values: Classes to overlap to.
         :return:
         """

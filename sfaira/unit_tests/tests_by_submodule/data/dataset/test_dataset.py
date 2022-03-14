@@ -100,7 +100,6 @@ def test_dsgs_subset_cell_wise(celltype: str):
 def test_dsgs_streamline_features(match_to_release: str,
                                   remove_gene_version: bool,
                                   subset_genes_to_type: Union[str, None]):
-    adata_ids = AdataIdsSfaira()
     ds = PrepareData().prepare_dsg(load=False)
     ds.subset(key="organism", values=["Homo sapiens"])
     ds.subset(key="organ", values=["lung"])
