@@ -26,7 +26,7 @@ class IndexDataset(torch.utils.data.Dataset):
             idx = idx.tolist()
         if isinstance(idx, int):
             idx = [idx]
-        xy = ((torch.from_numpy(np.asarray[idx]),),)
+        xy = ((torch.from_numpy(np.asarray([idx])),),)
         return xy
 
 
