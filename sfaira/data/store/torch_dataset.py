@@ -95,7 +95,10 @@ class SfairaDataset(torch.utils.data.Dataset):
         if self.use_cache:
             xy = [self.__getitem_raw(idx=i) for i in range(self._len)]
             self._shapes = [len(z) for z in xy[0]]  # length of each data tuple, e.g. number of x and y tensors.
-            xy = tuple(tuple(torch.stack([xy[n][i][j] for n in range(self._len)]) for j in range(xi))
+            # Expand observation dimension via stack if __getitem_raw collapsed the observation axis:
+            xy = tuple(tuple(torch.cat([xy[n][i][j] for n in range(self._len)], dim=0) if len(xy[0][i][j].shape) > 1
+                             else torch.stack([xy[n][i][j] for n in range(self._len)], dim=0)
+                             for j in range(xi))
                        for i, xi in enumerate(self._shapes))
             self.cached_data = xy
         else:
@@ -124,6 +127,7 @@ class SfairaDataset(torch.utils.data.Dataset):
         xy = self.map_fn(*data_tuple)
         # Flatten batch dim for torch.Dataset [not necessary for IteratableDataset]
         # TODO this might be inefficient, might need different solution.
+        # TODO has consequences in setup_cache as well
         if xy[0][0].shape[0] == 1 and len(xy[0][0].shape) >= 2:
             xy = tuple(tuple(zz.squeeze(axis=0) for zz in z) for z in xy)
         xy = tuple(tuple(torch.from_numpy(zz) for zz in z) for z in xy)
