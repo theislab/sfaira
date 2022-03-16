@@ -1,146 +1,146 @@
-source	target
-B cell	B cell
-CD4-positive, alpha-beta T cell	CD4-positive, alpha-beta T cell
-CD8-positive, alpha-beta T cell	CD8-positive, alpha-beta T cell
-GABAergic neuron	GABAergic neuron
-M cell of gut	M cell of gut
-Muller cell	Muller cell
-OFF-bipolar cell	OFF-bipolar cell
-ON-bipolar cell	ON-bipolar cell
-Purkinje myocyte	Purkinje myocyte
-T cell	T cell
-alveolar macrophage	alveolar macrophage
-astrocyte	astrocyte
-basal cell of epidermis	basal cell of epidermis
-basal cell of epithelium of bronchus	basal cell of epithelium of bronchus
-basal cell of epithelium of trachea	basal cell of epithelium of trachea
-basophil	basophil
-bladder urothelial cell	bladder urothelial cell
-brush cell of bronchus	brush cell of bronchus
-brush cell of trachea	brush cell of trachea
-capillary endothelial cell	capillary endothelial cell
-cardiomyocyte	cardiac muscle cell
-cell	cell
-chondrocyte	chondrocyte
-choroid plexus epithelial cell	choroid plexus epithelial cell
-ciliated cell	ciliated cell
-club cell	club cell
-conventional dendritic cell	conventional dendritic cell
-corticotroph	corticotroph
-dendritic cell	dendritic cell
-endothelial cell	endothelial cell
-endothelial cell of artery	endothelial cell of artery
-endothelial cell of hepatic sinusoid	endothelial cell of hepatic sinusoid
-endothelial cell of lymphatic vessel	endothelial cell of lymphatic vessel
-endothelial cell of sinusoid	endothelial cell of sinusoid
-enterocyte of epithelium of large intestine	enterocyte of epithelium of large intestine
-enterocyte of epithelium of small intestine	enterocyte of epithelium of small intestine
-eosinophil	eosinophil
-ependymal cell	ependymal cell
-epidermal cell	epidermal cell
-epithelial cell	epithelial cell
-epithelial cell of exocrine pancreas	epithelial cell of exocrine pancreas
-epithelial cell of large intestine	epithelial cell of large intestine
-epithelial cell of proximal tubule	epithelial cell of proximal tubule
-epithelial cell of small intestine	epithelial cell of small intestine
-epithelial cell of sweat gland	epithelial cell of sweat gland
-epithelial cell of uterus	epithelial cell of uterus
-erythroid lineage cell	erythroid lineage cell
-erythroid progenitor cell	erythroid progenitor cell
-fast muscle cell	fast muscle cell
-fat cell	fat cell
-fibroblast	fibroblast
-fibroblast of lung	fibroblast of lung
-glomerular endothelial cell	glomerular endothelial cell
-glutamatergic neuron	glutamatergic neuron
-gonadotroph	gonadtroph
-granulocyte monocyte progenitor cell	granulocyte monocyte progenitor cell
-granulosa cell	granulosa cell
-hair follicle cell	hair follicle cell
-hematopoietic precursor cell	hematopoietic precursor cell
-hepatocyte	hepatocyte
-innate lymphoid cell	innate lymphoid cell
-interstitial cell of Cajal	interstitial cell of Cajal
-intestinal enteroendocrine cell	intestinal enteroendocrine cell
-intestinal tuft cell	intestinal tuft cell
-intrahepatic bile duct epithelial cell	intrahepatic bile duct epithelium
-kidney collecting duct cell	kidney collecting duct cell
-kidney distal convoluted tubule epithelial cell	kidney distal convoluted tubule epithelial cell
-kidney loop of Henle epithelial cell	kidney loop of Henle epithelial cell
-kidney loop of Henle thick ascending limb epithelial cell	kidney loop of Henle thick ascending limb epithelial cell
-kidney loop of Henle thin ascending limb epithelial cell	kidney loop of Henle thin ascending limb epithelial cell
-kidney loop of Henle thin descending limb epithelial cell	kidney loop of Henle thin descending limb epithelial cell
-kidney proximal convoluted tubule epithelial cell	kidney proximal convoluted tubule epithelial cell
-kidney proximal straight tubule epithelial cell	kidney proximal straight tubule epithelial cell
-lactotroph	mammotroph
-large intestine goblet cell	large intestine goblet cell
-leptomeningeal cell	leptomeningeal cell
-lung ciliated cell	lung ciliated cell
-lung neuroendocrine cell	lung neuroendocrine cell
-lymphocyte	lymphocyte
-macrophage	macrophage
-macula densa epithelial cell	macula densa epithelial cell
-mature NK T cell	mature NK T cell
-megakaryocyte progenitor cell	megakaryocyte progenitor cell
-melanocyte	melanocyte
-mesenchymal stem cell	mesenchymal stem cell
-mesothelial cell	mesothelial cell
-mesothelial cell of epicardium	mesothelial cell of epicardium
-monocyte	monocyte
-myelinating Schwann cell	myelinating Schwann cell
-myeloid cell	myeloid cell
-myofibroblast cell	myofibroblast cell
-natural killer cell	natural killer cell
-neuroendocrine cell	neuroendocrine cell
-neuron	neuron
-neutrophil	neutrophil
-nodal myocyte	nodal myocyte
-non-myelinating Schwann cell	non-myelinating Schwann cell
-oligodendrocyte	oligodendrocyte
-oligodendrocyte precursor cell	oligodendrocyte precursor cell
-oral mucosa squamous cell	oral mucosa squamous cell
-osteoblast	osteoblast
-pancreatic A cell	pancreatic A cell
-pancreatic B cell	type B pancreatic cell
-pancreatic D cell	pancreatic D cell
-pancreatic PP cell	pancreatic PP cell
-pancreatic acinar cell	pancreatic acinar cell
-pancreatic ductal cell	pancreatic ductal cell
-pancreatic endocrine cell	pancreatic endocrine cell
-pericyte cell	pericyte cell
-plasma cell	plasma cell
-plasmacytoid dendritic cell	plasmacytoid dendritic cell
-platelet	platelet
-podocyte	glomerular visceral epithelial cell
-preosteoblast	preosteoblast
-regular atrial cardiac myocyte	regular atrial cardiac myocyte
-regular ventricular cardiac myocyte	regular ventricular cardiac myocyte
-renal alpha-intercalated cell	renal alpha-intercalated cell
-renal beta-intercalated cell	renal beta-intercalated cell
-renal intercalated cell	renal intercalated cell
-renal principal cell	renal principal cell
-reticular cell	reticular cell
-retina horizontal cell	retina horizontal cell
-retinal bipolar neuron	retinal bipolar neuron
-retinal cone cell	retinal cone cell
-retinal rod cell	retinal rod cell
-secretory cell	secretory cell
-skeletal muscle satellite stem cell	skeletal muscle satellite stem cell
-slow muscle cell	slow muscle cell
-small intestine goblet cell	small intestine goblet cell
-smooth muscle cell	smooth muscle cell
-somatotroph	somatotroph
-spermatid	spermatid
-spermatocyte	spermatocyte
-spermatogonium	spermatogonium
-stromal cell	stromal cell
-tendon cell	tendon cell
-thyrotroph	thyrotroph
-type I pneumocyte	type I pneumocyte
-type II pneumocyte	type II pneumocyte
-unassigned	cell
-urothelial cell	urothelial cell
-vasa recta ascending limb cell	vasa recta ascending limb cell
-vasa recta descending limb cell	vasa recta descending limb cell
-vascular associated smooth muscle cell	vascular associated smooth muscle cell
-vein endothelial cell	vein endothelial cell
+source	target	target_id
+B cell	B cell	CL:0000236
+CD4-positive, alpha-beta T cell	CD4-positive, alpha-beta T cell	CL:0000624
+CD8-positive, alpha-beta T cell	CD8-positive, alpha-beta T cell	CL:0000625
+GABAergic neuron	GABAergic neuron	CL:0000617
+M cell of gut	M cell of gut	CL:0000682
+Muller cell	Muller cell	CL:0011107
+OFF-bipolar cell	OFF-bipolar cell	CL:0000750
+ON-bipolar cell	ON-bipolar cell	CL:0000749
+Purkinje myocyte	Purkinje myocyte	CL:0002068
+T cell	T cell	CL:0000084
+alveolar macrophage	alveolar macrophage	CL:0000583
+astrocyte	astrocyte	CL:0000127
+basal cell of epidermis	basal cell of epidermis	CL:0002187
+basal cell of epithelium of bronchus	basal cell of epithelium of bronchus	CL:1000349
+basal cell of epithelium of trachea	basal cell of epithelium of trachea	CL:1000348
+basophil	basophil	CL:0000767
+bladder urothelial cell	bladder urothelial cell	CL:1001428
+brush cell of bronchus	brush cell of bronchus	CL:0002208
+brush cell of trachea	brush cell of trachea	CL:0002207
+capillary endothelial cell	capillary endothelial cell	CL:0002144
+cardiomyocyte	cardiac muscle cell	CL:0000746
+cell	cell	CL:0000000
+chondrocyte	chondrocyte	CL:0000138
+choroid plexus epithelial cell	choroid plexus epithelial cell	CL:0000706
+ciliated cell	ciliated cell	CL:0000064
+club cell	club cell	CL:0000158
+conventional dendritic cell	conventional dendritic cell	CL:0000990
+corticotroph	corticotroph	CL:0002309
+dendritic cell	dendritic cell	CL:0000451
+endothelial cell	endothelial cell	CL:0000115
+endothelial cell of artery	endothelial cell of artery	CL:1000413
+endothelial cell of hepatic sinusoid	endothelial cell of hepatic sinusoid	CL:1000398
+endothelial cell of lymphatic vessel	endothelial cell of lymphatic vessel	CL:0002138
+endothelial cell of sinusoid	endothelial cell of sinusoid	CL:0002262
+enterocyte of epithelium of large intestine	enterocyte of epithelium of large intestine	CL:0002071
+enterocyte of epithelium of small intestine	enterocyte of epithelium of small intestine	CL:1000334
+eosinophil	eosinophil	CL:0000771
+ependymal cell	ependymal cell	CL:0000065
+epidermal cell	epidermal cell	CL:0000362
+epithelial cell	epithelial cell	CL:0000066
+epithelial cell of exocrine pancreas	epithelial cell of exocrine pancreas	CL:1001433
+epithelial cell of large intestine	epithelial cell of large intestine	CL:0002253
+epithelial cell of proximal tubule	epithelial cell of proximal tubule	CL:0002306
+epithelial cell of small intestine	epithelial cell of small intestine	CL:0002254
+epithelial cell of sweat gland	epithelial cell of sweat gland	CL:1000448
+epithelial cell of uterus	epithelial cell of uterus	CL:0002149
+erythroid lineage cell	erythroid lineage cell	CL:0000764
+erythroid progenitor cell	erythroid progenitor cell	CL:0000038
+fast muscle cell	fast muscle cell	CL:0000190
+fat cell	fat cell	CL:0000136
+fibroblast	fibroblast	CL:0000057
+fibroblast of lung	fibroblast of lung	CL:0002553
+glomerular endothelial cell	glomerular endothelial cell	CL:0002188
+glutamatergic neuron	glutamatergic neuron	CL:0000679
+gonadotroph	gonadtroph	CL:0000437
+granulocyte monocyte progenitor cell	granulocyte monocyte progenitor cell	CL:0000557
+granulosa cell	granulosa cell	CL:0000501
+hair follicle cell	hair follicle cell	CL:0002559
+hematopoietic precursor cell	hematopoietic precursor cell	CL:0008001
+hepatocyte	hepatocyte	CL:0000182
+innate lymphoid cell	innate lymphoid cell	CL:0001065
+interstitial cell of Cajal	interstitial cell of Cajal	CL:0002088
+intestinal enteroendocrine cell	intestinal enteroendocrine cell	CL:1001516
+intestinal tuft cell	intestinal tuft cell	CL:0019032
+intrahepatic bile duct epithelial cell	intrahepatic cholangiocyte	CL:0002538
+kidney collecting duct cell	kidney collecting duct cell	CL:1001225
+kidney distal convoluted tubule epithelial cell	kidney distal convoluted tubule epithelial cell	CL:1000849
+kidney loop of Henle epithelial cell	kidney loop of Henle epithelial cell	CL:1000909
+kidney loop of Henle thick ascending limb epithelial cell	kidney loop of Henle thick ascending limb epithelial cell	CL:1001106
+kidney loop of Henle thin ascending limb epithelial cell	kidney loop of Henle thin ascending limb epithelial cell	CL:1001107
+kidney loop of Henle thin descending limb epithelial cell	kidney loop of Henle thin descending limb epithelial cell	CL:1001111
+kidney proximal convoluted tubule epithelial cell	kidney proximal convoluted tubule epithelial cell	CL:1000838
+kidney proximal straight tubule epithelial cell	kidney proximal straight tubule epithelial cell	CL:1000839
+lactotroph	mammotroph	CL:0002311
+large intestine goblet cell	large intestine goblet cell	CL:1000320
+leptomeningeal cell	leptomeningeal cell	CL:0000708
+lung ciliated cell	lung ciliated cell	CL:1000271
+lung neuroendocrine cell	lung neuroendocrine cell	CL:1000223
+lymphocyte	lymphocyte	CL:0000542
+macrophage	macrophage	CL:0000235
+macula densa epithelial cell	macula densa epithelial cell	CL:1000850
+mature NK T cell	mature NK T cell	CL:0000814
+megakaryocyte progenitor cell	megakaryocyte progenitor cell	CL:0000553
+melanocyte	melanocyte	CL:0000148
+mesenchymal stem cell	mesenchymal stem cell	CL:0000134
+mesothelial cell	mesothelial cell	CL:0000077
+mesothelial cell of epicardium	mesothelial cell of epicardium	CL:0011019
+monocyte	monocyte	CL:0000576
+myelinating Schwann cell	myelinating Schwann cell	CL:0000218
+myeloid cell	myeloid cell	CL:0000763
+myofibroblast cell	myofibroblast cell	CL:0000186
+natural killer cell	natural killer cell	CL:0000623
+neuroendocrine cell	neuroendocrine cell	CL:0000165
+neuron	neuron	CL:0000540
+neutrophil	neutrophil	CL:0000775
+nodal myocyte	nodal myocyte	CL:0002072
+non-myelinating Schwann cell	non-myelinating Schwann cell	CL:0002376
+oligodendrocyte	oligodendrocyte	CL:0000128
+oligodendrocyte precursor cell	oligodendrocyte precursor cell	CL:0002453
+oral mucosa squamous cell	oral mucosa squamous cell	CL:1001576
+osteoblast	osteoblast	CL:0000062
+pancreatic A cell	pancreatic A cell	CL:0000171
+pancreatic B cell	type B pancreatic cell	CL:0000169
+pancreatic D cell	pancreatic D cell	CL:0000173
+pancreatic PP cell	pancreatic PP cell	CL:0002275
+pancreatic acinar cell	pancreatic acinar cell	CL:0002064
+pancreatic ductal cell	pancreatic ductal cell	CL:0002079
+pancreatic endocrine cell	pancreatic endocrine cell	CL:0008024
+pericyte cell	pericyte cell	CL:0000669
+plasma cell	plasma cell	CL:0000786
+plasmacytoid dendritic cell	plasmacytoid dendritic cell	CL:0000784
+platelet	platelet	CL:0000233
+podocyte	glomerular visceral epithelial cell	CL:0000653
+preosteoblast	preosteoblast	CL:0007010
+regular atrial cardiac myocyte	regular atrial cardiac myocyte	CL:0002129
+regular ventricular cardiac myocyte	regular ventricular cardiac myocyte	CL:0002131
+renal alpha-intercalated cell	renal alpha-intercalated cell	CL:0005011
+renal beta-intercalated cell	renal beta-intercalated cell	CL:0002201
+renal intercalated cell	renal intercalated cell	CL:0005010
+renal principal cell	renal principal cell	CL:0005009
+reticular cell	reticular cell	CL:0000432
+retina horizontal cell	retina horizontal cell	CL:0000745
+retinal bipolar neuron	retinal bipolar neuron	CL:0000748
+retinal cone cell	retinal cone cell	CL:0000573
+retinal rod cell	retinal rod cell	CL:0000604
+secretory cell	secretory cell	CL:0000151
+skeletal muscle satellite stem cell	skeletal muscle satellite stem cell	CL:0008011
+slow muscle cell	slow muscle cell	CL:0000189
+small intestine goblet cell	small intestine goblet cell	CL:1000495
+smooth muscle cell	smooth muscle cell	CL:0000192
+somatotroph	somatotroph	CL:0002312
+spermatid	spermatid	CL:0000018
+spermatocyte	spermatocyte	CL:0000017
+spermatogonium	spermatogonium	CL:0000020
+stromal cell	stromal cell	CL:0000499
+tendon cell	tendon cell	CL:0000388
+thyrotroph	thyrotroph	CL:0000476
+type I pneumocyte	type I pneumocyte	CL:0002062
+type II pneumocyte	type II pneumocyte	CL:0002063
+unassigned	cell	CL:0000000
+urothelial cell	urothelial cell	CL:0000731
+vasa recta ascending limb cell	vasa recta ascending limb cell	CL:1001131
+vasa recta descending limb cell	vasa recta descending limb cell	CL:1001285
+vascular associated smooth muscle cell	vascular associated smooth muscle cell	CL:0000359
+vein endothelial cell	vein endothelial cell	CL:0002543

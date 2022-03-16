@@ -1,28 +1,28 @@
-source	target
-Aorta	aorta
-Bladder	urinary bladder
-Blood	blood
-Bone	bone
-Bone_marrow	bone marrow
-Brain_cortex	cerebral cortex
-Brainstem	brainstem
-Colon	colon
-Diaphragm	diaphragm
-Eye_retina	retina
-Fat	flat
-Heart	heart
-Hypothalamus_Pituitary	hypothalamus-pituitary axis
-Kidney	kidney
-Limb_muscle	limb muscle
-Liver	liver
-Lung	lung
-Mammary_gland	mammary gland
-Pancreas	pancreas
-Skin	skin of body
-Small_intestine	small intestine
-Spleen	spleen
-Testes	testis
-Thymus	thymus
-Tongue	tongue
-Trachea	trachea
-Uterus	uterus
+source	target	target_id
+Aorta	aorta	UBERON:0000947
+Bladder	urinary bladder	UBERON:0001255
+Blood	blood	UBERON:0000178
+Bone	bone	AEO:0000082
+Bone_marrow	bone marrow	UBERON:0002371
+Brain_cortex	cerebral cortex	UBERON:0000956
+Brainstem	brainstem	UBERON:0002298
+Colon	colon	UBERON:0001155
+Diaphragm	diaphragm	UBERON:0001103
+Eye_retina	retina	UBERON:0000966
+Fat	flat	PATO:0000407
+Heart	heart	UBERON:0000948
+Hypothalamus_Pituitary	hypothalamus-pituitary axis	UBERON:0004092
+Kidney	kidney	UBERON:0002113
+Limb_muscle	limb muscle	UBERON:0003661
+Liver	liver	UBERON:0002107
+Lung	lung	UBERON:0002048
+Mammary_gland	mammary gland	UBERON:0001911
+Pancreas	pancreas	UBERON:0001264
+Skin	skin of body	UBERON:0002097
+Small_intestine	small intestine	UBERON:0002108
+Spleen	spleen	UBERON:0002106
+Testes	testis	UBERON:0000473
+Thymus	thymus	UBERON:0002370
+Tongue	tongue	UBERON:0001723
+Trachea	trachea	UBERON:0003126
+Uterus	uterus	UBERON:0000995
