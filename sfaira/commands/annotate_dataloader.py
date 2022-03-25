@@ -144,7 +144,7 @@ class DataloaderAnnotater:
                         ]
                     # II) Build a data set group from the already loaded data sets and use the group ontology writing
                     # function.
-                    dsg_f = DatasetGroup(datasets=dict([(x.id_base, ds.datasets[x.id_base]) for x in datasets_f]))
+                    dsg_f = DatasetGroup(datasets=dict([(x.id, ds.datasets[x.id]) for x in datasets_f]))
                     # III) Write this directly into the sfaira clone so that it can be committed via git.
                     doi_sfaira_repr = clean_doi(doi)
                     fn_tsv = os.path.join(path, doi_sfaira_repr, f"{file_module}")
