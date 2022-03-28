@@ -40,7 +40,7 @@ def map_fn(inputs):
         else:
             return None
     except (FileNotFoundError, OSError) as e:
-        return ds.id_cleaned, e,
+        return ds.id_base, e,
 
 
 def merge_uns_from_list(adata_ls):
@@ -195,6 +195,7 @@ class DatasetGroup:
             keep_orginal_obs: bool = False,
             keep_symbol_obs: bool = True,
             keep_id_obs: bool = True,
+            **kwargs
     ):
         """
         Streamline the adata instance in each data set to output format.
@@ -226,6 +227,7 @@ class DatasetGroup:
                 keep_orginal_obs=keep_orginal_obs,
                 keep_symbol_obs=keep_symbol_obs,
                 keep_id_obs=keep_id_obs,
+                **kwargs
             )
 
     def streamline_features(
@@ -1166,6 +1168,7 @@ class DatasetSuperGroup:
             keep_orginal_obs: bool = False,
             keep_symbol_obs: bool = True,
             keep_id_obs: bool = True,
+            **kwargs
     ):
         """
         Streamline the adata instance in each group and each data set to output format.
@@ -1198,6 +1201,7 @@ class DatasetSuperGroup:
                     keep_orginal_obs=keep_orginal_obs,
                     keep_symbol_obs=keep_symbol_obs,
                     keep_id_obs=keep_id_obs,
+                    **kwargs
                 )
 
     def subset(self, key, values):

@@ -242,7 +242,7 @@ def publish_dataloader() -> None:
 
 @sfaira_cli.command()
 @click.option('--doi', type=str, required=True, help="The doi of the paper that the data loader refers to.")
-@click.option('--schema', type=str, default=None, help="Schema to streamline to, e.g. 'cellxgene'")
+@click.option('--schema', type=str, required=True, help="Schema to streamline to, e.g. 'cellxgene'")
 @click.option('--path-out',
               type=click.Path(exists=True),
               help='Absolute path of the location of the streamlined output h5ads.')
@@ -250,20 +250,41 @@ def publish_dataloader() -> None:
               default=DEFAULT_DATA_PATH,
               type=click.Path(exists=True),
               help='Absolute path of the location of the raw data directory.')
-@click.option('--path-loader',
-              default=PACKAGE_LOADER_PATH,
-              type=click.Path(exists=False),
-              help='Relative path from the current directory to the location of the data loader.')
+@click.option('--contributors',
+              type=str,
+              default=None,
+              help='Contributors for this curated object (listed in cellxgene for example).')
+@click.option('--del-obs',
+              type=str,
+              default=None,
+              help='# separated string of columns to remove from .obs, do not add spaces.')
+@click.option('--keep-obs',
+              type=str,
+              default=None,
+              help='# separated string of columns to remove from .obs, do not add spaces.')
 @click.option('--path-cache',
               type=click.Path(exists=True),
               default=None,
               help='The optional absolute path to cached data library maintained by sfaira. Using such a cache speeds '
                    'up loading in sequential runs but is not necessary.')
-def export_h5ad(doi, schema, path_out, path_data, path_loader, path_cache) -> None:
+@click.option('--path-loader',
+              default=PACKAGE_LOADER_PATH,
+              type=click.Path(exists=False),
+              help='Relative path from the current directory to the location of the data loader.')
+@click.option('--title',
+              type=str,
+              default=None,
+              help='The optional absolute path to cached data library maintained by sfaira. Using such a cache speeds '
+                   'up loading in sequential runs but is not necessary.')
+def export_h5ad(del_obs, contributors, doi, schema, keep_obs, path_out, path_data, path_loader, path_cache, title) -> \
+        None:
     """Creates a collection of streamlined h5ad object for a given DOI."""
+    del_obs = del_obs if del_obs is None else del_obs.split("#")
+    keep_obs = keep_obs if keep_obs is None else keep_obs.split("#")
     path_loader, path_data, _ = set_paths(loader=path_loader, data=path_data, cache=path_cache)
-    h5ad_export = H5adExport(doi=doi, path_cache=path_cache, path_data=path_data, path_loader=path_loader,
-                             path_out=path_out, schema=schema)
+    h5ad_export = H5adExport(clean_obs=del_obs, contributors=contributors, doi=doi, keep_obs=keep_obs,
+                             path_cache=path_cache, path_data=path_data, path_loader=path_loader, path_out=path_out,
+                             schema=schema, title=title)
     h5ad_export.write()
 
 
