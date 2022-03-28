@@ -34,7 +34,7 @@ class DatasetSuperGroupLoaders(DatasetSuperGroup):
             if os.path.isdir(os.path.join(cwd, f)):  # only directories
                 if f[:len(dir_prefix)] == dir_prefix and f not in dir_exclude:  # Narrow down to data set directories
                     path_dsg = str(pydoc.locate(f"sfaira.data.dataloaders.loaders.{f}.FILE_PATH"))
-                    if path_dsg is not None:
+                    if path_dsg != "None":
                         try:
                             dsg = DatasetGroupDirectoryOriented(
                                 file_base=path_dsg,
