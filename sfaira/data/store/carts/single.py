@@ -386,11 +386,9 @@ class CartDask(CartSingle):
     _x: dask.array
     _obs: pd.DataFrame
 
-    def __init__(self, x, obs, obs_keys, **kwargs):
+    def __init__(self, x: dask.array, obs: pd.DataFrame, obs_keys: List[str], **kwargs):
         self._x = x
         self._obs = obs[obs_keys]
-        # Redefine index so that .loc indexing can be used instead of .iloc indexing:
-        self._obs.index = np.arange(0, obs.shape[0])
         super(CartDask, self).__init__(obs_keys=obs_keys, **kwargs)
         self.schedule.batchsplits = self._x.chunks[0]  # align batchsplits with partitions of the underlying dask array
 
