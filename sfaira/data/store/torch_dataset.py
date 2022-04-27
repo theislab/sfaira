@@ -51,7 +51,7 @@ class SfairaDataset(torch.utils.data.Dataset):
             map_fn,
             x: Union[np.ndarray, scipy.sparse.spmatrix, dask.array.Array],
             obs: pd.DataFrame,
-            obsm: Dict[str, Union[np.ndarray, scipy.sparse.spmatrix, dask.array.Array],],
+            obsm: Dict[str, Union[np.ndarray, scipy.sparse.spmatrix, dask.array.Array]],
             use_cache: bool = False,
             **kwargs):
         """

@@ -206,6 +206,7 @@ class OntologyHierarchical(Ontology, abc.ABC):
     Basic ordered ontology container
     """
     _graph: networkx.MultiDiGraph
+    _node_names: Union[None, List[str]] = None
 
     @property
     def graph(self) -> networkx.MultiDiGraph:
@@ -225,17 +226,15 @@ class OntologyHierarchical(Ontology, abc.ABC):
         if isinstance(x, str):
             x = [x]
         node_ids = self.node_ids
-        for y in x:
-            if y not in node_ids:
-                raise ValueError(f"queried node id {y} is not in graph")
+        if np.any([y not in node_ids for y in x]):
+            raise ValueError(f"queried node id {x} are not all in graph")
 
     def __validate_node_names(self, x: Union[str, List[str]]):
         if isinstance(x, str):
             x = [x]
         node_names = self.node_names
-        for y in x:
-            if y not in node_names:
-                raise ValueError(f"queried node name {y} is not in graph")
+        if np.any([y not in node_names for y in x]):
+            raise ValueError(f"queried node names {x} are not all in graph")
 
     @property
     def nodes(self) -> List[Tuple[str, dict]]:
@@ -247,10 +246,9 @@ class OntologyHierarchical(Ontology, abc.ABC):
 
     @property
     def node_names(self) -> List[str]:
-        try:
-            return [x["name"] for x in self.graph.nodes.values()]
-        except KeyError as e:
-            raise KeyError(f"KeyError '{e}' in {type(self)}")
+        if self._node_names is None:
+            self._node_names = [v["name"] for v in self.graph.nodes.values()]
+        return self._node_names
 
     @property
     def node_ids(self) -> List[str]:
@@ -268,15 +266,11 @@ class OntologyHierarchical(Ontology, abc.ABC):
             x = [x]
         if self.is_a_node_id(x[0]):
             self.__validate_node_ids(x=x)
-            x = [
-                [v["name"] for k, v in self.graph.nodes.items() if k == z][0]
-                for z in x
-            ]
+            x = [self.graph.nodes[k]["name"] for k in x]
         elif self.is_a_node_name(x[0]):
             self.__validate_node_names(x=x)
         else:
             raise ValueError(f"node {x[0]} not recognized")
-        self.__validate_node_names(x=x)
         if was_str:
             return x[0]
         else:
@@ -296,7 +290,6 @@ class OntologyHierarchical(Ontology, abc.ABC):
             ]
         else:
             raise ValueError(f"node {x[0]} not recognized")
-        self.__validate_node_ids(x=x)
         if was_str:
             return x[0]
         else:
@@ -324,6 +317,8 @@ class OntologyHierarchical(Ontology, abc.ABC):
             if not np.any([self.is_a(query=z, reference=y, convert_to_id=False) for z in x]):
                 nodes_to_remove.append(y)
         self.graph.remove_nodes_from(nodes_to_remove)
+        self.get_ancestors.cache_clear()
+        self.get_descendants.cache_clear()
 
     @property
     def n_leaves(self) -> int:

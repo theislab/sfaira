@@ -17,7 +17,7 @@ from sfaira.data.dataloaders.base.dataset import DatasetBase
 from sfaira.data.dataloaders.base.utils import identify_tsv, is_child
 from sfaira.versions.genomes.genomes import GenomeContainer
 from sfaira.versions.metadata.maps import prepare_ontology_map_tab
-from sfaira.data.utils import read_yaml
+from sfaira.data.dataloaders.utils import read_yaml
 
 UNS_STRING_META_IN_OBS = "__obs__"
 
@@ -183,86 +183,13 @@ class DatasetGroup:
             for k in datasets_to_remove:
                 del self.datasets[k]
 
-    load.__doc__ += load_doc
-
-    def streamline_metadata(
-            self,
-            schema: str = "sfaira",
-            clean_obs: bool = True,
-            clean_var: bool = True,
-            clean_uns: bool = True,
-            clean_obs_names: bool = True,
-            keep_orginal_obs: bool = False,
-            keep_symbol_obs: bool = True,
-            keep_id_obs: bool = True,
-            **kwargs
-    ):
-        """
-        Streamline the adata instance in each data set to output format.
-        Output format are saved in ADATA_FIELDS* classes.
-
-        :param schema: Export format.
-            - "sfaira"
-            - "cellxgene"
-        :param clean_obs: Whether to delete non-streamlined fields in .obs, .obsm and .obsp.
-        :param clean_var: Whether to delete non-streamlined fields in .var, .varm and .varp.
-        :param clean_uns: Whether to delete non-streamlined fields in .uns.
-        :param clean_obs_names: Whether to replace obs_names with a string comprised of dataset id and an increasing integer.
-        :param clean_obs_names: Whether to replace obs_names with a string comprised of dataset id and an increasing
-            integer.
-        :param keep_orginal_obs: For ontology-constrained .obs columns, whether to keep a column with original
-            annotation.
-        :param keep_symbol_obs: For ontology-constrained .obs columns, whether to keep a column with ontology symbol
-            annotation.
-        :param keep_id_obs: For ontology-constrained .obs columns, whether to keep a column with ontology ID annotation.
-        :return:
-        """
+    def streamline_obs_uns(self, **kwargs):
         for x in self.ids:
-            self.datasets[x].streamline_metadata(
-                schema=schema,
-                clean_obs=clean_obs,
-                clean_var=clean_var,
-                clean_uns=clean_uns,
-                clean_obs_names=clean_obs_names,
-                keep_orginal_obs=keep_orginal_obs,
-                keep_symbol_obs=keep_symbol_obs,
-                keep_id_obs=keep_id_obs,
-                **kwargs
-            )
+            self.datasets[x].streamline_obs_uns(**kwargs)
 
-    def streamline_features(
-            self,
-            match_to_release: Union[str, Dict[str, str], None],
-            remove_gene_version: bool = True,
-            subset_genes_to_type: Union[None, str, List[str]] = None,
-            schema: Union[str, None] = None,
-    ):
-        """
-        Subset and sort genes to genes defined in an assembly or genes of a particular type, such as protein coding.
-        This also adds missing ensid or gene symbol columns if match_to_reference is not set to False and removes all
-        adata.var columns that are not defined as gene_id_ensembl_var_key or gene_id_symbol_var_key in the dataloader.
-
-        :param match_to_release: Which ensembl genome annotation release to map the feature space to. Can be:
-                - str: Provide the name of the release (eg. "104").
-                - dict: Mapping of organism to name of the release (see str format). Chooses release for each
-                    data set based on organism annotation.
-        :param remove_gene_version: Whether to remove the version number after the colon sometimes found in ensembl
-            gene ids.
-        :param subset_genes_to_type: Type(s) to subset to. Can be a single type or a list of types or None.
-            Types can be:
-                - None: All genes in assembly.
-                - "protein_coding": All protein coding genes in assembly.
-        :param schema: Export format.
-            - "sfaira"
-            - "cellxgene"
-        """
+    def streamline_var(self, **kwargs):
         for x in self.ids:
-            self.datasets[x].streamline_features(
-                match_to_release=match_to_release,
-                remove_gene_version=remove_gene_version,
-                subset_genes_to_type=subset_genes_to_type,
-                schema=schema,
-            )
+            self.datasets[x].streamline_var(**kwargs)
 
     def collapse_counts(self):
         """
@@ -271,46 +198,9 @@ class DatasetGroup:
         for x in self.ids:
             self.datasets[x].collapse_counts()
 
-    def write_distributed_store(
-            self,
-            dir_cache: Union[str, os.PathLike],
-            store_format: str = "dao",
-            dense: bool = False,
-            compression_kwargs: dict = {},
-            chunks: Union[int, None] = None,
-    ):
-        """
-        Write data set into a format that allows distributed access to data set on disk.
-
-        Stores are useful for distributed access to data sets, in many settings this requires some streamlining of the
-        data sets that are accessed. Use .streamline_* before calling this method to streamline the data sets.
-        This method writes a separate file for each data set in this object.
-
-        :param dir_cache: Directory to write cache in.
-        :param store_format: Disk format for objects in cache. Recommended is "dao".
-
-            - "h5ad": Allows access via backed .h5ad.
-                Note on compression: .h5ad supports sparse data with is a good compression that gives fast row-wise
-                    access if the files are csr, so further compression potentially not necessary.
-            - "dao": Distributed access optimised format, recommended for batched access in optimisation, for example.
-        :param dense: Whether to write sparse or dense store, this will be homogenously enforced.
-        :param compression_kwargs: Compression key word arguments to give to h5py or zarr
-            For store_format=="h5ad", see also anndata.AnnData.write_h5ad:
-                - compression,
-                - compression_opts.
-            For store_format=="dao", see also sfaira.data.write_dao which relays kwargs to
-            zarr.hierarchy.create_dataset:
-                - compressor
-                - overwrite
-                - order
-                and others.
-        :param chunks: Observation axes of chunk size of zarr array, see anndata.AnnData.write_zarr documentation.
-            Only relevant for store=="dao". The feature dimension of the chunks is always is the full feature space.
-            Uses zarr default chunking across both axes if None.
-        """
+    def write_distributed_store(self, **kwargs):
         for _, v in self.datasets.items():
-            v.write_distributed_store(dir_cache=dir_cache, store_format=store_format, dense=dense,
-                                      compression_kwargs=compression_kwargs, chunks=chunks)
+            v.write_distributed_store(**kwargs)
 
     def write_backed(
             self,
@@ -605,37 +495,9 @@ class DatasetGroup:
         for x in ids_del:
             del self.datasets[x]
 
-    def subset_cells(self, key, values: Union[str, List[str]]):
-        """
-        Subset list of adata objects based on cell-wise properties.
-
-        These keys are properties that are not available in lazy model and require loading first because the
-        subsetting works on the cell-level: .adata are maintained but reduced to matches.
-
-        :param key: Property to subset by. Options (defined in AdataIdsSfaira.obs_keys):
-
-                - "assay_sc"
-                - "assay_differentiation"
-                - "assay_type_differentiation
-                - "bio_sample"
-                - "cell_line"
-                - "cell_type"
-                - "development_stage"
-                - "disease"
-                - "ethnicity"
-                - "id"
-                - "individual"
-                - "organ"
-                - "organism"
-                - "sex"
-                - "state_exact"
-                - "sample_source"
-                - "tech_sample"
-        :param values: Classes to overlap to.
-        :return:
-        """
+    def subset_cells(self, **kwargs):
         for x in self.ids:
-            self.datasets[x].subset_cells(key=key, values=values)
+            self.datasets[x].subset_cells(**kwargs)
             if self.datasets[x].adata is None:  # No observations (cells) left.
                 del self.datasets[x]
 
@@ -976,66 +838,13 @@ class DatasetSuperGroup:
         for x in self.dataset_groups:
             x.download(**kwargs)
 
-    def load(
-            self,
-            annotated_only: bool = False,
-            load_raw: bool = False,
-            allow_caching: bool = True,
-            processes: int = 1,
-            **kwargs
-    ):
-        """
-        Loads data set homosapiens into anndata object.
-
-        :param annotated_only:
-        :param load_raw: See .load().
-        :param allow_caching: See .load().
-        :param processes: Processes to parallelise loading over. Uses python multiprocessing if > 1, for loop otherwise.
-            Note: parallelises loading of each dataset group, but not across groups.
-        :return:
-        """
+    def load(self, **kwargs):
         for x in self.dataset_groups:
-            x.load(
-                annotated_only=annotated_only,
-                load_raw=load_raw,
-                allow_caching=allow_caching,
-                processes=processes,
-                **kwargs
-            )
+            x.load(**kwargs)
 
-    def streamline_features(
-            self,
-            match_to_release: Union[str, Dict[str, str], None],
-            remove_gene_version: bool = True,
-            subset_genes_to_type: Union[None, str, List[str]] = None,
-            schema: Union[str, None] = None,
-    ):
-        """
-        Subset and sort genes to genes defined in an assembly or genes of a particular type, such as protein coding.
-        This also adds missing ensid or gene symbol columns if match_to_reference is not set to False and removes all
-        adata.var columns that are not defined as gene_id_ensembl_var_key or gene_id_symbol_var_key in the dataloader.
-
-        :param match_to_release: Which ensembl genome annotation release to map the feature space to. Can be:
-                - str: Provide the name of the release (eg. "104").
-                - dict: Mapping of organism to name of the release (see str format). Chooses release for each
-                    data set based on organism annotation.
-        :param remove_gene_version: Whether to remove the version number after the colon sometimes found in ensembl
-            gene ids.
-        :param subset_genes_to_type: Type(s) to subset to. Can be a single type or a list of types or None.
-            Types can be:
-                - None: All genes in assembly.
-                - "protein_coding": All protein coding genes in assembly.
-        :param schema: Export format.
-            - "sfaira"
-            - "cellxgene"
-        """
+    def streamline_var(self, **kwargs):
         for x in self.dataset_groups:
-            x.streamline_features(
-                match_to_release=match_to_release,
-                remove_gene_version=remove_gene_version,
-                subset_genes_to_type=subset_genes_to_type,
-                schema=schema,
-            )
+            x.streamline_var(**kwargs)
 
     def collapse_counts(self):
         """
@@ -1122,107 +931,14 @@ class DatasetSuperGroup:
 
         return adata_concat
 
-    def write_distributed_store(
-            self,
-            dir_cache: Union[str, os.PathLike],
-            store_format: str = "dao",
-            dense: bool = False,
-            compression_kwargs: dict = {},
-            chunks: Union[int, None] = None,
-    ):
-        """
-        Write data set into a format that allows distributed access to data set on disk.
-
-        Stores are useful for distributed access to data sets, in many settings this requires some streamlining of the
-        data sets that are accessed. Use .streamline_* before calling this method to streamline the data sets.
-        This method writes a separate file for each data set in this object.
-
-        :param dir_cache: Directory to write cache in.
-        :param store_format: Disk format for objects in cache. Recommended is "dao".
-
-            - "h5ad": Allows access via backed .h5ad.
-                Note on compression: .h5ad supports sparse data with is a good compression that gives fast row-wise
-                    access if the files are csr, so further compression potentially not necessary.
-            - "dao": Distributed access optimised format, recommended for batched access in optimisation, for example.
-        :param dense: Whether to write sparse or dense store, this will be homogenously enforced.
-        :param compression_kwargs: Compression key word arguments to give to h5py or zarr
-            For store_format=="h5ad", see also anndata.AnnData.write_h5ad:
-                - compression,
-                - compression_opts.
-            For store_format=="dao", see also sfaira.data.write_dao which relays kwargs to
-            zarr.hierarchy.create_dataset:
-                - compressor
-                - overwrite
-                - order
-                and others.
-        :param chunks: Observation axes of chunk size of zarr array, see anndata.AnnData.write_zarr documentation.
-            Only relevant for store=="dao". The feature dimension of the chunks is always is the full feature space.
-            Uses zarr default chunking across both axes if None.
-        """
+    def write_distributed_store(self, **kwargs):
         for x in self.dataset_groups:
-            x.write_distributed_store(dir_cache=dir_cache, store_format=store_format, dense=dense,
-                                      compression_kwargs=compression_kwargs, chunks=chunks)
+            x.write_distributed_store(**kwargs)
 
-    def streamline_metadata(
-            self,
-            schema: str = "sfaira",
-            clean_obs: bool = True,
-            clean_var: bool = True,
-            clean_uns: bool = True,
-            clean_obs_names: bool = True,
-            keep_orginal_obs: bool = False,
-            keep_symbol_obs: bool = True,
-            keep_id_obs: bool = True,
-            **kwargs
-    ):
-        """
-        Streamline the adata instance in each group and each data set to output format.
-        Output format are saved in ADATA_FIELDS* classes.
-
-        :param schema: Export format.
-            - "sfaira"
-            - "cellxgene"
-        :param clean_obs: Whether to delete non-streamlined fields in .obs, .obsm and .obsp.
-        :param clean_var: Whether to delete non-streamlined fields in .var, .varm and .varp.
-        :param clean_uns: Whether to delete non-streamlined fields in .uns.
-        :param clean_obs_names: Whether to replace obs_names with a string comprised of dataset id and an increasing integer.
-        :param clean_obs_names: Whether to replace obs_names with a string comprised of dataset id and an increasing
-            integer.
-        :param keep_orginal_obs: For ontology-constrained .obs columns, whether to keep a column with original
-            annotation.
-        :param keep_symbol_obs: For ontology-constrained .obs columns, whether to keep a column with ontology symbol
-            annotation.
-        :param keep_id_obs: For ontology-constrained .obs columns, whether to keep a column with ontology ID annotation.
-        :return:
-        """
+    def streamline_obs_uns(self, **kwargs):
         for x in self.dataset_groups:
             for xx in x.ids:
-                x.datasets[xx].streamline_metadata(
-                    schema=schema,
-                    clean_obs=clean_obs,
-                    clean_var=clean_var,
-                    clean_uns=clean_uns,
-                    clean_obs_names=clean_obs_names,
-                    keep_orginal_obs=keep_orginal_obs,
-                    keep_symbol_obs=keep_symbol_obs,
-                    keep_id_obs=keep_id_obs,
-                    **kwargs
-                )
-
-    def subset(self, key, values):
-        """
-        Subset list of adata objects based on match to values in key property.
-
-        These keys are properties that are available in lazy model.
-        Subsetting happens on .datasets.
-
-        :param key: Property to subset by.
-        :param values: Classes to overlap to.
-        :return:
-        """
-        for x in self.dataset_groups:
-            x.subset(key=key, values=values)
-        self.dataset_groups = [x for x in self.dataset_groups if x.datasets]  # Delete empty DatasetGroups
+                x.datasets[xx].streamline_obs_uns(**kwargs)
 
     def remove_duplicates(
             self,
@@ -1283,37 +999,15 @@ class DatasetSuperGroup:
                     idx_tokeep.append(i)
         self.dataset_groups = [self.dataset_groups[i] for i in idx_tokeep]
 
-    def subset_cells(self, key, values: Union[str, List[str]]):
-        """
-        Subset list of adata objects based on cell-wise properties.
+    def subset(self, **kwargs):
+        for x in self.dataset_groups:
+            x.subset(**kwargs)
+        # Delete empty DatasetGroups:
+        self.dataset_groups = [x for x in self.dataset_groups if x.datasets]
 
-        These keys are properties that are not available in lazy model and require loading first because the
-        subsetting works on the cell-level: .adata are maintained but reduced to matches.
-
-        :param key: Property to subset by. Options (defined in AdataIdsSfaira.obs_keys):
-
-                - "assay_sc"
-                - "assay_differentiation"
-                - "assay_type_differentiation
-                - "bio_sample"
-                - "cell_line"
-                - "cell_type"
-                - "development_stage"
-                - "disease"
-                - "ethnicity"
-                - "id"
-                - "individual"
-                - "organ"
-                - "organism"
-                - "sex"
-                - "state_exact"
-                - "sample_source"
-                - "tech_sample"
-        :param values: Classes to overlap to.
-        :return:
-        """
+    def subset_cells(self, **kwargs):
         for i in range(len(self.dataset_groups)):
-            self.dataset_groups[i].subset_cells(key=key, values=values)
+            self.dataset_groups[i].subset_cells(**kwargs)
 
     def project_celltypes_to_ontology(self, adata_fields: Union[AdataIds, None] = None, copy=False):
         """

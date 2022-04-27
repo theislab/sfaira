@@ -45,12 +45,12 @@ for k, ds in universe.datasets.items():
             load_raw=False,
             allow_caching=True,
         )
-        ds.streamline_features(
+        ds.streamline_var(
             remove_gene_version=True,
             match_to_release={"Homo sapiens": "104", "Mus musculus": "104"},
             subset_genes_to_type="protein_coding"
         )
-        ds.streamline_metadata(schema="sfaira", clean_obs=True, clean_var=True, clean_uns=True, clean_obs_names=True)
+        ds.streamline_obs_uns(schema="sfaira", clean_obs=True, clean_var=True, clean_uns=True, clean_obs_names=True)
         ds.write_distributed_store(dir_cache=args.path_store, store_format=args.store_type,
                                    compression_kwargs=compression_kwargs, **kwargs)
         ds.clear()

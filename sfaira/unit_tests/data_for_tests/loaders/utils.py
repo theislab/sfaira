@@ -37,11 +37,11 @@ def _create_adata(celltypes, ncells, ngenes, assembly) -> anndata.AnnData:
 
 def _load_script(dsg, rewrite: bool, match_to_release):
     dsg.load(allow_caching=True, load_raw=rewrite)
-    dsg.streamline_features(schema="sfaira",
-                            match_to_release=match_to_release,
-                            remove_gene_version=True,
-                            subset_genes_to_type="all")
-    dsg.streamline_metadata(schema="sfaira", clean_obs=True, clean_var=True, clean_uns=True, clean_obs_names=True)
+    dsg.streamline_var(schema="sfaira",
+                       match_to_release=match_to_release,
+                       remove_gene_version=True,
+                       subset_genes_to_type="all")
+    dsg.streamline_obs_uns(schema="sfaira", clean_obs=True, clean_var=True, clean_uns=True, clean_obs_names=True)
     return dsg
 
 

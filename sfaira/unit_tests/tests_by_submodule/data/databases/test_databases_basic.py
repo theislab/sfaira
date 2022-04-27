@@ -1,7 +1,6 @@
 import os
 import pytest
 import shutil
-from typing import List
 
 from sfaira.unit_tests.directories import DIR_DATA_DATABASES_CACHE
 from sfaira.unit_tests.data_for_tests.databases.utils import prepare_dsg_database

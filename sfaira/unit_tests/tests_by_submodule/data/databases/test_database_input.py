@@ -19,41 +19,37 @@ MATCH_TO_RELEASE = {"Homo sapiens": RELEASE_HUMAN, "Mus musculus": RELEASE_MOUSE
 ])
 @pytest.mark.parametrize("subset_genes_to_type", [None, "protein_coding"])
 def test_streamline_features(database: str, subset_genes_to_type: str):
-    """Check if feature streamlining from cellxgene is successfull."""
+    """Check if feature streamlining from cellxgene is successful."""
     adata_ids_cxg = AdataIdsCellxgene_v2_0_0()
+    adata_ids_sfaira = AdataIdsSfaira()
     database, subset_args = database
     dsg = prepare_dsg_database(database=database)
     dsg.subset(key=subset_args[0], values=subset_args[1])
     dsg.load()
-    gc = GenomeContainer(
-        organism="Mus musculus",
-        release=MATCH_TO_RELEASE["Mus musculus"])
+    gc = GenomeContainer(organism="Mus musculus", release=MATCH_TO_RELEASE["Mus musculus"])
     # Define set of raw IDs:
     original_ids = dict([
-        (k, np.unique([x for x in v.adata.var.index.tolist() if x in gc.ensembl]))
+        (k, np.array([x for x in v.adata.var.index.tolist() if x in gc.ensembl]))
         for k, v in dsg.datasets.items()])
-    dsg.streamline_features(match_to_release=MATCH_TO_RELEASE,
-                            schema="sfaira",
-                            subset_genes_to_type=subset_genes_to_type)
+    dsg.streamline_var(match_to_release=MATCH_TO_RELEASE,
+                       schema="sfaira",
+                       subset_genes_to_type=subset_genes_to_type)
     # Initialise reference gc to check target space inside of ds.
     if subset_genes_to_type is not None:
         gc.set(biotype=subset_genes_to_type)
     for k, v in dsg.datasets.items():
         if subset_genes_to_type is None:
             # Should have maintained original IDs.
-            print(len(v.adata.var.index))
-            print(len(original_ids[k]))
-            print(len(np.unique(v.adata.var.index)))
-            print(len(np.unique(original_ids[k])))
-            print(len([x for x in v.adata.var.index.tolist() if x in gc.ensembl]))
-            print(len([x for x in original_ids[k] if x in gc.ensembl]))
-            print(len([x for x in v.adata.var.index.tolist() if x in original_ids[k]]))
-            print(len([x for x in original_ids[k] if x in v.adata.var.index.tolist()]))
             assert len(v.adata.var.index) == len(original_ids[k])
             assert np.all(v.adata.var.index == original_ids[k])
         else:
             # Should have expanded features to target space.
-            assert np.all(v.adata.var[adata_ids_cxg.feature_symbol].values == gc.symbols)
+            print(v.adata.var.tail())
+            print(gc.ensembl[-5:])
+            print(v.adata.var.shape)
+            print(v.adata.var[adata_ids_sfaira.feature_id].values.shape)
+            print(len(gc.ensembl))
+            assert np.all(v.adata.var[adata_ids_sfaira.feature_id].values == gc.ensembl)
 
 
 @pytest.mark.parametrize("database", [
@@ -66,10 +62,10 @@ def test_streamline_metadata(database: str, format: str):
     dsg = prepare_dsg_database(database=database)
     dsg.subset(key=subset_args[0], values=subset_args[1])
     dsg.load()
-    dsg.streamline_features(match_to_release=MATCH_TO_RELEASE,
-                            schema=format,
-                            subset_genes_to_type="protein_coding")
-    dsg.streamline_metadata(schema=format)
+    dsg.streamline_var(match_to_release=MATCH_TO_RELEASE,
+                       schema=format,
+                       subset_genes_to_type="protein_coding")
+    dsg.streamline_obs_uns(schema=format)
     adata = dsg.datasets[subset_args[1]].adata
     ids = AdataIdsSfaira()
     assert "CL:0000128" in adata.obs[ids.cell_type + ids.onto_id_suffix].values
@@ -91,10 +87,10 @@ def test_output_to_store(store: str, database: str):
     dsg = prepare_dsg_database(database=database)
     dsg.subset(key=subset_args[0], values=subset_args[1])
     dsg.load()
-    dsg.streamline_features(match_to_release=MATCH_TO_RELEASE, schema="sfaira",
-                            subset_genes_to_type="protein_coding")
-    dsg.streamline_metadata(schema="sfaira", clean_obs=True, clean_uns=True, clean_var=True, clean_obs_names=True,
-                            keep_id_obs=True, keep_orginal_obs=False, keep_symbol_obs=True)
+    dsg.streamline_var(match_to_release=MATCH_TO_RELEASE, schema="sfaira", subset_genes_to_type="protein_coding",
+                       clean_var=True)
+    dsg.streamline_obs_uns(schema="sfaira", clean_obs=True, clean_uns=True, clean_obs_names=True,
+                           keep_id_obs=True, keep_orginal_obs=False, keep_symbol_obs=True)
     dsg.write_distributed_store(dir_cache=DIR_DATABASE_STORE_DAO, store_format=store, dense=True)
     fn_store = os.path.join(DIR_DATABASE_STORE_DAO, subset_args[1])
     adata = read_dao(store=fn_store)
