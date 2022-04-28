@@ -407,20 +407,11 @@ class DatasetGroup:
         )) for x in self.ids if self.datasets[x].adata is not None])
         return obs_concat
 
-    def ncells_bydataset(self, annotated_only: bool = False) -> np.ndarray:
-        cells = []
-        for x in self.ids:
-            # if this is for celltype prediction, only load the data with have celltype annotation
-            try:
-                if self.datasets[x].annotated or not annotated_only:
-                    cells.append(self.datasets[x].ncells)
-            except FileNotFoundError:
-                del self.datasets[x]
-        return np.asarray(cells)
-
-    def ncells(self, annotated_only: bool = False):
-        cells = self.ncells_bydataset(annotated_only=annotated_only)
-        return np.sum(cells)
+    @property
+    def ncells(self) -> Union[None, int]:
+        x = np.array([x.ncells for x in self.datasets.values()])
+        x = np.sum(x)[0] if np.all(np.logical_not(np.isnan(x))) else None
+        return x
 
     @property
     def ontology_container_sfaira(self):
@@ -442,55 +433,24 @@ class DatasetGroup:
         for _, v in self.datasets.items():
             v.project_free_to_ontology(adata_fields=adata_fields, copy=copy)
 
-    def subset(self, key, values: Union[list, tuple, np.ndarray]):
-        """
-        Subset list of adata objects based on sample-wise properties.
-
-        These keys are properties that are available in lazy model.
-        Subsetting happens on .datasets.
-
-        :param key: Property to subset by.
-        :param values: Classes to overlap to. Return if elements match any of these classes.
-        :return:
-        """
-        ids_del = []
-        if isinstance(values, np.ndarray):
-            values = values.tolist()
-        if isinstance(values, tuple):
-            values = list(values)
-        if not isinstance(values, list):
-            values = [values]
+    def subset(self, key, values, **kwargs) -> bool:
+        keep = False
         for x in self.ids:
-            try:
-                values_found = getattr(self.datasets[x], key)
-            except AttributeError:
-                raise ValueError(f"{key} not a valid property of data set object")
-            try:
-                ontology = getattr(self.datasets[x].ontology_container_sfaira, key)
-            except AttributeError:
-                raise ValueError(f"{key} not a valid property of ontology_container object")
-            if values_found is None:
-                # Delete entries which do not have this meta data item annotated.
-                ids_del.append(x)
+            if hasattr(self, key) and getattr(self, key) is not None:
+                # Collection-level annotation.
+                annot = getattr(self, key)
+                if isinstance(annot, str):
+                    annot = [annot]
+                keep = np.any([y in values for y in annot])
             else:
-                if not isinstance(values_found, list):
-                    values_found = [values_found]
-                if not np.any([
-                    np.any([
-                        is_child(query=y, ontology=ontology, ontology_parent=z)
-                        for z in values
-                    ]) for y in values_found
-                ]):
-                    # Delete entries which a non-matching meta data value associated with this item.
-                    ids_del.append(x)
-        for x in ids_del:
-            del self.datasets[x]
+                # Dataset. or cell-level annotation.
+                keep_x = self.datasets[x].subset(key=key, values=values, **kwargs)
+                if keep_x:
+                    keep = True
+                else:
+                    del self.datasets[x]
+        return keep
 
-    def subset_cells(self, **kwargs):
-        for x in self.ids:
-            self.datasets[x].subset_cells(**kwargs)
-            if self.datasets[x].adata is None:  # No observations (cells) left.
-                del self.datasets[x]
 
     @property
     def additional_annotation_key(self) -> Dict[str, Union[None, str]]:
@@ -781,20 +741,6 @@ class DatasetSuperGroup:
         g = GenomeContainer(release=genome)
         return g
 
-    def ncells_bydataset(self, annotated_only: bool = False):
-        """
-        List of list of length of all data sets by data set group.
-        :return:
-        """
-        return [x.ncells_bydataset(annotated_only=annotated_only) for x in self.dataset_groups]
-
-    def ncells_bydataset_flat(self, annotated_only: bool = False):
-        """
-        Flattened list of length of all data sets.
-        :return:
-        """
-        return [xx for x in self.ncells_bydataset(annotated_only=annotated_only) for xx in x]
-
     def ncells(self, annotated_only: bool = False):
         return np.sum(self.ncells_bydataset_flat(annotated_only=annotated_only))
 
@@ -991,14 +937,7 @@ class DatasetSuperGroup:
         self.dataset_groups = [self.dataset_groups[i] for i in idx_tokeep]
 
     def subset(self, **kwargs):
-        for x in self.dataset_groups:
-            x.subset(**kwargs)
-        # Delete empty DatasetGroups:
-        self.dataset_groups = [x for x in self.dataset_groups if x.datasets]
-
-    def subset_cells(self, **kwargs):
-        for i in range(len(self.dataset_groups)):
-            self.dataset_groups[i].subset_cells(**kwargs)
+        self.dataset_groups = [x for x in self.dataset_groups if x.subset(**kwargs)]
 
     def project_celltypes_to_ontology(self, adata_fields: Union[AdataIds, None] = None, copy=False):
         """

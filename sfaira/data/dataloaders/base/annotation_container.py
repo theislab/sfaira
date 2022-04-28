@@ -7,7 +7,7 @@ from sfaira.data.dataloaders.obs_utils import get_ontology, value_protection
 
 class AnnotationContainer:
 
-    dataset_index: Union[None, int] = None
+    _dataset_index: Union[None, int] = None
 
     layer_counts: Union[None, int] = None
     layer_processed: Union[None, str] = None
@@ -51,6 +51,7 @@ class AnnotationContainer:
     assay_sc_obs_key: Union[None, str] = None
     assay_differentiation_obs_key: Union[None, str] = None
     assay_type_differentiation_obs_key: Union[None, str] = None
+    cell_line_obs_key: Union[None, str] = None
     cell_type_obs_key: Union[None, str] = None
     development_stage_obs_key: Union[None, str] = None
     disease_obs_key: Union[None, str] = None
@@ -97,9 +98,7 @@ class AnnotationContainer:
             assert os.path.exists(yaml_path), f"did not find yaml {yaml_path}"
             yaml_vals = read_yaml(fn=yaml_path)
             # Set organism first as this is required to disambiguate valid entries for other meta data.
-            k = "organism"
-            v = yaml_vals["attr"]["organism"]
-            setattr(self, k, v)
+            self.organism = yaml_vals["attr"]["organism"]
             for k, v in yaml_vals["attr"].items():
                 if v is not None and k not in ["organism", "sample_fns"]:
                     if isinstance(v, dict):  # v is a dictionary over file-wise meta-data items
@@ -111,7 +110,7 @@ class AnnotationContainer:
                     try:
                         setattr(self, k, v)
                     except AttributeError as e:
-                        raise ValueError(f"An error occured when setting {k} as {v}: {e}")
+                        raise ValueError(f"ValueError when setting {k} as {v}: {e}")
                     
     @property
     def assay_sc(self) -> Union[None, str]:
@@ -208,6 +207,18 @@ class AnnotationContainer:
     def cell_type(self, x: str):
         x = value_protection(attr="cell_type", allowed=self.get_ontology(k="cell_type"), attempted=x)
         self._cell_type = x
+
+    @property
+    def dataset_index(self) -> Union[None, int]:
+        x = self._dataset_index
+        # Catch if index was omitted:
+        if x is None:
+            x = 1
+        return x
+
+    @dataset_index.setter
+    def dataset_index(self, x: int):
+        self._dataset_index = x
 
     @property
     def default_embedding(self) -> Union[None, str]:

@@ -28,25 +28,27 @@ from sfaira.versions.metadata.maps import prepare_ontology_map_tab
 
 
 class DatasetBase(AnnotationContainer):
-    adata: Union[None, anndata.AnnData]
-    _meta: Union[None, pandas.DataFrame]
+    adata: Union[None, anndata.AnnData] = None
+    _meta: Union[None, pandas.DataFrame] = None
     data_dir_base: Union[None, str]
     meta_path: Union[None, str]
     cache_path: Union[None, str]
-    genome_container: Union[None, GenomeContainer]
+    genome_container: Union[None, GenomeContainer] = None
     supplier: str
 
-    _celltype_universe: Union[None, CelltypeUniverse]
+    _celltype_universe: Union[None, CelltypeUniverse] = None
     _ontology_class_maps: Union[dict]
 
-    load_raw: Union[None, bool]
-    mapped_features: Union[None, str, bool]
-    remove_gene_version: Union[None, bool]
-    subset_gene_type: Union[None, str]
-    streamlined_meta: bool
+    load_raw: Union[None, bool] = None
+    mapped_features: Union[None, str, bool] = None
+    remove_gene_version: Union[None, bool] = None
+    subset_gene_type: Union[None, str] = None
+    streamlined_meta: bool = False
 
     sample_fn: Union[None, str]
     _sample_fns: Union[None, List[str]]
+
+    _title: Union[None, str] = None
 
     _additional_annotation_key: Union[None, str]
 
@@ -86,21 +88,11 @@ class DatasetBase(AnnotationContainer):
         self._adata_ids = AdataIdsSfaira()
         self.ontology_container_sfaira = OCS  # Using a pre-instantiated version of this yields drastic speed-ups.
 
-        self.adata = None
-        self.meta = None
-        self.genome_container = None
         self.data_dir_base = data_path
         self.meta_path = meta_path
         self.cache_path = cache_path
 
-        self._celltype_universe = None
         self._ontology_class_maps = dict([(k, None) for k in self._adata_ids.ontology_constrained])
-
-        self.load_raw = None
-        self.mapped_features = None
-        self.remove_gene_version = None
-        self.subset_gene_type = None
-        self.streamlined_meta = False
 
         self.sample_fn = sample_fn
         self._sample_fns = sample_fns
@@ -900,6 +892,7 @@ class DatasetBase(AnnotationContainer):
                     if k == "author":
                         pass
                     return x
+                print(f"attempts {attempt_counter}")
         except ValueError as e:
             print(f"ValueError: {e}")
             return None
@@ -907,7 +900,7 @@ class DatasetBase(AnnotationContainer):
             print(f"ConnectionError: {e}")
             return None
 
-    def subset_cells(self, key, values):
+    def subset(self, key, values, allow_missing_annotation: bool = False, allow_partial_match: bool = True) -> bool:
         """
         Subset list of adata objects based on cell-wise properties.
 
@@ -934,11 +927,21 @@ class DatasetBase(AnnotationContainer):
                 - "sample_source"
                 - "tech_sample"
         :param values: Classes to overlap to.
-        :return:
+        :param allow_missing_annotation: Whether to add cells and data sets with missing annotation for queried key into
+            the selection of the subset.
+        :param allow_partial_match: Whether to allow all or no cells in a dataset that is not yet loaded into memory but
+            that has (partially) matching cell-wise annotation for the given subset filter.
+        :return: If the dataset should be kept for downstream operations.
+            If the dataset was already loaded, this says if it was empty after sub-setting.
+            If it was not loaded yet but fully satisfied the sub-setting, this is True.
+            If it was not loaded yet but partially satisfied the sub-setting, this is allow_partial_match. Note in this
+            case, we know that some cells in the data set fit this criterion, but because the data set is not yet loaded
+            we do not know which ones. If you want to avoid this ambiguity, load the data before subset().
+            If it was not loaded yet and did not satisfy the sub-setting, this is False.
         """
-        supported_keys = self._adata_ids.obs_keys
-        if key not in supported_keys:
-            raise ValueError(f"attempted to subset based on non-supported key={key}, choose from {supported_keys}")
+        if not hasattr(self._adata_ids, key):
+            raise ValueError(f"attempted to subset based on non-supported key={key}, "
+                             "choose from sfaira controlled meta data")
         if not isinstance(values, list):
             values = [values]
 
@@ -946,39 +949,59 @@ class DatasetBase(AnnotationContainer):
             sample_attr = getattr(self, samplewise_key)
             if sample_attr is not None and not isinstance(sample_attr, list):
                 sample_attr = [sample_attr]
-            obs_key = getattr(self, cellwise_key)
             if sample_attr is not None:
                 if len(sample_attr) == 1:
                     # Only use sample-wise subsetting if the sample-wise attribute is unique (not mixed).
                     if np.any([x in values for x in sample_attr]):
-                        idx = np.arange(1, self.ncells)
+                        idx_ = np.arange(1, self.ncells)
+                        keep_dataset_ = True
                     else:
-                        idx = np.array([])
+                        idx_ = np.array([])
+                        keep_dataset_ = False
                 else:
                     # No per cell annotation and ambiguous sample annotation: pass entire data set if some keys match.
                     raise NotImplementedError(f"{self.id}: {(samplewise_key, cellwise_key)}")
-            elif obs_key is not None:
-                assert self.adata is not None, "call .load() before .subset_cells()"
-                values_found = self.adata.obs[obs_key].values
-                values_found_unique = np.unique(values_found)
-                try:
-                    ontology = getattr(self.ontology_container_sfaira, samplewise_key)
-                except AttributeError:
-                    raise ValueError(f"{key} not a valid property of ontology_container object")
-                # Test only unique elements  found in ontology to save time.
-                values_found_unique_matched = [
-                    x for x in values_found_unique if np.any([
-                        is_child(query=x, ontology=ontology, ontology_parent=y)
-                        for y in values
-                    ])
-                ]
-                idx = np.where([x in values_found_unique_matched for x in values_found])[0]
+            elif hasattr(self, cellwise_key) and getattr(self, cellwise_key) is not None:
+                obs_key = getattr(self, cellwise_key)
+                if self.loaded:
+                    values_found = self.adata.obs[obs_key].values
+                    values_found_unique = np.unique(values_found)
+                    try:
+                        ontology = getattr(self.ontology_container_sfaira, samplewise_key)
+                    except AttributeError:
+                        raise ValueError(f"{key} not a valid property of ontology_container object")
+                    # Test only unique elements  found in ontology to save time.
+                    values_found_unique_matched = [
+                        x for x in values_found_unique if np.any([
+                            is_child(query=x, ontology=ontology, ontology_parent=y)
+                            for y in values
+                        ])
+                    ]
+                    idx_ = np.where([x in values_found_unique_matched for x in values_found])[0]
+                    keep_dataset_ = len(idx_) > 0
+                else:
+                    if allow_partial_match:
+                        # TODO find keys from tsvs here
+                        idx_ = None
+                        keep_dataset_ = False
+                    else:
+                        idx_ = None
+                        keep_dataset_ = False
             else:
-                assert False, f"no subset chosen {(samplewise_key, cellwise_key)}"
-            return idx
+                if allow_missing_annotation:
+                    # Pass all cells in object:
+                    idx_ = np.arange(0, self.adata.n_obs)
+                    keep_dataset_ = True
+                else:
+                    # Pass none of the cells in object:
+                    idx_ = np.array([])
+                    keep_dataset_ = False
+            return idx_, keep_dataset_
 
-        idx_keep = get_subset_idx(samplewise_key=key, cellwise_key=key + "_obs_key")
-        self.adata = self.adata[idx_keep, :].copy() if len(idx_keep) > 0 else None
+        idx, keep_dataset = get_subset_idx(samplewise_key=key, cellwise_key=key + "_obs_key")
+        if self.loaded:
+            self.adata = self.adata[idx, :].copy() if len(idx) > 0 else None
+        return keep_dataset
 
     def show_summary(self):
         print(f"{(self.supplier, self.organism, self.organ, self.assay_sc, self.disease)}")

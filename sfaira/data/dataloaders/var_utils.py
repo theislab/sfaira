@@ -167,9 +167,12 @@ def streamline_var(adata: anndata.AnnData,
         raise ValueError("Neither layer_counts nor layer_proc are set in yaml. Aborting")
     # Second, we streamline the feature dimension of these data matrices to make sure all necessary feature
     # identifiers are provided:
+    print(var1.head())
+    print((feature_id_var_key, feature_symbol_var_key))
     var1, feature_id_var_key, feature_symbol_var_key = format_var(
         adata_ids=adata_target_ids, clean_var=clean_var, feature_id_var_key=feature_id_var_key,
         feature_symbol_var_key=feature_symbol_var_key, gc=genome_container, var=var1)
+    print(var1.head())
     # Only need to process var2 if x2 has a separate feature space, ie if x2 is in .raw:
     if layer2 is not None and layer2 == "raw":
         # Note: Assume that IDs and var keys in .adata.raw.var are the same as in .adata.var.

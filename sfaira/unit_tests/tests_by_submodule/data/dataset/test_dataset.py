@@ -83,7 +83,7 @@ def test_dsgs_subset_cell_wise(celltype: str):
     ds.subset(key="organism", values=["Homo sapiens"])
     ds.subset(key="organ", values=[organ])
     ds.load()
-    ds.subset_cells(key="cell_type", values=celltype)
+    ds.subset(key="cell_type", values=celltype)
     # Check group was not emptied by sub-setting:
     assert len(ds.datasets.keys()) > 0
     for x in ds.dataset_groups:
