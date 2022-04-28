@@ -131,7 +131,7 @@ def streamline_obs_uns(adata: anndata.AnnData,
             # Build a combination label out of all columns used to describe this group.
             # Add data set label into this label so that these groups are unique across data sets.
             val = [
-                id + "_".join([str(xxx) for xxx in xx])
+                dataset_id + "_".join([str(xxx) for xxx in xx])
                 for xx in zip(*[adata.obs[batch_col].values.tolist() for batch_col in batch_cols])
             ]
         else:

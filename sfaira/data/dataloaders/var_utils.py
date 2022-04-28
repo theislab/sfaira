@@ -246,7 +246,8 @@ def streamline_var(adata: anndata.AnnData,
             adata.raw = anndata.AnnData(x2, obs=pd.DataFrame({}, index=adata.obs_names), var=var2)
     layer_counts = layer_counts
     layer_processed = layer_proc
-    adata.uns[adata_target_ids.mapped_features] = match_to_release
+    if hasattr(adata_target_ids, "mapped_features") and adata_target_ids.mapped_features is not None:
+        adata.uns[adata_target_ids.mapped_features] = match_to_release
     # Reporting:
     if verbose > 0:
         report = f"transformed feature space on {dataset_id}: \n" \

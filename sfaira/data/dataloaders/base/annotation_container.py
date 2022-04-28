@@ -7,7 +7,7 @@ from sfaira.data.dataloaders.obs_utils import get_ontology, value_protection
 
 class AnnotationContainer:
 
-    dataset_index: Union[None, str] = None
+    dataset_index: Union[None, int] = None
 
     layer_counts: Union[None, int] = None
     layer_processed: Union[None, str] = None
@@ -32,6 +32,7 @@ class AnnotationContainer:
     _download_url_data: Union[Tuple[List[None]], Tuple[List[str]], None] = None
     _download_url_meta: Union[Tuple[List[None]], Tuple[List[str]], None] = None
     _ethnicity: Union[None, str] = None
+    gm: Union[None, str] = None
     individual: Union[None, str] = None
     _organ: Union[None, str] = None
     _organism: Union[None, str] = None
@@ -41,9 +42,9 @@ class AnnotationContainer:
     source_doi: Union[None, str] = None
     _sample_source: Union[None, str] = None
     state_exact: Union[None, str] = None
-    _year: Union[None, int] = None
-    gm: Union[None, str] = None
+    _tech_sample: Union[None, str] = None
     treatment: Union[None, str] = None
+    _year: Union[None, int] = None
 
     _bio_sample_obs_key: Union[None, str] = None
     _tech_sample_obs_key: Union[None, str] = None
@@ -343,8 +344,6 @@ class AnnotationContainer:
     @organism.setter
     def organism(self, x: str):
         x = value_protection(attr="organism", allowed=self.get_ontology(k="organism"), attempted=x)
-        # Update ontology container so that correct ontologies are queried:
-        self.ontology_container_sfaira.organism_cache = x
         self._organism = x
 
     @property

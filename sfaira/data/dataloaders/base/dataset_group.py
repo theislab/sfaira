@@ -77,15 +77,6 @@ def merge_uns_from_list(adata_ls):
     return uns
 
 
-load_doc = \
-    """
-    :param remove_gene_version: Remove gene version string from ENSEMBL ID so that different versions in different data sets are superimposed.
-    :param match_to_reference: Reference genomes name or False to keep original feature space.
-    :param load_raw: Loads unprocessed version of data if available in data loader.
-    :param allow_caching: Whether to allow method to cache adata object for faster re-loading.
-    """
-
-
 class DatasetGroup:
     """
     Container class that co-manages multiple data sets, removing need to call Dataset() methods directly through

@@ -18,7 +18,7 @@ import ssl
 from sfaira.versions.genomes import GenomeContainer
 from sfaira.versions.metadata import CelltypeUniverse
 from sfaira.consts import AdataIdsCellxgene_v2_0_0, AdataIdsSfaira, META_DATA_FIELDS, OCS
-from sfaira.data.dataloaders.base.utils import identify_tsv
+from sfaira.data.dataloaders.base.utils import is_child, get_directory_formatted_doi, identify_tsv
 from sfaira.data.dataloaders.obs_utils import get_ontology, streamline_obs_uns
 from sfaira.data.store.io.io_dao import write_dao
 from sfaira.data.dataloaders.base.annotation_container import AnnotationContainer
@@ -463,9 +463,6 @@ class DatasetBase(AnnotationContainer):
         self._adata_ids = adata_target_ids
         self.streamlined_meta = True
 
-    def get_ontology(self, **kwargs):
-        return get_ontology(organism=self.organism, **kwargs)
-   
     def write_distributed_store(
             self,
             dir_cache: Union[str, os.PathLike],
@@ -726,10 +723,7 @@ class DatasetBase(AnnotationContainer):
 
     @property
     def annotated(self) -> Union[bool, None]:
-        if self.cell_type_obs_key is not None:
-            return True
-        else:
-            return False
+        return self.cell_type_obs_key is not None
 
     @property
     def data_dir(self):
