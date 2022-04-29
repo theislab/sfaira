@@ -700,17 +700,6 @@ class StoreDao(StoreSingleFeatureSpace):
         return self._x
 
     @property
-    def obs(self) -> pd.DataFrame:
-        """
-        Assemble .obs table of subset of selected data.
-
-        Resulting index is increasing integers starting with zero.
-
-        :return: .obs data frame.
-        """
-        return self._obs
-
-    @property
     def _x(self) -> dask.array.Array:
         """
         One dask array of all cells.
