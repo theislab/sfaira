@@ -103,5 +103,5 @@ class PrepareData:
             if rewrite_store or not os.path.exists(anticipated_fn):
                 ds = _load_script(dsg=ds, rewrite=rewrite, match_to_release=MATCH_TO_RELEASE)
                 ds.write_distributed_store(dir_cache=dir_store_formatted, store_format=store_format, dense=True,
-                                           chunks=128, compression_kwargs=compression_kwargs)
+                                           chunks=10, compression_kwargs=compression_kwargs)
         return dir_store_formatted

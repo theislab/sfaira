@@ -8,6 +8,7 @@ import dask.array
 import dask.dataframe
 import numpy as np
 import pandas as pd
+import scipy.sparse
 from sfaira.consts import AdataIdsSfaira, OCS
 from sfaira.data.dataloaders.base.utils import is_child, UNS_STRING_META_IN_OBS
 from sfaira.data.store.carts.single import CartAnndata, CartDask, CartSingle
@@ -679,6 +680,24 @@ class StoreDao(StoreSingleFeatureSpace):
         return CartDask(x=self._x, obs=self.obs, obsm=self.obsm, **kwargs)
 
     # Methods that are specific to this child class:
+
+    def move_to_memory(self):
+        """
+        Persist underlying dask array into memory in sparse.CSR format.
+        """
+        if not self._x_dask_cache:
+            self._x_dask_cache = self._x
+
+        self._x_dask_cache = self._x_dask_cache.map_blocks(scipy.sparse.csr_matrix).persist()
+
+    @property
+    def x(self) -> dask.array.Array:
+        """
+        One dask array of all cells.
+
+        Requires feature dimension to be shared.
+        """
+        return self._x
 
     @property
     def _x(self) -> dask.array.Array:
