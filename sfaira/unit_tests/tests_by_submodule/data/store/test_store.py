@@ -3,12 +3,15 @@ import dask.array
 import h5py
 import numpy as np
 import os
+import patsy
 import pytest
 import scipy.sparse
 
 from sfaira.data import load_store
 
+from sfaira.unit_tests.data_for_tests.loaders.consts import CELLTYPES
 from sfaira.unit_tests.data_for_tests.loaders import PrepareData
+from sfaira.unit_tests.tests_by_submodule.data.store.utils import get_dmat
 
 
 @pytest.mark.parametrize("store_format", ["h5ad", "dao", "anndata"])
@@ -31,6 +34,54 @@ def test_fatal(store_format: str):
         _ = x.shape
         _ = x.indices
         _ = x.genome_container
+
+
+@pytest.mark.parametrize("store_format", ["h5ad", "dao", "anndata"])
+@pytest.mark.parametrize("single", [False, True])
+def test_obsm(store_format: str, single: bool):
+    """
+    Test if in memory obsm interface works.
+    """
+    if store_format == "anndata":
+        stores = PrepareData().prepare_store_anndata()
+    else:
+        store_path = PrepareData().prepare_store(store_format=store_format)
+        stores = load_store(cache_path=store_path, store_format=store_format)
+    if single:
+        store = stores.stores["Homo sapiens"]
+        store.obsm = {"dmat": get_dmat("~1+cell_type", store.obs)}
+    else:
+        store = stores
+        store.obsm = dict([(k, {"dmat": get_dmat("~1+cell_type", v.obs)}) for k, v in store.stores.items()])
+    obsm1 = store.obsm
+    if single:
+        assert list(obsm1.keys()) == ["dmat"]
+        assert obsm1["dmat"].shape[0] == store.n_obs
+    else:
+        for k, v in obsm1.items():
+            assert list(v.keys()) == ["dmat"]
+            assert v["dmat"].shape[0] == store.stores[k].n_obs
+    store.subset(attr_key="cell_type", values=CELLTYPES[:1])
+    # Obsm should be reset by subset:
+    if single:
+        assert len(store.obsm.keys()) == 0
+    else:
+        for k, v in store.obsm.items():
+            assert len(v.keys()) == 0
+    if single:
+        store.obsm = {"dmat": get_dmat("~1+cell_type", store.obs)}
+    else:
+        store.obsm = dict([(k, {"dmat": get_dmat("~1+cell_type", v.obs)}) for k, v in store.stores.items()])
+    obsm2 = store.obsm
+    if single:
+        assert list(obsm2.keys()) == ["dmat"]
+        assert obsm2["dmat"].shape[0] == store.n_obs
+        assert obsm2["dmat"].shape[0] < obsm1["dmat"].shape[0]
+    else:
+        for k, v in obsm2.items():
+            assert list(v.keys()) == ["dmat"]
+            assert v["dmat"].shape[0] == store.stores[k].n_obs
+            assert v["dmat"].shape[0] < obsm1[k]["dmat"].shape[0]
 
 
 @pytest.mark.parametrize("store_format", ["h5ad", "dao"])

@@ -1,5 +1,5 @@
 source	target	target_id
-0	UNKNOWN	UNKNOWN
+0	unknown	unknown
 AT1 cell	type I pneumocyte	CL:0002062
 AT2 cell	type II pneumocyte	CL:0002063
 Absorptive cell	absorptive cell	CL:0000212
@@ -300,7 +300,7 @@ Intercalated cell	renal intercalated cell	CL:0005010
 Intercalated cell_SLC26A4 high	renal intercalated cell	CL:0005010
 Intercalated cell_SPINK1 high	renal intercalated cell	CL:0005010
 Intermediate Epithelial cell	intermediate epitheliocyte	CL:0002209
-Intermediated cell	UNKNOWN	UNKNOWN
+Intermediated cell	unknown	unknown
 Interneuron	interneuron	CL:0000099
 Interstitial cell_POSTN high	kidney interstitial cell	CL:1000500
 Interstitial cell_PTN high	kidney interstitial cell	CL:1000500
@@ -393,8 +393,8 @@ Monocyte_S100A9 high	monocyte	CL:0000576
 Monocyte_TPPP3 high	monocyte	CL:0000576
 Motile liver macrophage	macrophage	CL:0000235
 Motor neuron	motor neuron	CL:0000100
-MT high	UNKNOWN	UNKNOWN
-MT-gene high cell	UNKNOWN	UNKNOWN
+MT high	unknown	unknown
+MT-gene high cell	unknown	unknown
 Mucosal aquamous Epithelial cell	mucous cell of stomach	CL:0002180
 Mucous Epithelial cell	epithelial cell	CL:0000066
 Mucous Epithelial cell_REG1A high	epithelial cell	CL:0000066
@@ -489,24 +489,24 @@ Primordial germ cell_GTSF1 high	primordial germ cell	CL:0000670
 Primordial germ cell_TCL1A high	primordial germ cell	CL:0000670
 Principle cell	renal principal cell	CL:0005009
 Proliferating  B cell	B cell	CL:0000236
-Proliferating  cell	UNKNOWN	UNKNOWN
+Proliferating  cell	unknown	unknown
 Proliferating  keratinocyte	keratinocyte	CL:0000312
 Proliferating B cell	B cell	CL:0000236
 Proliferating Intra-adrenal ganglion neuron	neuron	CL:0000540
 Proliferating T cell	T cell	CL:0000084
 Proliferating alveolar bipotent progenitor cell	pneumocyte	CL:0000322
-Proliferating cell	UNKNOWN	UNKNOWN
-Proliferating cell_C7 high	UNKNOWN	UNKNOWN
-Proliferating cell_CCNB1 high	UNKNOWN	UNKNOWN
-Proliferating cell_FABP5 high	UNKNOWN	UNKNOWN
-Proliferating cell_HMGB2 high	UNKNOWN	UNKNOWN
-Proliferating cell_KIAA0101 high	UNKNOWN	UNKNOWN
-Proliferating cell_KIAA0101_high	UNKNOWN	UNKNOWN
-Proliferating cell_PTTG1 high	UNKNOWN	UNKNOWN
-Proliferating cell_TOP2A high	UNKNOWN	UNKNOWN
-Proliferating cell_UBE2C  high	UNKNOWN	UNKNOWN
-Proliferating cell_UBE2C high	UNKNOWN	UNKNOWN
-Proliferating cell_UBE2C_high	UNKNOWN	UNKNOWN
+Proliferating cell	unknown	unknown
+Proliferating cell_C7 high	unknown	unknown
+Proliferating cell_CCNB1 high	unknown	unknown
+Proliferating cell_FABP5 high	unknown	unknown
+Proliferating cell_HMGB2 high	unknown	unknown
+Proliferating cell_KIAA0101 high	unknown	unknown
+Proliferating cell_KIAA0101_high	unknown	unknown
+Proliferating cell_PTTG1 high	unknown	unknown
+Proliferating cell_TOP2A high	unknown	unknown
+Proliferating cell_UBE2C  high	unknown	unknown
+Proliferating cell_UBE2C high	unknown	unknown
+Proliferating cell_UBE2C_high	unknown	unknown
 Proliferating endothelial cell	endothelial cell	CL:0000115
 Proliferating fibroblast	fibroblast	CL:0000057
 Proliferating lung mesenchyme cell_HIST1H4C high	mesenchymal cell	CL:0008019
@@ -598,11 +598,11 @@ Tendon cell_GCG high	tendon cell	CL:0000388
 Theca cell	theca cell	CL:0000503
 Thyroid follicular cell	thyroid follicular cell	CL:0002258
 Treg cell	regulatory T cell	CL:0000815
-Unknown	UNKNOWN	UNKNOWN
+Unknown	unknown	unknown
 Unknown Epithelial cell_EFNA1 high	epithelial cell	CL:0000066
 Unknown Epithelial cell_FOS high	epithelial cell	CL:0000066
-Unknown1	UNKNOWN	UNKNOWN
-Unknown2	UNKNOWN	UNKNOWN
+Unknown1	unknown	unknown
+Unknown2	unknown	unknown
 Ureteric Epithelial cell	epithelial cell	CL:0000066
 Ureteric bud cell	epithelial cell	CL:0000066
 Ureteric epithelial cell	epithelial cell	CL:0000066

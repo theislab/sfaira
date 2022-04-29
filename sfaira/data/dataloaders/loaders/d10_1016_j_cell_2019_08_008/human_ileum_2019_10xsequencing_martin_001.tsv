@@ -2,7 +2,7 @@ source	target	target_id
 ACKR1+ endothelium	endothelial cell	CL:0000115
 B cells	B cell	CL:0000236
 CD36+ endothelium	endothelial cell	CL:0000115
-Cycling	UNKNOWN	UNKNOWN
+Cycling	unknown	unknown
 Enterocytes	enterocyte	CL:0000584
 Enteroendocrines	enteroendocrine cell	CL:0000164
 Fibs	fibroblast	CL:0000057

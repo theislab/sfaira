@@ -10,7 +10,7 @@ from sfaira.unit_tests.directories import DIR_DATA_LOADERS_CACHE
 
 SYMBOL_COL = "target"
 ID_COL = "target_id"
-UNKNOWN_IDS = ["UNKNOWN", "NOT_A_CELL"]
+UNKNOWN_IDS = ["unknown", "NOT_A_CELL"]
 
 
 def test_celltype_update():

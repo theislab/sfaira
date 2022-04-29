@@ -31,7 +31,7 @@ CD8 TEM_3	effector memory CD8-positive, alpha-beta T cell	CL:0000913
 CD8 TEM_4	effector memory CD8-positive, alpha-beta T cell	CL:0000913
 CD8 TEM_5	effector memory CD8-positive, alpha-beta T cell	CL:0000913
 CD8 TEM_6	effector memory CD8-positive, alpha-beta T cell	CL:0000913
-Doublet	UNKNOWN	UNKNOWN
+Doublet	unknown	unknown
 Eryth	erythrocyte	CL:0000232
 HSPC	hematopoietic multipotent progenitor cell	CL:0000837
 ILC	innate lymphoid cell	CL:0001065

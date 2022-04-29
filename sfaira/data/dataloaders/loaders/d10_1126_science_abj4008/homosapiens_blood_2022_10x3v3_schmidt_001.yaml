@@ -1,0 +1,90 @@
+dataset_structure:
+    dataset_index: 1
+    sample_fns:
+dataset_wise:
+    author: "Schmidt, Ralf"
+    default_embedding: 
+    doi_preprint: 
+    doi_journal: "10.1126/science.abj4008"
+    download_url_data:
+        - "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE190604&format=file&file=GSE190604%5Fbarcodes%2Etsv%2Egz"
+        - "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE190604&format=file&file=GSE190604%5Ffeatures%2Etsv%2Egz"
+        - "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE190604&format=file&file=GSE190604%5Fmatrix%2Emtx%2Egz"
+    download_url_meta: "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE190604&format=file&file=GSE190604%5Fcellranger%2Dguidecalls%2Daggregated%2Dunfiltered%2Etxt%2Egz"
+    primary_data: True
+    year: 2022
+layers:
+    layer_counts: "X"
+    layer_processed: 
+    layer_spliced_counts: 
+    layer_spliced_processed: 
+    layer_unspliced_counts: 
+    layer_unspliced_processed: 
+    layer_velocity: 
+dataset_or_feature_wise:
+    feature_reference: "Homo_sapiens.GRCh38.98"
+    feature_reference_var_key: 
+    feature_type: "rna"
+    feature_type_var_key: 
+dataset_or_observation_wise:
+    assay_sc: "10x 3' v3"
+    assay_sc_obs_key: 
+    assay_differentiation: 
+    assay_differentiation_obs_key: 
+    assay_type_differentiation: 
+    assay_type_differentiation_obs_key: 
+    bio_sample:
+    bio_sample_obs_key: 
+    cell_line: 
+    cell_line_obs_key: 
+    cell_type: "T cell"
+    cell_type_obs_key: 
+    development_stage: "human adult stage"
+    development_stage_obs_key: 
+    disease: "healthy"
+    disease_obs_key: 
+    ethnicity: 
+    ethnicity_obs_key: 
+    gm:
+    gm_obs_key: "feature_call"
+    individual:
+    individual_obs_key: 
+    organ: "blood"
+    organ_obs_key: 
+    organism: "Homo sapiens"
+    organism_obs_key: 
+    sample_source: "primary_tissue"
+    sample_source_obs_key: 
+    sex: 
+    sex_obs_key: 
+    source_doi:
+    source_doi_obs_key:
+    state_exact:
+    state_exact_obs_key:
+    tech_sample:
+    tech_sample_obs_key: 
+    treatment:
+    treatment_obs_key:
+feature_wise:
+    feature_id_var_key: "gene_ids"
+    feature_symbol_var_key: "index"
+observation_wise:
+    spatial_x_coord_obs_key:
+    spatial_y_coord_obs_key:
+    spatial_z_coord_obs_key:
+    vdj_vj_1_obs_key_prefix:
+    vdj_vj_2_obs_key_prefix:
+    vdj_vdj_1_obs_key_prefix:
+    vdj_vdj_2_obs_key_prefix:
+    vdj_c_call_obs_key_suffix:
+    vdj_consensus_count_obs_key_suffix:
+    vdj_d_call_obs_key_suffix:
+    vdj_duplicate_count_obs_key_suffix:
+    vdj_j_call_obs_key_suffix:
+    vdj_junction_obs_key_suffix:
+    vdj_junction_aa_obs_key_suffix:
+    vdj_locus_obs_key_suffix:
+    vdj_productive_obs_key_suffix:
+    vdj_v_call_obs_key_suffix:
+meta:
+    version: "1.2"

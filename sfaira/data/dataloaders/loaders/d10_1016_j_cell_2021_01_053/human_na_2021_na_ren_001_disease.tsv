@@ -1,0 +1,3 @@
+source	target	target_id
+negative	healthy	PATO:0000461
+positive	COVID-19	MONDO:0100096

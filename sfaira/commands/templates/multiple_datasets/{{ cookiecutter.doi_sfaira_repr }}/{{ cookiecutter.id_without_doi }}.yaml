@@ -10,7 +10,7 @@ dataset_structure:
     download_url_data: {% if cookiecutter.download_url_data %}"{{ cookiecutter.download_url_data }}"{% endif %}
     download_url_meta: {% if cookiecutter.download_url_meta %}"{{ cookiecutter.download_url_meta }}"{% endif %}
     primary_data: {{ cookiecutter.primary_data }}
-    year: "{{ cookiecutter.year }}"
+    year: {{ cookiecutter.year }}
 layers:
     layer_counts: {% if cookiecutter.layer_counts %}"{{ cookiecutter.layer_counts }}"{% endif %}
     layer_processed: {% if cookiecutter.layer_processed %}"{{ cookiecutter.layer_processed }}"{% endif %}
@@ -67,18 +67,22 @@ feature_wise:
     feature_id_var_key: {% if cookiecutter.feature_id_var_key %}"{{ cookiecutter.feature_id_var_key }}"{% endif %}
     feature_symbol_var_key: {% if cookiecutter.feature_symbol_var_key %}"{{ cookiecutter.feature_symbol_var_key }}"{% endif %}
 observation_wise:
-    spatial_x_coord: {% if cookiecutter.spatial_x_coord %}"{{ cookiecutter.spatial_x_coord }}"{% endif %}
-    spatial_y_coord: {% if cookiecutter.spatial_y_coord %}"{{ cookiecutter.spatial_y_coord }}"{% endif %}
-    spatial_z_coord: {% if cookiecutter.spatial_z_coord %}"{{ cookiecutter.spatial_z_coord }}"{% endif %}
-    vdj_c_call: {% if cookiecutter.vdj_c_call %}"{{ cookiecutter.vdj_c_call }}"{% endif %}
-    vdj_consensus_count: {% if cookiecutter.vdj_consensus_count %}"{{ cookiecutter.vdj_consensus_count }}"{% endif %}
-    vdj_d_call: {% if cookiecutter.vdj_d_call %}"{{ cookiecutter.vdj_d_call }}"{% endif %}
-    vdj_duplicate_count: {% if cookiecutter.vdj_duplicate_count %}"{{ cookiecutter.vdj_duplicate_count }}"{% endif %}
-    vdj_j_call: {% if cookiecutter.vdj_j_call %}"{{ cookiecutter.vdj_j_call }}"{% endif %}
-    vdj_junction: {% if cookiecutter.vdj_junction %}"{{ cookiecutter.vdj_junction }}"{% endif %}
-    vdj_junction_aa: {% if cookiecutter.vdj_junction_aa %}"{{ cookiecutter.vdj_junction_aa }}"{% endif %}
-    vdj_locus: {% if cookiecutter.vdj_locus %}"{{ cookiecutter.vdj_locus }}"{% endif %}
-    vdj_productive: {% if cookiecutter.vdj_productive %}"{{ cookiecutter.vdj_productive }}"{% endif %}
-    vdj_v_call: {% if cookiecutter.vdj_v_call %}"{{ cookiecutter.vdj_v_call }}"{% endif %}
+    spatial_x_coord_obs_key: {% if cookiecutter.spatial_x_coord_obs_key %}"{{ cookiecutter.spatial_x_coord_obs_key }}"{% endif %}
+    spatial_y_coord_obs_key: {% if cookiecutter.spatial_y_coord_obs_key %}"{{ cookiecutter.spatial_y_coord_obs_key }}"{% endif %}
+    spatial_z_coord_obs_key: {% if cookiecutter.spatial_z_coord_obs_key %}"{{ cookiecutter.spatial_z_coord_obs_key }}"{% endif %}
+    vdj_vj_1_obs_key_prefix: {% if cookiecutter.vdj_vj_1_obs_key_prefix %}"{{ cookiecutter.vdj_vj_1_obs_key_prefix }}"{% endif %}
+    vdj_vj_2_obs_key_prefix: {% if cookiecutter.vdj_vj_2_obs_key_prefix %}"{{ cookiecutter.vdj_vj_2_obs_key_prefix }}"{% endif %}
+    vdj_vdj_1_obs_key_prefix: {% if cookiecutter.vdj_vdj_1_obs_key_prefix %}"{{ cookiecutter.vdj_vdj_1_obs_key_prefix }}"{% endif %}
+    vdj_vdj_2_obs_key_prefix: {% if cookiecutter.vdj_vdj_2_obs_key_prefix %}"{{ cookiecutter.vdj_vdj_2_obs_key_prefix }}"{% endif %}
+    vdj_c_call_obs_key_suffix: {% if cookiecutter.vdj_c_call_obs_key_suffix %}"{{ cookiecutter.vdj_c_call_obs_key_suffix }}"{% endif %}
+    vdj_consensus_count_obs_key_suffix: {% if cookiecutter.vdj_consensus_count_obs_key_suffix %}"{{ cookiecutter.vdj_consensus_count_obs_key_suffix }}"{% endif %}
+    vdj_d_call_obs_key_suffix: {% if cookiecutter.vdj_d_call_obs_key_suffix %}"{{ cookiecutter.vdj_d_call_obs_key_suffix }}"{% endif %}
+    vdj_duplicate_count_obs_key_suffix: {% if cookiecutter.vdj_duplicate_count_obs_key_suffix %}"{{ cookiecutter.vdj_duplicate_count_obs_key_suffix }}"{% endif %}
+    vdj_j_call_obs_key_suffix: {% if cookiecutter.vdj_j_call_obs_key_suffix %}"{{ cookiecutter.vdj_j_call_obs_key_suffix }}"{% endif %}
+    vdj_junction_obs_key_suffix: {% if cookiecutter.vdj_junction_obs_key_suffix %}"{{ cookiecutter.vdj_junction_obs_key_suffix }}"{% endif %}
+    vdj_junction_aa_obs_key_suffix: {% if cookiecutter.vdj_junction_aa_obs_key_suffix %}"{{ cookiecutter.vdj_junction_aa_obs_key_suffix }}"{% endif %}
+    vdj_locus_obs_key_suffix: {% if cookiecutter.vdj_locus_obs_key_suffix %}"{{ cookiecutter.vdj_locus_obs_key_suffix }}"{% endif %}
+    vdj_productive_obs_key_suffix: {% if cookiecutter.vdj_productive_obs_key_suffix %}"{{ cookiecutter.vdj_productive_obs_key_suffix }}"{% endif %}
+    vdj_v_call_obs_key_suffix: {% if cookiecutter.vdj_v_call_obs_key_suffix %}"{{ cookiecutter.vdj_v_call_obs_key_suffix }}"{% endif %}
 meta:
     version: "1.2"

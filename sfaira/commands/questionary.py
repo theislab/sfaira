@@ -29,7 +29,8 @@ def sfaira_questionary(function: str,
     """
     Custom selection based on Questionary. Handles keyboard interrupts and default values.
 
-    :param function: The function of questionary to call (e.g. select or text). See https://github.com/tmbo/questionary for all available functions.
+    :param function: The function of questionary to call (e.g. select or text).
+        See https://github.com/tmbo/questionary for all available functions.
     :param question: The question to prompt for. Should not include default values or colons.
     :param choices: List of all possible choices. Usually only relevant with 'select'.
     :param default: A set default value which will be chosen if the user does not enter anything.
@@ -42,16 +43,18 @@ def sfaira_questionary(function: str,
                 log.debug(f'Default value {default} is not in the set of choices!')
             answer = getattr(questionary, function)(f'{question}: ', choices=choices, style=sfaira_style).unsafe_ask()
         elif function == 'password':
-            while not answer or answer == '':
-                answer = getattr(questionary, function)(f'{question}: ', style=sfaira_style).unsafe_ask()
+            # while not answer or answer == '': # re-asking behaviour is unwanted for sfaira cli pull request submission
+            answer = getattr(questionary, function)(f'{question}: ', style=sfaira_style).unsafe_ask()
         elif function == 'text':
             if not default:
-                log.debug('Tried to utilize default value in questionary prompt, but is None! Please set a default value.')
+                log.debug('Tried to utilize default value in questionary prompt, '
+                          'but is None! Please set a default value.')
                 default = ''
             answer = getattr(questionary, function)(f'{question} [{default}]: ', style=sfaira_style).unsafe_ask()
         elif function == 'confirm':
             default_value_bool = True if default == 'Yes' or default == 'yes' else False
-            answer = getattr(questionary, function)(f'{question} [{default}]: ', style=sfaira_style, default=default_value_bool).unsafe_ask()
+            answer = getattr(questionary, function)(f'{question} [{default}]: ', style=sfaira_style,
+                                                    default=default_value_bool).unsafe_ask()
         else:
             log.debug(f'Unsupported questionary function {function} used!')
 

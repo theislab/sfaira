@@ -17,6 +17,13 @@ def _invert_permutation(p: np.ndarray):
     return s
 
 
+def _assign_perm_original_data_column(df, perm):
+    if perm is not None:
+        df['permutation_original_data'] = perm
+
+    return df
+
+
 def _buffered_path(path_base, path, fn):
     path_base = os.path.join(path_base, path)
     if not os.path.exists(path_base):
@@ -68,10 +75,10 @@ def write_dao(store: Union[str, Path], adata: anndata.AnnData, chunks: Union[boo
     if shuffle_data:
         perm = np.arange(0, adata.X.shape[0])
         np.random.shuffle(perm)
-        adata.obs['permutation_original_data'] = _invert_permutation(perm)
+        perm_original_data = _invert_permutation(perm)
     else:
         perm = np.arange(0, adata.X.shape[0])
-
+        perm_original_data = None
     # If adata.X is already a dense array in memory, it can be safely written fully to a zarr array. Otherwise:
     # Create empty store and then write in dense chunks to avoid having to load entire adata.X into a dense array in
     # memory.
@@ -98,6 +105,8 @@ def write_dao(store: Union[str, Path], adata: anndata.AnnData, chunks: Union[boo
     (
         adata
         .obs.iloc[perm]
+        # only assign permutation_original_data column if data was shuffled
+        .pipe(_assign_perm_original_data_column, perm=perm_original_data)
         # make sure all columns are dtype=str and are converted to categorical
         # this has to change if we have numeric values in obs
         # exclude 'perumtation_original_data' column from this as it's numeric

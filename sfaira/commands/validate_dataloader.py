@@ -8,6 +8,7 @@ from rich.progress import Progress, BarColumn
 from typing import Dict, List
 import yaml
 
+from sfaira.commands.utils import get_pydoc
 from sfaira.consts.utils import clean_doi
 
 log = logging.getLogger(__name__)
@@ -29,9 +30,10 @@ class DataloaderValidator:
                             if str(x).endswith(".py") and str(x) != "__init__.py"]
         yaml_filenames = [x for x in os.listdir(os.path.join(path_loader, self._clean_doi))
                           if str(x).endswith(".yaml")]
+        self.path_loader = path_loader
         self.fns_loaders = loader_filenames
         self.paths_yamls = [os.path.join(path_loader, self._clean_doi, x) for x in yaml_filenames]
-        self.yaml_dicts = []
+        self.yaml_dicts = {}
         self.passed = []
         self.warned = []
         self.failed = []
@@ -79,9 +81,10 @@ class DataloaderValidator:
 
         for fn in self.fns_loaders:
             file_module = ".".join(fn.split(".")[:-1])
-            pydoc_path = "sfaira.data.dataloaders.loaders." + self._clean_doi + "." + file_module
+            _, pydoc_handle = get_pydoc(path_loader=self.path_loader, doi_sfaira_repr=self._clean_doi)
+            pydoc_handle = pydoc_handle + "." + file_module
             for x in elements:
-                query_element = pydoc.locate(pydoc_path + "." + x)
+                query_element = pydoc.locate(pydoc_handle + "." + x)
                 if query_element is None:
                     passed_required_elements = False
                     self.failed.append(f'Missing element in namespace of {fn}.py file: {x}')
@@ -156,9 +159,9 @@ class DataloaderValidator:
                 'individual',
                 'organ',
                 'organism',
-                'primary_doi',
                 'sample_source',
                 'sex',
+                'source_doi',
                 'state_exact',
                 'tech_sample',
                 'treatment']] for z in y],
@@ -166,19 +169,23 @@ class DataloaderValidator:
                 'feature_id_var_key',
                 'feature_symbol_var_key'],
             'observation_wise': [
-                'spatial_x_coord',
-                'spatial_y_coord',
-                'spatial_z_coord',
-                'vdj_c_call',
-                'vdj_consensus_count',
-                'vdj_d_call',
-                'vdj_duplicate_count',
-                'vdj_j_call',
-                'vdj_junction',
-                'vdj_junction_aa',
-                'vdj_locus',
-                'vdj_productive',
-                'vdj_v_call'],
+                'spatial_x_coord_obs_key',
+                'spatial_y_coord_obs_key',
+                'spatial_z_coord_obs_key',
+                'vdj_vj_1_obs_key_prefix',
+                'vdj_vj_2_obs_key_prefix',
+                'vdj_vdj_1_obs_key_prefix',
+                'vdj_vdj_2_obs_key_prefix',
+                'vdj_c_call_obs_key_suffix',
+                'vdj_consensus_count_obs_key_suffix',
+                'vdj_d_call_obs_key_suffix',
+                'vdj_duplicate_count_obs_key_suffix',
+                'vdj_j_call_obs_key_suffix',
+                'vdj_junction_obs_key_suffix',
+                'vdj_junction_aa_obs_key_suffix',
+                'vdj_locus_obs_key_suffix',
+                'vdj_productive_obs_key_suffix',
+                'vdj_v_call_obs_key_suffix'],
             'meta': [
                 'version'],
         }
@@ -210,7 +217,6 @@ class DataloaderValidator:
                 'author',
                 ['doi_journal', 'doi_preprint'],
                 'download_url_data',
-                'normalization',
                 'primary_data',
                 'year'],
             'layers': [
@@ -218,7 +224,7 @@ class DataloaderValidator:
             'dataset_or_feature_wise': [
                 ['feature_type', 'feature_type_var_key']],
             'feature_wise': [
-                ['gene_id_ensembl_var_key', 'gene_id_symbols_var_key']],
+                ['feature_id_var_key', 'feature_symbol_var_key']],
             'meta': [
                 'version'],
         }
@@ -230,6 +236,7 @@ class DataloaderValidator:
             attributes['dataset_wise'].append("default_embedding")
             attributes['dataset_or_observation_wise'] = [[x, x + "_obs_key"] for x in [
                 'assay_sc',
+                'cell_type',
                 'development_stage',
                 'disease',
                 'ethnicity',

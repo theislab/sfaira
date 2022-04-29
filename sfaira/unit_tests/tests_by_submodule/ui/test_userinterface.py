@@ -45,7 +45,7 @@ class HelperUi:
         :return:
         """
         dsg = PrepareData().prepare_dsg(rewrite=True, load=False)
-        dsg.subset(key="id", values=["homosapiens_lung_2021_None_mock4_001_no_doi_mock4"])
+        dsg.subset(key="id", values=["homosapiens_lung_2021_None_mock4_001_dno_doi_mock4"])
         dsg.load()
         return dsg.adata
 
@@ -70,7 +70,7 @@ class HelperUi:
         self.ui.zoo_embedding.model_id = 'embedding_human-blood-ae-0.2-0.1_theislab'
         self.ui.zoo_celltype.model_id = 'celltype_human-blood-mlp-0.1.3-0.1_theislab'
         test_data = self._get_adata()
-        self.ui.load_data(test_data, gene_ens_col='index')
+        self.ui.load_data(test_data, feature_id_col='index')
         self.ui.load_model_celltype()
         self.ui.load_model_embedding()
         self.ui.predict_all()

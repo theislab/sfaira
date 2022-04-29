@@ -1,8 +1,8 @@
 import anndata
+import cProfile
 from IPython.display import display_javascript, display_html
 import json
 import os
-import pathlib
 import pickle
 import requests
 from typing import List, Union
@@ -71,6 +71,7 @@ class Dataset(DatasetBase):
             sample_fn: Union[str, None] = None,
             sample_fns: Union[List[str], None] = None,
             additional_annotation_key: Union[str, None] = None,
+            cache_metadata: bool = False,
             verbose: int = 0,
             **kwargs
     ):
@@ -85,12 +86,13 @@ class Dataset(DatasetBase):
         # General keys are defined in the shared IDs object. Further down, the species specific one is loaded to
         # disambiguate species-dependent differences.
         self._adata_ids_cellxgene = AdataIdsCellxgene()
+        self._cache_metadata = cache_metadata
         self._collection = None
         self.collection_id = collection_id
         self.supplier = "cellxgene"
         doi = [x['link_url'] for x in self.collection["links"] if x['link_type'] == 'DOI']
         self.doi_journal = collection_id if len(doi) == 0 else doi[0]  # TODO access journal DOI explicitly.
-        self.id = sample_fn
+        self.id_base = sample_fn
         # Set h5ad download URLs:
         download_url_data = []
         for asset in self._collection_dataset['dataset_assets']:
@@ -102,23 +104,29 @@ class Dataset(DatasetBase):
         # Set dataset-wise attributes based on object preview from REST API (without h5ad download):
         # Set organism first so that other terms can access this attribute (e.g. developmental_stage ontology).
         reordered_keys = ["organism"] + [x for x in self._adata_ids_cellxgene.dataset_keys if x != "organism"]
+        collection_dataset = self._collection_dataset
         for k in reordered_keys:
-            val = self._collection_dataset[getattr(self._adata_ids_cellxgene, k)]
+            val = collection_dataset[getattr(self._adata_ids_cellxgene, k)]
             # Unique label if list is length 1:
             # Otherwise do not set property and resort to cell-wise labels.
             v_clean = clean_cellxgene_meta_uns(k=k, val=val, adata_ids=self._adata_ids_cellxgene)
-            # Set as single element or list if multiple entries are given.
-            if len(v_clean) > 1:
-                v_clean = v_clean[0]
             try:
-                setattr(self, k, v_clean)
+                # Only set global attribute if this is a single value:
+                # If not a single value, sfaira accesses observation-wise annotation in .obs.
+                if len(v_clean) == 1:
+                    v_clean = v_clean[0]
+                    if k == "organ":
+                        # cellxgene uses custom extensions of the actual UBERON terms for cell cultures:
+                        v_clean = v_clean.split(" (cell culture)")[0]
+                    setattr(self, k, v_clean)
             except ValueError as e:
-                if verbose > 0:
-                    print(f"WARNING: {e} in {self.collection_id} and data set {self.id}")
+                print(f"WARNING: {e} in {self.collection_id} and data set {self.id}")
 
         self._adata_ids_cellxgene = AdataIdsCellxgene_v2_0_0()
         # Add author information.  # TODO need to change this to contributor?
         self.author = "cellxgene"
+        self.layer_processed = "X"
+        # TODO extract counts vs processed layers
         # The h5ad objects from cellxgene follow a particular structure and the following attributes are guaranteed to
         # be in place. Note that these point at the anndata instance and will only be available for evaluation after
         # download. See below for attributes that are lazily available
@@ -130,16 +138,23 @@ class Dataset(DatasetBase):
         self.organ_obs_key = self._adata_ids_cellxgene.organ
         self.state_exact_obs_key = self._adata_ids_cellxgene.state_exact
 
-        self.feature_symbol_var_key = self._adata_ids_cellxgene.feature_symbol
+        self.feature_id_var_key = self._adata_ids_cellxgene.feature_id
 
         self._unknown_celltype_identifiers = self._adata_ids_cellxgene.unknown_metadata_identifier
 
     @property
     def _collection_cache_dir(self):
         """
-        The cache dir is in a cache directory in the homedirectory of the user by default and can be user modified.
+        Collection meta data caching directory.
+
+        Caches are written into specific directory under HOME/.cache with other sfaira meta data unless
+        path_data was supplied to constructor. This co-localisation of collection meta data with data downloads eases
+        transfer of cache files between machines.
         """
-        return settings.cachedir_databases_cellxgene
+        if self.data_dir_base is None:
+            return settings.cachedir_databases_cellxgene
+        else:
+            return os.path.join(self.data_dir_base, "meta")
 
     @property
     def _collection_cache_fn(self):
@@ -147,20 +162,18 @@ class Dataset(DatasetBase):
 
     @property
     def collection(self):
+        """
+        Cached collection meta data.
+
+        Note on caching: updates to the remote collection break these caches.
+        Disbale caching are clear caches manually (~/.cache/sfaira/dataset_meta/cellxgene) if this causes issues.
+        """
         if self._collection is None:
-            # Check if cached:
-            if os.path.exists(self._collection_cache_fn):
-                with open(self._collection_cache_fn, "rb") as f:
-                    self._collection = pickle.load(f)
-            else:
-                # Download and cache:
-                self._collection = get_collection(collection_id=self.collection_id)
-                with open(self._collection_cache_fn, "wb") as f:
-                    pickle.dump(obj=self._collection, file=f)
+            self._collection = get_collection(collection_id=self.collection_id, cache=self._collection_cache_fn)
         return self._collection
 
     @property
-    def _collection_dataset(self):
+    def _collection_dataset(self) -> dict:
         return self.collection['datasets'][self._sample_fns.index(self.sample_fn)]
 
     @property
@@ -168,13 +181,15 @@ class Dataset(DatasetBase):
         return self.collection_id
 
     @property
-    def doi_cleaned_id(self):
-        return self.id
+    def id(self):
+        return self.id_base
+
+    @property
+    def id_without_doi(self):
+        return self.id_base
 
     def load(
             self,
-            remove_gene_version: bool = True,
-            match_to_reference: Union[str, bool, None] = None,
             load_raw: bool = False,
             allow_caching: bool = True,
             set_metadata: bool = True,
@@ -183,8 +198,6 @@ class Dataset(DatasetBase):
         # Invoke load with cellxgene adapted parameters:
         #  - Never cache as the cellxgene objects already fast to read.
         super().load(
-            remove_gene_version=False,
-            match_to_reference=match_to_reference,
             load_raw=True,
             allow_caching=False,
             set_metadata=set_metadata,

@@ -2,11 +2,20 @@ name: Run flake8 linting
 
 on:
   push:
+    branches:
+      - main
+      - release
+      - dev
     paths:
       - "**/*.py"
   pull_request:
     paths:
       - "**/*.py"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   lint:

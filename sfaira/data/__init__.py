@@ -6,7 +6,6 @@ from sfaira.data.store import load_store, \
     StoreMultipleFeatureSpaceBase, \
     StoresAnndata, StoresDao, StoresH5ad
 from . import dataloaders
-from .dataloaders import Universe
+from .dataloaders import Universe, utils
 from .interactive import DatasetInteractive
 from . import store
-from . import utils

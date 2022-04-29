@@ -76,6 +76,28 @@ def test_data(store_format: str, idx, obs_keys: List[str], randomized_batch_acce
 
 
 @pytest.mark.parametrize("store_format", ["h5ad", "dao"])
+def test_obsm(store_format: str):
+    """
+    Test if in memory obsm interface works.
+    """
+    # Need to re-write because specific obs_keys are required:
+    kwargs = {"obs_keys": ["cell_type"]}
+    cart = _get_cart(store_format=store_format, feature_space="multi", obsm=True, **kwargs)
+    it = cart.iterator
+    counter = 0
+    for i, z in enumerate(it()):
+        counter += 1
+        data_tuple = z[0]
+        assert len(data_tuple) == 2
+        x_i, obsm_i = data_tuple
+        # Flat batches of size 1:
+        assert len(x_i.shape) == 1
+        assert len(obsm_i.shape) == 1
+        # Non-shared feature dimension:
+        assert x_i.shape[0] != obsm_i.shape[0], (x_i.shape, obsm_i.shape)
+
+
+@pytest.mark.parametrize("store_format", ["h5ad", "dao"])
 @pytest.mark.parametrize("idx", [None, np.array([1, 4, 98])])
 def test_schedule_blocked(store_format: str, idx):
     """
@@ -109,23 +131,29 @@ def test_schedule_blocked(store_format: str, idx):
     assert np.sum([y.shape[0] for y in batches]) == target_nobs
 
 
-@pytest.mark.parametrize("adaptor", ["python", "tensorflow", "torch", "torch-loader", "torch-iter",
-                                     "torch-iter-loader"])
-def test_adaptors(adaptor: str):
+@pytest.mark.parametrize(
+    "adaptor", ["python", "tensorflow", "torch", "torch-loader", "torch-iter", "torch-iter-loader"]
+)
+@pytest.mark.parametrize("obsm", [False, True])
+@pytest.mark.parametrize("shuffle_buffer_size", [0, 1000])
+def test_adaptors(adaptor: str, obsm: bool, shuffle_buffer_size: int):
     """
     Test if framework-specific generator adpators yield batches.
     """
     idx = np.arange(0, 10)
 
-    def map_fn(x_, obs_):
-        """
-        Note: Need to convert to numpy in output because torch does not accept dask.
-        """
-        return (np.asarray(x_[:, :2]),),
+    if obsm:
+
+        def map_fn(x_, obs_, obsm_):
+            return (np.asarray(x_[:, :2]),),
+    else:
+
+        def map_fn(x_, obs_):
+            return (np.asarray(x_[:, :2]),),
 
     kwargs = {"idx": {"Mus musculus": idx}, "obs_keys": [], "randomized_batch_access": False, "retrieval_batch_size": 2,
               "map_fn": map_fn}
-    cart = _get_cart(store_format="dao", feature_space="single", **kwargs)
+    cart = _get_cart(store_format="dao", feature_space="single", obsm=obsm, **kwargs)
 
     if adaptor == "python":
         kwargs = {}
@@ -139,14 +167,56 @@ def test_adaptors(adaptor: str):
         kwargs = {}
     else:
         assert False
-    it = cart.adaptor(generator_type=adaptor, **kwargs)
+    it = cart.adaptor(generator_type=adaptor, shuffle_buffer=shuffle_buffer_size, **kwargs)
     if adaptor == "tensorflow":
         it = iter(it.range(2))
     if adaptor in ["torch", "torch-iter"]:
-        import torch
-        it = list(torch.utils.data.DataLoader(it))
+        from torch.utils.data import DataLoader
+        it = list(DataLoader(it))
         it = iter(it)
     if adaptor in ["torch-loader", "torch-iter-loader"]:
-        import torch
         it = iter(list(it))
     _ = next(it)
+
+
+@pytest.mark.parametrize("adaptor", ["torch"])
+@pytest.mark.parametrize("idx_subset", [[2, 7], 3])
+def test_cache(adaptor: str, idx_subset):
+    """
+    Test if cache and raw dataset yield same data: both in terms of map_fn transformation and in terms of indexing.
+
+    This is only re-implemented for the adapator "torch" and "toch-loader" (which directly builds upon caching in
+    "torch").
+    """
+    import torch
+
+    idx = np.arange(0, 10)
+
+    def map_fn(x_, obs_):
+        return (np.asarray(x_) + 2.,),
+
+    kwargs = {"idx": {"Mus musculus": idx}, "obs_keys": [], "randomized_batch_access": False, "retrieval_batch_size": 2,
+              "map_fn": map_fn}
+    cart = _get_cart(store_format="dao", feature_space="single", **kwargs)
+    # Compare cached and raw dataset:
+    # Create non-cached reference data set:
+    it_raw = cart.adaptor(generator_type=adaptor, shuffle_buffer=10, dataset_kwargs={"use_cache": False})
+    assert it_raw.cached_data is None
+    xy_raw_selected = it_raw[idx_subset]
+    # Create cached data set:
+    it_cached = cart.adaptor(generator_type=adaptor, shuffle_buffer=10, dataset_kwargs={"use_cache": True})
+    # Tests:
+    assert it_cached.cached_data is not None
+    assert it_cached.cached_data[0][0].shape[0] == len(idx)
+    xy_cache_selected = it_cached[idx_subset]
+    len_idx = 1 if isinstance(idx_subset, int) else len(idx_subset)
+    if len_idx == 1:
+        assert len(xy_raw_selected[0][0].shape) == 1
+        assert len(xy_cache_selected[0][0].shape) == 1
+    else:
+        assert len(xy_raw_selected[0][0].shape) == 2
+        assert len(xy_cache_selected[0][0].shape) == 2
+        assert xy_raw_selected[0][0].shape[0] == len_idx
+        assert xy_cache_selected[0][0].shape[0] == len_idx
+    # Check that chosen elements are the same:
+    assert torch.all(xy_raw_selected[0][0] == xy_cache_selected[0][0])

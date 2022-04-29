@@ -10,6 +10,9 @@ from rich import print
 
 from sfaira.commands.annotate_dataloader import DataloaderAnnotater
 from sfaira.commands.cache_control import CacheControl
+from sfaira.commands.export_h5ad import H5adExport
+from sfaira.commands.submit_pullrequest import PullRequestHandler
+from sfaira.commands.test_dataloader import DataloaderTester
 from sfaira.commands.utils import doi_lint
 from sfaira.commands.validate_dataloader import DataloaderValidator
 from sfaira.commands.validate_h5ad import H5adValidator
@@ -104,17 +107,17 @@ def sfaira_cli(ctx, verbose, log_file):
 
 
 @sfaira_cli.command()
-def cache_clear() -> None:
+@click.option('--reload',
+              is_flag=True,
+              help='Downloads new ontology versions into cache after clearing it.')
+def clear_cache(reload) -> None:
     """Clears sfaira cache, including ontology and genome cache."""
     ctrl = CacheControl()
-    ctrl.clear()
-
-
-@sfaira_cli.command()
-def cache_reload() -> None:
-    """Downloads new ontology versions into cache."""
-    ctrl = CacheControl()
-    ctrl.reload()
+    if reload:
+        ctrl.clear(countdown=False)
+        ctrl.reload()
+    else:
+        ctrl.clear(countdown=True)
 
 
 @sfaira_cli.command()
@@ -136,7 +139,7 @@ def create_dataloader(path_data, path_loader) -> None:
 
 
 @sfaira_cli.command()
-@click.option('--doi', type=str, default=None, help="The doi of the paper that the data loader refers to.")
+@click.option('--doi', type=str, required=True, help="The doi of the paper that the data loader refers to.")
 @click.option('--path-data',
               default=DEFAULT_DATA_PATH,
               type=click.Path(exists=False),
@@ -145,13 +148,14 @@ def create_dataloader(path_data, path_loader) -> None:
               default=PACKAGE_LOADER_PATH,
               type=click.Path(exists=False),
               help='Relative path from the current directory to the location of the data loader.')
-def annotate_dataloader(doi, path_data, path_loader) -> None:
+@click.option('--schema', type=str, default="sfaira", help="The curation schema to check meta data availability for.")
+def annotate_dataloader(doi, path_data, path_loader, schema) -> None:
     """
     Annotates a dataloader.
     """
     path_loader, path_data, _ = set_paths(loader=path_loader, data=path_data)
-    if doi is None or doi_lint(doi):
-        dataloader_validator = DataloaderValidator(path_loader, doi)
+    if doi_lint(doi):
+        dataloader_validator = DataloaderValidator(path_loader, doi, schema=schema)
         dataloader_validator.validate()
         dataloader_annotater = DataloaderAnnotater()
         dataloader_annotater.annotate(path_loader, path_data, dataloader_validator.doi)
@@ -160,7 +164,7 @@ def annotate_dataloader(doi, path_data, path_loader) -> None:
 
 
 @sfaira_cli.command()
-@click.option('--doi', type=str, default=None, help="The doi of the paper that the data loader refers to.")
+@click.option('--doi', type=str, required=True, help="The doi of the paper that the data loader refers to.")
 @click.option('--path-loader',
               default=PACKAGE_LOADER_PATH,
               type=click.Path(exists=False),
@@ -171,7 +175,7 @@ def validate_dataloader(doi, path_loader, schema) -> None:
     Verifies the dataloader against sfaira's requirements.
     """
     path_loader, _, _ = set_paths(loader=path_loader)
-    if doi is None or doi_lint(doi):
+    if doi_lint(doi):
         dataloader_validator = DataloaderValidator(path_loader=path_loader, doi=doi, schema=schema)
         dataloader_validator.validate()
     else:
@@ -189,7 +193,7 @@ def _full_test(path_loader, path_data, doi, schema, clean_tsvs, in_phase_3):
 
 
 @sfaira_cli.command()
-@click.option('--doi', type=str, default=None, help="The doi of the paper that the data loader refers to.")
+@click.option('--doi', type=str, required=True, help="The doi of the paper that the data loader refers to.")
 @click.option('--path-data',
               default=DEFAULT_DATA_PATH,
               type=click.Path(exists=False),
@@ -208,7 +212,7 @@ def test_dataloader(doi, path_data, path_loader, schema) -> None:
 
 
 @sfaira_cli.command()
-@click.option('--doi', type=str, default=None, help="The doi of the paper that the data loader refers to.")
+@click.option('--doi', type=str, required=True, help="The doi of the paper that the data loader refers to.")
 @click.option('--path-data',
               default=DEFAULT_DATA_PATH,
               type=click.Path(exists=False),
@@ -227,7 +231,7 @@ def finalize_dataloader(doi, path_data, path_loader, schema) -> None:
 
 
 @sfaira_cli.command()
-def publish_loader() -> None:
+def publish_dataloader() -> None:
     """
     Interactively create a GitHub pull request for a newly created data loader.
     This only works when called in the sfaira CLI docker container.
@@ -239,8 +243,8 @@ def publish_loader() -> None:
 
 
 @sfaira_cli.command()
-@click.option('--doi', type=str, default=None, help="DOI of data sets to export")
-@click.option('--schema', type=str, default=None, help="Schema to streamline to, e.g. 'cellxgene'")
+@click.option('--doi', type=str, required=True, help="The doi of the paper that the data loader refers to.")
+@click.option('--schema', type=str, required=True, help="Schema to streamline to, e.g. 'cellxgene'")
 @click.option('--path-out',
               type=click.Path(exists=True),
               help='Absolute path of the location of the streamlined output h5ads.')
@@ -248,16 +252,42 @@ def publish_loader() -> None:
               default=DEFAULT_DATA_PATH,
               type=click.Path(exists=True),
               help='Absolute path of the location of the raw data directory.')
+@click.option('--contributors',
+              type=str,
+              default=None,
+              help='Contributors for this curated object (listed in cellxgene for example).')
+@click.option('--del-obs',
+              type=str,
+              default=None,
+              help='# separated string of columns to remove from .obs, do not add spaces.')
+@click.option('--keep-obs',
+              type=str,
+              default=None,
+              help='# separated string of columns to remove from .obs, do not add spaces.')
 @click.option('--path-cache',
               type=click.Path(exists=True),
               default=None,
               help='The optional absolute path to cached data library maintained by sfaira. Using such a cache speeds '
                    'up loading in sequential runs but is not necessary.')
-def export_h5ad(doi, schema, path_out, path_data, path_cache) -> None:
+@click.option('--path-loader',
+              default=PACKAGE_LOADER_PATH,
+              type=click.Path(exists=False),
+              help='Relative path from the current directory to the location of the data loader.')
+@click.option('--title',
+              type=str,
+              default=None,
+              help='The optional absolute path to cached data library maintained by sfaira. Using such a cache speeds '
+                   'up loading in sequential runs but is not necessary.')
+def export_h5ad(del_obs, contributors, doi, schema, keep_obs, path_out, path_data, path_loader, path_cache, title) -> \
+        None:
     """Creates a collection of streamlined h5ad object for a given DOI."""
-    raise NotImplementedError()
-    # _, path_data, path_cache = set_paths(data=path_data, cache=path_cache)
-    # check_paths([path_data, path_cache])
+    del_obs = del_obs if del_obs is None else del_obs.split("#")
+    keep_obs = keep_obs if keep_obs is None else keep_obs.split("#")
+    path_loader, path_data, _ = set_paths(loader=path_loader, data=path_data, cache=path_cache)
+    h5ad_export = H5adExport(clean_obs=del_obs, contributors=contributors, doi=doi, keep_obs=keep_obs,
+                             path_cache=path_cache, path_data=path_data, path_loader=path_loader, path_out=path_out,
+                             schema=schema, title=title)
+    h5ad_export.write()
 
 
 @sfaira_cli.command()
@@ -269,9 +299,8 @@ def validate_h5ad(h5ad, schema) -> None:
     h5ad is the absolute path of the .h5ad file to test.
     schema is the schema type ("cellxgene",) to test.
     """
-    h5ad_tester = H5adValidator(h5ad, schema)
-    h5ad_tester.test_schema()
-    h5ad_tester.test_numeric_data()
+    h5ad_validator = H5adValidator(h5ad, schema)
+    h5ad_validator.validate()
 
 
 if __name__ == "__main__":
