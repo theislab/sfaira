@@ -83,8 +83,9 @@ def cellxgene_export_adaptor_1_1_0(adata: anndata.AnnData, adata_ids: AdataIdsCe
     return adata
 
 
-def cellxgene_export_adaptor_2_0_0(adata: anndata.AnnData, adata_ids: AdataIdsCellxgene, obs_keys_batch,
-                                   mask_portal_fields: bool = True, **kwargs) -> anndata.AnnData:
+def cellxgene_export_adaptor_2_0_0(adata: anndata.AnnData, adata_ids: AdataIdsCellxgene, layer_key_counts: str,
+                                   layer_key_proc: str, obs_keys_batch, mask_portal_fields: bool = True,
+                                   title: Union[str, None] = None, **kwargs) -> anndata.AnnData:
     """
     Cellxgene-schema 2.0.0.
 
@@ -92,11 +93,20 @@ def cellxgene_export_adaptor_2_0_0(adata: anndata.AnnData, adata_ids: AdataIdsCe
     """
     obs_keys_autofill = [getattr(adata_ids, x) for x in adata_ids.ontology_constrained]
     uns_keys_autofill = []
-    var_keys_autofill = [adata_ids.feature_symbol, adata_ids.feature_reference]
-    raw_var_keys_remove = [adata_ids.feature_is_filtered]
+    var_keys_autofill = [adata_ids.feature_symbol]
+    raw_var_keys_autofill = [adata_ids.feature_symbol]
     # 1) Modify .uns
-    adata.uns["X_normalization"] = "log_normalized"
-    adata.uns["X_approximate_distribution"] = "normal"
+    if layer_key_proc == "X":
+        add_proc = False
+        adata.uns["X_normalization"] = "custom"
+    elif layer_key_counts == "X":
+        assert layer_key_proc is None
+        # This implies that a auto log-normalised layer will be added below.
+        add_proc = True
+        adata.uns["X_normalization"] = "log_normalized"
+        adata.uns["X_approximate_distribution"] = "normal"
+    else:
+        assert False
     adata.uns["schema_version"] = "2.0.0"
     adata.uns[adata_ids.author] = {
         "name": "sfaira",
@@ -105,6 +115,16 @@ def cellxgene_export_adaptor_2_0_0(adata: anndata.AnnData, adata_ids: AdataIdsCe
     }
     if obs_keys_batch is not None:
         adata.uns["batch_condition"] = obs_keys_batch.split("*")
+        if adata_ids.tech_sample in adata.obs.columns:
+            # Delete curated columns as cellxgene does not require this in obs, it only requires the reference to the
+            # original column in .uns.
+            del adata.obs[adata_ids.tech_sample]
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError(f"found type {type(title)} for title, require string or None")
+        adata.uns[adata_ids.title] = title
+    # Remove overloading:
+    adata.uns = dict(adata.uns)
     # 2) Modify .obs
     # a) Correct unknown cell type entries:
     adata.obs[adata_ids.cell_type] = [
@@ -127,23 +147,42 @@ def cellxgene_export_adaptor_2_0_0(adata: anndata.AnnData, adata_ids: AdataIdsCe
                      [getattr(adata_ids, x) + adata_ids.onto_id_suffix
                       for x in adata_ids.ontology_constrained]
     adata.obs = adata.obs[cellxgene_cols + [x for x in adata.obs.columns if x not in cellxgene_cols]]
-    # 3) Modify .X, assuming that .X is raw (TODO)
+    # 3) Modify .X.
     # Check if .X is counts: The conversion are based on the assumption that .X is csr.
     assert isinstance(adata.X, scipy.sparse.csr_matrix), type(adata.X)
-    count_values = np.unique(np.asarray(adata.X.todense()))
-    if not np.all(count_values % 1. == 0.):
-        print(f"WARNING: not all count entries were counts, "
-              f"the maximum deviation from integer is "
-              f"{np.max([x % 1. if x % 1. < 0.5 else 1. - x % 1. for x in count_values])}. "
-              f"The count matrix is rounded.")
-        adata.X.data = np.rint(adata.X.data)
+    # Add standard processed count layer (log-normalized) if only counts are supplied:
+    # Note that processed counts are in .X if they are supplied along-side raw counts at this point already (this
+    # happens in feature streamlining). Raw counts are only not in .X if they processed counts are not supplied.
+    # In this exception case, we generate log-normalized data suited for plotting here.
+    if add_proc:
+        adata.raw = adata
+        # Log-normalise values in .X
+        sc.pp.normalize_per_cell(adata)
+        sc.pp.log1p(adata)
+        # This key may be written by log1p above:
+        if "log1p" in adata.uns.keys():
+            del adata.uns["log1p"]
+    # TODO skipped for now:
+    # Round numbers in count object:
+    # if layer_key_proc is not None:
+    #    count_values = np.unique(np.asarray(adata.layers[adata_ids.layer_counts].todense()))
+    #    if not np.all(count_values % 1. == 0.):
+    #        print(f"WARNING: not all count entries were counts, "
+    #              f"the maximum deviation from integer is "
+    #              f"{np.max([x % 1. if x % 1. < 0.5 else 1. - x % 1. for x in count_values])}. "
+    #              f"The count matrix is rounded.")
+    #        adata.layers[adata_ids.layer_counts].data = np.rint(adata.layers[adata_ids.layer_counts].data)
     # 4) Modify .var:
-    adata.var[adata_ids.feature_biotype] = "gene"
-    adata.var[adata_ids.feature_reference] = adata.obs[adata_ids.organism + adata_ids.onto_id_suffix].values[0]
-    # TODO set filtered based on feature overlap between raw and X.
-    adata.var[adata_ids.feature_is_filtered] = False
-    adata.var[adata_ids.feature_biotype] = pd.Categorical(adata.var[adata_ids.feature_biotype].values.tolist())
-    adata.var.index = adata.var[adata_ids.feature_id].values
+    adata.var[adata_ids.feature_biotype] = pd.Categorical(["gene" for _ in range(adata.n_vars)])
+    if adata.raw is not None:
+        adata.raw.var[adata_ids.feature_biotype] = pd.Categorical(["gene" for _ in range(adata.raw.n_vars)])
+    if adata.raw is not None and adata.n_vars < adata.raw.n_vars:
+        # extend X by zero columns and add filtered attribute:
+        raise NotImplementedError()
+    else:
+        adata.var[adata_ids.feature_is_filtered] = False
+        # Assert that genes are ordered the same way in raw and processed:
+        assert np.all(adata.var.index == adata.raw.var.index)
     # Modify ensembl ID writing:
     # adata.var[adata_ids.feature_id] = ["G:".join(x.split("G")) for x in adata.var[adata_ids.feature_id]]
     # adata.var.index = ["G:".join(x.split("G")) for x in adata.var.index]
@@ -155,19 +194,16 @@ def cellxgene_export_adaptor_2_0_0(adata: anndata.AnnData, adata_ids: AdataIdsCe
             del adata.uns[k]
         for k in var_keys_autofill:
             del adata.var[k]
-    # 6) Modify .raw, assuming that .X is raw: TODO below
-    # Note that this depends on var cleaning in step 5.
-    var_raw = pd.DataFrame(dict([(k, v) for k, v in adata.var.items() if k not in raw_var_keys_remove]))
-    adata.raw = anndata.AnnData(adata.X, var=var_raw)
-    # Log-normalise values in .X TODO make optional
-    sc.pp.normalize_per_cell(adata)
-    sc.pp.log1p(adata)
-    # 7) Check if default embedding is present, add in otherwise:
+        for k in raw_var_keys_autofill:
+            if adata.raw is not None and k in adata.raw.var.columns:
+                del adata.raw.var[k]
+    # 6) Check if default embedding is present, add in otherwise:
     # First check if any pre-computed embedding is given.
     # If that is not the case, compute a default UMAP.
     # Define hierarchy of embeddings accepted as defaults, first one matched will be chosen:
     default_embedding_names = ["X_umap", "X_tsne", "X_draw_graph_fa"]
-    if adata.uns[adata_ids.default_embedding] == adata_ids.unknown_metadata_identifier:
+    if adata.uns[adata_ids.default_embedding] is None or \
+            adata.uns[adata_ids.default_embedding] == adata_ids.unknown_metadata_identifier:
         found_default = False
         counter = 0
         while not found_default and counter < len(default_embedding_names):
@@ -176,9 +212,7 @@ def cellxgene_export_adaptor_2_0_0(adata: anndata.AnnData, adata_ids: AdataIdsCe
                 found_default = True
             counter += 1
         if not found_default and adata.n_obs > 10:
-            adata_embedding = adata.raw.to_adata().copy()
-            sc.pp.normalize_per_cell(adata_embedding)
-            sc.pp.log1p(adata_embedding)
+            adata_embedding = adata.copy()
             sc.pp.pca(adata_embedding)
             sc.pp.neighbors(adata_embedding)
             sc.tl.umap(adata_embedding)

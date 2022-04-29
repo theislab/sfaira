@@ -73,7 +73,7 @@ if os.path.isdir(os.path.join(dir_sfaira_dataloaders, dir_study)):  # only direc
                             meta_path=path_meta,
                             cache_path=path_cache
                         )]
-                    dsg_f = sfaira.data.DatasetGroup(datasets=dict([(x.id, x) for x in datasets_f]))
+                    dsg_f = sfaira.data.DatasetGroup(datasets=dict([(x.id_cleaned, x) for x in datasets_f]))
                     dsg_f.load(
                         load_raw=False,
                         allow_caching=True,

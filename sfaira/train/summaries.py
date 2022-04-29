@@ -1445,8 +1445,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                 if data_organ is not None:
                     u.subset("organ", data_organ)
                 u.load(allow_caching=False)
-                u.streamline_features(match_to_release=genome, subset_genes_to_type=gene_type)
-                u.streamline_metadata()
+                u.streamline_var(match_to_release=genome, subset_genes_to_type=gene_type)
+                u.streamline_obs_uns()
                 adata = u.adata
             else:
                 raise ValueError("data_source has to be 'universe' or 'store'")

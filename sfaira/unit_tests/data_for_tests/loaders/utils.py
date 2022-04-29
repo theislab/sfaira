@@ -37,8 +37,11 @@ def _create_adata(celltypes, ncells, ngenes, assembly) -> anndata.AnnData:
 
 def _load_script(dsg, rewrite: bool, match_to_release):
     dsg.load(allow_caching=True, load_raw=rewrite)
-    dsg.streamline_features(remove_gene_version=True, match_to_release=match_to_release)
-    dsg.streamline_metadata(schema="sfaira", clean_obs=True, clean_var=True, clean_uns=True, clean_obs_names=True)
+    dsg.streamline_var(schema="sfaira",
+                       match_to_release=match_to_release,
+                       remove_gene_version=True,
+                       subset_genes_to_type="all")
+    dsg.streamline_obs_uns(schema="sfaira", clean_obs=True, clean_var=True, clean_uns=True, clean_obs_names=True)
     return dsg
 
 
@@ -87,9 +90,9 @@ class PrepareData:
             else:
                 compression_kwargs = {}
             if store_format == "dao":
-                anticipated_fn = os.path.join(dir_store_formatted, ds.doi_cleaned_id)
+                anticipated_fn = os.path.join(dir_store_formatted, ds.id)
             elif store_format == "h5ad":
-                anticipated_fn = os.path.join(dir_store_formatted, ds.doi_cleaned_id + ".h5ad")
+                anticipated_fn = os.path.join(dir_store_formatted, ds.id + ".h5ad")
             else:
                 assert False
             if rewrite_store and os.path.exists(anticipated_fn):

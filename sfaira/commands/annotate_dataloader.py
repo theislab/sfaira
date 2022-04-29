@@ -8,7 +8,7 @@ from typing import Union
 from sfaira.commands.utils import get_pydoc
 from sfaira.consts.utils import clean_doi
 from sfaira.data import DatasetGroupDirectoryOriented, DatasetGroup, DatasetBase
-from sfaira.data.utils import read_yaml
+from sfaira.data.dataloaders.utils import read_yaml
 
 try:
     import sfaira_extension as sfairae
