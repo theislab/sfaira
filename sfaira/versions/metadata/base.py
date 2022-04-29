@@ -208,6 +208,11 @@ class OntologyHierarchical(Ontology, abc.ABC):
     _graph: networkx.MultiDiGraph
     _node_names: Union[None, List[str]] = None
 
+    def _clear_caches(self):
+        self.get_ancestors.cache_clear()
+        self.get_descendants.cache_clear()
+        self._node_names = None
+
     @property
     def graph(self) -> networkx.MultiDiGraph:
         return self._graph
@@ -215,10 +220,7 @@ class OntologyHierarchical(Ontology, abc.ABC):
     @graph.setter
     def graph(self, graph: networkx.MultiDiGraph):
         self._graph = graph
-        # Reset caches:
-        self.get_ancestors.cache_clear()
-        self.get_descendants.cache_clear()
-        self._node_names = None
+        self._clear_caches()
 
     def _check_graph(self):
         if not networkx.is_directed_acyclic_graph(self.graph):
@@ -319,8 +321,7 @@ class OntologyHierarchical(Ontology, abc.ABC):
             if not np.any([self.is_a(query=z, reference=y, convert_to_id=False) for z in x]):
                 nodes_to_remove.append(y)
         self.graph.remove_nodes_from(nodes_to_remove)
-        self.get_ancestors.cache_clear()
-        self.get_descendants.cache_clear()
+        self._clear_caches()
 
     @property
     def n_leaves(self) -> int:
