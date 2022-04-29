@@ -177,6 +177,7 @@ class AdataIdsSfaira(AdataIds):
             "tech_sample",
         ]
         self.var_keys = [
+            "feature_biotype",
             "feature_id",
             "feature_symbol",
         ]
@@ -221,7 +222,7 @@ class AdataIdsCellxgene(AdataIds):
         self.doi_preprint = "preprint_doi"
         self.disease = "disease"
         self.feature_biotype = "feature_biotype"
-        self.feature_id = "feature_id"
+        self.feature_id = "index"
         self.feature_is_filtered = "feature_is_filtered"
         self.feature_reference = "feature_reference"
         self.feature_symbol = "feature_name"
@@ -274,7 +275,8 @@ class AdataIdsCellxgene(AdataIds):
             "sex",
         ]
         self.var_keys = [
-            "feature_id",
+            "feature_biotype",
+            "feature_is_filtered",
             "feature_symbol",
         ]
         self.uns_keys = [

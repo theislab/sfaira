@@ -174,14 +174,8 @@ def cellxgene_export_adaptor_2_0_0(adata: anndata.AnnData, adata_ids: AdataIdsCe
     #        adata.layers[adata_ids.layer_counts].data = np.rint(adata.layers[adata_ids.layer_counts].data)
     # 4) Modify .var:
     adata.var[adata_ids.feature_biotype] = pd.Categorical(["gene" for _ in range(adata.n_vars)])
-    adata.var.index = adata.var[adata_ids.feature_id].values
-    # TODO remove this after clean up such that this does not happend after streamlining:
-    if adata_ids.feature_id in adata.var.columns:
-        del adata.var[adata_ids.feature_id]
     if adata.raw is not None:
         adata.raw.var[adata_ids.feature_biotype] = pd.Categorical(["gene" for _ in range(adata.raw.n_vars)])
-        if adata_ids.feature_id in adata.raw.var.columns:
-            del adata.raw.var[adata_ids.feature_id]
     if adata.raw is not None and adata.n_vars < adata.raw.n_vars:
         # extend X by zero columns and add filtered attribute:
         raise NotImplementedError()

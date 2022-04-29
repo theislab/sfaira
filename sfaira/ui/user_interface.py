@@ -388,12 +388,12 @@ class UserInterface:
         self.data.organ = organ
         self.data.cell_type_obs_key = cell_type_obs_key
         # Align to correct feature space
-        self.data.streamline_features(
+        self.data.streamline_var(
             match_to_release=self.zoo_embedding.topology_container.gc.release,
             subset_genes_to_type=list(set(self.zoo_embedding.topology_container.gc.biotype))
         )
         # Transfer required metadata from the Dataset instance to the adata object
-        self.data.streamline_metadata(
+        self.data.streamline_obs_uns(
             clean_obs=False,
             clean_var=True,
             clean_uns=False,

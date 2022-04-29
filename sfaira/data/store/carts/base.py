@@ -30,6 +30,7 @@ class CartBase:
     which have their own classes below.
     """
 
+    obsm: dict
     schedule: BatchDesignBase
     var: pd.DataFrame  # Feature meta data (features x properties).
     map_fn: callable
@@ -89,7 +90,7 @@ class CartBase:
             # Only import this module if torch is used to avoid strict torch dependency:
             from sfaira.data.store.torch_dataset import SfairaDataset
 
-            g = SfairaDataset(map_fn=self.map_fn, obs=self.obs, x=self.x, **dataset_kwargs)
+            g = SfairaDataset(map_fn=self.map_fn, obs=self.obs, obsm=self.obsm, x=self.x, **dataset_kwargs)
             if generator_type == "torch-loader":
                 g = DataLoader(g, **kwargs)
         elif generator_type in ["torch-iter", "torch-iter-loader"]:

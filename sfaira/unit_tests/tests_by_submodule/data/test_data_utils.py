@@ -5,7 +5,8 @@ import pytest
 import scipy.sparse
 from typing import Union
 
-from sfaira.data.utils import map_freetext_to_ontology, collapse_matrix
+from sfaira.data.dataloaders.utils import map_freetext_to_ontology
+from sfaira.data.dataloaders.var_utils import collapse_x_var_by_feature
 
 
 @pytest.mark.parametrize("trial_cell_type_labels",
@@ -82,7 +83,7 @@ def test_collapse_matrix(
         index = ["g" + str(i) for i in range(x.shape[1])]
     var = pd.DataFrame({"var_column": index})
     adata = anndata.AnnData(x, var=var)
-    x_new, var_new = collapse_matrix(x, var, var_column="var_column")
+    x_new, var_new = collapse_x_var_by_feature(x, var, var_column="var_column")
     adata2 = anndata.AnnData(x_new, var=var_new)
     assert adata.X.shape[0] == adata2.X.shape[0], "observation dimension mismatch"
     assert adata.X.dtype == adata2.X.dtype, "type mismatch"

@@ -47,8 +47,8 @@ class H5adExport:
                         path_loader=self.path_loader)
         dsg.load(load_raw=False, allow_caching=True)
         if self.schema == "cellxgene":
-            dsg.streamline_features(match_to_release=None, schema="cellxgene:" + "2.0.0")
-            dsg.streamline_metadata(
+            dsg.streamline_var(match_to_release=None, schema="cellxgene:" + "2.0.0")
+            dsg.streamline_obs_uns(
                 schema=self.schema.lower(),
                 clean_obs=self.clean_obs,
                 clean_var=False,

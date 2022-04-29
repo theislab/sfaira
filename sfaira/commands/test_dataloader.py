@@ -120,7 +120,7 @@ class DataloaderTester:
                         print(f'[bold red]Did not find column {val} for {x} in data set {k}, found: '
                               f'{v.adata.var.columns}.')
                         sys.exit()
-            v.streamline_features(match_to_release=None, schema="cellxgene:" + "2.0.0")
+            v.streamline_var(match_to_release=None, schema="cellxgene:" + "2.0.0")
             signal_proc = np.asarray(v.adata.X.sum()).sum()
             if signal_proc < 0.01 * signal_raw and v.feature_type != "peak":
                 print('[bold red]Mapping your feature space to a reference annotation resulted in a heavy loss of '
@@ -128,7 +128,7 @@ class DataloaderTester:
                 print(f'[bold red]From {signal_raw} total counts before streamlining, {signal_proc} are left after.')
                 print('[bold red]Consider revising feature meta data.')
                 sys.exit()
-            v.streamline_metadata(schema="cellxgene")
+            v.streamline_obs_uns(schema="cellxgene")
         print("[bold blue]Completed testing of data loader, the data loader is now ready for use.")
         if in_phase_3:
             print('[bold orange]Sfaira butler: "You data loader is finished!"')

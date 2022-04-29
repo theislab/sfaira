@@ -9,7 +9,7 @@ class DatasetInteractive(DatasetBase):
     def __init__(
             self,
             data: anndata.AnnData,
-            feature_symbol_col: Union[str, None] = 'index',
+            feature_symbol_col: Union[str, None] = None,
             feature_id_col: Union[str, None] = None,
             feature_type_col: Union[str, None] = None,
             dataset_id: str = "interactive_dataset",
