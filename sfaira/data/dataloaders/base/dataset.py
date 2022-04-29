@@ -452,7 +452,6 @@ class DatasetBase(AnnotationContainer):
                                         keep_id_obs=keep_id_obs,
                                         ontology_class_maps=self.ontology_class_maps,
                                         **kwargs)
-   
         self._adata_ids = adata_target_ids
         self.streamlined_meta = True
 

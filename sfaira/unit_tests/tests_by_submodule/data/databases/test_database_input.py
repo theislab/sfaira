@@ -20,7 +20,6 @@ MATCH_TO_RELEASE = {"Homo sapiens": RELEASE_HUMAN, "Mus musculus": RELEASE_MOUSE
 @pytest.mark.parametrize("subset_genes_to_type", [None, "protein_coding"])
 def test_streamline_features(database: str, subset_genes_to_type: str):
     """Check if feature streamlining from cellxgene is successful."""
-    adata_ids_cxg = AdataIdsCellxgene_v2_0_0()
     adata_ids_sfaira = AdataIdsSfaira()
     database, subset_args = database
     dsg = prepare_dsg_database(database=database)

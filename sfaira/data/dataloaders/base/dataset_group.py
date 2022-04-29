@@ -451,7 +451,6 @@ class DatasetGroup:
                     del self.datasets[x]
         return keep
 
-
     @property
     def additional_annotation_key(self) -> Dict[str, Union[None, str]]:
         """"

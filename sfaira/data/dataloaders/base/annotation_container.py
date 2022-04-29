@@ -111,7 +111,7 @@ class AnnotationContainer:
                         setattr(self, k, v)
                     except AttributeError as e:
                         raise ValueError(f"ValueError when setting {k} as {v}: {e}")
-                    
+
     @property
     def assay_sc(self) -> Union[None, str]:
         return self._assay_sc

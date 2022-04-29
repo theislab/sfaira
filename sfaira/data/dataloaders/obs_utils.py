@@ -329,7 +329,7 @@ def impute_ontology_cols_obs(adata: anndata.AnnData,
     return adata
 
 
-def project_free_to_ontology(adata: anndata.AnnData, 
+def project_free_to_ontology(adata: anndata.AnnData,
                              adata_ids: AdataIds,
                              attr: str,
                              ontology_class_maps: Dict[str, pd.DataFrame],
@@ -452,8 +452,8 @@ def value_protection(allowed: Union[Ontology, None],
     :param attr: Attribute to set.
     :param allowed: Constraint for values of `attr`.
         Either ontology instance used to constrain entries, or list of allowed values.
-    :param attempted: Value(s) to attempt to set in `attr`.#
-    :param id_dataset: Dataset ID used for logging.
+    :param attempted: Value(s) to attempt to set in `attr`.
+    :param dataset_id: Dataset ID used for logging.
     :return:
     """
     if not isinstance(attempted, list):
