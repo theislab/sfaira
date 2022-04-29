@@ -77,7 +77,12 @@ def test_reset_root():
     Tests if root can be reset correctly.
     """
     oc = OntologyCl(branch=DEFAULT_CL, use_developmental_relationships=False)
+    assert len(oc.node_ids) == len(oc.node_names)
+    n0 = len(oc.node_ids)
     oc.reset_root(root="T cell")
+    assert len(oc.node_ids) == len(oc.node_names)
+    n1 = len(oc.node_ids)
+    assert n1 < n0
     assert "T-helper 1 cell" in oc.node_names
     assert "T cell" in oc.node_names
     assert "lymphocyte" not in oc.node_names

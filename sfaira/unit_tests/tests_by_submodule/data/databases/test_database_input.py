@@ -44,11 +44,6 @@ def test_streamline_features(database: str, subset_genes_to_type: str):
             assert np.all(v.adata.var.index == original_ids[k])
         else:
             # Should have expanded features to target space.
-            print(v.adata.var.tail())
-            print(gc.ensembl[-5:])
-            print(v.adata.var.shape)
-            print(v.adata.var[adata_ids_sfaira.feature_id].values.shape)
-            print(len(gc.ensembl))
             assert np.all(v.adata.var[adata_ids_sfaira.feature_id].values == gc.ensembl)
 
 

@@ -439,7 +439,7 @@ class DatasetGroup:
             if hasattr(self, key) and getattr(self, key) is not None:
                 # Collection-level annotation.
                 annot = getattr(self, key)
-                if isinstance(annot, str):
+                if not (isinstance(annot, list) or isinstance(annot, tuple) or isinstance(annot, np.ndarray)):
                     annot = [annot]
                 keep = np.any([y in values for y in annot])
             else:

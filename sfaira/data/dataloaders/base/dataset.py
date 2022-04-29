@@ -19,7 +19,8 @@ from sfaira.versions.genomes import GenomeContainer
 from sfaira.versions.metadata import CelltypeUniverse
 from sfaira.consts import AdataIdsCellxgene_v2_0_0, AdataIdsSfaira, META_DATA_FIELDS, OCS
 from sfaira.data.dataloaders.base.utils import is_child, get_directory_formatted_doi, identify_tsv
-from sfaira.data.dataloaders.obs_utils import get_ontology, streamline_obs_uns
+from sfaira.data.dataloaders.crossref import crossref_query
+from sfaira.data.dataloaders.obs_utils import streamline_obs_uns
 from sfaira.data.store.io.io_dao import write_dao
 from sfaira.data.dataloaders.base.annotation_container import AnnotationContainer
 from sfaira.data.dataloaders.var_utils import streamline_var, collapse_x_var_by_feature
@@ -828,10 +829,13 @@ class DatasetBase(AnnotationContainer):
 
     @property
     def title(self):
-        if self._title is not None:
-            return self._title
-        else:
-            return self.__crossref_query(k="title")
+        if self._title is None:
+            x = crossref_query(doi=self.doi_main, k="title")
+            # This is a list of length 1 if a title is found:
+            if isinstance(x, list):
+                x = x[0]
+            self._title = x
+        return self._title
 
     @property
     def celltypes_universe(self):
@@ -868,38 +872,6 @@ class DatasetBase(AnnotationContainer):
                 v[self._adata_ids.classmap_target_key].values.tolist()
             )))
 
-    def __crossref_query(self, k):
-        """
-        Queries cross REST API via package crossref_commons.
-
-        :param k: Key to extract from crossref query container.
-        :return:
-        """
-        from crossref_commons.retrieval import get_entity
-        from crossref_commons.types import EntityType, OutputType
-        try:
-            attempt_counter = 0
-            while True:
-                x = None
-                try:
-                    attempt_counter += 1
-                    x = get_entity(self.doi_main, EntityType.PUBLICATION, OutputType.JSON)[k]
-                except ConnectionError as e:
-                    # Terminate trial after 5 attempts with ConnectionError:
-                    if attempt_counter > 5:
-                        raise ConnectionError(e)
-                finally:
-                    if k == "author":
-                        pass
-                    return x
-                print(f"attempts {attempt_counter}")
-        except ValueError as e:
-            print(f"ValueError: {e}")
-            return None
-        except ConnectionError as e:
-            print(f"ConnectionError: {e}")
-            return None
-
     def subset(self, key, values, allow_missing_annotation: bool = False, allow_partial_match: bool = True) -> bool:
         """
         Subset list of adata objects based on cell-wise properties.
@@ -907,7 +879,7 @@ class DatasetBase(AnnotationContainer):
         These keys are properties that are not available in lazy model and require loading first because the
         subsetting works on the cell-level: .adata are maintained but reduced to matches.
 
-        :param key: Property to subset by. Options (defined in AdataIdsSfaira.obs_keys):
+        :param key: Property to subset by. Choose from sfaira controlled meta data:
 
                 - "assay_sc"
                 - "assay_differentiation"
@@ -926,7 +898,10 @@ class DatasetBase(AnnotationContainer):
                 - "state_exact"
                 - "sample_source"
                 - "tech_sample"
-        :param values: Classes to overlap to.
+
+            The name key is independent of the schema used for streamlining uns and obs annotation.
+        :param values: Target labels. All observations that are annotated with one of these labels or their descendants
+            (for ontology-based meta data) are kept in the subset.
         :param allow_missing_annotation: Whether to add cells and data sets with missing annotation for queried key into
             the selection of the subset.
         :param allow_partial_match: Whether to allow all or no cells in a dataset that is not yet loaded into memory but
@@ -942,12 +917,13 @@ class DatasetBase(AnnotationContainer):
         if not hasattr(self._adata_ids, key):
             raise ValueError(f"attempted to subset based on non-supported key={key}, "
                              "choose from sfaira controlled meta data")
-        if not isinstance(values, list):
+        if not (isinstance(values, list) or isinstance(values, tuple) or isinstance(values, np.ndarray)):
             values = [values]
 
         def get_subset_idx(samplewise_key, cellwise_key):
             sample_attr = getattr(self, samplewise_key)
-            if sample_attr is not None and not isinstance(sample_attr, list):
+            if sample_attr is not None and not (isinstance(sample_attr, list) or isinstance(sample_attr, tuple) or
+                                                isinstance(sample_attr, np.ndarray)):
                 sample_attr = [sample_attr]
             if sample_attr is not None:
                 if len(sample_attr) == 1:
@@ -962,9 +938,22 @@ class DatasetBase(AnnotationContainer):
                     # No per cell annotation and ambiguous sample annotation: pass entire data set if some keys match.
                     raise NotImplementedError(f"{self.id}: {(samplewise_key, cellwise_key)}")
             elif hasattr(self, cellwise_key) and getattr(self, cellwise_key) is not None:
-                obs_key = getattr(self, cellwise_key)
                 if self.loaded:
-                    values_found = self.adata.obs[obs_key].values
+                    # Look for the streamlined ID column in .obs.
+                    # Alternatively look for the streamlined symbol column in .obs-
+                    col_ids = getattr(self._adata_ids, samplewise_key) + self._adata_ids.onto_id_suffix
+                    col_symbols = getattr(self._adata_ids, samplewise_key)
+                    # Check for availability:
+                    col_ids = col_ids if col_ids in self.adata.obs.columns else None
+                    col_symbols = col_symbols if col_symbols in self.adata.obs.columns else None
+                    if col_ids in self.adata.obs.columns:
+                        col_lookup = col_ids
+                    elif col_symbols in self.adata.obs.columns:
+                        col_lookup = col_symbols
+                    else:
+                        # TODO is this ever useful?
+                        col_lookup = cellwise_key
+                    values_found = self.adata.obs[col_lookup].values
                     values_found_unique = np.unique(values_found)
                     try:
                         ontology = getattr(self.ontology_container_sfaira, samplewise_key)

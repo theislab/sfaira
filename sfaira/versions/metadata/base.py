@@ -215,8 +215,10 @@ class OntologyHierarchical(Ontology, abc.ABC):
     @graph.setter
     def graph(self, graph: networkx.MultiDiGraph):
         self._graph = graph
+        # Reset caches:
         self.get_ancestors.cache_clear()
         self.get_descendants.cache_clear()
+        self._node_names = None
 
     def _check_graph(self):
         if not networkx.is_directed_acyclic_graph(self.graph):
