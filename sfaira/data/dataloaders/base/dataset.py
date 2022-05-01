@@ -28,6 +28,16 @@ from sfaira.consts.utils import clean_doi, clean_id_str
 from sfaira.versions.metadata.maps import prepare_ontology_map_tab
 
 
+from tqdm import tqdm
+
+
+class DownloadProgressBar(tqdm):
+    def update_to(self, b=1, bsize=1, tsize=None):
+        if tsize is not None:
+            self.total = tsize
+        self.update(b * bsize - self.n)
+
+
 class DatasetBase(AnnotationContainer):
     adata: Union[None, anndata.AnnData] = None
     _meta: Union[None, pandas.DataFrame] = None
@@ -184,8 +194,9 @@ class DatasetBase(AnnotationContainer):
                     fn = url.split("/")[-1]
                 # Only download if file not already downloaded:
                 if not os.path.isfile(os.path.join(self.data_dir, fn)):
-                    print(f"Downloading: {fn}")
-                    urllib.request.urlretrieve(url, os.path.join(self.data_dir, fn))
+                    print_dir = f"{self.directory_formatted_doi}:{fn}"
+                    with DownloadProgressBar(unit='B', unit_scale=True, miniters=1, desc=print_dir) as pbar:
+                        urllib.request.urlretrieve(url, os.path.join(self.data_dir, fn), reporthook=pbar.update_to)
 
     def _download_synapse(self, synapse_entity, fn, **kwargs):
         try:
