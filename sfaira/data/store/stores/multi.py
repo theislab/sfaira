@@ -8,8 +8,7 @@ from typing import Dict, List, Tuple, Union
 
 from sfaira.consts import AdataIdsSfaira
 from sfaira.data.store.stores.base import StoreBase
-from sfaira.data.store.stores.single import StoreSingleFeatureSpace, \
-    StoreDao, StoreAnndata
+from sfaira.data.store.stores.single import StoreSingleFeatureSpace, StoreDao, StoreAnndata
 from sfaira.data.store.carts.multi import CartMulti
 from sfaira.data.store.io.io_dao import read_dao
 from sfaira.versions.genomes.genomes import GenomeContainer
@@ -28,6 +27,18 @@ class StoreMultipleFeatureSpaceBase(StoreBase):
 
     def __init__(self, stores: Dict[str, StoreSingleFeatureSpace]):
         self._stores = stores
+
+    @property
+    def obsm(self) -> Dict[str, dict]:
+        """
+        Only expose obsm of stores that contain observations.
+        """
+        return dict([(k, v.obsm) for k, v in self._stores.items() if v.n_obs > 0])
+
+    @obsm.setter
+    def obsm(self, x: Dict[str, dict]):
+        for k, v in x.items():
+            self._stores[k].obsm = v
 
     @property
     def stores(self) -> Dict[str, StoreSingleFeatureSpace]:

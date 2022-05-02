@@ -436,7 +436,10 @@ def test_dataset_size(batch_size: int, randomized_batch_access: bool):
 
 
 @pytest.mark.parametrize("data_type", ["adata", "store"])
-@pytest.mark.parametrize("test_split", [0.3, {"id": "homosapiens_lung_2021_10xtechnology_mock1_001_no_doi_mock1"}])
+@pytest.mark.parametrize("test_split", [
+    0.3,
+    {"id": "homosapiens_lung_2021_10xtechnology_mock1_001_dno_doi_mock1"}
+])
 def test_split_index_sets(data_type: str, test_split):
     """
     Test that train, val, test split index sets are correct:

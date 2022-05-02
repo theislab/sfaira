@@ -32,9 +32,9 @@ universe = sfaira.data.dataloaders.Universe(data_path=args.data_path,
 
 for k, ds in universe.datasets.items():
     if args.store_type == "h5ad":
-        fn_store = os.path.join(args.path_store, ds.doi_cleaned_id + ".h5ad")
+        fn_store = os.path.join(args.path_store, ds.id + ".h5ad")
     elif args.store_type == "dao":
-        fn_store = os.path.join(args.path_store, ds.doi_cleaned_id)
+        fn_store = os.path.join(args.path_store, ds.id)
     else:
         assert False
     if os.path.exists(fn_store):
@@ -45,12 +45,12 @@ for k, ds in universe.datasets.items():
             load_raw=False,
             allow_caching=True,
         )
-        ds.streamline_features(
+        ds.streamline_var(
             remove_gene_version=True,
             match_to_release={"Homo sapiens": "104", "Mus musculus": "104"},
             subset_genes_to_type="protein_coding"
         )
-        ds.streamline_metadata(schema="sfaira", clean_obs=True, clean_var=True, clean_uns=True, clean_obs_names=True)
+        ds.streamline_obs_uns(schema="sfaira", clean_obs=True, clean_var=True, clean_uns=True, clean_obs_names=True)
         ds.write_distributed_store(dir_cache=args.path_store, store_format=args.store_type,
                                    compression_kwargs=compression_kwargs, **kwargs)
         ds.clear()

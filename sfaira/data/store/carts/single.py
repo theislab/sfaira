@@ -68,11 +68,13 @@ class CartSingle(CartBase):
     _batch_schedule_name: str
     batch_size: int
     obs_keys: List[str]
+    obsm: dict
     schedule: BatchDesignBase
     var: pd.DataFrame
     var_idx: Union[None, np.ndarray]
 
-    def __init__(self, obs_idx, obs_keys, var, var_idx=None, batch_schedule="base", batch_size=1, map_fn=None, **kwargs):
+    def __init__(self, obs_idx, obs_keys, var, var_idx=None, batch_schedule="base", batch_size=1, map_fn=None, obsm={},
+                 **kwargs):
         """
 
         :param batch_schedule: A valid batch schedule name or a class that inherits from BatchDesignBase.
@@ -89,6 +91,7 @@ class CartSingle(CartBase):
         :param obs_idx: np.ndarray: The observations to emit.
         :param obs_keys: .obs columns to return in the generator. These have to be a subset of the columns available
             in self.adata_by_key.
+        :parm obsm: Empty dict or dict with additional observation-indexed arrays that are in memory.
         :param var_idx: The features to emit.
         :parm split_to_obs: Whether to split tensors to observation-wise slices at the emission stage of the generator.
         """
@@ -112,6 +115,11 @@ class CartSingle(CartBase):
                                  f"BatchDesignBase to the constructor of GeneratorSingle. Found {type(batch_schedule)}.")
         self.schedule = batch_schedule(**kwargs)
         self.obs_idx = obs_idx  # This needs to be set after .schedule.
+        self.obsm = obsm
+
+    @property
+    def _emit_obsm(self):
+        return len(self.obsm.keys()) > 0
 
     @property
     def _obs_full(self):
@@ -239,7 +247,12 @@ class CartAnndata(CartSingle):
                         x = self._parse_array(x=x, return_dense=self.return_dense)
                         # Prepare .obs.
                         obs = self.adata_dict[k].obs[self.obs_keys].iloc[v, :]
-                        data_tuple = self.map_fn(x, obs)
+                        if self._emit_obsm:
+                            obsm = self.obsm[k][v, :]
+                            map_fn_args = (x, obs, obsm)
+                        else:
+                            map_fn_args = (x, obs)
+                        data_tuple = self.map_fn(*map_fn_args)
                         for data_tuple_i in split_batch(x=data_tuple):
                             yield data_tuple_i
                 else:
@@ -264,7 +277,12 @@ class CartAnndata(CartSingle):
                         self.adata_dict[k].obs[self.obs_keys].iloc[v, :]
                         for k, v in idx_i_dict.items()
                     ], axis=0, join="inner", ignore_index=True, copy=False)
-                    data_tuple = self.map_fn(x, obs)
+                    if self._emit_obsm:
+                        obsm = dict([(k, v[idx_i, :]) for k, v in self.obsm.items()])
+                        map_fn_args = (x, obs, obsm)
+                    else:
+                        map_fn_args = (x, obs)
+                    data_tuple = self.map_fn(*map_fn_args)
                     yield data_tuple
 
     def iterator(self, repeat: int = 1, shuffle_buffer: int = 0):
@@ -419,7 +437,12 @@ class CartDask(CartSingle):
                 if self.var_idx is not None:
                     x_i = x_i[:, self.var_idx]
                 obs_i = self._obs.iloc[batch_idxs, :]
-                data_tuple = self.map_fn(x_i, obs_i)
+                if self._emit_obsm:
+                    obsm_i = dict([(k, v[batch_idxs, :]) for k, v in self.obsm.items()])
+                    map_fn_args = (x_i, obs_i, obsm_i)
+                else:
+                    map_fn_args = (x_i, obs_i)
+                data_tuple = self.map_fn(*map_fn_args)
                 if self.batch_size == 1:
                     for data_tuple_i in split_batch(x=data_tuple):
                         yield data_tuple_i
@@ -474,5 +497,3 @@ class CartDask(CartSingle):
             return self._x[self.schedule.idx, :].compute()
         else:
             return self._x[self.schedule.idx, :][:, self.var_idx].compute()
-
-    # Methods that are specific to this child class:
