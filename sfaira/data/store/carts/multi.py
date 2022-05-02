@@ -42,7 +42,6 @@ class CartMulti(CartBase):
         if self.intercalated:
             while keep_repeating:
                 ratios = self.ratios.copy()
-                print(f"GENERATOR: intercalating generators at ratios {ratios}")
                 # Document which generators are still yielding batches:
                 yielding = np.ones((ratios.shape[0],)) == 1.
                 iterators = [v.iterator(repeat=1, shuffle_buffer=shuffle_buffer) for v in self.carts.values()]
