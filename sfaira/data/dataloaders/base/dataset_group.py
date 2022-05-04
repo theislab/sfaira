@@ -409,8 +409,8 @@ class DatasetGroup:
 
     @property
     def ncells(self) -> Union[None, int]:
-        x = np.array([x.ncells for x in self.datasets.values()])
-        x = np.sum(x)[0] if np.all(np.logical_not(np.isnan(x))) else None
+        x = [x.ncells for x in self.datasets.values()]
+        x = sum(x) if np.all([y is not None for y in x]) else None
         return x
 
     @property
@@ -740,8 +740,11 @@ class DatasetSuperGroup:
         g = GenomeContainer(release=genome)
         return g
 
-    def ncells(self, annotated_only: bool = False):
-        return np.sum(self.ncells_bydataset_flat(annotated_only=annotated_only))
+    @property
+    def ncells(self) -> Union[None, int]:
+        x = [x.ncells for x in self.dataset_groups]
+        x = sum(x) if np.all([y is not None for y in x]) else None
+        return x
 
     @property
     def datasets(self) -> Dict[str, DatasetBase]:
