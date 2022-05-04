@@ -428,7 +428,8 @@ class CartDask(CartSingle):
                 if len(batch_idxs) > 0:
                     x_i = self._x[batch_idxs, :]
                     if self.var_idx is not None:
-                        x_i = x_i[:, self.var_idx]
+                        with dask.config.set(**{'array.slicing.split_large_chunks': False}):
+                            x_i = x_i[:, self.var_idx]
                     obs_i = self._obs.iloc[batch_idxs, :]
                     if self._emit_obsm:
                         obsm_i = dict([(k, v[batch_idxs, :]) for k, v in self.obsm.items()])
