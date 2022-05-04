@@ -11,4 +11,3 @@ def load(data_dir, **kwargs):
     adata.X = adata.X.multiply(scipy.sparse.csc_matrix(adata.obs["n_counts"].values[:, None])).multiply(1 / 10000)
 
     return adata
-
