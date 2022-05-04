@@ -5,12 +5,15 @@ import obonet
 import os
 import owlready2
 import pickle
+
+import pandas as pd
 import requests
 from functools import lru_cache
 from typing import Dict, List, Tuple, Union
 
 
 from sfaira import settings
+from sfaira.versions.metadata.extensions import EFO_TERMS
 
 """
 Ontology managament classes.
@@ -424,9 +427,13 @@ class OntologyHierarchical(Ontology, abc.ABC):
         print(f"time for precomputing ancestors: {time.time()-t0}")
         return maps
 
-    def reset_root(self, root: str):
-        new_nodes = [self.convert_to_id(x=root)] + self.get_ancestors(node=root)
-        self.graph = self.graph.subgraph(nodes=new_nodes)
+    def reset_root(self, root: Union[str, List[str]]):
+        if isinstance(root, str):
+            root = [root]
+        new_nodes = self.convert_to_id(x=root)
+        for x in root:
+            new_nodes += self.get_ancestors(node=x)
+        self.graph = self.graph.subgraph(nodes=new_nodes).copy()
 
     @abc.abstractmethod
     def synonym_node_properties(self) -> List[str]:
@@ -629,9 +636,9 @@ class OntologyExtendedObo(OntologyObo):
     def __init__(self, obo, **kwargs):
         super().__init__(obo=obo, **kwargs)
 
-    def add_extension(self, dict_ontology: Dict[str, List[Dict[str, dict]]]):
+    def add_children(self, dict_ontology: Dict[str, List[Dict[str, dict]]]):
         """
-        Extend ontology by additional edges and nodes defined in a dictionary.
+        Extend ontology by additional edges and children nodes defined in a dictionary.
 
         Checks that DAG is not broken after graph assembly.
 
@@ -639,7 +646,7 @@ class OntologyExtendedObo(OntologyObo):
 
             - keys: parent nodes (which must be in ontology)
             - values: children nodes (which can be in ontology), must be given as a dictionary in which keys are
-                ontology IDs and values are node values..
+                ontology IDs and values are node values.
                 If these are in the ontology, an edge is added, otherwise, an edge and the node are added.
         :return:
         """
@@ -653,7 +660,32 @@ class OntologyExtendedObo(OntologyObo):
                 if child_node_k not in self.node_ids:  # Add node
                     self.graph.add_node(node_for_adding=child_node_k, **child_node_v)
                 # Add edge.
-                self.graph.add_edge(k, child_node_k)
+                self.graph.add_edge(child_node_k, k)
+        # Check that DAG was not broken:
+        self._check_graph()
+
+    def add_parents(self, dict_ontology: Dict[str, List[str]]):
+        """
+        Extend ontology by additional edges and parent nodes defined in a dictionary.
+
+        Checks that DAG is not broken after graph assembly.
+
+        :param dict_ontology: Dictionary of nodes and edges to add to ontology. Parsing:
+
+            - keys: parent nodes (which are not in ontology)
+            - values: children nodes (which must be in ontology)
+        :return:
+        """
+        for k, v in dict_ontology.items():
+            # Add parent:
+            self.graph.add_node(node_for_adding=k, **{"name": k})
+            # Check if edge is added only, or edge and node.
+            v = self.convert_to_id(x=v)
+            for child_node_k in v:
+                if child_node_k not in self.node_ids:  # Add node
+                    raise ValueError(f"key {child_node_k} was not in reference ontology")
+                # Add edge.
+                self.graph.add_edge(child_node_k, k)
         # Check that DAG was not broken:
         self._check_graph()
 
@@ -1023,7 +1055,8 @@ class OntologyMondo(OntologyExtendedObo):
             recache: bool = False,
             **kwargs
     ):
-        # Latest release also available from url="http://purl.obolibrary.org/obo/mondo.obo".
+        # TODO Consider switching to owl, the newer releases of MONDO only push the owl release to GitHub, so versioned
+        #  ontology access is only possible with owl.
         obofile = cached_load_file(
             url=f"https://raw.githubusercontent.com/monarch-initiative/mondo/{branch}/mondo-lastbuild.obo",
             ontology_cache_dir="mondo",
@@ -1043,7 +1076,7 @@ class OntologyMondo(OntologyExtendedObo):
         # add healthy property
         # Add node "healthy" under root node "MONDO:0000001": "quality".
         # We use a PATO node for this label: PATO:0000461.
-        self.add_extension(dict_ontology={
+        self.add_children(dict_ontology={
             "MONDO:0000001": {
                 "PATO:0000461": {"name": "healthy"}
             },
@@ -1152,6 +1185,8 @@ class OntologyEfo(OntologyExtendedObo):
             recache=recache,
         )
         super().__init__(obo=obofile)
+        # Subset EFO to relevant sub trees:
+        self.reset_root(root=["OBI:0001686", "EFO:0010183", "EFO:0002772"])
 
         # Clean up nodes:
         nodes_to_delete = []
@@ -1160,6 +1195,8 @@ class OntologyEfo(OntologyExtendedObo):
                 nodes_to_delete.append(k)
         for k in nodes_to_delete:
             self.graph.remove_node(k)
+
+        self.add_parents(dict_ontology=EFO_TERMS)
 
     @property
     def synonym_node_properties(self) -> List[str]:
