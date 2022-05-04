@@ -1,3 +1,5 @@
+import os
+import shutil
 from typing import Dict, List, Union
 import yaml
 
@@ -110,3 +112,9 @@ def read_yaml(fn) -> Dict[str, Dict[str, Union[str, int, bool]]]:
         else:
             meta_dict.update(v)
     return {"attr": attr_dict, "meta": meta_dict}
+
+
+def buffered_decompress(fn_compressed, fn_decompressed):
+    if not os.path.exists(fn_decompressed):
+        shutil.unpack_archive(filename=fn_compressed, extract_dir=os.path.dirname(fn_compressed))
+    return fn_decompressed

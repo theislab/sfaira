@@ -1,0 +1,60 @@
+source	target	target_id
+Astro_AMY	astrocyte	CL:0000127
+Astro_AMY_CTX	astrocyte	CL:0000127
+Astro_CTX	astrocyte	CL:0000127
+Astro_HPC	astrocyte	CL:0000127
+Astro_HYPO	astrocyte	CL:0000127
+Astro_STR	astrocyte	CL:0000127
+Astro_THAL_hab	astrocyte	CL:0000127
+Astro_THAL_lat	astrocyte	CL:0000127
+Astro_THAL_med	astrocyte	CL:0000127
+Astro_WM	astrocyte	CL:0000127
+Endo	endothelial cell	CL:0000115
+Ext_Amy_1	excitatory neuron	CL:0008030
+Ext_Amy_2	excitatory neuron	CL:0008030
+Ext_ClauPyr	excitatory neuron	CL:0008030
+Ext_Hpc_CA1	excitatory neuron	CL:0008030
+Ext_Hpc_CA2	excitatory neuron	CL:0008030
+Ext_Hpc_CA3	excitatory neuron	CL:0008030
+Ext_Hpc_DG1	excitatory neuron	CL:0008030
+Ext_Hpc_DG2	excitatory neuron	CL:0008030
+Ext_L23	excitatory neuron	CL:0008030
+Ext_L25	excitatory neuron	CL:0008030
+Ext_L56	excitatory neuron	CL:0008030
+Ext_L5_1	excitatory neuron	CL:0008030
+Ext_L5_2	excitatory neuron	CL:0008030
+Ext_L5_3	excitatory neuron	CL:0008030
+Ext_L6	excitatory neuron	CL:0008030
+Ext_L6B	excitatory neuron	CL:0008030
+Ext_Med	excitatory neuron	CL:0008030
+Ext_Pir	excitatory neuron	CL:0008030
+Ext_Thal_1	excitatory neuron	CL:0008030
+Ext_Thal_2	excitatory neuron	CL:0008030
+Ext_Unk_1	excitatory neuron	CL:0008030
+Ext_Unk_2	excitatory neuron	CL:0008030
+Ext_Unk_3	excitatory neuron	CL:0008030
+Inh_1	inhibitory neuron	CL:0008029
+Inh_2	inhibitory neuron	CL:0008029
+Inh_3	inhibitory neuron	CL:0008029
+Inh_4	inhibitory neuron	CL:0008029
+Inh_5	inhibitory neuron	CL:0008029
+Inh_6	inhibitory neuron	CL:0008029
+Inh_Lamp5	inhibitory neuron	CL:0008029
+Inh_Meis2_1	inhibitory neuron	CL:0008029
+Inh_Meis2_2	inhibitory neuron	CL:0008029
+Inh_Meis2_3	inhibitory neuron	CL:0008029
+Inh_Meis2_4	inhibitory neuron	CL:0008029
+Inh_Pvalb	inhibitory neuron	CL:0008029
+Inh_Sst	inhibitory neuron	CL:0008029
+Inh_Vip	inhibitory neuron	CL:0008029
+LowQ_1	unknown	unknown
+LowQ_2	unknown	unknown
+Micro	microglial cell	CL:0000129
+Nb_1	unknown	unknown
+Nb_2	unknown	unknown
+OPC_1	oligodendrocyte precursor cell	CL:0002453
+OPC_2	oligodendrocyte precursor cell	CL:0002453
+Oligo_1	oligodendrocyte	CL:0000128
+Oligo_2	oligodendrocyte	CL:0000128
+Unk_1	unknown	unknown
+Unk_2	unknown	unknown
