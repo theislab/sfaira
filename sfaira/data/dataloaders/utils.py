@@ -114,7 +114,15 @@ def read_yaml(fn) -> Dict[str, Dict[str, Union[str, int, bool]]]:
     return {"attr": attr_dict, "meta": meta_dict}
 
 
-def buffered_decompress(fn_compressed, fn_decompressed):
-    if not os.path.exists(fn_decompressed):
-        shutil.unpack_archive(filename=fn_compressed, extract_dir=os.path.dirname(fn_compressed))
-    return fn_decompressed
+def buffered_decompress(fn_compressed):
+    if fn_compressed.endswith(".zip"):
+        dir_decompressed = fn_compressed.split(".zip")[0]
+    elif fn_compressed.endswith(".tar.gz"):
+        dir_decompressed = fn_compressed.split(".tar.gz")[0]
+    elif fn_compressed.endswith(".gz"):
+        dir_decompressed = fn_compressed.split(".gz")[0]
+    else:
+        dir_decompressed = os.path.dirname(fn_compressed)
+    if not os.path.exists(dir_decompressed):
+        shutil.unpack_archive(filename=fn_compressed, extract_dir=dir_decompressed)
+    return dir_decompressed
