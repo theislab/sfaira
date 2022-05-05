@@ -51,6 +51,12 @@ dataset_or_observation_wise:
     gm:
     gm_obs_key:
     individual:
+        5705STDY8058280_filtered_feature_bc_matrix.h5: "1"
+        5705STDY8058281_filtered_feature_bc_matrix.h5: "1"
+        5705STDY8058282_filtered_feature_bc_matrix.h5: "1"
+        5705STDY8058283_filtered_feature_bc_matrix.h5: "2"
+        5705STDY8058284_filtered_feature_bc_matrix.h5: "2"
+        5705STDY8058285_filtered_feature_bc_matrix.h5: "2"
     individual_obs_key: 
     organ: "brain"
     organ_obs_key: 
@@ -58,7 +64,13 @@ dataset_or_observation_wise:
     organism_obs_key: 
     sample_source: "primary_tissue"
     sample_source_obs_key: 
-    sex: 
+    sex:
+        5705STDY8058280_filtered_feature_bc_matrix.h5: "female"
+        5705STDY8058281_filtered_feature_bc_matrix.h5: "female"
+        5705STDY8058282_filtered_feature_bc_matrix.h5: "female"
+        5705STDY8058283_filtered_feature_bc_matrix.h5: "male"
+        5705STDY8058284_filtered_feature_bc_matrix.h5: "male"
+        5705STDY8058285_filtered_feature_bc_matrix.h5: "male"
     sex_obs_key: 
     source_doi:
     source_doi_obs_key:
