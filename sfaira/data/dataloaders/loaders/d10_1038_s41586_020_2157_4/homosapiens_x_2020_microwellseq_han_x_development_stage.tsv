@@ -1,106 +1,106 @@
-	0	1
-0	AdultAdipose_1	homosapiens adult stage
-1	AdultAdrenalGland_2	homosapiens adult stage
-2	AdultAdrenalGland_3	homosapiens adult stage
-3	AdultArtery_1	homosapiens adult stage
-4	AdultAscendingColon_1	homosapiens adult stage
-5	AdultBladder_1	homosapiens adult stage
-6	AdultBladder_2	homosapiens adult stage
-7	AdultCerebellum_1	homosapiens adult stage
-8	AdultCervix_1	homosapiens adult stage
-9	AdultColon_1	homosapiens adult stage
-10	AdultDuodenum_1	homosapiens adult stage
-11	AdultEpityphlon_1	homosapiens adult stage
-12	AdultEsophagus_1	homosapiens adult stage
-13	AdultEsophagus_2	homosapiens adult stage
-14	AdultFallopiantube_1	homosapiens adult stage
-15	AdultGallbladder_1	homosapiens adult stage
-16	AdultGallbladder_2	homosapiens adult stage
-17	AdultHeart_1	homosapiens adult stage
-18	AdultHeart_2	homosapiens adult stage
-19	AdultIleum_2	homosapiens adult stage
-20	AdultJejunum_2	homosapiens adult stage
-21	AdultKidney_2	homosapiens adult stage
-22	AdultKidney_3	homosapiens adult stage
-23	AdultKidney_4	homosapiens adult stage
-24	AdultLiver_1	homosapiens adult stage
-25	AdultLiver_2	homosapiens adult stage
-26	AdultLiver_4	homosapiens adult stage
-27	AdultLung_1	homosapiens adult stage
-28	AdultLung_2	homosapiens adult stage
-29	AdultLung_3	homosapiens adult stage
-30	AdultMuscle_1	homosapiens adult stage
-31	AdultOmentum_1	homosapiens adult stage
-32	AdultOmentum_2	homosapiens adult stage
-33	AdultOmentum_3	homosapiens adult stage
-34	AdultPancreas_1	homosapiens adult stage
-35	AdultPeripheralBlood_3	homosapiens adult stage
-36	AdultPeripheralBlood_4	homosapiens adult stage
-37	AdultPleura_1	homosapiens adult stage
-38	AdultProstate_1	homosapiens adult stage
-39	AdultRectum_1	homosapiens adult stage
-40	AdultSigmoidColon_1	homosapiens adult stage
-41	AdultSpleenParenchyma_1	homosapiens adult stage
-42	AdultSpleen_1	homosapiens adult stage
-43	AdultStomach_1	homosapiens adult stage
-44	AdultStomach_2	homosapiens adult stage
-45	AdultStomach_3	homosapiens adult stage
-46	AdultTemporalLobe_1	homosapiens adult stage
-47	AdultThyroid_1	homosapiens adult stage
-48	AdultThyroid_2	homosapiens adult stage
-49	AdultTrachea_2	homosapiens adult stage
-50	AdultTransverseColon_2	homosapiens adult stage
-51	AdultUreter_1	homosapiens adult stage
-52	AdultUterus_1	homosapiens adult stage
-53	BoneMarrow_1	homosapiens adult stage
-54	BoneMarrow_2	homosapiens adult stage
-55	ChorionicVillus_1	homosapiens adult stage
-56	CordBloodCD34P_1	homosapiens adult stage
-57	CordBloodCD34P_2	homosapiens adult stage
-58	CordBlood_1	homosapiens adult stage
-59	CordBlood_2	homosapiens adult stage
-60	FetalAdrenalGland_2	fetal stage
-61	FetalAdrenalGland_3	fetal stage
-62	FetalAdrenalGland_4	fetal stage
-63	FetalBrain_3	fetal stage
-64	FetalBrain_4	fetal stage
-65	FetalBrain_5	fetal stage
-66	FetalBrain_6	fetal stage
-67	FetalCalvaria_1	fetal stage
-68	FetalEyes_1	fetal stage
-69	FetalFemaleGonad_1	fetal stage
-70	FetalFemaleGonad_2	fetal stage
-71	FetalHeart_1	fetal stage
-72	FetalHeart_2	fetal stage
-73	FetalIntestine_1	fetal stage
-74	FetalIntestine_2	fetal stage
-75	FetalIntetsine_3	fetal stage
-76	FetalIntestine_4	fetal stage
-77	FetalIntestine_5	fetal stage
-78	FetalKidney_3	fetal stage
-79	FetalKidney_4	fetal stage
-80	FetalKidney_5	fetal stage
-81	FetalKidney_6	fetal stage
-82	FetalLung_1	fetal stage
-83	FetalLung_2	fetal stage
-84	FetalMaleGonad_1	fetal stage
-85	FetalMaleGonad_2	fetal stage
-86	FetalMuscle_1	fetal stage
-87	FetalPancreas_1	fetal stage
-88	FetalPancreas_2	fetal stage
-89	FetalPancreas_3	fetal stage
-90	FetalRib_2	fetal stage
-91	FetalRib_3	fetal stage
-92	FetalSkin_2	fetal stage
-93	FetalSkin_3	fetal stage
-94	FetalSpinalCord_1	fetal stage
-95	FetalStomach_1	fetal stage
-96	FetalStomach_2	fetal stage
-97	FetalThymus_1	fetal stage
-98	FetalThymus_2	fetal stage
-99	HESC_1	blastula stage
-100	Liver_1	homosapiens adult stage
-101	Liver_2	homosapiens adult stage
-102	NeonatalAdrenalGland_1	newborn homosapiens stage
-103	PeripheralBlood_1	homosapiens adult stage
-104	Placenta_1	homosapiens adult stage
+source	target
+AdultAdipose_1	homosapiens adult stage
+AdultAdrenalGland_2	homosapiens adult stage
+AdultAdrenalGland_3	homosapiens adult stage
+AdultArtery_1	homosapiens adult stage
+AdultAscendingColon_1	homosapiens adult stage
+AdultBladder_1	homosapiens adult stage
+AdultBladder_2	homosapiens adult stage
+AdultCerebellum_1	homosapiens adult stage
+AdultCervix_1	homosapiens adult stage
+AdultColon_1	homosapiens adult stage
+AdultDuodenum_1	homosapiens adult stage
+AdultEpityphlon_1	homosapiens adult stage
+AdultEsophagus_1	homosapiens adult stage
+AdultEsophagus_2	homosapiens adult stage
+AdultFallopiantube_1	homosapiens adult stage
+AdultGallbladder_1	homosapiens adult stage
+AdultGallbladder_2	homosapiens adult stage
+AdultHeart_1	homosapiens adult stage
+AdultHeart_2	homosapiens adult stage
+AdultIleum_2	homosapiens adult stage
+AdultJejunum_2	homosapiens adult stage
+AdultKidney_2	homosapiens adult stage
+AdultKidney_3	homosapiens adult stage
+AdultKidney_4	homosapiens adult stage
+AdultLiver_1	homosapiens adult stage
+AdultLiver_2	homosapiens adult stage
+AdultLiver_4	homosapiens adult stage
+AdultLung_1	homosapiens adult stage
+AdultLung_2	homosapiens adult stage
+AdultLung_3	homosapiens adult stage
+AdultMuscle_1	homosapiens adult stage
+AdultOmentum_1	homosapiens adult stage
+AdultOmentum_2	homosapiens adult stage
+AdultOmentum_3	homosapiens adult stage
+AdultPancreas_1	homosapiens adult stage
+AdultPeripheralBlood_3	homosapiens adult stage
+AdultPeripheralBlood_4	homosapiens adult stage
+AdultPleura_1	homosapiens adult stage
+AdultProstate_1	homosapiens adult stage
+AdultRectum_1	homosapiens adult stage
+AdultSigmoidColon_1	homosapiens adult stage
+AdultSpleenParenchyma_1	homosapiens adult stage
+AdultSpleen_1	homosapiens adult stage
+AdultStomach_1	homosapiens adult stage
+AdultStomach_2	homosapiens adult stage
+AdultStomach_3	homosapiens adult stage
+AdultTemporalLobe_1	homosapiens adult stage
+AdultThyroid_1	homosapiens adult stage
+AdultThyroid_2	homosapiens adult stage
+AdultTrachea_2	homosapiens adult stage
+AdultTransverseColon_2	homosapiens adult stage
+AdultUreter_1	homosapiens adult stage
+AdultUterus_1	homosapiens adult stage
+BoneMarrow_1	homosapiens adult stage
+BoneMarrow_2	homosapiens adult stage
+ChorionicVillus_1	homosapiens adult stage
+CordBloodCD34P_1	homosapiens adult stage
+CordBloodCD34P_2	homosapiens adult stage
+CordBlood_1	homosapiens adult stage
+CordBlood_2	homosapiens adult stage
+FetalAdrenalGland_2	fetal stage
+FetalAdrenalGland_3	fetal stage
+FetalAdrenalGland_4	fetal stage
+FetalBrain_3	fetal stage
+FetalBrain_4	fetal stage
+FetalBrain_5	fetal stage
+FetalBrain_6	fetal stage
+FetalCalvaria_1	fetal stage
+FetalEyes_1	fetal stage
+FetalFemaleGonad_1	fetal stage
+FetalFemaleGonad_2	fetal stage
+FetalHeart_1	fetal stage
+FetalHeart_2	fetal stage
+FetalIntestine_1	fetal stage
+FetalIntestine_2	fetal stage
+FetalIntetsine_3	fetal stage
+FetalIntestine_4	fetal stage
+FetalIntestine_5	fetal stage
+FetalKidney_3	fetal stage
+FetalKidney_4	fetal stage
+FetalKidney_5	fetal stage
+FetalKidney_6	fetal stage
+FetalLung_1	fetal stage
+FetalLung_2	fetal stage
+FetalMaleGonad_1	fetal stage
+FetalMaleGonad_2	fetal stage
+FetalMuscle_1	fetal stage
+FetalPancreas_1	fetal stage
+FetalPancreas_2	fetal stage
+FetalPancreas_3	fetal stage
+FetalRib_2	fetal stage
+FetalRib_3	fetal stage
+FetalSkin_2	fetal stage
+FetalSkin_3	fetal stage
+FetalSpinalCord_1	fetal stage
+FetalStomach_1	fetal stage
+FetalStomach_2	fetal stage
+FetalThymus_1	fetal stage
+FetalThymus_2	fetal stage
+HESC_1	blastula stage
+Liver_1	homosapiens adult stage
+Liver_2	homosapiens adult stage
+NeonatalAdrenalGland_1	newborn homosapiens stage
+PeripheralBlood_1	homosapiens adult stage
+Placenta_1	homosapiens adult stage

@@ -1,106 +1,106 @@
-	0	1
-0	AdultAdipose_1	adipose tissue of abdominal region
-1	AdultAdrenalGland_2	adrenal gland
-2	AdultAdrenalGland_3	adrenal gland
-3	AdultArtery_1	artery
-4	AdultAscendingColon_1	ascending colon
-5	AdultBladder_1	urinary bladder
-6	AdultBladder_2	urinary bladder
-7	AdultCerebellum_1	cerebellum
-8	AdultCervix_1	uterine cervix
-9	AdultColon_1	colon
-10	AdultDuodenum_1	duodenum
-11	AdultEpityphlon_1	caecum
-12	AdultEsophagus_1	esophagus
-13	AdultEsophagus_2	esophagus
-14	AdultFallopiantube_1	fallopian tube
-15	AdultGallbladder_1	gall bladder
-16	AdultGallbladder_2	gall bladder
-17	AdultHeart_1	heart
-18	AdultHeart_2	heart
-19	AdultIleum_2	ileum
-20	AdultJejunum_2	jejunum
-21	AdultKidney_2	kidney
-22	AdultKidney_3	kidney
-23	AdultKidney_4	kidney
-24	AdultLiver_1	liver
-25	AdultLiver_2	liver
-26	AdultLiver_4	liver
-27	AdultLung_1	lung
-28	AdultLung_2	lung
-29	AdultLung_3	lung
-30	AdultMuscle_1	skeletal muscle organ
-31	AdultOmentum_1	omentum
-32	AdultOmentum_2	omentum
-33	AdultOmentum_3	omentum
-34	AdultPancreas_1	pancreas
-35	AdultPeripheralBlood_3	blood
-36	AdultPeripheralBlood_4	blood
-37	AdultPleura_1	pleura
-38	AdultProstate_1	prostate gland
-39	AdultRectum_1	rectum
-40	AdultSigmoidColon_1	sigmoid colon
-41	AdultSpleenParenchyma_1	parenchyma of spleen
-42	AdultSpleen_1	spleen
-43	AdultStomach_1	stomach
-44	AdultStomach_2	stomach
-45	AdultStomach_3	stomach
-46	AdultTemporalLobe_1	temporal lobe
-47	AdultThyroid_1	thyroid gland
-48	AdultThyroid_2	thyroid gland
-49	AdultTrachea_2	trachea
-50	AdultTransverseColon_2	transverse colon
-51	AdultUreter_1	ureter
-52	AdultUterus_1	uterus
-53	BoneMarrow_1	bone marrow
-54	BoneMarrow_2	bone marrow
-55	ChorionicVillus_1	chorionic villus
-56	CordBloodCD34P_1	umbilical cord blood
-57	CordBloodCD34P_2	umbilical cord blood
-58	CordBlood_1	umbilical cord blood
-59	CordBlood_2	umbilical cord blood
-60	FetalAdrenalGland_2	adrenal gland
-61	FetalAdrenalGland_3	adrenal gland
-62	FetalAdrenalGland_4	adrenal gland
-63	FetalBrain_3	brain
-64	FetalBrain_4	brain
-65	FetalBrain_5	brain
-66	FetalBrain_6	brain
-67	FetalCalvaria_1	vault of skull
-68	FetalEyes_1	eye
-69	FetalFemaleGonad_1	ovary
-70	FetalFemaleGonad_2	ovary
-71	FetalHeart_1	heart
-72	FetalHeart_2	heart
-73	FetalIntestine_1	intestine
-74	FetalIntestine_2	intestine
-75	FetalIntetsine_3	intestine
-76	FetalIntestine_4	intestine
-77	FetalIntestine_5	intestine
-78	FetalKidney_3	kidney
-79	FetalKidney_4	kidney
-80	FetalKidney_5	kidney
-81	FetalKidney_6	kidney
-82	FetalLung_1	lung
-83	FetalLung_2	lung
-84	FetalMaleGonad_1	testis
-85	FetalMaleGonad_2	testis
-86	FetalMuscle_1	skeletal muscle organ
-87	FetalPancreas_1	pancreas
-88	FetalPancreas_2	pancreas
-89	FetalPancreas_3	pancreas
-90	FetalRib_2	rib
-91	FetalRib_3	rib
-92	FetalSkin_2	skin of body
-93	FetalSkin_3	skin of body
-94	FetalSpinalCord_1	spinal cord
-95	FetalStomach_1	stomach
-96	FetalStomach_2	stomach
-97	FetalThymus_1	thymus
-98	FetalThymus_2	thymus
-99	HESC_1	blastocyst
-100	Liver_1	liver
-101	Liver_2	liver
-102	NeonatalAdrenalGland_1	adrenal gland
-103	PeripheralBlood_1	blood
-104	Placenta_1	placenta
+source	target
+AdultAdipose_1	adipose tissue of abdominal region
+AdultAdrenalGland_2	adrenal gland
+AdultAdrenalGland_3	adrenal gland
+AdultArtery_1	artery
+AdultAscendingColon_1	ascending colon
+AdultBladder_1	urinary bladder
+AdultBladder_2	urinary bladder
+AdultCerebellum_1	cerebellum
+AdultCervix_1	uterine cervix
+AdultColon_1	colon
+AdultDuodenum_1	duodenum
+AdultEpityphlon_1	caecum
+AdultEsophagus_1	esophagus
+AdultEsophagus_2	esophagus
+AdultFallopiantube_1	fallopian tube
+AdultGallbladder_1	gall bladder
+AdultGallbladder_2	gall bladder
+AdultHeart_1	heart
+AdultHeart_2	heart
+AdultIleum_2	ileum
+AdultJejunum_2	jejunum
+AdultKidney_2	kidney
+AdultKidney_3	kidney
+AdultKidney_4	kidney
+AdultLiver_1	liver
+AdultLiver_2	liver
+AdultLiver_4	liver
+AdultLung_1	lung
+AdultLung_2	lung
+AdultLung_3	lung
+AdultMuscle_1	skeletal muscle organ
+AdultOmentum_1	omentum
+AdultOmentum_2	omentum
+AdultOmentum_3	omentum
+AdultPancreas_1	pancreas
+AdultPeripheralBlood_3	blood
+AdultPeripheralBlood_4	blood
+AdultPleura_1	pleura
+AdultProstate_1	prostate gland
+AdultRectum_1	rectum
+AdultSigmoidColon_1	sigmoid colon
+AdultSpleenParenchyma_1	parenchyma of spleen
+AdultSpleen_1	spleen
+AdultStomach_1	stomach
+AdultStomach_2	stomach
+AdultStomach_3	stomach
+AdultTemporalLobe_1	temporal lobe
+AdultThyroid_1	thyroid gland
+AdultThyroid_2	thyroid gland
+AdultTrachea_2	trachea
+AdultTransverseColon_2	transverse colon
+AdultUreter_1	ureter
+AdultUterus_1	uterus
+BoneMarrow_1	bone marrow
+BoneMarrow_2	bone marrow
+ChorionicVillus_1	chorionic villus
+CordBloodCD34P_1	umbilical cord blood
+CordBloodCD34P_2	umbilical cord blood
+CordBlood_1	umbilical cord blood
+CordBlood_2	umbilical cord blood
+FetalAdrenalGland_2	adrenal gland
+FetalAdrenalGland_3	adrenal gland
+FetalAdrenalGland_4	adrenal gland
+FetalBrain_3	brain
+FetalBrain_4	brain
+FetalBrain_5	brain
+FetalBrain_6	brain
+FetalCalvaria_1	vault of skull
+FetalEyes_1	eye
+FetalFemaleGonad_1	ovary
+FetalFemaleGonad_2	ovary
+FetalHeart_1	heart
+FetalHeart_2	heart
+FetalIntestine_1	intestine
+FetalIntestine_2	intestine
+FetalIntetsine_3	intestine
+FetalIntestine_4	intestine
+FetalIntestine_5	intestine
+FetalKidney_3	kidney
+FetalKidney_4	kidney
+FetalKidney_5	kidney
+FetalKidney_6	kidney
+FetalLung_1	lung
+FetalLung_2	lung
+FetalMaleGonad_1	testis
+FetalMaleGonad_2	testis
+FetalMuscle_1	skeletal muscle organ
+FetalPancreas_1	pancreas
+FetalPancreas_2	pancreas
+FetalPancreas_3	pancreas
+FetalRib_2	rib
+FetalRib_3	rib
+FetalSkin_2	skin of body
+FetalSkin_3	skin of body
+FetalSpinalCord_1	spinal cord
+FetalStomach_1	stomach
+FetalStomach_2	stomach
+FetalThymus_1	thymus
+FetalThymus_2	thymus
+HESC_1	blastocyst
+Liver_1	liver
+Liver_2	liver
+NeonatalAdrenalGland_1	adrenal gland
+PeripheralBlood_1	blood
+Placenta_1	placenta
