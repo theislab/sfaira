@@ -237,13 +237,14 @@ def streamline_var(adata: anndata.AnnData,
         obsm=adata.obsm,
         obsp=adata.obsp,
         var=var1,
-        uns=adata.uns
+        uns=adata.uns,
+        dtype="float32"
     )
     if layer2 is not None:
         if layer2 != "raw":
             adata.layers[layer2] = x2
         else:
-            adata.raw = anndata.AnnData(x2, obs=pd.DataFrame({}, index=adata.obs_names), var=var2)
+            adata.raw = anndata.AnnData(x2, obs=pd.DataFrame({}, index=adata.obs_names), var=var2, dtype="float32")
     layer_counts = layer_counts
     layer_processed = layer_proc
     if hasattr(adata_target_ids, "mapped_features") and adata_target_ids.mapped_features is not None:
@@ -290,7 +291,7 @@ def format_var(adata_ids: AdataIds,
     if feature_symbol_var_key is None and feature_id_var_key is None:
         raise ValueError("Either feature_symbol_var_key or feature_id_var_key needs to be provided in the "
                          "data loader")
-    elif feature_symbol_var_key is None and feature_id_var_key:
+    elif feature_id_var_key:
         ensids = var.index if feature_id_var_key == "index" else var[feature_id_var_key].values
         # Add new feature identifier:
         var[adata_ids.feature_symbol] = gc.translate_id_to_symbols(x=ensids)
@@ -370,7 +371,7 @@ def reorder_adata_to_target_features(
     else:
         raise ValueError(f"supply either allowed_ids or target_ids: {(allowed_ids, target_ids)}")
 
-    map_mat = scipy.sparse.csr_matrix(np.zeros((len(input_ids), len(output_ids))))
+    map_mat = scipy.sparse.lil_matrix(np.zeros((len(input_ids), len(output_ids))))
     if map_in_upper_case:
         input_ids = np.array([z.upper() for z in input_ids])
         output_ids = np.array([z.upper() for z in output_ids])
@@ -380,6 +381,7 @@ def reorder_adata_to_target_features(
     for i, z in enumerate(output_ids):
         # TODO: this is an equality map of feature identifiers that could be replaced by ENSEMBL informed maps.
         map_mat[np.where(input_ids == z)[0], i] = 1.
+    map_mat = map_mat.tocsr()
     x, var = reorder_x_var(map_mat=map_mat, var=var, var_index_target=output_ids, x=x)
     return x, var
 
@@ -404,9 +406,10 @@ def collapse_x_var_by_feature(x, var, var_column, sep_deduplication="-"):
     old_index = np.array([z.split(sep_deduplication)[0] for z in old_index])
     new_index = np.unique(old_index)
     if len(new_index) < len(old_index):
-        map_mat = scipy.sparse.csr_matrix(np.zeros((len(old_index), len(new_index))))
+        map_mat = scipy.sparse.lil_matrix(np.zeros((len(old_index), len(new_index))))
         for i, z in enumerate(new_index):
             map_mat[np.where(old_index == z)[0], i] = 1.
+        map_mat = map_mat.tocsr()
         x, var = reorder_x_var(map_mat=map_mat, var=var, var_index_target=new_index, x=x)
     return x, var
 

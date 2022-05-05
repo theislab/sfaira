@@ -11,7 +11,6 @@ numba
 numpy>=1.16.4
 obonet
 openpyxl
-owlready2
 pandas
 pyarrow
 pytest>=6.2.2
