@@ -1,6 +1,7 @@
 import logging
 import numpy as np
 import os
+import warnings
 
 import sys
 from rich import print
@@ -49,10 +50,15 @@ class DataloaderTester:
             ds.clean_ontology_class_maps()
 
         ds, cache_path = self._get_ds()
-        ds.load(load_raw=True, allow_caching=False)
         # Test that not too much of the count matrix is lost during feature streamlining:
         # This would indicate an issue with the feature assignments.
         for k, v in ds.datasets.items():
+            # Ignore warnings such as:
+            # "UserWarning: Variable names are not unique. To make them unique, call `.var_names_make_unique`."
+            # from anndata:
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore", category=UserWarning)
+                v.load(load_raw=True, allow_caching=False)
             signal_raw = np.asarray(v.adata.X.sum()).sum()
             # Check that fields are there:
             # .obs:
@@ -129,6 +135,7 @@ class DataloaderTester:
                 print('[bold red]Consider revising feature meta data.')
                 sys.exit()
             v.streamline_obs_uns(schema="cellxgene")
+            v.clear()
         print("[bold blue]Completed testing of data loader, the data loader is now ready for use.")
         if in_phase_3:
             print('[bold orange]Sfaira butler: "You data loader is finished!"')

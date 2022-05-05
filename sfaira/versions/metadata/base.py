@@ -3,7 +3,7 @@ import networkx
 import numpy as np
 import obonet
 import os
-import owlready2
+# import owlready2
 import pickle
 
 import pandas as pd
@@ -225,8 +225,8 @@ class OntologyHierarchical(Ontology, abc.ABC):
         self._graph = graph
         self._clear_caches()
 
-    def _check_graph(self):
-        if not networkx.is_directed_acyclic_graph(self.graph):
+    def _check_graph(self, verbose=0):
+        if not networkx.is_directed_acyclic_graph(self.graph) and verbose > 0:
             print(f"Ontology {type(self)} is not a DAG, treat child-parent reasoning with care.")
 
     def __validate_node_ids(self, x: Union[str, List[str]]):
@@ -580,7 +580,7 @@ class OntologyEbi(OntologyHierarchical):
 
 class OntologyOwl(OntologyHierarchical, abc.ABC):
 
-    onto_owl = owlready2.Ontology
+    # onto_owl = owlready2.Ontology
 
     def __init__(
             self,
@@ -687,7 +687,7 @@ class OntologyExtendedObo(OntologyObo):
                 # Add edge.
                 self.graph.add_edge(child_node_k, k)
         # Check that DAG was not broken:
-        self._check_graph()
+        self._check_graph(verbose=0)
 
     @property
     def synonym_node_properties(self) -> List[str]:
@@ -876,7 +876,7 @@ class OntologyUberon(OntologyExtendedObo):
                 edges_to_delete.append((x[0], x[1]))
         for x in edges_to_delete:
             self.graph.remove_edge(u=x[0], v=x[1])
-        self._check_graph()
+        self._check_graph(verbose=0)
 
     @property
     def synonym_node_properties(self) -> List[str]:
@@ -965,7 +965,7 @@ class OntologyCl(OntologyExtendedObo):
                 edges_to_delete.append((x[0], x[1]))
         for x in edges_to_delete:
             self.graph.remove_edge(u=x[0], v=x[1])
-        self._check_graph()
+        self._check_graph(verbose=0)
 
     @property
     def synonym_node_properties(self) -> List[str]:
