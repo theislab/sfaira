@@ -15,8 +15,5 @@ def load(data_dir, sample_fn, **kwargs):
     adata = ad.AnnData(matrix.T)
     adata.X = scipy.sparse.csc_matrix(np.expm1(adata.X))
     adata.obs = obs
-    s_dict = {"F": "female", "M": "male"}
-    adata.obs['Sex'] = [s_dict[i] for i in adata.obs['Sex']]
-    adata.obs['Age'] = [str(x) + "-year-old homosapiens stage" for x in adata.obs['Age'].values]
 
     return adata

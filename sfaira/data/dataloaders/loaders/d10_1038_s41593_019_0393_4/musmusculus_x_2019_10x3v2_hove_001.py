@@ -7,12 +7,6 @@ import scipy.io
 
 
 def load(data_dir, **kwargs):
-    sample_organ_dict = {
-        "Choroid plexus": "choroid plexus",
-        "Dura mater": "dura mater",
-        "Enr. SDM": "brain meninx",
-        "Whole brain": "brain",
-    }
     fn = [
         os.path.join(data_dir, "filtered_gene_bc_matrices_mex_WT_fullAggr.zip"),
         os.path.join(data_dir, "annot_fullAggr.csv")
@@ -39,7 +33,7 @@ def load(data_dir, **kwargs):
     idx_map = np.array([obs.index.tolist().index(i) for i in obs_names])
     adata = adata[idx_map, :]
     obs_names = obs_names[idx_map]
-    obs["organ"] = [sample_organ_dict[x] for x in obs["sample"].values]
+    obs["organ"] = obs["sample"].values
 
     # Assign attributes
     adata.obs_names = obs_names

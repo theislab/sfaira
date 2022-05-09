@@ -1,0 +1,3 @@
+source	target	target_id
+CASE	pulmonary tuberculosis	MONDO:0006052
+CONTROL	healthy	PATO:0000461

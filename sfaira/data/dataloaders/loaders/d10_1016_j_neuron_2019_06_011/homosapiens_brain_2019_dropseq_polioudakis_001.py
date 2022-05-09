@@ -5,10 +5,6 @@ import zipfile
 
 
 def load(data_dir, **kwargs):
-    age_dict = {
-        17: "17th week post-fertilization homosapiens stage",
-        18: "18th week post-fertilization homosapiens stage",
-    }
     ct_dict = {
         "End": "Endothelial",
         "ExDp1": "Excitatory deep layer 1",
@@ -47,6 +43,6 @@ def load(data_dir, **kwargs):
     adata = adata[obs.index.tolist()].copy()
     adata.obs = obs
     shutil.rmtree(fn_tmp)
-    adata.obs['devstage'] = [age_dict[i] for i in adata.obs['Gestation_week']]
     adata.obs['celltype'] = [ct_dict[i] for i in adata.obs['Cluster']]
+
     return adata
