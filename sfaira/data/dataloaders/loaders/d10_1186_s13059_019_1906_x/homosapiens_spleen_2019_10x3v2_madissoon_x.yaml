@@ -53,9 +53,9 @@ dataset_or_observation_wise:
     individual:
     individual_obs_key: 
     organ:
-        madissoon19_lung.processed.h5ad': 'lung parenchyma'
-        oesophagus.cellxgene.h5ad': 'esophagus'
-        spleen.cellxgene.h5ad': 'spleen'
+        madissoon19_lung.processed.h5ad: 'lung parenchyma'
+        oesophagus.cellxgene.h5ad: 'esophagus'
+        spleen.cellxgene.h5ad: 'spleen'
     organ_obs_key: 
     organism: "Homo sapiens"
     organism_obs_key: 
