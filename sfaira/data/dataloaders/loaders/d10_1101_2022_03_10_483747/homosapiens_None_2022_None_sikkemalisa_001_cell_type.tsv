@@ -1,0 +1,59 @@
+source	target	target_id
+AT1	type I pneumocyte	CL:0002062
+AT2	type II pneumocyte	CL:0002063
+AT2 proliferating	type II pneumocyte	CL:0002063
+Adventitial fibroblasts	fibroblast of lung	CL:0002553
+Alveolar Mφ CCL3+	alveolar macrophage	CL:0000583
+Alveolar Mφ MT-positive	alveolar macrophage	CL:0000583
+Alveolar Mφ proliferating	alveolar macrophage	CL:0000583
+Alveolar fibroblasts	fibroblast of lung	CL:0002553
+Alveolar macrophages	alveolar macrophage	CL:0000583
+B cells	B cell	CL:0000236
+Basal resting	respiratory basal cell	CL:0002633
+CD4 T cells	CD4-positive, alpha-beta T cell	CL:0000624
+CD8 T cells	CD8-positive, alpha-beta T cell	CL:0000625
+Classical monocytes	classical monocyte	CL:0000860
+Club (nasal)	club cell	CL:0000158
+Club (non-nasal)	club cell	CL:0000158
+DC1	conventional dendritic cell	CL:0000990
+DC2	CD1c-positive myeloid dendritic cell	CL:0002399
+Deuterosomal	multi-ciliated epithelial cell	CL:0005012
+EC aerocyte capillary	capillary endothelial cell	CL:0002144
+EC arterial	pulmonary artery endothelial cell	CL:1001568
+EC general capillary	capillary endothelial cell	CL:0002144
+EC venous pulmonary	vein endothelial cell	CL:0002543
+EC venous systemic	vein endothelial cell	CL:0002543
+Fibromyocytes	stromal cell	CL:0000499
+Goblet (bronchial)	bronchial goblet cell	CL:1000312
+Goblet (nasal)	nasal mucosa goblet cell	CL:0002480
+Goblet (subsegmental)	tracheobronchial goblet cell	CL:0019003
+Interstitial Mφ perivascular	lung macrophage	CL:1001603
+Ionocyte	ionocyte	CL:0005006
+Lymphatic EC differentiating	endothelial cell of lymphatic vessel	CL:0002138
+Lymphatic EC mature	endothelial cell of lymphatic vessel	CL:0002138
+Lymphatic EC proliferating	endothelial cell of lymphatic vessel	CL:0002138
+Mast cells	mast cell	CL:0000097
+Mesothelium	mesothelial cell	CL:0000077
+Migratory DCs	dendritic cell	CL:0000451
+Monocyte-derived Mφ	elicited macrophage	CL:0000861
+Multiciliated (nasal)	multi-ciliated epithelial cell	CL:0005012
+Multiciliated (non-nasal)	ciliated columnar cell of tracheobronchial tree	CL:0002145
+Myofibroblasts	myofibroblast cell	CL:0000186
+NK cells	natural killer cell	CL:0000623
+Neuroendocrine	lung neuroendocrine cell	CL:1000223
+Non-classical monocytes	non-classical monocyte	CL:0000875
+Peribronchial fibroblasts	bronchus fibroblast of lung	CL:2000093
+Pericytes	pericyte cell	CL:0000669
+Plasma cells	plasma cell	CL:0000786
+Plasmacytoid DCs	plasmacytoid dendritic cell	CL:0000784
+SM activated stress response	smooth muscle cell	CL:0000192
+SMG duct	acinar cell	CL:0000622
+SMG mucous	mucus secreting cell	CL:0000319
+SMG serous (bronchial)	tracheobronchial serous cell	CL:0019001
+SMG serous (nasal)	serous secreting cell	CL:0000313
+Smooth muscle	tracheobronchial smooth muscle cell	CL:0019019
+Subpleural fibroblasts	fibroblast	CL:0000057
+Suprabasal	respiratory basal cell	CL:0002633
+T cells proliferating	T cell	CL:0000084
+Transitional Club-AT2	epithelial cell of lung	CL:0000082
+Tuft	brush cell of trachebronchial tree	CL:0002075

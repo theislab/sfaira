@@ -1,0 +1,8 @@
+source	target	target_id
+asian	Asian	HANCESTRO:0008
+black	African	HANCESTRO:0010
+latino	Hispanic or Latin American	HANCESTRO:0014
+mixed	unknown	unknown
+nan	unknown	unknown
+pacific islander	Pacific Islander	HANCESTRO:0574
+white	European	HANCESTRO:0005

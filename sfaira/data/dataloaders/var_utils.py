@@ -346,6 +346,7 @@ def reorder_adata_to_target_features(
 
     :param allowed_ids: Allowed identifiers, can use this to subset if target identifiers is not set.
         Note: These have to match the identifier class used in var[var_key], eg. gene symbols or ENSG IDs.
+        Note: Original feature ordering is kept if allowed_ids is not None and target_ids is None.
     :param map_in_upper_case: Whether to map features in upper case, ie case-insensitive.
     :param map_without_version: Whether to map features in without accounting version (".* suffix of feature ID).
     :param target_ids: Target set of feature identifiers.
@@ -370,11 +371,10 @@ def reorder_adata_to_target_features(
         output_ids = target_ids
     else:
         raise ValueError(f"supply either allowed_ids or target_ids: {(allowed_ids, target_ids)}")
-
     map_mat = scipy.sparse.lil_matrix(np.zeros((len(input_ids), len(output_ids))))
     if map_in_upper_case:
-        input_ids = np.array([z.upper() for z in input_ids])
-        output_ids = np.array([z.upper() for z in output_ids])
+        input_ids = np.array([z.upper() if isinstance(z, str) else "" for z in input_ids])
+        output_ids = np.array([z.upper() if isinstance(z, str) else "" for z in output_ids])
     if map_without_version:
         input_ids = np.array([z.split(".")[0] for z in input_ids])
         output_ids = np.array([z.split(".")[0] for z in output_ids])
@@ -404,7 +404,9 @@ def collapse_x_var_by_feature(x, var, var_column, sep_deduplication="-"):
     """
     old_index = var.index if var_column == "index" else var[var_column].values
     old_index = np.array([z.split(sep_deduplication)[0] for z in old_index])
-    new_index = np.unique(old_index)
+    # Get unique elements maintaining original ordering:
+    idx = np.unique(old_index, return_index=True)[1]
+    new_index = old_index[np.sort(idx)]
     if len(new_index) < len(old_index):
         map_mat = scipy.sparse.lil_matrix(np.zeros((len(old_index), len(new_index))))
         for i, z in enumerate(new_index):

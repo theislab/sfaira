@@ -344,7 +344,7 @@ class DatasetBase(AnnotationContainer):
                 - "protein_coding": All protein coding genes in assembly.
         :param verbose: Report feature transformation statistics.
         """
-        self.__assert_loaded()
+        self._assert_loaded()
         if schema.startswith("sfaira"):
             adata_target_ids = AdataIdsSfaira()
         elif schema.startswith("cellxgene"):
@@ -423,7 +423,7 @@ class DatasetBase(AnnotationContainer):
         :param keep_id_obs: For ontology-constrained .obs columns, whether to keep a column with ontology ID annotation.
         :return:
         """
-        self.__assert_loaded()
+        self._assert_loaded()
         if isinstance(keep_orginal_obs, tuple):
             keep_orginal_obs = list(keep_orginal_obs)
         elif isinstance(keep_orginal_obs, np.ndarray):
@@ -495,7 +495,7 @@ class DatasetBase(AnnotationContainer):
         """
         if compression_kwargs is None:
             compression_kwargs = {}
-        self.__assert_loaded()
+        self._assert_loaded()
         if store_format == "h5ad":
             if not isinstance(self.adata.X, scipy.sparse.csr_matrix):
                 print(f"WARNING: high-perfomances caches based on .h5ad work better with .csr formatted expression "
@@ -1002,6 +1002,6 @@ class DatasetBase(AnnotationContainer):
     def show_summary(self):
         print(f"{(self.supplier, self.organism, self.organ, self.assay_sc, self.disease)}")
 
-    def __assert_loaded(self):
+    def _assert_loaded(self):
         if self.adata is None:
             raise ValueError("adata was not loaded, this is necessary for this operation")
