@@ -376,7 +376,8 @@ def project_free_to_ontology(adata: anndata.AnnData,
         #  mapping files with and without the ID in the third column.
         # This mapping blocks progression in the unit test if not deactivated.
         adata.obs[getattr(adata_ids, attr)] = labels_mapped
-        project_ontology_ids_obs(attr=attr, map_exceptions=map_exceptions, from_id=False, adata_ids=adata_ids)
+        adata = project_ontology_ids_obs(adata=adata, attr=attr, map_exceptions=map_exceptions, from_id=False,
+                                         adata_ids=adata_ids, organism=organism)
     else:
         # Assumes that the original labels are the correct ontology symbols, because of a lack of ontology,
         # ontology IDs cannot be inferred.

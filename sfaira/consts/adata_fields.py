@@ -227,7 +227,7 @@ class AdataIdsCellxgene(AdataIds):
         self.feature_reference = "feature_reference"
         self.feature_symbol = "feature_name"
         self.id = "id"
-        self.ncells = "ncells"
+        self.ncells = "cell_count"
         self.layer_counts = "raw"
         self.layer_proc = "X"
         self.organ = "tissue"

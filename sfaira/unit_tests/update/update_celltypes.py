@@ -1,8 +1,5 @@
-import numpy as np
 import os
-import pandas as pd
 import pydoc
-import pytest
 
 from sfaira.data.dataloaders.loaders import DatasetSuperGroupLoaders
 

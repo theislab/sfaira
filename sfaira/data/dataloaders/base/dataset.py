@@ -925,17 +925,25 @@ class DatasetBase(AnnotationContainer):
                                                 isinstance(sample_attr, np.ndarray)):
                 sample_attr = [sample_attr]
             if sample_attr is not None:
-                if len(sample_attr) == 1:
-                    # Only use sample-wise subsetting if the sample-wise attribute is unique (not mixed).
-                    if np.any([x in values for x in sample_attr]):
-                        idx_ = np.arange(1, self.ncells)
-                        keep_dataset_ = True
-                    else:
-                        idx_ = np.array([])
-                        keep_dataset_ = False
+                if hasattr(self.ontology_container_sfaira, samplewise_key):
+                    # Ontology constrained meta data:
+                    ontology = getattr(self.ontology_container_sfaira, samplewise_key)
+                    keep_all = np.any([np.any([is_child(query=x, ontology=ontology, ontology_parent=y)
+                                               for y in values])
+                                       for x in sample_attr])
                 else:
-                    # No per cell annotation and ambiguous sample annotation: pass entire data set if some keys match.
-                    raise NotImplementedError(f"{self.id}: {(samplewise_key, cellwise_key)}")
+                    # Non-constrained meta data:
+                    keep_all = [x in values for x in sample_attr]
+                    if allow_partial_match:
+                        keep_all = np.any(keep_all)
+                    else:
+                        keep_all = np.all(keep_all)
+                if keep_all:
+                    idx_ = np.arange(1, self.ncells)
+                    keep_dataset_ = True
+                else:
+                    idx_ = np.array([])
+                    keep_dataset_ = False
             elif hasattr(self, cellwise_key) and getattr(self, cellwise_key) is not None:
                 if self.loaded:
                     # Look for the streamlined ID column in .obs.

@@ -14,9 +14,10 @@ import warnings
 
 from sfaira.consts import AdataIds, AdataIdsSfaira
 from sfaira.data.dataloaders.base.dataset import DatasetBase
-from sfaira.data.dataloaders.base.utils import identify_tsv, is_child
+from sfaira.data.dataloaders.base.utils import identify_tsv
 from sfaira.versions.genomes.genomes import GenomeContainer
 from sfaira.versions.metadata.maps import prepare_ontology_map_tab
+from sfaira.data.dataloaders.obs_utils import get_ontology, value_protection
 from sfaira.data.dataloaders.utils import read_yaml
 
 UNS_STRING_META_IN_OBS = "__obs__"
@@ -409,8 +410,8 @@ class DatasetGroup:
 
     @property
     def ncells(self) -> Union[None, int]:
-        x = np.array([x.ncells for x in self.datasets.values()])
-        x = np.sum(x)[0] if np.all(np.logical_not(np.isnan(x))) else None
+        x = [x.ncells for x in self.datasets.values()]
+        x = sum(x) if np.all([y is not None for y in x]) else None
         return x
 
     @property
@@ -655,11 +656,11 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                         v = self.datasets[self.ids[0]]
                         onto_key = identify_tsv(fn=fn_map, ontology_names=self._adata_ids.ontology_constrained)
                         if os.path.exists(fn_map):
-                            onto = v.get_ontology(onto_key)
+                            onto = get_ontology(k=onto_key, organism=v.organism)
                             # Access reading and value protection mechanisms from first data set loaded in group.
                             tab = v._read_ontology_class_map(fn=fn_map)
                             # Checks that the assigned ontology class names appear in the ontology.
-                            v._value_protection(
+                            value_protection(
                                 attr=onto_key,
                                 allowed=onto,
                                 attempted=[
@@ -740,8 +741,11 @@ class DatasetSuperGroup:
         g = GenomeContainer(release=genome)
         return g
 
-    def ncells(self, annotated_only: bool = False):
-        return np.sum(self.ncells_bydataset_flat(annotated_only=annotated_only))
+    @property
+    def ncells(self) -> Union[None, int]:
+        x = [x.ncells for x in self.dataset_groups]
+        x = sum(x) if np.all([y is not None for y in x]) else None
+        return x
 
     @property
     def datasets(self) -> Dict[str, DatasetBase]:

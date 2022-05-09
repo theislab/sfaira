@@ -3,13 +3,14 @@ import pytest
 
 import numpy as np
 
-from sfaira.consts import AdataIdsSfaira, AdataIdsCellxgene_v2_0_0
+from sfaira.consts import AdataIdsSfaira
+from sfaira.data.dataloaders.databases.cellxgene import DatasetSuperGroupCellxgene
 from sfaira.data.store.io.io_dao import read_dao
 from sfaira.versions.genomes import GenomeContainer
 from sfaira.unit_tests.data_for_tests.databases.utils import prepare_dsg_database
 from sfaira.unit_tests.data_for_tests.databases.consts import CELLXGENE_DATASET_ID
 from sfaira.unit_tests.data_for_tests.loaders import RELEASE_HUMAN, RELEASE_MOUSE
-from sfaira.unit_tests.directories import DIR_DATABASE_STORE_DAO
+from sfaira.unit_tests.directories import DIR_DATA_DATABASES_CACHE, DIR_DATABASE_STORE_DAO
 
 MATCH_TO_RELEASE = {"Homo sapiens": RELEASE_HUMAN, "Mus musculus": RELEASE_MOUSE}
 
@@ -105,3 +106,22 @@ def test_output_to_store(store: str, database: str):
     anticipated_var = [getattr(adata_ids_sfaira, x) for x in anticipated_var]
     assert len(adata.var.columns) == len(anticipated_var)
     assert np.all([x in adata.var.columns for x in anticipated_var]), (adata.var.columns, anticipated_var)
+
+
+def test_cellxgene_single_cell_subset():
+    """
+    This test can be used to debug cellxgene collection sub-setting.
+    """
+    dsg = DatasetSuperGroupCellxgene(data_path=DIR_DATA_DATABASES_CACHE, cache_metadata=True)
+    assays = np.unique([str(x.assay_sc) for x in dsg.flatten().datasets.values() if x.assay_sc is not None])
+    print(f"assay None: {np.sum([x.ncells for x in dsg.flatten().datasets.values() if x.assay_sc is None])} cells")
+    for k in assays:
+        print(f"assay {k}: {np.sum([x.ncells for x in dsg.flatten().datasets.values() if str(x.assay_sc) == k])} cells")
+    n_total_cells = dsg.ncells
+    dsg.subset(key="assay_sc", values="sfaira single cell library construction")
+    print(f"found {n_total_cells} total cells and {dsg.ncells} selected cells")
+    dsg.subset(key="assay_sc", values=["RNA assay", "10x technology", "sci-RNA-seq", "microwell-seq"])
+    print(f"found {n_total_cells} total cells and {dsg.ncells} selected cells")
+    dsg.subset(key="primary_data", values=True)
+    print(f"found {n_total_cells} total cells and {dsg.ncells} selected cells")
+    assert dsg.ncells > 1e7
