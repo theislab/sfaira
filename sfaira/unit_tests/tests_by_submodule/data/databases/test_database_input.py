@@ -25,14 +25,16 @@ def test_streamline_features(database: str, subset_genes_to_type: str):
     database, subset_args = database
     dsg = prepare_dsg_database(database=database)
     dsg.subset(key=subset_args[0], values=subset_args[1])
+    assert len(dsg.dataset_groups) > 0
     dsg.load()
-    gc = GenomeContainer(organism="Mus musculus", release=MATCH_TO_RELEASE["Mus musculus"])
+    organism = [v.organism for v in dsg.datasets.values()][0]
+    gc = GenomeContainer(organism=organism, release=MATCH_TO_RELEASE[organism])
     # Define set of raw IDs:
     original_ids = dict([
         (k, np.array([x for x in v.adata.var.index.tolist() if x in gc.ensembl]))
         for k, v in dsg.datasets.items()])
     dsg.streamline_var(match_to_release=MATCH_TO_RELEASE,
-                       schema="sfaira",
+                       remove_gene_version=True,
                        subset_genes_to_type=subset_genes_to_type)
     # Initialise reference gc to check target space inside of ds.
     if subset_genes_to_type is not None:
