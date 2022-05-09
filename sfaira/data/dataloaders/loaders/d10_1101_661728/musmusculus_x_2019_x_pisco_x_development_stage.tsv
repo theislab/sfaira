@@ -1,5 +1,7 @@
-source	target
-Male	male
-Female	female
-nan	unknown
-FeM=male	unknown
+source	target	target_id
+18m	18 month-old stage	MmusDv:0000089
+1m	4 weeks	MmusDv:0000048
+21m	20 month-old stage and over	MmusDv:0000091
+24m	20 month-old stage and over	MmusDv:0000091
+30m	20 month-old stage and over	MmusDv:0000091
+3m	3 month-old stage	MmusDv:0000063

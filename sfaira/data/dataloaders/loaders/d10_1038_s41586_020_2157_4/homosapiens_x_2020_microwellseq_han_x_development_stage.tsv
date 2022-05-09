@@ -1,106 +1,106 @@
-source	target
-AdultAdipose_1	homosapiens adult stage
-AdultAdrenalGland_2	homosapiens adult stage
-AdultAdrenalGland_3	homosapiens adult stage
-AdultArtery_1	homosapiens adult stage
-AdultAscendingColon_1	homosapiens adult stage
-AdultBladder_1	homosapiens adult stage
-AdultBladder_2	homosapiens adult stage
-AdultCerebellum_1	homosapiens adult stage
-AdultCervix_1	homosapiens adult stage
-AdultColon_1	homosapiens adult stage
-AdultDuodenum_1	homosapiens adult stage
-AdultEpityphlon_1	homosapiens adult stage
-AdultEsophagus_1	homosapiens adult stage
-AdultEsophagus_2	homosapiens adult stage
-AdultFallopiantube_1	homosapiens adult stage
-AdultGallbladder_1	homosapiens adult stage
-AdultGallbladder_2	homosapiens adult stage
-AdultHeart_1	homosapiens adult stage
-AdultHeart_2	homosapiens adult stage
-AdultIleum_2	homosapiens adult stage
-AdultJejunum_2	homosapiens adult stage
-AdultKidney_2	homosapiens adult stage
-AdultKidney_3	homosapiens adult stage
-AdultKidney_4	homosapiens adult stage
-AdultLiver_1	homosapiens adult stage
-AdultLiver_2	homosapiens adult stage
-AdultLiver_4	homosapiens adult stage
-AdultLung_1	homosapiens adult stage
-AdultLung_2	homosapiens adult stage
-AdultLung_3	homosapiens adult stage
-AdultMuscle_1	homosapiens adult stage
-AdultOmentum_1	homosapiens adult stage
-AdultOmentum_2	homosapiens adult stage
-AdultOmentum_3	homosapiens adult stage
-AdultPancreas_1	homosapiens adult stage
-AdultPeripheralBlood_3	homosapiens adult stage
-AdultPeripheralBlood_4	homosapiens adult stage
-AdultPleura_1	homosapiens adult stage
-AdultProstate_1	homosapiens adult stage
-AdultRectum_1	homosapiens adult stage
-AdultSigmoidColon_1	homosapiens adult stage
-AdultSpleenParenchyma_1	homosapiens adult stage
-AdultSpleen_1	homosapiens adult stage
-AdultStomach_1	homosapiens adult stage
-AdultStomach_2	homosapiens adult stage
-AdultStomach_3	homosapiens adult stage
-AdultTemporalLobe_1	homosapiens adult stage
-AdultThyroid_1	homosapiens adult stage
-AdultThyroid_2	homosapiens adult stage
-AdultTrachea_2	homosapiens adult stage
-AdultTransverseColon_2	homosapiens adult stage
-AdultUreter_1	homosapiens adult stage
-AdultUterus_1	homosapiens adult stage
-BoneMarrow_1	homosapiens adult stage
-BoneMarrow_2	homosapiens adult stage
-ChorionicVillus_1	homosapiens adult stage
-CordBloodCD34P_1	homosapiens adult stage
-CordBloodCD34P_2	homosapiens adult stage
-CordBlood_1	homosapiens adult stage
-CordBlood_2	homosapiens adult stage
-FetalAdrenalGland_2	fetal stage
-FetalAdrenalGland_3	fetal stage
-FetalAdrenalGland_4	fetal stage
-FetalBrain_3	fetal stage
-FetalBrain_4	fetal stage
-FetalBrain_5	fetal stage
-FetalBrain_6	fetal stage
-FetalCalvaria_1	fetal stage
-FetalEyes_1	fetal stage
-FetalFemaleGonad_1	fetal stage
-FetalFemaleGonad_2	fetal stage
-FetalHeart_1	fetal stage
-FetalHeart_2	fetal stage
-FetalIntestine_1	fetal stage
-FetalIntestine_2	fetal stage
-FetalIntetsine_3	fetal stage
-FetalIntestine_4	fetal stage
-FetalIntestine_5	fetal stage
-FetalKidney_3	fetal stage
-FetalKidney_4	fetal stage
-FetalKidney_5	fetal stage
-FetalKidney_6	fetal stage
-FetalLung_1	fetal stage
-FetalLung_2	fetal stage
-FetalMaleGonad_1	fetal stage
-FetalMaleGonad_2	fetal stage
-FetalMuscle_1	fetal stage
-FetalPancreas_1	fetal stage
-FetalPancreas_2	fetal stage
-FetalPancreas_3	fetal stage
-FetalRib_2	fetal stage
-FetalRib_3	fetal stage
-FetalSkin_2	fetal stage
-FetalSkin_3	fetal stage
-FetalSpinalCord_1	fetal stage
-FetalStomach_1	fetal stage
-FetalStomach_2	fetal stage
-FetalThymus_1	fetal stage
-FetalThymus_2	fetal stage
-HESC_1	blastula stage
-Liver_1	homosapiens adult stage
-Liver_2	homosapiens adult stage
-NeonatalAdrenalGland_1	newborn homosapiens stage
-PeripheralBlood_1	homosapiens adult stage
-Placenta_1	homosapiens adult stage
+source	target	target_id
+AdultAdipose_1	human adult stage	HsapDv:0000087
+AdultAdrenalGland_2	human adult stage	HsapDv:0000087
+AdultAdrenalGland_3	human adult stage	HsapDv:0000087
+AdultArtery_1	human adult stage	HsapDv:0000087
+AdultAscendingColon_1	human adult stage	HsapDv:0000087
+AdultBladder_1	human adult stage	HsapDv:0000087
+AdultBladder_2	human adult stage	HsapDv:0000087
+AdultCerebellum_1	human adult stage	HsapDv:0000087
+AdultCervix_1	human adult stage	HsapDv:0000087
+AdultColon_1	human adult stage	HsapDv:0000087
+AdultDuodenum_1	human adult stage	HsapDv:0000087
+AdultEpityphlon_1	human adult stage	HsapDv:0000087
+AdultEsophagus_1	human adult stage	HsapDv:0000087
+AdultEsophagus_2	human adult stage	HsapDv:0000087
+AdultFallopiantube_1	human adult stage	HsapDv:0000087
+AdultGallbladder_1	human adult stage	HsapDv:0000087
+AdultGallbladder_2	human adult stage	HsapDv:0000087
+AdultHeart_1	human adult stage	HsapDv:0000087
+AdultHeart_2	human adult stage	HsapDv:0000087
+AdultIleum_2	human adult stage	HsapDv:0000087
+AdultJejunum_2	human adult stage	HsapDv:0000087
+AdultKidney_2	human adult stage	HsapDv:0000087
+AdultKidney_3	human adult stage	HsapDv:0000087
+AdultKidney_4	human adult stage	HsapDv:0000087
+AdultLiver_1	human adult stage	HsapDv:0000087
+AdultLiver_2	human adult stage	HsapDv:0000087
+AdultLiver_4	human adult stage	HsapDv:0000087
+AdultLung_1	human adult stage	HsapDv:0000087
+AdultLung_2	human adult stage	HsapDv:0000087
+AdultLung_3	human adult stage	HsapDv:0000087
+AdultMuscle_1	human adult stage	HsapDv:0000087
+AdultOmentum_1	human adult stage	HsapDv:0000087
+AdultOmentum_2	human adult stage	HsapDv:0000087
+AdultOmentum_3	human adult stage	HsapDv:0000087
+AdultPancreas_1	human adult stage	HsapDv:0000087
+AdultPeripheralBlood_3	human adult stage	HsapDv:0000087
+AdultPeripheralBlood_4	human adult stage	HsapDv:0000087
+AdultPleura_1	human adult stage	HsapDv:0000087
+AdultProstate_1	human adult stage	HsapDv:0000087
+AdultRectum_1	human adult stage	HsapDv:0000087
+AdultSigmoidColon_1	human adult stage	HsapDv:0000087
+AdultSpleenParenchyma_1	human adult stage	HsapDv:0000087
+AdultSpleen_1	human adult stage	HsapDv:0000087
+AdultStomach_1	human adult stage	HsapDv:0000087
+AdultStomach_2	human adult stage	HsapDv:0000087
+AdultStomach_3	human adult stage	HsapDv:0000087
+AdultTemporalLobe_1	human adult stage	HsapDv:0000087
+AdultThyroid_1	human adult stage	HsapDv:0000087
+AdultThyroid_2	human adult stage	HsapDv:0000087
+AdultTrachea_2	human adult stage	HsapDv:0000087
+AdultTransverseColon_2	human adult stage	HsapDv:0000087
+AdultUreter_1	human adult stage	HsapDv:0000087
+AdultUterus_1	human adult stage	HsapDv:0000087
+BoneMarrow_1	human adult stage	HsapDv:0000087
+BoneMarrow_2	human adult stage	HsapDv:0000087
+ChorionicVillus_1	human adult stage	HsapDv:0000087
+CordBloodCD34P_1	human adult stage	HsapDv:0000087
+CordBloodCD34P_2	human adult stage	HsapDv:0000087
+CordBlood_1	human adult stage	HsapDv:0000087
+CordBlood_2	human adult stage	HsapDv:0000087
+FetalAdrenalGland_2	fetal stage	HsapDv:0000037
+FetalAdrenalGland_3	fetal stage	HsapDv:0000037
+FetalAdrenalGland_4	fetal stage	HsapDv:0000037
+FetalBrain_3	fetal stage	HsapDv:0000037
+FetalBrain_4	fetal stage	HsapDv:0000037
+FetalBrain_5	fetal stage	HsapDv:0000037
+FetalBrain_6	fetal stage	HsapDv:0000037
+FetalCalvaria_1	fetal stage	HsapDv:0000037
+FetalEyes_1	fetal stage	HsapDv:0000037
+FetalFemaleGonad_1	fetal stage	HsapDv:0000037
+FetalFemaleGonad_2	fetal stage	HsapDv:0000037
+FetalHeart_1	fetal stage	HsapDv:0000037
+FetalHeart_2	fetal stage	HsapDv:0000037
+FetalIntestine_1	fetal stage	HsapDv:0000037
+FetalIntestine_2	fetal stage	HsapDv:0000037
+FetalIntetsine_3	fetal stage	HsapDv:0000037
+FetalIntestine_4	fetal stage	HsapDv:0000037
+FetalIntestine_5	fetal stage	HsapDv:0000037
+FetalKidney_3	fetal stage	HsapDv:0000037
+FetalKidney_4	fetal stage	HsapDv:0000037
+FetalKidney_5	fetal stage	HsapDv:0000037
+FetalKidney_6	fetal stage	HsapDv:0000037
+FetalLung_1	fetal stage	HsapDv:0000037
+FetalLung_2	fetal stage	HsapDv:0000037
+FetalMaleGonad_1	fetal stage	HsapDv:0000037
+FetalMaleGonad_2	fetal stage	HsapDv:0000037
+FetalMuscle_1	fetal stage	HsapDv:0000037
+FetalPancreas_1	fetal stage	HsapDv:0000037
+FetalPancreas_2	fetal stage	HsapDv:0000037
+FetalPancreas_3	fetal stage	HsapDv:0000037
+FetalRib_2	fetal stage	HsapDv:0000037
+FetalRib_3	fetal stage	HsapDv:0000037
+FetalSkin_2	fetal stage	HsapDv:0000037
+FetalSkin_3	fetal stage	HsapDv:0000037
+FetalSpinalCord_1	fetal stage	HsapDv:0000037
+FetalStomach_1	fetal stage	HsapDv:0000037
+FetalStomach_2	fetal stage	HsapDv:0000037
+FetalThymus_1	fetal stage	HsapDv:0000037
+FetalThymus_2	fetal stage	HsapDv:0000037
+HESC_1	blastula stage	HsapDv:0000006
+Liver_1	human adult stage	HsapDv:0000087
+Liver_2	human adult stage	HsapDv:0000087
+NeonatalAdrenalGland_1	newborn human stage	HsapDv:0000082
+PeripheralBlood_1	human adult stage	HsapDv:0000087
+Placenta_1	human adult stage	HsapDv:0000087
