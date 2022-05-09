@@ -1,0 +1,16 @@
+source	target	target_id
+Adrenal	adrenal gland	UBERON:0002369
+Cerebellum	cerebellum	UBERON:0002037
+Cerebrum	telencephalon	UBERON:0001893
+Eye	eye	UBERON:0000970
+Heart	heart	UBERON:0000948
+Intestine	intestine	UBERON:0000160
+Kidney	kidney	UBERON:0002113
+Liver	liver	UBERON:0002107
+Lung	lung	UBERON:0002048
+Muscle	muscle organ	UBERON:0001630
+Pancreas	pancreas	UBERON:0001264
+Placenta	placenta	UBERON:0001987
+Spleen	spleen	UBERON:0002106
+Stomach	stomach	UBERON:0000945
+Thymus	thymus	UBERON:0002370
