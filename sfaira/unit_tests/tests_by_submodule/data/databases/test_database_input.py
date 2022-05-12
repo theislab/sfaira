@@ -1,7 +1,9 @@
 import os
 import pytest
 
+import dask.array
 import numpy as np
+import pandas as pd
 
 from sfaira.consts import AdataIdsSfaira
 from sfaira.data.dataloaders.databases.cellxgene import DatasetSuperGroupCellxgene
@@ -26,7 +28,7 @@ def test_streamline_features(database: str, subset_genes_to_type: str):
     dsg = prepare_dsg_database(database=database)
     dsg.subset(key=subset_args[0], values=subset_args[1])
     assert len(dsg.dataset_groups) > 0
-    dsg.load()
+    dsg.load(clean_ontology_labels=True)
     organism = [v.organism for v in dsg.datasets.values()][0]
     gc = GenomeContainer(organism=organism, release=MATCH_TO_RELEASE[organism])
     # Define set of raw IDs:
@@ -58,7 +60,7 @@ def test_streamline_metadata(database: str, format: str):
     database, subset_args = database
     dsg = prepare_dsg_database(database=database)
     dsg.subset(key=subset_args[0], values=subset_args[1])
-    dsg.load()
+    dsg.load(clean_ontology_labels=True)
     dsg.streamline_var(match_to_release=MATCH_TO_RELEASE,
                        schema=format,
                        subset_genes_to_type="protein_coding")
@@ -83,9 +85,10 @@ def test_output_to_store(store: str, database: str):
     database, subset_args = database
     dsg = prepare_dsg_database(database=database)
     dsg.subset(key=subset_args[0], values=subset_args[1])
-    dsg.load()
+    dsg.load(clean_ontology_labels=True)
+    adata_original = dsg.datasets[CELLXGENE_DATASET_ID].adata.copy()
     dsg.streamline_var(match_to_release=MATCH_TO_RELEASE, schema="sfaira", subset_genes_to_type="protein_coding",
-                       clean_var=True)
+                       clean_var=True, subset_layer="counts")
     dsg.streamline_obs_uns(schema="sfaira", clean_obs=True, clean_uns=True, clean_obs_names=True,
                            keep_id_obs=True, keep_orginal_obs=False, keep_symbol_obs=True)
     dsg.write_distributed_store(dir_cache=DIR_DATABASE_STORE_DAO, store_format=store, dense=True)
@@ -104,10 +107,26 @@ def test_output_to_store(store: str, database: str):
     assert len(adata.obs.columns) == len(anticipated_obs)
     assert np.all([x in adata.obs.columns for x in anticipated_obs]), (adata.obs.columns, anticipated_obs)
     # Check var setup:
+    organism = [v.organism for v in dsg.datasets.values()][0]
+    gc = GenomeContainer(organism=organism, release=MATCH_TO_RELEASE[organism])
+    gc.set(biotype="protein_coding")
     anticipated_var = adata_ids_sfaira.var_keys
     anticipated_var = [getattr(adata_ids_sfaira, x) for x in anticipated_var]
     assert len(adata.var.columns) == len(anticipated_var)
     assert np.all([x in adata.var.columns for x in anticipated_var]), (adata.var.columns, anticipated_var)
+    assert adata.n_vars == gc.n_var
+    assert np.all(adata.var_names == gc.ensembl)
+    # Check X:
+    # Compare a non-zero gene from .raw with entry written into store:
+    # Note that adata::raw is written into store::X because subset_layer="counts" is used above.
+    var_check = adata_original.raw.var_names[np.where(np.asarray(adata_original.raw.X.sum(axis=0)).flatten() > 0)[0]]
+    var_check = [x for x in var_check if x in gc.ensembl][0]
+    xj_original = np.asarray(adata_original.raw[:, var_check].X.todense()).flatten()
+    x = dask.array.from_zarr(url=os.path.join(fn_store, "zarr"), component="X")
+    var = pd.read_parquet(os.path.join(fn_store, "parquet", "var.parquet"), engine="pyarrow")
+    xj = x[:, np.where(var["ensembl"].values == var_check)[0]].compute().flatten()
+    assert np.sum(xj) > 0
+    assert np.all(xj_original == xj)
 
 
 def test_cellxgene_single_cell_subset():

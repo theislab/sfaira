@@ -316,6 +316,7 @@ class DatasetBase(AnnotationContainer):
             remove_gene_version: bool = True,
             schema: str = "sfaira",
             subset_genes_to_type: Union[None, str, List[str]] = None,
+            subset_layer: Union[None, str] = None,
             verbose: int = 1,
             **kwargs
     ):
@@ -342,6 +343,8 @@ class DatasetBase(AnnotationContainer):
                 - None: Keep the subset of input gene set that can be mapped to assembly.
                 - "all": All genes in assembly.
                 - "protein_coding": All protein coding genes in assembly.
+        :param subset_layer: Defines layer to keep, out of "counts" and "processed". Leave as None to retain both layers
+            as available.
         :param verbose: Report feature transformation statistics.
         """
         self._assert_loaded()
@@ -353,6 +356,14 @@ class DatasetBase(AnnotationContainer):
             raise ValueError(f"did not recognize schema {schema}")
         if isinstance(match_to_release, dict):
             match_to_release = match_to_release[self.organism]
+        if subset_layer is not None:
+            assert isinstance(subset_layer, str), "subset_layer has to be of type str"
+            if subset_layer == "counts":
+                self.layer_processed = None
+            elif subset_layer == "processed":
+                self.layer_counts = None
+            else:
+                raise ValueError(f"subset_layer has to be either counts or processed")
 
         streamline_output = streamline_var(
             adata=self.adata,
