@@ -108,6 +108,11 @@ def test_output_to_store(store: str, database: str):
     anticipated_var = [getattr(adata_ids_sfaira, x) for x in anticipated_var]
     assert len(adata.var.columns) == len(anticipated_var)
     assert np.all([x in adata.var.columns for x in anticipated_var]), (adata.var.columns, anticipated_var)
+    organism = [v.organism for v in dsg.datasets.values()][0]
+    gc = GenomeContainer(organism=organism, release=MATCH_TO_RELEASE[organism])
+    gc.set(biotype="protein_coding")
+    assert len(adata.var_names) == len(gc.ensembl)
+    assert np.all(adata.var_names == np.array([x.upper() for x in gc.ensembl]))
 
 
 def test_cellxgene_single_cell_subset():
