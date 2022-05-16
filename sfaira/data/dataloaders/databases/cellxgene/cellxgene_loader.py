@@ -139,7 +139,7 @@ class Dataset(DatasetBase):
         # Add author information.  # TODO need to change this to contributor?
         self.author = "cellxgene"
         self.layer_processed = "X"
-        # TODO extract counts vs processed layers
+        self.layer_counts = "X" if collection_dataset["x_normalization"] == "none" else "raw"
         # The h5ad objects from cellxgene follow a particular structure and the following attributes are guaranteed to
         # be in place. Note that these point at the anndata instance and will only be available for evaluation after
         # download. See below for attributes that are lazily available
@@ -272,7 +272,7 @@ class Dataset(DatasetBase):
         """ % (uuid_session, json.dumps(self._collection_dataset)), raw=True)
 
 
-def load(data_dir, sample_fn, adata_ids: AdataIdsCellxgene, **kwargs):
+def load(data_dir, sample_fn, adata_ids: AdataIdsCellxgene, clean_ontology_labels: bool = False, **kwargs):
     """
     Generalised load function for cellxgene-provided data sets.
 
@@ -280,11 +280,9 @@ def load(data_dir, sample_fn, adata_ids: AdataIdsCellxgene, **kwargs):
     """
     fn = cellxgene_fn(dir=data_dir, dataset_id=sample_fn)
     adata = anndata.read_h5ad(fn)
-    if adata.raw is not None:  # TODO still need this?
-        adata.X = adata.raw.X
-        del adata.raw
-    for k in adata_ids.ontology_constrained:
-        col_name = getattr(adata_ids, k)
-        if col_name in adata.obs.columns:
-            adata.obs[col_name] = clean_cellxgene_meta_obs(k=k, val=adata.obs[col_name].values, adata_ids=adata_ids)
+    if clean_ontology_labels:
+        for k in adata_ids.ontology_constrained:
+            col_name = getattr(adata_ids, k)
+            if col_name in adata.obs.columns:
+                adata.obs[col_name] = clean_cellxgene_meta_obs(k=k, val=adata.obs[col_name].values, adata_ids=adata_ids)
     return adata
