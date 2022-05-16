@@ -7,6 +7,7 @@ import pandas as pd
 
 from sfaira.consts import AdataIdsSfaira
 from sfaira.data.dataloaders.databases.cellxgene import DatasetSuperGroupCellxgene
+from sfaira.data import load_store
 from sfaira.data.store.io.io_dao import read_dao
 from sfaira.versions.genomes import GenomeContainer
 from sfaira.unit_tests.data_for_tests.databases.utils import prepare_dsg_database
@@ -127,6 +128,15 @@ def test_output_to_store(store: str, database: str):
     xj = x[:, np.where(var["ensembl"].values == var_check)[0]].compute().flatten()
     assert np.sum(xj) > 0
     assert np.all(xj_original == xj)
+    # Test interfacing store:
+    data_store = load_store(cache_path=DIR_DATABASE_STORE_DAO, store_format="dao")
+    data_store.genome_container = gc
+    assert data_store.stores[organism].n_vars == gc.n_var
+    var_idx, _, _ = data_store.stores[organism]._index_curation_helper(batch_size=1, retrival_batch_size=1)
+    assert var_idx is None  # Should be None because store is written according to gc that is imposed on store here.
+    cart = data_store.checkout()
+    assert cart.x[organism].shape[0] == adata_original.n_obs
+    assert cart.x[organism].shape[1] == gc.n_var
 
 
 def test_cellxgene_single_cell_subset():

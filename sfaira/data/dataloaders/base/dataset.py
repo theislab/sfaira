@@ -363,7 +363,7 @@ class DatasetBase(AnnotationContainer):
             elif subset_layer == "processed":
                 self.layer_counts = None
             else:
-                raise ValueError(f"subset_layer has to be either counts or processed")
+                raise ValueError("subset_layer has to be either counts or processed")
 
         streamline_output = streamline_var(
             adata=self.adata,
