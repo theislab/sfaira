@@ -143,12 +143,14 @@ class Dataset(DatasetBase):
         # The h5ad objects from cellxgene follow a particular structure and the following attributes are guaranteed to
         # be in place. Note that these point at the anndata instance and will only be available for evaluation after
         # download. See below for attributes that are lazily available
+        self.assay_sc_obs_key = self._adata_ids_cellxgene.assay_sc
         self.cell_type_obs_key = self._adata_ids_cellxgene.cell_type
         self.development_stage_obs_key = self._adata_ids_cellxgene.development_stage
         self.disease_obs_key = self._adata_ids_cellxgene.disease
         self.ethnicity_obs_key = self._adata_ids_cellxgene.ethnicity
         self.sex_obs_key = self._adata_ids_cellxgene.sex
         self.organ_obs_key = self._adata_ids_cellxgene.organ
+        self.organism_obs_key = self._adata_ids_cellxgene.organism
         self.state_exact_obs_key = self._adata_ids_cellxgene.state_exact
 
         self.feature_id_var_key = self._adata_ids_cellxgene.feature_id
