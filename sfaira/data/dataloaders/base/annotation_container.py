@@ -102,8 +102,9 @@ class AnnotationContainer:
             for k, v in yaml_vals["attr"].items():
                 if v is not None and k not in ["organism", "sample_fns"]:
                     if isinstance(v, dict):  # v is a dictionary over file-wise meta-data items
-                        assert sample_fn in v.keys(), f"did not find key {sample_fn} in yamls keys for {k}"
-                        v = v[sample_fn]
+                        if sample_fn in v.keys():
+                            # only set value if field exists
+                            v = v[sample_fn]
                     # Catches spelling errors in meta data definition (yaml keys).
                     if not hasattr(self, k) and not hasattr(self, "_" + k):
                         raise ValueError(f"Tried setting unavailable property {k}.")
