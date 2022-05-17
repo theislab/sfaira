@@ -105,9 +105,6 @@ class AnnotationContainer:
                         if sample_fn in v.keys():
                             # only set value if field exists
                             v = v[sample_fn]
-                        else:
-                            # otherwise skip field
-                            continue
                     # Catches spelling errors in meta data definition (yaml keys).
                     if not hasattr(self, k) and not hasattr(self, "_" + k):
                         raise ValueError(f"Tried setting unavailable property {k}.")
