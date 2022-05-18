@@ -9,7 +9,7 @@ class AnnotationContainer:
 
     _dataset_index: Union[None, int] = None
 
-    layer_counts: Union[None, int] = None
+    layer_counts: Union[None, str] = None
     layer_processed: Union[None, str] = None
     layer_spliced_counts: Union[None, str] = None
     layer_spliced_processed: Union[None, str] = None

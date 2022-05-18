@@ -136,7 +136,8 @@ def streamline_obs_uns(adata: anndata.AnnData,
             ]
         else:
             # Locate annotation.
-            if hasattr(annotation_container, f"{k}_obs_key") and getattr(annotation_container, f"{k}_obs_key") is not None and \
+            if hasattr(annotation_container, f"{k}_obs_key") and \
+                    getattr(annotation_container, f"{k}_obs_key") is not None and \
                     getattr(annotation_container, f"{k}_obs_key") in adata.obs.columns:
                 # Last and-clause to check if this column is included in data sets. This may be violated if data
                 # is obtained from a database which is not fully streamlined.

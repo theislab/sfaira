@@ -167,34 +167,19 @@ def streamline_var(adata: anndata.AnnData,
         raise ValueError("Neither layer_counts nor layer_proc are set in yaml. Aborting")
     # Second, we streamline the feature dimension of these data matrices to make sure all necessary feature
     # identifiers are provided:
+    feature_id_var_key_raw = feature_id_var_key
+    feature_symbol_var_key_raw = feature_symbol_var_key
     var1, feature_id_var_key, feature_symbol_var_key = format_var(
         adata_ids=adata_target_ids, clean_var=clean_var, feature_id_var_key=feature_id_var_key,
         feature_symbol_var_key=feature_symbol_var_key, gc=genome_container, var=var1)
     # Only need to process var2 if x2 has a separate feature space, ie if x2 is in .raw:
-    if layer2 is not None and layer2 == "raw":
-        # Note: Assume that IDs and var keys in .adata.raw.var are the same as in .adata.var.
-        # This is tested here:
-        if feature_id_var_key is not None:
-            ids_counts = var2.index.values if feature_id_var_key == "index" \
-                else var2[feature_id_var_key].values
-            ids_proc = var2.index.values if feature_id_var_key == "index" \
-                else var2[feature_id_var_key].values
-        elif feature_symbol_var_key is not None:
-            ids_counts = var2.index.values if feature_symbol_var_key == "index" \
-                else var2[feature_symbol_var_key].values
-            ids_proc = var2.index.values if feature_symbol_var_key == "index" \
-                else var2[feature_symbol_var_key].values
-        else:
-            raise ValueError("Neither feature_id_var_key nor feature_symbol_var_key are set in yaml. Aborting")
-        if set(ids_proc) - set(ids_counts):
-            raise IndexError(f"Features of layer specified as `layer_processed` ('{layer_processed}') are "
-                             f"not a subset of the features of layer specified as `layer_counts` "
-                             f"('{layer_counts}'). This is not supported.")
-        var2, _, _ = format_var(adata_ids=adata_target_ids, clean_var=clean_var, feature_id_var_key=feature_id_var_key,
-                                feature_symbol_var_key=feature_symbol_var_key, gc=genome_container, var=var2)
+    if layer2 is not None:
+        var2, _, _ = format_var(adata_ids=adata_target_ids, clean_var=clean_var,
+                                feature_id_var_key=feature_id_var_key_raw,
+                                feature_symbol_var_key=feature_symbol_var_key_raw, gc=genome_container, var=var2)
     # Next, we impute and subset the feature dimension based on the target gene sets:
-    x1_sum = np.log(x1.sum() + 1.) / np.log(10)
-    x1_nonzero = (x1.sum(axis=0) > 0).sum()
+    x1_sum = np.log(x1.sum() + 1.) / np.log(10)  # reporting
+    x1_nonzero = (x1.sum(axis=0) > 0).sum()  # reporting
     x1 = convert_matrix_format(x=x1, matrix_format=matrix_format)
     x1, var1 = reorder_adata_to_target_features(
         allowed_ids=allowed_ids,
@@ -209,11 +194,11 @@ def streamline_var(adata: anndata.AnnData,
     # other than feature_id_var_key.
     var1, _, _ = format_var(adata_ids=adata_target_ids, feature_id_var_key="index", feature_symbol_var_key=None,
                             gc=genome_container, var=var1)
-    x1_new_sum = np.log(x1.sum() + 1.) / np.log(10)
-    x1_new_nonzero = (x1.sum(axis=0) > 0).sum()
+    x1_new_sum = np.log(x1.sum() + 1.) / np.log(10)  # reporting
+    x1_new_nonzero = (x1.sum(axis=0) > 0).sum()  # reporting
     if layer2 is not None:
-        x2_sum = np.log(x2.sum() + 1.) / np.log(10)
-        x2_nonzero = (x2.sum(axis=0) > 0).sum()
+        x2_sum = np.log(x2.sum() + 1.) / np.log(10)  # reporting
+        x2_nonzero = (x2.sum(axis=0) > 0).sum()  # reporting
         x2 = convert_matrix_format(x=x2, matrix_format=matrix_format)
         x2, var2 = reorder_adata_to_target_features(
             allowed_ids=allowed_ids,
@@ -228,8 +213,8 @@ def streamline_var(adata: anndata.AnnData,
         # fields other than feature_id_var_key.
         var2, _, _ = format_var(adata_ids=adata_target_ids, feature_id_var_key="index", feature_symbol_var_key=None,
                                 gc=genome_container, var=var2)
-        x2_new_sum = np.log(x2.sum() + 1.) / np.log(10)
-        x2_new_nonzero = (x2.sum(axis=0) > 0).sum()
+        x2_new_sum = np.log(x2.sum() + 1.) / np.log(10)  # reporting
+        x2_new_nonzero = (x2.sum(axis=0) > 0).sum()  # reporting
     # Last, we build a new .adata instance from these manipulated data matrices.
     adata = anndata.AnnData(
         X=x1,
