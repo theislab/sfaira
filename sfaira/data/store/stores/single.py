@@ -579,6 +579,11 @@ class StoreSingleFeatureSpace(StoreBase):
         batch_schedule_kwargs = {"randomized_batch_access": randomized_batch_access,
                                  "random_access": random_access,
                                  "retrieval_batch_size": retrieval_batch_size}
+        if "get_schedule_kwargs" in kwargs.keys():
+            # Derive specific batch schedule kwargs from a callable get_schedule_kwargs() supplied to this method.
+            # Note that get_schedule_kwargs has the signature: batch_schedule, obs, **kwargs
+            batch_schedule_kwargs.update(kwargs["get_schedule_kwargs"](batch_schedule=batch_schedule, obs=self.obs,
+                                                                       **kwargs))
         cart = self._get_cart(batch_schedule=batch_schedule, batch_size=batch_size, map_fn=map_fn, obs_idx=idx,
                               obs_keys=obs_keys, return_dense=return_dense, var=self.var, var_idx=var_idx,
                               **batch_schedule_kwargs, **kwargs)

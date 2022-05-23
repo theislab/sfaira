@@ -13,7 +13,6 @@ def load(data_dir, sample_fn, **kwargs):
     fn_annot = os.path.join(data_dir, "cell_id_to_type.tsv")
     cell_annot = pd.read_csv(fn_annot, sep="\t")
     cell_annot.set_index(keys="cellID", inplace=True)
-    print(cell_annot.head())
     with tarfile.open(fn) as tar:
         f = h5py.File(tar.extractfile(sample_fn), 'r')['GRCh38']
         x = scipy.sparse.csc_matrix((f['data'], f['indices'], f['indptr']), shape=f['shape']).T
