@@ -69,7 +69,7 @@ def load(data_dir, **kwargs):
         for x in adata.obs["celltype_specific"].values
     ]
     adata.obs["organ"] = adata.obs["sample"].values
-    adata.obs["sex"] = adata.obs["sex"].values
+    adata.obs["sex"] = adata.obs["sex"].replace(np.nan, 'unknown').values
     # TODO are the more exact developmental stages in dev_stage?
     adata.obs["dev_stage"] = adata.obs["sample"].values
 

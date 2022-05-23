@@ -15,5 +15,6 @@ def load(data_dir, sample_fn, **kwargs):
     adata = ad.AnnData(matrix.T)
     adata.X = scipy.sparse.csc_matrix(np.expm1(adata.X))
     adata.obs = obs
+    adata.obs['Age'] = adata.obs['Age'].astype(str) + '-year'
 
     return adata

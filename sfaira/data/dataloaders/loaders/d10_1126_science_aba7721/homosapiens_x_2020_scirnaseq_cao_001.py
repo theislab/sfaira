@@ -13,4 +13,6 @@ def load(data_dir, **kwargs):
     adata = anndata.read_loom(fn_tmp)
     os.remove(fn_tmp)
 
+    adata.obs['Development_day'] = adata.obs['Development_day'].astype(str) + '-days'
+
     return adata
