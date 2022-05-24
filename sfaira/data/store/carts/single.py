@@ -248,7 +248,7 @@ class CartAnndata(CartSingle):
                         # Prepare .obs.
                         obs = self.adata_dict[k].obs[self.obs_keys].iloc[v, :]
                         if self._emit_obsm:
-                            obsm = self.obsm[k][v, :]
+                            obsm = dict([(k, v[idx_i, :]) for k, v in self.obsm.items()])
                             map_fn_args = (x, obs, obsm)
                         else:
                             map_fn_args = (x, obs)
