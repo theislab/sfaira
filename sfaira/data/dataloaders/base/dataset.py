@@ -316,6 +316,7 @@ class DatasetBase(AnnotationContainer):
             remove_gene_version: bool = True,
             schema: str = "sfaira",
             subset_genes_to_type: Union[None, str, List[str]] = None,
+            subset_layer: Union[None, str] = None,
             verbose: int = 1,
             **kwargs
     ):
@@ -342,9 +343,11 @@ class DatasetBase(AnnotationContainer):
                 - None: Keep the subset of input gene set that can be mapped to assembly.
                 - "all": All genes in assembly.
                 - "protein_coding": All protein coding genes in assembly.
+        :param subset_layer: Defines layer to keep, out of "counts" and "processed". Leave as None to retain both layers
+            as available.
         :param verbose: Report feature transformation statistics.
         """
-        self.__assert_loaded()
+        self._assert_loaded()
         if schema.startswith("sfaira"):
             adata_target_ids = AdataIdsSfaira()
         elif schema.startswith("cellxgene"):
@@ -353,6 +356,14 @@ class DatasetBase(AnnotationContainer):
             raise ValueError(f"did not recognize schema {schema}")
         if isinstance(match_to_release, dict):
             match_to_release = match_to_release[self.organism]
+        if subset_layer is not None:
+            assert isinstance(subset_layer, str), "subset_layer has to be of type str"
+            if subset_layer == "counts":
+                self.layer_processed = None
+            elif subset_layer == "processed":
+                self.layer_counts = None
+            else:
+                raise ValueError("subset_layer has to be either counts or processed")
 
         streamline_output = streamline_var(
             adata=self.adata,
@@ -423,7 +434,7 @@ class DatasetBase(AnnotationContainer):
         :param keep_id_obs: For ontology-constrained .obs columns, whether to keep a column with ontology ID annotation.
         :return:
         """
-        self.__assert_loaded()
+        self._assert_loaded()
         if isinstance(keep_orginal_obs, tuple):
             keep_orginal_obs = list(keep_orginal_obs)
         elif isinstance(keep_orginal_obs, np.ndarray):
@@ -495,7 +506,7 @@ class DatasetBase(AnnotationContainer):
         """
         if compression_kwargs is None:
             compression_kwargs = {}
-        self.__assert_loaded()
+        self._assert_loaded()
         if store_format == "h5ad":
             if not isinstance(self.adata.X, scipy.sparse.csr_matrix):
                 print(f"WARNING: high-perfomances caches based on .h5ad work better with .csr formatted expression "
@@ -1002,6 +1013,6 @@ class DatasetBase(AnnotationContainer):
     def show_summary(self):
         print(f"{(self.supplier, self.organism, self.organ, self.assay_sc, self.disease)}")
 
-    def __assert_loaded(self):
+    def _assert_loaded(self):
         if self.adata is None:
             raise ValueError("adata was not loaded, this is necessary for this operation")

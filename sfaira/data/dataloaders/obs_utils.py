@@ -136,7 +136,8 @@ def streamline_obs_uns(adata: anndata.AnnData,
             ]
         else:
             # Locate annotation.
-            if hasattr(annotation_container, f"{k}_obs_key") and getattr(annotation_container, f"{k}_obs_key") is not None and \
+            if hasattr(annotation_container, f"{k}_obs_key") and \
+                    getattr(annotation_container, f"{k}_obs_key") is not None and \
                     getattr(annotation_container, f"{k}_obs_key") in adata.obs.columns:
                 # Last and-clause to check if this column is included in data sets. This may be violated if data
                 # is obtained from a database which is not fully streamlined.
@@ -233,7 +234,7 @@ def streamline_obs_uns(adata: anndata.AnnData,
         if not keep_symbol_obs and col_name in adata.obs.columns:
             del adata.obs[col_name]
     if clean_obs_names:
-        adata.obs.index = [f"{id}_{i}" for i in range(1, adata.n_obs + 1)]
+        adata.obs.index = [f"{dataset_id}_{i}" for i in range(1, adata.n_obs + 1)]
 
     # Make sure that correct unknown_metadata_identifier is used in .uns, .obs and .var metadata
     unknown_old = adata_input_ids.unknown_metadata_identifier
