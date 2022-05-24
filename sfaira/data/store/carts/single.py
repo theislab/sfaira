@@ -1,5 +1,5 @@
 import random
-from typing import Dict, List, Tuple, Union
+from typing import Callable, Dict, List, Tuple, Union
 
 import anndata
 import dask.array
@@ -14,7 +14,7 @@ from sfaira.data.store.carts.utils import split_batch
 
 class _ShuffleBuffer:
 
-    def __init__(self, generator: iter, buffer_size: int):
+    def __init__(self, generator: Callable[[], iter], buffer_size: int):
         if buffer_size < 1:
             raise ValueError('buffer_size should be larger than 0')
         self._g = generator
@@ -27,16 +27,35 @@ class _ShuffleBuffer:
         buffer[idx] = x
         return val
 
-    def generator(self):
+    def iterator(self):
         buffer = []
-        for x in self._g:
+        for x in self._g():
             if len(buffer) == self._buffer_size:
                 yield self.buffer_replace(buffer, x)
             else:
                 buffer.append(x)
+
         random.shuffle(buffer)
         while buffer:
             yield buffer.pop()
+
+
+class _DatasetIteratorRepeater:
+
+    def __init__(self, generator: Callable[[], iter], n_repeats: int):
+        self._g = generator
+        self._n_repeats = n_repeats
+
+    def iterator(self):
+        keep_repeating = True
+        n_repetitions = 0
+
+        while keep_repeating:
+            for elem in self._g():
+                yield elem
+
+            n_repetitions += 1
+            keep_repeating = (n_repetitions < self._n_repeats) or (self._n_repeats <= 0)
 
 
 class CartSingle(CartBase):
@@ -211,74 +230,68 @@ class CartAnndata(CartSingle):
             x = x.todense()
         return x
 
-    def _iterator(self, repeat: int):
+    def _iterator(self):
         """
         Iterator over data matrix and meta data table, yields batches of data points.
         """
-        keep_repeating = True
-        num_repetitions = 0
-
         # Speed up access to single object by skipping index overlap operations:
-        while keep_repeating:
-            batches = self.schedule.design
-            for idx_i in batches:
-                if len(idx_i) > 0:
-                    # Match adata objects that overlap to batch:
-                    idx_i_dict = self._obs_idx_dict_query(idx=idx_i)
-                    if self.batch_size == 1:
-                        # Emit each data set separately and avoid concatenation into larger chunks for emission.
-                        for k, v in idx_i_dict.items():
-                            # I) Prepare data matrix.
-                            x = self.adata_dict[k].X[v, :]
-                            x = self._parse_array(x=x, return_dense=self.return_dense)
-                            # Prepare .obs.
-                            obs = self.adata_dict[k].obs[self.obs_keys].iloc[v, :]
-                            if self._emit_obsm:
-                                obsm = dict([(k, v[idx_i, :]) for k, v in self.obsm.items()])
-                                map_fn_args = (x, obs, obsm)
-                            else:
-                                map_fn_args = (x, obs)
-                            data_tuple = self.map_fn(*map_fn_args)
-                            for data_tuple_i in split_batch(x=data_tuple):
-                                yield data_tuple_i
-                    else:
-                        # Concatenates slices first before returning. Note that this is likely slower than emitting by
-                        # observation in most scenarios.
+        for idx_i in self.schedule.design:
+            if len(idx_i) > 0:
+                # Match adata objects that overlap to batch:
+                idx_i_dict = self._obs_idx_dict_query(idx=idx_i)
+                if self.batch_size == 1:
+                    # Emit each data set separately and avoid concatenation into larger chunks for emission.
+                    for k, v in idx_i_dict.items():
                         # I) Prepare data matrix.
-                        x = [
-                            self._parse_array(self.adata_dict[k].X[v, :], return_dense=self.return_dense)
-                            for k, v in idx_i_dict.items()
-                        ]
-                        is_dense = isinstance(x[0], np.ndarray)
-                        # Concatenate blocks in observation dimension:
-                        if len(x) > 1:
-                            if is_dense:
-                                x = np.concatenate(x, axis=0)
-                            else:
-                                x = scipy.sparse.vstack(x)
-                        else:
-                            x = x[0]
+                        x = self.adata_dict[k].X[v, :]
+                        x = self._parse_array(x=x, return_dense=self.return_dense)
                         # Prepare .obs.
-                        obs = pd.concat([
-                            self.adata_dict[k].obs[self.obs_keys].iloc[v, :]
-                            for k, v in idx_i_dict.items()
-                        ], axis=0, join="inner", ignore_index=True, copy=False)
+                        obs = self.adata_dict[k].obs[self.obs_keys].iloc[v, :]
                         if self._emit_obsm:
                             obsm = dict([(k, v[idx_i, :]) for k, v in self.obsm.items()])
                             map_fn_args = (x, obs, obsm)
                         else:
                             map_fn_args = (x, obs)
                         data_tuple = self.map_fn(*map_fn_args)
-                        yield data_tuple
-
-            num_repetitions += 1
-            keep_repeating = (num_repetitions < repeat) or (repeat <= 0)
+                        for data_tuple_i in split_batch(x=data_tuple):
+                            yield data_tuple_i
+                else:
+                    # Concatenates slices first before returning. Note that this is likely slower than emitting by
+                    # observation in most scenarios.
+                    # I) Prepare data matrix.
+                    x = [
+                        self._parse_array(self.adata_dict[k].X[v, :], return_dense=self.return_dense)
+                        for k, v in idx_i_dict.items()
+                    ]
+                    is_dense = isinstance(x[0], np.ndarray)
+                    # Concatenate blocks in observation dimension:
+                    if len(x) > 1:
+                        if is_dense:
+                            x = np.concatenate(x, axis=0)
+                        else:
+                            x = scipy.sparse.vstack(x)
+                    else:
+                        x = x[0]
+                    # Prepare .obs.
+                    obs = pd.concat([
+                        self.adata_dict[k].obs[self.obs_keys].iloc[v, :]
+                        for k, v in idx_i_dict.items()
+                    ], axis=0, join="inner", ignore_index=True, copy=False)
+                    if self._emit_obsm:
+                        obsm = dict([(k, v[idx_i, :]) for k, v in self.obsm.items()])
+                        map_fn_args = (x, obs, obsm)
+                    else:
+                        map_fn_args = (x, obs)
+                    data_tuple = self.map_fn(*map_fn_args)
+                    yield data_tuple
 
     def iterator(self, repeat: int = 1, shuffle_buffer: int = 0):
         if shuffle_buffer > 2 and self.batch_size == 1:
-            return _ShuffleBuffer(self._iterator(repeat=repeat), shuffle_buffer).generator()
+            g_dataset = _ShuffleBuffer(self._iterator, shuffle_buffer).iterator
         else:
-            return self._iterator(repeat=repeat)
+            g_dataset = self._iterator
+
+        return _DatasetIteratorRepeater(g_dataset, n_repeats=repeat).iterator()
 
     def move_to_memory(self):
         """
@@ -391,12 +404,11 @@ class CartDask(CartSingle):
     _x: dask.array
     _obs: pd.DataFrame
 
-    def __init__(self, x, obs, obs_keys, **kwargs):
+    def __init__(self, x: dask.array, obs: pd.DataFrame, obs_keys: List[str], **kwargs):
         self._x = x
         self._obs = obs[obs_keys]
-        # Redefine index so that .loc indexing can be used instead of .iloc indexing:
-        self._obs.index = np.arange(0, obs.shape[0])
         super(CartDask, self).__init__(obs_keys=obs_keys, **kwargs)
+        self.schedule.batchsplits = self._x.chunks[0]  # align batchsplits with partitions of the underlying dask array
 
     @property
     def _obs_full(self):
@@ -412,48 +424,41 @@ class CartDask(CartSingle):
         """
         return self._x
 
-    def _iterator(self, repeat: int):
+    def _iterator(self):
         """
         Iterator over data matrix and meta data table, yields batches of data points.
         """
         # Can all data sets corresponding to one organism as a single array because they share the second dimension
         # and dask keeps expression data and obs out of memory.
-        self.schedule.batchsplits = self._x.chunks[0]
 
-        keep_repeating = True
-        num_repetitions = 0
-
-        while keep_repeating:
-            for batch_idxs in self.schedule.design:
-                if len(batch_idxs) > 0:
-                    x_i = self._x[batch_idxs, :]
-                    if self.var_idx is not None:
-                        with dask.config.set(**{'array.slicing.split_large_chunks': False}):
-                            x_i = x_i[:, self.var_idx]
-                    obs_i = self._obs.iloc[batch_idxs, :]
-                    if self._emit_obsm:
-                        obsm_i = dict([(k, v[batch_idxs, :]) for k, v in self.obsm.items()])
-                        map_fn_args = (x_i, obs_i, obsm_i)
-                    else:
-                        map_fn_args = (x_i, obs_i)
-                    data_tuple = self.map_fn(*map_fn_args)
-                    if self.batch_size == 1:
-                        for data_tuple_i in split_batch(x=data_tuple):
-                            yield data_tuple_i
-                    else:
-                        yield data_tuple
-
-            num_repetitions += 1
-            keep_repeating = (num_repetitions < repeat) or (repeat <= 0)
+        for batch_idxs in self.schedule.design:
+            if len(batch_idxs) > 0:
+                x_i = self._x[batch_idxs, :]
+                if self.var_idx is not None:
+                    x_i = x_i[:, self.var_idx]
+                obs_i = self._obs.iloc[batch_idxs, :]
+                if self._emit_obsm:
+                    obsm_i = dict([(k, v[batch_idxs, :]) for k, v in self.obsm.items()])
+                    map_fn_args = (x_i, obs_i, obsm_i)
+                else:
+                    map_fn_args = (x_i, obs_i)
+                data_tuple = self.map_fn(*map_fn_args)
+                if self.batch_size == 1:
+                    for data_tuple_i in split_batch(x=data_tuple):
+                        yield data_tuple_i
+                else:
+                    yield data_tuple
 
     def iterator(self, repeat: int = 1, shuffle_buffer: int = 0):
         """
         Iterator over data matrix and meta data table, yields batches of data points.
         """
         if shuffle_buffer > 2 and self.batch_size == 1:
-            return _ShuffleBuffer(self._iterator(repeat=repeat), shuffle_buffer).generator()
+            g_dataset = _ShuffleBuffer(self._iterator, shuffle_buffer).iterator
         else:
-            return self._iterator(repeat=repeat)
+            g_dataset = self._iterator
+
+        return _DatasetIteratorRepeater(g_dataset, n_repeats=repeat).iterator()
 
     def move_to_memory(self):
         """
