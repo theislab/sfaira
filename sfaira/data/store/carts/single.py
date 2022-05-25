@@ -1,3 +1,4 @@
+from functools import partial
 import random
 from typing import Callable, Dict, List, Tuple, Union
 
@@ -67,14 +68,16 @@ class CartSingle(CartBase):
     _obs_idx: Union[np.ndarray, None]
     _batch_schedule_name: str
     batch_size: int
+    map_fn: callable
+    map_fn_iter: callable
     obs_keys: List[str]
     obsm: dict
     schedule: BatchDesignBase
     var: pd.DataFrame
     var_idx: Union[None, np.ndarray]
 
-    def __init__(self, obs_idx, obs_keys, var, var_idx=None, batch_schedule="base", batch_size=1, map_fn=None, obsm={},
-                 **kwargs):
+    def __init__(self, obs_idx, obs_keys, var, var_idx=None, batch_schedule="base", batch_size=1, map_fn=None,
+                 map_fn_iter=None, obsm={}, **kwargs):
         """
 
         :param batch_schedule: A valid batch schedule name or a class that inherits from BatchDesignBase.
@@ -87,7 +90,11 @@ class CartSingle(CartBase):
 
         :param batch_size: Emission batch size. Must be 1 or 0.
         :param map_fn: Map function to apply to output tuple of raw generator. Each draw i from the generator is then:
-            `yield map_fn(x[i, var_idx], obs[i, obs_keys])`
+            `yield map_fn(x[i, var_idx], obs[i, obs_keys])`. This map function is designed for torch Datasets, ie
+            supply this if "torch" or "torch-loader" is used as an adaptor.
+        :param map_fn: Map function to apply to output tuple of raw generator. Each draw i from the generator is then:
+            `yield map_fn(x[i, var_idx], obs[i, obs_keys])`. This map function is designed for torch IteratableDatasets,
+            ie supply this if "torch-iter" or "torch-loader-iter" is used as an adaptor.
         :param obs_idx: np.ndarray: The observations to emit.
         :param obs_keys: .obs columns to return in the generator. These have to be a subset of the columns available
             in self.adata_by_key.
@@ -99,6 +106,7 @@ class CartSingle(CartBase):
         self._batch_schedule_name = batch_schedule
         self.batch_size = batch_size
         self.map_fn = map_fn
+        self.map_fn_iter = map_fn_iter
         self.obs_keys = obs_keys
         self.var = var
         self.var_idx = var_idx
@@ -116,6 +124,16 @@ class CartSingle(CartBase):
         self.schedule = batch_schedule(**kwargs)
         self.obs_idx = obs_idx  # This needs to be set after .schedule.
         self.obsm = obsm
+
+    def adaptor_torch(self, dataset_kwargs, loader, **kwargs):
+        from torch.utils.data import DataLoader
+        # Only import this module if torch is used to avoid strict torch dependency:
+        from sfaira.data.store.torch_dataset import SfairaDataset
+
+        g = SfairaDataset(map_fn=self.map_fn, obs=self.obs, obsm=self.obsm, x=self.x, **dataset_kwargs)
+        if loader:
+            g = DataLoader(g, **kwargs)
+        return g
 
     @property
     def _emit_obsm(self):
@@ -252,7 +270,7 @@ class CartAnndata(CartSingle):
                             map_fn_args = (x, obs, obsm)
                         else:
                             map_fn_args = (x, obs)
-                        data_tuple = self.map_fn(*map_fn_args)
+                        data_tuple = self.map_fn_iter(*map_fn_args)
                         for data_tuple_i in split_batch(x=data_tuple):
                             yield data_tuple_i
                 else:
@@ -282,7 +300,7 @@ class CartAnndata(CartSingle):
                         map_fn_args = (x, obs, obsm)
                     else:
                         map_fn_args = (x, obs)
-                    data_tuple = self.map_fn(*map_fn_args)
+                    data_tuple = self.map_fn_iter(*map_fn_args)
                     yield data_tuple
 
     def iterator(self, repeat: int = 1, shuffle_buffer: int = 0):
@@ -442,7 +460,7 @@ class CartDask(CartSingle):
                     map_fn_args = (x_i, obs_i, obsm_i)
                 else:
                     map_fn_args = (x_i, obs_i)
-                data_tuple = self.map_fn(*map_fn_args)
+                data_tuple = self.map_fn_iter(*map_fn_args)
                 if self.batch_size == 1:
                     for data_tuple_i in split_batch(x=data_tuple):
                         yield data_tuple_i

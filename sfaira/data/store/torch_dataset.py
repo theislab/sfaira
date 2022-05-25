@@ -7,6 +7,31 @@ import torch
 from typing import Dict, List, Tuple, Union
 
 
+def flatten_single_obs(xy, is_torch: bool):
+    # Flatten batch dim for torch.Dataset [not necessary for IteratableDataset]
+    # TODO this might be inefficient, might need different solution.
+    # TODO has consequences in setup_cache as well
+    if isinstance(xy, dict):
+        # Assume is dictionary of arrays.
+        if xy[list(xy.keys())[0]].shape[0] == 1 and len(xy[list(xy.keys())[0]].shape) >= 2:
+            xy = dict([(k, v.squeeze(axis=0)) for k, v in xy.items()])
+        if not is_torch:
+            xy = dict([(k, torch.from_numpy(v)) for k, v in xy.items()])
+    elif isinstance(xy[0], np.ndarray):
+        # Assume is tuple of arrays.
+        if xy[0].shape[0] == 1 and len(xy[0].shape) >= 2:
+            xy = tuple(z.squeeze(axis=0) for z in xy)
+        if not is_torch:
+            xy = tuple(torch.from_numpy(z) for z in xy)
+    else:
+        # Assume is tuple of tuples.
+        if xy[0][0].shape[0] == 1 and len(xy[0][0].shape) >= 2:
+            xy = tuple(tuple(zz.squeeze(axis=0) for zz in z) for z in xy)
+        if not is_torch:
+            xy = tuple(tuple(torch.from_numpy(zz) for zz in z) for z in xy)
+    return xy
+
+
 class IndexDataset(torch.utils.data.Dataset):
 
     """
@@ -125,12 +150,7 @@ class SfairaDataset(torch.utils.data.Dataset):
         else:
             data_tuple = (x, obs)
         xy = self.map_fn(*data_tuple)
-        # Flatten batch dim for torch.Dataset [not necessary for IteratableDataset]
-        # TODO this might be inefficient, might need different solution.
-        # TODO has consequences in setup_cache as well
-        if xy[0][0].shape[0] == 1 and len(xy[0][0].shape) >= 2:
-            xy = tuple(tuple(zz.squeeze(axis=0) for zz in z) for z in xy)
-        xy = tuple(tuple(torch.from_numpy(zz) for zz in z) for z in xy)
+        xy = flatten_single_obs(xy, is_torch=False)
         return xy
 
     def __getitem__(self, idx):
@@ -142,6 +162,46 @@ class SfairaDataset(torch.utils.data.Dataset):
             xy = self.__getitem_cache(idx=idx)
         else:
             xy = self.__getitem_raw(idx=idx)
+        return xy
+
+
+class SfairaMultiDataset(torch.utils.data.Dataset):
+
+    datasets: List[torch.utils.data.Dataset]
+    n_obs: List[int]
+    n_obs_cumulative_lb: List[int]
+    n_obs_cumulative_ub: List[int]
+    map_fn_merge: callable
+
+    def __init__(self, datasets: Dict[str, torch.utils.data.Dataset], map_fn_merge: Union[None, callable], **kwargs):
+        """
+
+        :param datasets:
+        :param kwargs:
+        """
+        assert map_fn_merge is not None, "set map_fn_merge"
+        super(SfairaMultiDataset, self).__init__()
+        self.dataset_keys = list(datasets.keys())
+        self.datasets = [datasets[k] for k in self.dataset_keys]
+        self.map_fn_merge = map_fn_merge
+        self.n_obs = [len(x) for x in self.datasets]
+        self.n_obs_cumulative_lb = [0] + np.cumsum(self.n_obs).tolist()[:-1]
+        self.n_obs_cumulative_ub = np.cumsum(self.n_obs).tolist()
+
+    def __len__(self):
+        return sum(self.n_obs)
+
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+        if isinstance(idx, int):
+            idx = [idx]
+        # Map indices to individual data sets:
+        idx = [[int(i - lb) for i in idx if lb <= i < ub]
+               for lb, ub in zip(self.n_obs_cumulative_lb, self.n_obs_cumulative_ub)]
+        # Note: the calls to the individual datasets already yield torch tensors, not numpy arrays!
+        xy = self.map_fn_merge([(k, x[i]) for k, x, i in zip(self.dataset_keys, self.datasets, idx) if len(i) > 0])
+        xy = flatten_single_obs(xy, is_torch=True)
         return xy
 
 
