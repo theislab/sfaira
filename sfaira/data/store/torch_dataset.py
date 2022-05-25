@@ -58,7 +58,9 @@ class IndexDataset(torch.utils.data.Dataset):
 class SfairaDataset(torch.utils.data.Dataset):
 
     _shapes: List[int]
-    cached_data: Union[None, Tuple[Tuple[torch.Tensor]]]
+    cached_data: Union[None, Union[Dict[str, torch.Tensor], Tuple[torch.Tensor], Tuple[Tuple[torch.Tensor]]]]
+    cache_element_structure: Union[None, Union[List[str], int, List[int]]]
+    cache_structure: Union[None, str]
     use_cache: bool
 
     """
@@ -119,12 +121,30 @@ class SfairaDataset(torch.utils.data.Dataset):
         self.use_cache = use_cache
         if self.use_cache:
             xy = [self.__getitem_raw(idx=[i]) for i in range(self._len)]
-            self._shapes = [len(z) for z in xy[0]]  # length of each data tuple, e.g. number of x and y tensors.
             # Expand observation dimension via stack if __getitem_raw collapsed the observation axis:
-            xy = tuple(tuple(torch.cat([xy[n][i][j] for n in range(self._len)], dim=0) if len(xy[0][i][j].shape) > 1
-                             else torch.stack([xy[n][i][j] for n in range(self._len)], dim=0)
-                             for j in range(xi))
-                       for i, xi in enumerate(self._shapes))
+            if isinstance(xy[0], dict):
+                # Assume is dictionary of tensors.
+                self.cache_element_structure = list(xy[0].keys())  # tensor keys
+                xy = dict([(k, torch.cat([xy[n][k] for n in range(self._len)], dim=0))
+                           if len(xy[0][k].shape) > 1 else
+                           (k, torch.stack([xy[n][k] for n in range(self._len)], dim=0))
+                           for k in self.cache_element_structure])
+                self.cache_structure = "dict_tensor"
+            elif isinstance(xy[0][0], np.ndarray):
+                # Assume is tuple of tensors.
+                self.cache_element_structure = len(xy[0])  # length of data tuple
+                xy = tuple(torch.cat([xy[n][i] for n in range(self._len)], dim=0) if len(xy[0][i].shape) > 1
+                           else torch.stack([xy[n][i] for n in range(self._len)], dim=0)
+                           for i in range(self.cache_element_structure))
+                self.cache_structure = "tuple_tensor"
+            else:
+                # Assume is tuple of tuples of tensors.
+                self.cache_element_structure = [len(z) for z in xy[0]]
+                xy = tuple(tuple(torch.cat([xy[n][i][j] for n in range(self._len)], dim=0) if len(xy[0][i][j].shape) > 1
+                                 else torch.stack([xy[n][i][j] for n in range(self._len)], dim=0)
+                                 for j in range(xi))
+                           for i, xi in enumerate(self.cache_element_structure))
+                self.cache_structure = "tuple_tuple_tensor"
             self.cached_data = xy
         else:
             self.cached_data = None
@@ -136,7 +156,15 @@ class SfairaDataset(torch.utils.data.Dataset):
         # Flatten batch dim for torch.Dataset [not necessary for IteratableDataset]
         if len(idx) == 1:
             idx = idx[0]
-        xy = tuple(tuple(self.cached_data[i][j][idx] for j in range(xi)) for i, xi in enumerate(self._shapes))
+        if self.cache_structure == "dict_tensor":
+            xy = dict([(k, self.cached_data[k][idx]) for k in self.cache_element_structure])
+        elif self.cache_structure == "tuple_tensor":
+            xy = tuple(self.cached_data[i][idx] for i in range(self.cache_element_structure))
+        elif self.cache_structure == "tuple_tuple_tensor":
+            xy = tuple(tuple(self.cached_data[i][j][idx] for j in range(xi))
+                       for i, xi in enumerate(self.cache_element_structure))
+        else:
+            assert False
         return xy
 
     def __getitem_raw(self, idx):
