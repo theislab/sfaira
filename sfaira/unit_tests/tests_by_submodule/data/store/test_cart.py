@@ -152,7 +152,7 @@ def test_adaptors(adaptor: str, obsm: bool, shuffle_buffer_size: int):
             return (np.asarray(x_[:, :2]),),
 
     kwargs = {"idx": {"Mus musculus": idx}, "obs_keys": [], "randomized_batch_access": False, "retrieval_batch_size": 2,
-              "map_fn": map_fn}
+              "map_fn": map_fn, "map_fn_base": map_fn}
     cart = _get_cart(store_format="dao", feature_space="single", obsm=obsm, **kwargs)
 
     if adaptor == "python":
@@ -196,7 +196,7 @@ def test_cache(adaptor: str, idx_subset):
         return (np.asarray(x_) + 2.,),
 
     kwargs = {"idx": {"Mus musculus": idx}, "obs_keys": [], "randomized_batch_access": False, "retrieval_batch_size": 2,
-              "map_fn": map_fn}
+              "map_fn_base": map_fn}
     cart = _get_cart(store_format="dao", feature_space="single", **kwargs)
     # Compare cached and raw dataset:
     # Create non-cached reference data set:

@@ -1,3 +1,4 @@
+import abc
 from functools import partial
 
 import pandas as pd
@@ -33,7 +34,6 @@ class CartBase:
     obsm: dict
     schedule: BatchDesignBase
     var: pd.DataFrame  # Feature meta data (features x properties).
-    map_fn: callable
 
     def adaptor(
             self,
@@ -86,23 +86,26 @@ class CartBase:
                 generator=partial(self.iterator, repeat=repeat, shuffle_buffer=shuffle_buffer), **kwargs
             )
         elif generator_type in ["torch", "torch-loader"]:
-            from torch.utils.data import DataLoader
-            # Only import this module if torch is used to avoid strict torch dependency:
-            from sfaira.data.store.torch_dataset import SfairaDataset
-
-            g = SfairaDataset(map_fn=self.map_fn, obs=self.obs, obsm=self.obsm, x=self.x, **dataset_kwargs)
-            if generator_type == "torch-loader":
-                g = DataLoader(g, **kwargs)
+            g = self.adaptor_torch(dataset_kwargs=dataset_kwargs, loader=generator_type == "torch-loader", **kwargs)
         elif generator_type in ["torch-iter", "torch-iter-loader"]:
-            from torch.utils.data import DataLoader
-            # Only import this module if torch is used to avoid strict torch dependency:
-            from sfaira.data.store.torch_dataset import SfairaIterableDataset
-
-            g = SfairaIterableDataset(iterator_fun=partial(self.iterator, repeat=repeat, shuffle_buffer=shuffle_buffer))
-            if generator_type == "torch-iter-loader":
-                g = DataLoader(g, **kwargs)
+            g = self.adaptor_torch_iter(loader=generator_type == "torch-iter-loader", repeat=repeat,
+                                        shuffle_buffer=shuffle_buffer, **kwargs)
         else:
             raise ValueError(f"{generator_type} not recognized")
+        return g
+
+    @abc.abstractmethod
+    def adaptor_torch(self, dataset_kwargs, loader, **kwargs):
+        pass
+
+    def adaptor_torch_iter(self, loader, repeat, shuffle_buffer, **kwargs):
+        from torch.utils.data import DataLoader
+        # Only import this module if torch is used to avoid strict torch dependency:
+        from sfaira.data.store.torch_dataset import SfairaIterableDataset
+
+        g = SfairaIterableDataset(iterator_fun=partial(self.iterator, repeat=repeat, shuffle_buffer=shuffle_buffer))
+        if loader:
+            g = DataLoader(g, **kwargs)
         return g
 
     @property
