@@ -1,6 +1,4 @@
-from functools import partial
-import random
-from typing import Callable, Dict, List, Tuple, Union
+from typing import Dict, List, Tuple, Union
 
 import anndata
 import dask.array
@@ -10,53 +8,8 @@ import scipy.sparse
 
 from sfaira.data.store.batch_schedule import BATCH_SCHEDULE, BatchDesignBase
 from sfaira.data.store.carts.base import CartBase
+from sfaira.data.store.carts.dataset_utils import _ShuffleBuffer, _DatasetIteratorRepeater
 from sfaira.data.store.carts.utils import split_batch
-
-
-class _ShuffleBuffer:
-
-    def __init__(self, generator: Callable[[], iter], buffer_size: int):
-        if buffer_size < 1:
-            raise ValueError('buffer_size should be larger than 0')
-        self._g = generator
-        self._buffer_size = buffer_size
-
-    @staticmethod
-    def buffer_replace(buffer, x):
-        idx = random.randint(0, len(buffer) - 1)
-        val = buffer[idx]
-        buffer[idx] = x
-        return val
-
-    def iterator(self):
-        buffer = []
-        for x in self._g():
-            if len(buffer) == self._buffer_size:
-                yield self.buffer_replace(buffer, x)
-            else:
-                buffer.append(x)
-
-        random.shuffle(buffer)
-        while buffer:
-            yield buffer.pop()
-
-
-class _DatasetIteratorRepeater:
-
-    def __init__(self, generator: Callable[[], iter], n_repeats: int):
-        self._g = generator
-        self._n_repeats = n_repeats
-
-    def iterator(self):
-        keep_repeating = True
-        n_repetitions = 0
-
-        while keep_repeating:
-            for elem in self._g():
-                yield elem
-
-            n_repetitions += 1
-            keep_repeating = (n_repetitions < self._n_repeats) or (self._n_repeats <= 0)
 
 
 class CartSingle(CartBase):
@@ -69,7 +22,7 @@ class CartSingle(CartBase):
     _batch_schedule_name: str
     batch_size: int
     map_fn: callable
-    map_fn_iter: callable
+    map_fn_base: callable
     obs_keys: List[str]
     obsm: dict
     schedule: BatchDesignBase
@@ -77,7 +30,7 @@ class CartSingle(CartBase):
     var_idx: Union[None, np.ndarray]
 
     def __init__(self, obs_idx, obs_keys, var, var_idx=None, batch_schedule="base", batch_size=1, map_fn=None,
-                 map_fn_iter=None, obsm={}, **kwargs):
+                 map_fn_base=None, obsm={}, **kwargs):
         """
 
         :param batch_schedule: A valid batch schedule name or a class that inherits from BatchDesignBase.
@@ -106,7 +59,7 @@ class CartSingle(CartBase):
         self._batch_schedule_name = batch_schedule
         self.batch_size = batch_size
         self.map_fn = map_fn
-        self.map_fn_iter = map_fn_iter
+        self.map_fn_base = map_fn_base
         self.obs_keys = obs_keys
         self.var = var
         self.var_idx = var_idx
@@ -130,7 +83,7 @@ class CartSingle(CartBase):
         # Only import this module if torch is used to avoid strict torch dependency:
         from sfaira.data.store.torch_dataset import SfairaDataset
 
-        g = SfairaDataset(map_fn=self.map_fn, obs=self.obs, obsm=self.obsm, x=self.x, **dataset_kwargs)
+        g = SfairaDataset(map_fn=self.map_fn_base, obs=self.obs, obsm=self.obsm, x=self.x, **dataset_kwargs)
         if loader:
             g = DataLoader(g, **kwargs)
         return g
@@ -270,7 +223,7 @@ class CartAnndata(CartSingle):
                             map_fn_args = (x, obs, obsm)
                         else:
                             map_fn_args = (x, obs)
-                        data_tuple = self.map_fn_iter(*map_fn_args)
+                        data_tuple = self.map_fn(*map_fn_args)
                         for data_tuple_i in split_batch(x=data_tuple):
                             yield data_tuple_i
                 else:
@@ -300,7 +253,7 @@ class CartAnndata(CartSingle):
                         map_fn_args = (x, obs, obsm)
                     else:
                         map_fn_args = (x, obs)
-                    data_tuple = self.map_fn_iter(*map_fn_args)
+                    data_tuple = self.map_fn(*map_fn_args)
                     yield data_tuple
 
     def iterator(self, repeat: int = 1, shuffle_buffer: int = 0):
@@ -460,7 +413,7 @@ class CartDask(CartSingle):
                     map_fn_args = (x_i, obs_i, obsm_i)
                 else:
                     map_fn_args = (x_i, obs_i)
-                data_tuple = self.map_fn_iter(*map_fn_args)
+                data_tuple = self.map_fn(*map_fn_args)
                 if self.batch_size == 1:
                     for data_tuple_i in split_batch(x=data_tuple):
                         yield data_tuple_i
