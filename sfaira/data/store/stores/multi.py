@@ -209,6 +209,7 @@ class StoreMultipleFeatureSpaceBase(StoreBase):
             self,
             idx: Union[Dict[str, Union[np.ndarray, None]], None] = None,
             intercalated: bool = True,
+            map_fn_merge: Union[None, callable] = None,
             **kwargs
     ) -> CartMulti:
         """
@@ -227,7 +228,7 @@ class StoreMultipleFeatureSpaceBase(StoreBase):
         for k in self.stores.keys():
             assert k in idx.keys(), (idx.keys(), self.stores.keys())
         carts = dict([(k, v.checkout(idx=idx[k], **kwargs)) for k, v in self.stores.items()])
-        return CartMulti(carts=carts, intercalated=intercalated)
+        return CartMulti(carts=carts, intercalated=intercalated, map_fn_merge=map_fn_merge)
 
 
 class StoresAnndata(StoreMultipleFeatureSpaceBase):

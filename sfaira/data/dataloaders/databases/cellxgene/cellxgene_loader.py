@@ -1,11 +1,9 @@
 import anndata
-import cProfile
 from IPython.display import display_javascript, display_html
 import json
 import os
-import pickle
 import requests
-from typing import List, Union
+from typing import List, Tuple, Union
 import uuid
 
 from sfaira import settings
@@ -25,28 +23,38 @@ def clean_cellxgene_meta_obs(k, val, adata_ids) -> Union[str, List[str]]:
     :param val: Found meta data entry.
     :returns: Cleaned meta data entry.
     """
+    # Note: in contrast to clean_cellxgene_meta_uns, we are not handling symbols and IDs at the same time here, so
+    # we cannot derive the suffixes yet but need to hard code them here.
     if k == adata_ids.organ:
         # Organ labels contain labels on tissue type also, such as 'UBERON:0001911 (cell culture)'.
-        val = [v.split(" ")[0] for v in val]
+        suffixes = " (cell culture)"
+        for s in suffixes:
+            val = [v.replace(s, "") for v in val]
     return val
 
 
-def clean_cellxgene_meta_uns(k, val, adata_ids) -> Union[str, List[str]]:
+def clean_cellxgene_meta_uns(k, val, adata_ids) -> Tuple[Union[str, List[str]], Union[str, List[str]]]:
     """
     :param k: Found meta data name.
     :param val: Found meta data entry.
     :returns: Cleaned meta data entry.
     """
-    x_clean = []
+    x_clean_id = []
+    x_clean_symbol = []
     for v in val:
         # Decide if labels are read from name or ontology ID:
-        v = v[adata_ids.onto_id_suffix[1:]]
+        v_symbol = v["label"]
+        v_id = v["ontology_term_id"]
         # Organ labels contain labels on tissue type also, such as 'UBERON:0001911 (cell culture)'.
-        if k == adata_ids.organ:
-            v = v.split(" ")[0]
-        if v != adata_ids.unknown_metadata_identifier and v != adata_ids.invalid_metadata_identifier:
-            x_clean.append(v)
-    return x_clean
+        if k == "organ":
+            if len(v_id.split(" ")) > 1:
+                suffix = " " + " ".join(v_id.split(" ")[1:])
+                v_id = v_id.replace(suffix, "")
+                v_symbol = v_symbol.replace(suffix, "")
+        if v_id != adata_ids.unknown_metadata_identifier and v_id != adata_ids.invalid_metadata_identifier:
+            x_clean_id.append(v_id)
+            x_clean_symbol.append(v_symbol)
+    return x_clean_id, x_clean_symbol
 
 
 class Dataset(DatasetBase):
@@ -58,6 +66,7 @@ class Dataset(DatasetBase):
     """
 
     collection_id: str
+    _ncells: int
 
     def __init__(
             self,
@@ -109,38 +118,47 @@ class Dataset(DatasetBase):
             val = collection_dataset[getattr(self._adata_ids_cellxgene, k)]
             # Unique label if list is length 1:
             # Otherwise do not set property and resort to cell-wise labels.
-            v_clean = clean_cellxgene_meta_uns(k=k, val=val, adata_ids=self._adata_ids_cellxgene)
+            v_clean_id, v_clean_symbol = clean_cellxgene_meta_uns(k=k, val=val, adata_ids=self._adata_ids_cellxgene)
             try:
-                # Only set global attribute if this is a single value:
-                # If not a single value, sfaira accesses observation-wise annotation in .obs.
-                if len(v_clean) == 1:
-                    v_clean = v_clean[0]
-                    if k == "organ":
-                        # cellxgene uses custom extensions of the actual UBERON terms for cell cultures:
-                        v_clean = v_clean.split(" (cell culture)")[0]
-                    setattr(self, k, v_clean)
+                if k == "organism":
+                    if len(v_clean_id) > 0 and 'Homo sapiens' in v_clean_symbol:
+                        # Cannot handle more than one organism yet.
+                        # TODO this can be removed if the organism is replaced by assembly in identifying feature space.
+                        v_clean_id = 'Homo sapiens'
+                    else:
+                        v_clean_id = v_clean_id[0]
+                setattr(self, k, v_clean_id)
             except ValueError as e:
-                print(f"WARNING: {e} in {self.collection_id} and data set {self.id}")
+                # The ontology ID was not matched, try mapping the symbol in a last attempt to rescue this map:
+                try:
+                    setattr(self, k, v_clean_symbol)
+                except ValueError as e2:
+                    print(f"WARNING: {e} and {e2} in {self.collection_id} and data set {self.id}")
 
         self._adata_ids_cellxgene = AdataIdsCellxgene_v2_0_0()
         # Add author information.  # TODO need to change this to contributor?
         self.author = "cellxgene"
         self.layer_processed = "X"
-        # TODO extract counts vs processed layers
+        self.layer_counts = "X" if collection_dataset["x_normalization"] == "none" else "raw"
         # The h5ad objects from cellxgene follow a particular structure and the following attributes are guaranteed to
         # be in place. Note that these point at the anndata instance and will only be available for evaluation after
         # download. See below for attributes that are lazily available
+        self.assay_sc_obs_key = self._adata_ids_cellxgene.assay_sc
         self.cell_type_obs_key = self._adata_ids_cellxgene.cell_type
         self.development_stage_obs_key = self._adata_ids_cellxgene.development_stage
         self.disease_obs_key = self._adata_ids_cellxgene.disease
         self.ethnicity_obs_key = self._adata_ids_cellxgene.ethnicity
         self.sex_obs_key = self._adata_ids_cellxgene.sex
         self.organ_obs_key = self._adata_ids_cellxgene.organ
+        self.organism_obs_key = self._adata_ids_cellxgene.organism
         self.state_exact_obs_key = self._adata_ids_cellxgene.state_exact
 
         self.feature_id_var_key = self._adata_ids_cellxgene.feature_id
 
         self._unknown_celltype_identifiers = self._adata_ids_cellxgene.unknown_metadata_identifier
+
+        self._primary_data = collection_dataset["is_primary_data"] == "PRIMARY"
+        self._ncells = collection_dataset["cell_count"]
 
     @property
     def _collection_cache_dir(self):
@@ -205,6 +223,10 @@ class Dataset(DatasetBase):
             **kwargs
         )
 
+    @property
+    def ncells(self) -> Union[None, int]:
+        return self._ncells
+
     def download(self, filetype: str = "h5ad", verbose: int = 0):
         """
 
@@ -250,7 +272,7 @@ class Dataset(DatasetBase):
         """ % (uuid_session, json.dumps(self._collection_dataset)), raw=True)
 
 
-def load(data_dir, sample_fn, adata_ids: AdataIdsCellxgene, **kwargs):
+def load(data_dir, sample_fn, adata_ids: AdataIdsCellxgene, clean_ontology_labels: bool = False, **kwargs):
     """
     Generalised load function for cellxgene-provided data sets.
 
@@ -258,11 +280,9 @@ def load(data_dir, sample_fn, adata_ids: AdataIdsCellxgene, **kwargs):
     """
     fn = cellxgene_fn(dir=data_dir, dataset_id=sample_fn)
     adata = anndata.read_h5ad(fn)
-    if adata.raw is not None:  # TODO still need this?
-        adata.X = adata.raw.X
-        del adata.raw
-    for k in adata_ids.ontology_constrained:
-        col_name = getattr(adata_ids, k)
-        if col_name in adata.obs.columns:
-            adata.obs[col_name] = clean_cellxgene_meta_obs(k=k, val=adata.obs[col_name].values, adata_ids=adata_ids)
+    if clean_ontology_labels:
+        for k in adata_ids.ontology_constrained:
+            col_name = getattr(adata_ids, k)
+            if col_name in adata.obs.columns:
+                adata.obs[col_name] = clean_cellxgene_meta_obs(k=k, val=adata.obs[col_name].values, adata_ids=adata_ids)
     return adata

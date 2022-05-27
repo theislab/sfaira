@@ -1,4 +1,5 @@
-from typing import Dict
+from functools import partial
+from typing import Dict, Union
 
 import anndata
 import numpy as np
@@ -15,8 +16,9 @@ class CartMulti(CartBase):
 
     carts: Dict[str, CartSingle]
     intercalated: bool
+    map_fn_merge: Union[None, callable]
 
-    def __init__(self, carts: Dict[str, CartSingle], intercalated: bool = False):
+    def __init__(self, carts: Dict[str, CartSingle], intercalated: bool = False, map_fn_merge=None):
         """
 
         :param carts: The generators to combine.
@@ -26,7 +28,23 @@ class CartMulti(CartBase):
         """
         self.carts = carts
         self.intercalated = intercalated
+        self.map_fn_merge = map_fn_merge
         self._ratios = None
+
+    def adaptor_torch(self, dataset_kwargs, loader, **kwargs):
+        from torch.utils.data import DataLoader
+        # Only import this module if torch is used to avoid strict torch dependency:
+        from sfaira.data.store.torch_dataset import SfairaDataset, SfairaMultiDataset
+
+        g = dict([(k, SfairaDataset(map_fn=c.map_fn_base, obs=c.obs, obsm=c.obsm, x=c.x, **dataset_kwargs))
+                  for k, c in self.carts.items()])
+        # Wrap data set into a multi dataset that emits a list of batch tensors with one element for each dataset.
+        # Note that in contrast to self.iterator which is used in iteratable-style access,
+        # this list of tensor lists needs to be decomposed by map_fn to yield batch-dimensional tensors.
+        g = SfairaMultiDataset(datasets=g, map_fn_merge=self.map_fn_merge)
+        if loader:
+            g = DataLoader(g, **kwargs)
+        return g
 
     @property
     def adata(self) -> Dict[str, anndata.AnnData]:
@@ -42,7 +60,6 @@ class CartMulti(CartBase):
         if self.intercalated:
             while keep_repeating:
                 ratios = self.ratios.copy()
-                print(f"GENERATOR: intercalating generators at ratios {ratios}")
                 # Document which generators are still yielding batches:
                 yielding = np.ones((ratios.shape[0],)) == 1.
                 iterators = [v.iterator(repeat=1, shuffle_buffer=shuffle_buffer) for v in self.carts.values()]

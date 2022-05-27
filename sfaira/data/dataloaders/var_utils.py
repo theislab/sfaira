@@ -167,34 +167,19 @@ def streamline_var(adata: anndata.AnnData,
         raise ValueError("Neither layer_counts nor layer_proc are set in yaml. Aborting")
     # Second, we streamline the feature dimension of these data matrices to make sure all necessary feature
     # identifiers are provided:
+    feature_id_var_key_raw = feature_id_var_key
+    feature_symbol_var_key_raw = feature_symbol_var_key
     var1, feature_id_var_key, feature_symbol_var_key = format_var(
         adata_ids=adata_target_ids, clean_var=clean_var, feature_id_var_key=feature_id_var_key,
         feature_symbol_var_key=feature_symbol_var_key, gc=genome_container, var=var1)
     # Only need to process var2 if x2 has a separate feature space, ie if x2 is in .raw:
-    if layer2 is not None and layer2 == "raw":
-        # Note: Assume that IDs and var keys in .adata.raw.var are the same as in .adata.var.
-        # This is tested here:
-        if feature_id_var_key is not None:
-            ids_counts = var2.index.values if feature_id_var_key == "index" \
-                else var2[feature_id_var_key].values
-            ids_proc = var2.index.values if feature_id_var_key == "index" \
-                else var2[feature_id_var_key].values
-        elif feature_symbol_var_key is not None:
-            ids_counts = var2.index.values if feature_symbol_var_key == "index" \
-                else var2[feature_symbol_var_key].values
-            ids_proc = var2.index.values if feature_symbol_var_key == "index" \
-                else var2[feature_symbol_var_key].values
-        else:
-            raise ValueError("Neither feature_id_var_key nor feature_symbol_var_key are set in yaml. Aborting")
-        if set(ids_proc) - set(ids_counts):
-            raise IndexError(f"Features of layer specified as `layer_processed` ('{layer_processed}') are "
-                             f"not a subset of the features of layer specified as `layer_counts` "
-                             f"('{layer_counts}'). This is not supported.")
-        var2, _, _ = format_var(adata_ids=adata_target_ids, clean_var=clean_var, feature_id_var_key=feature_id_var_key,
-                                feature_symbol_var_key=feature_symbol_var_key, gc=genome_container, var=var2)
+    if layer2 is not None:
+        var2, _, _ = format_var(adata_ids=adata_target_ids, clean_var=clean_var,
+                                feature_id_var_key=feature_id_var_key_raw,
+                                feature_symbol_var_key=feature_symbol_var_key_raw, gc=genome_container, var=var2)
     # Next, we impute and subset the feature dimension based on the target gene sets:
-    x1_sum = np.log(x1.sum() + 1.) / np.log(10)
-    x1_nonzero = (x1.sum(axis=0) > 0).sum()
+    x1_sum = np.log(x1.sum() + 1.) / np.log(10)  # reporting
+    x1_nonzero = (x1.sum(axis=0) > 0).sum()  # reporting
     x1 = convert_matrix_format(x=x1, matrix_format=matrix_format)
     x1, var1 = reorder_adata_to_target_features(
         allowed_ids=allowed_ids,
@@ -209,11 +194,11 @@ def streamline_var(adata: anndata.AnnData,
     # other than feature_id_var_key.
     var1, _, _ = format_var(adata_ids=adata_target_ids, feature_id_var_key="index", feature_symbol_var_key=None,
                             gc=genome_container, var=var1)
-    x1_new_sum = np.log(x1.sum() + 1.) / np.log(10)
-    x1_new_nonzero = (x1.sum(axis=0) > 0).sum()
+    x1_new_sum = np.log(x1.sum() + 1.) / np.log(10)  # reporting
+    x1_new_nonzero = (x1.sum(axis=0) > 0).sum()  # reporting
     if layer2 is not None:
-        x2_sum = np.log(x2.sum() + 1.) / np.log(10)
-        x2_nonzero = (x2.sum(axis=0) > 0).sum()
+        x2_sum = np.log(x2.sum() + 1.) / np.log(10)  # reporting
+        x2_nonzero = (x2.sum(axis=0) > 0).sum()  # reporting
         x2 = convert_matrix_format(x=x2, matrix_format=matrix_format)
         x2, var2 = reorder_adata_to_target_features(
             allowed_ids=allowed_ids,
@@ -228,8 +213,8 @@ def streamline_var(adata: anndata.AnnData,
         # fields other than feature_id_var_key.
         var2, _, _ = format_var(adata_ids=adata_target_ids, feature_id_var_key="index", feature_symbol_var_key=None,
                                 gc=genome_container, var=var2)
-        x2_new_sum = np.log(x2.sum() + 1.) / np.log(10)
-        x2_new_nonzero = (x2.sum(axis=0) > 0).sum()
+        x2_new_sum = np.log(x2.sum() + 1.) / np.log(10)  # reporting
+        x2_new_nonzero = (x2.sum(axis=0) > 0).sum()  # reporting
     # Last, we build a new .adata instance from these manipulated data matrices.
     adata = anndata.AnnData(
         X=x1,
@@ -237,13 +222,14 @@ def streamline_var(adata: anndata.AnnData,
         obsm=adata.obsm,
         obsp=adata.obsp,
         var=var1,
-        uns=adata.uns
+        uns=adata.uns,
+        dtype="float32"
     )
     if layer2 is not None:
         if layer2 != "raw":
             adata.layers[layer2] = x2
         else:
-            adata.raw = anndata.AnnData(x2, obs=pd.DataFrame({}, index=adata.obs_names), var=var2)
+            adata.raw = anndata.AnnData(x2, obs=pd.DataFrame({}, index=adata.obs_names), var=var2, dtype="float32")
     layer_counts = layer_counts
     layer_processed = layer_proc
     if hasattr(adata_target_ids, "mapped_features") and adata_target_ids.mapped_features is not None:
@@ -290,7 +276,7 @@ def format_var(adata_ids: AdataIds,
     if feature_symbol_var_key is None and feature_id_var_key is None:
         raise ValueError("Either feature_symbol_var_key or feature_id_var_key needs to be provided in the "
                          "data loader")
-    elif feature_symbol_var_key is None and feature_id_var_key:
+    elif feature_id_var_key:
         ensids = var.index if feature_id_var_key == "index" else var[feature_id_var_key].values
         # Add new feature identifier:
         var[adata_ids.feature_symbol] = gc.translate_id_to_symbols(x=ensids)
@@ -345,6 +331,7 @@ def reorder_adata_to_target_features(
 
     :param allowed_ids: Allowed identifiers, can use this to subset if target identifiers is not set.
         Note: These have to match the identifier class used in var[var_key], eg. gene symbols or ENSG IDs.
+        Note: Original feature ordering is kept if allowed_ids is not None and target_ids is None.
     :param map_in_upper_case: Whether to map features in upper case, ie case-insensitive.
     :param map_without_version: Whether to map features in without accounting version (".* suffix of feature ID).
     :param target_ids: Target set of feature identifiers.
@@ -369,17 +356,17 @@ def reorder_adata_to_target_features(
         output_ids = target_ids
     else:
         raise ValueError(f"supply either allowed_ids or target_ids: {(allowed_ids, target_ids)}")
-
-    map_mat = scipy.sparse.csr_matrix(np.zeros((len(input_ids), len(output_ids))))
+    map_mat = scipy.sparse.lil_matrix(np.zeros((len(input_ids), len(output_ids))))
     if map_in_upper_case:
-        input_ids = np.array([z.upper() for z in input_ids])
-        output_ids = np.array([z.upper() for z in output_ids])
+        input_ids = np.array([z.upper() if isinstance(z, str) else "" for z in input_ids])
+        output_ids = np.array([z.upper() if isinstance(z, str) else "" for z in output_ids])
     if map_without_version:
         input_ids = np.array([z.split(".")[0] for z in input_ids])
         output_ids = np.array([z.split(".")[0] for z in output_ids])
     for i, z in enumerate(output_ids):
         # TODO: this is an equality map of feature identifiers that could be replaced by ENSEMBL informed maps.
         map_mat[np.where(input_ids == z)[0], i] = 1.
+    map_mat = map_mat.tocsr()
     x, var = reorder_x_var(map_mat=map_mat, var=var, var_index_target=output_ids, x=x)
     return x, var
 
@@ -402,11 +389,14 @@ def collapse_x_var_by_feature(x, var, var_column, sep_deduplication="-"):
     """
     old_index = var.index if var_column == "index" else var[var_column].values
     old_index = np.array([z.split(sep_deduplication)[0] for z in old_index])
-    new_index = np.unique(old_index)
+    # Get unique elements maintaining original ordering:
+    idx = np.unique(old_index, return_index=True)[1]
+    new_index = old_index[np.sort(idx)]
     if len(new_index) < len(old_index):
-        map_mat = scipy.sparse.csr_matrix(np.zeros((len(old_index), len(new_index))))
+        map_mat = scipy.sparse.lil_matrix(np.zeros((len(old_index), len(new_index))))
         for i, z in enumerate(new_index):
             map_mat[np.where(old_index == z)[0], i] = 1.
+        map_mat = map_mat.tocsr()
         x, var = reorder_x_var(map_mat=map_mat, var=var, var_index_target=new_index, x=x)
     return x, var
 
