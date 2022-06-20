@@ -438,6 +438,15 @@ class CartDask(CartSingle):
         self._x = self._x.map_blocks(scipy.sparse.csr_matrix).persist()
 
     @property
+    def adata(self) -> anndata.AnnData:
+        """
+        Assembles a slice of this cart based on .obs_idx as an anndata instance.
+
+        TODO this can be removed once anndata can deal with dask array in x
+        """
+        return anndata.AnnData(X=scipy.sparse.csr_matrix(self.x.compute()), obs=self.obs, var=self.var)
+
+    @property
     def n_obs(self) -> int:
         """Total number of observations in cart."""
         return self._x.shape[0]
@@ -462,9 +471,9 @@ class CartDask(CartSingle):
         """
         Selected data matrix (cells x features) that is emitted in batches by .iterator() as csr matrix.
 
-        Note: to obtain the dask array instead of a csr matrix, use `self.x_dask`
+        Note: this is a dask array.
         """
         if self.var_idx is None:
-            return self._x[self.schedule.idx, :].compute()
+            return self._x[self.schedule.idx, :]
         else:
-            return self._x[self.schedule.idx, :][:, self.var_idx].compute()
+            return self._x[self.schedule.idx, :][:, self.var_idx]
