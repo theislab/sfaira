@@ -275,9 +275,14 @@ class StoreSingleFeatureSpace(StoreBase):
         :param excluded_values: Classes to exclude from match list. Supply either values or excluded_values.
         :return dictionary of files and observation indices by file.
         """
-        if not isinstance(values, list):
+        if values is not None and not (isinstance(values, list) or isinstance(values, tuple) or
+                                       isinstance(values, np.ndarray)):
             values = [values]
-        assert (values is None or excluded_values is not None) or (values is not None or excluded_values is None), \
+        if excluded_values is not None and not (isinstance(excluded_values, list) or
+                                                isinstance(excluded_values, tuple) or
+                                                isinstance(excluded_values, np.ndarray)):
+            excluded_values = [excluded_values]
+        assert (values is None and excluded_values is not None) or (values is not None and excluded_values is None), \
             "supply either values or excluded_values"
 
         def get_idx(adata, obs, k, v, xv, dataset) -> np.ndarray:
@@ -352,6 +357,8 @@ class StoreSingleFeatureSpace(StoreBase):
             # Keep intersection of old and new hits.
             idx_new = np.intersect1d(idx_old, idx_subset)
             if len(idx_new) > 0:
+                # Only add entries for data sets with remaining cells, other data sets are excluded from index
+                # management.
                 indices[key] = np.asarray(idx_new, dtype="int32")
 
         return indices
