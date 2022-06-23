@@ -19,4 +19,7 @@ def load(data_dir, sample_fn, **kwargs):
     adata.obs['Sex'] = [s_dict[i] for i in adata.obs['Sex']]
     adata.obs['Age'] = [str(x) + "-year-old homosapiens stage" for x in adata.obs['Age'].values]
 
+    print(adata)
+    print(adata.var)
+
     return adata
