@@ -196,16 +196,16 @@ def extract_layer_var(adata: anndata.AnnData, layer: str):
         var = None
     elif layer == "X":
         x = adata.X
-        var = adata.var
+        var = adata.var.copy()
     elif layer == "raw":
         x = adata.raw.X
-        var = adata.raw.var
+        var = adata.raw.var.copy()
     else:
         if layer not in adata.layers.keys():
             raise ValueError(f"layer {layer} not in layers {list(adata.layers.keys())}")
         else:
             x = adata.layers[layer]
-            var = adata.var
+            var = adata.var.copy()
     return x, var
 
 
