@@ -8,5 +8,5 @@ def load(data_dir, sample_fn, **kwargs) -> anndata.AnnData:
     ncells = 100
     ngenes = 50
     adata = _create_adata(celltypes=CELLTYPES[:2], ncells=ncells, ngenes=ngenes,
-                          assembly=ASSEMBLY_HUMAN, use_symbols=True)
+                          assembly=ASSEMBLY_HUMAN, use_symbols=True, add_raw_counts_layer=True, add_gene_id_column=True)
     return adata
