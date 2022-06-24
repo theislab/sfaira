@@ -21,7 +21,15 @@ MATCH_TO_RELEASE = {"Homo sapiens": RELEASE_HUMAN,
                     "Mus musculus": RELEASE_MOUSE}
 
 
-def _create_adata(celltypes, ncells, ngenes, assembly, use_symbols: bool = False) -> anndata.AnnData:
+def _create_adata(
+        celltypes,
+        ncells,
+        ngenes,
+        assembly,
+        use_symbols: bool = False,
+        add_raw_counts_layer: bool = False,
+        add_gene_id_column: bool = False
+) -> anndata.AnnData:
     """
     Usesd by mock data loaders.
     """
@@ -33,12 +41,16 @@ def _create_adata(celltypes, ncells, ngenes, assembly, use_symbols: bool = False
         genes = gc.ensembl[:ngenes]
     x = scipy.sparse.csc_matrix(np.random.randint(low=0, high=100, size=(ncells, ngenes)))
     var = pd.DataFrame(index=genes)
+    if add_gene_id_column:
+        var["gene_id"] = gc.ensembl[:ngenes]
     obs = pd.DataFrame({}, index=["cell_" + str(i) for i in range(ncells)])
     if len(celltypes) > 0:
         obs["free_annotation"] = [celltypes[i] for i in np.random.choice(len(celltypes), size=ncells, replace=True)]
     # Create random embedding
     obsm = {"X_umap": np.random.random(size=(ncells, 2))}
     adata = anndata.AnnData(X=x, obs=obs, obsm=obsm, var=var)
+    if add_raw_counts_layer:
+        adata.layers['counts'] = x
     return adata
 
 

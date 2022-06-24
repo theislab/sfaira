@@ -11,8 +11,8 @@ dataset_wise:
     primary_data: True
     year: 2021
 layers:
-    layer_counts: "X"
-    layer_processed:
+    layer_counts: "counts"
+    layer_processed: "X"
     layer_spliced_counts:
     layer_spliced_processed:
     layer_unspliced_counts:
@@ -63,7 +63,7 @@ dataset_or_observation_wise:
     treatment:
     treatment_obs_key:
 feature_wise:
-    feature_id_var_key:
+    feature_id_var_key: "gene_id"
     feature_symbol_var_key: "index"
 observation_wise:
     spatial_x_coord:
