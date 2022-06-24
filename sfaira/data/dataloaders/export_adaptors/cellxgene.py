@@ -179,7 +179,7 @@ def cellxgene_export_adaptor_2_0_0(adata: anndata.AnnData, adata_ids: AdataIdsCe
     if adata.raw is not None and adata.n_vars < adata.raw.n_vars:
         # extend X by zero columns and add filtered attribute:
         raise NotImplementedError()
-    else:
+    elif adata.raw is not None:
         adata.var[adata_ids.feature_is_filtered] = False
         # Assert that genes are ordered the same way in raw and processed:
         assert np.all(adata.var.index == adata.raw.var.index)
