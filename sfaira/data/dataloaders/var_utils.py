@@ -131,7 +131,7 @@ def streamline_var(adata: anndata.AnnData,
     # Need to clean again to populate all gene identifier fields other than feature_id_var_key which were
     # added to the object, ie imputed features. There are NaN after reorder_adata_to_target_features in all fields
     # other than feature_id_var_key.
-    var1, _, _ = format_var(target_adata_ids=target_adata_ids, current_feature_id_var_key=current_feature_id_var_key,
+    var1, _, _ = format_var(target_adata_ids=target_adata_ids, current_feature_id_var_key="index",
                             current_feature_symbol_var_key=None, gc=genome_container, var=var1)
     report_stats_x1_new_sum = np.log(x1.sum() + 1.) / np.log(10)
     report_stats_x1_new_nonzero = (x1.sum(axis=0) > 0).sum()
@@ -151,8 +151,8 @@ def streamline_var(adata: anndata.AnnData,
         # added to the object, ie imputed features. There are NaN after reorder_adata_to_target_features in all
         # fields other than feature_id_var_key.
         var2, _, _ = format_var(target_adata_ids=target_adata_ids,
-                                current_feature_id_var_key=current_feature_id_var_key,
-                                current_feature_symbol_var_key=None, gc=genome_container, var=var2)
+                                current_feature_id_var_key="index", current_feature_symbol_var_key=None,
+                                gc=genome_container, var=var2)
         report_stats_x2_new_sum = np.log(x2.sum() + 1.) / np.log(10)
         report_stats_x2_new_nonzero = (x2.sum(axis=0) > 0).sum()
     # Last, we build a new .adata instance from these manipulated data matrices.
