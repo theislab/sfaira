@@ -150,10 +150,7 @@ class BatchDesignBalanced(BatchDesignBase):
                                                   random_access=random_access, **kwargs)
         if randomized_batch_access:
             print("WARNING: randomized_batch_access==True is not a meaningful setting for BatchDesignBalanced. "
-                  "Setting will be ignored!p")
-        if not random_access:
-            print("WARNING: random_access==False is dangerous if you do not work with a large shuffle buffer "
-                  "downstream of the sfaira generator.")
+                  "Setting will be ignored!")
         # Create integer group assignment array.
         groups = np.sort(list(group_weights.keys()))
         grouping_int = np.zeros((grouping.shape[0], ), dtype="int32") - 1
@@ -200,9 +197,6 @@ class BatchDesignBlocks(BatchDesignBase):
             distribution but is normalised in this function. The outcome vector is always of length idx.
         """
         super(BatchDesignBlocks, self).__init__(random_access=random_access, **kwargs)
-        if not random_access:
-            print("WARNING: random_access==False is dangerous if you do not work with a large shuffle buffer "
-                  "downstream of the sfaira generator.")
         # Create integer group assignment array.
         self.grouping = grouping
 

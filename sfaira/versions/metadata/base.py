@@ -135,6 +135,31 @@ class OntologyList(Ontology):
     def n_leaves(self) -> int:
         return len(self.nodes)
 
+    def map_to_leaves(
+            self,
+            node: str,
+            return_type: str = "ids",
+    ) -> Union[List[str], np.ndarray]:
+        """
+        Map a given node to leave nodes.
+
+        Note that for a list ontology, this maps each node to itself.
+
+        :param node: Node(s) to map as symbol(s) or ID(s).
+        :param return_type:
+
+            "ids": IDs of mapped leave nodes. This is the query node itself for OntologyList.
+            "idx": indicies in leave note list of mapped leave nodes. This is the index of query node itself for
+                    OntologyList.
+        :return:
+        """
+        if return_type == "ids":
+            return [node]
+        elif return_type == "idx":
+            return np.where(self.node_ids == node)[0]
+        else:
+            raise ValueError(f"return_type {return_type} not recognized")
+
     def prepare_maps_to_leaves(
             self,
             include_self: bool = True
