@@ -37,7 +37,7 @@ class CartMulti(CartBase):
         from sfaira.data.store.torch_dataset import SfairaDataset, SfairaMultiDataset
 
         g = dict([(k, SfairaDataset(map_fn=c.map_fn_base, obs=c.obs, obsm=c.obsm, x=c.x, **dataset_kwargs))
-                  for k, c in self.carts.items()])
+                  for k, c in self.carts.items() if len(c.schedule.idx) > 0])
         # Wrap data set into a multi dataset that emits a list of batch tensors with one element for each dataset.
         # Note that in contrast to self.iterator which is used in iteratable-style access,
         # this list of tensor lists needs to be decomposed by map_fn to yield batch-dimensional tensors.

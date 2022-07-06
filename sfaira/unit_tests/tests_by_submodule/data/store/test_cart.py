@@ -39,7 +39,6 @@ def test_properties(store_format: str, feature_space: str):
     assert np.all([x.shape[0] == len(idx) for x in arr[:3]])
     assert isinstance(arr[0], anndata.AnnData)
     assert scipy.sparse.issparse(arr[0].X)
-    assert scipy.sparse.issparse(arr[1])
     assert isinstance(arr[2], pd.DataFrame)
     assert isinstance(arr[3], pd.DataFrame)
     # Other
