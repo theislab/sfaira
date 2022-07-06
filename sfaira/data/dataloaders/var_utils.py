@@ -10,12 +10,12 @@ from sfaira.versions.genomes import GenomeContainer
 
 
 def streamline_var(adata: anndata.AnnData,
-                   adata_target_ids: AdataIds,
+                   target_adata_ids: AdataIds,
                    organism: str,
                    dataset_id: str = "",
                    clean_var: bool = False,
-                   feature_id_var_key: Union[str, None] = None,
-                   feature_symbol_var_key: Union[str, None] = None,
+                   current_feature_id_var_key: Union[str, None] = None,
+                   current_feature_symbol_var_key: Union[str, None] = None,
                    layer_counts: Union[str, None] = None,
                    layer_processed: Union[str, None] = None,
                    match_to_release: Union[str, Dict[str, str], None] = None,
@@ -30,13 +30,13 @@ def streamline_var(adata: anndata.AnnData,
 
 
     :param adata: anndata.AnnData instance to transform.
-    :param adata_target_ids: AdataIds instance for output (transformed) adata. See also sfaira.consts.adata_fields for
+    :param target_adata_ids: AdataIds instance for output (transformed) adata. See also sfaira.consts.adata_fields for
         examples.
     :param clean_var: Whether to remove non-controlled fields in .var.
     :param dataset_id: Identifier of dataset used in logging.
-    :param feature_id_var_key: Column name of ENSEMBL IDs in adata.var, use "index" if they are in the index and None if
+    :param current_feature_id_var_key: Column name of ENSEMBL IDs in adata.var, use "index" if they are in the index and None if
         they are not included in adata. Supply either this feature_id_var_key feature_symbol_var_key.
-    :param feature_symbol_var_key: Column name of gene symbols in adata.var, use "index" if they are in the index and
+    :param current_feature_symbol_var_key: Column name of gene symbols in adata.var, use "index" if they are in the index and
         None if they are not included in adata. Supply either this feature_id_var_key feature_symbol_var_key.
     :param layer_counts: Key of layer with count data, use "X" if these are in adata.X and "raw" if they are in
         adata.raw.X. Need to supply at least one of layer_counts and layer_processed.
@@ -62,11 +62,11 @@ def streamline_var(adata: anndata.AnnData,
     :return:
     """
     if match_to_release is None:
-        match_to_release = adata_target_ids.feature_kwargs["match_to_release"]
+        match_to_release = target_adata_ids.feature_kwargs["match_to_release"]
     if remove_gene_version is None:
-        remove_gene_version = adata_target_ids.feature_kwargs["remove_gene_version"]
+        remove_gene_version = target_adata_ids.feature_kwargs["remove_gene_version"]
     if subset_genes_to_type is None:
-        subset_genes_to_type = adata_target_ids.feature_kwargs["subset_genes_to_type"]
+        subset_genes_to_type = target_adata_ids.feature_kwargs["subset_genes_to_type"]
 
     # Define target feature space.
     # Set genome container if mapping of gene labels is requested
@@ -95,40 +95,121 @@ def streamline_var(adata: anndata.AnnData,
     # Any change to the size of the feature dimension of the data matrix also requires changes to .var which is also
     # extracted here.
     assert layer_processed or layer_counts
-    if layer_processed is None:
-        x_proc = None
-        var_proc = None
-    elif layer_processed == "X":
-        x_proc = adata.X
-        var_proc = adata.var
-    elif layer_processed == "raw":
-        x_proc = adata.raw.X
-        var_proc = adata.raw.var
-    else:
-        if layer_processed not in adata.layers.keys():
-            raise ValueError(f"layer {layer_processed} not in layers {list(adata.layers.keys())}")
-        else:
-            x_proc = adata.layers[layer_processed]
-            var_proc = adata.var
-    if layer_counts is None:
-        x_counts = None
-        var_counts = None
-    elif layer_counts == "X":
-        x_counts = adata.X
-        var_counts = adata.var
-    elif layer_counts == "raw":
-        x_counts = adata.raw.X
-        var_counts = adata.raw.var
-    else:
-        if layer_counts not in adata.layers.keys():
-            raise ValueError(f"layer {layer_counts} not in layers {list(adata.layers.keys())}")
-        else:
-            x_counts = adata.layers[layer_counts]
-            var_counts = adata.var
+    x_proc, var_proc = extract_layer_var(adata=adata, layer=layer_processed)
+    x_counts, var_counts = extract_layer_var(adata=adata, layer=layer_counts)
 
     # Create new adata using extracted layers.
     # First, we prepare moving data matrices to new, controlled location in .adata.
     # Note: one layer needs to be in X.
+    x1, var1, x2, var2, layer2, layer_counts, layer_proc = prioritize_layers(
+        x_counts=x_counts, var_counts=var_counts, x_proc=x_proc, var_proc=var_proc, adata_target_ids=target_adata_ids)
+    # Second, we streamline the feature dimension of these data matrices to make sure all necessary feature
+    # identifiers are provided:
+    original_feature_id_var_key = current_feature_id_var_key
+    original_feature_symbol_var_key = current_feature_symbol_var_key
+    var1, current_feature_id_var_key, current_feature_symbol_var_key = format_var(
+        target_adata_ids=target_adata_ids, clean_var=clean_var, current_feature_id_var_key=current_feature_id_var_key,
+        current_feature_symbol_var_key=current_feature_symbol_var_key, gc=genome_container, var=var1)
+    # Only need to process var2 if x2 has a separate feature space, ie if x2 is in .raw:
+    if layer2 is not None:
+        var2, _, _ = format_var(target_adata_ids=target_adata_ids, clean_var=clean_var,
+                                current_feature_id_var_key=original_feature_id_var_key,
+                                current_feature_symbol_var_key=original_feature_symbol_var_key, gc=genome_container,
+                                var=var2)
+    # Next, we impute and subset the feature dimension based on the target gene sets:
+    report_stats_x1_sum = np.log(x1.sum() + 1.) / np.log(10)
+    report_stats_x1_nonzero = (x1.sum(axis=0) > 0).sum()
+    x1 = convert_matrix_format(x=x1, matrix_format=matrix_format)
+    x1, var1 = reorder_adata_to_target_features(
+        allowed_ids=allowed_ids,
+        map_in_upper_case=True,
+        map_without_version=True,
+        target_ids=target_ids,
+        var=var1,
+        var_key=current_feature_id_var_key,
+        x=x1)
+    # Need to clean again to populate all gene identifier fields other than feature_id_var_key which were
+    # added to the object, ie imputed features. There are NaN after reorder_adata_to_target_features in all fields
+    # other than feature_id_var_key.
+    var1, _, _ = format_var(target_adata_ids=target_adata_ids, current_feature_id_var_key="index",
+                            current_feature_symbol_var_key=None, gc=genome_container, var=var1)
+    report_stats_x1_new_sum = np.log(x1.sum() + 1.) / np.log(10)
+    report_stats_x1_new_nonzero = (x1.sum(axis=0) > 0).sum()
+    if layer2 is not None:
+        report_stats_x2_sum = np.log(x2.sum() + 1.) / np.log(10)
+        report_stats_x2_nonzero = (x2.sum(axis=0) > 0).sum()
+        x2 = convert_matrix_format(x=x2, matrix_format=matrix_format)
+        x2, var2 = reorder_adata_to_target_features(
+            allowed_ids=allowed_ids,
+            map_in_upper_case=True,
+            map_without_version=True,
+            target_ids=target_ids,
+            var=var2,
+            var_key=current_feature_id_var_key,
+            x=x2)
+        # Need to clean again to populate all gene identifier fields other than feature_id_var_key which were
+        # added to the object, ie imputed features. There are NaN after reorder_adata_to_target_features in all
+        # fields other than feature_id_var_key.
+        var2, _, _ = format_var(target_adata_ids=target_adata_ids,
+                                current_feature_id_var_key="index", current_feature_symbol_var_key=None,
+                                gc=genome_container, var=var2)
+        report_stats_x2_new_sum = np.log(x2.sum() + 1.) / np.log(10)
+        report_stats_x2_new_nonzero = (x2.sum(axis=0) > 0).sum()
+    # Last, we build a new .adata instance from these manipulated data matrices.
+    adata = anndata.AnnData(
+        X=x1,
+        obs=adata.obs,
+        obsm=adata.obsm,
+        obsp=adata.obsp,
+        var=var1,
+        uns=adata.uns,
+        dtype="float32"
+    )
+    if layer2 is not None:
+        if layer2 != "raw":
+            adata.layers[layer2] = x2
+        else:
+            adata.raw = anndata.AnnData(x2, obs=pd.DataFrame({}, index=adata.obs_names), var=var2, dtype="float32")
+    layer_counts = layer_counts
+    layer_processed = layer_proc
+    if hasattr(target_adata_ids, "mapped_features") and target_adata_ids.mapped_features is not None:
+        adata.uns[target_adata_ids.mapped_features] = match_to_release
+    # Reporting:
+    if verbose > 0:
+        report = f"transformed feature space on {dataset_id}: \n" \
+                 f"log10 total counts {round(report_stats_x1_sum, 2)} to {round(report_stats_x1_new_sum, 2)}, " \
+                 f"non-zero features {report_stats_x1_nonzero} to {report_stats_x1_new_nonzero}"
+        if layer2 is not None:
+            report += f"\n(secondary layer: log10 total total counts {round(report_stats_x2_sum, 2)} to " \
+                      f"{round(report_stats_x2_new_sum, 2)}, non-zero features {report_stats_x2_nonzero} to " \
+                      f"{report_stats_x2_new_nonzero})"
+        print(report)
+    return {"adata": adata,
+            "genome_container": genome_container,
+            "layer_counts": layer_counts,
+            "layer_processed": layer_processed}
+
+
+def extract_layer_var(adata: anndata.AnnData, layer: str):
+    if layer is None:
+        x = None
+        var = None
+    elif layer == "X":
+        x = adata.X
+        var = adata.var.copy()
+    elif layer == "raw":
+        x = adata.raw.X
+        var = adata.raw.var.copy()
+    else:
+        if layer not in adata.layers.keys():
+            raise ValueError(f"layer {layer} not in layers {list(adata.layers.keys())}")
+        else:
+            x = adata.layers[layer]
+            var = adata.var.copy()
+    return x, var
+
+
+def prioritize_layers(x_counts, var_counts, x_proc, var_proc, adata_target_ids):
     if x_proc is not None and x_counts is not None:
         layer_counts = adata_target_ids.layer_counts
         layer_proc = adata_target_ids.layer_proc
@@ -165,93 +246,12 @@ def streamline_var(adata: anndata.AnnData,
         layer_proc = "X"
     else:
         raise ValueError("Neither layer_counts nor layer_proc are set in yaml. Aborting")
-    # Second, we streamline the feature dimension of these data matrices to make sure all necessary feature
-    # identifiers are provided:
-    feature_id_var_key_raw = feature_id_var_key
-    feature_symbol_var_key_raw = feature_symbol_var_key
-    var1, feature_id_var_key, feature_symbol_var_key = format_var(
-        adata_ids=adata_target_ids, clean_var=clean_var, feature_id_var_key=feature_id_var_key,
-        feature_symbol_var_key=feature_symbol_var_key, gc=genome_container, var=var1)
-    # Only need to process var2 if x2 has a separate feature space, ie if x2 is in .raw:
-    if layer2 is not None:
-        var2, _, _ = format_var(adata_ids=adata_target_ids, clean_var=clean_var,
-                                feature_id_var_key=feature_id_var_key_raw,
-                                feature_symbol_var_key=feature_symbol_var_key_raw, gc=genome_container, var=var2)
-    # Next, we impute and subset the feature dimension based on the target gene sets:
-    x1_sum = np.log(x1.sum() + 1.) / np.log(10)  # reporting
-    x1_nonzero = (x1.sum(axis=0) > 0).sum()  # reporting
-    x1 = convert_matrix_format(x=x1, matrix_format=matrix_format)
-    x1, var1 = reorder_adata_to_target_features(
-        allowed_ids=allowed_ids,
-        map_in_upper_case=True,
-        map_without_version=True,
-        target_ids=target_ids,
-        var=var1,
-        var_key=feature_id_var_key,
-        x=x1)
-    # Need to clean again to populate all gene identifier fields other than feature_id_var_key which were
-    # added to the object, ie imputed features. There are NaN after reorder_adata_to_target_features in all fields
-    # other than feature_id_var_key.
-    var1, _, _ = format_var(adata_ids=adata_target_ids, feature_id_var_key="index", feature_symbol_var_key=None,
-                            gc=genome_container, var=var1)
-    x1_new_sum = np.log(x1.sum() + 1.) / np.log(10)  # reporting
-    x1_new_nonzero = (x1.sum(axis=0) > 0).sum()  # reporting
-    if layer2 is not None:
-        x2_sum = np.log(x2.sum() + 1.) / np.log(10)  # reporting
-        x2_nonzero = (x2.sum(axis=0) > 0).sum()  # reporting
-        x2 = convert_matrix_format(x=x2, matrix_format=matrix_format)
-        x2, var2 = reorder_adata_to_target_features(
-            allowed_ids=allowed_ids,
-            map_in_upper_case=True,
-            map_without_version=True,
-            target_ids=target_ids,
-            var=var2,
-            var_key=feature_id_var_key,
-            x=x2)
-        # Need to clean again to populate all gene identifier fields other than feature_id_var_key which were
-        # added to the object, ie imputed features. There are NaN after reorder_adata_to_target_features in all
-        # fields other than feature_id_var_key.
-        var2, _, _ = format_var(adata_ids=adata_target_ids, feature_id_var_key="index", feature_symbol_var_key=None,
-                                gc=genome_container, var=var2)
-        x2_new_sum = np.log(x2.sum() + 1.) / np.log(10)  # reporting
-        x2_new_nonzero = (x2.sum(axis=0) > 0).sum()  # reporting
-    # Last, we build a new .adata instance from these manipulated data matrices.
-    adata = anndata.AnnData(
-        X=x1,
-        obs=adata.obs,
-        obsm=adata.obsm,
-        obsp=adata.obsp,
-        var=var1,
-        uns=adata.uns,
-        dtype="float32"
-    )
-    if layer2 is not None:
-        if layer2 != "raw":
-            adata.layers[layer2] = x2
-        else:
-            adata.raw = anndata.AnnData(x2, obs=pd.DataFrame({}, index=adata.obs_names), var=var2, dtype="float32")
-    layer_counts = layer_counts
-    layer_processed = layer_proc
-    if hasattr(adata_target_ids, "mapped_features") and adata_target_ids.mapped_features is not None:
-        adata.uns[adata_target_ids.mapped_features] = match_to_release
-    # Reporting:
-    if verbose > 0:
-        report = f"transformed feature space on {dataset_id}: \n" \
-                 f"log10 total counts {round(x1_sum, 2)} to {round(x1_new_sum, 2)}, " \
-                 f"non-zero features {x1_nonzero} to {x1_new_nonzero}"
-        if layer2 is not None:
-            report += f"\n(secondary layer: log10 total total counts {round(x2_sum, 2)} to {round(x2_new_sum, 2)}, " \
-                      f"non-zero features {x2_nonzero} to {x2_new_nonzero})"
-        print(report)
-    return {"adata": adata,
-            "genome_container": genome_container,
-            "layer_counts": layer_counts,
-            "layer_processed": layer_processed}
+    return x1, var1, x2, var2, layer2, layer_counts, layer_proc
 
 
-def format_var(adata_ids: AdataIds,
-               feature_id_var_key: Union[None, str],
-               feature_symbol_var_key: Union[None, str],
+def format_var(target_adata_ids: AdataIds,
+               current_feature_id_var_key: Union[None, str],
+               current_feature_symbol_var_key: Union[None, str],
                gc: GenomeContainer,
                var: pd.DataFrame,
                clean_var: bool = False):
@@ -262,10 +262,10 @@ def format_var(adata_ids: AdataIds,
     In mapping of IDs to symbols and reverse, this is handled by methods of the GenomeContainer.
     In the output, both are defined by the assembly set on the GenomeContainer instance.
 
-    :param adata_ids: Field container.
+    :param target_adata_ids: Field container.
     :param clean_var: Whether to remove non-controlled fields in .var.
-    :param feature_symbol_var_key: Location of feature symbol column in input var (column name or "index").
-    :param feature_id_var_key:  Location of feature ID column in input var (column name or "index").
+    :param current_feature_symbol_var_key: Location of feature symbol column in input var (column name or "index").
+    :param current_feature_id_var_key:  Location of feature ID column in input var (column name or "index").
     :param gc: Genome container for feature identifier translation.
     :param var: Feature table to modify.
     :return: Tuple of
@@ -273,42 +273,50 @@ def format_var(adata_ids: AdataIds,
             - New location of IDs (column name or "index).
             - New location of symbols (column name or "index).
     """
-    if feature_symbol_var_key is None and feature_id_var_key is None:
+    if current_feature_symbol_var_key is None and current_feature_id_var_key is None:
         raise ValueError("Either feature_symbol_var_key or feature_id_var_key needs to be provided in the "
                          "data loader")
-    elif feature_id_var_key:
-        ensids = var.index if feature_id_var_key == "index" else var[feature_id_var_key].values
+    elif current_feature_id_var_key:
+        ensids = var.index if current_feature_id_var_key == "index" else var[current_feature_id_var_key].values
+        symbols = gc.translate_id_to_symbols(x=ensids)
         # Add new feature identifier:
-        var[adata_ids.feature_symbol] = gc.translate_id_to_symbols(x=ensids)
+        if target_adata_ids.feature_symbol == "index":
+            var.index = symbols
+        else:
+            var[target_adata_ids.feature_symbol] = symbols
         # Place existing identifier under streamlined key:
-        if feature_id_var_key != adata_ids.feature_id:
-            if adata_ids.feature_id == "index":
+        if current_feature_id_var_key != target_adata_ids.feature_id:
+            if target_adata_ids.feature_id == "index":
                 var.index = ensids
             else:
-                var[adata_ids.feature_id] = ensids
+                var[target_adata_ids.feature_id] = ensids
             # Delete old entry:
-            if feature_id_var_key != "index":
-                del var[feature_id_var_key]
-    elif feature_symbol_var_key and feature_id_var_key is None:
-        symbols = var.index if feature_symbol_var_key == "index" else var[feature_symbol_var_key]
+            if current_feature_id_var_key != "index":
+                del var[current_feature_id_var_key]
+    elif current_feature_symbol_var_key and current_feature_id_var_key is None:
+        symbols = var.index if current_feature_symbol_var_key == "index" else var[current_feature_symbol_var_key]
+        ensids = gc.translate_symbols_to_id(x=symbols)
         # Add new feature identifier:
-        var[adata_ids.feature_id] = gc.translate_symbols_to_id(x=symbols)
+        if target_adata_ids.feature_id == "index":
+            var.index = ensids
+        else:
+            var[target_adata_ids.feature_id] = ensids
         # Place existing identifier under streamlined key:
-        if feature_symbol_var_key != adata_ids.feature_symbol:
-            if adata_ids.feature_symbol == "index":
+        if current_feature_symbol_var_key != target_adata_ids.feature_symbol:
+            if target_adata_ids.feature_symbol == "index":
                 var.index = symbols
             else:
-                var[adata_ids.feature_symbol] = symbols
+                var[target_adata_ids.feature_symbol] = symbols
             # Delete old entry:
-            if feature_symbol_var_key != "index":
-                del var[feature_symbol_var_key]
+            if current_feature_symbol_var_key != "index":
+                del var[current_feature_symbol_var_key]
     # Optionally remove all non-controlled fields:
     if clean_var:
-        allowed_columns = [getattr(adata_ids, x) for x in adata_ids.var_keys]
+        allowed_columns = [getattr(target_adata_ids, x) for x in target_adata_ids.var_keys]
         for k in list(var.columns):
             if k not in allowed_columns:
                 del var[k]
-    return var, adata_ids.feature_id, adata_ids.feature_symbol
+    return var, target_adata_ids.feature_id, target_adata_ids.feature_symbol
 
 
 def reorder_adata_to_target_features(

@@ -5,6 +5,8 @@ import os
 import pandas as pd
 import pathlib
 
+from typing import Union
+
 from sfaira.data.store.stores.multi import StoresAnndata
 from sfaira.versions.genomes import GenomeContainer
 
@@ -12,26 +14,43 @@ from sfaira.unit_tests.directories import DIR_DATA_LOADERS_CACHE, DIR_DATA_LOADE
     DIR_DATA_LOADERS_STORE_H5AD, save_delete
 from .consts import RELEASE_HUMAN, RELEASE_MOUSE
 from .loaders import DatasetSuperGroupMock
+from .loaders_export import DatasetSuperGroupMockExport
+
 
 MATCH_TO_RELEASE = {"Homo sapiens": RELEASE_HUMAN,
                     "Mus musculus": RELEASE_MOUSE}
 
 
-def _create_adata(celltypes, ncells, ngenes, assembly) -> anndata.AnnData:
+def _create_adata(
+        celltypes,
+        ncells,
+        ngenes,
+        assembly,
+        use_symbols: bool = False,
+        add_raw_counts_layer: bool = False,
+        add_gene_id_column: bool = False
+) -> anndata.AnnData:
     """
     Usesd by mock data loaders.
     """
     gc = GenomeContainer(organism=" ".join(assembly.split(".")[0].split("_")), release=assembly.split(".")[-1])
     gc.set(biotype="protein_coding")
-    genes = gc.ensembl[:ngenes]
+    if use_symbols:
+        genes = gc.symbols[:ngenes]
+    else:
+        genes = gc.ensembl[:ngenes]
     x = scipy.sparse.csc_matrix(np.random.randint(low=0, high=100, size=(ncells, ngenes)))
     var = pd.DataFrame(index=genes)
+    if add_gene_id_column:
+        var["gene_id"] = gc.ensembl[:ngenes]
     obs = pd.DataFrame({}, index=["cell_" + str(i) for i in range(ncells)])
     if len(celltypes) > 0:
         obs["free_annotation"] = [celltypes[i] for i in np.random.choice(len(celltypes), size=ncells, replace=True)]
     # Create random embedding
     obsm = {"X_umap": np.random.random(size=(ncells, 2))}
     adata = anndata.AnnData(X=x, obs=obs, obsm=obsm, var=var)
+    if add_raw_counts_layer:
+        adata.layers['counts'] = x
     return adata
 
 
@@ -45,8 +64,8 @@ def _load_script(dsg, rewrite: bool, match_to_release):
     return dsg
 
 
-class PrepareData:
-    CLS_DSG = DatasetSuperGroupMock
+class PrepareDataBase:
+    CLS_DSG = Union[DatasetSuperGroupMock, DatasetSuperGroupMockExport]
 
     def prepare_dsg(self, rewrite: bool = False, load: bool = True, match_to_release=None):
         """
@@ -105,3 +124,11 @@ class PrepareData:
                 ds.write_distributed_store(dir_cache=dir_store_formatted, store_format=store_format, dense=True,
                                            chunks=10, compression_kwargs=compression_kwargs)
         return dir_store_formatted
+
+
+class PrepareData(PrepareDataBase):
+    CLS_DSG = DatasetSuperGroupMock
+
+
+class PrepareDataExport(PrepareDataBase):
+    CLS_DSG = DatasetSuperGroupMockExport

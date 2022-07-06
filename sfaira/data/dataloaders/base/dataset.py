@@ -282,12 +282,12 @@ class DatasetBase(AnnotationContainer):
 
         streamline_output = streamline_var(
             adata=self.adata,
-            adata_target_ids=adata_target_ids,
+            target_adata_ids=adata_target_ids,
             clean_var=clean_var,
             dataset_id=self.id,
             organism=self.organism,
-            feature_id_var_key=self.feature_id_var_key,
-            feature_symbol_var_key=self.feature_symbol_var_key,
+            current_feature_id_var_key=self.feature_id_var_key,
+            current_feature_symbol_var_key=self.feature_symbol_var_key,
             layer_counts=self.layer_counts,
             layer_processed=self.layer_processed,
             match_to_release=match_to_release,

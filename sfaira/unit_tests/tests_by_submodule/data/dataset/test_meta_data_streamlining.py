@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 
 from sfaira.consts.adata_fields import AdataIdsSfaira, AdataIdsCellxgene_v2_0_0
-from sfaira.unit_tests.data_for_tests.loaders import RELEASE_HUMAN, PrepareData
+from sfaira.unit_tests.data_for_tests.loaders import RELEASE_HUMAN, PrepareData, PrepareDataExport
 from sfaira.unit_tests.directories import DIR_TEMP
 
 
@@ -20,12 +20,12 @@ from sfaira.unit_tests.directories import DIR_TEMP
 def test_dsgs_streamline_metadata(out_format: str, clean_obs: bool, clean_var: bool, clean_uns: bool,
                                   clean_obs_names: bool, keep_id_obs: bool, keep_orginal_obs: bool,
                                   keep_symbol_obs: bool):
-    ds = PrepareData().prepare_dsg(load=False)
+    if out_format == "cellxgene":
+        ds = PrepareDataExport().prepare_dsg(load=False)
+    else:
+        ds = PrepareData().prepare_dsg(load=False)
     ds.subset(key="organism", values=["Homo sapiens"])
     ds.subset(key="organ", values=["lung"])
-    if out_format == "cellxgene":
-        # Other data data sets do not have complete enough annotation
-        ds.subset(key="doi_journal", values=["no_doi_mock1", "no_doi_mock3"])
     ds.load()
     ds.streamline_var(schema=out_format, remove_gene_version=False, match_to_release=RELEASE_HUMAN,
                       subset_genes_to_type=None, clean_var=clean_var)
