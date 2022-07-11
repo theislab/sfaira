@@ -35,8 +35,8 @@ Note that in all cases, you can use standard anndata reading functions to load a
 
 
 def _process_batch_size(batch_size: int, retrival_batch_size: int) -> Tuple[int, int]:
-    if batch_size not in [0, 1]:
-        raise ValueError("batch size is only supported other than 0 or 1")
+    if not isinstance(batch_size, int) or batch_size < 0:
+        raise ValueError("batch size is only supported as integer >= 0")
     return batch_size, retrival_batch_size
 
 
