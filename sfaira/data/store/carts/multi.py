@@ -29,7 +29,7 @@ class CartMulti(CartBase):
         self.carts = carts
         self.intercalated = intercalated
         self.map_fn_merge = map_fn_merge
-        self._ratios = None
+        self._iterator_frequencies = None
 
     def adaptor_torch(self, dataset_kwargs, loader, **kwargs):
         from torch.utils.data import DataLoader
@@ -59,20 +59,19 @@ class CartMulti(CartBase):
 
         if self.intercalated:
             while keep_repeating:
-                ratios = self.ratios.copy()
-                # Document which generators are still yielding batches:
-                yielding = np.ones((ratios.shape[0],)) == 1.
+                iterator_frequencies = self.iterator_frequencies.copy()
                 iterators = [v.iterator(repeat=1, shuffle_buffer=shuffle_buffer) for v in self.carts.values()]
-                while np.any(yielding):
-                    # Loop over one iterator length adjusted cycle of emissions.
-                    for i, (gi, n) in enumerate(zip(iterators, ratios)):
-                        n_rounded = int(n) + np.random.binomial(n=1, p=n - int(n))
-                        for _ in range(n_rounded):
-                            try:
-                                x = next(gi)
-                                yield x
-                            except StopIteration:
-                                yielding[i] = False
+                while len(iterators) > 0:
+                    # Sample iterator with frequencies so that in expectation, the frequency of samples from each
+                    # iterator is uniform over an epoch.
+                    itertor_idx = np.random.multinomial(n=1, pvals=iterator_frequencies, partial=())
+                    try:
+                        x = next(iterators[itertor_idx])
+                        yield x
+                    except StopIteration:
+                        # Remove iterator from list to sample. Once all are removed, the loop terminates.
+                        del iterators[itertor_idx]
+                        del iterator_frequencies[itertor_idx]
                 num_repetitions += 1
                 keep_repeating = (num_repetitions < repeat) or (repeat <= 0)
         else:
@@ -121,7 +120,7 @@ class CartMulti(CartBase):
         for k in self.carts.keys():
             assert k in x.keys(), (x.keys(), self.carts.keys())
             self.carts[k].obs_idx = x[k]
-        self._ratios = None  # Reset ratios.
+        self._iterator_frequencies = None  # Reset ratios.
 
     def move_to_memory(self):
         """
@@ -131,19 +130,19 @@ class CartMulti(CartBase):
             v.move_to_memory()
 
     @property
-    def ratios(self):
+    def iterator_frequencies(self):
         """
         Define relative drawing frequencies from iterators for intercalation.
 
         Note that these can be float and will be randomly rounded during intercalation.
         """
-        if self._ratios is None:
-            gen_lens = np.array([v.n_batches for v in self.carts.values()])  # eg. [10, 15, 20]
+        if self._iterator_frequencies is None:
+            iterator_lens = np.array([v.n_batches for v in self.carts.values()])  # eg. [10, 15, 20]
             # Compute ratios of sampling so that one batch is drawn from the smallest generator per intercalation cycle.
             # See also self.iterator.
-            freq = gen_lens / np.min(gen_lens)  # eg. [1.0, 1.5, 2.0]
-            self._ratios = freq
-        return self._ratios
+            freq = iterator_lens / np.sum(iterator_lens)  # eg. [10/45, 15/45, 20/45]
+            self._iterator_frequencies = freq
+        return self._iterator_frequencies
 
     @property
     def var(self):
