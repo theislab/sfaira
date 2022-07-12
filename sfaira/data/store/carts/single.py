@@ -205,9 +205,6 @@ class CartAnndata(CartSingle):
         """
         Iterator over data matrix and meta data table, yields batches of data points.
         """
-        assert isinstance(self.batch_size, int)
-        assert self.batch_size in [0, 1]
-
         # Speed up access to single object by skipping index overlap operations:
         for idx_i in self.schedule.design:
             if len(idx_i) > 0:
@@ -402,8 +399,6 @@ class CartDask(CartSingle):
         """
         Iterator over data matrix and meta data table, yields batches of data points.
         """
-        assert isinstance(self.batch_size, int)
-        assert self.batch_size >= 0
         # Can all data sets corresponding to one organism as a single array because they share the second dimension
         # and dask keeps expression data and obs out of memory.
         for batch_idxs in self.schedule.design:
@@ -418,10 +413,8 @@ class CartDask(CartSingle):
                 else:
                     map_fn_args = (x_i, obs_i)
                 data_tuple = self.map_fn(*map_fn_args)
-                if self.batch_size == 0:
-                    yield data_tuple
-                if self.batch_size > 0:
-                    for data_tuple_i in split_batch(x=data_tuple, split_size=self.batch_size):
+                if self.batch_size == 1:
+                    for data_tuple_i in split_batch(x=data_tuple):
                         yield data_tuple_i
                 else:
                     yield data_tuple

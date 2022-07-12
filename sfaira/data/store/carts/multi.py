@@ -59,7 +59,7 @@ class CartMulti(CartBase):
 
         if self.intercalated:
             while keep_repeating:
-                iterator_frequencies = self.iterator_frequencies.copy()
+                iterator_frequencies = self.iterator_frequencies.tolist().copy()
                 iterators = [v.iterator(repeat=1, shuffle_buffer=shuffle_buffer) for v in self.carts.values()]
                 while len(iterators) > 0:
                     # Sample iterator with frequencies so that in expectation, the frequency of samples from each
@@ -137,7 +137,7 @@ class CartMulti(CartBase):
         Note that these can be float and will be randomly rounded during intercalation.
         """
         if self._iterator_frequencies is None:
-            iterator_lens = np.array([v.n_batches for v in self.carts.values()])  # eg. [10, 15, 20]
+            iterator_lens = np.array([v.n_obs for v in self.carts.values()])  # eg. [10, 15, 20]
             # Compute ratios of sampling so that one batch is drawn from the smallest generator per intercalation cycle.
             # See also self.iterator.
             freq = iterator_lens / np.sum(iterator_lens)  # eg. [10/45, 15/45, 20/45]
