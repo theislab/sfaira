@@ -64,7 +64,7 @@ class CartMulti(CartBase):
                 while len(iterators) > 0:
                     # Sample iterator with frequencies so that in expectation, the frequency of samples from each
                     # iterator is uniform over an epoch.
-                    itertor_idx = np.random.multinomial(n=1, pvals=iterator_frequencies, partial=())
+                    itertor_idx = np.where(np.random.multinomial(n=1, pvals=iterator_frequencies))[0][0]
                     try:
                         x = next(iterators[itertor_idx])
                         yield x
