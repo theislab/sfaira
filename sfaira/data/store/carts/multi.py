@@ -1,4 +1,3 @@
-from functools import partial
 from typing import Dict, Union
 
 import anndata
@@ -44,6 +43,26 @@ class CartMulti(CartBase):
         g = SfairaMultiDataset(datasets=g, map_fn_merge=self.map_fn_merge)
         if loader:
             g = DataLoader(g, **kwargs)
+        return g
+
+    def adaptor_torch_iter(self, loader, repeat, shuffle_buffer, batch_size=None, interleaved: bool = False, **kwargs):
+        if interleaved:
+            from torch.utils.data import DataLoader
+            # Only import this module if torch is used to avoid strict torch dependency:
+            from sfaira.data.store.torch_dataset import InterleavedIterableDataset
+            assert batch_size is not None, "supply batch_size for interleaved multi loader"
+
+            datasets = [v.adaptor_torch_iter(loader=False, repeat=repeat, shuffle_buffer=shuffle_buffer)
+                        for v in self.carts.values()]
+            weights = [v.n_obs for v in self.carts.values()]
+            # Note on batch handling: the batch size is set in the dataset, the loader accepts the batches from the
+            # data, this is enforced by giving batch_size=None to the loader.
+            g = InterleavedIterableDataset(datasets=datasets, weights=weights, batch_size=batch_size)
+            if loader:
+                g = DataLoader(g, batch_size=None, **kwargs)
+        else:
+            g = super().adaptor_torch_iter(loader=loader, repeat=repeat, shuffle_buffer=shuffle_buffer,
+                                           batch_size=batch_size, **kwargs)
         return g
 
     @property
