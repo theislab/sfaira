@@ -54,7 +54,7 @@ class CartMulti(CartBase):
 
             datasets = [v.adaptor_torch_iter(loader=False, repeat=repeat, shuffle_buffer=shuffle_buffer)
                         for v in self.carts.values()]
-            weights = [v.n_obs for v in self.carts.values()]
+            weights = [v.n_obs_selected for v in self.carts.values()]
             # Note on batch handling: the batch size is set in the dataset, the loader accepts the batches from the
             # data, this is enforced by giving batch_size=None to the loader.
             g = InterleavedIterableDataset(datasets=datasets, weights=weights, batch_size=batch_size)
@@ -156,7 +156,7 @@ class CartMulti(CartBase):
         Note that these can be float and will be randomly rounded during intercalation.
         """
         if self._iterator_frequencies is None:
-            iterator_lens = np.array([v.n_obs for v in self.carts.values()])  # eg. [10, 15, 20]
+            iterator_lens = np.array([v.n_obs_selected for v in self.carts.values()])  # eg. [10, 15, 20]
             # Compute ratios of sampling so that one batch is drawn from the smallest generator per intercalation cycle.
             # See also self.iterator.
             freq = iterator_lens / np.sum(iterator_lens)  # eg. [10/45, 15/45, 20/45]
