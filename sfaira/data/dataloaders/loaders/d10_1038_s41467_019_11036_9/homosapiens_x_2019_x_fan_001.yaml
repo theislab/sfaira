@@ -37,7 +37,7 @@ dataset_wise:
     default_embedding: 
     doi_preprint: 
     doi_journal: "10.1038/s41467-019-11036-9"
-    download_url_data: "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE118127"
+    download_url_data: "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE118127&format=file"
     download_url_meta: 
     primary_data: True
     year: 2019

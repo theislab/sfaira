@@ -170,7 +170,75 @@ dataset_or_observation_wise:
     cell_line: 
     cell_line_obs_key: 
     cell_type: 
-    cell_type_obs_key: "Annotation"
+    cell_type_obs_key:
+        Bladder_dge.txt.gz: "Annotation"
+        BoneMarrow1_dge.txt.gz: "Annotation"
+        BoneMarrowcKit1_dge.txt.gz: "Annotation"
+        BoneMarrowcKit2_dge.txt.gz: "Annotation"
+        BoneMarrowcKit3_dge.txt.gz: "Annotation"
+        Brain1_dge.txt.gz: "Annotation"
+        Brain2_dge.txt.gz: "Annotation"
+        FetalBrain_dge.txt.gz:
+        FetalFemaleGonad_dge.txt.gz:
+        FetalIntestine_dge.txt.gz:
+        FetalKidney1_dge.txt.gz:
+        FetalKidney2_dge.txt.gz:
+        FetalLiverE14.1_dge.txt.gz:
+        FetalLung_dge.txt.gz:
+        FetalMaleGonad_dge.txt.gz:
+        FetalPancreas_dge.txt.gz:
+        FetalStomach_dge.txt.gz:
+        Kidney1_dge.txt.gz: "Annotation"
+        Kidney2_dge.txt.gz: "Annotation"
+        Liver1_dge.txt.gz: "Annotation"
+        Liver2_dge.txt.gz: "Annotation"
+        Lung1_dge.txt.gz: "Annotation"
+        Lung2_dge.txt.gz: "Annotation"
+        Lung3_dge.txt.gz: "Annotation"
+        MammaryGland.Virgin1_dge.txt.gz: "Annotation"
+        MammaryGland.Virgin2_dge.txt.gz: "Annotation"
+        MammaryGland.Virgin3_dge.txt.gz: "Annotation"
+        MammaryGland.Virgin4_dge.txt.gz: "Annotation"
+        MesenchymalStemCells_dge.txt.gz:
+        MesenchymalStemCellsPrimary_dge.txt.gz:
+        Muscle_dge.txt.gz: "Annotation"
+        NeonatalCalvaria1_dge.txt.gz: "Annotation"
+        NeonatalCalvaria2_dge.txt.gz: "Annotation"
+        NeonatalHeart_dge.txt.gz: "Annotation"
+        NeonatalMuscle1_dge.txt.gz: "Annotation"
+        NeonatalMuscle2_dge.txt.gz: "Annotation"
+        NeonatalRib1_dge.txt.gz: "Annotation"
+        NeonatalRib2_dge.txt.gz: "Annotation"
+        NeonatalRib3_dge.txt.gz: "Annotation"
+        NeonatalSkin_dge.txt.gz: "Annotation"
+        NeontalBrain1_dge.txt.gz: "Annotation"
+        NeontalBrain2_dge.txt.gz: "Annotation"
+        Ovary1_dge.txt.gz: "Annotation"
+        Ovary2_dge.txt.gz: "Annotation"
+        Pancreas_dge.txt.gz: "Annotation"
+        PeripheralBlood1_dge.txt.gz: "Annotation"
+        PeripheralBlood2_dge.txt.gz: "Annotation"
+        PeripheralBlood3_dge.txt.gz: "Annotation"
+        PeripheralBlood4_dge.txt.gz: "Annotation"
+        PeripheralBlood5_dge.txt.gz: "Annotation"
+        PeripheralBlood6_dge.txt.gz: "Annotation"
+        PlacentaE14.1_dge.txt.gz:
+        PlacentaE14.2_dge.txt.gz:
+        Prostate1_dge.txt.gz: "Annotation"
+        Prostate2_dge.txt.gz: "Annotation"
+        SmallIntestine.CD45_dge.txt.gz: "Annotation"
+        SmallIntestine1_dge.txt.gz: "Annotation"
+        SmallIntestine2_dge.txt.gz: "Annotation"
+        SmallIntestine3_dge.txt.gz: "Annotation"
+        Spleen_dge.txt.gz: "Annotation"
+        Stomach_dge.txt.gz: "Annotation"
+        Testis1_dge.txt.gz: "Annotation"
+        Testis2_dge.txt.gz: "Annotation"
+        Thymus1_dge.txt.gz: "Annotation"
+        Thymus2_dge.txt.gz: "Annotation"
+        TrophoblastStemCells_dge.txt.gz:
+        Uterus1_dge.txt.gz: "Annotation"
+        Uterus2_dge.txt.gz: "Annotation"
     development_stage: 
     development_stage_obs_key: 
     disease: "healthy"

@@ -40,4 +40,5 @@ def load(data_dir, sample_fn, **kwargs):
 
     adata.obs = adata.obs.reset_index().merge(metadata, how="left").set_index("index")
     adata.obs["Age"] = [str(x) for x in adata.obs["Age"].values]
+    adata.obs["Disease group"] = [str(x) for x in adata.obs["Disease group"].values]
     return adata
