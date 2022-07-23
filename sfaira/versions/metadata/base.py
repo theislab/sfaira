@@ -110,30 +110,37 @@ class OntologyList(Ontology):
 
     Node IDs and names are the same.
     """
-    nodes: list
+    nodes: Union[dict, list]
 
     def __init__(
             self,
-            terms: Union[List[Union[str, bool, int]]],
+            terms: Union[List[Union[str, bool, int]], Dict[str, dict]],
             **kwargs
     ):
         self.nodes = terms
+        self._dict_mode = isinstance(terms, dict)
 
     @property
     def node_names(self) -> List[str]:
-        return self.nodes
+        if self._dict_mode:
+            return [v["name"] for v in self.nodes.values()]
+        else:
+            return self.nodes
 
     @property
     def node_ids(self) -> List[str]:
-        return self.nodes
+        if self._dict_mode:
+            return list(self.nodes.keys())
+        else:
+            return self.nodes
 
     @property
     def leaves(self) -> List[str]:
-        return self.nodes
+        return self.node_ids
 
     @property
     def n_leaves(self) -> int:
-        return len(self.nodes)
+        return len(self.node_ids)
 
     def map_to_leaves(
             self,
@@ -149,10 +156,11 @@ class OntologyList(Ontology):
         :param return_type:
 
             "ids": IDs of mapped leave nodes. This is the query node itself for OntologyList.
-            "idx": indicies in leave note list of mapped leave nodes. This is the index of query node itself for
+            "idx": indices in leave note list of mapped leave nodes. This is the index of query node itself for
                     OntologyList.
         :return:
         """
+        node = self.__convert_to_id_cached(node)
         if return_type == "ids":
             return [node]
         elif return_type == "idx":
@@ -178,18 +186,49 @@ class OntologyList(Ontology):
             return dict([(x, np.array([])) for x in self.leaves])
 
     def is_a_node_id(self, x: str) -> bool:
-        return x in self.node_names
+        return x in self.node_ids
 
     def is_a_node_name(self, x: str) -> bool:
         return x in self.node_names
 
-    @staticmethod
-    def convert_to_id(x: Union[str, List[str]]) -> Union[str, List[str]]:
+    def convert_to_name(self, x: Union[str, List[str]]) -> Union[str, List[str]]:
+        if self._dict_mode:
+            was_str = isinstance(x, str)
+            if was_str:
+                x = [x]
+            if self.is_a_node_id(x[0]):
+                self.__validate_node_ids(x=x)
+                x = [self.nodes[k]["name"] for k in x]
+            elif self.is_a_node_name(x[0]):
+                self.__validate_node_names(x=x)
+            else:
+                raise ValueError(f"node {x[0]} not recognized")
+            if was_str:
+                x = x[0]
         return x
 
-    @staticmethod
-    def convert_to_name(x: Union[str, List[str]]) -> Union[str, List[str]]:
+    def convert_to_id(self, x: Union[str, List[str]]) -> Union[str, List[str]]:
+        if self._dict_mode:
+            was_str = isinstance(x, str)
+            if was_str:
+                x = [x]
+            if self.is_a_node_id(x[0]):
+                self.__validate_node_ids(x=x)
+            elif self.is_a_node_name(x[0]):
+                self.__validate_node_names(x=x)
+                x = [
+                    [k for k, v in self.nodes.items() if v["name"] == z][0]
+                    for z in x
+                ]
+            else:
+                raise ValueError(f"node {x[0]} not recognized")
+            if was_str:
+                x = x[0]
         return x
+
+    @lru_cache(maxsize=None)
+    def __convert_to_id_cached(self, x: str) -> str:
+        return self.convert_to_id(x)
 
     def map_node_suggestion(self, x: str, include_synonyms: bool = True, n_suggest: int = 10):
         """
@@ -227,6 +266,23 @@ class OntologyList(Ontology):
 
     def get_ancestors(self, node: str) -> List[str]:
         return []
+
+    def get_descendants(self, node: str) -> List[str]:
+        return []
+
+    def __validate_node_ids(self, x: Union[str, List[str]]):
+        if isinstance(x, str):
+            x = [x]
+        node_ids = self.node_ids
+        if np.any([y not in node_ids for y in x]):
+            raise ValueError(f"queried node id {x} are not all in graph")
+
+    def __validate_node_names(self, x: Union[str, List[str]]):
+        if isinstance(x, str):
+            x = [x]
+        node_names = self.node_names
+        if np.any([y not in node_names for y in x]):
+            raise ValueError(f"queried node names {x} are not all in graph")
 
 
 class OntologyHierarchical(Ontology, abc.ABC):
@@ -271,6 +327,22 @@ class OntologyHierarchical(Ontology, abc.ABC):
     @property
     def nodes(self) -> List[Tuple[str, dict]]:
         return list(self.graph.nodes.items())
+
+    @nodes.setter
+    def nodes(self, x: List[str]):
+        """
+        Sets new nodes-space for graph.
+
+        This clips nodes that are not in target set.
+        :param x: New set of nodes, identified as IDs.
+        """
+        x = self.convert_to_id(x)
+        nodes_to_remove = []
+        for y in self.node_ids:
+            if y not in x:
+                nodes_to_remove.append(y)
+        self.graph.remove_nodes_from(nodes_to_remove)
+        self._clear_caches()
 
     @property
     def nodes_dict(self) -> dict:
@@ -417,7 +489,7 @@ class OntologyHierarchical(Ontology, abc.ABC):
         :param return_type:
 
             "ids": IDs of mapped leave nodes
-            "idx": indicies in leave note list of mapped leave nodes
+            "idx": indices in leave note list of mapped leave nodes
         :param include_self: DEPRECEATED.
         :return:
         """

@@ -1,8 +1,35 @@
 import numpy as np
 from sfaira.consts.ontologies import DEFAULT_CL, DEFAULT_HSAPDV, DEFAULT_MONDO, DEFAULT_MMUSDV, DEFAULT_PATO, \
     DEFAULT_NCBITAXON, DEFAULT_UBERON
-from sfaira.versions.metadata import OntologyUberon, OntologyCl, OntologyHancestro, OntologyHsapdv, OntologyMondo, \
-    OntologyMmusdv, OntologyEfo, OntologyTaxon, OntologySex, OntologyUberonLifecyclestage
+from sfaira.versions.metadata import OntologyUberon, OntologyCl, OntologyHancestro, OntologyHsapdv, OntologyList,\
+    OntologyMondo, OntologyMmusdv, OntologyEfo, OntologyTaxon, OntologySex, OntologyUberonLifecyclestage
+
+
+"""
+Base
+"""
+
+
+def test_ontologylist():
+    """
+    Tests if ontology can be initialised.
+    """
+    cl = OntologyCl(branch=DEFAULT_CL, recache=False)
+    # Check list mode:
+    cl_list0 = OntologyList(terms=cl.node_ids)
+    # IDs and names should be the same:
+    assert np.all(np.asarray(cl_list0.node_ids) == np.asarray(cl_list0.node_names))
+    assert np.all([len(cl_list0.get_ancestors(node=x)) == 0 for x in cl_list0.node_names])
+    assert np.all([x in cl.node_ids for x in cl_list0.node_ids])
+    assert np.all([x in cl.node_ids for x in cl_list0.node_names])
+    # Check dict mode:
+    cl_list1 = OntologyList(terms=cl.nodes_dict)
+    # IDs and names should not be the same:
+    assert np.all(np.asarray(cl_list1.node_ids) != np.asarray(cl_list1.node_names))
+    assert np.all([len(cl_list1.get_ancestors(node=x)) == 0 for x in cl_list1.node_names])
+    assert np.all([x in cl.node_ids for x in cl_list1.node_ids])
+    assert np.all([x in cl.node_names for x in cl_list1.node_names])
+
 
 """
 OntologyCelltypes
