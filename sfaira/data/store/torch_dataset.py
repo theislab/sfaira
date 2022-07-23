@@ -242,3 +242,86 @@ class SfairaIterableDataset(torch.utils.data.IterableDataset):
 
     def __iter__(self):
         return self.iterator_fun()
+
+
+def collate(x):
+    """
+    Concatenate arrays in batch dimension for each slot:
+
+    Makes sure each tensor has a batch dimension.
+    Allows ndarray and tensor input, both will be collated.
+
+    :param x: List of batch observations. Each list element can be a list or a dictionary of tensors.
+    :return: Concatenated batch. This is a single dictionary or list (depending on input) of batch-dimensional
+        tensors).
+    """
+    if isinstance(x[0], dict):
+        if isinstance(x[0][list(x[0].keys())[0]], np.ndarray):
+            x = dict([
+                (k, np.concatenate([
+                    xi[k] if len(xi[k].shape) > 1 else np.expand_dims(xi[k], axis=0) for xi in x
+                ], axis=0))
+                for k in x[0].keys()])
+        elif isinstance(x[0][list(x[0].keys())[0]], torch.Tensor):
+            x = dict([(k, torch.cat([xi[k] if len(xi[k].shape) > 1 else xi[k].unsqueeze(0) for xi in x], dim=0))
+                      for k in x[0].keys()])
+        else:
+            raise ValueError(type(x[0][list(x[0].keys())[0]]))
+    elif isinstance(x[0], tuple) or isinstance(x[0], list):
+        if isinstance(x[0][0], np.ndarray):
+            x = [
+                np.concatenate([
+                    xi[i] if len(xi[i].shape) > 1 else np.expand_dims(xi[i], axis=0) for xi in x
+                ], axis=0)
+                for i in range(len(x[0]))]
+        elif isinstance(x[0][0], torch.Tensor):
+            x = [torch.cat([xi[i] if len(xi[i].shape) > 1 else xi[i].unsqueeze(0) for xi in x], dim=0)
+                 for i in range(len(x[0]))]
+        else:
+            raise ValueError(type(x[0][0]))
+    return x
+
+
+class InterleavedIterableDataset(torch.utils.data.IterableDataset):
+    """
+    Interleaves full batches of individual torch Datasets.
+
+    Each yield in __iter__ yields one full batch, not one observation!
+    This way, batching is moved from the loader to the dataset and one can make sure that any batch only consists of
+    observations from one dataset of the datasets that constitute this interleaved dataset.
+    Does not drop incomplete batches at end of an iterator but yields a last batch with batch size < the indicated batch
+    size.
+    """
+    def __init__(self, datasets: List[torch.utils.data.IterableDataset], weights: List[int], batch_size: int):
+        super(InterleavedIterableDataset, self).__init__()
+        assert len(datasets) == len(weights)
+        self.batch_size = batch_size
+        self.datasets = [iter(x) for x in datasets]
+        # Compute ratios of sampling so that one batch is drawn from the smallest generator per intercalation cycle.
+        # See also self.iterator.
+        self.iterator_frequencies = weights / np.sum(weights)
+
+    def __iter__(self):
+        datasets_in_loop = np.arange(0, len(self.datasets)).tolist()
+        iterator_frequencies = self.iterator_frequencies.tolist().copy()
+        while len(datasets_in_loop) > 0:
+            # Sample iterator with frequencies so that in expectation, the frequency of samples from each
+            # iterator is uniform over an epoch.
+            dataset_idx = np.where(np.random.multinomial(n=1, pvals=iterator_frequencies))[0][0]
+            batch = []
+            iter_yielding = True
+            # This while loop yields a last incomplete batch when an iterator finishes:
+            i = 0
+            while i < self.batch_size and iter_yielding:
+                try:
+                    x = next(self.datasets[datasets_in_loop[dataset_idx]])
+                    batch.append(x)
+                except StopIteration:
+                    # Remove iterator from list to sample. Once all are removed, the loop terminates.
+                    del datasets_in_loop[dataset_idx]
+                    del iterator_frequencies[dataset_idx]
+                    iter_yielding = False
+                i += 1
+            if len(batch) > 0:
+                batch = collate(batch)
+                yield batch

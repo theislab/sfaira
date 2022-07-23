@@ -401,7 +401,6 @@ class CartDask(CartSingle):
         """
         # Can all data sets corresponding to one organism as a single array because they share the second dimension
         # and dask keeps expression data and obs out of memory.
-
         for batch_idxs in self.schedule.design:
             if len(batch_idxs) > 0:
                 x_i = self._x[batch_idxs, :]
