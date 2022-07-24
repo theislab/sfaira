@@ -13,8 +13,8 @@ dataset_wise:
     primary_data: True
     year: 2019
 layers:
-    layer_counts: 
-    layer_processed: "X"
+    layer_counts: "X"
+    layer_processed:
     layer_spliced_counts: 
     layer_spliced_processed: 
     layer_unspliced_counts: 

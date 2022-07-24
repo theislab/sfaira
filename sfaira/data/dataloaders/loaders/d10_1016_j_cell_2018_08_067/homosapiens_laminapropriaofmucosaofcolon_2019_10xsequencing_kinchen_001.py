@@ -17,7 +17,4 @@ def load(data_dir, sample_fn, **kwargs):
     adata.obs = obs
     adata.obs['Age'] = adata.obs['Age'].astype(str) + '-year'
 
-    print(adata)
-    print(adata.var)
-
     return adata

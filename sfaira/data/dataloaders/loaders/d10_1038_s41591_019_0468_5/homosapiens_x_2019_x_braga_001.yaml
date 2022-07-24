@@ -17,11 +17,8 @@ dataset_wise:
     primary_data: True
     year: 2019
 layers:
-    layer_counts:
-        GSE130148: "X"
+    layer_counts: "X"
     layer_processed:
-        vieira19_Alveoli_and_parenchyma_anonymised.processed.h5ad: "X"
-        vieira19_Bronchi_anonymised.processed.h5ad: "X"
     layer_spliced_counts:
     layer_spliced_processed:
     layer_unspliced_counts:

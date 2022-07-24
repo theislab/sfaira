@@ -88,7 +88,7 @@ dataset_wise:
     primary_data: True
     year: 2019
 layers:
-    layer_counts: 
+    layer_counts: "raw"
     layer_processed: "X"
     layer_spliced_counts: 
     layer_spliced_processed: 
