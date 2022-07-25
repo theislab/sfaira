@@ -370,7 +370,7 @@ def project_free_to_ontology(adata: anndata.AnnData,
             attr=attr,
             allowed=get_ontology(k=attr, organism=organism),
             attempted=[x for x in list(set(labels_mapped)) if x not in map_exceptions],
-        )
+            dataset_id=dataset_id)
         # Add cell type IDs into object:
         # The IDs are not read from a source file but inferred based on the class name.
         # TODO this could be changed in the future, this allows this function to be used both on cell type name
