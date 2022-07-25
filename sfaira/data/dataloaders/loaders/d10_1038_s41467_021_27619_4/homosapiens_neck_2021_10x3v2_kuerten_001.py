@@ -1,5 +1,4 @@
 import anndata
-import gzip
 import os
 import pandas as pd
 import scipy.io
