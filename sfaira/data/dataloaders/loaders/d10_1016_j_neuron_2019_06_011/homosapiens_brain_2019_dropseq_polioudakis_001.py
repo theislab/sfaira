@@ -44,5 +44,6 @@ def load(data_dir, **kwargs):
     adata.obs = obs
     shutil.rmtree(fn_tmp)
     adata.obs['celltype'] = [ct_dict[i] for i in adata.obs['Cluster']]
+    adata.obs['Gestation_week'] = [str(x) for x in adata.obs['Gestation_week'].values]
 
     return adata

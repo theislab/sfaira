@@ -275,8 +275,18 @@ class DatasetBase(AnnotationContainer):
             assert isinstance(subset_layer, str), "subset_layer has to be of type str"
             if subset_layer == "counts":
                 self.layer_processed = None
+            elif subset_layer == "counts_prioritized":
+                # De-register processed data if count data are available:
+                # This will fill the count field with processed data if only processed data are available in the object.
+                if self.layer_counts is not None:
+                    self.layer_processed = None
             elif subset_layer == "processed":
                 self.layer_counts = None
+            elif subset_layer == "processed_prioritized":
+                # De-register count data if processed data are available:
+                # This will fill the processed field with count data if only count data are available in the object.
+                if self.layer_processed is not None:
+                    self.layer_counts = None
             else:
                 raise ValueError("subset_layer has to be either counts or processed")
 
