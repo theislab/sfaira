@@ -119,7 +119,8 @@ class AnnotationContainer:
 
     @assay_sc.setter
     def assay_sc(self, x: str):
-        x = value_protection(attr="assay_sc", allowed=self.get_ontology(k="assay_sc"), attempted=x)
+        x = value_protection(attr="assay_sc", allowed=self.get_ontology(k="assay_sc"), attempted=x,
+                             dataset_id=",".join([str(self.doi_journal), str(self.doi_preprint)]))
         self._assay_sc = x
 
     @property
@@ -129,7 +130,7 @@ class AnnotationContainer:
     @assay_differentiation.setter
     def assay_differentiation(self, x: str):
         x = value_protection(attr="assay_differentiation", allowed=self.get_ontology(k="assay_differentiation"),
-                             attempted=x)
+                             attempted=x, dataset_id=",".join([str(self.doi_journal), str(self.doi_preprint)]))
         self._assay_differentiation = x
 
     @property
@@ -139,7 +140,8 @@ class AnnotationContainer:
     @assay_type_differentiation.setter
     def assay_type_differentiation(self, x: str):
         x = value_protection(attr="assay_type_differentiation",
-                             allowed=self.get_ontology(k="assay_type_differentiation"), attempted=x)
+                             allowed=self.get_ontology(k="assay_type_differentiation"), attempted=x,
+                             dataset_id=",".join([str(self.doi_journal), str(self.doi_preprint)]))
         self._assay_type_differentiation = x
 
     @property
@@ -206,7 +208,8 @@ class AnnotationContainer:
 
     @cell_type.setter
     def cell_type(self, x: str):
-        x = value_protection(attr="cell_type", allowed=self.get_ontology(k="cell_type"), attempted=x)
+        x = value_protection(attr="cell_type", allowed=self.get_ontology(k="cell_type"), attempted=x,
+                             dataset_id=",".join([str(self.doi_journal), str(self.doi_preprint)]))
         self._cell_type = x
 
     @property
@@ -236,7 +239,8 @@ class AnnotationContainer:
 
     @development_stage.setter
     def development_stage(self, x: str):
-        x = value_protection(attr="development_stage", allowed=self.get_ontology(k="development_stage"), attempted=x)
+        x = value_protection(attr="development_stage", allowed=self.get_ontology(k="development_stage"), attempted=x,
+                             dataset_id=",".join([str(self.doi_journal), str(self.doi_preprint)]))
         self._development_stage = x
 
     @property
@@ -245,7 +249,8 @@ class AnnotationContainer:
 
     @disease.setter
     def disease(self, x: str):
-        x = value_protection(attr="disease", allowed=self.get_ontology(k="disease"), attempted=x)
+        x = value_protection(attr="disease", allowed=self.get_ontology(k="disease"), attempted=x,
+                             dataset_id=",".join([str(self.doi_journal), str(self.doi_preprint)]))
         self._disease = x
 
     @property
@@ -310,7 +315,8 @@ class AnnotationContainer:
 
     @ethnicity.setter
     def ethnicity(self, x: str):
-        x = value_protection(attr="ethnicity", allowed=self.get_ontology(k="ethnicity"), attempted=x)
+        x = value_protection(attr="ethnicity", allowed=self.get_ontology(k="ethnicity"), attempted=x,
+                             dataset_id=",".join([str(self.doi_journal), str(self.doi_preprint)]))
         self._ethnicity = x
 
     @property
@@ -328,7 +334,8 @@ class AnnotationContainer:
 
     @feature_type.setter
     def feature_type(self, x: str):
-        x = value_protection(attr="feature_type", allowed=self.get_ontology(k="feature_type"), attempted=x)
+        x = value_protection(attr="feature_type", allowed=self.get_ontology(k="feature_type"), attempted=x,
+                             dataset_id=",".join([str(self.doi_journal), str(self.doi_preprint)]))
         self._feature_type = x
 
     @property
@@ -337,7 +344,8 @@ class AnnotationContainer:
 
     @primary_data.setter
     def primary_data(self, x: bool):
-        x = value_protection(attr="primary_data", allowed=self.get_ontology(k="primary_data"), attempted=x)
+        x = value_protection(attr="primary_data", allowed=self.get_ontology(k="primary_data"), attempted=x,
+                             dataset_id=",".join([str(self.doi_journal), str(self.doi_preprint)]))
         self._primary_data = x
 
     @property
@@ -346,7 +354,8 @@ class AnnotationContainer:
 
     @organ.setter
     def organ(self, x: str):
-        x = value_protection(attr="organ", allowed=self.get_ontology(k="organ"), attempted=x)
+        x = value_protection(attr="organ", allowed=self.get_ontology(k="organ"), attempted=x,
+                             dataset_id=",".join([str(self.doi_journal), str(self.doi_preprint)]))
         self._organ = x
 
     @property
@@ -355,7 +364,8 @@ class AnnotationContainer:
 
     @organism.setter
     def organism(self, x: str):
-        x = value_protection(attr="organism", allowed=self.get_ontology(k="organism"), attempted=x)
+        x = value_protection(attr="organism", allowed=self.get_ontology(k="organism"), attempted=x,
+                             dataset_id=",".join([str(self.doi_journal), str(self.doi_preprint)]))
         self._organism = x
 
     @property
@@ -364,7 +374,8 @@ class AnnotationContainer:
 
     @sample_source.setter
     def sample_source(self, x: str):
-        x = value_protection(attr="sample_source", allowed=self.get_ontology(k="sample_source"), attempted=x)
+        x = value_protection(attr="sample_source", allowed=self.get_ontology(k="sample_source"), attempted=x,
+                             dataset_id=",".join([str(self.doi_journal), str(self.doi_preprint)]))
         self._sample_source = x
 
     @property
@@ -373,7 +384,8 @@ class AnnotationContainer:
 
     @sex.setter
     def sex(self, x: str):
-        x = value_protection(attr="sex", allowed=self.get_ontology(k="sex"), attempted=x)
+        x = value_protection(attr="sex", allowed=self.get_ontology(k="sex"), attempted=x,
+                             dataset_id=",".join([str(self.doi_journal), str(self.doi_preprint)]))
         self._sex = x
 
     @property
@@ -406,7 +418,8 @@ class AnnotationContainer:
 
     @year.setter
     def year(self, x: int):
-        x = value_protection(attr="year", allowed=self.get_ontology(k="year"), attempted=x)
+        x = value_protection(attr="year", allowed=self.get_ontology(k="year"), attempted=x,
+                             dataset_id=",".join([str(self.doi_journal), str(self.doi_preprint)]))
         self._year = x
 
     def get_ontology(self, **kwargs):
