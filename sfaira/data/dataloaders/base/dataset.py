@@ -34,10 +34,10 @@ class DatasetBase(AnnotationContainer):
     supplier: str
 
     _celltype_universe: Union[None, CelltypeUniverse] = None
-    _ontology_class_maps: Union[dict]
-
+    _fns_tsvs: Dict[str, List[str]]
     load_raw: Union[None, bool] = None
     mapped_features: Union[None, str, bool] = None
+    _ontology_class_maps: Union[dict]
     remove_gene_version: Union[None, bool] = None
     subset_gene_type: Union[None, str] = None
     streamlined_meta: bool = False
@@ -90,6 +90,7 @@ class DatasetBase(AnnotationContainer):
         self.cache_path = cache_path
 
         self._ontology_class_maps = dict([(k, None) for k in self._adata_ids.ontology_constrained])
+        self._fns_tsvs = []
 
         self.sample_fn = sample_fn
         self._sample_fns = sample_fns
@@ -532,6 +533,7 @@ class DatasetBase(AnnotationContainer):
         ontology_class_maps = {}
         for fn in fns:
             k = identify_tsv(fn=fn, ontology_names=self._adata_ids.ontology_constrained)
+            self._fns_tsvs[k] = fn
             if os.path.exists(fn):
                 ontology_class_maps[k] = self._read_ontology_class_map(fn=fn)
         self.ontology_class_maps = ontology_class_maps
@@ -912,10 +914,35 @@ class DatasetBase(AnnotationContainer):
                     idx_ = np.where([x in values_found_unique_matched for x in values_found])[0]
                     keep_dataset_ = len(idx_) > 0
                 else:
-                    if allow_partial_match:
-                        # TODO find keys from tsvs here
-                        idx_ = None
-                        keep_dataset_ = False
+                    if samplewise_key in self._fns_tsvs.keys():
+                        # We dont know associations here, so we will either keep the entire data set or nothing.
+                        values_found_unique = self._read_ontology_class_map(
+                            fn=self._fns_tsvs[samplewise_key])["target"].values
+                        try:
+                            ontology = getattr(self.ontology_container_sfaira, samplewise_key)
+                        except AttributeError:
+                            raise ValueError(f"{key} not a valid property of ontology_container object")
+                        values_found_unique_matched = [
+                            x for x in values_found_unique if np.any([
+                                is_child(query=x, ontology=ontology, ontology_parent=y)
+                                for y in values
+                            ])
+                        ]
+                        values_found_unique_mismatched = [x for x in values_found_unique
+                                                          if x not in values_found_unique_matched]
+                    else:
+                        values_found_unique_matched = None
+                        values_found_unique_mismatched = None
+                    if values_found_unique_matched is not None:
+                        if len(values_found_unique_mismatched) == 0 or \
+                                (len(values_found_unique_matched) > 0 and allow_partial_match):
+                            # Allow full data set if all values match, or > 0 values match and allow_partial_match is
+                            # true.
+                            idx_ = np.arange(0, self.adata.n_obs)
+                            keep_dataset_ = True
+                        else:
+                            idx_ = None
+                            keep_dataset_ = False
                     else:
                         idx_ = None
                         keep_dataset_ = False
