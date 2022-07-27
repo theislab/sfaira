@@ -119,6 +119,8 @@ def buffered_decompress(fn_compressed):
         dir_decompressed = fn_compressed.split(".zip")[0]
     elif fn_compressed.endswith(".tar.gz"):
         dir_decompressed = fn_compressed.split(".tar.gz")[0]
+    elif fn_compressed.endswith(".tar"):
+        dir_decompressed = fn_compressed.split(".tar")[0]
     elif fn_compressed.endswith(".gz"):
         dir_decompressed = fn_compressed.split(".gz")[0]
     else:

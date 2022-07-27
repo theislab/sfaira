@@ -26,8 +26,7 @@ def load(data_dir, **kwargs):
     fig1_anno = pd.read_excel(
         os.path.join(data_dir, "HCL_Fig1_cell_Info.xlsx"),
         index_col="cellnames",
-        engine="xlrd",  # ToDo: Update when pandas xlsx reading with openpyxl is fixed: yields empty tables
-    )
+        engine="openpyxl")
     fig1_anno.index = fig1_anno.index.str.replace("AdultJeJunum", "AdultJejunum", regex=True).str.replace(
         "AdultGallBladder", "AdultGallbladder", regex=True).str.replace(
         "FetalFemaleGonald", "FetalFemaleGonad", regex=True)
