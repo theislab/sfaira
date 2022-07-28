@@ -34,7 +34,7 @@ class DatasetBase(AnnotationContainer):
     supplier: str
 
     _celltype_universe: Union[None, CelltypeUniverse] = None
-    _fns_tsvs: Dict[str, List[str]]
+    _fns_tsvs: Dict[str, str]
     load_raw: Union[None, bool] = None
     mapped_features: Union[None, str, bool] = None
     _ontology_class_maps: Union[dict]
@@ -90,7 +90,7 @@ class DatasetBase(AnnotationContainer):
         self.cache_path = cache_path
 
         self._ontology_class_maps = dict([(k, None) for k in self._adata_ids.ontology_constrained])
-        self._fns_tsvs = []
+        self._fns_tsvs = {}
 
         self.sample_fn = sample_fn
         self._sample_fns = sample_fns
