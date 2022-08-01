@@ -1,3 +1,4 @@
+import abc
 from typing import Dict, List, Tuple, Union
 
 import anndata
@@ -161,6 +162,21 @@ class CartSingle(CartBase):
             self._obs_idx = x
             self.schedule.idx = x
 
+    @abc.abstractmethod
+    def _iterator(self):
+        pass
+
+    def iterator(self, repeat: int = 1, shuffle_buffer: int = 0):
+        """
+        Iterator over data matrix and meta data table, yields batches of data points.
+        """
+        if shuffle_buffer > 2 and self.batch_size == 1:
+            g_dataset = _ShuffleBuffer(self._iterator, shuffle_buffer).iterator
+        else:
+            g_dataset = self._iterator
+
+        return _DatasetIteratorRepeater(g_dataset, n_repeats=repeat).iterator()
+
 
 class CartAnndata(CartSingle):
 
@@ -255,14 +271,6 @@ class CartAnndata(CartSingle):
                         map_fn_args = (x, obs)
                     data_tuple = self.map_fn(*map_fn_args)
                     yield data_tuple
-
-    def iterator(self, repeat: int = 1, shuffle_buffer: int = 0):
-        if shuffle_buffer > 2 and self.batch_size == 1:
-            g_dataset = _ShuffleBuffer(self._iterator, shuffle_buffer).iterator
-        else:
-            g_dataset = self._iterator
-
-        return _DatasetIteratorRepeater(g_dataset, n_repeats=repeat).iterator()
 
     def move_to_memory(self):
         """
@@ -401,6 +409,8 @@ class CartDask(CartSingle):
         """
         # Can all data sets corresponding to one organism as a single array because they share the second dimension
         # and dask keeps expression data and obs out of memory.
+        # Trigger design once so that its random elements are different every time this iterator is called (ie
+        # ever epoch for example):
         for batch_idxs in self.schedule.design:
             if len(batch_idxs) > 0:
                 x_i = self._x[batch_idxs, :]
@@ -418,17 +428,6 @@ class CartDask(CartSingle):
                         yield data_tuple_i
                 else:
                     yield data_tuple
-
-    def iterator(self, repeat: int = 1, shuffle_buffer: int = 0):
-        """
-        Iterator over data matrix and meta data table, yields batches of data points.
-        """
-        if shuffle_buffer > 2 and self.batch_size == 1:
-            g_dataset = _ShuffleBuffer(self._iterator, shuffle_buffer).iterator
-        else:
-            g_dataset = self._iterator
-
-        return _DatasetIteratorRepeater(g_dataset, n_repeats=repeat).iterator()
 
     def move_to_memory(self):
         """

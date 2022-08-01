@@ -4,6 +4,7 @@ import anndata
 import numpy as np
 
 from sfaira.data.store.carts.base import CartBase
+from sfaira.data.store.carts.dataset_utils import _ShuffleBuffer, _DatasetIteratorRepeater
 from sfaira.data.store.carts.single import CartSingle
 
 
@@ -73,11 +74,14 @@ class CartMulti(CartBase):
         return dict([(k, v.adata) for k, v in self.carts.items()])
 
     def iterator(self, repeat: int = 1, shuffle_buffer: int = 0):
-        keep_repeating = True
-        num_repetitions = 0
+        """
+        Iterator over data matrix and meta data table, yields batches of data points.
 
-        if self.intercalated:
-            while keep_repeating:
+        Note: uses same shuffle buffer size across organisms and within organism, these are separate buffers though!
+        """
+
+        def _iterator():
+            if self.intercalated:
                 iterator_frequencies = self.iterator_frequencies.tolist().copy()
                 iterators = [v.iterator(repeat=1, shuffle_buffer=shuffle_buffer) for v in self.carts.values()]
                 while len(iterators) > 0:
@@ -91,16 +95,17 @@ class CartMulti(CartBase):
                         # Remove iterator from list to sample. Once all are removed, the loop terminates.
                         del iterators[itertor_idx]
                         del iterator_frequencies[itertor_idx]
-                num_repetitions += 1
-                keep_repeating = (num_repetitions < repeat) or (repeat <= 0)
-        else:
-            while keep_repeating:
+            else:
                 for gi in self.carts.values():
                     for x in gi.iterator():
                         yield x
 
-                num_repetitions += 1
-                keep_repeating = (num_repetitions < repeat) or (repeat <= 0)
+        if shuffle_buffer > 2 and np.all([x.batch_size == 1 for x in self.carts.values()]):
+            g_dataset = _ShuffleBuffer(_iterator, shuffle_buffer).iterator
+        else:
+            g_dataset = _iterator
+
+        return _DatasetIteratorRepeater(g_dataset, n_repeats=repeat).iterator()
 
     @property
     def n_batches(self) -> int:

@@ -111,7 +111,7 @@ class BatchDesignBasic(BatchDesignBase):
 
     @property
     def design(self) -> List[np.ndarray]:
-
+        print("DEV REPORT: TRIGGERED .design")
         if self.random_access:
             # shuffle idx for random access
             idx = np.random.permutation(self.idx)
@@ -168,6 +168,7 @@ class BatchDesignBalanced(BatchDesignBase):
 
     @property
     def design(self) -> List[np.ndarray]:
+        print("DEV REPORT: TRIGGERED .design")
         # select relevant probabilities and re-normalize to prob vector
         p_obs = self.p_obs[self.idx]
         p_obs = p_obs / np.sum(p_obs)
