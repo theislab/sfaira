@@ -45,7 +45,8 @@ class CartMulti(CartBase):
         See documentation of self._adaptor().
         """
         iter_kwargs = {"shuffle_buffer": shuffle_buffer, "shuffle_buffer_multi": shuffle_buffer_multi, "repeat": repeat}
-        self._adaptor(generator_type=generator_type, dataset_kwargs=dataset_kwargs, iter_kwargs=iter_kwargs, **kwargs)
+        return self._adaptor(generator_type=generator_type, dataset_kwargs=dataset_kwargs, iter_kwargs=iter_kwargs,
+                             **kwargs)
 
     def adaptor_torch(self, dataset_kwargs, loader, **kwargs):
         from torch.utils.data import DataLoader
