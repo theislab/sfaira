@@ -1,4 +1,5 @@
 import abc
+from functools import partial
 from typing import Dict, List, Tuple, Union
 
 import anndata
@@ -79,12 +80,36 @@ class CartSingle(CartBase):
         self.obs_idx = obs_idx  # This needs to be set after .schedule.
         self.obsm = obsm
 
+    def adaptor(
+            self,
+            generator_type: str,
+            dataset_kwargs: dict = None,
+            shuffle_buffer: int = 0,
+            repeat: int = 1,
+            **kwargs
+    ):
+        """
+        See documentation of self._adaptor().
+        """
+        iter_kwargs = {"shuffle_buffer": shuffle_buffer, "repeat": repeat}
+        self._adaptor(generator_type=generator_type, dataset_kwargs=dataset_kwargs, iter_kwargs=iter_kwargs, **kwargs)
+
     def adaptor_torch(self, dataset_kwargs, loader, **kwargs):
         from torch.utils.data import DataLoader
         # Only import this module if torch is used to avoid strict torch dependency:
         from sfaira.data.store.torch_dataset import SfairaDataset
 
         g = SfairaDataset(map_fn=self.map_fn_base, obs=self.obs, obsm=self.obsm, x=self.x, **dataset_kwargs)
+        if loader:
+            g = DataLoader(g, **kwargs)
+        return g
+
+    def adaptor_torch_iter(self, loader, repeat, shuffle_buffer, **kwargs):
+        from torch.utils.data import DataLoader
+        # Only import this module if torch is used to avoid strict torch dependency:
+        from sfaira.data.store.torch_dataset import SfairaIterableDataset
+
+        g = SfairaIterableDataset(iterator_fun=partial(self.iterator, repeat=repeat, shuffle_buffer=shuffle_buffer))
         if loader:
             g = DataLoader(g, **kwargs)
         return g
@@ -171,11 +196,11 @@ class CartSingle(CartBase):
         Iterator over data matrix and meta data table, yields batches of data points.
         """
         if shuffle_buffer > 2 and self.batch_size == 1:
-            g_dataset = _ShuffleBuffer(self._iterator, shuffle_buffer).iterator
+            iterator = _ShuffleBuffer(self._iterator, shuffle_buffer).iterator
         else:
-            g_dataset = self._iterator
+            iterator = self._iterator
 
-        return _DatasetIteratorRepeater(g_dataset, n_repeats=repeat).iterator()
+        return _DatasetIteratorRepeater(iterator, n_repeats=repeat).iterator()
 
 
 class CartAnndata(CartSingle):
