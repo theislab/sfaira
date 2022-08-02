@@ -105,11 +105,14 @@ class CartMulti(CartBase):
 
         Note: uses same shuffle buffer size across organisms and within organism, these are separate buffers though!
         """
+        keep_repeating = True
+        num_repetitions = 0
         if self.intercalated:
 
-            def _iterator():
-                iterator_frequencies = self.iterator_frequencies.tolist().copy()
-                iterators = [v.iterator(repeat=repeat, shuffle_buffer=shuffle_buffer) for v in self.carts.values()]
+            #def _iterator():
+            iterator_frequencies = self.iterator_frequencies.tolist().copy()
+            iterators = [v.iterator(repeat=1, shuffle_buffer=shuffle_buffer) for v in self.carts.values()]
+            while keep_repeating:
                 while len(iterators) > 0:
                     # Sample iterator with frequencies so that in expectation, the frequency of samples from each
                     # iterator is uniform over an epoch.
@@ -121,23 +124,28 @@ class CartMulti(CartBase):
                         # Remove iterator from list to sample. Once all are removed, the loop terminates.
                         del iterators[itertor_idx]
                         del iterator_frequencies[itertor_idx]
+                    num_repetitions += 1
+                    keep_repeating = (num_repetitions < repeat) or (repeat <= 0)
 
         else:
             if not repeat == 1 or len(self.carts.keys()) == 1:
                 raise ValueError("using non-intercalated iterator with more than one cart and multiple repeats,"
                                  "likely not desired.")
 
-            def _iterator():
+            #def _iterator():
+            while keep_repeating:
                 for gi in self.carts.values():
-                    for x in gi.iterator(repeat=repeat, shuffle_buffer=shuffle_buffer):
+                    for x in gi.iterator(): # repeat=repeat, shuffle_buffer=shuffle_buffer):
                         yield x
+                num_repetitions += 1
+                keep_repeating = (num_repetitions < repeat) or (repeat <= 0)
 
-        if shuffle_buffer_multi > 2 and np.all([x.batch_size == 1 for x in self.carts.values()]):
-            iterator = _ShuffleBuffer(generator=_iterator, buffer_size=shuffle_buffer_multi).iterator
-        else:
-            iterator = _iterator
-        # Note: do not repeat this overall iterator as the individual carts are already repeated.
-        return _DatasetIteratorRepeater(iterator, n_repeats=1).iterator()
+        #if shuffle_buffer_multi > 2 and np.all([x.batch_size == 1 for x in self.carts.values()]):
+        #    iterator = _ShuffleBuffer(generator=_iterator, buffer_size=shuffle_buffer_multi).iterator
+        #else:
+        #    iterator = _iterator
+        ## Note: do not repeat this overall iterator as the individual carts are already repeated.
+        #return _DatasetIteratorRepeater(iterator, n_repeats=1).iterator()
 
     @property
     def n_batches(self) -> int:
