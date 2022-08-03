@@ -938,7 +938,7 @@ class DatasetBase(AnnotationContainer):
                                 (len(values_found_unique_matched) > 0 and allow_partial_match):
                             # Allow full data set if all values match, or > 0 values match and allow_partial_match is
                             # true.
-                            idx_ = np.arange(0, self.adata.n_obs)
+                            idx_ = None
                             keep_dataset_ = True
                         else:
                             idx_ = None
@@ -949,16 +949,16 @@ class DatasetBase(AnnotationContainer):
             else:
                 if allow_missing_annotation:
                     # Pass all cells in object:
-                    idx_ = np.arange(0, self.adata.n_obs)
+                    idx_ = None
                     keep_dataset_ = True
                 else:
                     # Pass none of the cells in object:
-                    idx_ = np.array([])
+                    idx_ = None
                     keep_dataset_ = False
             return idx_, keep_dataset_
 
         idx, keep_dataset = get_subset_idx(samplewise_key=key, cellwise_key=key + "_obs_key")
-        if self.loaded:
+        if self.loaded and idx is not None:
             self.adata = self.adata[idx, :].copy() if len(idx) > 0 else None
         return keep_dataset
 
