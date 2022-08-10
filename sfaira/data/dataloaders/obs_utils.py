@@ -244,7 +244,7 @@ def streamline_obs_uns(adata: anndata.AnnData,
     adata.var = adata.var.replace({None: unknown_new})
     adata.var = adata.var.replace({unknown_old: unknown_new})
     for k in adata.uns_keys():
-        if adata.uns[k] is None or adata.uns[k] == unknown_old:
+        if adata.uns[k] is None or (isinstance(adata.uns[k], str) and adata.uns[k] == unknown_old):
             adata.uns[k] = unknown_new
 
     # Add additional hard-coded description changes for cellxgene schema:
