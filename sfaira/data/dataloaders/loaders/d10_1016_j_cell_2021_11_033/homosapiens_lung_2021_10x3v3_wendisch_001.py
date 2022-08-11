@@ -5,7 +5,7 @@ def load(data_dir, sample_fn, **kwargs):
     import anndata2ri
     from rpy2.robjects import r
 
-    fn = os.path.join(data_dir, "covid19.macrophage", sample_fn)
+    fn = os.path.join(data_dir, "covid19.macrophages", sample_fn)
     object_name = sample_fn.replace(".Rds", "")
     anndata2ri.activate()
     adata = r(
