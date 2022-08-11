@@ -4,7 +4,6 @@
 from ._settings import settings
 import sfaira.consts
 import sfaira.data
-import sfaira.models
 import sfaira.train
 import sfaira.ui
 import sfaira.versions
