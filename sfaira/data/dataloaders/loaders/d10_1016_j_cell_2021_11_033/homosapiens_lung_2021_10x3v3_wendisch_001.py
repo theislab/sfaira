@@ -10,7 +10,7 @@ def load(data_dir, sample_fn, **kwargs):
     anndata2ri.activate()
     adata = r(
         f"library(Seurat)\n"
-        f"load('{fn}')\n"
+        f"readRDS('{fn}')\n"
         f"new_obj = CreateSeuratObject(counts = `{object_name}`@assays$RNA@counts)\n"
         f"new_obj@meta.data = `{object_name}`@meta.data\n"
         f"as.SingleCellExperiment(new_obj)\n"
