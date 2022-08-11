@@ -40,7 +40,7 @@ dataset_or_observation_wise:
     cell_type: 
     cell_type_obs_key: "cell_type"
     development_stage: 
-    development_stage_obs_key: 
+    development_stage_obs_key: "age"
     disease: "COVID-19"
     disease_obs_key: 
     ethnicity: 
@@ -48,7 +48,7 @@ dataset_or_observation_wise:
     gm:
     gm_obs_key:
     individual:
-    individual_obs_key: 
+    individual_obs_key: "patient"
     organ: "lung"
     organ_obs_key: 
     organism: "Homo sapiens"
@@ -56,7 +56,7 @@ dataset_or_observation_wise:
     sample_source: "primary_tissue"
     sample_source_obs_key: 
     sex: 
-    sex_obs_key: 
+    sex_obs_key: "sex"
     source_doi:
     source_doi_obs_key:
     state_exact:
@@ -67,7 +67,7 @@ dataset_or_observation_wise:
     treatment_obs_key:
 feature_wise:
     feature_id_var_key: "index"
-    feature_symbol_var_key: "index"
+    feature_symbol_var_key:
 observation_wise:
     spatial_x_coord_obs_key: 
     spatial_y_coord_obs_key: 

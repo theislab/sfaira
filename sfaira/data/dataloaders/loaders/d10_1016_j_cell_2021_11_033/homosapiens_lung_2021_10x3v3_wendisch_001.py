@@ -1,13 +1,21 @@
-import anndata
 import os
-# import any packages you require for dataloading here. you can assume packages like numpy and pandas being available
 
 
-# the data_dir argument will be automatically set by sfaira to the folder where your datafiles lie
-# the sample_fn argument will be automatically set by sfaira to each of the sample_fns provided in the yaml top section
 def load(data_dir, sample_fn, **kwargs):
-    fn = os.path.join(data_dir, sample_fn)
-    # replace the simple data loading code below with the code required to load your data file(s)
-    adata = anndata.read(fn)
+    import anndata2ri
+    from rpy2.robjects import r
 
-    return adata  # your load function needs to return an AnnData object
+    fn = os.path.join(data_dir, "covid19.macrophage", sample_fn)
+    object_name = sample_fn.replace(".Rds", "")
+    anndata2ri.activate()
+    adata = r(
+        f"library(Seurat)\n"
+        f"load('{fn}')\n"
+        f"new_obj = CreateSeuratObject(counts = `{object_name}`@assays$RNA@counts)\n"
+        f"new_obj@meta.data = `{object_name}`@meta.data\n"
+        f"as.SingleCellExperiment(new_obj)\n"
+    )
+    # TODO SarsCov2 counts are not yet loaded here, they are in
+    # `{object_name}`@assays$SCoV2
+
+    return adata
