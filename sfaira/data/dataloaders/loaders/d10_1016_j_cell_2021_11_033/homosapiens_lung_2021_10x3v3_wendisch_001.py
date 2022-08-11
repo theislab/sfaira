@@ -10,9 +10,9 @@ def load(data_dir, sample_fn, **kwargs):
     anndata2ri.activate()
     adata = r(
         f"library(Seurat)\n"
-        f"readRDS('{fn}')\n"
-        f"new_obj = CreateSeuratObject(counts = `{object_name}`@assays$RNA@counts)\n"
-        f"new_obj@meta.data = `{object_name}`@meta.data\n"
+        f"obj <- readRDS('{fn}')\n"
+        f"new_obj = CreateSeuratObject(counts = obj@assays$RNA@counts)\n"
+        f"new_obj@meta.data = obj@meta.data\n"
         f"as.SingleCellExperiment(new_obj)\n"
     )
     # TODO SarsCov2 counts are not yet loaded here, they are in
