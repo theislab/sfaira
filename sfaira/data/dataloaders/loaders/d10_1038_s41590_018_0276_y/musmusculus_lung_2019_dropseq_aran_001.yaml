@@ -73,7 +73,7 @@ dataset_or_observation_wise:
     treatment:
     treatment_obs_key:
 feature_wise:
-    feature_id_var_key: "index"
+    feature_id_var_key:
     feature_symbol_var_key: "index"
 observation_wise:
     spatial_x_coord_obs_key: 

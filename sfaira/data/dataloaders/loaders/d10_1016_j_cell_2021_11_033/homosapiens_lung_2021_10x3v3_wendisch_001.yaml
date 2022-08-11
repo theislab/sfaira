@@ -2,7 +2,7 @@ dataset_structure:
     dataset_index: 1
     sample_fns:
         - "BAL-macrophages.Rds"
-        - " BAL.Rds"
+        - "BAL.Rds"
         - "Monocytes.Rds"
 dataset_wise:
     author: "Wendisch, Daniel"
