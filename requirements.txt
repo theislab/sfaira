@@ -20,14 +20,11 @@ scanpy>=1.7.0
 scipy>=1.2.1
 seaborn
 sparse
-tensorflow  # TODO remove as soon as # 70 is solved
-torch  # TODO remove as soon as # 70 is solved
-torchmetrics  # TODO remove as soon as # 70 is solved
 tqdm
 requests
 versioneer
 h5py
-xlrd==1.*
+xlrd==2.0.1
 zarr
 rich>=9.10.0
 click>=7.1.2

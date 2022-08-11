@@ -52,10 +52,19 @@ setup(
     install_requires=requirements,
     extras_require={
         'curation': [
+            "openpyxl",
             "scirpy",
+            "tables",
         ],
         'extension': [
             "sfaira_extension",
+        ],
+        'tensorflow': [
+            "tensorflow",
+        ],
+        'torch': [
+            "torch",
+            "torchmetrics",
         ],
     },
     version=versioneer.get_version(),
