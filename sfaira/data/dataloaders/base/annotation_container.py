@@ -111,15 +111,13 @@ class AnnotationContainer:
                         # only set value if field exists
                         if sample_fn in v.keys():
                             v = v[sample_fn]
-                        else:
-                            v = None
-                    # Catches spelling errors in meta data definition (yaml keys).
-                    if not hasattr(self, k) and not hasattr(self, "_" + k):
-                        raise ValueError(f"Tried setting unavailable property {k}.")
-                    try:
-                        setattr(self, k, v)
-                    except AttributeError as e:
-                        raise ValueError(f"ValueError when setting {k} as {v}: {e}")
+                            # Catches spelling errors in meta data definition (yaml keys).
+                            if not hasattr(self, k) and not hasattr(self, "_" + k):
+                                raise ValueError(f"Tried setting unavailable property {k}.")
+                            try:
+                                setattr(self, k, v)
+                            except AttributeError as e:
+                                raise ValueError(f"ValueError when setting {k} as {v}: {e}")
 
     @property
     def assay_sc(self) -> Union[None, str]:
