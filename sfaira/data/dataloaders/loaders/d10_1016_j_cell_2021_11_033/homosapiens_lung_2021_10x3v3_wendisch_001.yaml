@@ -1,8 +1,8 @@
 dataset_structure:
     dataset_index: 1
     sample_fns:
-        - "BAL-macrophages.Rds"
         - "BAL.Rds"
+        - "BAL-macrophages.Rds"
         - "Monocytes.Rds"
 dataset_wise:
     author: "Wendisch, Daniel"
@@ -11,7 +11,10 @@ dataset_wise:
     doi_journal: "10.1016/j.cell.2021.11.033"
     download_url_data: "https://nubes.helmholtz-berlin.de/s/XrM8igTzFTFSoio/download"
     download_url_meta: 
-    primary_data: True
+    primary_data:
+        BAL.Rds: True
+        BAL-macrophages.Rds: False
+        Monocytes.Rds: True
     year: 2021
 layers:
     layer_counts: "X"
@@ -38,9 +41,14 @@ dataset_or_observation_wise:
     cell_line: 
     cell_line_obs_key: 
     cell_type: 
-    cell_type_obs_key: "cell_type"
+    cell_type_obs_key:
+        BAL.Rds: "Celltype"
+        BAL-macrophages.Rds: "Cluster"
+        Monocytes.Rds: "orig.ident"
     development_stage: 
-    development_stage_obs_key: "age"
+    development_stage_obs_key:
+        BAL.Rds: "age"
+        Monocytes.Rds: "age"
     disease: "COVID-19"
     disease_obs_key: 
     ethnicity: 
@@ -48,7 +56,10 @@ dataset_or_observation_wise:
     gm:
     gm_obs_key:
     individual:
-    individual_obs_key: "patient"
+    individual_obs_key:
+        BAL.Rds: "patient"
+        BAL-macrophages.Rds: "donor"
+        Monocytes.Rds: "patient"
     organ: "lung"
     organ_obs_key: 
     organism: "Homo sapiens"
@@ -56,7 +67,9 @@ dataset_or_observation_wise:
     sample_source: "primary_tissue"
     sample_source_obs_key: 
     sex: 
-    sex_obs_key: "sex"
+    sex_obs_key:
+        BAL.Rds: "sex"
+        Monocytes.Rds: "sex"
     source_doi:
     source_doi_obs_key:
     state_exact:
