@@ -1,25 +1,19 @@
 dataset_structure:
     dataset_index: 1
     sample_fns:
-        - "GSM3036808_Control_1_1_Mouse_lung_digital_gene_expression_400.dge.txt.gz"
-        - "GSM3036809_Control_1_2_Mouse_lung_digital_gene_expression_1500.dge.txt.gz"
-        - "GSM3036810_Control_2_Mouse_lung_digital_gene_expression_4000.dge.txt.gz"
-        - "GSM3036811_Control_3_Mouse_lung_digital_gene_expression_6000.dge.txt.gz"
-        - "GSM3036812_Control_4_Mouse_lung_digital_gene_expression_4000.dge.txt.gz"
-        - "GSM3036813_Control_5_Mouse_lung_digital_gene_expression_4000.dge.txt.gz"
-        - "GSM3036814_Control_6_Mouse_lung_digital_gene_expression_6000.dge.txt.gz"
-        - "GSM3036815_Bleo_1_Mouse_lung_digital_gene_expression_4000.dge.txt.gz"
-        - "GSM3036816_Bleo_2_Mouse_lung_digital_gene_expression_6000.dge.txt.gz"
-        - "GSM3036817_Bleo_3_Mouse_lung_digital_gene_expression_6000.dge.txt.gz"
 dataset_wise:
-    author: "Aran, Dvir"
+    author: "Adams, TS"
     default_embedding: 
     doi_preprint: 
-    doi_journal: "10.1038/s41590-018-0276-y"
-    download_url_data: "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE111664&format=file"
+    doi_journal: "10.1126/sciadv.aba1983"
+    download_url_data:
+        - "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE136831&format=file&file=GSE136831%5FRawCounts%5FSparse%2Emtx%2Egz"
+        - "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE136831&format=file&file=GSE136831%5FAllCells%2EcellBarcodes%2Etxt%2Egz"
+        - "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE136831&format=file&file=GSE136831%5FAllCells%2ESamples%2ECellType%2EMetadataTable%2Etxt%2Egz"
+        - "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE136831&format=file&file=GSE136831%5FAllCells%2EGeneIDs%2Etxt%2Egz"
     download_url_meta: 
     primary_data: True
-    year: 2019
+    year: 2020
 layers:
     layer_counts: "X"
     layer_processed: 
@@ -34,7 +28,7 @@ dataset_or_feature_wise:
     feature_type: "rna"
     feature_type_var_key: 
 dataset_or_observation_wise:
-    assay_sc: "Drop-seq"
+    assay_sc: "10x 3' v2"
     assay_sc_obs_key: 
     assay_differentiation: 
     assay_differentiation_obs_key: 
@@ -45,7 +39,7 @@ dataset_or_observation_wise:
     cell_line: 
     cell_line_obs_key: 
     cell_type: 
-    cell_type_obs_key: 
+    cell_type_obs_key: "Subclass_Cell_Identity"
     development_stage: 
     development_stage_obs_key: 
     disease: 
@@ -55,10 +49,10 @@ dataset_or_observation_wise:
     gm:
     gm_obs_key:
     individual:
-    individual_obs_key: 
-    organ: "lung"
+    individual_obs_key: "Subject_Identity"
+    organ: 
     organ_obs_key: 
-    organism: "Mus musculus"
+    organism: "Homo sapiens"
     organism_obs_key: 
     sample_source: "primary_tissue"
     sample_source_obs_key: 
@@ -69,12 +63,12 @@ dataset_or_observation_wise:
     state_exact:
     state_exact_obs_key:
     tech_sample:
-    tech_sample_obs_key: 
+    tech_sample_obs_key: "Library_Identity"
     treatment:
     treatment_obs_key:
 feature_wise:
-    feature_id_var_key:
-    feature_symbol_var_key: "index"
+    feature_id_var_key: "index"
+    feature_symbol_var_key: "HGNC_EnsemblAlt_GeneID"
 observation_wise:
     spatial_x_coord_obs_key: 
     spatial_y_coord_obs_key: 

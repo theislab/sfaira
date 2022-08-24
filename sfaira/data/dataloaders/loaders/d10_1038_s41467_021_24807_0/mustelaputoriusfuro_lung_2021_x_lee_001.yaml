@@ -1,25 +1,15 @@
 dataset_structure:
     dataset_index: 1
     sample_fns:
-        - "GSM3036808_Control_1_1_Mouse_lung_digital_gene_expression_400.dge.txt.gz"
-        - "GSM3036809_Control_1_2_Mouse_lung_digital_gene_expression_1500.dge.txt.gz"
-        - "GSM3036810_Control_2_Mouse_lung_digital_gene_expression_4000.dge.txt.gz"
-        - "GSM3036811_Control_3_Mouse_lung_digital_gene_expression_6000.dge.txt.gz"
-        - "GSM3036812_Control_4_Mouse_lung_digital_gene_expression_4000.dge.txt.gz"
-        - "GSM3036813_Control_5_Mouse_lung_digital_gene_expression_4000.dge.txt.gz"
-        - "GSM3036814_Control_6_Mouse_lung_digital_gene_expression_6000.dge.txt.gz"
-        - "GSM3036815_Bleo_1_Mouse_lung_digital_gene_expression_4000.dge.txt.gz"
-        - "GSM3036816_Bleo_2_Mouse_lung_digital_gene_expression_6000.dge.txt.gz"
-        - "GSM3036817_Bleo_3_Mouse_lung_digital_gene_expression_6000.dge.txt.gz"
 dataset_wise:
-    author: "Aran, Dvir"
+    author: "Lee, JS"
     default_embedding: 
     doi_preprint: 
-    doi_journal: "10.1038/s41590-018-0276-y"
-    download_url_data: "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE111664&format=file"
-    download_url_meta: 
+    doi_journal: "10.1038/s41467-021-24807-0"
+    download_url_data: "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE171828&format=file&file=GSE171828%5FSeurat%5Fobject%5Ftotal%5Fcells%2ERds%2Egz"
+    download_url_meta: "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE171828&format=file&file=GSE171828%5Ftotal%5Fcell%5Fannotation%2Etsv%2Egz"
     primary_data: True
-    year: 2019
+    year: 2021
 layers:
     layer_counts: "X"
     layer_processed: 
@@ -34,7 +24,7 @@ dataset_or_feature_wise:
     feature_type: "rna"
     feature_type_var_key: 
 dataset_or_observation_wise:
-    assay_sc: "Drop-seq"
+    assay_sc: 
     assay_sc_obs_key: 
     assay_differentiation: 
     assay_differentiation_obs_key: 
@@ -45,7 +35,7 @@ dataset_or_observation_wise:
     cell_line: 
     cell_line_obs_key: 
     cell_type: 
-    cell_type_obs_key: 
+    cell_type_obs_key: "Annotation_fine"
     development_stage: 
     development_stage_obs_key: 
     disease: 
@@ -55,10 +45,10 @@ dataset_or_observation_wise:
     gm:
     gm_obs_key:
     individual:
-    individual_obs_key: 
+    individual_obs_key: "Sample_name"
     organ: "lung"
     organ_obs_key: 
-    organism: "Mus musculus"
+    organism: "Mustela putorius furo"
     organism_obs_key: 
     sample_source: "primary_tissue"
     sample_source_obs_key: 
@@ -73,8 +63,8 @@ dataset_or_observation_wise:
     treatment:
     treatment_obs_key:
 feature_wise:
-    feature_id_var_key:
-    feature_symbol_var_key: "index"
+    feature_id_var_key: "index"
+    feature_symbol_var_key:
 observation_wise:
     spatial_x_coord_obs_key: 
     spatial_y_coord_obs_key: 

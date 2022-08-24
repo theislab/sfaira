@@ -1,0 +1,46 @@
+source	target	target_id
+Abdominal_wall	abdominal wall	UBERON:0003697
+Adrenal_gland	adrenal gland	UBERON:0002369
+Aorta	aorta	UBERON:0000947
+Bladder	gall bladder	UBERON:0002110
+Bone_marrow	bone marrow	UBERON:0002371
+Bronchus	bronchus	UBERON:0002185
+Carotid	carotenoid	CHEBI:23044
+Cerebellum	cerebellum	UBERON:0002037
+Colon	colon	UBERON:0001155
+Diaphragm	diaphragm	UBERON:0001103
+Duodenum	duodenum	UBERON:0002114
+Epididymis	epididymis	UBERON:0001301
+Esophagus	esophagus	UBERON:0001043
+Fallopian_tube	fallopian tube	UBERON:0003889
+Gallbladder	gall bladder	UBERON:0002110
+Heart	heart	UBERON:0000948
+Kidney	kidney	UBERON:0002113
+Liver	liver	UBERON:0002107
+Lung	lung	UBERON:0002048
+Lymph_node	lymph node	UBERON:0000029
+Neocortex	neocortex	UBERON:0001950
+Ovary	ovary	UBERON:0000992
+PBMC	blood	UBERON:0000178
+Pancreas	pancreas	UBERON:0001264
+Pigmentary_epi	pigmented layer of retina	UBERON:0001782
+Pineal_gland	pineal complex	UBERON:0015238
+Pituitary_gland	pituitary gland	UBERON:0000007
+Prostate	prostate gland	UBERON:0002367
+Retina	retina	UBERON:0000966
+Salivary_gland	saliva-secreting gland	UBERON:0001044
+Skin	skin epidermis	UBERON:0001003
+Spermaduct	seminiferous tubule of testis	UBERON:0001343
+Spinal_cord	spinal cord	UBERON:0002240
+Spleen	spleen	UBERON:0002106
+Stomach	stomach	UBERON:0000945
+Subcutaneous_adipose	subcutaneous adipose tissue	UBERON:0002190
+Substantia_nigra	substantia nigra	UBERON:0002038
+Testis	testis	UBERON:0000473
+Thyroid_gland	thyroid gland	UBERON:0002046
+Tongue	tongue	UBERON:0001723
+Tonsil	tonsil	UBERON:0002372
+Trachea	trachea	UBERON:0003126
+Uterus	uterus	UBERON:0000995
+Vagina	vagina	UBERON:0000996
+Visceral_adipose	visceral fat	UBERON:0035818

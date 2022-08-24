@@ -99,7 +99,9 @@ class Dataset(DatasetBase):
         self._collection = None
         self.collection_id = collection_id
         self.supplier = "cellxgene"
-        doi = [x['link_url'] for x in self.collection["links"] if x['link_type'] == 'DOI']
+        doi = [x['link_url'].replace("https://doi.org/", "")
+               for x in self.collection["links"]
+               if x['link_type'] == 'DOI']
         self.doi_journal = collection_id if len(doi) == 0 else doi[0]  # TODO access journal DOI explicitly.
         self.id_base = sample_fn
         # Set h5ad download URLs:
