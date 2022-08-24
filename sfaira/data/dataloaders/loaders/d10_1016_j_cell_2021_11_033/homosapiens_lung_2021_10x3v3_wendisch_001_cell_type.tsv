@@ -1,16 +1,16 @@
-source	target
-AMφ-1	alveolar macrophage
-AMφ-2	alveolar macrophage
-B and DC	dendritic cell
-CD163/LGMN-Mφ	macrophage
-Epithelial cells	epithelial cell
-Erythrocytes	erythrocyte
-Macrophages	macrophage
-Mono/Mφ	macrophage
-Monocytes	monocyte
-NK cells	natural killer cell
-Neutrophils	neutrophil
-Plasma cells	plasma cell
-Prolif. AMφ	macrophage
-Stimulated monocytes	monocyte
-T cells	T cell
+source	target	target_id
+AMφ-1	alveolar macrophage	CL:0000583
+AMφ-2	alveolar macrophage	CL:0000583
+B and DC	dendritic cell	CL:0000451
+CD163/LGMN-Mφ	macrophage	CL:0000235
+Epithelial cells	epithelial cell	CL:0000066
+Erythrocytes	erythrocyte	CL:0000232
+Macrophages	macrophage	CL:0000235
+Mono/Mφ	macrophage	CL:0000235
+Monocytes	monocyte	CL:0000576
+NK cells	natural killer cell	CL:0000623
+Neutrophils	neutrophil	CL:0000775
+Plasma cells	plasma cell	CL:0000786
+Prolif. AMφ	macrophage	CL:0000235
+Stimulated monocytes	monocyte	CL:0000576
+T cells	T cell	CL:0000084

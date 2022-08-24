@@ -1,7 +1,7 @@
-source	target
-22	22-year-old human stage
-56	56-year-old human stage
-62	62-year-old human stage
-63	63-year-old human stage
-72	72-year-old human stage
-76	76-year-old human stage
+source	target	target_id
+22	22-year-old human stage	HsapDv:0000116
+56	56-year-old human stage	HsapDv:0000150
+62	62-year-old human stage	HsapDv:0000156
+63	63-year-old human stage	HsapDv:0000157
+72	72-year-old human stage	HsapDv:0000166
+76	76-year-old human stage	HsapDv:0000170
