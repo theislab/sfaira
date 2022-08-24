@@ -18,7 +18,7 @@ def load(data_dir, **kwargs):
     tab_obs2["Main_cell_type"] = [str(x) for x in tab_obs2["Main_cell_type"].values]
     tab_obs2["development_stage"] = [str(x) for x in tab_obs2["development_stage"].values]
     tab_obs2["embryo_sex"] = [str(x) for x in tab_obs2["embryo_sex"].values]
-    tab_var = pd.read_csv(fn_var, sep=",", compression="gzip")
+    tab_var = pd.read_csv(fn_var, index_col=0, sep=",", compression="gzip")
     tab_var.index = tab_var["gene_id"].values
     del tab_var["gene_id"]
     x = scipy.io.mmread(fn_x)
