@@ -48,7 +48,7 @@ dataset_or_observation_wise:
     development_stage: 
     development_stage_obs_key:
         BAL.Rds: "age"
-        Monocytes.Rds: "age"
+        BAL-macrophages.Rds: "age"
     disease: "COVID-19"
     disease_obs_key: 
     ethnicity: 
@@ -69,7 +69,7 @@ dataset_or_observation_wise:
     sex: 
     sex_obs_key:
         BAL.Rds: "sex"
-        Monocytes.Rds: "sex"
+        BAL-macrophages.Rds: "sex"
     source_doi:
     source_doi_obs_key:
     state_exact:
