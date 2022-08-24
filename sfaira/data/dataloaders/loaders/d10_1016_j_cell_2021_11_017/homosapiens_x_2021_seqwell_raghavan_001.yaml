@@ -1,25 +1,22 @@
 dataset_structure:
     dataset_index: 1
     sample_fns:
-        - "GSM3036808_Control_1_1_Mouse_lung_digital_gene_expression_400.dge.txt.gz"
-        - "GSM3036809_Control_1_2_Mouse_lung_digital_gene_expression_1500.dge.txt.gz"
-        - "GSM3036810_Control_2_Mouse_lung_digital_gene_expression_4000.dge.txt.gz"
-        - "GSM3036811_Control_3_Mouse_lung_digital_gene_expression_6000.dge.txt.gz"
-        - "GSM3036812_Control_4_Mouse_lung_digital_gene_expression_4000.dge.txt.gz"
-        - "GSM3036813_Control_5_Mouse_lung_digital_gene_expression_4000.dge.txt.gz"
-        - "GSM3036814_Control_6_Mouse_lung_digital_gene_expression_6000.dge.txt.gz"
-        - "GSM3036815_Bleo_1_Mouse_lung_digital_gene_expression_4000.dge.txt.gz"
-        - "GSM3036816_Bleo_2_Mouse_lung_digital_gene_expression_6000.dge.txt.gz"
-        - "GSM3036817_Bleo_3_Mouse_lung_digital_gene_expression_6000.dge.txt.gz"
+        - "Biopsy_RawDGE_23042cells.csv"
+        - "Biopsy473_RawDGE_1370cells.csv"
+        - "Fig4B_Organoid_RawDGE_6438cells.csv"
+        - "Fig4C_Organoid_RawDGE_2117cells.csv"
+        - "Fig4E_Organoid_RawDGE_2042cells.csv"
+        - "Fig6_Organoid_RawDGE_6071cells.csv"
+        - "Organoid_RawDGE_24995cells.csv"
 dataset_wise:
-    author: "Aran, Dvir"
+    author: "Raghavan, Srivatsan"
     default_embedding: 
     doi_preprint: 
-    doi_journal: "10.1038/s41590-018-0276-y"
-    download_url_data: "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE111664&format=file"
+    doi_journal: "10.1016/j.cell.2021.11.017"
+    download_url_data: "https://singlecell.broadinstitute.org/single_cell/study/SCP1644"
     download_url_meta: 
     primary_data: True
-    year: 2019
+    year: 2021
 layers:
     layer_counts: "X"
     layer_processed: 
@@ -34,7 +31,7 @@ dataset_or_feature_wise:
     feature_type: "rna"
     feature_type_var_key: 
 dataset_or_observation_wise:
-    assay_sc: "Drop-seq"
+    assay_sc: "Seq-Well"
     assay_sc_obs_key: 
     assay_differentiation: 
     assay_differentiation_obs_key: 
@@ -45,25 +42,25 @@ dataset_or_observation_wise:
     cell_line: 
     cell_line_obs_key: 
     cell_type: 
-    cell_type_obs_key: 
+    cell_type_obs_key: "Coarse_Cell_Annotations"
     development_stage: 
     development_stage_obs_key: 
     disease: 
-    disease_obs_key: 
+    disease_obs_key: "disease__ontology_label"
     ethnicity: 
     ethnicity_obs_key: 
     gm:
     gm_obs_key:
     individual:
     individual_obs_key: 
-    organ: "lung"
-    organ_obs_key: 
-    organism: "Mus musculus"
+    organ: 
+    organ_obs_key: "organ__ontology_label"
+    organism: "Homo sapiens"
     organism_obs_key: 
-    sample_source: "primary_tissue"
+    sample_source: "tumor"
     sample_source_obs_key: 
     sex: 
-    sex_obs_key: 
+    sex_obs_key: "sex"
     source_doi:
     source_doi_obs_key:
     state_exact:
@@ -73,7 +70,7 @@ dataset_or_observation_wise:
     treatment:
     treatment_obs_key:
 feature_wise:
-    feature_id_var_key:
+    feature_id_var_key: 
     feature_symbol_var_key: "index"
 observation_wise:
     spatial_x_coord_obs_key: 

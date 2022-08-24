@@ -1,25 +1,19 @@
 dataset_structure:
     dataset_index: 1
     sample_fns:
-        - "GSM3036808_Control_1_1_Mouse_lung_digital_gene_expression_400.dge.txt.gz"
-        - "GSM3036809_Control_1_2_Mouse_lung_digital_gene_expression_1500.dge.txt.gz"
-        - "GSM3036810_Control_2_Mouse_lung_digital_gene_expression_4000.dge.txt.gz"
-        - "GSM3036811_Control_3_Mouse_lung_digital_gene_expression_6000.dge.txt.gz"
-        - "GSM3036812_Control_4_Mouse_lung_digital_gene_expression_4000.dge.txt.gz"
-        - "GSM3036813_Control_5_Mouse_lung_digital_gene_expression_4000.dge.txt.gz"
-        - "GSM3036814_Control_6_Mouse_lung_digital_gene_expression_6000.dge.txt.gz"
-        - "GSM3036815_Bleo_1_Mouse_lung_digital_gene_expression_4000.dge.txt.gz"
-        - "GSM3036816_Bleo_2_Mouse_lung_digital_gene_expression_6000.dge.txt.gz"
-        - "GSM3036817_Bleo_3_Mouse_lung_digital_gene_expression_6000.dge.txt.gz"
+        - "GSM4889920_M0"
+        - "GSM4889921_M1"
+        - "GSM4889922_M2"
+        - "GSM4889923_M1_and_M2"
 dataset_wise:
-    author: "Aran, Dvir"
+    author: "Munoz-Rojas, AR"
     default_embedding: 
     doi_preprint: 
-    doi_journal: "10.1038/s41590-018-0276-y"
-    download_url_data: "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE111664&format=file"
+    doi_journal: "10.1038/s41467-020-20540-2"
+    download_url_data: "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE161125&format=file"
     download_url_meta: 
     primary_data: True
-    year: 2019
+    year: 2021
 layers:
     layer_counts: "X"
     layer_processed: 
@@ -34,7 +28,7 @@ dataset_or_feature_wise:
     feature_type: "rna"
     feature_type_var_key: 
 dataset_or_observation_wise:
-    assay_sc: "Drop-seq"
+    assay_sc: "10x 3' transcription profiling"
     assay_sc_obs_key: 
     assay_differentiation: 
     assay_differentiation_obs_key: 
@@ -44,7 +38,7 @@ dataset_or_observation_wise:
     bio_sample_obs_key: 
     cell_line: 
     cell_line_obs_key: 
-    cell_type: 
+    cell_type: "macrophage"
     cell_type_obs_key: 
     development_stage: 
     development_stage_obs_key: 
@@ -56,7 +50,7 @@ dataset_or_observation_wise:
     gm_obs_key:
     individual:
     individual_obs_key: 
-    organ: "lung"
+    organ: "bone marrow"
     organ_obs_key: 
     organism: "Mus musculus"
     organism_obs_key: 
@@ -67,13 +61,17 @@ dataset_or_observation_wise:
     source_doi:
     source_doi_obs_key:
     state_exact:
+        GSM4889920_M0: "M0"
+        GSM4889921_M1: "M1"
+        GSM4889922_M2: "M2"
+        GSM4889923_M1_and_M2: "M1_and_M2"
     state_exact_obs_key:
     tech_sample:
     tech_sample_obs_key: 
     treatment:
     treatment_obs_key:
 feature_wise:
-    feature_id_var_key:
+    feature_id_var_key: 
     feature_symbol_var_key: "index"
 observation_wise:
     spatial_x_coord_obs_key: 

@@ -1,25 +1,15 @@
 dataset_structure:
     dataset_index: 1
     sample_fns:
-        - "GSM3036808_Control_1_1_Mouse_lung_digital_gene_expression_400.dge.txt.gz"
-        - "GSM3036809_Control_1_2_Mouse_lung_digital_gene_expression_1500.dge.txt.gz"
-        - "GSM3036810_Control_2_Mouse_lung_digital_gene_expression_4000.dge.txt.gz"
-        - "GSM3036811_Control_3_Mouse_lung_digital_gene_expression_6000.dge.txt.gz"
-        - "GSM3036812_Control_4_Mouse_lung_digital_gene_expression_4000.dge.txt.gz"
-        - "GSM3036813_Control_5_Mouse_lung_digital_gene_expression_4000.dge.txt.gz"
-        - "GSM3036814_Control_6_Mouse_lung_digital_gene_expression_6000.dge.txt.gz"
-        - "GSM3036815_Bleo_1_Mouse_lung_digital_gene_expression_4000.dge.txt.gz"
-        - "GSM3036816_Bleo_2_Mouse_lung_digital_gene_expression_6000.dge.txt.gz"
-        - "GSM3036817_Bleo_3_Mouse_lung_digital_gene_expression_6000.dge.txt.gz"
 dataset_wise:
-    author: "Aran, Dvir"
+    author: "Elmentaite, Rasa"
     default_embedding: 
     doi_preprint: 
-    doi_journal: "10.1038/s41590-018-0276-y"
-    download_url_data: "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE111664&format=file"
+    doi_journal: "10.1038/s41586-021-03852-1"
+    download_url_data: "https://cellgeni.cog.sanger.ac.uk/gutcellatlas/Full_obj_raw_counts_nosoupx_v2.h5ad"
     download_url_meta: 
     primary_data: True
-    year: 2019
+    year: 2021
 layers:
     layer_counts: "X"
     layer_processed: 
@@ -34,8 +24,8 @@ dataset_or_feature_wise:
     feature_type: "rna"
     feature_type_var_key: 
 dataset_or_observation_wise:
-    assay_sc: "Drop-seq"
-    assay_sc_obs_key: 
+    assay_sc:
+    assay_sc_obs_key: "10X"
     assay_differentiation: 
     assay_differentiation_obs_key: 
     assay_type_differentiation: 
@@ -45,35 +35,35 @@ dataset_or_observation_wise:
     cell_line: 
     cell_line_obs_key: 
     cell_type: 
-    cell_type_obs_key: 
+    cell_type_obs_key: "Integrated_05"
     development_stage: 
-    development_stage_obs_key: 
+    development_stage_obs_key: "Age"
     disease: 
-    disease_obs_key: 
+    disease_obs_key: "Diagnosis"
     ethnicity: 
     ethnicity_obs_key: 
     gm:
     gm_obs_key:
     individual:
     individual_obs_key: 
-    organ: "lung"
+    organ: "intestine"
     organ_obs_key: 
-    organism: "Mus musculus"
+    organism: "Homo sapiens"
     organism_obs_key: 
     sample_source: "primary_tissue"
     sample_source_obs_key: 
     sex: 
-    sex_obs_key: 
+    sex_obs_key: "Gender"
     source_doi:
     source_doi_obs_key:
     state_exact:
     state_exact_obs_key:
     tech_sample:
-    tech_sample_obs_key: 
+    tech_sample_obs_key: "Sample name"
     treatment:
     treatment_obs_key:
 feature_wise:
-    feature_id_var_key:
+    feature_id_var_key: "gene_ids"
     feature_symbol_var_key: "index"
 observation_wise:
     spatial_x_coord_obs_key: 

@@ -1,0 +1,19 @@
+source	target	target_id
+CCL19	fibroblast	CL:0000057
+CD34	fibroblast	CL:0000057
+CD34+ sublining (SC-F1)	fibroblast	CL:0000057
+DKK3+ sublining (SC-F3)	fibroblast	CL:0000057
+Fibroblast	fibroblast	CL:0000057
+HAS1_PLIN2	fibroblast	CL:0000057
+HLA-DRAhi sublining (SC-F2)	fibroblast	CL:0000057
+Inflammatory Fibroblasts	fibroblast	CL:0000057
+Lining (SC-F4)	lining cell	CL:0000213
+Myofibroblast	myofibroblast cell	CL:0000186
+Myofibroblasts	myofibroblast cell	CL:0000186
+RSPO3+	fibroblast	CL:0000057
+Sublining	fibroblast	CL:0000057
+WNT2B+ Fos-hi	fibroblast	CL:0000057
+WNT2B+ Fos-lo 2	fibroblast	CL:0000057
+WNT5B+ 1	fibroblast	CL:0000057
+WNT5B+ 2	fibroblast	CL:0000057
+nan	unknown	unknown

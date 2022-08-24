@@ -1,0 +1,40 @@
+source	target	target_id
+Cardiac muscle lineages	cardiac muscle cell	CL:0000746
+Cholinergic neurons	cholinergic neuron	CL:0000108
+Chondroctye progenitors	chondrocyte	CL:0000138
+Chondrocytes & osteoblasts	chondrocyte	CL:0000138
+Connective tissue progenitors	connective tissue cell	CL:0002320
+Definitive erythroid lineage	primitive erythroid lineage cell	CL:0002417
+Early mesenchyme	mesenchymal cell	CL:0008019
+Endothelial cells	endothelial cell	CL:0000115
+Ependymal cell	ependymal cell	CL:0000065
+Epithelial cells	epithelial cell	CL:0000066
+Excitatory neurons	excitatory neuron	CL:0008030
+Granule neurons	granule cell	CL:0000120
+Hepatocytes	hepatocyte	CL:0000182
+Inhibitory interneurons	inhibitory interneuron	CL:0000498
+Inhibitory neuron progenitors	inhibitory neuron	CL:0008029
+Inhibitory neurons	inhibitory neuron	CL:0008029
+Intermediate Mesoderm	intermediate mesodermal cell	CL:0011011
+Isthmic organizer cells	neural cell	CL:0002319
+Jaw and tooth progenitors	bone cell	CL:0001035
+Lens	lens epithelial cell	CL:0002224
+Limb mesenchyme	mesenchymal cell	CL:0008019
+Megakaryocytes	megakaryocyte	CL:0000556
+Melanocytes	melanocyte	CL:0000148
+Myocytes	muscle cell	CL:0000187
+Neural Tube	neural cell	CL:0002319
+Neural progenitor cells	neural progenitor cell	CL:0011020
+Neutrophils	neutrophil	CL:0000775
+Notochord cells	notochordal cell	CL:0007005
+Oligodendrocyte Progenitors	oligodendrocyte precursor cell	CL:0002453
+Osteoblasts	osteoblast	CL:0000062
+Postmitotic premature neurons	neuron	CL:0000540
+Premature oligodendrocyte	oligodendrocyte	CL:0000128
+Primitive erythroid lineage	primitive erythroid lineage cell	CL:0002417
+Radial glia	radial glial cell	CL:0000681
+Schwann cell precursor	Schwann cell precursor	CL:0002375
+Sensory neurons	sensory neuron	CL:0000101
+Stromal cells	stromal cell	CL:0000499
+White blood cells	leukocyte	CL:0000738
+nan	unknown	unknown

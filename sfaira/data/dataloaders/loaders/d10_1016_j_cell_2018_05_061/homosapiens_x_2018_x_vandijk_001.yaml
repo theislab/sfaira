@@ -1,25 +1,15 @@
 dataset_structure:
     dataset_index: 1
     sample_fns:
-        - "GSM3036808_Control_1_1_Mouse_lung_digital_gene_expression_400.dge.txt.gz"
-        - "GSM3036809_Control_1_2_Mouse_lung_digital_gene_expression_1500.dge.txt.gz"
-        - "GSM3036810_Control_2_Mouse_lung_digital_gene_expression_4000.dge.txt.gz"
-        - "GSM3036811_Control_3_Mouse_lung_digital_gene_expression_6000.dge.txt.gz"
-        - "GSM3036812_Control_4_Mouse_lung_digital_gene_expression_4000.dge.txt.gz"
-        - "GSM3036813_Control_5_Mouse_lung_digital_gene_expression_4000.dge.txt.gz"
-        - "GSM3036814_Control_6_Mouse_lung_digital_gene_expression_6000.dge.txt.gz"
-        - "GSM3036815_Bleo_1_Mouse_lung_digital_gene_expression_4000.dge.txt.gz"
-        - "GSM3036816_Bleo_2_Mouse_lung_digital_gene_expression_6000.dge.txt.gz"
-        - "GSM3036817_Bleo_3_Mouse_lung_digital_gene_expression_6000.dge.txt.gz"
 dataset_wise:
-    author: "Aran, Dvir"
+    author: "van Dijk, David"
     default_embedding: 
     doi_preprint: 
-    doi_journal: "10.1038/s41590-018-0276-y"
-    download_url_data: "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE111664&format=file"
+    doi_journal: "10.1016/j.cell.2018.05.061"
+    download_url_data: "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE114397&format=file&file=GSE114397%5FHMLE%5FTGFb%2Etsv%2Egz"
     download_url_meta: 
     primary_data: True
-    year: 2019
+    year: 2018
 layers:
     layer_counts: "X"
     layer_processed: 
@@ -34,7 +24,7 @@ dataset_or_feature_wise:
     feature_type: "rna"
     feature_type_var_key: 
 dataset_or_observation_wise:
-    assay_sc: "Drop-seq"
+    assay_sc: "inDrop"
     assay_sc_obs_key: 
     assay_differentiation: 
     assay_differentiation_obs_key: 
@@ -56,11 +46,11 @@ dataset_or_observation_wise:
     gm_obs_key:
     individual:
     individual_obs_key: 
-    organ: "lung"
+    organ: 
     organ_obs_key: 
-    organism: "Mus musculus"
+    organism: "Homo sapiens"
     organism_obs_key: 
-    sample_source: "primary_tissue"
+    sample_source: "2d_culture"
     sample_source_obs_key: 
     sex: 
     sex_obs_key: 
@@ -73,7 +63,7 @@ dataset_or_observation_wise:
     treatment:
     treatment_obs_key:
 feature_wise:
-    feature_id_var_key:
+    feature_id_var_key: 
     feature_symbol_var_key: "index"
 observation_wise:
     spatial_x_coord_obs_key: 

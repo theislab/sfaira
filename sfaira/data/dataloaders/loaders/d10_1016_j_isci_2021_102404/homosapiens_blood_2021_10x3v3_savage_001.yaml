@@ -1,0 +1,307 @@
+dataset_structure:
+    dataset_index: 1
+    sample_fns:
+        - "GSM4749756_NW_TX0005-1_GRCh38"
+        - "GSM4749758_NW_TX0005-2_GRCh38"
+        - "GSM4749759_NW_TX0005-3_GRCh38"
+        - "GSM4749760_NW_TX0005-4_GRCh38"
+        - "GSM4749761_NW_TX0005-5_GRCh38"
+        - "GSM4749762_NW_TX0005-6_GRCh38"
+        - "GSM4749764_NW_TX0005-7_GRCh38"
+        - "GSM4749765_NW_TX0005-8_GRCh38"
+        - "GSM4749766_NW_TX0005-9_GRCh38"
+        - "GSM4749767_NW_TX0005-10_GRCh38"
+        - "GSM4749768_NW_TX0005-11_GRCh38"
+        - "GSM4749770_NW_TX0005-12_GRCh38"
+        - "GSM4749771_NW_TX0005-13_GRCh38"
+        - "GSM4749772_NW_TX0005-14_GRCh38"
+        - "GSM4749773_NW_TX0005-15_GRCh38"
+        - "GSM4749774_NW_TX0011-6_GRCh38"
+        - "GSM4749775_NW_TX0011-7_GRCh38"
+        - "GSM4749776_NW_TX0011-8_GRCh38"
+        - "GSM4749777_NW_TX0011-9_GRCh38"
+        - "GSM4749778_NW_TX0011-10_GRCh38"
+        - "GSM4749779_NW_TX0011-11_GRCh38"
+        - "GSM4749780_NW_TX0011-12_GRCh38"
+        - "GSM4749781_NW_TX0011-13_GRCh38"
+        - "GSM4749782_NW_TX0011-14_GRCh38"
+        - "GSM4749783_NW_TX0011-15_GRCh38"
+        - "GSM4749784_NW_TX0011-16_GRCh38"
+        - "GSM4749785_NW_TX0011-17_GRCh38"
+        - "GSM4749786_NW_TX0011-18_GRCh38"
+        - "GSM4749787_NW_TX0011-19_GRCh38"
+        - "GSM4749788_NW_TX0011-20_GRCh38"
+        - "GSM4749789_X019-RP1C1W1-RNA"
+        - "GSM4749790_X019-RP1C1W2-RNA"
+        - "GSM4749791_X019-RP1C1W3-RNA"
+        - "GSM4749792_X019-RP1C1W4-RNA"
+        - "GSM4749793_X019-RP1C1W5-RNA"
+        - "GSM4749794_X019-RP1C1W6-RNA"
+        - "GSM4749795_X019-RP1C1W7-RNA"
+        - "GSM4749796_X019-RP1C1W8-RNA"
+        - "GSM4749797_X019-RP1C2W1-RNA"
+        - "GSM4749798_X019-RP1C2W2-RNA"
+        - "GSM4749799_X019-RP1C2W3-RNA"
+        - "GSM4749800_X019-RP1C2W4-RNA"
+        - "GSM4749801_X019-RP2C2W5-RNA"
+        - "GSM4749802_X019-RP2C2W6-RNA"
+        - "GSM4749803_X019-RP2C2W7-RNA"
+        - "GSM4749804_X019-RP2C2W8-RNA"
+        - "GSM4749805_X019-RP2C3W1-RNA"
+        - "GSM4749806_X019-RP2C3W2-RNA"
+        - "GSM4749807_X019-RP2C3W3-RNA"
+        - "GSM4749808_X019-RP2C3W4-RNA"
+        - "GSM4749809_X019-RP2C3W5-RNA"
+        - "GSM4749810_X019-RP2C3W6-RNA"
+        - "GSM5211175_X031-P1_IMM19_317_1"
+        - "GSM5211176_X031-P1_IMM19_317_2"
+        - "GSM5211177_X031-P1_IMM19_317_3"
+dataset_wise:
+    author: "Savage, Adam K"
+    default_embedding: 
+    doi_preprint: "10.1101/2020.10.18.344663 "
+    doi_journal: "10.1016/j.isci.2021.102404"
+    download_url_data: "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE156989&format=file"
+    download_url_meta: 
+    primary_data: True
+    year: 2021
+layers:
+    layer_counts: "X"
+    layer_processed: 
+    layer_spliced_counts: 
+    layer_spliced_processed: 
+    layer_unspliced_counts: 
+    layer_unspliced_processed: 
+    layer_velocity: 
+dataset_or_feature_wise:
+    feature_reference: 
+    feature_reference_var_key: 
+    feature_type: "rna"
+    feature_type_var_key: 
+dataset_or_observation_wise:
+    assay_sc: "10x 3' v3"
+    assay_sc_obs_key: 
+    assay_differentiation: 
+    assay_differentiation_obs_key: 
+    assay_type_differentiation: 
+    assay_type_differentiation_obs_key: 
+    bio_sample:
+    bio_sample_obs_key: 
+    cell_line: 
+    cell_line_obs_key: 
+    cell_type: 
+    cell_type_obs_key: 
+    development_stage:
+    development_stage_obs_key: 
+    disease:
+        GSM4749756_NW_TX0005-1_GRCh38: "healthy"
+        GSM4749758_NW_TX0005-2_GRCh38: "healthy"
+        GSM4749759_NW_TX0005-3_GRCh38: "healthy"
+        GSM4749760_NW_TX0005-4_GRCh38: "healthy"
+        GSM4749761_NW_TX0005-5_GRCh38: "healthy"
+        GSM4749762_NW_TX0005-6_GRCh38: "healthy"
+        GSM4749764_NW_TX0005-7_GRCh38: "healthy"
+        GSM4749765_NW_TX0005-8_GRCh38: "healthy"
+        GSM4749766_NW_TX0005-9_GRCh38: "healthy"
+        GSM4749767_NW_TX0005-10_GRCh38: "healthy"
+        GSM4749768_NW_TX0005-11_GRCh38: "healthy"
+        GSM4749770_NW_TX0005-12_GRCh38: "healthy"
+        GSM4749771_NW_TX0005-13_GRCh38: "healthy"
+        GSM4749772_NW_TX0005-14_GRCh38: "healthy"
+        GSM4749773_NW_TX0005-15_GRCh38: "healthy"
+        GSM4749774_NW_TX0011-6_GRCh38: "systemic lupus erythematosus (disease)"
+        GSM4749775_NW_TX0011-7_GRCh38: "systemic lupus erythematosus (disease)"
+        GSM4749776_NW_TX0011-8_GRCh38: "systemic lupus erythematosus (disease)"
+        GSM4749777_NW_TX0011-9_GRCh38: "systemic lupus erythematosus (disease)"
+        GSM4749778_NW_TX0011-10_GRCh38: "systemic lupus erythematosus (disease)"
+        GSM4749779_NW_TX0011-11_GRCh38: "systemic lupus erythematosus (disease)"
+        GSM4749780_NW_TX0011-12_GRCh38: "systemic lupus erythematosus (disease)"
+        GSM4749781_NW_TX0011-13_GRCh38: "systemic lupus erythematosus (disease)"
+        GSM4749782_NW_TX0011-14_GRCh38: "systemic lupus erythematosus (disease)"
+        GSM4749783_NW_TX0011-15_GRCh38: "systemic lupus erythematosus (disease)"
+        GSM4749784_NW_TX0011-16_GRCh38: "systemic lupus erythematosus (disease)"
+        GSM4749785_NW_TX0011-17_GRCh38: "systemic lupus erythematosus (disease)"
+        GSM4749786_NW_TX0011-18_GRCh38: "systemic lupus erythematosus (disease)"
+        GSM4749787_NW_TX0011-19_GRCh38: "systemic lupus erythematosus (disease)"
+        GSM4749788_NW_TX0011-20_GRCh38: "systemic lupus erythematosus (disease)"
+        GSM4749789_X019-RP1C1W1-RNA: "healthy"
+        GSM4749790_X019-RP1C1W2-RNA: "healthy"
+        GSM4749791_X019-RP1C1W3-RNA: "healthy"
+        GSM4749792_X019-RP1C1W4-RNA: "healthy"
+        GSM4749793_X019-RP1C1W5-RNA: "healthy"
+        GSM4749794_X019-RP1C1W6-RNA: "healthy"
+        GSM4749795_X019-RP1C1W7-RNA: "healthy"
+        GSM4749796_X019-RP1C1W8-RNA: "healthy"
+        GSM4749797_X019-RP1C2W1-RNA: "healthy"
+        GSM4749798_X019-RP1C2W2-RNA: "healthy"
+        GSM4749799_X019-RP1C2W3-RNA: "healthy"
+        GSM4749800_X019-RP1C2W4-RNA: "healthy"
+        GSM4749801_X019-RP2C2W5-RNA: "healthy"
+        GSM4749802_X019-RP2C2W6-RNA: "healthy"
+        GSM4749803_X019-RP2C2W7-RNA: "healthy"
+        GSM4749804_X019-RP2C2W8-RNA: "healthy"
+        GSM4749805_X019-RP2C3W1-RNA: "healthy"
+        GSM4749806_X019-RP2C3W2-RNA: "healthy"
+        GSM4749807_X019-RP2C3W3-RNA: "healthy"
+        GSM4749808_X019-RP2C3W4-RNA: "healthy"
+        GSM4749809_X019-RP2C3W5-RNA: "healthy"
+        GSM4749810_X019-RP2C3W6-RNA: "healthy"
+        GSM5211175_X031-P1_IMM19_317_1: "healthy"
+        GSM5211176_X031-P1_IMM19_317_2: "healthy"
+        GSM5211177_X031-P1_IMM19_317_3: "healthy"
+    disease_obs_key: 
+    ethnicity: 
+    ethnicity_obs_key: 
+    gm:
+    gm_obs_key:
+    individual:
+        GSM4749756_NW_TX0005-1_GRCh38: "BRISL2"
+        GSM4749758_NW_TX0005-2_GRCh38: "BRISL2"
+        GSM4749759_NW_TX0005-3_GRCh38: "BRISL2"
+        GSM4749760_NW_TX0005-4_GRCh38: "BRISL2"
+        GSM4749761_NW_TX0005-5_GRCh38: "BRISL2"
+        GSM4749762_NW_TX0005-6_GRCh38: "BRISL3"
+        GSM4749764_NW_TX0005-7_GRCh38: "BRISL3"
+        GSM4749765_NW_TX0005-8_GRCh38: "BRISL3"
+        GSM4749766_NW_TX0005-9_GRCh38: "BRISL3"
+        GSM4749767_NW_TX0005-10_GRCh38: "BRISL3"
+        GSM4749768_NW_TX0005-11_GRCh38: "BRISL4"
+        GSM4749770_NW_TX0005-12_GRCh38: "BRISL4"
+        GSM4749771_NW_TX0005-13_GRCh38: "BRISL4"
+        GSM4749772_NW_TX0005-14_GRCh38: "BRISL4"
+        GSM4749773_NW_TX0005-15_GRCh38: "BRISL4"
+        GSM4749774_NW_TX0011-6_GRCh38: "BRISL5"
+        GSM4749775_NW_TX0011-7_GRCh38: "BRISL5"
+        GSM4749776_NW_TX0011-8_GRCh38: "BRISL5"
+        GSM4749777_NW_TX0011-9_GRCh38: "BRISL5"
+        GSM4749778_NW_TX0011-10_GRCh38: "BRISL5"
+        GSM4749779_NW_TX0011-11_GRCh38: "BRISL6"
+        GSM4749780_NW_TX0011-12_GRCh38: "BRISL6"
+        GSM4749781_NW_TX0011-13_GRCh38: "BRISL6"
+        GSM4749782_NW_TX0011-14_GRCh38: "BRISL6"
+        GSM4749783_NW_TX0011-15_GRCh38: "BRISL6"
+        GSM4749784_NW_TX0011-16_GRCh38: "BRISL7"
+        GSM4749785_NW_TX0011-17_GRCh38: "BRISL7"
+        GSM4749786_NW_TX0011-18_GRCh38: "BRISL7"
+        GSM4749787_NW_TX0011-19_GRCh38: "BRISL7"
+        GSM4749788_NW_TX0011-20_GRCh38: "BRISL7"
+        GSM4749789_X019-RP1C1W1-RNA: "A"
+        GSM4749790_X019-RP1C1W2-RNA: "B"
+        GSM4749791_X019-RP1C1W3-RNA: "C"
+        GSM4749792_X019-RP1C1W4-RNA: "D"
+        GSM4749793_X019-RP1C1W5-RNA: "A"
+        GSM4749794_X019-RP1C1W6-RNA: "B"
+        GSM4749795_X019-RP1C1W7-RNA: "C"
+        GSM4749796_X019-RP1C1W8-RNA: "D"
+        GSM4749797_X019-RP1C2W1-RNA: "C"
+        GSM4749798_X019-RP1C2W2-RNA: "D"
+        GSM4749799_X019-RP1C2W3-RNA: "A"
+        GSM4749800_X019-RP1C2W4-RNA: "B"
+        GSM4749801_X019-RP2C2W5-RNA: "C"
+        GSM4749802_X019-RP2C2W6-RNA: "D"
+        GSM4749803_X019-RP2C2W7-RNA: "A"
+        GSM4749804_X019-RP2C2W8-RNA: "B"
+        GSM4749805_X019-RP2C3W1-RNA: "C"
+        GSM4749806_X019-RP2C3W2-RNA: "D"
+        GSM4749807_X019-RP2C3W3-RNA: "A"
+        GSM4749808_X019-RP2C3W4-RNA: "B"
+        GSM4749809_X019-RP2C3W5-RNA: "C"
+        GSM4749810_X019-RP2C3W6-RNA: "D"
+        GSM5211175_X031-P1_IMM19_317_1: "control"
+        GSM5211176_X031-P1_IMM19_317_2: "control"
+        GSM5211177_X031-P1_IMM19_317_3: "control"
+    individual_obs_key: 
+    organ: "blood"
+    organ_obs_key: 
+    organism: "Homo sapiens"
+    organism_obs_key: 
+    sample_source: "primary_tissue"
+    sample_source_obs_key: 
+    sex: 
+    sex_obs_key: 
+    source_doi:
+    source_doi_obs_key:
+    state_exact:
+        GSM4749756_NW_TX0005-1_GRCh38: "2 hours"
+        GSM4749758_NW_TX0005-2_GRCh38: "4 hours"
+        GSM4749759_NW_TX0005-3_GRCh38: "6 hours"
+        GSM4749760_NW_TX0005-4_GRCh38: "8 hours"
+        GSM4749761_NW_TX0005-5_GRCh38: "18 hours"
+        GSM4749762_NW_TX0005-6_GRCh38: "2 hours"
+        GSM4749764_NW_TX0005-7_GRCh38: "4 hours"
+        GSM4749765_NW_TX0005-8_GRCh38: "6 hours"
+        GSM4749766_NW_TX0005-9_GRCh38: "8 hours"
+        GSM4749767_NW_TX0005-10_GRCh38: "18 hours"
+        GSM4749768_NW_TX0005-11_GRCh38: "2 hours"
+        GSM4749770_NW_TX0005-12_GRCh38: "4 hours"
+        GSM4749771_NW_TX0005-13_GRCh38: "6 hours"
+        GSM4749772_NW_TX0005-14_GRCh38: "8 hours"
+        GSM4749773_NW_TX0005-15_GRCh38: "18 hours"
+        GSM4749774_NW_TX0011-6_GRCh38: "2 hours"
+        GSM4749775_NW_TX0011-7_GRCh38: "4 hours"
+        GSM4749776_NW_TX0011-8_GRCh38: "6 hours"
+        GSM4749777_NW_TX0011-9_GRCh38: "8 hours"
+        GSM4749778_NW_TX0011-10_GRCh38: "18 hours"
+        GSM4749779_NW_TX0011-11_GRCh38: "2 hours"
+        GSM4749780_NW_TX0011-12_GRCh38: "4 hours"
+        GSM4749781_NW_TX0011-13_GRCh38: "6 hours"
+        GSM4749782_NW_TX0011-14_GRCh38: "8 hours"
+        GSM4749783_NW_TX0011-15_GRCh38: "18 hours"
+        GSM4749784_NW_TX0011-16_GRCh38: "2 hours"
+        GSM4749785_NW_TX0011-17_GRCh38: "4 hours"
+        GSM4749786_NW_TX0011-18_GRCh38: "6 hours"
+        GSM4749787_NW_TX0011-19_GRCh38: "8 hours"
+        GSM4749788_NW_TX0011-20_GRCh38: "18 hours"
+        GSM4749789_X019-RP1C1W1-RNA: "2 hours"
+        GSM4749790_X019-RP1C1W2-RNA: "2 hours"
+        GSM4749791_X019-RP1C1W3-RNA: "2 hours"
+        GSM4749792_X019-RP1C1W4-RNA: "2 hours"
+        GSM4749793_X019-RP1C1W5-RNA: "4 hours"
+        GSM4749794_X019-RP1C1W6-RNA: "4 hours"
+        GSM4749795_X019-RP1C1W7-RNA: "4 hours"
+        GSM4749796_X019-RP1C1W8-RNA: "4 hours"
+        GSM4749797_X019-RP1C2W1-RNA: "6 hours"
+        GSM4749798_X019-RP1C2W2-RNA: "6 hours"
+        GSM4749799_X019-RP1C2W3-RNA: "10 hours"
+        GSM4749800_X019-RP1C2W4-RNA: "10 hours"
+        GSM4749801_X019-RP2C2W5-RNA: "10 hours"
+        GSM4749802_X019-RP2C2W6-RNA: "10 hours"
+        GSM4749803_X019-RP2C2W7-RNA: "14 hours"
+        GSM4749804_X019-RP2C2W8-RNA: "14 hours"
+        GSM4749805_X019-RP2C3W1-RNA: "14 hours"
+        GSM4749806_X019-RP2C3W2-RNA: "14 hours"
+        GSM4749807_X019-RP2C3W3-RNA: "18 hours"
+        GSM4749808_X019-RP2C3W4-RNA: "18 hours"
+        GSM4749809_X019-RP2C3W5-RNA: "18 hours"
+        GSM4749810_X019-RP2C3W6-RNA: "18 hours"
+        GSM5211175_X031-P1_IMM19_317_1: "control"
+        GSM5211176_X031-P1_IMM19_317_2: "control"
+        GSM5211177_X031-P1_IMM19_317_3: "control"
+    state_exact_obs_key:
+    tech_sample:
+    tech_sample_obs_key: 
+    treatment:
+    treatment_obs_key:
+feature_wise:
+    feature_id_var_key: 
+    feature_symbol_var_key: "index"
+observation_wise:
+    spatial_x_coord_obs_key: 
+    spatial_y_coord_obs_key: 
+    spatial_z_coord_obs_key: 
+    vdj_vj_1_obs_key_prefix: 
+    vdj_vj_2_obs_key_prefix: 
+    vdj_vdj_1_obs_key_prefix: 
+    vdj_vdj_2_obs_key_prefix: 
+    vdj_c_call_obs_key_suffix: 
+    vdj_consensus_count_obs_key_suffix: 
+    vdj_d_call_obs_key_suffix: 
+    vdj_duplicate_count_obs_key_suffix: 
+    vdj_j_call_obs_key_suffix: 
+    vdj_junction_obs_key_suffix: 
+    vdj_junction_aa_obs_key_suffix: 
+    vdj_locus_obs_key_suffix: 
+    vdj_productive_obs_key_suffix: 
+    vdj_v_call_obs_key_suffix: 
+meta:
+    version: "1.2"
