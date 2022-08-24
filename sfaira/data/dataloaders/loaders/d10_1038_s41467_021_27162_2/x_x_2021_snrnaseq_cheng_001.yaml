@@ -89,7 +89,7 @@ dataset_or_observation_wise:
         RT_NewCelltype.rds: "lung"
         SP_NewCelltype.rds: "lung"
     organ_obs_key:
-        Cat_7Tissue_NewCT_210809.rds: "Tisue"
+        Cat_7Tissue_NewCT_210809.rds: "batch"
         Pangolin_9Tissue_NewCT_210809.rds: "batch"
         Tiger_5Tissue_NewCT_210809.rds: "Tisue"
     organism:
