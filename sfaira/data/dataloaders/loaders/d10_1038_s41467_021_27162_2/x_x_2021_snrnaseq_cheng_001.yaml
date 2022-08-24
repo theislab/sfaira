@@ -1,7 +1,7 @@
 dataset_structure:
     dataset_index: 1
     sample_fns:
-        #- "Cat_7Tissue_NewCT_210809.rds"
+        - "Cat_7Tissue_NewCT_210809.rds"
         - "DG_NewCelltype.rds"
         - "DK_NewCelltype.rds"
         - "DR_NewCelltype.rds"
@@ -11,7 +11,7 @@ dataset_structure:
         - "PN_NewCelltype.rds"
         - "RT_NewCelltype.rds"
         - "SP_NewCelltype.rds"
-        #- "Tiger_5Tissue_NewCT_210809.rds"
+        - "Tiger_5Tissue_NewCT_210809.rds"
 dataset_wise:
     author: "Cheng, Dongsheng"
     default_embedding: 
