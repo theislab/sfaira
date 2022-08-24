@@ -98,7 +98,13 @@ class AnnotationContainer:
             assert os.path.exists(yaml_path), f"did not find yaml {yaml_path}"
             yaml_vals = read_yaml(fn=yaml_path)
             # Set organism first as this is required to disambiguate valid entries for other meta data.
-            self.organism = yaml_vals["attr"]["organism"]
+            organism = yaml_vals["attr"]["organism"]
+            if isinstance(organism, dict):  # v is a dictionary over file-wise meta-data items
+                if sample_fn in organism.keys():
+                    organism = organism[sample_fn]
+                else:
+                    raise ValueError(f"Did not find organism annotation.")
+            self.organism = organism
             for k, v in yaml_vals["attr"].items():
                 if v is not None and k not in ["organism", "sample_fns"]:
                     if isinstance(v, dict):  # v is a dictionary over file-wise meta-data items
