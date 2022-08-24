@@ -58,8 +58,8 @@ dataset_or_observation_wise:
     individual:
     individual_obs_key:
         BAL.Rds: "patient"
-        BAL-macrophages.Rds: "donor"
-        Monocytes.Rds: "patient"
+        BAL-macrophages.Rds: "patient"
+        Monocytes.Rds: "donor"
     organ: "lung"
     organ_obs_key: 
     organism: "Homo sapiens"
