@@ -4,7 +4,7 @@ dataset_structure:
         - "Cat_7Tissue_NewCT_210809.rds"
         - "DG_NewCelltype.rds"
         # - "DK_NewCelltype.rds" bad capture by ensembl release used
-        - "DR_NewCelltype.rds"
+        # - "DR_NewCelltype.rds" not on ensembl release? ftp error
         - "HR_NewCelltype.rds"
         - "LD_NewCelltype.rds"
         - "Pangolin_9Tissue_NewCT_210809.rds"
