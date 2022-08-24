@@ -19,6 +19,7 @@ def load(data_dir, **kwargs):
         f"library(Seurat)\n"
         f"obj <- readRDS('{fn}')\n"
         f"new_obj = CreateSeuratObject(counts = obj@assays$RNA@counts)\n"
+        f"names(rownames(new_obj@assays$RNA@counts)) <- NULL\n"
         f"new_obj@meta.data = obj@meta.data\n"
         f"as.SingleCellExperiment(new_obj)\n"
     )
