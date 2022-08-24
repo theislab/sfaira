@@ -105,19 +105,25 @@ class AnnotationContainer:
                 else:
                     raise ValueError(f"Did not find organism annotation.")
             self.organism = organism
+
+            def set_attr_on_self(k_, v_):
+                # Catches spelling errors in meta data definition (yaml keys).
+                if not hasattr(self, k_) and not hasattr(self, "_" + k_):
+                    raise ValueError(f"Tried setting unavailable property {k_}.")
+                try:
+                    setattr(self, k_, v_)
+                except AttributeError as e:
+                    raise ValueError(f"ValueError when setting {k_} as {v_}: {e}")
+
             for k, v in yaml_vals["attr"].items():
                 if v is not None and k not in ["organism", "sample_fns"]:
                     if isinstance(v, dict):  # v is a dictionary over file-wise meta-data items
                         # only set value if field exists
                         if sample_fn in v.keys():
                             v = v[sample_fn]
-                            # Catches spelling errors in meta data definition (yaml keys).
-                            if not hasattr(self, k) and not hasattr(self, "_" + k):
-                                raise ValueError(f"Tried setting unavailable property {k}.")
-                            try:
-                                setattr(self, k, v)
-                            except AttributeError as e:
-                                raise ValueError(f"ValueError when setting {k} as {v}: {e}")
+                            set_attr_on_self(k, v)
+                    else:
+                        set_attr_on_self(k, v)
 
     @property
     def assay_sc(self) -> Union[None, str]:
