@@ -249,12 +249,16 @@ class DatasetGroup:
         :param protected_writing: Only write if file was not already found.
         """
         for x in attrs:
-            # TODO need to deal with groups that contain multiple organisms here.
-            organism = np.unique([v.organism for v in self.datasets.values()])
-            if len(organism) == 1:
-                organism = organism[0]
+            if x in ["development_stage", "ethnicity"]:
+                organism = np.unique([v.organism for v in self.datasets.values()])
+                if len(organism) == 1:
+                    organism = organism[0]
+                else:
+                    raise ValueError(f"write_ontology_class_maps() for attribute {x} on mixed organisms not yet "
+                                     f"supported.")
             else:
-                raise ValueError(f"write_ontology_class_maps() for mixed organisms not yet supported {organism}.")
+                # Organism can be ignored for other meta data:
+                organism = None
             fn_x = fn + "_" + x + ".tsv"
             labels_original = []
             organs = []
