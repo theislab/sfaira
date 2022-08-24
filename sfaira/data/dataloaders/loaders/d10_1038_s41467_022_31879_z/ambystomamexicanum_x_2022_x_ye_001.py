@@ -35,7 +35,7 @@ def load(data_dir, sample_fn, **kwargs):
         tab_meta["cell_type"] = [x.split("_") for x in tab_meta["Cluster"].values]
     else:
         fn_counts = os.path.join(data_dir, sample_dir, sample_fn)
-        fn_meta = os.path.join(data_dir, sample_dir, sample_fn.replace("dge.zip", "Annotation.csv"))
+        fn_meta = os.path.join(data_dir, sample_dir, sample_fn.replace("mergedge.csv", "Annotation.csv"))
         tab_x = pd.read_csv(fn_counts, header=0, index_col=0).T
         genes = ["_".join(x.split("_")[2:]) for x in tab_x.columns]
         tab_meta = pd.read_csv(fn_meta, header=0, index_col=0)
