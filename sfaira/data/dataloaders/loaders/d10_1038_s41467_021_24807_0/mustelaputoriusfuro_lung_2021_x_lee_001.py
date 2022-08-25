@@ -25,6 +25,6 @@ def load(data_dir, **kwargs):
     )
     tab_meta = pd.read_csv(fn_meta, sep="\t", index_col=0)
     adata.obs["Annotation_fine"] = [
-        tab_meta[x, "Annotation"] if x in tab_meta.index else y
+        tab_meta.loc[x, "Annotation"] if x in tab_meta.index else y
         for x, y in zip(adata.obs_names, adata.obs["Annotation"].values)]
     return adata
