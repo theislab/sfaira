@@ -106,7 +106,7 @@ class DataloaderTester:
                         for vali in val.split("*"):
                             if vali not in v.adata.obs.columns:
                                 print(f'[bold red]Did not find column {vali} for {x} in data set {k}, found: '
-                                      '{v.adata.obs.columns}.')
+                                      f'{v.adata.obs.columns}.')
                                 sys.exit()
                     else:
                         if val not in v.adata.obs.columns:
