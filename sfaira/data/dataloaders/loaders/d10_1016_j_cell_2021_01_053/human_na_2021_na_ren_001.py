@@ -18,8 +18,7 @@ def load(data_dir, **kwargs):
         X = scipy.io.mmread(mm).T.tocsr()
     obs = pd.read_csv(fn[1], header=None, sep="\t", index_col=0)
     obs.index.name = None
-    var = pd.read_csv(fn[2], header=None, sep="\t", names=['names'])
-    var.index = var['names'].values
+    var = pd.read_csv(fn[2], header=None, sep="\t", index_col=0)
     adata = anndata.AnnData(X=X, obs=obs, var=var)
 
     annotation = pd.read_csv(fn_meta[0])

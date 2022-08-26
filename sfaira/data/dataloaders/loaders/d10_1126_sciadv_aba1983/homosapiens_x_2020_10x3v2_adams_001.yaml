@@ -50,7 +50,7 @@ dataset_or_observation_wise:
     gm_obs_key:
     individual:
     individual_obs_key: "Subject_Identity"
-    organ: 
+    organ: "lung"
     organ_obs_key: 
     organism: "Homo sapiens"
     organism_obs_key: 
