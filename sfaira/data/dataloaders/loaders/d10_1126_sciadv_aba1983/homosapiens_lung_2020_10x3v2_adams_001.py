@@ -16,8 +16,7 @@ def load(data_dir, **kwargs):
     tab_barcodes = pd.read_csv(os.path.join(data_dir, fn_barcodes), sep="\t", index_col=0, header=None)
     tab_features = pd.read_csv(os.path.join(data_dir, fn_features), sep="\t", index_col=0)
     tab_meta = pd.read_csv(os.path.join(data_dir, fn_meta), sep="\t", index_col=0)
-    x = scipy.io.mmread(fn_counts)
-    x = x.transpose()
+    x = scipy.io.mmread(fn_counts).T.tocsr()
     adata = anndata.AnnData(x, obs=tab_barcodes, var=tab_features)
     adata.obs = tab_meta
     return adata
