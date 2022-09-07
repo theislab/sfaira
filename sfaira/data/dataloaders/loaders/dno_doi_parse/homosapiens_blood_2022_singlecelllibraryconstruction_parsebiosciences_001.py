@@ -13,5 +13,6 @@ def load(data_dir, **kwargs):
     fn_var = os.path.join(data_dir, "all_genes_1M_PBMC.csv")
     obs = pd.read_csv(fn_obs, index_col=False)
     var = pd.read_csv(fn_var, index_col=0)
-    adata = anndata.AnnData(scipy.io.mmread(fn_x), obs=obs, var=var)
+    x = scipy.io.mmread(fn_x).tocsr()
+    adata = anndata.AnnData(x, obs=obs, var=var)
     return adata

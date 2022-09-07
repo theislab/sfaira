@@ -19,8 +19,8 @@ def load(data_dir, **kwargs):
     tab_obs2["development_stage"] = [str(x) for x in tab_obs2["development_stage"].values]
     tab_obs2["embryo_sex"] = [str(x) for x in tab_obs2["embryo_sex"].values]
     tab_var = pd.read_csv(fn_var, index_col=0, sep=",", compression="gzip")
-    x = scipy.io.mmread(fn_x)
-    adata = anndata.AnnData(x.T, var=tab_var)
+    x = scipy.io.mmread(fn_x).T.tocsr()
+    adata = anndata.AnnData(x, var=tab_var)
     adata.obs_names = tab_obs.index
     adata.obs = tab_obs2.loc[adata.obs_names, :]
     return adata
