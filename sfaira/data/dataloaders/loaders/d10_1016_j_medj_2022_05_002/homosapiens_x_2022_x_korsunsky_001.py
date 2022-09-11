@@ -14,6 +14,7 @@ def load(data_dir, **kwargs):
     x = scipy.io.mmread(fn_x).T.tocsr()
     tab_obs = pd.read_csv(fn_obs, index_col=0, header=None, sep="\t", dtype=str)
     tab_var = pd.read_csv(fn_var, index_col=0, header=None, sep="\t", dtype=str)
+    tab_var.index = [str(x) for x in tab_var.index]
     tab_meta = pd.read_csv(fn_meta, index_col=0, header=0, skiprows=[1], sep="\t", dtype=str)
     tab_meta["cell_type_within_tissue"] = [str(x) for x in tab_meta["cell_type_within_tissue"].values]
     adata = anndata.AnnData(x, obs=tab_obs, var=tab_var)
