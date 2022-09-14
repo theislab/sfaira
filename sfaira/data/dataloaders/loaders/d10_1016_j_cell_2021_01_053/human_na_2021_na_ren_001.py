@@ -23,8 +23,14 @@ def load(data_dir, **kwargs):
 
     annotation = pd.read_csv(fn_meta[0])
     metadata = pd.read_excel(fn_meta[1], skiprows=20, skipfooter=37)
+    print(metadata.columns)
     metadata.columns = metadata.columns.str.split('characteristics: ').str[-1]
+    print(metadata.columns)
+    print(annotation.columns)
     tmp = annotation.merge(metadata, left_on='sampleID', right_on='Sample name').set_index('cellName')
+    print(tmp.columns)
     adata.obs = adata.obs.join(tmp).astype(str)
+    print(adata.obs.columns)
+    print(adata.obs["Datasets"])
 
     return adata
