@@ -101,6 +101,11 @@ class StoreSingleFeatureSpace(StoreBase):
         for col in adata_by_key[datasets[0]].obs.columns:
             if isinstance(adata_by_key[datasets[0]].obs[col].dtype, pd.api.types.CategoricalDtype):
                 categorical_columns.append(col)
+                # Make sure corresponding columns in other datasets are also categoricals:
+                for k in datasets[1:]:
+                    if not isinstance(adata_by_key[k].obs[col].dtype, pd.api.types.CategoricalDtype):
+                        raise TypeError(f"found non-categorical column {col} in {k} that does not match {datasets[0]}: "
+                                        f"{adata_by_key[k].obs[col]}")
         # union categorical levels across datasets for each column
         categories_columns: Dict[str, pd.Index] = {}
         for col in categorical_columns:
