@@ -1,7 +1,6 @@
 dataset_structure:
     dataset_index: 1
     sample_fns:
-        - "GSM6108055_AB6440.txt.gz"
         - "GSM6108056_AB6441.txt.gz"
         - "GSM6108057_AB6442.txt.gz"
         - "GSM6108058_AB6446.txt.gz"
