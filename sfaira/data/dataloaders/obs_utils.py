@@ -185,7 +185,10 @@ def streamline_obs_uns(adata: anndata.AnnData,
                 adata_input_ids.unknown_metadata_identifier,
             ]
         ], dataset_id=dataset_id)
-        obs_new[new_col] = val
+        try:
+            obs_new[new_col] = val
+        except ValueError as e:  # In exception cases, val is length zero here, keep this for debugging:
+            raise ValueError(f"error for {k}, {new_col}:" + str(e))
         # For ontology-constrained meta data, the remaining columns are added after .obs cleaning below.
     if isinstance(clean_obs, bool) and clean_obs:
         if adata.obsm is not None:
