@@ -57,6 +57,7 @@ EFO_TERMS = {
         "sci-RNA-seq",
         "sci-RNA-seq3",
         "single cell Hi-C",
+        "single nucleus RNA sequencing",
         "snmC-Seq2",
     ],
 }
