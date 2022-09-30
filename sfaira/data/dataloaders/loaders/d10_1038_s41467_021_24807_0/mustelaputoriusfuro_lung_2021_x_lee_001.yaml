@@ -24,7 +24,7 @@ dataset_or_feature_wise:
     feature_type: "rna"
     feature_type_var_key: 
 dataset_or_observation_wise:
-    assay_sc: 
+    assay_sc: "10x transcription profiling"
     assay_sc_obs_key: 
     assay_differentiation: 
     assay_differentiation_obs_key: 
