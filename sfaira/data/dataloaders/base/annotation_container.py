@@ -103,7 +103,7 @@ class AnnotationContainer:
                 if sample_fn in organism.keys():
                     organism = organism[sample_fn]
                 else:
-                    raise ValueError(f"Did not find organism annotation.")
+                    raise ValueError("Did not find organism annotation.")
             self.organism = organism
 
             def set_attr_on_self(k_, v_):
