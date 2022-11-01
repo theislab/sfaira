@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from typing import Dict, List, Tuple, Union
 
-from sfaira.consts import OCS
+from sfaira.consts import OC
 
 
 def synonym_string_processing(y):
@@ -436,7 +436,7 @@ def prepare_ontology_map(
         - List with boolean indicator whether or not this output should be reported.
     """
     try:
-        onto_cls = getattr(OCS, onto)
+        onto_cls = getattr(OC, onto)
         if isinstance(onto_cls, dict):
             try:
                 onto_cls = onto_cls[organism]
@@ -450,7 +450,7 @@ def prepare_ontology_map(
         fn = _prepare_celltype_map_fuzzy
         kwargs = {
             "anatomical_constraint": anatomical_constraint,
-            "onto_uberon": OCS.organ,
+            "onto_uberon": OC.organ,
         }
         omit_target_list = omit_target_list + ["cell"]
     else:

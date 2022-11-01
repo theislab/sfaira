@@ -2,7 +2,7 @@ import shutil
 import time
 
 from sfaira import settings
-from sfaira.consts import AdataIdsSfaira, OCS
+from sfaira.consts import AdataIdsSfaira, OC
 
 
 class CacheControl:
@@ -20,4 +20,4 @@ class CacheControl:
 
     def reload(self):
         for x in self.adata_ids.ontology_constrained:
-            OCS.reload_ontology(attr=x)
+            OC.reload_ontology(attr=x)

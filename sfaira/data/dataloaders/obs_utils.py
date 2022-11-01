@@ -4,7 +4,7 @@ import anndata
 import numpy as np
 import pandas as pd
 
-from sfaira.consts import AdataIds, OCS
+from sfaira.consts import AdataIds, OC
 from sfaira.data.dataloaders.export_adaptors import cellxgene_export_adaptor
 from sfaira.versions.metadata import Ontology, OntologyHierarchical
 
@@ -495,7 +495,7 @@ def value_protection(allowed: Union[Ontology, None],
 
 def get_ontology(k, organism: str) -> Union[OntologyHierarchical, None]:
     # Use global instance of ontology container:
-    ocs = OCS
+    ocs = OC
 
     x = getattr(ocs, k) if hasattr(ocs, k) else None
     if x is not None and isinstance(x, dict):

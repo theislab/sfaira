@@ -2,7 +2,7 @@ import os
 import sys
 
 # Any data loader here to extract path:
-from sfaira.consts import OCS
+from sfaira.consts import OC
 from sfaira.data import load_store
 from sfaira.versions.metadata import CelltypeUniverse, OntologyCl
 
@@ -43,7 +43,7 @@ for f in os.listdir(config_path):
             else:
                 celltypes_universe = CelltypeUniverse(
                     cl=OntologyCl(branch=cl_branch),
-                    uberon=OCS.organ,
+                    uberon=OC.organ,
                 )
                 celltypes_found = celltypes_universe.onto_cl.get_effective_leaves(x=celltypes_found)
                 celltypes_universe.write_target_universe(

@@ -6,7 +6,10 @@ from typing import List, Union
 
 import anndata
 import numpy as np
-import tensorflow as tf
+try:
+    import tensorflow as tf
+except ImportError:
+    tf = None
 from tqdm import tqdm
 
 from sfaira.consts import AdataIdsSfaira, AdataIds

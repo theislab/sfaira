@@ -52,7 +52,9 @@ setup(
     install_requires=requirements,
     extras_require={
         'curation': [
+            "cellxgene-schema",
             "openpyxl",
+            "parasail==1.1.11",  # newer versions cannot be installed on MacOS
             "scirpy",
             "tables",
         ],

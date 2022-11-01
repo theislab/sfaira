@@ -219,3 +219,129 @@ def cellxgene_export_adaptor_2_0_0(adata: anndata.AnnData, adata_ids: AdataIdsCe
             adata.obsm["X_umap"] = adata_embedding.obsm["X_umap"]
             adata.uns[adata_ids.default_embedding] = "X_umap"
     return adata
+
+
+def cellxgene_export_adaptor_3_0_0(adata: anndata.AnnData, adata_ids: AdataIdsCellxgene, layer_key_counts: str,
+                                   layer_key_proc: str, obs_keys_batch, mask_portal_fields: bool = True,
+                                   title: Union[str, None] = None, **kwargs) -> anndata.AnnData:
+    """
+    Cellxgene-schema 3.0.0.
+
+    Documented here: https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md
+    """
+    obs_keys_autofill = [getattr(adata_ids, x) for x in adata_ids.ontology_constrained]
+    uns_keys_autofill = []
+    var_keys_autofill = [adata_ids.feature_symbol]
+    raw_var_keys_autofill = [adata_ids.feature_symbol]
+    # 1) Modify .uns
+    if layer_key_proc == "X":
+        add_proc = False
+    elif layer_key_counts == "X":
+        assert layer_key_proc is None
+        # This implies that a auto log-normalised layer will be added below.
+        add_proc = True
+        adata.uns["X_approximate_distribution"] = "normal"
+    else:
+        assert False
+    adata.uns["schema_version"] = "3.0.0"
+    adata.uns[adata_ids.author] = {
+        "name": "sfaira",
+        "email": "https://github.com/theislab/sfaira/issues",
+        "institution": "sfaira",
+    }
+    if obs_keys_batch is not None:
+        adata.uns["batch_condition"] = obs_keys_batch.split("*")
+        if adata_ids.tech_sample in adata.obs.columns:
+            # Delete curated columns as cellxgene does not require this in obs, it only requires the reference to the
+            # original column in .uns.
+            del adata.obs[adata_ids.tech_sample]
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError(f"found type {type(title)} for title, require string or None")
+        adata.uns[adata_ids.title] = title
+    # Remove overloading:
+    adata.uns = dict(adata.uns)
+    # 2) Modify .obs
+    # a) Correct unknown cell type entries:
+    adata.obs[adata_ids.cell_type] = [
+        x if x not in [adata_ids.unknown_metadata_identifier, adata_ids.not_a_cell_celltype_identifier]
+        else "native cell" for x in adata.obs[adata_ids.cell_type]]
+    adata.obs[adata_ids.cell_type + adata_ids.onto_id_suffix] = [
+        x if x not in [adata_ids.unknown_metadata_identifier, adata_ids.not_a_cell_celltype_identifier]
+        else "CL:0000003" for x in adata.obs[adata_ids.cell_type + adata_ids.onto_id_suffix]]
+    # b) Correct unknown disease entries:
+    adata.obs[adata_ids.disease] = [
+        x if x not in [adata_ids.unknown_metadata_identifier] else "healthy"
+        for x in adata.obs[adata_ids.disease]]
+    adata.obs[adata_ids.disease + adata_ids.onto_id_suffix] = [
+        x if x not in [adata_ids.unknown_metadata_identifier] else "PATO:0000461"
+        for x in adata.obs[adata_ids.disease + adata_ids.onto_id_suffix]]
+    # Reorder data frame to put ontology columns first:
+    cellxgene_cols = [getattr(adata_ids, x) for x in adata_ids.ontology_constrained] + \
+                     [getattr(adata_ids, x) for x in adata_ids.obs_keys
+                      if x not in adata_ids.ontology_constrained] + \
+                     [getattr(adata_ids, x) + adata_ids.onto_id_suffix
+                      for x in adata_ids.ontology_constrained]
+    adata.obs = adata.obs[cellxgene_cols + [x for x in adata.obs.columns if x not in cellxgene_cols]]
+    # 3) Modify .X.
+    # Check if .X is counts: The conversion are based on the assumption that .X is csr.
+    assert isinstance(adata.X, scipy.sparse.csr_matrix), type(adata.X)
+    # Add standard processed count layer (log-normalized) if only counts are supplied:
+    # Note that processed counts are in .X if they are supplied along-side raw counts at this point already (this
+    # happens in feature streamlining). Raw counts are only not in .X if they processed counts are not supplied.
+    # In this exception case, we generate log-normalized data suited for plotting here.
+    if add_proc:
+        adata.raw = adata
+        # Log-normalise values in .X
+        sc.pp.normalize_per_cell(adata)
+        sc.pp.log1p(adata)
+        # This key may be written by log1p above:
+        if "log1p" in adata.uns.keys():
+            del adata.uns["log1p"]
+    # 4) Modify .var:
+    adata.var[adata_ids.feature_biotype] = pd.Categorical(["gene" for _ in range(adata.n_vars)])
+    if adata.raw is not None:
+        adata.raw.var[adata_ids.feature_biotype] = pd.Categorical(["gene" for _ in range(adata.raw.n_vars)])
+    if adata.raw is not None and adata.n_vars < adata.raw.n_vars:
+        # extend X by zero columns and add filtered attribute:
+        raise NotImplementedError()
+    elif adata.raw is not None:
+        adata.var[adata_ids.feature_is_filtered] = False
+        # Assert that genes are ordered the same way in raw and processed:
+        assert np.all(adata.var.index == adata.raw.var.index)
+    # Modify ensembl ID writing:
+    # adata.var[adata_ids.feature_id] = ["G:".join(x.split("G")) for x in adata.var[adata_ids.feature_id]]
+    # adata.var.index = ["G:".join(x.split("G")) for x in adata.var.index]
+    # 5) Take out elements that are auto-filled by cellxgene upload interface:
+    if mask_portal_fields:
+        for k in obs_keys_autofill:
+            del adata.obs[k]
+        for k in uns_keys_autofill:
+            del adata.uns[k]
+        for k in var_keys_autofill:
+            del adata.var[k]
+        for k in raw_var_keys_autofill:
+            if adata.raw is not None and k in adata.raw.var.columns:
+                del adata.raw.var[k]
+    # 6) Check if default embedding is present, add in otherwise:
+    # First check if any pre-computed embedding is given.
+    # If that is not the case, compute a default UMAP.
+    # Define hierarchy of embeddings accepted as defaults, first one matched will be chosen:
+    default_embedding_names = ["X_umap", "X_tsne", "X_draw_graph_fa"]
+    if adata.uns[adata_ids.default_embedding] is None or \
+            adata.uns[adata_ids.default_embedding] == adata_ids.unknown_metadata_identifier:
+        found_default = False
+        counter = 0
+        while not found_default and counter < len(default_embedding_names):
+            if default_embedding_names[counter] in adata.obsm.keys():
+                adata.uns[adata_ids.default_embedding] = default_embedding_names[counter]
+                found_default = True
+            counter += 1
+        if not found_default and adata.n_obs > 10:
+            adata_embedding = adata.copy()
+            sc.pp.pca(adata_embedding)
+            sc.pp.neighbors(adata_embedding)
+            sc.tl.umap(adata_embedding)
+            adata.obsm["X_umap"] = adata_embedding.obsm["X_umap"]
+            adata.uns[adata_ids.default_embedding] = "X_umap"
+    return adata

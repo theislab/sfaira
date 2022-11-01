@@ -7,7 +7,7 @@ import warnings
 from typing import Union, List
 import os
 
-from sfaira.consts import OCS
+from sfaira.consts import OC
 from sfaira.data import load_store
 from sfaira.data.dataloaders import Universe
 from sfaira.estimators.keras.base import EstimatorKerasEmbedding
@@ -916,7 +916,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         ])
         cu = CelltypeUniverse(
             cl=OntologyCl(branch="v2021-02-01"),
-            uberon=OCS.organ,
+            uberon=OC.organ,
         )
         cu.load_target_universe(targetpath)
         cell_counts = store.obs['cell_ontology_class'].value_counts().to_dict()
@@ -1081,7 +1081,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         ])
         cu = CelltypeUniverse(
             cl=OntologyCl(branch="v2021-02-01"),
-            uberon=OCS.organ,
+            uberon=OC.organ,
         )
         cu.load_target_universe(targetpath)
         cell_counts = store.obs['cell_ontology_class'].value_counts().to_dict()

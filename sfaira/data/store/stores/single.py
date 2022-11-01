@@ -9,7 +9,7 @@ import dask.dataframe
 import numpy as np
 import pandas as pd
 import scipy.sparse
-from sfaira.consts import AdataIdsSfaira, OCS
+from sfaira.consts import AdataIdsSfaira, OC
 from sfaira.data.dataloaders.base.utils import is_child, UNS_STRING_META_IN_OBS
 from sfaira.data.store.carts.single import CartAnndata, CartDask, CartSingle
 from sfaira.data.store.stores.base import StoreBase
@@ -80,7 +80,7 @@ class StoreSingleFeatureSpace(StoreBase):
         self.adata_by_key = self.__align_categorical_levels(adata_by_key)
         self.indices = indices
         self.obs_by_key = obs_by_key
-        self.ontology_container = OCS
+        self.ontology_container = OC
         self._genome_container = None
         self._adata_ids_sfaira = AdataIdsSfaira()
         self._celltype_universe = None

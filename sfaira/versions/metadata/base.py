@@ -725,15 +725,12 @@ class OntologyObo(OntologyHierarchical, abc.ABC):
         return [self.nodes[i][1]["name"] for i in np.argsort(scores)[-n_suggest:]][::-1]
 
 
-class OntologyExtendedObo(OntologyObo):
+class OntologyExtended:
     """
-    Basic .obo ontology extended by additional nodes and edges without breaking DAG.
+    Basic ontology extended by additional nodes and edges without breaking DAG.
     """
 
-    def __init__(self, obo, **kwargs):
-        super().__init__(obo=obo, **kwargs)
-
-    def add_children(self, dict_ontology: Dict[str, List[Dict[str, dict]]]):
+    def add_children(self, dict_ontology: Dict[str, Dict[str, dict]]):
         """
         Extend ontology by additional edges and children nodes defined in a dictionary.
 
@@ -791,7 +788,7 @@ class OntologyExtendedObo(OntologyObo):
         return ["synonym"]
 
 
-class OntologyUberon(OntologyExtendedObo):
+class OntologyUberon(OntologyObo, OntologyExtended):
 
     def __init__(
             self,
@@ -800,7 +797,7 @@ class OntologyUberon(OntologyExtendedObo):
             **kwargs
     ):
         obofile = cached_load_file(
-            url=f"https://raw.githubusercontent.com/obophenotype/uberon/{branch}/composite-vertebrate-basic.obo",
+            url=f"https://raw.githubusercontent.com/obophenotype/uberon/{branch}/uberon.obo",
             ontology_cache_dir="uberon",
             ontology_cache_fn=f"uberon_{branch}.obo",
             recache=recache,
@@ -820,148 +817,8 @@ class OntologyUberon(OntologyExtendedObo):
         # Clean up edges:
         # The graph object can hold different types of edges,
         # and multiple types are loaded from the obo, not all of which are relevant for us:
-        # All edge types (based on previous download, assert below that this is not extended):
-        edge_types = [
-            'aboral_to',
-            'adjacent_to',
-            'ambiguous_for_taxon',
-            'anastomoses_with',
-            'anterior_to',
-            'anteriorly_connected_to',
-            'attaches_to',
-            'attaches_to_part_of',
-            'bounding_layer_of',
-            'branching_part_of',
-            'capable_of',
-            'capable_of_part_of',
-            'channel_for',
-            'channels_from',
-            'channels_into',
-            'composed_primarily_of',
-            'conduit_for',
-            'confers_advantage_in',
-            'connected_to',
-            'connects',
-            'contains',
-            'contains_process',
-            'continuous_with',
-            'contributes_to_morphology_of',
-            'deep_to',
-            'developmentally_induced_by',
-            'developmentally_replaces',
-            'develops_from',  # developmental DAG -> include because it reflects the developmental hierarchy
-            'develops_from_part_of',  # developmental DAG -> include because it reflects the developmental hierarchy
-            'develops_in',
-            'directly_develops_from',  # developmental DAG -> include because it reflects the developmental hierarchy
-            'distal_to',
-            'distally_connected_to',
-            'distalmost_part_of',
-            'dorsal_to',
-            'drains',
-            'dubious_for_taxon',
-            'ends',
-            'ends_with',
-            'existence_ends_during',
-            'existence_ends_during_or_before',
-            'existence_ends_with',
-            'existence_starts_and_ends_during',
-            'existence_starts_during',
-            'existence_starts_during_or_after',
-            'existence_starts_with',
-            'extends_fibers_into',
-            'filtered_through',
-            'functionally_related_to',
-            'has_boundary',
-            'has_component',
-            'has_developmental_contribution_from',
-            'has_fused_element',
-            'has_member',
-            'has_muscle_antagonist',
-            'has_muscle_insertion',
-            'has_muscle_origin',
-            'has_part',
-            'has_potential_to_develop_into',
-            'has_potential_to_developmentally_contribute_to',
-            'has_quality',
-            'has_skeleton',
-            'immediate_transformation_of',
-            'immediately_anterior_to',
-            'immediately_deep_to',
-            'immediately_posterior_to',
-            'immediately_preceded_by',
-            'immediately_superficial_to',
-            'in_anterior_side_of',
-            'in_central_side_of',
-            'in_deep_part_of',
-            'in_distal_side_of',
-            'in_dorsal_side_of',
-            'in_innermost_side_of',
-            'in_lateral_side_of',
-            'in_left_side_of',
-            'in_outermost_side_of',
-            'in_posterior_side_of',
-            'in_proximal_side_of',
-            'in_right_side_of',
-            'in_superficial_part_of',
-            'in_taxon',
-            'in_ventral_side_of',
-            'indirectly_supplies',
-            'innervated_by',
-            'innervates',
-            'input_of',
-            'intersects_midsagittal_plane_of',
-            'is_a',  # term DAG -> include because it connect conceptual tissue groups
-            'layer_part_of',
-            'located_in',  # anatomic DAG -> include because it reflects the anatomic coarseness / hierarchy
-            'location_of',
-            'lumen_of',
-            'luminal_space_of',
-            'negatively_regulates',
-            'never_in_taxon',
-            'occurs_in',
-            'only_in_taxon',
-            'output_of',
-            'overlaps',
-            'part_of',  # anatomic DAG -> include because it reflects the anatomic coarseness / hierarchy
-            'participates_in',
-            'positively_regulates',
-            'postaxialmost_part_of',
-            'posterior_to',
-            'posteriorly_connected_to',
-            'preaxialmost_part_of',
-            'preceded_by',
-            'precedes',
-            'present_in_taxon',
-            'produced_by',
-            'produces',
-            'protects',
-            'proximal_to',
-            'proximally_connected_to',
-            'proximalmost_part_of',
-            'regulates',
-            'seeAlso',
-            'serially_homologous_to',
-            'sexually_homologous_to',
-            'simultaneous_with',
-            'site_of',
-            'skeleton_of',
-            'starts',
-            'starts_with',
-            'subdivision_of',
-            'superficial_to',
-            'supplies',
-            'surrounded_by',
-            'surrounds',
-            'synapsed_by',
-            'transformation_of',
-            'tributary_of',
-            'trunk_part_of',
-            'ventral_to'
-        ]
         edges_to_delete = []
         for i, x in enumerate(self.graph.edges):
-            if x[2] not in edge_types:
-                print(f"NON-CRITICAL WARNING: uberon edge type {x[2]} not in reference list yet")
             if x[2] not in [
                 "is_a",
                 "located_in",
@@ -994,7 +851,7 @@ class OntologyUberonLifecyclestage(OntologyUberon):
         self.reset_root(root="UBERON:0000105")
 
 
-class OntologyCl(OntologyExtendedObo):
+class OntologyCl(OntologyObo, OntologyExtended):
 
     def __init__(
             self,
@@ -1066,7 +923,7 @@ class OntologyCl(OntologyExtendedObo):
         return ["synonym"]
 
 
-class OntologyOboCustom(OntologyExtendedObo):
+class OntologyOboCustom(OntologyObo, OntologyExtended):
 
     def __init__(
             self,
@@ -1079,7 +936,7 @@ class OntologyOboCustom(OntologyExtendedObo):
 # use OWL for OntologyHancestro
 
 
-class OntologyHsapdv(OntologyExtendedObo):
+class OntologyHsapdv(OntologyObo):
 
     def __init__(
             self,
@@ -1110,7 +967,7 @@ class OntologyHsapdv(OntologyExtendedObo):
         return ["synonym"]
 
 
-class OntologyMmusdv(OntologyExtendedObo):
+class OntologyMmusdv(OntologyObo, OntologyExtended):
 
     def __init__(
             self,
@@ -1141,7 +998,7 @@ class OntologyMmusdv(OntologyExtendedObo):
         return ["synonym"]
 
 
-class OntologyMondo(OntologyExtendedObo):
+class OntologyMondo(OntologyObo, OntologyExtended):
 
     def __init__(
             self,
@@ -1149,10 +1006,10 @@ class OntologyMondo(OntologyExtendedObo):
             recache: bool = False,
             **kwargs
     ):
-        # TODO Consider switching to owl, the newer releases of MONDO only push the owl release to GitHub, so versioned
+        # TODO Need to switch to owl, the newer releases of MONDO only push the owl release to GitHub, so versioned
         #  ontology access is only possible with owl.
         obofile = cached_load_file(
-            url=f"https://raw.githubusercontent.com/monarch-initiative/mondo/{branch}/mondo-lastbuild.obo",
+            url=f"http://purl.obolibrary.org/obo/mondo.obo",
             ontology_cache_dir="mondo",
             ontology_cache_fn=f"mondo_{branch}.obo",
             recache=recache,
@@ -1181,7 +1038,7 @@ class OntologyMondo(OntologyExtendedObo):
         return ["synonym"]
 
 
-class OntologyCellosaurus(OntologyExtendedObo):
+class OntologyCellosaurus(OntologyObo, OntologyExtended):
 
     def __init__(
             self,
@@ -1210,7 +1067,7 @@ class OntologyCellosaurus(OntologyExtendedObo):
         return ["synonym"]
 
 
-class OntologyHancestro(OntologyEbi):
+class OntologyHancestro(OntologyEbi, OntologyExtended):
 
     """
     TODO move this to .owl backend once available.
@@ -1228,11 +1085,16 @@ class OntologyHancestro(OntologyEbi):
             recache=recache,
         )
 
+        # Add additional nodes under root node.
+        self.add_children(dict_ontology={
+            "HANCESTRO:0004": {"multiethnic": {"name": "multiethnic"}},
+        })
 
-class OntologyTaxon(OntologyExtendedObo):
+
+class OntologyTaxon(OntologyObo, OntologyExtended):
 
     """
-    Note on ontology: The same repo also contains ncbitaxon.obs, the full ontology which is ~500MB large and
+    Note on ontology: The same repo also contains ncbitaxon.obo, the full ontology which is ~500MB large and
     takes multiple minutes to load. We are using a reduced version, taxslim, here.
 
     See also https://github.com/obophenotype/ncbitaxon/releases/download/{branch}/ncbitaxon.obo.
@@ -1265,7 +1127,7 @@ class OntologyTaxon(OntologyExtendedObo):
         return ["synonym"]
 
 
-class OntologyEfo(OntologyExtendedObo):
+class OntologyEfo(OntologyObo, OntologyExtended):
 
     def __init__(
             self,
@@ -1297,7 +1159,7 @@ class OntologyEfo(OntologyExtendedObo):
         return ["synonym"]
 
 
-class OntologySex(OntologyExtendedObo):
+class OntologySex(OntologyObo, OntologyExtended):
 
     """
     Sex is defined based on a subset of the PATO ontology.
