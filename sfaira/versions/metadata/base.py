@@ -963,9 +963,6 @@ class OntologyUberon(OntologyExtendedObo):
             if x[2] not in edge_types:
                 print(f"NON-CRITICAL WARNING: uberon edge type {x[2]} not in reference list yet")
             if x[2] not in [
-                "develops_from",
-                'develops_from_part_of',
-                'directly_develops_from',
                 "is_a",
                 "located_in",
                 "part_of",
