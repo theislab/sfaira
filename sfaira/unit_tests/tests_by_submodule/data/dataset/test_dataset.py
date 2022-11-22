@@ -43,7 +43,7 @@ def test_dsgs_subset_dataset_wise(organ: str):
     for x in ds.dataset_groups:
         for k, v in x.datasets.items():
             assert v.organism == "Homo sapiens", v.organism
-            assert v.ontology_container_sfaira.organ.is_a(query=v.organ, reference=organ), v.organ
+            assert v.ontology_container_sfaira.organ.is_a(is_=v.organ, a_=organ), v.organ
 
 
 def test_dsgs_config_write_load():
@@ -91,9 +91,9 @@ def test_dsgs_subset_cell_wise(celltype: str):
     for x in ds.dataset_groups:
         for k, v in x.datasets.items():
             assert v.organism == "Homo sapiens", v.id_cleaned
-            assert v.ontology_container_sfaira.organ.is_a(query=v.organ, reference=organ), v.organ
+            assert v.ontology_container_sfaira.organ.is_a(is_=v.organ, a_=organ), v.organ
             for y in np.unique(v.adata.obs[v._adata_ids.cell_type].values):
-                assert v.ontology_container_sfaira.cell_type.is_a(query=y, reference=celltype), y
+                assert v.ontology_container_sfaira.cell_type.is_a(is_=y, a_=celltype), y
 
 
 @pytest.mark.parametrize("match_to_release", [RELEASE_HUMAN, {"Homo sapiens": RELEASE_HUMAN}])

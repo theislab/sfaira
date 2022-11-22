@@ -1,0 +1,24 @@
+source	target	target_id
+APOE pos FABP4 high tissue M2	macrophage	CL:0000235
+Activated tissue macrophage	tissue-resident macrophage	CL:0000864
+B cell	B cell	CL:0000236
+CD4 T cell	CD4-positive, alpha-beta T cell	CL:0000624
+CD8 T cell	CD8-positive, alpha-beta T cell	CL:0000625
+Dendritic cell	dendritic cell	CL:0000451
+Doublet	unknown	unknown
+Engulfing macrophage	macrophage	CL:0000235
+Epithelial cell	epithelial cell	CL:0000066
+Gamma delta T cell	gamma-delta T cell	CL:0000798
+Granulocyte	granulocyte	CL:0000094
+Infiltrating macrophage	macrophage	CL:0000235
+Interferon stimulated M1	macrophage	CL:0000235
+Mast cell	mast cell	CL:0000097
+NK cell	natural killer cell	CL:0000623
+Plasma cell	plasma cell	CL:0000786
+Proliferating T cell	T cell	CL:0000084
+Proliferating macrophage	macrophage	CL:0000235
+RBC	erythrocyte	CL:0000232
+Resting tissue macrophage	tissue-resident macrophage	CL:0000864
+SPP1 high fibrogenic M2	macrophage	CL:0000235
+Transitional M1	macrophage	CL:0000235
+Unclassified	unknown	unknown

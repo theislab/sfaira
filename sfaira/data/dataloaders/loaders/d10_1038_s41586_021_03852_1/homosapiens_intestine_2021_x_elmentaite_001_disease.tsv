@@ -1,0 +1,5 @@
+source	target	target_id
+Healthy adult	healthy	PATO:0000461
+Pediatric Crohn Disease	Crohn disease	MONDO:0005011
+Pediatric healthy	healthy	PATO:0000461
+fetal	healthy	PATO:0000461

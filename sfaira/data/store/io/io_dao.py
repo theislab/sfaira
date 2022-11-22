@@ -114,7 +114,16 @@ def write_dao(store: Union[str, Path], adata: anndata.AnnData, chunks: Union[boo
         .astype({col: 'category' for col in adata.obs.columns if col not in ['permutation_original_data']})
         .to_parquet(path=path_obs(store), engine='pyarrow', compression='snappy', index=None)
     )
-    adata.var.to_parquet(path=path_var(store), engine='pyarrow', compression='snappy', index=None)
+    # Need this nan conversion so that writing to parquet does not fail later:
+    # NaN is introduced when re-indexing .var when creating a new feature space, for example.
+    # The values that are NaN in these settings are var meta data like the feature biotype.
+    # ToDo: Could differentiate between substituting string and numeric nan here.
+    var = pd.DataFrame(dict([
+        (k, pd.Categorical(["nan" if vb else va for va, vb in zip(v, v.isna())]))
+        if any(v.isna()) else (k, v)
+        for k, v in adata.var.items()
+    ]), index=adata.var.index)
+    var.to_parquet(path=path_var(store), engine='pyarrow', compression='snappy', index=None)
 
 
 def read_dao(store: Union[str, Path], use_dask: bool = True, columns: Union[None, List[str]] = None,

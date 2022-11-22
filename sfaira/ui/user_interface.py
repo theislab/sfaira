@@ -9,7 +9,7 @@ import warnings
 import time
 
 from sfaira import settings
-from sfaira.consts import AdataIdsSfaira, AdataIds, OCS
+from sfaira.consts import AdataIdsSfaira, AdataIds, OC
 from sfaira.data import DatasetInteractive
 from sfaira.estimators.keras.base import EstimatorKerasEmbedding, EstimatorKerasCelltype
 from sfaira.ui.model_zoo import ModelZoo
@@ -374,10 +374,10 @@ class UserInterface:
             raise ValueError("Please provide either the gene_ens_col or the gene_symbol_col argument.")
 
         # handle organ names with stripped spaces
-        if organ not in OCS.organ.node_names:
-            organ_dict = {i.replace(" ", ""): i for i in OCS.organ.node_names}
+        if organ not in OC.organ.node_names:
+            organ_dict = {i.replace(" ", ""): i for i in OC.organ.node_names}
             assert organ in organ_dict, f"Organ {organ} is not a valid node name in the UBERON organ ontology"
-            organ = {i.replace(" ", ""): i for i in OCS.organ.node_names}[organ]
+            organ = {i.replace(" ", ""): i for i in OC.organ.node_names}[organ]
 
         self.data = DatasetInteractive(
             data=data,

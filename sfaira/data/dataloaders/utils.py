@@ -1,3 +1,4 @@
+import gzip
 import os
 import shutil
 from typing import Dict, List, Union
@@ -117,12 +118,26 @@ def read_yaml(fn) -> Dict[str, Dict[str, Union[str, int, bool]]]:
 def buffered_decompress(fn_compressed):
     if fn_compressed.endswith(".zip"):
         dir_decompressed = fn_compressed.split(".zip")[0]
+        decompressor = "shututil"
     elif fn_compressed.endswith(".tar.gz"):
         dir_decompressed = fn_compressed.split(".tar.gz")[0]
+        decompressor = "shututil"
+    elif fn_compressed.endswith(".tar"):
+        dir_decompressed = fn_compressed.split(".tar")[0]
+        decompressor = "shututil"
     elif fn_compressed.endswith(".gz"):
         dir_decompressed = fn_compressed.split(".gz")[0]
+        decompressor = "gzip"
     else:
         dir_decompressed = os.path.dirname(fn_compressed)
+        decompressor = "shututil"
     if not os.path.exists(dir_decompressed):
-        shutil.unpack_archive(filename=fn_compressed, extract_dir=dir_decompressed)
+        if decompressor == "shututil":
+            shutil.unpack_archive(filename=fn_compressed, extract_dir=dir_decompressed)
+        elif decompressor == "gzip":
+            with gzip.open(fn_compressed, 'rb') as f_in:
+                with open(dir_decompressed, 'wb') as f_out:
+                    shutil.copyfileobj(f_in, f_out)
+        else:
+            assert False, decompressor
     return dir_decompressed

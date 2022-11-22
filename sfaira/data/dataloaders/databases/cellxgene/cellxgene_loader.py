@@ -8,7 +8,7 @@ import uuid
 
 from sfaira import settings
 from sfaira.data.dataloaders.base import DatasetBase
-from sfaira.consts import AdataIdsCellxgene, AdataIdsCellxgene_v2_0_0
+from sfaira.consts import AdataIdsCellxgene, AdataIdsCellxgeneVersions, DEFAULT_SCHEMA
 from sfaira.data.dataloaders.databases.cellxgene.rest_helpers import get_collection, get_data
 from sfaira.data.dataloaders.databases.cellxgene.rest_helpers import CELLXGENE_PRODUCTION_ENDPOINT, DOWNLOAD_DATASET
 
@@ -94,12 +94,14 @@ class Dataset(DatasetBase):
         )
         # General keys are defined in the shared IDs object. Further down, the species specific one is loaded to
         # disambiguate species-dependent differences.
-        self._adata_ids_cellxgene = AdataIdsCellxgene()
+        self._adata_ids_cellxgene = AdataIdsCellxgeneVersions[DEFAULT_SCHEMA]
         self._cache_metadata = cache_metadata
         self._collection = None
         self.collection_id = collection_id
         self.supplier = "cellxgene"
-        doi = [x['link_url'] for x in self.collection["links"] if x['link_type'] == 'DOI']
+        doi = [x['link_url'].replace("https://doi.org/", "")
+               for x in self.collection["links"]
+               if x['link_type'] == 'DOI']
         self.doi_journal = collection_id if len(doi) == 0 else doi[0]  # TODO access journal DOI explicitly.
         self.id_base = sample_fn
         # Set h5ad download URLs:
@@ -135,11 +137,11 @@ class Dataset(DatasetBase):
                 except ValueError as e2:
                     print(f"WARNING: {e} and {e2} in {self.collection_id} and data set {self.id}")
 
-        self._adata_ids_cellxgene = AdataIdsCellxgene_v2_0_0()
+        self._adata_ids_cellxgene = AdataIdsCellxgeneVersions[DEFAULT_SCHEMA]
         # Add author information.  # TODO need to change this to contributor?
         self.author = "cellxgene"
         self.layer_processed = "X"
-        self.layer_counts = "X" if collection_dataset["x_normalization"] == "none" else "raw"
+        self.layer_counts = "raw"
         # The h5ad objects from cellxgene follow a particular structure and the following attributes are guaranteed to
         # be in place. Note that these point at the anndata instance and will only be available for evaluation after
         # download. See below for attributes that are lazily available
@@ -163,10 +165,10 @@ class Dataset(DatasetBase):
     @property
     def _collection_cache_dir(self):
         """
-        Collection meta data caching directory.
+        Collection metadata caching directory.
 
-        Caches are written into specific directory under HOME/.cache with other sfaira meta data unless
-        path_data was supplied to constructor. This co-localisation of collection meta data with data downloads eases
+        Caches are written into specific directory under HOME/.cache with other sfaira metadata unless
+        path_data was supplied to constructor. This co-localisation of collection metadata with data downloads eases
         transfer of cache files between machines.
         """
         if self.data_dir_base is None:
@@ -181,7 +183,7 @@ class Dataset(DatasetBase):
     @property
     def collection(self):
         """
-        Cached collection meta data.
+        Cached collection metadata.
 
         Note on caching: updates to the remote collection break these caches.
         Disbale caching are clear caches manually (~/.cache/sfaira/dataset_meta/cellxgene) if this causes issues.

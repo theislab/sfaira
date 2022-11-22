@@ -12,7 +12,7 @@ import warnings
 
 from sfaira.versions.genomes import GenomeContainer
 from sfaira.versions.metadata import CelltypeUniverse
-from sfaira.consts import AdataIdsCellxgene_v2_0_0, AdataIdsSfaira, META_DATA_FIELDS, OCS
+from sfaira.consts import AdataIdsCellxgeneVersions, AdataIdsSfaira, DEFAULT_SCHEMA, META_DATA_FIELDS, OC
 from sfaira.data.dataloaders.base.utils import is_child, get_directory_formatted_doi, identify_tsv
 from sfaira.data.dataloaders.crossref import crossref_query
 from sfaira.data.dataloaders.download_utils import download
@@ -22,6 +22,20 @@ from sfaira.data.dataloaders.base.annotation_container import AnnotationContaine
 from sfaira.data.dataloaders.var_utils import streamline_var, collapse_x_var_by_feature
 from sfaira.consts.utils import clean_doi, clean_id_str
 from sfaira.versions.metadata.maps import prepare_ontology_map_tab
+
+
+def get_target_ids(schema: str):
+    if schema.startswith("sfaira"):
+        target_ids = AdataIdsSfaira()
+    elif schema.startswith("cellxgene"):
+        if len(schema.split(":")) > 1:
+            v = schema.split(":")[1]
+        else:
+            v = DEFAULT_SCHEMA
+        target_ids = AdataIdsCellxgeneVersions[v]
+    else:
+        raise ValueError(f"did not recognize schema {schema}")
+    return target_ids
 
 
 class DatasetBase(AnnotationContainer):
@@ -34,10 +48,10 @@ class DatasetBase(AnnotationContainer):
     supplier: str
 
     _celltype_universe: Union[None, CelltypeUniverse] = None
-    _ontology_class_maps: Union[dict]
-
+    _fns_tsvs: Dict[str, str]
     load_raw: Union[None, bool] = None
     mapped_features: Union[None, str, bool] = None
+    _ontology_class_maps: Union[dict]
     remove_gene_version: Union[None, bool] = None
     subset_gene_type: Union[None, str] = None
     streamlined_meta: bool = False
@@ -83,13 +97,14 @@ class DatasetBase(AnnotationContainer):
         :param kwargs:
         """
         self._adata_ids = AdataIdsSfaira()
-        self.ontology_container_sfaira = OCS  # Using a pre-instantiated version of this yields drastic speed-ups.
+        self.ontology_container_sfaira = OC  # Using a pre-instantiated version of this yields drastic speed-ups.
 
         self.data_dir_base = data_path
         self.meta_path = meta_path
         self.cache_path = cache_path
 
         self._ontology_class_maps = dict([(k, None) for k in self._adata_ids.ontology_constrained])
+        self._fns_tsvs = {}
 
         self.sample_fn = sample_fn
         self._sample_fns = sample_fns
@@ -251,7 +266,9 @@ class DatasetBase(AnnotationContainer):
             Uses default set in schema if not set.
         :param schema: Export format.
             - "sfaira"
-            - "cellxgene"
+            - "cellxgene" - can contain a version separated by a ":", supported are:
+                - "cellxgene:2_0_0"
+                - "cellxgene:3_0_0"
         :param subset_genes_to_type: Type(s) to subset to. Can be a single type or a list of types or None.
             Uses default set in schema if not set.
             Types can be:
@@ -263,20 +280,25 @@ class DatasetBase(AnnotationContainer):
         :param verbose: Report feature transformation statistics.
         """
         self._assert_loaded()
-        if schema.startswith("sfaira"):
-            adata_target_ids = AdataIdsSfaira()
-        elif schema.startswith("cellxgene"):
-            adata_target_ids = AdataIdsCellxgene_v2_0_0()
-        else:
-            raise ValueError(f"did not recognize schema {schema}")
+        adata_target_ids = get_target_ids(schema=schema)
         if isinstance(match_to_release, dict):
             match_to_release = match_to_release[self.organism]
         if subset_layer is not None:
             assert isinstance(subset_layer, str), "subset_layer has to be of type str"
             if subset_layer == "counts":
                 self.layer_processed = None
+            elif subset_layer == "counts_prioritized":
+                # De-register processed data if count data are available:
+                # This will fill the count field with processed data if only processed data are available in the object.
+                if self.layer_counts is not None:
+                    self.layer_processed = None
             elif subset_layer == "processed":
                 self.layer_counts = None
+            elif subset_layer == "processed_prioritized":
+                # De-register count data if processed data are available:
+                # This will fill the processed field with count data if only count data are available in the object.
+                if self.layer_processed is not None:
+                    self.layer_counts = None
             else:
                 raise ValueError("subset_layer has to be either counts or processed")
 
@@ -321,7 +343,7 @@ class DatasetBase(AnnotationContainer):
 
         Output format are saved in ADATA_FIELDS* classes.
 
-        Note on ontology-controlled meta data:
+        Note on ontology-controlled metadata:
         These are defined for a given format in `ADATA_FIELDS*.ontology_constrained`.
         They may appear in three different formats:
             - original (free text) annotation
@@ -329,14 +351,16 @@ class DatasetBase(AnnotationContainer):
             - ontology ID
         During streamlining, these ontology-controlled meta data are projected to all of these three different formats.
         The initially annotated column may be any of these and is defined as "{attr}_obs_col".
-        The resulting three column per meta data item are named:
+        The resulting three column per metadata item are named:
             - ontology symbol: "{ADATA_FIELDS*.attr}"
             - ontology ID: {ADATA_FIELDS*.attr}_{ADATA_FIELDS*.onto_id_suffix}"
             - original (free text) annotation: "{ADATA_FIELDS*.attr}_{ADATA_FIELDS*.onto_original_suffix}"
 
         :param schema: Export format.
             - "sfaira"
-            - "cellxgene"
+            - "cellxgene" - can contain a version separated by a ":", supported are:
+                - "cellxgene:2_0_0"
+                - "cellxgene:3_0_0"
         :param clean_obs: Whether to delete non-streamlined fields in .obs, .obsm and .obsp.
              Alternatively, list of .obs fields to remove.
         :param clean_uns: Whether to delete non-streamlined fields in .uns.
@@ -356,13 +380,7 @@ class DatasetBase(AnnotationContainer):
             keep_orginal_obs = keep_orginal_obs.tolist()
 
         # Set schema as provided by the user
-        if schema.startswith("sfaira"):
-            adata_target_ids = AdataIdsSfaira()
-        elif schema.startswith("cellxgene"):
-            adata_target_ids = AdataIdsCellxgene_v2_0_0()
-        else:
-            raise ValueError(f"did not recognize schema {schema}")
-
+        adata_target_ids = get_target_ids(schema=schema)
         self.adata = streamline_obs_uns(adata=self.adata,
                                         adata_input_ids=self._adata_ids,
                                         adata_target_ids=adata_target_ids,
@@ -474,7 +492,7 @@ class DatasetBase(AnnotationContainer):
             k = getattr(self, x + "_obs_key")
             if k is None:
                 warnings.warn(f"attempted to write ontology class maps for data set {self.id_base} without annotation "
-                              f"of meta data {x}")
+                              f"of metadata {x}")
             elif k not in self.adata.obs.columns:
                 warnings.warn(f"attempted to write ontology class maps for data set {self.id_base} but did not find "
                               f"column {k} in .obs which should correspond to {x}")
@@ -522,6 +540,7 @@ class DatasetBase(AnnotationContainer):
         ontology_class_maps = {}
         for fn in fns:
             k = identify_tsv(fn=fn, ontology_names=self._adata_ids.ontology_constrained)
+            self._fns_tsvs[k] = fn
             if os.path.exists(fn):
                 ontology_class_maps[k] = self._read_ontology_class_map(fn=fn)
         self.ontology_class_maps = ontology_class_maps
@@ -553,7 +572,7 @@ class DatasetBase(AnnotationContainer):
         else:
             if isinstance(fn, str):
                 fn = os.path.normpath(fn)
-        # Only load meta data if file exists:
+        # Only load metadata if file exists:
         if fn is not None and os.path.isfile(fn):
             meta = pandas.read_csv(
                 fn,
@@ -572,7 +591,7 @@ class DatasetBase(AnnotationContainer):
             dir_out: Union[None, str] = None,
     ):
         """
-        Write meta data object for data set.
+        Write metadata object for data set.
 
         Does not cache data and attempts to load raw data.
 
@@ -595,9 +614,9 @@ class DatasetBase(AnnotationContainer):
 
         if self.adata is None:
             self.load(load_raw=True, allow_caching=False)
-        # Add data-set wise meta data into table:
+        # Add data-set wise metadata into table:
         meta = pandas.DataFrame(index=range(1))
-        # Expand table by variably cell-wise or data set-wise meta data:
+        # Expand table by variably cell-wise or data set-wise metadata:
         for x in self._adata_ids.controlled_meta_fields:
             if hasattr(self, f"{x}_obs_key") and getattr(self, f"{x}_obs_key") is not None:
                 col = getattr(self._adata_ids, x)
@@ -622,7 +641,7 @@ class DatasetBase(AnnotationContainer):
         else:
             author = self.author
 
-        # Note: access private attributes here, e.g. _organism, to avoid loading of content via meta data, which would
+        # Note: access private attributes here, e.g. _organism, to avoid loading of content via metadata, which would
         # invoke call to self.id before it is set.
         self.id_base = f"{clean_id_str(self._organism)}_" \
                        f"{clean_id_str(self._organ)}_" \
@@ -740,7 +759,7 @@ class DatasetBase(AnnotationContainer):
                     if x[k] is not None:  # None is always allowed.
                         if not isinstance(v[0], META_DATA_FIELDS[k]):
                             raise ValueError(f"key '{k}' of value `{v[0]}` and signature `{type(v[0])}` "
-                                             f"in meta data table did not match signature "
+                                             f"in metadata table did not match signature "
                                              f"{str(META_DATA_FIELDS[k])}")
         self._meta = x
 
@@ -804,7 +823,7 @@ class DatasetBase(AnnotationContainer):
         These keys are properties that are not available in lazy model and require loading first because the
         subsetting works on the cell-level: .adata are maintained but reduced to matches.
 
-        :param key: Property to subset by. Choose from sfaira controlled meta data:
+        :param key: Property to subset by. Choose from sfaira controlled metadata:
 
                 - "assay_sc"
                 - "assay_differentiation"
@@ -826,7 +845,7 @@ class DatasetBase(AnnotationContainer):
 
             The name key is independent of the schema used for streamlining uns and obs annotation.
         :param values: Target labels. All observations that are annotated with one of these labels or their descendants
-            (for ontology-based meta data) are kept in the subset.
+            (for ontology-based metadata) are kept in the subset.
         :param allow_missing_annotation: Whether to add cells and data sets with missing annotation for queried key into
             the selection of the subset.
         :param allow_partial_match: Whether to allow all or no cells in a dataset that is not yet loaded into memory but
@@ -841,7 +860,7 @@ class DatasetBase(AnnotationContainer):
         """
         if not hasattr(self._adata_ids, key):
             raise ValueError(f"attempted to subset based on non-supported key={key}, "
-                             "choose from sfaira controlled meta data")
+                             "choose from sfaira controlled metadata")
         if not (isinstance(values, list) or isinstance(values, tuple) or isinstance(values, np.ndarray)):
             values = [values]
 
@@ -852,13 +871,13 @@ class DatasetBase(AnnotationContainer):
                 sample_attr = [sample_attr]
             if sample_attr is not None:
                 if hasattr(self.ontology_container_sfaira, samplewise_key):
-                    # Ontology constrained meta data:
+                    # Ontology constrained metadata:
                     ontology = getattr(self.ontology_container_sfaira, samplewise_key)
                     keep_all = np.any([np.any([is_child(query=x, ontology=ontology, ontology_parent=y)
                                                for y in values])
                                        for x in sample_attr])
                 else:
-                    # Non-constrained meta data:
+                    # Non-constrained metadata:
                     keep_all = [x in values for x in sample_attr]
                     if allow_partial_match:
                         keep_all = np.any(keep_all)
@@ -902,26 +921,51 @@ class DatasetBase(AnnotationContainer):
                     idx_ = np.where([x in values_found_unique_matched for x in values_found])[0]
                     keep_dataset_ = len(idx_) > 0
                 else:
-                    if allow_partial_match:
-                        # TODO find keys from tsvs here
-                        idx_ = None
-                        keep_dataset_ = False
+                    if samplewise_key in self._fns_tsvs.keys():
+                        # We dont know associations here, so we will either keep the entire data set or nothing.
+                        values_found_unique = self._read_ontology_class_map(
+                            fn=self._fns_tsvs[samplewise_key])["target"].values
+                        try:
+                            ontology = getattr(self.ontology_container_sfaira, samplewise_key)
+                        except AttributeError:
+                            raise ValueError(f"{key} not a valid property of ontology_container object")
+                        values_found_unique_matched = [
+                            x for x in values_found_unique if np.any([
+                                is_child(query=x, ontology=ontology, ontology_parent=y)
+                                for y in values
+                            ])
+                        ]
+                        values_found_unique_mismatched = [x for x in values_found_unique
+                                                          if x not in values_found_unique_matched]
+                    else:
+                        values_found_unique_matched = None
+                        values_found_unique_mismatched = None
+                    if values_found_unique_matched is not None:
+                        if len(values_found_unique_mismatched) == 0 or \
+                                (len(values_found_unique_matched) > 0 and allow_partial_match):
+                            # Allow full data set if all values match, or > 0 values match and allow_partial_match is
+                            # true.
+                            idx_ = None
+                            keep_dataset_ = True
+                        else:
+                            idx_ = None
+                            keep_dataset_ = False
                     else:
                         idx_ = None
                         keep_dataset_ = False
             else:
                 if allow_missing_annotation:
                     # Pass all cells in object:
-                    idx_ = np.arange(0, self.adata.n_obs)
+                    idx_ = None
                     keep_dataset_ = True
                 else:
                     # Pass none of the cells in object:
-                    idx_ = np.array([])
+                    idx_ = None
                     keep_dataset_ = False
             return idx_, keep_dataset_
 
         idx, keep_dataset = get_subset_idx(samplewise_key=key, cellwise_key=key + "_obs_key")
-        if self.loaded:
+        if self.loaded and idx is not None:
             self.adata = self.adata[idx, :].copy() if len(idx) > 0 else None
         return keep_dataset
 

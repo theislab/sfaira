@@ -35,12 +35,11 @@ class CartBase:
     schedule: BatchDesignBase
     var: pd.DataFrame  # Feature meta data (features x properties).
 
-    def adaptor(
+    def _adaptor(
             self,
             generator_type: str,
             dataset_kwargs: dict = None,
-            shuffle_buffer: int = 0,
-            repeat: int = 1,
+            iter_kwargs: dict = {},
             **kwargs
     ):
         """
@@ -66,30 +65,32 @@ class CartBase:
         :param dataset_kwargs: Dict
             Parameters to pass to the constructor of torch Dataset.
             Only relevant if generator_type in ['torch', 'torch-loader']
-        :param shuffle_buffer: int
-            If shuffle_buffer > 0 -> Use a shuffle buffer with size shuffle_buffer to shuffle output of self.iterator
-            (this option is useful when using randomized_batch_access in the DaskCart)
-        :param repeat: int
-            Number of times to repeat the dataset until the underlying generator runs out of samples.
-            If repeat <= 0 -> repeat dataset forever
+        :param iter_kwargs: Dict
+
+            - shuffle_buffer: int
+                If shuffle_buffer > 0 -> Use a shuffle buffer with size shuffle_buffer to shuffle output of self.iterator
+                (this option is useful when using randomized_batch_access in the DaskCart)
+            - shuffle_buffer_multi: int
+            - repeat: int
+                Number of times to repeat the dataset until the underlying generator runs out of samples.
+                If repeat <= 0 -> repeat dataset forever
         :returns: Modified iteratable (see generator_type).
         """
         if not dataset_kwargs:
             dataset_kwargs = {}
 
         if generator_type == "python":
-            g = self.iterator(repeat=repeat, shuffle_buffer=shuffle_buffer)
+            g = self.iterator(**iter_kwargs)
         elif generator_type == "tensorflow":
             import tensorflow as tf
 
             g = tf.data.Dataset.from_generator(
-                generator=partial(self.iterator, repeat=repeat, shuffle_buffer=shuffle_buffer), **kwargs
+                generator=partial(self.iterator, **iter_kwargs), **kwargs
             )
         elif generator_type in ["torch", "torch-loader"]:
             g = self.adaptor_torch(dataset_kwargs=dataset_kwargs, loader=generator_type == "torch-loader", **kwargs)
         elif generator_type in ["torch-iter", "torch-iter-loader"]:
-            g = self.adaptor_torch_iter(loader=generator_type == "torch-iter-loader", repeat=repeat,
-                                        shuffle_buffer=shuffle_buffer, **kwargs)
+            g = self.adaptor_torch_iter(loader=generator_type == "torch-iter-loader", **iter_kwargs, **kwargs)
         else:
             raise ValueError(f"{generator_type} not recognized")
         return g
@@ -98,15 +99,9 @@ class CartBase:
     def adaptor_torch(self, dataset_kwargs, loader, **kwargs):
         pass
 
-    def adaptor_torch_iter(self, loader, repeat, shuffle_buffer, **kwargs):
-        from torch.utils.data import DataLoader
-        # Only import this module if torch is used to avoid strict torch dependency:
-        from sfaira.data.store.torch_dataset import SfairaIterableDataset
-
-        g = SfairaIterableDataset(iterator_fun=partial(self.iterator, repeat=repeat, shuffle_buffer=shuffle_buffer))
-        if loader:
-            g = DataLoader(g, **kwargs)
-        return g
+    @abc.abstractmethod
+    def adaptor_torch_iter(self, **kwargs):
+        pass
 
     @property
     def adata(self):
@@ -115,7 +110,7 @@ class CartBase:
         """
         raise NotImplementedError()
 
-    def iterator(self, repeat: int = 1, shuffle_buffer: int = 0):
+    def iterator(self, **kwargs):
         """
         Iterator over data matrix and meta data table, yields batches of data points.
         """

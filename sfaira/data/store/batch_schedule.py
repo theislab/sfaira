@@ -111,7 +111,6 @@ class BatchDesignBasic(BatchDesignBase):
 
     @property
     def design(self) -> List[np.ndarray]:
-
         if self.random_access:
             # shuffle idx for random access
             idx = np.random.permutation(self.idx)

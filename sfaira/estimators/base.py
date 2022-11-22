@@ -6,7 +6,7 @@ import anndata
 import numpy as np
 import pandas as pd
 
-from sfaira.consts import AdataIdsSfaira, OCS, AdataIds
+from sfaira.consts import AdataIdsSfaira, OC, AdataIds
 from sfaira.data.store.stores.base import StoreBase
 from sfaira.data.store.stores.multi import StoresAnndata
 from sfaira.data.store.stores.single import StoreSingleFeatureSpace
@@ -233,7 +233,7 @@ class EstimatorBaseCelltype(EstimatorBase):
             celltype_ontology = OntologyCl(branch=self.topology_container.output["cl"])
         self.celltype_universe = CelltypeUniverse(
             cl=celltype_ontology,
-            uberon=OCS.organ,
+            uberon=OC.organ,
         )
         # Set leaves if they are defined in topology:
         if self.topology_container.output["targets"] is not None:

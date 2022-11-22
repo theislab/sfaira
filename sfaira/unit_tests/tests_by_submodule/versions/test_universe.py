@@ -1,5 +1,6 @@
 import os
 
+from sfaira.consts.schema import DEFAULT_SCHEMA, ONTOLOGY_VERSIONS
 from sfaira.versions.metadata import CelltypeUniverse, OntologyCl, OntologyUberon
 from sfaira.unit_tests import DIR_TEMP
 
@@ -14,8 +15,8 @@ def test_universe_io():
     tmp_fn = os.path.join(DIR_TEMP, "universe_temp.csv")
     targets = ["stromal cell", "lymphocyte", "T-helper 1 cell", "T-helper 17 cell"]
     leaves_target = ["stromal cell", "T-helper 1 cell", "T-helper 17 cell"]
-    cl = OntologyCl(branch="v2021-02-01")
-    uberon = OntologyUberon(branch="2019-11-22")
+    cl = OntologyCl(branch=ONTOLOGY_VERSIONS[DEFAULT_SCHEMA]["VERSION_CL"])
+    uberon = OntologyUberon(branch=ONTOLOGY_VERSIONS[DEFAULT_SCHEMA]["VERSION_UBERON"])
     cu = CelltypeUniverse(cl=cl, uberon=uberon)
     cu.write_target_universe(fn=tmp_fn, x=targets)
     cu.load_target_universe(fn=tmp_fn)

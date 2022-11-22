@@ -309,3 +309,49 @@ class AdataIdsCellxgene_v2_0_0(AdataIdsCellxgene):
     def __init__(self):
         super(AdataIdsCellxgene_v2_0_0, self).__init__()
         self.feature_kwargs["match_to_release"] = "104"
+
+
+class AdataIdsCellxgene_v3_0_0(AdataIdsCellxgene):
+
+    """
+    https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md
+    """
+
+    def __init__(self):
+        super(AdataIdsCellxgene_v3_0_0, self).__init__()
+        self.ethnicity = "self_reported_ethnicity"
+        self.feature_kwargs["match_to_release"] = "104"
+        self.individual = "donor_id"
+        self.suspension_type = "suspension_type"
+
+        self.ontology_constrained = [
+            "assay_sc",
+            "cell_type",
+            "development_stage",
+            "disease",
+            "ethnicity",
+            "organ",
+            "organism",
+            "sex",
+            "suspension_type",
+        ]
+
+        self.obs_keys = [
+            "assay_sc",
+            "cell_type",
+            "development_stage",
+            "disease",
+            "individual",
+            "ethnicity",
+            "organ",
+            "organism",
+            "primary_data",
+            "sex",
+            "suspension_type",
+        ]
+
+
+AdataIdsCellxgeneVersions = {
+    "2_0_0": AdataIdsCellxgene_v2_0_0(),
+    "3_0_0": AdataIdsCellxgene_v3_0_0()
+}

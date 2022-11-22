@@ -1,0 +1,11 @@
+source	target	target_id
+DC1	dendritic cell	CL:0000451
+DC2	conventional dendritic cell	CL:0000990
+DC3	conventional dendritic cell	CL:0000990
+DC4	conventional dendritic cell	CL:0000990
+DC5	dendritic cell	CL:0000451
+DC6	plasmacytoid dendritic cell	CL:0000784
+Mono1	monocyte	CL:0000576
+Mono2	monocyte	CL:0000576
+Mono3	monocyte	CL:0000576
+Mono4	monocyte	CL:0000576

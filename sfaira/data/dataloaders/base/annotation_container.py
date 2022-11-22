@@ -2,7 +2,8 @@ import os
 from typing import List, Tuple, Union
 
 from sfaira.data.dataloaders.utils import read_yaml
-from sfaira.data.dataloaders.obs_utils import get_ontology, value_protection
+from sfaira.data.dataloaders.obs_utils import value_protection
+from sfaira.data.dataloaders.ontology_access import get_ontology
 
 
 class AnnotationContainer:
@@ -42,6 +43,7 @@ class AnnotationContainer:
     source_doi: Union[None, str] = None
     _sample_source: Union[None, str] = None
     state_exact: Union[None, str] = None
+    _suspension_type: Union[None, str] = None
     _tech_sample: Union[None, str] = None
     treatment: Union[None, str] = None
     _year: Union[None, int] = None
@@ -98,20 +100,37 @@ class AnnotationContainer:
             assert os.path.exists(yaml_path), f"did not find yaml {yaml_path}"
             yaml_vals = read_yaml(fn=yaml_path)
             # Set organism first as this is required to disambiguate valid entries for other meta data.
-            self.organism = yaml_vals["attr"]["organism"]
+            organism = yaml_vals["attr"]["organism"]
+            if isinstance(organism, dict):  # v is a dictionary over file-wise meta-data items
+                if sample_fn in organism.keys():
+                    organism = organism[sample_fn]
+                else:
+                    raise ValueError("Did not find organism annotation.")
+            self.organism = organism
+
+            def set_attr_on_self(k_, v_):
+                # Catches spelling errors in meta data definition (yaml keys).
+                if not hasattr(self, k_) and not hasattr(self, "_" + k_):
+                    raise ValueError(f"Tried setting unavailable property {k_}.")
+                try:
+                    setattr(self, k_, v_)
+                except AttributeError as e:
+                    raise ValueError(f"ValueError when setting {k_} as {v_}: {e}")
+
             for k, v in yaml_vals["attr"].items():
                 if v is not None and k not in ["organism", "sample_fns"]:
                     if isinstance(v, dict):  # v is a dictionary over file-wise meta-data items
+                        # only set value if field exists
                         if sample_fn in v.keys():
-                            # only set value if field exists
                             v = v[sample_fn]
-                    # Catches spelling errors in meta data definition (yaml keys).
-                    if not hasattr(self, k) and not hasattr(self, "_" + k):
-                        raise ValueError(f"Tried setting unavailable property {k}.")
-                    try:
-                        setattr(self, k, v)
-                    except AttributeError as e:
-                        raise ValueError(f"ValueError when setting {k} as {v}: {e}")
+                            set_attr_on_self(k, v)
+                    else:
+                        set_attr_on_self(k, v)
+
+    @property
+    def _dataset_id_reporting(self):
+        """Identifier used to define dataset in which an annotation error occurs."""
+        return ",".join([str(self.doi_journal), str(self.doi_preprint), str(self.dataset_index)])
 
     @property
     def assay_sc(self) -> Union[None, str]:
@@ -119,7 +138,8 @@ class AnnotationContainer:
 
     @assay_sc.setter
     def assay_sc(self, x: str):
-        x = value_protection(attr="assay_sc", allowed=self.get_ontology(k="assay_sc"), attempted=x)
+        x = value_protection(attr="assay_sc", allowed=self.get_ontology(k="assay_sc"), attempted=x,
+                             dataset_id=self._dataset_id_reporting)
         self._assay_sc = x
 
     @property
@@ -129,7 +149,7 @@ class AnnotationContainer:
     @assay_differentiation.setter
     def assay_differentiation(self, x: str):
         x = value_protection(attr="assay_differentiation", allowed=self.get_ontology(k="assay_differentiation"),
-                             attempted=x)
+                             attempted=x, dataset_id=self._dataset_id_reporting)
         self._assay_differentiation = x
 
     @property
@@ -139,7 +159,8 @@ class AnnotationContainer:
     @assay_type_differentiation.setter
     def assay_type_differentiation(self, x: str):
         x = value_protection(attr="assay_type_differentiation",
-                             allowed=self.get_ontology(k="assay_type_differentiation"), attempted=x)
+                             allowed=self.get_ontology(k="assay_type_differentiation"), attempted=x,
+                             dataset_id=self._dataset_id_reporting)
         self._assay_type_differentiation = x
 
     @property
@@ -206,7 +227,8 @@ class AnnotationContainer:
 
     @cell_type.setter
     def cell_type(self, x: str):
-        x = value_protection(attr="cell_type", allowed=self.get_ontology(k="cell_type"), attempted=x)
+        x = value_protection(attr="cell_type", allowed=self.get_ontology(k="cell_type"), attempted=x,
+                             dataset_id=self._dataset_id_reporting)
         self._cell_type = x
 
     @property
@@ -236,7 +258,8 @@ class AnnotationContainer:
 
     @development_stage.setter
     def development_stage(self, x: str):
-        x = value_protection(attr="development_stage", allowed=self.get_ontology(k="development_stage"), attempted=x)
+        x = value_protection(attr="development_stage", allowed=self.get_ontology(k="development_stage"), attempted=x,
+                             dataset_id=self._dataset_id_reporting)
         self._development_stage = x
 
     @property
@@ -245,7 +268,8 @@ class AnnotationContainer:
 
     @disease.setter
     def disease(self, x: str):
-        x = value_protection(attr="disease", allowed=self.get_ontology(k="disease"), attempted=x)
+        x = value_protection(attr="disease", allowed=self.get_ontology(k="disease"), attempted=x,
+                             dataset_id=self._dataset_id_reporting)
         self._disease = x
 
     @property
@@ -276,7 +300,7 @@ class AnnotationContainer:
     @property
     def download_url_meta(self) -> Union[Tuple[List[str]], Tuple[List[None]]]:
         """
-        Meta data download website(s).
+        Metadata download website(s).
 
         Save as tuple with single element, which is a list of all download websites relevant to dataset.
         :return:
@@ -310,7 +334,8 @@ class AnnotationContainer:
 
     @ethnicity.setter
     def ethnicity(self, x: str):
-        x = value_protection(attr="ethnicity", allowed=self.get_ontology(k="ethnicity"), attempted=x)
+        x = value_protection(attr="ethnicity", allowed=self.get_ontology(k="ethnicity"), attempted=x,
+                             dataset_id=self._dataset_id_reporting)
         self._ethnicity = x
 
     @property
@@ -328,7 +353,8 @@ class AnnotationContainer:
 
     @feature_type.setter
     def feature_type(self, x: str):
-        x = value_protection(attr="feature_type", allowed=self.get_ontology(k="feature_type"), attempted=x)
+        x = value_protection(attr="feature_type", allowed=self.get_ontology(k="feature_type"), attempted=x,
+                             dataset_id=self._dataset_id_reporting)
         self._feature_type = x
 
     @property
@@ -337,7 +363,8 @@ class AnnotationContainer:
 
     @primary_data.setter
     def primary_data(self, x: bool):
-        x = value_protection(attr="primary_data", allowed=self.get_ontology(k="primary_data"), attempted=x)
+        x = value_protection(attr="primary_data", allowed=self.get_ontology(k="primary_data"), attempted=x,
+                             dataset_id=self._dataset_id_reporting)
         self._primary_data = x
 
     @property
@@ -346,7 +373,8 @@ class AnnotationContainer:
 
     @organ.setter
     def organ(self, x: str):
-        x = value_protection(attr="organ", allowed=self.get_ontology(k="organ"), attempted=x)
+        x = value_protection(attr="organ", allowed=self.get_ontology(k="organ"), attempted=x,
+                             dataset_id=self._dataset_id_reporting)
         self._organ = x
 
     @property
@@ -355,7 +383,8 @@ class AnnotationContainer:
 
     @organism.setter
     def organism(self, x: str):
-        x = value_protection(attr="organism", allowed=self.get_ontology(k="organism"), attempted=x)
+        x = value_protection(attr="organism", allowed=self.get_ontology(k="organism"), attempted=x,
+                             dataset_id=self._dataset_id_reporting)
         self._organism = x
 
     @property
@@ -364,7 +393,8 @@ class AnnotationContainer:
 
     @sample_source.setter
     def sample_source(self, x: str):
-        x = value_protection(attr="sample_source", allowed=self.get_ontology(k="sample_source"), attempted=x)
+        x = value_protection(attr="sample_source", allowed=self.get_ontology(k="sample_source"), attempted=x,
+                             dataset_id=self._dataset_id_reporting)
         self._sample_source = x
 
     @property
@@ -373,8 +403,19 @@ class AnnotationContainer:
 
     @sex.setter
     def sex(self, x: str):
-        x = value_protection(attr="sex", allowed=self.get_ontology(k="sex"), attempted=x)
+        x = value_protection(attr="sex", allowed=self.get_ontology(k="sex"), attempted=x,
+                             dataset_id=self._dataset_id_reporting)
         self._sex = x
+
+    @property
+    def suspension_type(self) -> Union[None, str]:
+        return self._suspension_type
+
+    @suspension_type.setter
+    def suspension_type(self, x: str):
+        x = value_protection(attr="suspension_type", allowed=self.get_ontology(k="suspension_type"), attempted=x,
+                             dataset_id=self._dataset_id_reporting)
+        self._suspension_type = x
 
     @property
     def tech_sample(self) -> Union[None, str]:
@@ -406,7 +447,8 @@ class AnnotationContainer:
 
     @year.setter
     def year(self, x: int):
-        x = value_protection(attr="year", allowed=self.get_ontology(k="year"), attempted=x)
+        x = value_protection(attr="year", allowed=self.get_ontology(k="year"), attempted=x,
+                             dataset_id=self._dataset_id_reporting)
         self._year = x
 
     def get_ontology(self, **kwargs):

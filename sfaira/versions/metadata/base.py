@@ -1,16 +1,15 @@
 import abc
-import networkx
-import numpy as np
-import obonet
-import os
-# import owlready2
-import pickle
-
-import pandas as pd
-import requests
 from functools import lru_cache
+import os
+import pickle
+import requests
 from typing import Dict, List, Tuple, Union
 
+import networkx
+import numpy as np
+import nxontology.imports
+import obonet
+import pronto
 
 from sfaira import settings
 from sfaira.versions.metadata.extensions import EFO_TERMS
@@ -33,14 +32,14 @@ ToDo explain usage of ontology extension.
 
 
 def cached_load_file(url, ontology_cache_dir, ontology_cache_fn, recache: bool = False):
-    if os.name == "nt":  # if running on windows, do not download obo file, but rather pass url directly to obonet
+    if os.name == "nt":  # if running on Windows, do not download obo file, but rather pass url directly to obonet
         # TODO add caching option.
-        obofile = url
+        onto_fn = url
     else:
         ontology_cache_dir = os.path.join(settings.cachedir_ontologies, ontology_cache_dir)
-        obofile = os.path.join(ontology_cache_dir, ontology_cache_fn)
+        onto_fn = os.path.join(ontology_cache_dir, ontology_cache_fn)
         # Download if necessary:
-        if not os.path.exists(obofile) or recache:
+        if not os.path.exists(onto_fn) or recache:
             os.makedirs(name=ontology_cache_dir, exist_ok=True)
 
             def download_file():
@@ -48,13 +47,10 @@ def cached_load_file(url, ontology_cache_dir, ontology_cache_fn, recache: bool =
                 if not os.path.exists(ontology_cache_dir):
                     os.makedirs(ontology_cache_dir)
                 r = requests.get(url, allow_redirects=True)
-                # if url.startswith("https://raw.githubusercontent.com"):
-                #     open(obofile, 'wb').write(r.text)
-                # else:
-                open(obofile, 'wb').write(r.content)
+                open(onto_fn, 'wb').write(r.content)
 
             download_file()
-    return obofile
+    return onto_fn
 
 
 def cached_load_ebi(ontology_cache_dir, ontology_cache_fn, recache: bool = False) -> (networkx.MultiDiGraph, os.PathLike):
@@ -97,6 +93,10 @@ class Ontology:
 
     def is_node(self, x: str):
         return x in self.node_names
+
+    @abc.abstractmethod
+    def is_a(self, is_: str, a_: str, **kwargs) -> bool:
+        pass
 
     def validate_node(self, x: str):
         if not self.is_node(x=x):
@@ -252,17 +252,17 @@ class OntologyList(Ontology):
     def synonym_node_properties(self) -> List[str]:
         return []
 
-    def is_a(self, query: str, reference: str) -> bool:
+    def is_a(self, is_: str, a_: str) -> bool:
         """
         Checks if query node is reference node.
 
         Note that there is no notion of ancestors for list ontologies.
 
-        :param query: Query node name. Node ID or name.
-        :param reference: Reference node name. Node ID or name.
+        :param is_: Query node name. Node ID or name.
+        :param a_: Reference node name. Node ID or name.
         :return: If query node is reference node or an ancestor thereof.
         """
-        return query == reference
+        return is_ == a_
 
     def get_ancestors(self, node: str) -> List[str]:
         return []
@@ -291,6 +291,8 @@ class OntologyHierarchical(Ontology, abc.ABC):
     """
     _graph: networkx.MultiDiGraph
     _node_names: Union[None, List[str]] = None
+
+    edge_attributes: bool
 
     def _clear_caches(self):
         self.get_ancestors.cache_clear()
@@ -418,7 +420,7 @@ class OntologyHierarchical(Ontology, abc.ABC):
         x = self.convert_to_id(x)
         nodes_to_remove = []
         for y in self.graph.nodes():
-            if not np.any([self.is_a(query=z, reference=y, convert_to_id=False) for z in x]):
+            if not np.any([self.is_a(is_=z, a_=y, convert_to_id=False) for z in x]):
                 nodes_to_remove.append(y)
         self.graph.remove_nodes_from(nodes_to_remove)
         self._clear_caches()
@@ -448,7 +450,7 @@ class OntologyHierarchical(Ontology, abc.ABC):
         x = self.convert_to_id(x=x)
         leaves = []
         for y in x:
-            if not np.any([self.is_a(query=z, reference=y, convert_to_id=False) for z in list(set(x) - {y})]):
+            if not np.any([self.is_a(is_=z, a_=y, convert_to_id=False) for z in list(set(x) - {y})]):
                 leaves.append(y)
         return leaves
 
@@ -462,19 +464,19 @@ class OntologyHierarchical(Ontology, abc.ABC):
         node = self.__convert_to_id_cached(node)
         return list(networkx.descendants(self.graph, node))
 
-    def is_a(self, query: str, reference: str, convert_to_id: bool = True) -> bool:
+    def is_a(self, is_: str, a_: str, convert_to_id: bool = True) -> bool:
         """
         Checks if query node is reference node or an ancestor thereof.
 
-        :param query: Query node name. Node ID or name.
-        :param reference: Reference node name. Node ID or name.
+        :param is_: Query node name. Node ID or name.
+        :param a_: Reference node name. Node ID or name.
         :param convert_to_id: Whether to call self.convert_to_id on `query` and `reference` input arguments
         :return: If query node is reference node or an ancestor thereof.
         """
         if convert_to_id:
-            query = self.__convert_to_id_cached(query)
-            reference = self.__convert_to_id_cached(reference)
-        return query in self.get_ancestors(node=reference) or query == reference
+            is_ = self.__convert_to_id_cached(is_)
+            a_ = self.__convert_to_id_cached(a_)
+        return is_ in self.get_ancestors(node=a_) or is_ == a_
 
     def map_to_leaves(
             self,
@@ -536,13 +538,31 @@ class OntologyHierarchical(Ontology, abc.ABC):
     def synonym_node_properties(self) -> List[str]:
         pass
 
+    def _clean_nodes(self, ontology_name: Union[str, List[str]]):
+        # Clean up nodes:
+        if isinstance(ontology_name, str):
+            ontology_name = [ontology_name]
+        nodes_to_delete = []
+        for k, v in self.graph.nodes.items():
+            if "name" not in v.keys():
+                # Remove nodes without name .
+                nodes_to_delete.append(k)
+            elif all([x.lower() not in k.lower() for x in ontology_name]):
+                # Remove nodes from different ontology name space.
+                nodes_to_delete.append(k)
+        for k in nodes_to_delete:
+            self.graph.remove_node(k)
+
 
 class OntologyEbi(OntologyHierarchical):
     """
     Recursively assembles ontology by querying EBI web interface.
 
     Not recommended for large ontologies because of the iterative query of the web API.
+    This ontology backend is not currently used anymore but the class will not yet be deprecated.
     """
+
+    edge_attributes: bool = False
 
     def __init__(
             self,
@@ -677,26 +697,79 @@ class OntologyEbi(OntologyHierarchical):
 
 class OntologyOwl(OntologyHierarchical, abc.ABC):
 
-    # onto_owl = owlready2.Ontology
+    """
+    Edge attributes are currently not parsed by the owl backend, see also documentation in __init__().
+    Note that these are available in the obo backend.
+    """
+
+    edge_attributes: bool = False
 
     def __init__(
             self,
             owl: str,
+            ontology_name: Union[str, List[str]],
             **kwargs
     ):
-        # self.onto_owl = owlready2.get_ontology(owl)
-        # self.onto_owl.load()
-        self.graph = None
+        def parse_website_id(x: str):
+            """
+            Adjust node labels that are structured as a website in import, eg. "http://www.ebi.ac.uk/efo/EFO_0010183"
+            """
+            return ":".join(x.split("/")[-1].split("_")) if x.startswith("http") else x
+
+        # There is no unique agreed-upon interface to read owl into networkx objects. Below are a few options and some
+        # discussion thereof.
+
+        # The first and chosen option uses a nxontology interface. Note that nxontology is more than a reader so
+        # this is potentially a dependency that is larger than what we need here.
+        # Note: nxontology.imports.from_file works but only reads is_a edges and could be a consideration for fast
+        # reading.
+
+        import warnings
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            nxo = nxontology.imports.from_file(owl)
+        # Note for future work:
+        # This reader would be preferable in terms of its ability to retain edge attributes:
+        # Issue: This throws an error for EFO, see same issue arising below in manual pronto interface.
+        # import pronto
+        # owl_onto = pronto.Ontology(handle=url)
+        # nxo = nxontology.imports.pronto_to_multidigraph(owl_onto)
+        self.graph = nxo.graph
+        # Note: nxontology owl reading yields reversed edges compared to obo reading.
+        self.graph = self.graph.reverse(copy=True)
+
+        # A second option would be to go purely via pronto:
+        # import pronto
+        # Issue: This throws an error for EFO and ignores is_a edges unless subclass of is added.
+        # owl_onto = pronto.Ontology(handle=owl)
+        # g = networkx.MultiDiGraph()
+        # Build the graph with code like here:
+        # https://github.com/althonos/pronto/blob/1909ee95fd9908be68bc0c5d15733a1f13f195e6/pronto/term.py#L217-L229
+        # self.graph = g
+
+        # A third option would be to go via owlready2 like here:
+        # https://github.com/chanzuckerberg/single-cell-curation/blob/37d8a199c4017d743694ad9ff47f8ccca555efd0/
+        # cellxgene_schema_cli/scripts/ontology_processing.py#L121
+        # This would need to be extended to account for edge attributes.
+
+        node_id_map = {x: parse_website_id(x) for x in self.graph.nodes}
+        self.graph = networkx.relabel.relabel_nodes(self.graph, mapping=node_id_map, copy=True)
+        self._clean_nodes(ontology_name=ontology_name)
 
 
 class OntologyObo(OntologyHierarchical, abc.ABC):
 
+    edge_attributes: bool = True
+
     def __init__(
             self,
             obo: str,
+            ontology_name: Union[None, str, List[str]] = None,
             **kwargs
     ):
         self.graph = obonet.read_obo(obo, ignore_obsolete=True)
+        if ontology_name is not None:
+            self._clean_nodes(ontology_name=ontology_name)
 
     def map_node_suggestion(self, x: str, include_synonyms: bool = True, n_suggest: int = 10):
         """
@@ -725,15 +798,12 @@ class OntologyObo(OntologyHierarchical, abc.ABC):
         return [self.nodes[i][1]["name"] for i in np.argsort(scores)[-n_suggest:]][::-1]
 
 
-class OntologyExtendedObo(OntologyObo):
+class OntologyExtended:
     """
-    Basic .obo ontology extended by additional nodes and edges without breaking DAG.
+    Basic ontology extended by additional nodes and edges without breaking DAG.
     """
 
-    def __init__(self, obo, **kwargs):
-        super().__init__(obo=obo, **kwargs)
-
-    def add_children(self, dict_ontology: Dict[str, List[Dict[str, dict]]]):
+    def add_children(self, dict_ontology: Dict[str, Dict[str, dict]]):
         """
         Extend ontology by additional edges and children nodes defined in a dictionary.
 
@@ -791,7 +861,15 @@ class OntologyExtendedObo(OntologyObo):
         return ["synonym"]
 
 
-class OntologyUberon(OntologyExtendedObo):
+class OntologyUberon(OntologyObo, OntologyExtended):
+
+    """
+    Note on obo vs owl backend for UBERON.
+    In contrast to most of the other ontologies, we need edge attribute pasing to do sensible reasoning on UBERON, e.g.
+    to parse part_of relationships. As long as this is not supported by the owl backend, keep this on the obo backend.
+    Note also that the obo file is smaller and currently still supplied with every release on GitHub, so this should not
+    create any disadvantages beyonnd inconsistent backend usage for the ontologies here.
+    """
 
     def __init__(
             self,
@@ -799,181 +877,32 @@ class OntologyUberon(OntologyExtendedObo):
             recache: bool = False,
             **kwargs
     ):
-        obofile = cached_load_file(
-            url=f"https://raw.githubusercontent.com/obophenotype/uberon/{branch}/composite-vertebrate-basic.obo",
+        obo_fn = cached_load_file(
+            url=f"https://github.com/obophenotype/uberon/releases/download/{branch}/uberon.obo",
             ontology_cache_dir="uberon",
             ontology_cache_fn=f"uberon_{branch}.obo",
             recache=recache,
         )
-        super().__init__(obo=obofile)
+        super().__init__(obo=obo_fn, ontology_name=["cl", "uberon"])
 
-        # Clean up nodes:
-        nodes_to_delete = []
-        for k, v in self.graph.nodes.items():
-            # Only retain nodes which are  "anatomical collection" 'UBERON:0034925':
-            # ToDo this seems to narrow, need to check if we need to constrain the nodes we use.
-            if "name" not in v.keys():
-                nodes_to_delete.append(k)
-        for k in nodes_to_delete:
-            self.graph.remove_node(k)
-
-        # Clean up edges:
-        # The graph object can hold different types of edges,
-        # and multiple types are loaded from the obo, not all of which are relevant for us:
-        # All edge types (based on previous download, assert below that this is not extended):
-        edge_types = [
-            'aboral_to',
-            'adjacent_to',
-            'ambiguous_for_taxon',
-            'anastomoses_with',
-            'anterior_to',
-            'anteriorly_connected_to',
-            'attaches_to',
-            'attaches_to_part_of',
-            'bounding_layer_of',
-            'branching_part_of',
-            'capable_of',
-            'capable_of_part_of',
-            'channel_for',
-            'channels_from',
-            'channels_into',
-            'composed_primarily_of',
-            'conduit_for',
-            'confers_advantage_in',
-            'connected_to',
-            'connects',
-            'contains',
-            'contains_process',
-            'continuous_with',
-            'contributes_to_morphology_of',
-            'deep_to',
-            'developmentally_induced_by',
-            'developmentally_replaces',
-            'develops_from',  # developmental DAG -> include because it reflects the developmental hierarchy
-            'develops_from_part_of',  # developmental DAG -> include because it reflects the developmental hierarchy
-            'develops_in',
-            'directly_develops_from',  # developmental DAG -> include because it reflects the developmental hierarchy
-            'distal_to',
-            'distally_connected_to',
-            'distalmost_part_of',
-            'dorsal_to',
-            'drains',
-            'dubious_for_taxon',
-            'ends',
-            'ends_with',
-            'existence_ends_during',
-            'existence_ends_during_or_before',
-            'existence_ends_with',
-            'existence_starts_and_ends_during',
-            'existence_starts_during',
-            'existence_starts_during_or_after',
-            'existence_starts_with',
-            'extends_fibers_into',
-            'filtered_through',
-            'functionally_related_to',
-            'has_boundary',
-            'has_component',
-            'has_developmental_contribution_from',
-            'has_fused_element',
-            'has_member',
-            'has_muscle_antagonist',
-            'has_muscle_insertion',
-            'has_muscle_origin',
-            'has_part',
-            'has_potential_to_develop_into',
-            'has_potential_to_developmentally_contribute_to',
-            'has_quality',
-            'has_skeleton',
-            'immediate_transformation_of',
-            'immediately_anterior_to',
-            'immediately_deep_to',
-            'immediately_posterior_to',
-            'immediately_preceded_by',
-            'immediately_superficial_to',
-            'in_anterior_side_of',
-            'in_central_side_of',
-            'in_deep_part_of',
-            'in_distal_side_of',
-            'in_dorsal_side_of',
-            'in_innermost_side_of',
-            'in_lateral_side_of',
-            'in_left_side_of',
-            'in_outermost_side_of',
-            'in_posterior_side_of',
-            'in_proximal_side_of',
-            'in_right_side_of',
-            'in_superficial_part_of',
-            'in_taxon',
-            'in_ventral_side_of',
-            'indirectly_supplies',
-            'innervated_by',
-            'innervates',
-            'input_of',
-            'intersects_midsagittal_plane_of',
-            'is_a',  # term DAG -> include because it connect conceptual tissue groups
-            'layer_part_of',
-            'located_in',  # anatomic DAG -> include because it reflects the anatomic coarseness / hierarchy
-            'location_of',
-            'lumen_of',
-            'luminal_space_of',
-            'negatively_regulates',
-            'never_in_taxon',
-            'occurs_in',
-            'only_in_taxon',
-            'output_of',
-            'overlaps',
-            'part_of',  # anatomic DAG -> include because it reflects the anatomic coarseness / hierarchy
-            'participates_in',
-            'positively_regulates',
-            'postaxialmost_part_of',
-            'posterior_to',
-            'posteriorly_connected_to',
-            'preaxialmost_part_of',
-            'preceded_by',
-            'precedes',
-            'present_in_taxon',
-            'produced_by',
-            'produces',
-            'protects',
-            'proximal_to',
-            'proximally_connected_to',
-            'proximalmost_part_of',
-            'regulates',
-            'seeAlso',
-            'serially_homologous_to',
-            'sexually_homologous_to',
-            'simultaneous_with',
-            'site_of',
-            'skeleton_of',
-            'starts',
-            'starts_with',
-            'subdivision_of',
-            'superficial_to',
-            'supplies',
-            'surrounded_by',
-            'surrounds',
-            'synapsed_by',
-            'transformation_of',
-            'tributary_of',
-            'trunk_part_of',
-            'ventral_to'
-        ]
-        edges_to_delete = []
-        for i, x in enumerate(self.graph.edges):
-            if x[2] not in edge_types:
-                print(f"NON-CRITICAL WARNING: uberon edge type {x[2]} not in reference list yet")
-            if x[2] not in [
-                "develops_from",
-                'develops_from_part_of',
-                'directly_develops_from',
-                "is_a",
-                "located_in",
-                "part_of",
-            ]:
-                edges_to_delete.append((x[0], x[1]))
-        for x in edges_to_delete:
-            self.graph.remove_edge(u=x[0], v=x[1])
-        self._check_graph(verbose=0)
+        if self.edge_attributes:
+            # Clean up edges:
+            # The graph object can hold different types of edges,
+            # and multiple types are loaded from the obo, not all of which are relevant for us:
+            edges_to_delete = []
+            for i, x in enumerate(self.graph.edges):
+                if x[2] not in [
+                    # "develops_from",
+                    # 'develops_from_part_of',
+                    # 'directly_develops_from',
+                    "is_a",
+                    "located_in",
+                    "part_of",
+                ]:
+                    edges_to_delete.append((x[0], x[1]))
+            for x in edges_to_delete:
+                self.graph.remove_edge(u=x[0], v=x[1])
+            self._check_graph(verbose=0)
 
     @property
     def synonym_node_properties(self) -> List[str]:
@@ -997,79 +926,60 @@ class OntologyUberonLifecyclestage(OntologyUberon):
         self.reset_root(root="UBERON:0000105")
 
 
-class OntologyCl(OntologyExtendedObo):
+class OntologyCl(OntologyObo, OntologyExtended):
 
     def __init__(
             self,
             branch: str,
-            use_developmental_relationships: bool = False,
             recache: bool = False,
             **kwargs
     ):
-        """
-
-        Developmental edges are not desired in all interactions with this ontology, double-negative thymocytes are for
-        example not an intuitive parent node for a fine grained T cell label in a non-thymic tissue.
-        :param branch:
-        :param use_developmental_relationships: Whether to keep developmental relationships.
-        :param kwargs:
-        """
-        obofile = cached_load_file(
-            url=f"https://raw.github.com/obophenotype/cell-ontology/{branch}/cl.obo",
+        obo_fn = cached_load_file(
+            url=f"https://raw.githubusercontent.com/obophenotype/cell-ontology/{branch}/cl.obo",
             ontology_cache_dir="cl",
             ontology_cache_fn=f"cl_{branch}.obo",
             recache=recache,
         )
-        super().__init__(obo=obofile)
+        super().__init__(obo=obo_fn, ontology_name="cl")
 
-        # Clean up nodes:
-        nodes_to_delete = []
-        for k, v in self.graph.nodes.items():
-            # Some terms are not associated with the namespace cell but are cell types,
-            # we identify these based on their ID nomenclature here.
-            if ("namespace" in v.keys() and v["namespace"] not in ["cell", "cl"]) or \
-                    ("namespace" not in v.keys() and str(k)[:2] != "CL"):
-                nodes_to_delete.append(k)
-            elif "name" not in v.keys():
-                nodes_to_delete.append(k)
-        for k in nodes_to_delete:
-            self.graph.remove_node(k)
-
-        # Clean up edges:
-        # The graph object can hold different types of edges,
-        # and multiple types are loaded from the obo, not all of which are relevant for us:
-        # All edge types (based on previous download, assert below that this is not extended):
-        edge_types = [
-            'is_a',  # nomenclature DAG -> include because of annotation coarseness differences
-            'derives_from',
-            'develops_from',  # developmental DAG -> include because of developmental differences
-            'has_part',  # ?
-            'develops_into',  # inverse developmental DAG -> do not include
-            'part_of',
-            'RO:0002120',  # ?
-            'RO:0002103',  # ?
-            'lacks_plasma_membrane_part',  # ?
-        ]
-        edges_to_delete = []
-        if use_developmental_relationships:
-            edges_allowed = ["is_a", "develops_from"]
-        else:
+        if self.edge_attributes:
+            # Clean up edges:
+            # The graph object can hold different types of edges,
+            # and multiple types are loaded from the obo, not all of which are relevant for us:
+            # All edge types (based on previous download, assert below that this is not extended):
+            edge_types = [
+                'is_a',  # nomenclature DAG -> include because of annotation coarseness differences
+                'derives_from',
+                'develops_from',  # developmental DAG -> include because of developmental differences
+                'develops_into',  # inverse developmental DAG -> do not include
+                'has_part',  # ?
+                'innervates',
+                'lacks_plasma_membrane_part',  # ?
+                'part_of',
+                'RO:0001000',  # ?
+                'RO:0002103',  # ?
+                'RO:0002120',  # ?
+                'RO:0002130',  # ?
+                'RO:0002203',  # ?
+                'synapsed_by',
+            ]
+            edges_to_delete = []
             edges_allowed = ["is_a"]
-        for i, x in enumerate(self.graph.edges):
-            if x[2] not in edge_types:
-                print(f"NON-CRITICAL WARNING: cl edge type {x[2]} not in reference list yet")
-            if x[2] not in edges_allowed:
-                edges_to_delete.append((x[0], x[1]))
-        for x in edges_to_delete:
-            self.graph.remove_edge(u=x[0], v=x[1])
-        self._check_graph(verbose=0)
+            for i, x in enumerate(self.graph.edges):
+                if x[2] not in edge_types:
+                    print(f"NON-CRITICAL WARNING: cl edge type {x[2]} not in reference list yet")
+                if x[2] not in edges_allowed:
+                    edges_to_delete.append((x[0], x[1]))
+            for x in edges_to_delete:
+                self.graph.remove_edge(u=x[0], v=x[1])
+            self._check_graph(verbose=0)
 
     @property
     def synonym_node_properties(self) -> List[str]:
         return ["synonym"]
 
 
-class OntologyOboCustom(OntologyExtendedObo):
+class OntologyOboCustom(OntologyObo, OntologyExtended):
 
     def __init__(
             self,
@@ -1078,11 +988,12 @@ class OntologyOboCustom(OntologyExtendedObo):
     ):
         super().__init__(obo=obo, **kwargs)
 
+    @property
+    def synonym_node_properties(self) -> List[str]:
+        return ["synonym"]
 
-# use OWL for OntologyHancestro
 
-
-class OntologyHsapdv(OntologyExtendedObo):
+class OntologyHsapdv(OntologyOwl):
 
     def __init__(
             self,
@@ -1090,30 +1001,20 @@ class OntologyHsapdv(OntologyExtendedObo):
             recache: bool = False,
             **kwargs
     ):
-        # Note on URL: berkeleybop is the ontology supported by cellxgene, GitHub seems to be older but versioned.
-        obofile = cached_load_file(
-            url="http://ontologies.berkeleybop.org/hsapdv.obo",
-            # url=f"https://raw.githubusercontent.com/obophenotype/developmental-stage-ontologies/{branch}/src/hsapdv/hsapdv.obo",
+        owl_fn = cached_load_file(
+            url="http://ontologies.berkeleybop.org/hsapdv.owl",
             ontology_cache_dir="hsapdv",
-            ontology_cache_fn=f"hsapdv_{branch}.obo",
+            ontology_cache_fn=f"hsapdv_{branch}.owl",
             recache=recache,
         )
-        super().__init__(obo=obofile)
-
-        # Clean up nodes:
-        nodes_to_delete = []
-        for k, v in self.graph.nodes.items():
-            if "name" not in v.keys():
-                nodes_to_delete.append(k)
-        for k in nodes_to_delete:
-            self.graph.remove_node(k)
+        super().__init__(owl=owl_fn, ontology_name="hsapdv")
 
     @property
     def synonym_node_properties(self) -> List[str]:
         return ["synonym"]
 
 
-class OntologyMmusdv(OntologyExtendedObo):
+class OntologyMmusdv(OntologyOwl, OntologyExtended):
 
     def __init__(
             self,
@@ -1122,29 +1023,20 @@ class OntologyMmusdv(OntologyExtendedObo):
             **kwargs
     ):
         # URL for releases, not used here yet because versioning with respect to releases below is not consistent yet.
-        # url=f"https://raw.githubusercontent.com/obophenotype/developmental-stage-ontologies/{branch}/src/mmusdv/mmusdv.obo"
-        obofile = cached_load_file(
-            url="http://ontologies.berkeleybop.org/mmusdv.obo",
+        owl_fn = cached_load_file(
+            url="http://ontologies.berkeleybop.org/mmusdv.owl",
             ontology_cache_dir="mmusdv",
-            ontology_cache_fn="mmusdv.obo",
+            ontology_cache_fn=f"mmusdv_{branch}.owl",
             recache=recache,
         )
-        super().__init__(obo=obofile)
-
-        # Clean up nodes:
-        nodes_to_delete = []
-        for k, v in self.graph.nodes.items():
-            if "name" not in v.keys():
-                nodes_to_delete.append(k)
-        for k in nodes_to_delete:
-            self.graph.remove_node(k)
+        super().__init__(owl=owl_fn, ontology_name="mmusdv")
 
     @property
     def synonym_node_properties(self) -> List[str]:
         return ["synonym"]
 
 
-class OntologyMondo(OntologyExtendedObo):
+class OntologyMondo(OntologyObo, OntologyExtended):
 
     def __init__(
             self,
@@ -1152,23 +1044,13 @@ class OntologyMondo(OntologyExtendedObo):
             recache: bool = False,
             **kwargs
     ):
-        # TODO Consider switching to owl, the newer releases of MONDO only push the owl release to GitHub, so versioned
-        #  ontology access is only possible with owl.
-        obofile = cached_load_file(
-            url=f"https://raw.githubusercontent.com/monarch-initiative/mondo/{branch}/mondo-lastbuild.obo",
+        obo_fn = cached_load_file(
+            url=f"https://github.com/monarch-initiative/mondo/releases/download/{branch}/mondo.obo",
             ontology_cache_dir="mondo",
             ontology_cache_fn=f"mondo_{branch}.obo",
             recache=recache,
         )
-        super().__init__(obo=obofile)
-
-        # Clean up nodes:
-        nodes_to_delete = []
-        for k, v in self.graph.nodes.items():
-            if "name" not in v.keys():
-                nodes_to_delete.append(k)
-        for k in nodes_to_delete:
-            self.graph.remove_node(k)
+        super().__init__(obo=obo_fn, ontology_name="mondo")
 
         # add healthy property
         # Add node "healthy" under root node "MONDO:0000001": "quality".
@@ -1184,7 +1066,7 @@ class OntologyMondo(OntologyExtendedObo):
         return ["synonym"]
 
 
-class OntologyCellosaurus(OntologyExtendedObo):
+class OntologyCellosaurus(OntologyObo, OntologyExtended):
 
     def __init__(
             self,
@@ -1197,48 +1079,42 @@ class OntologyCellosaurus(OntologyExtendedObo):
             ontology_cache_fn="cellosaurus.obo",
             recache=recache,
         )
-        super().__init__(obo=obofile)
-
-        # Clean up nodes:
-        # edge_types = ["derived_from", "originate_from_same_individual_as"]
-        nodes_to_delete = []
-        for k, v in self.graph.nodes.items():
-            if "name" not in v.keys():
-                nodes_to_delete.append(k)
-        for k in nodes_to_delete:
-            self.graph.remove_node(k)
+        super().__init__(obo=obofile, ontology_name="cvcl")
 
     @property
     def synonym_node_properties(self) -> List[str]:
         return ["synonym"]
 
 
-class OntologyHancestro(OntologyEbi):
+class OntologyHancestro(OntologyOwl, OntologyExtended):
 
-    """
-    TODO move this to .owl backend once available.
-    TODO root term: No term HANCESTRO_0001 ("Thing"?) accessible through EBI interface, because of that country-related
-        higher order terms are not available as they are parallel to HANCESTRO_0004. Maybe fix with .owl backend?
-    """
-
-    def __init__(self, recache: bool = False):
-        super().__init__(
-            ontology="hancestro",
-            root_term="HANCESTRO_0004",
-            additional_terms={},
-            additional_edges=[],
-            ontology_cache_fn="hancestro.pickle",
+    def __init__(self, branch: str, recache: bool = False):
+        owl_fn = cached_load_file(
+            url=f"https://github.com/EBISPOT/ancestro/raw/{branch}/hancestro.owl",
+            ontology_cache_dir="hancestro",
+            ontology_cache_fn=f"hancestro_{branch}.owl",
             recache=recache,
         )
+        super().__init__(owl=owl_fn, ontology_name="hancestro")
+
+        # Add additional nodes under root node.
+        self.add_children(dict_ontology={
+            "HANCESTRO:0004": {"multiethnic": {"name": "multiethnic"}},
+        })
+
+    @property
+    def synonym_node_properties(self) -> List[str]:
+        return ["synonym"]
 
 
-class OntologyTaxon(OntologyExtendedObo):
+class OntologyTaxon(OntologyObo, OntologyExtended):
 
     """
-    Note on ontology: The same repo also contains ncbitaxon.obs, the full ontology which is ~500MB large and
+    Note on ontology: The same repo also contains ncbitaxon.owl/obo, the full ontology which is up to 1.5GB large and
     takes multiple minutes to load. We are using a reduced version, taxslim, here.
-
-    See also https://github.com/obophenotype/ncbitaxon/releases/download/{branch}/ncbitaxon.obo.
+    Note that also a gz compressed owl file is available and much smaller (50MB), we do however need to
+    uncompress this on disk.
+    See also https://github.com/obophenotype/ncbitaxon/releases/download/{branch}/ncbitaxon.owl.
     """
 
     def __init__(
@@ -1247,52 +1123,36 @@ class OntologyTaxon(OntologyExtendedObo):
             recache: bool = False,
             **kwargs
     ):
-        obofile = cached_load_file(
+        obo_fn = cached_load_file(
             url=f"https://github.com/obophenotype/ncbitaxon/releases/download/{branch}/taxslim.obo",
             ontology_cache_dir="ncbitaxon",
             ontology_cache_fn=f"ncbitaxon_{branch}.obo",
             recache=recache,
         )
-        super().__init__(obo=obofile)
-
-        # Clean up nodes:
-        nodes_to_delete = []
-        for k, v in self.graph.nodes.items():
-            if "name" not in v.keys():
-                nodes_to_delete.append(k)
-        for k in nodes_to_delete:
-            self.graph.remove_node(k)
+        super().__init__(obo=obo_fn, ontology_name="ncbitaxon")
 
     @property
     def synonym_node_properties(self) -> List[str]:
         return ["synonym"]
 
 
-class OntologyEfo(OntologyExtendedObo):
+class OntologyEfo(OntologyObo, OntologyExtended):
 
     def __init__(
             self,
+            branch: str,
             recache: bool = False,
             **kwargs
     ):
-        obofile = cached_load_file(
-            url="https://www.ebi.ac.uk/efo/efo.obo",
+        obo_fn = cached_load_file(
+            url=f"https://github.com/EBISPOT/efo/releases/download/{branch}/efo.obo",
             ontology_cache_dir="efo",
-            ontology_cache_fn="efo.obo",
+            ontology_cache_fn=f"efo_{branch}.obo",
             recache=recache,
         )
-        super().__init__(obo=obofile)
+        super().__init__(obo=obo_fn, ontology_name=["efo", "obi"])
         # Subset EFO to relevant sub trees:
         self.reset_root(root=["OBI:0001686", "EFO:0010183", "EFO:0002772"])
-
-        # Clean up nodes:
-        nodes_to_delete = []
-        for k, v in self.graph.nodes.items():
-            if "name" not in v.keys():
-                nodes_to_delete.append(k)
-        for k in nodes_to_delete:
-            self.graph.remove_node(k)
-
         self.add_parents(dict_ontology=EFO_TERMS)
 
     @property
@@ -1300,7 +1160,7 @@ class OntologyEfo(OntologyExtendedObo):
         return ["synonym"]
 
 
-class OntologySex(OntologyExtendedObo):
+class OntologyPato(OntologyObo, OntologyExtended):
 
     """
     Sex is defined based on a subset of the PATO ontology.
@@ -1312,27 +1172,17 @@ class OntologySex(OntologyExtendedObo):
             recache: bool = False,
             **kwargs
     ):
-        obofile = cached_load_file(
-            url=f"https://raw.githubusercontent.com/pato-ontology/pato/{branch}/pato-base.obo",
+        obo_fn = cached_load_file(
+            url=f"https://github.com/pato-ontology/pato/raw/{branch}/pato.obo",
             ontology_cache_dir="pato",
             ontology_cache_fn=f"pato_{branch}.obo",
             recache=recache,
         )
-        super().__init__(obo=obofile)
-        nodes_to_delete = []
-        # Subset ontology: see also:
-        # https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/2.0.0/schema.md#sex_ontology_term_id
-        targets = self.get_ancestors("PATO:0001894")
-        for k, v in self.graph.nodes.items():
-            if k not in targets:
-                nodes_to_delete.append(k)
-        # Clean up nodes:
-        for k, v in self.graph.nodes.items():
-            if "name" not in v.keys():
-                nodes_to_delete.append(k)
-        nodes_to_delete = np.unique(nodes_to_delete)
-        for k in nodes_to_delete:
-            self.graph.remove_node(k)
+        super().__init__(obo=obo_fn, ontology_name="pato")
+
+        # Subset ontology, see also:
+        # https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md#sex_ontology_term_id
+        self.reset_root(root=["PATO:0001894"])
 
     @property
     def synonym_node_properties(self) -> List[str]:

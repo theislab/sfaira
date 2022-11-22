@@ -60,14 +60,14 @@ dataset_or_observation_wise:
     source_doi:
     source_doi_obs_key:
     state_exact: 
-    state_exact_obs_key: "severeness"
+    state_exact_obs_key: "Disease group"
     tech_sample:
-    tech_sample_obs_key: "Experimental  batch"
+    tech_sample_obs_key: "Experimental batch"
     treatment:
     treatment_obs_key:
 feature_wise:
     feature_id_var_key: "index"
-    feature_symbol_var_key: "names"
+    feature_symbol_var_key: "gene_symbols"
 observation_wise:
     spatial_x_coord_obs_key:
     spatial_y_coord_obs_key:

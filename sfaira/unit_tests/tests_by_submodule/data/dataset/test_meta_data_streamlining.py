@@ -34,7 +34,7 @@ def test_dsgs_streamline_metadata(out_format: str, clean_obs: bool, clean_var: b
                           keep_id_obs=keep_id_obs, keep_orginal_obs=keep_orginal_obs, keep_symbol_obs=keep_symbol_obs)
 
 
-@pytest.mark.parametrize("schema_version", ["2_0_0"])
+@pytest.mark.parametrize("schema_version", ["3_0_0"])
 @pytest.mark.parametrize("organism", ["Homo sapiens", "Mus musculus"])
 def test_cellxgene_export(schema_version: str, organism: str):
     """
@@ -60,8 +60,9 @@ def test_cellxgene_export(schema_version: str, organism: str):
                 self.warnings = ["WARNING: " + i for i in self.warnings]
             if self.errors:
                 self.errors = ["ERROR: " + i for i in self.errors]
-            if self.warnings or self.errors:
+            if self.warnings:
                 print(self.warnings[:20])
+            if self.errors:
                 print(self.errors[:20])
                 assert False
 
@@ -80,7 +81,7 @@ def test_cellxgene_export(schema_version: str, organism: str):
     adata_post = ds.adata_ls[0].copy()
     # Custom checks:
     adata_ids_sfaira = AdataIdsSfaira()
-    if schema_version == "2_0_0":
+    if schema_version == "3_0_0":
         adata_ids_cellxgene = AdataIdsCellxgene_v2_0_0()
     else:
         assert False

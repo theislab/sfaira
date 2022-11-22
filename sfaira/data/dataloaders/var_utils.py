@@ -294,7 +294,7 @@ def format_var(target_adata_ids: AdataIds,
             if current_feature_id_var_key != "index":
                 del var[current_feature_id_var_key]
     elif current_feature_symbol_var_key and current_feature_id_var_key is None:
-        symbols = var.index if current_feature_symbol_var_key == "index" else var[current_feature_symbol_var_key]
+        symbols = var.index if current_feature_symbol_var_key == "index" else var[current_feature_symbol_var_key].values
         ensids = gc.translate_symbols_to_id(x=symbols)
         # Add new feature identifier:
         if target_adata_ids.feature_id == "index":
@@ -316,6 +316,11 @@ def format_var(target_adata_ids: AdataIds,
         for k in list(var.columns):
             if k not in allowed_columns:
                 del var[k]
+    # Fill in index if this is defined as a var column:
+    if target_adata_ids.feature_index != "index":
+        if target_adata_ids.feature_index not in var.columns:
+            raise ValueError(f"Did not find var column {target_adata_ids.feature_index} to set as index for .var.")
+        var.index = var[target_adata_ids.feature_index]
     return var, target_adata_ids.feature_id, target_adata_ids.feature_symbol
 
 
@@ -350,7 +355,7 @@ def reorder_adata_to_target_features(
     :return: Tuple of processed x and var.
     """
     # Process gene annotations
-    # Make features unique (to avoid na-matches in converted columns to be collapsed below.
+    # Make features unique to avoid na-matches in converted columns to be collapsed below.
     x, var = collapse_x_var_by_feature(sep_deduplication="-", var=var, var_column=var_key, x=x)
     input_ids = var.index if var_key == "index" else var[var_key].values
     # Set index of var to var_key if not already the case, this is useful to avoid index duplication events in
@@ -385,7 +390,7 @@ def collapse_x_var_by_feature(x, var, var_column, sep_deduplication="-"):
 
     Keeps .var column of first occurrence of duplicated variables.
     Does not modify data if index is already unique.
-    Reverses potential previous deduplication of feature names via declared dedepulication suffixes.
+    Reverses potential previous deduplication of feature names via declared de-depulication suffixes.
     These would have been introduced by methods such as:
         https://anndata.readthedocs.io/en/refpaths/anndata.AnnData.var_names_make_unique.html.
 
