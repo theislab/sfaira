@@ -230,7 +230,7 @@ class AnnotationContainer:
         x = value_protection(attr="cell_type", allowed=self.get_ontology(k="cell_type"), attempted=x,
                              dataset_id=self._dataset_id_reporting)
         self._cell_type = x
-        
+
     @property
     def dataset_index(self) -> Union[None, int]:
         x = self._dataset_index
@@ -406,7 +406,7 @@ class AnnotationContainer:
         x = value_protection(attr="sex", allowed=self.get_ontology(k="sex"), attempted=x,
                              dataset_id=self._dataset_id_reporting)
         self._sex = x
-        
+
     @property
     def suspension_type(self) -> Union[None, str]:
         return self._suspension_type

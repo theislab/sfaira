@@ -24,7 +24,7 @@ class OntologyContainerSfaira:
     _organ: Union[None, OntologyUberon]
     _organism: Union[None, OntologyTaxon]
     _sex: Union[None, OntologyPato]
-    
+
     versions: dict
 
     def __init__(self):
@@ -75,7 +75,7 @@ class OntologyContainerSfaira:
             "organism",
             "sex"
         ]
-        
+
     def set_schema_version(self, version: str = DEFAULT_SCHEMA):
         self.versions = ONTOLOGY_VERSIONS[version]
         for k in self.versioned_ontologies:
