@@ -5,7 +5,7 @@ END	endothelial cell	CL:0000115
 GABA1	GABAergic interneuron	CL:0011005
 GABA2	GABAergic interneuron	CL:0011005
 MG	microglial cell	CL:0000129
-NSC	neuronal stem cell	CL:0000047
+NSC	neural stem cell	CL:0000047
 ODC1	oligodendrocyte	CL:0000128
 OPC	oligodendrocyte precursor cell	CL:0002453
 Unclassified	unknown	unknown

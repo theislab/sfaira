@@ -227,7 +227,7 @@ Erythroid progenitor cell	erythroblast	CL:0000765
 Erythroid progenitor cell_NPM1 high	erythroblast	CL:0000765
 Erythroid progenitor cell_REXO2 high	erythroblast	CL:0000765
 Erythroid/Basophil Progenitor	erythroblast	CL:0000765
-Excitatory neuron	excitatory neuron	CL:0008030
+Excitatory neuron	glutamatergic neuron	CL:0000679
 Exocrine cell	pancreas exocrine glandular cell	CL:1001599
 Exocrine cell_SAA1 high	pancreas exocrine glandular cell	CL:1001599
 Extravillous trophoblast_AOC1 high	extravillous trophoblast	CL:0008036
@@ -295,7 +295,7 @@ Inflammatory cell	inflammatory cell	CL:0009002
 Inflammatory stromal cell_HSPA1A high	inflammatory cell	CL:0009002
 Inflammatory stromal cell_MT-RNR2 high	inflammatory cell	CL:0009002
 Inflammed  epithelial cell	inflammatory cell	CL:0009002
-Inhibitory neuron	inhibitory neuron	CL:0008029
+Inhibitory neuron	GABAergic neuron	CL:0000617
 Intercalated cell	renal intercalated cell	CL:0005010
 Intercalated cell_SLC26A4 high	renal intercalated cell	CL:0005010
 Intercalated cell_SPINK1 high	renal intercalated cell	CL:0005010
@@ -475,14 +475,14 @@ Paneth cell_REG3A high	paneth cell	CL:0000510
 Parietal cell	parietal cell	CL:0000162
 Parietal cell_ATP4B high	parietal cell	CL:0000162
 Parietal cell_GIF high	parietal cell	CL:0000162
-Pericyte	pericyte cell	CL:0000669
+Pericyte	pericyte	CL:0000669
 Pit cell	hepatic pit cell	CL:2000054
 Pit cell_FOXQ1 high	hepatic pit cell	CL:2000054
 Pit cell_MUC6 high	hepatic pit cell	CL:2000054
 Pit cell_TFF2 high	hepatic pit cell	CL:2000054
 Pit cell_WFDC21P high	hepatic pit cell	CL:2000054
 Plasmacytoid dendritic cell	plasmacytoid dendritic cell, human	CL:0001058
-Podocyte	glomerular visceral epithelial cell	CL:0000653
+Podocyte	podocyte	CL:0000653
 Pre B cell	precursor B cell	CL:0000817
 Primordial germ cell	primordial germ cell	CL:0000670
 Primordial germ cell_GTSF1 high	primordial germ cell	CL:0000670

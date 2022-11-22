@@ -4,8 +4,9 @@ import anndata
 import numpy as np
 import pandas as pd
 
-from sfaira.consts import AdataIds, OC
+from sfaira.consts import AdataIds
 from sfaira.data.dataloaders.export_adaptors import cellxgene_export_adaptor
+from sfaira.data.dataloaders.ontology_access import get_ontology
 from sfaira.versions.metadata import Ontology, OntologyHierarchical
 
 
@@ -112,28 +113,31 @@ def streamline_obs_uns(adata: anndata.AnnData,
     obs_new = pd.DataFrame(index=adata.obs.index)
     obs_to_delete = []
     for k in [x for x in adata_target_ids.obs_keys]:
-        if k in experiment_batch_labels and getattr(annotation_container, f"{k}_obs_key") is not None:
-            # Handle batch-annotation columns which can be provided as a combination of columns separated by an
-            # asterisk.
-            # The queried meta data are always:
-            # 1b-I) a combination of existing columns in .obs
-            old_cols = getattr(annotation_container, f"{k}_obs_key")
-            batch_cols = []
-            for batch_col in old_cols.split("*"):
-                if batch_col in adata.obs.columns:
-                    batch_cols.append(batch_col)
-                else:
-                    # This should not occur in single data set loaders (see warning below) but can occur in
-                    # streamlined data loaders if not all instances of the streamlined data sets have all columns
-                    # in .obs set.
-                    print(f"WARNING: attribute {batch_col} of data set {dataset_id} was not found in columns: "
-                          f"{adata.obs.columns}.")
-            # Build a combination label out of all columns used to describe this group.
-            # Add data set label into this label so that these groups are unique across data sets.
-            val = [
-                dataset_id + "_".join([str(xxx) for xxx in xx])
-                for xx in zip(*[adata.obs[batch_col].values.tolist() for batch_col in batch_cols])
-            ]
+        if k in experiment_batch_labels:
+            if getattr(annotation_container, f"{k}_obs_key") is not None:
+                # Handle batch-annotation columns which can be provided as a combination of columns separated by an
+                # asterisk.
+                # The queried meta data are always:
+                # 1b-I) a combination of existing columns in .obs
+                old_cols = getattr(annotation_container, f"{k}_obs_key")
+                batch_cols = []
+                for batch_col in old_cols.split("*"):
+                    if batch_col in adata.obs.columns:
+                        batch_cols.append(batch_col)
+                    else:
+                        # This should not occur in single data set loaders (see warning below) but can occur in
+                        # streamlined data loaders if not all instances of the streamlined data sets have all columns
+                        # in .obs set.
+                        print(f"WARNING: attribute {batch_col} of data set {dataset_id} was not found in columns: "
+                              f"{adata.obs.columns}.")
+                # Build a combination label out of all columns used to describe this group.
+                # Add data set label into this label so that these groups are unique across data sets.
+                val = [
+                    dataset_id + "_".join([str(xxx) for xxx in xx])
+                    for xx in zip(*[adata.obs[batch_col].values.tolist() for batch_col in batch_cols])
+                ]
+            else:
+                val = [adata_input_ids.unknown_metadata_identifier] * adata.n_obs
         else:
             # Locate annotation.
             if hasattr(annotation_container, f"{k}_obs_key") and \
@@ -491,21 +495,3 @@ def value_protection(allowed: Union[Ontology, None],
     if len(attempted_clean) == 1:
         attempted_clean = attempted_clean[0]
     return attempted_clean
-
-
-def get_ontology(k, organism: str) -> Union[OntologyHierarchical, None]:
-    # Use global instance of ontology container:
-    ocs = OC
-
-    x = getattr(ocs, k) if hasattr(ocs, k) else None
-    if x is not None and isinstance(x, dict):
-        assert isinstance(organism, str), organism
-        # Check if organism-specific option is available, otherwise choose generic option:
-        if organism in x.keys():
-            k = organism
-        else:
-            k = ocs.key_other
-            assert k in x.keys(), x.keys()  # Sanity check on dictionary keys.
-        x = x[k]
-        assert x is None or isinstance(x, Ontology), x  # Sanity check on dictionary element.
-    return x

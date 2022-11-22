@@ -1,11 +1,11 @@
 source	target	target_id
 Sjogren syndrome	Sjogren syndrome	MONDO:0010030
 dry eye syndrome	dry eye syndrome	MONDO:0006733
-idiopathic pulmonary fibrosis	idiopathic pulmonary fibrosis	MONDO:0008345
+idiopathic pulmonary fibrosis	interstitial lung disease 2	MONDO:0800029
 interstitial lung disease	interstitial lung disease	MONDO:0015925
 non-specific interstitial pneumonia	non-specific interstitial pneumonia	MONDO:0019622
 normal	healthy	PATO:0000461
 osteoarthritis	osteoarthritis	MONDO:0005178
 rheumatoid arthritis	rheumatoid arthritis	MONDO:0008383
 rheumatoid lung disease	rheumatoid lung disease	MONDO:0004586
-ulcerative colitis	ulcerative colitis (disease)	MONDO:0005101
+ulcerative colitis	ulcerative colitis	MONDO:0005101

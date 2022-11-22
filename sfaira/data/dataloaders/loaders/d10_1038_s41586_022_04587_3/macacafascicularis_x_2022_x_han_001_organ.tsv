@@ -2,10 +2,10 @@ source	target	target_id
 Abdominal_wall	abdominal wall	UBERON:0003697
 Adrenal_gland	adrenal gland	UBERON:0002369
 Aorta	aorta	UBERON:0000947
-Bladder	gall bladder	UBERON:0002110
+Bladder	gallbladder	UBERON:0002110
 Bone_marrow	bone marrow	UBERON:0002371
 Bronchus	bronchus	UBERON:0002185
-Carotid	carotenoid	CHEBI:23044
+Carotid	common carotid artery plus branches	UBERON:0001530
 Cerebellum	cerebellum	UBERON:0002037
 Colon	colon	UBERON:0001155
 Diaphragm	diaphragm	UBERON:0001103
@@ -13,7 +13,7 @@ Duodenum	duodenum	UBERON:0002114
 Epididymis	epididymis	UBERON:0001301
 Esophagus	esophagus	UBERON:0001043
 Fallopian_tube	fallopian tube	UBERON:0003889
-Gallbladder	gall bladder	UBERON:0002110
+Gallbladder	gallbladder	UBERON:0002110
 Heart	heart	UBERON:0000948
 Kidney	kidney	UBERON:0002113
 Liver	liver	UBERON:0002107

@@ -21,7 +21,7 @@ Monocyte	monocyte	CL:0000576
 Monocyte precursor	granulocyte monocyte progenitor cell	CL:0000557
 NK	natural killer cell	CL:0000623
 Neutrophil-myeloid progenitor	common myeloid progenitor	CL:0000049
-Pre pro B cell	Fraction A pre-pro B cell	CL:0002045
+Pre pro B cell	fraction A pre-pro B cell	CL:0002045
 VCAM1+ EI macrophage	macrophage	CL:0000235
 pDC precursor	plasmacytoid dendritic cell	CL:0000784
 pre-B cell	precursor B cell	CL:0000817

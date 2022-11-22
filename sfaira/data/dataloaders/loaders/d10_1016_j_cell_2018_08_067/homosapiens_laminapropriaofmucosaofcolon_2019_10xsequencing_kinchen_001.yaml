@@ -46,7 +46,7 @@ dataset_or_observation_wise:
     development_stage_obs_key: "Age"
     disease:
         HC: "healthy"
-        UC: "ulcerative colitis (disease)"
+        UC: "ulcerative colitis"
     disease_obs_key:
     ethnicity:
     ethnicity_obs_key:

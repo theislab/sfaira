@@ -9,12 +9,12 @@ Early mesenchyme	mesenchymal cell	CL:0008019
 Endothelial cells	endothelial cell	CL:0000115
 Ependymal cell	ependymal cell	CL:0000065
 Epithelial cells	epithelial cell	CL:0000066
-Excitatory neurons	excitatory neuron	CL:0008030
+Excitatory neurons	glutamatergic neuron	CL:0000679
 Granule neurons	granule cell	CL:0000120
 Hepatocytes	hepatocyte	CL:0000182
 Inhibitory interneurons	inhibitory interneuron	CL:0000498
-Inhibitory neuron progenitors	inhibitory neuron	CL:0008029
-Inhibitory neurons	inhibitory neuron	CL:0008029
+Inhibitory neuron progenitors	GABAergic neuron	CL:0000617
+Inhibitory neurons	GABAergic neuron	CL:0000617
 Intermediate Mesoderm	intermediate mesodermal cell	CL:0011011
 Isthmic organizer cells	neural cell	CL:0002319
 Jaw and tooth progenitors	bone cell	CL:0001035

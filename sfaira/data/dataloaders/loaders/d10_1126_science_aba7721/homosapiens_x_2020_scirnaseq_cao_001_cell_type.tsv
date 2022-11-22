@@ -21,7 +21,7 @@ ENS neurons	enteric neuron	CL:0007011
 Endocardial cells	endocardial cell	CL:0002350
 Epicardial fat cells	epicardial adipocyte	CL:1000309
 Erythroblasts	erythroblast	CL:0000765
-Excitatory neurons	excitatory neuron	CL:0008030
+Excitatory neurons	glutamatergic neuron	CL:0000679
 Extravillous trophoblasts	extravillous trophoblast	CL:0008036
 Ganglion cells	CNS neuron (sensu Vertebrata)	CL:0000117
 Goblet cells	goblet cell	CL:0000160
@@ -31,11 +31,11 @@ Hepatoblasts	hepatoblast	CL:0005026
 Horizontal cells	retina horizontal cell	CL:0000745
 IGFBP1_DKK1 positive cells	unknown	unknown
 Inhibitory interneurons	inhibitory interneuron	CL:0000498
-Inhibitory neurons	inhibitory neuron	CL:0008029
+Inhibitory neurons	GABAergic neuron	CL:0000617
 Intestinal epithelial cells	intestinal epithelial cell	CL:0002563
 Islet endocrine cells	endocrine cell	CL:0000163
 Lens fibre cells	lens fiber cell	CL:0011004
-Limbic system neurons	neuron of cerebral cortex	CL:0002609
+Limbic system neurons	cerebral cortex neuron	CL:0010012
 Lymphatic endothelial cells	endothelial cell of lymphatic vessel	CL:0002138
 Lymphoid cells	innate lymphoid cell	CL:0001065
 MUC13_DMBT1 positive cells	unknown	unknown

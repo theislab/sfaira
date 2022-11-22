@@ -35,9 +35,9 @@ NK cells	natural killer cell	CL:0000623
 Neurons	neuron	CL:0000540
 Others	unknown	unknown
 Paneth cells	paneth cell	CL:0000510
-Pericytes	pericyte cell	CL:0000669
-Podocytes	glomerular visceral epithelial cell	CL:0000653
-Potocytes	glomerular visceral epithelial cell	CL:0000653
+Pericytes	pericyte	CL:0000669
+Podocytes	podocyte	CL:0000653
+Potocytes	podocyte	CL:0000653
 Progenitor cells	progenitor cell	CL:0011026
 Proximal tubule cells	epithelial cell of proximal tubule	CL:0002306
 SMCs	smooth muscle cell	CL:0000192

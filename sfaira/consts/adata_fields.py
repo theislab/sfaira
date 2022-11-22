@@ -341,6 +341,7 @@ class AdataIdsCellxgene_v3_0_0(AdataIdsCellxgene):
             "cell_type",
             "development_stage",
             "disease",
+            "individual",
             "ethnicity",
             "organ",
             "organism",

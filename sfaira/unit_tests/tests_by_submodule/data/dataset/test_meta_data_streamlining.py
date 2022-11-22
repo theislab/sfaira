@@ -60,8 +60,9 @@ def test_cellxgene_export(schema_version: str, organism: str):
                 self.warnings = ["WARNING: " + i for i in self.warnings]
             if self.errors:
                 self.errors = ["ERROR: " + i for i in self.errors]
-            if self.warnings or self.errors:
+            if self.warnings:
                 print(self.warnings[:20])
+            if self.errors:
                 print(self.errors[:20])
                 assert False
 

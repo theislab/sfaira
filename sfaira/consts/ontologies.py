@@ -3,7 +3,7 @@ from typing import Dict, Union
 from sfaira.consts.schema import DEFAULT_SCHEMA, ONTOLOGY_VERSIONS
 from sfaira.versions.metadata import OntologyList, OntologyCl
 from sfaira.versions.metadata import OntologyCellosaurus, OntologyHancestro, OntologyHsapdv, OntologyMondo, \
-    OntologyMmusdv, OntologyEfo, OntologySex, OntologyTaxon, OntologyUberon, OntologyUberonLifecyclestage
+    OntologyMmusdv, OntologyEfo, OntologyPato, OntologyTaxon, OntologyUberon, OntologyUberonLifecyclestage
 
 OTHER_ORGANISM_KEY = "other"
 
@@ -23,7 +23,7 @@ class OntologyContainerSfaira:
     _ethnicity: Union[None, Dict[str, Union[OntologyHancestro, None]]]
     _organ: Union[None, OntologyUberon]
     _organism: Union[None, OntologyTaxon]
-    _sex: Union[None, OntologySex]
+    _sex: Union[None, OntologyPato]
     
     versions: dict
 
@@ -81,16 +81,17 @@ class OntologyContainerSfaira:
         for k in self.versioned_ontologies:
             self.reload_ontology(attr=k)
 
-    def reload_ontology(self, attr):
+    def reload_ontology(self, attr, recache: bool = False):
         """
         Complex alternative to attribute-wise setters.
 
         :param attr:
+        :param recache: Whether to re-download and cache the ontology.
         :return:
         """
-        kwargs = {"recache": True}
+        kwargs = {"recache": recache}
         if attr == "assay_sc":
-            self._assay_sc = OntologyEfo(**kwargs)
+            self._assay_sc = OntologyEfo(branch=self.versions["VERSION_EFO"], **kwargs)
         elif attr == "cell_line":
             self._cell_line = OntologyCellosaurus(**kwargs)
         elif attr == "cell_type":
@@ -105,7 +106,7 @@ class OntologyContainerSfaira:
             self._disease = OntologyMondo(branch=self.versions["VERSION_MONDO"], **kwargs)
         elif attr == "ethnicity":
             self._ethnicity = {
-                "homosapiens": OntologyHancestro(),
+                "Homo sapiens": OntologyHancestro(branch=self.versions["VERSION_HANCESTRO"]),
                 self.key_other: None,
             }
         elif attr == "organ":
@@ -113,13 +114,17 @@ class OntologyContainerSfaira:
         elif attr == "organism":
             self._organism = OntologyTaxon(branch=self.versions["VERSION_NCBITAXON"], **kwargs)
         elif attr == "sex":
-            self._sex = OntologySex(branch=self.versions["VERSION_PATO"], **kwargs)
+            self._sex = OntologyPato(branch=self.versions["VERSION_PATO"], **kwargs)
 
     @property
     def assay_sc(self):
         if self._assay_sc is None:  # Lazy loading after class instantiation.
-            self._assay_sc = OntologyEfo()
+            self._assay_sc = OntologyEfo(branch=self.versions["VERSION_EFO"])
         return self._assay_sc
+
+    @assay_sc.setter
+    def assay_sc(self, x: str):
+        self._assay_sc = OntologyEfo(branch=x)
 
     @property
     def cell_line(self):
@@ -153,11 +158,15 @@ class OntologyContainerSfaira:
             self._disease = OntologyMondo(branch=self.versions["VERSION_MONDO"])
         return self._disease
 
+    @disease.setter
+    def disease(self, x: str):
+        self._disease = OntologyMondo(branch=x)
+
     @property
     def ethnicity(self):
         if self._ethnicity is None:  # Lazy loading after class instantiation.
             self._ethnicity = {
-                "Homo sapiens": OntologyHancestro(),
+                "Homo sapiens": OntologyHancestro(branch=self.versions["VERSION_HANCESTRO"]),
                 self.key_other: None,
             }
         return self._ethnicity
@@ -168,17 +177,29 @@ class OntologyContainerSfaira:
             self._organ = OntologyUberon(branch=self.versions["VERSION_UBERON"])
         return self._organ
 
+    @organ.setter
+    def organ(self, x: str):
+        self._organ = OntologyUberon(branch=x)
+
     @property
     def organism(self):
         if self._organism is None:  # Lazy loading after class instantiation.
             self._organism = OntologyTaxon(branch=self.versions["VERSION_NCBITAXON"])
         return self._organism
 
+    @organism.setter
+    def organism(self, x: str):
+        self._organism = OntologyTaxon(branch=x)
+
     @property
     def sex(self):
         if self._sex is None:  # Lazy loading after class instantiation.
-            self._sex = OntologySex(branch=self.versions["VERSION_PATO"])
+            self._sex = OntologyPato(branch=self.versions["VERSION_PATO"])
         return self._sex
+
+    @sex.setter
+    def sex(self, x: str):
+        self._sex = OntologyPato(branch=x)
 
 
 OC = OntologyContainerSfaira()

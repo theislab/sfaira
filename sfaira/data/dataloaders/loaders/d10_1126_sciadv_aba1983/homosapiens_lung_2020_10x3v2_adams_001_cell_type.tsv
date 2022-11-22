@@ -83,7 +83,7 @@ Myofibroblast	unknown	unknown
 Mystery_Disease_Epithelial	respiratory epithelial cell	CL:0002368
 NK	natural killer cell	CL:0000623
 Neuroendocrine	lung neuroendocrine cell	CL:1000223
-Pericyte	pericyte cell	CL:0000669
+Pericyte	pericyte	CL:0000669
 Smooth-Muscle	smooth muscle cell	CL:0000192
 Smooth-Muscle_MT-tRNAs	smooth muscle cell	CL:0000192
 T	T cell	CL:0000084

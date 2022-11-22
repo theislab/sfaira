@@ -14,7 +14,7 @@ Bladder urothelial cell	bladder urothelial cell	CL:1001428
 Cardiomyocyte	cardiac muscle cell	CL:0000746
 Chromaffin cell	chromaffin cell	CL:0000166
 Connecting tubule cell	kidney connecting tubule epithelial cell	CL:1000768
-Cortical excitatory neuron	excitatory neuron	CL:0008030
+Cortical excitatory neuron	glutamatergic neuron	CL:0000679
 Corticotrope	corticotroph	CL:0002309
 Dendritic cell	dendritic cell	CL:0000451
 Digestive tract endothelial cell 1	gut endothelial cell	CL:0000131
@@ -27,7 +27,7 @@ Endothelial cell	endothelial cell	CL:0000115
 Enteric glial cell	glial cell	CL:0000125
 Epidermal adipocyte 	fat cell	CL:0000136
 Epidermal endothelial cell	endothelial cell	CL:0000115
-Epidermal pericyte	pericyte cell	CL:0000669
+Epidermal pericyte	pericyte	CL:0000669
 Epidermal smooth muscle cell	smooth muscle cell	CL:0000192
 Epidermal stromal cell	stromal cell	CL:0000499
 Epididymal epithelial cell	epithelial cell	CL:0000066
@@ -39,7 +39,7 @@ Fasciculata cell	stromal cell	CL:0000499
 Female reproductive ciliated cell	ciliated cell	CL:0000064
 Folliculostellate cell	folliculostellate cell	CL:0000642
 Gallbladder endothelial cell	endothelial cell	CL:0000115
-Gallbladder glandular cell	gall bladder glandular cell	CL:1001592
+Gallbladder glandular cell	gallbladder glandular cell	CL:1001592
 Gallbladder mucous cell	mucus secreting cell	CL:0000319
 Gallbladder smooth muscle cell	smooth muscle cell	CL:0000192
 Glomerulosa cell	glomerular cell	CL:1000746
@@ -49,7 +49,7 @@ Granule cell	granule cell	CL:0000120
 Granulosa cell	granulosa cell	CL:0000501
 Hepatocyte	hepatocyte	CL:0000182
 Immune mesothelial cell	mesothelial cell	CL:0000077
-Inhibitory neuron	inhibitory neuron	CL:0008029
+Inhibitory neuron	GABAergic neuron	CL:0000617
 Intercalated cell	renal intercalated cell	CL:0005010
 Keratinocyte 	keratinocyte	CL:0000312
 Lactotrope	mammotroph	CL:0002311

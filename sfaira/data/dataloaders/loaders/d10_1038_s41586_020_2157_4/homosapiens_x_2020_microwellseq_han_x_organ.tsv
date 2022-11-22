@@ -2,7 +2,7 @@ source	target	target_id
 AdultAdipose_1	adipose tissue of abdominal region	UBERON:0007808
 AdultAdrenalGland_2	adrenal gland	UBERON:0002369
 AdultAdrenalGland_3	adrenal gland	UBERON:0002369
-AdultArtery_1	artery	AEO:0000208
+AdultArtery_1	artery	UBERON:0001637
 AdultAscendingColon_1	ascending colon	UBERON:0001156
 AdultBladder_1	urinary bladder	UBERON:0001255
 AdultBladder_2	urinary bladder	UBERON:0001255
@@ -14,8 +14,8 @@ AdultEpityphlon_1	caecum	UBERON:0001153
 AdultEsophagus_1	esophagus	UBERON:0001043
 AdultEsophagus_2	esophagus	UBERON:0001043
 AdultFallopiantube_1	fallopian tube	UBERON:0003889
-AdultGallbladder_1	gall bladder	UBERON:0002110
-AdultGallbladder_2	gall bladder	UBERON:0002110
+AdultGallbladder_1	gallbladder	UBERON:0002110
+AdultGallbladder_2	gallbladder	UBERON:0002110
 AdultHeart_1	heart	UBERON:0000948
 AdultHeart_2	heart	UBERON:0000948
 AdultIleum_2	ileum	UBERON:0002116

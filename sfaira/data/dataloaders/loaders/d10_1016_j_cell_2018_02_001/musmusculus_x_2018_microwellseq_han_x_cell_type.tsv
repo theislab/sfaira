@@ -243,7 +243,7 @@ Macrophage_S100a4 high(Bone-Marrow)	macrophage	CL:0000235
 Macrophage_S100a4 high(Bone-Marrow_c-kit)	macrophage	CL:0000235
 Macrophage_S100a4 high(Peripheral_Blood)	macrophage	CL:0000235
 Marcrophage_Cd74 high(Ovary)	macrophage	CL:0000235
-Marginal zone B cell(Spleen)	marginal zone B cell	CL:0000845
+Marginal zone B cell(Spleen)	marginal zone B cell of spleen	CL:0000845
 Mast cell(Bone-Marrow)	mast cell	CL:0000097
 Mast cell(Neonatal-Calvaria)	mast cell	CL:0000097
 Mast cell(Neonatal-Muscle)	mast cell	CL:0000097
@@ -348,7 +348,7 @@ Plasmacytoid dendritic cell(Lung)	plasmacytoid dendritic cell	CL:0000784
 Pre T cell(Thymus)	thymocyte	CL:0000893
 Pre-Sertoli cell_Cst9 high(Testis)	Sertoli cell	CL:0000216
 Pre-Sertoli cell_Ctsl high(Testis)	Sertoli cell	CL:0000216
-Pre-pro B cell(Bone-Marrow)	Fraction A pre-pro B cell	CL:0002045
+Pre-pro B cell(Bone-Marrow)	fraction A pre-pro B cell	CL:0002045
 Preleptotene spermatogonia(Testis)	primary spermatocyte	CL:0000656
 Preosteoblast/Osteoblast/Bone cell/Cartilage cell(Neonatal-Calvaria)	non-terminally differentiated cell	CL:0000055
 Proliferating thymocyte(Thymus)	thymocyte	CL:0000893

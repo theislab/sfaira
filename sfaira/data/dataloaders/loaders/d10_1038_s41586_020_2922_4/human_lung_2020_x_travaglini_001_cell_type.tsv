@@ -108,9 +108,9 @@ Nonclassical Monocyte_P1	non-classical monocyte	CL:0000875
 Nonclassical Monocyte_P2	non-classical monocyte	CL:0000875
 Nonclassical Monocyte_P3	non-classical monocyte	CL:0000875
 OLR1+ Classical Monocyte_P2	classical monocyte	CL:0000860
-Pericyte_P1	pericyte cell	CL:0000669
-Pericyte_P2	pericyte cell	CL:0000669
-Pericyte_P3	pericyte cell	CL:0000669
+Pericyte_P1	pericyte	CL:0000669
+Pericyte_P2	pericyte	CL:0000669
+Pericyte_P3	pericyte	CL:0000669
 Plasma_P1	plasma cell	CL:0000786
 Plasma_P3	plasma cell	CL:0000786
 Plasmacytoid Dendritic_P1	plasmacytoid dendritic cell	CL:0000784

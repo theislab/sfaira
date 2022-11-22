@@ -18,7 +18,7 @@ CLDN10+ cells	progenitor cell of endocrine pancreas	CL:0002351
 CLP	common lymphoid progenitor	CL:0000051
 CX3CR1+ CD8 Tmem	effector memory CD8-positive, alpha-beta T cell, terminally differentiated	CL:0001062
 Colonocyte	colon epithelial cell	CL:0011108
-Contractile pericyte (PLN+)	pericyte cell	CL:0000669
+Contractile pericyte (PLN+)	pericyte	CL:0000669
 Cycling B cell	B cell	CL:0000236
 Cycling plasma cell	plasma cell	CL:0000786
 D cells (SST+)	pancreatic D cell	CL:0000173
@@ -49,7 +49,7 @@ IgA plasma cell	IgA plasma cell	CL:0000987
 IgG plasma cell	IgG plasma cell	CL:0000985
 IgM plasma cell	IgM plasma cell	CL:0000986
 Immature B	immature B cell	CL:0000816
-Immature pericyte	pericyte cell	CL:0000669
+Immature pericyte	pericyte	CL:0000669
 K cells (GIP+)	GIP cell	CL:0002278
 L cells (PYY+)	type L enteroendocrine cell	CL:0002279
 LEC1 (ACKR4+)	endothelial cell of lymphatic vessel	CL:0002138
@@ -86,7 +86,7 @@ NK cell	natural killer cell	CL:0000623
 Naive B	naive B cell	CL:0000788
 Neuroblast	progenitor cell	CL:0011026
 Paneth	paneth cell	CL:0000510
-Pericyte	pericyte cell	CL:0000669
+Pericyte	pericyte	CL:0000669
 Pre-B	precursor B cell	CL:0000817
 Pro-B	pro-B cell	CL:0000826
 Progenitor (NEUROG3+)	progenitor cell of endocrine pancreas	CL:0002351
@@ -117,7 +117,7 @@ Th17	T-helper 17 cell	CL:0000899
 Transitional Stromal 3 (C3+)	stromal cell	CL:0000499
 Treg	regulatory T cell	CL:0000815
 Tuft	intestinal tuft cell	CL:0019032
-angiogenic pericyte	pericyte cell	CL:0000669
+angiogenic pericyte	pericyte	CL:0000669
 arterial capillary	endothelial cell of artery	CL:1000413
 cDC1	conventional dendritic cell	CL:0000990
 cDC2	conventional dendritic cell	CL:0000990

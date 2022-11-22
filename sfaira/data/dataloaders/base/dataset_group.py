@@ -17,7 +17,8 @@ from sfaira.data.dataloaders.base.dataset import DatasetBase
 from sfaira.data.dataloaders.base.utils import identify_tsv
 from sfaira.versions.genomes.genomes import GenomeContainer
 from sfaira.versions.metadata.maps import prepare_ontology_map_tab
-from sfaira.data.dataloaders.obs_utils import get_ontology, value_protection
+from sfaira.data.dataloaders.obs_utils import value_protection
+from sfaira.data.dataloaders.ontology_access import get_ontology
 from sfaira.data.dataloaders.utils import read_yaml
 
 UNS_STRING_META_IN_OBS = "__obs__"
@@ -682,6 +683,45 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                                     x != self._adata_ids.not_a_cell_celltype_identifier)
                                 else self._adata_ids.unknown_metadata_identifier
                                 for x in tab[self._adata_ids.classmap_target_key].values
+                            ]
+                            v._write_ontology_class_map(fn=fn_map, tab=tab)
+
+    def update_ontology_symbols(self):
+        """
+        Updates ontology symbols based on IDs to new schema version.
+        """
+        for f in os.listdir(self._cwd):
+            if os.path.isfile(os.path.join(self._cwd, f)):  # only files
+                # Narrow down to data set files:
+                if f.split(".")[-1] == "py" and f.split(".")[0] not in ["__init__", "base", "group"]:
+                    fn = ".".join(f.split(".")[:-1])
+                    fns_map = [os.path.join(self._cwd, fn + "_" + x + ".tsv")
+                               for x in self._adata_ids.ontology_constrained]
+                    for fn_map in fns_map:
+                        # Get a data set instance from the group to use its methods below.
+                        v = self.datasets[self.ids[0]]
+                        onto_key = identify_tsv(fn=fn_map, ontology_names=self._adata_ids.ontology_constrained)
+                        if os.path.exists(fn_map):
+                            onto = get_ontology(k=onto_key, organism=v.organism)
+                            # Access reading and value protection mechanisms from first data set loaded in group.
+                            tab = v._read_ontology_class_map(fn=fn_map)
+                            # Throw documentation for putatively obsolete nodes:
+                            for node_id in tab[self._adata_ids.classmap_target_id_key].values:
+                                # Note: obsolete nodes can be read in from ontology files but are omitted in the
+                                # obo backend currently.
+                                if node_id != self._adata_ids.unknown_metadata_identifier and \
+                                        node_id != self._adata_ids.not_a_cell_celltype_identifier and \
+                                        node_id not in onto.node_ids:
+                                    print(f"WARNING: {node_id} was not found in ontology {onto_key}. It has "
+                                          f"potentially become obsolete, check the ontology for documentation. "
+                                          f"This requires manual intervention and will cause an error.")
+                            # Updates the first column with the corresponding ontology IDs into the file.
+                            tab[self._adata_ids.classmap_target_key] = [
+                                onto.convert_to_name(x)
+                                if (x != self._adata_ids.unknown_metadata_identifier and
+                                    x != self._adata_ids.not_a_cell_celltype_identifier)
+                                else self._adata_ids.unknown_metadata_identifier
+                                for x in tab[self._adata_ids.classmap_target_id_key].values
                             ]
                             v._write_ontology_class_map(fn=fn_map, tab=tab)
 

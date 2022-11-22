@@ -102,7 +102,7 @@ mesangial cell	mesangial cell	CL:0000650
 mesenchymal cell	mesenchymal cell	CL:0008019
 mesenchymal progenitor cell	mesenchymal cell	CL:0008019
 mesenchymal stem cell	mesenchymal stem cell	CL:0000134
-mesenchymal stem cell of adipose	mesenchymal stem cell of adipose	CL:0002570
+mesenchymal stem cell of adipose	mesenchymal stem cell of adipose tissue	CL:0002570
 microglial cell	microglial cell	CL:0000129
 monocyte	monocyte	CL:0000576
 mucus secreting cell	mucus secreting cell	CL:0000319
@@ -114,7 +114,7 @@ naive T cell	naive T cell	CL:0000898
 neuroendocrine cell	neuroendocrine cell	CL:0000165
 neuroepithelial cell	neuroepithelial stem cell	CL:0002259
 neuron	neuron	CL:0000540
-neuronal stem cell	neuronal stem cell	CL:0000047
+neuronal stem cell	neural stem cell	CL:0000047
 neutrophil	neutrophil	CL:0000775
 non-classical monocyte	non-classical monocyte	CL:0000875
 oligodendrocyte	oligodendrocyte	CL:0000128
@@ -127,10 +127,10 @@ pancreatic acinar cell	pancreatic acinar cell	CL:0002064
 pancreatic ductal cel	pancreatic ductal cell	CL:0002079
 pancreatic ductal cell	pancreatic ductal cell	CL:0002079
 pancreatic stellate cell	pancreatic stellate cell	CL:0002410
-pericyte cell	pericyte cell	CL:0000669
+pericyte cell	pericyte	CL:0000669
 plasma cell	plasma cell	CL:0000786
 plasmacytoid dendritic cell	plasmacytoid dendritic cell	CL:0000784
-podocyte	glomerular visceral epithelial cell	CL:0000653
+podocyte	podocyte	CL:0000653
 precursor B cell	precursor B cell	CL:0000817
 proerythroblast	proerythroblast	CL:0000547
 professional antigen presenting cell	professional antigen presenting cell	CL:0000145
