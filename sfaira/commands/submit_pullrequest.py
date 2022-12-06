@@ -1,4 +1,3 @@
-import logging
 import subprocess
 import os
 import shutil
@@ -6,9 +5,6 @@ import sys
 
 from sfaira.commands.questionary import sfaira_questionary
 from rich import print
-
-
-log = logging.getLogger(__name__)
 
 
 class PullRequestHandler:

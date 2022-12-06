@@ -1,4 +1,3 @@
-import logging
 import numpy as np
 import os
 import warnings
@@ -13,8 +12,6 @@ try:
     import sfaira_extension as sfairae
 except ImportError:
     sfairae = None
-
-log = logging.getLogger(__name__)
 
 
 class DataloaderTester:
@@ -79,6 +76,7 @@ class DataloaderTester:
                 "sample_source_obs_key",
                 "sex_obs_key",
                 "source_doi_obs_key",
+                "suspension_type_obs_key",
                 "state_exact_obs_key",
                 "tech_sample_obs_key",
                 "treatment_obs_key",

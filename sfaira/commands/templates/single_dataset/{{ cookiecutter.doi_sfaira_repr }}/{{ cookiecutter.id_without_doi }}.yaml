@@ -58,6 +58,8 @@ dataset_or_observation_wise:
     source_doi_obs_key:
     state_exact:
     state_exact_obs_key:
+    suspension_type: {% if cookiecutter.suspension_type %}"{{ cookiecutter.suspension_type }}"{% endif %}
+    suspension_type_obs_key: {% if cookiecutter.suspension_type_obs_key %}"{{ cookiecutter.suspension_type_obs_key }}"{% endif %}
     tech_sample:
     tech_sample_obs_key: {% if cookiecutter.tech_sample_obs_key %}"{{ cookiecutter.tech_sample_obs_key }}"{% endif %}
     treatment:

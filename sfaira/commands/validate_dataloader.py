@@ -1,5 +1,4 @@
 import sys
-import logging
 import os
 import pydoc
 import rich
@@ -10,8 +9,6 @@ import yaml
 
 from sfaira.commands.utils import get_pydoc
 from sfaira.consts.utils import clean_doi
-
-log = logging.getLogger(__name__)
 
 
 class DataloaderValidator:
@@ -162,6 +159,7 @@ class DataloaderValidator:
                 'sample_source',
                 'sex',
                 'source_doi',
+                'suspension_type',
                 'state_exact',
                 'tech_sample',
                 'treatment']] for z in y],
@@ -242,7 +240,8 @@ class DataloaderValidator:
                 'ethnicity',
                 'organ',
                 'organism',
-                'sex']]
+                'sex',
+                'suspension_type']]
         else:
             print(f"[bold red]Did not recognize schema {self.schema} in validate.")
             sys.exit()
