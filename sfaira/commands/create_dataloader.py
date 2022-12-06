@@ -612,7 +612,7 @@ class DataloaderCreator:
                   'sfaira finalize-dataloader."')
             print('[bold orange]               "   You can skip phase 2 (sfaira annotate-dataloader), '
                   'unless you set any of the following items in the .yaml during manual editing:"')
-            print(f'[bold orange]               "   assay_sc_obs_key, cell_line_obs_key, cell_type_obs_key, '
+            print('[bold orange]               "   assay_sc_obs_key, cell_line_obs_key, cell_type_obs_key, '
                   'development_stage_obs_key, disease_obs_key, ethnicity_obs_key, organ_obs_key, '
                   'organism_obs_key, sex_obs_key, suspension_type_obs_key."')
             self.action_counter += 1
