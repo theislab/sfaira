@@ -66,6 +66,7 @@ class AnnotationContainer:
     sex_obs_key: Union[None, str] = None
     source_doi_obs_key: Union[None, str] = None
     state_exact_obs_key: Union[None, str] = None
+    suspension_type_obs_key: Union[None, str] = None
     treatment_obs_key: Union[None, str] = None
 
     _feature_reference: Union[None, str] = None
