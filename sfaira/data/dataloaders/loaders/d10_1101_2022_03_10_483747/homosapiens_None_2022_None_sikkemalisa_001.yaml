@@ -1,7 +1,7 @@
 dataset_structure:
     dataset_index: 1
-    sample_fns:
-        - "HLCA_v1.h5ad"
+    sample_fns: 
+        - "HLCA_full_v1.1_to_share.h5ad"
 dataset_wise:
     author: "Sikkema, Lisa"
     default_embedding: 
@@ -9,7 +9,7 @@ dataset_wise:
     doi_journal:
     download_url_data: "https://beta.fastgenomics.org/datasets/detail-dataset-427f1eee6dd44f50bae1ab13f0f3c6a9#Files"
     download_url_meta:
-    primary_data: False
+    primary_data: False # LISA NOT SURE
     year: 2022
 layers:
     layer_counts: "counts"
@@ -20,13 +20,13 @@ layers:
     layer_unspliced_processed: 
     layer_velocity: 
 dataset_or_feature_wise:
-    feature_reference:
+    feature_reference: "Homo_sapiens.GRCh38.107"
     feature_reference_var_key: 
     feature_type: "rna"
     feature_type_var_key: 
 dataset_or_observation_wise:
     assay_sc:
-    assay_sc_obs_key: "single_cell_platform"
+    assay_sc_obs_key: "assay"
     assay_differentiation: 
     assay_differentiation_obs_key: 
     assay_type_differentiation: 
@@ -36,19 +36,19 @@ dataset_or_observation_wise:
     cell_line: 
     cell_line_obs_key: 
     cell_type: 
-    cell_type_obs_key: "ann_finest_level"
+    cell_type_obs_key: "cell_type"
     development_stage:
-    development_stage_obs_key: "age"
+    development_stage_obs_key: "development_stage"
     disease:
-    disease_obs_key:
-    ethnicity:
-    ethnicity_obs_key: "ethnicity"
+    disease_obs_key: "disease"
+    ethnicity: 
+    ethnicity_obs_key:
     gm:
     gm_obs_key:
     individual:
-    individual_obs_key: "subject_ID"
+    individual_obs_key: "donor_id"
     organ:
-    organ_obs_key: "anatomical_region_level_1"
+    organ_obs_key: "tissue"
     organism: "Homo sapiens"
     organism_obs_key: 
     sample_source: "primary_tissue"
@@ -56,18 +56,20 @@ dataset_or_observation_wise:
     sex:
     sex_obs_key: "sex"
     source_doi:
-    source_doi_obs_key: "study_long"
+    source_doi_obs_key: "study"
     state_exact:
     state_exact_obs_key:
+    suspension_type:
+    suspension_type_obs_key: "suspension_type"
     tech_sample:
     tech_sample_obs_key: 
     treatment:
     treatment_obs_key:
 feature_wise:
-    feature_id_var_key: "gene_ids"
-    feature_symbol_var_key: "gene_symbols"
+    feature_id_var_key: "ensembl_ids"
+    feature_symbol_var_key: "index"
 observation_wise:
-    spatial_x_coord_obs_key: 
+    spatial_x_coord_obs_key:
     spatial_y_coord_obs_key: 
     spatial_z_coord_obs_key: 
     vdj_vj_1_obs_key_prefix: 
@@ -85,4 +87,4 @@ observation_wise:
     vdj_productive_obs_key_suffix: 
     vdj_v_call_obs_key_suffix: 
 meta:
-    version: "1.2"
+    version: "1.3"
