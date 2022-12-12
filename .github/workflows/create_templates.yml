@@ -41,6 +41,6 @@ jobs:
       - name: Create single_dataset template
         run: |
           mkdir -p ./d10_1000_j_journal_2022_01_001
-          echo -e "1\nEinstein, Albert\nX_umap\n10.1000/j.journal.2022.01.001\n\nURL\nURL2\nY2022\nX\n\n\n\n\n\n\n\n\n\n\n\n\nHomo sapiens\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nindex\n\n" | sfaira create-dataloader
+          echo -e "1\nEinstein, Albert\nX_umap\n10.1000/j.journal.2022.01.001\n\nURL\nURL2\nY2022\nX\n\n\n\n\n\n\n\n\n\n\n\n\nna\nHomo sapiens\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nindex\n\n" | sfaira create-dataloader
           sfaira validate-dataloader --doi 10.1000/j.journal.2022.01.001
           rm -rf ./d10_1000_j_journal_2022_01_001
