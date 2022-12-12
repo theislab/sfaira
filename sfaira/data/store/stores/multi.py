@@ -61,7 +61,7 @@ class StoreMultipleFeatureSpaceBase(StoreBase):
             # Transform into dictionary first.
             organisms = [k for k, v in self.stores.items()]
             if isinstance(organisms, list) and len(organisms) == 0:
-                raise Warning("found empty organism lists in genome_container.setter")
+                print("Warning(found empty organism lists in genome_container.setter)")
             if len(organisms) > 1:
                 raise ValueError(f"Gave a single GenomeContainer for a store instance that has multiple organism: "
                                  f"{organisms}, either further subset the store or give a dictionary of "
