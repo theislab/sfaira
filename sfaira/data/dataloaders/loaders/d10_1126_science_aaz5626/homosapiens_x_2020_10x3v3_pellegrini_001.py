@@ -17,10 +17,12 @@ def load(data_dir, **kwargs):
 
     assay_diff_dict = {
         "Tel": "Lancaster, 2014 (doi: 10.1038/nprot.2014.158); Lancaster, 2017 (doi: 10.1038/nbt.3906)",
-        "ChP1": "Lancaster, 2014 (doi: 10.1038/nprot.2014.158); Lancaster, 2017 (doi: 10.1038/nbt.3906); added CHIR" "and BMP4 for ChP patterning on day 10 (Pellegrini, 2020 (doi: 10.1126/science.aaz5626))",
-        "ChP2": "Lancaster, 2014 (doi: 10.1038/nprot.2014.158); Lancaster, 2017 (doi: 10.1038/nbt.3906); added CHIR"
-"and BMP4 for ChP patterning on day 10 (Pellegrini, 2020 (doi: 10.1126/science.aaz5626))",
-        "ChP3": "Lancaster, 2014 (doi: 10.1038/nprot.2014.158); Lancaster, 2017 (doi: 10.1038/nbt.3906); added CHIR" "and BMP4 for ChP patterning on day 10 (Pellegrini, 2020 (doi: 10.1126/science.aaz5626))"}
+        "ChP1": "Lancaster, 2014 (doi: 10.1038/nprot.2014.158); Lancaster, 2017 (doi: 10.1038/nbt.3906);"
+        "added CHIR and BMP4 for ChP patterning on day 10 (Pellegrini, 2020 (doi: 10.1126/science.aaz5626))",
+        "ChP2": "Lancaster, 2014 (doi: 10.1038/nprot.2014.158); Lancaster, 2017 (doi: 10.1038/nbt.3906);"
+        "added CHIR and BMP4 for ChP patterning on day 10 (Pellegrini, 2020 (doi: 10.1126/science.aaz5626))",
+        "ChP3": "Lancaster, 2014 (doi: 10.1038/nprot.2014.158); Lancaster, 2017 (doi: 10.1038/nbt.3906);"
+        "added CHIR and BMP4 for ChP patterning on day 10 (Pellegrini, 2020 (doi: 10.1126/science.aaz5626))"}
     
     assay_type_diff_dict = {
         "Tel": "unguided",
@@ -40,7 +42,7 @@ def load(data_dir, **kwargs):
         "ChP2": "WA01",
         "ChP3": "WA01"}
 
-    dev_stage_dict = {   # change later to fit with ontology database
+    dev_stage_dict = {
         "Tel": "55-day",
         "ChP1": "27-day",
         "ChP2": "46-day",
