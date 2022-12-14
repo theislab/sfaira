@@ -1,5 +1,3 @@
-import logging
-
 import os
 from rich import print
 from typing import Dict
@@ -7,8 +5,6 @@ from typing import Dict
 from sfaira.commands.utils import get_ds
 from sfaira.consts.utils import clean_doi
 from sfaira.data import DatasetBase
-
-log = logging.getLogger(__name__)
 
 
 class H5adExport:

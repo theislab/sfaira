@@ -76,32 +76,12 @@ def main():
 
 @click.group()
 @click.version_option(__version__, message=click.style(f'sfaira Version: {__version__}', fg='blue'))
-@click.option('-v', '--verbose', is_flag=True, default=False, help='Enable verbose output (print debug statements).')
-@click.option("-l", "--log-file", help="Save a verbose log to a file.")
 @click.pass_context
-def sfaira_cli(ctx, verbose, log_file):
+def sfaira_cli(ctx):
     """
     Create and manage sfaira dataloaders.
     """
-    # Set the base logger to output DEBUG
-    log.setLevel(logging.DEBUG)
-
-    # Set up logs to the console
-    log.addHandler(
-        rich.logging.RichHandler(
-            level=logging.DEBUG if verbose else logging.INFO,
-            console=rich.console.Console(file=sys.stderr),
-            show_time=True,
-            markup=True,
-        )
-    )
-
-    # Set up logs to a file if we asked for one
-    if log_file:
-        log_fh = logging.FileHandler(log_file, encoding="utf-8")
-        log_fh.setLevel(logging.DEBUG)
-        log_fh.setFormatter(logging.Formatter("[%(asctime)s] %(name)-20s [%(levelname)-7s]  %(message)s"))
-        log.addHandler(log_fh)
+    pass
 
 
 @sfaira_cli.command()

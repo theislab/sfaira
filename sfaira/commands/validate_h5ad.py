@@ -1,9 +1,5 @@
-import logging
-
 import anndata
 from rich import print
-
-log = logging.getLogger(__name__)
 
 
 class H5adValidator:

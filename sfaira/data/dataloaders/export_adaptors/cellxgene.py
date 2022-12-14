@@ -236,7 +236,7 @@ def match_supsension_and_efo(adata, adata_ids, efo_ontology: OntologyEfo, valid_
         for k, v in valid_combinations.items():
             if efo_ontology.is_a(is_=efo, a_=k):
                 if efo in efo_map.keys():
-                    raise Warning(f"found multiple suspension matches for EFO {efo}.")
+                    print(f"Warning(found multiple suspension matches for EFO {efo}.)")
                 efo_map[efo] = v[0]
     # Picks first match, ie prioritises cell if both cell and nucleus are possible.
     adata.obs[adata_ids.suspension_type] = [

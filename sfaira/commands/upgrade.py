@@ -1,5 +1,4 @@
 import json
-import logging
 import urllib
 import sys
 from pkg_resources import parse_version
@@ -10,8 +9,6 @@ from subprocess import Popen, PIPE, check_call
 from rich import print
 
 from sfaira.commands.questionary import sfaira_questionary
-
-log = logging.getLogger(__name__)
 
 
 class UpgradeCommand:
@@ -40,8 +37,6 @@ class UpgradeCommand:
         """
         latest_local_version = sfaira.__version__
         sliced_local_version = latest_local_version[:-9] if latest_local_version.endswith('-SNAPSHOT') else latest_local_version
-        log.debug(f'Latest local sfaira version is: {latest_local_version}.')
-        log.debug('Checking whether a new sfaira version exists on PyPI.')
         try:
             # Retrieve info on latest version
             # Adding nosec (bandit) here, since we have a hardcoded https request
@@ -73,7 +68,6 @@ class UpgradeCommand:
         """
         Calls pip as a subprocess with the --upgrade flag to upgrade sfaira to the latest version.
         """
-        log.debug('Attempting to upgrade sfaira via    pip install --upgrade sfaira .')
         if not UpgradeCommand.is_pip_accessible():
             sys.exit(1)
         try:
@@ -89,11 +83,9 @@ class UpgradeCommand:
 
         :return: True if accessible, false if not
         """
-        log.debug('Verifying that pip is accessible.')
         pip_installed = Popen(['pip', '--version'], stdout=PIPE, stderr=PIPE, universal_newlines=True)
         (git_installed_stdout, git_installed_stderr) = pip_installed.communicate()
         if pip_installed.returncode != 0:
-            log.debug('Pip was not accessible!')
             print('[bold red]Unable to find \'pip\' in the PATH. Is it installed?')
             print('[bold red]Run command was [green]\'pip --version \'')
             return False

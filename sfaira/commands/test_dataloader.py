@@ -1,4 +1,3 @@
-import logging
 import numpy as np
 import os
 import warnings
@@ -7,14 +6,13 @@ import sys
 from rich import print
 
 from sfaira.commands.utils import get_ds
+from sfaira.consts.schema import DEFAULT_SCHEMA
 from sfaira.consts.utils import clean_doi
 
 try:
     import sfaira_extension as sfairae
 except ImportError:
     sfairae = None
-
-log = logging.getLogger(__name__)
 
 
 class DataloaderTester:
@@ -79,6 +77,7 @@ class DataloaderTester:
                 "sample_source_obs_key",
                 "sex_obs_key",
                 "source_doi_obs_key",
+                "suspension_type_obs_key",
                 "state_exact_obs_key",
                 "tech_sample_obs_key",
                 "treatment_obs_key",
@@ -126,7 +125,7 @@ class DataloaderTester:
                         print(f'[bold red]Did not find column {val} for {x} in data set {k}, found: '
                               f'{v.adata.var.columns}.')
                         sys.exit()
-            v.streamline_var(match_to_release=None, schema="cellxgene:" + "2.0.0")
+            v.streamline_var(match_to_release=None, schema="cellxgene:" + DEFAULT_SCHEMA)
             signal_proc = np.asarray(v.adata.X.sum()).sum()
             if signal_proc < 0.01 * signal_raw and v.feature_type != "peak":
                 print('[bold red]Mapping your feature space to a reference annotation resulted in a heavy loss of '

@@ -115,7 +115,7 @@ class DataloaderAnnotater:
                     if sample_fns is None:
                         sample_fns = [None]
                     # Here we distinguish between class that are already defined and those that are not.
-                    # The latter case arises if meta data are defined in YAMLs and _load is given as a function.
+                    # The latter case arises if metadata are defined in YAMLs and _load is given as a function.
                     if DatasetFound is None:
                         datasets_f = [
                             DatasetBase(
