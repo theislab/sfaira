@@ -23,7 +23,7 @@ def load(data_dir, **kwargs):
         "added CHIR and BMP4 for ChP patterning on day 10 (Pellegrini, 2020 (doi: 10.1126/science.aaz5626))",
         "ChP3": "Lancaster, 2014 (doi: 10.1038/nprot.2014.158); Lancaster, 2017 (doi: 10.1038/nbt.3906);"
         "added CHIR and BMP4 for ChP patterning on day 10 (Pellegrini, 2020 (doi: 10.1126/science.aaz5626))"}
-    
+
     assay_type_diff_dict = {
         "Tel": "unguided",
         "ChP1": "guided",
