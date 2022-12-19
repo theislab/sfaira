@@ -9,7 +9,7 @@ dataset_wise:
     doi_journal:
     download_url_data: "https://beta.fastgenomics.org/datasets/detail-dataset-427f1eee6dd44f50bae1ab13f0f3c6a9#Files"
     download_url_meta:
-    primary_data: False # LISA NOT SURE
+    primary_data: False
     year: 2022
 layers:
     layer_counts: "counts"
@@ -42,7 +42,7 @@ dataset_or_observation_wise:
     disease:
     disease_obs_key: "disease"
     ethnicity: 
-    ethnicity_obs_key:
+    ethnicity_obs_key: "ancestry"
     gm:
     gm_obs_key:
     individual:
@@ -66,8 +66,8 @@ dataset_or_observation_wise:
     treatment:
     treatment_obs_key:
 feature_wise:
-    feature_id_var_key: "ensembl_ids"
-    feature_symbol_var_key: "index"
+    feature_id_var_key: "ensembl_id"
+    feature_symbol_var_key: "gene_symbol"
 observation_wise:
     spatial_x_coord_obs_key:
     spatial_y_coord_obs_key: 

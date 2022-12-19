@@ -1,8 +1,8 @@
 source	target	target_id
+african	African	HANCESTRO:0010
+american	American	HANCESTRO:0463
 asian	Asian	HANCESTRO:0008
-black	African	HANCESTRO:0010
-latino	Hispanic or Latin American	HANCESTRO:0014
-mixed	unknown	unknown
+european	European	HANCESTRO:0005
+mixed	admixed ancestry	HANCESTRO:0306
 nan	unknown	unknown
 pacific islander	Pacific Islander	HANCESTRO:0574
-white	European	HANCESTRO:0005

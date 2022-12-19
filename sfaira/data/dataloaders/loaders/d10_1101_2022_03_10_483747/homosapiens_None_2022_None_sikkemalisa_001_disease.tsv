@@ -1,0 +1,18 @@
+source	target	target_id
+COVID-19	COVID-19	MONDO:0100096
+chronic obstructive pulmonary disease	chronic obstructive pulmonary disease	MONDO:0005002
+chronic rhinitis	chronic rhinitis	MONDO:0004514
+cystic fibrosis	cystic fibrosis	MONDO:0009061
+hypersensitivity pneumonitis	hypersensitivity pneumonitis	MONDO:0017853
+interstitial lung disease	interstitial lung disease	MONDO:0015925
+lung adenocarcinoma	lung adenocarcinoma	MONDO:0005061
+lung large cell carcinoma	lung large cell carcinoma	MONDO:0003050
+lymphangioleiomyomatosis	lymphangioleiomyomatosis	MONDO:0011705
+nan	unknown	unknown
+non-specific interstitial pneumonia	non-specific interstitial pneumonia	MONDO:0019622
+normal	healthy	PATO:0000461
+pleomorphic carcinoma	pleomorphic carcinoma	MONDO:0003573
+pneumonia	pneumonia	MONDO:0005249
+pulmonary fibrosis	pulmonary fibrosis	MONDO:0002771
+pulmonary sarcoidosis	pulmonary sarcoidosis	MONDO:0001708
+squamous cell lung carcinoma	squamous cell lung carcinoma	MONDO:0005097
