@@ -270,7 +270,7 @@ class GridsearchContainer:
                 or metric_select.endswith('tpr'):
             ascending = False
             if cv_mode == "min":
-                raise Warning("selected cv_mode min with metric_id %s, likely not intended" % metric_select)
+                print(f"Warning(selected cv_mode min with metric_id {metric_select}, likely not intended")
         elif metric_select.endswith('loss') \
                 or metric_select.endswith('mse') \
                 or metric_select.endswith('negll') \
@@ -278,7 +278,7 @@ class GridsearchContainer:
                 or metric_select.endswith('fpr'):
             ascending = True
             if cv_mode == "max":
-                raise Warning("selected cv_mode max with metric_id %s, likely not intended" % metric_select)
+                print(f"Warning(selected cv_mode max with metric_id {metric_select}, likely not intended")
         else:
             raise ValueError("measure %s not recognized" % metric_select)
 
