@@ -298,7 +298,7 @@ class StoresDao(StoreMultipleFeatureSpaceBase):
                 adata = None
                 x = None
                 trial_path = os.path.join(cache_path_i, f)
-                if os.path.isdir(trial_path):
+                if os.path.isdir(trial_path) and not f.startswith("."):
                     # zarr-backed anndata are saved as directories with the elements of the array group as further sub
                     # directories, e.g. a directory called "X", and a file ".zgroup" which identifies the zarr group.
                     adata, x = read_dao(trial_path, use_dask=True, columns=columns, obs_separate=False, x_separate=True)
@@ -339,7 +339,7 @@ class StoresH5ad(StoreMultipleFeatureSpaceBase):
             for f in np.sort(os.listdir(cache_path_i)):
                 adata = None
                 trial_path = os.path.join(cache_path_i, f)
-                if os.path.isfile(trial_path):
+                if os.path.isfile(trial_path) and not f.startswith("."):
                     # Narrow down to supported file types:
                     if f.split(".")[-1] == "h5ad":
                         try:
