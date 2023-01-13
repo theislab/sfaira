@@ -14,13 +14,13 @@ dataset_wise:
     doi_preprint: 
     doi_journal: "10.1016/j.cell.2021.11.017"
     download_url_data:
-        - "manual,Biopsy_RawDGE_23042cells.csv,https://singlecell.broadinstitute.org/single_cell/data/public/SCP1644/microenvironment-drives-cell-state-plasticity-and-drug-response-in-pancreatic-cancer?filename=Biopsy_RawDGE_23042cells.csv"
-        - "manual,Biopsy473_RawDGE_1370cells.csv,https://singlecell.broadinstitute.org/single_cell/data/public/SCP1644/microenvironment-drives-cell-state-plasticity-and-drug-response-in-pancreatic-cancer?filename=Biopsy473_RawDGE_1370cells.csv"
-        - "manual,Fig4B_Organoid_RawDGE_6438cells.csv,https://singlecell.broadinstitute.org/single_cell/data/public/SCP1644/microenvironment-drives-cell-state-plasticity-and-drug-response-in-pancreatic-cancer?filename=Fig4B_Organoid_RawDGE_6438cells.csv"
-        - "manual,Fig4C_Organoid_RawDGE_2117cells.csv,https://singlecell.broadinstitute.org/single_cell/data/public/SCP1644/microenvironment-drives-cell-state-plasticity-and-drug-response-in-pancreatic-cancer?filename=Fig4C_Organoid_RawDGE_2117cells.csv"
-        - "manual,Fig4E_Organoid_RawDGE_2042cells.csv,https://singlecell.broadinstitute.org/single_cell/data/public/SCP1644/microenvironment-drives-cell-state-plasticity-and-drug-response-in-pancreatic-cancer?filename=Fig4E_Organoid_RawDGE_2042cells.csv"
-        - "manual,Fig6_Organoid_RawDGE_6071cells.csv,https://singlecell.broadinstitute.org/single_cell/data/public/SCP1644/microenvironment-drives-cell-state-plasticity-and-drug-response-in-pancreatic-cancer?filename=Fig6_Organoid_RawDGE_6071cells.csv"
-        - "manual,Organoid_RawDGE_24995cells.csv,https://singlecell.broadinstitute.org/single_cell/data/public/SCP1644/microenvironment-drives-cell-state-plasticity-and-drug-response-in-pancreatic-cancer?filename=Organoid_RawDGE_24995cells.csv"
+        Biopsy_RawDGE_23042cells.csv: "manual,Biopsy_RawDGE_23042cells.csv,https://singlecell.broadinstitute.org/single_cell/data/public/SCP1644/microenvironment-drives-cell-state-plasticity-and-drug-response-in-pancreatic-cancer?filename=Biopsy_RawDGE_23042cells.csv"
+        Biopsy473_RawDGE_1370cells.csv: "manual,Biopsy473_RawDGE_1370cells.csv,https://singlecell.broadinstitute.org/single_cell/data/public/SCP1644/microenvironment-drives-cell-state-plasticity-and-drug-response-in-pancreatic-cancer?filename=Biopsy473_RawDGE_1370cells.csv"
+        Fig4B_Organoid_RawDGE_6438cells.csv: "manual,Fig4B_Organoid_RawDGE_6438cells.csv,https://singlecell.broadinstitute.org/single_cell/data/public/SCP1644/microenvironment-drives-cell-state-plasticity-and-drug-response-in-pancreatic-cancer?filename=Fig4B_Organoid_RawDGE_6438cells.csv"
+        Fig4C_Organoid_RawDGE_2117cells.csv: "manual,Fig4C_Organoid_RawDGE_2117cells.csv,https://singlecell.broadinstitute.org/single_cell/data/public/SCP1644/microenvironment-drives-cell-state-plasticity-and-drug-response-in-pancreatic-cancer?filename=Fig4C_Organoid_RawDGE_2117cells.csv"
+        Fig4E_Organoid_RawDGE_2042cells.csv: "manual,Fig4E_Organoid_RawDGE_2042cells.csv,https://singlecell.broadinstitute.org/single_cell/data/public/SCP1644/microenvironment-drives-cell-state-plasticity-and-drug-response-in-pancreatic-cancer?filename=Fig4E_Organoid_RawDGE_2042cells.csv"
+        Fig6_Organoid_RawDGE_6071cells.csv: "manual,Fig6_Organoid_RawDGE_6071cells.csv,https://singlecell.broadinstitute.org/single_cell/data/public/SCP1644/microenvironment-drives-cell-state-plasticity-and-drug-response-in-pancreatic-cancer?filename=Fig6_Organoid_RawDGE_6071cells.csv"
+        Organoid_RawDGE_24995cells.csv: "manual,Organoid_RawDGE_24995cells.csv,https://singlecell.broadinstitute.org/single_cell/data/public/SCP1644/microenvironment-drives-cell-state-plasticity-and-drug-response-in-pancreatic-cancer?filename=Organoid_RawDGE_24995cells.csv"
     download_url_meta: "manual,complete_MetaData_70170cells_scp.csv,https://singlecell.broadinstitute.org/single_cell/data/public/SCP1644/microenvironment-drives-cell-state-plasticity-and-drug-response-in-pancreatic-cancer?filename=complete_MetaData_70170cells_scp.csv"
     primary_data: True
     year: 2021
