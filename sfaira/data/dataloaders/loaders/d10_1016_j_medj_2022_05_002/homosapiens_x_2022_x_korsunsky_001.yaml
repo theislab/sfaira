@@ -6,8 +6,11 @@ dataset_wise:
     default_embedding: 
     doi_preprint: 
     doi_journal: "10.1016/j.medj.2022.05.002"
-    download_url_data: "https://singlecell.broadinstitute.org/single_cell/study/SCP738"
-    download_url_meta: 
+    download_url_data:
+        - "manual,umis.mtx,https://singlecell.broadinstitute.org/single_cell/data/public/SCP738/cross-tissue-single-cell-stromal-atlas-identifies-shared-pathological-fibroblast-phenotypes-in-four-chronic-inflammatory-diseases?filename=umis.mtx"
+        - "manual,umis_barcodes.tsv,https://singlecell.broadinstitute.org/single_cell/data/public/SCP738/cross-tissue-single-cell-stromal-atlas-identifies-shared-pathological-fibroblast-phenotypes-in-four-chronic-inflammatory-diseases?filename=umis_barcodes.tsv"
+        - "manual,umis_genes.tsv,https://singlecell.broadinstitute.org/single_cell/data/public/SCP738/cross-tissue-single-cell-stromal-atlas-identifies-shared-pathological-fibroblast-phenotypes-in-four-chronic-inflammatory-diseases?filename=umis_genes.tsv"
+    download_url_meta: "manual,metaData.txt,https://singlecell.broadinstitute.org/single_cell/data/public/SCP738/cross-tissue-single-cell-stromal-atlas-identifies-shared-pathological-fibroblast-phenotypes-in-four-chronic-inflammatory-diseases?filename=metaData.txt"
     primary_data: True
     year: 2022
 layers:

@@ -6,8 +6,8 @@ dataset_wise:
     default_embedding: "X_tsne"
     doi_preprint: 
     doi_journal: "10.1126/science.aah4573"
-    download_url_data: "https://singlecell.broadinstitute.org/single_cell/study/SCP43"
-    download_url_meta: 
+    download_url_data: "manual,raw_expression_matrix.txt,https://singlecell.broadinstitute.org/single_cell/data/public/SCP43/atlas-of-human-blood-dendritic-cells-and-monocytes?filename=raw_expression_matrix.txt"
+    download_url_meta: "manual,metadata.txt,https://singlecell.broadinstitute.org/single_cell/data/public/SCP43/atlas-of-human-blood-dendritic-cells-and-monocytes?filename=metadata.txt"
     primary_data: True
     year: 2022
 layers:

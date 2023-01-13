@@ -4,8 +4,8 @@ import pandas as pd
 
 
 def load(data_dir, **kwargs):
-    fn_counts = os.path.join(data_dir, "SCP43", "other", "raw_expression_matrix.txt")
-    fn_meta = os.path.join(data_dir, "SCP43", "metadata", "metadata.txt")
+    fn_counts = os.path.join(data_dir, "raw_expression_matrix.txt")
+    fn_meta = os.path.join(data_dir, "metadata.txt")
     tab_meta = pd.read_csv(fn_meta, sep="\t", index_col=0, header=0)
     tab_meta = tab_meta.iloc[1:, :].copy()
     adata = anndata.read_text(fn_counts, delimiter="\t").transpose()

@@ -6,11 +6,10 @@ import pandas as pd
 
 
 def load(data_dir, **kwargs):
-    dir_x = os.path.join(data_dir, "SCP738", "expression", "616423b1771a5b086db80551")
-    fn_obs = os.path.join(dir_x, "umis_barcodes.tsv")
-    fn_var = os.path.join(dir_x, "umis_genes.tsv")
-    fn_x = os.path.join(dir_x, "umis.mtx")
-    fn_meta = os.path.join(data_dir, "SCP738", "metadata", "metaData.txt")
+    fn_obs = os.path.join(data_dir, "umis_barcodes.tsv")
+    fn_var = os.path.join(data_dir, "umis_genes.tsv")
+    fn_x = os.path.join(data_dir, "umis.mtx")
+    fn_meta = os.path.join(data_dir, "metaData.txt")
     x = scipy.io.mmread(fn_x).T.tocsr()
     tab_obs = pd.read_csv(fn_obs, index_col=0, header=None, sep="\t", dtype=str)
     tab_var = pd.read_csv(fn_var, index_col=0, header=None, sep="\t", dtype=str)
