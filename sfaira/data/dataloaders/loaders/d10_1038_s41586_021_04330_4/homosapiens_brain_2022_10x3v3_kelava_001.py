@@ -29,9 +29,9 @@ def load(data_dir, **kwargs):
         "E2": "oestradiol_2",
     }
 
-    treatment=[]
-    sample=[]
-    state=[]
+    treatment = []
+    sample = []
+    state = []
     for i in adata.obs.index:
         ii = i.split("_")
         treatment.append(treat_dict[ii[0]])
