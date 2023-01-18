@@ -53,7 +53,7 @@ dataset_or_observation_wise:
     sample_source: "3d_culture"
     sample_source_obs_key: 
     sex: 
-    sex_obs_key:
+    sex_obs_key: "cell_line"
     source_doi:
     source_doi_obs_key:
     suspension_type: "cell" 
