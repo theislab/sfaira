@@ -8,7 +8,7 @@ import h5py
 
 def load(data_dir, **kwargs):
     f = h5py.File(os.path.join(data_dir, 'HumanFetalBrainPool.h5'), 'r')
-    dset = f['shoji']   
+    dset = f['shoji']
 
     X = scipy.sparse.csr_matrix(dset['Expression'][()], dtype=np.float32)
     obs = pd.DataFrame({'Age': np.array(dset['Age'], dtype=np.float32),
@@ -35,9 +35,9 @@ def load(data_dir, **kwargs):
                         'UnsplicedFraction': np.array(dset['UnsplicedFraction'], dtype=np.float32),
                         'ValidCells': np.array(dset['ValidCells'], dtype=bool)},
                        index=np.array(dset['CellID'], dtype=str))
-    
-    var =  pd.DataFrame({'Accession': np.array(dset['Accession'], dtype=str),
-                         'Chromosome': np.array(dset['Chromosome'], dtype=str), 
+
+    var = pd.DataFrame({'Accession': np.array(dset['Accession'], dtype=str),
+                         'Chromosome': np.array(dset['Chromosome'], dtype=str),
                          'End': np.array(dset['End'], dtype=str),
                          'Gene': np.array(dset['Gene'], dtype=str),
                          'GeneNonzeros': np.array(dset['GeneNonzeros'], dtype=np.uint32),
@@ -57,9 +57,9 @@ def load(data_dir, **kwargs):
            'Recipe': np.array(dset['Recipe'], dtype=str),
            'Species': np.array(dset['Species'], dtype=str)}
 
-    obsm = {'X_umap': np.array(dset['Embedding'], dtype=np.float32), 
-           'X_factors': np.array(dset['Factors'], dtype=np.float32)}
-                        
+    obsm = {'X_umap': np.array(dset['Embedding'], dtype=np.float32),
+            'X_factors': np.array(dset['Factors'], dtype=np.float32)}
+
     varm = {'Enrichment': np.array(dset['Enrichment'], dtype=np.float32).T,
             'Loadings': np.array(dset['Loadings'], dtype=np.float32),
             'Nonzeros': np.array(dset['Nonzeros'], dtype=np.uint64).T,
