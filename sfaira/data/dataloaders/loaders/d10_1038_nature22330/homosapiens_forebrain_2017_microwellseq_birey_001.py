@@ -11,8 +11,7 @@ import os
 def load(data_dir, **kwargs):
     # replace my-data-file.h5ad with the filename you're loading
     fn = os.path.join(data_dir, "GSE93811_RAW.tar")
-    # replace the simple data loading code below with the code required to load your data file(s)
-    
+    # replace the simple data loading code below with the code required to load your data file(s)  
     dfs = []
     obs = []
     with tarfile.open(fn) as tar:
