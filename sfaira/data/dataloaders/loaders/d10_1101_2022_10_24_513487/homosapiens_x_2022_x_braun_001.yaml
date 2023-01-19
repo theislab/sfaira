@@ -55,7 +55,7 @@ dataset_or_observation_wise:
     sample_source: "primary_tissue"
     sample_source_obs_key: 
     sex: 
-    sex_obs_key: # currently missing from metadata but should be known
+    sex_obs_key: "Donor"
     source_doi:
     source_doi_obs_key:
     state_exact:
