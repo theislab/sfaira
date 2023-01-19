@@ -37,16 +37,16 @@ def load(data_dir, **kwargs):
                        index=np.array(dset['CellID'], dtype=str))
 
     var = pd.DataFrame({'Accession': np.array(dset['Accession'], dtype=str),
-                         'Chromosome': np.array(dset['Chromosome'], dtype=str),
-                         'End': np.array(dset['End'], dtype=str),
-                         'Gene': np.array(dset['Gene'], dtype=str),
-                         'GeneNonzeros': np.array(dset['GeneNonzeros'], dtype=np.uint32),
-                         'GeneTotalUMIs': np.array(dset['GeneTotalUMIs'], dtype=np.uint32),
-                         'SelectedFeatures': np.array(dset['SelectedFeatures'], dtype=bool),
-                         'Start': np.array(dset['Start'], dtype=str),
-                         'StdevExpression': np.array(dset['StdevExpression'], dtype=np.float32),
-                         'ValidGenes': np.array(dset['ValidGenes'], dtype=bool)},
-                        index=np.array(dset['Gene'], dtype=str))
+                        'Chromosome': np.array(dset['Chromosome'], dtype=str),
+                        'End': np.array(dset['End'], dtype=str),
+                        'Gene': np.array(dset['Gene'], dtype=str),
+                        'GeneNonzeros': np.array(dset['GeneNonzeros'], dtype=np.uint32),
+                        'GeneTotalUMIs': np.array(dset['GeneTotalUMIs'], dtype=np.uint32),
+                        'SelectedFeatures': np.array(dset['SelectedFeatures'], dtype=bool),
+                        'Start': np.array(dset['Start'], dtype=str),
+                        'StdevExpression': np.array(dset['StdevExpression'], dtype=np.float32),
+                        'ValidGenes': np.array(dset['ValidGenes'], dtype=bool)},
+                       index=np.array(dset['Gene'], dtype=str))
 
     uns = {'AnnotationDefinition': np.array(dset['AnnotationDefinition'], dtype=str),
            'AnnotationDescription': np.array(dset['AnnotationDescription'], dtype=str),
