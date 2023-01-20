@@ -606,7 +606,7 @@ class StoreSingleFeatureSpace(StoreBase):
         raise NotImplementedError()
 
     @property
-    def var(self) -> Union[pd.DataFrame]:
+    def var(self) -> pd.DataFrame:
         if self.genome_container is None:
             var = pd.DataFrame({}, index=self.var_names)
         else:
