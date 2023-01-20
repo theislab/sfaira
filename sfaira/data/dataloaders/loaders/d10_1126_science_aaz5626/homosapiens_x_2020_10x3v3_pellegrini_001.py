@@ -42,17 +42,17 @@ def load(data_dir, **kwargs):
         "ChP2": "WA01",
         "ChP3": "WA01"}
 
-    dev_stage_dict = {
-        "Tel": "55-day",
-        "ChP1": "27-day",
-        "ChP2": "46-day",
-        "ChP3": "53-day"}
+    organoid_age_dict = {
+        "Tel": "55",
+        "ChP1": "27",
+        "ChP2": "46",
+        "ChP3": "53"}
 
     obs["assay_diff"] = [assay_diff_dict[i] for i in obs["orig.ident"]]
     obs["assay_type_diff"] = [assay_type_diff_dict[i] for i in obs["orig.ident"]]
     obs["organ"] = [organ_dict[i] for i in obs["orig.ident"]]
     obs["cell_line"] = [cell_line_dict[i] for i in obs["orig.ident"]]
-    obs["dev_stage"] = [dev_stage_dict[i] for i in obs["orig.ident"]]
+    obs["organoid_age_days"] = [organoid_age_dict[i] for i in obs["orig.ident"]]
 
     adata = anndata.AnnData(X=X, obs=obs, var=var, obsm=obsm)
 
