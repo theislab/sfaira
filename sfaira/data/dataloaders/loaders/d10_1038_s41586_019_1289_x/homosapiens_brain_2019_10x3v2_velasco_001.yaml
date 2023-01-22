@@ -40,7 +40,7 @@ dataset_or_feature_wise:
 dataset_or_observation_wise:
     assay_sc: "10x 3' v2"
     assay_sc_obs_key: 
-    assay_differentiation: 
+    assay_differentiation: "Kadoshima, 2013 with modifications (doi: 10.1073/pnas.1315710110)"
     assay_differentiation_obs_key: 
     assay_type_differentiation: "guided"
     assay_type_differentiation_obs_key: 
