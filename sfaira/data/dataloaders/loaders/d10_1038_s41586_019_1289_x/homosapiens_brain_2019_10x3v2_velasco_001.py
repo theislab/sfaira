@@ -16,6 +16,9 @@ def load(data_dir, sample_fn, **kwargs):
     metadata_df = pd.read_csv(fn_meta, sep="\t", index_col=0, header=0)
     metadata_df = metadata_df.tail(-1)
 
+    # add additional field for organoid age
+    metadata_df["organoid_age_days"] = pd.Series([{"3mon": "90", "6mon": "180"}[i] for i in metadata_df["Batch"].str.split("_").str[1]], dtype="category")
+
     # multiply by the UMIs, divide by 10^6
     arr = scipy.sparse.csr_matrix(
         np.multiply(expr_df.values, metadata_df.nUMI.loc[
