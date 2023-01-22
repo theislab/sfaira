@@ -46,7 +46,14 @@ dataset_or_observation_wise:
     assay_type_differentiation_obs_key: 
     bio_sample:
     bio_sample_obs_key: 
-    cell_line: 
+    cell_line:
+        GSE129519_expression_11a.6mon.txt.gz: "11a"
+        GSE129519_expression_GM.6mon.txt.gz: "GM08330"
+        GSE129519_expression_HUES66.3mon.txt.gz: "HUES 66"
+        GSE129519_expression_PGP1.3mon.batch2.txt.gz: "GM23338"
+        GSE129519_expression_PGP1.3mon.txt.gz: "GM23338"
+        GSE129519_expression_PGP1.6mon.batch3.txt.gz: "GM23338"
+        GSE129519_expression_PGP1.6mon.txt.gz: "GM23338"
     cell_line_obs_key: 
     cell_type: 
     cell_type_obs_key: "CellType"
