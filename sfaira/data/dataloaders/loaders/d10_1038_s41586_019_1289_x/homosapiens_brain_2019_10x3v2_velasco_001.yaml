@@ -14,13 +14,13 @@ dataset_wise:
     doi_preprint: 
     doi_journal: "10.1038/s41586-019-1289-x"
     download_url_data:
-        - "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE129nnn/GSE129519/suppl/GSE129519%5Fexpression%5F11a%2E6mon%2Etxt%2Egz"
-        - "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE129nnn/GSE129519/suppl/GSE129519%5Fexpression%5FGM%2E6mon%2Etxt%2Egz"
-        - "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE129nnn/GSE129519/suppl/GSE129519%5Fexpression%5FHUES66%2E3mon%2Etxt%2Egz"
-        - "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE129nnn/GSE129519/suppl/GSE129519%5Fexpression%5FPGP1%2E3mon%2Ebatch2%2Etxt%2Egz"
-        - "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE129nnn/GSE129519/suppl/GSE129519%5Fexpression%5FPGP1%2E3mon%2Etxt%2Egz"
-        - "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE129nnn/GSE129519/suppl/GSE129519%5Fexpression%5FPGP1%2E6mon%2Ebatch3%2Etxt%2Egz"
-        - "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE129nnn/GSE129519/suppl/GSE129519%5Fexpression%5FPGP1%2E6mon%2Etxt%2Egz"
+        GSE129519_expression_11a.6mon.txt.gz: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE129nnn/GSE129519/suppl/GSE129519%5Fexpression%5F11a%2E6mon%2Etxt%2Egz"
+        GSE129519_expression_GM.6mon.txt.gz: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE129nnn/GSE129519/suppl/GSE129519%5Fexpression%5FGM%2E6mon%2Etxt%2Egz"
+        GSE129519_expression_HUES66.3mon.txt.gz: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE129nnn/GSE129519/suppl/GSE129519%5Fexpression%5FHUES66%2E3mon%2Etxt%2Egz"
+        GSE129519_expression_PGP1.3mon.batch2.txt.gz: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE129nnn/GSE129519/suppl/GSE129519%5Fexpression%5FPGP1%2E3mon%2Ebatch2%2Etxt%2Egz"
+        GSE129519_expression_PGP1.3mon.txt.gz: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE129nnn/GSE129519/suppl/GSE129519%5Fexpression%5FPGP1%2E3mon%2Etxt%2Egz"
+        GSE129519_expression_PGP1.6mon.batch3.txt.gz: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE129nnn/GSE129519/suppl/GSE129519%5Fexpression%5FPGP1%2E6mon%2Ebatch3%2Etxt%2Egz"
+        GSE129519_expression_PGP1.6mon.txt.gz: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE129nnn/GSE129519/suppl/GSE129519%5Fexpression%5FPGP1%2E6mon%2Etxt%2Egz"
     download_url_meta: "manual,meta_combined.txt,https://singlecell.broadinstitute.org/single_cell/data/public/SCP282/reproducible-brain-organoids?filename=meta_combined.txt"
     primary_data: True
     year: 2019
