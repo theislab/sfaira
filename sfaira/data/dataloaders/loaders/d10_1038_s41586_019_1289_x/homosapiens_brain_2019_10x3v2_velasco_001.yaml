@@ -42,7 +42,7 @@ dataset_or_observation_wise:
     assay_sc_obs_key: 
     assay_differentiation: 
     assay_differentiation_obs_key: 
-    assay_type_differentiation: 
+    assay_type_differentiation: "guided"
     assay_type_differentiation_obs_key: 
     bio_sample:
     bio_sample_obs_key: 
