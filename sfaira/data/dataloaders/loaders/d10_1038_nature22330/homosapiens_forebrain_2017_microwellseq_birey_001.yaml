@@ -19,26 +19,26 @@ layers:
     layer_unspliced_processed: 
     layer_velocity: 
 dataset_or_feature_wise:
-    feature_reference: 
+    feature_reference: "Homo_sapiens.GRCh37.74" 
     feature_reference_var_key: 
     feature_type: "rna"
     feature_type_var_key: 
 dataset_or_observation_wise:
     assay_sc: "microwell-seq"
     assay_sc_obs_key: 
-    assay_differentiation: "Pasca, 2015" 
+    assay_differentiation: "Pasca, 2015 (doi: 10.1038/nmeth.3415)" 
     assay_differentiation_obs_key: 
     assay_type_differentiation: "guided"
     assay_type_differentiation_obs_key: 
     bio_sample:
-    bio_sample_obs_key: 
-    cell_line: 
-    cell_line_obs_key: 
+    bio_sample_obs_key: "sample"
+    cell_line: "2242-1"
+    cell_line_obs_key: #"cell_line"
     cell_type: 
     cell_type_obs_key: 
-    development_stage: "14th week post-fertilization human stage"
-    development_stage_obs_key: 
-    disease: 
+    development_stage: "15th week post-fertilization human stage"
+    development_stage_obs_key: "organoid_age_days"
+    disease: "healthy"
     disease_obs_key: 
     ethnicity: 
     ethnicity_obs_key: 
@@ -46,7 +46,7 @@ dataset_or_observation_wise:
     gm_obs_key:
     individual:
     individual_obs_key: 
-    organ: "forebrain"
+    organ: 
     organ_obs_key: "sample"
     organism: "Homo sapiens"
     organism_obs_key: 
@@ -58,7 +58,7 @@ dataset_or_observation_wise:
     source_doi_obs_key:
     state_exact:
     state_exact_obs_key:
-    suspension_type: 
+    suspension_type: "cell"
     suspension_type_obs_key: 
     tech_sample:
     tech_sample_obs_key: 
