@@ -57,8 +57,15 @@ dataset_or_observation_wise:
     cell_line_obs_key: 
     cell_type: 
     cell_type_obs_key: "CellType"
-    development_stage: 
-    development_stage_obs_key: "Batch"
+    development_stage:
+        GSE129519_expression_11a.6mon.txt.gz: "26th week post-fertilization human stage"
+        GSE129519_expression_GM.6mon.txt.gz: "26th week post-fertilization human stage"
+        GSE129519_expression_HUES66.3mon.txt.gz: "13th week post-fertilization human stage"
+        GSE129519_expression_PGP1.3mon.batch2.txt.gz: "13th week post-fertilization human stage"
+        GSE129519_expression_PGP1.3mon.txt.gz: "13th week post-fertilization human stage"
+        GSE129519_expression_PGP1.6mon.batch3.txt.gz: "26th week post-fertilization human stage"
+        GSE129519_expression_PGP1.6mon.txt.gz: "26th week post-fertilization human stage"
+    development_stage_obs_key:
     disease: 
     disease_obs_key: 
     ethnicity: 
@@ -67,7 +74,7 @@ dataset_or_observation_wise:
     gm_obs_key:
     individual:
     individual_obs_key: 
-    organ: "brain"
+    organ: "pallium"
     organ_obs_key: 
     organism: "Homo sapiens"
     organism_obs_key: 
