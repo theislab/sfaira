@@ -33,7 +33,8 @@ def load(data_dir, **kwargs):
                         'TopLevelCluster': np.array(dset['TopLevelCluster'], dtype=np.uint32),
                         'TotalUMIs': np.array(dset['TotalUMIs'], dtype=np.uint32),
                         'UnsplicedFraction': np.array(dset['UnsplicedFraction'], dtype=np.float32),
-                        'ValidCells': np.array(dset['ValidCells'], dtype=bool)},
+                        'ValidCells': np.array(dset['ValidCells'], dtype=bool),
+                        'age_days': np.round(np.array(dset['Age'], dtype=np.float32)*7.)},
                        index=np.array(dset['CellID'], dtype=str))
 
     var = pd.DataFrame({'Accession': np.array(dset['Accession'], dtype=str),
