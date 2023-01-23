@@ -1,0 +1,17 @@
+source	target	target_id
+Astroglia	astrocyte	CL:0000127
+CFuPNs	pyramidal neuron	CL:0000598
+CPNs	pyramidal neuron	CL:0000598
+Cajal-Retzius	Cajal-Retzius cell	CL:0000695
+Cycling	neural progenitor cell	CL:0011020
+IPCs	neural progenitor cell	CL:0011020
+IPCs/Immature PNs	neural progenitor cell	CL:0011020
+Immature CFuPNs	pyramidal neuron	CL:0000598
+Immature CPNs	pyramidal neuron	CL:0000598
+Immature Interneurons	interneuron	CL:0000099
+Immature PNs	pyramidal neuron	CL:0000598
+RG	radial glial cell	CL:0000681
+Unknown	unknown	unknown
+Ventral Precursors	neural progenitor cell	CL:0011020
+oRG	radial glial cell	CL:0000681
+oRG/Astroglia	radial glial cell	CL:0000681
