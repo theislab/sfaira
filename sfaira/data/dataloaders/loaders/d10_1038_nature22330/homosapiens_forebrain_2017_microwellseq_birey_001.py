@@ -20,22 +20,14 @@ def load(data_dir, sample_fn, **kwargs):
                     obs.append(member.name.split("_")[1])
                 dfs.append(d)
 
-        adata = ad.AnnData(X=scipy.sparse.csr_matrix(np.vstack((dfs[0], dfs[1]))), 
-                           obs=pd.DataFrame({"sample": obs}), 
+        adata = ad.AnnData(X=scipy.sparse.csr_matrix(np.vstack((dfs[0], dfs[1]))),
+                           obs=pd.DataFrame({"sample": obs}),
                            var=pd.DataFrame(index=dfs[0].columns.values))
         adata.obs['organoid_age_days'] = "105"
         adata.obs['cell_line'] = "2242-1"
-
-#        annot = sc.queries.biomart_annotations(
-#            "hsapiens", 
-#            ["ensembl_gene_id", "external_gene_name"], 
-#            host="grch37.ensembl.org",
-#        ).set_index("external_gene_name")
-#        adata.var[annot.columns] = annot
-
     else:
-        fn_f2 = os.path.join(data_dir, "GSE93321_exps.txt.gz") #fusion data, 2 weeks
-        fn_f4 = os.path.join(data_dir, "GSE95837_exps.txt.gz") # fusion data, 4 weeks
+        fn_f2 = os.path.join(data_dir, "GSE93321_exps.txt.gz")# fusion data, 2 weeks 37
+        fn_f4 = os.path.join(data_dir, "GSE95837_exps.txt.gz")# fusion data, 4 weeks
         f2 = pd.read_csv(fn_f2,delimiter='\t', compression='gzip', index_col=0)
         f4 = pd.read_csv(fn_f4,delimiter='\t', compression='gzip', index_col=0)
 
