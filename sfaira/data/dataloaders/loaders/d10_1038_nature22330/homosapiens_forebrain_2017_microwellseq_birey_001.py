@@ -26,10 +26,10 @@ def load(data_dir, sample_fn, **kwargs):
         adata.obs['organoid_age_days'] = "105"
         adata.obs['cell_line'] = "2242-1"
     else:
-        fn_f2 = os.path.join(data_dir, "GSE93321_exps.txt.gz")# fusion data, 2 weeks 37
-        fn_f4 = os.path.join(data_dir, "GSE95837_exps.txt.gz")# fusion data, 4 weeks
-        f2 = pd.read_csv(fn_f2,delimiter='\t', compression='gzip', index_col=0)
-        f4 = pd.read_csv(fn_f4,delimiter='\t', compression='gzip', index_col=0)
+        fn_f2 = os.path.join(data_dir, "GSE93321_exps.txt.gz")  # fusion data, 2 weeks
+        fn_f4 = os.path.join(data_dir, "GSE95837_exps.txt.gz")  # fusion data, 4 weeks
+        f2 = pd.read_csv(fn_f2, delimiter='\t', compression='gzip', index_col=0)
+        f4 = pd.read_csv(fn_f4, delimiter='\t', compression='gzip', index_col=0)
 
         adata_f2 = ad.AnnData(f2.T)
         adata_f2.obs['migration_time'] = '2 weeks'
@@ -38,7 +38,7 @@ def load(data_dir, sample_fn, **kwargs):
         adata_f4.obs['migration_time'] = '4 weeks'
         adata_f4.obs['cell_line'] = '2242-1/8858-1'
         adata = adata_f2.concatenate(adata_f4, index_unique=None)
-        
+
         annot = sc.queries.biomart_annotations(
             "hsapiens",
             ["ensembl_gene_id", "external_gene_name"],
