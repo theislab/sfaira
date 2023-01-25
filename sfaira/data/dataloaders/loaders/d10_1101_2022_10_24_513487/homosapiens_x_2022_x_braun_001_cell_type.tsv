@@ -1,0 +1,13 @@
+source	target	target_id
+Erythrocyte	erythrocyte	CL:0000232
+Fibroblast	fibroblast	CL:0000057
+Glioblast	glioblast	CL:0000030
+Immune	central nervous system macrophage	CL:0000878
+Neural crest	neural crest cell	CL:0011012
+Neuroblast	neuroblast (sensu Vertebrata)	CL:0000031
+Neuron	neuron	CL:0000540
+Neuronal IPC	progenitor cell	CL:0011026
+Oligo	oligodendrocyte	CL:0000128
+Placodes	neuroplacodal cell	CL:0000032
+Radial glia	radial glial cell	CL:0000681
+Vascular	brain microvascular endothelial cell	CL:2000044
