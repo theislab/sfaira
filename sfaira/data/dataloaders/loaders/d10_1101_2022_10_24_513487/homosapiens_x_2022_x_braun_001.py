@@ -48,8 +48,8 @@ def load(data_dir, **kwargs):
                         'StdevExpression': np.array(dset['StdevExpression'], dtype=np.float32),
                         'ValidGenes': np.array(dset['ValidGenes'], dtype=bool)},
                        index=np.array(dset['Gene'], dtype=str))
-    var["Accession_orig"] = var["Accession"].copy()             ## TODO: Remove once automatic removal of gene versions in sfaira is fixed (#712)
-    var["Accession"] = var["Accession"].str.split(".").str[0]   ## TODO: Remove once automatic removal of gene versions in sfaira is fixed (#712)
+    var["Accession_orig"] = var["Accession"].copy()             # TODO: Remove once automatic removal of gene versions in sfaira is fixed (#712)
+    var["Accession"] = var["Accession"].str.split(".").str[0]   # TODO: Remove once automatic removal of gene versions in sfaira is fixed (#712)
 
     uns = {'AnnotationDefinition': np.array(dset['AnnotationDefinition'], dtype=str),
            'AnnotationDescription': np.array(dset['AnnotationDescription'], dtype=str),
