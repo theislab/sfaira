@@ -11,7 +11,7 @@ def load(data_dir, **kwargs):
     dset = f['shoji']
 
     X = scipy.sparse.csr_matrix(dset['Expression'][()], dtype=np.float32)
-    obs = pd.DataFrame({'Age': np.array(dset['Age'], dtype=np.float32),
+    obs = pd.DataFrame({'Age': np.array(dset['Age'], dtype=str),
                         'CellClass': np.array(dset['CellClass'], dtype=str),
                         'CellCycleFraction': np.array(dset['CellCycleFraction'], dtype=np.float32),
                         'CellID': np.array(dset['CellID'], dtype=str),
@@ -34,7 +34,7 @@ def load(data_dir, **kwargs):
                         'TotalUMIs': np.array(dset['TotalUMIs'], dtype=np.uint32),
                         'UnsplicedFraction': np.array(dset['UnsplicedFraction'], dtype=np.float32),
                         'ValidCells': np.array(dset['ValidCells'], dtype=bool),
-                        'age_days': np.round(np.array(dset['Age'], dtype=np.float32)*7.)},
+                        'age_days': np.round(np.array(dset['Age'], dtype=np.float32) * 7.)},
                        index=np.array(dset['CellID'], dtype=str))
 
     var = pd.DataFrame({'Accession': np.array(dset['Accession'], dtype=str),
@@ -48,6 +48,8 @@ def load(data_dir, **kwargs):
                         'StdevExpression': np.array(dset['StdevExpression'], dtype=np.float32),
                         'ValidGenes': np.array(dset['ValidGenes'], dtype=bool)},
                        index=np.array(dset['Gene'], dtype=str))
+    var["Accession_orig"] = var["Accession"].copy()             ## TODO: Remove once automatic removal of gene versions in sfaira is fixed (#712)
+    var["Accession"] = var["Accession"].str.split(".").str[0]   ## TODO: Remove once automatic removal of gene versions in sfaira is fixed (#712)
 
     uns = {'AnnotationDefinition': np.array(dset['AnnotationDefinition'], dtype=str),
            'AnnotationDescription': np.array(dset['AnnotationDescription'], dtype=str),
