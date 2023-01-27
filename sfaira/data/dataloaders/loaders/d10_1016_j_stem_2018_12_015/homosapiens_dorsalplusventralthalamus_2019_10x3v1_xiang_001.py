@@ -13,8 +13,8 @@ def load(data_dir, **kwargs):
     fn_matrix = os.path.join(data_dir, "GSE122342_matrix.mtx.gz")
     fn_genes = os.path.join(data_dir, "GSE122342_genes.tsv.gz")
     fn_barcodes = os.path.join(data_dir, "GSE122342_barcodes.tsv.gz")
-    fn_schThO_class = os.path.join(data_dir, "schThO_class.txt")  # annotated cell clusters 
-    fn_GSEA_enrich = os.path.join(data_dir, "GSEA_category_enrich.txt")  # gene set enrichment analysis (GSEA) 
+    fn_schThO_class = os.path.join(data_dir, "schThO_class.txt")
+    fn_GSEA_enrich = os.path.join(data_dir, "GSEA_category_enrich.txt")
 
     uncompressed_file_type = "mtx"
     with TemporaryDirectory() as tmpdir:
@@ -23,7 +23,7 @@ def load(data_dir, **kwargs):
             shutil.copyfileobj(input_f, output_f)
         matrix = scipy.io.mmread(fn_matrix)
 
-    genes = pd.read_csv(fn_genes, delimiter='\t', compression='gzip', index_col=0, header = None, names=["ensembl_gene_id", "gene_id"])
+    genes = pd.read_csv(fn_genes, delimiter='\t', compression='gzip', index_col=0, header=None, names=["ensembl_gene_id", "gene_id"])
     barcodes = pd.read_csv(fn_barcodes, delimiter='\t', compression='gzip', index_col=0, header=None)
     barcodes.index.name = None
     metadata1 = pd.read_csv(fn_schThO_class, delimiter='\t', index_col=0)
