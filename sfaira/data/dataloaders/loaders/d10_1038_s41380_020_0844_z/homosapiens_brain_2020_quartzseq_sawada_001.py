@@ -21,14 +21,14 @@ def load(data_dir, **kwargs):
                 disease.append(member.name.split("_")[2])
                 sample.append(member.name.split("_")[2] + "_" + member.name.split("_")[3])
             temp = ad.AnnData(X=scipy.sparse.csr_matrix(d),
-                               var=pd.DataFrame(index=d.columns.values),
-                               obs=pd.DataFrame(index=d.index))
+                              var=pd.DataFrame(index=d.columns.values),
+                              obs=pd.DataFrame(index=d.index))
             adatas.append(temp)
 
     adata = ad.concat(adatas, join='outer')
     adata.obs['disease'] = disease
     adata.obs['person'] = "DT1_A"
-    adata.obs.loc[adata.obs['disease']=="Unaffect", 'person'] = "DT1_U"
+    adata.obs.loc[adata.obs['disease'] == "Unaffect", 'person'] = "DT1_U"
     adata.obs['sample'] = sample
     adata.obs['organoid_age_data'] = "35"
 
