@@ -9,15 +9,15 @@ import tarfile
 
 # the data_dir argument will be automatically set by sfaira to the folder where your datafiles lie
 def load(data_dir, **kwargs):
-    
+
     fn = os.path.join(data_dir, "GSE168323_RAW.tar")
-    
+
     adatas_list = []
     protocol_dict = {'standardorg': 'Fiorenzano, 2021 standard VM (doi: 10.1038/s41467-021-27464-5)',
                      'silk': 'Fiorenzano, 2021 VM with spider-silk microfibers (doi: 10.1038/s41467-021-27464-5)',
-                     'silkLam': 'Fiorenzano, 2021 VM with spider-silk microfibers & full-length human laminin ' 
+                     'silkLam': 'Fiorenzano, 2021 VM with spider-silk microfibers & full-length human laminin '
                      '(doi:10.1038/s41467-021-27464-5)'}
-    
+
     with tarfile.open(fn) as tar:
         for member in tar.getmembers():
             d = pd.read_csv(tar.extractfile(member), compression="gzip", delimiter=',', header=0, index_col=0).T
@@ -38,14 +38,14 @@ def load(data_dir, **kwargs):
             temp = ad.AnnData(X=scipy.sparse.csr_matrix(d),
                               var=pd.DataFrame(index=d.columns.values),
                               obs=pd.DataFrame(index=d.index))
-            
+
             temp.obs['dev_age'] = age
             temp.obs['organoid_age_days'] = age
             temp.obs['tech_sample'] = tech_sample
             temp.obs['protocol'] = protocol
 
             adatas_list.append(temp)
-    
+
     adata = ad.concat(adatas_list, join='outer')
 
-    return adata  
+    return adata
