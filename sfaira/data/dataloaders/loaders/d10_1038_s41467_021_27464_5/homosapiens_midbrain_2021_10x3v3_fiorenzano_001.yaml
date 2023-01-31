@@ -6,7 +6,7 @@ dataset_wise:
     default_embedding: 
     doi_preprint: 
     doi_journal: "10.1038/s41467-021-27464-5"
-    download_url_data: "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE168323&format=file"
+    download_url_data: "ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE168nnn/GSE168323/suppl/GSE168323_RAW.tar"
     download_url_meta: 
     primary_data: False
     year: 2021
