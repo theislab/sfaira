@@ -9,7 +9,7 @@ import scipy.sparse
 def load(data_dir, **kwargs):
 
     fn = os.path.join(data_dir, "GSE115011_marton_all_cells.csv.gz")
-    d = pd.read_csv(fn, index_col = 0).T
+    d = pd.read_csv(fn, index_col=0).T
 
     adata = ad.AnnData(X=scipy.sparse.csr_matrix(d),
                        var=pd.DataFrame(index=d.columns.values),
