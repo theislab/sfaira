@@ -6,7 +6,7 @@ dataset_wise:
     default_embedding: 
     doi_preprint: 
     doi_journal: "10.1038/s41380-020-0844-z"
-    download_url_data: "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE120190&format=file"
+    download_url_data: "ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE120nnn/GSE120190/suppl/GSE120190_RAW.tar"
     download_url_meta: 
     primary_data: True
     year: 2020
