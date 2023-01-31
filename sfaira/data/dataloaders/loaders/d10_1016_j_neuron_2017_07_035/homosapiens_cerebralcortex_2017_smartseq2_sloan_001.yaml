@@ -19,7 +19,7 @@ layers:
     layer_unspliced_processed: 
     layer_velocity: 
 dataset_or_feature_wise:
-    feature_reference: "hg19"
+    feature_reference: "Homo_sapiens.GRCh37.74"
     feature_reference_var_key: 
     feature_type: "rna"
     feature_type_var_key: 
