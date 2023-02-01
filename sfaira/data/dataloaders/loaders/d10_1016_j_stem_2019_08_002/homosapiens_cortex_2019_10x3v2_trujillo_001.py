@@ -16,7 +16,6 @@ def load(data_dir, **kwargs):
     barcodes = []
     genes = []
     matrix = []
-    sample = []
 
     with tarfile.open(fn) as tar:
         for member in tar.getmembers():
@@ -35,7 +34,7 @@ def load(data_dir, **kwargs):
                     bar['organoid_age_days'] = "300"
                 barcodes.append(bar)
             elif re.search('genes', temp):
-                gen = pd.read_csv(tar.extractfile(member), delimiter='\t', compression='gzip', index_col=0, header = None, names=["ensembl_gene_id", "gene_id"])
+                gen = pd.read_csv(tar.extractfile(member), delimiter='\t', compression='gzip', index_col=0, header=None, names=["ensembl_gene_id", "gene_id"])
                 genes.append(gen)
             else:
                 fn_matrix = tar.extractfile(member)
