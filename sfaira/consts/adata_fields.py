@@ -233,7 +233,6 @@ class AdataIdsCellxgene(AdataIds):
         self.organ = "tissue"
         self.organism = "organism"
         self.primary_data = "is_primary_data"
-        self.suspension_type = "suspension_type"
         self.title = "title"
         self.year = "year"
 
@@ -262,7 +261,6 @@ class AdataIdsCellxgene(AdataIds):
             "organ",
             "organism",
             "sex",
-            "suspension_type",
         ]
 
         self.obs_keys = [
