@@ -53,7 +53,7 @@ def cached_load_file(url, ontology_cache_dir, ontology_cache_fn, recache: bool =
     return onto_fn
 
 
-def cached_load_ebi(ontology_cache_dir, ontology_cache_fn, recache: bool = False) -> (networkx.MultiDiGraph, os.PathLike):
+def cached_load_ebi(ontology_cache_dir, ontology_cache_fn, recache: bool = False) -> Tuple[networkx.MultiDiGraph, os.PathLike]:
     """
     Load pickled graph object if available.
 

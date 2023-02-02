@@ -333,15 +333,14 @@ class StoreSingleFeatureSpace(StoreBase):
             selection_free = []
             selection_ont_constrained = []
             for i in selection_input:
-                if i in unknown_identifiers \
-                    or (isinstance(i, str) and i.startswith(self._adata_ids_sfaira.custom_metadata_prefix)):
+                if i in unknown_identifiers or (isinstance(i, str) and i.startswith(self._adata_ids_sfaira.custom_metadata_prefix)):
                     selection_free.append(i)
                 else:
                     selection_ont_constrained.append(i)
             for x in pd.unique(values_found):
                 if x in selection_free or np.any([
                     is_child(query=x, ontology=ontology, ontology_parent=y) for y in selection_ont_constrained
-                    ]):
+                ]):
                     values_found_unique_matched.append(x)
             boolean_selection = np.isin(values_found, values_found_unique_matched)
             if negative_selection:

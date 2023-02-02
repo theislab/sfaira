@@ -163,17 +163,17 @@ def streamline_obs_uns(adata: anndata.AnnData,
         if k in adata_input_ids.ontology_constrained:
             # 1a-*.
             if isinstance(get_ontology(k=k, organism=organism), OntologyHierarchical) and np.all([
-                get_ontology(k=k, organism=organism).is_a_node_name(x)
-                or x == adata_input_ids.unknown_metadata_identifier
-                or (isinstance(x, str) and x.startswith(adata_input_ids.custom_metadata_prefix))
+                get_ontology(k=k, organism=organism).is_a_node_name(x) or
+                x == adata_input_ids.unknown_metadata_identifier or
+                (isinstance(x, str) and x.startswith(adata_input_ids.custom_metadata_prefix))
                 for x in np.unique(val)
             ]):  # 1a-II)
                 new_col = getattr(adata_target_ids, k)
                 validation_ontology = get_ontology(k=k, organism=organism)
             elif isinstance(get_ontology(k=k, organism=organism), OntologyHierarchical) and np.all([
-                get_ontology(k=k, organism=organism).is_a_node_id(x)
-                or x == adata_input_ids.unknown_metadata_identifier
-                or (isinstance(x, str) and x.startswith(adata_input_ids.custom_metadata_prefix))
+                get_ontology(k=k, organism=organism).is_a_node_id(x) or
+                x == adata_input_ids.unknown_metadata_identifier or
+                (isinstance(x, str) and x.startswith(adata_input_ids.custom_metadata_prefix))
                 for x in np.unique(val)
             ]):  # 1a-III)
                 new_col = getattr(adata_target_ids, k) + adata_input_ids.onto_id_suffix
@@ -190,9 +190,9 @@ def streamline_obs_uns(adata: anndata.AnnData,
             x for x in np.unique(val)
             if x not in [
                 adata_input_ids.unknown_metadata_identifier,
-            ]
-            and (not isinstance(x, str)
-                 or not x.startswith(adata_input_ids.custom_metadata_prefix))
+            ] and
+            (not isinstance(x, str) or
+             not x.startswith(adata_input_ids.custom_metadata_prefix))
         ], dataset_id=dataset_id)
         try:
             obs_new[new_col] = val
@@ -264,14 +264,14 @@ def streamline_obs_uns(adata: anndata.AnnData,
         schema_version = schema.split(":")[-1] if ":" in schema else None
         # convert all custom ontology symbols to unknown symbols as custom labels are not supported in the cellxgene schema
         for k in [
-            x for x in adata_target_ids.obs_keys if x in adata_target_ids.ontology_constrained
-            and x in adata.obs_keys()
-            ]:
+            x for x in adata_target_ids.obs_keys if x in adata_target_ids.ontology_constrained and
+            x in adata.obs_keys()
+        ]:
             adata.obs[k] = [
-                x if (not isinstance(x, str) or not x.startswith(adata_target_ids.custom_metadata_prefix)) 
-                else adata_target_ids.unknown_metadata_identifier 
+                x if (not isinstance(x, str) or not x.startswith(adata_target_ids.custom_metadata_prefix))
+                else adata_target_ids.unknown_metadata_identifier
                 for x in adata.obs[k]
-                ]
+            ]
         adata = cellxgene_export_adaptor(adata=adata,
                                          adata_ids=adata_target_ids,
                                          layer_key_counts=annotation_container.layer_counts,
@@ -322,9 +322,9 @@ def impute_ontology_cols_obs(adata: anndata.AnnData,
         # Symbols:
         symbol_col_present = col_symbol in adata.obs.columns
         symbol_col_streamlined = np.all([
-            ontology.is_a_node_name(x)
-            or x == adata_input_ids.unknown_metadata_identifier
-            or (isinstance(x, str) and x.startswith(adata_input_ids.custom_metadata_prefix))
+            ontology.is_a_node_name(x) or
+            x == adata_input_ids.unknown_metadata_identifier or
+            (isinstance(x, str) and x.startswith(adata_input_ids.custom_metadata_prefix))
             for x in np.unique(adata.obs[col_symbol].values)]) if symbol_col_present else False
         symbol_present = symbol_col_present and symbol_col_streamlined
         # IDs:
@@ -396,9 +396,9 @@ def project_free_to_ontology(adata: anndata.AnnData,
             allowed=get_ontology(k=attr, organism=organism),
             attempted=[
                 x for x in list(set(labels_mapped))
-                if x not in map_exceptions
-                and (not isinstance(x, str) or not x.startswith(tuple(prefix_exceptions)))
-                ],
+                if x not in map_exceptions and
+                (not isinstance(x, str) or not x.startswith(tuple(prefix_exceptions)))
+            ],
             dataset_id=dataset_id)
         # Add cell type IDs into object:
         # The IDs are not read from a source file but inferred based on the class name.
@@ -407,7 +407,8 @@ def project_free_to_ontology(adata: anndata.AnnData,
         # This mapping blocks progression in the unit test if not deactivated.
         adata.obs[getattr(adata_ids, attr)] = labels_mapped
         adata = project_ontology_ids_obs(adata=adata, attr=attr, map_exceptions=map_exceptions,
-                prefix_exceptions=prefix_exceptions, from_id=False, adata_ids=adata_ids, organism=organism)
+                                         prefix_exceptions=prefix_exceptions, from_id=False,
+                                         adata_ids=adata_ids, organism=organism)
     else:
         # Assumes that the original labels are the correct ontology symbols, because of a lack of ontology,
         # ontology IDs cannot be inferred.
@@ -424,8 +425,8 @@ def project_ontology_ids_obs(adata: anndata.AnnData,
                              adata_ids: AdataIds,
                              organism: str,
                              map_exceptions: Union[None, List[str]] = None,
-                             prefix_exceptions = None,
-                             exceptions_value = None,
+                             prefix_exceptions=None,
+                             exceptions_value=None,
                              from_id: bool = False) -> anndata.AnnData:
     """
     Project ontology names to IDs for a given ontology in .obs entries.
@@ -447,9 +448,9 @@ def project_ontology_ids_obs(adata: anndata.AnnData,
     map_exceptions = map_exceptions if map_exceptions is not None else [adata_ids.unknown_metadata_identifier]
     map_exceptions = [x.lower() for x in map_exceptions]
     prefix_exceptions = adata_ids.custom_metadata_prefix \
-                       if prefix_exceptions is None else prefix_exceptions
+        if prefix_exceptions is None else prefix_exceptions
     exceptions_value = adata_ids.unknown_metadata_identifier \
-                       if exceptions_value is None else exceptions_value
+        if exceptions_value is None else exceptions_value
     col_name = getattr(adata_ids, attr)
     if from_id:
         col_name += adata_ids.onto_id_suffix
@@ -459,8 +460,8 @@ def project_ontology_ids_obs(adata: anndata.AnnData,
         (x, ontology.convert_to_id(x))
         for x in np.unique([
             xx for xx in input_values
-            if xx.lower() not in map_exceptions 
-            and (not isinstance(xx, str) or not xx.lower().startswith(tuple(prefix_exceptions)))
+            if xx.lower() not in map_exceptions and
+            (not isinstance(xx, str) or not xx.lower().startswith(tuple(prefix_exceptions)))
         ])
     ])
     output_values = [

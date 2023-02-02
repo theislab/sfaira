@@ -258,9 +258,9 @@ class TestHelperEstimatorKerasCelltype(HelperEstimatorKeras):
         leaves = self.estimator.celltype_universe.onto_cl.get_effective_leaves(
             x=[
                 x for x in obs_cl
-                if x != self.adata_ids.unknown_metadata_identifier
-                and (not isinstance(x, str) or not x.startswith(self.adata_ids.custom_metadata_prefix))
-                ]
+                if x != self.adata_ids.unknown_metadata_identifier and
+                (not isinstance(x, str) or not x.startswith(self.adata_ids.custom_metadata_prefix))
+            ]
         )
         self.nleaves = len(leaves)
         self.estimator.celltype_universe.onto_cl.leaves = leaves

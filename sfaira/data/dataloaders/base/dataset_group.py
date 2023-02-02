@@ -674,18 +674,18 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                                     if x not in [
                                         self._adata_ids.unknown_metadata_identifier,
                                         self._adata_ids.not_a_cell_celltype_identifier
-                                    ]
-                                    and (not isinstance(x, str) 
-                                         or not x.startswith(self._adata_ids.custom_metadata_prefix))
+                                    ] and
+                                    (not isinstance(x, str) or
+                                     not x.startswith(self._adata_ids.custom_metadata_prefix))
                                 ]
                             )
                             # Adds a third column with the corresponding ontology IDs into the file.
                             tab[self._adata_ids.classmap_target_id_key] = [
                                 onto.convert_to_id(x)
                                 if (x != self._adata_ids.unknown_metadata_identifier and
-                                    x != self._adata_ids.not_a_cell_celltype_identifier
-                                    and (not isinstance(x, str)
-                                         or not x.startswith(self._adata_ids.custom_metadata_prefix)))
+                                    x != self._adata_ids.not_a_cell_celltype_identifier and
+                                    (not isinstance(x, str) or
+                                     not x.startswith(self._adata_ids.custom_metadata_prefix)))
                                 else self._adata_ids.unknown_metadata_identifier
                                 for x in tab[self._adata_ids.classmap_target_key].values
                             ]
@@ -725,8 +725,8 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                                 onto.convert_to_name(x)
                                 if (x != self._adata_ids.unknown_metadata_identifier and
                                     x != self._adata_ids.not_a_cell_celltype_identifier and
-                                    (not isinstance(x, str)
-                                     or not x.startswith(self._adata_ids.custom_metadata_prefix)))
+                                    (not isinstance(x, str) or
+                                     not x.startswith(self._adata_ids.custom_metadata_prefix)))
                                 else self._adata_ids.unknown_metadata_identifier
                                 for x in tab[self._adata_ids.classmap_target_id_key].values
                             ]

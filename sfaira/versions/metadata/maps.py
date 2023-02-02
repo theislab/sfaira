@@ -131,10 +131,10 @@ def _prepare_celltype_map_fuzzy(
             for y in nodes
         ])
         include_terms.append(
-            term_original_case not in omit_list \
-                and (not isinstance(term_original_case, str) 
-                     or not term_original_case.startswith(tuple(omit_prefix_list)))
-            )
+            term_original_case not in omit_list and
+            (not isinstance(term_original_case, str) or
+             not term_original_case.startswith(tuple(omit_prefix_list)))
+        )
         if match_only and not anatomical_constraint:
             # Explicitly trying to report perfect matches (match_only is True).
             matches.append({"perfect_match": [nodes[i][1]["name"] for i in np.where(scores_strict == 100)[0]][0]})
@@ -361,10 +361,10 @@ def _prepare_ontology_map_fuzzy(
             for y in nodes
         ])
         include_terms.append(
-            term not in omit_list \
-                and (not isinstance(term, str)
-                     or not term.startswith(tuple(omit_prefix_list)))
-            )
+            term not in omit_list and
+            (not isinstance(term, str) or
+             not term.startswith(tuple(omit_prefix_list)))
+        )
         if match_only:
             # Explicitly trying to report perfect matches (match_only is True).
             matches.append({"perfect_match": [nodes[i][1]["name"] for i in np.where(scores_strict == 100)[0]][0]})
