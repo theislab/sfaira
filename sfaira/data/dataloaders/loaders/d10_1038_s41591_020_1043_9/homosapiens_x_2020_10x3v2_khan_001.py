@@ -73,6 +73,6 @@ def load(data_dir, **kwargs):
         adatas.append(temp)
     adata = ad.concat(adatas, merge='first')
     adata.obs['organoid_age_days'] = "83"
-    del( adata.var['status'])
+    del (adata.var['status'])
 
     return adata
