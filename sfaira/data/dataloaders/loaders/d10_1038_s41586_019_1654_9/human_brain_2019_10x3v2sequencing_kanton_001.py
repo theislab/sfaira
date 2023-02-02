@@ -15,9 +15,7 @@ def load(data_dir, **kwargs):
         "Neuroectoderm": "10",
         "Neuroepithelium": "15",
     }
-    #x = scipy.io.mmread(os.path.join(data_dir, 'human_cell_counts_GRCh38.mtx')).T.tocsr().astype(np.float32)
-    import scipy.sparse
-    x = scipy.sparse.csr_matrix((90576,33694))
+    x = scipy.io.mmread(os.path.join(data_dir, 'human_cell_counts_GRCh38.mtx')).T.tocsr().astype(np.float32)
     var = pandas.read_csv(os.path.join(data_dir, 'genes_GRCh38.txt'), sep="\t", index_col=1, names=['ensembl', 'genetype'])
     obs = pandas.read_csv(os.path.join(data_dir, 'metadata_human_cells.tsv'), sep="\t", index_col=0)
     obs["celltype"] = obs['cl_FullLineage'].fillna(obs['cl_LineComp']).fillna("unknown")
