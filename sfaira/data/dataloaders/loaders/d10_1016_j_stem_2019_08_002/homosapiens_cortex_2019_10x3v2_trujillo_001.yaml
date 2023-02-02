@@ -46,7 +46,7 @@ dataset_or_observation_wise:
     gm_obs_key:
     individual:
     individual_obs_key: 
-    organ: "forebrain"
+    organ: "forebrain"  # I think some of the older organoids should have the annotation cortex, but in the shared table the mentioned organ was only forebrain
     organ_obs_key: 
     organism: "Homo sapiens"
     organism_obs_key: 
