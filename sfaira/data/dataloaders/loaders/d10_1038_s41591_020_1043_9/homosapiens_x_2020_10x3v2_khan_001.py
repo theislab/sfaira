@@ -54,7 +54,8 @@ def load(data_dir, **kwargs):
                     bar['subject_age'] = "22 ys"
                 barcodes.append(bar)
             elif re.search('features', temp):
-                gen = pd.read_csv(tar.extractfile(member), delimiter='\t', compression='gzip', index_col=0, header=None, names=["ensembl_gene_id", "gene_id", "status"])
+                gen = pd.read_csv(tar.extractfile(member), delimiter='\t', compression='gzip', 
+                                  index_col=0, header=None, names=["ensembl_gene_id", "gene_id", "status"])
                 genes.append(gen)
             else:
                 fn_matrix = tar.extractfile(member)
@@ -70,8 +71,8 @@ def load(data_dir, **kwargs):
     for i in range(len(matrix)):
         temp = ad.AnnData(X=matrix[i], obs=barcodes[i], var=genes[i])
         adatas.append(temp)
-    adata = ad.concat(adatas, merge = 'first')
+    adata = ad.concat(adatas, merge='first')
     adata.obs['organoid_age_days'] = "83"
-    del(adata.var['status'])
+    del(adata.var['status'] )
 
     return adata
