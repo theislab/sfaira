@@ -59,6 +59,7 @@ def map_freetext_to_ontology(
         choices_for_perfect_match=choices_for_perfect_match,
         omit_list=[],
         omit_target_list=omit_target_list,
+        omit_prefix_list=[],
         n_suggest=n_suggest,
         threshold_for_partial_matching=threshold_for_partial_matching,
     )

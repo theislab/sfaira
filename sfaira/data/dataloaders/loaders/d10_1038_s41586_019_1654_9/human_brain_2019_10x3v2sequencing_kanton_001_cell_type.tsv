@@ -6,7 +6,7 @@ Cortical NPCs	neural progenitor cell	CL:0011020
 Cortical neurons	cerebral cortex neuron	CL:0010012
 IPs and early cortical neurons	neuroblast (sensu Vertebrata)	CL:0000031
 LGE interneurons	interneuron	CL:0000099
-MGE/CGE interneurons	interneuron	CL:0000099
+MGE/CGE interneurons	custom_xxx	unknown
 Mid-hindbrain NPCs	neural progenitor cell	CL:0011020
 Midbrain GABAergic interneurons	GABAergic interneuron	CL:0011005
 Purkinje cells	Purkinje cell	CL:0000121

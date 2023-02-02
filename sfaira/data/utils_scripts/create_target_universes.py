@@ -38,6 +38,10 @@ for f in os.listdir(config_path):
                         )
             celltypes_found = sorted(list(celltypes_found - {store._adata_ids_sfaira.unknown_metadata_identifier,
                                                              store._adata_ids_sfaira.not_a_cell_celltype_identifier}))
+            celltypes_found = [
+                x for x in celltypes_found
+                if (not isinstance(x, str) or not x.startswith(store._adata_ids_sfaira.custom_metadata_prefix))
+                ]
             if len(celltypes_found) == 0:
                 print(f"WARNING: No cells found for {organism} {organ}, skipping.")
             else:

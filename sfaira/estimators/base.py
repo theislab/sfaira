@@ -257,12 +257,13 @@ class EstimatorBaseCelltype(EstimatorBase):
         def encoder(x) -> np.ndarray:
             if isinstance(x, str):
                 x = [x]
-            # Encodes unknowns to empty rows.
+            # Encodes unknowns and custom values to empty rows.
             idx = [
                 leave_maps[y] if y not in [
                     self._adata_ids.unknown_metadata_identifier,
                     self._adata_ids.not_a_cell_celltype_identifier,
-                ] else np.array([])
+                ] and (not isinstance(y, str) or not y.startswith(self._adata_ids.custom_metadata_prefix))
+                else np.array([])
                 for y in x
             ]
             oh = np.zeros((len(x), self.ntypes,), dtype="float32")

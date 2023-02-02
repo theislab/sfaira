@@ -319,34 +319,34 @@ class StoreSingleFeatureSpace(StoreBase):
             except AttributeError:
                 raise ValueError(f"{k} not a valid property of ontology_container object")
 
-            values_found_unique_matched = []
-
             unknown_identifiers = [
                 self._adata_ids_sfaira.unknown_metadata_identifier,
                 self._adata_ids_sfaira.not_a_cell_celltype_identifier
             ]
             if v:
-                for unknown_ident in unknown_identifiers:
-                    if unknown_ident in v:
-                        v.remove(unknown_ident)
-                        values_found_unique_matched.append(unknown_ident)
+                negative_selection = False
+                selection_input = v
             elif xv:
-                for unknown_ident in unknown_identifiers:
-                    if unknown_ident in xv:
-                        xv.remove(unknown_ident)
-                        values_found_unique_matched.append(unknown_ident)
-
+                negative_selection = True
+                selection_input = xv
+            values_found_unique_matched = []
+            selection_free = []
+            selection_ont_constrained = []
+            for i in selection_input:
+                if i in unknown_identifiers \
+                    or (isinstance(i, str) and i.startswith(self._adata_ids_sfaira.custom_metadata_prefix)):
+                    selection_free.append(i)
+                else:
+                    selection_ont_constrained.append(i)
             for x in pd.unique(values_found):
-                if x in unknown_identifiers:
-                    pass
-                elif v is not None and np.any([is_child(query=x, ontology=ontology, ontology_parent=y) for y in v]):
+                if x in selection_free or np.any([
+                    is_child(query=x, ontology=ontology, ontology_parent=y) for y in selection_ont_constrained
+                    ]):
                     values_found_unique_matched.append(x)
-                elif xv is not None and np.all([
-                    not is_child(query=x, ontology=ontology, ontology_parent=y) for y in xv
-                ]):
-                    values_found_unique_matched.append(x)
-
-            idx = np.where(np.isin(values_found, values_found_unique_matched))[0]
+            boolean_selection = np.isin(values_found, values_found_unique_matched)
+            if negative_selection:
+                boolean_selection = ~boolean_selection
+            idx = np.where(boolean_selection)[0]
             return idx
 
         indices = {}

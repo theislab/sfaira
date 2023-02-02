@@ -51,7 +51,7 @@ class DatasetBase(AnnotationContainer):
     _fns_tsvs: Dict[str, str]
     load_raw: Union[None, bool] = None
     mapped_features: Union[None, str, bool] = None
-    _ontology_class_maps: Union[dict]
+    _ontology_class_maps: dict
     remove_gene_version: Union[None, bool] = None
     subset_gene_type: Union[None, str] = None
     streamlined_meta: bool = False
@@ -507,6 +507,7 @@ class DatasetBase(AnnotationContainer):
                     anatomical_constraint=self.organ,
                     include_synonyms=True,
                     omit_list=[self._adata_ids.unknown_metadata_identifier],
+                    omit_prefix_list=[self._adata_ids.custom_metadata_prefix],
                     **kwargs
                 )
                 if not os.path.exists(fn_x) or not protected_writing:
