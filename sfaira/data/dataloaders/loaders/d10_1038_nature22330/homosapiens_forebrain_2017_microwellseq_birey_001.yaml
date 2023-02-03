@@ -11,7 +11,7 @@ dataset_wise:
     doi_journal: "10.1038/nature22330"
     download_url_data: 
         GSE93811_microwell: "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE93811&format=file"
-        GSE93321_Smart-seq_2-weeks: "ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE93nnn/GSE93321/suppl/GSE93321%5Fexps%2Etxt%2Egz"
+        GSE93321_Smart-seq_2-weeks: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE93nnn/GSE93321/suppl/GSE93321%5Fexps%2Etxt%2Egz"
         GSE95837_Smart-seq_4-weeks: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE95nnn/GSE95837/suppl/GSE95837%5Fexps%2Etxt%2Egz"
     download_url_meta: 
     primary_data: True
