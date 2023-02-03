@@ -33,23 +33,23 @@ dataset_or_observation_wise:
     bio_sample:
     bio_sample_obs_key: "Line"
     cell_line:
-#    cell_line_obs_key: "Line"  ## A hybrid cell line made up of chip cell line C3647 and human cell line H21792 (no cellosaurus entry, doi: 10.7554/eLife.33084)
+    cell_line_obs_key: "Line"  ## A hybrid cell line made up of chimp cell line C3647 and human cell line H21792 (no cellosaurus entry, doi: 10.7554/eLife.33084)
     cell_type: 
     cell_type_obs_key: 
     development_stage: "22nd week post-fertilization human stage"
     development_stage_obs_key: 
     disease: "healthy"
     disease_obs_key: 
-    ethnicity:  ## The human cell line was of caucasian enthnicity.
+    ethnicity: "European" ## This is a hybrid cell line made from human and chimp cells. The human cell line was of caucasian enthnicity.
     ethnicity_obs_key: 
     gm:
     gm_obs_key:
     individual:
-    individual_obs_key: 
+    individual_obs_key:
     organ: "cerebral cortex"
     organ_obs_key: 
-#    organism: "Homo sapiens"
-#    organism_obs_key: "Organism"
+    organism: "Homo sapiens" # SHOULD BE `hybrid` BUT TERM NOT IN STAXSLIM SUBSET. Fused human and chimpanzee cortical spheroids.
+    organism_obs_key:
     sample_source: "3d_culture"
     sample_source_obs_key: 
     sex: "female"
