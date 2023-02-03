@@ -41,6 +41,8 @@ def load(data_dir, **kwargs):
     adata.obs["treatment"] = treatment
     adata.obs["sample"] = sample
     adata.obs["treatment_concentrations"] = sample
+    adata.obs["organoid_age_days"] = "35"
+    adata.obs["organoid_age_days"] = adata.obs["organoid_age_days"].astype("category")
     adata.X = scipy.sparse.csr_matrix(adata.X)
 
     return adata
