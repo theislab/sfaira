@@ -36,7 +36,8 @@ def load(data_dir, **kwargs):
                 features_dict[sample_key] = features_df
 
             elif 'matrix' in member.name:
-                mtx = mmread(gzip.open(tar.extractfile(member), 'rb'))
+                with gzip.open(tar.extractfile(member), 'rb') as mm:
+                    mtx = mmread(mm)
                 mtx_dict[sample_key] = mtx
 
             else:
