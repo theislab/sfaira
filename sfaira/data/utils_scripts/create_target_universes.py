@@ -5,6 +5,7 @@ import sys
 from sfaira.consts import OC
 from sfaira.data import load_store
 from sfaira.versions.metadata import CelltypeUniverse, OntologyCl
+from sfaira.data.dataloaders.obs_utils import is_custom
 
 
 # Set global variables.
@@ -40,7 +41,7 @@ for f in os.listdir(config_path):
                                                              store._adata_ids_sfaira.not_a_cell_celltype_identifier}))
             celltypes_found = [
                 x for x in celltypes_found
-                if (not isinstance(x, str) or not x.startswith(store._adata_ids_sfaira.custom_metadata_prefix))
+                if not is_custom(x, store._adata_ids_sfaira)
             ]
             if len(celltypes_found) == 0:
                 print(f"WARNING: No cells found for {organism} {organ}, skipping.")

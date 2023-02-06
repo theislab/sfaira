@@ -165,7 +165,7 @@ def streamline_obs_uns(adata: anndata.AnnData,
             if isinstance(get_ontology(k=k, organism=organism), OntologyHierarchical) and np.all([
                 get_ontology(k=k, organism=organism).is_a_node_name(x) or
                 x == adata_input_ids.unknown_metadata_identifier or
-                (isinstance(x, str) and x.startswith(adata_input_ids.custom_metadata_prefix))
+                is_custom(x, adata_input_ids)
                 for x in np.unique(val)
             ]):  # 1a-II)
                 new_col = getattr(adata_target_ids, k)
@@ -173,7 +173,7 @@ def streamline_obs_uns(adata: anndata.AnnData,
             elif isinstance(get_ontology(k=k, organism=organism), OntologyHierarchical) and np.all([
                 get_ontology(k=k, organism=organism).is_a_node_id(x) or
                 x == adata_input_ids.unknown_metadata_identifier or
-                (isinstance(x, str) and x.startswith(adata_input_ids.custom_metadata_prefix))
+                is_custom(x, adata_input_ids)
                 for x in np.unique(val)
             ]):  # 1a-III)
                 new_col = getattr(adata_target_ids, k) + adata_input_ids.onto_id_suffix
@@ -190,9 +190,7 @@ def streamline_obs_uns(adata: anndata.AnnData,
             x for x in np.unique(val)
             if x not in [
                 adata_input_ids.unknown_metadata_identifier,
-            ] and
-            (not isinstance(x, str) or
-             not x.startswith(adata_input_ids.custom_metadata_prefix))
+            ] and not is_custom(x, adata_input_ids)
         ], dataset_id=dataset_id)
         try:
             obs_new[new_col] = val
@@ -268,7 +266,7 @@ def streamline_obs_uns(adata: anndata.AnnData,
             x in adata.obs_keys()
         ]:
             adata.obs[k] = [
-                x if (not isinstance(x, str) or not x.startswith(adata_target_ids.custom_metadata_prefix))
+                x if not is_custom(x, adata_target_ids)
                 else adata_target_ids.unknown_metadata_identifier
                 for x in adata.obs[k]
             ]
@@ -324,7 +322,7 @@ def impute_ontology_cols_obs(adata: anndata.AnnData,
         symbol_col_streamlined = np.all([
             ontology.is_a_node_name(x) or
             x == adata_input_ids.unknown_metadata_identifier or
-            (isinstance(x, str) and x.startswith(adata_input_ids.custom_metadata_prefix))
+            is_custom(x, adata_input_ids)
             for x in np.unique(adata.obs[col_symbol].values)]) if symbol_col_present else False
         symbol_present = symbol_col_present and symbol_col_streamlined
         # IDs:
@@ -520,3 +518,15 @@ def value_protection(allowed: Union[Ontology, None],
     if len(attempted_clean) == 1:
         attempted_clean = attempted_clean[0]
     return attempted_clean
+
+
+def is_custom(x: Union[str, bool, float, int],
+              adata_ids: AdataIds) -> bool:
+    """
+    Evaluate whether a metadata item is a custom entry by checking if it's a string and whether it starts with the prefix for custom medatada,
+
+    :param x: input which should be evaluated for being a custom metadata entry
+    :param adata_ids: instance of AdataIds which in use
+    :return: True if the input is a custom identifier else False
+    """
+    return isinstance(x, str) and x.startswith(adata_ids.custom_metadata_prefix)

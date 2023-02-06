@@ -9,6 +9,7 @@ from typing import Union
 from sfaira import settings
 from sfaira.consts import AdataIdsSfaira
 from sfaira.data import StoreSingleFeatureSpace, StoreMultipleFeatureSpaceBase, load_store
+from sfaira.data.dataloaders.obs_utils import is_custom
 from sfaira.estimators import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
 from sfaira.versions.genomes.genomes import CustomFeatureContainer
 from sfaira.versions.metadata import OntologyOboCustom
@@ -259,7 +260,7 @@ class TestHelperEstimatorKerasCelltype(HelperEstimatorKeras):
             x=[
                 x for x in obs_cl
                 if x != self.adata_ids.unknown_metadata_identifier and
-                (not isinstance(x, str) or not x.startswith(self.adata_ids.custom_metadata_prefix))
+                not is_custom(x, self._adata_ids)
             ]
         )
         self.nleaves = len(leaves)

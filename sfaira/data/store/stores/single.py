@@ -14,6 +14,7 @@ from sfaira.data.dataloaders.base.utils import is_child, UNS_STRING_META_IN_OBS
 from sfaira.data.store.carts.single import CartAnndata, CartDask, CartSingle
 from sfaira.data.store.stores.base import StoreBase
 from sfaira.versions.genomes.genomes import GenomeContainer, ReactiveFeatureContainer
+from sfaira.data.dataloaders.obs_utils import is_custom
 
 """
 Distributed stores are array-like classes that sit on groups of on disk representations of anndata instances files.
@@ -333,14 +334,14 @@ class StoreSingleFeatureSpace(StoreBase):
             selection_free = []
             selection_ont_constrained = []
             for i in selection_input:
-                if i in unknown_identifiers or (isinstance(i, str) and i.startswith(self._adata_ids_sfaira.custom_metadata_prefix)):
+                if i in unknown_identifiers or is_custom(i, self._adata_ids_sfaira):
                     selection_free.append(i)
                 else:
                     selection_ont_constrained.append(i)
             for x in pd.unique(values_found):
                 if x in selection_free:
                     values_found_unique_matched.append(x)
-                elif x in unknown_identifiers or (isinstance(x, str) and x.startswith(self._adata_ids_sfaira.custom_metadata_prefix)):
+                elif x in unknown_identifiers or is_custom(x, self._adata_ids_sfaira):
                     pass
                 elif np.any([
                     is_child(query=x, ontology=ontology, ontology_parent=y) for y in selection_ont_constrained
