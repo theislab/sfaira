@@ -260,7 +260,7 @@ class TestHelperEstimatorKerasCelltype(HelperEstimatorKeras):
             x=[
                 x for x in obs_cl
                 if x != self.adata_ids.unknown_metadata_identifier and
-                not is_custom(x, self._adata_ids)
+                not is_custom(x, self.adata_ids)
             ]
         )
         self.nleaves = len(leaves)
