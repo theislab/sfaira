@@ -260,16 +260,17 @@ def streamline_obs_uns(adata: anndata.AnnData,
     # Add additional hard-coded description changes for cellxgene schema:
     if schema.startswith("cellxgene"):
         schema_version = schema.split(":")[-1] if ":" in schema else None
-        # convert all custom ontology symbols to unknown symbols as custom labels are not supported in the cellxgene schema
+        # convert all custom ontology symbols to unknown symbols in ontology constrained cols so that these values can be fully handled by ontology operations
         for k in [
             x for x in adata_target_ids.obs_keys if x in adata_target_ids.ontology_constrained and
             x in adata.obs_keys()
         ]:
-            adata.obs[k] = [
-                x if not is_custom(x, adata_target_ids)
-                else adata_target_ids.unknown_metadata_identifier
-                for x in adata.obs[k]
-            ]
+            if adata.obs[k].apply(is_custom, args=(adata_target_ids,)).any():
+                adata.obs[k] = [
+                    x if not is_custom(x, adata_target_ids)
+                    else adata_target_ids.unknown_metadata_identifier
+                    for x in adata.obs[k]
+                ]
         adata = cellxgene_export_adaptor(adata=adata,
                                          adata_ids=adata_target_ids,
                                          layer_key_counts=annotation_container.layer_counts,
