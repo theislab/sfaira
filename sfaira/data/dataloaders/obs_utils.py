@@ -348,8 +348,7 @@ def impute_ontology_cols_obs(adata: anndata.AnnData,
                 adata = project_ontology_ids_obs(adata=adata, attr=attr, from_id=True, adata_ids=adata_target_ids,
                                                  organism=organism)
             if not original_present:
-                val = adata.obs[col_symbol]
-                adata.obs[col_original] = val
+                adata.obs[col_original] = adata.obs[col_symbol].copy()
     return adata
 
 
@@ -424,8 +423,8 @@ def project_ontology_ids_obs(adata: anndata.AnnData,
                              adata_ids: AdataIds,
                              organism: str,
                              map_exceptions: Union[None, List[str]] = None,
-                             prefix_exceptions=None,
-                             exceptions_value=None,
+                             prefix_exceptions: Union[None, List[str]] = None,
+                             exceptions_value: Union[None, str] = None,
                              from_id: bool = False) -> anndata.AnnData:
     """
     Project ontology names to IDs for a given ontology in .obs entries.
@@ -444,12 +443,10 @@ def project_ontology_ids_obs(adata: anndata.AnnData,
     assert ontology is not None, f"cannot project value for {attr} because ontology is None"
     assert isinstance(attr, (str, list)), f"argument key_in needs to be of type str or list. Supplied" \
                                           f"type: {type(attr)}"
-    map_exceptions = map_exceptions if map_exceptions is not None else [adata_ids.unknown_metadata_identifier]
+    map_exceptions = [adata_ids.unknown_metadata_identifier] if map_exceptions is None else map_exceptions
     map_exceptions = [x.lower() for x in map_exceptions]
-    prefix_exceptions = adata_ids.custom_metadata_prefix \
-        if prefix_exceptions is None else prefix_exceptions
-    exceptions_value = adata_ids.unknown_metadata_identifier \
-        if exceptions_value is None else exceptions_value
+    prefix_exceptions = [adata_ids.custom_metadata_prefix] if prefix_exceptions is None else prefix_exceptions
+    exceptions_value = adata_ids.unknown_metadata_identifier if exceptions_value is None else exceptions_value
     col_name = getattr(adata_ids, attr)
     if from_id:
         col_name += adata_ids.onto_id_suffix
