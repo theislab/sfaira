@@ -37,8 +37,8 @@ def load(data_dir, sample_fn, **kwargs):
         adata_f4.obs['state_exact'] = 'Neurons from hSS and hCS oganoids fused for 4 weeks'
         adata_f2.obs['cell_line'] = '2242-1'
         adata_f4.obs['cell_line'] = ['2242-1' if i in line_2_idxs else '8858-1' for i in adata_f4.obs_names]
-        adata_f2.obs['organoid_age_days'] = "74"
-        adata_f4.obs['organoid_age_days'] = "84"
+        adata_f2.obs['organoid_age_days'] = "104"
+        adata_f4.obs['organoid_age_days'] = "118"
         adata = adata_f2.concatenate(adata_f4, index_unique=None)
         adata.X = scipy.sparse.csr_matrix(adata.X, dtype=np.float32).copy()
         del adata.obs["batch"]
