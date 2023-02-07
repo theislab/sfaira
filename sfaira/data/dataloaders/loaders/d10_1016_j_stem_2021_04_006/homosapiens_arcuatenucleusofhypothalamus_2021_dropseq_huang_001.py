@@ -29,8 +29,8 @@ def load(data_dir, sample_fn, **kwargs):
 
     with tarfile.open(fn) as tar:
         with gzip.open(tar.extractfile(sample_fn), 'rb') as df:
-            d = pd.read_csv(df, delimiter = '\t', index_col=0).T
-   
+            d = pd.read_csv(df, delimiter='\t', index_col=0).T
+
     adata = ad.AnnData(X=scipy.sparse.csr_matrix(d), var=pd.DataFrame(index=d.columns.values),
                        obs=pd.DataFrame(index=d.index))
 
