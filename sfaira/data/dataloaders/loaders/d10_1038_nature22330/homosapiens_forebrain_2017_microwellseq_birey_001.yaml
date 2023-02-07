@@ -61,7 +61,7 @@ dataset_or_observation_wise:
         GSE93811_microwell: "15th week post-fertilization human stage"
         GSE93321_Smart-seq_2-weeks: "13th week post-fertilization human stage"
         GSE95837_Smart-seq_4-weeks: "13th week post-fertilization human stage"
-    development_stage_obs_key: "organoid_age_days"
+    development_stage_obs_key: 
     disease: "healthy"
     disease_obs_key: 
     ethnicity: 
