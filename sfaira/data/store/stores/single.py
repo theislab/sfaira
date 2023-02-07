@@ -14,6 +14,7 @@ from sfaira.data.dataloaders.base.utils import is_child, UNS_STRING_META_IN_OBS
 from sfaira.data.store.carts.single import CartAnndata, CartDask, CartSingle
 from sfaira.data.store.stores.base import StoreBase
 from sfaira.versions.genomes.genomes import GenomeContainer, ReactiveFeatureContainer
+from sfaira.data.dataloaders.obs_utils import is_custom
 
 """
 Distributed stores are array-like classes that sit on groups of on disk representations of anndata instances files.
@@ -319,34 +320,37 @@ class StoreSingleFeatureSpace(StoreBase):
             except AttributeError:
                 raise ValueError(f"{k} not a valid property of ontology_container object")
 
-            values_found_unique_matched = []
-
             unknown_identifiers = [
                 self._adata_ids_sfaira.unknown_metadata_identifier,
                 self._adata_ids_sfaira.not_a_cell_celltype_identifier
             ]
             if v:
-                for unknown_ident in unknown_identifiers:
-                    if unknown_ident in v:
-                        v.remove(unknown_ident)
-                        values_found_unique_matched.append(unknown_ident)
+                negative_selection = False
+                selection_input = v
             elif xv:
-                for unknown_ident in unknown_identifiers:
-                    if unknown_ident in xv:
-                        xv.remove(unknown_ident)
-                        values_found_unique_matched.append(unknown_ident)
-
+                negative_selection = True
+                selection_input = xv
+            values_found_unique_matched = []
+            selection_free = []
+            selection_ont_constrained = []
+            for i in selection_input:
+                if i in unknown_identifiers or is_custom(i, self._adata_ids_sfaira):
+                    selection_free.append(i)
+                else:
+                    selection_ont_constrained.append(i)
             for x in pd.unique(values_found):
-                if x in unknown_identifiers:
-                    pass
-                elif v is not None and np.any([is_child(query=x, ontology=ontology, ontology_parent=y) for y in v]):
+                if x in selection_free:
                     values_found_unique_matched.append(x)
-                elif xv is not None and np.all([
-                    not is_child(query=x, ontology=ontology, ontology_parent=y) for y in xv
+                elif x in unknown_identifiers or is_custom(x, self._adata_ids_sfaira):
+                    pass
+                elif np.any([
+                    is_child(query=x, ontology=ontology, ontology_parent=y) for y in selection_ont_constrained
                 ]):
                     values_found_unique_matched.append(x)
-
-            idx = np.where(np.isin(values_found, values_found_unique_matched))[0]
+            boolean_selection = np.isin(values_found, values_found_unique_matched)
+            if negative_selection:
+                boolean_selection = ~boolean_selection
+            idx = np.where(boolean_selection)[0]
             return idx
 
         indices = {}
