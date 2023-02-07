@@ -19,9 +19,9 @@ dataset_wise:
     default_embedding: 
     doi_preprint: 
     doi_journal: "10.1016/j.stem.2021.04.006"
-    download_url_data: "ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE164nnn/GSE164102/suppl/GSE164102_RAW.tar"
+    download_url_data: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE164nnn/GSE164102/suppl/GSE164102_RAW.tar"
     download_url_meta: 
-    primary_data: False
+    primary_data: True
     year: 2021
 layers:
     layer_counts: "X"
@@ -32,7 +32,7 @@ layers:
     layer_unspliced_processed: 
     layer_velocity: 
 dataset_or_feature_wise:
-    feature_reference: "Homo_sapiens.GRCh38.28"
+    feature_reference: "Homo_sapiens.GRCh38.92"
     feature_reference_var_key: 
     feature_type: "rna"
     feature_type_var_key: 
@@ -45,23 +45,23 @@ dataset_or_observation_wise:
     assay_type_differentiation_obs_key: 
     bio_sample:
     bio_sample_obs_key: 
-    cell_line: # exclude for now - these are custom cell lines
-        # "GSM4996689_DGE67anew.txt.gz": C3-1 
-        # "GSM4996690_DGE67bnew.txt.gz": C3-1
-        # "GSM4996691_DGE69new.txt.gz": C65
-        # "GSM4996692_DGE68new.txt.gz": Min
-        # "GSM4996693_DGE70new.txt.gz": Min
-        # "GSM4996694_DGE66new.txt.gz": Maj
-        # "GSM4996695_DGE71new.txt.gz": Maj
-        # "GSM4996696_DGE7374.txt.gz": C3
-        # "GSM4996697_DGE7778.txt.gz": C65
-        # "GSM4996698_DGE7576.txt.gz": Min
-        # "GSM4996699_DGE7980.txt.gz": Min
-        # "GSM4996700_DGE72.txt.gz": Maj
-        # "GSM4996701_DGE81.txt.gz": Maj
+    cell_line: 
+        "GSM4996689_DGE67anew.txt.gz": custom_C3
+        "GSM4996690_DGE67bnew.txt.gz": custom_C3
+        "GSM4996691_DGE69new.txt.gz": custom_C65
+        "GSM4996692_DGE68new.txt.gz": custom_Min-1
+        "GSM4996693_DGE70new.txt.gz": custom_Min-2
+        "GSM4996694_DGE66new.txt.gz": custom_Maj-1
+        "GSM4996695_DGE71new.txt.gz": custom_Maj-2
+        "GSM4996696_DGE7374.txt.gz": custom_C3
+        "GSM4996697_DGE7778.txt.gz": custom_C65
+        "GSM4996698_DGE7576.txt.gz": custom_Min-1
+        "GSM4996699_DGE7980.txt.gz": custom_Min-2
+        "GSM4996700_DGE72.txt.gz": custom_Maj-1
+        "GSM4996701_DGE81.txt.gz": custom_Maj-2
     cell_line_obs_key: 
     cell_type: 
-    cell_type_obs_key: # metadata not included
+    cell_type_obs_key: 
     development_stage: 
     development_stage_obs_key: "organoid_age_days"
     disease: 
@@ -79,7 +79,20 @@ dataset_or_observation_wise:
         "GSM4996700_DGE72.txt.gz": Prader-Willi syndrome due to translocation
         "GSM4996701_DGE81.txt.gz": Prader-Willi syndrome due to translocation
     disease_obs_key: 
-    ethnicity: 
+    ethnicity:
+        "GSM4996689_DGE67anew.txt.gz": American
+        "GSM4996690_DGE67bnew.txt.gz": American
+        "GSM4996691_DGE69new.txt.gz": African American
+        "GSM4996692_DGE68new.txt.gz": unknown
+        "GSM4996693_DGE70new.txt.gz": unknown
+        "GSM4996694_DGE66new.txt.gz": African American
+        "GSM4996695_DGE71new.txt.gz": African American
+        "GSM4996696_DGE7374.txt.gz": American
+        "GSM4996697_DGE7778.txt.gz": African American
+        "GSM4996698_DGE7576.txt.gz": unknown
+        "GSM4996699_DGE7980.txt.gz": unknown
+        "GSM4996700_DGE72.txt.gz": African American
+        "GSM4996701_DGE81.txt.gz": African American
     ethnicity_obs_key: 
     gm:
     gm_obs_key:

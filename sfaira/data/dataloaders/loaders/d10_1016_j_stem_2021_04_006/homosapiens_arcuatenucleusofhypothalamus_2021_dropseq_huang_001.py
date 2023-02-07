@@ -5,7 +5,7 @@ import gzip
 import scipy
 import tarfile
 import anndata as ad
-from scipy.io import mmread
+import scipy.sparse
 
 
 # the data_dir argument will be automatically set by sfaira to the folder where your datafiles lie
@@ -31,7 +31,8 @@ def load(data_dir, sample_fn, **kwargs):
         with gzip.open(tar.extractfile(sample_fn), 'rb') as df:
             d = pd.read_csv(df, delimiter='\t', index_col=0).T
 
-    adata = ad.AnnData(X=scipy.sparse.csr_matrix(d), var=pd.DataFrame(index=d.columns.values),
+    adata = ad.AnnData(X=scipy.sparse.csr_matrix(d, dtype=np.float32),
+                       var=pd.DataFrame(index=d.columns.values),
                        obs=pd.DataFrame(index=d.index))
 
     adata.obs['organoid_age_days'] = age_dict[sample_fn]
