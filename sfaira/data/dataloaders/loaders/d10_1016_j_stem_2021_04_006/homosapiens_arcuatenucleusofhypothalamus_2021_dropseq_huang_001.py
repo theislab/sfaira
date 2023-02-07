@@ -12,9 +12,9 @@ from scipy.io import mmread
 # the sample_fn argument will be automatically set by sfaira to each of the sample_fns provided in the yaml top section
 def load(data_dir, sample_fn, **kwargs):
     fn = os.path.join(data_dir, "GSE164102_RAW.tar")
- 
+
     age_dict = {'GSM4996689_DGE67anew.txt.gz': '20',
-                'GSM4996690_DGE67bnew.txt.gz': '20', 
+                'GSM4996690_DGE67bnew.txt.gz': '20',
                 'GSM4996691_DGE69new.txt.gz': '20',
                 'GSM4996692_DGE68new.txt.gz': '20',
                 'GSM4996693_DGE70new.txt.gz': '20',
