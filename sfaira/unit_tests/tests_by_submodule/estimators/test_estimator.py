@@ -9,6 +9,7 @@ from typing import Union
 from sfaira import settings
 from sfaira.consts import AdataIdsSfaira
 from sfaira.data import StoreSingleFeatureSpace, StoreMultipleFeatureSpaceBase, load_store
+from sfaira.data.dataloaders.obs_utils import is_custom
 from sfaira.estimators import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
 from sfaira.versions.genomes.genomes import CustomFeatureContainer
 from sfaira.versions.metadata import OntologyOboCustom
@@ -112,7 +113,7 @@ class HelperEstimatorBase:
 class HelperEstimatorKeras(HelperEstimatorBase):
 
     data: Union[anndata.AnnData, StoreSingleFeatureSpace]
-    estimator: Union[EstimatorKeras]
+    estimator: EstimatorKeras
     model_type: str
     tc: TopologyContainer
 
@@ -256,7 +257,11 @@ class TestHelperEstimatorKerasCelltype(HelperEstimatorKeras):
         )
         obs_cl = self.estimator.data.checkout(obs_keys=[self.adata_ids.cell_type]).obs[self.adata_ids.cell_type].values
         leaves = self.estimator.celltype_universe.onto_cl.get_effective_leaves(
-            x=[x for x in obs_cl if x != self.adata_ids.unknown_metadata_identifier]
+            x=[
+                x for x in obs_cl
+                if x != self.adata_ids.unknown_metadata_identifier and
+                not is_custom(x, self.adata_ids)
+            ]
         )
         self.nleaves = len(leaves)
         self.estimator.celltype_universe.onto_cl.leaves = leaves
