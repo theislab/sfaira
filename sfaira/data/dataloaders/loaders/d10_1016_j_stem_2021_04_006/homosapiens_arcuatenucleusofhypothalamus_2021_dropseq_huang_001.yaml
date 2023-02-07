@@ -83,14 +83,10 @@ dataset_or_observation_wise:
         "GSM4996689_DGE67anew.txt.gz": American
         "GSM4996690_DGE67bnew.txt.gz": American
         "GSM4996691_DGE69new.txt.gz": African American
-        "GSM4996692_DGE68new.txt.gz": unknown
-        "GSM4996693_DGE70new.txt.gz": unknown
         "GSM4996694_DGE66new.txt.gz": African American
         "GSM4996695_DGE71new.txt.gz": African American
         "GSM4996696_DGE7374.txt.gz": American
         "GSM4996697_DGE7778.txt.gz": African American
-        "GSM4996698_DGE7576.txt.gz": unknown
-        "GSM4996699_DGE7980.txt.gz": unknown
         "GSM4996700_DGE72.txt.gz": African American
         "GSM4996701_DGE81.txt.gz": African American
     ethnicity_obs_key: 
