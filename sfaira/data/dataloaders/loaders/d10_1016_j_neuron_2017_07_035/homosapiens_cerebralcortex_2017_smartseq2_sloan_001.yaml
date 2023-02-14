@@ -8,7 +8,7 @@ dataset_wise:
     doi_journal: "10.1016/j.neuron.2017.07.035"
     download_url_data: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE99nnn/GSE99951/suppl/GSE99951_all_data_htseq_out.csv.gz"
     download_url_meta: 
-    primary_data: False
+    primary_data: True
     year: 2017
 layers:
     layer_counts: "X"
@@ -28,16 +28,16 @@ dataset_or_observation_wise:
     assay_sc_obs_key: 
     assay_differentiation: "Pasca, 2015 (doi: 10.1038/nmeth.3415)" 
     assay_differentiation_obs_key: 
-    assay_type_differentiation: 
+    assay_type_differentiation: "guided"
     assay_type_differentiation_obs_key: 
     bio_sample:
     bio_sample_obs_key: # need to contact the authors for metadata regarding which cells came from which hSC
-    cell_line: # used 4 different cell lines (Human iPSC line 8858-1, Human iPSC line 8858-3, Human iPSC line 2242-1, Human iPSC line 1205-4)
+    cell_line: custom_8858-1_8858-3_2242-1_1205-4
     cell_line_obs_key: # need to contact the authors for metadata regarding which cells came from which cell line
     cell_type: 
     cell_type_obs_key: "cell_type"
     development_stage: 
-    development_stage_obs_key: "dev_age"
+    development_stage_obs_key: "organoid_age_days"
     disease: "healthy"
     disease_obs_key: 
     ethnicity: 
@@ -53,7 +53,7 @@ dataset_or_observation_wise:
     sample_source: "3d_culture"
     sample_source_obs_key: 
     sex: 
-    sex_obs_key: # need to contact authors for sex metadata
+    sex_obs_key: # add once we know which cell came from which cell line
     source_doi:
     source_doi_obs_key:
     state_exact:

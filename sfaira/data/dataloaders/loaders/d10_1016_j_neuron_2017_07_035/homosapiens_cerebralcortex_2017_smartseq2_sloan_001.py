@@ -5,10 +5,9 @@ import numpy as np
 
 
 def load(data_dir, **kwargs):
-
     fn = os.path.join(data_dir, "GSE99951_all_data_htseq_out.csv.gz")
     adata = anndata.read_csv(fn, delimiter=" ").T
-
+    adata.X = scipy.sparse.csr_matrix(adata.X)
     age_dict = {
         "1001000078": "100",
         "1001000061": "130",
@@ -23,15 +22,7 @@ def load(data_dir, **kwargs):
         "1001000210": "450",
         "1001000212": "450",
         "1001000213": "450"}
-
-    age = []
-    for i in adata.obs.index:
-        ii = i.split(".")
-        age.append(age_dict[ii[0]])
-
-    adata.obs['dev_age'] = age
-    adata.obs["organoid_age_days"] = age
-
+    adata.obs["organoid_age_days"] = [age_dict[i.split(".")[0]] for i in adata.obs.index]
     adata.obs["cell_type"] = np.array(['neuron', 'glia1.0', 'glia1.0', 'neuron', 'glia1.0', 'neuron',
                                        'glia1.0', 'glia1.0', 'glia1.0', 'glia1.0', 'neuron', 'neuron',
                                        'neuron', 'neuron', 'neuron', 'glia1.0', 'glia1.0', 'neuron',
@@ -151,7 +142,4 @@ def load(data_dir, **kwargs):
                                        'glia3.0', 'glia2.0', 'neuron', 'glia1.0', 'glia2.0', 'glia2.0',
                                        'glia2.0', 'glia1.0', 'glia2.0', 'glia1.0', 'glia1.0', 'glia2.0',
                                        'glia2.0', 'neuron'])
-
-    adata.X = scipy.sparse.csr_matrix(adata.X)
-
-    return adata  # your load function needs to return an AnnData object
+    return adata
