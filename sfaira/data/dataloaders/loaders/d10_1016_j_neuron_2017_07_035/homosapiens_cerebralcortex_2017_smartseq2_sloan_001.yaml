@@ -1,0 +1,89 @@
+dataset_structure:
+    dataset_index: 1
+    sample_fns:
+dataset_wise:
+    author: "Sloan, Steven"
+    default_embedding: 
+    doi_preprint: 
+    doi_journal: "10.1016/j.neuron.2017.07.035"
+    download_url_data: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE99nnn/GSE99951/suppl/GSE99951_all_data_htseq_out.csv.gz"
+    download_url_meta: 
+    primary_data: True
+    year: 2017
+layers:
+    layer_counts: "X"
+    layer_processed: 
+    layer_spliced_counts: 
+    layer_spliced_processed: 
+    layer_unspliced_counts: 
+    layer_unspliced_processed: 
+    layer_velocity: 
+dataset_or_feature_wise:
+    feature_reference: "Homo_sapiens.GRCh37.74"
+    feature_reference_var_key: 
+    feature_type: "rna"
+    feature_type_var_key: 
+dataset_or_observation_wise:
+    assay_sc: "Smart-seq2"
+    assay_sc_obs_key: 
+    assay_differentiation: "Pasca, 2015 (doi: 10.1038/nmeth.3415)" 
+    assay_differentiation_obs_key: 
+    assay_type_differentiation: "guided"
+    assay_type_differentiation_obs_key: 
+    bio_sample:
+    bio_sample_obs_key: # need to contact the authors for metadata regarding which cells came from which hSC
+    cell_line: custom_8858-1_8858-3_2242-1_1205-4
+    cell_line_obs_key: # need to contact the authors for metadata regarding which cells came from which cell line
+    cell_type: 
+    cell_type_obs_key: "cell_type"
+    development_stage: 
+    development_stage_obs_key: "organoid_age_days"
+    disease: "healthy"
+    disease_obs_key: 
+    ethnicity: 
+    ethnicity_obs_key: 
+    gm:
+    gm_obs_key:
+    individual:
+    individual_obs_key: 
+    organ: "cerebral cortex"
+    organ_obs_key: 
+    organism: "Homo sapiens"
+    organism_obs_key: 
+    sample_source: "3d_culture"
+    sample_source_obs_key: 
+    sex: 
+    sex_obs_key: # add once we know which cell came from which cell line
+    source_doi:
+    source_doi_obs_key:
+    state_exact:
+    state_exact_obs_key:
+    suspension_type: "cell"
+    suspension_type_obs_key: 
+    tech_sample:
+    tech_sample_obs_key: # "To minimize batch effects, we collected single cells from multiple in vitro differentiation stages in the same sorting experiment, performed library generation on samples in tandem, and sequenced cells from multiple time points simultaneously."
+    treatment:
+    treatment_obs_key:
+feature_wise:
+    feature_id_var_key: 
+    feature_symbol_var_key: "index"
+observation_wise:
+    spatial_x_coord_obs_key: 
+    spatial_y_coord_obs_key: 
+    spatial_z_coord_obs_key: 
+    vdj_vj_1_obs_key_prefix: 
+    vdj_vj_2_obs_key_prefix: 
+    vdj_vdj_1_obs_key_prefix: 
+    vdj_vdj_2_obs_key_prefix: 
+    vdj_c_call_obs_key_suffix: 
+    vdj_consensus_count_obs_key_suffix: 
+    vdj_d_call_obs_key_suffix: 
+    vdj_duplicate_count_obs_key_suffix: 
+    vdj_j_call_obs_key_suffix: 
+    vdj_junction_obs_key_suffix: 
+    vdj_junction_aa_obs_key_suffix: 
+    vdj_locus_obs_key_suffix: 
+    vdj_productive_obs_key_suffix: 
+    vdj_v_call_obs_key_suffix: 
+meta:
+    version: "1.2"

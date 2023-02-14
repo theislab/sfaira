@@ -1,0 +1,5 @@
+source	target	target_id
+glia1.0	immature astrocyte	CL:0002626
+glia2.0	immature astrocyte	CL:0002626
+glia3.0	mature astrocyte	CL:0002627
+neuron	cerebral cortex neuron	CL:0010012
