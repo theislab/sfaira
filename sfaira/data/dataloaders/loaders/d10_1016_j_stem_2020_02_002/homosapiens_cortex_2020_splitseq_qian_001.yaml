@@ -26,9 +26,9 @@ dataset_or_feature_wise:
 dataset_or_observation_wise:
     assay_sc: "SPLiT-seq"
     assay_sc_obs_key: 
-    assay_differentiation: 
+    assay_differentiation: "Lancaster, 2014 (doi: 10.1038/nprot.2014.158)"
     assay_differentiation_obs_key: 
-    assay_type_differentiation: 
+    assay_type_differentiation: "unguided"
     assay_type_differentiation_obs_key: 
     bio_sample:
     bio_sample_obs_key: 
