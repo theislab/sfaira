@@ -5,7 +5,6 @@ import pandas as pd
 import numpy as np
 
 
-
 def load(data_dir, **kwargs):
     dataset_tar_path = os.path.join(data_dir, "GSE137941_RAW.tar")
     with tarfile.open(dataset_tar_path, "r") as tar:
