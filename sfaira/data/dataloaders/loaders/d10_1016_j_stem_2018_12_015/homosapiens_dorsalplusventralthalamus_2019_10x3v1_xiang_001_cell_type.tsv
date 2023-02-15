@@ -1,0 +1,11 @@
+source	target	target_id
+AS	astrocyte	CL:0000127
+BRC	neural cell	CL:0002319
+CBC	ciliated cell	CL:0000064
+GPC	radial glial cell	CL:0000681
+Immature neuron	neuron	CL:0000540
+Intermediate	neuroepithelial stem cell	CL:0002259
+Mature neuron	neuron	CL:0000540
+NPC	neural progenitor cell	CL:0011020
+PGG	glial cell	CL:0000125
+UPRC	neural cell	CL:0002319
