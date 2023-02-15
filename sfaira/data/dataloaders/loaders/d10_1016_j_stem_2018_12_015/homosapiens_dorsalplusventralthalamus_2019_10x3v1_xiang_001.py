@@ -3,10 +3,7 @@ import pandas as pd
 import anndata as ad
 import scanpy as sc
 import os
-import scipy
-import gzip
-from tempfile import TemporaryDirectory
-import shutil
+import scipy.io
 
 
 def load(data_dir, **kwargs):
@@ -16,27 +13,19 @@ def load(data_dir, **kwargs):
     fn_schThO_class = os.path.join(data_dir, "schThO_class.txt")
     fn_GSEA_enrich = os.path.join(data_dir, "GSEA_category_enrich.txt")
 
-    uncompressed_file_type = "mtx"
-    with TemporaryDirectory() as tmpdir:
-        tmppth = tmpdir + f"/decompressed.{uncompressed_file_type}"
-        with gzip.open(fn_matrix, "rb") as input_f, open(tmppth, "wb") as output_f:
-            shutil.copyfileobj(input_f, output_f)
-        matrix = scipy.io.mmread(fn_matrix)
-
-    genes = pd.read_csv(fn_genes, delimiter='\t', compression='gzip', index_col=0, header=None, names=["ensembl_gene_id", "gene_id"])
-    barcodes = pd.read_csv(fn_barcodes, delimiter='\t', compression='gzip', index_col=0, header=None)
-    barcodes.index.name = None
+    barcodes = pd.read_csv(fn_barcodes, delimiter='\t', compression='gzip', index_col=0, header=None, names=[None])
     metadata1 = pd.read_csv(fn_schThO_class, delimiter='\t', index_col=0)
-    metadata1["organoid_age_days"] = "34"
-    metadata1.loc[metadata1.Time == "late", "organoid_age_days"] = "89"
-    obs = barcodes.join(metadata1)
+    metadata1["organoid_age_days"] = metadata1["Time"].replace({"early": "34", "late": "89"}).astype("category")
     metadata2 = pd.read_csv(fn_GSEA_enrich, delimiter='\t', index_col=0)
-    obs = obs.join(metadata2)
+    obs = barcodes.join(metadata1).join(metadata2)
+
+    x = scipy.io.mmread(fn_matrix).T.tocsr().astype(np.float32)
+    var = pd.read_csv(fn_genes, delimiter='\t', compression='gzip', index_col=0, header=None, names=[None, "gene_id"])
 
     adata = ad.AnnData(
-        X=matrix.T,
+        X=x,
         obs=obs,
-        var=genes,)
-    adata
+        var=var,
+    )
 
     return adata
