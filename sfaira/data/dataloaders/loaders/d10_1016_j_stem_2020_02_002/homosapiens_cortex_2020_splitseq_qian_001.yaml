@@ -38,7 +38,7 @@ dataset_or_observation_wise:
     cell_type_obs_key: 
     development_stage: "22nd week post-fertilization human stage"
     development_stage_obs_key: 
-    disease: 
+    disease: "healthy"
     disease_obs_key: 
     ethnicity: 
     ethnicity_obs_key: 
