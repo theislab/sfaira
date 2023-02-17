@@ -6,7 +6,7 @@ dataset_wise:
     default_embedding: 
     doi_preprint: 
     doi_journal: "10.1016/j.stem.2019.08.002"
-    download_url_data: "ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE130nnn/GSE130238/suppl/GSE130238_RAW.tar"
+    download_url_data: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE130nnn/GSE130238/suppl/GSE130238_RAW.tar"
     download_url_meta: 
     primary_data: True
     year: 2019
@@ -28,7 +28,7 @@ dataset_or_observation_wise:
     assay_sc_obs_key: 
     assay_differentiation: "Pasca, 2015 (doi: 10.1038/nmeth.3415)"
     assay_differentiation_obs_key: 
-    assay_type_differentiation: "unguided"
+    assay_type_differentiation: "guided"
     assay_type_differentiation_obs_key: 
     bio_sample:
     bio_sample_obs_key: "time"
