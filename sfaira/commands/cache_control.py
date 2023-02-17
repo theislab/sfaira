@@ -14,9 +14,9 @@ class CacheControl:
     def clear(countdown=True):
         if countdown:
             for i in range(5):
-                print(f"WARNING: deleting entire folder {settings.cachedir_ontologies} in {5 - i} sec ...")
+                print(f"WARNING: deleting entire folder {settings.cachedir_base} in {5 - i} sec ...")
                 time.sleep(1)
-        shutil.rmtree(path=settings.cachedir_ontologies)
+        shutil.rmtree(path=settings.cachedir_base)
 
     def reload(self):
         for x in self.adata_ids.ontology_constrained:

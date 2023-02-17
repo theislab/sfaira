@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 
 from sfaira.consts import AdataIdsSfaira, OC, AdataIds
+from sfaira.data.dataloaders.obs_utils import is_custom
 from sfaira.data.store.stores.base import StoreBase
 from sfaira.data.store.stores.multi import StoresAnndata
 from sfaira.data.store.stores.single import StoreSingleFeatureSpace
@@ -257,12 +258,13 @@ class EstimatorBaseCelltype(EstimatorBase):
         def encoder(x) -> np.ndarray:
             if isinstance(x, str):
                 x = [x]
-            # Encodes unknowns to empty rows.
+            # Encodes unknowns and custom values to empty rows.
             idx = [
                 leave_maps[y] if y not in [
                     self._adata_ids.unknown_metadata_identifier,
                     self._adata_ids.not_a_cell_celltype_identifier,
-                ] else np.array([])
+                ] and not is_custom(y, self._adata_ids)
+                else np.array([])
                 for y in x
             ]
             oh = np.zeros((len(x), self.ntypes,), dtype="float32")

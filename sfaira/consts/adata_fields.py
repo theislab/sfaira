@@ -64,6 +64,7 @@ class AdataIds:
     invalid_metadata_identifier: Union[str, None]
     not_a_cell_celltype_identifier: Union[str, None]
     unknown_metadata_identifier: Union[str, None]
+    custom_metadata_prefix: Union[str, None]
 
     @property
     def controlled_meta_keys(self):
@@ -143,6 +144,7 @@ class AdataIdsSfaira(AdataIds):
         self.invalid_metadata_identifier = "na"
         self.not_a_cell_celltype_identifier = "NOT_A_CELL"
         self.unknown_metadata_identifier = "unknown"
+        self.custom_metadata_prefix = "custom_"
 
         self.batch_keys = [self.bio_sample, self.individual, self.tech_sample]
 
@@ -233,7 +235,6 @@ class AdataIdsCellxgene(AdataIds):
         self.organ = "tissue"
         self.organism = "organism"
         self.primary_data = "is_primary_data"
-        self.suspension_type = "suspension_type"
         self.title = "title"
         self.year = "year"
 
@@ -250,6 +251,7 @@ class AdataIdsCellxgene(AdataIds):
         self.invalid_metadata_identifier = "na"
         self.not_a_cell_celltype_identifier = "CL:0000003"
         self.unknown_metadata_identifier = "unknown"
+        self.custom_metadata_prefix = "custom_"
 
         self.batch_keys = []
 
@@ -262,7 +264,6 @@ class AdataIdsCellxgene(AdataIds):
             "organ",
             "organism",
             "sex",
-            "suspension_type",
         ]
 
         self.obs_keys = [

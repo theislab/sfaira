@@ -47,6 +47,7 @@ class TemplateAttributes:
     organ: str = ''
     sample_source: str = ''
     sex: str = ''
+    suspension_type: str = ''
 
     assay_sc_obs_key: str = ''
     cell_type_obs_key: str = ''
@@ -56,6 +57,7 @@ class TemplateAttributes:
     organ_obs_key: str = ''
     sample_source_obs_key: str = ''
     sex_obs_key: str = ''
+    suspension_type_obs_key: str = ''
 
     spatial_x_coord_obs_key: str = ''
     spatial_y_coord_obs_key: str = ''
@@ -365,6 +367,7 @@ class DataloaderCreator:
             default='')
         if self.template_attributes.assay_sc != "" and self.template_attributes.assay_sc_obs_key != "":
             print(format_warning_double_curation('assay_sc'))
+            self.template_attributes.assay_sc_obs_key = ''
         # cell_type:
         self.template_attributes.cell_type_obs_key = sfaira_questionary(
             function='text',
@@ -372,6 +375,7 @@ class DataloaderCreator:
             default='')
         if self.template_attributes.cell_type != "" and self.template_attributes.cell_type_obs_key != "":
             print(format_warning_double_curation('cell type'))
+            self.template_attributes.cell_type_obs_key = ''
         # development_stage:
         self.template_attributes.development_stage_obs_key = sfaira_questionary(
             function='text',
@@ -381,6 +385,7 @@ class DataloaderCreator:
         if self.template_attributes.development_stage != "" and \
                 self.template_attributes.development_stage_obs_key != "":
             print(format_warning_double_curation('development_stage'))
+            self.template_attributes.development_stage_obs_key = ''
         # disease:
         self.template_attributes.disease_obs_key = sfaira_questionary(
             function='text',
@@ -388,6 +393,7 @@ class DataloaderCreator:
             default='')
         if self.template_attributes.disease != "" and self.template_attributes.disease_obs_key != "":
             print(format_warning_double_curation('disease'))
+            self.template_attributes.disease_obs_key = ''
         # ethnicity:
         self.template_attributes.ethnicity_obs_key = sfaira_questionary(
             function='text',
@@ -395,6 +401,7 @@ class DataloaderCreator:
             default='')
         if self.template_attributes.ethnicity != "" and self.template_attributes.ethnicity_obs_key != "":
             print(format_warning_double_curation('ethnicity'))
+            self.template_attributes.ethnicity_obs_key = ''
         # organ:
         self.template_attributes.organ_obs_key = sfaira_questionary(
             function='text',
@@ -402,6 +409,7 @@ class DataloaderCreator:
             default='')
         if self.template_attributes.organ != "" and self.template_attributes.organ_obs_key != "":
             print(format_warning_double_curation('organ'))
+            self.template_attributes.organ_obs_key = ''
         # sample_source:
         self.template_attributes.sample_source_obs_key = sfaira_questionary(
             function='text',
@@ -409,7 +417,8 @@ class DataloaderCreator:
                      '["primary_tissue", "2d_culture", "3d_culture", "tumor"]):',
             default='')
         if self.template_attributes.sample_source != "" and self.template_attributes.sample_source_obs_key != "":
-            print(format_warning_double_curation('sex'))
+            print(format_warning_double_curation('sample_source'))
+            self.template_attributes.sample_source_obs_key = ''
         # sex:
         self.template_attributes.sex_obs_key = sfaira_questionary(
             function='text',
@@ -417,6 +426,7 @@ class DataloaderCreator:
             default='')
         if self.template_attributes.sex != "" and self.template_attributes.sex_obs_key != "":
             print(format_warning_double_curation('sex'))
+            self.template_attributes.sex_obs_key = ''
         # suspension type
         self.template_attributes.suspension_type_obs_key = sfaira_questionary(
             function='text',
@@ -425,6 +435,8 @@ class DataloaderCreator:
         if self.template_attributes.suspension_type != "" and \
                 self.template_attributes.suspension_type_obs_key != "":
             print(format_warning_double_curation('suspension_type'))
+            self.template_attributes.suspension_type_obs_key = ''
+
         requires_annotate = np.any([x != "" for x in [
             self.template_attributes.assay_sc_obs_key,
             self.template_attributes.cell_type_obs_key,

@@ -31,7 +31,7 @@ def _create_adata(
         add_gene_id_column: bool = False
 ) -> anndata.AnnData:
     """
-    Usesd by mock data loaders.
+    Used by mock data loaders.
     """
     gc = GenomeContainer(organism=" ".join(assembly.split(".")[0].split("_")), release=assembly.split(".")[-1])
     gc.set(biotype="protein_coding")

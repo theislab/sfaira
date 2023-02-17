@@ -17,7 +17,7 @@ from sfaira.data.dataloaders.base.dataset import DatasetBase
 from sfaira.data.dataloaders.base.utils import identify_tsv
 from sfaira.versions.genomes.genomes import GenomeContainer
 from sfaira.versions.metadata.maps import prepare_ontology_map_tab
-from sfaira.data.dataloaders.obs_utils import value_protection
+from sfaira.data.dataloaders.obs_utils import value_protection, is_custom
 from sfaira.data.dataloaders.ontology_access import get_ontology
 from sfaira.data.dataloaders.utils import read_yaml
 
@@ -288,6 +288,7 @@ class DatasetGroup:
                     match_only=False,
                     omit_list=[v._adata_ids.not_a_cell_celltype_identifier,
                                v._adata_ids.unknown_metadata_identifier],
+                    omit_prefix_list=[v._adata_ids.custom_metadata_prefix],
                     **kwargs
                 )
                 tab = tab.sort_values(self._adata_ids.classmap_source_key)
@@ -673,14 +674,15 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                                     if x not in [
                                         self._adata_ids.unknown_metadata_identifier,
                                         self._adata_ids.not_a_cell_celltype_identifier
-                                    ]
+                                    ] and not is_custom(x, self._adata_ids)
                                 ]
                             )
                             # Adds a third column with the corresponding ontology IDs into the file.
                             tab[self._adata_ids.classmap_target_id_key] = [
                                 onto.convert_to_id(x)
                                 if (x != self._adata_ids.unknown_metadata_identifier and
-                                    x != self._adata_ids.not_a_cell_celltype_identifier)
+                                    x != self._adata_ids.not_a_cell_celltype_identifier and
+                                    not is_custom(x, self._adata_ids))
                                 else self._adata_ids.unknown_metadata_identifier
                                 for x in tab[self._adata_ids.classmap_target_key].values
                             ]
@@ -719,7 +721,8 @@ class DatasetGroupDirectoryOriented(DatasetGroup):
                             tab[self._adata_ids.classmap_target_key] = [
                                 onto.convert_to_name(x)
                                 if (x != self._adata_ids.unknown_metadata_identifier and
-                                    x != self._adata_ids.not_a_cell_celltype_identifier)
+                                    x != self._adata_ids.not_a_cell_celltype_identifier and
+                                    not is_custom(x, self._adata_ids))
                                 else self._adata_ids.unknown_metadata_identifier
                                 for x in tab[self._adata_ids.classmap_target_id_key].values
                             ]

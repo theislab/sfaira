@@ -69,7 +69,9 @@ def download(urls, data_dir, directory_formatted_doi, dataset_id, **kwargs):
             else:
                 fn = url.split("/")[-1]
             # Only download if file not already downloaded:
-            if not os.path.isfile(os.path.join(data_dir, fn)):
+            if os.path.isfile(os.path.join(data_dir, fn)):
+                print(f"File {fn} already found on disk, skipping download.")
+            else:
                 print_dir = f"{directory_formatted_doi}:{fn}"
                 with DownloadProgressBar(unit='B', unit_scale=True, miniters=1, desc=print_dir) as pbar:
                     urllib.request.urlretrieve(url, os.path.join(data_dir, fn), reporthook=pbar.update_to)

@@ -1,0 +1,28 @@
+source	target	target_id
+Brain	brain	UBERON:0000955
+Caudate+Putamen	caudate-putamen	UBERON:0005383
+Cerebellum	cerebellum	UBERON:0002037
+Cortex	cortex	UBERON:0001851
+Cortex entorhinal	entorhinal cortex	UBERON:0002728
+Cortex frontal	frontal cortex	UBERON:0001870
+Cortex hemisphere A	cortex	UBERON:0001851
+Cortex hemisphere B	cortex	UBERON:0001851
+Cortex occipital	occipital cortex	UBERON:0016540
+Cortex parietal	parietal cortex	UBERON:0016530
+Cortex temporal	temporal cortex	UBERON:0016538
+Cortical hem	telencephalon neural crest	UBERON:0003850
+Diencephalon	diencephalon	UBERON:0001894
+Forebrain	forebrain	UBERON:0001890
+Head	head	UBERON:0000033
+Hindbrain	hindbrain	UBERON:0002028
+Hippocampus	hippocampal formation	UBERON:0002421
+Hypothalamus	hypothalamus	UBERON:0001898
+Medulla	medulla oblongata	UBERON:0001896
+Midbrain	midbrain	UBERON:0001891
+Midbrain dorsal	midbrain	UBERON:0001891
+Midbrain ventral	midbrain	UBERON:0001891
+Pons	pons	UBERON:0000988
+Striatum	striatum	UBERON:0002435
+Subcortex	cerebral subcortex	UBERON:0000454
+Telencephalon	telencephalon	UBERON:0001893
+Thalamus	dorsal plus ventral thalamus	UBERON:0001897

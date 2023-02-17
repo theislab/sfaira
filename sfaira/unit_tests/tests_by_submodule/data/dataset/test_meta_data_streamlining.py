@@ -4,7 +4,7 @@ import anndata
 import numpy as np
 import pytest
 
-from sfaira.consts.adata_fields import AdataIdsSfaira, AdataIdsCellxgene_v2_0_0
+from sfaira.consts.adata_fields import AdataIdsSfaira, AdataIdsCellxgene_v3_0_0
 from sfaira.unit_tests.data_for_tests.loaders import RELEASE_HUMAN, PrepareData, PrepareDataExport
 from sfaira.unit_tests.directories import DIR_TEMP
 
@@ -82,7 +82,7 @@ def test_cellxgene_export(schema_version: str, organism: str):
     # Custom checks:
     adata_ids_sfaira = AdataIdsSfaira()
     if schema_version == "3_0_0":
-        adata_ids_cellxgene = AdataIdsCellxgene_v2_0_0()
+        adata_ids_cellxgene = AdataIdsCellxgene_v3_0_0()
     else:
         assert False
     # .obs
