@@ -1,7 +1,8 @@
 dataset_structure:
     dataset_index: 1
     sample_fns: 
-        - "HLCA_full_v1.1_to_share.h5ad"
+        - "HLCA_v1.1_core.h5ad"
+        - "HLCA_v1.1_full.h5ad"
 dataset_wise:
     author: "Sikkema, Lisa"
     default_embedding: 
@@ -10,7 +11,7 @@ dataset_wise:
     download_url_data: "https://beta.fastgenomics.org/datasets/detail-dataset-427f1eee6dd44f50bae1ab13f0f3c6a9#Files"
     download_url_meta:
     primary_data: False
-    year: 2022
+    year: 2023
 layers:
     layer_counts: "counts"
     layer_processed: "X"
@@ -20,8 +21,10 @@ layers:
     layer_unspliced_processed: 
     layer_velocity: 
 dataset_or_feature_wise:
-    feature_reference: "Homo_sapiens.GRCh38.107"
-    feature_reference_var_key: 
+    feature_reference: 
+        HLCA_v1.1_full.h5ad: "Homo_sapiens.GRCh38.107"
+    feature_reference_var_key:
+        HLCA_v1.1_core.h5ad: "reference_genome" 
     feature_type: "rna"
     feature_type_var_key: 
 dataset_or_observation_wise:
@@ -40,7 +43,10 @@ dataset_or_observation_wise:
     development_stage:
     development_stage_obs_key: "development_stage"
     disease:
-    disease_obs_key: "disease"
+    disease_obs_key: 
+        HLCA_v1.1_full.h5ad: "disease"
+        HLCA_v1.1_core.h5ad: "lung_condition"
+    disease_obs_key: 
     ethnicity: 
     ethnicity_obs_key: "ancestry"
     gm:
@@ -60,13 +66,14 @@ dataset_or_observation_wise:
     state_exact:
     state_exact_obs_key:
     suspension_type:
-    suspension_type_obs_key: "suspension_type"
+    suspension_type_obs_key: 
+        HLCA_v1.1_full.h5ad: "suspension_type"
     tech_sample:
     tech_sample_obs_key: 
     treatment:
     treatment_obs_key:
 feature_wise:
-    feature_id_var_key: "ensembl_id"
+    feature_id_var_key: "index"
     feature_symbol_var_key: "gene_symbol"
 observation_wise:
     spatial_x_coord_obs_key:
