@@ -70,7 +70,7 @@ dataset_or_observation_wise:
     suspension_type: "cell"
     suspension_type_obs_key: 
     tech_sample: 
-    tech_sample_obs_key: "sample"
+    tech_sample_obs_key:
     treatment:
     treatment_obs_key:
 feature_wise:
