@@ -1,14 +1,17 @@
 dataset_structure:
     dataset_index: 1
     sample_fns:
+        - "GSM4518167_2242_d80_hStrS"
+        - "GSM4518168_1205_d80_hStrS"
+        - "GSM4518169_8858_d83_hStrS"
 dataset_wise:
     author: "Miura, Yuki"
     default_embedding:
     doi_preprint:
     doi_journal: "10.1038/s41587-020-00763-w"
-    download_url_data: "ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE149nnn/GSE149931/suppl/GSE149931_RAW.tar"
+    download_url_data: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE149nnn/GSE149931/suppl/GSE149931_RAW.tar"
     download_url_meta:
-    primary_data: False
+    primary_data: True
     year: 2020
 layers:
     layer_counts: "X"
@@ -32,12 +35,15 @@ dataset_or_observation_wise:
     assay_type_differentiation_obs_key: 
     bio_sample:
     bio_sample_obs_key: 
-    cell_line: 
-    cell_line_obs_key: # "cell_line" -- add later, custom cell lines not yet added to sfaira
+    cell_line:
+        GSM4518167_2242_d80_hStrS: "custom_2242-1"
+        GSM4518168_1205_d80_hStrS: "custom_1205-1"
+        GSM4518169_8858_d83_hStrS: "custom_8858-1"
+    cell_line_obs_key:
     cell_type: 
     cell_type_obs_key: 
-    development_stage: 
-    development_stage_obs_key: "age"
+    development_stage: "12th week post-fertilization human stage"
+    development_stage_obs_key:
     disease: "healthy"
     disease_obs_key: 
     ethnicity: 
@@ -52,8 +58,11 @@ dataset_or_observation_wise:
     organism_obs_key: 
     sample_source: "3d_culture"
     sample_source_obs_key: 
-    sex: 
-    sex_obs_key: # add later, once more information about cell lines are known
+    sex:
+        GSM4518167_2242_d80_hStrS: "male"
+        GSM4518168_1205_d80_hStrS: "female"
+        GSM4518169_8858_d83_hStrS: "male"
+    sex_obs_key:
     source_doi:
     source_doi_obs_key:
     state_exact:
@@ -65,7 +74,7 @@ dataset_or_observation_wise:
     treatment:
     treatment_obs_key:
 feature_wise:
-    feature_id_var_key: "EnsemblID"
+    feature_id_var_key: "ensembl_id"
     feature_symbol_var_key: "index"
 observation_wise:
     spatial_x_coord_obs_key: 
