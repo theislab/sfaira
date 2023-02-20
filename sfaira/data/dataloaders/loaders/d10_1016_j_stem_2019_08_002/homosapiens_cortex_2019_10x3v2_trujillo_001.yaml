@@ -1,6 +1,18 @@
 dataset_structure:
     dataset_index: 1
     sample_fns:
+        - "GSM3734294_1M"
+        - "GSM3734294_1M"
+        - "GSM3734294_1M"
+        - "GSM3734295_3M"
+        - "GSM3734295_3M"
+        - "GSM3734295_3M"
+        - "GSM3734296_6M"
+        - "GSM3734296_6M"
+        - "GSM3734296_6M"
+        - "GSM3734297_10M"
+        - "GSM3734297_10M"
+        - "GSM3734297_10M"
 dataset_wise:
     author: "Trujillo, Cleber"
     default_embedding: 
@@ -31,13 +43,25 @@ dataset_or_observation_wise:
     assay_type_differentiation: "guided"
     assay_type_differentiation_obs_key: 
     bio_sample:
-    bio_sample_obs_key: "time"
-    cell_line: "WT - iPSC"
+    bio_sample_obs_key:
+    cell_line:
     cell_line_obs_key: 
     cell_type: 
     cell_type_obs_key: 
-    development_stage: 
-    development_stage_obs_key: "organoid_age_days"
+    development_stage:
+        GSM3734294_1M: "Carnegie stage 13"
+        GSM3734294_1M: "Carnegie stage 13"
+        GSM3734294_1M: "Carnegie stage 13"
+        GSM3734295_3M: "13th week post-fertilization human stage"
+        GSM3734295_3M: "13th week post-fertilization human stage"
+        GSM3734295_3M: "13th week post-fertilization human stage"
+        GSM3734296_6M: "26th week post-fertilization human stage"
+        GSM3734296_6M: "26th week post-fertilization human stage"
+        GSM3734296_6M: "26th week post-fertilization human stage"
+        GSM3734297_10M: "2-month-old human stage"
+        GSM3734297_10M: "2-month-old human stage"
+        GSM3734297_10M: "2-month-old human stage"
+    development_stage_obs_key:
     disease: "healthy"
     disease_obs_key: 
     ethnicity: 
@@ -46,7 +70,7 @@ dataset_or_observation_wise:
     gm_obs_key:
     individual:
     individual_obs_key: 
-    organ: "forebrain"  # I think some of the older organoids should have the annotation cortex, but in the shared table the mentioned organ was only forebrain
+    organ: "cerebral cortex"
     organ_obs_key: 
     organism: "Homo sapiens"
     organism_obs_key: 
