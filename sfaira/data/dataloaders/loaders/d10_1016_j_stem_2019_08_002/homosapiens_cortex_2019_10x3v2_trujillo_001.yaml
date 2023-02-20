@@ -2,16 +2,8 @@ dataset_structure:
     dataset_index: 1
     sample_fns:
         - "GSM3734294_1M"
-        - "GSM3734294_1M"
-        - "GSM3734294_1M"
-        - "GSM3734295_3M"
-        - "GSM3734295_3M"
         - "GSM3734295_3M"
         - "GSM3734296_6M"
-        - "GSM3734296_6M"
-        - "GSM3734296_6M"
-        - "GSM3734297_10M"
-        - "GSM3734297_10M"
         - "GSM3734297_10M"
 dataset_wise:
     author: "Trujillo, Cleber"
@@ -50,16 +42,8 @@ dataset_or_observation_wise:
     cell_type_obs_key: 
     development_stage:
         GSM3734294_1M: "Carnegie stage 13"
-        GSM3734294_1M: "Carnegie stage 13"
-        GSM3734294_1M: "Carnegie stage 13"
-        GSM3734295_3M: "13th week post-fertilization human stage"
-        GSM3734295_3M: "13th week post-fertilization human stage"
         GSM3734295_3M: "13th week post-fertilization human stage"
         GSM3734296_6M: "26th week post-fertilization human stage"
-        GSM3734296_6M: "26th week post-fertilization human stage"
-        GSM3734296_6M: "26th week post-fertilization human stage"
-        GSM3734297_10M: "2-month-old human stage"
-        GSM3734297_10M: "2-month-old human stage"
         GSM3734297_10M: "2-month-old human stage"
     development_stage_obs_key:
     disease: "healthy"
