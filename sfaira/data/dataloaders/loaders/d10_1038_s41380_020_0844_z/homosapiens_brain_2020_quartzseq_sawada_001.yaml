@@ -1,12 +1,20 @@
 dataset_structure:
     dataset_index: 1
     sample_fns:
+        - GSM3395714_scDT1_Affect_Lot4_p19_S3
+        - GSM3395715_scDT1_Affect_Lot3_p13_S7
+        - GSM3395716_scDT1_Affect_Lot1_p9_S1
+        - GSM3395717_scDT1_Affect_Lot2_p11_S6
+        - GSM3395718_scDT1_Unaffect_Lot3_p21_S4
+        - GSM3395719_scDT1_Unaffect_Lot1_p15_S8
+        - GSM3395720_scDT1_Unaffect_Lot2_p17_S2
+        - GSM3395721_scDT1_Unaffect_Lot4_p23_S5
 dataset_wise:
     author: "Sawada, Tomoyo"
     default_embedding: 
     doi_preprint: 
     doi_journal: "10.1038/s41380-020-0844-z"
-    download_url_data: "ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE120nnn/GSE120190/suppl/GSE120190_RAW.tar"
+    download_url_data: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE120nnn/GSE120190/suppl/GSE120190_RAW.tar"
     download_url_meta: 
     primary_data: True
     year: 2020
@@ -19,32 +27,56 @@ layers:
     layer_unspliced_processed: 
     layer_velocity: 
 dataset_or_feature_wise:
-    feature_reference: "Homo_sapiens.GRCh38.91"
+    feature_reference: "Homo_sapiens.GRCh38.90"
     feature_reference_var_key: 
     feature_type: "rna"
     feature_type_var_key: 
 dataset_or_observation_wise:
-    assay_sc: "Quartz-seq2"
+    assay_sc: "Quartz-seq"
     assay_sc_obs_key: 
     assay_differentiation: "Lancaster, 2014 with modifications (doi: 10.1038/nprot.2014.158)"
     assay_differentiation_obs_key: 
     assay_type_differentiation: "unguided"
     assay_type_differentiation_obs_key: 
-    bio_sample:  
-    bio_sample_obs_key: "sample"
-    cell_line: 
-    cell_line_obs_key: #"person"
+    bio_sample:
+    bio_sample_obs_key:
+    cell_line:
+        GSM3395714_scDT1_Affect_Lot4_p19_S3: "custom_DT1_A"
+        GSM3395715_scDT1_Affect_Lot3_p13_S7: "custom_DT1_A"
+        GSM3395716_scDT1_Affect_Lot1_p9_S1: "custom_DT1_A"
+        GSM3395717_scDT1_Affect_Lot2_p11_S6: "custom_DT1_A"
+        GSM3395718_scDT1_Unaffect_Lot3_p21_S4: "custom_DT1_U"
+        GSM3395719_scDT1_Unaffect_Lot1_p15_S8: "custom_DT1_U"
+        GSM3395720_scDT1_Unaffect_Lot2_p17_S2: "custom_DT1_U"
+        GSM3395721_scDT1_Unaffect_Lot4_p23_S5: "custom_DT1_U"
+    cell_line_obs_key: 
     cell_type: 
     cell_type_obs_key: 
     development_stage: "Carnegie stage 15"
-    development_stage_obs_key: "organoid_age_data"
-    disease: 
-    disease_obs_key: "disease"
+    development_stage_obs_key:
+    disease:
+        GSM3395714_scDT1_Affect_Lot4_p19_S3: "schizoaffective disorder"
+        GSM3395715_scDT1_Affect_Lot3_p13_S7: "schizoaffective disorder"
+        GSM3395716_scDT1_Affect_Lot1_p9_S1: "schizoaffective disorder"
+        GSM3395717_scDT1_Affect_Lot2_p11_S6: "schizoaffective disorder"
+        GSM3395718_scDT1_Unaffect_Lot3_p21_S4: "healthy"
+        GSM3395719_scDT1_Unaffect_Lot1_p15_S8: "healthy"
+        GSM3395720_scDT1_Unaffect_Lot2_p17_S2: "healthy"
+        GSM3395721_scDT1_Unaffect_Lot4_p23_S5: "healthy"
+    disease_obs_key:
     ethnicity: "Japanese"
     ethnicity_obs_key: 
     gm:
     gm_obs_key:
     individual:
+        GSM3395714_scDT1_Affect_Lot4_p19_S3: "DT1_A"
+        GSM3395715_scDT1_Affect_Lot3_p13_S7: "DT1_A"
+        GSM3395716_scDT1_Affect_Lot1_p9_S1: "DT1_A"
+        GSM3395717_scDT1_Affect_Lot2_p11_S6: "DT1_A"
+        GSM3395718_scDT1_Unaffect_Lot3_p21_S4: "DT1_U"
+        GSM3395719_scDT1_Unaffect_Lot1_p15_S8: "DT1_U"
+        GSM3395720_scDT1_Unaffect_Lot2_p17_S2: "DT1_U"
+        GSM3395721_scDT1_Unaffect_Lot4_p23_S5: "DT1_U"
     individual_obs_key: 
     organ: "brain"
     organ_obs_key: 
