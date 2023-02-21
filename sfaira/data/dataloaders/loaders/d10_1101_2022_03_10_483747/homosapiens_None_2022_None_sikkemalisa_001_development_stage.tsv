@@ -1,77 +1,77 @@
-source	target
-1-month-old human stage	1-month-old human stage
-10-year-old human stage	10-year-old human stage
-11-month-old human stage	11-month-old human stage
-12-month-old human stage	12-month-old human stage
-12-year-old human stage	12-year-old human stage
-14-year-old human stage	14-year-old human stage
-15-year-old human stage	15-year-old human stage
-16-year-old human stage	16-year-old human stage
-18-year-old human stage	18-year-old human stage
-2-year-old human stage	2-year-old human stage
-20-year-old human stage	20-year-old human stage
-21-year-old human stage	21-year-old human stage
-22-year-old human stage	22-year-old human stage
-23-year-old human stage	23-year-old human stage
-24-year-old human stage	24-year-old human stage
-25-year-old human stage	25-year-old human stage
-26-year-old human stage	26-year-old human stage
-27-year-old human stage	27-year-old human stage
-29-year-old human stage	29-year-old human stage
-3-month-old human stage	3-month-old human stage
-3-year-old human stage	3-year-old human stage
-30-year-old human stage	30-year-old human stage
-31-year-old human stage	31-year-old human stage
-32-year-old human stage	32-year-old human stage
-33-year-old human stage	33-year-old human stage
-34-year-old human stage	34-year-old human stage
-35-year-old human stage	35-year-old human stage
-36-year-old human stage	36-year-old human stage
-37-year-old human stage	37-year-old human stage
-38-year-old human stage	38-year-old human stage
-4-year-old human stage	4-year-old human stage
-40-year-old human stage	40-year-old human stage
-41-year-old human stage	41-year-old human stage
-42-year-old human stage	42-year-old human stage
-43-year-old human stage	43-year-old human stage
-44-year-old human stage	44-year-old human stage
-45-year-old human stage	45-year-old human stage
-46-year-old human stage	46-year-old human stage
-47-year-old human stage	47-year-old human stage
-48-year-old human stage	48-year-old human stage
-49-year-old human stage	49-year-old human stage
-5-year-old human stage	5-year-old human stage
-50-year-old human stage	50-year-old human stage
-51-year-old human stage	51-year-old human stage
-52-year-old human stage	52-year-old human stage
-53-year-old human stage	53-year-old human stage
-54-year-old human stage	54-year-old human stage
-55-year-old human stage	55-year-old human stage
-56-year-old human stage	56-year-old human stage
-57-year-old human stage	57-year-old human stage
-58-year-old human stage	58-year-old human stage
-59-year-old human stage	59-year-old human stage
-6-month-old human stage	6-month-old human stage
-60-year-old human stage	60-year-old human stage
-61-year-old human stage	61-year-old human stage
-62-year-old human stage	62-year-old human stage
-63-year-old human stage	63-year-old human stage
-64-year-old human stage	64-year-old human stage
-65-year-old human stage	65-year-old human stage
-66-year-old human stage	66-year-old human stage
-67-year-old human stage	67-year-old human stage
-68-year-old human stage	68-year-old human stage
-69-year-old human stage	69-year-old human stage
-7-year-old human stage	7-year-old human stage
-70-year-old human stage	70-year-old human stage
-71-year-old human stage	71-year-old human stage
-72-year-old human stage	72-year-old human stage
-73-year-old human stage	73-year-old human stage
-75-year-old human stage	75-year-old human stage
-76-year-old human stage	76-year-old human stage
-77-year-old human stage	77-year-old human stage
-79-year-old human stage	79-year-old human stage
-81-year-old human stage	81-year-old human stage
-9-year-old human stage	9-year-old human stage
-nan	unknown	
-newborn human stage	newborn human stage
+source	target	target_id
+1-month-old human stage	1-month-old human stage	HsapDv:0000174
+10-year-old human stage	10-year-old human stage	HsapDv:0000104
+11-month-old human stage	11-month-old human stage	HsapDv:0000184
+12-month-old human stage	12-month-old human stage	HsapDv:0000185
+12-year-old human stage	12-year-old human stage	HsapDv:0000106
+14-year-old human stage	14-year-old human stage	HsapDv:0000108
+15-year-old human stage	15-year-old human stage	HsapDv:0000109
+16-year-old human stage	16-year-old human stage	HsapDv:0000110
+18-year-old human stage	18-year-old human stage	HsapDv:0000112
+2-year-old human stage	2-year-old human stage	HsapDv:0000096
+20-year-old human stage	20-year-old human stage	HsapDv:0000114
+21-year-old human stage	21-year-old human stage	HsapDv:0000115
+22-year-old human stage	22-year-old human stage	HsapDv:0000116
+23-year-old human stage	23-year-old human stage	HsapDv:0000117
+24-year-old human stage	24-year-old human stage	HsapDv:0000118
+25-year-old human stage	25-year-old human stage	HsapDv:0000119
+26-year-old human stage	26-year-old human stage	HsapDv:0000120
+27-year-old human stage	27-year-old human stage	HsapDv:0000121
+29-year-old human stage	29-year-old human stage	HsapDv:0000123
+3-month-old human stage	3-month-old human stage	HsapDv:0000176
+3-year-old human stage	3-year-old human stage	HsapDv:0000097
+30-year-old human stage	30-year-old human stage	HsapDv:0000124
+31-year-old human stage	31-year-old human stage	HsapDv:0000125
+32-year-old human stage	32-year-old human stage	HsapDv:0000126
+33-year-old human stage	33-year-old human stage	HsapDv:0000127
+34-year-old human stage	34-year-old human stage	HsapDv:0000128
+35-year-old human stage	35-year-old human stage	HsapDv:0000129
+36-year-old human stage	36-year-old human stage	HsapDv:0000130
+37-year-old human stage	37-year-old human stage	HsapDv:0000131
+38-year-old human stage	38-year-old human stage	HsapDv:0000132
+4-year-old human stage	4-year-old human stage	HsapDv:0000098
+40-year-old human stage	40-year-old human stage	HsapDv:0000134
+41-year-old human stage	41-year-old human stage	HsapDv:0000135
+42-year-old human stage	42-year-old human stage	HsapDv:0000136
+43-year-old human stage	43-year-old human stage	HsapDv:0000137
+44-year-old human stage	44-year-old human stage	HsapDv:0000138
+45-year-old human stage	45-year-old human stage	HsapDv:0000139
+46-year-old human stage	46-year-old human stage	HsapDv:0000140
+47-year-old human stage	47-year-old human stage	HsapDv:0000141
+48-year-old human stage	48-year-old human stage	HsapDv:0000142
+49-year-old human stage	49-year-old human stage	HsapDv:0000143
+5-year-old human stage	5-year-old human stage	HsapDv:0000099
+50-year-old human stage	50-year-old human stage	HsapDv:0000144
+51-year-old human stage	51-year-old human stage	HsapDv:0000145
+52-year-old human stage	52-year-old human stage	HsapDv:0000146
+53-year-old human stage	53-year-old human stage	HsapDv:0000147
+54-year-old human stage	54-year-old human stage	HsapDv:0000148
+55-year-old human stage	55-year-old human stage	HsapDv:0000149
+56-year-old human stage	56-year-old human stage	HsapDv:0000150
+57-year-old human stage	57-year-old human stage	HsapDv:0000151
+58-year-old human stage	58-year-old human stage	HsapDv:0000152
+59-year-old human stage	59-year-old human stage	HsapDv:0000153
+6-month-old human stage	6-month-old human stage	HsapDv:0000179
+60-year-old human stage	60-year-old human stage	HsapDv:0000154
+61-year-old human stage	61-year-old human stage	HsapDv:0000155
+62-year-old human stage	62-year-old human stage	HsapDv:0000156
+63-year-old human stage	63-year-old human stage	HsapDv:0000157
+64-year-old human stage	64-year-old human stage	HsapDv:0000158
+65-year-old human stage	65-year-old human stage	HsapDv:0000159
+66-year-old human stage	66-year-old human stage	HsapDv:0000160
+67-year-old human stage	67-year-old human stage	HsapDv:0000161
+68-year-old human stage	68-year-old human stage	HsapDv:0000162
+69-year-old human stage	69-year-old human stage	HsapDv:0000163
+7-year-old human stage	7-year-old human stage	HsapDv:0000101
+70-year-old human stage	70-year-old human stage	HsapDv:0000164
+71-year-old human stage	71-year-old human stage	HsapDv:0000165
+72-year-old human stage	72-year-old human stage	HsapDv:0000166
+73-year-old human stage	73-year-old human stage	HsapDv:0000167
+75-year-old human stage	75-year-old human stage	HsapDv:0000169
+76-year-old human stage	76-year-old human stage	HsapDv:0000170
+77-year-old human stage	77-year-old human stage	HsapDv:0000171
+79-year-old human stage	79-year-old human stage	HsapDv:0000173
+81-year-old human stage	81-year-old human stage	HsapDv:0000207
+9-year-old human stage	9-year-old human stage	HsapDv:0000103
+nan	unknown	unknown
+newborn human stage	newborn human stage	HsapDv:0000082

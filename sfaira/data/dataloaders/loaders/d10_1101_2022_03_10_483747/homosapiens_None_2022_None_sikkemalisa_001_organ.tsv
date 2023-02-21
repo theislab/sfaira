@@ -1,5 +1,5 @@
-source	target
-lung parenchyma	lung parenchyma
-nan	unknown	
-nose	nose
-respiratory airway	respiratory airway
+source	target	target_id
+lung parenchyma	lung parenchyma	UBERON:0008946
+nan	unknown	unknown
+nose	nose	UBERON:0000004
+respiratory airway	respiratory airway	UBERON:0001005

@@ -5,7 +5,7 @@ dataset_structure:
         - "HLCA_v1.1_full.h5ad"
 dataset_wise:
     author: "Sikkema, Lisa"
-    default_embedding: 
+    default_embedding: "X_umap"
     doi_preprint: "10.1101/2022.03.10.483747"
     doi_journal:
     download_url_data: "https://beta.fastgenomics.org/datasets/detail-dataset-427f1eee6dd44f50bae1ab13f0f3c6a9#Files"
@@ -23,8 +23,8 @@ layers:
 dataset_or_feature_wise:
     feature_reference: 
         HLCA_v1.1_full.h5ad: "Homo_sapiens.GRCh38.107"
+        HLCA_v1.1_core.h5ad: "Homo_sapiens.GRCh38.84"
     feature_reference_var_key:
-        HLCA_v1.1_core.h5ad: "reference_genome" 
     feature_type: "rna"
     feature_type_var_key: 
 dataset_or_observation_wise:
