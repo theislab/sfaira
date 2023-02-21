@@ -34,5 +34,6 @@ sparse
 tqdm
 versioneer
 switchlang>=0.1.0
+tables
 xlrd==2.0.1
 zarr
