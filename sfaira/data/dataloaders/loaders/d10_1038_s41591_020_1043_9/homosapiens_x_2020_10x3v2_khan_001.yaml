@@ -37,11 +37,11 @@ dataset_or_observation_wise:
     bio_sample:
     bio_sample_obs_key:
     cell_line: 
-    cell_line_obs_key:
         GSM4306931_Control_1: "custom_0524-1"
         GSM4306932_Control_2: "custom_0307-1"
         GSM4306933_Patient_1: "custom_7958-3"
         GSM4306934_Patient_2: "custom_6303-5"
+    cell_line_obs_key:
     cell_type: 
     cell_type_obs_key: 
     development_stage: "12th week post-fertilization human stage"
