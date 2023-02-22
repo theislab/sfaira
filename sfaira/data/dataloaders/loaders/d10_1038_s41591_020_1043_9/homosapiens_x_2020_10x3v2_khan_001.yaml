@@ -1,12 +1,16 @@
 dataset_structure:
     dataset_index: 1
     sample_fns:
+        - "GSM4306931_Control_1"
+        - "GSM4306932_Control_2"
+        - "GSM4306933_Patient_1"
+        - "GSM4306934_Patient_2"
 dataset_wise:
     author: "Khan, Themasap"
     default_embedding: 
     doi_preprint: 
     doi_journal: "10.1038/s41591-020-1043-9"
-    download_url_data: "ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE145nnn/GSE145122/suppl/GSE145122_RAW.tar"
+    download_url_data: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE145nnn/GSE145122/suppl/GSE145122_RAW.tar"
     download_url_meta: 
     primary_data: True
     year: 2020
@@ -19,7 +23,7 @@ layers:
     layer_unspliced_processed: 
     layer_velocity: 
 dataset_or_feature_wise:
-    feature_reference: "Homo_sapiens.GRCh38.84"
+    feature_reference: "Homo_sapiens.GRCh38.93"
     feature_reference_var_key: 
     feature_type: "rna"
     feature_type_var_key: 
@@ -31,15 +35,23 @@ dataset_or_observation_wise:
     assay_type_differentiation: "guided"
     assay_type_differentiation_obs_key: 
     bio_sample:
-    bio_sample_obs_key: "sample"
+    bio_sample_obs_key:
     cell_line: 
-    cell_line_obs_key: #"cell_line"
+    cell_line_obs_key:
+        GSM4306931_Control_1: "custom_0524-1"
+        GSM4306932_Control_2: "custom_0307-1"
+        GSM4306933_Patient_1: "custom_7958-3"
+        GSM4306934_Patient_2: "custom_6303-5"
     cell_type: 
     cell_type_obs_key: 
     development_stage: "12th week post-fertilization human stage"
-    development_stage_obs_key: "organoid_age_days"
-    disease: 
-    disease_obs_key: "disease"
+    development_stage_obs_key:
+    disease:
+        GSM4306931_Control_1: "healthy"
+        GSM4306932_Control_2: "healthy"
+        GSM4306933_Patient_1: "22q11.2 deletion syndrome"
+        GSM4306934_Patient_2: "22q11.2 deletion syndrome"
+    disease_obs_key:
     ethnicity: 
     ethnicity_obs_key: 
     gm:
@@ -47,16 +59,24 @@ dataset_or_observation_wise:
     individual:
     individual_obs_key: 
     organ: "forebrain"
-    organ_obs_key: 
+    organ_obs_key:
     organism: "Homo sapiens"
     organism_obs_key: 
     sample_source: "3d_culture"
     sample_source_obs_key: 
-    sex: 
-    sex_obs_key: "sex"
+    sex:
+        GSM4306931_Control_1: "female"
+        GSM4306932_Control_2: "male"
+        GSM4306933_Patient_1: "female"
+        GSM4306934_Patient_2: "female"
+    sex_obs_key:
     source_doi:
     source_doi_obs_key:
     state_exact:
+        GSM4306931_Control_1: "Subject age: 27 years. No additional diagnoses. IQ: 120"
+        GSM4306932_Control_2: "Subject age: 27 years. No additional diagnoses. IQ: n/a"
+        GSM4306933_Patient_1: "Subject age: 25 years. Psychiatric diagnoses: Schizophrenia, Depressive Disorder Not Otherwise Specified. IQ (FSIQ, subtest): 56"
+        GSM4306934_Patient_2: "Subject age: 22 years. Psychiatric diagnoses: none. IQ (FSIQ, subtest): 65"
     state_exact_obs_key:
     suspension_type: "cell"
     suspension_type_obs_key: 
@@ -65,8 +85,8 @@ dataset_or_observation_wise:
     treatment:
     treatment_obs_key:
 feature_wise:
-    feature_id_var_key: "index"
-    feature_symbol_var_key: "gene_id"
+    feature_id_var_key: "ensembl_id"
+    feature_symbol_var_key: "index"
 observation_wise:
     spatial_x_coord_obs_key: 
     spatial_y_coord_obs_key: 
