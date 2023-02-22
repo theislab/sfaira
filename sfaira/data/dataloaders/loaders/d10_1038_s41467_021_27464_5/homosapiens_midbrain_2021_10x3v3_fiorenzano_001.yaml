@@ -6,7 +6,7 @@ dataset_wise:
     default_embedding: 
     doi_preprint: 
     doi_journal: "10.1038/s41467-021-27464-5"
-    download_url_data: "ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE168nnn/GSE168323/suppl/GSE168323_RAW.tar"
+    download_url_data: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE168nnn/GSE168323/suppl/GSE168323_RAW.tar"
     download_url_meta: 
     primary_data: False
     year: 2021
@@ -31,13 +31,13 @@ dataset_or_observation_wise:
     assay_type_differentiation: "guided"
     assay_type_differentiation_obs_key: 
     bio_sample:
-    bio_sample_obs_key: # organoid labels are missing
+    bio_sample_obs_key:
     cell_line: 
-    cell_line_obs_key: # undifferentiated RC17, H9, HS999, and HS1001, and TH-Cre hPSC cells were used. Cell line metadata is missing
+    cell_line_obs_key:
     cell_type: 
-    cell_type_obs_key: # cell type labels are missing
+    cell_type_obs_key:
     development_stage: 
-    development_stage_obs_key: "dev_age"
+    development_stage_obs_key: "organoid_age_days"
     disease: "healthy"
     disease_obs_key: 
     ethnicity: 
@@ -46,7 +46,7 @@ dataset_or_observation_wise:
     gm_obs_key:
     individual:
     individual_obs_key:
-    organ: "midbrain"
+    organ: "midbrain tegmentum"
     organ_obs_key: 
     organism: "Homo sapiens"
     organism_obs_key: 

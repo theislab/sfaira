@@ -2,7 +2,6 @@ import anndata as ad
 import os
 import numpy as np
 import pandas as pd
-import gzip
 import scipy
 import tarfile
 
@@ -26,24 +25,19 @@ def load(data_dir, **kwargs):
                 age = member.name.split("Day")[1].split("-")[0]
                 tech_sample = member.name.split('-')[1].split('.csv')[0]
                 protocol = protocol_dict[member.name.split('-')[1][2:].split(".csv")[0]]
-
             elif "standardorg" in member.name:
                 age = member.name.split("day")[1].split(".csv")[0]
                 tech_sample = member.name.split("_")[1].split(".csv")[0]
                 protocol = protocol_dict['standardorg']
-
             else:
                 print("Error: organoid protocol not found in protocol dict")
 
-            temp = ad.AnnData(X=scipy.sparse.csr_matrix(d),
+            temp = ad.AnnData(X=scipy.sparse.csr_matrix(d, dtype=np.float32),
                               var=pd.DataFrame(index=d.columns.values),
                               obs=pd.DataFrame(index=d.index))
-
-            temp.obs['dev_age'] = age
             temp.obs['organoid_age_days'] = age
             temp.obs['tech_sample'] = tech_sample
             temp.obs['protocol'] = protocol
-
             adatas_list.append(temp)
 
     adata = ad.concat(adatas_list, join='outer')
