@@ -25,7 +25,7 @@ for doi in dois.split(","):
         allow_caching=True,
     )
     if schema == "cellxgene":
-        ds.streamline_var(match_to_release=None, schema="cellxgene:" + "2.0.0")
+        ds.streamline_var(match_to_release=None, schema="cellxgene:" + "3_0_0")
         ds.streamline_obs_uns(
             schema=schema.lower(),
             clean_obs=False,
