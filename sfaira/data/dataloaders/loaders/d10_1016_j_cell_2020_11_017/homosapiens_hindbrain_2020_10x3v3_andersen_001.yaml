@@ -72,7 +72,7 @@ dataset_or_observation_wise:
     source_doi:
     source_doi_obs_key:
     state_exact:
-        GSM3510169_hSpC_d45_noDAPT: "adapted differentiation prtocol without DAPT"
+        GSM3510169_hSpC_d45_noDAPT: "adapted differentiation protocol without DAPT"
     state_exact_obs_key:
     suspension_type: "cell"
     suspension_type_obs_key: 
