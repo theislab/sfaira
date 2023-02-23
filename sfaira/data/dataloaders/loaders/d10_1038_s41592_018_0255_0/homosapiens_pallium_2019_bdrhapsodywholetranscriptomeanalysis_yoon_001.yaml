@@ -1,6 +1,9 @@
 dataset_structure:
     dataset_index: 1
     sample_fns:
+        - "GSM2878890_hCS_FF_1"
+        - "GSM2878891_hCS_FF_2"
+        - "GSM2878892_hCS_FF_3"
 dataset_wise:
     author: "Yoon, Se-Jin"
     default_embedding: 
@@ -31,9 +34,12 @@ dataset_or_observation_wise:
     assay_type_differentiation: "guided"
     assay_type_differentiation_obs_key: 
     bio_sample:
-    bio_sample_obs_key: "sample"
-    cell_line: 
-    cell_line_obs_key: #"sample" hCS_FF1 is custom_C-6.1; hCS_FF2 is custom_C-6.2; hCS_FF3 is custom_C-7
+    bio_sample_obs_key:
+    cell_line:
+        GSM2878890_hCS_FF_1: "custom_C-6.1"
+        GSM2878891_hCS_FF_2: "custom_C-6.2"
+        GSM2878892_hCS_FF_3: "custom_C-7"
+    cell_line_obs_key:
     cell_type: 
     cell_type_obs_key: 
     development_stage: "15th week post-fertilization human stage"
@@ -53,7 +59,7 @@ dataset_or_observation_wise:
     sample_source: "3d_culture"
     sample_source_obs_key: 
     sex: 
-    sex_obs_key: #unknown, should be from different donors
+    sex_obs_key: # unknown, should be from different donors
     source_doi:
     source_doi_obs_key:
     state_exact:
