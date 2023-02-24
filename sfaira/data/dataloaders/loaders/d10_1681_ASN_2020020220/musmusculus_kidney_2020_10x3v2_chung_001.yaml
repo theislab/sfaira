@@ -14,7 +14,7 @@ dataset_wise:
     default_embedding: 
     doi_preprint: 
     doi_journal: "10.1681/ASN.2020020220"
-    download_url_data: "https://singlecell.broadinstitute.org/single_cell/study/SCP975"
+    download_url_data: "SCP975"
     download_url_meta: 
     primary_data: True
     year: 2020

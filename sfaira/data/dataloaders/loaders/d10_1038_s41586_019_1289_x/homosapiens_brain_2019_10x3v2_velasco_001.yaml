@@ -1,27 +1,20 @@
 dataset_structure:
     dataset_index: 1
     sample_fns:
-        - "GSE129519_expression_11a.6mon.txt.gz"
-        - "GSE129519_expression_GM.6mon.txt.gz"
-        - "GSE129519_expression_HUES66.3mon.txt.gz"
-        - "GSE129519_expression_PGP1.3mon.batch2.txt.gz"
-        - "GSE129519_expression_PGP1.3mon.txt.gz"
-        - "GSE129519_expression_PGP1.6mon.batch3.txt.gz"
-        - "GSE129519_expression_PGP1.6mon.txt.gz"
+        - "11a.6mon"
+        - "GM.6mon"
+        - "HUES66.3mon"
+        - "PGP1.3mon.batch2"
+        - "PGP1.3mon"
+        - "PGP1.6mon.batch3"
+        - "PGP1.6mon"
 dataset_wise:
     author: "Velasco, Silvia"
-    default_embedding: 
+    default_embedding: "X_tsne"
     doi_preprint: 
     doi_journal: "10.1038/s41586-019-1289-x"
-    download_url_data:
-        GSE129519_expression_11a.6mon.txt.gz: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE129nnn/GSE129519/suppl/GSE129519%5Fexpression%5F11a%2E6mon%2Etxt%2Egz"
-        GSE129519_expression_GM.6mon.txt.gz: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE129nnn/GSE129519/suppl/GSE129519%5Fexpression%5FGM%2E6mon%2Etxt%2Egz"
-        GSE129519_expression_HUES66.3mon.txt.gz: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE129nnn/GSE129519/suppl/GSE129519%5Fexpression%5FHUES66%2E3mon%2Etxt%2Egz"
-        GSE129519_expression_PGP1.3mon.batch2.txt.gz: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE129nnn/GSE129519/suppl/GSE129519%5Fexpression%5FPGP1%2E3mon%2Ebatch2%2Etxt%2Egz"
-        GSE129519_expression_PGP1.3mon.txt.gz: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE129nnn/GSE129519/suppl/GSE129519%5Fexpression%5FPGP1%2E3mon%2Etxt%2Egz"
-        GSE129519_expression_PGP1.6mon.batch3.txt.gz: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE129nnn/GSE129519/suppl/GSE129519%5Fexpression%5FPGP1%2E6mon%2Ebatch3%2Etxt%2Egz"
-        GSE129519_expression_PGP1.6mon.txt.gz: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE129nnn/GSE129519/suppl/GSE129519%5Fexpression%5FPGP1%2E6mon%2Etxt%2Egz"
-    download_url_meta: "manual,meta_combined.txt,https://singlecell.broadinstitute.org/single_cell/data/public/SCP282/reproducible-brain-organoids?filename=meta_combined.txt"
+    download_url_data: "SCP282"
+    download_url_meta:
     primary_data: True
     year: 2019
 layers:
@@ -47,24 +40,24 @@ dataset_or_observation_wise:
     bio_sample:
     bio_sample_obs_key: "Organoid"
     cell_line:
-        GSE129519_expression_11a.6mon.txt.gz: "11a"
-        GSE129519_expression_GM.6mon.txt.gz: "GM08330"
-        GSE129519_expression_HUES66.3mon.txt.gz: "HUES 66"
-        GSE129519_expression_PGP1.3mon.batch2.txt.gz: "GM23338"
-        GSE129519_expression_PGP1.3mon.txt.gz: "GM23338"
-        GSE129519_expression_PGP1.6mon.batch3.txt.gz: "GM23338"
-        GSE129519_expression_PGP1.6mon.txt.gz: "GM23338"
+        11a.6mon: "11a"
+        GM.6mon: "GM08330"
+        HUES66.3mon: "HUES 66"
+        PGP1.3mon.batch2: "GM23338"
+        PGP1.3mon: "GM23338"
+        PGP1.6mon.batch3: "GM23338"
+        PGP1.6mon: "GM23338"
     cell_line_obs_key: 
     cell_type: 
     cell_type_obs_key: "CellType"
     development_stage:
-        GSE129519_expression_11a.6mon.txt.gz: "26th week post-fertilization human stage"
-        GSE129519_expression_GM.6mon.txt.gz: "26th week post-fertilization human stage"
-        GSE129519_expression_HUES66.3mon.txt.gz: "13th week post-fertilization human stage"
-        GSE129519_expression_PGP1.3mon.batch2.txt.gz: "13th week post-fertilization human stage"
-        GSE129519_expression_PGP1.3mon.txt.gz: "13th week post-fertilization human stage"
-        GSE129519_expression_PGP1.6mon.batch3.txt.gz: "26th week post-fertilization human stage"
-        GSE129519_expression_PGP1.6mon.txt.gz: "26th week post-fertilization human stage"
+        11a.6mon: "26th week post-fertilization human stage"
+        GM.6mon: "26th week post-fertilization human stage"
+        HUES66.3mon: "13th week post-fertilization human stage"
+        PGP1.3mon.batch2: "13th week post-fertilization human stage"
+        PGP1.3mon: "13th week post-fertilization human stage"
+        PGP1.6mon.batch3: "26th week post-fertilization human stage"
+        PGP1.6mon: "26th week post-fertilization human stage"
     development_stage_obs_key:
     disease: 
     disease_obs_key: 
@@ -81,13 +74,13 @@ dataset_or_observation_wise:
     sample_source: "3d_culture"
     sample_source_obs_key: 
     sex:
-        GSE129519_expression_11a.6mon.txt.gz: "male"
-        GSE129519_expression_GM.6mon.txt.gz: "male"
-        GSE129519_expression_HUES66.3mon.txt.gz: "female"
-        GSE129519_expression_PGP1.3mon.batch2.txt.gz: "male"
-        GSE129519_expression_PGP1.3mon.txt.gz: "male"
-        GSE129519_expression_PGP1.6mon.batch3.txt.gz: "male"
-        GSE129519_expression_PGP1.6mon.txt.gz: "male"
+        11a.6mon: "male"
+        GM.6mon: "male"
+        HUES66.3mon: "female"
+        PGP1.3mon.batch2: "male"
+        PGP1.3mon: "male"
+        PGP1.6mon.batch3: "male"
+        PGP1.6mon: "male"
     sex_obs_key:
     source_doi:
     source_doi_obs_key:

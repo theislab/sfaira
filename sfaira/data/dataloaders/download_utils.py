@@ -39,6 +39,20 @@ def download(urls, data_dir, directory_formatted_doi, dataset_id, **kwargs):
             else:
                 _download_synapse(synapse_entity=url.split(",")[0], data_dir=data_dir, fn=fn, dataset_id=dataset_id,
                                   **kwargs)
+        # Special case for data from the braod single cell portal
+        elif url.split(",")[0].startswith('SCP'):
+            fn = url
+            if os.path.isdir(os.path.join(data_dir, url)):
+                print(f"SCP directory {fn} already found on disk, assuming complete content, skipping download.")
+            else:
+                warnings.warn(
+                    f"Dataset {dataset_id} is not available for automatic download as it is served on the Broad Institute Single Cell Portal. "
+                    f"To retreive the data, follow the steps below.\n"
+                    f"Step 1: Log in to the Broad Single Cell Portal at https://singlecell.broadinstitute.org\n"
+                    f"Step 2: Create a bulk download curl command using the 'Bulk download' button on the following site: "
+                    f"https://singlecell.broadinstitute.org/single_cell/study/{fn}#study-download\n"
+                    f"Step 3: Change directory in your terminal to {data_dir} and execute the curl command obtained in Step 2 there."
+                )
         # Special case for public data that is labelled as not automatically downloadable
         elif url.split(",")[0] == 'manual':
             u = ",".join(url.split(",")[2:])
