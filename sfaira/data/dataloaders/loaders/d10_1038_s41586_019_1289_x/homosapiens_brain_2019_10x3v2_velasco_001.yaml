@@ -41,7 +41,7 @@ dataset_or_observation_wise:
     bio_sample_obs_key: "Organoid"
     cell_line:
         11a.6mon: "11a"
-        GM.6mon: "GM08330"
+        GM.6mon: "8330-iPS-8"
         HUES66.3mon: "HUES 66"
         PGP1.3mon.batch2: "GM23338"
         PGP1.3mon: "GM23338"
