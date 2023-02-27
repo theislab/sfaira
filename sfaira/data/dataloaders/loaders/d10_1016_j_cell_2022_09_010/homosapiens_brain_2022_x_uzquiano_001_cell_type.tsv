@@ -1,0 +1,67 @@
+source	target	target_id
+Amacrine	amacrine cell	CL:0000561
+Astroglia	astrocyte	CL:0000127
+CFuPN	extratelencephalic-projecting glutamatergic cortical neuron	CL:4023009
+CH/CP	neural progenitor cell	CL:0011020
+CPN	cerebral cortex pyramidal neuron	CL:4023111
+Cajal Retzius	Cajal-Retzius cell	CL:0000695
+Choroid plexus	choroid plexus epithelial cell	CL:0000706
+Cortical IN	cerebral cortex GABAergic interneuron	CL:0010011
+Cortical PN	cerebral cortex pyramidal neuron	CL:4023111
+Cortical hem	neural progenitor cell	CL:0011020
+Cycling IN progenitors	neuroblast (sensu Vertebrata)	CL:0000031
+ECM cells	extracellular matrix secreting cell	CL:0000327
+Endothelial/pericytes	pericyte	CL:0000669
+Excitatory neu	glutamatergic neuron	CL:0000679
+FOXG1- EMX1- neurons	CNS neuron (sensu Vertebrata)	CL:0000117
+Glial precursors	glioblast	CL:0000030
+Glial prog	glioblast	CL:0000030
+HindbrainSC	CNS neuron (sensu Vertebrata)	CL:0000117
+IN prog	neuroblast (sensu Vertebrata)	CL:0000031
+IN progenitors	neuroblast (sensu Vertebrata)	CL:0000031
+IP	neuroblast (sensu Vertebrata)	CL:0000031
+IPNewbornPN	neuroblast (sensu Vertebrata)	CL:0000031
+Immature DL PN	pyramidal neuron	CL:0000598
+Immature IN	CNS interneuron	CL:0000402
+Interneurons CGE	caudal ganglionic eminence derived GABAergic cortical interneuron	CL:4023070
+Interneurons MGE	medial ganglionic eminence derived GABAergic cortical interneuron	CL:4023069
+Interneurons PSB	CNS interneuron	CL:0000402
+Layer IV	cerebral cortex neuron	CL:0010012
+Mesenchymal	mesenchymal cell	CL:0008019
+Mesenchyme	mesenchymal cell	CL:0008019
+Mesoderm	mesodermal cell	CL:0000222
+Mesoderm prog	mesodermal cell	CL:0000222
+Microglia	microglial cell	CL:0000129
+Midbrain	CNS neuron (sensu Vertebrata)	CL:0000117
+Migrating IN	neuroblast (sensu Vertebrata)	CL:0000031
+Neural crest	neural crest cell	CL:0011012
+Neural placode	neuroplacodal cell	CL:0000032
+Newborn CFuPN	extratelencephalic-projecting glutamatergic cortical neuron	CL:4023009
+Newborn CPN	cerebral cortex pyramidal neuron	CL:4023111
+Newborn DL PN	pyramidal neuron	CL:0000598
+Non cortical prog	neural progenitor cell	CL:0011020
+OPC	oligodendrocyte precursor cell	CL:0002453
+Pigmented epithelial cells	pigmented epithelial cell	CL:0000529
+Pigmented epithelial cells 	pigmented epithelial cell	CL:0000529
+Pre-delaminating neural crest	premigratory neural crest cell	CL:0007004
+Preplate/Subplate	forebrain neuroblast	CL:1000042
+PreplateSubplate	forebrain neuroblast	CL:1000042
+RG	radial glial cell	CL:0000681
+RGC	radial glial cell	CL:0000681
+Retina Muller	Mueller cell	CL:0000636
+Retina photor	eye photoreceptor cell	CL:0000287
+Retina prog	retinal progenitor cell	CL:0002672
+Subcortical interneurons	CNS interneuron	CL:0000402
+Subcortical neuronal precursors	neural progenitor cell	CL:0011020
+Subcortical neurons	CNS neuron (sensu Vertebrata)	CL:0000117
+Subcortical progenitors	neural progenitor cell	CL:0011020
+Thalamic	CNS neuron (sensu Vertebrata)	CL:0000117
+Thalamic neurons	CNS neuron (sensu Vertebrata)	CL:0000117
+ThalamusHypo	hypothalamus cell	CL:2000030
+Unknown	unknown	unknown
+Unspecified PN	pyramidal neuron	CL:0000598
+Ventral pallium derived CR cells	Cajal-Retzius cell	CL:0000695
+aRG	radial glial cell	CL:0000681
+oRG	radial glial cell	CL:0000681
+oRG II	radial glial cell	CL:0000681
+oRG/Astroglia	radial glial cell	CL:0000681
