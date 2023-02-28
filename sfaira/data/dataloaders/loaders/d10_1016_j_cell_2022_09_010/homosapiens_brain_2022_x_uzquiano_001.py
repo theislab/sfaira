@@ -141,13 +141,15 @@ def load(data_dir, sample_fn, **kwargs):
     if "SHARE" in sample_fn:
         meta["age"] = meta["biosample_id"].str.split("-").str[1]
         meta["organoid_age_days"] = meta["biosample_id"].str.split("-").str[1].replace({"d23": 23, "1m": 30, "2m": 60, "3m": 90}).values
+        meta["organoid_age_days"] = meta["organoid_age_days"] .astype(str)
     elif sample_fn == "FETAL":
         meta["age"] = meta["biosample_id"].str.split("-").str[2].values
-        meta["organoid_age_days"] = meta["biosample_id"].str.split("-").str[2].str[3:].values.astype(int) * 7
+        meta["age_days"] = meta["biosample_id"].str.split("-").str[2].str[3:].values.astype(int) * 7
+        meta["age_days"] = meta["age_days"] .astype(str)
     else:
         meta["age"] = sample_fn.split("_")[1]
         meta["organoid_age_days"] = age_dict[sample_fn.split("_")[-1]]
-    meta["organoid_age_days"] = meta["organoid_age_days"] .astype(str)
+        meta["organoid_age_days"] = meta["organoid_age_days"] .astype(str)
     meta = pd.concat((meta, clusters[["CellType", "Cluster"]]), axis=1)
 
     adata = ad.AnnData(
