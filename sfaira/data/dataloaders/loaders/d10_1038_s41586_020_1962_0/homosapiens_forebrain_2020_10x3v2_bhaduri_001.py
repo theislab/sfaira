@@ -45,8 +45,8 @@ def load(data_dir, **kwargs):
         "Week10P_1323_4": ["1323_4", "70", "Directed [D]"],
         "L13234PWeek24": ["1323_4", "168", "Directed [D]"],  # GEO wk2413234P, female; I think this is 1323_4
         "L13234SWeek24": ["1323_4", "168", "Least Direct [L]"],  # GEO wk2413234S, female; I think this is 1323_4
-        "L13234SWeek15": ["1323_4", "105", "Least Direct [L]"]  # male, 10x v2, in GEO says its age is 24 weeks, but the name suggests 15 weeks?    
-    }
+        "L13234SWeek15": ["1323_4", "105", "Least Direct [L]"]}  # male, 10x v2, in GEO says its age is 24 weeks, but the name suggests 15 weeks?    
+
     fn = os.path.join(data_dir, "GSE132672_allorganoids_withnew_matrix.txt.gz")
     df = pd.read_csv(fn, delimiter='\t', compression='gzip', index_col=0)
     adata = ad.AnnData(df.T)
