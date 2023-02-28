@@ -41,7 +41,7 @@ class H5adExport:
     def _load_objects(self):
         dsg, _ = get_ds(doi_sfaira_repr=self.doi_sfaira_repr, path_cache=self.path_cache, path_data=self.path_data,
                         path_loader=self.path_loader)
-        dsg.load(load_raw=False, allow_caching=True)
+        dsg.load(load_raw=True, allow_caching=False)
         if self.schema == "cellxgene":
             dsg.streamline_var(match_to_release=None, schema="cellxgene:" + "3_0_0")
             dsg.streamline_obs_uns(
