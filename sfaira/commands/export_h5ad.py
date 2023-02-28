@@ -1,6 +1,7 @@
 import os
 from rich import print
 from typing import Dict
+import warnings
 
 from sfaira.commands.utils import get_ds
 from sfaira.consts.utils import clean_doi
@@ -41,7 +42,10 @@ class H5adExport:
     def _load_objects(self):
         dsg, _ = get_ds(doi_sfaira_repr=self.doi_sfaira_repr, path_cache=self.path_cache, path_data=self.path_data,
                         path_loader=self.path_loader)
-        dsg.load(load_raw=True, allow_caching=False)
+        if self.path_cache is not None:
+            warnings.warn(f"Caching of data file is enabled. Note that you will have to manually delete the cache at {self.path_cache} "
+                          f"if you have changed the load function. Otherwise the changes will no proagate to the exported h5ad.")
+        dsg.load(load_raw=self.path_cache is None, allow_caching=self.path_cache is not None)
         if self.schema == "cellxgene":
             dsg.streamline_var(match_to_release=None, schema="cellxgene:" + "3_0_0")
             dsg.streamline_obs_uns(
