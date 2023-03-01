@@ -6,7 +6,7 @@ dataset_wise:
     default_embedding:
     doi_preprint:
     doi_journal: "10.1038/s41586-022-05279-8"
-    download_url_data: "private"  #update
+    download_url_data: "https://zenodo.org/record/7687749/files/rna_matrices.tar.gz"
     download_url_meta:
     primary_data: True
     year: 2022
