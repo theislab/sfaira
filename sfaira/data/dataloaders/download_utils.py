@@ -64,6 +64,11 @@ def download(urls, data_dir, directory_formatted_doi, dataset_id, **kwargs):
                       f"Please download it from {u} and copy to {os.path.join(data_dir, fn)}")
         # All other cases
         else:
+            if url.split(",")[0] == 'rename':
+                rename = url.split(",")[1]
+                url = ",".join(url.split(",")[2:])
+            else:
+                rename = None
             url = urllib.parse.unquote(url)
             try:
                 urllib.request.urlopen(url)
@@ -78,7 +83,9 @@ def download(urls, data_dir, directory_formatted_doi, dataset_id, **kwargs):
                 # to get local issuer certificate (_ssl.c:1124)
                 ssl._create_default_https_context = ssl._create_unverified_context
 
-            if 'Content-Disposition' in urllib.request.urlopen(url).info().keys():
+            if rename is not None:
+                fn = rename
+            elif 'Content-Disposition' in urllib.request.urlopen(url).info().keys():
                 fn = cgi.parse_header(urllib.request.urlopen(url).info()['Content-Disposition'])[1]["filename"]
             else:
                 fn = url.split("/")[-1]
