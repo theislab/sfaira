@@ -1,25 +1,34 @@
 dataset_structure:
     dataset_index: 1
     sample_fns:
+        - "organoids"
+        - "primary"
 dataset_wise:
     author: "Bhaduri, Aparna"
-    default_embedding: 
+    default_embedding:
+        primary: "X_tsne"
     doi_preprint: 
     doi_journal: "10.1038/s41586-020-1962-0"
-    download_url_data: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE132nnn/GSE132672/suppl/GSE132672%5Fallorganoids%5Fwithnew%5Fmatrix%2Etxt%2Egz"
+    download_url_data: 
+        organoids: "https://cells.ucsc.edu/organoidreportcard/organoids10X/organoidsmatrix_nonorm.txt.gz"
+        primary: "https://cells.ucsc.edu/organoidreportcard/primary10X/primarymatrix_nonorm.txt.gz"
     download_url_meta: 
+        organoids: "https://static-content.springer.com/esm/art%3A10.1038%2Fs41586-020-1962-0/MediaObjects/41586_2020_1962_MOESM3_ESM.xlsx"
+        primary: 
+            - "https://cells.ucsc.edu/organoidreportcard/primary10X/meta.tsv"
+            - "https://cells.ucsc.edu/organoidreportcard/primary10X/Seurat_tsne.coords.tsv.gz"
     primary_data: True
     year: 2020
 layers:
-    layer_counts: 
-    layer_processed: "X"
+    layer_counts: "X"
+    layer_processed: 
     layer_spliced_counts: 
     layer_spliced_processed: 
     layer_unspliced_counts: 
     layer_unspliced_processed: 
     layer_velocity: 
 dataset_or_feature_wise:
-    feature_reference: "Homo_sapiens.GRCh38.104"
+    feature_reference: "Homo_sapiens.GRCh38.83"
     feature_reference_var_key: 
     feature_type: "rna"
     feature_type_var_key: 
@@ -27,17 +36,22 @@ dataset_or_observation_wise:
     assay_sc: "10x 3' v2"
     assay_sc_obs_key: 
     assay_differentiation: 
-    assay_differentiation_obs_key: "protocol"
+    assay_differentiation_obs_key: 
+        organoids: "Protocol"
     assay_type_differentiation: 
-    assay_type_differentiation_obs_key: "protocol"
+    assay_type_differentiation_obs_key:
+        organoids: "assay_type_diff"
     bio_sample:
-    bio_sample_obs_key: "sample"
+    bio_sample_obs_key:
+        orgnoids: "Sample"
+        primary: "Area*Individual"
     cell_line: 
-    cell_line_obs_key: "cell_line"
+    cell_line_obs_key:
+        organoids: "Line"
     cell_type: 
-    cell_type_obs_key: 
+    cell_type_obs_key: "celltype"
     development_stage: 
-    development_stage_obs_key: "organoid_age_day"
+    development_stage_obs_key: "Age"
     disease: "healthy"
     disease_obs_key: 
     ethnicity: 
@@ -46,14 +60,20 @@ dataset_or_observation_wise:
     gm_obs_key:
     individual:
     individual_obs_key: 
-    organ: "forebrain"
+        primary: "Individual"
+    organ: 
     organ_obs_key: 
+        organoids: "Protocol"
+        primary: "Area"
     organism: "Homo sapiens"
     organism_obs_key: 
-    sample_source: "3d_culture"  # TODO: Add primary data
+    sample_source:
+        organoids: "3d_culture"
+        primary: "primary_tissue"
     sample_source_obs_key: 
     sex: 
-    sex_obs_key: "cell_line"
+    sex_obs_key:
+        organoids: "Line"
     source_doi:
     source_doi_obs_key:
     state_exact:

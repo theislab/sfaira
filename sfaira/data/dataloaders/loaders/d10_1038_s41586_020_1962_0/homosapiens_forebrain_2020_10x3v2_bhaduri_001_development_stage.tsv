@@ -1,7 +1,11 @@
 source	target	target_id
-105	15th week post-fertilization human stage	HsapDv:0000052
-168	24th week post-fertilization human stage	HsapDv:0000061
-21	Carnegie stage 09	HsapDv:0000016
-35	Carnegie stage 15	HsapDv:0000022
-56	Carnegie stage 22	HsapDv:0000029
-70	10th week post-fertilization human stage	HsapDv:0000047
+3	Carnegie stage 09	HsapDv:0000016
+5	Carnegie stage 15	HsapDv:0000022
+6	Carnegie stage 17	HsapDv:0000024
+8	Carnegie stage 22	HsapDv:0000029
+10	10th week post-fertilization human stage	HsapDv:0000047
+14	14th week post-fertilization human stage	HsapDv:0000051
+15	15th week post-fertilization human stage	HsapDv:0000052
+18	18th week post-fertilization human stage	HsapDv:0000055
+22	22nd week post-fertilization human stage	HsapDv:0000059
+24	24th week post-fertilization human stage	HsapDv:0000061

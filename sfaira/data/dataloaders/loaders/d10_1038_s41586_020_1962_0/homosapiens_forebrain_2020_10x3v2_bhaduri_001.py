@@ -1,56 +1,73 @@
-import numpy as np
-import pandas as pd
-import anndata as ad
-import scipy.sparse
 import os
-import scanpy as sc
+import pandas as pd
+import numpy as np
+import scipy.sparse
+import gzip
+import anndata as ad
 
 
-def load(data_dir, **kwargs):
-    dic = {
-        "sample": ["donor", "organoid_age_days", "protocol"],
-        "H1SWeek3": ["H1", "21", "Least Direct [L]"],  # male
-        "H1XWeek3": ["H1", "21", "Most Directed [M]"],
-        "H1XWeek5": ["H1", "35", "Most Directed [M]"],
-        "H1SWeek5": ["H1", "35", "Least Direct [L]"],
-        "H1SWeek8": ["H1", "56", "Least Direct [L]"],
-        "H1XWeek8": ["H1", "56", "Most Directed [M]"],
-        "H1XWeek10": ["H1", "70", "Most Directed [M]"],
-        "H1SWeek10": ["H1", "70", "Least Direct [L]"],
-        "H1SWeek24": ["H1", "168", "Protocol [L]"],  # male, GEO name is wk24H1S_S2
-        "H28126SWeek3": ["H28126", "21", "Least Direct [L]"],  # male
-        "H28126XWeek3": ["H28126", "21", "Most Directed [M]"],
-        "H28126SWeek5": ["H28126", "35", "Least Direct [L]"],
-        "H28126XWeek5": ["H28126", "35", "Most Directed [M]"],
-        "H28126PWeek5": ["H28126", "35", "Directed [D]"],
-        "H28126S2Week5": ["H28126", "35", "Least Direct [L]"],  # hES-derived cerebral organoid
-        "H28126SWeek8": ["H28126", "56", "Least Direct [L]"],
-        "H28126XWeek8": ["H28126", "56", "Most Directed [M]"],
-        "H28126S2Week8": ["H28126", "56", "Least Direct [L]"],
-        "H28126PWeek8": ["H28126", "56", "Directed [D]"],
-        "H28126SWeek10": ["H28126", "70", "Least Direct [L]"],
-        "H28126XWeek10": ["H28126", "70", "Most Directed [M]"],
-        "H28126S2Week10": ["H28126", "70", " Least Direct [L]"],
-        "YH10SWeek5": ["WTC10", "35", "Least Direct [L]"],  # male
-        "YH10PWeek5": ["WTC10", "35", "Directed [D]"],
-        "YH10SWeek8": ["WTC10", "56", "Least Direct [L]"],
-        "YH10PWeek8": ["WTC10", "56", "Directed [D]"],
-        "YH10PWeek10": ["WTC10", "70", "Directed [D]"],
-        "YH10SWeek10": ["WTC10", "70", "Least Direct [L]"],
-        "Week5S_1323_4": ["1323_4", "35", "Least Direct [L]"],  # female
-        "Week5P_1323_4": ["1323_4", "35", "Directed [D]"],
-        "Week8S_1323_4": ["1323_4", "56", "Least Direct [L]"],
-        "Week8P_1323_4": ["1323_4", "56", "Directed [D]"],
-        "Week10S_1323_4": ["1323_4", "70", "Least Direct [L]"],
-        "Week10P_1323_4": ["1323_4", "70", "Directed [D]"],
-        "L13234PWeek24": ["1323_4", "168", "Directed [D]"],  # GEO wk2413234P, female; I think this is 1323_4
-        "L13234SWeek24": ["1323_4", "168", "Least Direct [L]"],  # GEO wk2413234S, female; I think this is 1323_4
-        "L13234SWeek15": ["1323_4", "105", "Least Direct [L]"]}  # male, 10x v2, in GEO says its age is 24 weeks, but the name suggests 15 weeks?    
+def load(data_dir, sample_fn, **kwargs):
+    def read_txt_sparse(fn, sep="\t"):
+        X_data = []
+        X_row, X_col = [], []
+        index = []
+        with gzip.open(fn, mode="rt") as f:
+            header = f.readline().strip().split(sep)
+            for row_idx, line in enumerate(f.readlines()):
+                row = line.split(sep)
+                index.append(row.pop(0))
+                row = np.array(row, dtype=np.float32)
+                col_inds, = np.nonzero(row)
+                X_col.extend(col_inds)
+                X_row.extend([row_idx] * len(col_inds))
+                X_data.extend(row[col_inds])
+        X = scipy.sparse.coo_matrix((X_data, (X_row, X_col)), shape=(len(index), len(header)), dtype=np.float32).T.tocsr()
+        return X, header, index
 
-    fn = os.path.join(data_dir, "GSE132672_allorganoids_withnew_matrix.txt.gz")
-    df = pd.read_csv(fn, delimiter='\t', compression='gzip', index_col=0)
-    adata = ad.AnnData(df.T)
-    adata.obs['sample'] = df.columns.str.slice(stop=-17)
-    adata.obs[["cell_line", "organoid_age_day", "protocol"]] = [dic[i] for i in adata.obs['sample']]
+    if sample_fn == "organoids":
+        fn = os.path.join(data_dir, 'organoidsmatrix_nonorm.txt.gz')
+        X, header, index = read_txt_sparse(fn)
+
+        adata = ad.AnnData(X=X, obs=pd.DataFrame(index=header), var=pd.DataFrame(index=index))
+        meta = pd.read_excel(os.path.join(data_dir, "41586_2020_1962_MOESM3_ESM.xlsx"),
+                             sheet_name="STable 1 Cell Metadata", usecols="N:AB", skiprows=1, index_col=0)
+        meta.columns = [i.strip(".1") for i in meta.columns]
+
+        adata.obs = adata.obs.reset_index()["index"].str.split(" ", expand=True)
+        adata.obs = pd.DataFrame(index=adata.obs[1] + "_" + adata.obs[0])
+        new_index = list(set(adata.obs.index) & set(meta.index))
+        adata = adata[new_index].copy()
+        adata.obs = meta.loc[new_index].copy()
+        adata.obs["assay_type_diff"] = adata.obs["Protocol"].replace({"Least Directed": "unguided", "Directed": "guided", "Most Directed": "guided"})
+    else:
+        fn = os.path.join(data_dir, 'primarymatrix_nonorm.txt.gz')
+        X, header, index = read_txt_sparse(fn)
+
+        adata = ad.AnnData(X=X, obs=pd.DataFrame(index=header), var=pd.DataFrame(index=index))
+        meta = pd.read_csv(os.path.join(data_dir, 'meta.tsv'), sep="\t", index_col=0)
+        tsne = pd.read_csv(os.path.join(data_dir, 'Seurat_tsne.coords.tsv.gz'), sep="\t", index_col=0, header=None)
+
+        adata.obs = adata.obs.reset_index()["index"].str.split(" ", expand=True)
+        adata.obs[2] = adata.obs[1].str[:4]
+        adata.obs[3] = adata.obs[1].str[4:].str.lower().replace({"somato": "somatosensory"})
+        adata.obs.index = adata.obs[[2, 3, 0]].apply(lambda row: '_'.join(row), axis=1).values
+
+        meta["arealower"] = meta["Area"].str.lower().str.split().str[0]
+        meta["barcodes"] = meta.index.str.extract('([A-Z]{16})')[0].to_list()
+        meta.index = meta[["Individual", "arealower", "barcodes"]].apply(lambda row: '_'.join(row), axis=1).values
+        tsne.index = meta[["Individual", "arealower", "barcodes"]].apply(lambda row: '_'.join(row), axis=1).values
+        meta = meta.loc[meta.index.drop_duplicates(keep=False)].copy()
+        tsne = tsne.loc[tsne.index.drop_duplicates(keep=False)].copy()
+
+        consensus_index = list(set(meta.index) & set(adata.obs.index))
+        adata = adata[consensus_index].copy()
+        adata.obs = meta.loc[consensus_index].copy()
+        adata.obsm["X_tsne"] = tsne.loc[consensus_index].values
+
+    adata.obs["organoid_age_days"] = adata.obs["Age"] * 7
+    adata.obs["organoid_age_days"] = adata.obs["organoid_age_days"].astype("str")
+    adata.obs["Age"] = adata.obs["Age"].astype("str")
+    adata.obs["celltype"] = adata.obs["Type"] + "_" + adata.obs["Subtype"]
+    adata.var_names_make_unique()
 
     return adata
