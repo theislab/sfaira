@@ -1,22 +1,30 @@
 dataset_structure:
     dataset_index: 1
     sample_fns:
+        - "d15"
+        - "d32to62"
+        - "microdissected"
 dataset_wise:
     author: "He, Zhisong"
     default_embedding: 
     doi_preprint: 
     doi_journal: "10.1038/s41592-021-01344-8"
     download_url_data: 
-        - "https://www.ebi.ac.uk/biostudies/files/E-MTAB-10973/counts.mtx.gz"
-        - "https://www.ebi.ac.uk/biostudies/files/E-MTAB-10974/counts_org1-12.mtx.gz"
-        - "https://www.ebi.ac.uk/biostudies/files/E-MTAB-10974/counts_org_d15.mtx.gz"
+        d15: "https://www.ebi.ac.uk/biostudies/files/E-MTAB-10974/counts_org_d15.mtx.gz"
+        d32to62: "https://www.ebi.ac.uk/biostudies/files/E-MTAB-10974/counts_org1-12.mtx.gz"
+        microdissected: "https://www.ebi.ac.uk/biostudies/files/E-MTAB-10973/counts.mtx.gz"
     download_url_meta: 
-        - "https://www.ebi.ac.uk/biostudies/files/E-MTAB-10973/features.tsv.gz"
-        - "https://www.ebi.ac.uk/biostudies/files/E-MTAB-10973/meta.tsv.gz"
-        - "https://www.ebi.ac.uk/biostudies/files/E-MTAB-10974/features_org1-12.tsv.gz"
-        - "https://www.ebi.ac.uk/biostudies/files/E-MTAB-10974/meta_org1-12.tsv.gz"
-        - "https://www.ebi.ac.uk/biostudies/files/E-MTAB-10974/features_org_d15.tsv.gz"
-        - "https://www.ebi.ac.uk/biostudies/files/E-MTAB-10974/meta_org_d15.tsv.gz"
+        d15:
+            - "https://www.ebi.ac.uk/biostudies/files/E-MTAB-10974/features_org_d15.tsv.gz"
+            - "https://www.ebi.ac.uk/biostudies/files/E-MTAB-10974/meta_org_d15.tsv.gz"
+        d32to62:
+            - "https://www.ebi.ac.uk/biostudies/files/E-MTAB-10974/features_org1-12.tsv.gz"
+            - "https://www.ebi.ac.uk/biostudies/files/E-MTAB-10974/meta_org1-12.tsv.gz"
+            - "private,cell_annotation.csv"
+        microdissected:
+            - "https://www.ebi.ac.uk/biostudies/files/E-MTAB-10973/features.tsv.gz"
+            - "https://www.ebi.ac.uk/biostudies/files/E-MTAB-10973/meta.tsv.gz"
+
     primary_data: True
     year: 2022
 layers:
@@ -28,7 +36,7 @@ layers:
     layer_unspliced_processed: 
     layer_velocity: 
 dataset_or_feature_wise:
-    feature_reference: "Homo_sapiens.GRCh38.104"
+    feature_reference: "Homo_sapiens.GRCh38.93"
     feature_reference_var_key: 
     feature_type: "rna"
     feature_type_var_key: 
@@ -40,11 +48,17 @@ dataset_or_observation_wise:
     assay_type_differentiation: "unguided"
     assay_type_differentiation_obs_key: 
     bio_sample:
-    bio_sample_obs_key: "sample"
-    cell_line: 
+    bio_sample_obs_key:
+        d15: "sample"
+        d32to62: "organoid"
+        microdissected: "orig.ident"
+    cell_line: "custom_409b2-iCas9"
     cell_line_obs_key: 
     cell_type: 
-    cell_type_obs_key: # I don't know where to find it yet
+    cell_type_obs_key:
+        d15: "final_ident"
+        d32to62: "celltype"
+        #microdissected: ""  MISSING
     development_stage: 
     development_stage_obs_key: "organoid_age_days"
     disease: "healthy"
@@ -77,7 +91,7 @@ feature_wise:
     feature_id_var_key: 
     feature_symbol_var_key: "index"
 observation_wise:
-    spatial_x_coord_obs_key: # TODO add spatial data
+    spatial_x_coord_obs_key:
     spatial_y_coord_obs_key: 
     spatial_z_coord_obs_key: 
     vdj_vj_1_obs_key_prefix: 
