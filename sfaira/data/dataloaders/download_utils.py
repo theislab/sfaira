@@ -69,7 +69,6 @@ def download(urls, data_dir, directory_formatted_doi, dataset_id, **kwargs):
                 url = ",".join(url.split(",")[2:])
             else:
                 rename = None
-            url = urllib.parse.unquote(url)
             try:
                 urllib.request.urlopen(url)
             except urllib.error.HTTPError as err:
@@ -88,7 +87,7 @@ def download(urls, data_dir, directory_formatted_doi, dataset_id, **kwargs):
             elif 'Content-Disposition' in urllib.request.urlopen(url).info().keys():
                 fn = cgi.parse_header(urllib.request.urlopen(url).info()['Content-Disposition'])[1]["filename"]
             else:
-                fn = url.split("/")[-1]
+                fn = urllib.parse.unquote(url.split("/")[-1])
             # Only download if file not already downloaded:
             if os.path.isfile(os.path.join(data_dir, fn)):
                 print(f"File {fn} already found on disk, skipping download.")
