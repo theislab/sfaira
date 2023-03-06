@@ -6,7 +6,7 @@ dataset_wise:
     default_embedding: "X_umap"
     doi_preprint: 
     doi_journal: "10.15252/embj.2022111118"
-    download_url_data: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE205nnn/GSE205554/suppl/GSE205554%5Fintegration%5Fall%5FpostGruffi%2ERds%2Egz"
+    download_url_data: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE205nnn/GSE205554/suppl/GSE205554%5Fintegration%5Fall%5FpreGruffi%2ERds%2Egz"
     download_url_meta:
     primary_data: True
     year: 2022
