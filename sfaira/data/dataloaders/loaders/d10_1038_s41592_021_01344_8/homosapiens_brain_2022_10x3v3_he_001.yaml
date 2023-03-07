@@ -20,10 +20,11 @@ dataset_wise:
         d32to62:
             - "https://www.ebi.ac.uk/biostudies/files/E-MTAB-10974/features_org1-12.tsv.gz"
             - "https://www.ebi.ac.uk/biostudies/files/E-MTAB-10974/meta_org1-12.tsv.gz"
-            - "private,cell_annotation.csv"
+            - "private,cell_annotation_1_12.csv"
         microdissected:
             - "https://www.ebi.ac.uk/biostudies/files/E-MTAB-10973/features.tsv.gz"
             - "https://www.ebi.ac.uk/biostudies/files/E-MTAB-10973/meta.tsv.gz"
+            - "private,cell_annotation_dissected.csv"
 
     primary_data: True
     year: 2022
@@ -58,7 +59,7 @@ dataset_or_observation_wise:
     cell_type_obs_key:
         d15: "final_ident"
         d32to62: "celltype"
-        #microdissected: ""  MISSING
+        microdissected: "celltype"
     development_stage: 
     development_stage_obs_key: "organoid_age_days"
     disease: "healthy"

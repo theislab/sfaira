@@ -1,0 +1,27 @@
+source	target	target_id
+Choroid plexus	choroid plexus epithelial cell	CL:0000706
+Dien-/Mesencephalic NPC	neuroblast (sensu Vertebrata)	CL:0000031
+Dien-/Mesencephalic neuron	midbrain dopaminergic neuron	CL:2000097
+Dien.NPC	neuroblast (sensu Vertebrata)	CL:0000031
+Dien.Neuron	central nervous system neuron	CL:2000029
+Epithelial cell	epithelial cell	CL:0000066
+Mesenchymal	mesenchymal cell	CL:0008019
+Mesenchymal cell	mesenchymal cell	CL:0008019
+Microglia	microglial cell	CL:0000129
+Neural crest	neural crest cell	CL:0011012
+Neural crest derived neuron	neural crest derived neuron	CL:0000029
+PSC	pluripotent stem cell	CL:0002248
+Retinal progenitors	retinal progenitor cell	CL:0002672
+Rhomben.NPC	neuroblast (sensu Vertebrata)	CL:0000031
+Rhomben.Neuron	central nervous system neuron	CL:2000029
+Rhombencephalic NPC	neuroblast (sensu Vertebrata)	CL:0000031
+Rhombencephalic neuron	central nervous system neuron	CL:2000029
+Telencephalic neuron	cerebral cortex neuron	CL:0010012
+Telenephalic NPC	forebrain neuroblast	CL:1000042
+forebrain: early forebrain neural tube	forebrain neuroblast	CL:1000042
+forebrain: forebrain RGs	forebrain radial glial cell	CL:0013000
+forebrain: hypothalamic RGs	radial glial cell	CL:0000681
+forebrain: retinal progenitors	retinal progenitor cell	CL:0002672
+hindbrain	central nervous system neuron	CL:2000029
+midbrain	midbrain dopaminergic neuron	CL:2000097
+nan	unknown	unknown
