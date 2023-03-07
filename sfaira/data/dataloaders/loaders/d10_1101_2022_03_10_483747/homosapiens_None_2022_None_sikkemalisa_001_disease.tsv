@@ -1,24 +1,18 @@
 source	target
-CF	cystic fibrosis:congestive heart failure:calcifying fibrous tumor:congenital nephrotic syndrome, Finnish type
-COPD	chronic obstructive pulmonary disease:COPD, severe early onset:cryptogenic organizing pneumonia:severe X-linked mitochondrial encephalomyopathy
 COVID-19	COVID-19
-COVID-19 moderate	post-COVID-19 disorder:COVID-19:SARS-CoV-2-related disease:actinic lichen planus:|||:refractory anemia:enthesitis-related juvenile idiopathic arthritis:ataxia telangiectasia:rheumatoid arthritis
-COVID-19 severe	COVID-19:post-COVID-19 disorder:SARS-CoV-2-related disease:herpes labialis:|||:status epilepticus:Rasmussen subacute encephalitis:epidermodysplasia verruciformis:epithelial recurrent erosion dystrophy
-Chronic rhinitis	chronic rhinitis
-End-stage lung fibrosis, unknown etiology	chronic intervillositis of unknown etiology:sporadic adult-onset ataxia of unknown etiology:fibrosclerosis, multifocal:focal segmental glomerulosclerosis 4, susceptibility to:|||:congenital infiltrating lipomatosis of the face:Knobloch syndrome:Norrie disease:scirrhous adenocarcinoma
-HP	hyperplastic polyp:hypersensitivity pneumonitis:hereditary chronic pancreatitis:hyperprolinemia type 1
-Healthy	healthy
-Healthy (tumor adjacent)	placenta cancer:neuroblastoma:heart neoplasm:epithelial tumor of anal canal:|||:healthy:neoplasm:well-differentiated liposarcoma:Alzheimer disease type 1
-ILD	interstitial lung disease:severe early-onset pulmonary alveolar proteinosis due to MARS deficiency:interstitial lung disease 2:interstitial lung disease 1
-IPF	interstitial lung disease 2:idiopathic interstitial pneumonia:incontinentia pigmenti:pemphigus foliaceus
-Large Cell Carcinoma	large cell carcinoma
-Lung adenocarcinoma	lung adenocarcinoma
-Lymphangioleiomyomatosis	lymphangioleiomyomatosis
-Myositis-associated ILD	familial juvenile hyperuricemic nephropathy type 1:central nervous system AIDS arteritis:MUTYH-related attenuated familial adenomatous polyposis:cytokine release syndrome:|||:juvenile dermatomyositis:ataxia telangiectasia:myositis:aortic valve stenosis
-NSIP	non-specific interstitial pneumonia:necrotizing soft tissue infection:subacute inflammatory demyelinating polyneuropathy:neonatal severe primary hyperparathyroidism
-Pleiomorphic Carcinoma	pleomorphic carcinoma:pleomorphic breast carcinoma:pleomorphic adenoma:salivary gland carcinoma ex pleomorphic adenoma
-Pneumonia non-COVID	lipid pneumonia:eosinophilic pneumonia:pneumonia:radiation pneumonitis:|||:poikiloderma with neutropenia:immunodeficiency, common variable, 5:immunodeficiency, common variable, 1:immunodeficiency, common variable, 2
-Sarcoidosis	sarcoidosis
-Squamous Cell Carcinoma	squamous cell carcinoma
-Systemic sclerosis-associated ILD	limited cutaneous systemic sclerosis:limited systemic sclerosis:systemic sclerosis:scleroderma, familial progressive:|||:ataxia telangiectasia:Angelman syndrome:cognitive impairment with or without cerebellar ataxia:congenital lobar emphysema
-anti-CD3 anti-CD28 antibody stimulated	anti-basement membrane glomerulonephritis:anti-neutrophil antibody associated vasculitis:acute disseminated encephalomyelitis with anti-MOG antibodies:acquired adult-onset immunodeficiency:|||:short stature and advanced bone age, with or without early-onset osteoarthritis and/or osteochondritis dissecans:anorexia nervosa, susceptibility to, 1:Cowden disease:osteochondritis dissecans
+chronic obstructive pulmonary disease	chronic obstructive pulmonary disease
+chronic rhinitis	chronic rhinitis
+cystic fibrosis	cystic fibrosis
+hypersensitivity pneumonitis	hypersensitivity pneumonitis
+interstitial lung disease	interstitial lung disease
+lung adenocarcinoma	lung adenocarcinoma
+lung large cell carcinoma	lung large cell carcinoma
+lymphangioleiomyomatosis	lymphangioleiomyomatosis
+nan	unknown
+non-specific interstitial pneumonia	non-specific interstitial pneumonia
+normal	healthy
+pleomorphic carcinoma	pleomorphic carcinoma
+pneumonia	pneumonia
+pulmonary fibrosis	pulmonary fibrosis
+pulmonary sarcoidosis	pulmonary sarcoidosis
+squamous cell lung carcinoma	squamous cell lung carcinoma

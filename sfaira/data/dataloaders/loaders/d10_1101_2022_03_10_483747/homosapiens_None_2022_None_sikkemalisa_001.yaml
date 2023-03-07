@@ -43,7 +43,7 @@ dataset_or_observation_wise:
     development_stage:
     development_stage_obs_key: "development_stage"
     disease:
-    disease_obs_key: "lung_condition"
+    disease_obs_key: "disease"
     ethnicity: 
     ethnicity_obs_key: "ancestry"
     gm:
