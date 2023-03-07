@@ -1,8 +1,8 @@
-source	target	target_id
-african	African	HANCESTRO:0010
-american	American	HANCESTRO:0463
-asian	Asian	HANCESTRO:0008
-european	European	HANCESTRO:0005
-mixed	admixed ancestry	HANCESTRO:0306
-nan	unknown	unknown
-pacific islander	Pacific Islander	HANCESTRO:0574
+source	target
+african	African
+american	American
+asian	Asian
+european	European
+mixed	Mende:admixed ancestry:Manx:Icelandic:|||:Saint-Pierrais or Miquelonnais:Middle Africa:Macedonian:Greater Middle Eastern  (Middle Eastern, North African or Persian)
+nan	Kenyan:Indian:Tongan:Niuean:|||:Surinamese:Armenian:Venezuelan:Uruguayan
+pacific islander	Pacific Islander

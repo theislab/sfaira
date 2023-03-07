@@ -43,10 +43,7 @@ dataset_or_observation_wise:
     development_stage:
     development_stage_obs_key: "development_stage"
     disease:
-    disease_obs_key: 
-        HLCA_v1.1_full.h5ad: "disease"
-        HLCA_v1.1_core.h5ad: "lung_condition"
-    disease_obs_key: 
+    disease_obs_key: "lung_condition"
     ethnicity: 
     ethnicity_obs_key: "ancestry"
     gm:
@@ -66,8 +63,7 @@ dataset_or_observation_wise:
     state_exact:
     state_exact_obs_key:
     suspension_type:
-    suspension_type_obs_key: 
-        HLCA_v1.1_full.h5ad: "suspension_type"
+    suspension_type_obs_key: "suspension_type"
     tech_sample:
     tech_sample_obs_key: 
     treatment:

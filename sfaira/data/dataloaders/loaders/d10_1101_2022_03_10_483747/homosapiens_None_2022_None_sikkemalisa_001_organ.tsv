@@ -1,5 +1,5 @@
-source	target	target_id
-lung parenchyma	lung parenchyma	UBERON:0008946
-nan	unknown	unknown
-nose	nose	UBERON:0000004
-respiratory airway	respiratory airway	UBERON:0001005
+source	target
+lung parenchyma	lung parenchyma
+nan	nasal artery:anterior nuclear group:autonomic nervous system:nasal ciliary artery:|||:ruminant forestomach:diencephalic white matter:distal phalanx of digit 4:distal phalanx of digit 3
+nose	nose
+respiratory airway	respiratory airway

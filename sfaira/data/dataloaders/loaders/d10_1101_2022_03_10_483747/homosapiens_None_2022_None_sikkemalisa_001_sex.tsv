@@ -1,4 +1,4 @@
-source	target	target_id
-female	female	PATO:0000383
-male	male	PATO:0000384
-nan	unknown	unknown
+source	target
+female	female
+male	male
+nan	monandrous:protandrous:diandrous:male:|||:intact male:intact female:protogynous hermaphroditism:male pseudohermaphrodite
