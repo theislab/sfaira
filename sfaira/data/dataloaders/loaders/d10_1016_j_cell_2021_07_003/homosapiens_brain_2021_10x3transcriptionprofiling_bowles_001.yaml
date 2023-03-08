@@ -37,7 +37,7 @@ dataset_or_observation_wise:
     assay_type_differentiation: "guided"
     assay_type_differentiation_obs_key: 
     bio_sample:
-    bio_sample_obs_key: "ID"
+    bio_sample_obs_key: "ID*age"
     cell_line: 
     cell_line_obs_key: "ID"
     cell_type: 
