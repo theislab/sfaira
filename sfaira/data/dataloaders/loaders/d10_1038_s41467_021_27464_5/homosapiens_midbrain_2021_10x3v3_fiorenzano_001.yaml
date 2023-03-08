@@ -1,64 +1,56 @@
 dataset_structure:
     dataset_index: 1
     sample_fns:
-        - "B6_normal_pre_EF.csv"
-        - "BTBR_control_pre_EF.csv"
-        - "BTBR_ob12_pre_EF.csv"
-        - "cd2ap_ko_pre_EF.csv"
-        - "cd2ap_wt_pre_EF.csv"
-        - "doxo_pre_EF.csv"
-        - "nephritis_d1_pre_EF.csv"
-        - "nephritis_d5_pre_EF.csv"
 dataset_wise:
-    author: "Chung, Jun-Jae "
+    author: "Fiorenzano, Alessandro"
     default_embedding: 
     doi_preprint: 
-    doi_journal: "10.1681/ASN.2020020220"
-    download_url_data: "SCP975"
+    doi_journal: "10.1038/s41467-021-27464-5"
+    download_url_data: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE168nnn/GSE168323/suppl/GSE168323_RAW.tar"
     download_url_meta: 
-    primary_data: True
-    year: 2020
+    primary_data: False
+    year: 2021
 layers:
-    layer_counts:
-    layer_processed: "X"
+    layer_counts: "X"
+    layer_processed: 
     layer_spliced_counts: 
     layer_spliced_processed: 
     layer_unspliced_counts: 
     layer_unspliced_processed: 
     layer_velocity: 
 dataset_or_feature_wise:
-    feature_reference: 
+    feature_reference: "Homo_sapiens.GRCh38.93"
     feature_reference_var_key: 
     feature_type: "rna"
     feature_type_var_key: 
 dataset_or_observation_wise:
-    assay_sc: "10x 3' v2"
+    assay_sc: "10x 3' v3"
     assay_sc_obs_key: 
     assay_differentiation: 
-    assay_differentiation_obs_key: 
-    assay_type_differentiation: 
+    assay_differentiation_obs_key: "protocol"
+    assay_type_differentiation: "guided"
     assay_type_differentiation_obs_key: 
     bio_sample:
-    bio_sample_obs_key: 
+    bio_sample_obs_key:
     cell_line: 
-    cell_line_obs_key: 
+    cell_line_obs_key:
     cell_type: 
-    cell_type_obs_key: "Cell_type"
+    cell_type_obs_key:
     development_stage: 
-    development_stage_obs_key: 
-    disease: 
+    development_stage_obs_key: "organoid_age_days"
+    disease: "healthy"
     disease_obs_key: 
     ethnicity: 
     ethnicity_obs_key: 
     gm:
     gm_obs_key:
     individual:
-    individual_obs_key: 
-    organ: "kidney"
+    individual_obs_key:
+    organ: "midbrain tegmentum"
     organ_obs_key: 
-    organism: "Mus musculus"
+    organism: "Homo sapiens"
     organism_obs_key: 
-    sample_source: "primary_tissue"
+    sample_source: "3d_culture"
     sample_source_obs_key: 
     sex: 
     sex_obs_key: 
@@ -66,8 +58,10 @@ dataset_or_observation_wise:
     source_doi_obs_key:
     state_exact:
     state_exact_obs_key:
+    suspension_type: "cell"
+    suspension_type_obs_key: 
     tech_sample:
-    tech_sample_obs_key: 
+    tech_sample_obs_key: "tech_sample"
     treatment:
     treatment_obs_key:
 feature_wise:

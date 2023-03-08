@@ -6,26 +6,50 @@ import scipy
 
 
 def load(data_dir, sample_fn, **kwargs):
-    fn = os.path.join(data_dir, sample_fn)
-    fn_meta = os.path.join(data_dir, "meta_combined.txt")
+    fn_expr_dict = {
+        "11a.6mon": "expression_11a.6mon.txt.gz",
+        "GM.6mon": "expression_GM.6mon.txt.gz",
+        "HUES66.3mon": "expression_HUES66.3mon.txt",
+        "PGP1.3mon.batch2": "expression_PGP1.3mon.batch2.txt.gz",
+        "PGP1.3mon": "expression_PGP1.3mon.txt.gz",
+        "PGP1.6mon.batch3": "expression_PGP1.6mon.Batch2.txt.gz",
+        "PGP1.6mon": "expression_PGP1.6mon.txt.gz",
+    }
+    fn_tsne_dict = {
+        "11a.6mon": "tsne_11a.6mon.1.txt",
+        "GM.6mon": "tsne_GM.6mon.1.txt",
+        "HUES66.3mon": "tsne_HUES66.3mon.txt",
+        "PGP1.3mon.batch2": "tsne_PGP1.3mon.batch2.txt",
+        "PGP1.3mon": "tsne_PGP1.3mon.txt",
+        "PGP1.6mon.batch3": "tsne_PGP1.6mon.Batch2.1.txt",
+        "PGP1.6mon": "tsne_PGP1.6mon.1.txt",
+    }
 
-    expr_df = pd.read_csv(fn, sep="\t", compression='gzip', index_col=0)
+    fn = os.path.join(data_dir, "SCP282")
+    fn_meta = os.path.join(fn, "metadata", "meta_combined.txt")
+    fn_tsne = os.path.join(fn, "cluster", fn_tsne_dict[sample_fn])
+    fn_expression = os.path.join(fn, "expression", fn_expr_dict[sample_fn])
+
+    expr_df = pd.read_csv(fn_expression, sep="\t", index_col=0)
     expr_df = expr_df.apply(np.expm1)
     expr_df = expr_df.T
 
     metadata_df = pd.read_csv(fn_meta, sep="\t", index_col=0, header=0, low_memory=False)
     metadata_df = metadata_df.tail(-1)
+    metadata_df.index.name = None
+    metadata_df = metadata_df.loc[expr_df.index.tolist()].copy()
+    metadata_df["organoid_age_days"] = [{"3mon": "90", "6mon": "180"}[i] for i in metadata_df["Batch"].str.split("_").str[1]]
 
-    # add additional field for organoid age
-    metadata_df["organoid_age_days"] = pd.Series([{"3mon": "90", "6mon": "180"}[i] for i in metadata_df["Batch"].str.split("_").str[1]], dtype="category")
+    tsne_df = pd.read_csv(fn_tsne, sep="\t", skiprows=2, index_col=0, header=None)
 
-    # multiply by the UMIs, divide by 10^6
-    arr = scipy.sparse.csr_matrix(
-        np.multiply(expr_df.values, metadata_df.nUMI.loc[expr_df.index.tolist()].values.reshape(-1, 1).astype(int)), dtype=np.float32)
-    arr /= 10**6
+    # reverse normalisation
+    x = scipy.sparse.csr_matrix(np.multiply(expr_df.values, metadata_df["nUMI"].values.reshape(-1, 1).astype(int)), dtype=np.float32)
+    x /= 10**6
 
     adata = ad.AnnData(
-        X=arr, obs=metadata_df.loc[expr_df.index.tolist()].copy(),
+        X=x,
+        obs=metadata_df,
+        obsm={"X_tsne": tsne_df.loc[metadata_df.index].values},
         var=pd.DataFrame(index=expr_df.columns.values))
 
     return adata

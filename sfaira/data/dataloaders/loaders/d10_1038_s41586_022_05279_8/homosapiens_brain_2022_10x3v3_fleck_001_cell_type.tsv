@@ -1,0 +1,17 @@
+source	target	target_id
+ctx-neuron	neuron of the forebrain	CL:0012001
+ctx-npc	forebrain neuroblast	CL:1000042
+early-iPSC	pluripotent stem cell	CL:0002248
+early-nect_nepi	neural stem cell	CL:0000047
+early-npc	neural progenitor cell	CL:0011020
+ge-nect_nepi	neural stem cell	CL:0000047
+ge-neuron	caudal ganglionic eminence derived GABAergic cortical interneuron	CL:4023070
+ge-npc	neural progenitor cell	CL:0011020
+nt-nect_nepi	neural stem cell	CL:0000047
+nt-neuron	neuron	CL:0000540
+nt-npc	neural progenitor cell	CL:0011020
+other-iPSC	pluripotent stem cell	CL:0002248
+other-nect_nepi	neural stem cell	CL:0000047
+other-npc	neural progenitor cell	CL:0011020
+telencephalon-nect_nepi	neural stem cell	CL:0000047
+telencephalon-npc	neural progenitor cell	CL:0011020

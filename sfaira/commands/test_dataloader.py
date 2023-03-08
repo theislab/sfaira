@@ -56,6 +56,7 @@ class DataloaderTester:
             # from anndata:
             with warnings.catch_warnings():
                 warnings.filterwarnings("ignore", category=UserWarning)
+                print(f"loading {k}")
                 v.load(load_raw=True, allow_caching=False)
             signal_raw = np.asarray(v.adata.X.sum()).sum()
             # Check that fields are there:

@@ -1,20 +1,16 @@
 dataset_structure:
     dataset_index: 1
     sample_fns:
-        - "11a.6mon"
-        - "GM.6mon"
-        - "HUES66.3mon"
-        - "PGP1.3mon.batch2"
-        - "PGP1.3mon"
-        - "PGP1.6mon.batch3"
-        - "PGP1.6mon"
+        - "GSM2878890_hCS_FF_1"
+        - "GSM2878891_hCS_FF_2"
+        - "GSM2878892_hCS_FF_3"
 dataset_wise:
-    author: "Velasco, Silvia"
-    default_embedding: "X_tsne"
+    author: "Yoon, Se-Jin"
+    default_embedding: 
     doi_preprint: 
-    doi_journal: "10.1038/s41586-019-1289-x"
-    download_url_data: "SCP282"
-    download_url_meta:
+    doi_journal: "10.1038/s41592-018-0255-0"
+    download_url_data: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE107nnn/GSE107771/suppl/GSE107771_RAW.tar"
+    download_url_meta: 
     primary_data: True
     year: 2019
 layers:
@@ -26,40 +22,29 @@ layers:
     layer_unspliced_processed: 
     layer_velocity: 
 dataset_or_feature_wise:
-    feature_reference: "Homo_sapiens.GRCh38.84"
+    feature_reference: "Homo_sapiens.GRCh37.74"
     feature_reference_var_key: 
     feature_type: "rna"
     feature_type_var_key: 
 dataset_or_observation_wise:
-    assay_sc: "10x 3' v2"
+    assay_sc: "BD Rhapsody Whole Transcriptome Analysis"
     assay_sc_obs_key: 
-    assay_differentiation: "Kadoshima, 2013 with modifications (doi: 10.1073/pnas.1315710110)"
+    assay_differentiation: "Yoon and Pasca, 2018 (doi: 10.1038/protex.2018.123)"
     assay_differentiation_obs_key: 
     assay_type_differentiation: "guided"
     assay_type_differentiation_obs_key: 
     bio_sample:
-    bio_sample_obs_key: "Organoid"
+    bio_sample_obs_key:
     cell_line:
-        11a.6mon: "11a"
-        GM.6mon: "8330-iPS-8"
-        HUES66.3mon: "HUES 66"
-        PGP1.3mon.batch2: "GM23338"
-        PGP1.3mon: "GM23338"
-        PGP1.6mon.batch3: "GM23338"
-        PGP1.6mon: "GM23338"
-    cell_line_obs_key: 
+        GSM2878890_hCS_FF_1: "custom_C-6.1"
+        GSM2878891_hCS_FF_2: "custom_C-6.2"
+        GSM2878892_hCS_FF_3: "custom_C-7"
+    cell_line_obs_key:
     cell_type: 
-    cell_type_obs_key: "CellType"
-    development_stage:
-        11a.6mon: "26th week post-fertilization human stage"
-        GM.6mon: "26th week post-fertilization human stage"
-        HUES66.3mon: "13th week post-fertilization human stage"
-        PGP1.3mon.batch2: "13th week post-fertilization human stage"
-        PGP1.3mon: "13th week post-fertilization human stage"
-        PGP1.6mon.batch3: "26th week post-fertilization human stage"
-        PGP1.6mon: "26th week post-fertilization human stage"
-    development_stage_obs_key:
-    disease: 
+    cell_type_obs_key: 
+    development_stage: "15th week post-fertilization human stage"
+    development_stage_obs_key: 
+    disease: "healthy"
     disease_obs_key: 
     ethnicity: 
     ethnicity_obs_key: 
@@ -73,21 +58,14 @@ dataset_or_observation_wise:
     organism_obs_key: 
     sample_source: "3d_culture"
     sample_source_obs_key: 
-    sex:
-        11a.6mon: "male"
-        GM.6mon: "male"
-        HUES66.3mon: "female"
-        PGP1.3mon.batch2: "male"
-        PGP1.3mon: "male"
-        PGP1.6mon.batch3: "male"
-        PGP1.6mon: "male"
-    sex_obs_key:
+    sex: 
+    sex_obs_key: # unknown, should be from different donors
     source_doi:
     source_doi_obs_key:
     state_exact:
     state_exact_obs_key:
     suspension_type: "cell"
-    suspension_type_obs_key:
+    suspension_type_obs_key: 
     tech_sample:
     tech_sample_obs_key: 
     treatment:

@@ -6,7 +6,7 @@ dataset_wise:
     default_embedding: "X_tsne"
     doi_preprint: 
     doi_journal: "10.1126/science.aah4573"
-    download_url_data: "https://singlecell.broadinstitute.org/single_cell/study/SCP43"
+    download_url_data: "SCP43"
     download_url_meta: 
     primary_data: True
     year: 2022

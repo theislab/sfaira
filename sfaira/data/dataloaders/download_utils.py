@@ -39,6 +39,20 @@ def download(urls, data_dir, directory_formatted_doi, dataset_id, **kwargs):
             else:
                 _download_synapse(synapse_entity=url.split(",")[0], data_dir=data_dir, fn=fn, dataset_id=dataset_id,
                                   **kwargs)
+        # Special case for data from the braod single cell portal
+        elif url.split(",")[0].startswith('SCP'):
+            fn = url
+            if os.path.isdir(os.path.join(data_dir, url)):
+                print(f"SCP directory {fn} already found on disk, assuming complete content, skipping download.")
+            else:
+                warnings.warn(
+                    f"Dataset {dataset_id} is not available for automatic download as it is served on the Broad Institute Single Cell Portal. "
+                    f"To retreive the data, follow the steps below.\n"
+                    f"Step 1: Log in to the Broad Single Cell Portal at https://singlecell.broadinstitute.org\n"
+                    f"Step 2: Create a bulk download curl command using the 'Bulk download' button on the following site: "
+                    f"https://singlecell.broadinstitute.org/single_cell/study/{fn}#study-download\n"
+                    f"Step 3: Change directory in your terminal to {data_dir} and execute the curl command obtained in Step 2 there."
+                )
         # Special case for public data that is labelled as not automatically downloadable
         elif url.split(",")[0] == 'manual':
             u = ",".join(url.split(",")[2:])
@@ -50,7 +64,11 @@ def download(urls, data_dir, directory_formatted_doi, dataset_id, **kwargs):
                       f"Please download it from {u} and copy to {os.path.join(data_dir, fn)}")
         # All other cases
         else:
-            url = urllib.parse.unquote(url)
+            if url.split(",")[0] == 'rename':
+                rename = url.split(",")[1]
+                url = ",".join(url.split(",")[2:])
+            else:
+                rename = None
             try:
                 urllib.request.urlopen(url)
             except urllib.error.HTTPError as err:
@@ -64,10 +82,12 @@ def download(urls, data_dir, directory_formatted_doi, dataset_id, **kwargs):
                 # to get local issuer certificate (_ssl.c:1124)
                 ssl._create_default_https_context = ssl._create_unverified_context
 
-            if 'Content-Disposition' in urllib.request.urlopen(url).info().keys():
+            if rename is not None:
+                fn = rename
+            elif 'Content-Disposition' in urllib.request.urlopen(url).info().keys():
                 fn = cgi.parse_header(urllib.request.urlopen(url).info()['Content-Disposition'])[1]["filename"]
             else:
-                fn = url.split("/")[-1]
+                fn = urllib.parse.unquote(url.split("/")[-1])
             # Only download if file not already downloaded:
             if os.path.isfile(os.path.join(data_dir, fn)):
                 print(f"File {fn} already found on disk, skipping download.")

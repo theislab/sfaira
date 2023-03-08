@@ -1,13 +1,13 @@
 source	target	target_id
 Astroglia	astrocyte	CL:0000127
-CFuPNs	pyramidal neuron	CL:0000598
-CPNs	pyramidal neuron	CL:0000598
+CFuPNs	extratelencephalic-projecting glutamatergic cortical neuron	CL:4023009
+CPNs	cerebral cortex pyramidal neuron	CL:4023111
 Cajal-Retzius	Cajal-Retzius cell	CL:0000695
-Cycling	neural progenitor cell	CL:0011020
-IPCs	neural progenitor cell	CL:0011020
-IPCs/Immature PNs	neural progenitor cell	CL:0011020
-Immature CFuPNs	pyramidal neuron	CL:0000598
-Immature CPNs	pyramidal neuron	CL:0000598
+Cycling	neuroblast (sensu Vertebrata)	CL:0000031
+IPCs	neuroblast (sensu Vertebrata)	CL:0000031
+IPCs/Immature PNs	neuroblast (sensu Vertebrata)	CL:0000031
+Immature CFuPNs	extratelencephalic-projecting glutamatergic cortical neuron	CL:4023009
+Immature CPNs	cerebral cortex pyramidal neuron	CL:4023111
 Immature Interneurons	interneuron	CL:0000099
 Immature PNs	pyramidal neuron	CL:0000598
 RG	radial glial cell	CL:0000681

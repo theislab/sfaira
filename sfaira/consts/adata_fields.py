@@ -124,6 +124,7 @@ class AdataIdsSfaira(AdataIds):
         self.organism = "organism"
         self.primary_data = "primary_data"
         self.sample_source = "sample_source"
+        self.suspension_type = "suspension_type"
         self.tech_sample = "tech_sample"
         self.title = "title"
         self.year = "year"
@@ -158,6 +159,7 @@ class AdataIdsSfaira(AdataIds):
             "organ",
             "organism",
             "sex",
+            "suspension_type",
         ]
         self.obs_keys = [
             "assay_sc",
@@ -176,6 +178,7 @@ class AdataIdsSfaira(AdataIds):
             "sex",
             "state_exact",
             "sample_source",
+            "suspension_type",
             "tech_sample",
         ]
         self.var_keys = [

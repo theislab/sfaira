@@ -1,33 +1,34 @@
 dataset_structure:
     dataset_index: 1
     sample_fns:
-        - "B6_normal_pre_EF.csv"
-        - "BTBR_control_pre_EF.csv"
-        - "BTBR_ob12_pre_EF.csv"
-        - "cd2ap_ko_pre_EF.csv"
-        - "cd2ap_wt_pre_EF.csv"
-        - "doxo_pre_EF.csv"
-        - "nephritis_d1_pre_EF.csv"
-        - "nephritis_d5_pre_EF.csv"
+        - "organoids"
+        - "primary"
 dataset_wise:
-    author: "Chung, Jun-Jae "
-    default_embedding: 
+    author: "Bhaduri, Aparna"
+    default_embedding:
+        primary: "X_tsne"
     doi_preprint: 
-    doi_journal: "10.1681/ASN.2020020220"
-    download_url_data: "SCP975"
+    doi_journal: "10.1038/s41586-020-1962-0"
+    download_url_data: 
+        organoids: "https://cells.ucsc.edu/organoidreportcard/organoids10X/organoidsmatrix_nonorm.txt.gz"
+        primary: "https://cells.ucsc.edu/organoidreportcard/primary10X/primarymatrix_nonorm.txt.gz"
     download_url_meta: 
+        organoids: "https://static-content.springer.com/esm/art%3A10.1038%2Fs41586-020-1962-0/MediaObjects/41586_2020_1962_MOESM3_ESM.xlsx"
+        primary: 
+            - "https://cells.ucsc.edu/organoidreportcard/primary10X/meta.tsv"
+            - "https://cells.ucsc.edu/organoidreportcard/primary10X/Seurat_tsne.coords.tsv.gz"
     primary_data: True
     year: 2020
 layers:
-    layer_counts:
-    layer_processed: "X"
+    layer_counts: "X"
+    layer_processed: 
     layer_spliced_counts: 
     layer_spliced_processed: 
     layer_unspliced_counts: 
     layer_unspliced_processed: 
     layer_velocity: 
 dataset_or_feature_wise:
-    feature_reference: 
+    feature_reference: "Homo_sapiens.GRCh38.83"
     feature_reference_var_key: 
     feature_type: "rna"
     feature_type_var_key: 
@@ -36,17 +37,22 @@ dataset_or_observation_wise:
     assay_sc_obs_key: 
     assay_differentiation: 
     assay_differentiation_obs_key: 
+        organoids: "Protocol"
     assay_type_differentiation: 
-    assay_type_differentiation_obs_key: 
+    assay_type_differentiation_obs_key:
+        organoids: "assay_type_diff"
     bio_sample:
-    bio_sample_obs_key: 
+    bio_sample_obs_key:
+        orgnoids: "Sample"
+        primary: "Area*Individual"
     cell_line: 
-    cell_line_obs_key: 
+    cell_line_obs_key:
+        organoids: "Line"
     cell_type: 
-    cell_type_obs_key: "Cell_type"
+    cell_type_obs_key: "celltype"
     development_stage: 
-    development_stage_obs_key: 
-    disease: 
+    development_stage_obs_key: "Age"
+    disease: "healthy"
     disease_obs_key: 
     ethnicity: 
     ethnicity_obs_key: 
@@ -54,18 +60,26 @@ dataset_or_observation_wise:
     gm_obs_key:
     individual:
     individual_obs_key: 
-    organ: "kidney"
+        primary: "Individual"
+    organ: 
     organ_obs_key: 
-    organism: "Mus musculus"
+        organoids: "Protocol"
+        primary: "Area"
+    organism: "Homo sapiens"
     organism_obs_key: 
-    sample_source: "primary_tissue"
+    sample_source:
+        organoids: "3d_culture"
+        primary: "primary_tissue"
     sample_source_obs_key: 
     sex: 
-    sex_obs_key: 
+    sex_obs_key:
+        organoids: "Line"
     source_doi:
     source_doi_obs_key:
     state_exact:
     state_exact_obs_key:
+    suspension_type: "cell"
+    suspension_type_obs_key: 
     tech_sample:
     tech_sample_obs_key: 
     treatment:

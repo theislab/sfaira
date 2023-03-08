@@ -1,22 +1,21 @@
 dataset_structure:
     dataset_index: 1
     sample_fns:
-        - "11a.6mon"
-        - "GM.6mon"
-        - "HUES66.3mon"
-        - "PGP1.3mon.batch2"
-        - "PGP1.3mon"
-        - "PGP1.6mon.batch3"
-        - "PGP1.6mon"
+        - "2mo"
+        - "4mo"
+        - "6mo"
 dataset_wise:
-    author: "Velasco, Silvia"
-    default_embedding: "X_tsne"
+    author: "Bowles, Kathryn"
+    default_embedding: "X_umap"
     doi_preprint: 
-    doi_journal: "10.1038/s41586-019-1289-x"
-    download_url_data: "SCP282"
-    download_url_meta:
+    doi_journal: "10.1016/j.cell.2021.07.003"
+    download_url_data: 
+        2mo: "private,All_2mo_Clustered_Annotated.rds"
+        4mo: "private,All_4mo_Clustered_Annotated.rds"
+        6mo: "private,All_6mo_Clustered_Annotated.rds"
+    download_url_meta: 
     primary_data: True
-    year: 2019
+    year: 2021
 layers:
     layer_counts: "X"
     layer_processed: 
@@ -26,70 +25,52 @@ layers:
     layer_unspliced_processed: 
     layer_velocity: 
 dataset_or_feature_wise:
-    feature_reference: "Homo_sapiens.GRCh38.84"
+    feature_reference: "Homo_sapiens.GRCh38.93"
     feature_reference_var_key: 
     feature_type: "rna"
     feature_type_var_key: 
 dataset_or_observation_wise:
-    assay_sc: "10x 3' v2"
+    assay_sc: "CITE-seq (sample multiplexing)"
     assay_sc_obs_key: 
-    assay_differentiation: "Kadoshima, 2013 with modifications (doi: 10.1073/pnas.1315710110)"
+    assay_differentiation: "Yoon, 2019 (doi: 10.1038/s41592-018-0255-0)"
     assay_differentiation_obs_key: 
     assay_type_differentiation: "guided"
     assay_type_differentiation_obs_key: 
     bio_sample:
-    bio_sample_obs_key: "Organoid"
-    cell_line:
-        11a.6mon: "11a"
-        GM.6mon: "8330-iPS-8"
-        HUES66.3mon: "HUES 66"
-        PGP1.3mon.batch2: "GM23338"
-        PGP1.3mon: "GM23338"
-        PGP1.6mon.batch3: "GM23338"
-        PGP1.6mon: "GM23338"
-    cell_line_obs_key: 
+    bio_sample_obs_key: "ID"
+    cell_line: 
+    cell_line_obs_key: "ID"
     cell_type: 
     cell_type_obs_key: "CellType"
-    development_stage:
-        11a.6mon: "26th week post-fertilization human stage"
-        GM.6mon: "26th week post-fertilization human stage"
-        HUES66.3mon: "13th week post-fertilization human stage"
-        PGP1.3mon.batch2: "13th week post-fertilization human stage"
-        PGP1.3mon: "13th week post-fertilization human stage"
-        PGP1.6mon.batch3: "26th week post-fertilization human stage"
-        PGP1.6mon: "26th week post-fertilization human stage"
+    development_stage: 
+        2mo: "Carnegie stage 23"
+        4mo: "18th week post-fertilization human stage"
+        6mo: "26th week post-fertilization human stage"
     development_stage_obs_key:
     disease: 
-    disease_obs_key: 
+    disease_obs_key: "Mt"
     ethnicity: 
     ethnicity_obs_key: 
     gm:
-    gm_obs_key:
+    gm_obs_key: "Mt"
     individual:
     individual_obs_key: 
-    organ: "pallium"
+    organ: "cerebral cortex"
     organ_obs_key: 
     organism: "Homo sapiens"
     organism_obs_key: 
     sample_source: "3d_culture"
     sample_source_obs_key: 
-    sex:
-        11a.6mon: "male"
-        GM.6mon: "male"
-        HUES66.3mon: "female"
-        PGP1.3mon.batch2: "male"
-        PGP1.3mon: "male"
-        PGP1.6mon.batch3: "male"
-        PGP1.6mon: "male"
+    sex: "female"
     sex_obs_key:
     source_doi:
     source_doi_obs_key:
     state_exact:
     state_exact_obs_key:
     suspension_type: "cell"
-    suspension_type_obs_key:
+    suspension_type_obs_key: 
     tech_sample:
-    tech_sample_obs_key: 
+    tech_sample_obs_key: "Run"
     treatment:
     treatment_obs_key:
 feature_wise:

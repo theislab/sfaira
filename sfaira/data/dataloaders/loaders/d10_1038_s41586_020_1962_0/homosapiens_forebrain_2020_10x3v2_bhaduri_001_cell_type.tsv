@@ -1,0 +1,45 @@
+source	target	target_id
+Astrocyte_Astrocyte	mature astrocyte	CL:0002627
+Endothelial_Endothelial	endothelial cell	CL:0000115
+Excitatory Neuron _Cajal Retzius	Cajal-Retzius cell	CL:0000695
+Excitatory Neuron _Deep Layer	cerebral cortex pyramidal neuron	CL:4023111
+Excitatory Neuron _IPC/newborn	neuroblast (sensu Vertebrata)	CL:0000031
+Excitatory Neuron _Layer IV	cerebral cortex pyramidal neuron	CL:4023111
+Excitatory Neuron _Layer VI Occipital	L6b glutamatergic cortical neuron	CL:4023038
+Excitatory Neuron _Layer VI Pan-area	L6b glutamatergic cortical neuron	CL:4023038
+Excitatory Neuron _Low Quality	glutamatergic neuron	CL:0000679
+Excitatory Neuron _Newborn	glutamatergic neuron	CL:0000679
+Excitatory Neuron _PFC	cerebral cortex pyramidal neuron	CL:4023111
+Excitatory Neuron _Pan-neuronal	glutamatergic neuron	CL:0000679
+Excitatory Neuron _Parietal and Temporal	cerebral cortex pyramidal neuron	CL:4023111
+Excitatory Neuron _Upper Layer	cerebral cortex pyramidal neuron	CL:4023111
+Excitatory Neuron _Upper Layer Occipital	cerebral cortex pyramidal neuron	CL:4023111
+Excitatory Neuron _Upper Layer PFC	cerebral cortex pyramidal neuron	CL:4023111
+Excitatory Neuron _V1 Neurons	cerebral cortex pyramidal neuron	CL:4023111
+Excitatory Neuron_Low quality	glutamatergic neuron	CL:0000679
+Excitatory Neuron_Newborn Low-Quality	glutamatergic neuron	CL:0000679
+Excitatory Neuron_Pan-neuronal	glutamatergic neuron	CL:0000679
+IPC_IPC-div1	neuroblast (sensu Vertebrata)	CL:0000031
+IPC_IPC-div2	neuroblast (sensu Vertebrata)	CL:0000031
+IPC_IPC-new	neuroblast (sensu Vertebrata)	CL:0000031
+Inhibitory Neuron_MGE2	medial ganglionic eminence derived GABAergic cortical interneuron	CL:4023069
+Inhibitory Neuron_SST-MGE1	sst GABAergic cortical interneuron	CL:4023017
+Microglia_Microglia	microglial cell	CL:0000129
+Microglia_Microglia low quality	microglial cell	CL:0000129
+Mixed Neuron/Radial Glia_Mixed	neural cell	CL:0002319
+Mural_Mural	mural cell	CL:0008034
+OPC_OPC	oligodendrocyte precursor cell	CL:0002453
+Outlier_Outlier	unknown	unknown
+Radial Glia_Glycolytic RG	radial glial cell	CL:0000681
+Radial Glia_Hindbrain RG	radial glial cell	CL:0000681
+Radial Glia_Low Quality	radial glial cell	CL:0000681
+Radial Glia_Low quality	radial glial cell	CL:0000681
+Radial Glia_Pan-radial glia	radial glial cell	CL:0000681
+Radial Glia_early	radial glial cell	CL:0000681
+Radial Glia_late	radial glial cell	CL:0000681
+Radial Glia_oRG	radial glial cell	CL:0000681
+Radial Glia_oRG/Astrocyte	immature astrocyte	CL:0002626
+Radial Glia_tRG	radial glial cell	CL:0000681
+Radial Glia_vRG	radial glial cell	CL:0000681
+Red blood cells_Low Quality	erythrocyte	CL:0000232
+Unknown_Unknown	unknown	unknown

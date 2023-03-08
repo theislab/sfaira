@@ -1,22 +1,18 @@
 dataset_structure:
     dataset_index: 1
     sample_fns:
-        - "11a.6mon"
-        - "GM.6mon"
-        - "HUES66.3mon"
-        - "PGP1.3mon.batch2"
-        - "PGP1.3mon"
-        - "PGP1.6mon.batch3"
-        - "PGP1.6mon"
+        - "GSM3510168_hSpC_d45"
+        - "GSM3510169_hSpC_d45_noDAPT"
+        - "GSM4589792_hSpS_d53"
 dataset_wise:
-    author: "Velasco, Silvia"
-    default_embedding: "X_tsne"
-    doi_preprint: 
-    doi_journal: "10.1038/s41586-019-1289-x"
-    download_url_data: "SCP282"
+    author: "Andersen, Jimena"
+    default_embedding: 
+    doi_preprint:
+    doi_journal: "10.1016/j.cell.2020.11.017"
+    download_url_data: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE123nnn/GSE123722/suppl/GSE123722_RAW.tar"
     download_url_meta:
     primary_data: True
-    year: 2019
+    year: 2020
 layers:
     layer_counts: "X"
     layer_processed: 
@@ -26,39 +22,37 @@ layers:
     layer_unspliced_processed: 
     layer_velocity: 
 dataset_or_feature_wise:
-    feature_reference: "Homo_sapiens.GRCh38.84"
+    feature_reference:
+        GSM3510168_hSpC_d45: "Homo_sapiens.GRCh37.74"
+        GSM3510169_hSpC_d45_noDAPT: "Homo_sapiens.GRCh37.74"
+        GSM4589792_hSpS_d53: "Homo_sapiens.GRCh38.93"
     feature_reference_var_key: 
     feature_type: "rna"
     feature_type_var_key: 
 dataset_or_observation_wise:
-    assay_sc: "10x 3' v2"
+    assay_sc: 
+        GSM3510168_hSpC_d45: "BD Rhapsody Whole Transcriptome Analysis"
+        GSM3510169_hSpC_d45_noDAPT: "BD Rhapsody Whole Transcriptome Analysis"
+        GSM4589792_hSpS_d53: "10x 3' v3"
     assay_sc_obs_key: 
-    assay_differentiation: "Kadoshima, 2013 with modifications (doi: 10.1073/pnas.1315710110)"
+    assay_differentiation:
+        GSM3510168_hSpC_d45: "Andersen, 2020 hSpS (doi: 10.1016/j.cell.2020.11.017)"
+        GSM3510169_hSpC_d45_noDAPT: "Andersen, 2020 hSpS (doi: 10.1016/j.cell.2020.11.017); without DAPT"
+        GSM4589792_hSpS_d53: "Andersen, 2020 hSpS (doi: 10.1016/j.cell.2020.11.017)"
     assay_differentiation_obs_key: 
     assay_type_differentiation: "guided"
     assay_type_differentiation_obs_key: 
     bio_sample:
-    bio_sample_obs_key: "Organoid"
-    cell_line:
-        11a.6mon: "11a"
-        GM.6mon: "8330-iPS-8"
-        HUES66.3mon: "HUES 66"
-        PGP1.3mon.batch2: "GM23338"
-        PGP1.3mon: "GM23338"
-        PGP1.6mon.batch3: "GM23338"
-        PGP1.6mon: "GM23338"
-    cell_line_obs_key: 
+    bio_sample_obs_key: "cellline"
+    cell_line: 
+    cell_line_obs_key: "cellline"
     cell_type: 
-    cell_type_obs_key: "CellType"
-    development_stage:
-        11a.6mon: "26th week post-fertilization human stage"
-        GM.6mon: "26th week post-fertilization human stage"
-        HUES66.3mon: "13th week post-fertilization human stage"
-        PGP1.3mon.batch2: "13th week post-fertilization human stage"
-        PGP1.3mon: "13th week post-fertilization human stage"
-        PGP1.6mon.batch3: "26th week post-fertilization human stage"
-        PGP1.6mon: "26th week post-fertilization human stage"
-    development_stage_obs_key:
+    cell_type_obs_key: 
+    development_stage: 
+        GSM3510168_hSpC_d45: "Carnegie stage 18"
+        GSM3510169_hSpC_d45_noDAPT: "Carnegie stage 18"
+        GSM4589792_hSpS_d53: "Carnegie stage 21"
+    development_stage_obs_key: 
     disease: 
     disease_obs_key: 
     ethnicity: 
@@ -67,33 +61,28 @@ dataset_or_observation_wise:
     gm_obs_key:
     individual:
     individual_obs_key: 
-    organ: "pallium"
+    organ: "hindbrain"
     organ_obs_key: 
     organism: "Homo sapiens"
     organism_obs_key: 
     sample_source: "3d_culture"
     sample_source_obs_key: 
-    sex:
-        11a.6mon: "male"
-        GM.6mon: "male"
-        HUES66.3mon: "female"
-        PGP1.3mon.batch2: "male"
-        PGP1.3mon: "male"
-        PGP1.6mon.batch3: "male"
-        PGP1.6mon: "male"
-    sex_obs_key:
+    sex: 
+    sex_obs_key: "cellline"
     source_doi:
     source_doi_obs_key:
     state_exact:
+        GSM3510169_hSpC_d45_noDAPT: "adapted differentiation protocol without DAPT"
     state_exact_obs_key:
     suspension_type: "cell"
-    suspension_type_obs_key:
+    suspension_type_obs_key: 
     tech_sample:
     tech_sample_obs_key: 
     treatment:
     treatment_obs_key:
 feature_wise:
-    feature_id_var_key: 
+    feature_id_var_key:
+        GSM4589792_hSpS_d53: "ensembl_id"
     feature_symbol_var_key: "index"
 observation_wise:
     spatial_x_coord_obs_key: 
