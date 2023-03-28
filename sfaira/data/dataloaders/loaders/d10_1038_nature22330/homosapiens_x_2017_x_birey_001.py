@@ -5,7 +5,6 @@ import anndata as ad
 import scipy.sparse
 import os
 import re
-import scanpy as sc
 
 
 def load(data_dir, sample_fn, **kwargs):
@@ -25,6 +24,10 @@ def load(data_dir, sample_fn, **kwargs):
         adata.obs["state_exact"] = "Non-fused organoids"
         adata.obs['organoid_age_days'] = "105"
         adata.obs['cell_line'] = "2242-1"
+        adata.obs["protocol"] = adata.obs["location"].replace({
+            "hCS": "Pasca, 2015 (doi: 10.1038/nmeth.3415)",
+            "hSS": "Birey, 2017 (doi: 10.1038/nature22330)",
+        })
     elif sample_fn == "Smart-seq":
         line_2_idxs = ['hSS507', 'hSS515', 'hSS536', 'hSS544', 'hSS627', 'hSS671', 'hSS683',
                        'hSS692', 'hSS693', 'hCS717', 'hCS730', 'hCS731', 'hCS732', 'hCS746',
@@ -43,6 +46,10 @@ def load(data_dir, sample_fn, **kwargs):
         adata.X = scipy.sparse.csr_matrix(adata.X, dtype=np.float32).copy()
         del adata.obs["batch"]
         adata.obs['location'] = ["".join(re.findall("[a-zA-Z]+", i)) for i in adata.obs_names]
+        adata.obs["protocol"] = adata.obs["location"].replace({
+            "hCS": "Pasca, 2015 (doi: 10.1038/nmeth.3415)",
+            "hSS": "Birey, 2017 (doi: 10.1038/nature22330)",
+        })
     else:
         raise ValueError()
     return adata
