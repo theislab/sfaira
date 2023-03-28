@@ -26,14 +26,14 @@ dataset_or_feature_wise:
 dataset_or_observation_wise:
     assay_sc: "Smart-seq2"
     assay_sc_obs_key: 
-    assay_differentiation: "Marton, 2019 hOLS (doi: 10.1038/s41593-018-0316-9)"
+    assay_differentiation: "Marton, 2019 (doi: 10.1038/s41593-018-0316-9)"
     assay_differentiation_obs_key: 
     assay_type_differentiation: "guided"
     assay_type_differentiation_obs_key: 
     bio_sample:
     bio_sample_obs_key: "cellline"
     cell_line: 
-    cell_line_obs_key: "cellline" # missing cell line metadata (used hiPSC cell lines 1205-4 and 0410-1)
+    cell_line_obs_key: "cellline"
     cell_type: 
     cell_type_obs_key: 
     development_stage: "19th week post-fertilization human stage"
@@ -46,7 +46,7 @@ dataset_or_observation_wise:
     gm_obs_key:
     individual:
     individual_obs_key: 
-    organ: "forebrain"
+    organ: "pallium"
     organ_obs_key: 
     organism: "Homo sapiens"
     organism_obs_key: 
@@ -61,7 +61,7 @@ dataset_or_observation_wise:
     suspension_type: "cell"
     suspension_type_obs_key: 
     tech_sample:
-    tech_sample_obs_key: 
+    tech_sample_obs_key: "plateid"
     treatment:
     treatment_obs_key:
 feature_wise:
