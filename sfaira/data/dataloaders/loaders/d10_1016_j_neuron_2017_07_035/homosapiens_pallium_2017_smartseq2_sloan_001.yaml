@@ -31,7 +31,7 @@ dataset_or_observation_wise:
     assay_type_differentiation: "guided"
     assay_type_differentiation_obs_key: 
     bio_sample:
-    bio_sample_obs_key: # need to contact the authors for metadata regarding which cells came from which hSC
+    bio_sample_obs_key: "biosample" # need to contact the authors for metadata regarding which cells came from which organoid/cell line
     cell_line: custom_8858-1_8858-3_2242-1_1205-4
     cell_line_obs_key: # need to contact the authors for metadata regarding which cells came from which cell line
     cell_type: 
@@ -46,7 +46,7 @@ dataset_or_observation_wise:
     gm_obs_key:
     individual:
     individual_obs_key: 
-    organ: "cerebral cortex"
+    organ: "pallium"
     organ_obs_key: 
     organism: "Homo sapiens"
     organism_obs_key: 
@@ -61,7 +61,7 @@ dataset_or_observation_wise:
     suspension_type: "cell"
     suspension_type_obs_key: 
     tech_sample:
-    tech_sample_obs_key: # "To minimize batch effects, we collected single cells from multiple in vitro differentiation stages in the same sorting experiment, performed library generation on samples in tandem, and sequenced cells from multiple time points simultaneously."
+    tech_sample_obs_key: "techsample" # "To minimize batch effects, we collected single cells from multiple in vitro differentiation stages in the same sorting experiment, performed library generation on samples in tandem, and sequenced cells from multiple time points simultaneously."
     treatment:
     treatment_obs_key:
 feature_wise:

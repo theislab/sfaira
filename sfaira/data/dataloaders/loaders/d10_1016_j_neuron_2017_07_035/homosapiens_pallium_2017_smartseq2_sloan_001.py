@@ -23,6 +23,8 @@ def load(data_dir, **kwargs):
         "1001000212": "450",
         "1001000213": "450"}
     adata.obs["organoid_age_days"] = [age_dict[i.split(".")[0]] for i in adata.obs.index]
+    adata.obs["biosample"] = [age_dict[i.split(".")[0]] for i in adata.obs.index]
+    adata.obs["techsample"] = [i.split(".")[0] for i in adata.obs.index]
     adata.obs["cell_type"] = np.array(['neuron', 'glia1.0', 'glia1.0', 'neuron', 'glia1.0', 'neuron',
                                        'glia1.0', 'glia1.0', 'glia1.0', 'glia1.0', 'neuron', 'neuron',
                                        'neuron', 'neuron', 'neuron', 'glia1.0', 'glia1.0', 'neuron',
