@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import anndata as ad
-import scanpy as sc
 import os
 import scipy.io
 
