@@ -118,7 +118,7 @@ dataset_or_observation_wise:
     gm_obs_key: "Condition"
     individual:
     individual_obs_key:
-    organ: "cerebral cortex"
+    organ: "telencephalon"
     organ_obs_key:
     organism: "Homo sapiens"
     organism_obs_key:

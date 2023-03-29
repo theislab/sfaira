@@ -154,7 +154,7 @@ def load(data_dir, sample_fn, **kwargs):
 
     if loadpaths[sample_fn][3] is not None:
         clusters = pd.read_csv(loadpaths[sample_fn][3], sep="\t", index_col=0, low_memory=False).tail(-1)
-        obsm = {"X_tsne": clusters.loc[obs.index, ["X", "Y"]].values}
+        obsm = {"X_tsne": clusters.loc[obs.index, ["X", "Y"]].values.astype(np.float32)}
     else:
         obsm = {}
 
