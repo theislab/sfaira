@@ -29,7 +29,7 @@ dataset_or_feature_wise:
 dataset_or_observation_wise:
     assay_sc: "BD Rhapsody Whole Transcriptome Analysis"
     assay_sc_obs_key: 
-    assay_differentiation: "Yoon and Pasca, 2018 (doi: 10.1038/protex.2018.123)"
+    assay_differentiation: "Yoon, 2019 (doi: 10.1038/s41592-018-0255-0)"
     assay_differentiation_obs_key: 
     assay_type_differentiation: "guided"
     assay_type_differentiation_obs_key: 
