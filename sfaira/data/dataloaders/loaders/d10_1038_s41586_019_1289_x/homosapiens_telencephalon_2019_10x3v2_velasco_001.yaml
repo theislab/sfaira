@@ -33,7 +33,7 @@ dataset_or_feature_wise:
 dataset_or_observation_wise:
     assay_sc: "10x 3' v2"
     assay_sc_obs_key: 
-    assay_differentiation: "Kadoshima, 2013 with modifications (doi: 10.1073/pnas.1315710110)"
+    assay_differentiation: "Velasco, 2019 (doi: 10.1038/s41586-019-1289-x)"
     assay_differentiation_obs_key: 
     assay_type_differentiation: "guided"
     assay_type_differentiation_obs_key: 
@@ -51,13 +51,13 @@ dataset_or_observation_wise:
     cell_type: 
     cell_type_obs_key: "CellType"
     development_stage:
-        11a.6mon: "26th week post-fertilization human stage"
-        GM.6mon: "26th week post-fertilization human stage"
-        HUES66.3mon: "13th week post-fertilization human stage"
-        PGP1.3mon.batch2: "13th week post-fertilization human stage"
-        PGP1.3mon: "13th week post-fertilization human stage"
-        PGP1.6mon.batch3: "26th week post-fertilization human stage"
-        PGP1.6mon: "26th week post-fertilization human stage"
+        11a.6mon: "24th week post-fertilization human stage"
+        GM.6mon: "28th week post-fertilization human stage"
+        HUES66.3mon: "16th week post-fertilization human stage"
+        PGP1.3mon.batch2: "17th week post-fertilization human stage"
+        PGP1.3mon: "15th week post-fertilization human stage"
+        PGP1.6mon.batch3: "24th week post-fertilization human stage"
+        PGP1.6mon: "24th week post-fertilization human stage"
     development_stage_obs_key:
     disease: 
     disease_obs_key: 
@@ -67,7 +67,7 @@ dataset_or_observation_wise:
     gm_obs_key:
     individual:
     individual_obs_key: 
-    organ: "pallium"
+    organ: "telencephalon"
     organ_obs_key: 
     organism: "Homo sapiens"
     organism_obs_key: 
