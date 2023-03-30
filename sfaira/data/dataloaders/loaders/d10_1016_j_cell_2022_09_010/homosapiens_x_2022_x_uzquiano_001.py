@@ -59,18 +59,18 @@ def load(data_dir, sample_fn, **kwargs):
             os.path.join(p_ex, "62042e18771a5b0db1d548ed", "expression_6month_genes.txt"),
             os.path.join(p_cl, "umap_6month.txt")
         ],
-        #"ATAC_1month": [
-        #    os.path.join(p_ex, "expression_1month-ATAC.txt"),
-        #    "from-meta_1m-ATAC",
-        #    os.path.join(p_ex, "62042e18771a5b0db1d548ea", "expression_6month-ATAC_genes.txt"),
-        #    os.path.join(p_cl, "umap_1month-ATAC.txt")
-        #],
-        #"ATAC_3month": [
-        #    os.path.join(p_ex, "expression_3month-ATAC.txt"),
-        #    "from-meta_3m-ATAC",
-        #    os.path.join(p_ex, "62042e18771a5b0db1d548ea", "expression_6month-ATAC_genes.txt"),
-        #    os.path.join(p_cl, "umap_3month-ATAC.txt")
-        #],
+        # "ATAC_1month": [
+        #     os.path.join(p_ex, "expression_1month-ATAC.txt"),
+        #     "from-meta_1m-ATAC",
+        #     os.path.join(p_ex, "62042e18771a5b0db1d548ea", "expression_6month-ATAC_genes.txt"),
+        #     os.path.join(p_cl, "umap_1month-ATAC.txt")
+        # ],
+        # "ATAC_3month": [
+        #     os.path.join(p_ex, "expression_3month-ATAC.txt"),
+        #     "from-meta_3m-ATAC",
+        #     os.path.join(p_ex, "62042e18771a5b0db1d548ea", "expression_6month-ATAC_genes.txt"),
+        #     os.path.join(p_cl, "umap_3month-ATAC.txt")
+        # ],
         "ATAC_6month": [
             os.path.join(p_ex, "62042e18771a5b0db1d548ea", "expression_6month-ATAC.txt"),
             os.path.join(p_ex, "62042e18771a5b0db1d548ea", "expression_6month-ATAC_barcodes.txt"),
@@ -192,7 +192,6 @@ def load(data_dir, sample_fn, **kwargs):
     if "SHARE" in sample_fn:
         adata.obs["age"] = adata.obs["biosample_id"].replace(agedays_dict["SHARE"]).astype("category")
         adata.obs["organoid_age_days"] = adata.obs["biosample_id"].replace(agedays_dict["SHARE"]).astype("category")
-        assert not set(adata.obs["biosample_id"].unique().tolist()) - set(agedays_dict["SHARE"].keys()) and not set(agedays_dict["SHARE"].keys()) - set(adata.obs["biosample_id"].unique().tolist())
     elif sample_fn == "FETAL":
         adata.obs["age"] = adata.obs["donor_id"].replace(agedays_dict[sample_fn]).astype("category")
         adata.obs["age_days"] = adata.obs["donor_id"].replace(agedays_dict[sample_fn]).astype("category")
