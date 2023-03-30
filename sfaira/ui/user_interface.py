@@ -197,7 +197,7 @@ class UserInterface:
         sandbox = 'sandbox.' if sandbox else ''
 
         # Verify access token
-        r = requests.get(f'https://{sandbox}zenodo.org/api/deposit/depositions', params=params)
+        r = requests.get(f'https://{sandbox}zenodo.org/api/deposit/depositions', params=params, timeout=60)
         if r.status_code != 200:
             raise ValueError(
                 "Your Zenodo access token was not accepted by the API. Please provide a valid access token.")
@@ -207,7 +207,8 @@ class UserInterface:
             r = requests.post(f'https://{sandbox}zenodo.org/api/deposit/depositions',
                               params=params,
                               json={},
-                              headers=headers)
+                              headers=headers,
+                              timeout=60)
             # Obtain bucket URL and deposition ID
             bucket_url = r.json()["links"]["bucket"]
             deposition_id = r.json()['id']
@@ -217,37 +218,43 @@ class UserInterface:
             # Create a new version of the existing deposition
             r = requests.post(
                 f'https://{sandbox}zenodo.org/api/deposit/depositions/{update_existing_deposition}/actions/newversion',
-                params=params)
+                params=params,
+                timeout=60)
             try:
                 deposition_id = r.json()["links"]["latest_draft"].split("/")[-1]
             except json.decoder.JSONDecodeError:
                 time.sleep(10)
                 r = requests.post(
                     f'https://{sandbox}zenodo.org/api/deposit/depositions/{update_existing_deposition}/actions/newversion',
-                    params=params)
+                    params=params,
+                    timeout=60)
                 deposition_id = r.json()["links"]["latest_draft"].split("/")[-1]
             if r.status_code != 201:
                 raise ValueError(
                     f"A new version of deposition {update_existing_deposition} could not be created, "
                     f"please make sure your API key is associated with the account that owns this deposition.")
-            r = requests.get(f'https://{sandbox}zenodo.org/api/deposit/depositions/{deposition_id}', params=params)
+            r = requests.get(f'https://{sandbox}zenodo.org/api/deposit/depositions/{deposition_id}', params=params, timeout=60)
             bucket_url = r.json()["links"]["bucket"]
 
             # Delete all existing files from new version
             r_files = requests.get(f'https://{sandbox}zenodo.org/api/deposit/depositions/{deposition_id}/files',
-                                   params=params)
+                                   params=params,
+                                   timeout=60)
             while len(r_files.json()) > 0:
                 for file_dict in r_files.json():
                     requests.delete(
                         f'https://{sandbox}zenodo.org/api/deposit/depositions/{deposition_id}/files/{file_dict["id"]}',
-                        params=params)
+                        params=params,
+                        timeout=60)
                 r_files = requests.get(f'https://{sandbox}zenodo.org/api/deposit/depositions/{deposition_id}/files',
-                                       params=params)
+                                       params=params,
+                                       timeout=60)
                 while isinstance(r_files.json(), dict):
                     print("Pausing due to Zenodo API rate limitng")
                     time.sleep(10)
                     r_files = requests.get(f'https://{sandbox}zenodo.org/api/deposit/depositions/{deposition_id}/files',
-                                           params=params)
+                                           params=params,
+                                           timeout=60)
 
         # Loop over files in model lookup table and upload them one by one
         for i, weight_path in enumerate(self.model_lookuptable['model_file_path']):
@@ -257,6 +264,7 @@ class UserInterface:
                     f"{bucket_url}/{filename_weights}",
                     data=fp,
                     params=params,
+                    timeout=60,
                 )
             while r.status_code != 200:
                 print(f"Upload of {weight_path} was not successful (status code {r.status_code}), retrying")
@@ -266,6 +274,7 @@ class UserInterface:
                         f"{bucket_url}/{filename_weights}",
                         data=fp,
                         params=params,
+                        timeout=60,
                     )
             # Verify checksum after upload
             if r.json()['checksum'][4:] != self.model_lookuptable['md5'][i]:
@@ -283,6 +292,7 @@ class UserInterface:
                         f"{bucket_url}/{filename_topology}",
                         data=fp,
                         params=params,
+                        timeout=60,
                     )
 
         # Add model lookup table to zenodo
@@ -294,6 +304,7 @@ class UserInterface:
             f"{bucket_url}/model_lookuptable.csv",
             data=df.to_csv(),
             params=params,
+            timeout=60,
         )
 
         # Add metadata
@@ -311,7 +322,8 @@ class UserInterface:
                          data=json.dumps({
                              'metadata': meta
                          }),
-                         headers=headers)
+                         headers=headers,
+                         timeout=60)
 
         if not publish:
             print(f"Zenodo deposition draft has been created: {r.json()['links']['latest_draft_html']}")
@@ -319,7 +331,8 @@ class UserInterface:
         else:
             # Publish the deposition
             r = requests.post(f'https://{sandbox}zenodo.org/api/deposit/depositions/{deposition_id}/actions/publish',
-                              params=params)
+                              params=params,
+                              timeout=60)
             if r.status_code == 202:
                 if sandbox:
                     print(f"Weights referenced in model_lookuptable have been sucessfully published on Zenodo: "
