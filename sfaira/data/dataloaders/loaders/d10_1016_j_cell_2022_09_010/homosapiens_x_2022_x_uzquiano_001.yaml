@@ -9,8 +9,6 @@ dataset_structure:
         - "RNA_4month"
         - "RNA_5month"
         - "RNA_6month"
-        - "ATAC_1month"
-        - "ATAC_3month"
         - "ATAC_6month"
         - "SHARE_RNA"
         - "SHARE_ATAC"
@@ -49,8 +47,8 @@ dataset_or_feature_wise:
         ATAC_6month: "Homo_sapiens.GRCh38.86"
         SHARE_RNA: "Homo_sapiens.GRCh37.74"
         SHARE_ATAC: "Homo_sapiens.GRCh37.74"
-        QUAD-GM_3.5month: "Homo_sapiens.GRCh38.94"
-        QUAD-H66_3.5month: "Homo_sapiens.GRCh38.94"
+        QUAD-GM_3.5month: "Homo_sapiens.GRCh38.84"
+        QUAD-H66_3.5month: "Homo_sapiens.GRCh38.84"
         FETAL: "Homo_sapiens.GRCh38.93"
     feature_reference_var_key:
     feature_type: "rna"
@@ -70,8 +68,8 @@ dataset_or_observation_wise:
         ATAC_6month: "10x scATAC-seq"
         SHARE_RNA: "single cell library construction" #"custom_SHARE-seq-RNA"
         SHARE_ATAC: "single cell library construction" #"custom_SHARE-seq-ATAC"
-        QUAD-GM_3.5month: "10x 3' v3"
-        QUAD-H66_3.5month: "10x 3' v3"
+        QUAD-GM_3.5month: "10x 3' v2"
+        QUAD-H66_3.5month: "10x 3' v2"
         FETAL: "10x 3' v3"
     assay_sc_obs_key:
     assay_differentiation: 
@@ -88,10 +86,25 @@ dataset_or_observation_wise:
         ATAC_6month: "Velasco, 2019 (doi: 10.1038/s41586-019-1289-x)"
         SHARE_RNA: "Velasco, 2019 (doi: 10.1038/s41586-019-1289-x)"
         SHARE_ATAC: "Velasco, 2019 (doi: 10.1038/s41586-019-1289-x)"
-        QUAD-GM_3.5month: "Quadrato, 2017 (doi: 10.1038/nature22047)"
-        QUAD-H66_3.5month: "Quadrato, 2017 (doi: 10.1038/nature22047)"
+        QUAD-GM_3.5month: "Quadrato, 2017 (doi: 10.1038/protex.2017.049)"
+        QUAD-H66_3.5month: "Quadrato, 2017 (doi: 10.1038/protex.2017.049)"
     assay_differentiation_obs_key:
-    assay_type_differentiation: "unguided"
+    assay_type_differentiation:
+        RNA_23days: "guided"
+        RNA_1month: "guided"
+        RNA_1.5month: "guided"
+        RNA_2month: "guided"
+        RNA_3month: "guided"
+        RNA_4month: "guided"
+        RNA_5month: "guided"
+        RNA_6month: "guided"
+        ATAC_1month: "guided"
+        ATAC_3month: "guided"
+        ATAC_6month: "guided"
+        SHARE_RNA: "guided"
+        SHARE_ATAC: "guided"
+        QUAD-GM_3.5month: "unguided"
+        QUAD-H66_3.5month: "unguided"
     assay_type_differentiation_obs_key:
     bio_sample:
     bio_sample_obs_key: "biosample_id"
@@ -124,7 +137,23 @@ dataset_or_observation_wise:
     gm_obs_key:
     individual:
     individual_obs_key: "donor_id"
-    organ: "brain"
+    organ:
+        RNA_23days: "telencephalon"
+        RNA_1month: "telencephalon"
+        RNA_1.5month: "telencephalon"
+        RNA_2month: "telencephalon"
+        RNA_3month: "telencephalon"
+        RNA_4month: "telencephalon"
+        RNA_5month: "telencephalon"
+        RNA_6month: "telencephalon"
+        ATAC_1month: "telencephalon"
+        ATAC_3month: "telencephalon"
+        ATAC_6month: "telencephalon"
+        SHARE_RNA: "telencephalon"
+        SHARE_ATAC: "telencephalon"
+        QUAD-GM_3.5month: "brain"
+        QUAD-H66_3.5month: "brain"
+        FETAL: "cortical plate"
     organ_obs_key:
     organism: "Homo sapiens"
     organism_obs_key:

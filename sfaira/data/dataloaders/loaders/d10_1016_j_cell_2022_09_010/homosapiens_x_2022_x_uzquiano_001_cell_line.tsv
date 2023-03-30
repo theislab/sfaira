@@ -1,21 +1,10 @@
 source	target	target_id
-11a b14	11a	CVCL_8987
-GM08330 b12	8330-iPS-8	CVCL_VK56
 GM08330 b29	8330-iPS-8	CVCL_VK56
-GM08330 b3	8330-iPS-8	CVCL_VK56
-HUES66 b10	HUES 66	CVCL_B201
 HUES66 b28	HUES 66	CVCL_B201
-HUES66 b9	HUES 66	CVCL_B201
 Mito 210 c1 b1	custom_Mito 210	unknown
 Mito 210 c1 b4	custom_Mito 210	unknown
-Mito 210 c1 b5	custom_Mito 210	unknown
 Mito 210 c1 b7	custom_Mito 210	unknown
-Mito 210 c1 b8	custom_Mito 210	unknown
 Mito 210 c2 b16	custom_Mito 210	unknown
 Mito 210 c2 b6	custom_Mito 210	unknown
-PGP1 b11	GM23338	CVCL_F182
-PGP1 b17	GM23338	CVCL_F182
 PGP1 c1 b13	GM23338	CVCL_F182
 PGP1 c1 b2	GM23338	CVCL_F182
-PGP1 c2 b11	GM23338	CVCL_F182
-PGP1 c2 b12	GM23338	CVCL_F182
