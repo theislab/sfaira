@@ -29,7 +29,7 @@ dataset_or_feature_wise:
 dataset_or_observation_wise:
     assay_sc: "10x 3' v3"
     assay_sc_obs_key: 
-    assay_differentiation: "Miura, 2020 hStrS (doi: 10.1038/s41587-020-00763-w)"
+    assay_differentiation: "Miura, 2020 (doi: 10.1038/s41587-020-00763-w)"
     assay_differentiation_obs_key:
     assay_type_differentiation: "guided"
     assay_type_differentiation_obs_key: 
