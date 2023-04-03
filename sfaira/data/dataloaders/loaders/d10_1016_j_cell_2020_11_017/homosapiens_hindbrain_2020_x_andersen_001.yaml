@@ -36,9 +36,9 @@ dataset_or_observation_wise:
         GSM4589792_hSpS_d53: "10x 3' v3"
     assay_sc_obs_key: 
     assay_differentiation:
-        GSM3510168_hSpC_d45: "Andersen, 2020 hSpS (doi: 10.1016/j.cell.2020.11.017)"
-        GSM3510169_hSpC_d45_noDAPT: "Andersen, 2020 hSpS (doi: 10.1016/j.cell.2020.11.017); without DAPT"
-        GSM4589792_hSpS_d53: "Andersen, 2020 hSpS (doi: 10.1016/j.cell.2020.11.017)"
+        GSM3510168_hSpC_d45: "Andersen, 2020 (doi: 10.1016/j.cell.2020.11.017)"
+        GSM3510169_hSpC_d45_noDAPT: "Andersen, 2020 (doi: 10.1016/j.cell.2020.11.017); without DAPT"
+        GSM4589792_hSpS_d53: "Andersen, 2020 (doi: 10.1016/j.cell.2020.11.017)"
     assay_differentiation_obs_key: 
     assay_type_differentiation: "guided"
     assay_type_differentiation_obs_key: 
