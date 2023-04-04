@@ -28,7 +28,7 @@ dataset_or_observation_wise:
     assay_sc_obs_key: 
     assay_differentiation: "Esk, 2020 (doi: 10.1126/science.abb5390)"
     assay_differentiation_obs_key: 
-    assay_type_differentiation: "unguided"
+    assay_type_differentiation: "guided"
     assay_type_differentiation_obs_key: 
     bio_sample:
     bio_sample_obs_key: "library"
@@ -46,7 +46,7 @@ dataset_or_observation_wise:
     gm_obs_key:
     individual:
     individual_obs_key: 
-    organ: "brain"
+    organ: "pallium"
     organ_obs_key: 
     organism: "Homo sapiens"
     organism_obs_key: 
