@@ -17,6 +17,7 @@ def load(data_dir, **kwargs):
         meta = pd.read_csv(tar.extractfile("data_matrices/meta.tsv.gz"), compression="gzip", sep="\t", index_col=0)
 
     meta = meta.loc[obs.index]
+    meta["age"] = [i.split("_")[1] for i in meta["sample"]]
     meta["organoid_age_days"] = [i.split("_")[1] for i in meta["sample"]]
     meta["celltype"] = meta["lineage"] + "-" + meta["stage_manual"]
 
