@@ -7,7 +7,7 @@ dataset_wise:
     doi_preprint:
     doi_journal: "10.1016/j.stem.2020.02.002"
     download_url_data: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE137nnn/GSE137941/suppl/GSE137941_RAW.tar"
-    download_url_meta: 
+    download_url_meta: "private,meta.csv"
     primary_data: True
     year: 2020
 layers:
@@ -26,16 +26,16 @@ dataset_or_feature_wise:
 dataset_or_observation_wise:
     assay_sc: "SPLiT-seq"
     assay_sc_obs_key: 
-    assay_differentiation: "Lancaster, 2014 (doi: 10.1038/nprot.2014.158)"
+    assay_differentiation: "Qian, 2020 (doi: 10.1016/j.stem.2020.02.002)"
     assay_differentiation_obs_key: 
-    assay_type_differentiation: "unguided"
+    assay_type_differentiation: "guided"
     assay_type_differentiation_obs_key: 
     bio_sample:
     bio_sample_obs_key: 
     cell_line: "C1-iPSC-2"
     cell_line_obs_key: 
     cell_type: 
-    cell_type_obs_key: 
+    cell_type_obs_key: "CellType"
     development_stage: "22nd week post-fertilization human stage"
     development_stage_obs_key: 
     disease: "healthy"
@@ -46,7 +46,7 @@ dataset_or_observation_wise:
     gm_obs_key:
     individual:
     individual_obs_key: 
-    organ: "cerebral cortex"
+    organ: "pallium"
     organ_obs_key: 
     organism: "Homo sapiens"
     organism_obs_key: 
