@@ -37,7 +37,7 @@ dataset_or_observation_wise:
     assay_type_differentiation: "guided"
     assay_type_differentiation_obs_key: 
     bio_sample:
-    bio_sample_obs_key: "ID*age"
+    bio_sample_obs_key: "ID"
     cell_line: 
     cell_line_obs_key: "ID"
     cell_type: 
@@ -55,7 +55,7 @@ dataset_or_observation_wise:
     gm_obs_key: "Mt"
     individual:
     individual_obs_key: 
-    organ: "cerebral cortex"
+    organ: "pallium"
     organ_obs_key: 
     organism: "Homo sapiens"
     organism_obs_key: 
