@@ -61,7 +61,7 @@ dataset_or_observation_wise:
         d32to62: "celltype"
         microdissected: "celltype"
     development_stage: 
-    development_stage_obs_key: "organoid_age_days"
+    development_stage_obs_key: "age"
     disease: "healthy"
     disease_obs_key: 
     ethnicity: 

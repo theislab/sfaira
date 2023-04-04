@@ -18,13 +18,16 @@ def load(data_dir, sample_fn, **kwargs):
     adata = ad.AnnData(X=x, obs=meta, var=var)
 
     if sample_fn == "d15":
-        replace = ["is_PSC", "proj_forebrain", "proj_midbrain", "proj_hindbrain", "proj_region", "final_ident"]
-        adata.obs[replace] = adata.obs[replace].astype(str)
+        replace_str = ["is_PSC", "proj_forebrain", "proj_midbrain", "proj_hindbrain", "proj_region", "final_ident"]
+        adata.obs[replace_str] = adata.obs[replace_str].astype(str)
+        adata.obs["age"] = "15"
         adata.obs["organoid_age_days"] = "15"
     elif sample_fn == "d32to62":
+        adata.obs["age"] = [i.split("-d")[1] for i in meta["organoid"]]
         adata.obs["organoid_age_days"] = [i.split("-d")[1] for i in meta["organoid"]]
         adata.obs["celltype"] = pd.read_csv(os.path.join(data_dir, 'cell_annotation_1_12.csv'), index_col=0)["annotation"]
     elif sample_fn == "microdissected":
+        adata.obs["age"] = "60"
         adata.obs["organoid_age_days"] = "60"
         adata.obs["celltype"] = pd.read_csv(os.path.join(data_dir, 'cell_annotation_dissected.csv'), index_col=0)["annotation"]
 
