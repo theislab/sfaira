@@ -22,6 +22,7 @@ def load(data_dir, **kwargs):
         "1001000210": "450",
         "1001000212": "450",
         "1001000213": "450"}
+    adata.obs["age"] = [age_dict[i.split(".")[0]] for i in adata.obs.index]
     adata.obs["organoid_age_days"] = [age_dict[i.split(".")[0]] for i in adata.obs.index]
     adata.obs["biosample"] = [age_dict[i.split(".")[0]] for i in adata.obs.index]
     adata.obs["techsample"] = [i.split(".")[0] for i in adata.obs.index]
