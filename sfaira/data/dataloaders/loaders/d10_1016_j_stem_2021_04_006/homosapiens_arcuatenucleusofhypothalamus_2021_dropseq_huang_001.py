@@ -8,8 +8,6 @@ import anndata as ad
 import scipy.sparse
 
 
-# the data_dir argument will be automatically set by sfaira to the folder where your datafiles lie
-# the sample_fn argument will be automatically set by sfaira to each of the sample_fns provided in the yaml top section
 def load(data_dir, sample_fn, **kwargs):
     fn = os.path.join(data_dir, "GSE164102_RAW.tar")
 

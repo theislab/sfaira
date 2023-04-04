@@ -39,7 +39,7 @@ dataset_or_feature_wise:
 dataset_or_observation_wise:
     assay_sc: "Drop-seq"
     assay_sc_obs_key: 
-    assay_differentiation: "Huang, 2021 ARCOs (doi: 10.1016/j.stem.2021.04.006)"
+    assay_differentiation: "Huang, 2021 (doi: 10.1016/j.stem.2021.04.006)"
     assay_differentiation_obs_key: 
     assay_type_differentiation: "guided"
     assay_type_differentiation_obs_key: 
@@ -62,8 +62,21 @@ dataset_or_observation_wise:
     cell_line_obs_key: 
     cell_type: 
     cell_type_obs_key: 
-    development_stage: 
-    development_stage_obs_key: "organoid_age_days"
+    development_stage:
+        "GSM4996689_DGE67anew.txt.gz": Carnegie stage 09
+        "GSM4996690_DGE67bnew.txt.gz": Carnegie stage 09
+        "GSM4996691_DGE69new.txt.gz": Carnegie stage 09
+        "GSM4996692_DGE68new.txt.gz": Carnegie stage 09
+        "GSM4996693_DGE70new.txt.gz": Carnegie stage 09
+        "GSM4996694_DGE66new.txt.gz": Carnegie stage 09
+        "GSM4996695_DGE71new.txt.gz": Carnegie stage 09
+        "GSM4996696_DGE7374.txt.gz": Carnegie stage 16
+        "GSM4996697_DGE7778.txt.gz": Carnegie stage 16
+        "GSM4996698_DGE7576.txt.gz": Carnegie stage 16
+        "GSM4996699_DGE7980.txt.gz": Carnegie stage 16
+        "GSM4996700_DGE72.txt.gz": Carnegie stage 16
+        "GSM4996701_DGE81.txt.gz": Carnegie stage 16
+    development_stage_obs_key:
     disease: 
         "GSM4996689_DGE67anew.txt.gz": healthy
         "GSM4996690_DGE67bnew.txt.gz": healthy
