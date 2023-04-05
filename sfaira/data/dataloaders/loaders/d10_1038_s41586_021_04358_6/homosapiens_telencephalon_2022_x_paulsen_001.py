@@ -177,7 +177,7 @@ def load(data_dir, sample_fn, **kwargs):
 
     # add age in days annotation
     if sample_fn == "GM_wt_harmonized":
-        adata.obs["organoid_age_days"] = adata.obs["biosample_id"].replace({"GM_1mon": "32", "GM_3mon": "98"})
+        adata.obs["organoid_age_days"] = adata.obs["dataset"].replace({"GM_1mon": "32", "GM_3mon": "98"})
     else:
         adata.obs["organoid_age_days"] = days_dict[sample_fn]
 
