@@ -353,7 +353,7 @@ class DatasetGroup:
                         f"streamlined metadata. Run .streamline_metadata() first."
                     match_ref_list.append(self.datasets[d_id].mapped_features)
                     rm_gene_ver_list.append(self.datasets[d_id].remove_gene_version)
-                    gene_type_list.append(self.datasets[d_id].subset_gene_type)
+                    gene_type_list.append(str(self.datasets[d_id].subset_gene_type))
             assert len(set(match_ref_list)) == 1, \
                 "Not all datasets in this group had their features matched to the same reference (argument " \
                 "'match_to_reference' of method .streamline_features())." \
@@ -878,7 +878,7 @@ class DatasetSuperGroup:
                                                                            f"streamlined metadata. Run .streamline_metadata() first."
                     match_ref_list.append(self.flatten().datasets[d_id].mapped_features)
                     rm_gene_ver_list.append(self.flatten().datasets[d_id].remove_gene_version)
-                    gene_type_list.append(self.flatten().datasets[d_id].subset_gene_type)
+                    gene_type_list.append(str(self.flatten().datasets[d_id].subset_gene_type))
             assert len(set(match_ref_list)) == 1, \
                 "Not all datasets in this group had their features matched to the same reference (argument " \
                 "'match_to_reference' of method .streamline_features()). This is however a prerequisite for creating a " \
