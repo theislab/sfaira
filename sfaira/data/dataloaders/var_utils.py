@@ -82,8 +82,9 @@ def streamline_var(adata: anndata.AnnData,
         if isinstance(subset_genes_to_type, str):
             subset_genes_to_type = [subset_genes_to_type]
         keys = np.unique(genome_container.biotype)
-        if subset_genes_to_type not in keys:
-            raise ValueError(f"subset type {subset_genes_to_type} not available in list {keys}")
+        for s in subset_genes_to_type:
+            if s not in keys:
+                raise ValueError(f"subset type {s} not available in list {keys}")
         target_ids = np.asarray([
             x.upper() for x, y in zip(genome_container.ensembl, genome_container.biotype)
             if y in subset_genes_to_type
