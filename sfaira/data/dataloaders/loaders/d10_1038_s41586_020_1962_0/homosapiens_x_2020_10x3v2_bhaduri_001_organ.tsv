@@ -1,9 +1,9 @@
 source	target	target_id
 Central cortex	cerebral cortex	UBERON:0000956
-Directed	pallium	UBERON:0000203
+Directed	cerebral cortex	UBERON:0000956
 Frontal cortex	frontal cortex	UBERON:0001870
 Least Directed	telencephalon	UBERON:0001893
-Most Directed	pallium	UBERON:0000203
+Most Directed	cerebral cortex	UBERON:0000956
 Occipital cortex	occipital cortex	UBERON:0016540
 PFC	prefrontal cortex	UBERON:0000451
 Telencephalon	telencephalon	UBERON:0001893
