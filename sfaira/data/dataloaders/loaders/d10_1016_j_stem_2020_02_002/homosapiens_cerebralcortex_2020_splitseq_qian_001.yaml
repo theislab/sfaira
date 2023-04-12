@@ -2,42 +2,42 @@ dataset_structure:
     dataset_index: 1
     sample_fns:
 dataset_wise:
-    author: "Vertesy, Abel"
-    default_embedding: "X_umap"
-    doi_preprint: 
-    doi_journal: "10.15252/embj.2022111118"
-    download_url_data: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE205nnn/GSE205554/suppl/GSE205554%5Fintegration%5Fall%5FpreGruffi%2ERds%2Egz"
-    download_url_meta:
+    author: "Qian, Xuyu"
+    default_embedding: 
+    doi_preprint:
+    doi_journal: "10.1016/j.stem.2020.02.002"
+    download_url_data: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE137nnn/GSE137941/suppl/GSE137941_RAW.tar"
+    download_url_meta: "private,meta.csv"
     primary_data: True
-    year: 2022
+    year: 2020
 layers:
     layer_counts: "X"
-    layer_processed: "logcounts"
+    layer_processed: 
     layer_spliced_counts: 
     layer_spliced_processed: 
     layer_unspliced_counts: 
     layer_unspliced_processed: 
     layer_velocity: 
 dataset_or_feature_wise:
-    feature_reference: "Homo_sapiens.GRCh38.93"
+    feature_reference: "Homo_sapiens.GRCh38.92"
     feature_reference_var_key: 
     feature_type: "rna"
     feature_type_var_key: 
 dataset_or_observation_wise:
-    assay_sc: "10x 3' v3"
+    assay_sc: "SPLiT-seq"
     assay_sc_obs_key: 
-    assay_differentiation: "Esk, 2020 (doi: 10.1126/science.abb5390)"
+    assay_differentiation: "Qian, 2020 (doi: 10.1016/j.stem.2020.02.002)"
     assay_differentiation_obs_key: 
     assay_type_differentiation: "guided"
     assay_type_differentiation_obs_key: 
     bio_sample:
-    bio_sample_obs_key: "library"
-    cell_line: "HPSI0114i-rozh_5"
+    bio_sample_obs_key: 
+    cell_line: "C1-iPSC-2"
     cell_line_obs_key: 
     cell_type: 
-    cell_type_obs_key: "integrated_snn_res.0.3.Manual.short"
-    development_stage: "18th week post-fertilization human stage"
-    development_stage_obs_key:
+    cell_type_obs_key: "CellType"
+    development_stage: "22nd week post-fertilization human stage"
+    development_stage_obs_key: 
     disease: "healthy"
     disease_obs_key: 
     ethnicity: 
@@ -46,26 +46,26 @@ dataset_or_observation_wise:
     gm_obs_key:
     individual:
     individual_obs_key: 
-    organ: "pallium"
+    organ: "cerebral cortex"
     organ_obs_key: 
     organism: "Homo sapiens"
     organism_obs_key: 
     sample_source: "3d_culture"
     sample_source_obs_key: 
-    sex: "female"
-    sex_obs_key:
+    sex: "male"
+    sex_obs_key: 
     source_doi:
     source_doi_obs_key:
-    state_exact:
+    state_exact: "Sliced organoids"
     state_exact_obs_key:
-    suspension_type: "cell"
-    suspension_type_obs_key:
+    suspension_type: "nucleus"
+    suspension_type_obs_key: 
     tech_sample:
     tech_sample_obs_key: 
     treatment:
     treatment_obs_key:
 feature_wise:
-    feature_id_var_key: 
+    feature_id_var_key:
     feature_symbol_var_key: "index"
 observation_wise:
     spatial_x_coord_obs_key: 

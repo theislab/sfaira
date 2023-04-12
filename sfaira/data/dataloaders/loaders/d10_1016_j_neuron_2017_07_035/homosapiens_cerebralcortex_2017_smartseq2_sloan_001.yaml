@@ -1,19 +1,15 @@
 dataset_structure:
     dataset_index: 1
     sample_fns:
-        - "GSM3734294_1M"
-        - "GSM3734295_3M"
-        - "GSM3734296_6M"
-        - "GSM3734297_10M"
 dataset_wise:
-    author: "Trujillo, Cleber"
+    author: "Sloan, Steven"
     default_embedding: 
     doi_preprint: 
-    doi_journal: "10.1016/j.stem.2019.08.002"
-    download_url_data: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE130nnn/GSE130238/suppl/GSE130238_RAW.tar"
+    doi_journal: "10.1016/j.neuron.2017.07.035"
+    download_url_data: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE99nnn/GSE99951/suppl/GSE99951_all_data_htseq_out.csv.gz"
     download_url_meta: 
     primary_data: True
-    year: 2019
+    year: 2017
 layers:
     layer_counts: "X"
     layer_processed: 
@@ -23,29 +19,25 @@ layers:
     layer_unspliced_processed: 
     layer_velocity: 
 dataset_or_feature_wise:
-    feature_reference: "Homo_sapiens.GRCh38.84"
+    feature_reference: "Homo_sapiens.GRCh37.74"
     feature_reference_var_key: 
     feature_type: "rna"
     feature_type_var_key: 
 dataset_or_observation_wise:
-    assay_sc: "10x 3' v2"
+    assay_sc: "Smart-seq2"
     assay_sc_obs_key: 
-    assay_differentiation: "Trujillo, 2019 (doi: 10.1016/j.stem.2019.08.002)"
+    assay_differentiation: "Pasca, 2015 (doi: 10.1038/nmeth.3415)" 
     assay_differentiation_obs_key: 
     assay_type_differentiation: "guided"
     assay_type_differentiation_obs_key: 
     bio_sample:
-    bio_sample_obs_key:
-    cell_line:
-    cell_line_obs_key: 
+    bio_sample_obs_key: "biosample" # need to contact the authors for metadata regarding which cells came from which organoid/cell line
+    cell_line: custom_8858-1_8858-3_2242-1_1205-4
+    cell_line_obs_key: # need to contact the authors for metadata regarding which cells came from which cell line
     cell_type: 
-    cell_type_obs_key: 
-    development_stage:
-        GSM3734294_1M: "Carnegie stage 13"
-        GSM3734295_3M: "13th week post-fertilization human stage"
-        GSM3734296_6M: "26th week post-fertilization human stage"
-        GSM3734297_10M: "2-month-old human stage"
-    development_stage_obs_key:
+    cell_type_obs_key: "cell_type"
+    development_stage: 
+    development_stage_obs_key: "age"
     disease: "healthy"
     disease_obs_key: 
     ethnicity: 
@@ -54,14 +46,14 @@ dataset_or_observation_wise:
     gm_obs_key:
     individual:
     individual_obs_key: 
-    organ: "pallium"
+    organ: "cerebral cortex"
     organ_obs_key: 
     organism: "Homo sapiens"
     organism_obs_key: 
     sample_source: "3d_culture"
     sample_source_obs_key: 
-    sex: "male"
-    sex_obs_key: 
+    sex: 
+    sex_obs_key: # add once we know which cell came from which cell line
     source_doi:
     source_doi_obs_key:
     state_exact:
@@ -69,12 +61,12 @@ dataset_or_observation_wise:
     suspension_type: "cell"
     suspension_type_obs_key: 
     tech_sample:
-    tech_sample_obs_key: 
+    tech_sample_obs_key: "techsample" # "To minimize batch effects, we collected single cells from multiple in vitro differentiation stages in the same sorting experiment, performed library generation on samples in tandem, and sequenced cells from multiple time points simultaneously."
     treatment:
     treatment_obs_key:
 feature_wise:
-    feature_id_var_key: "index"
-    feature_symbol_var_key: "gene_id"
+    feature_id_var_key: 
+    feature_symbol_var_key: "index"
 observation_wise:
     spatial_x_coord_obs_key: 
     spatial_y_coord_obs_key: 

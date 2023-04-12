@@ -1,15 +1,21 @@
 dataset_structure:
     dataset_index: 1
     sample_fns:
+        - "2mo"
+        - "4mo"
+        - "6mo"
 dataset_wise:
-    author: "Sloan, Steven"
-    default_embedding: 
+    author: "Bowles, Kathryn"
+    default_embedding: "X_umap"
     doi_preprint: 
-    doi_journal: "10.1016/j.neuron.2017.07.035"
-    download_url_data: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE99nnn/GSE99951/suppl/GSE99951_all_data_htseq_out.csv.gz"
+    doi_journal: "10.1016/j.cell.2021.07.003"
+    download_url_data: 
+        2mo: "private,All_2mo_Clustered_Annotated.rds"
+        4mo: "private,All_4mo_Clustered_Annotated.rds"
+        6mo: "private,All_6mo_Clustered_Annotated.rds"
     download_url_meta: 
     primary_data: True
-    year: 2017
+    year: 2021
 layers:
     layer_counts: "X"
     layer_processed: 
@@ -19,41 +25,44 @@ layers:
     layer_unspliced_processed: 
     layer_velocity: 
 dataset_or_feature_wise:
-    feature_reference: "Homo_sapiens.GRCh37.74"
+    feature_reference: "Homo_sapiens.GRCh38.93"
     feature_reference_var_key: 
     feature_type: "rna"
     feature_type_var_key: 
 dataset_or_observation_wise:
-    assay_sc: "Smart-seq2"
+    assay_sc: "CITE-seq (sample multiplexing)"
     assay_sc_obs_key: 
-    assay_differentiation: "Pasca, 2015 (doi: 10.1038/nmeth.3415)" 
+    assay_differentiation: "Yoon, 2019 (doi: 10.1038/s41592-018-0255-0)"
     assay_differentiation_obs_key: 
     assay_type_differentiation: "guided"
     assay_type_differentiation_obs_key: 
     bio_sample:
-    bio_sample_obs_key: "biosample" # need to contact the authors for metadata regarding which cells came from which organoid/cell line
-    cell_line: custom_8858-1_8858-3_2242-1_1205-4
-    cell_line_obs_key: # need to contact the authors for metadata regarding which cells came from which cell line
+    bio_sample_obs_key: "ID"
+    cell_line: 
+    cell_line_obs_key: "ID"
     cell_type: 
-    cell_type_obs_key: "cell_type"
+    cell_type_obs_key: "CellType"
     development_stage: 
-    development_stage_obs_key: "age"
-    disease: "healthy"
-    disease_obs_key: 
+        2mo: "Carnegie stage 23"
+        4mo: "18th week post-fertilization human stage"
+        6mo: "26th week post-fertilization human stage"
+    development_stage_obs_key:
+    disease: 
+    disease_obs_key: "Mt"
     ethnicity: 
     ethnicity_obs_key: 
     gm:
-    gm_obs_key:
+    gm_obs_key: "Mt"
     individual:
     individual_obs_key: 
-    organ: "pallium"
+    organ: "cerebral cortex"
     organ_obs_key: 
     organism: "Homo sapiens"
     organism_obs_key: 
     sample_source: "3d_culture"
     sample_source_obs_key: 
-    sex: 
-    sex_obs_key: # add once we know which cell came from which cell line
+    sex: "female"
+    sex_obs_key:
     source_doi:
     source_doi_obs_key:
     state_exact:
@@ -61,7 +70,7 @@ dataset_or_observation_wise:
     suspension_type: "cell"
     suspension_type_obs_key: 
     tech_sample:
-    tech_sample_obs_key: "techsample" # "To minimize batch effects, we collected single cells from multiple in vitro differentiation stages in the same sorting experiment, performed library generation on samples in tandem, and sequenced cells from multiple time points simultaneously."
+    tech_sample_obs_key: "Run"
     treatment:
     treatment_obs_key:
 feature_wise:

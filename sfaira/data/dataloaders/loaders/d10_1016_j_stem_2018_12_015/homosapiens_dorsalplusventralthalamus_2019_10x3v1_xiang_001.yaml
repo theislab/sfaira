@@ -2,13 +2,17 @@ dataset_structure:
     dataset_index: 1
     sample_fns:
 dataset_wise:
-    author: "Marton, Rebecca"
+    author: "Xiang, Yangfei"
     default_embedding: 
     doi_preprint: 
-    doi_journal: "10.1038/s41593-018-0316-9"
-    download_url_data: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE115nnn/GSE115011/suppl/GSE115011_marton_all_cells.csv.gz"
-    download_url_meta: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE115nnn/GSE115011/matrix/GSE115011_series_matrix.txt.gz"
-    primary_data: False
+    doi_journal: "10.1016/j.stem.2018.12.015"
+    download_url_data: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE122nnn/GSE122342/suppl/GSE122342%5Fmatrix%2Emtx%2Egz"        
+    download_url_meta:
+        - "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE122nnn/GSE122342/suppl/GSE122342%5Fgenes%2Etsv%2Egz"
+        - "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE122nnn/GSE122342/suppl/GSE122342%5Fbarcodes%2Etsv%2Egz"
+        - "https://data.mendeley.com/public-files/datasets/wgmfxds99c/files/7d25a827-c9e3-442d-af4a-e4cd997addd6/file_downloaded"
+        - "https://data.mendeley.com/public-files/datasets/wgmfxds99c/files/975e9be2-d999-42e9-b311-ebdf182f296e/file_downloaded"
+    primary_data: True
     year: 2019
 layers:
     layer_counts: "X"
@@ -19,25 +23,25 @@ layers:
     layer_unspliced_processed: 
     layer_velocity: 
 dataset_or_feature_wise:
-    feature_reference: "Homo_sapiens.GRCh37.90"
-    feature_reference_var_key:
+    feature_reference: "Homo_sapiens.GRCh37.82"
+    feature_reference_var_key: 
     feature_type: "rna"
     feature_type_var_key: 
 dataset_or_observation_wise:
-    assay_sc: "Smart-seq2"
+    assay_sc: "10x 3' v1"
     assay_sc_obs_key: 
-    assay_differentiation: "Marton, 2019 (doi: 10.1038/s41593-018-0316-9)"
+    assay_differentiation: "Xiang, 2019 (doi: 10.1016/j.stem.2018.12.015)"
     assay_differentiation_obs_key: 
     assay_type_differentiation: "guided"
     assay_type_differentiation_obs_key: 
     bio_sample:
-    bio_sample_obs_key: "cellline"
-    cell_line: 
-    cell_line_obs_key: "cellline"
+    bio_sample_obs_key: "Time"
+    cell_line: "HES-3 NKX2.1GFP/w"
+    cell_line_obs_key: 
     cell_type: 
-    cell_type_obs_key: 
-    development_stage: "19th week post-fertilization human stage"
-    development_stage_obs_key: 
+    cell_type_obs_key: "Annotation"
+    development_stage: 
+    development_stage_obs_key: "Time"
     disease: "healthy"
     disease_obs_key: 
     ethnicity: 
@@ -46,27 +50,27 @@ dataset_or_observation_wise:
     gm_obs_key:
     individual:
     individual_obs_key: 
-    organ: "pallium"
+    organ: "dorsal plus ventral thalamus"
     organ_obs_key: 
     organism: "Homo sapiens"
     organism_obs_key: 
     sample_source: "3d_culture"
     sample_source_obs_key: 
-    sex: 
-    sex_obs_key: "cellline"
+    sex: "female"
+    sex_obs_key: 
     source_doi:
     source_doi_obs_key:
-    state_exact: "Human oligodendrocyte-enriched brain oeganoids"
+    state_exact:
     state_exact_obs_key:
     suspension_type: "cell"
     suspension_type_obs_key: 
     tech_sample:
-    tech_sample_obs_key: "plateid"
+    tech_sample_obs_key: 
     treatment:
     treatment_obs_key:
 feature_wise:
-    feature_id_var_key: 
-    feature_symbol_var_key: "index"
+    feature_id_var_key: "index"
+    feature_symbol_var_key: "gene_id"
 observation_wise:
     spatial_x_coord_obs_key: 
     spatial_y_coord_obs_key: 
