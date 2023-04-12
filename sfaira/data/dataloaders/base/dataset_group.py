@@ -373,20 +373,14 @@ class DatasetGroup:
             # TODO: need to keep this? -> yes, still catching errors here (March 2020)
             # Fix for loading bug: sometime concatenating sparse matrices fails the first time but works on second try.
             try:
-                adata_concat = adata_ls[0].concatenate(
-                    *adata_ls[1:],
+                adata_concat = anndata.concat(
+                    adata_ls,
                     join="outer",
-                    batch_key=self._adata_ids.dataset,
-                    batch_categories=[i for i in self.ids if self.datasets[i].adata is not None],
-                    index_unique=None
                 )
             except ValueError:
-                adata_concat = adata_ls[0].concatenate(
-                    *adata_ls[1:],
+                adata_concat = anndata.concat(
+                    adata_ls,
                     join="outer",
-                    batch_key=self._adata_ids.dataset,
-                    batch_categories=[i for i in self.ids if self.datasets[i].adata is not None],
-                    index_unique=None
                 )
             adata_concat.var = var_original
             adata_concat.uns = merge_uns_from_list(adata_ls)
@@ -897,20 +891,14 @@ class DatasetSuperGroup:
             # TODO: need to keep this? -> yes, still catching errors here (March 2020)
             # Fix for loading bug: sometime concatenating sparse matrices fails the first time but works on second try.
             try:
-                adata_concat = adata_ls[0].concatenate(
-                    *adata_ls[1:],
+                adata_concat = anndata.concat(
+                    adata_ls,
                     join="outer",
-                    batch_key=self._adata_ids.dataset,
-                    batch_categories=[i for i in self.ids if self.flatten().datasets[i].adata is not None],
-                    index_unique=None
                 )
             except ValueError:
-                adata_concat = adata_ls[0].concatenate(
-                    *adata_ls[1:],
+                adata_concat = anndata.concat(
+                    adata_ls,
                     join="outer",
-                    batch_key=self._adata_ids.dataset,
-                    batch_categories=[i for i in self.ids if self.flatten().datasets[i].adata is not None],
-                    index_unique=None
                 )
             adata_concat.var = var_original
             adata_concat.uns = merge_uns_from_list(adata_ls)
