@@ -2,14 +2,14 @@ dataset_structure:
     dataset_index: 1
     sample_fns:
 dataset_wise:
-    author: "Qian, Xuyu"
+    author: "Marton, Rebecca"
     default_embedding: 
-    doi_preprint:
-    doi_journal: "10.1016/j.stem.2020.02.002"
-    download_url_data: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE137nnn/GSE137941/suppl/GSE137941_RAW.tar"
-    download_url_meta: 
-    primary_data: True
-    year: 2020
+    doi_preprint: 
+    doi_journal: "10.1038/s41593-018-0316-9"
+    download_url_data: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE115nnn/GSE115011/suppl/GSE115011_marton_all_cells.csv.gz"
+    download_url_meta: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE115nnn/GSE115011/matrix/GSE115011_series_matrix.txt.gz"
+    primary_data: False
+    year: 2019
 layers:
     layer_counts: "X"
     layer_processed: 
@@ -19,24 +19,24 @@ layers:
     layer_unspliced_processed: 
     layer_velocity: 
 dataset_or_feature_wise:
-    feature_reference: "Homo_sapiens.GRCh38.92"
-    feature_reference_var_key: 
+    feature_reference: "Homo_sapiens.GRCh37.90"
+    feature_reference_var_key:
     feature_type: "rna"
     feature_type_var_key: 
 dataset_or_observation_wise:
-    assay_sc: "SPLiT-seq"
+    assay_sc: "Smart-seq2"
     assay_sc_obs_key: 
-    assay_differentiation: "Lancaster, 2014 (doi: 10.1038/nprot.2014.158)"
+    assay_differentiation: "Marton, 2019 (doi: 10.1038/s41593-018-0316-9)"
     assay_differentiation_obs_key: 
-    assay_type_differentiation: "unguided"
+    assay_type_differentiation: "guided"
     assay_type_differentiation_obs_key: 
     bio_sample:
-    bio_sample_obs_key: 
-    cell_line: "C1-iPSC-2"
-    cell_line_obs_key: 
+    bio_sample_obs_key: "cellline"
+    cell_line: 
+    cell_line_obs_key: "cellline"
     cell_type: 
     cell_type_obs_key: 
-    development_stage: "22nd week post-fertilization human stage"
+    development_stage: "19th week post-fertilization human stage"
     development_stage_obs_key: 
     disease: "healthy"
     disease_obs_key: 
@@ -52,20 +52,20 @@ dataset_or_observation_wise:
     organism_obs_key: 
     sample_source: "3d_culture"
     sample_source_obs_key: 
-    sex: "male"
-    sex_obs_key: 
+    sex: 
+    sex_obs_key: "cellline"
     source_doi:
     source_doi_obs_key:
-    state_exact: "Sliced organoids"
+    state_exact: "Human oligodendrocyte-enriched brain oeganoids"
     state_exact_obs_key:
-    suspension_type: "nucleus"
+    suspension_type: "cell"
     suspension_type_obs_key: 
     tech_sample:
-    tech_sample_obs_key: 
+    tech_sample_obs_key: "plateid"
     treatment:
     treatment_obs_key:
 feature_wise:
-    feature_id_var_key:
+    feature_id_var_key: 
     feature_symbol_var_key: "index"
 observation_wise:
     spatial_x_coord_obs_key: 

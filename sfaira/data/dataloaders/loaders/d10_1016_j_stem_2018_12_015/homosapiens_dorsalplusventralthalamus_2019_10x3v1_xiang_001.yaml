@@ -30,7 +30,7 @@ dataset_or_feature_wise:
 dataset_or_observation_wise:
     assay_sc: "10x 3' v1"
     assay_sc_obs_key: 
-    assay_differentiation: "Xiang, 2017 (doi: 10.1016/j.stem.2017.07.007)"
+    assay_differentiation: "Xiang, 2019 (doi: 10.1016/j.stem.2018.12.015)"
     assay_differentiation_obs_key: 
     assay_type_differentiation: "guided"
     assay_type_differentiation_obs_key: 

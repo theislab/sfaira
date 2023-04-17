@@ -38,8 +38,8 @@ dataset_or_observation_wise:
         microwell: "BD Rhapsody Whole Transcriptome Analysis"
         Smart-seq: "Smart-seq2"
     assay_sc_obs_key: 
-    assay_differentiation: "Pasca, 2015 (doi: 10.1038/nmeth.3415)" 
-    assay_differentiation_obs_key: 
+    assay_differentiation: 
+    assay_differentiation_obs_key: "protocol"
     assay_type_differentiation: "guided"
     assay_type_differentiation_obs_key: 
     bio_sample:
@@ -49,7 +49,7 @@ dataset_or_observation_wise:
     cell_type: 
     cell_type_obs_key: 
     development_stage:
-    development_stage_obs_key: "organoid_age_days"
+    development_stage_obs_key: "age"
     disease: "healthy"
     disease_obs_key: 
     ethnicity: 

@@ -38,7 +38,12 @@ def load(data_dir, sample_fn, **kwargs):
         new_index = list(set(adata.obs.index) & set(meta.index))
         adata = adata[new_index].copy()
         adata.obs = meta.loc[new_index].copy()
-        adata.obs["assay_type_diff"] = adata.obs["Protocol"].replace({"Least Directed": "unguided", "Directed": "guided", "Most Directed": "guided"})
+        adata.obs["assay_type_diff"] = adata.obs["Protocol"].replace({"Least Directed": "guided", "Directed": "guided", "Most Directed": "guided"})
+        adata.obs["assay_diff"] = adata.obs["Protocol"].replace({
+            "Least Directed": "Velasco, 2019 (doi: 10.1038/s41586-019-1289-x)",
+            "Directed": "Bhaduri, 2020 (doi: 10.1038/s41586-020-1962-0); directed",
+            "Most Directed": "Bhaduri, 2020 (doi: 10.1038/s41586-020-1962-0); most directed"
+        })
     else:
         fn = os.path.join(data_dir, 'primarymatrix_nonorm.txt.gz')
         X, header, index = read_txt_sparse(fn)
@@ -62,7 +67,7 @@ def load(data_dir, sample_fn, **kwargs):
         consensus_index = list(set(meta.index) & set(adata.obs.index))
         adata = adata[consensus_index].copy()
         adata.obs = meta.loc[consensus_index].copy()
-        adata.obsm["X_tsne"] = tsne.loc[consensus_index].values
+        adata.obsm["X_tsne"] = tsne.loc[consensus_index].values.astype(np.float32)
 
     adata.obs["organoid_age_days"] = adata.obs["Age"] * 7
     adata.obs["organoid_age_days"] = adata.obs["organoid_age_days"].astype("str")

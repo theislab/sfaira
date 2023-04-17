@@ -252,12 +252,12 @@ class Dataset(DatasetBase):
                     assert counter < 2, f"found more than one {filetype} for data set {self.sample_fn}"
                     url = CELLXGENE_PRODUCTION_ENDPOINT + DOWNLOAD_DATASET + asset['dataset_id'] + "/asset/" + \
                         asset['id']
-                    r = requests.post(url)
+                    r = requests.post(url, timeout=60)
                     r.raise_for_status()
                     presigned_url = r.json()['presigned_url']
                     # Report:
                     headers = {'range': 'bytes=0-0'}
-                    r1 = requests.get(presigned_url, headers=headers)
+                    r1 = requests.get(presigned_url, headers=headers, timeout=60)
                     if r1.status_code == requests.codes.partial:
                         if verbose > 0:
                             print(f"Downloading {r1.headers['Content-Range']} from {r1.headers['Server']}")

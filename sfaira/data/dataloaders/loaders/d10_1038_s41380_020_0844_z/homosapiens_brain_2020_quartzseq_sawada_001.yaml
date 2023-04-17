@@ -34,7 +34,7 @@ dataset_or_feature_wise:
 dataset_or_observation_wise:
     assay_sc: "Quartz-seq"
     assay_sc_obs_key: 
-    assay_differentiation: "Lancaster, 2014 with modifications (doi: 10.1038/nprot.2014.158)"
+    assay_differentiation: "Sawada, 2020 (doi: 10.1038/s41380-020-0844-z)"
     assay_differentiation_obs_key: 
     assay_type_differentiation: "unguided"
     assay_type_differentiation_obs_key: 

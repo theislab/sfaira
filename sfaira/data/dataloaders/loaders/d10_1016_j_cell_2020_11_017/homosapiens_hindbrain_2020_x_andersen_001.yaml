@@ -1,22 +1,16 @@
 dataset_structure:
     dataset_index: 1
     sample_fns:
-        - "organoids"
-        - "primary"
+        - "GSM3510168_hSpC_d45"
+        - "GSM3510169_hSpC_d45_noDAPT"
+        - "GSM4589792_hSpS_d53"
 dataset_wise:
-    author: "Bhaduri, Aparna"
-    default_embedding:
-        primary: "X_tsne"
-    doi_preprint: 
-    doi_journal: "10.1038/s41586-020-1962-0"
-    download_url_data: 
-        organoids: "https://cells.ucsc.edu/organoidreportcard/organoids10X/organoidsmatrix_nonorm.txt.gz"
-        primary: "https://cells.ucsc.edu/organoidreportcard/primary10X/primarymatrix_nonorm.txt.gz"
-    download_url_meta: 
-        organoids: "https://static-content.springer.com/esm/art%3A10.1038%2Fs41586-020-1962-0/MediaObjects/41586_2020_1962_MOESM3_ESM.xlsx"
-        primary: 
-            - "https://cells.ucsc.edu/organoidreportcard/primary10X/meta.tsv"
-            - "https://cells.ucsc.edu/organoidreportcard/primary10X/Seurat_tsne.coords.tsv.gz"
+    author: "Andersen, Jimena"
+    default_embedding: 
+    doi_preprint:
+    doi_journal: "10.1016/j.cell.2020.11.017"
+    download_url_data: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE123nnn/GSE123722/suppl/GSE123722_RAW.tar"
+    download_url_meta:
     primary_data: True
     year: 2020
 layers:
@@ -28,31 +22,38 @@ layers:
     layer_unspliced_processed: 
     layer_velocity: 
 dataset_or_feature_wise:
-    feature_reference: "Homo_sapiens.GRCh38.83"
+    feature_reference:
+        GSM3510168_hSpC_d45: "Homo_sapiens.GRCh37.74"
+        GSM3510169_hSpC_d45_noDAPT: "Homo_sapiens.GRCh37.74"
+        GSM4589792_hSpS_d53: "Homo_sapiens.GRCh38.93"
     feature_reference_var_key: 
     feature_type: "rna"
     feature_type_var_key: 
 dataset_or_observation_wise:
-    assay_sc: "10x 3' v2"
+    assay_sc: 
+        GSM3510168_hSpC_d45: "BD Rhapsody Whole Transcriptome Analysis"
+        GSM3510169_hSpC_d45_noDAPT: "BD Rhapsody Whole Transcriptome Analysis"
+        GSM4589792_hSpS_d53: "10x 3' v3"
     assay_sc_obs_key: 
-    assay_differentiation: 
+    assay_differentiation:
+        GSM3510168_hSpC_d45: "Andersen, 2020 (doi: 10.1016/j.cell.2020.11.017)"
+        GSM3510169_hSpC_d45_noDAPT: "Andersen, 2020 (doi: 10.1016/j.cell.2020.11.017); without DAPT"
+        GSM4589792_hSpS_d53: "Andersen, 2020 (doi: 10.1016/j.cell.2020.11.017)"
     assay_differentiation_obs_key: 
-        organoids: "Protocol"
-    assay_type_differentiation: 
-    assay_type_differentiation_obs_key:
-        organoids: "assay_type_diff"
+    assay_type_differentiation: "guided"
+    assay_type_differentiation_obs_key: 
     bio_sample:
-    bio_sample_obs_key:
-        orgnoids: "Sample"
-        primary: "Area*Individual"
+    bio_sample_obs_key: "cellline"
     cell_line: 
-    cell_line_obs_key:
-        organoids: "Line"
+    cell_line_obs_key: "cellline"
     cell_type: 
-    cell_type_obs_key: "celltype"
+    cell_type_obs_key: 
     development_stage: 
-    development_stage_obs_key: "Age"
-    disease: "healthy"
+        GSM3510168_hSpC_d45: "Carnegie stage 18"
+        GSM3510169_hSpC_d45_noDAPT: "Carnegie stage 18"
+        GSM4589792_hSpS_d53: "Carnegie stage 21"
+    development_stage_obs_key: 
+    disease: 
     disease_obs_key: 
     ethnicity: 
     ethnicity_obs_key: 
@@ -60,23 +61,18 @@ dataset_or_observation_wise:
     gm_obs_key:
     individual:
     individual_obs_key: 
-        primary: "Individual"
-    organ: 
+    organ: "hindbrain"
     organ_obs_key: 
-        organoids: "Protocol"
-        primary: "Area"
     organism: "Homo sapiens"
     organism_obs_key: 
-    sample_source:
-        organoids: "3d_culture"
-        primary: "primary_tissue"
+    sample_source: "3d_culture"
     sample_source_obs_key: 
     sex: 
-    sex_obs_key:
-        organoids: "Line"
+    sex_obs_key: "cellline"
     source_doi:
     source_doi_obs_key:
     state_exact:
+        GSM3510169_hSpC_d45_noDAPT: "adapted differentiation protocol without DAPT"
     state_exact_obs_key:
     suspension_type: "cell"
     suspension_type_obs_key: 
@@ -85,7 +81,8 @@ dataset_or_observation_wise:
     treatment:
     treatment_obs_key:
 feature_wise:
-    feature_id_var_key: 
+    feature_id_var_key:
+        GSM4589792_hSpS_d53: "ensembl_id"
     feature_symbol_var_key: "index"
 observation_wise:
     spatial_x_coord_obs_key: 

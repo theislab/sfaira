@@ -1,18 +1,22 @@
 dataset_structure:
     dataset_index: 1
     sample_fns:
-        - "GSM4518167_2242_d80_hStrS"
-        - "GSM4518168_1205_d80_hStrS"
-        - "GSM4518169_8858_d83_hStrS"
+        - "11a.6mon"
+        - "GM.6mon"
+        - "HUES66.3mon"
+        - "PGP1.3mon.batch2"
+        - "PGP1.3mon"
+        - "PGP1.6mon.batch3"
+        - "PGP1.6mon"
 dataset_wise:
-    author: "Miura, Yuki"
-    default_embedding:
-    doi_preprint:
-    doi_journal: "10.1038/s41587-020-00763-w"
-    download_url_data: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE149nnn/GSE149931/suppl/GSE149931_RAW.tar"
+    author: "Velasco, Silvia"
+    default_embedding: "X_tsne"
+    doi_preprint: 
+    doi_journal: "10.1038/s41586-019-1289-x"
+    download_url_data: "SCP282"
     download_url_meta:
     primary_data: True
-    year: 2020
+    year: 2019
 layers:
     layer_counts: "X"
     layer_processed: 
@@ -22,29 +26,40 @@ layers:
     layer_unspliced_processed: 
     layer_velocity: 
 dataset_or_feature_wise:
-    feature_reference: "Homo_sapiens.GRCh38.93"
+    feature_reference: "Homo_sapiens.GRCh38.84"
     feature_reference_var_key: 
     feature_type: "rna"
     feature_type_var_key: 
 dataset_or_observation_wise:
-    assay_sc: "10x 3' v3"
+    assay_sc: "10x 3' v2"
     assay_sc_obs_key: 
-    assay_differentiation: "Miura, 2020 hStrS (doi: 10.1038/s41587-020-00763-w)"
-    assay_differentiation_obs_key:
+    assay_differentiation: "Velasco, 2019 (doi: 10.1038/s41586-019-1289-x)"
+    assay_differentiation_obs_key: 
     assay_type_differentiation: "guided"
     assay_type_differentiation_obs_key: 
     bio_sample:
-    bio_sample_obs_key: 
+    bio_sample_obs_key: "Organoid"
     cell_line:
-        GSM4518167_2242_d80_hStrS: "custom_2242-1"
-        GSM4518168_1205_d80_hStrS: "custom_1205-1"
-        GSM4518169_8858_d83_hStrS: "custom_8858-1"
-    cell_line_obs_key:
+        11a.6mon: "11a"
+        GM.6mon: "8330-iPS-8"
+        HUES66.3mon: "HUES 66"
+        PGP1.3mon.batch2: "GM23338"
+        PGP1.3mon: "GM23338"
+        PGP1.6mon.batch3: "GM23338"
+        PGP1.6mon: "GM23338"
+    cell_line_obs_key: 
     cell_type: 
-    cell_type_obs_key: 
-    development_stage: "12th week post-fertilization human stage"
+    cell_type_obs_key: "CellType"
+    development_stage:
+        11a.6mon: "24th week post-fertilization human stage"
+        GM.6mon: "28th week post-fertilization human stage"
+        HUES66.3mon: "16th week post-fertilization human stage"
+        PGP1.3mon.batch2: "17th week post-fertilization human stage"
+        PGP1.3mon: "15th week post-fertilization human stage"
+        PGP1.6mon.batch3: "24th week post-fertilization human stage"
+        PGP1.6mon: "24th week post-fertilization human stage"
     development_stage_obs_key:
-    disease: "healthy"
+    disease: 
     disease_obs_key: 
     ethnicity: 
     ethnicity_obs_key: 
@@ -52,29 +67,33 @@ dataset_or_observation_wise:
     gm_obs_key:
     individual:
     individual_obs_key: 
-    organ: "striatum"
+    organ: "telencephalon"
     organ_obs_key: 
     organism: "Homo sapiens"
     organism_obs_key: 
     sample_source: "3d_culture"
     sample_source_obs_key: 
     sex:
-        GSM4518167_2242_d80_hStrS: "male"
-        GSM4518168_1205_d80_hStrS: "female"
-        GSM4518169_8858_d83_hStrS: "male"
+        11a.6mon: "male"
+        GM.6mon: "male"
+        HUES66.3mon: "female"
+        PGP1.3mon.batch2: "male"
+        PGP1.3mon: "male"
+        PGP1.6mon.batch3: "male"
+        PGP1.6mon: "male"
     sex_obs_key:
     source_doi:
     source_doi_obs_key:
     state_exact:
     state_exact_obs_key:
     suspension_type: "cell"
-    suspension_type_obs_key: 
-    tech_sample: 
-    tech_sample_obs_key:
+    suspension_type_obs_key:
+    tech_sample:
+    tech_sample_obs_key: 
     treatment:
     treatment_obs_key:
 feature_wise:
-    feature_id_var_key: "ensembl_id"
+    feature_id_var_key: 
     feature_symbol_var_key: "index"
 observation_wise:
     spatial_x_coord_obs_key: 

@@ -59,18 +59,18 @@ def load(data_dir, sample_fn, **kwargs):
             os.path.join(p_ex, "62042e18771a5b0db1d548ed", "expression_6month_genes.txt"),
             os.path.join(p_cl, "umap_6month.txt")
         ],
-        "ATAC_1month": [
-            os.path.join(p_ex, "expression_1month-ATAC.txt"),
-            "from_meta_atac_1",
-            os.path.join(p_ex, "62042e18771a5b0db1d548ea", "expression_6month-ATAC_genes.txt"),
-            os.path.join(p_cl, "umap_1month-ATAC.txt")
-        ],
-        "ATAC_3month": [
-            os.path.join(p_ex, "expression_3month-ATAC.txt"),
-            "from_meta_atac_3",
-            os.path.join(p_ex, "62042e18771a5b0db1d548ea", "expression_6month-ATAC_genes.txt"),
-            os.path.join(p_cl, "umap_3month-ATAC.txt")
-        ],
+        # "ATAC_1month": [
+        #     os.path.join(p_ex, "expression_1month-ATAC.txt"),
+        #     "from-meta_1m-ATAC",
+        #     os.path.join(p_ex, "62042e18771a5b0db1d548ea", "expression_6month-ATAC_genes.txt"),
+        #     os.path.join(p_cl, "umap_1month-ATAC.txt")
+        # ],
+        # "ATAC_3month": [
+        #     os.path.join(p_ex, "expression_3month-ATAC.txt"),
+        #     "from-meta_3m-ATAC",
+        #     os.path.join(p_ex, "62042e18771a5b0db1d548ea", "expression_6month-ATAC_genes.txt"),
+        #     os.path.join(p_cl, "umap_3month-ATAC.txt")
+        # ],
         "ATAC_6month": [
             os.path.join(p_ex, "62042e18771a5b0db1d548ea", "expression_6month-ATAC.txt"),
             os.path.join(p_ex, "62042e18771a5b0db1d548ea", "expression_6month-ATAC_barcodes.txt"),
@@ -109,54 +109,95 @@ def load(data_dir, sample_fn, **kwargs):
         ],
     }
 
-    age_dict = {
-        "23days": "23",
-        "1month": "30",
-        "1.5month": "45",
-        "2month": "60",
-        "3month": "90",
-        "3.5month": "105",
-        "4month": "120",
-        "5month": "150",
-        "6month": "180",
-    }
-
-    index_dict = {
-        "from_meta_atac_1": "1m-ATAC",
-        "from_meta_atac_3": "3m-ATAC",
+    agedays_dict = {
+        "RNA_23days": {
+            "Mito 210 c1 b1": "23",
+            "PGP1 c1 b2": "23",
+        },
+        "RNA_1month": {
+            "Mito 210 c2 b6": "35"
+        },
+        "RNA_1.5month": {
+            "Mito 210 c1 b7": "45",
+            "PGP1 c1 b2": "47",
+        },
+        "RNA_2month": {
+            "Mito 210 c1 b1": "61",
+            "PGP1 c1 b2": "60",
+        },
+        "RNA_3month": {
+            "Mito 210 c2 b6": "90",
+        },
+        "RNA_4month": {
+            "PGP1 c1 b13": "119",
+            "Mito 210 c1 b1": "119",
+        },
+        "RNA_5month": {
+            "Mito 210 c1 b1": "147",
+            "PGP1 c1 b13": "149",
+        },
+        "RNA_6month": {
+            "Mito 210 c2 b16": "192",
+        },
+        "ATAC_6month": {
+            "Mito 210 c1 b4": "178",
+        },
+        "SHARE": {
+            "Share-1m-4": "35",
+            "Share-1m-5": "35",
+            "Share-1m-6": "35",
+            "Share-2m-7": "59",
+            "Share-2m-8": "59",
+            "Share-2m-9": "59",
+            "Share-d23-1": "23",
+            "Share-d23-2": "23",
+            "Share-d23-3": "23",
+            "Share-3m-10": "90",
+            "Share-3m-11": "90",
+            "Share-3m-12": "90",
+        },
+        "QUAD-GM_3.5month": {
+            "GM08330 b29": "127",
+        },
+        "QUAD-H66_3.5month": {
+            "HUES66 b28": "113",
+        },
+        "FETAL": {
+            "Fetal-1-PCW14": "98",
+            "Fetal-2-PCW15": "105",
+            "Fetal-3-PCW16": "112",
+            "Fetal-4-PCW18": "126",
+        },
     }
 
     meta = pd.read_csv(p_me, sep="\t", index_col=0, low_memory=False).tail(-1)
     x = scipy.io.mmread(loadpaths[sample_fn][0]).T.tocsr().astype(np.float32)
     var = pd.read_csv(loadpaths[sample_fn][2], sep="\t", index_col=0, low_memory=False, header=None, names=[None])
-    if loadpaths[sample_fn][1].startswith("from_meta"):  # for a few samples there is no barcode information, so we extract it from the meta file
-        obs = meta.loc[[index_dict[loadpaths[sample_fn][1]] in i for i in meta.index]]
+    if loadpaths[sample_fn][1].startswith("from-meta"):  # for a few samples there is no barcode information, so we extract it from the meta file
+        obs = meta.loc[[loadpaths[sample_fn][1].split("_")[1] in i for i in meta.index]]
     else:  # in all other cases, we just load the barcodes file
         obs = pd.read_csv(loadpaths[sample_fn][1], sep="\t", index_col=0, low_memory=False, header=None, names=[None])
-
+    meta = meta.loc[obs.index]
     clusters = pd.read_csv(loadpaths[sample_fn][3], sep="\t", index_col=0, low_memory=False).tail(-1)
     clusters = clusters.loc[obs.index]
-
-    meta = meta.loc[obs.index]
-    if "SHARE" in sample_fn:
-        meta["age"] = meta["biosample_id"].str.split("-").str[1]
-        meta["organoid_age_days"] = meta["biosample_id"].str.split("-").str[1].replace({"d23": 23, "1m": 30, "2m": 60, "3m": 90}).values
-        meta["organoid_age_days"] = meta["organoid_age_days"] .astype(str)
-    elif sample_fn == "FETAL":
-        meta["age"] = meta["biosample_id"].str.split("-").str[2].values
-        meta["age_days"] = meta["biosample_id"].str.split("-").str[2].str[3:].values.astype(int) * 7
-        meta["age_days"] = meta["age_days"] .astype(str)
-    else:
-        meta["age"] = sample_fn.split("_")[1]
-        meta["organoid_age_days"] = age_dict[sample_fn.split("_")[-1]]
-        meta["organoid_age_days"] = meta["organoid_age_days"] .astype(str)
     meta = pd.concat((meta, clusters[["CellType", "Cluster"]]), axis=1)
 
     adata = ad.AnnData(
         X=x,
         obs=meta,
         var=var,
-        obsm={"X_umap": clusters[["X", "Y"]].values}
+        obsm={"X_umap": clusters[["X", "Y"]].values.astype(np.float32)}
     )
+
+    if "SHARE" in sample_fn:
+        adata.obs["age"] = adata.obs["biosample_id"].replace(agedays_dict["SHARE"]).astype("category")
+        adata.obs["organoid_age_days"] = adata.obs["biosample_id"].replace(agedays_dict["SHARE"]).astype("category")
+    elif sample_fn == "FETAL":
+        adata.obs["age"] = adata.obs["donor_id"].replace(agedays_dict[sample_fn]).astype("category")
+        adata.obs["age_days"] = adata.obs["donor_id"].replace(agedays_dict[sample_fn]).astype("category")
+    else:
+        adata = adata[adata.obs["donor_id"].isin(agedays_dict[sample_fn].keys())].copy()
+        adata.obs["age"] = adata.obs["donor_id"].replace(agedays_dict[sample_fn]).astype("category")
+        adata.obs["organoid_age_days"] = adata.obs["donor_id"].replace(agedays_dict[sample_fn]).astype("category")
 
     return adata

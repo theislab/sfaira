@@ -22,6 +22,7 @@ def load(data_dir, **kwargs):
     df = pd.read_csv(io.StringIO(df_str), sep="\t", header=0, index_col=0).T
     df.rename(index={'Rebecca-Oligo_HMMKJ_L7_AAGAGGCA-ACTCTAGG': 'SCGPM_Rebecca-Oligo_HMMKJ_L7_AAGAGGCA-ACTCTAGG'}, inplace=True)
     adata.obs["cellline"] = pd.Categorical(df.loc[adata.obs.index].iloc[:, 10].str.split().str[1].values)
+    adata.obs["plateid"] = pd.Categorical(df.loc[adata.obs.index].iloc[:, 8].values)
     adata.obs["organoid_age_days"] = "127"
     adata.var_names_make_unique()
 

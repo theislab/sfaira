@@ -3,7 +3,6 @@ import os
 import scipy.sparse
 
 
-# the data_dir argument will be automatically set by sfaira to the folder where your datafiles lie
 def load(data_dir, **kwargs):
 
     fn = os.path.join(data_dir, "GSE187877_expression_count_matrix.txt.gz")
@@ -40,7 +39,7 @@ def load(data_dir, **kwargs):
 
     adata.obs["treatment"] = treatment
     adata.obs["sample"] = sample
-    adata.obs["treatment_concentrations"] = sample
+    adata.obs["treatment_concentrations"] = state
     adata.obs["organoid_age_days"] = "35"
     adata.obs["organoid_age_days"] = adata.obs["organoid_age_days"].astype("category")
     adata.X = scipy.sparse.csr_matrix(adata.X)

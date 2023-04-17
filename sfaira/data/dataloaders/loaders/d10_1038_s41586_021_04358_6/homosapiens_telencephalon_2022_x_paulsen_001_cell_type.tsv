@@ -1,0 +1,26 @@
+source	target	target_id
+Astroglia	astrocyte	CL:0000127
+CFuPNs	extratelencephalic-projecting glutamatergic cortical neuron	CL:4023009
+CPNs	cerebral cortex pyramidal neuron	CL:4023111
+Cajal-Retzius	Cajal-Retzius cell	CL:0000695
+Choroid Plexus/Cortical Hem	choroid plexus epithelial cell	CL:0000706
+Cortical Hem	neural progenitor cell	CL:0011020
+Cortical hem	neural progenitor cell	CL:0011020
+Cycling GABAergic Progenitors 1	neuroblast (sensu Vertebrata)	CL:0000031
+Cycling GABAergic Progenitors 2	neuroblast (sensu Vertebrata)	CL:0000031
+Cycling Progenitors	neuroblast (sensu Vertebrata)	CL:0000031
+GABAergic Neurons 1	GABAergic neuron	CL:0000617
+GABAergic Neurons 2	GABAergic neuron	CL:0000617
+GABAergic Progenitors 1	neuroblast (sensu Vertebrata)	CL:0000031
+GABAergic Progenitors 2	neuroblast (sensu Vertebrata)	CL:0000031
+INs	CNS interneuron	CL:0000402
+IPCs	neuroblast (sensu Vertebrata)	CL:0000031
+Newborn DL PNs	pyramidal neuron	CL:0000598
+Newborn PNs	pyramidal neuron	CL:0000598
+PNs	pyramidal neuron	CL:0000598
+RG	radial glial cell	CL:0000681
+Subcortical	neuron	CL:0000540
+Unknown	unknown	unknown
+aRG	radial glial cell	CL:0000681
+oRG	radial glial cell	CL:0000681
+oRG/Astroglia	radial glial cell	CL:0000681

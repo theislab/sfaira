@@ -24,6 +24,15 @@ def load(data_dir, sample_fn, **kwargs):
         "PGP1.6mon.batch3": "tsne_PGP1.6mon.Batch2.1.txt",
         "PGP1.6mon": "tsne_PGP1.6mon.1.txt",
     }
+    age_dict = {
+        "11a.6mon": "166",
+        "GM.6mon": "190",
+        "HUES66.3mon": "109",
+        "PGP1.3mon.batch2": "113",
+        "PGP1.3mon": "101",
+        "PGP1.6mon.batch3": "166",
+        "PGP1.6mon": "166",
+    }
 
     fn = os.path.join(data_dir, "SCP282")
     fn_meta = os.path.join(fn, "metadata", "meta_combined.txt")
@@ -34,17 +43,17 @@ def load(data_dir, sample_fn, **kwargs):
     expr_df = expr_df.apply(np.expm1)
     expr_df = expr_df.T
 
-    metadata_df = pd.read_csv(fn_meta, sep="\t", index_col=0, header=0, low_memory=False)
-    metadata_df = metadata_df.tail(-1)
+    metadata_df = pd.read_csv(fn_meta, sep="\t", index_col=0, header=0, low_memory=False).tail(-1)
     metadata_df.index.name = None
     metadata_df = metadata_df.loc[expr_df.index.tolist()].copy()
-    metadata_df["organoid_age_days"] = [{"3mon": "90", "6mon": "180"}[i] for i in metadata_df["Batch"].str.split("_").str[1]]
+    metadata_df["organoid_age_days"] = age_dict[sample_fn]
 
     tsne_df = pd.read_csv(fn_tsne, sep="\t", skiprows=2, index_col=0, header=None)
 
     # reverse normalisation
     x = scipy.sparse.csr_matrix(np.multiply(expr_df.values, metadata_df["nUMI"].values.reshape(-1, 1).astype(int)), dtype=np.float32)
     x /= 10**6
+    x = np.round(x)
 
     adata = ad.AnnData(
         X=x,

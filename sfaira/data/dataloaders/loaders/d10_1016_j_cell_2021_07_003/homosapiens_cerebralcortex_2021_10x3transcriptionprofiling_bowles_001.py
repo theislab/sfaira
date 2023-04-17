@@ -14,5 +14,12 @@ def load(data_dir, sample_fn, **kwargs):
         f"as.SingleCellExperiment(so, assay='RNA')\n"
     )
     adata.X = adata.X.astype(np.float32)
+    age_dict = {
+        "2mo": "60",
+        "4mo": "120",
+        "6mo": "180",
+    }
+    adata.obs["organoid_age_days"] = age_dict[sample_fn]
+    adata.obs["Run"] = adata.obs["Run"].astype(str)
 
     return adata

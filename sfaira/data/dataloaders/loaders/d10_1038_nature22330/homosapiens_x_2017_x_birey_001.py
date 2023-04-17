@@ -5,7 +5,6 @@ import anndata as ad
 import scipy.sparse
 import os
 import re
-import scanpy as sc
 
 
 def load(data_dir, sample_fn, **kwargs):
@@ -23,8 +22,13 @@ def load(data_dir, sample_fn, **kwargs):
                            obs=pd.DataFrame({"location": obs}),
                            var=pd.DataFrame(index=dfs[0].columns.values))
         adata.obs["state_exact"] = "Non-fused organoids"
+        adata.obs['age'] = "105"
         adata.obs['organoid_age_days'] = "105"
         adata.obs['cell_line'] = "2242-1"
+        adata.obs["protocol"] = adata.obs["location"].replace({
+            "hCS": "Pasca, 2015 (doi: 10.1038/nmeth.3415)",
+            "hSS": "Birey, 2017 (doi: 10.1038/nature22330)",
+        })
     elif sample_fn == "Smart-seq":
         line_2_idxs = ['hSS507', 'hSS515', 'hSS536', 'hSS544', 'hSS627', 'hSS671', 'hSS683',
                        'hSS692', 'hSS693', 'hCS717', 'hCS730', 'hCS731', 'hCS732', 'hCS746',
@@ -37,12 +41,18 @@ def load(data_dir, sample_fn, **kwargs):
         adata_f4.obs['state_exact'] = 'Neurons from hSS and hCS oganoids fused for 4 weeks'
         adata_f2.obs['cell_line'] = '2242-1'
         adata_f4.obs['cell_line'] = ['2242-1' if i in line_2_idxs else '8858-1' for i in adata_f4.obs_names]
+        adata_f2.obs['age'] = "104"
         adata_f2.obs['organoid_age_days'] = "104"
+        adata_f4.obs['age'] = "118"
         adata_f4.obs['organoid_age_days'] = "118"
         adata = adata_f2.concatenate(adata_f4, index_unique=None)
         adata.X = scipy.sparse.csr_matrix(adata.X, dtype=np.float32).copy()
         del adata.obs["batch"]
         adata.obs['location'] = ["".join(re.findall("[a-zA-Z]+", i)) for i in adata.obs_names]
+        adata.obs["protocol"] = adata.obs["location"].replace({
+            "hCS": "Pasca, 2015 (doi: 10.1038/nmeth.3415)",
+            "hSS": "Birey, 2017 (doi: 10.1038/nature22330)",
+        })
     else:
         raise ValueError()
     return adata

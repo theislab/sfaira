@@ -35,11 +35,11 @@ dataset_or_observation_wise:
     bio_sample:
     bio_sample_obs_key: "orig.ident"
     cell_line: 
-    cell_line_obs_key: "cell_line"
+    cell_line_obs_key: "orig.ident"
     cell_type: 
     cell_type_obs_key: "Cluster"
     development_stage: 
-    development_stage_obs_key: "organoid_age_days"
+    development_stage_obs_key: "orig.ident"
     disease: "healthy"
     disease_obs_key: 
     ethnicity: 
@@ -49,13 +49,13 @@ dataset_or_observation_wise:
     individual:
     individual_obs_key: 
     organ: 
-    organ_obs_key: "organ"
+    organ_obs_key: "orig.ident"
     organism: "Homo sapiens"
     organism_obs_key: 
     sample_source: "3d_culture"
     sample_source_obs_key: 
     sex: 
-    sex_obs_key: "cell_line"
+    sex_obs_key: "orig.ident"
     source_doi:
     source_doi_obs_key:
     suspension_type: "cell" 

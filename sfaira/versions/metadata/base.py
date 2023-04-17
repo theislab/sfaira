@@ -46,7 +46,7 @@ def cached_load_file(url, ontology_cache_dir, ontology_cache_fn, recache: bool =
                 print(f"Downloading: {ontology_cache_fn} to {ontology_cache_dir}")
                 if not os.path.exists(ontology_cache_dir):
                     os.makedirs(ontology_cache_dir)
-                r = requests.get(url, allow_redirects=True)
+                r = requests.get(url, allow_redirects=True, timeout=60)
                 open(onto_fn, 'wb').write(r.content)
 
             download_file()
@@ -609,14 +609,14 @@ class OntologyEbi(OntologyHierarchical):
                 - nodes (dictionaries of node ID and node values) and
                 - edges (node ID of parent and child).
             """
-            terms_children = requests.get(get_url_children(iri=iri)).json()["_embedded"]["terms"]
+            terms_children = requests.get(get_url_children(iri=iri), timeout=60).json()["_embedded"]["terms"]
             nodes_new = {}
             edges_new = []
             direct_children = []
             k_self = get_id_from_iri(iri)
             # Define root node if this is the first iteration, this node is otherwise not defined through values.
             if k_self == ":".join(root_term.split("_")):
-                terms_self = requests.get(get_url_self(iri=iri)).json()
+                terms_self = requests.get(get_url_self(iri=iri), timeout=60).json()
                 nodes_new[k_self] = {
                     "name": terms_self["label"],
                     "description": terms_self["description"],
