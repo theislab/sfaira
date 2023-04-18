@@ -115,6 +115,7 @@ class AdataIdsSfaira(AdataIds):
         self.feature_index = self.feature_id
         self.feature_symbol = "gene_symbol"
         self.feature_biotype = "feature_biotype"
+        self.gm = "gm"
         self.id = "id"
         self.individual = "individual"
         self.layer_counts = "X"
@@ -124,7 +125,10 @@ class AdataIdsSfaira(AdataIds):
         self.organism = "organism"
         self.primary_data = "primary_data"
         self.sample_source = "sample_source"
+        self.source_doi = "source_doi"
+        self.suspension_type = "suspension_type"
         self.tech_sample = "tech_sample"
+        self.treatment = "treatment"
         self.title = "title"
         self.year = "year"
 
@@ -158,6 +162,7 @@ class AdataIdsSfaira(AdataIds):
             "organ",
             "organism",
             "sex",
+            "suspension_type",
         ]
         self.obs_keys = [
             "assay_sc",
@@ -169,6 +174,7 @@ class AdataIdsSfaira(AdataIds):
             "development_stage",
             "disease",
             "ethnicity",
+            "gm",
             "id",
             "individual",
             "organ",
@@ -176,7 +182,10 @@ class AdataIdsSfaira(AdataIds):
             "sex",
             "state_exact",
             "sample_source",
+            "source_doi",
+            "suspension_type",
             "tech_sample",
+            "treatment",
         ]
         self.var_keys = [
             "feature_biotype",
