@@ -1,0 +1,52 @@
+source	target	target_id
+B cell	B cell	CL:0000236
+CD1c-positive myeloid dendritic cell	CD1c-positive myeloid dendritic cell	CL:0002399
+CD4-positive, alpha-beta T cell	CD4-positive, alpha-beta T cell	CL:0000624
+CD8-positive, alpha-beta T cell	CD8-positive, alpha-beta T cell	CL:0000625
+T cell	T cell	CL:0000084
+acinar cell	acinar cell	CL:0000622
+alveolar macrophage	alveolar macrophage	CL:0000583
+alveolar type 1 fibroblast cell	alveolar type 1 fibroblast cell	CL:4028004
+alveolar type 2 fibroblast cell	alveolar type 2 fibroblast cell	CL:4028006
+bronchial goblet cell	bronchial goblet cell	CL:1000312
+bronchus fibroblast of lung	bronchus fibroblast of lung	CL:2000093
+brush cell of trachebronchial tree	brush cell of trachebronchial tree	CL:0002075
+capillary endothelial cell	capillary endothelial cell	CL:0002144
+ciliated columnar cell of tracheobronchial tree	ciliated columnar cell of tracheobronchial tree	CL:0002145
+classical monocyte	classical monocyte	CL:0000860
+club cell	club cell	CL:0000158
+conventional dendritic cell	conventional dendritic cell	CL:0000990
+dendritic cell	dendritic cell	CL:0000451
+elicited macrophage	elicited macrophage	CL:0000861
+endothelial cell of lymphatic vessel	endothelial cell of lymphatic vessel	CL:0002138
+epithelial cell of alveolus of lung	epithelial cell of alveolus of lung	CL:0010003
+epithelial cell of lower respiratory tract	epithelial cell of lower respiratory tract	CL:0002632
+fibroblast	fibroblast	CL:0000057
+hematopoietic stem cell	hematopoietic stem cell	CL:0000037
+ionocyte	ionocyte	CL:0005006
+lung macrophage	lung macrophage	CL:1001603
+lung neuroendocrine cell	lung neuroendocrine cell	CL:1000223
+lung pericyte	lung pericyte	CL:0009089
+mast cell	mast cell	CL:0000097
+mesothelial cell	mesothelial cell	CL:0000077
+mucus secreting cell	mucus secreting cell	CL:0000319
+multi-ciliated epithelial cell	multi-ciliated epithelial cell	CL:0005012
+myofibroblast cell	myofibroblast cell	CL:0000186
+nan	unknown	unknown
+nasal mucosa goblet cell	nasal mucosa goblet cell	CL:0002480
+natural killer cell	natural killer cell	CL:0000623
+non-classical monocyte	non-classical monocyte	CL:0000875
+plasma cell	plasma cell	CL:0000786
+plasmacytoid dendritic cell	plasmacytoid dendritic cell	CL:0000784
+pulmonary artery endothelial cell	pulmonary artery endothelial cell	CL:1001568
+respiratory basal cell	respiratory basal cell	CL:0002633
+respiratory hillock cell	respiratory hillock cell	CL:4030023
+serous secreting cell	serous secreting cell	CL:0000313
+smooth muscle cell	smooth muscle cell	CL:0000192
+stromal cell	stromal cell	CL:0000499
+tracheobronchial goblet cell	tracheobronchial goblet cell	CL:0019003
+tracheobronchial serous cell	tracheobronchial serous cell	CL:0019001
+tracheobronchial smooth muscle cell	tracheobronchial smooth muscle cell	CL:0019019
+type I pneumocyte	type I pneumocyte	CL:0002062
+type II pneumocyte	type II pneumocyte	CL:0002063
+vein endothelial cell	vein endothelial cell	CL:0002543
