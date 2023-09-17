@@ -111,10 +111,10 @@ class CartSingle(CartBase):
             assert len(idx) == len(np.unique(idx)), f"repeated indices in idx: {len(idx) - len(np.unique(idx))}"
             if isinstance(idx, np.ndarray):
                 assert len(idx.shape) == 1, idx.shape
-                assert idx.dtype == np.int
+                assert idx.dtype == int
             else:
                 assert isinstance(idx, list)
-                assert isinstance(idx[0], int) or isinstance(idx[0], np.int)
+                assert isinstance(idx[0], int) or isinstance(idx[0], int)
         idx = np.asarray(idx)
         return idx
 
