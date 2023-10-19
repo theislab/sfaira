@@ -1,0 +1,114 @@
+source	target	target_id
+Adipocyte	fat cell	CL:0000136
+Adipocyte progenitor/stromal cell	fat cell	CL:0000136
+Adrenal endothelial cell	endothelial cell	CL:0000115
+Adrenal immune cell	leukocyte	CL:0000738
+Alveolar epithelial type 1 cell	type I pneumocyte	CL:0002062
+Alveolar epithelial type 2 cell	type II pneumocyte	CL:0002063
+Ascending loop of Henle cell	kidney loop of Henle ascending limb epithelial cell	CL:1001016
+Astrocyte	astrocyte	CL:0000127
+B cell	B cell	CL:0000236
+Bile ductal cell	duct epithelial cell	CL:0000068
+Bladder intermediate cell	intermediate muscle cell	CL:0002216
+Bladder urothelial cell	bladder urothelial cell	CL:1001428
+Cardiomyocyte	cardiac muscle cell	CL:0000746
+Chromaffin cell	chromaffin cell	CL:0000166
+Connecting tubule cell	kidney connecting tubule epithelial cell	CL:1000768
+Cortical excitatory neuron	glutamatergic neuron	CL:0000679
+Corticotrope	corticotroph	CL:0002309
+Dendritic cell	dendritic cell	CL:0000451
+Digestive tract endothelial cell 1	gut endothelial cell	CL:0000131
+Digestive tract endothelial cell 2	gut endothelial cell	CL:0000131
+Digestive tract stromal cell	stromal cell	CL:0000499
+Distal convoluted tubule cell	kidney distal convoluted tubule epithelial cell	CL:1000849
+Dopaminergic neuron	dopaminergic neuron	CL:0000700
+Dscending loop of Henle cell	kidney loop of Henle descending limb epithelial cell	CL:1001021
+Endothelial cell	endothelial cell	CL:0000115
+Enteric glial cell	glial cell	CL:0000125
+Epidermal adipocyte 	fat cell	CL:0000136
+Epidermal endothelial cell	endothelial cell	CL:0000115
+Epidermal pericyte	pericyte	CL:0000669
+Epidermal smooth muscle cell	smooth muscle cell	CL:0000192
+Epidermal stromal cell	stromal cell	CL:0000499
+Epididymal epithelial cell	epithelial cell	CL:0000066
+Epididymis sterociliated cell	ciliated cell	CL:0000064
+Epidydimal monocyte	monocyte	CL:0000576
+Erythroid cell	erythroid progenitor cell	CL:0000038
+Fallopian tube epithelial cell	epithelial cell	CL:0000066
+Fasciculata cell	stromal cell	CL:0000499
+Female reproductive ciliated cell	ciliated cell	CL:0000064
+Folliculostellate cell	folliculostellate cell	CL:0000642
+Gallbladder endothelial cell	endothelial cell	CL:0000115
+Gallbladder glandular cell	gallbladder glandular cell	CL:1001592
+Gallbladder mucous cell	mucus secreting cell	CL:0000319
+Gallbladder smooth muscle cell	smooth muscle cell	CL:0000192
+Glomerulosa cell	glomerular cell	CL:1000746
+Goblet/serous cell	goblet cell	CL:0000160
+Gonadotrope cell	gonadtroph	CL:0000437
+Granule cell	granule cell	CL:0000120
+Granulosa cell	granulosa cell	CL:0000501
+Hepatocyte	hepatocyte	CL:0000182
+Immune mesothelial cell	mesothelial cell	CL:0000077
+Inhibitory neuron	GABAergic neuron	CL:0000617
+Intercalated cell	renal intercalated cell	CL:0005010
+Keratinocyte 	keratinocyte	CL:0000312
+Lactotrope	mammotroph	CL:0002311
+Leyding/myoid cells	Leydig cell	CL:0000178
+Lingual epithelial cell	epithelial cell	CL:0000066
+Liver endothelial cell 1	endothelial cell of sinusoid	CL:0002262
+Liver endothelial cell 2	endothelial cell of sinusoid	CL:0002262
+Liver immune cell	leukocyte	CL:0000738
+Lower digestive tract epithelial cell	intestinal epithelial cell	CL:0002563
+Macrophage	macrophage	CL:0000235
+Male reproductive basal cell	basal cell	CL:0000646
+Male reproductive epithelial cell	epithelial cell	CL:0000066
+Male reproductive smooth muscle cell	smooth muscle cell	CL:0000192
+Melanocyte	melanocyte	CL:0000148
+Mesothelial cell	mesothelial cell	CL:0000077
+Microglia	microglial cell	CL:0000129
+Molecular interneuron	interneuron	CL:0000099
+Monocyte	monocyte	CL:0000576
+Neuron	neuron	CL:0000540
+OPC	oligodendrocyte precursor cell	CL:0002453
+Oligodendrocyte	oligodendrocyte	CL:0000128
+Pancreas acinar cell	pancreatic acinar cell	CL:0002064
+Pancreas ductal and islet cell	pancreatic ductal cell	CL:0002079
+Photoreceptor	photoreceptor cell	CL:0000210
+Pineal micoglia	microglial cell	CL:0000129
+Pineal oligodendrocyte	oligodendrocyte	CL:0000128
+Pinealocyte	pinealocyte	CL:0000652
+Plasma B cell	plasma cell	CL:0000786
+Podocyte	kidney glomerular epithelial cell	CL:1000510
+Principal cell	renal principal cell	CL:0005009
+Proximal tubule cell	epithelial cell of proximal tubule	CL:0002306
+Pseudostratified columnar cell	columnar/cuboidal epithelial cell	CL:0000075
+Purkinje cell	Purkinje cell	CL:0000121
+Respiratory ciliated cell	ciliated cell	CL:0000064
+Retinal cell	retinal cell	CL:0009004
+Retinal pigment epithelial cell	retinal pigment epithelial cell	CL:0002586
+Salivary NKT 	mature NK T cell	CL:0000814
+Salivary acinar cell	acinar cell of salivary gland	CL:0002623
+Salivary goblet/mucous cell	mucus secreting cell	CL:0000319
+Salivary intercalated cell	stromal cell	CL:0000499
+Salivary serous/acinar cell	acinar cell of salivary gland	CL:0002623
+Salivary stromal cell	stromal cell	CL:0000499
+Sertoli cell	Sertoli cell	CL:0000216
+Smooth muscle cell	smooth muscle cell	CL:0000192
+Somatotrope	somatotroph	CL:0002312
+Stellate cell	stellate neuron	CL:0000122
+Stromal cell	stromal cell	CL:0000499
+T cell	T cell	CL:0000084
+T cell/NKT cell	mature NK T cell	CL:0000814
+Theca cell/granulosa	theca cell	CL:0000503
+Thyroid endothelial cell	endothelial cell	CL:0000115
+Thyroid follicular cell	thyroid follicular cell	CL:0002258
+Thyroid stromal cell	stromal cell	CL:0000499
+Tongue stromal cell	stromal cell	CL:0000499
+Type I skeletal muscle myonuclei	slow muscle myoblast	CL:0000857
+Type II skeletal muscle myonuclei	fast muscle myoblast	CL:0000858
+Type IIa skeletal muscle myonuclei	fast muscle myoblast	CL:0000858
+Unknown cell	unknown	unknown
+Upper digestive tract epithelial cells	epithelial cell	CL:0000066
+Uterus luminal epithelial cell	epithelial cell of uterus	CL:0002149
+Uterus stromal cell	stromal cell	CL:0000499
+Viseral adipose mesothelial cell	mesothelial cell	CL:0000077

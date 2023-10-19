@@ -331,9 +331,8 @@ class GenomeContainer(GenomeContainerBase):
         """
         if isinstance(x, str):
             x = [x]
-        self.__validate_symbols(x=x, enforce_captitalization=False)
         map_dict = dict([(k.upper(), v) for k, v in self.symbol_to_id_dict.items()])
-        y = [map_dict[xx.upper()] for xx in x]
+        y = [map_dict[xx.upper()] if xx.upper() in map_dict.keys() else "nan" for xx in x]
         if len(y) == 1:
             y = y[0]
         return y
@@ -347,9 +346,8 @@ class GenomeContainer(GenomeContainerBase):
         """
         if isinstance(x, str):
             x = [x]
-        self.__validate_ensembl(x=x, enforce_captitalization=False)
         map_dict = dict([(k.upper(), v) for k, v in self.id_to_symbols_dict.items()])
-        y = [map_dict[xx.upper()] for xx in x]
+        y = [map_dict[xx.upper()] if xx.upper() in map_dict.keys() else "nan" for xx in x]
         if len(y) == 1:
             y = y[0]
         return y

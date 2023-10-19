@@ -7,7 +7,7 @@ import warnings
 from typing import Union, List
 import os
 
-from sfaira.consts import OCS
+from sfaira.consts import OC
 from sfaira.data import load_store
 from sfaira.data.dataloaders import Universe
 from sfaira.estimators.keras.base import EstimatorKerasEmbedding
@@ -270,7 +270,7 @@ class GridsearchContainer:
                 or metric_select.endswith('tpr'):
             ascending = False
             if cv_mode == "min":
-                raise Warning("selected cv_mode min with metric_id %s, likely not intended" % metric_select)
+                print(f"Warning(selected cv_mode min with metric_id {metric_select}, likely not intended")
         elif metric_select.endswith('loss') \
                 or metric_select.endswith('mse') \
                 or metric_select.endswith('negll') \
@@ -278,7 +278,7 @@ class GridsearchContainer:
                 or metric_select.endswith('fpr'):
             ascending = True
             if cv_mode == "max":
-                raise Warning("selected cv_mode max with metric_id %s, likely not intended" % metric_select)
+                print(f"Warning(selected cv_mode max with metric_id {metric_select}, likely not intended")
         else:
             raise ValueError("measure %s not recognized" % metric_select)
 
@@ -916,7 +916,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         ])
         cu = CelltypeUniverse(
             cl=OntologyCl(branch="v2021-02-01"),
-            uberon=OCS.organ,
+            uberon=OC.organ,
         )
         cu.load_target_universe(targetpath)
         cell_counts = store.obs['cell_ontology_class'].value_counts().to_dict()
@@ -1081,7 +1081,7 @@ class SummarizeGridsearchCelltype(GridsearchContainer):
         ])
         cu = CelltypeUniverse(
             cl=OntologyCl(branch="v2021-02-01"),
-            uberon=OCS.organ,
+            uberon=OC.organ,
         )
         cu.load_target_universe(targetpath)
         cell_counts = store.obs['cell_ontology_class'].value_counts().to_dict()
@@ -1445,8 +1445,8 @@ class SummarizeGridsearchEmbedding(GridsearchContainer):
                 if data_organ is not None:
                     u.subset("organ", data_organ)
                 u.load(allow_caching=False)
-                u.streamline_features(match_to_release=genome, subset_genes_to_type=gene_type)
-                u.streamline_metadata()
+                u.streamline_var(match_to_release=genome, subset_genes_to_type=gene_type)
+                u.streamline_obs_uns()
                 adata = u.adata
             else:
                 raise ValueError("data_source has to be 'universe' or 'store'")

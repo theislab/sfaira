@@ -1,0 +1,13 @@
+source	target	target_id
+10_RG1	radial glial cell	CL:0000681
+11_RG2	radial glial cell	CL:0000681
+12_DP	neuroblast (sensu Vertebrata)	CL:0000031
+1_L1	cerebral cortex pyramidal neuron	CL:4023111
+2_UL1	cerebral cortex pyramidal neuron	CL:4023111
+3_UL2	cerebral cortex pyramidal neuron	CL:4023111
+4_DL1	cerebral cortex pyramidal neuron	CL:4023111
+5_DL2	cerebral cortex pyramidal neuron	CL:4023111
+6_CN1	cerebral cortex pyramidal neuron	CL:4023111
+7_CN2	cerebral cortex pyramidal neuron	CL:4023111
+8_AG	astrocyte	CL:0000127
+9_IPC	neuroblast (sensu Vertebrata)	CL:0000031

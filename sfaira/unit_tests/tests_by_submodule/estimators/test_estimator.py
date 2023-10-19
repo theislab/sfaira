@@ -9,6 +9,7 @@ from typing import Union
 from sfaira import settings
 from sfaira.consts import AdataIdsSfaira
 from sfaira.data import StoreSingleFeatureSpace, StoreMultipleFeatureSpaceBase, load_store
+from sfaira.data.dataloaders.obs_utils import is_custom
 from sfaira.estimators import EstimatorKeras, EstimatorKerasCelltype, EstimatorKerasEmbedding
 from sfaira.versions.genomes.genomes import CustomFeatureContainer
 from sfaira.versions.metadata import OntologyOboCustom
@@ -69,6 +70,7 @@ class HelperEstimatorBase:
 
     adata_ids: AdataIdsSfaira
     data: Union[anndata.AnnData, StoreSingleFeatureSpace, StoreMultipleFeatureSpaceBase]
+    store_path: str
     tc: TopologyContainer
 
     def load_adata(self, organism="Homo sapiens", organ=None, match_to_reference=None):
@@ -81,6 +83,7 @@ class HelperEstimatorBase:
             dsg.subset(key="organ", values=organ)
         self.adata_ids = dsg.dataset_groups[0]._adata_ids
         self.data = dsg.adata_ls
+        self.store_path = None
 
     def load_store(self, organism="Homo sapiens", organ=None, match_to_reference=None):
         data = PrepareData()
@@ -93,6 +96,7 @@ class HelperEstimatorBase:
             store.subset(attr_key="organ", values=organ)
         self.adata_ids = store._adata_ids_sfaira
         self.data = store.stores[organism]
+        self.store_path = store_path
 
     def load_multistore(self):
         data = PrepareData()
@@ -103,12 +107,13 @@ class HelperEstimatorBase:
         assert "Mus musculus" in store.stores.keys(), store.stores.keys()
         assert "Homo sapiens" in store.stores.keys(), store.stores.keys()
         self.data = store
+        self.store_path = store_path
 
 
 class HelperEstimatorKeras(HelperEstimatorBase):
 
     data: Union[anndata.AnnData, StoreSingleFeatureSpace]
-    estimator: Union[EstimatorKeras]
+    estimator: EstimatorKeras
     model_type: str
     tc: TopologyContainer
 
@@ -252,7 +257,11 @@ class TestHelperEstimatorKerasCelltype(HelperEstimatorKeras):
         )
         obs_cl = self.estimator.data.checkout(obs_keys=[self.adata_ids.cell_type]).obs[self.adata_ids.cell_type].values
         leaves = self.estimator.celltype_universe.onto_cl.get_effective_leaves(
-            x=[x for x in obs_cl if x != self.adata_ids.unknown_metadata_identifier]
+            x=[
+                x for x in obs_cl
+                if x != self.adata_ids.unknown_metadata_identifier and
+                not is_custom(x, self.adata_ids)
+            ]
         )
         self.nleaves = len(leaves)
         self.estimator.celltype_universe.onto_cl.leaves = leaves
@@ -432,7 +441,10 @@ def test_dataset_size(batch_size: int, randomized_batch_access: bool):
 
 
 @pytest.mark.parametrize("data_type", ["adata", "store"])
-@pytest.mark.parametrize("test_split", [0.3, {"id": "homosapiens_lung_2021_10xtechnology_mock1_001_no_doi_mock1"}])
+@pytest.mark.parametrize("test_split", [
+    0.3,
+    {"id": "homosapiens_lung_2021_10xtechnology_mock1_001_dno_doi_mock1"}
+])
 def test_split_index_sets(data_type: str, test_split):
     """
     Test that train, val, test split index sets are correct:

@@ -1,4 +1,5 @@
-import random
+import abc
+from functools import partial
 from typing import Dict, List, Tuple, Union
 
 import anndata
@@ -9,34 +10,8 @@ import scipy.sparse
 
 from sfaira.data.store.batch_schedule import BATCH_SCHEDULE, BatchDesignBase
 from sfaira.data.store.carts.base import CartBase
+from sfaira.data.store.carts.dataset_utils import _ShuffleBuffer, _DatasetIteratorRepeater
 from sfaira.data.store.carts.utils import split_batch
-
-
-class _ShuffleBuffer:
-
-    def __init__(self, generator: iter, buffer_size: int):
-        if buffer_size < 1:
-            raise ValueError('buffer_size should be larger than 0')
-        self._g = generator
-        self._buffer_size = buffer_size
-
-    @staticmethod
-    def buffer_replace(buffer, x):
-        idx = random.randint(0, len(buffer) - 1)
-        val = buffer[idx]
-        buffer[idx] = x
-        return val
-
-    def generator(self):
-        buffer = []
-        for x in self._g:
-            if len(buffer) == self._buffer_size:
-                yield self.buffer_replace(buffer, x)
-            else:
-                buffer.append(x)
-        random.shuffle(buffer)
-        while buffer:
-            yield buffer.pop()
 
 
 class CartSingle(CartBase):
@@ -48,12 +23,16 @@ class CartSingle(CartBase):
     _obs_idx: Union[np.ndarray, None]
     _batch_schedule_name: str
     batch_size: int
+    map_fn: callable
+    map_fn_base: callable
     obs_keys: List[str]
+    obsm: dict
     schedule: BatchDesignBase
     var: pd.DataFrame
     var_idx: Union[None, np.ndarray]
 
-    def __init__(self, obs_idx, obs_keys, var, var_idx=None, batch_schedule="base", batch_size=1, map_fn=None, **kwargs):
+    def __init__(self, obs_idx, obs_keys, var, var_idx=None, batch_schedule="base", batch_size=1, map_fn=None,
+                 map_fn_base=None, obsm={}, **kwargs):
         """
 
         :param batch_schedule: A valid batch schedule name or a class that inherits from BatchDesignBase.
@@ -66,10 +45,15 @@ class CartSingle(CartBase):
 
         :param batch_size: Emission batch size. Must be 1 or 0.
         :param map_fn: Map function to apply to output tuple of raw generator. Each draw i from the generator is then:
-            `yield map_fn(x[i, var_idx], obs[i, obs_keys])`
+            `yield map_fn(x[i, var_idx], obs[i, obs_keys])`. This map function is designed for torch Datasets, ie
+            supply this if "torch" or "torch-loader" is used as an adaptor.
+        :param map_fn: Map function to apply to output tuple of raw generator. Each draw i from the generator is then:
+            `yield map_fn(x[i, var_idx], obs[i, obs_keys])`. This map function is designed for torch IteratableDatasets,
+            ie supply this if "torch-iter" or "torch-loader-iter" is used as an adaptor.
         :param obs_idx: np.ndarray: The observations to emit.
         :param obs_keys: .obs columns to return in the generator. These have to be a subset of the columns available
             in self.adata_by_key.
+        :parm obsm: Empty dict or dict with additional observation-indexed arrays that are in memory.
         :param var_idx: The features to emit.
         :parm split_to_obs: Whether to split tensors to observation-wise slices at the emission stage of the generator.
         """
@@ -77,6 +61,7 @@ class CartSingle(CartBase):
         self._batch_schedule_name = batch_schedule
         self.batch_size = batch_size
         self.map_fn = map_fn
+        self.map_fn_base = map_fn_base
         self.obs_keys = obs_keys
         self.var = var
         self.var_idx = var_idx
@@ -93,6 +78,46 @@ class CartSingle(CartBase):
                                  f"BatchDesignBase to the constructor of GeneratorSingle. Found {type(batch_schedule)}.")
         self.schedule = batch_schedule(**kwargs)
         self.obs_idx = obs_idx  # This needs to be set after .schedule.
+        self.obsm = obsm
+
+    def adaptor(
+            self,
+            generator_type: str,
+            dataset_kwargs: dict = None,
+            shuffle_buffer: int = 0,
+            repeat: int = 1,
+            **kwargs
+    ):
+        """
+        See documentation of self._adaptor().
+        """
+        iter_kwargs = {"shuffle_buffer": shuffle_buffer, "repeat": repeat}
+        return self._adaptor(generator_type=generator_type, dataset_kwargs=dataset_kwargs, iter_kwargs=iter_kwargs,
+                             **kwargs)
+
+    def adaptor_torch(self, dataset_kwargs, loader, **kwargs):
+        from torch.utils.data import DataLoader
+        # Only import this module if torch is used to avoid strict torch dependency:
+        from sfaira.data.store.torch_dataset import SfairaDataset
+
+        g = SfairaDataset(map_fn=self.map_fn_base, obs=self.obs, obsm=self.obsm, x=self.x, **dataset_kwargs)
+        if loader:
+            g = DataLoader(g, **kwargs)
+        return g
+
+    def adaptor_torch_iter(self, loader, repeat, shuffle_buffer, **kwargs):
+        from torch.utils.data import DataLoader
+        # Only import this module if torch is used to avoid strict torch dependency:
+        from sfaira.data.store.torch_dataset import SfairaIterableDataset
+
+        g = SfairaIterableDataset(iterator_fun=partial(self.iterator, repeat=repeat, shuffle_buffer=shuffle_buffer))
+        if loader:
+            g = DataLoader(g, **kwargs)
+        return g
+
+    @property
+    def _emit_obsm(self):
+        return len(self.obsm.keys()) > 0
 
     @property
     def _obs_full(self):
@@ -111,10 +136,10 @@ class CartSingle(CartBase):
             assert len(idx) == len(np.unique(idx)), f"repeated indices in idx: {len(idx) - len(np.unique(idx))}"
             if isinstance(idx, np.ndarray):
                 assert len(idx.shape) == 1, idx.shape
-                assert idx.dtype == np.int
+                assert idx.dtype == int
             else:
                 assert isinstance(idx, list)
-                assert isinstance(idx[0], int) or isinstance(idx[0], np.int)
+                assert isinstance(idx[0], int) or isinstance(idx[0], int)
         idx = np.asarray(idx)
         return idx
 
@@ -163,6 +188,21 @@ class CartSingle(CartBase):
             self._obs_idx = x
             self.schedule.idx = x
 
+    @abc.abstractmethod
+    def _iterator(self):
+        pass
+
+    def iterator(self, repeat: int = 1, shuffle_buffer: int = 0):
+        """
+        Iterator over data matrix and meta data table, yields batches of data points.
+        """
+        if shuffle_buffer > 2 and self.batch_size == 1:
+            iterator = _ShuffleBuffer(self._iterator, shuffle_buffer).iterator
+        else:
+            iterator = self._iterator
+
+        return _DatasetIteratorRepeater(iterator, n_repeats=repeat).iterator()
+
 
 class CartAnndata(CartSingle):
 
@@ -203,64 +243,60 @@ class CartAnndata(CartSingle):
             x = x.todense()
         return x
 
-    def _iterator(self, repeat: int):
+    def _iterator(self):
         """
         Iterator over data matrix and meta data table, yields batches of data points.
         """
-        keep_repeating = True
-        num_repetitions = 0
-
         # Speed up access to single object by skipping index overlap operations:
-        while keep_repeating:
-            batches = self.schedule.design
-            for idx_i in batches:
-                if len(idx_i) > 0:
-                    # Match adata objects that overlap to batch:
-                    idx_i_dict = self._obs_idx_dict_query(idx=idx_i)
-                    if self.batch_size == 1:
-                        # Emit each data set separately and avoid concatenation into larger chunks for emission.
-                        for k, v in idx_i_dict.items():
-                            # I) Prepare data matrix.
-                            x = self.adata_dict[k].X[v, :]
-                            x = self._parse_array(x=x, return_dense=self.return_dense)
-                            # Prepare .obs.
-                            obs = self.adata_dict[k].obs[self.obs_keys].iloc[v, :]
-                            data_tuple = self.map_fn(x, obs)
-                            for data_tuple_i in split_batch(x=data_tuple):
-                                yield data_tuple_i
-                    else:
-                        # Concatenates slices first before returning. Note that this is likely slower than emitting by
-                        # observation in most scenarios.
+        for idx_i in self.schedule.design:
+            if len(idx_i) > 0:
+                # Match adata objects that overlap to batch:
+                idx_i_dict = self._obs_idx_dict_query(idx=idx_i)
+                if self.batch_size == 1:
+                    # Emit each data set separately and avoid concatenation into larger chunks for emission.
+                    for k, v in idx_i_dict.items():
                         # I) Prepare data matrix.
-                        x = [
-                            self._parse_array(self.adata_dict[k].X[v, :], return_dense=self.return_dense)
-                            for k, v in idx_i_dict.items()
-                        ]
-                        is_dense = isinstance(x[0], np.ndarray)
-                        # Concatenate blocks in observation dimension:
-                        if len(x) > 1:
-                            if is_dense:
-                                x = np.concatenate(x, axis=0)
-                            else:
-                                x = scipy.sparse.vstack(x)
-                        else:
-                            x = x[0]
+                        x = self.adata_dict[k].X[v, :]
+                        x = self._parse_array(x=x, return_dense=self.return_dense)
                         # Prepare .obs.
-                        obs = pd.concat([
-                            self.adata_dict[k].obs[self.obs_keys].iloc[v, :]
-                            for k, v in idx_i_dict.items()
-                        ], axis=0, join="inner", ignore_index=True, copy=False)
-                        data_tuple = self.map_fn(x, obs)
-                        yield data_tuple
-
-            num_repetitions += 1
-            keep_repeating = (num_repetitions < repeat) or (repeat <= 0)
-
-    def iterator(self, repeat: int = 1, shuffle_buffer: int = 0):
-        if shuffle_buffer > 2 and self.batch_size == 1:
-            return _ShuffleBuffer(self._iterator(repeat=repeat), shuffle_buffer).generator()
-        else:
-            return self._iterator(repeat=repeat)
+                        obs = self.adata_dict[k].obs[self.obs_keys].iloc[v, :]
+                        if self._emit_obsm:
+                            obsm = dict([(k, v[idx_i, :]) for k, v in self.obsm.items()])
+                            map_fn_args = (x, obs, obsm)
+                        else:
+                            map_fn_args = (x, obs)
+                        data_tuple = self.map_fn(*map_fn_args)
+                        for data_tuple_i in split_batch(x=data_tuple):
+                            yield data_tuple_i
+                else:
+                    # Concatenates slices first before returning. Note that this is likely slower than emitting by
+                    # observation in most scenarios.
+                    # I) Prepare data matrix.
+                    x = [
+                        self._parse_array(self.adata_dict[k].X[v, :], return_dense=self.return_dense)
+                        for k, v in idx_i_dict.items()
+                    ]
+                    is_dense = isinstance(x[0], np.ndarray)
+                    # Concatenate blocks in observation dimension:
+                    if len(x) > 1:
+                        if is_dense:
+                            x = np.concatenate(x, axis=0)
+                        else:
+                            x = scipy.sparse.vstack(x)
+                    else:
+                        x = x[0]
+                    # Prepare .obs.
+                    obs = pd.concat([
+                        self.adata_dict[k].obs[self.obs_keys].iloc[v, :]
+                        for k, v in idx_i_dict.items()
+                    ], axis=0, join="inner", ignore_index=True, copy=False)
+                    if self._emit_obsm:
+                        obsm = dict([(k, v[idx_i, :]) for k, v in self.obsm.items()])
+                        map_fn_args = (x, obs, obsm)
+                    else:
+                        map_fn_args = (x, obs)
+                    data_tuple = self.map_fn(*map_fn_args)
+                    yield data_tuple
 
     def move_to_memory(self):
         """
@@ -373,12 +409,11 @@ class CartDask(CartSingle):
     _x: dask.array
     _obs: pd.DataFrame
 
-    def __init__(self, x, obs, obs_keys, **kwargs):
+    def __init__(self, x: dask.array, obs: pd.DataFrame, obs_keys: List[str], **kwargs):
         self._x = x
         self._obs = obs[obs_keys]
-        # Redefine index so that .loc indexing can be used instead of .iloc indexing:
-        self._obs.index = np.arange(0, obs.shape[0])
         super(CartDask, self).__init__(obs_keys=obs_keys, **kwargs)
+        self.schedule.batchsplits = self._x.chunks[0]  # align batchsplits with partitions of the underlying dask array
 
     @property
     def _obs_full(self):
@@ -394,48 +429,46 @@ class CartDask(CartSingle):
         """
         return self._x
 
-    def _iterator(self, repeat: int):
+    def _iterator(self):
         """
         Iterator over data matrix and meta data table, yields batches of data points.
         """
         # Can all data sets corresponding to one organism as a single array because they share the second dimension
         # and dask keeps expression data and obs out of memory.
-        self.schedule.batchsplits = self._x.chunks[0]
-
-        keep_repeating = True
-        num_repetitions = 0
-
-        while keep_repeating:
-            for batch_idxs in self.schedule.design:
-                if len(batch_idxs) > 0:
-                    x_i = self._x[batch_idxs, :]
-                    if self.var_idx is not None:
-                        x_i = x_i[:, self.var_idx]
-                    obs_i = self._obs.iloc[batch_idxs, :]
-                    data_tuple = self.map_fn(x_i, obs_i)
-                    if self.batch_size == 1:
-                        for data_tuple_i in split_batch(x=data_tuple):
-                            yield data_tuple_i
-                    else:
-                        yield data_tuple
-
-            num_repetitions += 1
-            keep_repeating = (num_repetitions < repeat) or (repeat <= 0)
-
-    def iterator(self, repeat: int = 1, shuffle_buffer: int = 0):
-        """
-        Iterator over data matrix and meta data table, yields batches of data points.
-        """
-        if shuffle_buffer > 2 and self.batch_size == 1:
-            return _ShuffleBuffer(self._iterator(repeat=repeat), shuffle_buffer).generator()
-        else:
-            return self._iterator(repeat=repeat)
+        # Trigger design once so that its random elements are different every time this iterator is called (ie
+        # ever epoch for example):
+        for batch_idxs in self.schedule.design:
+            if len(batch_idxs) > 0:
+                x_i = self._x[batch_idxs, :]
+                if self.var_idx is not None:
+                    x_i = x_i[:, self.var_idx]
+                obs_i = self._obs.iloc[batch_idxs, :]
+                if self._emit_obsm:
+                    obsm_i = dict([(k, v[batch_idxs, :]) for k, v in self.obsm.items()])
+                    map_fn_args = (x_i, obs_i, obsm_i)
+                else:
+                    map_fn_args = (x_i, obs_i)
+                data_tuple = self.map_fn(*map_fn_args)
+                if self.batch_size == 1:
+                    for data_tuple_i in split_batch(x=data_tuple):
+                        yield data_tuple_i
+                else:
+                    yield data_tuple
 
     def move_to_memory(self):
         """
         Persist underlying dask array into memory in sparse.CSR format.
         """
         self._x = self._x.map_blocks(scipy.sparse.csr_matrix).persist()
+
+    @property
+    def adata(self) -> anndata.AnnData:
+        """
+        Assembles a slice of this cart based on .obs_idx as an anndata instance.
+
+        TODO this can be removed once anndata can deal with dask array in x
+        """
+        return anndata.AnnData(X=scipy.sparse.csr_matrix(self.x.compute()), obs=self.obs, var=self.var)
 
     @property
     def n_obs(self) -> int:
@@ -462,11 +495,9 @@ class CartDask(CartSingle):
         """
         Selected data matrix (cells x features) that is emitted in batches by .iterator() as csr matrix.
 
-        Note: to obtain the dask array instead of a csr matrix, use `self.x_dask`
+        Note: this is a dask array.
         """
         if self.var_idx is None:
-            return self._x[self.schedule.idx, :].compute()
+            return self._x[self.schedule.idx, :]
         else:
-            return self._x[self.schedule.idx, :][:, self.var_idx].compute()
-
-    # Methods that are specific to this child class:
+            return self._x[self.schedule.idx, :][:, self.var_idx]

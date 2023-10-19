@@ -1,0 +1,135 @@
+source	target	target_id
+Activated CD4 T	activated CD4-positive, alpha-beta T cell, human	CL:0001043
+Activated CD8 T	activated CD8-positive, alpha-beta T cell, human	CL:0001049
+Activated T	alpha-beta T cell	CL:0000789
+Adult Glia	glial cell	CL:0000125
+BEST2+ Goblet cell	goblet cell	CL:0000160
+BEST4+ epithelial	epithelial cell	CL:0000066
+Branch A1 (iMN)	progenitor cell	CL:0011026
+Branch A2 (IPAN/IN)	progenitor cell	CL:0011026
+Branch A3 (IPAN/IN)	progenitor cell	CL:0011026
+Branch A4 (IN)	progenitor cell	CL:0011026
+Branch B1 (eMN)	progenitor cell	CL:0011026
+Branch B2 (eMN)	progenitor cell	CL:0011026
+Branch B3 (IPAN)	progenitor cell	CL:0011026
+CD8 Tmem	effector memory CD8-positive, alpha-beta T cell, terminally differentiated	CL:0001062
+CLC+ Mast cell	mast cell	CL:0000097
+CLDN10+ cells	progenitor cell of endocrine pancreas	CL:0002351
+CLP	common lymphoid progenitor	CL:0000051
+CX3CR1+ CD8 Tmem	effector memory CD8-positive, alpha-beta T cell, terminally differentiated	CL:0001062
+Colonocyte	colon epithelial cell	CL:0011108
+Contractile pericyte (PLN+)	pericyte	CL:0000669
+Cycling B cell	B cell	CL:0000236
+Cycling plasma cell	plasma cell	CL:0000786
+D cells (SST+)	pancreatic D cell	CL:0000173
+DZ GC cell	dendritic cell	CL:0000451
+Differentiating glia	glial cell	CL:0000125
+Distal progenitor	progenitor cell	CL:0011026
+EC cells (NPW+)	type EC enteroendocrine cell	CL:0000577
+EC cells (TAC1+)	type EC enteroendocrine cell	CL:0000577
+EECs	enteroendocrine cell	CL:0000164
+ENCC/glia Progenitor	glial cell	CL:0000125
+Enterocyte	enterocyte	CL:0000584
+FCRL4+ Memory B	memory B cell	CL:0000787
+FDC	follicular dendritic cell	CL:0000442
+Fetal arterial EC	endothelial cell of artery	CL:1000413
+Fetal venous EC	vein endothelial cell	CL:0002543
+GC B cell	B cell	CL:0000236
+Germ	B cell	CL:0000236
+Glia 1 (DHH+)	glial cell	CL:0000125
+Glia 2 (ELN+)	glial cell	CL:0000125
+Glia 3 (BCAN+)	glial cell	CL:0000125
+Goblet cell	pancreatic goblet cell	CL:1000322
+I cells (CCK+)	type I enteroendocrine cell	CL:0002277
+ICC	interstitial cell of Cajal	CL:0002088
+ILC2	group 2 innate lymphoid cell	CL:0001069
+ILC3	group 3 innate lymphoid cell	CL:0001071
+ILCP	innate lymphoid cell	CL:0001065
+IgA plasma cell	IgA plasma cell	CL:0000987
+IgG plasma cell	IgG plasma cell	CL:0000985
+IgM plasma cell	IgM plasma cell	CL:0000986
+Immature B	immature B cell	CL:0000816
+Immature pericyte	pericyte	CL:0000669
+K cells (GIP+)	GIP cell	CL:0002278
+L cells (PYY+)	type L enteroendocrine cell	CL:0002279
+LEC1 (ACKR4+)	endothelial cell of lymphatic vessel	CL:0002138
+LEC2 (MADCAM1+)	endothelial cell of lymphatic vessel	CL:0002138
+LEC3 (ADGRG3+)	endothelial cell of lymphatic vessel	CL:0002138
+LEC4 (STAB2+)	endothelial cell of lymphatic vessel	CL:0002138
+LEC5 (CLDN11+)	endothelial cell of lymphatic vessel	CL:0002138
+LEC6 (ADAMTS4+)	endothelial cell of lymphatic vessel	CL:0002138
+LTi-like NCR+ ILC3	group 3 innate lymphoid cell	CL:0001071
+LTi-like NCR- ILC3	group 3 innate lymphoid cell	CL:0001071
+LYVE1+ Macrophage	macrophage	CL:0000235
+LZ GC cell	B cell	CL:0000236
+Lymphoid DC	plasmacytoid dendritic cell	CL:0000784
+M/X cells (MLN/GHRL+)	type A enteroendocrine cell	CL:0002067
+MAIT cell	mucosal invariant T cell	CL:0000940
+MMP9+ Inflammatory macrophage	macrophage	CL:0000235
+MPO+ mono-neutrophil	neutrophil	CL:0000775
+Macrophages	macrophage	CL:0000235
+Mast cell	mast cell	CL:0000097
+Mature arterial EC	endothelial cell of artery	CL:1000413
+Mature venous EC	vein endothelial cell	CL:0002543
+Megakaryocyte	megakaryocyte	CL:0000556
+Memory B	memory B cell	CL:0000787
+Mesoderm 1 (HAND1+)	progenitor cell	CL:0011026
+Mesoderm 2 (ZEB2+)	progenitor cell	CL:0011026
+Mesothelium	progenitor cell	CL:0011026
+Mesothelium (PRG4+)	progenitor cell	CL:0011026
+Mesothelium (RGS5+)	progenitor cell	CL:0011026
+Microfold cell	progenitor cell	CL:0011026
+Monocytes	monocyte	CL:0000576
+N cells (NTS+)	type N enteroendocrine cell	CL:0002280
+NK T cell	mature NK T cell	CL:0000814
+NK cell	natural killer cell	CL:0000623
+Naive B	naive B cell	CL:0000788
+Neuroblast	progenitor cell	CL:0011026
+Paneth	paneth cell	CL:0000510
+Pericyte	pericyte	CL:0000669
+Pre-B	precursor B cell	CL:0000817
+Pro-B	pro-B cell	CL:0000826
+Progenitor (NEUROG3+)	progenitor cell of endocrine pancreas	CL:0002351
+Proximal progenitor	progenitor cell of endocrine pancreas	CL:0002351
+RBC	erythrocyte	CL:0000232
+SELL+ CD4 T	CD4-positive, alpha-beta T cell	CL:0000624
+SELL+ CD8 T	CD8-positive, alpha-beta T cell	CL:0000625
+SMC (PART1/CAPN3+)	smooth muscle cell	CL:0000192
+SMC (PLPP2+)	smooth muscle cell	CL:0000192
+STAT1+ Naive B	naive B cell	CL:0000788
+Stem cells	stem cell	CL:0000034
+Stromal 1 (ADAMDEC1+)	stromal cell	CL:0000499
+Stromal 1 (CCL11+)	stromal cell	CL:0000499
+Stromal 2 (CH25H+)	stromal cell	CL:0000499
+Stromal 2 (NPY+)	stromal cell	CL:0000499
+Stromal 3 (C7+)	stromal cell	CL:0000499
+Stromal 3 (KCNN3+)	stromal cell	CL:0000499
+Stromal 4 (MMP1+)	stromal cell	CL:0000499
+T reticular	reticular cell	CL:0000432
+TA	epithelial cell	CL:0000066
+TRDV2/TRGV9 gdT	gamma-delta T cell	CL:0000798
+TRGV2 gdT	gamma-delta T cell	CL:0000798
+TRGV4 gdT	gamma-delta T cell	CL:0000798
+TRGV5/7 gdT	gamma-delta T cell	CL:0000798
+Tfh	T follicular helper cell	CL:0002038
+Th1	T-helper 1 cell	CL:0000545
+Th17	T-helper 17 cell	CL:0000899
+Transitional Stromal 3 (C3+)	stromal cell	CL:0000499
+Treg	regulatory T cell	CL:0000815
+Tuft	intestinal tuft cell	CL:0019032
+angiogenic pericyte	pericyte	CL:0000669
+arterial capillary	endothelial cell of artery	CL:1000413
+cDC1	conventional dendritic cell	CL:0000990
+cDC2	conventional dendritic cell	CL:0000990
+cycling EC	type EC enteroendocrine cell	CL:0000577
+cycling ENCC/glia	glial cell	CL:0000125
+cycling neuroblast	progenitor cell	CL:0011026
+cycling stromal	stromal cell	CL:0000499
+gdT	gamma-delta T cell	CL:0000798
+mLN Stroma (FMO2+)	B cell	CL:0000236
+mLTo	lymphoid tissue–inducer cell	CL:0011018
+myofibroblast	myofibroblast cell	CL:0000186
+myofibroblast (RSPO2+)	myofibroblast cell	CL:0000186
+pDC	plasmacytoid dendritic cell	CL:0000784
+venous capillary	vein endothelial cell	CL:0002543
+β cells (INS+)	type B pancreatic cell	CL:0000169

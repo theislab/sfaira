@@ -660,7 +660,7 @@ Common challenges in cell type curation include the following:
     In some tissues, these phenotypes can be related to specific cell types through knowledge on the phenotypes of the
     cell types that occur in that tissue.
     If this is not possible or you do not know the tissue well enough,
-    you can leave the cell type as "UNKNOWN" and future curators may improve this annotaiton.
+    you can leave the cell type as "unknown" and future curators may improve this annotaiton.
     In cases such as "cycling T cell", you may just resort to the parent label "T cell" unless you have reason to
     believe that "cycling" identifies a specific T cell subset here.
 4. The free-text labels are more fine-grained than the ontology.
@@ -1070,7 +1070,7 @@ outlined below.
     keys with `*` in this string, e.g. `group1*group2` to get one `individual` for each group1 and group2 entry.
     Note that the notion of individuals is slightly mal-defined in some cases, we allow this element to allow
     researchers to distinguish sample groups that originate from biological material with distinct genotypes.
-    See also the meta data items `individual` and `tech_sample`.
+    See also the meta data items `bio_sample` and `tech_sample`.
 - organ and organ_obs_key [ontology term]
     The UBERON_ label of the sample.
     This meta data item ontology is for tissue or organ identifiers from UBERON.
@@ -1103,7 +1103,7 @@ outlined below.
     You can concatenate multiple columns to build more fine grained observation groupings by concatenating the column
     keys with `*` in this string, e.g. `patient*treatment*protocol` to get one `tech_sample` for each patient, treatment
     and measurement protocol.
-    See also the meta data items `individual` and `tech_sample`.
+    See also the meta data items `individual` and `bio_sample`.
 - treatment and treatment_obs_key [string]
     Treatment of sample, e.g. compound names in stimulation experiments.
 

@@ -1,0 +1,16 @@
+source	target	target_id
+CGE/MGE IN	caudal ganglionic eminence derived GABAergic cortical interneuron	CL:4023070
+Choroid Plexus	choroid plexus epithelial cell	CL:0000706
+Cortical EN	glutamatergic neuron	CL:0000679
+Cortical IP	forebrain neuroblast	CL:1000042
+Deeper layer EN	glutamatergic neuron	CL:0000679
+Mesenchyme	mesenchymal cell	CL:0008019
+NPC	neural progenitor cell	CL:0011020
+Upper layer EN	glutamatergic neuron	CL:0000679
+CP	choroid plexus epithelial cell	CL:0000706
+DF NPC	forebrain neuroblast	CL:1000042
+DF neuron	neuron of the forebrain	CL:0012001
+EP	epithelial cell	CL:0000066
+M	mesenchymal cell	CL:0008019
+VF NPC	forebrain neuroblast	CL:1000042
+VF neuron	cortical interneuron	CL:0008031

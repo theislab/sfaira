@@ -8,7 +8,7 @@ from typing import Union
 from sfaira.commands.utils import get_pydoc
 from sfaira.consts.utils import clean_doi
 from sfaira.data import DatasetGroupDirectoryOriented, DatasetGroup, DatasetBase
-from sfaira.data.utils import read_yaml
+from sfaira.data.dataloaders.utils import read_yaml
 
 try:
     import sfaira_extension as sfairae
@@ -115,7 +115,7 @@ class DataloaderAnnotater:
                     if sample_fns is None:
                         sample_fns = [None]
                     # Here we distinguish between class that are already defined and those that are not.
-                    # The latter case arises if meta data are defined in YAMLs and _load is given as a function.
+                    # The latter case arises if metadata are defined in YAMLs and _load is given as a function.
                     if DatasetFound is None:
                         datasets_f = [
                             DatasetBase(
@@ -159,7 +159,11 @@ class DataloaderAnnotater:
                         protected_writing=True,
                         n_suggest=4,
                     )
-                    tsvs_written.append((fn_tsv, attrs))
+                    if os.getenv('SFAIRA_DOCKER'):
+                        written_output = (os.path.join("<PATCH_LOADER_YOU_MOUNTED_TO_THE_CONTAINER>", doi_sfaira_repr, f"{file_module}"), attrs)
+                    else:
+                        written_output = (fn_tsv, attrs)
+                    tsvs_written.append(written_output)
         print("[bold blue]Completed annotation.")
         print('[bold orange]Sfaira butler: "Up next, follow these steps until the next call of the sfaira CLI:"')
         self.action_counter = 1

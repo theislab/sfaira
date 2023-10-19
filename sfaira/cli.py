@@ -76,46 +76,26 @@ def main():
 
 @click.group()
 @click.version_option(__version__, message=click.style(f'sfaira Version: {__version__}', fg='blue'))
-@click.option('-v', '--verbose', is_flag=True, default=False, help='Enable verbose output (print debug statements).')
-@click.option("-l", "--log-file", help="Save a verbose log to a file.")
 @click.pass_context
-def sfaira_cli(ctx, verbose, log_file):
+def sfaira_cli(ctx):
     """
     Create and manage sfaira dataloaders.
     """
-    # Set the base logger to output DEBUG
-    log.setLevel(logging.DEBUG)
-
-    # Set up logs to the console
-    log.addHandler(
-        rich.logging.RichHandler(
-            level=logging.DEBUG if verbose else logging.INFO,
-            console=rich.console.Console(file=sys.stderr),
-            show_time=True,
-            markup=True,
-        )
-    )
-
-    # Set up logs to a file if we asked for one
-    if log_file:
-        log_fh = logging.FileHandler(log_file, encoding="utf-8")
-        log_fh.setLevel(logging.DEBUG)
-        log_fh.setFormatter(logging.Formatter("[%(asctime)s] %(name)-20s [%(levelname)-7s]  %(message)s"))
-        log.addHandler(log_fh)
+    pass
 
 
 @sfaira_cli.command()
-def cache_clear() -> None:
+@click.option('--reload',
+              is_flag=True,
+              help='Downloads new ontology versions into cache after clearing it.')
+def clear_cache(reload) -> None:
     """Clears sfaira cache, including ontology and genome cache."""
     ctrl = CacheControl()
-    ctrl.clear()
-
-
-@sfaira_cli.command()
-def cache_reload() -> None:
-    """Downloads new ontology versions into cache."""
-    ctrl = CacheControl()
-    ctrl.reload()
+    if reload:
+        ctrl.clear(countdown=False)
+        ctrl.reload()
+    else:
+        ctrl.clear(countdown=True)
 
 
 @sfaira_cli.command()
@@ -242,7 +222,7 @@ def publish_dataloader() -> None:
 
 @sfaira_cli.command()
 @click.option('--doi', type=str, required=True, help="The doi of the paper that the data loader refers to.")
-@click.option('--schema', type=str, default=None, help="Schema to streamline to, e.g. 'cellxgene'")
+@click.option('--schema', type=str, required=True, help="Schema to streamline to, e.g. 'cellxgene'")
 @click.option('--path-out',
               type=click.Path(exists=True),
               help='Absolute path of the location of the streamlined output h5ads.')
@@ -250,20 +230,40 @@ def publish_dataloader() -> None:
               default=DEFAULT_DATA_PATH,
               type=click.Path(exists=True),
               help='Absolute path of the location of the raw data directory.')
-@click.option('--path-loader',
-              default=PACKAGE_LOADER_PATH,
-              type=click.Path(exists=False),
-              help='Relative path from the current directory to the location of the data loader.')
+@click.option('--contributors',
+              type=str,
+              default=None,
+              help='Contributors for this curated object (listed in cellxgene for example).')
+@click.option('--del-obs',
+              type=str,
+              default=None,
+              help='# separated string of columns to remove from .obs, do not add spaces.')
+@click.option('--keep-obs',
+              type=str,
+              default=None,
+              help='# separated string of columns to remove from .obs, do not add spaces.')
 @click.option('--path-cache',
               type=click.Path(exists=True),
               default=None,
               help='The optional absolute path to cached data library maintained by sfaira. Using such a cache speeds '
                    'up loading in sequential runs but is not necessary.')
-def export_h5ad(doi, schema, path_out, path_data, path_loader, path_cache) -> None:
+@click.option('--path-loader',
+              default=PACKAGE_LOADER_PATH,
+              type=click.Path(exists=False),
+              help='Relative path from the current directory to the location of the data loader.')
+@click.option('--title',
+              type=str,
+              default=None,
+              help='Title of dataloader / publication')
+def export_h5ad(del_obs, contributors, doi, schema, keep_obs, path_out, path_data, path_loader, path_cache, title) -> \
+        None:
     """Creates a collection of streamlined h5ad object for a given DOI."""
+    del_obs = del_obs if del_obs is None else del_obs.split("#")
+    keep_obs = keep_obs if keep_obs is None else keep_obs.split("#")
     path_loader, path_data, _ = set_paths(loader=path_loader, data=path_data, cache=path_cache)
-    h5ad_export = H5adExport(doi=doi, path_cache=path_cache, path_data=path_data, path_loader=path_loader,
-                             path_out=path_out, schema=schema)
+    h5ad_export = H5adExport(clean_obs=del_obs, contributors=contributors, doi=doi, keep_obs=keep_obs,
+                             path_cache=path_cache, path_data=path_data, path_loader=path_loader, path_out=path_out,
+                             schema=schema, title=title)
     h5ad_export.write()
 
 

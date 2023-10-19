@@ -6,7 +6,7 @@ import os
 import pathlib
 from typing import Union
 
-from sfaira.consts.ontologies import DEFAULT_UBERON, DEFAULT_CL
+from sfaira.consts.ontologies import DEFAULT_SCHEMA, ONTOLOGY_VERSIONS
 from sfaira.data import load_store
 from sfaira.train import TrainModelCelltype, TrainModelEmbedding
 from sfaira.ui import ModelZoo
@@ -24,8 +24,8 @@ def get_cu():
     if not os.path.exists(DIR_TEMP):
         pathlib.Path(DIR_TEMP).mkdir(parents=True, exist_ok=True)
     fn = os.path.join(DIR_TEMP, "universe_temp.csv")
-    cl = OntologyCl(branch=DEFAULT_CL)
-    uberon = OntologyUberon(branch=DEFAULT_UBERON)
+    cl = OntologyCl(branch=ONTOLOGY_VERSIONS[DEFAULT_SCHEMA]["VERSION_CL"])
+    uberon = OntologyUberon(branch=ONTOLOGY_VERSIONS[DEFAULT_SCHEMA]["VERSION_UBERON"])
     cu = CelltypeUniverse(cl=cl, uberon=uberon)
     cu.write_target_universe(fn=fn, x=TARGETS)
     del cu

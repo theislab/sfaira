@@ -1,0 +1,117 @@
+dataset_structure:
+    dataset_index: 1
+    sample_fns:
+        - "fixation"
+        - "indrop"
+dataset_wise:
+    author: "He, Zhisong"
+    default_embedding:
+    doi_preprint:
+    doi_journal: "10.1186/s13059-020-02147-4"
+    download_url_data: 
+        fixation: "https://www.ebi.ac.uk/biostudies/files/E-MTAB-9473/raw_counts.mtx.gz"
+        indrop: "https://data.mendeley.com/public-files/datasets/3kthhpw2pd/files/672799c4-8bca-4da2-b81a-06814a5d9171/file_downloaded"
+    download_url_meta:
+        fixation:
+            - "https://www.ebi.ac.uk/biostudies/files/E-MTAB-9473/genes.tsv.gz"
+            - "https://www.ebi.ac.uk/biostudies/files/E-MTAB-9473/cell_metadata.tsv.gz"
+        indrop:
+            - "https://data.mendeley.com/public-files/datasets/3kthhpw2pd/files/35b50c7c-59c5-4f74-aa07-e062e329a910/file_downloaded"
+            - "https://data.mendeley.com/public-files/datasets/3kthhpw2pd/files/7f39f311-6074-4d78-9730-9f06a53464e3/file_downloaded"
+            - "private,meta.tsv.gz"
+    primary_data: True
+    year: 2020
+layers:
+    layer_counts: "X"
+    layer_processed:
+    layer_spliced_counts:
+    layer_spliced_processed:
+    layer_unspliced_counts:
+    layer_unspliced_processed:
+    layer_velocity:
+dataset_or_feature_wise:
+    feature_reference:
+        fixation: "Homo_sapiens.GRCh38.93"
+        indrop: "Homo_sapiens.GRCh37.74"
+    feature_reference_var_key:
+    feature_type: "rna"
+    feature_type_var_key:
+dataset_or_observation_wise:
+    assay_sc: 
+        fixation: "10x 3' v2"
+        indrop: "inDrop"
+    assay_sc_obs_key:
+    assay_differentiation: "Lancaster, 2014 (doi: 10.1038/nprot.2014.158)"
+    assay_differentiation_obs_key:
+    assay_type_differentiation: "unguided"
+    assay_type_differentiation_obs_key:
+    bio_sample:
+    bio_sample_obs_key:
+        fixation: "condition"
+        indrop: "experiment"
+    cell_line:
+        fixation: "custom_HPSI0214i-kucg_2_HPSI0314i-sojd_3"
+        indrop: "WA09"
+    cell_line_obs_key: 
+    cell_type:
+    cell_type_obs_key:
+        fixation: "celltype"
+        indrop: "annot_ct"
+    development_stage:
+        fixation: "17th week post-fertilization human stage"
+        indrop: "22nd week post-fertilization human stage"
+    development_stage_obs_key: 
+    disease: "healthy"
+    disease_obs_key:
+    ethnicity:
+    ethnicity_obs_key:
+    gm:
+        indrop: "Using CRISPR editing, double-stranded breaks were introduced in the first exon of the PLCB1 gene."
+    gm_obs_key:
+    individual:
+    individual_obs_key:
+    organ: "brain"
+    organ_obs_key:
+    organism: "Homo sapiens"
+    organism_obs_key:
+    sample_source: "3d_culture"
+    sample_source_obs_key:
+    sex: 
+        indrop: "female"
+    sex_obs_key: 
+    source_doi:
+    source_doi_obs_key:
+    suspension_type: "cell" 
+    suspension_type_obs_key: 
+    state_exact:
+    state_exact_obs_key:
+        fixation: "condition"
+    tech_sample:
+    tech_sample_obs_key:
+    treatment:
+    treatment_obs_key:
+feature_wise:
+    feature_id_var_key: 
+        fixation: "index"
+    feature_symbol_var_key: 
+        indrop: "index"
+observation_wise:
+    spatial_x_coord_obs_key:
+    spatial_y_coord_obs_key:
+    spatial_z_coord_obs_key:
+    vdj_vj_1_obs_key_prefix:
+    vdj_vj_2_obs_key_prefix:
+    vdj_vdj_1_obs_key_prefix:
+    vdj_vdj_2_obs_key_prefix:
+    vdj_c_call_obs_key_suffix:
+    vdj_consensus_count_obs_key_suffix:
+    vdj_d_call_obs_key_suffix:
+    vdj_duplicate_count_obs_key_suffix:
+    vdj_j_call_obs_key_suffix:
+    vdj_junction_obs_key_suffix:
+    vdj_junction_aa_obs_key_suffix:
+    vdj_locus_obs_key_suffix:
+    vdj_productive_obs_key_suffix:
+    vdj_v_call_obs_key_suffix:
+meta:
+    version: "1.2"

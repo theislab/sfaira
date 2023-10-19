@@ -29,8 +29,9 @@ class AdataIds:
     feature_symbol: str
     id: str
     individual: str
+    layer_counts: str
+    layer_proc: str
     ncells: str
-    normalization: str
     organ: str
     organism: str
     primary_data: str
@@ -63,6 +64,7 @@ class AdataIds:
     invalid_metadata_identifier: Union[str, None]
     not_a_cell_celltype_identifier: Union[str, None]
     unknown_metadata_identifier: Union[str, None]
+    custom_metadata_prefix: Union[str, None]
 
     @property
     def controlled_meta_keys(self):
@@ -113,15 +115,20 @@ class AdataIdsSfaira(AdataIds):
         self.feature_index = self.feature_id
         self.feature_symbol = "gene_symbol"
         self.feature_biotype = "feature_biotype"
+        self.gm = "gm"
         self.id = "id"
         self.individual = "individual"
+        self.layer_counts = "X"
+        self.layer_proc = "processed_counts"
         self.ncells = "ncells"
-        self.normalization = "normalization"
         self.organ = "organ"
         self.organism = "organism"
         self.primary_data = "primary_data"
         self.sample_source = "sample_source"
+        self.source_doi = "source_doi"
+        self.suspension_type = "suspension_type"
         self.tech_sample = "tech_sample"
+        self.treatment = "treatment"
         self.title = "title"
         self.year = "year"
 
@@ -141,6 +148,7 @@ class AdataIdsSfaira(AdataIds):
         self.invalid_metadata_identifier = "na"
         self.not_a_cell_celltype_identifier = "NOT_A_CELL"
         self.unknown_metadata_identifier = "unknown"
+        self.custom_metadata_prefix = "custom_"
 
         self.batch_keys = [self.bio_sample, self.individual, self.tech_sample]
 
@@ -154,6 +162,7 @@ class AdataIdsSfaira(AdataIds):
             "organ",
             "organism",
             "sex",
+            "suspension_type",
         ]
         self.obs_keys = [
             "assay_sc",
@@ -165,6 +174,7 @@ class AdataIdsSfaira(AdataIds):
             "development_stage",
             "disease",
             "ethnicity",
+            "gm",
             "id",
             "individual",
             "organ",
@@ -172,9 +182,13 @@ class AdataIdsSfaira(AdataIds):
             "sex",
             "state_exact",
             "sample_source",
+            "source_doi",
+            "suspension_type",
             "tech_sample",
+            "treatment",
         ]
         self.var_keys = [
+            "feature_biotype",
             "feature_id",
             "feature_symbol",
         ]
@@ -186,7 +200,6 @@ class AdataIdsSfaira(AdataIds):
             "doi_preprint",
             "download_url_data",
             "download_url_meta",
-            "normalization",
             "primary_data",
             "title",
             "year",
@@ -208,6 +221,7 @@ class AdataIdsCellxgene(AdataIds):
         self.onto_original_suffix = "_original"
 
         self.feature_kwargs = {
+            "match_to_release": "104",
             "remove_gene_version": True,
             "subset_genes_to_type": None}
 
@@ -219,12 +233,14 @@ class AdataIdsCellxgene(AdataIds):
         self.doi_preprint = "preprint_doi"
         self.disease = "disease"
         self.feature_biotype = "feature_biotype"
-        self.feature_id = "feature_id"
+        self.feature_id = "index"
         self.feature_is_filtered = "feature_is_filtered"
         self.feature_reference = "feature_reference"
         self.feature_symbol = "feature_name"
         self.id = "id"
-        self.ncells = "ncells"
+        self.ncells = "cell_count"
+        self.layer_counts = "raw"
+        self.layer_proc = "X"
         self.organ = "tissue"
         self.organism = "organism"
         self.primary_data = "is_primary_data"
@@ -244,6 +260,7 @@ class AdataIdsCellxgene(AdataIds):
         self.invalid_metadata_identifier = "na"
         self.not_a_cell_celltype_identifier = "CL:0000003"
         self.unknown_metadata_identifier = "unknown"
+        self.custom_metadata_prefix = "custom_"
 
         self.batch_keys = []
 
@@ -268,15 +285,13 @@ class AdataIdsCellxgene(AdataIds):
             "organism",
             "primary_data",
             "sex",
-            "tech_sample",
         ]
         self.var_keys = [
-            "feature_id",
+            "feature_biotype",
+            "feature_is_filtered",
             "feature_symbol",
         ]
         self.uns_keys = [
-            "doi_journal",
-            "doi_preprint",
             "default_embedding",
             "title",
         ]
@@ -306,3 +321,49 @@ class AdataIdsCellxgene_v2_0_0(AdataIdsCellxgene):
     def __init__(self):
         super(AdataIdsCellxgene_v2_0_0, self).__init__()
         self.feature_kwargs["match_to_release"] = "104"
+
+
+class AdataIdsCellxgene_v3_0_0(AdataIdsCellxgene):
+
+    """
+    https://github.com/chanzuckerberg/single-cell-curation/blob/main/schema/3.0.0/schema.md
+    """
+
+    def __init__(self):
+        super(AdataIdsCellxgene_v3_0_0, self).__init__()
+        self.ethnicity = "self_reported_ethnicity"
+        self.feature_kwargs["match_to_release"] = "104"
+        self.individual = "donor_id"
+        self.suspension_type = "suspension_type"
+
+        self.ontology_constrained = [
+            "assay_sc",
+            "cell_type",
+            "development_stage",
+            "disease",
+            "ethnicity",
+            "organ",
+            "organism",
+            "sex",
+            "suspension_type",
+        ]
+
+        self.obs_keys = [
+            "assay_sc",
+            "cell_type",
+            "development_stage",
+            "disease",
+            "individual",
+            "ethnicity",
+            "organ",
+            "organism",
+            "primary_data",
+            "sex",
+            "suspension_type",
+        ]
+
+
+AdataIdsCellxgeneVersions = {
+    "2_0_0": AdataIdsCellxgene_v2_0_0(),
+    "3_0_0": AdataIdsCellxgene_v3_0_0()
+}

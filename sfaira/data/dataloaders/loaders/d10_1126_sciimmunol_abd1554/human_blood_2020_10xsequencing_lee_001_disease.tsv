@@ -1,6 +1,6 @@
 source	target	target_id
 Healthy donor	healthy	PATO:0000461
-mild COVID-19	mild COVID-19 infection	MONDO:0100140
-mild COVID-19 (asymptomatic)	mild COVID-19 infection	MONDO:0100140
-severe COVID-19	severe COVID-19 infection	MONDO:0100142
+mild COVID-19	COVID-19	MONDO:0100096
+mild COVID-19 (asymptomatic)	COVID-19	MONDO:0100096
+severe COVID-19	COVID-19	MONDO:0100096
 severe influenza	influenza	MONDO:0005812

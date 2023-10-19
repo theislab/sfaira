@@ -1,0 +1,118 @@
+dataset_structure:
+    dataset_index: 1
+    sample_fns:
+        - "GSM3319032_sample_1-1_filtered_gene_bc_matrices_h5.h5"
+        - "GSM3319033_sample_1-2_filtered_gene_bc_matrices_h5.h5"
+        - "GSM3319034_sample_1-3_filtered_gene_bc_matrices_h5.h5"
+        - "GSM3319035_sample_1-4_filtered_gene_bc_matrices_h5.h5"
+        - "GSM3319036_sample_1-5_filtered_gene_bc_matrices_h5.h5"
+        - "GSM3319037_sample_1-6_filtered_gene_bc_matrices_h5.h5"
+        - "GSM3319038_sample_1-7_filtered_gene_bc_matrices_h5.h5"
+        - "GSM3319039_sample_1-8_filtered_gene_bc_matrices_h5.h5"
+        - "GSM3319040_sample_3-13_filtered_gene_bc_matrices_h5.h5"
+        - "GSM3319041_sample_3-14_filtered_gene_bc_matrices_h5.h5"
+        - "GSM3319042_sample_3-15_filtered_gene_bc_matrices_h5.h5"
+        - "GSM3319043_sample_3-16_filtered_gene_bc_matrices_h5.h5"
+        - "GSM3319044_sample_3-17_filtered_gene_bc_matrices_h5.h5"
+        - "GSM3319045_sample_3-18_filtered_gene_bc_matrices_h5.h5"
+        - "GSM3319046_sample_3-5_filtered_gene_bc_matrices_h5.h5"
+        - "GSM3319047_sample_3-6_filtered_gene_bc_matrices_h5.h5"
+        - "GSM3557959_sample1_B1_i12A_filtered_gene_bc_matrices_h5.h5"
+        - "GSM3557960_sample10_B2_i10D_filtered_gene_bc_matrices_h5.h5"
+        - "GSM3557961_sample11_B2_i10F_filtered_gene_bc_matrices_h5.h5"
+        - "GSM3557962_sample12_B2_i10G_filtered_gene_bc_matrices_h5.h5"
+        - "GSM3557963_sample13_B1_i12C_filtered_gene_bc_matrices_h5.h5"
+        - "GSM3557964_sample145_B1_i12D_filtered_gene_bc_matrices_h5.h5"
+        - "GSM3557965_sample2_B1_i12B_filtered_gene_bc_matrices_h5.h5"
+        - "GSM3557966_sample3_B1_i12G_filtered_gene_bc_matrices_h5.h5"
+        - "GSM3557967_sample4_B1_i12F_filtered_gene_bc_matrices_h5.h5"
+        - "GSM3557968_sample5_B2_i10E_filtered_gene_bc_matrices_h5.h5"
+        - "GSM3557969_sample6a_B1_i12H_filtered_gene_bc_matrices_h5.h5"
+        - "GSM3557970_sample7_B2_i10C_filtered_gene_bc_matrices_h5.h5"
+        - "GSM3557971_sample8a_B2_i10A_filtered_gene_bc_matrices_h5.h5"
+        - "GSM3557972_sample8b_B2_i10B_filtered_gene_bc_matrices_h5.h5"
+        - "GSM3557973_sampleC1_B1_i12E_filtered_gene_bc_matrices_h5.h5"
+dataset_wise:
+    author: "Fan, Xueying"
+    default_embedding: 
+    doi_preprint: 
+    doi_journal: "10.1038/s41467-019-11036-9"
+    download_url_data: "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE118127&format=file"
+    download_url_meta: 
+    primary_data: True
+    year: 2019
+layers:
+    layer_counts: "X"
+    layer_processed: 
+    layer_spliced_counts: 
+    layer_spliced_processed: 
+    layer_unspliced_counts: 
+    layer_unspliced_processed: 
+    layer_velocity: 
+dataset_or_feature_wise:
+    feature_reference: "Homo_sapiens.GRCh38.84"
+    feature_reference_var_key: 
+    feature_type: "rna"
+    feature_type_var_key: 
+dataset_or_observation_wise:
+    assay_sc: "10x 3' v2"
+    assay_sc_obs_key: 
+    assay_differentiation: 
+    assay_differentiation_obs_key: 
+    assay_type_differentiation: 
+    assay_type_differentiation_obs_key: 
+    bio_sample:
+    bio_sample_obs_key: 
+    cell_line: 
+    cell_line_obs_key: 
+    cell_type: 
+    cell_type_obs_key: "clusterID" 
+    development_stage: "human adult stage"
+    development_stage_obs_key: 
+    disease: "healthy"
+    disease_obs_key: 
+    ethnicity:
+    ethnicity_obs_key: 
+    gm:
+    gm_obs_key:
+    individual:
+    individual_obs_key: 
+    organ: "ovary"
+    organ_obs_key: 
+    organism: "Homo sapiens"
+    organism_obs_key: 
+    sample_source: "primary_tissue"
+    sample_source_obs_key: 
+    sex: "female"
+    sex_obs_key: 
+    source_doi:
+    source_doi_obs_key:
+    state_exact:
+    state_exact_obs_key:
+    tech_sample:
+    tech_sample_obs_key: 
+    treatment:
+    treatment_obs_key:
+feature_wise:
+    feature_id_var_key: "feature_id"
+    feature_symbol_var_key: "feature_symbol"
+observation_wise:
+    spatial_x_coord_obs_key: 
+    spatial_y_coord_obs_key: 
+    spatial_z_coord_obs_key: 
+    vdj_vj_1_obs_key_prefix: 
+    vdj_vj_2_obs_key_prefix: 
+    vdj_vdj_1_obs_key_prefix: 
+    vdj_vdj_2_obs_key_prefix: 
+    vdj_c_call_obs_key_suffix: 
+    vdj_consensus_count_obs_key_suffix: 
+    vdj_d_call_obs_key_suffix: 
+    vdj_duplicate_count_obs_key_suffix: 
+    vdj_j_call_obs_key_suffix: 
+    vdj_junction_obs_key_suffix: 
+    vdj_junction_aa_obs_key_suffix: 
+    vdj_locus_obs_key_suffix: 
+    vdj_productive_obs_key_suffix: 
+    vdj_v_call_obs_key_suffix: 
+meta:
+    version: "1.2"

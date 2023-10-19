@@ -1,0 +1,6 @@
+source	target	target_id
+F	female	PATO:0000383
+female	female	PATO:0000383
+male	male	PATO:0000384
+M	male	PATO:0000384
+nan	unknown	unknown

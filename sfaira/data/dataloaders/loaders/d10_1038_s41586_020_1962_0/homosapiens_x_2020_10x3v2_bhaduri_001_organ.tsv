@@ -1,0 +1,15 @@
+source	target	target_id
+Central cortex	cerebral cortex	UBERON:0000956
+Directed	cerebral cortex	UBERON:0000956
+Frontal cortex	frontal cortex	UBERON:0001870
+Least Directed	telencephalon	UBERON:0001893
+Most Directed	cerebral cortex	UBERON:0000956
+Occipital cortex	occipital cortex	UBERON:0016540
+PFC	prefrontal cortex	UBERON:0000451
+Telencephalon	telencephalon	UBERON:0001893
+V1	primary visual cortex	UBERON:0002436
+hippocampus	hippocampal formation	UBERON:0002421
+motor	primary motor cortex	UBERON:0001384
+parietal	parietal cortex	UBERON:0016530
+somatosensory	somatosensory cortex	UBERON:0008930
+temporal	temporal cortex	UBERON:0016538

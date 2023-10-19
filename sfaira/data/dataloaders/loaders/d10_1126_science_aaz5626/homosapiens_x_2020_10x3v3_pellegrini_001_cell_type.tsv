@@ -1,0 +1,6 @@
+source	target	target_id
+ChP stroma	fibroblast of choroid plexus	CL:0002549
+Imm ChP/hem	choroid plexus epithelial cell	CL:0000706
+Mat ChP	choroid plexus epithelial cell	CL:0000706
+Neural prog	neural progenitor cell	CL:0011020
+Neurons	neuron	CL:0000540

@@ -1,6 +1,5 @@
 from cookiecutter.main import cookiecutter
 from dataclasses import dataclass, asdict
-import logging
 import numpy as np
 import os
 import re
@@ -9,8 +8,6 @@ from typing import Union, Dict
 
 from sfaira.consts.utils import clean_doi, clean_id_str
 from sfaira.commands.questionary import sfaira_questionary
-
-log = logging.getLogger(__name__)
 
 
 @dataclass
@@ -50,6 +47,7 @@ class TemplateAttributes:
     organ: str = ''
     sample_source: str = ''
     sex: str = ''
+    suspension_type: str = ''
 
     assay_sc_obs_key: str = ''
     cell_type_obs_key: str = ''
@@ -59,6 +57,7 @@ class TemplateAttributes:
     organ_obs_key: str = ''
     sample_source_obs_key: str = ''
     sex_obs_key: str = ''
+    suspension_type_obs_key: str = ''
 
     spatial_x_coord_obs_key: str = ''
     spatial_y_coord_obs_key: str = ''
@@ -279,7 +278,7 @@ class DataloaderCreator:
             question=format_q_mat_key("gene-wise velocities"),
             default='')
 
-        # Meta data that may also be observation-wise:
+        # Metadata that may also be observation-wise:
         print('[bold blue]Cell-wise meta data that are shared across the dataset (yaml::dataset_or_observation_wise).')
         print('[bold blue]The following meta data queries are on a dataset-resolution and should be set '
               'if they do not vary across the cells in that dataset. '
@@ -319,6 +318,10 @@ class DataloaderCreator:
             function='text',
             question=format_q_uns_key("organ", "organ or tissue", "UBERON"),
             default='')
+        self.template_attributes.suspension_type = sfaira_questionary(
+            function='text',
+            question=format_q_uns_key("suspension_type", "suspension type", "(cell, na, nucleus)"),
+            default='')
 
         organism_try = 0
         organism = ''
@@ -342,7 +345,7 @@ class DataloaderCreator:
             question=format_q_uns_key("sex", "sex", "PATO"),
             default='')
 
-        # Encouraged meta data that tend to be in .obs and would require mapping .tsv:
+        # Encouraged metadata that tend to be in .obs and would require mapping .tsv:
         print('[bold blue]Cell-wise meta data (yaml::dataset_or_observation_wise).')
         print('[bold blue]The following meta data queries are on cell-resolution '
               'and do not need to be set if they were annotated on a dataset-level above. '
@@ -364,6 +367,7 @@ class DataloaderCreator:
             default='')
         if self.template_attributes.assay_sc != "" and self.template_attributes.assay_sc_obs_key != "":
             print(format_warning_double_curation('assay_sc'))
+            self.template_attributes.assay_sc_obs_key = ''
         # cell_type:
         self.template_attributes.cell_type_obs_key = sfaira_questionary(
             function='text',
@@ -371,6 +375,7 @@ class DataloaderCreator:
             default='')
         if self.template_attributes.cell_type != "" and self.template_attributes.cell_type_obs_key != "":
             print(format_warning_double_curation('cell type'))
+            self.template_attributes.cell_type_obs_key = ''
         # development_stage:
         self.template_attributes.development_stage_obs_key = sfaira_questionary(
             function='text',
@@ -380,6 +385,7 @@ class DataloaderCreator:
         if self.template_attributes.development_stage != "" and \
                 self.template_attributes.development_stage_obs_key != "":
             print(format_warning_double_curation('development_stage'))
+            self.template_attributes.development_stage_obs_key = ''
         # disease:
         self.template_attributes.disease_obs_key = sfaira_questionary(
             function='text',
@@ -387,6 +393,7 @@ class DataloaderCreator:
             default='')
         if self.template_attributes.disease != "" and self.template_attributes.disease_obs_key != "":
             print(format_warning_double_curation('disease'))
+            self.template_attributes.disease_obs_key = ''
         # ethnicity:
         self.template_attributes.ethnicity_obs_key = sfaira_questionary(
             function='text',
@@ -394,6 +401,7 @@ class DataloaderCreator:
             default='')
         if self.template_attributes.ethnicity != "" and self.template_attributes.ethnicity_obs_key != "":
             print(format_warning_double_curation('ethnicity'))
+            self.template_attributes.ethnicity_obs_key = ''
         # organ:
         self.template_attributes.organ_obs_key = sfaira_questionary(
             function='text',
@@ -401,6 +409,7 @@ class DataloaderCreator:
             default='')
         if self.template_attributes.organ != "" and self.template_attributes.organ_obs_key != "":
             print(format_warning_double_curation('organ'))
+            self.template_attributes.organ_obs_key = ''
         # sample_source:
         self.template_attributes.sample_source_obs_key = sfaira_questionary(
             function='text',
@@ -408,7 +417,8 @@ class DataloaderCreator:
                      '["primary_tissue", "2d_culture", "3d_culture", "tumor"]):',
             default='')
         if self.template_attributes.sample_source != "" and self.template_attributes.sample_source_obs_key != "":
-            print(format_warning_double_curation('sex'))
+            print(format_warning_double_curation('sample_source'))
+            self.template_attributes.sample_source_obs_key = ''
         # sex:
         self.template_attributes.sex_obs_key = sfaira_questionary(
             function='text',
@@ -416,6 +426,17 @@ class DataloaderCreator:
             default='')
         if self.template_attributes.sex != "" and self.template_attributes.sex_obs_key != "":
             print(format_warning_double_curation('sex'))
+            self.template_attributes.sex_obs_key = ''
+        # suspension type
+        self.template_attributes.suspension_type_obs_key = sfaira_questionary(
+            function='text',
+            question=format_q_obs_key("suspension_type_obs_key", "suspension type", "(cell, na, nucleus)"),
+            default='')
+        if self.template_attributes.suspension_type != "" and \
+                self.template_attributes.suspension_type_obs_key != "":
+            print(format_warning_double_curation('suspension_type'))
+            self.template_attributes.suspension_type_obs_key = ''
+
         requires_annotate = np.any([x != "" for x in [
             self.template_attributes.assay_sc_obs_key,
             self.template_attributes.cell_type_obs_key,
@@ -424,6 +445,7 @@ class DataloaderCreator:
             self.template_attributes.ethnicity_obs_key,
             self.template_attributes.organ_obs_key,
             self.template_attributes.sex_obs_key,
+            self.template_attributes.suspension_type_obs_key,
         ]])
 
         # Modality-specific data:
@@ -602,9 +624,9 @@ class DataloaderCreator:
                   'sfaira finalize-dataloader."')
             print('[bold orange]               "   You can skip phase 2 (sfaira annotate-dataloader), '
                   'unless you set any of the following items in the .yaml during manual editing:"')
-            print('[bold orange]               "   assay_sc_obs_key, cell_line_sc_obs_key, cell_type_sc_obs_key, '
-                  'development_stage_sc_obs_key, disease_sc_obs_key, ethnicity_sc_obs_key, organ_sc_obs_key, '
-                  'organism_sc_obs_key, sex_sc_obs_key."')
+            print('[bold orange]               "   assay_sc_obs_key, cell_line_obs_key, cell_type_obs_key, '
+                  'development_stage_obs_key, disease_obs_key, ethnicity_obs_key, organ_obs_key, '
+                  'organism_obs_key, sex_obs_key, suspension_type_obs_key."')
             self.action_counter += 1
 
     @property

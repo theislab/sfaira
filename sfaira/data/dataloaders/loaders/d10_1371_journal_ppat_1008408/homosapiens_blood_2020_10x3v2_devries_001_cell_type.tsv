@@ -1,0 +1,7 @@
+source	target	target_id
+B	B cell	CL:0000236
+CD4+_T	CD4-positive, alpha-beta T cell	CL:0000624
+CD8+_T	CD8-positive, alpha-beta T cell	CL:0000625
+Monocyte	monocyte	CL:0000576
+NK	natural killer cell	CL:0000623
+pDC	plasmacytoid dendritic cell	CL:0000784

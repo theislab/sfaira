@@ -1,4 +1,3 @@
-import logging
 import subprocess
 import os
 import shutil
@@ -6,9 +5,6 @@ import sys
 
 from sfaira.commands.questionary import sfaira_questionary
 from rich import print
-
-
-log = logging.getLogger(__name__)
 
 
 class PullRequestHandler:
@@ -96,7 +92,7 @@ class PullRequestHandler:
         # Copy loader
         shutil.copytree(
             src=os.path.join(self.path_loader, self.loader_name),
-            dst=os.path.join("/root/sfaira/data/dataloaders/loaders", self.loader_name)
+            dst=os.path.join("/root/sfaira/sfaira/data/dataloaders/loaders", self.loader_name)
         )
 
     def _submit_pr(self):

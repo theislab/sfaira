@@ -90,10 +90,10 @@ todo_include_todos = False
 intersphinx_mapping = dict(
     anndata=('https://anndata.readthedocs.io/en/latest/', None),
     scanpy=('https://scanpy.readthedocs.io/en/latest/', None),
-    numpy=('https://docs.scipy.org/doc/numpy/', None),
+    numpy=('https://numpy.org/doc/stable/', None),
     pandas=('http://pandas.pydata.org/pandas-docs/stable/', None),
     python=('https://docs.python.org/3', None),
-    scipy=('https://docs.scipy.org/doc/scipy/reference/', None)
+    scipy=('https://docs.scipy.org/doc/scipy/', None)
 )
 
 
@@ -109,7 +109,7 @@ html_context = dict(
     display_github=True,      # Integrate GitHub
     github_user='theislab',   # Username
     github_repo='sfaira',    # Repo name
-    github_version='master',  # Version
+    github_version='main',  # Version
     conf_py_path='/docs/',    # Path in the checkout to the docs root
 )
 html_static_path = ['_static']
