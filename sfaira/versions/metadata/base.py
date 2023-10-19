@@ -110,29 +110,29 @@ class OntologyList(Ontology):
 
     Node IDs and names are the same.
     """
-    nodes: Union[dict, list]
+    _nodes: Dict[str, dict]
 
     def __init__(
             self,
             terms: Union[List[Union[str, bool, int]], Dict[str, dict]],
             **kwargs
     ):
-        self.nodes = terms
-        self._dict_mode = isinstance(terms, dict)
+        # Map to dictionary so that .nodes attribute is a homogenous interface across types of ontologies.
+        if isinstance(terms, list):
+            terms = {x: {"name": x} for x in terms}
+        self._nodes = terms
+
+    @property
+    def nodes(self) -> List[Tuple[str, dict]]:
+        return list(self._nodes.items())
 
     @property
     def node_names(self) -> List[str]:
-        if self._dict_mode:
-            return [v["name"] for v in self.nodes.values()]
-        else:
-            return self.nodes
+        return [v["name"] for v in self._nodes.values()]
 
     @property
     def node_ids(self) -> List[str]:
-        if self._dict_mode:
-            return list(self.nodes.keys())
-        else:
-            return self.nodes
+        return list(self._nodes.keys())
 
     @property
     def leaves(self) -> List[str]:
@@ -192,38 +192,36 @@ class OntologyList(Ontology):
         return x in self.node_names
 
     def convert_to_name(self, x: Union[str, List[str]]) -> Union[str, List[str]]:
-        if self._dict_mode:
-            was_str = isinstance(x, str)
-            if was_str:
-                x = [x]
-            if self.is_a_node_id(x[0]):
-                self.__validate_node_ids(x=x)
-                x = [self.nodes[k]["name"] for k in x]
-            elif self.is_a_node_name(x[0]):
-                self.__validate_node_names(x=x)
-            else:
-                raise ValueError(f"node {x[0]} not recognized")
-            if was_str:
-                x = x[0]
+        was_str = isinstance(x, str)
+        if was_str:
+            x = [x]
+        if self.is_a_node_id(x[0]):
+            self.__validate_node_ids(x=x)
+            x = [self.nodes[k]["name"] for k in x]
+        elif self.is_a_node_name(x[0]):
+            self.__validate_node_names(x=x)
+        else:
+            raise ValueError(f"node {x[0]} not recognized")
+        if was_str:
+            x = x[0]
         return x
 
     def convert_to_id(self, x: Union[str, List[str]]) -> Union[str, List[str]]:
-        if self._dict_mode:
-            was_str = isinstance(x, str)
-            if was_str:
-                x = [x]
-            if self.is_a_node_id(x[0]):
-                self.__validate_node_ids(x=x)
-            elif self.is_a_node_name(x[0]):
-                self.__validate_node_names(x=x)
-                x = [
-                    [k for k, v in self.nodes.items() if v["name"] == z][0]
-                    for z in x
-                ]
-            else:
-                raise ValueError(f"node {x[0]} not recognized")
-            if was_str:
-                x = x[0]
+        was_str = isinstance(x, str)
+        if was_str:
+            x = [x]
+        if self.is_a_node_id(x[0]):
+            self.__validate_node_ids(x=x)
+        elif self.is_a_node_name(x[0]):
+            self.__validate_node_names(x=x)
+            x = [
+                [k for k, v in self._nodes.items() if v["name"] == z][0]
+                for z in x
+            ]
+        else:
+            raise ValueError(f"node {x[0]} not recognized")
+        if was_str:
+            x = x[0]
         return x
 
     @lru_cache(maxsize=None)
