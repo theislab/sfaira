@@ -1,0 +1,100 @@
+source	target	target_id
+ATI	type I pneumocyte	CL:0002062
+ATII_High-Surfactants	type II pneumocyte	CL:0002063
+ATII_High-Surfactants_SubjSpec	type II pneumocyte	CL:0002063
+ATII_Low-Surfactants	type II pneumocyte	CL:0002063
+ATII_Low-Surfactants_SubjSpec	type II pneumocyte	CL:0002063
+Assorted_Epithelial_MT-tRNAs	epithelial cell	CL:0000066
+B	B cell	CL:0000236
+B_Plasma	plasma cell	CL:0000786
+B_Plasma_LowInfo	plasma cell	CL:0000786
+Basal	respiratory basal cell	CL:0002633
+Ciliated	lung ciliated cell	CL:1000271
+Ciliated_CellCycle	lung ciliated cell	CL:1000271
+Ciliated_CellCycle_MT-tRNAs	lung ciliated cell	CL:1000271
+Ciliated_FOXN4+	lung ciliated cell	CL:1000271
+Ciliated_MT-tRNAs	lung ciliated cell	CL:1000271
+Club	club cell	CL:0000158
+Club_CellCycle	club cell	CL:0000158
+Dendritic_A	dendritic cell	CL:0000451
+Dendritic_B	dendritic cell	CL:0000451
+Dendritic_C	dendritic cell	CL:0000451
+Dendritic_CellCycle_A	dendritic cell	CL:0000451
+Dendritic_Langerhans	Langerhans cell	CL:0000453
+Dendritic_MT-tRNAs	dendritic cell	CL:0000451
+Dendritic_Plasmacytoid	plasmacytoid dendritic cell	CL:0000784
+Fibroblast	fibroblast	CL:0000057
+Goblet_A	lung goblet cell	CL:1000143
+Goblet_B	lung goblet cell	CL:1000143
+Goblet_MT-tRNAs	lung goblet cell	CL:1000143
+Innate_lymphoid_A	innate lymphoid cell	CL:0001065
+Innate_lymphoid_B	innate lymphoid cell	CL:0001065
+Ionocyte	ionocyte	CL:0005006
+Lymphatic-Endothelial	lung endothelial cell	CL:1001567
+Macrophage	lung macrophage	CL:1001603
+Macrophage_Alveolar	alveolar macrophage	CL:0000583
+Macrophage_Alveolar_CellCycle_A	alveolar macrophage	CL:0000583
+Macrophage_Alveolar_CellCycle_B	alveolar macrophage	CL:0000583
+Macrophage_Alveolar_Outlier_A	alveolar macrophage	CL:0000583
+Macrophage_Alveolar_Outlier_B	alveolar macrophage	CL:0000583
+Macrophage_Alveolar_Outlier_C	alveolar macrophage	CL:0000583
+Macrophage_Alveolar_Outlier_D	alveolar macrophage	CL:0000583
+Macrophage_Alveolar_Outlier_E	alveolar macrophage	CL:0000583
+Macrophage_Alveolar_Outlier_F	alveolar macrophage	CL:0000583
+Macrophage_CellCycle_A	lung macrophage	CL:1001603
+Macrophage_CellCycle_B	lung macrophage	CL:1001603
+Macrophage_CellCycle_MT-tRNAs	lung macrophage	CL:1001603
+Macrophage_MT-tRNAs	lung macrophage	CL:1001603
+Macrophage_Outlier_A	lung macrophage	CL:1001603
+Macrophage_Outlier_B	lung macrophage	CL:1001603
+Macrophage_Outlier_C	lung macrophage	CL:1001603
+Macrophage_Outlier_D	lung macrophage	CL:1001603
+Macrophage_Outlier_E	lung macrophage	CL:1001603
+Macrophage_Outlier_F	lung macrophage	CL:1001603
+Macrophage_Outlier_HSPs	lung macrophage	CL:1001603
+Mast	mast cell	CL:0000097
+Mesothelial	mesothelial cell	CL:0000077
+Monocyte	monocyte	CL:0000576
+Monocyte_MT-tRNAs	monocyte	CL:0000576
+Monocyte_Non-Classical	non-classical monocyte	CL:0000875
+Monocyte_Outlier_B	monocyte	CL:0000576
+Monocyte_Outlier_C	monocyte	CL:0000576
+Multiplet_Assort	unknown	unknown
+Multiplet_B_Mac	unknown	unknown
+Multiplet_Dend_T	unknown	unknown
+Multiplet_Lymphocyte_Secretory	unknown	unknown
+Multiplet_Lymphocytes_Ciliated	unknown	unknown
+Multiplet_Lymphocytes_Fibroblast	unknown	unknown
+Multiplet_Macrophage_Low-Info	unknown	unknown
+Multiplet_Macrophage_LymphEndo	unknown	unknown
+Multiplet_Macrophage_Mesothelial	unknown	unknown
+Multiplet_Mast_Mac	unknown	unknown
+Multiplet_NK_Mac	unknown	unknown
+Multiplet_NK_T	unknown	unknown
+Multiplet_SMCs_Pericytes	unknown	unknown
+Multiplet_Secretory_Ciliated	unknown	unknown
+Multiplet_T	unknown	unknown
+Multiplet_T_Mac_A	unknown	unknown
+Multiplet_T_Mac_B	unknown	unknown
+Multiplet_Treg_Mac	unknown	unknown
+Multiplet_VE_Stromal	unknown	unknown
+Multiplet_VascEndoB_VascEndoD	unknown	unknown
+Myofibroblast	unknown	unknown
+Mystery_Disease_Epithelial	respiratory epithelial cell	CL:0002368
+NK	natural killer cell	CL:0000623
+Neuroendocrine	lung neuroendocrine cell	CL:1000223
+Pericyte	pericyte	CL:0000669
+Smooth-Muscle	smooth muscle cell	CL:0000192
+Smooth-Muscle_MT-tRNAs	smooth muscle cell	CL:0000192
+T	T cell	CL:0000084
+T_Cytotoxic_A	cytotoxic T cell	CL:0000910
+T_Cytotoxic_B	cytotoxic T cell	CL:0000910
+T_Cytotoxic_C	cytotoxic T cell	CL:0000910
+T_Regulatory_A	regulatory T cell	CL:0000815
+T_Regulatory_B	regulatory T cell	CL:0000815
+Vascular-Endothelial_A	endothelial cell of vascular tree	CL:0002139
+Vascular-Endothelial_B	endothelial cell of vascular tree	CL:0002139
+Vascular-Endothelial_C	endothelial cell of vascular tree	CL:0002139
+Vascular-Endothelial_D	endothelial cell of vascular tree	CL:0002139
+Vascular-Endothelial_E	endothelial cell of vascular tree	CL:0002139
+Vascular-Endothelial_E_MT-tRNAs	endothelial cell of vascular tree	CL:0002139

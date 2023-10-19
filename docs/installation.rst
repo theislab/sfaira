@@ -27,5 +27,5 @@ which is similar to the current release but may have additional features already
 You may choose the branch `dev` if you want newer features than available from `release`.
 You may choose a specific feature branch if you want to use or improve that feature before it
 is reviewed and merged into `dev`.
-Note that the `master` branch only contains releases,
-so every installation based on the `master` branch can also be performed via PyPi.
+Note that the `main` branch only contains releases,
+so every installation based on the `main` branch can also be performed via PyPi.

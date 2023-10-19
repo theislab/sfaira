@@ -8,8 +8,7 @@ from typing import Dict, List, Tuple, Union
 
 from sfaira.consts import AdataIdsSfaira
 from sfaira.data.store.stores.base import StoreBase
-from sfaira.data.store.stores.single import StoreSingleFeatureSpace, \
-    StoreDao, StoreAnndata
+from sfaira.data.store.stores.single import StoreSingleFeatureSpace, StoreDao, StoreAnndata
 from sfaira.data.store.carts.multi import CartMulti
 from sfaira.data.store.io.io_dao import read_dao
 from sfaira.versions.genomes.genomes import GenomeContainer
@@ -28,6 +27,18 @@ class StoreMultipleFeatureSpaceBase(StoreBase):
 
     def __init__(self, stores: Dict[str, StoreSingleFeatureSpace]):
         self._stores = stores
+
+    @property
+    def obsm(self) -> Dict[str, dict]:
+        """
+        Only expose obsm of stores that contain observations.
+        """
+        return dict([(k, v.obsm) for k, v in self._stores.items() if v.n_obs > 0])
+
+    @obsm.setter
+    def obsm(self, x: Dict[str, dict]):
+        for k, v in x.items():
+            self._stores[k].obsm = v
 
     @property
     def stores(self) -> Dict[str, StoreSingleFeatureSpace]:
@@ -50,15 +61,17 @@ class StoreMultipleFeatureSpaceBase(StoreBase):
             # Transform into dictionary first.
             organisms = [k for k, v in self.stores.items()]
             if isinstance(organisms, list) and len(organisms) == 0:
-                raise Warning("found empty organism lists in genome_container.setter")
+                print("Warning(found empty organism lists in genome_container.setter)")
             if len(organisms) > 1:
-                raise ValueError(f"Gave a single GenomeContainer for a store instance that has mulitiple organism: "
+                raise ValueError(f"Gave a single GenomeContainer for a store instance that has multiple organism: "
                                  f"{organisms}, either further subset the store or give a dictionary of "
                                  f"GenomeContainers")
             else:
                 x = {organisms[0]: x}
         for k, v in x.items():
-            self.stores[k].genome_container = v
+            # Note: the store can be empty for some organism and not have the corresponding key set:
+            if k in self.stores.keys():
+                self.stores[k].genome_container = v
 
     @property
     def indices(self) -> Dict[str, np.ndarray]:
@@ -196,6 +209,7 @@ class StoreMultipleFeatureSpaceBase(StoreBase):
             self,
             idx: Union[Dict[str, Union[np.ndarray, None]], None] = None,
             intercalated: bool = True,
+            map_fn_merge: Union[None, callable] = None,
             **kwargs
     ) -> CartMulti:
         """
@@ -214,7 +228,7 @@ class StoreMultipleFeatureSpaceBase(StoreBase):
         for k in self.stores.keys():
             assert k in idx.keys(), (idx.keys(), self.stores.keys())
         carts = dict([(k, v.checkout(idx=idx[k], **kwargs)) for k, v in self.stores.items()])
-        return CartMulti(carts=carts, intercalated=intercalated)
+        return CartMulti(carts=carts, intercalated=intercalated, map_fn_merge=map_fn_merge)
 
 
 class StoresAnndata(StoreMultipleFeatureSpaceBase):
@@ -284,7 +298,7 @@ class StoresDao(StoreMultipleFeatureSpaceBase):
                 adata = None
                 x = None
                 trial_path = os.path.join(cache_path_i, f)
-                if os.path.isdir(trial_path):
+                if os.path.isdir(trial_path) and not f.startswith("."):
                     # zarr-backed anndata are saved as directories with the elements of the array group as further sub
                     # directories, e.g. a directory called "X", and a file ".zgroup" which identifies the zarr group.
                     adata, x = read_dao(trial_path, use_dask=True, columns=columns, obs_separate=False, x_separate=True)
@@ -325,7 +339,7 @@ class StoresH5ad(StoreMultipleFeatureSpaceBase):
             for f in np.sort(os.listdir(cache_path_i)):
                 adata = None
                 trial_path = os.path.join(cache_path_i, f)
-                if os.path.isfile(trial_path):
+                if os.path.isfile(trial_path) and not f.startswith("."):
                     # Narrow down to supported file types:
                     if f.split(".")[-1] == "h5ad":
                         try:

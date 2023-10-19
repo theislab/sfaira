@@ -26,7 +26,7 @@ def is_child(
             if ontology_parent is None:
                 return ontology.is_node(query)
             else:
-                return ontology.is_a(query=query, reference=ontology_parent)
+                return ontology.is_a(is_=query, a_=ontology_parent)
         elif ontology is None:
             return query == ontology_parent
         else:

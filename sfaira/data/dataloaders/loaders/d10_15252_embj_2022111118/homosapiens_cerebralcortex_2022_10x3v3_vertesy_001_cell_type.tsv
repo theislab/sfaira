@@ -1,0 +1,17 @@
+source	target	target_id
+DL-EN	glutamatergic neuron	CL:0000679
+Differentiating RG	radial glial cell	CL:0000681
+Dividing Glia	glioblast	CL:0000030
+Glia	glial cell	CL:0000125
+IPC	neuroblast (sensu Vertebrata)	CL:0000031
+Interneurons	CNS interneuron	CL:0000402
+Interneurons Prog.	neuroblast (sensu Vertebrata)	CL:0000031
+MSN	medium spiny neuron	CL:1001474
+Midbrain EN	midbrain dopaminergic neuron	CL:2000097
+Non-neural	animal cell	CL:0000548
+Stressed Neurons	neuron	CL:0000540
+Stressed Prog.	neuroblast (sensu Vertebrata)	CL:0000031
+UL-EN	glutamatergic neuron	CL:0000679
+Unclear	unknown	unknown
+Unclear Scattered	unknown	unknown
+immature EN	glutamatergic neuron	CL:0000679

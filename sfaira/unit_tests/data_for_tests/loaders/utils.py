@@ -5,6 +5,8 @@ import os
 import pandas as pd
 import pathlib
 
+from typing import Union
+
 from sfaira.data.store.stores.multi import StoresAnndata
 from sfaira.versions.genomes import GenomeContainer
 
@@ -12,38 +14,58 @@ from sfaira.unit_tests.directories import DIR_DATA_LOADERS_CACHE, DIR_DATA_LOADE
     DIR_DATA_LOADERS_STORE_H5AD, save_delete
 from .consts import RELEASE_HUMAN, RELEASE_MOUSE
 from .loaders import DatasetSuperGroupMock
+from .loaders_export import DatasetSuperGroupMockExport
+
 
 MATCH_TO_RELEASE = {"Homo sapiens": RELEASE_HUMAN,
                     "Mus musculus": RELEASE_MOUSE}
 
 
-def _create_adata(celltypes, ncells, ngenes, assembly) -> anndata.AnnData:
+def _create_adata(
+        celltypes,
+        ncells,
+        ngenes,
+        assembly,
+        use_symbols: bool = False,
+        add_raw_counts_layer: bool = False,
+        add_gene_id_column: bool = False
+) -> anndata.AnnData:
     """
-    Usesd by mock data loaders.
+    Used by mock data loaders.
     """
     gc = GenomeContainer(organism=" ".join(assembly.split(".")[0].split("_")), release=assembly.split(".")[-1])
     gc.set(biotype="protein_coding")
-    genes = gc.ensembl[:ngenes]
+    if use_symbols:
+        genes = gc.symbols[:ngenes]
+    else:
+        genes = gc.ensembl[:ngenes]
     x = scipy.sparse.csc_matrix(np.random.randint(low=0, high=100, size=(ncells, ngenes)))
     var = pd.DataFrame(index=genes)
+    if add_gene_id_column:
+        var["gene_id"] = gc.ensembl[:ngenes]
     obs = pd.DataFrame({}, index=["cell_" + str(i) for i in range(ncells)])
     if len(celltypes) > 0:
         obs["free_annotation"] = [celltypes[i] for i in np.random.choice(len(celltypes), size=ncells, replace=True)]
     # Create random embedding
     obsm = {"X_umap": np.random.random(size=(ncells, 2))}
     adata = anndata.AnnData(X=x, obs=obs, obsm=obsm, var=var)
+    if add_raw_counts_layer:
+        adata.layers['counts'] = x
     return adata
 
 
 def _load_script(dsg, rewrite: bool, match_to_release):
     dsg.load(allow_caching=True, load_raw=rewrite)
-    dsg.streamline_features(remove_gene_version=True, match_to_release=match_to_release)
-    dsg.streamline_metadata(schema="sfaira", clean_obs=True, clean_var=True, clean_uns=True, clean_obs_names=True)
+    dsg.streamline_var(schema="sfaira",
+                       match_to_release=match_to_release,
+                       remove_gene_version=True,
+                       subset_genes_to_type="all")
+    dsg.streamline_obs_uns(schema="sfaira", clean_obs=True, clean_var=True, clean_uns=True, clean_obs_names=True)
     return dsg
 
 
-class PrepareData:
-    CLS_DSG = DatasetSuperGroupMock
+class PrepareDataBase:
+    CLS_DSG = Union[DatasetSuperGroupMock, DatasetSuperGroupMockExport]
 
     def prepare_dsg(self, rewrite: bool = False, load: bool = True, match_to_release=None):
         """
@@ -87,9 +109,9 @@ class PrepareData:
             else:
                 compression_kwargs = {}
             if store_format == "dao":
-                anticipated_fn = os.path.join(dir_store_formatted, ds.doi_cleaned_id)
+                anticipated_fn = os.path.join(dir_store_formatted, ds.id)
             elif store_format == "h5ad":
-                anticipated_fn = os.path.join(dir_store_formatted, ds.doi_cleaned_id + ".h5ad")
+                anticipated_fn = os.path.join(dir_store_formatted, ds.id + ".h5ad")
             else:
                 assert False
             if rewrite_store and os.path.exists(anticipated_fn):
@@ -100,5 +122,13 @@ class PrepareData:
             if rewrite_store or not os.path.exists(anticipated_fn):
                 ds = _load_script(dsg=ds, rewrite=rewrite, match_to_release=MATCH_TO_RELEASE)
                 ds.write_distributed_store(dir_cache=dir_store_formatted, store_format=store_format, dense=True,
-                                           chunks=128, compression_kwargs=compression_kwargs)
+                                           chunks=10, compression_kwargs=compression_kwargs)
         return dir_store_formatted
+
+
+class PrepareData(PrepareDataBase):
+    CLS_DSG = DatasetSuperGroupMock
+
+
+class PrepareDataExport(PrepareDataBase):
+    CLS_DSG = DatasetSuperGroupMockExport

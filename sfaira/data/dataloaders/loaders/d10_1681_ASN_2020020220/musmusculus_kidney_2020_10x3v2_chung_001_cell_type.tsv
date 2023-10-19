@@ -1,0 +1,11 @@
+source	target	target_id
+PEC	parietal epithelial cell	CL:1000452
+SMC	vascular associated smooth muscle cell	CL:0000359
+endothelial	ureter urothelial cell	CL:1000706
+endothelial_arteriolar	endothelial cell of arteriole	CL:1000412
+immune	leukocyte	CL:0000738
+mesangial	mesangial cell	CL:0000650
+myofibroblast	myofibroblast cell	CL:0000186
+myofibroblasts	myofibroblast cell	CL:0000186
+podocyte	podocyte	CL:0000653
+podocytes	podocyte	CL:0000653

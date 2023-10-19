@@ -1,0 +1,16 @@
+source	target	target_id
+B_Cells	B cell	CL:0000236
+CellLine	unknown	unknown
+DC	dendritic cell	CL:0000451
+Endothelial	endothelial cell	CL:0000115
+Hepatocyte	hepatocyte	CL:0000182
+Hepatocytes	hepatocyte	CL:0000182
+Macrophage	macrophage	CL:0000235
+Mesenchymal	mesenchymal cell	CL:0008019
+Organoid	unknown	unknown
+Plasma_cell	plasma cell	CL:0000786
+T_NK	mature alpha-beta T cell	CL:0000791
+T_Regs	regulatory T cell	CL:0000815
+Tumor	unknown	unknown
+XCR1_DC	dendritic cell	CL:0000451
+pDC_cell	plasmacytoid dendritic cell	CL:0000784

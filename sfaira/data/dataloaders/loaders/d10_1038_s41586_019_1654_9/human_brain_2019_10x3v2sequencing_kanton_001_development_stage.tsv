@@ -1,0 +1,8 @@
+source	target	target_id
+EB	Carnegie stage 03	HsapDv:0000007
+Neuroectoderm	Carnegie stage 05	HsapDv:0000009
+Neuroepithelium	Carnegie stage 06	HsapDv:0000011
+Organoid-1M	Carnegie stage 13	HsapDv:0000020
+Organoid-2M	13th week post-fertilization human stage	HsapDv:0000050
+Organoid-4M	26th week post-fertilization human stage	HsapDv:0000063
+iPSCs	Carnegie stage 01	HsapDv:0000003

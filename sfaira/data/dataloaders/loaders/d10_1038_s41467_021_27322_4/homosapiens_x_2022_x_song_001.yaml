@@ -1,0 +1,140 @@
+dataset_structure:
+    dataset_index: 1
+    sample_fns:
+        - "GSM5353214_PA_AUG_PB_1A_S1_dge.txt.gz"
+        - "GSM5353215_PA_AUG_PB_1B_S2_dge.txt.gz"
+        - "GSM5353216_PA_PB1A_Pool_1_3_S50_L002_dge.txt.gz"
+        - "GSM5353217_PA_PB1A_Pool_2_S107_L004_dge.txt.gz"
+        - "GSM5353218_PA_PB1B_Pool_1_2_S74_L003_dge.txt.gz"
+        - "GSM5353219_PA_PB1B_Pool_2_S24_L001_dge.txt.gz"
+        - "GSM5353220_PA_PB1B_Pool_3_S51_L002_dge.txt.gz"
+        - "GSM5353221_PA_PB2A_Pool_1_3_S25_L001_dge.txt.gz"
+        - "GSM5353222_PA_PB2B_Pool_1_3_S52_L002_dge.txt.gz"
+        - "GSM5353223_PA_PB2B_Pool_2_S26_L001_dge.txt.gz"
+        - "GSM5353224_PA_PR5186_Pool_1_2_3_S27_L001_dge.txt.gz"
+        - "GSM5353225_PA_PR5196-1_Pool_1_2_3_S53_L002_dge.txt.gz"
+        - "GSM5353226_PA_PR5196-2_Pool_1_2_3_S54_L002_dge.txt.gz"
+        - "GSM5353227_PA_PR5199-193K_Pool_1_2_3_S55_L002_dge.txt.gz"
+        - "GSM5353228_PA_PR5199-640K_Pool_1_3_S108_L004_dge.txt.gz"
+        - "GSM5353229_PA_PR5199-640K_Pool_2_S56_L002_dge.txt.gz"
+        - "GSM5353230_PA_PR5249_N1_S1_L001_dge.txt.gz"
+        - "GSM5353231_PA_PR5249_N2_S2_L001_dge.txt.gz"
+        - "GSM5353232_PA_PR5249_T1_S3_L001_dge.txt.gz"
+        - "GSM5353233_PA_PR5249_T2_S4_L001_dge.txt.gz"
+        - "GSM5353234_PA_PR5251_N1_S5_L001_dge.txt.gz"
+        - "GSM5353235_PA_PR5251_N2_S6_L001_dge.txt.gz"
+        - "GSM5353236_PA_PR5251_T1_S7_L001_dge.txt.gz"
+        - "GSM5353237_PA_PR5251_T2_S8_L001_dge.txt.gz"
+        - "GSM5353238_PA_PR5254_N1_S13_L001_dge.txt.gz"
+        - "GSM5353239_PA_PR5254_N2_S14_L001_dge.txt.gz"
+        - "GSM5353240_PA_PR5254_T1_S15_L001_dge.txt.gz"
+        - "GSM5353241_PA_PR5261_N1_S21_L002_dge.txt.gz"
+        - "GSM5353242_PA_PR5261_N2_S22_L002_dge.txt.gz"
+        - "GSM5353243_PA_PR5261_T1_S23_L002_dge.txt.gz"
+        - "GSM5353244_PA_PR5261_T2_S24_L002_dge.txt.gz"
+        - "GSM5353245_PA_PR5269_1_S25_L002_dge.txt.gz"
+        - "GSM5353246_PA_PR5269_2_S26_L002_dge.txt.gz"
+        - "GSM5353247_PA_PR5269_3_S27_L002_dge.txt.gz"
+        - "GSM5353248_PA_PR5269_4_S28_L002_dge.txt.gz"
+        - "GSM5353249_HNW_PR5249_N_org_pool1_pool2_S42_L003_dge.txt.gz"
+        - "GSM5353250_PR5249_N_org_pool3_S57_L004_dge.txt.gz"
+        - "GSM5353251_HNW_PR5251_N_org_pool1_S35_L002_dge.txt.gz"
+        - "GSM5353252_HNW_PR5251_N_org_pool2_S41_L003_dge.txt.gz"
+        - "GSM5353253_HNW_PR5251_T_org_pool1_pool2_S40_L003_dge.txt.gz"
+        - "GSM5353254_PR5251_T_org_pool3_S62_L004_dge.txt.gz"
+        - "GSM5353255_HNW_PR5254_N_org_pool1_S39_L003_dge.txt.gz"
+        - "GSM5353256_HNW_PR5254_T_org_S38_L003_dge.txt.gz"
+        - "GSM5353257_PR5254_N_org_pool2_pool3_S65_L004_dge.txt.gz"
+        - "GSM5353258_PR5261_N_V1_org_S69_L004_dge.txt.gz"
+        - "GSM5353259_PR5261_T_V1_org_S55_L004_dge.txt.gz"
+        - "GSM5353260_HNW_PR5261_N_V2_org_S37_L003_dge.txt.gz"
+        - "GSM5353261_PR5261_T_V2_org_S58_L004_dge.txt.gz"
+        - "GSM5353262_PR5269_T_org_S60_L004_dge.txt.gz"
+        - "GSM5353263_PR5274_T_V1_org_S63_L004_dge.txt.gz"
+        - "GSM5353264_PR5274_T_V2_org_S66_L004_dge.txt.gz"
+        - "GSM5353265_PR5316_T_base_org_S36_L003_dge.txt.gz"
+        - "GSM5353266_HNW_PR5316_N_base_org_S72_L004_dge.txt.gz"
+dataset_wise:
+    author: "Song, H"
+    default_embedding: 
+    doi_preprint: 
+    doi_journal: "10.1038/s41467-021-27322-4"
+    download_url_data: "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE176031&format=file"
+    download_url_meta: 
+    primary_data: True
+    year: 2022
+layers:
+    layer_counts: "X"
+    layer_processed: 
+    layer_spliced_counts: 
+    layer_spliced_processed: 
+    layer_unspliced_counts: 
+    layer_unspliced_processed: 
+    layer_velocity: 
+dataset_or_feature_wise:
+    feature_reference: 
+    feature_reference_var_key: 
+    feature_type: "rna"
+    feature_type_var_key: 
+dataset_or_observation_wise:
+    assay_sc: "Seq-Well S3"
+    assay_sc_obs_key: 
+    assay_differentiation: 
+    assay_differentiation_obs_key: 
+    assay_type_differentiation: 
+    assay_type_differentiation_obs_key: 
+    bio_sample:
+    bio_sample_obs_key: 
+    cell_line: 
+    cell_line_obs_key: 
+    cell_type: 
+    cell_type_obs_key: 
+    development_stage: 
+    development_stage_obs_key: 
+    disease: 
+    disease_obs_key: 
+    ethnicity: 
+    ethnicity_obs_key: 
+    gm:
+    gm_obs_key:
+    individual:
+    individual_obs_key: 
+    organ: 
+    organ_obs_key: 
+    organism: "Homo sapiens"
+    organism_obs_key: 
+    sample_source: "tumor"
+    sample_source_obs_key: 
+    sex: 
+    sex_obs_key: 
+    source_doi:
+    source_doi_obs_key:
+    state_exact:
+    state_exact_obs_key:
+    tech_sample:
+    tech_sample_obs_key: 
+    treatment:
+    treatment_obs_key:
+feature_wise:
+    feature_id_var_key:
+    feature_symbol_var_key: "index"
+observation_wise:
+    spatial_x_coord_obs_key: 
+    spatial_y_coord_obs_key: 
+    spatial_z_coord_obs_key: 
+    vdj_vj_1_obs_key_prefix: 
+    vdj_vj_2_obs_key_prefix: 
+    vdj_vdj_1_obs_key_prefix: 
+    vdj_vdj_2_obs_key_prefix: 
+    vdj_c_call_obs_key_suffix: 
+    vdj_consensus_count_obs_key_suffix: 
+    vdj_d_call_obs_key_suffix: 
+    vdj_duplicate_count_obs_key_suffix: 
+    vdj_j_call_obs_key_suffix: 
+    vdj_junction_obs_key_suffix: 
+    vdj_junction_aa_obs_key_suffix: 
+    vdj_locus_obs_key_suffix: 
+    vdj_productive_obs_key_suffix: 
+    vdj_v_call_obs_key_suffix: 
+meta:
+    version: "1.2"

@@ -1,0 +1,32 @@
+source	target	target_id
+Cerebellar glutamatergic neurons 1	cerebellum glutamatergic neuron	CL:2000028
+Cerebellar glutamatergic neurons 2	cerebellum glutamatergic neuron	CL:2000028
+Cortical IPs	neural progenitor cell	CL:0011020
+Cortical NPCs	neural progenitor cell	CL:0011020
+Cortical neurons	cerebral cortex neuron	CL:0010012
+IPs and early cortical neurons	neuroblast (sensu Vertebrata)	CL:0000031
+LGE interneurons	interneuron	CL:0000099
+MGE/CGE interneurons	interneuron	CL:0000099
+Mid-hindbrain NPCs	neural progenitor cell	CL:0011020
+Midbrain GABAergic interneurons	GABAergic interneuron	CL:0011005
+Purkinje cells	Purkinje cell	CL:0000121
+RGCs 3	forebrain radial glial cell	CL:0013000
+RGCs early 1	forebrain radial glial cell	CL:0013000
+RGCs early 2	forebrain radial glial cell	CL:0013000
+Ventral NPCs	neural progenitor cell	CL:0011020
+choroid plexus/mesenchymal-like cells	choroid plexus epithelial cell	CL:0000706
+cortical neurons 1	cerebral cortex neuron	CL:0010012
+cortical neurons 2	cerebral cortex neuron	CL:0010012
+cycling dorsal progenitors	neural progenitor cell	CL:0011020
+cycling ventral progenitors	neural progenitor cell	CL:0011020
+ectodermal/neuroectodermal-like cells	neurectodermal cell	CL:0000133
+gliogenic/outer RGCs and astrocytes	glial cell	CL:0000125
+midbrain/hindbrain cells	neural cell	CL:0002319
+neuroepithelial-like cells	neuroepithelial stem cell	CL:0002259
+retina progenitors	retinal progenitor cell	CL:0002672
+stem cells 1	stem cell	CL:0000034
+stem cells 2	stem cell	CL:0000034
+stem cells 3	stem cell	CL:0000034
+ventral progenitors and neurons 1	neural progenitor cell	CL:0011020
+ventral progenitors and neurons 2	neural progenitor cell	CL:0011020
+ventral progenitors and neurons 3	neural progenitor cell	CL:0011020

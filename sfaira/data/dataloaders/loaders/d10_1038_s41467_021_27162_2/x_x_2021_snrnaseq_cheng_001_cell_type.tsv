@@ -1,0 +1,52 @@
+source	target	target_id
+AT1	type I pneumocyte	CL:0002062
+AT2	type II pneumocyte	CL:0002063
+ATI	type I pneumocyte	CL:0002062
+ATII	type II pneumocyte	CL:0002063
+B cells	B cell	CL:0000236
+Cardiomyocytes	cardiac muscle cell	CL:0000746
+Cholangiocytes	cholangiocyte	CL:1000488
+Ciliated cells	ciliated cell	CL:0000064
+Collecting duct cells	kidney collecting duct cell	CL:1001225
+Cycling cells	unknown	unknown
+Dendritic cells	dendritic cell	CL:0000451
+Dendrocytes	oligodendrocyte	CL:0000128
+Distal convoluted tubule cells	kidney distal convoluted tubule epithelial cell	CL:1000849
+Endothelial cells	endothelial cell	CL:0000115
+Enterocytes	enterocyte	CL:0000584
+Enteroendocrine cells	enteroendocrine cell	CL:0000164
+Epicardial cells	mesothelial cell	CL:0000077
+Epithelial cells	epithelial cell	CL:0000066
+Epithelium cells	epithelial cell	CL:0000066
+Fibroblasts	fibroblast	CL:0000057
+Goblet cells	goblet cell	CL:0000160
+Henle's loop cells	kidney loop of Henle epithelial cell	CL:1000909
+Hepatic stellate cells	hepatic stellate cell	CL:0000632
+Hepatocytes	hepatocyte	CL:0000182
+Immune cells	leukocyte	CL:0000738
+Kupffer cells	Kupffer cell	CL:0000091
+LSECs	endothelial cell of hepatic sinusoid	CL:1000398
+Macrophages	macrophage	CL:0000235
+Mesangial cells	mesangial cell	CL:0000650
+Mesothelial cells	mesothelial cell	CL:0000077
+Mix	unknown	unknown
+Monocytes	monocyte	CL:0000576
+NK cells	natural killer cell	CL:0000623
+Neurons	neuron	CL:0000540
+Others	unknown	unknown
+Paneth cells	paneth cell	CL:0000510
+Pericytes	pericyte	CL:0000669
+Podocytes	podocyte	CL:0000653
+Potocytes	podocyte	CL:0000653
+Progenitor cells	progenitor cell	CL:0011026
+Proximal tubule cells	epithelial cell of proximal tubule	CL:0002306
+SMCs	smooth muscle cell	CL:0000192
+Secretory cells	secretory cell	CL:0000151
+Smooth muscle cells	smooth muscle cell	CL:0000192
+Stem cells	stem cell	CL:0000034
+Stromal cells	stromal cell	CL:0000499
+T cells	T cell	CL:0000084
+TA cells	transit amplifying cell	CL:0009010
+Tuft cells	brush cell	CL:0002204
+Unknown	unknown	unknown
+Wolfring's glands cells	endocrine cell	CL:0000163

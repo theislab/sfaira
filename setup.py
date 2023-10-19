@@ -51,16 +51,21 @@ setup(
     },
     install_requires=requirements,
     extras_require={
-        'tensorflow': [
-            # 'tensorflow>=2.0.0'  # TODO Add Tensorflow here again
-        ],
-        'plotting_deps': [
-            "seaborn",
-            "matplotlib",
-            "sklearn"
+        'curation': [
+            "cellxgene-schema",
+            "openpyxl",
+            "parasail==1.1.11",  # newer versions cannot be installed on MacOS
+            "scirpy",
         ],
         'extension': [
             "sfaira_extension",
+        ],
+        'tensorflow': [
+            "tensorflow",
+        ],
+        'torch': [
+            "torch",
+            "torchmetrics",
         ],
     },
     version=versioneer.get_version(),

@@ -1,0 +1,93 @@
+dataset_structure:
+    dataset_index: 1
+    sample_fns:
+dataset_wise:
+    author: "Xiang, Yangfei"
+    default_embedding: 
+    doi_preprint: 
+    doi_journal: "10.1016/j.stem.2018.12.015"
+    download_url_data: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE122nnn/GSE122342/suppl/GSE122342%5Fmatrix%2Emtx%2Egz"        
+    download_url_meta:
+        - "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE122nnn/GSE122342/suppl/GSE122342%5Fgenes%2Etsv%2Egz"
+        - "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE122nnn/GSE122342/suppl/GSE122342%5Fbarcodes%2Etsv%2Egz"
+        - "https://data.mendeley.com/public-files/datasets/wgmfxds99c/files/7d25a827-c9e3-442d-af4a-e4cd997addd6/file_downloaded"
+        - "https://data.mendeley.com/public-files/datasets/wgmfxds99c/files/975e9be2-d999-42e9-b311-ebdf182f296e/file_downloaded"
+    primary_data: True
+    year: 2019
+layers:
+    layer_counts: "X"
+    layer_processed: 
+    layer_spliced_counts: 
+    layer_spliced_processed: 
+    layer_unspliced_counts: 
+    layer_unspliced_processed: 
+    layer_velocity: 
+dataset_or_feature_wise:
+    feature_reference: "Homo_sapiens.GRCh37.82"
+    feature_reference_var_key: 
+    feature_type: "rna"
+    feature_type_var_key: 
+dataset_or_observation_wise:
+    assay_sc: "10x 3' v1"
+    assay_sc_obs_key: 
+    assay_differentiation: "Xiang, 2019 (doi: 10.1016/j.stem.2018.12.015)"
+    assay_differentiation_obs_key: 
+    assay_type_differentiation: "guided"
+    assay_type_differentiation_obs_key: 
+    bio_sample:
+    bio_sample_obs_key: "Time"
+    cell_line: "HES-3 NKX2.1GFP/w"
+    cell_line_obs_key: 
+    cell_type: 
+    cell_type_obs_key: "Annotation"
+    development_stage: 
+    development_stage_obs_key: "Time"
+    disease: "healthy"
+    disease_obs_key: 
+    ethnicity: 
+    ethnicity_obs_key: 
+    gm:
+    gm_obs_key:
+    individual:
+    individual_obs_key: 
+    organ: "dorsal plus ventral thalamus"
+    organ_obs_key: 
+    organism: "Homo sapiens"
+    organism_obs_key: 
+    sample_source: "3d_culture"
+    sample_source_obs_key: 
+    sex: "female"
+    sex_obs_key: 
+    source_doi:
+    source_doi_obs_key:
+    state_exact:
+    state_exact_obs_key:
+    suspension_type: "cell"
+    suspension_type_obs_key: 
+    tech_sample:
+    tech_sample_obs_key: 
+    treatment:
+    treatment_obs_key:
+feature_wise:
+    feature_id_var_key: "index"
+    feature_symbol_var_key: "gene_id"
+observation_wise:
+    spatial_x_coord_obs_key: 
+    spatial_y_coord_obs_key: 
+    spatial_z_coord_obs_key: 
+    vdj_vj_1_obs_key_prefix: 
+    vdj_vj_2_obs_key_prefix: 
+    vdj_vdj_1_obs_key_prefix: 
+    vdj_vdj_2_obs_key_prefix: 
+    vdj_c_call_obs_key_suffix: 
+    vdj_consensus_count_obs_key_suffix: 
+    vdj_d_call_obs_key_suffix: 
+    vdj_duplicate_count_obs_key_suffix: 
+    vdj_j_call_obs_key_suffix: 
+    vdj_junction_obs_key_suffix: 
+    vdj_junction_aa_obs_key_suffix: 
+    vdj_locus_obs_key_suffix: 
+    vdj_productive_obs_key_suffix: 
+    vdj_v_call_obs_key_suffix: 
+meta:
+    version: "1.2"

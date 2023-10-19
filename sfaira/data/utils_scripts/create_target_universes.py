@@ -2,9 +2,10 @@ import os
 import sys
 
 # Any data loader here to extract path:
-from sfaira.consts import OCS
+from sfaira.consts import OC
 from sfaira.data import load_store
 from sfaira.versions.metadata import CelltypeUniverse, OntologyCl
+from sfaira.data.dataloaders.obs_utils import is_custom
 
 
 # Set global variables.
@@ -38,12 +39,16 @@ for f in os.listdir(config_path):
                         )
             celltypes_found = sorted(list(celltypes_found - {store._adata_ids_sfaira.unknown_metadata_identifier,
                                                              store._adata_ids_sfaira.not_a_cell_celltype_identifier}))
+            celltypes_found = [
+                x for x in celltypes_found
+                if not is_custom(x, store._adata_ids_sfaira)
+            ]
             if len(celltypes_found) == 0:
                 print(f"WARNING: No cells found for {organism} {organ}, skipping.")
             else:
                 celltypes_universe = CelltypeUniverse(
                     cl=OntologyCl(branch=cl_branch),
-                    uberon=OCS.organ,
+                    uberon=OC.organ,
                 )
                 celltypes_found = celltypes_universe.onto_cl.get_effective_leaves(x=celltypes_found)
                 celltypes_universe.write_target_universe(

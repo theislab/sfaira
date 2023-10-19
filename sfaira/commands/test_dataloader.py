@@ -1,19 +1,18 @@
-import logging
 import numpy as np
 import os
+import warnings
 
 import sys
 from rich import print
 
 from sfaira.commands.utils import get_ds
+from sfaira.consts.schema import DEFAULT_SCHEMA
 from sfaira.consts.utils import clean_doi
 
 try:
     import sfaira_extension as sfairae
 except ImportError:
     sfairae = None
-
-log = logging.getLogger(__name__)
 
 
 class DataloaderTester:
@@ -49,10 +48,16 @@ class DataloaderTester:
             ds.clean_ontology_class_maps()
 
         ds, cache_path = self._get_ds()
-        ds.load(load_raw=True, allow_caching=False)
         # Test that not too much of the count matrix is lost during feature streamlining:
         # This would indicate an issue with the feature assignments.
         for k, v in ds.datasets.items():
+            # Ignore warnings such as:
+            # "UserWarning: Variable names are not unique. To make them unique, call `.var_names_make_unique`."
+            # from anndata:
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore", category=UserWarning)
+                print(f"loading {k}")
+                v.load(load_raw=True, allow_caching=False)
             signal_raw = np.asarray(v.adata.X.sum()).sum()
             # Check that fields are there:
             # .obs:
@@ -73,6 +78,7 @@ class DataloaderTester:
                 "sample_source_obs_key",
                 "sex_obs_key",
                 "source_doi_obs_key",
+                "suspension_type_obs_key",
                 "state_exact_obs_key",
                 "tech_sample_obs_key",
                 "treatment_obs_key",
@@ -100,7 +106,7 @@ class DataloaderTester:
                         for vali in val.split("*"):
                             if vali not in v.adata.obs.columns:
                                 print(f'[bold red]Did not find column {vali} for {x} in data set {k}, found: '
-                                      '{v.adata.obs.columns}.')
+                                      f'{v.adata.obs.columns}.')
                                 sys.exit()
                     else:
                         if val not in v.adata.obs.columns:
@@ -120,7 +126,7 @@ class DataloaderTester:
                         print(f'[bold red]Did not find column {val} for {x} in data set {k}, found: '
                               f'{v.adata.var.columns}.')
                         sys.exit()
-            v.streamline_features(schema="cellxgene:" + "2.0.0")
+            v.streamline_var(match_to_release=None, schema="cellxgene:" + DEFAULT_SCHEMA)
             signal_proc = np.asarray(v.adata.X.sum()).sum()
             if signal_proc < 0.01 * signal_raw and v.feature_type != "peak":
                 print('[bold red]Mapping your feature space to a reference annotation resulted in a heavy loss of '
@@ -128,7 +134,8 @@ class DataloaderTester:
                 print(f'[bold red]From {signal_raw} total counts before streamlining, {signal_proc} are left after.')
                 print('[bold red]Consider revising feature meta data.')
                 sys.exit()
-            v.streamline_metadata(schema="cellxgene")
+            v.streamline_obs_uns(schema="cellxgene")
+            v.clear()
         print("[bold blue]Completed testing of data loader, the data loader is now ready for use.")
         if in_phase_3:
             print('[bold orange]Sfaira butler: "You data loader is finished!"')

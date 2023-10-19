@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from typing import Dict, List, Tuple, Union
 
-from sfaira.consts import OCS
+from sfaira.consts import OC
 
 
 def synonym_string_processing(y):
@@ -26,6 +26,7 @@ def _prepare_celltype_map_fuzzy(
         n_suggest: int,
         omit_list: list,
         omit_target_list: list,
+        omit_prefix_list: list,
         threshold_for_partial_matching: float,
 ) -> Tuple[
     List[Dict[str, Union[List[str], str]]],
@@ -74,6 +75,7 @@ def _prepare_celltype_map_fuzzy(
     :param n_suggest: Number of cell types to suggest per search strategy.
     :param omit_list: Free text node labels to omit in map.
     :param omit_target_list: Ontology nodes to not match to.
+    :param omit_prefix_list: Prefixes that mark free text node labels that should be omitted in map
     :param threshold_for_partial_matching: Maximum fuzzy match score below which lenient matching (ratio) is
         extended through partial_ratio.
     :return: Tuple
@@ -93,7 +95,8 @@ def _prepare_celltype_map_fuzzy(
     for x in source:
         if not isinstance(x, list) and not isinstance(x, tuple):
             x = [x, "nan"]
-        term = x[0].lower().strip("'").strip("\"").strip("'").strip("\"").strip("]").strip("[")
+        term_original_case = x[0].strip("'").strip("\"").strip("'").strip("\"").strip("]").strip("[")
+        term = term_original_case.lower()
         # Test for perfect string matching:
         scores_strict = np.array([
             np.max(
@@ -127,7 +130,11 @@ def _prepare_celltype_map_fuzzy(
             fuzz.partial_ratio(term, y[1]["name"].lower())
             for y in nodes
         ])
-        include_terms.append(term not in omit_list)
+        include_terms.append(
+            term_original_case not in omit_list and
+            (not isinstance(term_original_case, str) or
+             not term_original_case.startswith(tuple(omit_prefix_list)))
+        )
         if match_only and not anatomical_constraint:
             # Explicitly trying to report perfect matches (match_only is True).
             matches.append({"perfect_match": [nodes[i][1]["name"] for i in np.where(scores_strict == 100)[0]][0]})
@@ -265,6 +272,7 @@ def _prepare_ontology_map_fuzzy(
         n_suggest: int,
         omit_list: list,
         omit_target_list: list,
+        omit_prefix_list: list,
         threshold_for_partial_matching: float,
 ) -> Tuple[
     List[Dict[str, Union[List[str], str]]],
@@ -297,6 +305,7 @@ def _prepare_ontology_map_fuzzy(
     :param n_suggest: Number of cell types to suggest per search strategy.
     :param omit_list: Free text node labels to omit in map.
     :param omit_target_list: Ontology nodes to not match to.
+    :param omit_prefix_list: Prefixes that mark free text node labels that should be omitted in map
     :param threshold_for_partial_matching: Maximum fuzzy match score below which lenient matching (ratio) is
         extended through partial_ratio.
     :return: Tuple
@@ -351,7 +360,11 @@ def _prepare_ontology_map_fuzzy(
             fuzz.partial_ratio(term, y[1]["name"].lower())
             for y in nodes
         ])
-        include_terms.append(term not in omit_list)
+        include_terms.append(
+            term not in omit_list and
+            (not isinstance(term, str) or
+             not term.startswith(tuple(omit_prefix_list)))
+        )
         if match_only:
             # Explicitly trying to report perfect matches (match_only is True).
             matches.append({"perfect_match": [nodes[i][1]["name"] for i in np.where(scores_strict == 100)[0]][0]})
@@ -403,6 +416,7 @@ def prepare_ontology_map(
         n_suggest: int = 4,
         omit_list: list = [],
         omit_target_list: list = [],
+        omit_prefix_list: list = [],
         organism: Union[None, str] = None,
         threshold_for_partial_matching: float = 90.,
 ) -> Tuple[
@@ -423,6 +437,7 @@ def prepare_ontology_map(
     :param n_suggest: Number of cell types to suggest per search strategy.
     :param omit_list: Free text node labels to omit in map.
     :param omit_target_list: Ontology nodes to not match to.
+    :param omit_prefix_list: Prefixes that mark free text node labels that should be omitted in map
     :param organism: Organism of data. This is used to disambiguate the ontology in some cases, e.g. when selecting
         an ontology for the meta data item "developmental stage" for either mouse or human.
     :param threshold_for_partial_matching: Maximum fuzzy match score below which lenient matching (ratio) is
@@ -435,7 +450,7 @@ def prepare_ontology_map(
         - List with boolean indicator whether or not this output should be reported.
     """
     try:
-        onto_cls = getattr(OCS, onto)
+        onto_cls = getattr(OC, onto)
         if isinstance(onto_cls, dict):
             try:
                 onto_cls = onto_cls[organism]
@@ -449,7 +464,7 @@ def prepare_ontology_map(
         fn = _prepare_celltype_map_fuzzy
         kwargs = {
             "anatomical_constraint": anatomical_constraint,
-            "onto_uberon": OCS.organ,
+            "onto_uberon": OC.organ,
         }
         omit_target_list = omit_target_list + ["cell"]
     else:
@@ -464,6 +479,7 @@ def prepare_ontology_map(
         n_suggest=n_suggest,
         omit_list=omit_list,
         omit_target_list=omit_target_list,
+        omit_prefix_list=omit_prefix_list,
         threshold_for_partial_matching=threshold_for_partial_matching,
         **kwargs
     )

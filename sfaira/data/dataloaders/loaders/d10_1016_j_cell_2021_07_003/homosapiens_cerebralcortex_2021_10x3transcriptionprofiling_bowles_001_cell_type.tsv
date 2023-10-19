@@ -1,0 +1,17 @@
+source	target	target_id
+Ast	astrocyte	CL:0000127
+ExDp1	cerebral cortex neuron	CL:0010012
+ExDp2	cerebral cortex neuron	CL:0010012
+ExM	cerebral cortex neuron	CL:0010012
+ExM-U	cerebral cortex neuron	CL:0010012
+ExN	cerebral cortex neuron	CL:0010012
+Glia	glial cell	CL:0000125
+IP	neuroblast (sensu Vertebrata)	CL:0000031
+InCGE	caudal ganglionic eminence derived GABAergic cortical interneuron	CL:4023070
+InMGE	medial ganglionic eminence derived GABAergic cortical interneuron	CL:4023069
+OPC	oligodendrocyte precursor cell	CL:0002453
+PgG2M	neural progenitor cell	CL:0011020
+PgS	neural progenitor cell	CL:0011020
+UN	neuron	CL:0000540
+oRG	radial glial cell	CL:0000681
+vRG	radial glial cell	CL:0000681

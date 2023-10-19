@@ -3,7 +3,7 @@ import pandas as pd
 from typing import List, Union
 
 from sfaira.versions.metadata import CelltypeUniverse
-from sfaira.consts import OCS
+from sfaira.consts import OC
 from sfaira.versions.topologies import TopologyContainer, TOPOLOGIES
 
 
@@ -31,7 +31,7 @@ class ModelZoo:
         :param model_lookuptable: model_lookuptable.
         :param model_class: Model class to subset to.
         """
-        self._ontology_container_sfaira = OCS
+        self._ontology_container_sfaira = OC
         self._model_id = None
         self.topology_container = None
 
@@ -148,8 +148,8 @@ class ModelZoo:
 
         :param x: Model ID to set. Format: modelclass_organism-organ-modeltype-topology-version_organisation
         """
-        assert self.available_model_ids is None or x in self.available_model_ids,\
-            f"{x} not found in available_model_ids, please check available models using ModelZoo.available_model_ids"
+        assert self.available_model_ids is None or x in self.available_model_ids, \
+            f"{x} not found in available_model_ids {self.available_model_ids}"
         assert len(x.split('_')) == 3, f'model_id {x} is invalid'
         self._model_id = x
         self.topology_container = self.TOPOLOGY_CONTAINER_CLASS(

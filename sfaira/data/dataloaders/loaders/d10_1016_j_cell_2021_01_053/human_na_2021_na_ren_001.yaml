@@ -50,7 +50,7 @@ dataset_or_observation_wise:
     gm:
     gm_obs_key:
     individual:
-    individual_obs_key: "PatientID"
+    individual_obs_key: "Patients"
     organ: 
     organ_obs_key: "Sample type"
     organism: "Homo sapiens"
@@ -64,7 +64,7 @@ dataset_or_observation_wise:
     state_exact: 
     state_exact_obs_key: "CoVID-19 severity"
     tech_sample:
-    tech_sample_obs_key: "datasets"
+    tech_sample_obs_key: "Datasets"
     treatment:
     treatment_obs_key:
 feature_wise:

@@ -1,12 +1,9 @@
-import logging
 import sys
 from typing import Optional, List, Union
 
 import questionary
 from prompt_toolkit.styles import Style  # type: ignore
 from rich import print
-
-log = logging.getLogger(__name__)
 
 sfaira_style = Style([
     ('qmark', 'fg:#0000FF bold'),  # token in front of the question
@@ -39,16 +36,12 @@ def sfaira_questionary(function: str,
     answer: Optional[str] = ''
     try:
         if function == 'select':
-            if default not in choices:  # type: ignore
-                log.debug(f'Default value {default} is not in the set of choices!')
             answer = getattr(questionary, function)(f'{question}: ', choices=choices, style=sfaira_style).unsafe_ask()
         elif function == 'password':
             # while not answer or answer == '': # re-asking behaviour is unwanted for sfaira cli pull request submission
             answer = getattr(questionary, function)(f'{question}: ', style=sfaira_style).unsafe_ask()
         elif function == 'text':
             if not default:
-                log.debug('Tried to utilize default value in questionary prompt, '
-                          'but is None! Please set a default value.')
                 default = ''
             answer = getattr(questionary, function)(f'{question} [{default}]: ', style=sfaira_style).unsafe_ask()
         elif function == 'confirm':
@@ -56,16 +49,13 @@ def sfaira_questionary(function: str,
             answer = getattr(questionary, function)(f'{question} [{default}]: ', style=sfaira_style,
                                                     default=default_value_bool).unsafe_ask()
         else:
-            log.debug(f'Unsupported questionary function {function} used!')
+            pass
 
     except KeyboardInterrupt:
         print('[bold red] Aborted!')
         sys.exit(1)
     if answer is None or answer == '':
         answer = default
-
-    log.debug(f'User was asked the question: ||{question}|| as: {function}')
-    log.debug(f'User selected {answer}')
 
     if isinstance(answer, str):
         answer = answer.strip('\"')

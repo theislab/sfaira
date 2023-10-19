@@ -8,11 +8,13 @@ import dask.array
 import dask.dataframe
 import numpy as np
 import pandas as pd
-from sfaira.consts import AdataIdsSfaira, OCS
+import scipy.sparse
+from sfaira.consts import AdataIdsSfaira, OC
 from sfaira.data.dataloaders.base.utils import is_child, UNS_STRING_META_IN_OBS
 from sfaira.data.store.carts.single import CartAnndata, CartDask, CartSingle
 from sfaira.data.store.stores.base import StoreBase
 from sfaira.versions.genomes.genomes import GenomeContainer, ReactiveFeatureContainer
+from sfaira.data.dataloaders.obs_utils import is_custom
 
 """
 Distributed stores are array-like classes that sit on groups of on disk representations of anndata instances files.
@@ -60,24 +62,31 @@ class StoreSingleFeatureSpace(StoreBase):
     reduced.
     All data retrieval operations work on .indices: Generators run over these indices when retrieving observations for
     example.
+
+    Note on .obsm:
+    Optional cell-indexed arrays that are kept in memory! In contrast to the core data matrix that may be lazy.
+    Typical examples of such obsm include observation-wise predictors that are computed from .obs, e.g. a design
+    matrix.
     """
 
     _adata_by_key: Dict[str, anndata.AnnData]
+    _dataset_weights: Dict[str, float]
     _indices: Dict[str, np.ndarray]
     _obs_by_key: Union[None, Dict[str, dask.dataframe.DataFrame]]
     data_source: str
-    _dataset_weights: Dict[str, float]
+    obsm: dict
 
     def __init__(self, adata_by_key: Dict[str, anndata.AnnData], indices: Dict[str, np.ndarray],
                  obs_by_key: Union[None, Dict[str, dask.dataframe.DataFrame]] = None, data_source: str = "X"):
         self.adata_by_key = self.__align_categorical_levels(adata_by_key)
         self.indices = indices
         self.obs_by_key = obs_by_key
-        self.ontology_container = OCS
+        self.ontology_container = OC
         self._genome_container = None
         self._adata_ids_sfaira = AdataIdsSfaira()
-        self.data_source = data_source
         self._celltype_universe = None
+        self.data_source = data_source
+        self.obsm = {}
 
     @staticmethod
     def __align_categorical_levels(adata_by_key: Dict[str, anndata.AnnData]) -> Dict[str, anndata.AnnData]:
@@ -93,6 +102,11 @@ class StoreSingleFeatureSpace(StoreBase):
         for col in adata_by_key[datasets[0]].obs.columns:
             if isinstance(adata_by_key[datasets[0]].obs[col].dtype, pd.api.types.CategoricalDtype):
                 categorical_columns.append(col)
+                # Make sure corresponding columns in other datasets are also categoricals:
+                for k in datasets[1:]:
+                    if not isinstance(adata_by_key[k].obs[col].dtype, pd.api.types.CategoricalDtype):
+                        raise TypeError(f"found non-categorical column {col} in {k} that does not match {datasets[0]}: "
+                                        f"{adata_by_key[k].obs[col]}")
         # union categorical levels across datasets for each column
         categories_columns: Dict[str, pd.Index] = {}
         for col in categorical_columns:
@@ -106,6 +120,9 @@ class StoreSingleFeatureSpace(StoreBase):
                                                                 categories=categories)
 
         return adata_by_key
+
+    def _reset_obsm(self):
+        self.obsm = {}
 
     @property
     def idx(self) -> np.ndarray:
@@ -264,9 +281,14 @@ class StoreSingleFeatureSpace(StoreBase):
         :param excluded_values: Classes to exclude from match list. Supply either values or excluded_values.
         :return dictionary of files and observation indices by file.
         """
-        if not isinstance(values, list):
+        if values is not None and not (isinstance(values, list) or isinstance(values, tuple) or
+                                       isinstance(values, np.ndarray)):
             values = [values]
-        assert (values is None or excluded_values is not None) or (values is not None or excluded_values is None), \
+        if excluded_values is not None and not (isinstance(excluded_values, list) or
+                                                isinstance(excluded_values, tuple) or
+                                                isinstance(excluded_values, np.ndarray)):
+            excluded_values = [excluded_values]
+        assert (values is None and excluded_values is not None) or (values is not None and excluded_values is None), \
             "supply either values or excluded_values"
 
         def get_idx(adata, obs, k, v, xv, dataset) -> np.ndarray:
@@ -298,34 +320,37 @@ class StoreSingleFeatureSpace(StoreBase):
             except AttributeError:
                 raise ValueError(f"{k} not a valid property of ontology_container object")
 
-            values_found_unique_matched = []
-
             unknown_identifiers = [
                 self._adata_ids_sfaira.unknown_metadata_identifier,
                 self._adata_ids_sfaira.not_a_cell_celltype_identifier
             ]
             if v:
-                for unknown_ident in unknown_identifiers:
-                    if unknown_ident in v:
-                        v.remove(unknown_ident)
-                        values_found_unique_matched.append(unknown_ident)
+                negative_selection = False
+                selection_input = v
             elif xv:
-                for unknown_ident in unknown_identifiers:
-                    if unknown_ident in xv:
-                        xv.remove(unknown_ident)
-                        values_found_unique_matched.append(unknown_ident)
-
+                negative_selection = True
+                selection_input = xv
+            values_found_unique_matched = []
+            selection_free = []
+            selection_ont_constrained = []
+            for i in selection_input:
+                if i in unknown_identifiers or is_custom(i, self._adata_ids_sfaira):
+                    selection_free.append(i)
+                else:
+                    selection_ont_constrained.append(i)
             for x in pd.unique(values_found):
-                if x in unknown_identifiers:
-                    pass
-                elif v is not None and np.any([is_child(query=x, ontology=ontology, ontology_parent=y) for y in v]):
+                if x in selection_free:
                     values_found_unique_matched.append(x)
-                elif xv is not None and np.all([
-                    not is_child(query=x, ontology=ontology, ontology_parent=y) for y in xv
+                elif x in unknown_identifiers or is_custom(x, self._adata_ids_sfaira):
+                    pass
+                elif np.any([
+                    is_child(query=x, ontology=ontology, ontology_parent=y) for y in selection_ont_constrained
                 ]):
                     values_found_unique_matched.append(x)
-
-            idx = np.where(np.isin(values_found, values_found_unique_matched))[0]
+            boolean_selection = np.isin(values_found, values_found_unique_matched)
+            if negative_selection:
+                boolean_selection = ~boolean_selection
+            idx = np.where(boolean_selection)[0]
             return idx
 
         indices = {}
@@ -341,6 +366,8 @@ class StoreSingleFeatureSpace(StoreBase):
             # Keep intersection of old and new hits.
             idx_new = np.intersect1d(idx_old, idx_subset)
             if len(idx_new) > 0:
+                # Only add entries for data sets with remaining cells, other data sets are excluded from index
+                # management.
                 indices[key] = np.asarray(idx_new, dtype="int32")
 
         return indices
@@ -351,6 +378,7 @@ class StoreSingleFeatureSpace(StoreBase):
         Subset list of adata objects based on cell-wise properties.
 
         Subsetting is done based on index vectors, the objects remain untouched.
+        Resets .obsm. TODO this could be indexed in the future.
 
         :param attr_key: Property to subset by. Options:
 
@@ -373,6 +401,7 @@ class StoreSingleFeatureSpace(StoreBase):
         self.indices = self.get_subset_idx(attr_key=attr_key, values=values, excluded_values=excluded_values)
         if self.n_obs == 0 and verbose > 0:
             print(f"WARNING: store is now empty after subsetting {attr_key} for {values}, excluding {excluded_values}.")
+        self._reset_obsm()
 
     def write_config(self, fn: Union[str, os.PathLike]):
         """
@@ -566,13 +595,22 @@ class StoreSingleFeatureSpace(StoreBase):
         batch_schedule_kwargs = {"randomized_batch_access": randomized_batch_access,
                                  "random_access": random_access,
                                  "retrieval_batch_size": retrieval_batch_size}
+        if "get_schedule_kwargs" in kwargs.keys():
+            # Derive specific batch schedule kwargs from a callable get_schedule_kwargs() supplied to this method.
+            # Note that get_schedule_kwargs has the signature: batch_schedule, obs, **kwargs
+            batch_schedule_kwargs.update(kwargs["get_schedule_kwargs"](batch_schedule=batch_schedule, obs=self.obs,
+                                                                       **kwargs))
         cart = self._get_cart(batch_schedule=batch_schedule, batch_size=batch_size, map_fn=map_fn, obs_idx=idx,
                               obs_keys=obs_keys, return_dense=return_dense, var=self.var, var_idx=var_idx,
                               **batch_schedule_kwargs, **kwargs)
         return cart
 
     @property
-    def var(self) -> Union[pd.DataFrame]:
+    def obs(self):
+        raise NotImplementedError()
+
+    @property
+    def var(self) -> pd.DataFrame:
         if self.genome_container is None:
             var = pd.DataFrame({}, index=self.var_names)
         else:
@@ -596,7 +634,14 @@ class StoreAnndata(StoreSingleFeatureSpace):
         self.in_memory = in_memory
 
     def _get_cart(self, return_dense: bool = False, **kwargs) -> iter:
-        return CartAnndata(adata_dict=self._adata_sliced, return_dense=return_dense, **kwargs)
+        return CartAnndata(adata_dict=self._adata_sliced, obsm=self.obsm, return_dense=return_dense, **kwargs)
+
+    @property
+    def obs(self):
+        return pd.concat([
+            self._adata_by_key[k].obs.iloc[v, :]
+            for k, v in self.indices.items()
+        ], axis=0, join="inner", ignore_index=True, copy=False)
 
     # Methods that are specific to this child class:
 
@@ -653,9 +698,27 @@ class StoreDao(StoreSingleFeatureSpace):
         return dict([(k, self._x_by_key[k][v, :]) for k, v in self.indices.items()])
 
     def _get_cart(self, **kwargs) -> CartDask:
-        return CartDask(x=self._x, obs=self._obs, **kwargs)
+        return CartDask(x=self._x, obs=self.obs, obsm=self.obsm, **kwargs)
 
     # Methods that are specific to this child class:
+
+    def move_to_memory(self):
+        """
+        Persist underlying dask array into memory in sparse.CSR format.
+        """
+        if not self._x_dask_cache:
+            self._x_dask_cache = self._x
+
+        self._x_dask_cache = self._x_dask_cache.map_blocks(scipy.sparse.csr_matrix).persist()
+
+    @property
+    def x(self) -> dask.array.Array:
+        """
+        One dask array of all cells.
+
+        Requires feature dimension to be shared.
+        """
+        return self._x
 
     @property
     def _x(self) -> dask.array.Array:
@@ -681,7 +744,7 @@ class StoreDao(StoreSingleFeatureSpace):
         return self._x_dask_cache
 
     @property
-    def _obs(self) -> pd.DataFrame:
+    def obs(self) -> pd.DataFrame:
         """
         Assemble .obs table of subset of selected data.
 
