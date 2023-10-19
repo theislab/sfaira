@@ -148,7 +148,7 @@ class ModelZoo:
 
         :param x: Model ID to set. Format: modelclass_organism-organ-modeltype-topology-version_organisation
         """
-        assert self.available_model_ids is None or x in self.available_model_ids,\
+        assert self.available_model_ids is None or x in self.available_model_ids, \
             f"{x} not found in available_model_ids {self.available_model_ids}"
         assert len(x.split('_')) == 3, f'model_id {x} is invalid'
         self._model_id = x

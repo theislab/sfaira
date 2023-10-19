@@ -144,7 +144,7 @@ class EstimatorBase:
     ):
         y = self.obs[obs_key]
         for i, val in enumerate(y):
-            if type(val) == list:
+            if isinstance(val, list):
                 y[i] = " / ".join(val)
         labels = np.unique(y)
         label_dict = {}

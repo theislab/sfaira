@@ -1,6 +1,6 @@
 import numpy as np
 from sfaira.consts.schema import DEFAULT_SCHEMA, ONTOLOGY_VERSIONS
-from sfaira.versions.metadata import OntologyUberon, OntologyCl, OntologyHancestro, OntologyHsapdv, OntologyList,\
+from sfaira.versions.metadata import OntologyUberon, OntologyCl, OntologyHancestro, OntologyHsapdv, OntologyList, \
     OntologyMondo, OntologyMmusdv, OntologyEfo, OntologyTaxon, OntologyPato, OntologyUberonLifecyclestage
 
 
