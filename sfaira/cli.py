@@ -16,6 +16,8 @@ from sfaira.commands.test_dataloader import DataloaderTester
 from sfaira.commands.utils import doi_lint
 from sfaira.commands.validate_dataloader import DataloaderValidator
 from sfaira.commands.validate_h5ad import H5adValidator
+from sfaira.commands.test_dataloader import DataloaderTester
+from sfaira.commands.submit_pullrequest import PullRequestHandler
 
 from sfaira import __version__
 from sfaira.commands.create_dataloader import DataloaderCreator
