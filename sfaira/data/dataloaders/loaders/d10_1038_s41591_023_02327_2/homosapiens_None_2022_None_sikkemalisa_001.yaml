@@ -6,8 +6,8 @@ dataset_wise:
     author: "Sikkema, Lisa"
     default_embedding: 
     doi_preprint: "10.1101/2022.03.10.483747"
-    doi_journal:
-    download_url_data: "https://beta.fastgenomics.org/datasets/detail-dataset-427f1eee6dd44f50bae1ab13f0f3c6a9#Files"
+    doi_journal: "10.1038/s41591-023-02327-2"
+    download_url_data: "manual,HLCA_v1.h5ad,https://beta.fastgenomics.org/datasets/detail-dataset-427f1eee6dd44f50bae1ab13f0f3c6a9#Files"
     download_url_meta:
     primary_data: False
     year: 2022
