@@ -110,7 +110,7 @@ class OntologyList(Ontology):
 
     Node IDs and names are the same.
     """
-    nodes: Union[dict, list]
+    _nodes: Dict[str, dict]
 
     def __init__(
             self,
@@ -120,15 +120,19 @@ class OntologyList(Ontology):
         # Map to dictionary so that .nodes attribute is a homogenous interface across types of ontologies.
         if isinstance(terms, list):
             terms = {x: {"name": x} for x in terms}
-        self.nodes = terms
+        self._nodes = terms
+
+    @property
+    def nodes(self) -> List[Tuple[str, dict]]:
+        return list(self._nodes.items())
 
     @property
     def node_names(self) -> List[str]:
-        return [v["name"] for v in self.nodes.values()]
+        return [v["name"] for v in self._nodes.values()]
 
     @property
     def node_ids(self) -> List[str]:
-        return list(self.nodes.keys())
+        return list(self._nodes.keys())
 
     @property
     def leaves(self) -> List[str]:
@@ -211,7 +215,7 @@ class OntologyList(Ontology):
         elif self.is_a_node_name(x[0]):
             self.__validate_node_names(x=x)
             x = [
-                [k for k, v in self.nodes.items() if v["name"] == z][0]
+                [k for k, v in self._nodes.items() if v["name"] == z][0]
                 for z in x
             ]
         else:

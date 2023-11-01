@@ -22,7 +22,7 @@ pandas
 pronto
 pyarrow
 pytest>=6.2.2
-python-Levenshtein
+Levenshtein
 PyYAML
 requests>=2.25.1
 rich>=9.10.0

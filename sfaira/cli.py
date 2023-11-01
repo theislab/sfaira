@@ -254,8 +254,7 @@ def publish_dataloader() -> None:
 @click.option('--title',
               type=str,
               default=None,
-              help='The optional absolute path to cached data library maintained by sfaira. Using such a cache speeds '
-                   'up loading in sequential runs but is not necessary.')
+              help='Title of dataloader / publication')
 def export_h5ad(del_obs, contributors, doi, schema, keep_obs, path_out, path_data, path_loader, path_cache, title) -> \
         None:
     """Creates a collection of streamlined h5ad object for a given DOI."""

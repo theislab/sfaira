@@ -6,7 +6,7 @@ dataset_wise:
     author: "Gokcen"
     default_embedding: "X_umap"
     doi_preprint: "10.1101/2021.07.19.452954"
-    doi_journal:
+    doi_journal: "10.1126/science.abl4290"
     download_url_data: "https://storage.googleapis.com/gtex_analysis_v9/snrna_seq_data/GTEx_8_tissues_snRNAseq_atlas_071421.public_obs.h5ad"
     download_url_meta:
     primary_data: True
