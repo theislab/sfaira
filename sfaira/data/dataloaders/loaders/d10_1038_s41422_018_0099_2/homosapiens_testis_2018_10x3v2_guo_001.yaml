@@ -2,7 +2,7 @@ dataset_structure:
     dataset_index: 1
     sample_fns:
 dataset_wise:
-    author: "Guo"
+    author: "Guo, Jingtao"
     default_embedding: 
     doi_preprint: 
     doi_journal: "10.1038/s41422-018-0099-2"

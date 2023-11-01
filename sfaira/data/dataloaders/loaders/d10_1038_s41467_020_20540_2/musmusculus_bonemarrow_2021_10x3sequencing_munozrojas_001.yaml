@@ -6,7 +6,7 @@ dataset_structure:
         - "GSM4889922_M2"
         - "GSM4889923_M1_and_M2"
 dataset_wise:
-    author: "Munoz-Rojas, AR"
+    author: "Munoz-Rojas, Andres R"
     default_embedding: 
     doi_preprint: 
     doi_journal: "10.1038/s41467-020-20540-2"

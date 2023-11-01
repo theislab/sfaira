@@ -10,7 +10,7 @@ dataset_structure:
         - "GSM4039247_m-tumor-1-filtered"
         - "GSM4039248_m-tumor-2-filtered"
 dataset_wise:
-    author: "Ochoka, N"
+    author: "Ochoka, Natalia"
     default_embedding: 
     doi_preprint: 
     doi_journal: "10.1038/s41467-021-21407-w"

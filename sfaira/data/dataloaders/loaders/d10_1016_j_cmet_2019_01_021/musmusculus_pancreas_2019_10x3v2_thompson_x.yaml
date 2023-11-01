@@ -10,7 +10,7 @@ dataset_structure:
         - "GSM3308552_NOD_16w_B"
         - "GSM3308553_NOD_16w_C"
 dataset_wise:
-    author: "Thompson"
+    author: "Thompson, Peter J"
     default_embedding: 
     doi_preprint: 
     doi_journal: "10.1016/j.cmet.2019.01.021"

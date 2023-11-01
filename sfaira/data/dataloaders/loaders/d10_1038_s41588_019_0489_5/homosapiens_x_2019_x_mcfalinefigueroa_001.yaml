@@ -5,7 +5,7 @@ dataset_structure:
         - "GSE114687_HuMEC"
         - "GSE114687_pseudospace"
 dataset_wise:
-    author: "McFaline-Figueroa, JL"
+    author: "McFaline-Figueroa, Jose L"
     default_embedding: 
     doi_preprint: 
     doi_journal: "10.1038/s41588-019-0489-5"

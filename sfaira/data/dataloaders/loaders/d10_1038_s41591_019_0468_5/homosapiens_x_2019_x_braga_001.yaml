@@ -5,7 +5,7 @@ dataset_structure:
         - "vieira19_Bronchi_anonymised.processed.h5ad"
         - "GSE130148"
 dataset_wise:
-    author: "Braga"
+    author: "Vieira Braga, Felipe A"
     default_embedding:
     doi_preprint:
     doi_journal: "10.1038/s41591-019-0468-5"

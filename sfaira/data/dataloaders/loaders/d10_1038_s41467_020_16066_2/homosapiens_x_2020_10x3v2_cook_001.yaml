@@ -30,7 +30,7 @@ dataset_structure:
         - "GSE147405_OVCA420_TNF_TimeCourse_UMI_matrix.csv.gz"
         - "GSE147405_OVCA420_Untreated_KinaseScreen_UMI_matrix.csv.gz"
 dataset_wise:
-    author: "Cook, DP"
+    author: "Cook, David P"
     default_embedding: 
     doi_preprint: 
     doi_journal: "10.1038/s41467-020-16066-2"

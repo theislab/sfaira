@@ -5,7 +5,7 @@ dataset_structure:
         - "GSM4876356_pymt_tam_2"
         - "GSM4876357_pymt_tam_3"
 dataset_wise:
-    author: "Opzoomer, JW"
+    author: "Opzoomer, James W"
     default_embedding: 
     doi_preprint: 
     doi_journal: "10.1126/sciadv.abg9518"

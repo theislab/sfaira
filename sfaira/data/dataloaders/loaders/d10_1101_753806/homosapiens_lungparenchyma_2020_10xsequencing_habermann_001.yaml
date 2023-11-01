@@ -2,7 +2,7 @@ dataset_structure:
     dataset_index: 1
     sample_fns:
 dataset_wise:
-    author: "Habermann"
+    author: "Habermann, Arun C"
     default_embedding: 
     doi_preprint: "10.1101/753806"
     doi_journal: "10.1126/sciadv.aba1972"

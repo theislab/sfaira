@@ -4,7 +4,7 @@ dataset_structure:
         - "GSM4257051_G2"
         - "GSM4257052_D1_2"
 dataset_wise:
-    author: "Via"
+    author: "Da Via, Matteo C"
     default_embedding: 
     doi_preprint: "10.1038/s41591-021-01245-5"
     doi_journal:

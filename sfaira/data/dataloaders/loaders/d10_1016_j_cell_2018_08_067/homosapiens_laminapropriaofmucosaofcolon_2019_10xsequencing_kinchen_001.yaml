@@ -4,7 +4,7 @@ dataset_structure:
         - "HC"
         - "UC"
 dataset_wise:
-    author: "Kinchen"
+    author: "Kinchen, James"
     default_embedding:
     doi_journal: "10.1016/j.cell.2018.08.067"
     doi_preprint:
