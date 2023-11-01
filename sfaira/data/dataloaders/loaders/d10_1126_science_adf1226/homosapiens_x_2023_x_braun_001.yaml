@@ -3,13 +3,13 @@ dataset_structure:
     sample_fns:
 dataset_wise:
     author: "Braun, Emelie"
-    default_embedding: "X_umap"
+    default_embedding: 
     doi_preprint: "10.1101/2022.10.24.513487"
     doi_journal: "10.1126/science.adf1226"
     download_url_data: "https://storage.googleapis.com/linnarsson-lab-human/human_dev_GRCh38-3.0.0.h5ad"
     download_url_meta: 
     primary_data: True
-    year: 2022
+    year: 2023
 layers:
     layer_counts: "X"
     layer_processed: 
