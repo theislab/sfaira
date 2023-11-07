@@ -9,7 +9,7 @@ def load(data_dir, **kwargs):
         os.path.join(data_dir, "GSE135893_genes.tsv.gz"),
         os.path.join(data_dir, "GSE135893_barcodes.tsv.gz"),
         os.path.join(data_dir, "GSE135893_IPF_metadata.csv.gz"),
-        os.path.join(data_dir, "aba1972_Table_S2.csv"),
+        os.path.join(data_dir, "aba1972_table_s2.csv"),
     ]
     adata = anndata.read_mtx(fn[0]).T
     adata.var = pd.read_csv(fn[1], index_col=0, header=None, names=["ids"])

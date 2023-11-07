@@ -12,7 +12,7 @@ dataset_wise:
         - "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE135nnn/GSE135893/suppl/GSE135893%5Fbarcodes%2Etsv%2Egz"
     download_url_meta:
         - "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE135nnn/GSE135893/suppl/GSE135893%5FIPF%5Fmetadata%2Ecsv%2Egz"
-        - "https://www.science.org/doi/suppl/10.1126/sciadv.aba1972/suppl_file/aba1972_table_s2.csv"
+        - "manual,aba1972_table_s2.csv,https://www.science.org/doi/suppl/10.1126/sciadv.aba1972/suppl_file/aba1972_table_s2.csv"
     primary_data: True
     year: 2020
 layers:
