@@ -13,8 +13,8 @@ dataset_wise:
     default_embedding: 
     doi_preprint: 
     doi_journal: "10.1016/j.celrep.2019.10.131"
-    download_url_data: "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE124691"
-    download_url_meta: "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE124691&format=file&file=GSE124691%5FGenes%2Etsv%2Egz"
+    download_url_data: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE124nnn/GSE124691/suppl/GSE124691%5FRAW%2Etar"
+    download_url_meta: "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE124nnn/GSE124691/suppl/GSE124691%5FGenes%2Etsv%2Egz"
     primary_data: True
     year: 2019
 layers:
