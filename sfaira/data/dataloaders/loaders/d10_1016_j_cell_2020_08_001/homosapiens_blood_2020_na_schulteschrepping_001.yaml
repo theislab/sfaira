@@ -12,7 +12,13 @@ dataset_wise:
     default_embedding: "X_umap"
     doi_preprint:
     doi_journal: "10.1016/j.cell.2020.08.001"
-    download_url_data: "https://beta.fastgenomics.org/p/schulte-schrepping_covid19"
+    download_url_data:
+        Schulte-Schrepping_2020_COVID19_10x_Neutrophils_processed_cellXgene.h5ad: "manual,Schulte-Schrepping_2020_COVID19_10x_Neutrophils_processed_cellXgene.h5ad,https://beta.fastgenomics.org/datasets/detail-dataset-7656cfe94fb14a01b787f4774e555036#Files"
+        Schulte-Schrepping_2020_COVID19_10x_PBMC_processed_cellXgene.h5ad: "manual,Schulte-Schrepping_2020_COVID19_10x_PBMC_processed_cellXgene.h5ad,https://beta.fastgenomics.org/datasets/detail-dataset-952687f71ef34322a850553c4a24e82e#Files"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_freshPBMC-WB_processed_cellXgene.h5ad: "Schulte-Schrepping_2020_COVID19_Rhapsody_freshPBMC-WB_processed_cellXgene.h5ad,https://beta.fastgenomics.org/datasets/detail-dataset-1ad2967be372494a9fdba621610ad3f3#Files"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Monocytes_processed_cellXgene.h5ad: "manual,Schulte-Schrepping_2020_COVID19_Rhapsody_Monocytes_processed_cellXgene.h5ad,https://beta.fastgenomics.org/datasets/detail-dataset-2ad59997cb7c4ba0823e076ab5a38084#Files"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Neutrophils_processed_cellXgene.h5ad: "manual,Schulte-Schrepping_2020_COVID19_Rhapsody_Neutrophils_processed_cellXgene.h5ad,https://beta.fastgenomics.org/datasets/detail-dataset-ee4b1a0f339140ad82f861aea35076f1#Files"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_PBMC_processed_cellXgene.h5ad: "manual,Schulte-Schrepping_2020_COVID19_Rhapsody_PBMC_processed_cellXgene.h5ad,https://beta.fastgenomics.org/datasets/detail-dataset-7ae02f5553074bda92c14a8f0bce2d24#Files"
     download_url_meta:
     primary_data: True
     year: 2020
@@ -33,10 +39,10 @@ dataset_or_observation_wise:
     assay_sc:
         Schulte-Schrepping_2020_COVID19_10x_Neutrophils_processed_cellXgene.h5ad: "10x 3' v3"
         Schulte-Schrepping_2020_COVID19_10x_PBMC_processed_cellXgene.h5ad: "10x 3' v3"
-        Schulte-Schrepping_2020_COVID19_Rhapsody_freshPBMC-WB_processed_cellXgene.h5ad: "single cell library construction"
-        Schulte-Schrepping_2020_COVID19_Rhapsody_Monocytes_processed_cellXgene.h5ad: "single cell library construction"
-        Schulte-Schrepping_2020_COVID19_Rhapsody_Neutrophils_processed_cellXgene.h5ad: "single cell library construction"
-        Schulte-Schrepping_2020_COVID19_Rhapsody_PBMC_processed_cellXgene.h5ad: "single cell library construction"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_freshPBMC-WB_processed_cellXgene.h5ad: "BD Rhapsody Whole Transcriptome Analysis"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Monocytes_processed_cellXgene.h5ad: "BD Rhapsody Whole Transcriptome Analysis"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_Neutrophils_processed_cellXgene.h5ad: "BD Rhapsody Whole Transcriptome Analysis"
+        Schulte-Schrepping_2020_COVID19_Rhapsody_PBMC_processed_cellXgene.h5ad: "BD Rhapsody Whole Transcriptome Analysis"
     assay_sc_obs_key:
     assay_differentiation:
     assay_differentiation_obs_key:
