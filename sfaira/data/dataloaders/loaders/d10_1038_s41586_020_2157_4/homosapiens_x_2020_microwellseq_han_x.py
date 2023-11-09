@@ -7,7 +7,7 @@ import zipfile
 
 
 def load(data_dir, **kwargs):
-    adata = anndata.read(os.path.join(data_dir, "HCL_Fig1_adata.h5ad"))
+    adata = anndata.read_h5ad(os.path.join(data_dir, "HCL_Fig1_adata.h5ad"))
     # convert to sparse matrix
     adata.X = scipy.sparse.csr_matrix(adata.X).copy()
 

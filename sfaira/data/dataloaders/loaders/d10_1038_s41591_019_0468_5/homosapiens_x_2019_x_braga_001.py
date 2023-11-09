@@ -16,7 +16,7 @@ def load(data_dir, sample_fn, **kwargs):
         return adata
     else:
         fn = os.path.join(data_dir, sample_fn)
-        adata = anndata.read(fn)
+        adata = anndata.read_h5ad(fn)
         adata.X = np.expm1(adata.X)
 
         return adata

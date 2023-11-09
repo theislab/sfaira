@@ -23,7 +23,7 @@ class TrainModel:
     ):
         # Check if handling backed anndata or base path to directory of raw files:
         if isinstance(data, str) and data.split(".")[-1] == "h5ad":
-            self.data = anndata.read(data, backed='r')
+            self.data = anndata.read_h5ad(data, backed='r')
             if len(self.data.obs.columns) == 0:
                 fn_backed_obs = ".".join(data.split(".")[:-1]) + "_obs.csv"
                 self.data.obs = pd.read_csv(fn_backed_obs)

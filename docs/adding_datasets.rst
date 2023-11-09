@@ -615,7 +615,7 @@ The corresponding `load` function would be:
     def load(data_dir, sample_fn, fn=None) -> anndata.AnnData:
         # The following reads either my_file_A.h5ad or my_file_B.h5ad which correspond to A and B in the yaml.
         fn = os.path.join(data_dir, f"my_file_{sample_fn}.h5ad")
-        adata = anndata.read(fn)
+        adata = anndata.read_h5ad(fn)
         return adata
 ..
 

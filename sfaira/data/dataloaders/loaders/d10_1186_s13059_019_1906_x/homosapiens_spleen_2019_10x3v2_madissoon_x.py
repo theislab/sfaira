@@ -5,7 +5,7 @@ import scipy.sparse
 
 def load(data_dir, sample_fn, **kwargs):
     fn = os.path.join(data_dir, sample_fn)
-    adata = anndata.read(fn)
+    adata = anndata.read_h5ad(fn)
     if sample_fn != "madissoon19_lung.processed.h5ad":
         adata.X = adata.X.multiply(scipy.sparse.csc_matrix(adata.obs["n_counts"].values[:, None]))\
             .multiply(1 / 10000)

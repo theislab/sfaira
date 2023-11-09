@@ -8,6 +8,6 @@ import os
 def load(data_dir, sample_fn, **kwargs):
     fn = os.path.join(data_dir, sample_fn)
     # replace the simple data loading code below with the code required to load your data file(s)
-    adata = anndata.read(fn)
+    adata = anndata.read_h5ad(fn)
 
     return adata  # your load function needs to return an AnnData object
