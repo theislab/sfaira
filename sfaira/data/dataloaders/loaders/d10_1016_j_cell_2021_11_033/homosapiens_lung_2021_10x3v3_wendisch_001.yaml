@@ -9,7 +9,10 @@ dataset_wise:
     default_embedding: 
     doi_preprint: 
     doi_journal: "10.1016/j.cell.2021.11.033"
-    download_url_data: "https://nubes.helmholtz-berlin.de/s/XrM8igTzFTFSoio/download"
+    download_url_data:
+        BAL.Rds: "manual,BAL.Rds,https://nubes.helmholtz-berlin.de/s/XrM8igTzFTFSoio/download"
+        BAL-macrophages.Rds: "manual,BAL-macrophages.Rds,https://nubes.helmholtz-berlin.de/s/XrM8igTzFTFSoio/download"
+        Monocytes.Rds: "manual,Monocytes.Rds,https://nubes.helmholtz-berlin.de/s/XrM8igTzFTFSoio/download"
     download_url_meta: 
     primary_data:
         BAL.Rds: True
