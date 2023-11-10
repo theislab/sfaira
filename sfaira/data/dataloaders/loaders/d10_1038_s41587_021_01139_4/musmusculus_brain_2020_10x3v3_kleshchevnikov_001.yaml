@@ -12,8 +12,14 @@ dataset_wise:
     default_embedding: 
     doi_preprint: "10.1101/2020.11.15.378125v1"
     doi_journal: "10.1038/s41587-021-01139-4"
-    download_url_data: "https://www.ebi.ac.uk/arrayexpress/files/E-MTAB-11115/E-MTAB-11115.processed.5.zip"
-    download_url_meta: "https://www.ebi.ac.uk/arrayexpress/files/E-MTAB-11115/E-MTAB-11115.processed.4.zip"
+    download_url_data:
+        5705STDY8058280_filtered_feature_bc_matrix.h5: "https://www.ebi.ac.uk/biostudies/files/E-MTAB-11115/5705STDY8058280_filtered_feature_bc_matrix.h5"
+        5705STDY8058281_filtered_feature_bc_matrix.h5: "https://www.ebi.ac.uk/biostudies/files/E-MTAB-11115/5705STDY8058281_filtered_feature_bc_matrix.h5"
+        5705STDY8058282_filtered_feature_bc_matrix.h5: "https://www.ebi.ac.uk/biostudies/files/E-MTAB-11115/5705STDY8058282_filtered_feature_bc_matrix.h5"
+        5705STDY8058283_filtered_feature_bc_matrix.h5: "https://www.ebi.ac.uk/biostudies/files/E-MTAB-11115/5705STDY8058283_filtered_feature_bc_matrix.h5"
+        5705STDY8058284_filtered_feature_bc_matrix.h5: "https://www.ebi.ac.uk/biostudies/files/E-MTAB-11115/5705STDY8058284_filtered_feature_bc_matrix.h5"
+        5705STDY8058285_filtered_feature_bc_matrix.h5: "https://www.ebi.ac.uk/biostudies/files/E-MTAB-11115/5705STDY8058285_filtered_feature_bc_matrix.h5"
+    download_url_meta: "https://www.ebi.ac.uk/biostudies/files/E-MTAB-11115/cell_annotation.csv"
     primary_data: True
     year: 2020
 layers:
