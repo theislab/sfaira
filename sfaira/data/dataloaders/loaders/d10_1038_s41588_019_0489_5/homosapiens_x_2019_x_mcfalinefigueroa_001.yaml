@@ -1,7 +1,7 @@
 dataset_structure:
     dataset_index: 1
     sample_fns:
-        - "GSE114687_CROPSeq_pseudospace"
+        - "GSE114687_CROPseq_pseudospace"
         - "GSE114687_HuMEC"
         - "GSE114687_pseudospace"
 dataset_wise:

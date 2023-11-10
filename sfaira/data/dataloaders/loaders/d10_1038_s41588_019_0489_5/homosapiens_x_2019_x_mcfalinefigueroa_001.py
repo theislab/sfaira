@@ -18,8 +18,8 @@ def load(data_dir, sample_fn, **kwargs):
         fn_meta = os.path.join(data_dir, sample_fn + "_metadata.tsv.gz")
     adata = sc.readwrite.read_10x_mtx(data_dir, prefix=sample_fn + "_")
     # Meta data files all look different, give all the same column space:
-    if sample_fn == "GSE114687_CROPSeq_pseudospace":
-        tab = pd.read_csv(fn_meta, header=None, index_col=None, sep="\t")
+    if sample_fn == "GSE114687_CROPseq_pseudospace":
+        tab = pd.read_csv(os.path.join(data_dir, "GSE114687_CROPSeq_pseudospace_metadata.tsv.gz"), header=None, index_col=None, sep="\t")
         tab["location"] = tab.iloc[:, 15].values
         adata.obs = tab
     elif sample_fn == "GSE114687_HuMEC":
