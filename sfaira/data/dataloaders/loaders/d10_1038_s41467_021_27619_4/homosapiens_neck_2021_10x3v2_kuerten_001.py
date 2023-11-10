@@ -12,10 +12,16 @@ def load(data_dir, sample_fn, **kwargs):
     fn_mtx = buffered_decompress(os.path.join(tar_dir, f"{sample_fn}_matrix.mtx.gz"))
     x = scipy.io.mmread(fn_mtx).T.tocsr()
     fn_obs = buffered_decompress(os.path.join(tar_dir, f"{sample_fn}_barcodes.tsv.gz"))
-    obs = pd.read_csv(fn_obs, header=None, sep="\t", index_col=0)
+    try:
+        obs = pd.read_csv(fn_obs, header=None, sep="\t", index_col=0)
+    except UnicodeDecodeError:
+        obs = pd.read_csv(fn_obs, header=None, sep="\t", index_col=0, compression="gzip")
     obs.index.name = None
     fn_var = buffered_decompress(os.path.join(tar_dir, f"{sample_fn}_features.tsv.gz"))
-    var = pd.read_csv(fn_var, header=None, sep="\t")
+    try:
+        var = pd.read_csv(fn_var, header=None, sep="\t")
+    except UnicodeDecodeError:
+        var = pd.read_csv(fn_var, header=None, sep="\t", compression="gzip")
     var.columns = ["ensembl", "symbol", "feature_class"]
     var.index = var["ensembl"].values
     adata = anndata.AnnData(X=x, obs=obs, var=var)
