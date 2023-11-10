@@ -30,4 +30,7 @@ def load(data_dir, sample_fn, **kwargs):
         pass
     else:
         assert False
+
+    adata.obs.columns = adata.obs.columns.astype(str)
+
     return adata
