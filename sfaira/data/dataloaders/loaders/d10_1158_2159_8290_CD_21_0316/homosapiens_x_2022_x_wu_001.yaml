@@ -27,7 +27,7 @@ dataset_or_feature_wise:
     feature_type: "rna"
     feature_type_var_key: 
 dataset_or_observation_wise:
-    assay_sc: "10x technology"
+    assay_sc: "10x 3' v3"
     assay_sc_obs_key: 
     assay_differentiation: 
     assay_differentiation_obs_key: 
@@ -49,7 +49,7 @@ dataset_or_observation_wise:
     gm_obs_key:
     individual:
     individual_obs_key: 
-    organ: 
+    organ: "liver"
     organ_obs_key: 
     organism: "Homo sapiens"
     organism_obs_key: 
@@ -59,6 +59,8 @@ dataset_or_observation_wise:
     sex_obs_key: 
     source_doi:
     source_doi_obs_key:
+    suspension_type: "cell" 
+    suspension_type_obs_key: 
     state_exact:
     state_exact_obs_key:
     tech_sample:

@@ -12,6 +12,7 @@ def load(data_dir, **kwargs):
     with tarfile.open(fn) as tar:
         with gzip.open(tar.extractfile("data_matrices/counts.mtx.gz"), "rb") as mm:
             x = scipy.io.mmread(mm).T.tocsr().astype(np.float32)
+            x.data = np.round(x.data)
         var = pd.read_csv(tar.extractfile("data_matrices/features.tsv.gz"), compression="gzip", sep="\t", header=None, index_col=0, names=[None])
         obs = pd.read_csv(tar.extractfile("data_matrices/barcodes.tsv.gz"), compression="gzip", sep="\t", index_col=0, header=None, names=[None])
         meta = pd.read_csv(tar.extractfile("data_matrices/meta.tsv.gz"), compression="gzip", sep="\t", index_col=0)

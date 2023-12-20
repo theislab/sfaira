@@ -60,6 +60,8 @@ dataset_or_observation_wise:
     sex_obs_key: 
     source_doi:
     source_doi_obs_key:
+    suspension_type: "cell" 
+    suspension_type_obs_key: 
     state_exact:
         GSM4889920_M0: "M0"
         GSM4889921_M1: "M1"

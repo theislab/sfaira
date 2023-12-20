@@ -101,12 +101,14 @@ dataset_or_observation_wise:
     organ_obs_key: 
     organism: "Homo sapiens"
     organism_obs_key: 
-    sample_source:
+    sample_source: "tumor"
     sample_source_obs_key: 
     sex:
     sex_obs_key:
     source_doi:
     source_doi_obs_key:
+    suspension_type: "cell" 
+    suspension_type_obs_key: 
     state_exact: "head and neck squamous cell carcinoma HPV+ or HPV-"
     state_exact_obs_key: 
     tech_sample:

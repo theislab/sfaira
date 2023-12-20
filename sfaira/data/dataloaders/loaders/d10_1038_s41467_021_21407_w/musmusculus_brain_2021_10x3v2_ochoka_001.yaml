@@ -96,6 +96,8 @@ dataset_or_observation_wise:
     sex_obs_key: 
     source_doi:
     source_doi_obs_key:
+    suspension_type: "cell" 
+    suspension_type_obs_key: 
     state_exact:
     state_exact_obs_key:
     tech_sample:

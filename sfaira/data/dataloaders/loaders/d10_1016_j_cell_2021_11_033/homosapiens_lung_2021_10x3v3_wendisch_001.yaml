@@ -75,6 +75,8 @@ dataset_or_observation_wise:
         BAL-macrophages.Rds: "sex"
     source_doi:
     source_doi_obs_key:
+    suspension_type: "cell" 
+    suspension_type_obs_key: 
     state_exact:
     state_exact_obs_key:
     tech_sample:
