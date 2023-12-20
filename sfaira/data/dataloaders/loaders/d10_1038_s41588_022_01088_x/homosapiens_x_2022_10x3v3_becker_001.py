@@ -9,5 +9,5 @@ def load(data_dir, **kwargs):
     fn = os.path.join(data_dir, "becker_crc.h5ad")
     # replace the simple data loading code below with the code required to load your data file(s)
     adata = anndata.read_h5ad(fn)
-
+    adata.obs["age"] = adata.obs["age"].astype(str)
     return adata  # your load function needs to return an AnnData object

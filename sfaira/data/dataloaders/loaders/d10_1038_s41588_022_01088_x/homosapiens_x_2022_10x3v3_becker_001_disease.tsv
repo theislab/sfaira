@@ -1,0 +1,4 @@
+source	target	target_id
+FAP	classic familial adenomatous polyposis	MONDO:0021055
+Healthy	healthy	PATO:0000461
+Sporadic CRC	colorectal cancer	MONDO:0005575

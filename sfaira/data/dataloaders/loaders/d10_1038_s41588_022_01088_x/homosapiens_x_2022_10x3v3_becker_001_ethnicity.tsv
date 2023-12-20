@@ -1,0 +1,7 @@
+source	target	target_id
+Asian	Asian	HANCESTRO:0008
+Black	African	HANCESTRO:0010
+Hispanic/Latino	Hispanic or Latin American	HANCESTRO:0014
+Other	uncategorised population	HANCESTRO:0018
+White	European	HANCESTRO:0005
+White/Asian	Asian	HANCESTRO:0008
