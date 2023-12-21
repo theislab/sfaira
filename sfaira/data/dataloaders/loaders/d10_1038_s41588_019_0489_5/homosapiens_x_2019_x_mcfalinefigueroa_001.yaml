@@ -61,7 +61,7 @@ dataset_or_observation_wise:
     gm_obs_key:
     individual:
     individual_obs_key: 
-    organ: 
+    organ: "cell in vitro"
     organ_obs_key: 
     organism: "Homo sapiens"
     organism_obs_key: 

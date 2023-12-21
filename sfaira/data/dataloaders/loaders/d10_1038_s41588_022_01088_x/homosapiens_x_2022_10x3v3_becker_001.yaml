@@ -25,7 +25,7 @@ dataset_or_feature_wise:
     feature_type_var_key: 
 dataset_or_observation_wise:
     assay_sc: "10x 3' v3"
-    assay_sc_obs_key: "assay"
+    assay_sc_obs_key: 
     assay_differentiation: 
     assay_differentiation_obs_key: 
     assay_type_differentiation: 
@@ -46,7 +46,7 @@ dataset_or_observation_wise:
     gm_obs_key:
     individual:
     individual_obs_key: "Donor_Study_ID"
-    organ: 
+    organ: colon
     organ_obs_key: 
     organism: "Homo sapiens"
     organism_obs_key: 
