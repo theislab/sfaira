@@ -1,0 +1,44 @@
+dataset_structure:
+    dataset_index: 1
+    sample_fns:
+        - "GSE115746_cells_exon_counts.csv.gz"
+dataset_wise:
+    author: "Tasic"
+    doi: "10.1038/s41586-018-0654-5"
+    download_url_data: "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE115746&format=file&file=GSE115746%5Fcells%5Fexon%5Fcounts%2Ecsv%2Egz"
+    download_url_meta: "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE115746&format=file&file=GSE115746%5Fcomplete%5Fmetadata%5F28706%2Dcells%2Ecsv%2Egz"
+    normalization: "raw"
+    year: "2018"
+dataset_or_observation_wise:
+    age:
+    age_obs_key:
+    assay: "smart-seq2"
+    assay_obs_key:
+    bio_sample:
+    bio_sample_obs_key:
+    development_stage:
+    development_stage_obs_key:
+    ethnicity:
+    ethnicity_obs_key:
+    healthy:
+    healthy_obs_key:
+    individual:
+    individual_obs_key: "donor_id"
+    organ: "brain"
+    organ_obs_key:
+    organism: "mouse"
+    organism_obs_key: "organism"
+    sex:
+    sex_obs_key: "donor_sex"
+    state_exact: "healthy"
+    state_exact_obs_key:
+    tech_sample:
+    tech_sample_obs_key:
+observation_wise:
+    cellontology_original_obs_key: "cell_cluster"
+feature_wise:
+    var_ensembl_col:
+    var_symbol_col:
+misc:
+meta:
+    version: "1.0"
