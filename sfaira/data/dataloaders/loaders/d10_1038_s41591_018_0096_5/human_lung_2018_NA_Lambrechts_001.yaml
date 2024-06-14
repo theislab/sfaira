@@ -1,0 +1,43 @@
+dataset_structure:
+    dataset_index: 1
+    sample_fns:
+dataset_wise:
+    author: "Lambrechts, Diether"
+    doi: "10.1038/s41591.018.0096.5"
+    download_url_data: "https://bit.ly/387ZM2s"
+    download_url_meta: "https://bit.ly/3dGyjGr"
+    normalization: "raw"
+    year: "2018"
+dataset_or_observation_wise:
+    age:
+    age_obs_key:
+    assay:
+    assay_obs_key: "sc_platform"
+    bio_sample:
+    bio_sample_obs_key: 
+    development_stage:
+    development_stage_obs_key:
+    ethnicity:
+    ethnicity_obs_key:
+    healthy: "False"
+    healthy_obs_key:
+    individual:
+    individual_obs_key: "PatientNumber"
+    organ: "lung"
+    organ_obs_key:
+    organism: "human"
+    organism_obs_key:
+    sex:
+    sex_obs_key:
+    state_exact: "cancer"
+    state_exact_obs_key:
+    tech_sample:
+    tech_sample_obs_key: "sample"
+observation_wise:
+    cellontology_original_obs_key: "CellType"
+feature_wise:
+    var_ensembl_col:
+    var_symbol_col: "index"
+misc:
+meta:
+    version: "1.0"
